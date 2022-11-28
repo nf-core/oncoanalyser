@@ -1,11 +1,12 @@
 #!/usr/bin/env nextflow
 /*
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-  umccr/hmftools
+    nf-core/oncoanalyser
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-  Github : https://github.com/umccr/hmftools
-  Website: https://nf-co.re/hmftools
-  Slack  : https://nfcore.slack.com/channels/hmftools
+    Github : https://github.com/nf-core/oncoanalyser
+
+    Website: https://nf-co.re/oncoanalyser
+    Slack  : https://nfcore.slack.com/channels/oncoanalyser
 ----------------------------------------------------------------------------------------
 */
 
@@ -13,7 +14,7 @@ nextflow.enable.dsl = 2
 
 /*
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-  VALIDATE & PRINT PARAMETER SUMMARY
+    VALIDATE & PRINT PARAMETER SUMMARY
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 */
 
@@ -21,22 +22,22 @@ WorkflowMain.initialise(workflow, params, log)
 
 /*
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-  NAMED WORKFLOW FOR PIPELINE
+    NAMED WORKFLOW FOR PIPELINE
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 */
 
-include { HMFTOOLS } from './workflows/hmftools'
+include { ONCOANALYSER } from './workflows/oncoanalyser'
 
 //
-// WORKFLOW: Run main umccr/hmftools analysis pipeline
+// WORKFLOW: Run main nf-core/oncoanalyser analysis pipeline
 //
-workflow NFCORE_HMFTOOLS {
-  HMFTOOLS()
+workflow NFCORE_ONCOANALYSER {
+    ONCOANALYSER()
 }
 
 /*
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-  RUN ALL WORKFLOWS
+    RUN ALL WORKFLOWS
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 */
 
@@ -45,11 +46,11 @@ workflow NFCORE_HMFTOOLS {
 // See: https://github.com/nf-core/rnaseq/issues/619
 //
 workflow {
-  NFCORE_HMFTOOLS()
+    NFCORE_ONCOANALYSER()
 }
 
 /*
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-  THE END
+    THE END
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 */

@@ -1,262 +1,248 @@
-#!/usr/bin/env python
-
-
-"""Provide a command line tool to validate and transform tabular samplesheets."""
-
-
+#!/usr/bin/env python3
 import argparse
-import csv
-import logging
+import collections
+import enum
+import pathlib
 import sys
-from collections import Counter
-from pathlib import Path
-
-logger = logging.getLogger()
 
 
-class RowChecker:
-    """
-    Define a service that can validate and transform each given row.
+HEADER_COLS = (
+    'id',
+    'subject_name',
+    'sample_name',
+    'sample_type',
+    'filetype',
+    'filepath',
+)
 
-    Attributes:
-        modified (list): A list of dicts, where each dict corresponds to a previously
-            validated and transformed row. The order of rows is maintained.
 
-    """
+class FileType(enum.Enum):
 
-    VALID_FORMATS = (
-        ".fq.gz",
-        ".fastq.gz",
+    BAM_WGS = 'bam_wgs'
+    BAM_WTS = 'bam_wts'
+    VCF_SV = 'vcf_sv'
+    SMLV_VCF = 'vcf_smlv'
+    VCF_SV_GRIPSS_SOFT = 'vcf_sv_gripss_soft'
+    VCF_SV_GRIPSS_HARD = 'vcf_sv_gripss_hard'
+    AMBER_DIR = 'amber_dir'
+    COBALT_DIR = 'cobalt_dir'
+    PURPLE_DIR = 'purple_dir'
+
+    def __repr__(self):
+        return self.value
+
+
+class SampleType(enum.Enum):
+
+    TUMOR = 'tumor'
+    NORMAL = 'normal'
+
+    def __repr__(self):
+        return self.value
+
+
+FILETYPES_EXPECTED = {
+    'full': {
+        'required': [
+            (SampleType.TUMOR, FileType.BAM_WGS),
+            (SampleType.NORMAL, FileType.BAM_WGS),
+        ],
+        'optional': [
+            (SampleType.TUMOR, FileType.BAM_WTS),
+            (SampleType.TUMOR, FileType.VCF_SV),
+            (SampleType.NORMAL, FileType.VCF_SV),
+        ],
+    },
+    'gridss_purple_linx': {
+        'required': [
+            (SampleType.TUMOR, FileType.BAM_WGS),
+            (SampleType.NORMAL, FileType.BAM_WGS),
+        ],
+        'optional': [
+            (SampleType.TUMOR, FileType.VCF_SV),
+            (SampleType.NORMAL, FileType.VCF_SV),
+            (SampleType.TUMOR, FileType.SMLV_VCF),
+            (SampleType.NORMAL, FileType.SMLV_VCF)
+        ],
+    },
+    'gridss': {
+        'required': [
+            (SampleType.TUMOR, FileType.BAM_WGS),
+            (SampleType.NORMAL, FileType.BAM_WGS),
+        ],
+        'optional': [
+            (SampleType.TUMOR, FileType.VCF_SV),
+            (SampleType.NORMAL, FileType.VCF_SV),
+        ],
+    },
+    'purple': {
+        'required': [
+            (SampleType.TUMOR, FileType.AMBER_DIR),
+            (SampleType.TUMOR, FileType.COBALT_DIR),
+            (SampleType.TUMOR, FileType.VCF_SV_GRIPSS_HARD),
+            (SampleType.TUMOR, FileType.VCF_SV_GRIPSS_SOFT),
+        ],
+        'optional': [
+            (SampleType.TUMOR, FileType.SMLV_VCF),
+            (SampleType.NORMAL, FileType.SMLV_VCF),
+        ],
+    },
+    # NOTE(SW): expectation that we always at least want to run LINX somatic
+    'linx': {
+        'required': [
+            (SampleType.TUMOR, FileType.PURPLE_DIR),
+        ],
+        'optional': [
+            (SampleType.NORMAL, FileType.VCF_SV_GRIPSS_HARD),
+        ],
+    },
+    'lilac': {
+        'required': [
+            (SampleType.TUMOR, FileType.BAM_WGS),
+            (SampleType.NORMAL, FileType.BAM_WGS),
+            (SampleType.TUMOR, FileType.PURPLE_DIR),
+        ],
+        'optional': [],
+    },
+    'teal': {
+        'required': [
+            (SampleType.TUMOR, FileType.BAM_WGS),
+            (SampleType.NORMAL, FileType.BAM_WGS),
+            (SampleType.TUMOR, FileType.COBALT_DIR),
+            (SampleType.TUMOR, FileType.PURPLE_DIR),
+        ],
+        'optional': [],
+    },
+}
+
+
+def get_arguments():
+    parser = argparse.ArgumentParser()
+    parser.add_argument(
+        '--input_fp',
+        required=True,
+        type=pathlib.Path,
+        help='Input samplesheet filepath',
     )
-
-    def __init__(
-        self,
-        sample_col="sample",
-        first_col="fastq_1",
-        second_col="fastq_2",
-        single_col="single_end",
-        **kwargs,
-    ):
-        """
-        Initialize the row checker with the expected column names.
-
-        Args:
-            sample_col (str): The name of the column that contains the sample name
-                (default "sample").
-            first_col (str): The name of the column that contains the first (or only)
-                FASTQ file path (default "fastq_1").
-            second_col (str): The name of the column that contains the second (if any)
-                FASTQ file path (default "fastq_2").
-            single_col (str): The name of the new column that will be inserted and
-                records whether the sample contains single- or paired-end sequencing
-                reads (default "single_end").
-
-        """
-        super().__init__(**kwargs)
-        self._sample_col = sample_col
-        self._first_col = first_col
-        self._second_col = second_col
-        self._single_col = single_col
-        self._seen = set()
-        self.modified = []
-
-    def validate_and_transform(self, row):
-        """
-        Perform all validations on the given row and insert the read pairing status.
-
-        Args:
-            row (dict): A mapping from column headers (keys) to elements of that row
-                (values).
-
-        """
-        self._validate_sample(row)
-        self._validate_first(row)
-        self._validate_second(row)
-        self._validate_pair(row)
-        self._seen.add((row[self._sample_col], row[self._first_col]))
-        self.modified.append(row)
-
-    def _validate_sample(self, row):
-        """Assert that the sample name exists and convert spaces to underscores."""
-        if len(row[self._sample_col]) <= 0:
-            raise AssertionError("Sample input is required.")
-        # Sanitize samples slightly.
-        row[self._sample_col] = row[self._sample_col].replace(" ", "_")
-
-    def _validate_first(self, row):
-        """Assert that the first FASTQ entry is non-empty and has the right format."""
-        if len(row[self._first_col]) <= 0:
-            raise AssertionError("At least the first FASTQ file is required.")
-        self._validate_fastq_format(row[self._first_col])
-
-    def _validate_second(self, row):
-        """Assert that the second FASTQ entry has the right format if it exists."""
-        if len(row[self._second_col]) > 0:
-            self._validate_fastq_format(row[self._second_col])
-
-    def _validate_pair(self, row):
-        """Assert that read pairs have the same file extension. Report pair status."""
-        if row[self._first_col] and row[self._second_col]:
-            row[self._single_col] = False
-            first_col_suffix = Path(row[self._first_col]).suffixes[-2:]
-            second_col_suffix = Path(row[self._second_col]).suffixes[-2:]
-            if first_col_suffix != second_col_suffix:
-                raise AssertionError("FASTQ pairs must have the same file extensions.")
-        else:
-            row[self._single_col] = True
-
-    def _validate_fastq_format(self, filename):
-        """Assert that a given filename has one of the expected FASTQ extensions."""
-        if not any(filename.endswith(extension) for extension in self.VALID_FORMATS):
-            raise AssertionError(
-                f"The FASTQ file has an unrecognized extension: {filename}\n"
-                f"It should be one of: {', '.join(self.VALID_FORMATS)}"
-            )
-
-    def validate_unique_samples(self):
-        """
-        Assert that the combination of sample name and FASTQ filename is unique.
-
-        In addition to the validation, also rename all samples to have a suffix of _T{n}, where n is the
-        number of times the same sample exist, but with different FASTQ files, e.g., multiple runs per experiment.
-
-        """
-        if len(self._seen) != len(self.modified):
-            raise AssertionError("The pair of sample name and FASTQ must be unique.")
-        seen = Counter()
-        for row in self.modified:
-            sample = row[self._sample_col]
-            seen[sample] += 1
-            row[self._sample_col] = f"{sample}_T{seen[sample]}"
+    parser.add_argument(
+        '--mode',
+        required=True,
+        type=str,
+        choices=FILETYPES_EXPECTED.keys(),
+        help='Pipeline execution mode',
+    )
+    args = parser.parse_args()
+    if not args.input_fp.exists():
+        parser.error(f'Input file {args.input_fp} does not exist')
+    return args
 
 
-def read_head(handle, num_lines=10):
-    """Read the specified number of lines from the current position in the file."""
-    lines = []
-    for idx, line in enumerate(handle):
-        if idx == num_lines:
-            break
-        lines.append(line)
-    return "".join(lines)
+def main():
+    # Get commandline arguments
+    args = get_arguments()
+
+    # Read data
+    runs = collections.defaultdict(list)
+    with args.input_fp.open('r') as fh:
+        line_token_gen = (line.rstrip().split('\t') for line in fh)
+        header_tokens = next(line_token_gen)
+        check_header(header_tokens, HEADER_COLS)
+        for lts in line_token_gen:
+            record = {k: v for k, v in zip(header_tokens, lts)}
+            record['sample_type_enum'] = get_enum(record, 'sample_type', SampleType)
+            record['filetype_enum'] = get_enum(record, 'filetype', FileType)
+            runs[record['id']].append(record)
+
+    # Validate data
+    for rid, records in runs.items():
+        input_types = {(r['sample_type_enum'], r['filetype_enum']) for r in records}
+        check_input_types(
+            input_types,
+            FILETYPES_EXPECTED[args.mode]['required'],
+            FILETYPES_EXPECTED[args.mode]['optional'],
+        )
+        check_subject_names(rid, records)
+        check_bam_sample_names(records, FileType.BAM_WGS)
+        check_bam_sample_names(records, FileType.BAM_WTS)
+        check_sample_type_sample_names(rid, records)
 
 
-def sniff_format(handle):
-    """
-    Detect the tabular format.
-
-    Args:
-        handle (text file): A handle to a `text file`_ object. The read position is
-        expected to be at the beginning (index 0).
-
-    Returns:
-        csv.Dialect: The detected tabular format.
-
-    .. _text file:
-        https://docs.python.org/3/glossary.html#term-text-file
-
-    """
-    peek = read_head(handle)
-    handle.seek(0)
-    sniffer = csv.Sniffer()
-    if not sniffer.has_header(peek):
-        logger.critical("The given sample sheet does not appear to contain a header.")
+def get_enum(record, name, enum_class):
+    value = record[name]
+    try:
+        return enum_class(value)
+    except ValueError:
+        print(f'Got invalid {name} for {record["id"]}: {value}', file=sys.stderr)
         sys.exit(1)
-    dialect = sniffer.sniff(peek)
-    return dialect
 
 
-def check_samplesheet(file_in, file_out):
-    """
-    Check that the tabular samplesheet has the structure expected by nf-core pipelines.
-
-    Validate the general shape of the table, expected columns, and each row. Also add
-    an additional column which records whether one or two FASTQ reads were found.
-
-    Args:
-        file_in (pathlib.Path): The given tabular samplesheet. The format can be either
-            CSV, TSV, or any other format automatically recognized by ``csv.Sniffer``.
-        file_out (pathlib.Path): Where the validated and transformed samplesheet should
-            be created; always in CSV format.
-
-    Example:
-        This function checks that the samplesheet follows the following structure,
-        see also the `viral recon samplesheet`_::
-
-            sample,fastq_1,fastq_2
-            SAMPLE_PE,SAMPLE_PE_RUN1_1.fastq.gz,SAMPLE_PE_RUN1_2.fastq.gz
-            SAMPLE_PE,SAMPLE_PE_RUN2_1.fastq.gz,SAMPLE_PE_RUN2_2.fastq.gz
-            SAMPLE_SE,SAMPLE_SE_RUN1_1.fastq.gz,
-
-    .. _viral recon samplesheet:
-        https://raw.githubusercontent.com/nf-core/test-datasets/viralrecon/samplesheet/samplesheet_test_illumina_amplicon.csv
-
-    """
-    required_columns = {"sample", "fastq_1", "fastq_2"}
-    # See https://docs.python.org/3.9/library/csv.html#id3 to read up on `newline=""`.
-    with file_in.open(newline="") as in_handle:
-        reader = csv.DictReader(in_handle, dialect=sniff_format(in_handle))
-        # Validate the existence of the expected header columns.
-        if not required_columns.issubset(reader.fieldnames):
-            req_cols = ", ".join(required_columns)
-            logger.critical(f"The sample sheet **must** contain these column headers: {req_cols}.")
-            sys.exit(1)
-        # Validate each row.
-        checker = RowChecker()
-        for i, row in enumerate(reader):
-            try:
-                checker.validate_and_transform(row)
-            except AssertionError as error:
-                logger.critical(f"{str(error)} On line {i + 2}.")
-                sys.exit(1)
-        checker.validate_unique_samples()
-    header = list(reader.fieldnames)
-    header.insert(1, "single_end")
-    # See https://docs.python.org/3.9/library/csv.html#id3 to read up on `newline=""`.
-    with file_out.open(mode="w", newline="") as out_handle:
-        writer = csv.DictWriter(out_handle, header, delimiter=",")
-        writer.writeheader()
-        for row in checker.modified:
-            writer.writerow(row)
+def check_subject_names(rid, records):
+    subject_names = {r['subject_name'] for r in records}
+    if len(subject_names) > 1:
+        subject_names_str = ', '.join(subject_names)
+        msg = f'Got multiple subject names for {rid}: {subject_names_str}'
+        print(msg, file=sys.stderr)
+        sys.exit(1)
 
 
-def parse_args(argv=None):
-    """Define and immediately parse command line arguments."""
-    parser = argparse.ArgumentParser(
-        description="Validate and transform a tabular samplesheet.",
-        epilog="Example: python check_samplesheet.py samplesheet.csv samplesheet.valid.csv",
-    )
-    parser.add_argument(
-        "file_in",
-        metavar="FILE_IN",
-        type=Path,
-        help="Tabular input samplesheet in CSV or TSV format.",
-    )
-    parser.add_argument(
-        "file_out",
-        metavar="FILE_OUT",
-        type=Path,
-        help="Transformed output samplesheet in CSV format.",
-    )
-    parser.add_argument(
-        "-l",
-        "--log-level",
-        help="The desired log level (default WARNING).",
-        choices=("CRITICAL", "ERROR", "WARNING", "INFO", "DEBUG"),
-        default="WARNING",
-    )
-    return parser.parse_args(argv)
+def check_bam_sample_names(records, bam_filetype):
+    record_tumor_bam = None
+    record_normal_bam = None
+    for record in records:
+        if record['filetype_enum'] != bam_filetype:
+            continue
+        if record['sample_type_enum'] == SampleType.TUMOR:
+            record_tumor_bam = record
+        elif record['sample_type_enum'] == SampleType.NORMAL:
+            record_normal_bam = record
+
+    if record_tumor_bam is None or record_normal_bam is None:
+        return
+
+    if record_tumor_bam['sample_name'] == record_normal_bam['sample_name']:
+        sample_name = record_tumor_bam['sample_name']
+        print(f'Got identical sample names for \'{repr(bam_filetype)}\' BAMs: {sample_name}', file=sys.stderr)
+        sys.exit(1)
 
 
-def main(argv=None):
-    """Coordinate argument parsing and program execution."""
-    args = parse_args(argv)
-    logging.basicConfig(level=args.log_level, format="[%(levelname)s] %(message)s")
-    if not args.file_in.is_file():
-        logger.error(f"The given input file {args.file_in} was not found!")
-        sys.exit(2)
-    args.file_out.parent.mkdir(parents=True, exist_ok=True)
-    check_samplesheet(args.file_in, args.file_out)
+def check_sample_type_sample_names(rid, records):
+    sample_names_tumor = set()
+    sample_names_normal = set()
+    for record in records:
+        if record['sample_type_enum'] == SampleType.TUMOR:
+            sample_names_tumor.add(record['sample_name'])
+        elif record['sample_type_enum'] == SampleType.NORMAL:
+            sample_names_normal.add(record['sample_name'])
+        else:
+            assert False
+    if len(sample_names_tumor) > 1:
+        sn_tumor_str = ', '.join(sample_names_tumor)
+        print(f'Got mismatch sample names for {rid} tumor: {sn_tumor_str}', file=sys.stderr)
+        sys.exit(1)
+    if len(sample_names_normal) > 1:
+        sn_normal_str = ', '.join(sample_names_normal)
+        print(f'Got mismatch sample names for {rid} normal: {sn_normal_str}', file=sys.stderr)
+        sys.exit(1)
 
 
-if __name__ == "__main__":
-    sys.exit(main())
+def check_header(header_tokens, required_cols):
+    check_set_difference(header_tokens, required_cols, 'Found unknown header column')
+    check_set_difference(required_cols, header_tokens, 'Missing required column')
+
+
+def check_input_types(input_types, required, optional):
+    check_set_difference(input_types, required + optional, 'Found unknown input type')
+    check_set_difference(required, input_types, 'Missing required input type')
+
+
+def check_set_difference(a, b, message_base):
+    d = set(a).difference(b)
+    if d :
+        d_str = ', '.join(str(e) for e in d)
+        plurality = 's' if len(d) > 1 else ''
+        print(f'{message_base}{plurality}: {d_str}', file=sys.stderr)
+        sys.exit(1)
+
+
+if __name__ == '__main__':
+    main()
