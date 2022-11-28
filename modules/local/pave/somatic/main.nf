@@ -6,7 +6,7 @@ process PAVE_SOMATIC {
 
     input:
     tuple val(meta), path(sage_vcf)
-    path genome_fa
+    path genome_fasta
     path genome_fai
     val genome_ver
     path sage_pon_file
@@ -32,7 +32,7 @@ process PAVE_SOMATIC {
         -jar "${task.ext.jarPath}" \\
             -sample "${meta.get(['sample_name', 'tumor'])}" \\
             -ref_genome_version "${genome_ver}" \\
-            -ref_genome "${genome_fa}" \\
+            -ref_genome "${genome_fasta}" \\
             -ensembl_data_dir "${ensembl_data_dir}" \\
             -driver_gene_panel "${driver_gene_panel}" \\
             -pon_file "${sage_pon_file}" \\

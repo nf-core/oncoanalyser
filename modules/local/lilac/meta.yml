@@ -36,7 +36,7 @@ input:
   - purple_dir:
       type: directory
       description: Optional PURPLE output directory
-  - genome_fa:
+  - genome_fasta:
       type: file
       description: Reference genome assembly fa file
       pattern: "*.{fa,fasta}"

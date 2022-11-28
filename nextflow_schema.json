@@ -49,6 +49,16 @@
                     "description": "Pipeline mode to use.",
                     "fa_icon": "fas fa-diagram-project"
                 },
+                "processes_exclude": {
+                    "type": "string",
+                    "description": "Pipeline processes to exclude.",
+                    "fa_icon": "fas fa-diagram-project"
+                },
+                "processes_include": {
+                    "type": "string",
+                    "description": "Pipeline processes to include.",
+                    "fa_icon": "fas fa-diagram-project"
+                },
                 "gridss_config": {
                     "type": "string",
                     "description": "Path to GRIDSS configuration file.",
@@ -62,18 +72,42 @@
             "fa_icon": "fas fa-dna",
             "description": "Reference data files and options required for the workflow.",
             "properties": {
-                "ref_data_genome_fa": {
+                "genome": {
+                     "type": "string",
+                    "description": "Name of iGenomes reference.",
+                    "fa_icon": "fas fa-book",
+                    "help_text": "If using a reference genome configured in the pipeline using iGenomes, use this parameter to give the ID for the reference. This is then used to build the full paths for all required reference genome files e.g. `--genome GRCh38`. \n\nSee the [nf-core website docs](https://nf-co.re/usage/reference_genomes) for more details."
+                 },
+                "fasta": {
+                     "type": "string",
+                     "format": "file-path",
+                      "mimetype": "text/plain",
+                      "pattern": "^\\S+\\.fn?a(sta)?(\\.gz)?$",
+                      "description": "Path to FASTA genome file.",
+                      "help_text": "This parameter is *mandatory* if `--genome` is not specified. If you don't have a BWA index available this will be generated for you automatically. Combine with `--save_reference` to save BWA index for future runs.",
+                     "fa_icon": "far fa-file-code"
+                 },
+                "igenomes_base": {
+                     "type": "string",
+                     "format": "directory-path",
+                    "description": "Directory / URL base for iGenomes references.",
+                    "default": "s3://ngi-igenomes/igenomes",
+                    "fa_icon": "fas fa-cloud-download-alt",
+                    "hidden": true
+                 },
+                "igenomes_ignore": {
+                    "type": "boolean",
+                    "description": "Do not load the iGenomes reference config.",
+                    "fa_icon": "fas fa-ban",
+                    "hidden": true,
+                    "help_text": "Do not load `igenomes.config` when running the pipeline. You may choose this option if you observe c lashes between custom parameters and those supplied in `igenomes.config`."
+                },
+                "ref_data_genome_fasta": {
                     "type": "string",
                     "format": "file-path",
                     "pattern": "^\\S+\\.fn?a(sta)?(\\.gz)?$",
                     "description": "Path to reference genome FASTA file.",
                     "fa_icon": "far fa-file-code"
-                },
-                "ref_data_genome_version": {
-                    "type": "string",
-                    "description": "Reference genome version (37 or 38).",
-                    "fa_icon": "far fa-file-code",
-                    "enum": ["37", "38", "38_noalt"]
                 },
                 "ref_data_genome_fai": {
                     "type": "string",
@@ -107,6 +141,12 @@
                     "format": "file-path",
                     "pattern": "^\\S+\\.gridsscache$",
                     "description": "Path to reference genome GRIDSS index file.",
+                    "fa_icon": "far fa-file-code"
+                },
+                "ref_data_hmf_bundle": {
+                    "type": "string",
+                    "format": "directory-path",
+                    "description": "Path HMF reference data bundle.",
                     "fa_icon": "far fa-file-code"
                 },
                 "ref_data_amber_loci": {
@@ -164,14 +204,14 @@
                     "description": "Path to RepeatMasker file.",
                     "fa_icon": "far fa-file-code"
                 },
-                "ref_data_rna_exp_counts": {
+                "ref_data_isofox_exp_counts": {
                     "type": "string",
                     "format": "file-path",
                     "pattern": "^\\S+\\.csv$",
                     "description": "Path to Isofox expected read counts file.",
                     "fa_icon": "far fa-file-code"
                 },
-                "ref_data_rna_exp_gc_ratios": {
+                "ref_data_isofox_exp_gc_ratios": {
                     "type": "string",
                     "format": "file-path",
                     "pattern": "^\\S+\\.csv$",
@@ -210,14 +250,14 @@
                     "description": "Path to VIRUSBreakend database directory.",
                     "fa_icon": "far fa-folder-open"
                 },
-                "ref_data_virus_taxonomy": {
+                "ref_data_virusinterpreter_taxonomy": {
                     "type": "string",
                     "format": "file-path",
                     "pattern": "^\\S+\\.tsv$",
                     "description": "Path to Virus Interpreter taxonomy file.",
                     "fa_icon": "far fa-file-code"
                 },
-                "ref_data_virus_reporting": {
+                "ref_data_virusinterpreter_reporting": {
                     "type": "string",
                     "format": "file-path",
                     "pattern": "^\\S+\\.tsv$",

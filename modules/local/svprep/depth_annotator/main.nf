@@ -3,7 +3,7 @@ process DEPTH_ANNOTATOR {
 
     input:
     tuple val(meta), path(bams), path(bais), path(vcf), val(labels)
-    path genome_fa
+    path genome_fasta
     val genome_ver
 
     output:
@@ -29,7 +29,7 @@ process DEPTH_ANNOTATOR {
             -output_vcf sv.svprep.gridss.depths.vcf.gz \\
             -samples "${labels_arg}" \\
             -bam_files "${bams_arg}" \\
-            -ref_genome ${genome_fa} \\
+            -ref_genome ${genome_fasta} \\
             -ref_genome_version ${genome_ver} \\
             -threads ${task.cpus}
 

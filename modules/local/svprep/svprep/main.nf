@@ -3,7 +3,7 @@ process SVPREP {
 
     input:
     tuple val(meta), path(bam), path(bai), path(junctions)
-    path genome_fa
+    path genome_fasta
     val genome_ver
     path sv_blacklist
     path known_fusions
@@ -31,7 +31,7 @@ process SVPREP {
             ${args} \\
             -sample "${meta.id}" \\
             -bam_file "${bam}" \\
-            -ref_genome "${genome_fa}" \\
+            -ref_genome "${genome_fasta}" \\
             -ref_genome_version "${genome_ver}" \\
             -blacklist_bed "${sv_blacklist}" \\
             -known_fusion_bed "${known_fusions}" \\

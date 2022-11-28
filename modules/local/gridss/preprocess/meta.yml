@@ -26,7 +26,7 @@ input:
   - gridss_config:
       type: file
       description: Optional GRIDSS configuration file
-  - genome_fa:
+  - genome_fasta:
       type: file
       description: Reference genome assembly fa file
       pattern: "*.{fa,fasta}"

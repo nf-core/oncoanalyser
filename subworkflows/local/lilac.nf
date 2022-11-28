@@ -12,7 +12,7 @@ workflow LILAC {
     take:
         ch_inputs_bams              // channel: [val(meta), tumor_bam, normal_bam, tumor_bai, normal_bai]
         ch_inputs_purple_dir        // channel: [val(meta), purple_dir]
-        ref_data_genome_fa          //    file: /path/to/genome_fa
+        ref_data_genome_fasta       //    file: /path/to/genome_fasta
         ref_data_genome_fai         //    file: /path/to/genome_fai
         ref_data_genome_version     //     val: genome version
         ref_data_lilac_resource_dir //    file: /path/to/lilac_resource_dir/
@@ -47,7 +47,7 @@ workflow LILAC {
             // are realigned for consistency.
             EXTRACT_AND_INDEX_CONTIG(
                 'chr6',
-                ref_data_genome_fa,
+                ref_data_genome_fasta,
                 ref_data_genome_fai,
             )
             REALIGN_READS(
@@ -74,7 +74,7 @@ workflow LILAC {
         // Run LILAC
         LILAC_PROCESS(
             ch_lilac_inputs,
-            ref_data_genome_fa,
+            ref_data_genome_fasta,
             ref_data_genome_version,
             ref_data_lilac_resource_dir,
         )

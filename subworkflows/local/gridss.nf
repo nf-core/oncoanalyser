@@ -10,7 +10,7 @@ workflow GRIDSS {
     take:
         ch_inputs                       // channel: [val(meta), bam_tumor, bam_normal]
         gridss_config                   //    file: /path/to/gridss_config (optional)
-        ref_data_genome_fa              //    file: /path/to/genome_fa
+        ref_data_genome_fasta           //    file: /path/to/genome_fasta
         ref_data_genome_fai             //    file: /path/to/genome_fai
         ref_data_genome_dict            //    file: /path/to/genome_dict
         ref_data_genome_bwa_index       //    file: /path/to/genome_bwa_index_dir/
@@ -43,7 +43,7 @@ workflow GRIDSS {
         PREPROCESS(
             ch_preprocess_inputs,
             gridss_config,
-            ref_data_genome_fa,
+            ref_data_genome_fasta,
             ref_data_genome_fai,
             ref_data_genome_dict,
             ref_data_genome_bwa_index,
@@ -75,7 +75,7 @@ workflow GRIDSS {
         ASSEMBLE(
             ch_assemble_inputs,
             gridss_config,
-            ref_data_genome_fa,
+            ref_data_genome_fasta,
             ref_data_genome_fai,
             ref_data_genome_dict,
             ref_data_genome_bwa_index,
@@ -103,7 +103,7 @@ workflow GRIDSS {
         CALL(
             ch_call_inputs,
             gridss_config,
-            ref_data_genome_fa,
+            ref_data_genome_fasta,
             ref_data_genome_fai,
             ref_data_genome_dict,
             ref_data_genome_bwa_index,

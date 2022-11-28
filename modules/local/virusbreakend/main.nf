@@ -6,14 +6,14 @@ process VIRUSBREAKEND {
 
     input:
     tuple val(meta), path(bam)
-    path virusbreakenddb
     path gridss_config
-    path genome_fa
+    path genome_fasta
     path genome_fai
     path genome_dict
     path genome_bwa_index_dir, stageAs: 'bwa_index'
     path genome_bwa_index_image
     path genome_gridss_index
+    path virusbreakenddb
 
     output:
     tuple val(meta), path("*.summary.tsv"), emit: tsv
@@ -33,7 +33,7 @@ process VIRUSBREAKEND {
         --threads ${task.cpus} \\
         --db ${virusbreakenddb.toString().replaceAll("/\$", "")}/ \\
         --output ${meta.id}.virusbreakend.vcf \\
-        --reference ${genome_fa} \\
+        --reference ${genome_fasta} \\
         ${bam}
 
     cat <<-END_VERSIONS > versions.yml

@@ -13,56 +13,26 @@ def summary_params = NfcoreSchema.paramsSummaryMap(workflow, params)
 // Validate input parameters
 WorkflowOncoanalyser.initialise(params, workflow, log)
 
+
+// Set processes to run
+processes = Processes.set_processes(params.mode, log)
+
+processes_include = Processes.get_process_list(params.processes_include, log)
+processes_exclude = Processes.get_process_list(params.processes_exclude, log)
+Processes.check_include_exclude_list(processes_include, processes_exclude, log)
+
+processes.addAll(processes_include)
+processes.removeAll(processes_exclude)
+
+run = Constants.Process
+    .values()
+    .collectEntries { p -> [p.name().toLowerCase(), p in processes] }
+
+
 // Check input path parameters to see if they exist
 def checkPathParamList = [
     params.input,
-    // Reference genome
-    params.ref_data_genome_fa,
-    params.ref_data_genome_fai,
-    params.ref_data_genome_dict,
-    params.ref_data_genome_bwa_index,
-    params.ref_data_genome_bwa_index_image,
-    params.ref_data_genome_gridss_index,
-    // AMBER and COBALT
-    params.ref_data_amber_loci,
-    params.ref_data_cobalt_gc_profile,
-    // CUPPA
-    params.ref_data_cuppa,
-    // SVPREP, GRIDSS, GRIPSS
     params.gridss_config,
-    params.ref_data_sv_prep_blacklist,
-    params.ref_data_gridss_blacklist,
-    params.ref_data_gridss_breakend_pon,
-    params.ref_data_gridss_breakpoint_pon,
-    params.ref_data_repeat_masker_file,
-    // Isofox
-    params.ref_data_rna_exp_counts,
-    params.ref_data_rna_exp_gc_ratios,
-    // LINX
-    params.ref_data_linx_fragile_sites,
-    params.ref_data_linx_lines,
-    // SAGE, PAVE
-    params.ref_data_sage_blacklist_bed,
-    params.ref_data_sage_blacklist_vcf,
-    params.ref_data_sage_coding_panel,
-    params.ref_data_sage_high_confidence,
-    params.ref_data_sage_known_hotspots_germline,
-    params.ref_data_sage_known_hotspots_somatic,
-    params.ref_data_sage_pon_file,
-    // LILAC
-    params.ref_data_lilac_resource_dir,
-    // VIRUSBreakend, Virus Interpreter
-    params.ref_data_virusbreakenddb,
-    params.ref_data_virus_taxonomy,
-    params.ref_data_virus_reporting,
-    // Other
-    params.ref_data_purple_germline_del,
-    params.ref_data_clinvar_vcf,
-    params.ref_data_driver_gene_panel,
-    params.ref_data_ensembl_data_dir,
-    params.ref_data_known_fusion_data,
-    params.ref_data_known_fusions,
-    params.ref_data_mappability_bed,
 ]
 
 for (param in checkPathParamList) { if (param) { file(param, checkIfExists: true) } }
@@ -99,18 +69,17 @@ include { TEAL              } from '../modules/local/teal/main'
 include { VIRUSBREAKEND     } from '../modules/local/virusbreakend/main'
 include { VIRUSINTERPRETER  } from '../modules/local/virusinterpreter/main'
 
-include { PICARD_COLLECTWGSMETRICS as COLLECTWGSMETRICS } from '../modules/nf-core/picard/collectwgsmetrics/main'
-
 //
 // SUBWORKFLOWS
 //
-include { GRIDSS        } from '../subworkflows/local/gridss'
-include { GRIDSS_SVPREP } from '../subworkflows/local/gridss_svprep'
-include { GRIPSS        } from '../subworkflows/local/gripss'
-include { LILAC         } from '../subworkflows/local/lilac'
-include { LINX          } from '../subworkflows/local/linx'
-include { PAVE          } from '../subworkflows/local/pave'
-include { SAGE          } from '../subworkflows/local/sage'
+include { GRIDSS            } from '../subworkflows/local/gridss'
+include { GRIDSS_SVPREP     } from '../subworkflows/local/gridss_svprep'
+include { GRIPSS            } from '../subworkflows/local/gripss'
+include { LILAC             } from '../subworkflows/local/lilac'
+include { LINX              } from '../subworkflows/local/linx'
+include { PAVE              } from '../subworkflows/local/pave'
+include { PREPARE_REFERENCE } from '../subworkflows/local/prepare_reference'
+include { SAGE              } from '../subworkflows/local/sage'
 
 /*
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -122,6 +91,7 @@ include { SAGE          } from '../subworkflows/local/sage'
 // MODULES
 //
 include { CUSTOM_DUMPSOFTWAREVERSIONS } from '../modules/nf-core/custom/dumpsoftwareversions/main'
+include { PICARD_COLLECTWGSMETRICS as COLLECTWGSMETRICS } from '../modules/nf-core/picard/collectwgsmetrics/main'
 
 /*
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -133,60 +103,11 @@ include { CUSTOM_DUMPSOFTWAREVERSIONS } from '../modules/nf-core/custom/dumpsoft
 def get_file_object(path) {
     return path ? file(path) : []
 }
-
-samplesheet                           = get_file_object(params.input)
-// Reference genome
-ref_data_genome_fa                    = get_file_object(params.ref_data_genome_fa)
-ref_data_genome_version               = params.ref_data_genome_version
-ref_data_genome_fai                   = get_file_object(params.ref_data_genome_fai)
-ref_data_genome_dict                  = get_file_object(params.ref_data_genome_dict)
-ref_data_genome_bwa_index             = get_file_object(params.ref_data_genome_bwa_index)
-ref_data_genome_bwa_index_image       = get_file_object(params.ref_data_genome_bwa_index_image)
-ref_data_genome_gridss_index          = get_file_object(params.ref_data_genome_gridss_index)
-// AMBER and COBALT
-ref_data_amber_loci                   = get_file_object(params.ref_data_amber_loci)
-ref_data_cobalt_gc_profile            = get_file_object(params.ref_data_cobalt_gc_profile)
-// CUPPA
-ref_data_cuppa                        = get_file_object(params.ref_data_cuppa)
-// SVPREP, GRIDSS, GRIPSS
-gridss_config                         = get_file_object(params.gridss_config)
-ref_data_sv_prep_blacklist            = get_file_object(params.ref_data_sv_prep_blacklist)
-ref_data_gridss_blacklist             = get_file_object(params.ref_data_gridss_blacklist)
-ref_data_gridss_breakend_pon          = get_file_object(params.ref_data_gridss_breakend_pon)
-ref_data_gridss_breakpoint_pon        = get_file_object(params.ref_data_gridss_breakpoint_pon)
-ref_data_repeat_masker_file           = get_file_object(params.ref_data_repeat_masker_file)
-// Isofox
-ref_data_rna_exp_counts               = get_file_object(params.ref_data_rna_exp_counts)
-ref_data_rna_exp_gc_ratios            = get_file_object(params.ref_data_rna_exp_gc_ratios)
-// LINX
-ref_data_linx_fragile_sites           = get_file_object(params.ref_data_linx_fragile_sites)
-ref_data_linx_lines                   = get_file_object(params.ref_data_linx_lines)
-// SAGE, PAVE
-ref_data_sage_blacklist_bed           = get_file_object(params.ref_data_sage_blacklist_bed)
-ref_data_sage_blacklist_vcf           = get_file_object(params.ref_data_sage_blacklist_vcf)
-ref_data_sage_coding_panel            = get_file_object(params.ref_data_sage_coding_panel)
-ref_data_sage_high_confidence         = get_file_object(params.ref_data_sage_high_confidence)
-ref_data_sage_known_hotspots_germline = get_file_object(params.ref_data_sage_known_hotspots_germline)
-ref_data_sage_known_hotspots_somatic  = get_file_object(params.ref_data_sage_known_hotspots_somatic)
-ref_data_sage_pon_file                = get_file_object(params.ref_data_sage_pon_file)
-// LILAC
-ref_data_lilac_resource_dir           = get_file_object(params.ref_data_lilac_resource_dir)
-// VIRUSBreakend, Virus Interpreter
-ref_data_virusbreakenddb              = get_file_object(params.ref_data_virusbreakenddb)
-ref_data_virus_taxonomy               = get_file_object(params.ref_data_virus_taxonomy)
-ref_data_virus_reporting              = get_file_object(params.ref_data_virus_reporting)
-// Other
-ref_data_purple_germline_del          = get_file_object(params.ref_data_purple_germline_del)
-ref_data_clinvar_vcf                  = get_file_object(params.ref_data_clinvar_vcf)
-ref_data_driver_gene_panel            = get_file_object(params.ref_data_driver_gene_panel)
-ref_data_ensembl_data_dir             = get_file_object(params.ref_data_ensembl_data_dir)
-ref_data_known_fusion_data            = get_file_object(params.ref_data_known_fusion_data)
-ref_data_known_fusions                = get_file_object(params.ref_data_known_fusions)
-ref_data_mappability_bed              = get_file_object(params.ref_data_mappability_bed)
+samplesheet   = get_file_object(params.input)
+gridss_config = get_file_object(params.gridss_config)
 
 // Set processes to run
 processes = Processes.set_processes(params.mode, log)
-
 processes_include = Processes.get_process_list(params.processes_include, log)
 processes_exclude = Processes.get_process_list(params.processes_exclude, log)
 Processes.check_include_exclude_list(processes_include, processes_exclude, log)
@@ -211,6 +132,10 @@ workflow ONCOANALYSER {
     )
     // channel: [val(meta)]
     ch_inputs = WorkflowOncoanalyser.prepare_inputs(CHECK_SAMPLESHEET.out, workflow.stubRun, log)
+
+    // Set up reference data and unpack HMF data map for convenience
+    PREPARE_REFERENCE(run)
+    hmf_data = PREPARE_REFERENCE.out.hmf_data
 
     // Set up channel with common inputs for several processes
     if (run.amber || run.cobalt || run.pave || run.lilac || run.teal) {
@@ -248,12 +173,12 @@ workflow ONCOANALYSER {
             }
         ISOFOX(
             ch_isofox_inputs,
-            ref_data_genome_fa,
-            ref_data_genome_fai,
-            ref_data_genome_version,
-            ref_data_ensembl_data_dir,
-            ref_data_rna_exp_counts,
-            ref_data_rna_exp_gc_ratios,
+            PREPARE_REFERENCE.out.genome_fasta,
+            PREPARE_REFERENCE.out.genome_fai,
+            PREPARE_REFERENCE.out.genome_version,
+            hmf_data.ensembl_data_dir,
+            hmf_data.isofox_exp_counts,
+            hmf_data.isofox_exp_gc_ratios,
         )
         ch_versions = ch_versions.mix(ISOFOX.out.versions)
         ch_isofox_out = ch_isofox_out.mix(ISOFOX.out.isofox_dir)
@@ -313,7 +238,7 @@ workflow ONCOANALYSER {
 
         COLLECTWGSMETRICS(
             ch_cwm_inputs,
-            ref_data_genome_fa,
+            PREPARE_REFERENCE.out.genome_fasta,
         )
         ch_versions = ch_versions.mix(COLLECTWGSMETRICS.out.versions)
 
@@ -341,8 +266,8 @@ workflow ONCOANALYSER {
 
         AMBER(
             ch_bams_and_indices,
-            ref_data_genome_version,
-            ref_data_amber_loci,
+            PREPARE_REFERENCE.out.genome_version,
+            hmf_data.amber_loci,
         )
         ch_versions = ch_versions.mix(AMBER.out.versions)
         ch_amber_out = ch_amber_out.mix(AMBER.out.amber_dir)
@@ -357,7 +282,7 @@ workflow ONCOANALYSER {
 
         COBALT(
             ch_bams_and_indices,
-            ref_data_cobalt_gc_profile,
+            hmf_data.cobalt_gc_profile,
         )
         ch_versions = ch_versions.mix(COBALT.out.versions)
         ch_cobalt_out = ch_cobalt_out.mix(COBALT.out.cobalt_dir)
@@ -374,16 +299,16 @@ workflow ONCOANALYSER {
             GRIDSS_SVPREP(
                 ch_inputs,
                 gridss_config,
-                ref_data_genome_fa,
-                ref_data_genome_version,
-                ref_data_genome_fai,
-                ref_data_genome_dict,
-                ref_data_genome_bwa_index,
-                ref_data_genome_bwa_index_image,
-                ref_data_genome_gridss_index,
-                ref_data_gridss_blacklist,
-                ref_data_sv_prep_blacklist,
-                ref_data_known_fusions,
+                PREPARE_REFERENCE.out.genome_fasta,
+                PREPARE_REFERENCE.out.genome_version,
+                PREPARE_REFERENCE.out.genome_fai,
+                PREPARE_REFERENCE.out.genome_dict,
+                PREPARE_REFERENCE.out.genome_bwa_index,
+                PREPARE_REFERENCE.out.genome_bwa_index_image,
+                PREPARE_REFERENCE.out.genome_gridss_index,
+                hmf_data.gridss_blacklist,
+                hmf_data.sv_prep_blacklist,
+                hmf_data.known_fusions,
             )
             ch_versions = ch_versions.mix(GRIDSS_SVPREP.out.versions)
             ch_gridss_out = ch_gridss_out.mix(GRIDSS_SVPREP.out.results)
@@ -397,13 +322,13 @@ workflow ONCOANALYSER {
             GRIDSS(
                 ch_gridss_inputs,
                 gridss_config,
-                ref_data_genome_fa,
-                ref_data_genome_fai,
-                ref_data_genome_dict,
-                ref_data_genome_bwa_index,
-                ref_data_genome_bwa_index_image,
-                ref_data_genome_gridss_index,
-                ref_data_gridss_blacklist,
+                PREPARE_REFERENCE.out.genome_fasta,
+                PREPARE_REFERENCE.out.genome_fai,
+                PREPARE_REFERENCE.out.genome_dict,
+                PREPARE_REFERENCE.out.genome_bwa_index,
+                PREPARE_REFERENCE.out.genome_bwa_index_image,
+                PREPARE_REFERENCE.out.genome_gridss_index,
+                hmf_data.gridss_blacklist,
             )
             ch_versions = ch_versions.mix(GRIDSS.out.versions)
             ch_gridss_out = ch_gridss_out.mix(GRIDSS.out.results)
@@ -421,13 +346,13 @@ workflow ONCOANALYSER {
 
         GRIPSS(
             run.gridss ? ch_gridss_out : WorkflowOncoanalyser.get_input(ch_inputs, ['gridss_vcf', 'tumor_normal']),
-            ref_data_genome_fa,
-            ref_data_genome_fai,
-            ref_data_genome_version,
-            ref_data_gridss_breakend_pon,
-            ref_data_gridss_breakpoint_pon,
-            ref_data_known_fusions,
-            ref_data_repeat_masker_file,
+            PREPARE_REFERENCE.out.genome_fasta,
+            PREPARE_REFERENCE.out.genome_fai,
+            PREPARE_REFERENCE.out.genome_version,
+            hmf_data.gridss_breakend_pon,
+            hmf_data.gridss_breakpoint_pon,
+            hmf_data.known_fusions,
+            hmf_data.repeat_masker_file,
         )
         ch_versions = ch_versions.mix(GRIPSS.out.versions)
         ch_gripss_germline_out = ch_gripss_germline_out.mix(GRIPSS.out.germline)
@@ -445,18 +370,18 @@ workflow ONCOANALYSER {
 
         SAGE(
             ch_bams_and_indices,
-            ref_data_genome_fa,
-            ref_data_genome_fai,
-            ref_data_genome_dict,
-            ref_data_genome_version,
-            ref_data_sage_known_hotspots_germline,
-            ref_data_sage_known_hotspots_somatic,
-            ref_data_sage_coding_panel,
-            ref_data_sage_high_confidence,
-            ref_data_sage_pon_file,
-            ref_data_mappability_bed,
-            ref_data_driver_gene_panel,
-            ref_data_ensembl_data_dir,
+            PREPARE_REFERENCE.out.genome_fasta,
+            PREPARE_REFERENCE.out.genome_fai,
+            PREPARE_REFERENCE.out.genome_dict,
+            PREPARE_REFERENCE.out.genome_version,
+            hmf_data.sage_known_hotspots_germline,
+            hmf_data.sage_known_hotspots_somatic,
+            hmf_data.sage_coding_panel,
+            hmf_data.sage_high_confidence,
+            hmf_data.sage_pon_file,
+            hmf_data.mappability_bed,
+            hmf_data.driver_gene_panel,
+            hmf_data.ensembl_data_dir,
         )
         ch_versions = ch_versions.mix(SAGE.out.versions)
         ch_sage_germline_out = ch_sage_germline_out.mix(SAGE.out.germline)
@@ -475,16 +400,16 @@ workflow ONCOANALYSER {
         PAVE(
             run.sage ? ch_sage_germline_out : WorkflowOncoanalyser.get_input(ch_inputs, ['sage_vcf', 'normal']),
             run.sage ? ch_sage_somatic_out : WorkflowOncoanalyser.get_input(ch_inputs, ['sage_vcf', 'tumor']),
-            ref_data_genome_fa,
-            ref_data_genome_fai,
-            ref_data_genome_version,
-            ref_data_sage_pon_file,
-            ref_data_sage_blacklist_bed,
-            ref_data_sage_blacklist_vcf,
-            ref_data_clinvar_vcf,
-            ref_data_mappability_bed,
-            ref_data_driver_gene_panel,
-            ref_data_ensembl_data_dir,
+            PREPARE_REFERENCE.out.genome_fasta,
+            PREPARE_REFERENCE.out.genome_fai,
+            PREPARE_REFERENCE.out.genome_version,
+            hmf_data.sage_pon_file,
+            hmf_data.sage_blacklist_bed,
+            hmf_data.sage_blacklist_vcf,
+            hmf_data.clinvar_vcf,
+            hmf_data.mappability_bed,
+            hmf_data.driver_gene_panel,
+            hmf_data.ensembl_data_dir,
         )
         ch_versions = ch_versions.mix(PAVE.out.versions)
         ch_pave_germline_out = ch_pave_germline_out.mix(PAVE.out.germline)
@@ -527,16 +452,16 @@ workflow ONCOANALYSER {
 
         PURPLE(
             ch_purple_inputs,
-            ref_data_genome_fa,
-            ref_data_genome_fai,
-            ref_data_genome_dict,
-            ref_data_genome_version,
-            ref_data_cobalt_gc_profile,
-            ref_data_sage_known_hotspots_somatic,
-            ref_data_sage_known_hotspots_germline,
-            ref_data_driver_gene_panel,
-            ref_data_ensembl_data_dir,
-            ref_data_purple_germline_del,
+            PREPARE_REFERENCE.out.genome_fasta,
+            PREPARE_REFERENCE.out.genome_fai,
+            PREPARE_REFERENCE.out.genome_dict,
+            PREPARE_REFERENCE.out.genome_version,
+            hmf_data.cobalt_gc_profile,
+            hmf_data.sage_known_hotspots_somatic,
+            hmf_data.sage_known_hotspots_germline,
+            hmf_data.driver_gene_panel,
+            hmf_data.ensembl_data_dir,
+            hmf_data.purple_germline_del,
         )
         ch_versions = ch_versions.mix(PURPLE.out.versions)
         ch_purple_out = ch_purple_out.mix(PURPLE.out.purple_dir)
@@ -571,10 +496,10 @@ workflow ONCOANALYSER {
         LILAC(
             ch_bams_and_indices,
             run.purple ? ch_purple_out : WorkflowOncoanalyser.get_input(['purple_dir', 'tumor_normal']),
-            ref_data_genome_fa,
-            ref_data_genome_fai,
-            ref_data_genome_version,
-            ref_data_lilac_resource_dir,
+            PREPARE_REFERENCE.out.genome_fasta,
+            PREPARE_REFERENCE.out.genome_fai,
+            PREPARE_REFERENCE.out.genome_version,
+            hmf_data.lilac_resource_dir,
         )
         ch_versions = ch_versions.mix(LILAC.out.versions)
     }
@@ -591,14 +516,14 @@ workflow ONCOANALYSER {
 
         VIRUSBREAKEND(
             ch_virusbreakend_inputs,
-            ref_data_virusbreakenddb,
             gridss_config,
-            ref_data_genome_fa,
-            ref_data_genome_fai,
-            ref_data_genome_dict,
-            ref_data_genome_bwa_index,
-            ref_data_genome_bwa_index_image,
-            ref_data_genome_gridss_index,
+            PREPARE_REFERENCE.out.genome_fasta,
+            PREPARE_REFERENCE.out.genome_fai,
+            PREPARE_REFERENCE.out.genome_dict,
+            PREPARE_REFERENCE.out.genome_bwa_index,
+            PREPARE_REFERENCE.out.genome_bwa_index_image,
+            PREPARE_REFERENCE.out.genome_gridss_index,
+            hmf_data.virusbreakenddb,
         )
         ch_versions = ch_versions.mix(VIRUSBREAKEND.out.versions)
 
@@ -619,8 +544,8 @@ workflow ONCOANALYSER {
 
         VIRUSINTERPRETER(
             ch_virusinterpreter_inputs,
-            ref_data_virus_taxonomy,
-            ref_data_virus_reporting,
+            hmf_data.virus_taxonomy,
+            hmf_data.virus_reporting,
         )
         ch_versions = ch_versions.mix(VIRUSINTERPRETER.out.versions)
         ch_virusinterpreter_out = ch_virusinterpreter_out.mix(VIRUSINTERPRETER.out.virusinterpreter_dir)
@@ -639,12 +564,12 @@ workflow ONCOANALYSER {
         LINX(
             run.gripss ? ch_gripps_germline_hard : WorkflowOncoanalyser.get_input(ch_inputs, ['vcf_sv_gripss_hard', 'normal']),
             run.purple ? ch_purple_out : WorkflowOncoanalyser.get_input(ch_inputs, ['purple_dir', 'tumor_normal']),
-            ref_data_genome_version,
-            ref_data_linx_fragile_sites,
-            ref_data_linx_lines,
-            ref_data_ensembl_data_dir,
-            ref_data_known_fusion_data,
-            ref_data_driver_gene_panel,
+            PREPARE_REFERENCE.out.genome_version,
+            hmf_data.linx_fragile_sites,
+            hmf_data.linx_lines,
+            hmf_data.ensembl_data_dir,
+            hmf_data.known_fusion_data,
+            hmf_data.driver_gene_panel,
         )
         ch_versions = ch_versions.mix(LINX.out.versions)
         ch_linx_somatic_out = ch_linx_somatic_out.mix(LINX.out.somatic)
@@ -697,7 +622,7 @@ workflow ONCOANALYSER {
 
         CUPPA_CLASSIFIER(
             ch_cuppa_inputs,
-            ref_data_cuppa,
+            hmf_data.cuppa,
         )
         ch_versions = ch_versions.mix(CUPPA_CLASSIFIER.out.versions)
 

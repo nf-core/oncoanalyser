@@ -5,7 +5,7 @@ process PREPROCESS {
     input:
     tuple val(meta), path(bam)
     path gridss_config
-    path genome_fa
+    path genome_fasta
     path genome_fai
     path genome_dict
     path genome_bwa_index_dir, stageAs: 'bwa_index'
@@ -32,7 +32,7 @@ process PREPROCESS {
         --jvmheap "${task.memory.giga}g" \\
         --jar "${task.ext.jarPath}" \\
         --steps preprocess \\
-        --reference "${genome_fa}" \\
+        --reference "${genome_fasta}" \\
         --workingdir gridss_preprocess/ \\
         --threads "${task.cpus}" \\
         ${config_arg} \\

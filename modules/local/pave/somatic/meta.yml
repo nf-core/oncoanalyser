@@ -26,7 +26,7 @@ input:
       type: file
       description: SAGE VCF
       pattern: "*.{vcf.gz}"
-  - genome_fa:
+  - genome_fasta:
       type: file
       description: Reference genome assembly fa file
       pattern: "*.{fa,fasta}"

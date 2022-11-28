@@ -4,7 +4,7 @@ process PURPLE {
 
     input:
     tuple val(meta), path(amber), path(cobalt), path(sv_hard_vcf), path(sv_hard_vcf_index), path(sv_soft_vcf), path(sv_soft_vcf_index), path(smlv_tumor_vcf), path(smlv_normal_vcf)
-    path genome_fa
+    path genome_fasta
     path genome_fai
     path genome_dict
     val genome_ver
@@ -64,7 +64,7 @@ process PURPLE {
             -somatic_hotspots "${sage_known_hotspots_somatic}" \\
             -germline_hotspots "${sage_known_hotspots_germline}" \\
             ${germline_del_freq_arg} \\
-            -ref_genome "${genome_fa}" \\
+            -ref_genome "${genome_fasta}" \\
             -ref_genome_version "${genome_ver}" \\
             -threads "${task.cpus}" \\
             -circos "${task.ext.circosPath}"

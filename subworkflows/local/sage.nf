@@ -8,7 +8,7 @@ include { SAGE_SOMATIC  } from '../../modules/local/sage/somatic/main'
 workflow SAGE {
     take:
         ch_inputs                             // channel: [meta, tumor_bam, normal_bam, tumor_bai, normal_bai]
-        ref_data_genome_fa                    //    file: /path/to/genome_fa
+        ref_data_genome_fasta                 //    file: /path/to/genome_fasta
         ref_data_genome_fai                   //    file: /path/to/genome_fai
         ref_data_genome_dict                  //    file: /path/to/genome_dict
         ref_data_genome_version               //     val: genome version
@@ -28,7 +28,7 @@ workflow SAGE {
         // Germline
         SAGE_GERMLINE(
             ch_inputs,
-            ref_data_genome_fa,
+            ref_data_genome_fasta,
             ref_data_genome_fai,
             ref_data_genome_dict,
             ref_data_genome_version,
@@ -42,7 +42,7 @@ workflow SAGE {
         // Somatic
         SAGE_SOMATIC(
             ch_inputs,
-            ref_data_genome_fa,
+            ref_data_genome_fasta,
             ref_data_genome_fai,
             ref_data_genome_dict,
             ref_data_genome_version,
