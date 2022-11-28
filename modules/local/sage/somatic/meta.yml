@@ -38,7 +38,7 @@ input:
       type: file
       description: Normal BAI file
       pattern: "*.{bai}"
-  - genome_fa:
+  - genome_fasta:
       type: file
       description: Reference genome assembly fa file
       pattern: "*.{fa,fasta}"

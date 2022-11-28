@@ -4,7 +4,7 @@ process SAGE_SOMATIC {
 
     input:
     tuple val(meta), path(tumor_bam), path(normal_bam), path(tumor_bai), path(normal_bai)
-    path genome_fa
+    path genome_fasta
     path genome_fai
     path genome_dict
     val genome_ver
@@ -33,7 +33,7 @@ process SAGE_SOMATIC {
             -tumor "${meta.get(['sample_name', 'tumor'])}" \\
             -tumor_bam "${tumor_bam}" \\
             -ref_genome_version "${genome_ver}" \\
-            -ref_genome "${genome_fa}" \\
+            -ref_genome "${genome_fasta}" \\
             -hotspots "${sage_known_hotspots_somatic}" \\
             -panel_bed "${sage_coding_panel}" \\
             -high_confidence_bed "${sage_high_confidence}" \\

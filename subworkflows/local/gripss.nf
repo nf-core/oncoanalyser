@@ -8,7 +8,7 @@ include { GRIPSS_SOMATIC  } from '../../modules/local/gripss/somatic/main'
 workflow GRIPSS {
     take:
         ch_inputs               // channel: [val(meta), gridss_vcf]
-        ref_data_genome_fa      //    file: /path/to/genome_fa
+        ref_data_genome_fasta   //    file: /path/to/genome_fasta
         ref_data_genome_fai     //    file: /path/to/genome_fai
         ref_data_genome_version //     val: genome version
         breakend_pon            //    file: /path/to/breakend_pon
@@ -23,7 +23,7 @@ workflow GRIPSS {
         // Germline
         GRIPSS_GERMLINE(
             ch_inputs,
-            ref_data_genome_fa,
+            ref_data_genome_fasta,
             ref_data_genome_fai,
             ref_data_genome_version,
             breakend_pon,
@@ -36,7 +36,7 @@ workflow GRIPSS {
         // Somatic
         GRIPSS_SOMATIC(
             ch_inputs,
-            ref_data_genome_fa,
+            ref_data_genome_fasta,
             ref_data_genome_fai,
             ref_data_genome_version,
             breakend_pon,

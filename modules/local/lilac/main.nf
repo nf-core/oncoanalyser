@@ -4,7 +4,7 @@ process LILAC {
 
     input:
     tuple val(meta), path(tumor_bam), path(normal_bam), path(tumour_bai), path(normal_bai), path(purple_dir)
-    path genome_fa
+    path genome_fasta
     val genome_ver
     path lilac_resource_dir, stageAs: 'lilac_resource_dir'
 
@@ -33,7 +33,7 @@ process LILAC {
             ${tumor_bam_arg} \\
             -reference_bam ${normal_bam} \\
             -ref_genome_version "${genome_ver}" \\
-            -ref_genome "${genome_fa}" \\
+            -ref_genome "${genome_fasta}" \\
             -resource_dir "${lilac_resource_dir}" \\
             ${purple_args.replaceAll('\\n', '')} \\
             -threads "${task.cpus}" \\

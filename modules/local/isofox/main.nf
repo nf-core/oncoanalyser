@@ -6,7 +6,7 @@ process ISOFOX {
 
     input:
     tuple val(meta), path(bam)
-    path genome_fa
+    path genome_fasta
     path genome_fai
     val genome_ver
     path ensembl_data_dir
@@ -32,7 +32,7 @@ process ISOFOX {
             ${args} \\
             -sample ${meta.get(['sample_name', 'tumor'])} \\
             -bam_file ${bam} \\
-            -ref_genome ${genome_fa} \\
+            -ref_genome ${genome_fasta} \\
             -ref_genome_version ${genome_ver} \\
             -ensembl_data_dir ${ensembl_data_dir} \\
             -exp_counts_file ${exp_counts} \\

@@ -5,7 +5,7 @@ process CALL {
     input:
     tuple val(meta), path(bams), path(assemble_dir), val(labels)
     path gridss_config
-    path genome_fa
+    path genome_fasta
     path genome_fai
     path genome_dict
     path genome_bwa_index_dir, stageAs: 'bwa_index'
@@ -64,7 +64,7 @@ process CALL {
         --jar "${task.ext.jarPath}" \\
         --steps call \\
         --labels "${labels_arg}" \\
-        --reference "${genome_fa}" \\
+        --reference "${genome_fasta}" \\
         --blacklist "${blacklist}" \\
         --workingdir "${output_dirname}/work/" \\
         --assembly "${output_dirname}/sv_assemblies.bam" \\

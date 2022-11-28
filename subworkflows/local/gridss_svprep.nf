@@ -14,7 +14,7 @@ workflow GRIDSS_SVPREP {
     take:
         ch_inputs                       // channel: [val(meta)]
         gridss_config                   //    file: /path/to/gridss_config (optional)
-        ref_data_genome_fa              //    file: /path/to/genome_fa
+        ref_data_genome_fasta           //    file: /path/to/genome_fasta
         ref_data_genome_version         //     val: genome version
         ref_data_genome_fai             //    file: /path/to/genome_fai
         ref_data_genome_dict            //    file: /path/to/genome_dict
@@ -42,7 +42,7 @@ workflow GRIDSS_SVPREP {
         // Filter tumor BAM
         SVPREP_TUMOR(
             ch_svprep_tumor_inputs,
-            ref_data_genome_fa,
+            ref_data_genome_fasta,
             ref_data_genome_version,
             ref_data_sv_prep_blacklist,
             ref_data_known_fusions,
@@ -63,7 +63,7 @@ workflow GRIDSS_SVPREP {
 
         SVPREP_NORMAL(
             ch_svprep_normal_inputs,
-            ref_data_genome_fa,
+            ref_data_genome_fasta,
             ref_data_genome_version,
             ref_data_sv_prep_blacklist,
             ref_data_known_fusions,
@@ -108,7 +108,7 @@ workflow GRIDSS_SVPREP {
         GRIDSS_PREPROCESS(
             ch_preprocess_inputs,
             gridss_config,
-            ref_data_genome_fa,
+            ref_data_genome_fasta,
             ref_data_genome_fai,
             ref_data_genome_dict,
             ref_data_genome_bwa_index,
@@ -146,7 +146,7 @@ workflow GRIDSS_SVPREP {
         GRIDSS_ASSEMBLE(
             ch_assemble_inputs,
             gridss_config,
-            ref_data_genome_fa,
+            ref_data_genome_fasta,
             ref_data_genome_fai,
             ref_data_genome_dict,
             ref_data_genome_bwa_index,
@@ -174,7 +174,7 @@ workflow GRIDSS_SVPREP {
         GRIDSS_CALL(
             ch_call_inputs,
             gridss_config,
-            ref_data_genome_fa,
+            ref_data_genome_fasta,
             ref_data_genome_fai,
             ref_data_genome_dict,
             ref_data_genome_bwa_index,
@@ -205,7 +205,7 @@ workflow GRIDSS_SVPREP {
         // Add depth annotations to SVs
         SVPREP_DEPTH_ANNOTATOR(
             ch_depth_inputs,
-            ref_data_genome_fa,
+            ref_data_genome_fasta,
             ref_data_genome_version,
         )
 

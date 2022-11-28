@@ -7,18 +7,57 @@ import static groovy.io.FileType.FILES
 import nextflow.Channel
 import nextflow.Nextflow
 
+import Constants
+
 class WorkflowOncoanalyser {
 
     //
     // Check and validate parameters
     //
     public static void initialise(params, workflow, log) {
-        //genomeExistsError(params, log)
-        //if (!params.fasta) {
-        //    log.error "Genome fasta file not specified with e.g. '--fasta genome.fa' or via a detectable config file."
-        //    System.exit(1)
-        //}
+
+        if (params.genome && params.genomes && ! params.genomes.containsKey(params.genome)) {
+            log.error "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n" +
+                "  Genome '${params.genome}' not found in any config files provided to the pipeline.\n" +
+                "  Currently, the available genome keys are:\n" +
+                "  ${params.genomes.keySet().join(", ")}\n" +
+                "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
+            System.exit(1)
+        }
+
+        if (Constants.genomes_version_37.contains(params.genome)) {
+            params.ref_data_genome_version = '37'
+        } else if (Constants.genomes_version_38.contains(params.genome)) {
+            params.ref_data_genome_version = '38'
+        } else if (Constants.genomes_version_38_noalt.contains(params.genome)) {
+            params.ref_data_genome_version = '38_noalt'
+        } else {
+            def genome_version_list_all = Constants.genomes_version_37 + Constants.genomes_version_38
+            log.error "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n" +
+                "  Genome '${params.genome}' is not defined in genome version list.                 \n" +
+                "  Currently, the list of genomes in the version list include:\n" +
+                "  ${genome_version_list_all.join(", ")}\n" +
+                "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
+            System.exit(1)
+        }
+
+        if (!params.containsKey('ref_data_hmf_bundle')) {
+            if (params.ref_data_genome_version == '37') {
+                params.ref_data_hmf_bundle = Constants.hmf_reference_data_37_bundle_path
+            } else if (params.ref_data_genome_version == '38') {
+                params.ref_data_hmf_bundle = Constants.hmf_reference_data_38_bundle_path
+            } else {
+                assert false : "Got a bad genome version: ${params.ref_data_genome_version}"
+            }
+        }
+
+        if (!params.ref_data_genome_fasta) {
+            log.error "Genome fasta file not specified with e.g. '--ref_data_genome_fasta genome.fa' or via a detectable config file."
+            System.exit(1)
+        }
+
         // Download region file for collectwgsmetrics if in test mode
+        // NOTE(SW): this will be removed as part of the overhaul for testing
         if (workflow.profile.contains('test')) {
             def stage_dir = new File(workflow.workDir.toString(), 'stage/manual/')
             def interval_file = new File(stage_dir, 'collectwgsmetrics.interval_list')
@@ -166,17 +205,5 @@ class WorkflowOncoanalyser {
 
     public static get_input(ch, key) {
         return ch.map { meta -> [meta, meta.getAt(key)] }
-    }
-
-    // Exit pipeline if incorrect --genome key provided
-    private static void genomeExistsError(params, log) {
-        if (params.genomes && params.genome && !params.genomes.containsKey(params.genome)) {
-            log.error "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n" +
-                "  Genome '${params.genome}' not found in any config files provided to the pipeline.\n" +
-                "  Currently, the available genome keys are:\n" +
-                "  ${params.genomes.keySet().join(", ")}\n" +
-                "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
-            System.exit(1)
-        }
     }
 }

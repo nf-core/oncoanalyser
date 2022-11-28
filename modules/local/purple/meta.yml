@@ -52,7 +52,7 @@ input:
       type: file
       description: Optional small variant normal VCF file
       pattern: "*.{vcf.gz}"
-  - genome_fa:
+  - genome_fasta:
       type: file
       description: Reference genome assembly fa file
       pattern: "*.{fa,fasta}"

@@ -4,11 +4,8 @@ import Constants
 class Processes {
 
     public static set_processes(mode_str, log) {
-        def mode_enum
-
-        try {
-            mode_enum = Constants.PipelineMode.valueOf(mode_str.toUpperCase())
-        } catch(java.lang.IllegalArgumentException e) {
+        def mode_enum = Constants.get_enum_from_string(mode_str, Constants.PipelineMode)
+        if (!mode_enum) {
             def workflows_str = Processes.get_workflow_names().join('\n  - ')
             log.error "\nERROR: recieved invalid pipeline mode: '${mode_str}'. Valid options are:\n  - ${workflows_str}"
             System.exit(1)
@@ -55,6 +52,9 @@ class Processes {
     }
 
     public static get_process_list(process_str, log) {
+        if (!process_str) {
+            return []
+        }
         return process_str
             .tokenize(',')
             .collect { name ->
@@ -96,5 +96,4 @@ class Processes {
             *.name()
             *.toLowerCase()
     }
-
 }
