@@ -1,0 +1,65 @@
+name: "TEAL"
+description: TEAL measures telomere content, and estimates telomeric length based on WGS read data
+keywords:
+  - teal
+  - telomere
+tools:
+  - "TEAL":
+      description: "TEAL measures telomere content, and estimates telomeric length based on WGS read data."
+      homepage: "https://github.com/hartwigmedical/hmftools/tree/master/teal"
+      documentation: "https://github.com/hartwigmedical/hmftools/tree/master/teal"
+      tool_dev_url: "https://github.com/hartwigmedical/hmftools/tree/master/teal"
+      doi: ""
+      licence: "['GPL v3']"
+
+input:
+  - meta:
+      type: map
+      description: |
+        Groovy Map containing sample information
+        e.g. [['sample_name', 'tumor']: 'sample_tumor', ['sample_name', 'normal']: 'sample_normal']
+  - tumor_bam:
+      type: file
+      description: Optional tumor BAM file
+      pattern: "*.{bam}"
+  - normal_bam:
+      type: file
+      description: Optional normal BAM file
+      pattern: "*.{bam}"
+  - tumor_bai:
+      type: file
+      description: Tumor BAI file
+      pattern: "*.{bai}"
+  - normal_bai:
+      type: file
+      description: Normal BAI file
+      pattern: "*.{bai}"
+  - tumor_wgs_metrics:
+      type: file
+      description: Optional tumor WGS metrics file
+  - normal_wgs_metrics:
+      type: file
+      description: Optional normal WGS metrics file
+  - cobalt_dir:
+      type: directory
+      description: COBALT output directory
+  - purple_dir:
+      type: directory
+      description: PURPLE output directory
+
+output:
+  - meta:
+      type: map
+      description: |
+        Groovy Map containing sample information
+        e.g. [['sample_name', 'tumor']: 'sample_tumor', ['sample_name', 'normal']: 'sample_normal']
+  - teal_dir:
+      type: directory
+      description: TEAL output directory
+  - versions:
+      type: file
+      description: File containing software versions
+      pattern: "versions.yml"
+
+authors:
+  - "@scwatts"

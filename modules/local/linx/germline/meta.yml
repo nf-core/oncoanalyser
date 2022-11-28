@@ -1,0 +1,61 @@
+name: "LINX_germline"
+description: Generate LINX germline annotation data
+keywords:
+  - linx
+  - germline
+  - sv
+  - annotation
+tools:
+  - "LINX":
+      description: "LINX is an annotation, interpretation and visualisation tool for structural variants."
+      homepage: "https://github.com/hartwigmedical/hmftools/tree/master/linx"
+      documentation: "https://github.com/hartwigmedical/hmftools/tree/master/linx"
+      tool_dev_url: "https://github.com/hartwigmedical/hmftools/tree/master/linx"
+      doi: ""
+      licence: "['GPL v3']"
+
+input:
+  - meta:
+      type: map
+      description: |
+        Groovy Map containing sample information
+        e.g. [['sample_name', 'normal']: 'sample_normal']
+  - gridss_sv:
+      type: file
+      description: GRIPSS hard filtered VCF
+      pattern: "*.{vcf.gz}"
+  - genome_ver:
+      type: string
+      description: Reference genome version
+  - fragile_sites:
+      type: file
+      description: LINX fragile sites file
+      pattern: "*.{csv}"
+  - lines:
+      type: file
+      description: LINEs file
+      pattern: "*.{csv}"
+  - ensembl_data_dir:
+      type: directory
+      description: HMF Ensembl Data Cache directory
+  - driver_gene_panel:
+      type: file
+      description: HMF Driver Gene Panel file
+      pattern: "*.{csv}"
+
+output:
+  - meta:
+      type: map
+      description: |
+        Groovy Map containing sample information
+        e.g. [['sample_name', 'normal']: 'sample_normal']
+  - annotation_dir:
+      type: directory
+      description: LINX annotation output directory
+  - versions:
+      type: file
+      description: File containing software versions
+      pattern: "versions.yml"
+
+authors:
+  - "@scwatts"
