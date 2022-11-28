@@ -1,0 +1,77 @@
+name: "PAVE_somatic"
+description: PAVE annotates a somatic variant VCF with gene and transcript coding and protein effects
+keywords:
+  - pave
+  - annotation
+  - gene
+  - transcript
+  - protein
+  - vcf
+tools:
+  - "PAVE":
+      description: "PAVE annotates a somatic variant VCF with gene and transcript coding and protein effects."
+      homepage: "https://github.com/hartwigmedical/hmftools/tree/master/pave"
+      documentation: "https://github.com/hartwigmedical/hmftools/tree/master/pave"
+      tool_dev_url: "https://github.com/hartwigmedical/hmftools/tree/master/pave"
+      doi: ""
+      licence: "['GPL v3']"
+
+input:
+  - meta:
+      type: map
+      description: |
+        Groovy Map containing sample information
+        e.g. [['sample_name', 'tumor']: 'sample_tumor']
+  - sage_vcf:
+      type: file
+      description: SAGE VCF
+      pattern: "*.{vcf.gz}"
+  - genome_fa:
+      type: file
+      description: Reference genome assembly fa file
+      pattern: "*.{fa,fasta}"
+  - genome_fai:
+      type: file
+      description: Reference genome assembly fai file
+      pattern: "*.{fai}"
+  - genome_ver:
+      type: string
+      description: Reference genome version
+  - sage_pon_file:
+      type: file
+      description: SAGE PON file
+      pattern: "*.{tsv.gz}"
+  - mappability_bed:
+      type: file
+      description: HMF mappability BED
+      pattern: "*.{bed.gz}"
+  - driver_gene_panel:
+      type: file
+      description: HMF Driver Gene Panel file
+      pattern: "*.{tsv}"
+  - ensembl_data_dir:
+      type: directory
+      description: HMF Ensembl Data Cache directory
+      pattern: "*.{tsv}"
+
+output:
+  - meta:
+      type: map
+      description: |
+        Groovy Map containing sample information
+        e.g. [['sample_name', 'tumor']: 'sample_tumor']
+  - vcf:
+      type: file
+      description: PAVE VCF file
+      pattern: "*.{vcf.gz}"
+  - index:
+      type: file
+      description: PAVE VCF index file
+      pattern: "*.{vcf.gz.tbi}"
+  - versions:
+      type: file
+      description: File containing software versions
+      pattern: "versions.yml"
+
+authors:
+  - "@scwatts"

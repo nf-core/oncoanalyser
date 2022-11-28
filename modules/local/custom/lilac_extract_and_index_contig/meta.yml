@@ -1,0 +1,40 @@
+name: "lilac_extract_and_index_contig"
+description: Extract a contig FASTA record from a reference genome and index with BWA
+keywords:
+  - reference
+  - contig
+  - extract
+tools:
+  - custom:
+      description: "Extract and index contig"
+      homepage: "https://github.com/umccr/hmftools"
+      documentation: "https://github.com/umccr/hmftools"
+      doi: ""
+      licence: "['GPL v3']"
+
+input:
+  - contig_name:
+      type: string
+      description: Contig name
+  - ref_data_genome_dir:
+      type: directory
+      description: Directory containing reference genome
+  - ref_data_genome_fn:
+      type: string
+      description: Reference genome filename
+
+output:
+  - contig:
+      type: file
+      description: FASTA containing extracted contig
+      pattern: "*.{fa}"
+  - bwa_indices:
+      type: list
+      description: BWA indices for extracted contig
+  - versions:
+      type: file
+      description: File containing software versions
+      pattern: "versions.yml"
+
+authors:
+  - "@scwatts"

@@ -1,0 +1,58 @@
+name: "COBALT"
+description: Count bam lines determines the read depth ratios of the supplied tumor and reference genomes
+keywords:
+  - cobalt
+  - read depth ratios
+  - cnv
+tools:
+  - "COBALT":
+      description: "Count bam lines determines the read depth ratios of the supplied tumor and reference genomes."
+      homepage: "https://github.com/hartwigmedical/hmftools/tree/master/cobalt"
+      documentation: "https://github.com/hartwigmedical/hmftools/tree/master/cobalt"
+      tool_dev_url: "https://github.com/hartwigmedical/hmftools/tree/master/cobalt"
+      doi: ""
+      licence: "['GPL v3']"
+
+input:
+  - meta:
+      type: map
+      description: |
+        Groovy Map containing sample information
+        e.g. [['sample_name', 'tumor']: 'sample_tumor', [['sample_name', 'normal']]: 'sample_normal']
+  - tumor_bam:
+      type: file
+      description: Tumor BAM file
+      pattern: "*.{bam}"
+  - normal_bam:
+      type: file
+      description: Normal BAM file
+      pattern: "*.{bam}"
+  - tumor_bai:
+      type: file
+      description: Tumor BAI file
+      pattern: "*.{bai}"
+  - normal_bai:
+      type: file
+      description: Normal BAI file
+      pattern: "*.{bai}"
+  - gc_profile:
+      type: file
+      description: COBALT GC Profile file
+      pattern: "*.{cnp}"
+
+output:
+  - meta:
+      type: map
+      description: |
+        Groovy Map containing sample information
+        e.g. [['sample_name', 'tumor']: 'sample_tumor', [['sample_name', 'normal']]: 'sample_normal']
+  - cobalt:
+      type: directory
+      description: COBALT output directory
+  - versions:
+      type: file
+      description: File containing software versions
+      pattern: "versions.yml"
+
+authors:
+  - "@scwatts"

@@ -1,0 +1,65 @@
+name: "LILAC"
+description: LILAC is a WGS tool for HLA typing and somatic CNV and SNV calling
+keywords:
+  - lilac
+tools:
+  - "LILAC":
+      description: "LILAC is a WGS tool for HLA typing and somatic CNV and SNV calling."
+      homepage: "https://github.com/hartwigmedical/hmftools/tree/master/lilac"
+      documentation: "https://github.com/hartwigmedical/hmftools/tree/master/lilac"
+      tool_dev_url: "https://github.com/hartwigmedical/hmftools/tree/master/lilac"
+      doi: ""
+      licence: "['GPL v3']"
+
+input:
+  - meta:
+      type: map
+      description: |
+        Groovy Map containing sample information
+        e.g. ['subject_name': 'subject', ['sample_name', 'tumor']: 'sample_tumor', [['sample_name', 'normal']]: 'sample_normal']
+  - tumor_bam:
+      type: file
+      description: Optional tumor BAM file
+      pattern: "*.{bam}"
+  - normal_bam:
+      type: file
+      description: Normal BAM file
+      pattern: "*.{bam}"
+  - tumor_bai:
+      type: file
+      description: Optional tumor BAI file
+      pattern: "*.{bai}"
+  - normal_bai:
+      type: file
+      description: Normal BAI file
+      pattern: "*.{bai}"
+  - purple_dir:
+      type: directory
+      description: Optional PURPLE output directory
+  - genome_fa:
+      type: file
+      description: Reference genome assembly fa file
+      pattern: "*.{fa,fasta}"
+  - genome_ver:
+      type: string
+      description: Reference genome version
+  - lilac_resource_dir:
+      type: directory
+      description: LILAC resource directory
+
+output:
+  - meta:
+      type: map
+      description: |
+        Groovy Map containing sample information
+        e.g. ['subject_name': 'subject', ['sample_name', 'tumor']: 'sample_tumor', [['sample_name', 'normal']]: 'sample_normal']
+  - lilac_dir:
+      type: file
+      description: LILAC output directory
+  - versions:
+      type: file
+      description: File containing software versions
+      pattern: "versions.yml"
+
+authors:
+  - "@scwatts"
