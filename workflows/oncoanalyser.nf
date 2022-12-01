@@ -59,6 +59,7 @@ if (params.input) { ch_input = file(params.input) } else { exit 1, 'Input sample
 include { CHECK_SAMPLESHEET } from '../modules/local/check_samplesheet/main'
 
 include { AMBER             } from '../modules/local/amber/main'
+include { CHORD             } from '../modules/local/chord/main'
 include { COBALT            } from '../modules/local/cobalt/main'
 include { CUPPA_CLASSIFIER  } from '../modules/local/cuppa/classifier/main'
 include { CUPPA_VISUALISER  } from '../modules/local/cuppa/visualiser/main'
@@ -486,6 +487,27 @@ workflow ONCOANALYSER {
           hmf_data.sigs_signatures,
         )
         ch_versions = ch_versions.mix(SIGS.out.versions)
+    }
+
+    //
+    // MODULE: Run CHORD to predict HR deficiency status
+    //
+    if (run.chord) {
+        // channel: [val(meta), purple_dir]
+        ch_chord_inputs_purple_dir = run.purple ? ch_purple_out : WorkflowOncoanalyser.get_input(ch_inputs, ['purple_dir', 'tumor_normal'])
+        // channel: [val(meta), smlv_vcf, sv_vcf]
+        ch_chord_inputs = ch_chord_inputs_purple_dir
+            .map { meta, purple_dir ->
+                def smlv_vcf = file(purple_dir).resolve("${meta.get(['sample_name', 'tumor'])}.purple.somatic.vcf.gz")
+                def sv_vcf = file(purple_dir).resolve("${meta.get(['sample_name', 'tumor'])}.purple.sv.vcf.gz")
+                return [meta, smlv_vcf, sv_vcf]
+            }
+
+        CHORD(
+          ch_chord_inputs,
+          PREPARE_REFERENCE.out.genome_version,
+        )
+        ch_versions = ch_versions.mix(CHORD.out.versions)
     }
 
     //
