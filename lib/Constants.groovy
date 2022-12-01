@@ -17,6 +17,7 @@ class Constants {
 
     static enum Process {
         AMBER,
+        CHORD,
         COBALT,
         COLLECTWGSMETRICS,
         CUPPA,

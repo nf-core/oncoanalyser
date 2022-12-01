@@ -1,0 +1,56 @@
+--- a/extractSigPredictHRD.R
++++ b/extractSigPredictHRD.R
+@@ -4,12 +4,11 @@ options(stringsAsFactors=F) # to avoid invalid factor level warning
+
+ args <- commandArgs(TRUE)
+
+-chordToolDir <- args[1]
+-  workingDir <- args[2]
+-  sampleName <- args[3]
+-   snvIndVcf <- args[4]
+-       svVcf <- args[5]
+-refGenomeVsn <- args[6] # RG_37 or RG_38
++  workingDir <- args[1]
++  sampleName <- args[2]
++   snvIndVcf <- args[3]
++       svVcf <- args[4]
++refGenomeVsn <- args[5] # RG_37 or RG_38
+    sigOutTxt <- paste0( workingDir, '/', sampleName, '_chord_signatures.txt')
+    prdOutTxt <- paste0( workingDir, '/', sampleName, '_chord_prediction.txt')
+
+@@ -18,8 +17,8 @@ setwd(workingDir)
+
+ suppressPackageStartupMessages(library('devtools'))
+ suppressPackageStartupMessages(library('randomForest'))
+-suppressPackageStartupMessages(load_all(paste0(chordToolDir, '/mutSigExtractor-1.14')))
+-suppressPackageStartupMessages(load_all(paste0(chordToolDir, '/CHORD-2.00')))
++suppressPackageStartupMessages(library('mutSigExtractor'))
++suppressPackageStartupMessages(library('CHORD'))
+
+ cat("[INFO] Package NamespaceVersions after loading:\n")
+ for (pkgName in c("mutSigExtractor", "CHORD")){
+@@ -28,14 +27,14 @@ for (pkgName in c("mutSigExtractor", "CHORD")){
+ }
+
+ ## Convert genome name to BSGenome name
+-if (refGenomeVsn == "RG_37") {
++if (refGenomeVsn == "37") {
+   suppressPackageStartupMessages(library(BSgenome.Hsapiens.UCSC.hg19))
+   refGenome <- BSgenome.Hsapiens.UCSC.hg19
+-} else if (refGenomeVsn == "RG_38") {
++} else if (refGenomeVsn == "38") {
+   suppressPackageStartupMessages(library(BSgenome.Hsapiens.UCSC.hg38))
+   refGenome <- BSgenome.Hsapiens.UCSC.hg38
+ } else {
+-  stop("Unsupported ref genome version: ", refGenomeVsn," (should be HG37 or HG38)\n")
++  stop("Unsupported ref genome version: ", refGenomeVsn," (should be 37 or 38)\n")
+ }
+
+ cat("[INFO] CHORD Settings:\n")
+@@ -73,4 +72,4 @@ write.table(signatures, file=sigOutTxt, sep="\t")
+ cat("[INFO] Writing output file:", prdOutTxt,"\n")
+ write.table(prediction, file=prdOutTxt, sep="\t", quote=FALSE, row.names=FALSE)
+
+-cat("[INFO] FINISHED CHORD signature extraction and HRD prediction\n")
+\ No newline at end of file
++cat("[INFO] FINISHED CHORD signature extraction and HRD prediction\n")
