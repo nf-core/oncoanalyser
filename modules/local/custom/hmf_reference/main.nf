@@ -55,6 +55,9 @@ process HMF_REFERENCE {
     touch output/sage/SageGermlinePon.98x.tsv.gz
     touch output/sage/clinvar.vcf.gz
 
+    mkdir -p output/sigs/
+    touch output/sigs/snv_cosmic_signatures.csv
+
     mkdir -p output/lilac/
 
     mkdir -p output/virusbreakend/

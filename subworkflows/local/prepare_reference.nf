@@ -143,6 +143,8 @@ def create_hmf_data_map(hmf_bundle_dir, params_only) {
         'sage_known_hotspots_somatic':  get_hmf_data_file_object('ref_data_sage_known_hotspots_somatic',  'SAGE_KNOWN_HOTSPOTS_SOMATIC',  hmf_bundle_dir, params_only),
         'sage_pon_file':                get_hmf_data_file_object('ref_data_sage_pon_file',                'SAGE_PON_FILE',                hmf_bundle_dir, params_only),
         'clinvar_vcf':                  get_hmf_data_file_object('ref_data_clinvar_vcf',                  'CLINVAR_VCF',                  hmf_bundle_dir, params_only),
+        // SIGS
+        'sigs_signatures':              get_hmf_data_file_object('ref_data_sigs_signatures',              'SIGS_SIGNATURES',              hmf_bundle_dir, params_only),
         // LILAC
         'lilac_resource_dir':           get_hmf_data_file_object('ref_data_lilac_resource_dir',           'LILAC_RESOURCE_DIR',           hmf_bundle_dir, params_only),
         // VIRUSBreakend
