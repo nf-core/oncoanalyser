@@ -65,6 +65,7 @@ include { CUPPA_VISUALISER  } from '../modules/local/cuppa/visualiser/main'
 include { ISOFOX            } from '../modules/local/isofox/main'
 include { LINX_REPORT       } from '../modules/local/gpgr/linx_report/main'
 include { PURPLE            } from '../modules/local/purple/main'
+include { SIGS              } from '../modules/local/sigs/main'
 include { TEAL              } from '../modules/local/teal/main'
 include { VIRUSBREAKEND     } from '../modules/local/virusbreakend/main'
 include { VIRUSINTERPRETER  } from '../modules/local/virusinterpreter/main'
@@ -465,6 +466,26 @@ workflow ONCOANALYSER {
         )
         ch_versions = ch_versions.mix(PURPLE.out.versions)
         ch_purple_out = ch_purple_out.mix(PURPLE.out.purple_dir)
+    }
+
+    //
+    // MODULE: Run SIGS to fit somatic smlv to signature definitions
+    //
+    if (run.sigs) {
+        // channel: [val(meta), purple_dir]
+        ch_sigs_inputs_purple_dir = run.purple ? ch_purple_out : WorkflowOncoanalyser.get_input(ch_inputs, ['purple_dir', 'tumor_normal'])
+        // channel: [val(meta), smlv_vcf]
+        ch_sigs_inputs = ch_sigs_inputs_purple_dir
+            .map { meta, purple_dir ->
+                def smlv_vcf = file(purple_dir).resolve("${meta.get(['sample_name', 'tumor'])}.purple.somatic.vcf.gz")
+                return [meta, smlv_vcf]
+            }
+
+        SIGS(
+          ch_sigs_inputs,
+          hmf_data.sigs_signatures,
+        )
+        ch_versions = ch_versions.mix(SIGS.out.versions)
     }
 
     //

@@ -327,6 +327,13 @@
                     "description": "Path to somatic SAGE Known Hotspots file.",
                     "fa_icon": "far fa-file-code"
                 },
+                "ref_data_sigs_signatures": {
+                    "type": "string",
+                    "format": "file-path",
+                    "pattern": "^\\S+\\.csv$",
+                    "description": "Path to signature definition file.",
+                    "fa_icon": "far fa-file-code"
+                },
                 "ref_data_known_fusions": {
                     "type": "string",
                     "format": "file-path",
