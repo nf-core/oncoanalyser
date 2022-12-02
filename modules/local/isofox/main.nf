@@ -1,7 +1,7 @@
-// NOTE(SW): care must be taken for using exp_counts; only supports read length of 151 bp
-
-
 process ISOFOX {
+    tag "${meta.id}"
+    label 'process_medium'
+
     container 'docker.io/scwatts/isofox:1.5--0'
 
     input:
@@ -30,7 +30,7 @@ process ISOFOX {
         -Xmx${task.memory.giga}g \\
         -jar ${task.ext.jarPath} \\
             ${args} \\
-            -sample ${meta.get(['sample_name', 'tumor'])} \\
+            -sample ${meta.id} \\
             -bam_file ${bam} \\
             -ref_genome ${genome_fasta} \\
             -ref_genome_version ${genome_ver} \\

@@ -1,4 +1,7 @@
 process CUPPA_CLASSIFIER {
+    tag "${meta.id}"
+    label 'process_low'
+
     container 'docker.io/scwatts/cuppa:1.7--0'
 
     input:
@@ -26,7 +29,7 @@ process CUPPA_CLASSIFIER {
         -jar ${task.ext.jarPath} \\
             -categories ALL \\
             -ref_data_dir ${reference_data} \\
-            -sample_data ${meta.get(['sample_name', 'tumor'])} \\
+            -sample_data ${meta.id} \\
             -sample_data_dir sample_data/ \\
             -output_dir ./
 
@@ -39,8 +42,7 @@ process CUPPA_CLASSIFIER {
 
     stub:
     """
-    touch ${meta.get(['sample_name', 'tumor'])}.cup.data.csv
+    touch ${meta.id}.cup.data.csv
     echo -e '${task.process}:\\n  stub: noversions\\n' > versions.yml
     """
 }
-

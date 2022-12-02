@@ -1,4 +1,7 @@
 process SIGS {
+    tag "${meta.id}"
+    label 'process_low'
+
     container 'docker.io/scwatts/sigs:1.1--0'
 
     input:

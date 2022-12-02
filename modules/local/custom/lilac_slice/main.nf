@@ -1,5 +1,7 @@
 process SLICE {
-    //conda (params.enable_conda ? "bioconda::samtools:1.15.1" : null)
+    tag "${meta.id}"
+    label 'process_single'
+
     container 'quay.io/biocontainers/samtools:1.15.1--h1170115_0'
 
     input:
@@ -18,11 +20,11 @@ process SLICE {
     """
     samtools view \\
         ${args} \\
-        -L "${bed}" \\
+        -L ${bed} \\
         -@${task.cpus} \\
         -Obam \\
         ${bam} | \\
-        samtools sort -T tmp -o "${bam.simpleName}.sliced.bam"
+        samtools sort -T tmp -o ${bam.simpleName}.sliced.bam
 
     samtools index "${bam.simpleName}.sliced.bam"
 

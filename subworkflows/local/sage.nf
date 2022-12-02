@@ -7,7 +7,7 @@ include { SAGE_SOMATIC  } from '../../modules/local/sage/somatic/main'
 
 workflow SAGE {
     take:
-        ch_inputs                             // channel: [meta, tumor_bam, normal_bam, tumor_bai, normal_bai]
+        ch_inputs                             // channel: [meta_sage, tumor_bam, normal_bam, tumor_bai, normal_bai]
         ref_data_genome_fasta                 //    file: /path/to/genome_fasta
         ref_data_genome_fai                   //    file: /path/to/genome_fai
         ref_data_genome_dict                  //    file: /path/to/genome_dict

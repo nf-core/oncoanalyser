@@ -1,5 +1,7 @@
 process REALIGN_READS {
-    //conda (params.enable_conda ? "bioconda::hmftools-lilac=1.2" : null)
+    tag "${meta.id}"
+    label 'process_low'
+
     container 'docker.io/scwatts/custom-realign_reads_lilac:0.0.1--3'
 
     input:

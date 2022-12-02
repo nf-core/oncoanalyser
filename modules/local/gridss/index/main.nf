@@ -1,4 +1,7 @@
 process INDEX {
+    tag "${genome_fasta.name}"
+    label 'process_single'
+
     container 'docker.io/scwatts/gridss:2.13.2--3'
 
     input:
@@ -38,14 +41,14 @@ process INDEX {
       -Dsamjdk.buffer_size=4194304 \\
       -Dsamjdk.async_io_read_threads=${task.cpus} \\
       -cp ${task.ext.jarPath} \\
-        REFERENCE_SEQUENCE=${genome_fasta} \\
-        CREATE_SEQUENCE_DICTIONARY=${sequence_dict_arg} \\
-        CREATE_BWA_INDEX_IMAGE=${bwa_index_image_arg} \\
-        CREATE_GRIDSS_REFERENCE_CACHE=${gridss_index_arg}
+          REFERENCE_SEQUENCE=${genome_fasta} \\
+          CREATE_SEQUENCE_DICTIONARY=${sequence_dict_arg} \\
+          CREATE_BWA_INDEX_IMAGE=${bwa_index_image_arg} \\
+          CREATE_GRIDSS_REFERENCE_CACHE=${gridss_index_arg}
 
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":
-        gridss: \$(java -cp "${task.ext.jarPath}" gridss.CallVariants --version 2>&1 | sed 's/-gridss//')
+        gridss: \$(java -cp ${task.ext.jarPath} gridss.CallVariants --version 2>&1 | sed 's/-gridss//')
     END_VERSIONS
     """
 

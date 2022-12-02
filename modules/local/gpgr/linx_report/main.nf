@@ -1,5 +1,7 @@
 process LINX_REPORT {
-    //conda (params.enable_conda ? "umccr::r-gpgr==1.4.1" : null)
+    tag "${meta.id}"
+    label 'process_single'
+
     container 'ghcr.io/umccr/gpgr:1.4.1'
 
     input:
@@ -18,10 +20,10 @@ process LINX_REPORT {
     """
     gpgr.R linx \\
         ${args} \\
-        --sample ${meta.get(['sample_name', 'tumor'])} \\
+        --sample ${meta.id} \\
         --plot ${linx_visualiser}/ \\
         --table ${linx_annotation}/ \\
-        --out ${meta.get(['sample_name', 'tumor'])}_linx.html;
+        --out ${meta.id}_linx.html;
 
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":
@@ -32,7 +34,7 @@ process LINX_REPORT {
 
     stub:
     """
-    touch ${meta.get(['sample_name', 'tumor'])}_linx.html
+    touch ${meta.id}_linx.html
     echo -e '${task.process}:\n  stub: noversions\n' > versions.yml
     """
 }

@@ -1,4 +1,7 @@
 process DEPTH_ANNOTATOR {
+    tag "${meta.id}"
+    label 'process_medium'
+
     container 'docker.io/scwatts/svprep:1.1--0'
 
     input:
@@ -23,19 +26,19 @@ process DEPTH_ANNOTATOR {
     """
     java \\
         -Xmx${task.memory.giga}g \\
-        -cp "${task.ext.jarPath}" com.hartwig.hmftools.svprep.depth.DepthAnnotator \\
+        -cp ${task.ext.jarPath} com.hartwig.hmftools.svprep.depth.DepthAnnotator \\
             ${args} \\
             -input_vcf ${vcf} \\
             -output_vcf sv.svprep.gridss.depths.vcf.gz \\
-            -samples "${labels_arg}" \\
-            -bam_files "${bams_arg}" \\
+            -samples ${labels_arg} \\
+            -bam_files ${bams_arg} \\
             -ref_genome ${genome_fasta} \\
             -ref_genome_version ${genome_ver} \\
             -threads ${task.cpus}
 
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":
-        svprep: \$(java -jar "${task.ext.jarPath}" 2>&1 | head -n1 | sed 's/^.*SvPrep version: //')
+        svprep: \$(java -jar ${task.ext.jarPath} 2>&1 | head -n1 | sed 's/^.*SvPrep version: //')
     END_VERSIONS
     """
 

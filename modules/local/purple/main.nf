@@ -1,5 +1,7 @@
 process PURPLE {
-    //conda (params.enable_conda ? "bioconda::hmftools-purple=3.6" : null)
+    tag "${meta.id}"
+    label 'process_low'
+
     container 'docker.io/scwatts/purple:3.6--4'
 
     input:
@@ -46,44 +48,44 @@ process PURPLE {
     # Run PURPLE
     java \\
         -Xmx${task.memory.giga}g \\
-        -jar "${task.ext.jarPath}" \\
+        -jar ${task.ext.jarPath} \\
             ${args} \\
-            -tumor "${meta.get(['sample_name', 'tumor'])}" \\
-            -reference "${meta.get(['sample_name', 'normal'])}" \\
-            -sv_recovery_vcf "${sv_soft_vcf}" \\
-            -structural_vcf "${sv_hard_vcf}" \\
+            -tumor ${meta.tumor_id} \\
+            -reference ${meta.normal_id} \\
+            -sv_recovery_vcf ${sv_soft_vcf} \\
+            -structural_vcf ${sv_hard_vcf} \\
             \${smlv_tumor_vcf_arg} \\
             \${smlv_normal_vcf_arg} \\
-            -amber "${amber}" \\
-            -cobalt "${cobalt}" \\
+            -amber ${amber} \\
+            -cobalt ${cobalt} \\
             -output_dir purple/ \\
-            -gc_profile "${gc_profile}" \\
+            -gc_profile ${gc_profile} \\
             -run_drivers \\
-            -driver_gene_panel "${driver_gene_panel}" \\
-            -ensembl_data_dir "${ensembl_data_dir}" \\
-            -somatic_hotspots "${sage_known_hotspots_somatic}" \\
-            -germline_hotspots "${sage_known_hotspots_germline}" \\
+            -driver_gene_panel ${driver_gene_panel} \\
+            -ensembl_data_dir ${ensembl_data_dir} \\
+            -somatic_hotspots ${sage_known_hotspots_somatic} \\
+            -germline_hotspots ${sage_known_hotspots_germline} \\
             ${germline_del_freq_arg} \\
-            -ref_genome "${genome_fasta}" \\
-            -ref_genome_version "${genome_ver}" \\
-            -threads "${task.cpus}" \\
-            -circos "${task.ext.circosPath}"
+            -ref_genome ${genome_fasta} \\
+            -ref_genome_version ${genome_ver} \\
+            -threads ${task.cpus} \\
+            -circos ${task.ext.circosPath}
 
     # PURPLE can fail silently, check that at least the PURPLE SV VCF is created
-    if [[ ! -s "purple/${meta.get(['sample_name', 'tumor'])}.purple.sv.vcf.gz" ]]; then
+    if [[ ! -s "purple/${meta.tumor_id}.purple.sv.vcf.gz" ]]; then
         exit 1;
     fi
 
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":
-        purple: \$(java -jar "${task.ext.jarPath}" -version | sed 's/.*Purple version: //')
+        purple: \$(java -jar ${task.ext.jarPath} -version | sed 's/.*Purple version: //')
     END_VERSIONS
     """
 
     stub:
     """
     mkdir purple/
-    cat <<EOF > purple/${meta.get(['sample_name', 'tumor'])}.purple.sv.vcf.gz
+    cat <<EOF > purple/${meta.tumor_id}.purple.sv.vcf.gz
     ##fileformat=VCFv4.1
     ##contig=<ID=.>
     #CHROM	POS	ID	REF	ALT	QUAL	FILTER	INFO

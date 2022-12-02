@@ -1,4 +1,7 @@
 process PREPROCESS {
+    tag "${meta.id}"
+    label 'process_medium'
+
     container 'docker.io/scwatts/svprep:1.1--0'
 
     input:
@@ -28,12 +31,12 @@ process PREPROCESS {
 
     gridss_svprep \\
         ${args} \\
-        --jvmheap "${task.memory.giga}g" \\
-        --jar "${task.ext.jarPath}" \\
+        --jvmheap ${task.memory.giga}g \\
+        --jar ${task.ext.jarPath} \\
         --steps preprocess \\
-        --reference "${genome_fasta}" \\
+        --reference ${genome_fasta} \\
         --workingdir gridss_preprocess/ \\
-        --threads "${task.cpus}" \\
+        --threads ${task.cpus} \\
         ${config_arg} \\
         --labels ${meta.id} \\
         --bams ${bam} \\
@@ -42,7 +45,7 @@ process PREPROCESS {
 
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":
-        gridss: \$(java -cp "${task.ext.jarPath}" gridss.CallVariants --version 2>&1 | sed 's/-gridss//')
+        gridss: \$(java -cp ${task.ext.jarPath} gridss.CallVariants --version 2>&1 | sed 's/-gridss//')
     END_VERSIONS
     """
 

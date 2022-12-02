@@ -30,13 +30,16 @@ workflow GRIDSS_SVPREP {
         ch_versions = Channel.empty()
 
         // Prepare tumor sample inputs
-        // channel: [val(meta_svprep), bam, bai, []]
+        // channel: [val(meta_svprep), bam_tumor, bai_tumor, []]
         ch_svprep_tumor_inputs = ch_inputs
             .map { meta ->
-                def meta_svprep = [id: meta.get(['sample_name', 'tumor']), meta_full: meta]
-                def bam = meta.get(['bam_wgs', 'tumor'])
-                def bai = "${bam}.bai"
-                return [meta_svprep, bam, bai, []]
+                def meta_svprep = [
+                    key: meta.id,
+                    id: meta.get(['sample_name', 'tumor']),
+                    sample_type: 'tumor',
+                ]
+                def bam_tumor = meta.get(['bam_wgs', 'tumor'])
+                return [meta_svprep, bam_tumor, "${bam_tumor}.bai", []]
             }
 
         // Filter tumor BAM
@@ -53,10 +56,13 @@ workflow GRIDSS_SVPREP {
 
         // Prepare normal sample inputs
         // channel: [val(meta_svprep), bam_normal, bai_normal, junctions_tumor]
-        ch_svprep_normal_inputs = SVPREP_TUMOR.out.junctions
-            .map { meta_tumor_svprep, junctions_tumor ->
-                def meta = meta_tumor_svprep['meta_full']
-                def meta_svprep = [id: meta.get(['sample_name', 'normal']), meta_full: meta]
+        ch_svprep_normal_inputs = WorkflowOncoanalyser.restore_meta(SVPREP_TUMOR.out.junctions, ch_inputs)
+            .map { meta, junctions_tumor ->
+                def meta_svprep = [
+                    key: meta.id,
+                    id: meta.get(['sample_name', 'normal']),
+                    sample_type: 'normal',
+                ]
                 def bam_normal = meta.get(['bam_wgs', 'normal'])
                 return [meta_svprep, bam_normal, "${bam_normal}.bai", junctions_tumor]
             }
@@ -72,32 +78,25 @@ workflow GRIDSS_SVPREP {
         )
         ch_versions = ch_versions.mix(SVPREP_NORMAL.out.versions)
 
+        // channel: [val(meta_gridss), bam_tumor, bam_tumor_filtered]
         ch_preprocess_inputs_tumor = WorkflowOncoanalyser.group_by_meta(
             SVPREP_TUMOR.out.bam,
             ch_svprep_tumor_inputs,
         )
             .map { meta_svprep, bam_filtered, bam, bai ->
-                def meta_gridss = [
-                    id: meta_svprep.id,
-                    sample_type: 'tumor',
-                    subject_id: meta_svprep.meta_full.id,
-                ]
-                return [meta_gridss, bam, bam_filtered]
+                return [meta_svprep, bam, bam_filtered]
             }
 
+        // channel: [val(meta_gridss), bam_normal, bam_normal_filtered]
         ch_preprocess_inputs_normal = WorkflowOncoanalyser.group_by_meta(
             SVPREP_NORMAL.out.bam,
             ch_svprep_normal_inputs,
         )
             .map { meta_svprep, bam_filtered, bam, bai, junctions ->
-                def meta_gridss = [
-                    id: meta_svprep.id,
-                    sample_type: 'normal',
-                    subject_id: meta_svprep.meta_full.id,
-                ]
-                return [meta_gridss, bam, bam_filtered]
+                return [meta_svprep, bam, bam_filtered]
             }
 
+        // channel: [val(meta_gridss), bam, bam_filtered]
         ch_preprocess_inputs = Channel.empty()
             .mix(
                 ch_preprocess_inputs_tumor,
@@ -117,22 +116,28 @@ workflow GRIDSS_SVPREP {
         )
         ch_versions = ch_versions.mix(GRIDSS_PREPROCESS.out.versions)
 
+
+
+
         // Gather BAMs and outputs from preprocessing for each tumor/normal set
-        // channel: [subject_id, [[val(meta_gridss), bam, bam_filtered, preprocess_dir], ...]]
+        // channel: [key, [[val(meta_gridss), bam, bam_filtered, preprocess_dir], ...]]
         ch_bams_and_preprocess = WorkflowOncoanalyser.group_by_meta(
             ch_preprocess_inputs,
             GRIDSS_PREPROCESS.out.preprocess_dir,
         )
-        .map { [it[0].subject_id, it] }
+        .map { [it[0].key, it] }
         .groupTuple(size: 2)
+
+
+
 
         // Order and organise inputs for assembly
         // channel: [val(meta_gridss), [bams], [bams_filtered], [preprocess_dirs], [labels]]
         ch_assemble_inputs = ch_bams_and_preprocess
-            .map { subject_id, entries ->
+            .map { key, entries ->
                 def (tmeta, tbam, tbam_filtered, tpreprocess) = entries.find { e -> e[0].sample_type == 'tumor' }
                 def (nmeta, nbam, nbam_filtered, npreprocess) = entries.find { e -> e[0].sample_type == 'normal' }
-                def meta_gridss = [id: tmeta.subject_id]
+                def meta_gridss = [id: tmeta.key]
                 return [
                     meta_gridss,
                     [nbam, tbam],
@@ -184,7 +189,7 @@ workflow GRIDSS_SVPREP {
         )
         ch_versions = ch_versions.mix(GRIDSS_CALL.out.versions)
 
-        // Prepare inputs for depth annotation
+        // Prepare inputs for depth annotation, restore original meta
         // channel: [val(meta), [bams], [bais], vcf, [labels]]
         ch_depth_inputs = WorkflowOncoanalyser.group_by_meta(
             ch_inputs.map { meta -> [meta.id, meta] },
