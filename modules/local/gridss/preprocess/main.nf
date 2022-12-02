@@ -1,5 +1,7 @@
 process PREPROCESS {
-    //conda (params.enable_conda ? "bioconda::gridss=2.13.2" : null)
+    tag "${meta.id}"
+    label 'process_medium'
+
     container 'docker.io/scwatts/gridss:2.13.2--3'
 
     input:
@@ -29,18 +31,18 @@ process PREPROCESS {
 
     gridss \\
         ${args} \\
-        --jvmheap "${task.memory.giga}g" \\
-        --jar "${task.ext.jarPath}" \\
+        --jvmheap ${task.memory.giga}g \\
+        --jar ${task.ext.jarPath} \\
         --steps preprocess \\
-        --reference "${genome_fasta}" \\
+        --reference ${genome_fasta} \\
         --workingdir gridss_preprocess/ \\
-        --threads "${task.cpus}" \\
+        --threads ${task.cpus} \\
         ${config_arg} \\
         ${bam}
 
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":
-        gridss: \$(java -cp "${task.ext.jarPath}" gridss.CallVariants --version 2>&1 | sed 's/-gridss//')
+        gridss: \$(java -cp ${task.ext.jarPath} gridss.CallVariants --version 2>&1 | sed 's/-gridss//')
     END_VERSIONS
     """
 

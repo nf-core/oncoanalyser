@@ -1,5 +1,7 @@
 process LINX_GERMLINE {
-    //conda (params.enable_conda ? "bioconda::hmftools-linx=1.21" : null)
+    tag "${meta.id}"
+    label 'process_low'
+
     container 'docker.io/scwatts/linx:1.22--0'
 
     input:
@@ -23,22 +25,22 @@ process LINX_GERMLINE {
     """
     java \\
         -Xmx${task.memory.giga}g \\
-        -jar "${task.ext.jarPath}" \\
+        -jar ${task.ext.jarPath} \\
             ${args} \\
-            -sample "${meta.get(['sample_name', 'normal'])}" \\
+            -sample ${meta.id} \\
             -germline \\
-            -ref_genome_version "${genome_ver}" \\
-            -sv_vcf "${gripss_sv}" \\
-            -fragile_site_file "${fragile_sites}" \\
-            -line_element_file "${lines}" \\
-            -ensembl_data_dir "${ensembl_data_dir}" \\
+            -ref_genome_version ${genome_ver} \\
+            -sv_vcf ${gripss_sv} \\
+            -fragile_site_file ${fragile_sites} \\
+            -line_element_file ${lines} \\
+            -ensembl_data_dir ${ensembl_data_dir} \\
             -check_drivers \\
-            -driver_gene_panel "${driver_gene_panel}" \\
+            -driver_gene_panel ${driver_gene_panel} \\
             -output_dir linx_germline/
 
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":
-        linx: \$(java -jar "${task.ext.jarPath}" | sed 's/^.*LINX version: //')
+        linx: \$(java -jar ${task.ext.jarPath} | sed 's/^.*LINX version: //')
     END_VERSIONS
     """
 

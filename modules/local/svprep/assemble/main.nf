@@ -1,4 +1,7 @@
 process ASSEMBLE {
+    tag "${meta.id}"
+    label 'process_medium'
+
     container 'docker.io/scwatts/svprep:1.1--0'
 
     input:
@@ -62,22 +65,22 @@ process ASSEMBLE {
     # Run
     gridss_svprep \\
         ${args} \\
-        --jvmheap "${task.memory.giga}g" \\
-        --jar "${task.ext.jarPath}" \\
+        --jvmheap ${task.memory.giga}g \\
+        --jar ${task.ext.jarPath} \\
         --steps assemble \\
-        --labels "${labels_arg}" \\
-        --reference "${genome_fasta}" \\
-        --blacklist "${blacklist}" \\
-        --workingdir "${output_dirname}/work" \\
-        --assembly "${output_dirname}/sv_assemblies.bam" \\
-        --threads "${task.cpus}" \\
+        --labels ${labels_arg} \\
+        --reference ${genome_fasta} \\
+        --blacklist ${blacklist} \\
+        --workingdir ${output_dirname}/work \\
+        --assembly ${output_dirname}/sv_assemblies.bam \\
+        --threads ${task.cpus} \\
         ${config_arg} \\
         ${bams_arg} \\
         ${bams_filtered_arg}
 
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":
-        gridss: \$(java -cp "${task.ext.jarPath}" gridss.CallVariants --version 2>&1 | sed 's/-gridss//')
+        gridss: \$(java -cp ${task.ext.jarPath} gridss.CallVariants --version 2>&1 | sed 's/-gridss//')
     END_VERSIONS
     """
 

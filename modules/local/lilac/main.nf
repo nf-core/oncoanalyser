@@ -1,5 +1,7 @@
 process LILAC {
-    //conda (params.enable_conda ? "bioconda::hmftools-lilac=1.2" : null)
+    tag "${meta.id}"
+    label 'process_medium'
+
     container 'docker.io/scwatts/lilac:1.4.1--0'
 
     input:
@@ -27,16 +29,16 @@ process LILAC {
     """
     java \\
         -Xmx${task.memory.giga}g \\
-        -jar "${task.ext.jarPath}" \\
+        -jar ${task.ext.jarPath} \\
             ${args} \\
-            -sample "${sample_name}" \\
+            -sample ${sample_name} \\
             ${tumor_bam_arg} \\
             -reference_bam ${normal_bam} \\
-            -ref_genome_version "${genome_ver}" \\
-            -ref_genome "${genome_fasta}" \\
-            -resource_dir "${lilac_resource_dir}" \\
+            -ref_genome_version ${genome_ver} \\
+            -ref_genome ${genome_fasta} \\
+            -resource_dir ${lilac_resource_dir} \\
             ${purple_args.replaceAll('\\n', '')} \\
-            -threads "${task.cpus}" \\
+            -threads ${task.cpus} \\
             -output_dir lilac/
 
     # NOTE(SW): hard coded since there is no reliable way to obtain version information.
@@ -54,11 +56,11 @@ process LILAC {
 }
 
 def get_sample_name(meta, tumor_bam, normal_bam) {
-        if (tumor_bam) {
-                return meta.get(['sample_name', 'tumor'])
-        } else if (normal_bam) {
-                return meta.get(['sample_name', 'normal'])
-        } else {
-                Sys.exit(1)
-        }
+    if (tumor_bam) {
+        return meta.tumor_id
+    } else if (normal_bam) {
+        return meta.normal_id
+    } else {
+        Sys.exit(1)
+    }
 }

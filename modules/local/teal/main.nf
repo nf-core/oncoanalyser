@@ -1,5 +1,7 @@
 process TEAL {
-    //conda (params.enable_conda ? "bioconda::hmftools-teal=1.0.1" : null)
+    tag "${meta.id}"
+    label 'process_medium'
+
     container 'docker.io/scwatts/teal:1.0.1--2'
 
     input:
@@ -15,12 +17,12 @@ process TEAL {
     script:
     def args = task.ext.args ?: ''
     def tumor_args = normal_bam ? """
-        -tumor ${meta.get(['sample_name', 'tumor'])}
+        -tumor ${meta.tumor_id}
         -tumor_bam ${tumor_bam}
         -tumor_wgs_metrics ${tumor_wgs_metrics}
     """ : ''
     def reference_args = normal_bam ? """
-        -reference ${meta.get(['sample_name', 'normal'])}
+        -reference ${meta.normal_id}
         -reference_bam ${normal_bam}
         -reference_wgs_metrics ${normal_wgs_metrics}
     """ : ''
@@ -28,13 +30,13 @@ process TEAL {
     """
     java \\
         -Xmx${task.memory.giga}g \\
-        -jar "${task.ext.jarPath}" \\
+        -jar ${task.ext.jarPath} \\
             ${args} \\
             ${tumor_args.replaceAll('\n', '')} \\
             ${reference_args.replaceAll('\n', '')} \\
-            -cobalt "${cobalt_dir}" \\
-            -purple "${purple_dir}" \\
-            -threads "${task.cpus}" \\
+            -cobalt ${cobalt_dir} \\
+            -purple ${purple_dir} \\
+            -threads ${task.cpus} \\
             -output_dir teal/
 
     # NOTE(SW): hard coded since there is no reliable way to obtain version information.

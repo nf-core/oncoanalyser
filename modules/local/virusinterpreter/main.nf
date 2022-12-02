@@ -1,4 +1,7 @@
 process VIRUSINTERPRETER {
+    tag "${meta.id}"
+    label 'process_single'
+
     container 'docker.io/scwatts/virus_interpreter:1.2--0'
 
     input:
@@ -22,7 +25,7 @@ process VIRUSINTERPRETER {
     java \\
         -Xmx${task.memory.giga}g \\
         -jar ${task.ext.jarPath} \\
-            -sample_id ${meta.get(['sample_name', 'tumor'])} \\
+            -sample_id ${meta.id} \\
             -purple_purity_tsv ${purple_purity} \\
             -purple_qc_file ${purple_qc} \\
             -tumor_sample_wgs_metrics_file ${wgs_metrics} \\

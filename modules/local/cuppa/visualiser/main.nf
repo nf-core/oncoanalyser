@@ -1,4 +1,7 @@
 process CUPPA_VISUALISER {
+    tag "${meta.id}"
+    label 'process_low'
+
     container 'docker.io/scwatts/cuppa:1.7--0'
 
     input:
@@ -17,7 +20,7 @@ process CUPPA_VISUALISER {
 
     """
     python ${task.ext.pythonPath} \\
-        -sample ${meta.get(['sample_name', 'tumor'])} \\
+        -sample ${meta.id} \\
         -sample_data ${cuppa_csv} \\
         -output_dir ./
 
@@ -30,9 +33,8 @@ process CUPPA_VISUALISER {
 
     stub:
     """
-    touch ${meta.get(['sample_name', 'tumor'])}.cuppa.chart.png
-    touch ${meta.get(['sample_name', 'tumor'])}.cuppa.conclusion.txt
+    touch ${meta.id}.cuppa.chart.png
+    touch ${meta.id}.cuppa.conclusion.txt
     echo -e '${task.process}:\\n  stub: noversions\\n' > versions.yml
     """
 }
-

@@ -1,5 +1,7 @@
 process EXTRACT_AND_INDEX_CONTIG {
-    //conda (params.enable_conda ? "bioconda::null" : null)
+    tag "${meta.id}"
+    label 'process_single'
+
     container 'docker.io/scwatts/custom-extract_and_index_contig:0.0.1--3'
 
     input:

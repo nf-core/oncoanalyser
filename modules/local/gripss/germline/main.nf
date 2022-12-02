@@ -1,5 +1,7 @@
 process GRIPSS_GERMLINE {
-    //conda (params.enable_conda ? "bioconda::hmftools-gripss=2.2" : null)
+    tag "${meta.id}"
+    label 'process_low'
+
     container 'docker.io/scwatts/gripss:2.3.1--0'
 
     input:
@@ -27,15 +29,15 @@ process GRIPSS_GERMLINE {
     """
     java \\
         -Xmx${task.memory.giga}g \\
-        -jar "${task.ext.jarPath}" \\
+        -jar ${task.ext.jarPath} \\
             ${args} \\
-            -sample "${meta.get(['sample_name', 'normal'])}" \\
-            -ref_genome_version "${genome_ver}" \\
-            -ref_genome "${genome_fasta}" \\
-            -pon_sgl_file "${breakend_pon}" \\
-            -pon_sv_file "${breakpoint_pon}" \\
-            -known_hotspot_file "${known_fusions}" \\
-            -vcf "${gridss_vcf}" \\
+            -sample ${meta.normal_id} \\
+            -ref_genome_version ${genome_ver} \\
+            -ref_genome ${genome_fasta} \\
+            -pon_sgl_file ${breakend_pon} \\
+            -pon_sv_file ${breakpoint_pon} \\
+            -known_hotspot_file ${known_fusions} \\
+            -vcf ${gridss_vcf} \\
             ${repeat_mask_file_arg} \\
             -output_dir ./
 
@@ -48,15 +50,15 @@ process GRIPSS_GERMLINE {
 
     stub:
     """
-    cat <<EOF > ${meta.get(['sample_name', 'normal'])}.gripss.filtered.vcf.gz
+    cat <<EOF > ${meta.normal_id}.gripss.filtered.vcf.gz
     ##fileformat=VCFv4.1
     ##contig=<ID=.>
     #CHROM	POS	ID	REF	ALT	QUAL	FILTER	INFO
     .	.	.	.	.	.	.
     EOF
-    touch ${meta.get(['sample_name', 'normal'])}.gripss.filtered.vcf.gz.tbi
-    touch ${meta.get(['sample_name', 'normal'])}.gripss.vcf.gz
-    touch ${meta.get(['sample_name', 'normal'])}.gripss.vcf.gz.tbi
+    touch ${meta.normal_id}.gripss.filtered.vcf.gz.tbi
+    touch ${meta.normal_id}.gripss.vcf.gz
+    touch ${meta.normal_id}.gripss.vcf.gz.tbi
     echo -e '${task.process}:\\n  stub: noversions\\n' > versions.yml
     """
 }

@@ -1,7 +1,9 @@
 // NOTE(SW): PAVE gnomad filtering is not yet documented but is used in Pipeline5 https://github.com/hartwigmedical/pipeline5/blob/master/cluster/src/main/java/com/hartwig/pipeline/tertiary/pave/PaveArguments.java#L27-L28
 
 process PAVE_SOMATIC {
-    //conda (params.enable_conda ? "bioconda::hmftools-pave=1.3" : null)
+    tag "${meta.id}"
+    label 'process_medium'
+
     container 'docker.io/scwatts/pave:1.4--0'
 
     input:
@@ -29,16 +31,16 @@ process PAVE_SOMATIC {
     """
     java \\
         -Xmx${task.memory.giga}g \\
-        -jar "${task.ext.jarPath}" \\
-            -sample "${meta.get(['sample_name', 'tumor'])}" \\
-            -ref_genome_version "${genome_ver}" \\
-            -ref_genome "${genome_fasta}" \\
-            -ensembl_data_dir "${ensembl_data_dir}" \\
-            -driver_gene_panel "${driver_gene_panel}" \\
-            -pon_file "${sage_pon_file}" \\
-            -pon_filters "${pon_filters}" \\
-            -mappability_bed "${mappability_bed}" \\
-            -vcf_file "${sage_vcf}" \\
+        -jar ${task.ext.jarPath} \\
+            -sample ${meta.id} \\
+            -ref_genome_version ${genome_ver} \\
+            -ref_genome ${genome_fasta} \\
+            -ensembl_data_dir ${ensembl_data_dir} \\
+            -driver_gene_panel ${driver_gene_panel} \\
+            -pon_file ${sage_pon_file} \\
+            -pon_filters ${pon_filters} \\
+            -mappability_bed ${mappability_bed} \\
+            -vcf_file ${sage_vcf} \\
             -read_pass_only \\
             -output_dir ./
 
@@ -51,7 +53,7 @@ process PAVE_SOMATIC {
 
     stub:
     """
-    touch ${meta.get(['sample_name', 'tumor'])}.sage.pave_somatic.vcf.gz{,.tbi}
+    touch ${meta.id}.sage.pave_somatic.vcf.gz{,.tbi}
     echo -e '${task.process}:\\n  stub: noversions\\n' > versions.yml
     """
 }

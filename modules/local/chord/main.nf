@@ -1,4 +1,7 @@
 process CHORD {
+    tag "${meta.id}"
+    label 'process_low'
+
     container 'docker.io/scwatts/chord:2.00--0'
 
     input:
@@ -19,12 +22,12 @@ process CHORD {
     """
     extractSigPredictHRD.R \\
         ./ \\
-        ${meta.get(['sample_name', 'tumor'])} \\
+        ${meta.id} \\
         ${smlv_vcf} \\
         ${sv_vcf} \\
         ${genome_ver} \\
-        ${meta.get(['sample_name', 'tumor'])}_chord_signatures.txt \\
-        ${meta.get(['sample_name', 'tumor'])}_chord_prediction.txt
+        ${meta.id}_chord_signatures.txt \\
+        ${meta.id}_chord_prediction.txt
 
     # NOTE(SW): hard coded since there is no reliable way to obtain version information.
     cat <<-END_VERSIONS > versions.yml
@@ -36,8 +39,8 @@ process CHORD {
 
     stub:
     """
-    touch ${meta.get(['sample_name', 'tumor'])}_chord_signatures.txt
-    touch ${meta.get(['sample_name', 'tumor'])}_chord_prediction.txt
+    touch ${meta.id}_chord_signatures.txt
+    touch ${meta.id}_chord_prediction.txt
     echo -e '${task.process}:\\n  stub: noversions\\n' > versions.yml
     """
 }

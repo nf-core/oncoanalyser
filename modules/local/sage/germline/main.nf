@@ -1,5 +1,7 @@
 process SAGE_GERMLINE {
-    //conda (params.enable_conda ? "bioconda::hmftools-sage=3.1" : null)
+    tag "${meta.id}"
+    label 'process_medium'
+
     container 'docker.io/scwatts/sage:3.2--0'
 
     input:
@@ -14,8 +16,8 @@ process SAGE_GERMLINE {
     path ensembl_data_dir
 
     output:
-    tuple val(meta), path("${meta.subject_name}.sage_germline.vcf.gz"), emit: vcf
-    path 'versions.yml'                                               , emit: versions
+    tuple val(meta), path("${meta.tumor_id}.sage_germline.vcf.gz"), emit: vcf
+    path 'versions.yml'                                     , emit: versions
 
     when:
     task.ext.when == null || task.ext.when
@@ -26,18 +28,18 @@ process SAGE_GERMLINE {
     """
     java \\
         -Xmx${task.memory.giga}g \\
-        -jar "${task.ext.jarPath}" \\
+        -jar ${task.ext.jarPath} \\
             ${args} \\
-            -reference "${meta.get(['sample_name', 'tumor'])}" \\
-            -reference_bam "${tumor_bam}" \\
-            -tumor "${meta.get(['sample_name', 'normal'])}" \\
-            -tumor_bam "${normal_bam}" \\
-            -ref_genome_version "${genome_ver}" \\
-            -ref_genome "${genome_fasta}" \\
-            -hotspots "${sage_known_hotspots_germline}" \\
-            -panel_bed "${sage_coding_panel}" \\
-            -high_confidence_bed "${sage_high_confidence}" \\
-            -ensembl_data_dir "${ensembl_data_dir}" \\
+            -reference ${meta.tumor_id} \\
+            -reference_bam ${tumor_bam} \\
+            -tumor ${meta.normal_id} \\
+            -tumor_bam ${normal_bam} \\
+            -ref_genome_version ${genome_ver} \\
+            -ref_genome ${genome_fasta} \\
+            -hotspots ${sage_known_hotspots_germline} \\
+            -panel_bed ${sage_coding_panel} \\
+            -high_confidence_bed ${sage_high_confidence} \\
+            -ensembl_data_dir ${ensembl_data_dir} \\
             -hotspot_min_tumor_qual 50 \\
             -panel_min_tumor_qual 75 \\
             -hotspot_max_germline_vaf 100 \\
@@ -46,18 +48,18 @@ process SAGE_GERMLINE {
             -panel_max_germline_rel_raw_base_qual 100 \\
             -mnv_filter_enabled false \\
             -panel_only \\
-            -threads "${task.cpus}" \\
-            -out "${meta.subject_name}.sage_germline.vcf.gz"
+            -threads ${task.cpus} \\
+            -out ${meta.tumor_id}.sage_germline.vcf.gz
 
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":
-        sage: \$(java -jar "${task.ext.jarPath}" | head -n1 | sed 's/.*Sage version: //')
+        sage: \$(java -jar ${task.ext.jarPath} | head -n1 | sed 's/.*Sage version: //')
     END_VERSIONS
     """
 
     stub:
     """
-    touch "${meta.subject_name}.sage_germline.vcf.gz"
+    touch "${meta.tumor_id}.sage_germline.vcf.gz"
     echo -e '${task.process}:\\n  stub: noversions\\n' > versions.yml
     """
 }

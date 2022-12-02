@@ -10,11 +10,10 @@ include { LILAC as LILAC_PROCESS                } from '../../modules/local/lila
 
 workflow LILAC {
     take:
-        ch_inputs_bams              // channel: [val(meta), tumor_bam, normal_bam, tumor_bai, normal_bai]
-        ch_inputs_purple_dir        // channel: [val(meta), purple_dir]
+        ch_inputs_bams              // channel: [val(meta_lilac), tumor_bam, normal_bam, tumor_bai, normal_bai]
+        ch_inputs_purple_dir        // channel: [val(meta_lilac), purple_dir]
         ref_data_genome_fasta       //    file: /path/to/genome_fasta
         ref_data_genome_fai         //    file: /path/to/genome_fai
-        ref_data_genome_version     //     val: genome version
         ref_data_lilac_resource_dir //    file: /path/to/lilac_resource_dir/
 
     main:
@@ -22,16 +21,17 @@ workflow LILAC {
         ch_versions = Channel.empty()
 
         // Slice HLA regions
-        if (ref_data_genome_version == '38') {
-            slice_bed = file("${params.ref_data_lilac_resource_dir}/hla.38.alt.umccr.bed", checkIfExists: true)
-        } else {
-            slice_bed = file("${params.ref_data_lilac_resource_dir}/hla.${ref_data_genome_version}.bed", checkIfExists: true)
-        }
+        ch_slice_bed = ref_data_lilac_resource_dir
+            .map { lilac_dir ->
+                def genome_ver = params.ref_data_genome_version
+                def filename = genome_ver == '38' ? 'hla.38.alt.umccr.bed' : "hla.${genome_ver}.bed"
+                return file("${lilac_dir}/${filename}", checkIfExists: true)
+            }
         // NOTE(SW): here I remove duplicate files so that we only process each input once
         // NOTE(SW): orphaned reads are sometimes obtained, this is the slicing procedure used
         // in Pipeline5, see LilacBamSlicer.java#L115
         // channel: [val(meta_lilac), bam, bai, bed]
-        ch_slice_inputs = WorkflowLilac.get_slice_inputs(ch_inputs_bams, slice_bed)
+        ch_slice_inputs = WorkflowLilac.get_slice_inputs(ch_inputs_bams, ch_slice_bed)
         // channel: [val(meta_lilac), bam, bai, bed]
         ch_slice_inputs = WorkflowLilac.get_unique_input_files(ch_slice_inputs)
         SLICE(
@@ -39,8 +39,10 @@ workflow LILAC {
         )
         ch_versions = ch_versions.mix(SLICE.out.versions)
 
-        // Realign contigs if using hg38 (use of ALT contigs implied)
-        if (ref_data_genome_version == '38') {
+        // Realign contigs if using 38 (use of ALT contigs implied)
+        // channel: [val(meta)]
+        ch_metas = ch_inputs_bams.map { return it[0] }
+        if (params.ref_data_genome_version == '38') {
             // Align reads with chr6
             // NOTE(SW): the aim of this process is to take reads mapping to ALT contigs and align them
             // to the three relevant HLA genes on chr6. All reads including those previously mapped to chr6
@@ -57,25 +59,47 @@ workflow LILAC {
             )
 
             // Create input channel for LILAC
-            // channel: [val(meta), tumor_bam, normal_bam, tumor_bai, normal_bai, purple_dir]
-            ch_lilac_inputs = WorkflowOncoanalyser.group_by_meta(
+            // channel: [val(meta), tumor_bam, normal_bam, tumor_bai, normal_bai]
+            ch_lilac_inputs_slices = WorkflowOncoanalyser.restore_meta(
                 WorkflowLilac.sort_slices(REALIGN_READS.out.bam),
+                ch_metas,
+            )
+            // channel: [val(meta), tumor_bam, normal_bam, tumor_bai, normal_bai, purple_dir]
+            ch_lilac_inputs_full = WorkflowOncoanalyser.group_by_meta(
+                ch_lilac_inputs_slices,
                 ch_inputs_purple_dir,
             )
         } else {
             // Create input channel for LILAC
-            // channel: [val(meta), tumor_bam, normal_bam, tumor_bai, normal_bai, purple_dir]
-            ch_lilac_inputs = WorkflowOncoanalyser.group_by_meta(
+            // channel: [val(meta), tumor_bam, normal_bam, tumor_bai, normal_bai]
+            ch_lilac_inputs_slices = WorkflowOncoanalyser.restore_meta(
                 WorkflowLilac.sort_slices(SLICE.out.bam),
+                ch_metas,
+            )
+            // channel: [val(meta), tumor_bam, normal_bam, tumor_bai, normal_bai, purple_dir]
+            ch_lilac_inputs_full = WorkflowOncoanalyser.group_by_meta(
+                ch_lilac_inputs_slices,
                 ch_inputs_purple_dir,
             )
         }
 
         // Run LILAC
+        // channel: [val(meta_lilac), tumor_bam, normal_bam, tumor_bai, normal_bai, purple_dir]
+        ch_lilac_inputs = ch_lilac_inputs_full
+            .map {
+                def meta = it[0]
+                def meta_lilac = [
+                    key: meta.id,
+                    id: meta.id,
+                    tumor_id: meta.get(['sample_name', 'tumor']),
+                    normal_id: meta.get(['sample_name', 'normal']),
+                ]
+                return [meta_lilac, *it[1..-1]]
+            }
         LILAC_PROCESS(
             ch_lilac_inputs,
             ref_data_genome_fasta,
-            ref_data_genome_version,
+            params.ref_data_genome_version,
             ref_data_lilac_resource_dir,
         )
         ch_versions = ch_versions.mix(LILAC_PROCESS.out.versions)

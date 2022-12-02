@@ -1,5 +1,7 @@
 process SAGE_SOMATIC {
-    //conda (params.enable_conda ? "bioconda::hmftools-sage=3.1" : null)
+    tag "${meta.id}"
+    label 'process_medium'
+
     container 'docker.io/scwatts/sage:3.2--0'
 
     input:
@@ -14,7 +16,7 @@ process SAGE_SOMATIC {
     path ensembl_data_dir
 
     output:
-    tuple val(meta), path("${meta.subject_name}.sage_somatic.vcf.gz"), emit: vcf
+    tuple val(meta), path("${meta.tumor_id}.sage_somatic.vcf.gz"), emit: vcf
     path 'versions.yml'                                              , emit: versions
 
     when:
@@ -26,30 +28,30 @@ process SAGE_SOMATIC {
     """
     java \\
         -Xmx${task.memory.giga}g \\
-        -jar "${task.ext.jarPath}" \\
+        -jar ${task.ext.jarPath} \\
             ${args} \\
-            -reference "${meta.get(['sample_name', 'normal'])}" \\
-            -reference_bam "${normal_bam}" \\
-            -tumor "${meta.get(['sample_name', 'tumor'])}" \\
-            -tumor_bam "${tumor_bam}" \\
-            -ref_genome_version "${genome_ver}" \\
-            -ref_genome "${genome_fasta}" \\
-            -hotspots "${sage_known_hotspots_somatic}" \\
-            -panel_bed "${sage_coding_panel}" \\
-            -high_confidence_bed "${sage_high_confidence}" \\
-            -ensembl_data_dir "${ensembl_data_dir}" \\
-            -threads "${task.cpus}" \\
-            -out "${meta.subject_name}.sage_somatic.vcf.gz"
+            -reference ${meta.normal_id} \\
+            -reference_bam ${normal_bam} \\
+            -tumor ${meta.tumor_id}} \\
+            -tumor_bam ${tumor_bam} \\
+            -ref_genome_version ${genome_ver} \\
+            -ref_genome ${genome_fasta} \\
+            -hotspots ${sage_known_hotspots_somatic} \\
+            -panel_bed ${sage_coding_panel} \\
+            -high_confidence_bed ${sage_high_confidence} \\
+            -ensembl_data_dir ${ensembl_data_dir} \\
+            -threads ${task.cpus} \\
+            -out ${meta.tumor_id}.sage_somatic.vcf.gz
 
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":
-        sage: \$(java -jar "${task.ext.jarPath}" | head -n1 | sed 's/.*Sage version: //')
+        sage: \$(java -jar ${task.ext.jarPath} | head -n1 | sed 's/.*Sage version: //')
     END_VERSIONS
     """
 
     stub:
     """
-    touch "${meta.subject_name}.sage_somatic.vcf.gz"
+    touch "${meta.tumor_id}.sage_somatic.vcf.gz"
     echo -e '${task.process}:\\n  stub: noversions\\n' > versions.yml
     """
 }

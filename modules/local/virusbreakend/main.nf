@@ -1,7 +1,9 @@
-// NOTE(SW): the --db argument for the virusbreakend command must have a trailing slash if it is a
-// symlink
+// NOTE(SW): the --db argument for the virusbreakend command must have a trailing slash if it is a symlink
 
 process VIRUSBREAKEND {
+    tag "${meta.id}"
+    label 'process_high'
+
     container 'docker.io/scwatts/gridss:2.13.2--3'
 
     input:

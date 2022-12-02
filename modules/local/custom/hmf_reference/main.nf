@@ -1,4 +1,6 @@
 process HMF_REFERENCE {
+    label 'process_single'
+
     container 'public.ecr.aws/ubuntu/ubuntu:20.04_stable'
 
     input:
@@ -59,6 +61,8 @@ process HMF_REFERENCE {
     touch output/sigs/snv_cosmic_signatures.csv
 
     mkdir -p output/lilac/
+    touch output/lilac/hla.38.alt.umccr.bed
+    touch output/lilac/hla.38_noalt.bed
 
     mkdir -p output/virusbreakend/
 

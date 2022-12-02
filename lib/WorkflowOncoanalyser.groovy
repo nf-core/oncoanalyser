@@ -206,4 +206,37 @@ class WorkflowOncoanalyser {
     public static get_input(ch, key) {
         return ch.map { meta -> [meta, meta.getAt(key)] }
     }
+
+    public static restore_meta(ch_output, ch_metas) {
+        // NOTE(SW): ch_output must contain a Map in the first position with a key named 'key' that
+        // contains the corresponding meta.id value, for example: [val(meta_process), *process_outputs]
+
+        //return Channel.empty()
+        //    .mix(
+        //        // channel: [val(key), val(meta)]
+        //        ch_metas.map { meta -> [meta.id, meta] },
+        //        // channel: [val(key), list(process_outputs)]
+        //        // NOTE(SW): process meta is discarded
+        //        ch_output.map { [it[0].key, it[1..-1]] },
+        //    )
+        //    .groupTuple(size: 2)
+        //    // channel: [meta, *process_outputs]
+        //    .map { it.flatten()[1..-1] }
+
+        //def ch_left = ch_metas.map { meta -> [meta.id, meta] }
+        //def ch_right = ch_output.map { [it[0].key, it[1..-1]] }
+        //return ch_left
+        //    .join(ch_right, failOnDuplicate: true)
+        //    .map { it[1..-1] }
+
+        def ch_source = ch_metas.map { meta -> [meta.id, meta] }
+        def ch_target = ch_output.map { [it[0].key, it[1..-1]] }
+        return ch_source
+            .cross(ch_target)
+            .map { d_meta, d_outputs ->
+                def (skey, meta) = d_meta
+                def (dkey, outputs) = d_outputs
+                return [meta, *outputs]
+            }
+    }
 }

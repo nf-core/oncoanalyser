@@ -1,7 +1,13 @@
-// NOTE(SW): PAVE gnomad filtering is not yet documented but is used in Pipeline5 https://github.com/hartwigmedical/pipeline5/blob/master/cluster/src/main/java/com/hartwig/pipeline/tertiary/pave/PaveArguments.java#L27-L28
+// NOTE(SW): PAVE gnomad filtering is not yet documented but is used in Pipeline5:
+//  - cluster/src/main/java/com/hartwig/pipeline/tertiary/pave/PaveArguments.java#L27-L28
+// NOTE(SW): use of tumor sample name here is consistent with pipeline5
+//  - cluster/src/main/java/com/hartwig/pipeline/tertiary/pave/PaveGermline.java#L35-L39
+//  - cluster/src/main/java/com/hartwig/pipeline/tertiary/pave/PaveArguments.java#L34-L44
 
 process PAVE_GERMLINE {
-    //conda (params.enable_conda ? "bioconda::hmftools-pave=1.3" : null)
+    tag "${meta.id}"
+    label 'process_medium'
+
     container 'docker.io/scwatts/pave:1.4--0'
 
     input:
@@ -30,18 +36,18 @@ process PAVE_GERMLINE {
     """
     java \\
         -Xmx${task.memory.giga}g \\
-        -jar "${task.ext.jarPath}" \\
+        -jar ${task.ext.jarPath} \\
             ${args} \\
-            -sample "${meta.get(['sample_name', 'tumor'])}" \\
-            -ref_genome_version "${genome_ver}" \\
-            -ref_genome "${genome_fasta}" \\
-            -ensembl_data_dir "${ensembl_data_dir}" \\
-            -driver_gene_panel "${driver_gene_panel}" \\
-            -clinvar_vcf "${clinvar_vcf}" \\
-            -blacklist_bed "${sage_blacklist_bed}" \\
-            -blacklist_vcf "${sage_blacklist_vcf}" \\
-            -mappability_bed "${mappability_bed}" \\
-            -vcf_file "${sage_vcf}" \\
+            -sample ${meta.id} \\
+            -ref_genome_version ${genome_ver} \\
+            -ref_genome ${genome_fasta} \\
+            -ensembl_data_dir ${ensembl_data_dir} \\
+            -driver_gene_panel ${driver_gene_panel} \\
+            -clinvar_vcf ${clinvar_vcf} \\
+            -blacklist_bed ${sage_blacklist_bed} \\
+            -blacklist_vcf ${sage_blacklist_vcf} \\
+            -mappability_bed ${mappability_bed} \\
+            -vcf_file ${sage_vcf} \\
             -read_pass_only \\
             -output_dir ./
 
@@ -54,7 +60,7 @@ process PAVE_GERMLINE {
 
     stub:
     """
-    touch ${meta.get(['sample_name', 'tumor'])}.sage.pave_germline.vcf.gz{,.tbi}
+    touch ${meta.id}.sage.pave_germline.vcf.gz{,.tbi}
     echo -e '${task.process}:\\n  stub: noversions\\n' > versions.yml
     """
 }

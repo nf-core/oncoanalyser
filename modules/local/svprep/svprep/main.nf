@@ -1,4 +1,7 @@
 process SVPREP {
+    tag "${meta.id}"
+    label 'process_medium'
+
     container 'docker.io/scwatts/svprep:1.1--0'
 
     input:
@@ -27,25 +30,25 @@ process SVPREP {
     """
     java \\
         -Xmx${task.memory.giga}g \\
-        -jar "${task.ext.jarPath}" \\
+        -jar ${task.ext.jarPath} \\
             ${args} \\
-            -sample "${meta.id}" \\
-            -bam_file "${bam}" \\
-            -ref_genome "${genome_fasta}" \\
-            -ref_genome_version "${genome_ver}" \\
-            -blacklist_bed "${sv_blacklist}" \\
-            -known_fusion_bed "${known_fusions}" \\
+            -sample ${meta.id} \\
+            -bam_file ${bam} \\
+            -ref_genome ${genome_fasta} \\
+            -ref_genome_version ${genome_ver} \\
+            -blacklist_bed ${sv_blacklist} \\
+            -known_fusion_bed ${known_fusions} \\
             ${write_types_arg} \\
             ${existing_juction_file_arg} \\
             ${calc_fragment_length_arg} \\
-            -threads "${task.cpus}" \\
+            -threads ${task.cpus} \\
             -output_dir ./
 
     samtools sort -O bam "${meta.id}.sv_prep.bam" -o "${meta.id}.sv_prep.sorted.bam"
 
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":
-        sage: \$(java -jar "${task.ext.jarPath}" 2>&1 | head -n1 | sed 's/^.*SvPrep version: //')
+        sage: \$(java -jar ${task.ext.jarPath} 2>&1 | head -n1 | sed 's/^.*SvPrep version: //')
     END_VERSIONS
     """
 
