@@ -17,6 +17,7 @@ process CUPPA_CLASSIFIER {
 
     script:
     def args = task.ext.args ?: ''
+    def categories_arg = isofox_dir ? 'ALL' : 'DNA'
 
     """
     # Symlink input files into a single directory
@@ -27,7 +28,7 @@ process CUPPA_CLASSIFIER {
     java \\
         -Xmx${task.memory.giga}g \\
         -jar ${task.ext.jarPath} \\
-            -categories ALL \\
+            -categories ${categories_arg} \\
             -ref_data_dir ${reference_data} \\
             -sample_data ${meta.id} \\
             -sample_data_dir sample_data/ \\
