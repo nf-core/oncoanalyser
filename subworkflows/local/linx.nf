@@ -52,7 +52,7 @@ workflow LINX {
         ch_versions = ch_versions.mix(VISUALISER.out.versions)
 
         // channel: [val(meta), linx_annotation_dir, linx_visualiser_dir]
-        ch_linx_somatic_out = WorkflowOncoanalyser.group_by_meta(
+        ch_linx_somatic_out = WorkflowOncoanalyser.groupByMeta(
             LINX_SOMATIC.out.annotation_dir,
             VISUALISER.out.visualiser_dir,
         )

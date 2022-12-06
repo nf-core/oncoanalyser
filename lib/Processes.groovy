@@ -1,12 +1,13 @@
 import Constants
+import Utils
 
 
 class Processes {
 
-    public static set_processes(mode_str, log) {
-        def mode_enum = Constants.get_enum_from_string(mode_str, Constants.PipelineMode)
+    public static setProcesses(mode_str, log) {
+        def mode_enum = Utils.getEnumFromString(mode_str, Constants.PipelineMode)
         if (!mode_enum) {
-            def workflows_str = Processes.get_workflow_names().join('\n  - ')
+            def workflows_str = Processes.getWorkflowNames().join('\n  - ')
             log.error "\nERROR: recieved invalid pipeline mode: '${mode_str}'. Valid options are:\n  - ${workflows_str}"
             System.exit(1)
         }
@@ -51,7 +52,7 @@ class Processes {
         return processes
     }
 
-    public static get_process_list(process_str, log) {
+    public static getProcessList(process_str, log) {
         if (!process_str) {
             return []
         }
@@ -61,7 +62,7 @@ class Processes {
                 try {
                     return Constants.Process.valueOf(name.toUpperCase())
                 } catch(java.lang.IllegalArgumentException e) {
-                    def processes_str = Processes.get_process_names().join('\n  - ')
+                    def processes_str = Processes.getProcessNames().join('\n  - ')
                     log.error "\nERROR: recieved invalid process: '${name}'. Valid options are:\n  - ${processes_str}"
                     System.exit(1)
                 }
@@ -69,7 +70,7 @@ class Processes {
             .unique()
     }
 
-    public static check_include_exclude_list(include_list, exclude_list, log) {
+    public static checkIncludeExcludeList(include_list, exclude_list, log) {
         def processes_shared = [*include_list, *exclude_list]
             .countBy { it }
             .findAll { k, v -> v > 1 }
@@ -83,14 +84,14 @@ class Processes {
         }
     }
 
-    public static get_workflow_names() {
+    public static getWorkflowNames() {
         Constants.PipelineMode
             .values()
             *.name()
             *.toLowerCase()
     }
 
-    public static get_process_names() {
+    public static getProcessNames() {
         Constants.Process
             .values()
             *.name()

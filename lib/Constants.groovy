@@ -35,14 +35,6 @@ class Constants {
         VIRUSINTERPRETER,
     }
 
-    static public get_enum_from_string(s, e) {
-        try {
-            return e.valueOf(s.toUpperCase())
-        } catch(java.lang.IllegalArgumentException err) {
-            return null
-        }
-    }
-
     static public java.util.Map HMF_DATA_PATHS = [
         AMBER_LOCI:                   'amber/GermlineHetPon.vcf.gz',
         COBALT_GC_PROFILE:            'cobalt/DiploidRegions.bed.gz',

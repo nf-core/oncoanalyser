@@ -54,7 +54,7 @@ workflow GRIDSS {
 
         // Gather BAMs and outputs from preprocessing for each tumor/normal set
         // channel: [subject_id, [[val(meta_gridss), bam, preprocess_dir], ...]]
-        ch_bams_and_preprocess = WorkflowOncoanalyser.group_by_meta(
+        ch_bams_and_preprocess = WorkflowOncoanalyser.groupByMeta(
             ch_preprocess_inputs,
             PREPROCESS.out.preprocess_dir,
         )
@@ -87,7 +87,7 @@ workflow GRIDSS {
 
         // Prepare inputs for variant calling
         // channel: [val(meta_gridss), [bams], assemble_dir, [labels]]
-        ch_call_inputs = WorkflowOncoanalyser.group_by_meta(
+        ch_call_inputs = WorkflowOncoanalyser.groupByMeta(
             ch_assemble_inputs,
             ASSEMBLE.out.assemble_dir,
             flatten: false,

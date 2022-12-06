@@ -70,7 +70,7 @@ class WorkflowOncoanalyser {
         }
     }
 
-    public static prepare_inputs(ch, stub_run, log) {
+    public static prepareInputs(ch, stub_run, log) {
         return ch
             .splitCsv(header: true, strip: true, sep: '\t')
             .map { [it.id, it] }
@@ -162,7 +162,7 @@ class WorkflowOncoanalyser {
             }
     }
 
-    public static group_by_meta(Map named_args, ... channels) {
+    public static groupByMeta(Map named_args, ... channels) {
         def r = channels
         // Set position; required to use non-blocking .mix operator
         // NOTE(SW): operating on native list object containing channels
@@ -199,15 +199,15 @@ class WorkflowOncoanalyser {
     }
 
     // NOTE(SW): function signature required to catch where no named arguments are passed
-    public static group_by_meta(... channels) {
-        return group_by_meta([:], *channels)
+    public static groupByMeta(... channels) {
+        return groupByMeta([:], *channels)
     }
 
-    public static get_input(ch, key) {
+    public static getInput(ch, key) {
         return ch.map { meta -> [meta, meta.getAt(key)] }
     }
 
-    public static restore_meta(ch_output, ch_metas) {
+    public static restoreMeta(ch_output, ch_metas) {
         // NOTE(SW): ch_output must contain a Map in the first position with a key named 'key' that
         // contains the corresponding meta.id value, for example: [val(meta_process), *process_outputs]
 

@@ -92,12 +92,12 @@ workflow PREPARE_REFERENCE {
                 .collect()
                 .map { dir_list ->
                     assert dir_list.size() == 1
-                    return create_hmf_data_map(dir_list[0], false /* params_only */)
+                    return createHmfDataMap(dir_list[0], false /* params_only */)
                 }
             ch_versions = ch_versions.mix(HMF_REFERENCE.out.versions)
         } else {
             // If no HMF data bundle is supplied we construct from *only* params
-            ch_hmf_data = create_hmf_data_map(null, true /* params_only */)
+            ch_hmf_data = createHmfDataMap(null, true /* params_only */)
         }
 
     emit:
@@ -113,56 +113,56 @@ workflow PREPARE_REFERENCE {
         versions               = ch_versions                    // channel: [versions.yml]
 }
 
-def create_hmf_data_map(hmf_bundle_dir, params_only) {
+def createHmfDataMap(hmf_bundle_dir, params_only) {
     return [
         // AMBER
-        'amber_loci':                   get_hmf_data_file_object('ref_data_amber_loci',                   'AMBER_LOCI',                   hmf_bundle_dir, params_only),
+        'amber_loci':                   getHmfDataFileObject('ref_data_amber_loci',                   'AMBER_LOCI',                   hmf_bundle_dir, params_only),
         // COBALT
-        'cobalt_gc_profile':            get_hmf_data_file_object('ref_data_cobalt_gc_profile',            'COBALT_GC_PROFILE',            hmf_bundle_dir, params_only),
+        'cobalt_gc_profile':            getHmfDataFileObject('ref_data_cobalt_gc_profile',            'COBALT_GC_PROFILE',            hmf_bundle_dir, params_only),
         // CUPPA
-        'cuppa':                        get_hmf_data_file_object('ref_data_cuppa',                        'CUPPA',                        hmf_bundle_dir, params_only),
+        'cuppa':                        getHmfDataFileObject('ref_data_cuppa',                        'CUPPA',                        hmf_bundle_dir, params_only),
         // SVPREP
-        'sv_prep_blacklist':            get_hmf_data_file_object('ref_data_sv_prep_blacklist',            'SV_PREP_BLACKLIST',            hmf_bundle_dir, params_only),
+        'sv_prep_blacklist':            getHmfDataFileObject('ref_data_sv_prep_blacklist',            'SV_PREP_BLACKLIST',            hmf_bundle_dir, params_only),
         // GRIDSS, GRIPSS
-        'gridss_blacklist':             get_hmf_data_file_object('ref_data_gridss_blacklist',             'GRIDSS_BLACKLIST',             hmf_bundle_dir, params_only),
-        'gridss_breakend_pon':          get_hmf_data_file_object('ref_data_gridss_breakend_pon',          'GRIDSS_BREAKEND_PON',          hmf_bundle_dir, params_only),
-        'gridss_breakpoint_pon':        get_hmf_data_file_object('ref_data_gridss_breakpoint_pon',        'GRIDSS_BREAKPOINT_PON',        hmf_bundle_dir, params_only),
-        'repeat_masker_file':           get_hmf_data_file_object('ref_data_repeat_masker_file',           'REPEAT_MASKER_FILE',           hmf_bundle_dir, params_only),
+        'gridss_blacklist':             getHmfDataFileObject('ref_data_gridss_blacklist',             'GRIDSS_BLACKLIST',             hmf_bundle_dir, params_only),
+        'gridss_breakend_pon':          getHmfDataFileObject('ref_data_gridss_breakend_pon',          'GRIDSS_BREAKEND_PON',          hmf_bundle_dir, params_only),
+        'gridss_breakpoint_pon':        getHmfDataFileObject('ref_data_gridss_breakpoint_pon',        'GRIDSS_BREAKPOINT_PON',        hmf_bundle_dir, params_only),
+        'repeat_masker_file':           getHmfDataFileObject('ref_data_repeat_masker_file',           'REPEAT_MASKER_FILE',           hmf_bundle_dir, params_only),
         // Isofox
-        'isofox_exp_counts':            get_hmf_data_file_object('ref_data_isofox_exp_counts',            'ISOFOX_EXP_COUNTS',            hmf_bundle_dir, params_only),
-        'isofox_exp_gc_ratios':         get_hmf_data_file_object('ref_data_isofox_exp_gc_ratios',         'ISOFOX_EXP_GC_RATIOS',         hmf_bundle_dir, params_only),
+        'isofox_exp_counts':            getHmfDataFileObject('ref_data_isofox_exp_counts',            'ISOFOX_EXP_COUNTS',            hmf_bundle_dir, params_only),
+        'isofox_exp_gc_ratios':         getHmfDataFileObject('ref_data_isofox_exp_gc_ratios',         'ISOFOX_EXP_GC_RATIOS',         hmf_bundle_dir, params_only),
         // LINX
-        'linx_fragile_sites':           get_hmf_data_file_object('ref_data_linx_fragile_sites',           'LINX_FRAGILE_SITES',           hmf_bundle_dir, params_only),
-        'linx_lines':                   get_hmf_data_file_object('ref_data_linx_lines',                   'LINX_LINES',                   hmf_bundle_dir, params_only),
+        'linx_fragile_sites':           getHmfDataFileObject('ref_data_linx_fragile_sites',           'LINX_FRAGILE_SITES',           hmf_bundle_dir, params_only),
+        'linx_lines':                   getHmfDataFileObject('ref_data_linx_lines',                   'LINX_LINES',                   hmf_bundle_dir, params_only),
         // SAGE, PAVE
-        'sage_blacklist_bed':           get_hmf_data_file_object('ref_data_sage_blacklist_bed',           'SAGE_BLACKLIST_BED',           hmf_bundle_dir, params_only),
-        'sage_blacklist_vcf':           get_hmf_data_file_object('ref_data_sage_blacklist_vcf',           'SAGE_BLACKLIST_VCF',           hmf_bundle_dir, params_only),
-        'sage_coding_panel':            get_hmf_data_file_object('ref_data_sage_coding_panel',            'SAGE_CODING_PANEL',            hmf_bundle_dir, params_only),
-        'sage_high_confidence':         get_hmf_data_file_object('ref_data_sage_high_confidence',         'SAGE_HIGH_CONFIDENCE',         hmf_bundle_dir, params_only),
-        'sage_known_hotspots_germline': get_hmf_data_file_object('ref_data_sage_known_hotspots_germline', 'SAGE_KNOWN_HOTSPOTS_GERMLINE', hmf_bundle_dir, params_only),
-        'sage_known_hotspots_somatic':  get_hmf_data_file_object('ref_data_sage_known_hotspots_somatic',  'SAGE_KNOWN_HOTSPOTS_SOMATIC',  hmf_bundle_dir, params_only),
-        'sage_pon_file':                get_hmf_data_file_object('ref_data_sage_pon_file',                'SAGE_PON_FILE',                hmf_bundle_dir, params_only),
-        'clinvar_vcf':                  get_hmf_data_file_object('ref_data_clinvar_vcf',                  'CLINVAR_VCF',                  hmf_bundle_dir, params_only),
+        'sage_blacklist_bed':           getHmfDataFileObject('ref_data_sage_blacklist_bed',           'SAGE_BLACKLIST_BED',           hmf_bundle_dir, params_only),
+        'sage_blacklist_vcf':           getHmfDataFileObject('ref_data_sage_blacklist_vcf',           'SAGE_BLACKLIST_VCF',           hmf_bundle_dir, params_only),
+        'sage_coding_panel':            getHmfDataFileObject('ref_data_sage_coding_panel',            'SAGE_CODING_PANEL',            hmf_bundle_dir, params_only),
+        'sage_high_confidence':         getHmfDataFileObject('ref_data_sage_high_confidence',         'SAGE_HIGH_CONFIDENCE',         hmf_bundle_dir, params_only),
+        'sage_known_hotspots_germline': getHmfDataFileObject('ref_data_sage_known_hotspots_germline', 'SAGE_KNOWN_HOTSPOTS_GERMLINE', hmf_bundle_dir, params_only),
+        'sage_known_hotspots_somatic':  getHmfDataFileObject('ref_data_sage_known_hotspots_somatic',  'SAGE_KNOWN_HOTSPOTS_SOMATIC',  hmf_bundle_dir, params_only),
+        'sage_pon_file':                getHmfDataFileObject('ref_data_sage_pon_file',                'SAGE_PON_FILE',                hmf_bundle_dir, params_only),
+        'clinvar_vcf':                  getHmfDataFileObject('ref_data_clinvar_vcf',                  'CLINVAR_VCF',                  hmf_bundle_dir, params_only),
         // SIGS
-        'sigs_signatures':              get_hmf_data_file_object('ref_data_sigs_signatures',              'SIGS_SIGNATURES',              hmf_bundle_dir, params_only),
+        'sigs_signatures':              getHmfDataFileObject('ref_data_sigs_signatures',              'SIGS_SIGNATURES',              hmf_bundle_dir, params_only),
         // LILAC
-        'lilac_resource_dir':           get_hmf_data_file_object('ref_data_lilac_resource_dir',           'LILAC_RESOURCE_DIR',           hmf_bundle_dir, params_only),
+        'lilac_resource_dir':           getHmfDataFileObject('ref_data_lilac_resource_dir',           'LILAC_RESOURCE_DIR',           hmf_bundle_dir, params_only),
         // VIRUSBreakend
-        'virusbreakenddb':              get_hmf_data_file_object('ref_data_virusbreakenddb',              'VIRUSBREAKENDDB',              hmf_bundle_dir, params_only),
+        'virusbreakenddb':              getHmfDataFileObject('ref_data_virusbreakenddb',              'VIRUSBREAKENDDB',              hmf_bundle_dir, params_only),
         // Virus Interpreter
-        'virus_taxonomy':               get_hmf_data_file_object('ref_data_virus_taxonomy',               'VIRUSINTERPRETER_TAXONOMY',    hmf_bundle_dir, params_only),
-        'virus_reporting':              get_hmf_data_file_object('ref_data_virus_reporting',              'VIRUSINTERPRETER_REPORTING',   hmf_bundle_dir, params_only),
+        'virus_taxonomy':               getHmfDataFileObject('ref_data_virus_taxonomy',               'VIRUSINTERPRETER_TAXONOMY',    hmf_bundle_dir, params_only),
+        'virus_reporting':              getHmfDataFileObject('ref_data_virus_reporting',              'VIRUSINTERPRETER_REPORTING',   hmf_bundle_dir, params_only),
         // Misc
-        'purple_germline_del':          get_hmf_data_file_object('ref_data_purple_germline_del',          'PURPLE_GERMLINE_DEL',          hmf_bundle_dir, params_only),
-        'driver_gene_panel':            get_hmf_data_file_object('ref_data_driver_gene_panel',            'DRIVER_GENE_PANEL',            hmf_bundle_dir, params_only),
-        'ensembl_data_dir':             get_hmf_data_file_object('ref_data_ensembl_data_dir',             'ENSEMBL_DATA_DIR',             hmf_bundle_dir, params_only),
-        'known_fusion_data':            get_hmf_data_file_object('ref_data_known_fusion_data',            'KNOWN_FUSION_DATA',            hmf_bundle_dir, params_only),
-        'known_fusions':                get_hmf_data_file_object('ref_data_known_fusions',                'KNOWN_FUSIONS',                hmf_bundle_dir, params_only),
-        'mappability_bed':              get_hmf_data_file_object('ref_data_mappability_bed',              'MAPPABILITY_BED',              hmf_bundle_dir, params_only),
+        'purple_germline_del':          getHmfDataFileObject('ref_data_purple_germline_del',          'PURPLE_GERMLINE_DEL',          hmf_bundle_dir, params_only),
+        'driver_gene_panel':            getHmfDataFileObject('ref_data_driver_gene_panel',            'DRIVER_GENE_PANEL',            hmf_bundle_dir, params_only),
+        'ensembl_data_dir':             getHmfDataFileObject('ref_data_ensembl_data_dir',             'ENSEMBL_DATA_DIR',             hmf_bundle_dir, params_only),
+        'known_fusion_data':            getHmfDataFileObject('ref_data_known_fusion_data',            'KNOWN_FUSION_DATA',            hmf_bundle_dir, params_only),
+        'known_fusions':                getHmfDataFileObject('ref_data_known_fusions',                'KNOWN_FUSIONS',                hmf_bundle_dir, params_only),
+        'mappability_bed':              getHmfDataFileObject('ref_data_mappability_bed',              'MAPPABILITY_BED',              hmf_bundle_dir, params_only),
     ]
 }
 
-def get_hmf_data_file_object(pk, hk, base_dir, params_only) {
+def getHmfDataFileObject(pk, hk, base_dir, params_only) {
     if (params.containsKey(pk)) {
         return file(params.getAt(pk), checkIfExists: true)
     } else if (params_only) {

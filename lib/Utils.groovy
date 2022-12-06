@@ -4,6 +4,8 @@
 
 import org.yaml.snakeyaml.Yaml
 
+import nextflow.Nextflow
+
 class Utils {
 
     //
@@ -43,5 +45,17 @@ class Utils {
                 "  ${required_channels_in_order}\n" +
                 "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
         }
+    }
+
+    static public getEnumFromString(s, e) {
+        try {
+            return e.valueOf(s.toUpperCase())
+        } catch(java.lang.IllegalArgumentException err) {
+            return null
+        }
+    }
+
+    static public getFileObject(path) {
+        return path ? Nextflow.file(path) : []
     }
 }

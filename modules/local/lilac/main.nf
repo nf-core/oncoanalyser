@@ -19,7 +19,7 @@ process LILAC {
 
     script:
     def args = task.ext.args ?: ''
-    def sample_name = get_sample_name(meta, tumor_bam, normal_bam)
+    def sample_name = getSampleName(meta, tumor_bam, normal_bam)
     def tumor_bam_arg = tumor_bam ? "-tumor_bam ${tumor_bam}" : ''
     def purple_args = purple_dir ? """
         -gene_copy_number ${purple_dir}/${sample_name}.purple.cnv.gene.tsv \\
@@ -55,7 +55,7 @@ process LILAC {
     """
 }
 
-def get_sample_name(meta, tumor_bam, normal_bam) {
+def getSampleName(meta, tumor_bam, normal_bam) {
     if (tumor_bam) {
         return meta.tumor_id
     } else if (normal_bam) {

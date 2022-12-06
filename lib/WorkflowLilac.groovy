@@ -4,7 +4,7 @@
 
 class WorkflowLilac {
 
-    public static get_slice_inputs(ch, ch_slice_bed) {
+    public static getSliceInputs(ch, ch_slice_bed) {
         // channel: [val(meta_lilac), bam, bai]
         def d = ch
             .flatMap { meta, tbam, nbam, tbai, nbai ->
@@ -26,7 +26,7 @@ class WorkflowLilac {
         return d.combine(ch_slice_bed)
     }
 
-    public static get_unique_input_files(ch) {
+    public static getUniqueInputFiles(ch) {
         // channel: [val(meta_lilac), bam, bai, bed]
         def d = ch
             .map { [it[1..-1], it[0]] }
@@ -54,7 +54,7 @@ class WorkflowLilac {
         return d
     }
 
-    public static sort_slices(ch) {
+    public static sortSlices(ch) {
         // Collect T/N pairs into single channel element
         // channel: [val(meta), tumor_bam, normal_bam, tumor_bai, normal_bai]
         def d = ch
