@@ -1,5 +1,6 @@
-import Processes
 import Constants
+import Processes
+import Utils
 
 
 /*
@@ -13,13 +14,11 @@ def summary_params = NfcoreSchema.paramsSummaryMap(workflow, params)
 // Validate input parameters
 WorkflowOncoanalyser.initialise(params, workflow, log)
 
-
 // Set processes to run
-processes = Processes.set_processes(params.mode, log)
-
-processes_include = Processes.get_process_list(params.processes_include, log)
-processes_exclude = Processes.get_process_list(params.processes_exclude, log)
-Processes.check_include_exclude_list(processes_include, processes_exclude, log)
+processes = Processes.setProcesses(params.mode, log)
+processes_include = Processes.getProcessList(params.processes_include, log)
+processes_exclude = Processes.getProcessList(params.processes_exclude, log)
+Processes.checkIncludeExcludeList(processes_include, processes_exclude, log)
 
 processes.addAll(processes_include)
 processes.removeAll(processes_exclude)
@@ -27,7 +26,6 @@ processes.removeAll(processes_exclude)
 run = Constants.Process
     .values()
     .collectEntries { p -> [p.name().toLowerCase(), p in processes] }
-
 
 // Check input path parameters to see if they exist
 def checkPathParamList = [
@@ -102,25 +100,8 @@ include { PICARD_COLLECTWGSMETRICS as COLLECTWGSMETRICS } from '../modules/nf-co
 */
 
 // Get absolute file paths
-def get_file_object(path) {
-    return path ? file(path) : []
-}
-samplesheet   = get_file_object(params.input)
-gridss_config = get_file_object(params.gridss_config)
-
-// Set processes to run
-processes = Processes.set_processes(params.mode, log)
-processes_include = Processes.get_process_list(params.processes_include, log)
-processes_exclude = Processes.get_process_list(params.processes_exclude, log)
-Processes.check_include_exclude_list(processes_include, processes_exclude, log)
-
-processes.addAll(processes_include)
-processes.removeAll(processes_exclude)
-
-run = Constants.Process
-    .values()
-    .collectEntries { p -> [p.name().toLowerCase(), p in processes] }
-
+samplesheet   = Utils.getFileObject(params.input)
+gridss_config = Utils.getFileObject(params.gridss_config)
 
 workflow ONCOANALYSER {
     // Create channel for versions
@@ -133,7 +114,7 @@ workflow ONCOANALYSER {
         params.mode,
     )
     // channel: [val(meta)]
-    ch_inputs = WorkflowOncoanalyser.prepare_inputs(CHECK_SAMPLESHEET.out, workflow.stubRun, log)
+    ch_inputs = WorkflowOncoanalyser.prepareInputs(CHECK_SAMPLESHEET.out, workflow.stubRun, log)
 
     // Set up reference data and unpack HMF data map for convenience
     PREPARE_REFERENCE(run)
@@ -188,7 +169,7 @@ workflow ONCOANALYSER {
 
         // Set outputs, restoring original meta
         ch_versions = ch_versions.mix(ISOFOX.out.versions)
-        ch_isofox_out = ch_isofox_out.mix(WorkflowOncoanalyser.restore_meta(ISOFOX.out.isofox_dir, ch_inputs))
+        ch_isofox_out = ch_isofox_out.mix(WorkflowOncoanalyser.restoreMeta(ISOFOX.out.isofox_dir, ch_inputs))
     }
 
     //
@@ -264,7 +245,7 @@ workflow ONCOANALYSER {
         // Match outputs to original meta and set output
         // channel (tumor): [val(meta), metrics]
         // channel (normal): [val(meta), metrics]
-        ch_cwm_output = WorkflowOncoanalyser.restore_meta(ch_cwm_output_individual, ch_inputs)
+        ch_cwm_output = WorkflowOncoanalyser.restoreMeta(ch_cwm_output_individual, ch_inputs)
             .branch { meta, sample_type, metrics ->
                 tumor: sample_type == 'tumor'
                     return [meta, metrics]
@@ -303,7 +284,7 @@ workflow ONCOANALYSER {
 
         // Set outputs, restoring original meta
         ch_versions = ch_versions.mix(AMBER.out.versions)
-        ch_amber_out = ch_amber_out.mix(WorkflowOncoanalyser.restore_meta(AMBER.out.amber_dir, ch_inputs))
+        ch_amber_out = ch_amber_out.mix(WorkflowOncoanalyser.restoreMeta(AMBER.out.amber_dir, ch_inputs))
     }
 
     //
@@ -335,7 +316,7 @@ workflow ONCOANALYSER {
 
         // Set outputs, restoring original meta
         ch_versions = ch_versions.mix(COBALT.out.versions)
-        ch_cobalt_out = ch_cobalt_out.mix(WorkflowOncoanalyser.restore_meta(COBALT.out.cobalt_dir, ch_inputs))
+        ch_cobalt_out = ch_cobalt_out.mix(WorkflowOncoanalyser.restoreMeta(COBALT.out.cobalt_dir, ch_inputs))
     }
 
     //
@@ -397,7 +378,7 @@ workflow ONCOANALYSER {
         if (run.gridss) {
             ch_gripss_inputs_source = ch_gridss_out
         } else {
-            ch_gripss_inputs_source = WorkflowOncoanalyser.get_input(ch_inputs, ['gridss_vcf', 'tumor_normal'])
+            ch_gripss_inputs_source = WorkflowOncoanalyser.getInput(ch_inputs, ['gridss_vcf', 'tumor_normal'])
         }
 
         // Create inputs and create process-specific meta
@@ -427,8 +408,8 @@ workflow ONCOANALYSER {
 
         // Set outputs, restoring original meta
         ch_versions = ch_versions.mix(GRIPSS.out.versions)
-        ch_gripss_germline_out = ch_gripss_germline_out.mix(WorkflowOncoanalyser.restore_meta(GRIPSS.out.germline, ch_inputs))
-        ch_gripss_somatic_out = ch_gripss_somatic_out.mix(WorkflowOncoanalyser.restore_meta(GRIPSS.out.somatic, ch_inputs))
+        ch_gripss_germline_out = ch_gripss_germline_out.mix(WorkflowOncoanalyser.restoreMeta(GRIPSS.out.germline, ch_inputs))
+        ch_gripss_somatic_out = ch_gripss_somatic_out.mix(WorkflowOncoanalyser.restoreMeta(GRIPSS.out.somatic, ch_inputs))
     }
 
     //
@@ -470,8 +451,8 @@ workflow ONCOANALYSER {
 
         // Set outputs, restoring original meta
         ch_versions = ch_versions.mix(SAGE.out.versions)
-        ch_sage_germline_out = ch_sage_germline_out.mix(WorkflowOncoanalyser.restore_meta(SAGE.out.germline, ch_inputs))
-        ch_sage_somatic_out = ch_sage_somatic_out.mix(WorkflowOncoanalyser.restore_meta(SAGE.out.somatic, ch_inputs))
+        ch_sage_germline_out = ch_sage_germline_out.mix(WorkflowOncoanalyser.restoreMeta(SAGE.out.germline, ch_inputs))
+        ch_sage_somatic_out = ch_sage_somatic_out.mix(WorkflowOncoanalyser.restoreMeta(SAGE.out.somatic, ch_inputs))
     }
 
     //
@@ -488,8 +469,8 @@ workflow ONCOANALYSER {
             ch_pave_germline_inputs_source = ch_sage_germline_out
             ch_pave_somatic_inputs_source = ch_sage_somatic_out
         } else {
-            ch_pave_germline_inputs_source = WorkflowOncoanalyser.get_input(ch_inputs, ['sage_vcf', 'normal'])
-            ch_pave_somatic_inputs_source = WorkflowOncoanalyser.get_input(ch_inputs, ['sage_vcf', 'tumor'])
+            ch_pave_germline_inputs_source = WorkflowOncoanalyser.getInput(ch_inputs, ['sage_vcf', 'normal'])
+            ch_pave_somatic_inputs_source = WorkflowOncoanalyser.getInput(ch_inputs, ['sage_vcf', 'tumor'])
         }
 
         // Create inputs and create process-specific meta
@@ -529,8 +510,8 @@ workflow ONCOANALYSER {
 
         // Set outputs, restoring original meta
         ch_versions = ch_versions.mix(PAVE.out.versions)
-        ch_pave_germline_out = ch_pave_germline_out.mix(WorkflowOncoanalyser.restore_meta(PAVE.out.germline, ch_inputs))
-        ch_pave_somatic_out = ch_pave_somatic_out.mix(WorkflowOncoanalyser.restore_meta(PAVE.out.somatic, ch_inputs))
+        ch_pave_germline_out = ch_pave_germline_out.mix(WorkflowOncoanalyser.restoreMeta(PAVE.out.germline, ch_inputs))
+        ch_pave_somatic_out = ch_pave_somatic_out.mix(WorkflowOncoanalyser.restoreMeta(PAVE.out.somatic, ch_inputs))
     }
 
     //
@@ -559,12 +540,12 @@ workflow ONCOANALYSER {
         }
 
         // channel: [val(meta), amber_dir, cobalt_dir, sv_hard_vcf, sv_hard_tbi, sv_soft_vcf, sv_soft_tbi, smlv_tumor_vcf, smlv_normal_vcf]
-        ch_purple_inputs_sources = WorkflowOncoanalyser.group_by_meta(
-            run.amber ? ch_amber_out : WorkflowOncoanalyser.get_input(ch_inputs, ['amber_dir', 'tumor_normal']),
-            run.cobalt ? ch_cobalt_out : WorkflowOncoanalyser.get_input(ch_inputs, ['cobalt_dir', 'tumor_normal']),
+        ch_purple_inputs_sources = WorkflowOncoanalyser.groupByMeta(
+            run.amber ? ch_amber_out : WorkflowOncoanalyser.getInput(ch_inputs, ['amber_dir', 'tumor_normal']),
+            run.cobalt ? ch_cobalt_out : WorkflowOncoanalyser.getInput(ch_inputs, ['cobalt_dir', 'tumor_normal']),
             ch_purple_inputs_sv,
-            run.pave ? ch_pave_somatic_out : WorkflowOncoanalyser.get_input(ch_inputs, ['vcf_smlv', 'tumor']),
-            run.pave ? ch_pave_germline_out : WorkflowOncoanalyser.get_input(ch_inputs, ['vcf_smlv', 'normal']),
+            run.pave ? ch_pave_somatic_out : WorkflowOncoanalyser.getInput(ch_inputs, ['vcf_smlv', 'tumor']),
+            run.pave ? ch_pave_germline_out : WorkflowOncoanalyser.getInput(ch_inputs, ['vcf_smlv', 'normal']),
         )
 
         // channel: [val(meta_purple), amber_dir, cobalt_dir, sv_hard_vcf, sv_hard_tbi, sv_soft_vcf, sv_soft_tbi, smlv_tumor_vcf, smlv_normal_vcf]
@@ -597,7 +578,7 @@ workflow ONCOANALYSER {
 
         // Set outputs, restoring original meta
         ch_versions = ch_versions.mix(PURPLE.out.versions)
-        ch_purple_out = ch_purple_out.mix(WorkflowOncoanalyser.restore_meta(PURPLE.out.purple_dir, ch_inputs))
+        ch_purple_out = ch_purple_out.mix(WorkflowOncoanalyser.restoreMeta(PURPLE.out.purple_dir, ch_inputs))
     }
 
     //
@@ -609,7 +590,7 @@ workflow ONCOANALYSER {
         if (run.purple) {
             ch_sigs_inputs_source = ch_purple_out
         } else {
-            ch_sigs_inputs_source = WorkflowOncoanalyser.get_input(ch_inputs, ['purple_dir', 'tumor_normal'])
+            ch_sigs_inputs_source = WorkflowOncoanalyser.getInput(ch_inputs, ['purple_dir', 'tumor_normal'])
         }
 
         // Create inputs and create process-specific meta
@@ -639,7 +620,7 @@ workflow ONCOANALYSER {
         if (run.purple) {
           ch_chord_inputs_source = ch_purple_out
         } else {
-          ch_chord_inputs_source = WorkflowOncoanalyser.get_input(ch_inputs, ['purple_dir', 'tumor_normal'])
+          ch_chord_inputs_source = WorkflowOncoanalyser.getInput(ch_inputs, ['purple_dir', 'tumor_normal'])
         }
 
         // Create inputs and create process-specific meta
@@ -670,12 +651,12 @@ workflow ONCOANALYSER {
         // Select input sources
         // channel: [val(meta), tumor_bam, normal_bam, tumor_bai, normal_bai, tumor_wgs_metrics, normal_wgs_metrics, cobalt_dir, purple_dir]
         // NOTE(SW): assuming here that TEAL is being run in tumor/normal mode and so we expect a tumor metrics file and normal metrics file
-        ch_teal_inputs_source = WorkflowOncoanalyser.group_by_meta(
+        ch_teal_inputs_source = WorkflowOncoanalyser.groupByMeta(
             ch_bams_and_indices,
-            run.collectwgsmetrics ? ch_cwm_output.tumor : WorkflowOncoanalyser.get_input(ch_inputs, ['collectmetrics', 'tumor']),
-            run.collectwgsmetrics ? ch_cwm_output.normal : WorkflowOncoanalyser.get_input(ch_inputs, ['collectmetrics', 'normal']),
-            run.purple ? ch_purple_out : WorkflowOncoanalyser.get_input(ch_inputs, ['purple_dir', 'tumor_normal']),
-            run.cobalt ? ch_cobalt_out : WorkflowOncoanalyser.get_input(ch_inputs, ['cobalt_dir', 'tumor_normal']),
+            run.collectwgsmetrics ? ch_cwm_output.tumor : WorkflowOncoanalyser.getInput(ch_inputs, ['collectmetrics', 'tumor']),
+            run.collectwgsmetrics ? ch_cwm_output.normal : WorkflowOncoanalyser.getInput(ch_inputs, ['collectmetrics', 'normal']),
+            run.purple ? ch_purple_out : WorkflowOncoanalyser.getInput(ch_inputs, ['purple_dir', 'tumor_normal']),
+            run.cobalt ? ch_cobalt_out : WorkflowOncoanalyser.getInput(ch_inputs, ['cobalt_dir', 'tumor_normal']),
         )
 
         // Create inputs and create process-specific meta
@@ -710,13 +691,13 @@ workflow ONCOANALYSER {
         if (run.purple) {
             ch_lilac_inputs_source = ch_purple_out
         } else {
-            ch_lilac_inputs_source = WorkflowOncoanalyser.get_input(['purple_dir', 'tumor_normal'])
+            ch_lilac_inputs_source = WorkflowOncoanalyser.getInput(['purple_dir', 'tumor_normal'])
         }
 
         // Run process
         LILAC(
             ch_bams_and_indices,
-            run.purple ? ch_purple_out : WorkflowOncoanalyser.get_input(['purple_dir', 'tumor_normal']),
+            run.purple ? ch_purple_out : WorkflowOncoanalyser.getInput(['purple_dir', 'tumor_normal']),
             PREPARE_REFERENCE.out.genome_fasta,
             PREPARE_REFERENCE.out.genome_fai,
             hmf_data.lilac_resource_dir,
@@ -769,8 +750,8 @@ workflow ONCOANALYSER {
             }
 
         // channel: [val(meta), virus_tsv, purple_purity, purple_qc, wgs_metrics]
-        ch_virusinterpreter_inputs_full = WorkflowOncoanalyser.group_by_meta(
-            WorkflowOncoanalyser.restore_meta(VIRUSBREAKEND.out.tsv, ch_inputs),
+        ch_virusinterpreter_inputs_full = WorkflowOncoanalyser.groupByMeta(
+            WorkflowOncoanalyser.restoreMeta(VIRUSBREAKEND.out.tsv, ch_inputs),
             ch_virusinterpreter_inputs_purple,
             ch_cwm_output.tumor,
         )
@@ -796,7 +777,7 @@ workflow ONCOANALYSER {
 
         // Set outputs, restoring original meta
         ch_versions = ch_versions.mix(VIRUSINTERPRETER.out.versions)
-        ch_virusinterpreter_out = ch_virusinterpreter_out.mix(WorkflowOncoanalyser.restore_meta(VIRUSINTERPRETER.out.virusinterpreter_dir, ch_inputs))
+        ch_virusinterpreter_out = ch_virusinterpreter_out.mix(WorkflowOncoanalyser.restoreMeta(VIRUSINTERPRETER.out.virusinterpreter_dir, ch_inputs))
     }
 
     //
@@ -810,10 +791,10 @@ workflow ONCOANALYSER {
         if (run.gripss) {
             ch_linx_inputs_germline_source = ch_gripss_germline_out.map { meta, h, hi, s, si -> [meta, h] }
         } else {
-            ch_linx_inputs_germline_source = WorkflowOncoanalyser.get_input(ch_inputs, ['vcf_sv_gripss_hard', 'normal'])
+            ch_linx_inputs_germline_source = WorkflowOncoanalyser.getInput(ch_inputs, ['vcf_sv_gripss_hard', 'normal'])
         }
         // channel: [val(meta), sv_vcf, purple_dir]
-        ch_linx_inputs_somatic_source = run.purple ? ch_purple_out : WorkflowOncoanalyser.get_input(ch_inputs, ['purple_dir', 'tumor_normal'])
+        ch_linx_inputs_somatic_source = run.purple ? ch_purple_out : WorkflowOncoanalyser.getInput(ch_inputs, ['purple_dir', 'tumor_normal'])
 
         // Create inputs and create process-specific meta
         // channel: [val(meta_linx), sv_vcf]
@@ -851,7 +832,7 @@ workflow ONCOANALYSER {
 
         // Set outputs, restoring original meta
         ch_versions = ch_versions.mix(LINX.out.versions)
-        ch_linx_somatic_out = ch_linx_somatic_out.mix(WorkflowOncoanalyser.restore_meta(LINX.out.somatic, ch_inputs))
+        ch_linx_somatic_out = ch_linx_somatic_out.mix(WorkflowOncoanalyser.restoreMeta(LINX.out.somatic, ch_inputs))
 
         //
         // MODULE: Run gpgr to generate a LINX report
@@ -887,13 +868,13 @@ workflow ONCOANALYSER {
 
         // channel: [val(meta), isofox_dir, purple_dir, linx_dir, virusinterpreter_dir]
         // NOTE(SW): the Groovy Collection.flatten method used in
-        // WorkflowOncoanalyser.group_by_meta removes optional Isofox input; flattening
+        // WorkflowOncoanalyser.groupByMeta removes optional Isofox input; flattening
         // done manually below to preserve
-        ch_cuppa_inputs_source = WorkflowOncoanalyser.group_by_meta(
+        ch_cuppa_inputs_source = WorkflowOncoanalyser.groupByMeta(
             ch_cuppa_inputs_isofox,
-            run.purple ? ch_purple_out : WorkflowOncoanalyser.get_input(ch_inputs, ['purple_dir', 'tumor_normal']),
-            run.linx ? ch_linx_anno : WorkflowOncoanalyser.get_input(ch_inputs, ['linx_dir', 'tumor']),
-            run.virusinterpreter ? ch_virusinterpreter_out : WorkflowOncoanalyser.get_input(ch_inputs, ['virusinterpreter', 'tumor']),
+            run.purple ? ch_purple_out : WorkflowOncoanalyser.getInput(ch_inputs, ['purple_dir', 'tumor_normal']),
+            run.linx ? ch_linx_anno : WorkflowOncoanalyser.getInput(ch_inputs, ['linx_dir', 'tumor']),
+            run.virusinterpreter ? ch_virusinterpreter_out : WorkflowOncoanalyser.getInput(ch_inputs, ['virusinterpreter', 'tumor']),
             flatten: false,
         )
             .map { data ->

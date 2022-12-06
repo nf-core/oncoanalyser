@@ -31,9 +31,9 @@ workflow LILAC {
         // NOTE(SW): orphaned reads are sometimes obtained, this is the slicing procedure used
         // in Pipeline5, see LilacBamSlicer.java#L115
         // channel: [val(meta_lilac), bam, bai, bed]
-        ch_slice_inputs = WorkflowLilac.get_slice_inputs(ch_inputs_bams, ch_slice_bed)
+        ch_slice_inputs = WorkflowLilac.getSliceInputs(ch_inputs_bams, ch_slice_bed)
         // channel: [val(meta_lilac), bam, bai, bed]
-        ch_slice_inputs = WorkflowLilac.get_unique_input_files(ch_slice_inputs)
+        ch_slice_inputs = WorkflowLilac.getUniqueInputFiles(ch_slice_inputs)
         SLICE(
             ch_slice_inputs,
         )
@@ -60,24 +60,24 @@ workflow LILAC {
 
             // Create input channel for LILAC
             // channel: [val(meta), tumor_bam, normal_bam, tumor_bai, normal_bai]
-            ch_lilac_inputs_slices = WorkflowOncoanalyser.restore_meta(
-                WorkflowLilac.sort_slices(REALIGN_READS.out.bam),
+            ch_lilac_inputs_slices = WorkflowOncoanalyser.restoreMeta(
+                WorkflowLilac.sortSlices(REALIGN_READS.out.bam),
                 ch_metas,
             )
             // channel: [val(meta), tumor_bam, normal_bam, tumor_bai, normal_bai, purple_dir]
-            ch_lilac_inputs_full = WorkflowOncoanalyser.group_by_meta(
+            ch_lilac_inputs_full = WorkflowOncoanalyser.groupByMeta(
                 ch_lilac_inputs_slices,
                 ch_inputs_purple_dir,
             )
         } else {
             // Create input channel for LILAC
             // channel: [val(meta), tumor_bam, normal_bam, tumor_bai, normal_bai]
-            ch_lilac_inputs_slices = WorkflowOncoanalyser.restore_meta(
-                WorkflowLilac.sort_slices(SLICE.out.bam),
+            ch_lilac_inputs_slices = WorkflowOncoanalyser.restoreMeta(
+                WorkflowLilac.sortSlices(SLICE.out.bam),
                 ch_metas,
             )
             // channel: [val(meta), tumor_bam, normal_bam, tumor_bai, normal_bai, purple_dir]
-            ch_lilac_inputs_full = WorkflowOncoanalyser.group_by_meta(
+            ch_lilac_inputs_full = WorkflowOncoanalyser.groupByMeta(
                 ch_lilac_inputs_slices,
                 ch_inputs_purple_dir,
             )

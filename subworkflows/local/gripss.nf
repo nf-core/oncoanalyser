@@ -48,12 +48,12 @@ workflow GRIPSS {
 
     // Pack output
     // channel: [val(meta_gripss), hard_vcf, hard_tbi, soft_vcf, soft_tbi]
-    ch_germline_out = WorkflowOncoanalyser.group_by_meta(
+    ch_germline_out = WorkflowOncoanalyser.groupByMeta(
         GRIPSS_GERMLINE.out.vcf_hard,
         GRIPSS_GERMLINE.out.vcf_soft,
     )
     // channel: [val(meta_gripss), hard_vcf, hard_tbi, soft_vcf, soft_tbi]
-    ch_somatic_out = WorkflowOncoanalyser.group_by_meta(
+    ch_somatic_out = WorkflowOncoanalyser.groupByMeta(
         GRIPSS_SOMATIC.out.vcf_hard,
         GRIPSS_SOMATIC.out.vcf_soft,
     )
