@@ -2,6 +2,7 @@
 // SV Prep is a BAM filter designed to select only reads relevant to SV events run prior to GRIDSS.
 // GRIDSS is a software suite containing tools useful for the detection of genomic rearrangements.
 //
+import Constants
 
 include { ASSEMBLE        as GRIDSS_ASSEMBLE        } from '../../modules/local/svprep/assemble/main'
 include { CALL            as GRIDSS_CALL            } from '../../modules/local/svprep/call/main'
@@ -35,10 +36,10 @@ workflow GRIDSS_SVPREP {
             .map { meta ->
                 def meta_svprep = [
                     key: meta.id,
-                    id: meta.get(['sample_name', 'tumor']),
+                    id: meta.get(['sample_name', Constants.DataType.TUMOR]),
                     sample_type: 'tumor',
                 ]
-                def bam_tumor = meta.get(['bam_wgs', 'tumor'])
+                def bam_tumor = meta.get([Constants.FileType.BAM_WGS, Constants.DataType.TUMOR])
                 return [meta_svprep, bam_tumor, "${bam_tumor}.bai", []]
             }
 
@@ -60,10 +61,10 @@ workflow GRIDSS_SVPREP {
             .map { meta, junctions_tumor ->
                 def meta_svprep = [
                     key: meta.id,
-                    id: meta.get(['sample_name', 'normal']),
+                    id: meta.get(['sample_name', Constants.DataType.NORMAL]),
                     sample_type: 'normal',
                 ]
-                def bam_normal = meta.get(['bam_wgs', 'normal'])
+                def bam_normal = meta.get([Constants.FileType.BAM_WGS, Constants.DataType.NORMAL])
                 return [meta_svprep, bam_normal, "${bam_normal}.bai", junctions_tumor]
             }
 
@@ -116,9 +117,6 @@ workflow GRIDSS_SVPREP {
         )
         ch_versions = ch_versions.mix(GRIDSS_PREPROCESS.out.versions)
 
-
-
-
         // Gather BAMs and outputs from preprocessing for each tumor/normal set
         // channel: [key, [[val(meta_gridss), bam, bam_filtered, preprocess_dir], ...]]
         ch_bams_and_preprocess = WorkflowOncoanalyser.groupByMeta(
@@ -127,9 +125,6 @@ workflow GRIDSS_SVPREP {
         )
         .map { [it[0].key, it] }
         .groupTuple(size: 2)
-
-
-
 
         // Order and organise inputs for assembly
         // channel: [val(meta_gridss), [bams], [bams_filtered], [preprocess_dirs], [labels]]
@@ -190,20 +185,21 @@ workflow GRIDSS_SVPREP {
         ch_versions = ch_versions.mix(GRIDSS_CALL.out.versions)
 
         // Prepare inputs for depth annotation, restore original meta
-        // channel: [val(meta), [bams], [bais], vcf, [labels]]
+        // channel: [val(meta_svprep), [bams], [bais], vcf, [labels]]
         ch_depth_inputs = WorkflowOncoanalyser.groupByMeta(
             ch_inputs.map { meta -> [meta.id, meta] },
             GRIDSS_CALL.out.vcf.map { meta, vcf -> [meta.id, vcf] },
         )
             .map { id, meta, vcf ->
-                def tbam = meta.get(['bam_wgs', 'tumor'])
-                def nbam = meta.get(['bam_wgs', 'normal'])
+                def tbam = meta.get([Constants.FileType.BAM_WGS, Constants.DataType.TUMOR])
+                def nbam = meta.get([Constants.FileType.BAM_WGS, Constants.DataType.NORMAL])
+                def meta_svprep = [id: meta.id]
                 return [
-                    meta,
+                    meta_svprep,
                     [nbam, tbam],
                     ["${nbam}.bai", "${tbam}.bai"],
                     vcf,
-                    [meta.get(['sample_name', 'normal']), meta.get(['sample_name', 'tumor'])],
+                    [meta.get(['sample_name', Constants.DataType.NORMAL]), meta.get(['sample_name', Constants.DataType.TUMOR])],
                 ]
             }
 
@@ -214,8 +210,17 @@ workflow GRIDSS_SVPREP {
             ref_data_genome_version,
         )
 
-    emit:
-        results  = SVPREP_DEPTH_ANNOTATOR.out.vcf // channel: [val(meta), vcf]
+        // Reunite final VCF with the corresponding input meta object
+        ch_out = Channel.empty()
+            .concat(
+                ch_inputs.map { meta -> [meta.id, meta] },
+                SVPREP_DEPTH_ANNOTATOR.out.vcf.map { meta, vcf -> [meta.id, vcf] },
+            )
+            .groupTuple(size: 2)
+            .map { id, other -> other.flatten() }
 
-        versions = ch_versions                    // channel: [versions.yml]
+    emit:
+        results  = ch_out      // channel: [val(meta), vcf]
+
+        versions = ch_versions // channel: [versions.yml]
 }
