@@ -35,6 +35,31 @@ class Constants {
         VIRUSINTERPRETER,
     }
 
+    static enum DataType {
+        TUMOR,
+        NORMAL,
+        TUMOR_NORMAL,
+    }
+
+    static enum FileType {
+        // Generic
+        BAM_WGS,
+        BAM_WTS,
+        // Process
+        AMBER_DIR,
+        COBALT_DIR,
+        COLLECTWGSMETRICS,
+        GRIDSS_VCF,
+        GRIPSS_HARD_VCF,
+        GRIPSS_SOFT_VCF,
+        ISOFOX_DIR,
+        LINX_DIR,
+        PAVE_VCF,
+        PURPLE_DIR,
+        SAGE_VCF,
+        VIRUSINTERPRETER,
+    }
+
     static public java.util.Map HMF_DATA_PATHS = [
         AMBER_LOCI:                   'amber/GermlineHetPon.vcf.gz',
         COBALT_GC_PROFILE:            'cobalt/DiploidRegions.bed.gz',

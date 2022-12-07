@@ -15,11 +15,11 @@
                 "input": {
                     "type": "string",
                     "format": "file-path",
-                    "mimetype": "text/tsv",
-                    "pattern": "^\\S+\\.tsv$",
+                    "mimetype": "text/csv",
+                    "pattern": "^\\S+\\.csv$",
                     "schema": "assets/schema_input.json",
-                    "description": "Path to tab-separated file containing information about the samples in the experiment.",
-                    "help_text": "You will need to create a design file with information about the samples in your experiment before running the pipeline. Use this parameter to specify its location. It has to be a tab-separated file with 3 columns, and a header row. See [usage docs](https://nf-co.re/oncoanalyser/usage#samplesheet-input).",
+                    "description": "Path to csv-separated file containing information about the samples in the experiment.",
+                    "help_text": "You will need to create a design file with information about the samples in your experiment before running the pipeline. Use this parameter to specify its location. It has to be a csv-separated file with 3 columns, and a header row. See [usage docs](https://nf-co.re/oncoanalyser/usage#samplesheet-input).",
                     "fa_icon": "fas fa-file-tsv"
                 },
                 "outdir": {

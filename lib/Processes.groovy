@@ -7,7 +7,7 @@ class Processes {
     public static setProcesses(mode_str, log) {
         def mode_enum = Utils.getEnumFromString(mode_str, Constants.PipelineMode)
         if (!mode_enum) {
-            def workflows_str = Processes.getWorkflowNames().join('\n  - ')
+            def workflows_str = Utils.getEnumNames(Constants.PipelineMode).join('\n  - ')
             log.error "\nERROR: recieved invalid pipeline mode: '${mode_str}'. Valid options are:\n  - ${workflows_str}"
             System.exit(1)
         }
@@ -82,13 +82,6 @@ class Processes {
             log.error "\nERROR: ${message_base}:\n  - ${processes_shared_str}"
             System.exit(1)
         }
-    }
-
-    public static getWorkflowNames() {
-        Constants.PipelineMode
-            .values()
-            *.name()
-            *.toLowerCase()
     }
 
     public static getProcessNames() {

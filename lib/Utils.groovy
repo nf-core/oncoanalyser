@@ -55,6 +55,14 @@ class Utils {
         }
     }
 
+    public static getEnumNames(e) {
+        e
+            .values()
+            *.name()
+            *.toLowerCase()
+    }
+
+
     static public getFileObject(path) {
         return path ? Nextflow.file(path) : []
     }
