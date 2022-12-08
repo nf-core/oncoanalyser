@@ -49,7 +49,7 @@ workflow PREPARE_REFERENCE {
         ch_genome_bwa_index = file(params.ref_data_genome_bwa_index)
         ch_genome_bwa_index_image = file(params.ref_data_genome_bwa_index_image)
         ch_genome_gridss_index = file(params.ref_data_genome_gridss_index)
-        if (run.gridss || run.virusbreakend) {
+        if (run.gridss || run.virusinterpreter) {
             if (!params.ref_data_genome_bwa_index) {
                 BWA_INDEX([[:], ch_genome_fasta])
                 ch_genome_bwa_index = BWA_INDEX.out.index.map { it[1] }
