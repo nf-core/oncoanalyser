@@ -25,14 +25,14 @@ class WorkflowOncoanalyser {
             System.exit(1)
         }
 
-        if (Constants.genomes_version_37.contains(params.genome)) {
+        if (Constants.GENOMES_VERSION_37.contains(params.genome)) {
             params.ref_data_genome_version = '37'
-        } else if (Constants.genomes_version_38.contains(params.genome)) {
+        } else if (Constants.GENOMES_VERSION_38.contains(params.genome)) {
             params.ref_data_genome_version = '38'
-        } else if (Constants.genomes_version_38_noalt.contains(params.genome)) {
+        } else if (Constants.GENOMES_VERSION_38_NOALT.contains(params.genome)) {
             params.ref_data_genome_version = '38_noalt'
         } else {
-            def genome_version_list_all = Constants.genomes_version_37 + Constants.genomes_version_38
+            def genome_version_list_all = Constants.GENOMES_VERSION_37 + Constants.GENOMES_VERSION_38
             log.error "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n" +
                 "  Genome '${params.genome}' is not defined in genome version list.                 \n" +
                 "  Currently, the list of genomes in the version list include:\n" +
@@ -43,16 +43,16 @@ class WorkflowOncoanalyser {
 
         if (!params.containsKey('ref_data_hmf_bundle')) {
             if (params.ref_data_genome_version == '37') {
-                params.ref_data_hmf_bundle = Constants.hmf_reference_data_37_bundle_path
+                params.ref_data_hmf_bundle = Constants.HMF_REFERENCE_DATA_37_BUNDLE_PATH
             } else if (params.ref_data_genome_version == '38') {
-                params.ref_data_hmf_bundle = Constants.hmf_reference_data_38_bundle_path
+                params.ref_data_hmf_bundle = Constants.HMF_REFERENCE_DATA_38_BUNDLE_PATH
             } else {
                 assert false : "Got a bad genome version: ${params.ref_data_genome_version}"
             }
         }
 
         if (!params.containsKey('ref_data_virusbreakenddb_path')) {
-            params.ref_data_virusbreakenddb_path = Constants.virusbreakenddb_path
+            params.ref_data_virusbreakenddb_path = Constants.VIRUSBREAKENDDB_PATH
         }
 
         if (!params.ref_data_genome_fasta) {

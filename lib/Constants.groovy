@@ -1,14 +1,14 @@
 class Constants {
 
     // NOTE(SW): the HMF reference data files are incompatible with hg19 due to different contig naming
-    static List genomes_version_37       = ['GRCh37_hmf', 'GRCh37']
-    static List genomes_version_38       = ['GRCh38', 'hg38']
-    static List genomes_version_38_noalt = ['GRCh38_hmf']
+    static List GENOMES_VERSION_37       = ['GRCh37_hmf', 'GRCh37']
+    static List GENOMES_VERSION_38       = ['GRCh38', 'hg38']
+    static List GENOMES_VERSION_38_NOALT = ['GRCh38_hmf']
 
-    static String hmf_reference_data_37_bundle_path = 's3://umccr-research-dev/stephen/hmftools_reference_data/2_repack/gcloud_vm_v5.23/hmf_data_bundle_5.23_37_0.0.1.tar.gz'
-    static String hmf_reference_data_38_bundle_path = 's3://umccr-research-dev/stephen/hmftools_reference_data/2_repack/gcloud_vm_v5.23/hmf_data_bundle_5.23_38_0.0.1.tar.gz'
+    static String HMF_REFERENCE_DATA_37_BUNDLE_PATH = 's3://umccr-research-dev/stephen/hmftools_reference_data/2_repack/gcloud_vm_v5.23/hmf_data_bundle_5.23_37_0.0.1.tar.gz'
+    static String HMF_REFERENCE_DATA_38_BUNDLE_PATH = 's3://umccr-research-dev/stephen/hmftools_reference_data/2_repack/gcloud_vm_v5.23/hmf_data_bundle_5.23_38_0.0.1.tar.gz'
 
-    static String virusbreakenddb_path = 's3://virusbreakend/virusbreakenddb_20210401.tar.gz'
+    static String VIRUSBREAKENDDB_PATH = 's3://virusbreakend/virusbreakenddb_20210401.tar.gz'
 
     static enum PipelineMode {
         FULL,
