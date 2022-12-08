@@ -6,10 +6,10 @@ include { SAMTOOLS_FAIDX         } from '../../modules/nf-core/samtools/faidx/ma
 include { SAMTOOLS_DICT          } from '../../modules/nf-core/samtools/dict/main'
 include { BWA_INDEX              } from '../../modules/nf-core/bwa/index/main'
 
+include { EXTRACT_TARBALL as EXTRACT_TARBALL_HMF_BUNDLE      } from '../../modules/local/custom/extract_tarball/main'
 include { EXTRACT_TARBALL as EXTRACT_TARBALL_VIRUSBREAKENDDB } from '../../modules/local/custom/extract_tarball/main'
 include { INDEX as GRIDSS_BWA_INDEX_IMAGE                    } from '../../modules/local/gridss/index/main'
 include { INDEX as GRIDSS_INDEX                              } from '../../modules/local/gridss/index/main'
-include { HMF_REFERENCE                                      } from '../../modules/local/custom/hmf_reference/main'
 
 workflow PREPARE_REFERENCE {
     take:
@@ -101,18 +101,22 @@ workflow PREPARE_REFERENCE {
         //
         // Set HMF reference paths / stage, unpack if required
         //
-        if (params.ref_data_hmf_bundle) {
-            HMF_REFERENCE(params.ref_data_hmf_bundle)
+        // NOTE(SW): requiring all HMF reference data for now
+        if (params.ref_data_hmf_bundle.endsWith('.tar.gz')) {
+            // Decompress and set paths
+            EXTRACT_TARBALL_HMF_BUNDLE([[id: 'hmf_bundle'], file(params.ref_data_hmf_bundle)])
 
             // Obtain paths and convert queue channel to value channel
             // NOTE(SW): any relevant HMF reference file parameter explicitly set in config will take priority
-            ch_hmf_data = HMF_REFERENCE.out.dir
+            ch_hmf_data = EXTRACT_TARBALL_HMF_BUNDLE.out.dir
                 .collect()
                 .map { dir_list ->
                     assert dir_list.size() == 1
                     return createHmfDataMap(dir_list[0], false /* params_only */)
                 }
-            ch_versions = ch_versions.mix(HMF_REFERENCE.out.versions)
+        } else if (params.ref_data_hmf_bundle) {
+            // If provided as path to directory, set paths
+            ch_hmf_data = createHmfDataMap(params.ref_data_hmf_bundle, false /* params_only */)
         } else {
             // If no HMF data bundle is supplied we construct from *only* params
             ch_hmf_data = createHmfDataMap(null, true /* params_only */)
