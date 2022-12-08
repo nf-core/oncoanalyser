@@ -734,7 +734,7 @@ workflow ONCOANALYSER {
             PREPARE_REFERENCE.out.genome_bwa_index,
             PREPARE_REFERENCE.out.genome_bwa_index_image,
             PREPARE_REFERENCE.out.genome_gridss_index,
-            hmf_data.virusbreakenddb,
+            PREPARE_REFERENCE.out.virusbreakenddb,
         )
 
         // Set outputs
