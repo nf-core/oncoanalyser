@@ -1,5 +1,5 @@
 process EXTRACT_AND_INDEX_CONTIG {
-    tag "${meta.id}"
+    tag "${contig_name}"
     label 'process_single'
 
     container 'docker.io/scwatts/custom-extract_and_index_contig:0.0.1--3'
