@@ -146,7 +146,7 @@
                 "ref_data_hmf_bundle": {
                     "type": "string",
                     "format": "directory-path",
-                    "description": "Path HMF reference data bundle.",
+                    "description": "Path to HMF reference data bundle.",
                     "fa_icon": "far fa-file-code"
                 },
                 "ref_data_virusbreakenddb_path": {

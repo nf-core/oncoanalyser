@@ -5,8 +5,8 @@ class Constants {
     static List genomes_version_38       = ['GRCh38', 'hg38']
     static List genomes_version_38_noalt = ['GRCh38_hmf']
 
-    static String hmf_reference_data_37_bundle_path = 'PLACEHOLDER_hmf_reference_data_37_bundle_path'
-    static String hmf_reference_data_38_bundle_path = 'PLACEHOLDER_hmf_reference_data_38_bundle_path'
+    static String hmf_reference_data_37_bundle_path = 's3://umccr-research-dev/stephen/hmftools_reference_data/2_repack/gcloud_vm_v5.23/hmf_data_bundle_5.23_37_0.0.1.tar.gz'
+    static String hmf_reference_data_38_bundle_path = 's3://umccr-research-dev/stephen/hmftools_reference_data/2_repack/gcloud_vm_v5.23/hmf_data_bundle_5.23_38_0.0.1.tar.gz'
 
     static String virusbreakenddb_path = 's3://virusbreakend/virusbreakenddb_20210401.tar.gz'
 
