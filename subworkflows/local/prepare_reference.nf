@@ -6,9 +6,10 @@ include { SAMTOOLS_FAIDX         } from '../../modules/nf-core/samtools/faidx/ma
 include { SAMTOOLS_DICT          } from '../../modules/nf-core/samtools/dict/main'
 include { BWA_INDEX              } from '../../modules/nf-core/bwa/index/main'
 
-include { INDEX as GRIDSS_BWA_INDEX_IMAGE } from '../../modules/local/gridss/index/main'
-include { INDEX as GRIDSS_INDEX           } from '../../modules/local/gridss/index/main'
-include { HMF_REFERENCE                   } from '../../modules/local/custom/hmf_reference/main'
+include { EXTRACT_TARBALL as EXTRACT_TARBALL_VIRUSBREAKENDDB } from '../../modules/local/custom/extract_tarball/main'
+include { INDEX as GRIDSS_BWA_INDEX_IMAGE                    } from '../../modules/local/gridss/index/main'
+include { INDEX as GRIDSS_INDEX                              } from '../../modules/local/gridss/index/main'
+include { HMF_REFERENCE                                      } from '../../modules/local/custom/hmf_reference/main'
 
 workflow PREPARE_REFERENCE {
     take:
@@ -81,6 +82,23 @@ workflow PREPARE_REFERENCE {
         }
 
         //
+        // Set VIRUSBreakend database paths / stage, unpack if required
+        //
+        ch_virusbreakenddb = Channel.empty()
+        if (run.virusinterpreter) {
+            if (params.ref_data_virusbreakenddb_path.endsWith('.tar.gz')) {
+                ch_virusbreakenddb_inputs = [
+                    [id: 'virusbreakenddb'],
+                    file(params.ref_data_virusbreakenddb_path),
+                ]
+                EXTRACT_TARBALL_VIRUSBREAKENDDB(ch_virusbreakenddb_inputs)
+                ch_virusbreakenddb = EXTRACT_TARBALL_VIRUSBREAKENDDB.out.dir
+            } else {
+                ch_virusbreakenddb = file(params.ref_data_virusbreakenddb_path)
+            }
+        }
+
+        //
         // Set HMF reference paths / stage, unpack if required
         //
         if (params.ref_data_hmf_bundle) {
@@ -108,6 +126,8 @@ workflow PREPARE_REFERENCE {
         genome_bwa_index_image = ch_genome_bwa_index_image      // path: genome_bwa_index_image
         genome_gridss_index    = ch_genome_gridss_index         // path: genome_gridss_index
         genome_version         = params.ref_data_genome_version // val:  genome_version
+
+        virusbreakenddb        = ch_virusbreakenddb             // path: VIRUSBreakend database
         hmf_data               = ch_hmf_data                    // map:  HMF data paths
 
         versions               = ch_versions                    // channel: [versions.yml]
@@ -147,8 +167,6 @@ def createHmfDataMap(hmf_bundle_dir, params_only) {
         'sigs_signatures':              getHmfDataFileObject('ref_data_sigs_signatures',              'SIGS_SIGNATURES',              hmf_bundle_dir, params_only),
         // LILAC
         'lilac_resource_dir':           getHmfDataFileObject('ref_data_lilac_resource_dir',           'LILAC_RESOURCE_DIR',           hmf_bundle_dir, params_only),
-        // VIRUSBreakend
-        'virusbreakenddb':              getHmfDataFileObject('ref_data_virusbreakenddb',              'VIRUSBREAKENDDB',              hmf_bundle_dir, params_only),
         // Virus Interpreter
         'virus_taxonomy':               getHmfDataFileObject('ref_data_virus_taxonomy',               'VIRUSINTERPRETER_TAXONOMY',    hmf_bundle_dir, params_only),
         'virus_reporting':              getHmfDataFileObject('ref_data_virus_reporting',              'VIRUSINTERPRETER_REPORTING',   hmf_bundle_dir, params_only),

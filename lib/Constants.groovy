@@ -8,6 +8,8 @@ class Constants {
     static String hmf_reference_data_37_bundle_path = 'PLACEHOLDER_hmf_reference_data_37_bundle_path'
     static String hmf_reference_data_38_bundle_path = 'PLACEHOLDER_hmf_reference_data_38_bundle_path'
 
+    static String virusbreakenddb_path = 's3://virusbreakend/virusbreakenddb_20210401.tar.gz'
+
     static enum PipelineMode {
         FULL,
         MANUAL,

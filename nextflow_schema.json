@@ -149,6 +149,12 @@
                     "description": "Path HMF reference data bundle.",
                     "fa_icon": "far fa-file-code"
                 },
+                "ref_data_virusbreakenddb_path": {
+                    "type": "string",
+                    "format": "directory-path",
+                    "description": "Path to VIRUSBreakend database.",
+                    "fa_icon": "far fa-file-code"
+                },
                 "ref_data_amber_loci": {
                     "type": "string",
                     "format": "file-path",
@@ -242,12 +248,6 @@
                     "type": "string",
                     "format": "directory-path",
                     "description": "Path to LILAC resource directory.",
-                    "fa_icon": "far fa-folder-open"
-                },
-                "ref_data_virusbreakenddb": {
-                    "type": "string",
-                    "format": "directory-path",
-                    "description": "Path to VIRUSBreakend database directory.",
                     "fa_icon": "far fa-folder-open"
                 },
                 "ref_data_virusinterpreter_taxonomy": {

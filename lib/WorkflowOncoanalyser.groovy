@@ -51,6 +51,10 @@ class WorkflowOncoanalyser {
             }
         }
 
+        if (!params.containsKey('ref_data_virusbreakenddb_path')) {
+            params.ref_data_virusbreakenddb_path = Constants.virusbreakenddb_path
+        }
+
         if (!params.ref_data_genome_fasta) {
             log.error "Genome fasta file not specified with e.g. '--ref_data_genome_fasta genome.fa' or via a detectable config file."
             System.exit(1)
