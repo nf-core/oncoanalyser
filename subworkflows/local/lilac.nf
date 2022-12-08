@@ -42,7 +42,7 @@ workflow LILAC {
         // Realign contigs if using 38 (use of ALT contigs implied)
         // channel: [val(meta)]
         ch_metas = ch_inputs_bams.map { return it[0] }
-        if (params.ref_data_genome_version == '38') {
+        if (params.ref_data_genome_type == 'alt') {
             // Align reads with chr6
             // NOTE(SW): the aim of this process is to take reads mapping to ALT contigs and align them
             // to the three relevant HLA genes on chr6. All reads including those previously mapped to chr6

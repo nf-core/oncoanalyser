@@ -27,10 +27,13 @@ class WorkflowOncoanalyser {
 
         if (Constants.GENOMES_VERSION_37.contains(params.genome)) {
             params.ref_data_genome_version = '37'
+            params.ref_data_genome_type = 'no_alt'
         } else if (Constants.GENOMES_VERSION_38.contains(params.genome)) {
             params.ref_data_genome_version = '38'
+            params.ref_data_genome_type = 'alt'
         } else if (Constants.GENOMES_VERSION_38_NOALT.contains(params.genome)) {
-            params.ref_data_genome_version = '38_noalt'
+            params.ref_data_genome_version = '38'
+            params.ref_data_genome_type = 'no_alt'
         } else {
             def genome_version_list_all = Constants.GENOMES_VERSION_37 + Constants.GENOMES_VERSION_38
             log.error "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n" +
