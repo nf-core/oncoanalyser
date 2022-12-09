@@ -62,9 +62,9 @@ workflow PREPARE_INPUT {
                         ]
 
                         def index_ext
-                        if (filetype_bai.contains(filetype)) {
+                        if (filetype_bai.contains(filetype_enum)) {
                             index_ext = 'bai'
-                        } else if (filetype_tbi.contains(filetype)) {
+                        } else if (filetype_tbi.contains(filetype_enum)) {
                             index_ext = 'tbi'
                         } else {
                           return
