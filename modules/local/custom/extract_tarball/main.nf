@@ -1,5 +1,4 @@
 process EXTRACT_TARBALL {
-    tag "${meta.id}"
     label 'process_single'
 
     container 'public.ecr.aws/ubuntu/ubuntu:20.04_stable'
