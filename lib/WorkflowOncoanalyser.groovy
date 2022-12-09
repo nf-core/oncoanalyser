@@ -16,7 +16,7 @@ class WorkflowOncoanalyser {
     //
     public static void initialise(params, workflow, log) {
 
-        if (params.genome && params.genomes && ! params.genomes.containsKey(params.genome)) {
+        if (params.genomes && ! params.genomes.containsKey(params.genome)) {
             log.error "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n" +
                 "  Genome '${params.genome}' not found in any config files provided to the pipeline.\n" +
                 "  Currently, the available genome keys are:\n" +
@@ -44,11 +44,11 @@ class WorkflowOncoanalyser {
             System.exit(1)
         }
 
-        if (!params.containsKey('ref_data_hmf_bundle')) {
+        if (!params.containsKey('ref_data_hmf_bundle_path')) {
             if (params.ref_data_genome_version == '37') {
-                params.ref_data_hmf_bundle = Constants.HMF_REFERENCE_DATA_37_BUNDLE_PATH
+                params.ref_data_hmf_bundle_path = Constants.HMF_REFERENCE_DATA_37_BUNDLE_PATH
             } else if (params.ref_data_genome_version == '38') {
-                params.ref_data_hmf_bundle = Constants.HMF_REFERENCE_DATA_38_BUNDLE_PATH
+                params.ref_data_hmf_bundle_path = Constants.HMF_REFERENCE_DATA_38_BUNDLE_PATH
             } else {
                 assert false : "Got a bad genome version: ${params.ref_data_genome_version}"
             }

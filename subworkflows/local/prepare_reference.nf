@@ -102,9 +102,9 @@ workflow PREPARE_REFERENCE {
         // Set HMF reference paths / stage, unpack if required
         //
         // NOTE(SW): requiring all HMF reference data for now
-        if (params.ref_data_hmf_bundle.endsWith('.tar.gz')) {
+        if (params.ref_data_hmf_bundle_path.endsWith('.tar.gz')) {
             // Decompress and set paths
-            EXTRACT_TARBALL_HMF_BUNDLE([[id: 'hmf_bundle'], file(params.ref_data_hmf_bundle)])
+            EXTRACT_TARBALL_HMF_BUNDLE([[id: 'hmf_bundle'], file(params.ref_data_hmf_bundle_path)])
 
             // Obtain paths and convert queue channel to value channel
             // NOTE(SW): any relevant HMF reference file parameter explicitly set in config will take priority
@@ -114,9 +114,9 @@ workflow PREPARE_REFERENCE {
                     assert dir_list.size() == 1
                     return createHmfDataMap(dir_list[0], false /* params_only */)
                 }
-        } else if (params.ref_data_hmf_bundle) {
+        } else if (params.ref_data_hmf_bundle_path) {
             // If provided as path to directory, set paths
-            ch_hmf_data = createHmfDataMap(params.ref_data_hmf_bundle, false /* params_only */)
+            ch_hmf_data = createHmfDataMap(params.ref_data_hmf_bundle_path, false /* params_only */)
         } else {
             // If no HMF data bundle is supplied we construct from *only* params
             ch_hmf_data = createHmfDataMap(null, true /* params_only */)
