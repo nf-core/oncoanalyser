@@ -38,7 +38,7 @@ process PAVE_SOMATIC {
             -ensembl_data_dir ${ensembl_data_dir} \\
             -driver_gene_panel ${driver_gene_panel} \\
             -pon_file ${sage_pon_file} \\
-            -pon_filters ${pon_filters} \\
+            -pon_filters "${pon_filters}" \\
             -mappability_bed ${mappability_bed} \\
             -vcf_file ${sage_vcf} \\
             -read_pass_only \\
