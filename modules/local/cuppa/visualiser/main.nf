@@ -8,8 +8,11 @@ process CUPPA_VISUALISER {
     tuple val(meta), path(cuppa_csv)
 
     output:
-    path '*png'
-    path '*txt'
+    path '*chart.png'
+    path '*conclusion.txt'
+    path '*report.features.png'
+    path '*report.summary.png'
+    path '*cup_report.pdf'
     path 'versions.yml'    , emit: versions
 
     when:
@@ -19,10 +22,11 @@ process CUPPA_VISUALISER {
     def args = task.ext.args ?: ''
 
     """
-    python ${task.ext.pythonPath} \\
+    python ${task.ext.chartScriptPath} \\
         -sample ${meta.id} \\
         -sample_data ${cuppa_csv} \\
         -output_dir ./
+    Rscript ${task.ext.reportScriptPath} ${meta.id} ./
 
     # NOTE(SW): hard coded since there is no reliable way to obtain version information.
     cat <<-END_VERSIONS > versions.yml
