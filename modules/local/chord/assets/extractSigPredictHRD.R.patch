@@ -1,6 +1,10 @@
 --- a/extractSigPredictHRD.R
 +++ b/extractSigPredictHRD.R
-@@ -4,12 +4,11 @@ options(stringsAsFactors=F) # to avoid invalid factor level warning
+@@ -1,15 +1,14 @@
+-#!/usr/bin/Rscript
++#!/usr/bin/env Rscript
+
+ options(stringsAsFactors=F) # to avoid invalid factor level warning
 
  args <- commandArgs(TRUE)
 
@@ -29,7 +33,7 @@
 
  cat("[INFO] Package NamespaceVersions after loading:\n")
  for (pkgName in c("mutSigExtractor", "CHORD")){
-@@ -28,14 +27,14 @@ for (pkgName in c("mutSigExtractor", "CHORD")){
+@@ -28,18 +27,17 @@ for (pkgName in c("mutSigExtractor", "CHORD")){
  }
 
  ## Convert genome name to BSGenome name
@@ -47,7 +51,11 @@
  }
 
  cat("[INFO] CHORD Settings:\n")
-@@ -73,4 +72,4 @@ write.table(signatures, file=sigOutTxt, sep="\t")
+-cat("[INFO]   Chord dir:", chordToolDir, "\n")
+ cat("[INFO]   Working dir:", workingDir, "\n")
+ cat("[INFO]   Sample name:", sampleName, "\n")
+ cat("[INFO]   Somatic SNV/IND vcf:", snvIndVcf, "\n")
+@@ -73,4 +71,4 @@ write.table(signatures, file=sigOutTxt, sep="\t")
  cat("[INFO] Writing output file:", prdOutTxt,"\n")
  write.table(prediction, file=prdOutTxt, sep="\t", quote=FALSE, row.names=FALSE)
 

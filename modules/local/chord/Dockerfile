@@ -31,6 +31,8 @@ RUN \
 
 ENV PATH="/opt/conda/bin:/opt/conda/condabin:${PATH}:/opt/chord/"
 
+# NOTE(SW): mutSigExtractor must be installed second as the process to install
+# CHORD can upgrade mutSigExtractor to an incompatible version
 RUN \
-  R -e "devtools::install_github('https://github.com/UMCUGenetics/mutSigExtractor', ref='1.14')" && \
-  R -e "devtools::install_github('https://github.com/UMCUGenetics/CHORD', ref='2.00')"
+  R -e "devtools::install_github('https://github.com/UMCUGenetics/CHORD', ref='2.00')" && \
+  R -e "devtools::install_github('https://github.com/UMCUGenetics/mutSigExtractor', ref='1.14')"
