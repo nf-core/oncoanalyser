@@ -1,6 +1,7 @@
 //
 // LILAC is a WGS tool for HLA typing and somatic CNV and SNV calling
 //
+import Constants
 
 include { EXTRACT_AND_INDEX_CONTIG              } from '../../modules/local/custom/lilac_extract_and_index_contig/main'
 include { REALIGN_READS                         } from '../../modules/local/custom/lilac_realign_reads_lilac/main'
@@ -91,8 +92,8 @@ workflow LILAC {
                 def meta_lilac = [
                     key: meta.id,
                     id: meta.id,
-                    tumor_id: meta.get(['sample_name', 'tumor']),
-                    normal_id: meta.get(['sample_name', 'normal']),
+                    tumor_id: meta.get(['sample_name', Constants.DataType.TUMOR]),
+                    normal_id: meta.get(['sample_name', Constants.DataType.NORMAL]),
                 ]
                 return [meta_lilac, *it[1..-1]]
             }

@@ -151,7 +151,8 @@ workflow ONCOANALYSER {
         // channel: [meta_isofox, tumor_bam_wts]
         ch_isofox_inputs = ch_inputs_wts.present
             .map { meta ->
-                return [[key: meta.id, id: meta.id], meta.get([Constants.FileType.BAM_WTS, Constants.DataType.TUMOR])]
+                def meta_isofox = [key: meta.id, id: meta.get(['sample_name', Constants.DataType.TUMOR])]
+                return [meta_isofox, meta.get([Constants.FileType.BAM_WTS, Constants.DataType.TUMOR])]
             }
 
         // Run process
@@ -483,7 +484,7 @@ workflow ONCOANALYSER {
                 ]
                 return [pave_meta, sage_vcf]
             }
-        ch_pave_somatic_inputs = ch_pave_germline_inputs_source
+        ch_pave_somatic_inputs = ch_pave_somatic_inputs_source
             .map { meta, sage_vcf ->
                 def pave_meta = [
                     key: meta.id,
@@ -655,8 +656,8 @@ workflow ONCOANALYSER {
             ch_bams_and_indices,
             run.collectwgsmetrics ? ch_cwm_output.tumor : WorkflowOncoanalyser.getInput(ch_inputs, [Constants.FileType.COLLECTWGSMETRICS, Constants.DataType.TUMOR]),
             run.collectwgsmetrics ? ch_cwm_output.normal : WorkflowOncoanalyser.getInput(ch_inputs, [Constants.FileType.COLLECTWGSMETRICS, Constants.DataType.NORMAL]),
-            run.purple ? ch_purple_out : WorkflowOncoanalyser.getInput(ch_inputs, [Constants.FileType.PURPLE_DIR, Constants.DataType.TUMOR_NORMAL]),
             run.cobalt ? ch_cobalt_out : WorkflowOncoanalyser.getInput(ch_inputs, [Constants.FileType.COBALT_DIR, Constants.DataType.TUMOR_NORMAL]),
+            run.purple ? ch_purple_out : WorkflowOncoanalyser.getInput(ch_inputs, [Constants.FileType.PURPLE_DIR, Constants.DataType.TUMOR_NORMAL]),
         )
 
         // Create inputs and create process-specific meta
@@ -763,7 +764,7 @@ workflow ONCOANALYSER {
                 def meta = it[0]
                 def meta_virus = [
                     key: meta.id,
-                    id: meta.id,
+                    id: meta.get(['sample_name', Constants.DataType.TUMOR]),
                 ]
                 return [meta_virus, *it[1..-1]]
             }
@@ -803,7 +804,7 @@ workflow ONCOANALYSER {
                 def meta = it[0]
                 def meta_linx = [
                     key: meta.id,
-                    id: meta.id,
+                    id: meta.get(['sample_name', Constants.DataType.NORMAL]),
                 ]
                 return [meta_linx, it[1..-1]]
             }
@@ -813,7 +814,7 @@ workflow ONCOANALYSER {
                 def meta = it[0]
                 def meta_linx = [
                     key: meta.id,
-                    id: meta.id,
+                    id: meta.get(['sample_name', Constants.DataType.TUMOR]),
                 ]
                 return [meta_linx, it[1..-1]]
             }
@@ -841,7 +842,10 @@ workflow ONCOANALYSER {
         // channel: [meta(meta_linx_report), anno_dir, vis_dir]
         ch_linx_report_inputs = ch_linx_somatic_out
             .map { meta, anno_dir, vis_dir ->
-                def meta_linx_report = [id: meta.id]
+                def meta_linx_report = [
+                    key: meta.id,
+                    id: meta.get(['sample_name', Constants.DataType.TUMOR]),
+                ]
                 return [meta_linx_report, anno_dir, vis_dir]
             }
 
