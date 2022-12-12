@@ -19,10 +19,13 @@ process SIGS {
     def args = task.ext.args ?: ''
 
     """
+    mkdir -p sigs/
+
     java \\
         -Xmx${task.memory.giga}g \\
         -jar ${task.ext.jarPath} \\
             -sample ${meta.id} \\
+            -somatic_vcf_file ${smlv_vcf} \\
             -signatures_file ${signatures_file} \\
             -output_dir ./sigs/
 
