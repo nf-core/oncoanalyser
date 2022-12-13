@@ -8,7 +8,7 @@ process PAVE_GERMLINE {
     tag "${meta.id}"
     label 'process_medium'
 
-    container 'docker.io/scwatts/pave:1.4--0'
+    container 'docker.io/scwatts/pave:1.2.2--0'
 
     input:
     tuple val(meta), path(sage_vcf)
@@ -54,7 +54,7 @@ process PAVE_GERMLINE {
     # NOTE(SW): hard coded since there is no reliable way to obtain version information.
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":
-        pave: 1.4
+        pave: 1.2.2
     END_VERSIONS
     """
 

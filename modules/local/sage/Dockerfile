@@ -10,7 +10,7 @@ RUN \
 
 RUN \
   mkdir -p /opt/sage/ && \
-  wget -O /opt/sage/sage.jar 'https://github.com/hartwigmedical/hmftools/releases/download/sage-v3.2/sage_v3.2.jar'
+  wget -O /opt/sage/sage.jar 'https://github.com/hartwigmedical/hmftools/releases/download/sage-v3.0.3/sage_v3.0_rc3.jar'
 
 USER mambauser
 
