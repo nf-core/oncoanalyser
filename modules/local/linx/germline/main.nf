@@ -2,7 +2,7 @@ process LINX_GERMLINE {
     tag "${meta.id}"
     label 'process_low'
 
-    container 'docker.io/scwatts/linx:1.22--0'
+    container 'docker.io/scwatts/linx:1.19.1--0'
 
     input:
     tuple val(meta), path(gripss_sv)

@@ -2,7 +2,7 @@ process VISUALISER {
     tag "${meta.id}"
     label 'process_medium'
 
-    container 'docker.io/scwatts/linx:1.22--0'
+    container 'docker.io/scwatts/linx:1.19.1--0'
 
     // Lenient caching is required here as the hash of the LINX_SOMATIC
     // 'annotation_dir' output changes between runs even when the LINX_SOMATIC

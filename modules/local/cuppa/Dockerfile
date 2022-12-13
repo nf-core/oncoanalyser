@@ -10,8 +10,9 @@ RUN \
 
 RUN \
   mkdir -p /opt/cuppa/ && \
-  wget -O /opt/cuppa/cuppa.jar 'https://github.com/hartwigmedical/hmftools/releases/download/cuppa-v1.7/cuppa_v1.7.jar'
+  wget -O /opt/cuppa/cuppa.jar 'https://github.com/hartwigmedical/hmftools/releases/download/cuppa-v1.6/cuppa_v1.6.jar'
 
+# NOTE(SW): required plotting scripts aren't available under the cuppa-v1.6 tag
 ARG URL_BASE=https://raw.githubusercontent.com/hartwigmedical/hmftools/cuppa-v1.7/cuppa/src/main/resources
 ARG DIR_BASE=/opt/cuppa
 RUN \

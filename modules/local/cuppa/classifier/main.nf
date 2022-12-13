@@ -2,7 +2,7 @@ process CUPPA_CLASSIFIER {
     tag "${meta.id}"
     label 'process_low'
 
-    container 'docker.io/scwatts/cuppa:1.7--0'
+    container 'docker.io/scwatts/cuppa:1.6--0'
 
     input:
     tuple val(meta), path(isofox_dir), path(purple_dir), path(linx_dir), path(virusinterpreter_dir)
@@ -37,7 +37,7 @@ process CUPPA_CLASSIFIER {
     # NOTE(SW): hard coded since there is no reliable way to obtain version information.
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":
-        cuppa: 1.7
+        cuppa: 1.6
     END_VERSIONS
     """
 

@@ -2,7 +2,7 @@ process SAGE_GERMLINE {
     tag "${meta.id}"
     label 'process_medium'
 
-    container 'docker.io/scwatts/sage:3.2--0'
+    container 'docker.io/scwatts/sage:3.0.3--0'
 
     input:
     tuple val(meta), path(tumor_bam), path(normal_bam), path(tumor_bai), path(normal_bai)

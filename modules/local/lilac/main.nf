@@ -2,7 +2,7 @@ process LILAC {
     tag "${meta.id}"
     label 'process_medium'
 
-    container 'docker.io/scwatts/lilac:1.4.1--0'
+    container 'docker.io/scwatts/lilac:1.1--0'
 
     input:
     tuple val(meta), path(tumor_bam), path(normal_bam), path(tumour_bai), path(normal_bai), path(purple_dir)
@@ -44,7 +44,7 @@ process LILAC {
     # NOTE(SW): hard coded since there is no reliable way to obtain version information.
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":
-        lilac: 1.4.1
+        lilac: 1.1
     END_VERSIONS
     """
 
