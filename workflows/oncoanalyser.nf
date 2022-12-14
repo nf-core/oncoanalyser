@@ -384,7 +384,6 @@ workflow ONCOANALYSER {
             hmf_data.gridss_breakend_pon,
             hmf_data.gridss_breakpoint_pon,
             hmf_data.known_fusions,
-            hmf_data.repeat_masker_file,
         )
 
         // Set outputs, restoring original meta

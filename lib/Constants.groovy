@@ -68,7 +68,6 @@ class Constants {
         GRIDSS_BLACKLIST:             'gridss/ENCFF356LFX.bed.gz',
         GRIDSS_BREAKEND_PON:          'gridss/gridss_pon_single_breakend.bed.gz',
         GRIDSS_BREAKPOINT_PON:        'gridss/gridss_pon_breakpoint.bedpe.gz',
-        REPEAT_MASKER_FILE:           'gridss/repeat_masker.fa.out.gz',
         ISOFOX_EXP_COUNTS:            'isofox/read_151_exp_counts.csv',
         ISOFOX_EXP_GC_RATIOS:         'isofox/read_100_exp_gc_ratios.csv',
         LINX_FRAGILE_SITES:           'linx/fragile_sites_hmf.csv',
