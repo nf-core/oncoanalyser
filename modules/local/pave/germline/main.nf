@@ -15,12 +15,12 @@ process PAVE_GERMLINE {
     path genome_fasta
     path genome_fai
     val genome_ver
-    path sage_blacklist_bed
-    path sage_blacklist_vcf
-    path clinvar_vcf
-    path mappability_bed
+    path sage_blocklist_regions
+    path sage_blocklist_sites
+    path clinvar_annotations
+    path segment_mappability
     path driver_gene_panel
-    path ensembl_data_dir
+    path ensembl_data_resources
 
     output:
     tuple val(meta), path("*.vcf.gz")    , emit: vcf
@@ -41,12 +41,12 @@ process PAVE_GERMLINE {
             -sample ${meta.id} \\
             -ref_genome_version ${genome_ver} \\
             -ref_genome ${genome_fasta} \\
-            -ensembl_data_dir ${ensembl_data_dir} \\
+            -ensembl_data_resources ${ensembl_data_resources} \\
             -driver_gene_panel ${driver_gene_panel} \\
-            -clinvar_vcf ${clinvar_vcf} \\
-            -blacklist_bed ${sage_blacklist_bed} \\
-            -blacklist_vcf ${sage_blacklist_vcf} \\
-            -mappability_bed ${mappability_bed} \\
+            -clinvar_annotations ${clinvar_annotations} \\
+            -blacklist_bed ${sage_blocklist_regions} \\
+            -blacklist_vcf ${sage_blocklist_sites} \\
+            -segment_mappability ${segment_mappability} \\
             -vcf_file ${sage_vcf} \\
             -read_pass_only \\
             -output_dir ./

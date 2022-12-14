@@ -12,8 +12,8 @@ process SAGE_GERMLINE {
     val genome_ver
     path sage_known_hotspots_germline
     path sage_coding_panel
-    path sage_high_confidence
-    path ensembl_data_dir
+    path sage_highconf_regions
+    path ensembl_data_resources
 
     output:
     tuple val(meta), path("${meta.tumor_id}.sage_germline.vcf.gz"), emit: vcf
@@ -38,8 +38,8 @@ process SAGE_GERMLINE {
             -ref_genome ${genome_fasta} \\
             -hotspots ${sage_known_hotspots_germline} \\
             -panel_bed ${sage_coding_panel} \\
-            -high_confidence_bed ${sage_high_confidence} \\
-            -ensembl_data_dir ${ensembl_data_dir} \\
+            -high_confidence_bed ${sage_highconf_regions} \\
+            -ensembl_data_resources ${ensembl_data_resources} \\
             -hotspot_min_tumor_qual 50 \\
             -panel_min_tumor_qual 75 \\
             -hotspot_max_germline_vaf 100 \\

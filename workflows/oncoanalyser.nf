@@ -160,9 +160,9 @@ workflow ONCOANALYSER {
             PREPARE_REFERENCE.out.genome_fasta,
             PREPARE_REFERENCE.out.genome_fai,
             PREPARE_REFERENCE.out.genome_version,
-            hmf_data.ensembl_data_dir,
-            hmf_data.isofox_exp_counts,
-            hmf_data.isofox_exp_gc_ratios,
+            hmf_data.ensembl_data_resources,
+            hmf_data.isofox_counts,
+            hmf_data.isofox_gc_ratios,
         )
 
         // Set outputs, restoring original meta
@@ -279,7 +279,7 @@ workflow ONCOANALYSER {
         AMBER(
             ch_amber_inputs,
             PREPARE_REFERENCE.out.genome_version,
-            hmf_data.amber_loci,
+            hmf_data.heterozygous_sites,
         )
 
         // Set outputs, restoring original meta
@@ -311,7 +311,7 @@ workflow ONCOANALYSER {
         // Run process
         COBALT(
             ch_cobalt_inputs,
-            hmf_data.cobalt_gc_profile,
+            hmf_data.gc_profile,
         )
 
         // Set outputs, restoring original meta
@@ -340,7 +340,7 @@ workflow ONCOANALYSER {
             PREPARE_REFERENCE.out.genome_bwa_index,
             PREPARE_REFERENCE.out.genome_bwa_index_image,
             PREPARE_REFERENCE.out.genome_gridss_index,
-            hmf_data.gridss_blacklist,
+            hmf_data.gridss_region_blocklist,
         )
         ch_versions = ch_versions.mix(GRIDSS.out.versions)
         ch_gridss_out = ch_gridss_out.mix(GRIDSS.out.results)
@@ -381,8 +381,8 @@ workflow ONCOANALYSER {
             PREPARE_REFERENCE.out.genome_fasta,
             PREPARE_REFERENCE.out.genome_fai,
             PREPARE_REFERENCE.out.genome_version,
-            hmf_data.gridss_breakend_pon,
-            hmf_data.gridss_breakpoint_pon,
+            hmf_data.gridss_pon_breakends,
+            hmf_data.gridss_pon_breakpoints,
             hmf_data.known_fusions,
         )
 
@@ -422,11 +422,11 @@ workflow ONCOANALYSER {
             hmf_data.sage_known_hotspots_germline,
             hmf_data.sage_known_hotspots_somatic,
             hmf_data.sage_coding_panel,
-            hmf_data.sage_high_confidence,
-            hmf_data.sage_pon_file,
-            hmf_data.mappability_bed,
+            hmf_data.sage_highconf_regions,
+            hmf_data.sage_pon,
+            hmf_data.segment_mappability,
             hmf_data.driver_gene_panel,
-            hmf_data.ensembl_data_dir,
+            hmf_data.ensembl_data_resources,
         )
 
         // Set outputs, restoring original meta
@@ -479,13 +479,13 @@ workflow ONCOANALYSER {
             PREPARE_REFERENCE.out.genome_fasta,
             PREPARE_REFERENCE.out.genome_fai,
             PREPARE_REFERENCE.out.genome_version,
-            hmf_data.sage_pon_file,
-            hmf_data.sage_blacklist_bed,
-            hmf_data.sage_blacklist_vcf,
-            hmf_data.clinvar_vcf,
-            hmf_data.mappability_bed,
+            hmf_data.sage_pon,
+            hmf_data.sage_blocklist_regions,
+            hmf_data.sage_blocklist_sites,
+            hmf_data.clinvar_annotations,
+            hmf_data.segment_mappability,
             hmf_data.driver_gene_panel,
-            hmf_data.ensembl_data_dir,
+            hmf_data.ensembl_data_resources,
         )
 
         // Set outputs, restoring original meta
@@ -548,11 +548,11 @@ workflow ONCOANALYSER {
             PREPARE_REFERENCE.out.genome_fai,
             PREPARE_REFERENCE.out.genome_dict,
             PREPARE_REFERENCE.out.genome_version,
-            hmf_data.cobalt_gc_profile,
+            hmf_data.gc_profile,
             hmf_data.sage_known_hotspots_somatic,
             hmf_data.sage_known_hotspots_germline,
             hmf_data.driver_gene_panel,
-            hmf_data.ensembl_data_dir,
+            hmf_data.ensembl_data_resources,
             hmf_data.purple_germline_del,
         )
 
@@ -680,7 +680,7 @@ workflow ONCOANALYSER {
             run.purple ? ch_purple_out : WorkflowOncoanalyser.getInput([Constants.FileType.PURPLE_DIR, Constants.DataType.TUMOR_NORMAL]),
             PREPARE_REFERENCE.out.genome_fasta,
             PREPARE_REFERENCE.out.genome_fai,
-            hmf_data.lilac_resource_dir,
+            hmf_data.lilac_resources,
         )
 
         // Set outputs
@@ -803,9 +803,9 @@ workflow ONCOANALYSER {
             ch_linx_inputs_germline,
             ch_linx_inputs_somatic,
             PREPARE_REFERENCE.out.genome_version,
-            hmf_data.linx_fragile_sites,
+            hmf_data.linx_fragile_regions,
             hmf_data.linx_lines,
-            hmf_data.ensembl_data_dir,
+            hmf_data.ensembl_data_resources,
             hmf_data.known_fusion_data,
             hmf_data.driver_gene_panel,
         )
@@ -889,7 +889,7 @@ workflow ONCOANALYSER {
         // Run process
         CUPPA_CLASSIFIER(
             ch_cuppa_inputs,
-            hmf_data.cuppa,
+            hmf_data.cuppa_resources,
         )
 
         // Set outputs

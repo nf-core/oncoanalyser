@@ -143,10 +143,10 @@
                     "description": "Path to reference genome GRIDSS index file.",
                     "fa_icon": "far fa-file-code"
                 },
-                "ref_data_hmf_bundle_path": {
+                "ref_data_hmf_data_base": {
                     "type": "string",
                     "format": "directory-path",
-                    "description": "Path to HMF reference data bundle.",
+                    "description": "Path to HMF data base directory or URL.",
                     "fa_icon": "far fa-file-code"
                 },
                 "ref_data_virusbreakenddb_path": {

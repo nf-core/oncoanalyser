@@ -12,7 +12,7 @@ process VISUALISER {
     input:
     tuple val(meta), path(linx)
     val genome_ver
-    path ensembl_data_dir
+    path ensembl_data_resources
 
     output:
     tuple val(meta), path('linx_visualiser/plot/'), emit: visualiser_dir
@@ -32,7 +32,7 @@ process VISUALISER {
             ${args} \\
             -sample ${meta.id} \\
             -ref_genome_version ${genome_ver} \\
-            -ensembl_data_dir ${ensembl_data_dir} \\
+            -ensembl_data_resources ${ensembl_data_resources} \\
             -plot_out linx_visualiser/plot \\
             -data_out linx_visualiser/data \\
             -vis_file_dir ${linx} \\

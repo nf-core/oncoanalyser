@@ -6,7 +6,7 @@ process CUPPA_CLASSIFIER {
 
     input:
     tuple val(meta), path(isofox_dir), path(purple_dir), path(linx_dir), path(virusinterpreter_dir)
-    path reference_data
+    path cuppa_resources
 
     output:
     tuple val(meta), path('*csv'), emit: csv
@@ -29,7 +29,7 @@ process CUPPA_CLASSIFIER {
         -Xmx${task.memory.giga}g \\
         -jar ${task.ext.jarPath} \\
             -categories ${categories_arg} \\
-            -ref_data_dir ${reference_data} \\
+            -ref_data_dir ${cuppa_resources} \\
             -sample_data ${meta.id} \\
             -sample_data_dir sample_data/ \\
             -output_dir ./
