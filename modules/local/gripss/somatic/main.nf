@@ -12,7 +12,6 @@ process GRIPSS_SOMATIC {
     path breakend_pon
     path breakpoint_pon
     path known_fusions
-    path repeat_mask_file
 
     output:
     tuple val(meta), path('*.gripss.filtered.vcf.gz'), path('*.gripss.filtered.vcf.gz.tbi'), emit: vcf_hard
@@ -24,7 +23,6 @@ process GRIPSS_SOMATIC {
 
     script:
     def args = task.ext.args ?: ''
-    def repeat_mask_file_arg = repeat_mask_file ? "-repeat_mask_file ${repeat_mask_file}" : ''
 
     """
     java \\
@@ -39,7 +37,6 @@ process GRIPSS_SOMATIC {
             -pon_sv_file ${breakpoint_pon} \\
             -known_hotspot_file ${known_fusions} \\
             -vcf ${gridss_vcf} \\
-            ${repeat_mask_file_arg} \\
             -output_dir ./
 
     # NOTE(SW): hard coded since there is no reliable way to obtain version information

@@ -149,7 +149,6 @@ def createHmfDataMap(hmf_bundle_dir, params_only) {
         'gridss_blacklist':             getHmfDataFileObject('ref_data_gridss_blacklist',             'GRIDSS_BLACKLIST',             hmf_bundle_dir, params_only),
         'gridss_breakend_pon':          getHmfDataFileObject('ref_data_gridss_breakend_pon',          'GRIDSS_BREAKEND_PON',          hmf_bundle_dir, params_only),
         'gridss_breakpoint_pon':        getHmfDataFileObject('ref_data_gridss_breakpoint_pon',        'GRIDSS_BREAKPOINT_PON',        hmf_bundle_dir, params_only),
-        'repeat_masker_file':           getHmfDataFileObject('ref_data_repeat_masker_file',           'REPEAT_MASKER_FILE',           hmf_bundle_dir, params_only),
         // Isofox
         'isofox_exp_counts':            getHmfDataFileObject('ref_data_isofox_exp_counts',            'ISOFOX_EXP_COUNTS',            hmf_bundle_dir, params_only),
         'isofox_exp_gc_ratios':         getHmfDataFileObject('ref_data_isofox_exp_gc_ratios',         'ISOFOX_EXP_GC_RATIOS',         hmf_bundle_dir, params_only),
