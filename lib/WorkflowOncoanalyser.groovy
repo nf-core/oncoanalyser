@@ -16,6 +16,15 @@ class WorkflowOncoanalyser {
     //
     public static void initialise(params, workflow, log) {
 
+        // NOTE(SW): restricting allowable genome values to GRCh37_hmf for now
+        if (params.genome != 'GRCh37_hmf') {
+            log.error "ERROR: currently only the GRCh37_hmf genome is supported but got \"${params.genome}\"" +
+                ", please adjust the --genome argument accordingly."
+            System.exit(1)
+        }
+
+        // TODO(SW): allow users to set all appropriate reference genomes manually in config or CLI, including version and type (see below)
+
         if (!params.genome) {
             log.error "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n" +
                 "  Genome must be set using the --genome CLI argument or in a configuration file.\n" +
@@ -34,13 +43,8 @@ class WorkflowOncoanalyser {
 
         if (Constants.GENOMES_VERSION_37.contains(params.genome)) {
             params.ref_data_genome_version = '37'
-            params.ref_data_genome_type = 'no_alt'
         } else if (Constants.GENOMES_VERSION_38.contains(params.genome)) {
             params.ref_data_genome_version = '38'
-            params.ref_data_genome_type = 'alt'
-        } else if (Constants.GENOMES_VERSION_38_NOALT.contains(params.genome)) {
-            params.ref_data_genome_version = '38'
-            params.ref_data_genome_type = 'no_alt'
         } else {
             def genome_version_list_all = Constants.GENOMES_VERSION_37 + Constants.GENOMES_VERSION_38
             log.error "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n" +
@@ -49,6 +53,13 @@ class WorkflowOncoanalyser {
                 "  ${genome_version_list_all.join(", ")}\n" +
                 "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
             System.exit(1)
+        }
+
+        // TODO(SW): when allowing user to set custom genome, require this to be explicitly set
+        if (Constants.GENOMES_ALT.contains(params.genome)) {
+            params.ref_data_genome_type = 'alt'
+        } else {
+            params.ref_data_genome_type = 'no_alt'
         }
 
         if (!params.containsKey('ref_data_hmf_bundle_path')) {
