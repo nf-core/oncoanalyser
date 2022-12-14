@@ -27,7 +27,6 @@ class Processes {
                     Constants.Process.GRIPSS,
                     Constants.Process.LINX,
                     Constants.Process.PURPLE,
-                    Constants.Process.SVPREP,
                 ]
                 break
             case Constants.PipelineMode.CUPPA:
@@ -41,7 +40,6 @@ class Processes {
                     Constants.Process.ISOFOX,
                     Constants.Process.LINX,
                     Constants.Process.PURPLE,
-                    Constants.Process.SVPREP,
                     Constants.Process.VIRUSINTERPRETER,
                 ]
                 break

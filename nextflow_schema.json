@@ -175,13 +175,6 @@
                     "description": "Path to CUPPA reference file directory.",
                     "fa_icon": "far fa-file-code"
                 },
-                "ref_data_sv_prep_blacklist": {
-                    "type": "string",
-                    "format": "file-path",
-                    "pattern": "^\\S+\\.bed$",
-                    "description": "Path to SV Prep blacklist file.",
-                    "fa_icon": "far fa-file-code"
-                },
                 "ref_data_gridss_blacklist": {
                     "type": "string",
                     "format": "file-path",

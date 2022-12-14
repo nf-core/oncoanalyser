@@ -145,8 +145,6 @@ def createHmfDataMap(hmf_bundle_dir, params_only) {
         'cobalt_gc_profile':            getHmfDataFileObject('ref_data_cobalt_gc_profile',            'COBALT_GC_PROFILE',            hmf_bundle_dir, params_only),
         // CUPPA
         'cuppa':                        getHmfDataFileObject('ref_data_cuppa',                        'CUPPA',                        hmf_bundle_dir, params_only),
-        // SVPREP
-        'sv_prep_blacklist':            getHmfDataFileObject('ref_data_sv_prep_blacklist',            'SV_PREP_BLACKLIST',            hmf_bundle_dir, params_only),
         // GRIDSS, GRIPSS
         'gridss_blacklist':             getHmfDataFileObject('ref_data_gridss_blacklist',             'GRIDSS_BLACKLIST',             hmf_bundle_dir, params_only),
         'gridss_breakend_pon':          getHmfDataFileObject('ref_data_gridss_breakend_pon',          'GRIDSS_BREAKEND_PON',          hmf_bundle_dir, params_only),

@@ -32,7 +32,6 @@ class Constants {
         PURPLE,
         SAGE,
         SIGS,
-        SVPREP,
         TEAL,
         VIRUSINTERPRETER,
     }
@@ -66,7 +65,6 @@ class Constants {
         AMBER_LOCI:                   'amber/GermlineHetPon.vcf.gz',
         COBALT_GC_PROFILE:            'cobalt/DiploidRegions.bed.gz',
         CUPPA:                        'cuppa/',
-        SV_PREP_BLACKLIST:            'svprep/sv_prep_blacklist.bed',
         GRIDSS_BLACKLIST:             'gridss/ENCFF356LFX.bed.gz',
         GRIDSS_BREAKEND_PON:          'gridss/gridss_pon_single_breakend.bed.gz',
         GRIDSS_BREAKPOINT_PON:        'gridss/gridss_pon_breakpoint.bedpe.gz',
