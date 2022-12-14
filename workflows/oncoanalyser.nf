@@ -73,7 +73,6 @@ include { VIRUSINTERPRETER  } from '../modules/local/virusinterpreter/main'
 // SUBWORKFLOWS
 //
 include { GRIDSS            } from '../subworkflows/local/gridss'
-include { GRIDSS_SVPREP     } from '../subworkflows/local/gridss_svprep'
 include { GRIPSS            } from '../subworkflows/local/gripss'
 include { LILAC             } from '../subworkflows/local/lilac'
 include { LINX              } from '../subworkflows/local/linx'
@@ -326,44 +325,25 @@ workflow ONCOANALYSER {
     // channel: [val(meta), gridss_vcf]
     ch_gridss_out = Channel.empty()
     if (run.gridss) {
-        if (run.svprep) {
-            GRIDSS_SVPREP(
-                ch_inputs,
-                gridss_config,
-                PREPARE_REFERENCE.out.genome_fasta,
-                PREPARE_REFERENCE.out.genome_version,
-                PREPARE_REFERENCE.out.genome_fai,
-                PREPARE_REFERENCE.out.genome_dict,
-                PREPARE_REFERENCE.out.genome_bwa_index,
-                PREPARE_REFERENCE.out.genome_bwa_index_image,
-                PREPARE_REFERENCE.out.genome_gridss_index,
-                hmf_data.gridss_blacklist,
-                hmf_data.sv_prep_blacklist,
-                hmf_data.known_fusions,
-            )
-            ch_versions = ch_versions.mix(GRIDSS_SVPREP.out.versions)
-            ch_gridss_out = ch_gridss_out.mix(GRIDSS_SVPREP.out.results)
-        } else {
-            ch_gridss_inputs = ch_inputs
-                .map { meta ->
-                    def tumor_bam = meta.get([Constants.FileType.BAM_WGS, Constants.DataType.TUMOR])
-                    def normal_bam = meta.get([Constants.FileType.BAM_WGS, Constants.DataType.NORMAL])
-                    [meta, tumor_bam, normal_bam]
-                }
-            GRIDSS(
-                ch_gridss_inputs,
-                gridss_config,
-                PREPARE_REFERENCE.out.genome_fasta,
-                PREPARE_REFERENCE.out.genome_fai,
-                PREPARE_REFERENCE.out.genome_dict,
-                PREPARE_REFERENCE.out.genome_bwa_index,
-                PREPARE_REFERENCE.out.genome_bwa_index_image,
-                PREPARE_REFERENCE.out.genome_gridss_index,
-                hmf_data.gridss_blacklist,
-            )
-            ch_versions = ch_versions.mix(GRIDSS.out.versions)
-            ch_gridss_out = ch_gridss_out.mix(GRIDSS.out.results)
-        }
+        ch_gridss_inputs = ch_inputs
+            .map { meta ->
+                def tumor_bam = meta.get([Constants.FileType.BAM_WGS, Constants.DataType.TUMOR])
+                def normal_bam = meta.get([Constants.FileType.BAM_WGS, Constants.DataType.NORMAL])
+                [meta, tumor_bam, normal_bam]
+            }
+        GRIDSS(
+            ch_gridss_inputs,
+            gridss_config,
+            PREPARE_REFERENCE.out.genome_fasta,
+            PREPARE_REFERENCE.out.genome_fai,
+            PREPARE_REFERENCE.out.genome_dict,
+            PREPARE_REFERENCE.out.genome_bwa_index,
+            PREPARE_REFERENCE.out.genome_bwa_index_image,
+            PREPARE_REFERENCE.out.genome_gridss_index,
+            hmf_data.gridss_blacklist,
+        )
+        ch_versions = ch_versions.mix(GRIDSS.out.versions)
+        ch_gridss_out = ch_gridss_out.mix(GRIDSS.out.results)
     }
 
     //
