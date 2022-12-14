@@ -4,6 +4,7 @@
 import Constants
 import Utils
 
+include { ANNOTATE          } from '../../modules/local/gridss/annotate/main'
 include { ASSEMBLE          } from '../../modules/local/gridss/assemble/main'
 include { CALL              } from '../../modules/local/gridss/call/main'
 include { PREPROCESS        } from '../../modules/local/gridss/preprocess/main'
@@ -123,11 +124,16 @@ workflow GRIDSS {
         )
         ch_versions = ch_versions.mix(CALL.out.versions)
 
+        // Annotate variants with RepeatMasker
+        ANNOTATE(
+            CALL.out.vcf,
+        )
+
         // Reunite final VCF with the corresponding input meta object
         ch_out = Channel.empty()
             .concat(
                 ch_inputs.map { meta, tbam, nbam -> [meta.id, meta] },
-                CALL.out.vcf.map { meta, vcf -> [meta.id, vcf] },
+                ANNOTATE.out.vcf.map { meta, vcf -> [meta.id, vcf] },
             )
             .groupTuple(size: 2)
             .map { id, other -> other.flatten() }
