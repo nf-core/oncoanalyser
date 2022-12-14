@@ -39,6 +39,10 @@ process CUPPA_VISUALISER {
     """
     touch ${meta.id}.cuppa.chart.png
     touch ${meta.id}.cuppa.conclusion.txt
+    touch ${meta.id}.cuppa.conclusion.txt
+    touch ${meta.id}_cup_report.pdf
+    touch ${meta.id}.cup.report.features.png
+    touch ${meta.id}.cup.report.summary.png
     echo -e '${task.process}:\\n  stub: noversions\\n' > versions.yml
     """
 }
