@@ -12,8 +12,8 @@ process SAGE_SOMATIC {
     val genome_ver
     path sage_known_hotspots_somatic
     path sage_coding_panel
-    path sage_high_confidence
-    path ensembl_data_dir
+    path sage_highconf_regions
+    path ensembl_data_resources
 
     output:
     tuple val(meta), path("${meta.tumor_id}.sage_somatic.vcf.gz"), emit: vcf
@@ -38,8 +38,8 @@ process SAGE_SOMATIC {
             -ref_genome ${genome_fasta} \\
             -hotspots ${sage_known_hotspots_somatic} \\
             -panel_bed ${sage_coding_panel} \\
-            -high_confidence_bed ${sage_high_confidence} \\
-            -ensembl_data_dir ${ensembl_data_dir} \\
+            -high_confidence_bed ${sage_highconf_regions} \\
+            -ensembl_data_resources ${ensembl_data_resources} \\
             -threads ${task.cpus} \\
             -out ${meta.tumor_id}.sage_somatic.vcf.gz
 

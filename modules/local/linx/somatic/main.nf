@@ -9,7 +9,7 @@ process LINX_SOMATIC {
     val genome_ver
     path fragile_sites
     path lines
-    path ensembl_data_dir
+    path ensembl_data_resources
     path known_fusion_data
     path driver_gene_panel
 
@@ -34,7 +34,7 @@ process LINX_SOMATIC {
             -purple_dir ${purple_dir} \\
             -fragile_site_file ${fragile_sites} \\
             -line_element_file ${lines} \\
-            -ensembl_data_dir ${ensembl_data_dir} \\
+            -ensembl_data_resources ${ensembl_data_resources} \\
             -check_fusions \\
             -known_fusion_file ${known_fusion_data} \\
             -check_drivers \\

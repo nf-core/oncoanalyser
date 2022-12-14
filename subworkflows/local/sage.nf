@@ -15,11 +15,11 @@ workflow SAGE {
         ref_data_sage_known_hotspots_germline //    file: /path/to/sage_known_hotspots_germline
         ref_data_sage_known_hotspots_somatic  //    file: /path/to/sage_known_hotspots_somatic
         ref_data_sage_coding_panel            //    file: /path/to/sage_coding_panel
-        ref_data_sage_high_confidence         //    file: /path/to/sage_high_confidence
-        ref_data_sage_pon_file                //    file: /path/to/sage_pon
-        ref_data_mappability_bed              //    file: /path/to/mappability_bed
+        ref_data_sage_highconf_regions        //    file: /path/to/sage_highconf_regions
+        ref_data_sage_pon                     //    file: /path/to/sage_pon
+        ref_data_segment_mappability          //    file: /path/to/segment_mappability
         ref_data_driver_gene_panel            //    file: /path/to/driver_gene_panel
-        ref_data_ensembl_data_dir             //    file: /path/to/ensembl_data_dir/
+        ref_data_ensembl_data_resources       //    file: /path/to/ensembl_data_resources/
 
     main:
         // Channel for version.yml files
@@ -34,8 +34,8 @@ workflow SAGE {
             ref_data_genome_version,
             ref_data_sage_known_hotspots_germline,
             ref_data_sage_coding_panel,
-            ref_data_sage_high_confidence,
-            ref_data_ensembl_data_dir,
+            ref_data_sage_highconf_regions,
+            ref_data_ensembl_data_resources,
         )
         ch_versions = ch_versions.mix(SAGE_GERMLINE.out.versions)
 
@@ -48,8 +48,8 @@ workflow SAGE {
             ref_data_genome_version,
             ref_data_sage_known_hotspots_somatic,
             ref_data_sage_coding_panel,
-            ref_data_sage_high_confidence,
-            ref_data_ensembl_data_dir,
+            ref_data_sage_highconf_regions,
+            ref_data_ensembl_data_resources,
         )
         ch_versions = ch_versions.mix(SAGE_SOMATIC.out.versions)
 

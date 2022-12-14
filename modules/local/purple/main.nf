@@ -14,7 +14,7 @@ process PURPLE {
     path sage_known_hotspots_somatic
     path sage_known_hotspots_germline
     path driver_gene_panel
-    path ensembl_data_dir
+    path ensembl_data_resources
     path germline_del_freq
 
     output:
@@ -62,7 +62,7 @@ process PURPLE {
             -gc_profile ${gc_profile} \\
             -run_drivers \\
             -driver_gene_panel ${driver_gene_panel} \\
-            -ensembl_data_dir ${ensembl_data_dir} \\
+            -ensembl_data_resources ${ensembl_data_resources} \\
             -somatic_hotspots ${sage_known_hotspots_somatic} \\
             -germline_hotspots ${sage_known_hotspots_germline} \\
             ${germline_del_freq_arg} \\

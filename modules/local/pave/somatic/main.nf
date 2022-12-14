@@ -11,10 +11,10 @@ process PAVE_SOMATIC {
     path genome_fasta
     path genome_fai
     val genome_ver
-    path sage_pon_file
-    path mappability_bed
+    path sage_pon
+    path segment_mappability
     path driver_gene_panel
-    path ensembl_data_dir
+    path ensembl_data_resources
 
     output:
     tuple val(meta), path("*.vcf.gz")    , emit: vcf
@@ -35,11 +35,11 @@ process PAVE_SOMATIC {
             -sample ${meta.id} \\
             -ref_genome_version ${genome_ver} \\
             -ref_genome ${genome_fasta} \\
-            -ensembl_data_dir ${ensembl_data_dir} \\
+            -ensembl_data_resources ${ensembl_data_resources} \\
             -driver_gene_panel ${driver_gene_panel} \\
-            -pon_file ${sage_pon_file} \\
+            -pon_file ${sage_pon} \\
             -pon_filters "${pon_filters}" \\
-            -mappability_bed ${mappability_bed} \\
+            -segment_mappability ${segment_mappability} \\
             -vcf_file ${sage_vcf} \\
             -read_pass_only \\
             -output_dir ./
