@@ -24,8 +24,12 @@ workflow LILAC {
         // Slice HLA regions
         ch_slice_bed = ref_data_lilac_resource_dir
             .map { lilac_dir ->
-                def genome_ver = params.ref_data_genome_version
-                def filename = genome_ver == '38' ? 'hla.38.alt.umccr.bed' : "hla.${genome_ver}.bed"
+                def filename
+                if (params.ref_data_genome_type == 'no_alt') {
+                    filename = "hla.${params.ref_data_genome_version}.bed"
+                } else {
+                    filename = "hla.38.alt.umccr.bed"
+                }
                 return file("${lilac_dir}/${filename}", checkIfExists: true)
             }
         // NOTE(SW): here I remove duplicate files so that we only process each input once
