@@ -76,9 +76,17 @@ class WorkflowOncoanalyser {
             params.ref_data_virusbreakenddb_path = Constants.VIRUSBREAKENDDB_PATH
         }
 
-        if (!params.ref_data_genome_fasta) {
-            log.error "Genome fasta file not specified with e.g. '--ref_data_genome_fasta genome.fa' or via a detectable config file."
-            System.exit(1)
+        def null_check = [
+           'ref_data_genome_fasta',
+           'ref_data_genome_type',
+           'ref_data_genome_version',
+           'ref_data_virusbreakenddb_path',
+        ]
+        null_check.each { k ->
+            if (!params[k]) {
+                log.error "ERROR: '${k}' cannot be set to null in any configuration and must be adjusted or removed to proceed."
+                System.exit(1)
+            }
         }
 
         // Download region file for collectwgsmetrics if in test mode
