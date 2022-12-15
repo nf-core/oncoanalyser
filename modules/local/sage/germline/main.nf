@@ -39,7 +39,7 @@ process SAGE_GERMLINE {
             -hotspots ${sage_known_hotspots_germline} \\
             -panel_bed ${sage_coding_panel} \\
             -high_confidence_bed ${sage_highconf_regions} \\
-            -ensembl_data_resources ${ensembl_data_resources} \\
+            -ensembl_data_dir ${ensembl_data_resources} \\
             -hotspot_min_tumor_qual 50 \\
             -panel_min_tumor_qual 75 \\
             -hotspot_max_germline_vaf 100 \\

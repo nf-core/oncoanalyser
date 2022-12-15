@@ -35,7 +35,7 @@ process PAVE_SOMATIC {
             -sample ${meta.id} \\
             -ref_genome_version ${genome_ver} \\
             -ref_genome ${genome_fasta} \\
-            -ensembl_data_resources ${ensembl_data_resources} \\
+            -ensembl_data_dir ${ensembl_data_resources} \\
             -driver_gene_panel ${driver_gene_panel} \\
             -pon_file ${sage_pon} \\
             -pon_filters "${pon_filters}" \\
