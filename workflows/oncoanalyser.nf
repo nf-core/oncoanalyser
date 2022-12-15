@@ -578,7 +578,10 @@ workflow ONCOANALYSER {
         ch_sigs_inputs = ch_sigs_inputs_source
             .map { meta, purple_dir ->
                 def smlv_vcf = file(purple_dir).resolve("${meta.get(['sample_name', Constants.DataType.TUMOR])}.purple.somatic.vcf.gz")
-                def meta_sigs = [id: meta.id]
+                def meta_sigs = [
+                    id: meta.id,
+                    tumor_id: meta.get(['sample_name', Constants.DataType.TUMOR]),
+                ]
                 return [meta_sigs, smlv_vcf]
             }
 
