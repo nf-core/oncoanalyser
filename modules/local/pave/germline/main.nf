@@ -41,7 +41,7 @@ process PAVE_GERMLINE {
             -sample ${meta.id} \\
             -ref_genome_version ${genome_ver} \\
             -ref_genome ${genome_fasta} \\
-            -ensembl_data_resources ${ensembl_data_resources} \\
+            -ensembl_data_dir ${ensembl_data_resources} \\
             -driver_gene_panel ${driver_gene_panel} \\
             -clinvar_annotations ${clinvar_annotations} \\
             -blacklist_bed ${sage_blocklist_regions} \\

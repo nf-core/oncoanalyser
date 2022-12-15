@@ -39,7 +39,7 @@ process SAGE_SOMATIC {
             -hotspots ${sage_known_hotspots_somatic} \\
             -panel_bed ${sage_coding_panel} \\
             -high_confidence_bed ${sage_highconf_regions} \\
-            -ensembl_data_resources ${ensembl_data_resources} \\
+            -ensembl_data_dir ${ensembl_data_resources} \\
             -threads ${task.cpus} \\
             -out ${meta.tumor_id}.sage_somatic.vcf.gz
 

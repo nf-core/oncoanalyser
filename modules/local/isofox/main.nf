@@ -34,7 +34,7 @@ process ISOFOX {
             -bam_file ${bam} \\
             -ref_genome ${genome_fasta} \\
             -ref_genome_version ${genome_ver} \\
-            -ensembl_data_resources ${ensembl_data_resources} \\
+            -ensembl_data_dir ${ensembl_data_resources} \\
             -exp_counts_file ${exp_counts} \\
             -exp_gc_ratios_file ${exp_gc_ratios} \\
             -output_dir ./isofox/ \\

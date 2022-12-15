@@ -33,7 +33,7 @@ process LINX_GERMLINE {
             -sv_vcf ${gripss_sv} \\
             -fragile_site_file ${fragile_sites} \\
             -line_element_file ${lines} \\
-            -ensembl_data_resources ${ensembl_data_resources} \\
+            -ensembl_data_dir ${ensembl_data_resources} \\
             -check_drivers \\
             -driver_gene_panel ${driver_gene_panel} \\
             -output_dir linx_germline/
