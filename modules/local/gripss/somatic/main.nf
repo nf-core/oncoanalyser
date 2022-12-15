@@ -31,7 +31,7 @@ process GRIPSS_SOMATIC {
             ${args} \\
             -sample ${meta.tumor_id} \\
             -reference ${meta.normal_id} \\
-            -ref_genome_version ${genome_ver} \\
+            -ref_genome_version V${genome_ver} \\
             -ref_genome ${genome_fasta} \\
             -pon_sgl_file ${pon_breakends} \\
             -pon_sv_file ${pon_breakpoints} \\
