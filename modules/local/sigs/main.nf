@@ -6,7 +6,7 @@ process SIGS {
 
     input:
     tuple val(meta), path(smlv_vcf)
-    path signatures_file
+    path signatures
 
     output:
     tuple val(meta), path('sigs/'), emit: sigs_dir
@@ -26,7 +26,7 @@ process SIGS {
         -jar ${task.ext.jarPath} \\
             -sample ${meta.id} \\
             -somatic_vcf_file ${smlv_vcf} \\
-            -signatures_file ${signatures_file} \\
+            -signatures_file ${signatures} \\
             -output_dir ./sigs/
 
     # NOTE(SW): hard coded since there is no reliable way to obtain version information.

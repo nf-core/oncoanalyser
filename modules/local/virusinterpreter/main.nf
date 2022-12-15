@@ -6,8 +6,8 @@ process VIRUSINTERPRETER {
 
     input:
     tuple val(meta), path(virus_tsv), path(purple_purity), path(purple_qc), path(wgs_metrics)
-    path taxonomy
-    path virus_reporting
+    path taxonomy_db
+    path reporting_db
 
     output:
     tuple val(meta), path('virusinterpreter'), emit: virusinterpreter_dir
@@ -30,8 +30,8 @@ process VIRUSINTERPRETER {
             -purple_qc_file ${purple_qc} \\
             -tumor_sample_wgs_metrics_file ${wgs_metrics} \\
             -virus_breakend_tsv ${virus_tsv} \\
-            -taxonomy_db_tsv ${taxonomy} \\
-            -virus_reporting_db_tsv ${virus_reporting} \\
+            -taxonomy_db_tsv ${taxonomy_db} \\
+            -virus_reporting_db_tsv ${reporting_db} \\
             -output_dir ./virusinterpreter/
 
     cat <<-END_VERSIONS > versions.yml

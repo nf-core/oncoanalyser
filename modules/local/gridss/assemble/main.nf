@@ -13,7 +13,7 @@ process ASSEMBLE {
     path genome_bwa_index_dir, stageAs: 'bwa_index'
     path genome_bwa_index_image
     path genome_gridss_index
-    path blacklist
+    path blocklist
 
     output:
     tuple val(meta), path('gridss_assemble/'), emit: assemble_dir
@@ -69,7 +69,7 @@ process ASSEMBLE {
         --steps assemble \\
         --labels ${labels_arg} \\
         --reference ${genome_fasta} \\
-        --blacklist ${blacklist} \\
+        --blacklist ${blocklist} \\
         --workingdir ${output_dirname}/work \\
         --assembly ${output_dirname}/sv_assemblies.bam \\
         --threads ${task.cpus} \\

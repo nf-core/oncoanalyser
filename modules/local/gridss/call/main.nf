@@ -13,7 +13,7 @@ process CALL {
     path genome_bwa_index_dir, stageAs: 'bwa_index'
     path genome_bwa_index_image
     path genome_gridss_index
-    path blacklist
+    path blocklist
 
     output:
     tuple val(meta), path('gridss_call/sv_vcf.vcf.gz'), emit: vcf
@@ -67,7 +67,7 @@ process CALL {
         --steps call \\
         --labels ${labels_arg} \\
         --reference ${genome_fasta} \\
-        --blacklist ${blacklist} \\
+        --blacklist ${blocklist} \\
         --workingdir ${output_dirname}/work/ \\
         --assembly ${output_dirname}/sv_assemblies.bam \\
         --output ${output_dirname}/sv_vcf.vcf.gz \\

@@ -7,7 +7,7 @@ process LINX_SOMATIC {
     input:
     tuple val(meta), path(purple_dir)
     val genome_ver
-    path fragile_sites
+    path fragile_regions
     path lines
     path ensembl_data_resources
     path known_fusion_data
@@ -32,7 +32,7 @@ process LINX_SOMATIC {
             -ref_genome_version ${genome_ver} \\
             -sv_vcf ${purple_dir}/${meta.id}.purple.sv.vcf.gz \\
             -purple_dir ${purple_dir} \\
-            -fragile_site_file ${fragile_sites} \\
+            -fragile_site_file ${fragile_regions} \\
             -line_element_file ${lines} \\
             -ensembl_data_dir ${ensembl_data_resources} \\
             -check_fusions \\

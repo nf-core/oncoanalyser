@@ -125,44 +125,44 @@ workflow PREPARE_REFERENCE {
 def createHmfDataMap(hmf_data_base, params_only) {
     def params_mapping = [
         // AMBER
-        heterozygous_sites:           'ref_data_amber_loci',
+        heterozygous_sites:           'ref_data_heterozygous_sites',
         // COBALT
         gc_profile:                   'ref_data_gc_profile',
         // CUPPA
-        cuppa_resources:              'ref_data_cuppa_resource_dir',
+        cuppa_resources:              'ref_data_cuppa_resources',
         // GRIDSS
-        gridss_region_blocklist:      'ref_data_gridss_blacklist',
-        gridss_pon_breakends:         'ref_data_gridss_breakend_pon',
-        gridss_pon_breakpoints:       'ref_data_gridss_breakpoint_pon',
+        gridss_region_blocklist:      'ref_data_gridss_region_blocklist',
+        gridss_pon_breakends:         'ref_data_gridss_pon_breakends',
+        gridss_pon_breakpoints:       'ref_data_gridss_pon_breakpoints',
         // Isofox
-        isofox_counts:                'ref_data_isofox_exp_counts',
-        isofox_gc_ratios:             'ref_data_isofox_exp_gc_ratios',
+        isofox_counts:                'ref_data_isofox_counts',
+        isofox_gc_ratios:             'ref_data_isofox_gc_ratios',
         // LINX
-        linx_fragile_regions:         'ref_data_linx_fragile_sites',
+        linx_fragile_regions:         'ref_data_linx_fragile_regions',
         linx_lines:                   'ref_data_linx_lines',
         // SAGE
-        sage_blocklist_regions:       'ref_data_sage_blacklist_bed',
-        sage_blocklist_sites:         'ref_data_sage_blacklist_vcf',
+        sage_blocklist_regions:       'ref_data_sage_blocklist_regions',
+        sage_blocklist_sites:         'ref_data_sage_blocklist_sites',
         sage_coding_panel:            'ref_data_sage_coding_panel',
-        sage_highconf_regions:        'ref_data_sage_high_confidence',
+        sage_highconf_regions:        'ref_data_sage_highconf_regions',
         sage_known_hotspots_germline: 'ref_data_sage_known_hotspots_germline',
         sage_known_hotspots_somatic:  'ref_data_sage_known_hotspots_somatic',
-        sage_pon:                     'ref_data_sage_pon_file',
-        clinvar_annotations:          'ref_data_clinvar_vcf',
+        sage_pon:                     'ref_data_sage_pon',
+        clinvar_annotations:          'ref_data_clinvar_annotations',
         // SIGS
         sigs_signatures:              'ref_data_sigs_signatures',
         // LILAC
-        lilac_resources:              'ref_data_lilac_resource_dir',
+        lilac_resources:              'ref_data_lilac_resources',
         // Virus Interpreter
-        virus_taxonomy:               'ref_data_virus_taxonomy',
-        virus_reporting:              'ref_data_virus_reporting',
+        virus_taxonomy_db:            'ref_data_virus_taxonomy_db',
+        virus_reporting_db:           'ref_data_virus_reporting_db',
         // Misc
         purple_germline_del:          'ref_data_purple_germline_del',
         driver_gene_panel:            'ref_data_driver_gene_panel',
-        ensembl_data_resources:       'ref_data_ensembl_data_dir',
+        ensembl_data_resources:       'ref_data_ensembl_data_resources',
         known_fusion_data:            'ref_data_known_fusion_data',
         known_fusions:                'ref_data_known_fusions',
-        segment_mappability:          'ref_data_mappability_bed',
+        segment_mappability:          'ref_data_segment_mappability',
     ]
     params_mapping.collectEntries { k, v ->
         [k, getHmfDataFileObject(v, k, hmf_data_base, params_only)]
