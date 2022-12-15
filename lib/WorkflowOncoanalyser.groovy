@@ -62,7 +62,7 @@ class WorkflowOncoanalyser {
             params.ref_data_genome_type = 'no_alt'
         }
 
-        if (!params.containsKey('ref_data_hmf_bundle_path')) {
+        if (!params.containsKey('ref_data_hmf_data_base')) {
             if (params.ref_data_genome_version == '37') {
                 params.ref_data_hmf_data_base = Constants.HMF_DATA_37_BASE
             } else if (params.ref_data_genome_version == '38') {
