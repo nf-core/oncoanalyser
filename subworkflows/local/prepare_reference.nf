@@ -174,7 +174,8 @@ def getHmfDataFileObject(pk, hk, base_dir, params_only) {
     if (params.containsKey(pk)) {
         return file(params.getAt(pk), checkIfExists: true)
     } else if (params_only) {
-        assert false : "TODO(SW): more helpful message about missing param ${pk}"
+        log.error "ERROR: no entry for ${pk} found in params but is required as no HMF data base path provided"
+        System.exit(1)
     } else if (!hmfdata_paths.containsKey(hk)) {
         assert false : "bad key for params.hmfdata_paths.${params.genome_version}: ${hk}"
     } else {
