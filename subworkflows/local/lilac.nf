@@ -30,7 +30,14 @@ workflow LILAC {
                 } else {
                     filename = "hla.38.alt.umccr.bed"
                 }
-                return file("${lilac_dir}/${filename}", checkIfExists: true)
+
+                def filepath = lilac_dir.resolve(filename).toUri().toString()
+                // NOTE(SW): S3Path.toUri() includes an extra forward slash in the URI or path,
+                // which is removed here. Unsure whether this occurs in other URIs types
+                if (filepath.startsWith('s3:///')) {
+                    filepath = filepath.replaceFirst(/^s3:\/\/\//, 's3://')
+                }
+                return file(filepath, checkIfExists: true)
             }
         // NOTE(SW): here I remove duplicate files so that we only process each input once
         // NOTE(SW): orphaned reads are sometimes obtained, this is the slicing procedure used
