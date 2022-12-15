@@ -24,7 +24,7 @@ process SIGS {
     java \\
         -Xmx${task.memory.giga}g \\
         -jar ${task.ext.jarPath} \\
-            -sample ${meta.id} \\
+            -sample ${meta.tumor_id} \\
             -somatic_vcf_file ${smlv_vcf} \\
             -signatures_file ${signatures} \\
             -output_dir ./sigs/
