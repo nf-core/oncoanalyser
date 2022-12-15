@@ -30,7 +30,7 @@ process GRIPSS_GERMLINE {
         -jar ${task.ext.jarPath} \\
             ${args} \\
             -sample ${meta.normal_id} \\
-            -ref_genome_version ${genome_ver} \\
+            -ref_genome_version V${genome_ver} \\
             -ref_genome ${genome_fasta} \\
             -pon_sgl_file ${pon_breakends} \\
             -pon_sv_file ${pon_breakpoints} \\
