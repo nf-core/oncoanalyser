@@ -43,10 +43,10 @@ process PAVE_GERMLINE {
             -ref_genome ${genome_fasta} \\
             -ensembl_data_dir ${ensembl_data_resources} \\
             -driver_gene_panel ${driver_gene_panel} \\
-            -clinvar_annotations ${clinvar_annotations} \\
+            -clinvar_vcf ${clinvar_annotations} \\
             -blacklist_bed ${sage_blocklist_regions} \\
             -blacklist_vcf ${sage_blocklist_sites} \\
-            -segment_mappability ${segment_mappability} \\
+            -mappability_bed ${segment_mappability} \\
             -vcf_file ${sage_vcf} \\
             -read_pass_only \\
             -output_dir ./

@@ -39,7 +39,7 @@ process PAVE_SOMATIC {
             -driver_gene_panel ${driver_gene_panel} \\
             -pon_file ${sage_pon} \\
             -pon_filters "${pon_filters}" \\
-            -segment_mappability ${segment_mappability} \\
+            -mappability_bed ${segment_mappability} \\
             -vcf_file ${sage_vcf} \\
             -read_pass_only \\
             -output_dir ./
