@@ -32,7 +32,7 @@ process SAGE_SOMATIC {
             ${args} \\
             -reference ${meta.normal_id} \\
             -reference_bam ${normal_bam} \\
-            -tumor ${meta.tumor_id}} \\
+            -tumor ${meta.tumor_id} \\
             -tumor_bam ${tumor_bam} \\
             -ref_genome_version ${genome_ver} \\
             -ref_genome ${genome_fasta} \\
