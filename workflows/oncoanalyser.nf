@@ -751,8 +751,8 @@ workflow ONCOANALYSER {
         // Run process
         VIRUSINTERPRETER(
             ch_virusinterpreter_inputs,
-            hmf_data.virus_taxonomy,
-            hmf_data.virus_reporting,
+            hmf_data.virus_taxonomy_db,
+            hmf_data.virus_reporting_db,
         )
 
         // Set outputs, restoring original meta

@@ -15,7 +15,7 @@ process PURPLE {
     path sage_known_hotspots_germline
     path driver_gene_panel
     path ensembl_data_resources
-    path germline_del_freq
+    path germline_del
 
     output:
     tuple val(meta), path('purple/'), emit: purple_dir
@@ -28,7 +28,7 @@ process PURPLE {
     def args = task.ext.args ?: ''
     def smlv_tumor_vcf_fp = smlv_tumor_vcf ?: ''
     def smlv_normal_vcf_fp = smlv_normal_vcf ?: ''
-    def germline_del_freq_arg = germline_del_freq ? "-germline_del_freq_file ${germline_del_freq}" : ''
+    def germline_del_arg = germline_del ? "-germline_del_file ${germline_del}" : ''
 
     """
     # For provided smlv VCFs, filter records that do not contain the required FORMAT/AD field and
@@ -65,7 +65,7 @@ process PURPLE {
             -ensembl_data_dir ${ensembl_data_resources} \\
             -somatic_hotspots ${sage_known_hotspots_somatic} \\
             -germline_hotspots ${sage_known_hotspots_germline} \\
-            ${germline_del_freq_arg} \\
+            ${germline_del_arg} \\
             -ref_genome ${genome_fasta} \\
             -ref_genome_version ${genome_ver} \\
             -threads ${task.cpus} \\

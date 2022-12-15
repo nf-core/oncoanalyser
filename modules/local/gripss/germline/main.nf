@@ -9,8 +9,8 @@ process GRIPSS_GERMLINE {
     path genome_fasta
     path genome_fai
     val genome_ver
-    path breakend_pon
-    path breakpoint_pon
+    path pon_breakends
+    path pon_breakpoints
     path known_fusions
 
     output:
@@ -32,8 +32,8 @@ process GRIPSS_GERMLINE {
             -sample ${meta.normal_id} \\
             -ref_genome_version ${genome_ver} \\
             -ref_genome ${genome_fasta} \\
-            -pon_sgl_file ${breakend_pon} \\
-            -pon_sv_file ${breakpoint_pon} \\
+            -pon_sgl_file ${pon_breakends} \\
+            -pon_sv_file ${pon_breakpoints} \\
             -known_hotspot_file ${known_fusions} \\
             -vcf ${gridss_vcf} \\
             -output_dir ./

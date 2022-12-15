@@ -155,7 +155,7 @@
                     "description": "Path to VIRUSBreakend database.",
                     "fa_icon": "far fa-file-code"
                 },
-                "ref_data_amber_loci": {
+                "ref_data_heterozygous_sites": {
                     "type": "string",
                     "format": "file-path",
                     "pattern": "^\\S+\\.vcf\\.gz$",
@@ -169,48 +169,48 @@
                     "description": "Path to COBALT GC profile file.",
                     "fa_icon": "far fa-file-code"
                 },
-                "ref_data_cuppa": {
+                "ref_data_cuppa_resource_dir": {
                     "type": "string",
                     "format": "directory-path",
                     "description": "Path to CUPPA reference file directory.",
                     "fa_icon": "far fa-file-code"
                 },
-                "ref_data_gridss_blacklist": {
+                "ref_data_gridss_region_blocklist": {
                     "type": "string",
                     "format": "file-path",
                     "pattern": "^\\S+\\.bed.gz$",
-                    "description": "Path to GRIDSS blacklist file.",
+                    "description": "Path to GRIDSS blocklist file.",
                     "fa_icon": "far fa-file-code"
                 },
-                "ref_data_gridss_breakend_pon": {
+                "ref_data_gridss_pon_breakends": {
                     "type": "string",
                     "format": "file-path",
                     "pattern": "^\\S+\\.bed\\.gz",
                     "description": "Path to GRIDSS breakend PON file.",
                     "fa_icon": "far fa-file-code"
                 },
-                "ref_data_gridss_breakpoint_pon": {
+                "ref_data_gridss_pon_breakpoints": {
                     "type": "string",
                     "format": "file-path",
                     "pattern": "^\\S+\\.bedpe\\.gz$",
                     "description": "Path to GRIDSS breakpoint PON file.",
                     "fa_icon": "far fa-file-code"
                 },
-                "ref_data_isofox_exp_counts": {
+                "ref_data_isofox_counts": {
                     "type": "string",
                     "format": "file-path",
                     "pattern": "^\\S+\\.csv$",
                     "description": "Path to Isofox expected read counts file.",
                     "fa_icon": "far fa-file-code"
                 },
-                "ref_data_isofox_exp_gc_ratios": {
+                "ref_data_isofox_gc_ratios": {
                     "type": "string",
                     "format": "file-path",
                     "pattern": "^\\S+\\.csv$",
                     "description": "Path to Isofox expected GC ratios file.",
                     "fa_icon": "far fa-file-code"
                 },
-                "ref_data_linx_fragile_sites": {
+                "ref_data_linx_fragile_regions": {
                     "type": "string",
                     "format": "file-path",
                     "pattern": "^\\S+\\.csv$",
@@ -227,90 +227,90 @@
                 "ref_data_ensembl_data_dir": {
                     "type": "string",
                     "format": "directory-path",
-                    "description": "Path to HMF Ensembl Data Cache directory.",
+                    "description": "Path to HMF Ensembl data cache directory.",
                     "fa_icon": "far fa-file-code"
                 },
-                "ref_data_lilac_resource_dir": {
+                "ref_data_lilac_resources": {
                     "type": "string",
                     "format": "directory-path",
                     "description": "Path to LILAC resource directory.",
                     "fa_icon": "far fa-folder-open"
                 },
-                "ref_data_virusinterpreter_taxonomy": {
+                "ref_data_virus_taxonomy_db": {
                     "type": "string",
                     "format": "file-path",
                     "pattern": "^\\S+\\.tsv$",
                     "description": "Path to Virus Interpreter taxonomy file.",
                     "fa_icon": "far fa-file-code"
                 },
-                "ref_data_virusinterpreter_reporting": {
+                "ref_data_virus_reporting_db": {
                     "type": "string",
                     "format": "file-path",
                     "pattern": "^\\S+\\.tsv$",
                     "description": "Path to Virus Interpreter reporting file.",
                     "fa_icon": "far fa-file-code"
                 },
-                "ref_data_mappability_bed": {
+                "ref_data_segment_mappability": {
                     "type": "string",
                     "format": "file-path",
                     "pattern": "^\\S+\\.bed\\.gz$",
                     "description": "Path to HMF mappability file.",
                     "fa_icon": "far fa-file-code"
                 },
-                "ref_data_clinvar_vcf": {
+                "ref_data_clinvar_annotations": {
                     "type": "string",
                     "format": "file-path",
                     "pattern": "^\\S+\\.vcf\\.gz$",
-                    "description": "Path to HMF ClinVar file.",
+                    "description": "Path to HMF ClinVar annotations VCF file.",
                     "fa_icon": "far fa-file-code"
                 },
-                "ref_data_sage_blacklist_vcf": {
+                "ref_data_sage_blocklist_regions": {
                     "type": "string",
                     "format": "file-path",
                     "pattern": "^\\S+\\.vcf\\.gz$",
-                    "description": "Path to HMF SAGE Known Blacklist VCF file.",
+                    "description": "Path to HMF SAGE known blocklist VCF file.",
                     "fa_icon": "far fa-file-code"
                 },
-                "ref_data_sage_blacklist_bed": {
+                "ref_data_sage_blocklist_sites": {
                     "type": "string",
                     "format": "file-path",
                     "pattern": "^\\S+\\.bed$",
-                    "description": "Path to HMF SAGE Known Blacklist BED file.",
+                    "description": "Path to HMF SAGE known blocklist BED file.",
                     "fa_icon": "far fa-file-code"
                 },
-                "ref_data_sage_pon_file": {
+                "ref_data_sage_pon": {
                     "type": "string",
                     "format": "file-path",
                     "pattern": "^\\S+\\.tsv\\.gz$",
-                    "description": "Path to HMF SAGE Panel of Normals file.",
+                    "description": "Path to HMF SAGE panel of normals file.",
                     "fa_icon": "far fa-file-code"
                 },
-                "ref_data_sage_high_confidence": {
+                "ref_data_sage_highconf_regions": {
                     "type": "string",
                     "format": "file-path",
                     "pattern": "^\\S+\\.bed\\.gz$",
-                    "description": "Path to HMF distributed High Confidence regions file.",
+                    "description": "Path to HMF distributed high confidence regions file.",
                     "fa_icon": "far fa-file-code"
                 },
                 "ref_data_sage_coding_panel": {
                     "type": "string",
                     "format": "file-path",
                     "pattern": "^\\S+\\.bed\\.gz$",
-                    "description": "Path to somatic SAGE Coding Panel file.",
+                    "description": "Path to somatic SAGE coding panel file.",
                     "fa_icon": "far fa-file-code"
                 },
                 "ref_data_sage_known_hotspots_germline": {
                     "type": "string",
                     "format": "file-path",
                     "pattern": "^\\S+\\.vcf\\.gz$",
-                    "description": "Path to germline SAGE Known Hotspots file.",
+                    "description": "Path to germline SAGE known hotspots file.",
                     "fa_icon": "far fa-file-code"
                 },
                 "ref_data_sage_known_hotspots_somatic": {
                     "type": "string",
                     "format": "file-path",
                     "pattern": "^\\S+\\.vcf\\.gz$",
-                    "description": "Path to somatic SAGE Known Hotspots file.",
+                    "description": "Path to somatic SAGE known hotspots file.",
                     "fa_icon": "far fa-file-code"
                 },
                 "ref_data_sigs_signatures": {
@@ -324,28 +324,28 @@
                     "type": "string",
                     "format": "file-path",
                     "pattern": "^\\S+\\.bedpe$",
-                    "description": "Path to HMF Known Fusions file.",
+                    "description": "Path to HMF known fusions file.",
                     "fa_icon": "far fa-file-code"
                 },
                 "ref_data_known_fusion_data": {
                     "type": "string",
                     "format": "file-path",
                     "pattern": "^\\S+\\.csv$",
-                    "description": "Path to HMF Known Fusions Data file.",
+                    "description": "Path to HMF known fusions Data file.",
                     "fa_icon": "far fa-file-code"
                 },
                 "ref_data_purple_germline_del": {
                     "type": "string",
                     "format": "file-path",
                     "pattern": "^\\S+\\.csv$",
-                    "description": "Path to HMF PURPLE Germline Cohort Deletion Frequency file.",
+                    "description": "Path to HMF PURPLE germline cohort deletion frequency file.",
                     "fa_icon": "far fa-file-code"
                 },
                 "ref_data_driver_gene_panel": {
                     "type": "string",
                     "format": "file-path",
                     "pattern": "^\\S+\\.tsv$",
-                    "description": "Path to HMF Driver Gene Panel file.",
+                    "description": "Path to HMF driver gene panel file.",
                     "fa_icon": "far fa-file-code"
                 }
             }
