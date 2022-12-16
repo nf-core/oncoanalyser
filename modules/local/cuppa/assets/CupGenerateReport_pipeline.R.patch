@@ -1,0 +1,31 @@
+--- a/CupGenerateReport_pipeline.R
++++ b/CupGenerateReport_pipeline.R
+@@ -165,10 +165,10 @@ if (featureCount > featureLimit)
+ }
+ 
+ # Generating PNG files
+-outputFileSummary = paste0(cuppaDir, sampleId, '.cup.report.summary.png')
++outputFileSummary = paste0(sampleId, '.cup.report.summary.png')
+ if (separateFeaturePlot)
+   {
+-  outputFileFeatures = paste0(cuppaDir, sampleId, '.cup.report.features.png')
++  outputFileFeatures = paste0(sampleId, '.cup.report.features.png')
+   print(paste0("Writing output to png file: ", outputFileSummary))
+   png(file = outputFileSummary, res = 140, height = 2200, width = 4000)
+   grid.arrange(plot_grid(summaryPlot, genderPlot, sigPlot, svTraitsPlot,
+@@ -192,7 +192,7 @@ dev.off()
+ 
+ # Generate PDF report with disclaimer
+ 
+-outputFile = paste0(cuppaDir, sampleId, '_cup_report.pdf')
++outputFile = paste0(sampleId, '_cup_report.pdf')
+ print(paste0("writing output to pdf file: ", outputFile))
+ 
+ pdf(file = outputFile, height = 14, width = 20)
+@@ -214,4 +214,4 @@ if (separateFeaturePlot)
+             ncol = 1, nrow = 8, rel_heights = plotHeightsDisclaimer, align = 'v', axis = 'l')
+ }
+ 
+-dev.off()
+\ No newline at end of file
++dev.off()
