@@ -12,16 +12,18 @@ RUN \
   mkdir -p /opt/cuppa/ && \
   wget -O /opt/cuppa/cuppa.jar 'https://github.com/hartwigmedical/hmftools/releases/download/cuppa-v1.6/cuppa_v1.6.jar'
 
-# NOTE(SW): required plotting scripts aren't available under the cuppa-v1.6 tag
-ARG URL_BASE=https://raw.githubusercontent.com/hartwigmedical/hmftools/cuppa-v1.7/cuppa/src/main/resources
+# NOTE(SW): required report script is only available from the cuppa-v1.7 tag and later
+ARG URL_BASE=https://raw.githubusercontent.com/hartwigmedical/hmftools
+ARG URL_BASE_CHART=${URL_BASE}/cuppa-v1.6/cuppa/src/main/resources/cuppa-chart
+ARG URL_BASE_REPORT=${URL_BASE}/cuppa-v1.7/cuppa/src/main/resources/r
 ARG DIR_BASE=/opt/cuppa
 RUN \
   mkdir -p ${DIR_BASE}/{chart,report} && \
-    wget -P ${DIR_BASE}/chart/ ${URL_BASE}/cuppa-chart/requirements.txt && \
-    wget -P ${DIR_BASE}/chart/ ${URL_BASE}/cuppa-chart/cuppa-chart.py && \
-    wget -P ${DIR_BASE}/chart/main/ ${URL_BASE}/cuppa-chart/main/create_chart.py && \
-    wget -P ${DIR_BASE}/chart/main/ ${URL_BASE}/cuppa-chart/main/prepare_data.py && \
-    wget -P ${DIR_BASE}/report/ ${URL_BASE}/r/CupGenerateReport_pipeline.R
+    wget -P ${DIR_BASE}/chart/ ${URL_BASE_CHART}/requirements.txt && \
+    wget -P ${DIR_BASE}/chart/ ${URL_BASE_CHART}/cuppa-chart.py && \
+    wget -P ${DIR_BASE}/chart/main/ ${URL_BASE_CHART}/main/create_chart.py && \
+    wget -P ${DIR_BASE}/chart/main/ ${URL_BASE_CHART}/main/prepare_data.py && \
+    wget -P ${DIR_BASE}/report/ ${URL_BASE_REPORT}/CupGenerateReport_pipeline.R
 
 COPY assets/CupGenerateReport_pipeline.R.patch /tmp/
 RUN \
