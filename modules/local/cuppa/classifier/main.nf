@@ -18,6 +18,7 @@ process CUPPA_CLASSIFIER {
     script:
     def args = task.ext.args ?: ''
     def categories_arg = isofox_dir ? 'ALL' : 'DNA'
+    def gene_exp_arg = isofox_dir ? "-sample_gene_exp_file sample_data/${meta.id}.isf.gene_data.csv" : ''
 
     """
     # Symlink input files into a single directory
@@ -32,6 +33,9 @@ process CUPPA_CLASSIFIER {
             -ref_data_dir ${cuppa_resources} \\
             -sample_data ${meta.id} \\
             -sample_data_dir sample_data/ \\
+            -sample_sv_file sample_data/${meta.id}.purple.sv.vcf.gz \\
+            -sample_somatic_vcf sample_data/${meta.id}.purple.somatic.vcf.gz \\
+            ${gene_exp_arg} \\
             -output_dir ./
 
     # NOTE(SW): hard coded since there is no reliable way to obtain version information.
