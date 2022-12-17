@@ -22,8 +22,8 @@ process LILAC {
     def sample_name = getSampleName(meta, tumor_bam, normal_bam)
     def tumor_bam_arg = tumor_bam ? "-tumor_bam ${tumor_bam}" : ''
     def purple_args = purple_dir ? """
-        -gene_copy_number ${purple_dir}/${sample_name}.purple.cnv.gene.tsv \\
-        -somatic_vcf ${purple_dir}/${sample_name}.purple.sv.vcf.gz \\
+        -gene_copy_number_file ${purple_dir}/${sample_name}.purple.cnv.gene.tsv \\
+        -somatic_variants_file ${purple_dir}/${sample_name}.purple.sv.vcf.gz \\
     """ : ''
 
     """
