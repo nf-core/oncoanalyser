@@ -5,7 +5,7 @@ process ISOFOX {
     container 'docker.io/scwatts/isofox:1.5--0'
 
     input:
-    tuple val(meta), path(bam)
+    tuple val(meta), path(bam), path(bai)
     path genome_fasta
     path genome_fai
     val genome_ver

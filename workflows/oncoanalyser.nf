@@ -150,8 +150,9 @@ workflow ONCOANALYSER {
         // channel: [meta_isofox, tumor_bam_wts]
         ch_isofox_inputs = ch_inputs_wts.present
             .map { meta ->
+                def bam =  meta.get([Constants.FileType.BAM_WTS, Constants.DataType.TUMOR])
                 def meta_isofox = [key: meta.id, id: meta.get(['sample_name', Constants.DataType.TUMOR])]
-                return [meta_isofox, meta.get([Constants.FileType.BAM_WTS, Constants.DataType.TUMOR])]
+                return [meta_isofox, bam, "${bam}.bai"]
             }
 
         // Run process
