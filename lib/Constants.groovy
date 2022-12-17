@@ -32,7 +32,6 @@ class Constants {
         PURPLE,
         SAGE,
         SIGS,
-        TEAL,
         VIRUSINTERPRETER,
     }
 

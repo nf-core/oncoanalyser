@@ -65,7 +65,6 @@ include { ISOFOX            } from '../modules/local/isofox/main'
 include { LINX_REPORT       } from '../modules/local/gpgr/linx_report/main'
 include { PURPLE            } from '../modules/local/purple/main'
 include { SIGS              } from '../modules/local/sigs/main'
-include { TEAL              } from '../modules/local/teal/main'
 include { VIRUSBREAKEND     } from '../modules/local/virusbreakend/main'
 include { VIRUSINTERPRETER  } from '../modules/local/virusinterpreter/main'
 
@@ -119,7 +118,7 @@ workflow ONCOANALYSER {
     hmf_data = PREPARE_REFERENCE.out.hmf_data
 
     // Set up channel with common inputs for several processes
-    if (run.amber || run.cobalt || run.pave || run.lilac || run.teal) {
+    if (run.amber || run.cobalt || run.pave || run.lilac) {
         // channel: [val(meta), tumor_bam, normal_bam, tumor_bai, normal_bai]
         ch_bams_and_indices = ch_inputs
             .map { meta ->
@@ -169,90 +168,6 @@ workflow ONCOANALYSER {
         // Set outputs, restoring original meta
         ch_versions = ch_versions.mix(ISOFOX.out.versions)
         ch_isofox_out = ch_isofox_out.mix(WorkflowOncoanalyser.restoreMeta(ISOFOX.out.isofox_dir, ch_inputs))
-    }
-
-    //
-    // MODULE: Run COLLECTWGSMETRICS to generate stats required for downstream processes
-    //
-    if (run.virusinterpreter || run.teal) {
-        // Create inputs and create process-specific meta
-        // NOTE(SW): CUPPA only requires collectwgsmetrics for the tumor sample in the upstream
-        // process Virus Interpreter but TEAL currently requires collectwgsmetrics for both tumor
-        // and normal sample
-        // channel: [val(meta_cwm), bam]
-        ch_cwm_inputs_all = ch_inputs
-            .flatMap { meta ->
-                def sample_types = run.teal ? [Constants.DataType.TUMOR, Constants.DataType.NORMAL] : [Constants.DataType.TUMOR]
-                return sample_types
-                    .collect { sample_type ->
-                        def bam = meta.get([Constants.FileType.BAM_WGS, sample_type])
-                        def sample_name = meta.get(['sample_name', sample_type])
-                        def meta_cwm = [
-                            key: meta.id,
-                            id: sample_name,
-                            // NOTE(SW): must use string representation for caching purposes
-                            sample_type: sample_type.name(),
-                        ]
-                        return [meta_cwm, bam]
-                    }
-            }
-
-        // Collapse duplicate files e.g. repeated normal BAMs for multiple tumor samples
-        // NOTE(SW): no effective blocking by .groupTuple() as we're not dependent
-        // on any process
-        // channel: [val(meta_cwm), bam]
-        ch_cwm_inputs = ch_cwm_inputs_all
-            .map { [it[1..-1], it[0]] }
-            .groupTuple()
-            .map { filepaths, meta_cwm ->
-                def (keys, sample_names, sample_types) = meta_cwm
-                    .collect {
-                        [it.key, it.id, it.sample_type]
-                    }
-                    .transpose()
-
-                def sample_types_unique = sample_types.unique(false)
-                assert sample_types_unique.size() == 1
-                def sample_type = sample_types_unique[0]
-
-                def meta_cwm_new = [
-                    keys: keys,
-                    id: sample_names.join('__'),
-                    id_simple: keys.join('__'),
-                    sample_type: sample_type,
-                ]
-                return [meta_cwm_new, *filepaths]
-            }
-
-        // Run process
-        COLLECTWGSMETRICS(
-            ch_cwm_inputs,
-            PREPARE_REFERENCE.out.genome_fasta,
-        )
-
-        // Set outputs, process outputs and restore original meta
-        ch_versions = ch_versions.mix(COLLECTWGSMETRICS.out.versions)
-
-        // Replicate outputs to reverse unique operation
-        // channel: [val(meta_cwm_individual), sample_type, metrics]
-        ch_cwm_output_individual = COLLECTWGSMETRICS.out.metrics
-            .flatMap { meta_cwm_shared, metrics ->
-                meta_cwm_shared.keys.collect { key ->
-                    return [meta_cwm_shared + [key: key], meta_cwm_shared.sample_type, metrics]
-                }
-            }
-
-        // Match outputs to original meta and set output
-        // channel (tumor): [val(meta), metrics]
-        // channel (normal): [val(meta), metrics]
-        ch_cwm_output = WorkflowOncoanalyser.restoreMeta(ch_cwm_output_individual, ch_inputs)
-            .branch { meta, sample_type_str, metrics ->
-                def sample_type = Utils.getEnumFromString(sample_type_str, Constants.DataType)
-                tumor: sample_type == Constants.DataType.TUMOR
-                    return [meta, metrics]
-                normal: sample_type == Constants.DataType.NORMAL
-                    return [meta, metrics]
-            }
     }
 
     //
@@ -629,44 +544,6 @@ workflow ONCOANALYSER {
     }
 
     //
-    // MODULE: Run TEAL to characterise teleomeres
-    //
-    if (run.teal) {
-        // Select input sources
-        // channel: [val(meta), tumor_bam, normal_bam, tumor_bai, normal_bai, tumor_wgs_metrics, normal_wgs_metrics, cobalt_dir, purple_dir]
-        // NOTE(SW): assuming here that TEAL is being run in tumor/normal mode and so we expect a tumor metrics file and normal metrics file
-        ch_teal_inputs_source = WorkflowOncoanalyser.groupByMeta(
-            ch_bams_and_indices,
-            run.collectwgsmetrics ? ch_cwm_output.tumor : WorkflowOncoanalyser.getInput(ch_inputs, [Constants.FileType.COLLECTWGSMETRICS, Constants.DataType.TUMOR]),
-            run.collectwgsmetrics ? ch_cwm_output.normal : WorkflowOncoanalyser.getInput(ch_inputs, [Constants.FileType.COLLECTWGSMETRICS, Constants.DataType.NORMAL]),
-            run.cobalt ? ch_cobalt_out : WorkflowOncoanalyser.getInput(ch_inputs, [Constants.FileType.COBALT_DIR, Constants.DataType.TUMOR_NORMAL]),
-            run.purple ? ch_purple_out : WorkflowOncoanalyser.getInput(ch_inputs, [Constants.FileType.PURPLE_DIR, Constants.DataType.TUMOR_NORMAL]),
-        )
-
-        // Create inputs and create process-specific meta
-        // channel: [val(meta_teal), tumor_bam, normal_bam, tumor_bai, normal_bai, tumor_wgs_metrics, normal_wgs_metrics, cobalt_dir, purple_dir]
-        ch_teal_inputs = ch_teal_inputs_source
-            .map {
-                def meta = it[0]
-                def other = it[1..-1]
-                def meta_teal = [
-                    id: meta.id,
-                    tumor_id: meta.get(['sample_name', Constants.DataType.TUMOR]),
-                    normal_id: meta.get(['sample_name', Constants.DataType.NORMAL]),
-                ]
-                return [meta_teal, *other]
-            }
-
-        // Run process
-        TEAL(
-            ch_teal_inputs,
-        )
-
-        // Set outputs
-        ch_versions = ch_versions.mix(TEAL.out.versions)
-    }
-
-    //
     // SUBWORKFLOW: Run LILAC for HLA typing and somatic CNV and SNV calling
     //
     if (run.lilac) {
@@ -697,6 +574,30 @@ workflow ONCOANALYSER {
     // NOTE(SW): kept separate from CUPPA conditional block since we'll allow users to run this independently
     ch_virusinterpreter_out = Channel.empty()
     if (run.virusinterpreter) {
+        // collectwgsmetrics
+        // Create inputs and create process-specific meta
+        // channel: [val(meta_cwm), bam]
+        ch_cwm_inputs = ch_inputs
+            .map { meta ->
+                def bam = meta.get([Constants.FileType.BAM_WGS, Constants.DataType.TUMOR])
+                def meta_cwm = [
+                    key: meta.id,
+                    id: meta.get(['sample_name', Constants.DataType.TUMOR]),
+                ]
+                return [meta_cwm, bam]
+            }
+
+        // Run process
+        COLLECTWGSMETRICS(
+            ch_cwm_inputs,
+            PREPARE_REFERENCE.out.genome_fasta,
+        )
+
+        // Set outputs, restoring original meta
+        ch_versions = ch_versions.mix(COLLECTWGSMETRICS.out.versions)
+        ch_cwm_out = WorkflowOncoanalyser.restoreMeta(COLLECTWGSMETRICS.out.metrics, ch_inputs)
+
+        // VIRUSBreakend
         // Create inputs and create process-specific meta
         // channel: [val(meta_virus), tumor_bam]
         ch_virusbreakend_inputs = ch_inputs
@@ -737,9 +638,10 @@ workflow ONCOANALYSER {
         ch_virusinterpreter_inputs_full = WorkflowOncoanalyser.groupByMeta(
             WorkflowOncoanalyser.restoreMeta(VIRUSBREAKEND.out.tsv, ch_inputs),
             ch_virusinterpreter_inputs_purple,
-            ch_cwm_output.tumor,
+            ch_cwm_out,
         )
 
+        // Virus Interpreter
         // Create inputs and create process-specific meta
         // channel: [val(meta_virus), virus_tsv, purple_purity, purple_qc, wgs_metrics]
         ch_virusinterpreter_inputs = ch_virusinterpreter_inputs_full
