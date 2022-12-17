@@ -285,6 +285,13 @@
                     "description": "Path to HMF SAGE panel of normals file.",
                     "fa_icon": "far fa-file-code"
                 },
+                "ref_data_sage_coverage_panel_germline": {
+                    "type": "string",
+                    "format": "file-path",
+                    "pattern": "^\\S+\\.bed\\.gz$",
+                    "description": "Path to HMF SAGE germline coverage panel file.",
+                    "fa_icon": "far fa-file-code"
+                },
                 "ref_data_sage_highconf_regions": {
                     "type": "string",
                     "format": "file-path",

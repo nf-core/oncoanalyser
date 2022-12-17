@@ -1,3 +1,5 @@
+// NOTE(SW): logic that determines BQR outputs assumes '-out' is a path that includes at least one directory
+
 process SAGE_SOMATIC {
     tag "${meta.id}"
     label 'process_medium'
@@ -38,10 +40,13 @@ process SAGE_SOMATIC {
             -ref_genome ${genome_fasta} \\
             -hotspots ${sage_known_hotspots_somatic} \\
             -panel_bed ${sage_coding_panel} \\
+            -coverage_bed ${sage_coding_panel} \\
             -high_confidence_bed ${sage_highconf_regions} \\
             -ensembl_data_dir ${ensembl_data_resources} \\
+            -write_bqr_data \\
+            -write_bqr_plot \\
             -threads ${task.cpus} \\
-            -out ${meta.tumor_id}.sage_somatic.vcf.gz
+            -out ./${meta.tumor_id}.sage_somatic.vcf.gz
 
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":

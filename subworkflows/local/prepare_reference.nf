@@ -144,6 +144,7 @@ def createHmfDataMap(hmf_data_base, params_only) {
         sage_blocklist_regions:       'ref_data_sage_blocklist_regions',
         sage_blocklist_sites:         'ref_data_sage_blocklist_sites',
         sage_coding_panel:            'ref_data_sage_coding_panel',
+        sage_coverage_panel_germline: 'ref_data_sage_coverage_panel_germline',
         sage_highconf_regions:        'ref_data_sage_highconf_regions',
         sage_known_hotspots_germline: 'ref_data_sage_known_hotspots_germline',
         sage_known_hotspots_somatic:  'ref_data_sage_known_hotspots_somatic',

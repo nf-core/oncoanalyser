@@ -338,6 +338,7 @@ workflow ONCOANALYSER {
             hmf_data.sage_known_hotspots_germline,
             hmf_data.sage_known_hotspots_somatic,
             hmf_data.sage_coding_panel,
+            hmf_data.sage_coverage_panel_germline,
             hmf_data.sage_highconf_regions,
             hmf_data.sage_pon,
             hmf_data.segment_mappability,

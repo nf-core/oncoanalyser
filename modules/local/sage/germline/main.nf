@@ -1,3 +1,5 @@
+// NOTE(SW): 3.0.3 logic that determines BQR outputs assumes '-out' is a path that includes at least one directory
+
 process SAGE_GERMLINE {
     tag "${meta.id}"
     label 'process_medium'
@@ -12,6 +14,7 @@ process SAGE_GERMLINE {
     val genome_ver
     path sage_known_hotspots_germline
     path sage_coding_panel
+    path sage_coverage_panel_germline
     path sage_highconf_regions
     path ensembl_data_resources
 
@@ -38,6 +41,7 @@ process SAGE_GERMLINE {
             -ref_genome ${genome_fasta} \\
             -hotspots ${sage_known_hotspots_germline} \\
             -panel_bed ${sage_coding_panel} \\
+            -coverage_bed ${sage_coverage_panel_germline} \\
             -high_confidence_bed ${sage_highconf_regions} \\
             -ensembl_data_dir ${ensembl_data_resources} \\
             -hotspot_min_tumor_qual 50 \\
@@ -48,8 +52,10 @@ process SAGE_GERMLINE {
             -panel_max_germline_rel_raw_base_qual 100 \\
             -mnv_filter_enabled false \\
             -panel_only \\
+            -write_bqr_data \\
+            -write_bqr_plot \\
             -threads ${task.cpus} \\
-            -out ${meta.tumor_id}.sage_germline.vcf.gz
+            -out ./${meta.tumor_id}.sage_germline.vcf.gz
 
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":
