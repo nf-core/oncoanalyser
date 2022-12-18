@@ -28,7 +28,7 @@ process PURPLE {
     def args = task.ext.args ?: ''
     def smlv_tumor_vcf_fp = smlv_tumor_vcf ?: ''
     def smlv_normal_vcf_fp = smlv_normal_vcf ?: ''
-    def germline_del_arg = germline_del ? "-germline_del_file ${germline_del}" : ''
+    def germline_del_arg = germline_del ? "-germline_del_freq_file ${germline_del}" : ''
 
     """
     # For provided smlv VCFs, filter records that do not contain the required FORMAT/AD field and
