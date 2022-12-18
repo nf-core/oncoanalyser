@@ -20,7 +20,10 @@ process SAGE_GERMLINE {
 
     output:
     tuple val(meta), path("${meta.tumor_id}.sage_germline.vcf.gz"), emit: vcf
-    path 'versions.yml'                                     , emit: versions
+    path '*gene.coverage.tsv'                                     , emit: gene_coverage, optional: true
+    path '*sage.bqr.png'                                          , emit: bqr_png, optional: true
+    path '*sage.bqr.tsv'                                          , emit: bqr_tsv, optional: true
+    path 'versions.yml'                                           , emit: versions
 
     when:
     task.ext.when == null || task.ext.when
