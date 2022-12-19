@@ -1,3 +1,8 @@
-sample,fastq_1,fastq_2
-SAMPLE_PAIRED_END,/path/to/fastq/files/AEG588A1_S1_L002_R1_001.fastq.gz,/path/to/fastq/files/AEG588A1_S1_L002_R2_001.fastq.gz
-SAMPLE_SINGLE_END,/path/to/fastq/files/AEG588A4_S4_L003_R1_001.fastq.gz,
+id,subject_name,sample_name,sample_type,filetype,filepath
+SONE_1,SUBJECT_ONE,SAMPLE_ONE_TUMOR,tumor,bam_wgs,/Users/stephen/repos/hmftools_pipeline/sample_one_tumor.bam
+SONE_1,SUBJECT_ONE,SAMPLE_ONE_NORMAL,normal,bam_wgs,/Users/stephen/repos/hmftools_pipeline/sample_one_normal.bam
+STWO_1,SUBJECT_TWO,SAMPLE_TWO_TUMOR_1,tumor,bam_wgs,/Users/stephen/repos/hmftools_pipeline/sample_two_tumor_one.bam
+STWO_1,SUBJECT_TWO,SAMPLE_TWO_TUMOR_1,tumor,bam_wts,/Users/stephen/repos/hmftools_pipeline/sample_two_tumor_one.rna.bam
+STWO_1,SUBJECT_TWO,SAMPLE_TWO_NORMAL,normal,bam_wgs,/Users/stephen/repos/hmftools_pipeline/sample_two_normal.bam
+STWO_2,SUBJECT_TWO,SAMPLE_TWO_TUMOR_2,tumor,bam_wgs,/Users/stephen/repos/hmftools_pipeline/sample_two_tumor_two.bam
+STWO_2,SUBJECT_TWO,SAMPLE_TWO_NORMAL,normal,bam_wgs,/Users/stephen/repos/hmftools_pipeline/sample_two_normal.bam
