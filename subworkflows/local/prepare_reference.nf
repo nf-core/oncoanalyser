@@ -123,6 +123,8 @@ workflow PREPARE_REFERENCE {
 }
 
 def createHmfDataMap(hmf_data_base, params_only) {
+    // NOTE(SW): this code provides an explicit mapping between user exposed HMF data params and
+    // their corresponding internal representation
     def params_mapping = [
         // AMBER
         heterozygous_sites:           'ref_data_heterozygous_sites',
@@ -131,16 +133,26 @@ def createHmfDataMap(hmf_data_base, params_only) {
         // CUPPA
         cuppa_resources:              'ref_data_cuppa_resources',
         // GRIDSS
-        gridss_region_blocklist:      'ref_data_gridss_region_blocklist',
         gridss_pon_breakends:         'ref_data_gridss_pon_breakends',
         gridss_pon_breakpoints:       'ref_data_gridss_pon_breakpoints',
+        gridss_region_blocklist:      'ref_data_gridss_region_blocklist',
         // Isofox
         isofox_counts:                'ref_data_isofox_counts',
         isofox_gc_ratios:             'ref_data_isofox_gc_ratios',
+        // LILAC
+        lilac_resources:              'ref_data_lilac_resources',
         // LINX
         linx_fragile_regions:         'ref_data_linx_fragile_regions',
         linx_lines:                   'ref_data_linx_lines',
+        // ORANGE
+        cohort_mapping:               'ref_data_cohort_mapping',
+        cohort_percentiles:           'ref_data_cohort_percentiles',
+        // PEACH
+        peach_panel:                  'ref_data_peach_panel',
+        // PROTECT
+        serve_resources:              'ref_data_serve_resources',
         // SAGE
+        clinvar_annotations:          'ref_data_clinvar_annotations',
         sage_blocklist_regions:       'ref_data_sage_blocklist_regions',
         sage_blocklist_sites:         'ref_data_sage_blocklist_sites',
         sage_coding_panel:            'ref_data_sage_coding_panel',
@@ -149,28 +161,18 @@ def createHmfDataMap(hmf_data_base, params_only) {
         sage_known_hotspots_germline: 'ref_data_sage_known_hotspots_germline',
         sage_known_hotspots_somatic:  'ref_data_sage_known_hotspots_somatic',
         sage_pon:                     'ref_data_sage_pon',
-        clinvar_annotations:          'ref_data_clinvar_annotations',
-        // PEACH
-        peach_panel:                  'ref_data_peach_panel',
-        // PROTECT
-        serve_resources:              'ref_data_serve_resources',
         // SIGS
         sigs_signatures:              'ref_data_sigs_signatures',
-        // LILAC
-        lilac_resources:              'ref_data_lilac_resources',
         // Virus Interpreter
-        virus_taxonomy_db:            'ref_data_virus_taxonomy_db',
         virus_reporting_db:           'ref_data_virus_reporting_db',
-        // ORANGE
-        cohort_mapping:               'ref_data_cohort_mapping',
-        cohort_percentiles:           'ref_data_cohort_percentiles',
+        virus_taxonomy_db:            'ref_data_virus_taxonomy_db',
         // Misc
         disease_ontology:             'ref_data_disease_ontology',
-        purple_germline_del:          'ref_data_purple_germline_del',
         driver_gene_panel:            'ref_data_driver_gene_panel',
         ensembl_data_resources:       'ref_data_ensembl_data_resources',
         known_fusion_data:            'ref_data_known_fusion_data',
         known_fusions:                'ref_data_known_fusions',
+        purple_germline_del:          'ref_data_purple_germline_del',
         segment_mappability:          'ref_data_segment_mappability',
     ]
     params_mapping.collectEntries { k, v ->
