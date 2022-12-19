@@ -365,7 +365,7 @@
                     "type": "string",
                     "format": "file-path",
                     "pattern": "^\\S+\\.csv$",
-                    "description": "Path to HMF known fusions Data file.",
+                    "description": "Path to HMF known fusions data file.",
                     "fa_icon": "far fa-file-code"
                 },
                 "ref_data_disease_ontology": {
