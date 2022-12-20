@@ -5,7 +5,7 @@ process LILAC {
     container 'docker.io/scwatts/lilac:1.1--0'
 
     input:
-    tuple val(meta), path(tumor_bam), path(normal_bam), path(tumour_bai), path(normal_bai), path(purple_dir)
+    tuple val(meta), path(normal_wgs_bam), path(normal_wts_bam), path(tumor_wgs_bam), path(tumor_wgs_bai), path(tumor_wts_bam), path(tumor_wts_bai), path(purple_dir)
     path genome_fasta
     val genome_ver
     path lilac_resources, stageAs: 'lilac_resources'
@@ -19,8 +19,9 @@ process LILAC {
 
     script:
     def args = task.ext.args ?: ''
-    def sample_name = getSampleName(meta, tumor_bam, normal_bam)
-    def tumor_bam_arg = tumor_bam ? "-tumor_bam ${tumor_bam}" : ''
+    def sample_name = getSampleName(meta, tumor_wgs_bam, normal_wgs_bam)
+    def tumor_wgs_bam_arg = tumor_wgs_bam ? "-tumor_wgs_bam ${tumor_wgs_bam}" : ''
+    def tumor_wts_bam_arg = tumor_wts_bam ? "-rna_bam ${tumor_wts_bam}" : ''
     def purple_args = purple_dir ? """
         -gene_copy_number_file ${purple_dir}/${sample_name}.purple.cnv.gene.tsv \\
         -somatic_variants_file ${purple_dir}/${sample_name}.purple.sv.vcf.gz \\
@@ -32,8 +33,9 @@ process LILAC {
         -jar ${task.ext.jarPath} \\
             ${args} \\
             -sample ${sample_name} \\
-            ${tumor_bam_arg} \\
-            -reference_bam ${normal_bam} \\
+            ${tumor_wgs_bam_arg} \\
+            ${tumor_wts_bam_arg} \\
+            -reference_bam ${normal_wgs_bam} \\
             -ref_genome_version ${genome_ver} \\
             -ref_genome ${genome_fasta} \\
             -resource_dir ${lilac_resources} \\

@@ -659,9 +659,37 @@ workflow ONCOANALYSER {
             ch_lilac_inputs_source = WorkflowOncoanalyser.getInput([Constants.FileType.PURPLE_DIR, Constants.DataType.TUMOR_NORMAL])
         }
 
+        // Create channel with all available input BAMs
+        // First obtain WTS BAMs
+        // channel: [val(meta), wts_bam, wts_bai]
+        ch_lilac_bams_wts = Channel.empty()
+            .mix(
+                ch_inputs_wts_bams = ch_inputs_wts.present.map { meta ->
+                    def bam = meta.get([Constants.FileType.BAM_WTS, Constants.DataType.TUMOR])
+                    [meta, bam, "${bam}.bai"]
+                },
+                ch_inputs_wts.absent.map { meta -> [meta, [], []] },
+            )
+
+        // Combine WGS and WTS BAMs
+        // channel: [val(meta), normal_wgs_bam, normal_wgs_bai, tumor_wgs_bam, tumor_wgs_bai, tumor_wts_bam, tumor_wts_bai]
+        // WorkflowOncoanalyser.groupByMeta removes optional Isofox input; flattening done manually below to preserve
+        ch_lilac_bams = WorkflowOncoanalyser.groupByMeta(
+            ch_lilac_bams_wts,
+            ch_bams_and_indices,
+            flatten: false,
+        )
+            .map { data ->
+                def meta = data[0]
+                def inputs = data[1..-1].collectMany { it }
+                // Manually reorder channel
+                def (tbam_wts, tbai_wts, tbam_wgs, nbam_wgs, tbai_wgs, nbai_wgs) = inputs
+                return [meta, nbam_wgs, nbai_wgs, tbam_wgs, tbai_wgs, tbam_wts, tbai_wts]
+            }
+
         // Call subworkflow to run processes
         LILAC(
-            ch_bams_and_indices,
+            ch_lilac_bams,
             run.purple ? ch_purple_out : WorkflowOncoanalyser.getInput([Constants.FileType.PURPLE_DIR, Constants.DataType.TUMOR_NORMAL]),
             PREPARE_REFERENCE.out.genome_fasta,
             PREPARE_REFERENCE.out.genome_fai,
