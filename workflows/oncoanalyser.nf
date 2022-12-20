@@ -673,17 +673,14 @@ workflow ONCOANALYSER {
 
         // Combine WGS and WTS BAMs
         // channel: [val(meta), normal_wgs_bam, normal_wgs_bai, tumor_wgs_bam, tumor_wgs_bai, tumor_wts_bam, tumor_wts_bai]
-        // WorkflowOncoanalyser.groupByMeta removes optional Isofox input; flattening done manually below to preserve
         ch_lilac_bams = WorkflowOncoanalyser.groupByMeta(
             ch_lilac_bams_wts,
             ch_bams_and_indices,
-            flatten: false,
+            flatten_mode: 'nonrecursive',
         )
             .map { data ->
                 def meta = data[0]
-                def inputs = data[1..-1].collectMany { it }
-                // Manually reorder channel
-                def (tbam_wts, tbai_wts, tbam_wgs, nbam_wgs, tbai_wgs, nbai_wgs) = inputs
+                def (tbam_wts, tbai_wts, tbam_wgs, nbam_wgs, tbai_wgs, nbai_wgs) = data[1..-1]
                 return [meta, nbam_wgs, nbai_wgs, tbam_wgs, tbai_wgs, tbam_wts, tbai_wts]
             }
 
@@ -966,20 +963,13 @@ workflow ONCOANALYSER {
         ch_linx_anno = ch_linx_somatic_out.map { meta, anno_dir, vis_dir -> [meta, anno_dir]}
 
         // channel: [val(meta), isofox_dir, purple_dir, linx_dir, virusinterpreter_dir]
-        // NOTE(SW): the Groovy Collection.flatten method used in
-        // WorkflowOncoanalyser.groupByMeta removes optional Isofox input; flattening done manually below to preserve
         ch_cuppa_inputs_source = WorkflowOncoanalyser.groupByMeta(
             ch_cuppa_inputs_isofox,
             run.purple ? ch_purple_out : WorkflowOncoanalyser.getInput(ch_inputs, [Constants.FileType.PURPLE_DIR, Constants.DataType.TUMOR_NORMAL]),
             run.linx ? ch_linx_anno : WorkflowOncoanalyser.getInput(ch_inputs, [Constants.FileType.LINX_ANNO_DIR, Constants.DataType.TUMOR_NORMAL]),
             run.virusinterpreter ? ch_virusinterpreter_out : WorkflowOncoanalyser.getInput(ch_inputs, [Constants.FileType.VIRUSINTERPRETER_TSV, Constants.DataType.TUMOR]),
-            flatten: false,
+            flatten_mode: 'nonrecursive',
         )
-            .map { data ->
-                def meta = data[0]
-                def inputs = data[1..-1].collectMany { it }
-                return [meta, *inputs]
-            }
 
         // Create inputs and create process-specific meta
         // channel: [val(meta_cuppa), isofox_dir, purple_dir, linx_dir, virusinterpreter_dir]

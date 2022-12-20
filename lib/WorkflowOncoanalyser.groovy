@@ -134,8 +134,21 @@ class WorkflowOncoanalyser {
             }
 
         if (named_args.get('flatten', true)) {
-            r = r.map { it.flatten() }
+            def flatten_mode = named_args.get('flatten_mode', 'recursive')
+            if (flatten_mode == 'recursive') {
+                r = r.map { it.flatten() }
+            } else if (flatten_mode == 'nonrecursive') {
+                r = r.map { data ->
+                    def meta = data[0]
+                    def inputs = data[1..-1].collectMany { it }
+                    return [meta, *inputs]
+                }
+            } else {
+                System.err.println "ERROR: got bad flatten_mode: ${flatten_mode}"
+                System.exit(1)
+            }
         }
+
         return r
     }
 
