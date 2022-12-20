@@ -35,8 +35,8 @@ process PROTECT {
             -purple_purity_tsv ${purple_dir}/${meta.tumor_id}.purple.purity.tsv \\
             -purple_qc_file ${purple_dir}/${meta.tumor_id}.purple.qc \\
             -purple_gene_copy_number_tsv ${purple_dir}/${meta.tumor_id}.purple.cnv.gene.tsv \\
-            -purple_somatic_driver_catalog_tsv ${purple_dir}/${meta.tumor_id}.purple.driver.catalog.somatic.tsv \\
-            -purple_germline_driver_catalog_tsv ${purple_dir}/${meta.tumor_id}.purple.driver.catalog.germline.tsv \\
+            -purple_somatic_driver_catalog_tsv ${purple_dir}/${meta.tumor_id}.driver.catalog.somatic.tsv \\
+            -purple_germline_driver_catalog_tsv ${purple_dir}/${meta.tumor_id}.driver.catalog.germline.tsv \\
             -purple_somatic_variant_vcf ${purple_dir}/${meta.tumor_id}.purple.somatic.vcf.gz \\
             -purple_germline_variant_vcf ${purple_dir}/${meta.tumor_id}.purple.germline.vcf.gz \\
             -linx_fusion_tsv ${linx_dir}/${meta.tumor_id}.linx.fusion.tsv \\

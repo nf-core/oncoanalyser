@@ -777,6 +777,8 @@ workflow ONCOANALYSER {
     //
     // channel: [val(meta), linx_annotation_dir, linx_visuliaser_dir]
     ch_linx_somatic_out = Channel.empty()
+    // channel: [val(meta), linx_annotation_dir]
+    ch_linx_germline_out = Channel.empty()
     if (run.linx) {
         // Select input sources
         // channel: [val(meta), vcf]
@@ -825,6 +827,7 @@ workflow ONCOANALYSER {
         // Set outputs, restoring original meta
         ch_versions = ch_versions.mix(LINX.out.versions)
         ch_linx_somatic_out = ch_linx_somatic_out.mix(WorkflowOncoanalyser.restoreMeta(LINX.out.somatic, ch_inputs))
+        ch_linx_germline_out = ch_linx_germline_out.mix(WorkflowOncoanalyser.restoreMeta(LINX.out.germline, ch_inputs))
 
         //
         // MODULE: Run gpgr to generate a LINX report
@@ -1097,7 +1100,7 @@ workflow ONCOANALYSER {
         // Split LINX channel
         // channel (anno): [val(meta), anno_dir]
         // channel (plot): [val(meta), plot_dir]
-        ch_orange_inputs_linx = ch_linx_somatic_out
+        ch_orange_inputs_linx_somatic = ch_linx_somatic_out
             .multiMap { meta, anno_dir, plot_dir ->
                 anno: [meta, anno_dir]
                 plot: [meta, plot_dir]
@@ -1116,8 +1119,9 @@ workflow ONCOANALYSER {
             run.sage ? ch_sage_somatic_normal_bqr_out : WorkflowOncoanalyser.getInput(ch_inputs, [Constants.FileType.SAGE_BQR, Constants.DataType.NORMAL]),
             run.sage ? ch_sage_germline_coverage_out : WorkflowOncoanalyser.getInput(ch_inputs, [Constants.FileType.SAGE_COVERAGE, Constants.DataType.NORMAL]),
             run.purple ? ch_purple_out : WorkflowOncoanalyser.getInput([Constants.FileType.PURPLE_DIR, Constants.DataType.TUMOR_NORMAL]),
-            run.linx ? ch_orange_inputs_linx.anno : WorkflowOncoanalyser.getInput(ch_inputs, [Constants.FileType.LINX_ANNO_DIR, Constants.DataType.TUMOR_NORMAL]),
-            run.linx ? ch_orange_inputs_linx.plot : WorkflowOncoanalyser.getInput(ch_inputs, [Constants.FileType.LINX_PLOT_DIR, Constants.DataType.TUMOR_NORMAL]),
+            run.linx ? ch_orange_inputs_linx_somatic.anno : WorkflowOncoanalyser.getInput(ch_inputs, [Constants.FileType.LINX_ANNO_DIR, Constants.DataType.TUMOR_NORMAL]),
+            run.linx ? ch_orange_inputs_linx_somatic.plot : WorkflowOncoanalyser.getInput(ch_inputs, [Constants.FileType.LINX_PLOT_DIR, Constants.DataType.TUMOR_NORMAL]),
+            run.linx ? ch_linx_germline_out : WorkflowOncoanalyser.getInput(ch_inputs, [Constants.FileType.LINX_ANNO_DIR, Constants.DataType.NORMAL]),
             run.protect ? ch_protect_out : WorkflowOncoanalyser.getInput(ch_inputs, [Constants.FileType.PROTECT_TSV, Constants.DataType.TUMOR]),
             run.peach ? ch_peach_out : WorkflowOncoanalyser.getInput(ch_inputs, [Constants.FileType.PEACH_TSV, Constants.DataType.NORMAL]),
             run.cuppa ? ch_cuppa_out : WorkflowOncoanalyser.getInput(ch_inputs, [Constants.FileType.CUPPA_CSV, Constants.DataType.TUMOR]),
