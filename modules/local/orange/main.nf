@@ -29,7 +29,11 @@ process ORANGE {
     """
     echo "${pipeline_version_str}" > pipeline_version.txt
 
+    # NOTE(SW): '--add-opens java.base/java.time=ALL-UNNAMED' resolves issue writing JSON, see:
+    # https://stackoverflow.com/questions/70412805/what-does-this-error-mean-java-lang-reflect-inaccessibleobjectexception-unable/70878195#70878195
+
     java \\
+        --add-opens java.base/java.time=ALL-UNNAMED \\
         -Xmx${task.memory.giga}g \\
         -jar ${task.ext.jarPath} \\
             \\
