@@ -30,6 +30,7 @@ class Constants {
         LINX,
         PAVE,
         PEACH,
+        PROTECT,
         PURPLE,
         SAGE,
         SIGS,

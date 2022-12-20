@@ -152,6 +152,8 @@ def createHmfDataMap(hmf_data_base, params_only) {
         clinvar_annotations:          'ref_data_clinvar_annotations',
         // PEACH
         peach_panel:                  'ref_data_peach_panel',
+        // PROTECT
+        serve_resources:              'ref_data_serve_resources',
         // SIGS
         sigs_signatures:              'ref_data_sigs_signatures',
         // LILAC

@@ -64,6 +64,7 @@ include { CUPPA_VISUALISER  } from '../modules/local/cuppa/visualiser/main'
 include { ISOFOX            } from '../modules/local/isofox/main'
 include { LINX_REPORT       } from '../modules/local/gpgr/linx_report/main'
 include { PEACH             } from '../modules/local/peach/main'
+include { PROTECT           } from '../modules/local/protect/main'
 include { PURPLE            } from '../modules/local/purple/main'
 include { SIGS              } from '../modules/local/sigs/main'
 include { VIRUSBREAKEND     } from '../modules/local/virusbreakend/main'
@@ -804,6 +805,52 @@ workflow ONCOANALYSER {
 
         // Set outputs
         ch_versions = ch_versions.mix(LINX_REPORT.out.versions)
+    }
+
+    //
+    // MODULE: Run PROTECT to match somatic genomic features with treatment evidence
+    //
+    // channel: [val(meta), protect]
+    ch_protect_out = Channel.empty()
+    if (run.protect) {
+        // Select input sources
+        // channel: [val(meta), linx_somatic_annotation_dir]
+        ch_linx_anno = ch_linx_somatic_out.map { meta, anno_dir, vis_dir -> [meta, anno_dir]}
+
+        // channel: [val(meta), chord_prediction, purple_dir, linx_dir, virusinterpreter_dir]
+        ch_protect_inputs_source = WorkflowOncoanalyser.groupByMeta(
+            run.chord ? ch_chord_out : WorkflowOncoanalyser.getInput(ch_inputs, [Constants.FileType.CHORD_PREDICTION, Constants.DataType.TUMOR]),
+            run.purple ? ch_purple_out : WorkflowOncoanalyser.getInput(ch_inputs, [Constants.FileType.PURPLE_DIR, Constants.DataType.TUMOR_NORMAL]),
+            run.linx ? ch_linx_anno : WorkflowOncoanalyser.getInput(ch_inputs, [Constants.FileType.LINX_ANNO_DIR, Constants.DataType.TUMOR_NORMAL]),
+            run.virusinterpreter ? ch_virusinterpreter_out : WorkflowOncoanalyser.getInput(ch_inputs, [Constants.FileType.VIRUSINTERPRETER_TSV, Constants.DataType.TUMOR]),
+        )
+
+        // Create process-specific meta
+        // channel: [val(meta_protect), chord_prediction, purple_dir, linx_dir, virusinterpreter_dir]
+        ch_protect_inputs = ch_protect_inputs_source
+            .map {
+                def meta = it[0]
+                def other = it[1..-1]
+                def meta_protect = [
+                    key: meta.id,
+                    id: meta.id,
+                    tumor_id: meta.get(['sample_name', Constants.DataType.TUMOR]),
+                    normal_id: meta.get(['sample_name', Constants.DataType.NORMAL]),
+              ]
+              return [meta_protect, *other]
+            }
+
+        // Run process
+        PROTECT(
+          ch_protect_inputs,
+          PREPARE_REFERENCE.out.genome_version,
+          hmf_data.serve_resources,
+          hmf_data.disease_ontology,
+        )
+
+        // Set outputs, restoring original meta
+        ch_versions = ch_versions.mix(PROTECT.out.versions)
+        ch_protect_out = ch_protect_out.mix(WorkflowOncoanalyser.restoreMeta(PROTECT.out.tsv, ch_inputs))
     }
 
     //

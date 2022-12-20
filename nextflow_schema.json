@@ -327,6 +327,12 @@
                     "description": "Path to PEACH panel file.",
                     "fa_icon": "far fa-file-code"
                 },
+                "ref_data_serve_resources": {
+                    "type": "string",
+                    "format": "directory-path",
+                    "description": "Path to SERVE resource directory.",
+                    "fa_icon": "far fa-folder-open"
+                },
                 "ref_data_sigs_signatures": {
                     "type": "string",
                     "format": "file-path",
