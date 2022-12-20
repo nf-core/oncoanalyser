@@ -967,8 +967,7 @@ workflow ONCOANALYSER {
 
         // channel: [val(meta), isofox_dir, purple_dir, linx_dir, virusinterpreter_dir]
         // NOTE(SW): the Groovy Collection.flatten method used in
-        // WorkflowOncoanalyser.groupByMeta removes optional Isofox input; flattening
-        // done manually below to preserve
+        // WorkflowOncoanalyser.groupByMeta removes optional Isofox input; flattening done manually below to preserve
         ch_cuppa_inputs_source = WorkflowOncoanalyser.groupByMeta(
             ch_cuppa_inputs_isofox,
             run.purple ? ch_purple_out : WorkflowOncoanalyser.getInput(ch_inputs, [Constants.FileType.PURPLE_DIR, Constants.DataType.TUMOR_NORMAL]),
@@ -978,7 +977,7 @@ workflow ONCOANALYSER {
         )
             .map { data ->
                 def meta = data[0]
-                def inputs = data[1..-1].collect { it[0] }
+                def inputs = data[1..-1].collectMany { it }
                 return [meta, *inputs]
             }
 
