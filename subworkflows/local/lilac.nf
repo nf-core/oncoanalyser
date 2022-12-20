@@ -119,13 +119,8 @@ workflow LILAC {
         ch_lilac_inputs_full = WorkflowOncoanalyser.groupByMeta(
             ch_lilac_inputs_slices,
             ch_purple_dir,
-            flatten: false,
+            flatten_mode: 'nonrecursive',
         )
-            .map { data ->
-                def meta = data[0]
-                def inputs = data[1..-1].collectMany { it }
-                return [meta, *inputs]
-            }
 
         // Run LILAC
         // channel: [val(meta_lilac), normal_wgs_bam, normal_wgs_bai, tumor_wgs_bam, tumor_wgs_bai, tumor_wts_bam, tumor_wts_bai, purple_dir]
