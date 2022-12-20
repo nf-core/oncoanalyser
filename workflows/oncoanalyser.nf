@@ -63,6 +63,7 @@ include { CUPPA_CLASSIFIER  } from '../modules/local/cuppa/classifier/main'
 include { CUPPA_VISUALISER  } from '../modules/local/cuppa/visualiser/main'
 include { ISOFOX            } from '../modules/local/isofox/main'
 include { LINX_REPORT       } from '../modules/local/gpgr/linx_report/main'
+include { PEACH             } from '../modules/local/peach/main'
 include { PURPLE            } from '../modules/local/purple/main'
 include { SIGS              } from '../modules/local/sigs/main'
 include { VIRUSBREAKEND     } from '../modules/local/virusbreakend/main'
@@ -742,6 +743,47 @@ workflow ONCOANALYSER {
 
         // Set outputs
         ch_versions = ch_versions.mix(LINX_REPORT.out.versions)
+    }
+
+    //
+    // MODULE: Run PEACH to match germline SNVs with pharmacogenetic evidence
+    //
+    // channel: [val(meta), peach_genotype]
+    ch_peach_out = Channel.empty()
+    if (run.peach) {
+        // Select input sources
+        // channel: [val(meta), purple_dir]
+        if (run.purple) {
+            ch_peach_inputs_source = ch_purple_out
+        } else {
+            ch_peach_inputs_source = WorkflowOncoanalyser.getInput(ch_inputs, [Constants.FileType.PURPLE_DIR, Constants.DataType.TUMOR_NORMAL])
+        }
+
+        // Create inputs and create process-specific meta
+        // channel: [meta_peach, purple_germline_vcf]
+        ch_peach_inputs = ch_peach_inputs_source
+            .map { meta, purple_dir ->
+                def meta_peach = [
+                    key: meta.id,
+                    id: meta.id,
+                    tumor_id: meta.get(['sample_name', Constants.DataType.TUMOR]),
+                    normal_id: meta.get(['sample_name', Constants.DataType.NORMAL]),
+                ]
+                def purple_germline_vcf = file(purple_dir).resolve("${meta.get(['sample_name', Constants.DataType.TUMOR])}.purple.germline.vcf.gz")
+                file(purple_germline_vcf, checkIfExists: true)
+                return [meta_peach, purple_germline_vcf]
+            }
+
+        // Run process
+        PEACH(
+            ch_peach_inputs,
+            PREPARE_REFERENCE.out.genome_version,
+            hmf_data.peach_panel,
+        )
+
+        // Set outputs, restoring original meta
+        ch_versions = ch_versions.mix(PEACH.out.versions)
+        ch_peach_out = ch_peach_out.mix(WorkflowOncoanalyser.restoreMeta(PEACH.out.genotype, ch_inputs))
     }
 
     //

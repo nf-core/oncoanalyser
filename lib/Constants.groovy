@@ -29,6 +29,7 @@ class Constants {
         LILAC,
         LINX,
         PAVE,
+        PEACH,
         PURPLE,
         SAGE,
         SIGS,

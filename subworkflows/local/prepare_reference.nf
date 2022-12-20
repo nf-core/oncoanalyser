@@ -150,6 +150,8 @@ def createHmfDataMap(hmf_data_base, params_only) {
         sage_known_hotspots_somatic:  'ref_data_sage_known_hotspots_somatic',
         sage_pon:                     'ref_data_sage_pon',
         clinvar_annotations:          'ref_data_clinvar_annotations',
+        // PEACH
+        peach_panel:                  'ref_data_peach_panel',
         // SIGS
         sigs_signatures:              'ref_data_sigs_signatures',
         // LILAC
