@@ -320,6 +320,13 @@
                     "description": "Path to somatic SAGE known hotspots file.",
                     "fa_icon": "far fa-file-code"
                 },
+                "ref_data_peach_panel": {
+                    "type": "string",
+                    "format": "file-path",
+                    "pattern": "^\\S+\\.json$",
+                    "description": "Path to PEACH panel file.",
+                    "fa_icon": "far fa-file-code"
+                },
                 "ref_data_sigs_signatures": {
                     "type": "string",
                     "format": "file-path",
