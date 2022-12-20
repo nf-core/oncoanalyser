@@ -56,8 +56,11 @@ workflow SAGE {
         ch_versions = ch_versions.mix(SAGE_SOMATIC.out.versions)
 
     emit:
-        germline = SAGE_GERMLINE.out.vcf // channel: [val(meta), sage_vcf]
-        somatic = SAGE_SOMATIC.out.vcf   // channel: [val(meta), sage_vcf]
+        germline_vcf       = SAGE_GERMLINE.out.vcf            // channel: [val(meta), sage_vcf]
+        germline_coverage  = SAGE_GERMLINE.out.gene_coverage  // channel: [val(meta), sage_coverage]
+        somatic_vcf        = SAGE_SOMATIC.out.vcf             // channel: [val(meta), sage_vcf]
+        somatic_tumor_bqr  = SAGE_SOMATIC.out.tumor_bqr_png   // channel: [val(meta), sage_bqr_plot]
+        somatic_normal_bqr = SAGE_SOMATIC.out.normal_bqr_png  // channel: [val(meta), sage_brq_plot]
 
-        versions = ch_versions           // channel: [versions.yml]
+        versions           = ch_versions                      // channel: [versions.yml]
 }

@@ -8,12 +8,12 @@ process CUPPA_VISUALISER {
     tuple val(meta), path(cuppa_csv)
 
     output:
+    tuple val(meta), path('*report.summary.png') , emit: summary_plot
+    tuple val(meta), path('*report.features.png'), emit: feature_plot
     path '*chart.png'
     path '*conclusion.txt'
-    path '*report.features.png'
-    path '*report.summary.png'
     path '*cup_report.pdf'
-    path 'versions.yml'    , emit: versions
+    path 'versions.yml'                          , emit: versions
 
     when:
     task.ext.when == null || task.ext.when

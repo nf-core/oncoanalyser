@@ -9,9 +9,9 @@ process CHORD {
     val genome_ver
 
     output:
-    path '*_chord_signatures.txt', emit: signatures
-    path '*_chord_prediction.txt', emit: prediction
-    path 'versions.yml'          , emit: versions
+    tuple val(meta), path('*_chord_prediction.txt'), emit: prediction
+    path '*_chord_signatures.txt'                  , emit: signatures
+    path 'versions.yml'                            , emit: versions
 
     when:
     task.ext.when == null || task.ext.when

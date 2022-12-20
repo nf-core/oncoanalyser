@@ -63,6 +63,7 @@ include { CUPPA_CLASSIFIER  } from '../modules/local/cuppa/classifier/main'
 include { CUPPA_VISUALISER  } from '../modules/local/cuppa/visualiser/main'
 include { ISOFOX            } from '../modules/local/isofox/main'
 include { LINX_REPORT       } from '../modules/local/gpgr/linx_report/main'
+include { ORANGE            } from '../modules/local/orange/main'
 include { PEACH             } from '../modules/local/peach/main'
 include { PROTECT           } from '../modules/local/protect/main'
 include { PURPLE            } from '../modules/local/purple/main'
@@ -93,6 +94,7 @@ include { SAGE              } from '../subworkflows/local/sage'
 //
 include { CUSTOM_DUMPSOFTWAREVERSIONS } from '../modules/nf-core/custom/dumpsoftwareversions/main'
 include { PICARD_COLLECTWGSMETRICS    } from '../modules/nf-core/picard/collectwgsmetrics/main'
+include { SAMTOOLS_FLAGSTAT           } from '../modules/nf-core/samtools/flagstat/main'
 
 /*
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -101,7 +103,7 @@ include { PICARD_COLLECTWGSMETRICS    } from '../modules/nf-core/picard/collectw
 */
 
 // Get absolute file paths
-samplesheet   = Utils.getFileObject(params.input)
+samplesheet = Utils.getFileObject(params.input)
 gridss_config = Utils.getFileObject(params.gridss_config)
 
 workflow ONCOANALYSER {
@@ -151,7 +153,7 @@ workflow ONCOANALYSER {
         // channel: [meta_isofox, tumor_bam_wts]
         ch_isofox_inputs = ch_inputs_wts.present
             .map { meta ->
-                def bam =  meta.get([Constants.FileType.BAM_WTS, Constants.DataType.TUMOR])
+                def bam = meta.get([Constants.FileType.BAM_WTS, Constants.DataType.TUMOR])
                 def meta_isofox = [key: meta.id, id: meta.get(['sample_name', Constants.DataType.TUMOR])]
                 return [meta_isofox, bam, "${bam}.bai"]
             }
@@ -398,9 +400,15 @@ workflow ONCOANALYSER {
     // SUBWORKFLOW: call SNV, MNV, and small INDELS with SAGE
     //
     // channel: [val(meta), sage_vcf]
-    ch_sage_germline_out = Channel.empty()
+    ch_sage_germline_vcf_out = Channel.empty()
+    // channel: [val(meta), sage_coverage]
+    ch_sage_germline_coverage_out = Channel.empty()
     // channel: [val(meta), sage_vcf]
-    ch_sage_somatic_out = Channel.empty()
+    ch_sage_somatic_vcf_out = Channel.empty()
+    // channel: [val(meta), bqr_plot]
+    ch_sage_somatic_tumor_bqr_out = Channel.empty()
+    // channel: [val(meta), bqr_plot]
+    ch_sage_somatic_normal_bqr_out = Channel.empty()
     if (run.sage) {
         // Create inputs and create process-specific meta
         ch_sage_inputs = ch_bams_and_indices
@@ -434,8 +442,11 @@ workflow ONCOANALYSER {
 
         // Set outputs, restoring original meta
         ch_versions = ch_versions.mix(SAGE.out.versions)
-        ch_sage_germline_out = ch_sage_germline_out.mix(WorkflowOncoanalyser.restoreMeta(SAGE.out.germline, ch_inputs))
-        ch_sage_somatic_out = ch_sage_somatic_out.mix(WorkflowOncoanalyser.restoreMeta(SAGE.out.somatic, ch_inputs))
+        ch_sage_germline_vcf_out = ch_sage_germline_vcf_out.mix(WorkflowOncoanalyser.restoreMeta(SAGE.out.germline_vcf, ch_inputs))
+        ch_sage_germline_coverage_out = ch_sage_germline_coverage_out.mix(WorkflowOncoanalyser.restoreMeta(SAGE.out.germline_coverage, ch_inputs))
+        ch_sage_somatic_vcf_out = ch_sage_somatic_vcf_out.mix(WorkflowOncoanalyser.restoreMeta(SAGE.out.somatic_vcf, ch_inputs))
+        ch_sage_somatic_tumor_bqr_out = ch_sage_somatic_tumor_bqr_out.mix(WorkflowOncoanalyser.restoreMeta(SAGE.out.somatic_tumor_bqr, ch_inputs))
+        ch_sage_somatic_normal_bqr_out = ch_sage_somatic_normal_bqr_out.mix(WorkflowOncoanalyser.restoreMeta(SAGE.out.somatic_normal_bqr, ch_inputs))
     }
 
     //
@@ -449,8 +460,8 @@ workflow ONCOANALYSER {
         // Select input sources
         // channel: [meta, sage_vcf]
         if (run.sage) {
-            ch_pave_germline_inputs_source = ch_sage_germline_out
-            ch_pave_somatic_inputs_source = ch_sage_somatic_out
+            ch_pave_germline_inputs_source = ch_sage_germline_vcf_out
+            ch_pave_somatic_inputs_source = ch_sage_somatic_vcf_out
         } else {
             ch_pave_germline_inputs_source = WorkflowOncoanalyser.getInput(ch_inputs, [Constants.FileType.SAGE_VCF, Constants.DataType.NORMAL])
             ch_pave_somatic_inputs_source = WorkflowOncoanalyser.getInput(ch_inputs, [Constants.FileType.SAGE_VCF, Constants.DataType.TUMOR])
@@ -523,7 +534,7 @@ workflow ONCOANALYSER {
         }
 
         // channel: [val(meta), amber_dir, cobalt_dir, sv_hard_vcf, sv_hard_tbi, sv_soft_vcf, sv_soft_tbi, smlv_tumor_vcf, smlv_normal_vcf]
-        ch_purple_inputs_sources = WorkflowOncoanalyser.groupByMeta(
+        ch_purple_inputs_source = WorkflowOncoanalyser.groupByMeta(
             run.amber ? ch_amber_out : WorkflowOncoanalyser.getInput(ch_inputs, [Constants.FileType.AMBER_DIR, Constants.DataType.TUMOR_NORMAL]),
             run.cobalt ? ch_cobalt_out : WorkflowOncoanalyser.getInput(ch_inputs, [Constants.FileType.COBALT_DIR, Constants.DataType.TUMOR_NORMAL]),
             ch_purple_inputs_sv,
@@ -531,8 +542,9 @@ workflow ONCOANALYSER {
             run.pave ? ch_pave_germline_out : WorkflowOncoanalyser.getInput(ch_inputs, [Constants.FileType.PAVE_VCF, Constants.DataType.NORMAL]),
         )
 
+        // Create process-specific meta
         // channel: [val(meta_purple), amber_dir, cobalt_dir, sv_hard_vcf, sv_hard_tbi, sv_soft_vcf, sv_soft_tbi, smlv_tumor_vcf, smlv_normal_vcf]
-        ch_purple_inputs = ch_purple_inputs_sources
+        ch_purple_inputs = ch_purple_inputs_source
             .map {
                 def meta = it[0]
                 def other = it[1..-1]
@@ -600,6 +612,8 @@ workflow ONCOANALYSER {
     //
     // MODULE: Run CHORD to predict HR deficiency status
     //
+    // channel: [val(meta), chord_prediction]
+    ch_chord_out = Channel.empty()
     if (run.chord) {
         // Select input sources
         // channel: [val(meta), purple_dir]
@@ -616,7 +630,7 @@ workflow ONCOANALYSER {
                 def tumor_id = meta.get(['sample_name', Constants.DataType.TUMOR])
                 def smlv_vcf = file(purple_dir).resolve("${tumor_id}.purple.somatic.vcf.gz")
                 def sv_vcf = file(purple_dir).resolve("${tumor_id}.purple.sv.vcf.gz")
-                def meta_chord = [id: meta.id]
+                def meta_chord = [key: meta.id, id: meta.id]
                 return [meta_chord, smlv_vcf, sv_vcf]
             }
 
@@ -626,13 +640,16 @@ workflow ONCOANALYSER {
           PREPARE_REFERENCE.out.genome_version,
         )
 
-        // Set outputs
+        // Set outputs, restoring original meta
         ch_versions = ch_versions.mix(CHORD.out.versions)
+        ch_chord_out = ch_chord_out.mix(WorkflowOncoanalyser.restoreMeta(CHORD.out.prediction, ch_inputs))
     }
 
     //
     // SUBWORKFLOW: Run LILAC for HLA typing and somatic CNV and SNV calling
     //
+    // channel: [val(meta), lilac_dir]
+    ch_lilac_out = Channel.empty()
     if (run.lilac) {
         // Select input sources
         // channel: [val(meta), purple_dir]
@@ -651,14 +668,14 @@ workflow ONCOANALYSER {
             hmf_data.lilac_resources,
         )
 
-        // Set outputs
+        // Set outputs, restoring original meta
         ch_versions = ch_versions.mix(LILAC.out.versions)
+        ch_lilac_out = ch_lilac_out.mix(WorkflowOncoanalyser.restoreMeta(LILAC.out.results, ch_inputs))
     }
 
     //
     // MODULE: Run VIRUSBreakend and Virus Interpreter to quantify viral content
     //
-    // NOTE(SW): kept separate from CUPPA conditional block since we'll allow users to run this independently
     ch_virusinterpreter_out = Channel.empty()
     if (run.virusinterpreter) {
         // VIRUSBreakend
@@ -897,6 +914,12 @@ workflow ONCOANALYSER {
     //
     // MODULE: Run CUPPA predict tissue of origin
     //
+    // channel: [val(meta), cuppa_results]
+    ch_cuppa_out = Channel.empty()
+    // channel: [val(meta), cuppa_summary_plot]
+    ch_cuppa_summary_plot_out = Channel.empty()
+    // channel: [val(meta), cuppa_feature_plot]
+    ch_cuppa_feature_plot_out = Channel.empty()
     if (run.cuppa) {
         // Select input sources
         // channel: [val(meta), isofox_dir]
@@ -921,8 +944,8 @@ workflow ONCOANALYSER {
         ch_cuppa_inputs_source = WorkflowOncoanalyser.groupByMeta(
             ch_cuppa_inputs_isofox,
             run.purple ? ch_purple_out : WorkflowOncoanalyser.getInput(ch_inputs, [Constants.FileType.PURPLE_DIR, Constants.DataType.TUMOR_NORMAL]),
-            run.linx ? ch_linx_anno : WorkflowOncoanalyser.getInput(ch_inputs, [Constants.FileType.LINX_DIR, Constants.DataType.TUMOR_NORMAL]),
-            run.virusinterpreter ? ch_virusinterpreter_out : WorkflowOncoanalyser.getInput(ch_inputs, [Constants.FileType.VIRUSINTERPRETER, Constants.DataType.TUMOR]),
+            run.linx ? ch_linx_anno : WorkflowOncoanalyser.getInput(ch_inputs, [Constants.FileType.LINX_ANNO_DIR, Constants.DataType.TUMOR_NORMAL]),
+            run.virusinterpreter ? ch_virusinterpreter_out : WorkflowOncoanalyser.getInput(ch_inputs, [Constants.FileType.VIRUSINTERPRETER_TSV, Constants.DataType.TUMOR]),
             flatten: false,
         )
             .map { data ->
@@ -949,16 +972,169 @@ workflow ONCOANALYSER {
             hmf_data.cuppa_resources,
         )
 
-        // Set outputs
+        // Set outputs, restoring original meta
         ch_versions = ch_versions.mix(CUPPA_CLASSIFIER.out.versions)
+        ch_cuppa_out = ch_cuppa_out.mix(WorkflowOncoanalyser.restoreMeta(CUPPA_CLASSIFIER.out.csv, ch_inputs))
 
         // Run process
         CUPPA_VISUALISER(
             CUPPA_CLASSIFIER.out.csv,
         )
 
-        // Set outputs
+        // Set outputs, restoring original meta
         ch_versions = ch_versions.mix(CUPPA_VISUALISER.out.versions)
+        ch_cuppa_summary_plot_out = ch_cuppa_summary_plot_out.mix(WorkflowOncoanalyser.restoreMeta(CUPPA_VISUALISER.out.summary_plot, ch_inputs))
+        ch_cuppa_feature_plot_out = ch_cuppa_feature_plot_out.mix(WorkflowOncoanalyser.restoreMeta(CUPPA_VISUALISER.out.feature_plot, ch_inputs))
+    }
+
+    //
+    // MODULE: Run ORANGE to generate static PDF report
+    //
+    if (run.orange) {
+        // SAMtools flagstat
+        // Select input source
+        // channel (present): [val(meta), sample_type, flagstat]
+        // channel (absent): [val(meta)]
+        ch_inputs_flagstat = ch_inputs
+            .flatMap { meta -> [Constants.DataType.TUMOR, Constants.DataType.NORMAL].collect { [meta, it] } }
+            .branch { meta, sample_type ->
+                def key = [Constants.FileType.FLAGSTAT, sample_type]
+                present: meta.containsKey(key)
+                    return [meta, sample_type, meta.get(key)]
+                absent: ! meta.containsKey(key)
+            }
+
+        // Create inputs and create process-specific meta
+        // channel: [val(meta_flagstat), bam, bai]
+        ch_flagstat_inputs_all = ch_inputs_flagstat.absent
+            .map { meta, sample_type ->
+                def bam = meta.get([Constants.FileType.BAM_WGS, sample_type])
+                def meta_flagstat = [
+                    key: meta.id,
+                    id: meta.get(['sample_name', sample_type]),
+                    // NOTE(SW): must use string representation for caching purposes
+                    sample_type_str: sample_type.name(),
+                ]
+                return [meta_flagstat, bam, "${bam}.bai"]
+            }
+
+        // Collapse duplicate files e.g. repeated normal BAMs for multiple tumor samples
+        // channel: [val(meta_flagstat_shared), bam, bai]
+        ch_flagstat_inputs = ch_flagstat_inputs_all
+            .map { [it[1..-1], it[0]] }
+            .groupTuple()
+            .map { filepaths, meta_flagstat ->
+                def (keys, sample_names, sample_type_strs) = meta_flagstat
+                    .collect {
+                        [it.key, it.id, it.sample_type_str]
+                    }
+                    .transpose()
+
+                def sample_type_strs_unique = sample_type_strs.unique(false)
+                assert sample_type_strs_unique.size() == 1
+                def sample_type_str = sample_type_strs_unique[0]
+
+                def meta_flagstat_new = [
+                    keys: keys,
+                    id: sample_names.join('__'),
+                    id_simple: keys.join('__'),
+                    sample_type_str: sample_type_str,
+                ]
+                return [meta_flagstat_new, *filepaths]
+            }
+
+        // Run process
+        SAMTOOLS_FLAGSTAT(
+            ch_flagstat_inputs,
+        )
+
+        // Set version
+        ch_versions = ch_versions.mix(SAMTOOLS_FLAGSTAT.out.versions)
+
+        // Replicate outputs to reverse unique operation
+        // channel: [val(meta_flagstat_individual), flagstat]
+        ch_flagstat_out = SAMTOOLS_FLAGSTAT.out.flagstat
+            .flatMap { meta_flagstat_shared, flagstat ->
+                def sample_type = Utils.getEnumFromString(meta_flagstat_shared.sample_type_str, Constants.DataType)
+                meta_flagstat_shared.keys.collect { key ->
+                    return [meta_flagstat_shared + [key: key], sample_type, flagstat]
+                }
+            }
+
+        // Combine input flagstat channels, restoring original meta where required, split by sample type
+        // channel (somatic): [val(meta), flagstat]
+        // channel (germline): [val(meta), flagstat]
+        ch_orange_inputs_flagstat = Channel.empty()
+            .concat(
+                ch_inputs_flagstat.present,
+                WorkflowOncoanalyser.restoreMeta(ch_flagstat_out, ch_inputs),
+            )
+            .branch { meta, sample_type, flagstat ->
+                somatic: sample_type == Constants.DataType.TUMOR
+                    return [meta, flagstat]
+                germline: sample_type == Constants.DataType.NORMAL
+                    return [meta, flagstat]
+            }
+
+        // ORANGE
+        // Split LINX channel
+        // channel (anno): [val(meta), anno_dir]
+        // channel (plot): [val(meta), plot_dir]
+        ch_orange_inputs_linx = ch_linx_somatic_out
+            .multiMap { meta, anno_dir, plot_dir ->
+                anno: [meta, anno_dir]
+                plot: [meta, plot_dir]
+            }
+
+        // Select input source
+        // NOTE(SW): we could consider not allowing inputs from the samplesheet here since this nothing follows
+        ch_orange_inputs_source = WorkflowOncoanalyser.groupByMeta(
+            ch_cwm_out.somatic,
+            ch_cwm_out.germline,
+            ch_orange_inputs_flagstat.somatic,
+            ch_orange_inputs_flagstat.germline,
+            run.chord ? ch_chord_out : WorkflowOncoanalyser.getInput(ch_inputs, [Constants.FileType.CHORD_PREDICTION, Constants.DataType.TUMOR]),
+            run.lilac ? ch_lilac_out : WorkflowOncoanalyser.getInput(ch_inputs, [Constants.FileType.LILAC_DIR, Constants.DataType.NORMAL]),
+            run.sage ? ch_sage_somatic_tumor_bqr_out : WorkflowOncoanalyser.getInput(ch_inputs, [Constants.FileType.SAGE_BQR, Constants.DataType.TUMOR]),
+            run.sage ? ch_sage_somatic_normal_bqr_out : WorkflowOncoanalyser.getInput(ch_inputs, [Constants.FileType.SAGE_BQR, Constants.DataType.NORMAL]),
+            run.sage ? ch_sage_germline_coverage_out : WorkflowOncoanalyser.getInput(ch_inputs, [Constants.FileType.SAGE_COVERAGE, Constants.DataType.NORMAL]),
+            run.purple ? ch_purple_out : WorkflowOncoanalyser.getInput([Constants.FileType.PURPLE_DIR, Constants.DataType.TUMOR_NORMAL]),
+            run.linx ? ch_orange_inputs_linx.anno : WorkflowOncoanalyser.getInput(ch_inputs, [Constants.FileType.LINX_ANNO_DIR, Constants.DataType.TUMOR_NORMAL]),
+            run.linx ? ch_orange_inputs_linx.plot : WorkflowOncoanalyser.getInput(ch_inputs, [Constants.FileType.LINX_PLOT_DIR, Constants.DataType.TUMOR_NORMAL]),
+            run.protect ? ch_protect_out : WorkflowOncoanalyser.getInput(ch_inputs, [Constants.FileType.PROTECT_TSV, Constants.DataType.TUMOR]),
+            run.peach ? ch_peach_out : WorkflowOncoanalyser.getInput(ch_inputs, [Constants.FileType.PEACH_TSV, Constants.DataType.NORMAL]),
+            run.cuppa ? ch_cuppa_out : WorkflowOncoanalyser.getInput(ch_inputs, [Constants.FileType.CUPPA_CSV, Constants.DataType.TUMOR]),
+            run.cuppa ? ch_cuppa_feature_plot_out : WorkflowOncoanalyser.getInput(ch_inputs, [Constants.FileType.CUPPA_FEATURE_PLOT, Constants.DataType.TUMOR]),
+            run.cuppa ? ch_cuppa_summary_plot_out : WorkflowOncoanalyser.getInput(ch_inputs, [Constants.FileType.CUPPA_SUMMARY_PLOT, Constants.DataType.TUMOR]),
+            run.virusinterpreter ? ch_virusinterpreter_out : WorkflowOncoanalyser.getInput(ch_inputs, [Constants.FileType.VIRUSINTERPRETER_TSV, Constants.DataType.TUMOR]),
+        )
+
+        ch_orange_inputs = ch_orange_inputs_source
+            .map {
+                def meta = it[0]
+                def meta_orange = [
+                    key: meta.id,
+                    id: meta.id,
+                    tumor_id: meta.get(['sample_name', Constants.DataType.TUMOR]),
+                    normal_id: meta.get(['sample_name', Constants.DataType.NORMAL]),
+                ]
+                return [meta_orange, *it[1..-1]]
+            }
+
+        // Run process
+        ORANGE(
+            ch_orange_inputs,
+            PREPARE_REFERENCE.out.genome_version,
+            hmf_data.disease_ontology,
+            hmf_data.known_fusion_data,
+            hmf_data.driver_gene_panel,
+            hmf_data.cohort_mapping,
+            hmf_data.cohort_percentiles,
+            "5.23 (oncoanalyser 0.0.1dev)",
+        )
+
+        // Set outputs
+        ch_versions = ch_versions.mix(ORANGE.out.versions)
     }
 
     //
