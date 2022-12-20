@@ -10,8 +10,8 @@ process VIRUSINTERPRETER {
     path reporting_db
 
     output:
-    tuple val(meta), path('virusinterpreter'), emit: virusinterpreter_dir
-    path 'versions.yml'                      , emit: versions
+    tuple val(meta), path("${meta.id}.virus.annotated.tsv"), emit: virusinterpreter
+    path 'versions.yml'                                    , emit: versions
 
     when:
     task.ext.when == null || task.ext.when
@@ -32,7 +32,7 @@ process VIRUSINTERPRETER {
             -virus_breakend_tsv ${virus_tsv} \\
             -taxonomy_db_tsv ${taxonomy_db} \\
             -virus_reporting_db_tsv ${reporting_db} \\
-            -output_dir ./virusinterpreter/
+            -output_dir ./
 
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":
@@ -42,7 +42,7 @@ process VIRUSINTERPRETER {
 
     stub:
     """
-    mkdir virusinterpreter/
+    touch ${meta.id}.virus.annotated.tsv
     echo -e '${task.process}:\\n  stub: noversions\\n' > versions.yml
     """
 }

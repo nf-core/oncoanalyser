@@ -769,7 +769,7 @@ workflow ONCOANALYSER {
 
         // Set outputs, restoring original meta
         ch_versions = ch_versions.mix(VIRUSINTERPRETER.out.versions)
-        ch_virusinterpreter_out = ch_virusinterpreter_out.mix(WorkflowOncoanalyser.restoreMeta(VIRUSINTERPRETER.out.virusinterpreter_dir, ch_inputs))
+        ch_virusinterpreter_out = ch_virusinterpreter_out.mix(WorkflowOncoanalyser.restoreMeta(VIRUSINTERPRETER.out.virusinterpreter, ch_inputs))
     }
 
     //
@@ -859,7 +859,7 @@ workflow ONCOANALYSER {
         // channel: [val(meta), linx_somatic_annotation_dir]
         ch_linx_anno = ch_linx_somatic_out.map { meta, anno_dir, vis_dir -> [meta, anno_dir]}
 
-        // channel: [val(meta), chord_prediction, purple_dir, linx_dir, virusinterpreter_dir]
+        // channel: [val(meta), chord_prediction, purple_dir, linx_dir, virusinterpreter]
         ch_protect_inputs_source = WorkflowOncoanalyser.groupByMeta(
             run.chord ? ch_chord_out : WorkflowOncoanalyser.getInput(ch_inputs, [Constants.FileType.CHORD_PREDICTION, Constants.DataType.TUMOR]),
             run.purple ? ch_purple_out : WorkflowOncoanalyser.getInput(ch_inputs, [Constants.FileType.PURPLE_DIR, Constants.DataType.TUMOR_NORMAL]),
@@ -868,7 +868,7 @@ workflow ONCOANALYSER {
         )
 
         // Create process-specific meta
-        // channel: [val(meta_protect), chord_prediction, purple_dir, linx_dir, virusinterpreter_dir]
+        // channel: [val(meta_protect), chord_prediction, purple_dir, linx_dir, virusinterpreter]
         ch_protect_inputs = ch_protect_inputs_source
             .map {
                 def meta = it[0]
@@ -962,7 +962,7 @@ workflow ONCOANALYSER {
         // channel: [val(meta), linx_somatic_annotation_dir]
         ch_linx_anno = ch_linx_somatic_out.map { meta, anno_dir, vis_dir -> [meta, anno_dir]}
 
-        // channel: [val(meta), isofox_dir, purple_dir, linx_dir, virusinterpreter_dir]
+        // channel: [val(meta), isofox_dir, purple_dir, linx_dir, virusinterpreter]
         ch_cuppa_inputs_source = WorkflowOncoanalyser.groupByMeta(
             ch_cuppa_inputs_isofox,
             run.purple ? ch_purple_out : WorkflowOncoanalyser.getInput(ch_inputs, [Constants.FileType.PURPLE_DIR, Constants.DataType.TUMOR_NORMAL]),
@@ -972,7 +972,7 @@ workflow ONCOANALYSER {
         )
 
         // Create inputs and create process-specific meta
-        // channel: [val(meta_cuppa), isofox_dir, purple_dir, linx_dir, virusinterpreter_dir]
+        // channel: [val(meta_cuppa), isofox_dir, purple_dir, linx_dir, virusinterpreter]
         ch_cuppa_inputs = ch_cuppa_inputs_source
             .map {
                 def meta = it[0]
