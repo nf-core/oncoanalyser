@@ -16,6 +16,7 @@ process SLICE {
 
     script:
     def args = task.ext.args ?: ''
+    def bam_name = bam.name - ~/\.bam$/
 
     """
     samtools view \\
@@ -24,7 +25,7 @@ process SLICE {
         -@${task.cpus} \\
         -Obam \\
         ${bam} | \\
-        samtools sort -T tmp -o ${bam.simpleName}.sliced.bam
+        samtools sort -T tmp -o ${bam_name}.sliced.bam
 
     samtools index "${bam.simpleName}.sliced.bam"
 
@@ -35,8 +36,10 @@ process SLICE {
     """
 
     stub:
+    def bam_name = bam.name - ~/\.bam$/
+
     """
-    touch ${bam.simpleName}.sliced.bam ${bam.simpleName}.sliced.bam.bai
+    touch ${bam_name}.sliced.bam ${bam_name}.sliced.bam.bai
     echo -e '${task.process}:\\n  stub: noversions\\n' > versions.yml
     """
 }
