@@ -24,6 +24,10 @@
                     "samtools/faidx": {
                         "branch": "master",
                         "git_sha": "cf5b9c30a2adacc581793afb79fae5f5b50bed01"
+                    },
+                    "samtools/flagstat": {
+                        "branch": "master",
+                        "git_sha": "c8e35eb2055c099720a75538d1b8adb3fb5a464c"
                     }
                 }
             }

@@ -85,12 +85,14 @@ process PURPLE {
     stub:
     """
     mkdir purple/
-    cat <<EOF > purple/${meta.tumor_id}.purple.sv.vcf.gz
-    ##fileformat=VCFv4.1
-    ##contig=<ID=.>
-    #CHROM	POS	ID	REF	ALT	QUAL	FILTER	INFO
-    .	.	.	.	.	.	.
-    EOF
+    touch purple/${meta.tumor_id}.purple.cnv.gene.tsv
+    touch purple/${meta.tumor_id}.purple.driver.catalog.germline.tsv
+    touch purple/${meta.tumor_id}.purple.driver.catalog.somatic.tsv
+    touch purple/${meta.tumor_id}.purple.germline.vcf.gz
+    touch purple/${meta.tumor_id}.purple.purity.tsv
+    touch purple/${meta.tumor_id}.purple.qc
+    touch purple/${meta.tumor_id}.purple.somatic.vcf.gz
+    touch purple/${meta.tumor_id}.purple.sv.vcf.gz
     echo -e '${task.process}:\\n  stub: noversions\\n' > versions.yml
     """
 }

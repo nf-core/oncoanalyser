@@ -1,5 +1,3 @@
-// NOTE(SW): 3.0.3 logic that determines BQR outputs assumes '-out' is a path that includes at least one directory
-
 process SAGE_GERMLINE {
     tag "${meta.id}"
     label 'process_medium'
@@ -20,9 +18,7 @@ process SAGE_GERMLINE {
 
     output:
     tuple val(meta), path("${meta.tumor_id}.sage_germline.vcf.gz"), emit: vcf
-    path '*gene.coverage.tsv'                                     , emit: gene_coverage, optional: true
-    path '*sage.bqr.png'                                          , emit: bqr_png, optional: true
-    path '*sage.bqr.tsv'                                          , emit: bqr_tsv, optional: true
+    tuple val(meta), path('*gene.coverage.tsv')                   , emit: gene_coverage, optional: true
     path 'versions.yml'                                           , emit: versions
 
     when:
@@ -55,8 +51,6 @@ process SAGE_GERMLINE {
             -panel_max_germline_rel_raw_base_qual 100 \\
             -mnv_filter_enabled false \\
             -panel_only \\
-            -write_bqr_data \\
-            -write_bqr_plot \\
             -threads ${task.cpus} \\
             -out ./${meta.tumor_id}.sage_germline.vcf.gz
 
@@ -69,6 +63,7 @@ process SAGE_GERMLINE {
     stub:
     """
     touch "${meta.tumor_id}.sage_germline.vcf.gz"
+    touch "${meta.tumor_id}.gene.coverage.tsv"
     echo -e '${task.process}:\\n  stub: noversions\\n' > versions.yml
     """
 }

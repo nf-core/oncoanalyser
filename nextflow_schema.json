@@ -250,6 +250,20 @@
                     "description": "Path to Virus Interpreter reporting file.",
                     "fa_icon": "far fa-file-code"
                 },
+                "ref_data_cohort_mapping": {
+                    "type": "string",
+                    "format": "file-path",
+                    "pattern": "^\\S+\\.tsv$",
+                    "description": "Path to ORANGE cohort mapping file.",
+                    "fa_icon": "far fa-file-code"
+                },
+                "ref_data_cohort_percentiles": {
+                    "type": "string",
+                    "format": "file-path",
+                    "pattern": "^\\S+\\.tsv$",
+                    "description": "Path to ORANGE cohort percentiles file.",
+                    "fa_icon": "far fa-file-code"
+                },
                 "ref_data_segment_mappability": {
                     "type": "string",
                     "format": "file-path",
@@ -352,6 +366,13 @@
                     "format": "file-path",
                     "pattern": "^\\S+\\.csv$",
                     "description": "Path to HMF known fusions Data file.",
+                    "fa_icon": "far fa-file-code"
+                },
+                "ref_data_disease_ontology": {
+                    "type": "string",
+                    "format": "file-path",
+                    "pattern": "^\\S+\\.json$",
+                    "description": "Path to disease ontology file.",
                     "fa_icon": "far fa-file-code"
                 },
                 "ref_data_purple_germline_del": {

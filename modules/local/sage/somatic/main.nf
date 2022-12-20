@@ -19,8 +19,9 @@ process SAGE_SOMATIC {
 
     output:
     tuple val(meta), path("${meta.tumor_id}.sage_somatic.vcf.gz"), emit: vcf
+    tuple val(meta), path("${meta.tumor_id}.sage.bqr.png")       , emit: tumor_bqr_png, optional: true
+    tuple val(meta), path("${meta.normal_id}.sage.bqr.png")      , emit: normal_bqr_png, optional: true
     path '*gene.coverage.tsv'                                    , emit: gene_coverage, optional: true
-    path '*sage.bqr.png'                                         , emit: bqr_png, optional: true
     path '*sage.bqr.tsv'                                         , emit: bqr_tsv, optional: true
     path 'versions.yml'                                          , emit: versions
 
@@ -60,6 +61,8 @@ process SAGE_SOMATIC {
     stub:
     """
     touch "${meta.tumor_id}.sage_somatic.vcf.gz"
+    touch "${meta.tumor_id}.sage.bqr.png"
+    touch "${meta.normal_id}.sage.bqr.png"
     echo -e '${task.process}:\\n  stub: noversions\\n' > versions.yml
     """
 }

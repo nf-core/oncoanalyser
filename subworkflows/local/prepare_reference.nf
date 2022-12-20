@@ -161,7 +161,11 @@ def createHmfDataMap(hmf_data_base, params_only) {
         // Virus Interpreter
         virus_taxonomy_db:            'ref_data_virus_taxonomy_db',
         virus_reporting_db:           'ref_data_virus_reporting_db',
+        // ORANGE
+        cohort_mapping:               'ref_data_cohort_mapping',
+        cohort_percentiles:           'ref_data_cohort_percentiles',
         // Misc
+        disease_ontology:             'ref_data_disease_ontology',
         purple_germline_del:          'ref_data_purple_germline_del',
         driver_gene_panel:            'ref_data_driver_gene_panel',
         ensembl_data_resources:       'ref_data_ensembl_data_resources',

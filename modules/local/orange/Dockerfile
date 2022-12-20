@@ -9,22 +9,14 @@ RUN \
   rm -rf /var/lib/apt/lists/*
 
 RUN \
-  mkdir -p /opt/sage/ && \
-  wget -O /opt/sage/sage.jar 'https://github.com/hartwigmedical/hmftools/releases/download/sage-v3.0.3/sage_v3.0_rc3.jar'
+  mkdir -p /opt/orange/ && \
+  wget -O /opt/orange/orange.jar 'https://github.com/hartwigmedical/hmftools/releases/download/orange-v1.10/orange.jar'
 
 USER mambauser
 
 RUN \
   micromamba install -y -n base -c bioconda -c conda-forge \
-    bioconductor-genomicranges \
-    bioconductor-variantannotation \
-    font-ttf-dejavu \
-    'openjdk >=8' \
-    r-dplyr \
-    r-ggplot2 \
-    r-tidyr \
-    xorg-libxt \
-    zlib && \
+    'openjdk >=8' && \
   micromamba clean --all --yes
 
 ENV PATH="/opt/conda/bin:/opt/conda/condabin:${PATH}"
