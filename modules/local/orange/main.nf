@@ -5,7 +5,7 @@ process ORANGE {
     container 'docker.io/scwatts/orange:1.10--0'
 
     input:
-    tuple val(meta), path(bam_metrics_somatic), path(bam_metrics_germline), path(flagstat_somatic), path(flagstat_germline), path(chord_prediction), path(lilac_dir), path(sage_somatic_bqr), path(sage_germline_bqr), path(sage_germline_coverage), path(purple_dir), path(linx_anno_dir), path(linx_plot_dir), path(protect), path(peach_genotype), path(cuppa), path(cuppa_summary_plot), path(cuppa_feature_plot), path(virusinterpreter)
+    tuple val(meta), path(bam_metrics_somatic), path(bam_metrics_germline), path(flagstat_somatic), path(flagstat_germline), path(chord_prediction), path(lilac_dir), path(sage_somatic_bqr), path(sage_germline_bqr), path(sage_germline_coverage), path(purple_dir), path(linx_somatic_anno_dir), path(linx_somatic_plot_dir), path(linx_germline_anno_dir), path(protect), path(peach_genotype), path(cuppa), path(cuppa_summary_plot), path(cuppa_feature_plot), path(virusinterpreter)
     val genome_ver
     path disease_ontology
     path known_fusion_data
@@ -69,13 +69,13 @@ process ORANGE {
             -purple_germline_variant_vcf ${purple_dir}/${meta.tumor_id}.purple.germline.vcf.gz \\
             -purple_plot_directory ${purple_dir}/plot/ \\
             \\
-            -linx_breakend_tsv ${linx_anno_dir}/${meta.tumor_id}.linx.breakend.tsv \\
-            -linx_structural_variant_tsv ${linx_anno_dir}/${meta.tumor_id}.linx.svs.tsv \\
-            -linx_driver_tsv ${linx_anno_dir}/${meta.tumor_id}.linx.drivers.tsv \\
-            -linx_driver_catalog_tsv ${linx_anno_dir}/${meta.tumor_id}.linx.driver.catalog.tsv \\
-            -linx_fusion_tsv ${linx_anno_dir}/${meta.tumor_id}.linx.fusion.tsv \\
-            -linx_germline_disruption_tsv ${linx_anno_dir}/${meta.normal_id}.linx.germline.disruption.tsv \\
-            -linx_plot_directory ${linx_plot_dir} \\
+            -linx_breakend_tsv ${linx_somatic_anno_dir}/${meta.tumor_id}.linx.breakend.tsv \\
+            -linx_structural_variant_tsv ${linx_somatic_anno_dir}/${meta.tumor_id}.linx.svs.tsv \\
+            -linx_driver_tsv ${linx_somatic_anno_dir}/${meta.tumor_id}.linx.drivers.tsv \\
+            -linx_driver_catalog_tsv ${linx_somatic_anno_dir}/${meta.tumor_id}.linx.driver.catalog.tsv \\
+            -linx_fusion_tsv ${linx_somatic_anno_dir}/${meta.tumor_id}.linx.fusion.tsv \\
+            -linx_germline_disruption_tsv ${linx_germline_anno_dir}/${meta.normal_id}.linx.germline.disruption.tsv \\
+            -linx_plot_directory ${linx_somatic_plot_dir} \\
             \\
             -cuppa_result_csv ${cuppa} \\
             -cuppa_feature_plot ${cuppa_summary_plot} \\
