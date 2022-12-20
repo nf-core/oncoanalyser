@@ -91,7 +91,7 @@ include { SAGE              } from '../subworkflows/local/sage'
 // MODULES
 //
 include { CUSTOM_DUMPSOFTWAREVERSIONS } from '../modules/nf-core/custom/dumpsoftwareversions/main'
-include { PICARD_COLLECTWGSMETRICS as COLLECTWGSMETRICS } from '../modules/nf-core/picard/collectwgsmetrics/main'
+include { PICARD_COLLECTWGSMETRICS    } from '../modules/nf-core/picard/collectwgsmetrics/main'
 
 /*
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -169,6 +169,90 @@ workflow ONCOANALYSER {
         // Set outputs, restoring original meta
         ch_versions = ch_versions.mix(ISOFOX.out.versions)
         ch_isofox_out = ch_isofox_out.mix(WorkflowOncoanalyser.restoreMeta(ISOFOX.out.isofox_dir, ch_inputs))
+    }
+
+    //
+    // MODULE: Run PICARD_COLLECTWGSMETRICS to generate stats required for downstream processes
+    //
+    if (run.virusinterpreter || run.orange) {
+        // Create inputs and create process-specific meta
+        // NOTE(SW): CUPPA only requires collectwgsmetrics for the tumor sample in the upstream
+        // process Virus Interpreter but ORANGE currently requires collectwgsmetrics for both tumor
+        // and normal sample
+        // channel: [val(meta_cwm), bam]
+        ch_cwm_inputs_all = ch_inputs
+            .flatMap { meta ->
+                def sample_types = run.orange ? [Constants.DataType.TUMOR, Constants.DataType.NORMAL] : [Constants.DataType.TUMOR]
+                return sample_types
+                    .collect { sample_type ->
+                        def bam = meta.get([Constants.FileType.BAM_WGS, sample_type])
+                        def sample_name = meta.get(['sample_name', sample_type])
+                        def meta_cwm = [
+                            key: meta.id,
+                            id: sample_name,
+                            // NOTE(SW): must use string representation for caching purposes
+                            sample_type_str: sample_type.name(),
+                        ]
+                        return [meta_cwm, bam]
+                    }
+            }
+
+        // Collapse duplicate files e.g. repeated normal BAMs for multiple tumor samples
+        // NOTE(SW): no effective blocking by .groupTuple() as we're not dependent
+        // on any process
+        // channel: [val(meta_cwm), bam]
+        ch_cwm_inputs = ch_cwm_inputs_all
+            .map { [it[1..-1], it[0]] }
+            .groupTuple()
+            .map { filepaths, meta_cwm ->
+                def (keys, sample_names, sample_type_strs) = meta_cwm
+                    .collect {
+                        [it.key, it.id, it.sample_type_str]
+                    }
+                    .transpose()
+
+                def sample_type_strs_unique = sample_type_strs.unique(false)
+                assert sample_type_strs_unique.size() == 1
+                def sample_type_str = sample_type_strs_unique[0]
+
+                def meta_cwm_new = [
+                    keys: keys,
+                    id: sample_names.join('__'),
+                    id_simple: keys.join('__'),
+                    sample_type_str: sample_type_str,
+                ]
+                return [meta_cwm_new, *filepaths]
+            }
+
+        // Run process
+        PICARD_COLLECTWGSMETRICS(
+            ch_cwm_inputs,
+            PREPARE_REFERENCE.out.genome_fasta,
+        )
+
+        // Set outputs, process outputs and restore original meta
+        ch_versions = ch_versions.mix(PICARD_COLLECTWGSMETRICS.out.versions)
+
+        // Replicate outputs to reverse unique operation
+        // channel: [val(meta_cwm_individual), sample_type_str, metrics]
+        ch_cwm_out_individual = PICARD_COLLECTWGSMETRICS.out.metrics
+            .flatMap { meta_cwm_shared, metrics ->
+                meta_cwm_shared.keys.collect { key ->
+                    return [meta_cwm_shared + [key: key], meta_cwm_shared.sample_type_str, metrics]
+                }
+            }
+
+        // Match outputs to original meta and set output
+        // channel (tumor): [val(meta), metrics]
+        // channel (normal): [val(meta), metrics]
+        ch_cwm_out = WorkflowOncoanalyser.restoreMeta(ch_cwm_out_individual, ch_inputs)
+            .branch { meta, sample_type_str, metrics ->
+                def sample_type = Utils.getEnumFromString(sample_type_str, Constants.DataType)
+                somatic: sample_type == Constants.DataType.TUMOR
+                    return [meta, metrics]
+                germline: sample_type == Constants.DataType.NORMAL
+                    return [meta, metrics]
+            }
     }
 
     //
@@ -576,29 +660,6 @@ workflow ONCOANALYSER {
     // NOTE(SW): kept separate from CUPPA conditional block since we'll allow users to run this independently
     ch_virusinterpreter_out = Channel.empty()
     if (run.virusinterpreter) {
-        // collectwgsmetrics
-        // Create inputs and create process-specific meta
-        // channel: [val(meta_cwm), bam]
-        ch_cwm_inputs = ch_inputs
-            .map { meta ->
-                def bam = meta.get([Constants.FileType.BAM_WGS, Constants.DataType.TUMOR])
-                def meta_cwm = [
-                    key: meta.id,
-                    id: meta.get(['sample_name', Constants.DataType.TUMOR]),
-                ]
-                return [meta_cwm, bam]
-            }
-
-        // Run process
-        COLLECTWGSMETRICS(
-            ch_cwm_inputs,
-            PREPARE_REFERENCE.out.genome_fasta,
-        )
-
-        // Set outputs, restoring original meta
-        ch_versions = ch_versions.mix(COLLECTWGSMETRICS.out.versions)
-        ch_cwm_out = WorkflowOncoanalyser.restoreMeta(COLLECTWGSMETRICS.out.metrics, ch_inputs)
-
         // VIRUSBreakend
         // Create inputs and create process-specific meta
         // channel: [val(meta_virus), tumor_bam]
@@ -640,7 +701,7 @@ workflow ONCOANALYSER {
         ch_virusinterpreter_inputs_full = WorkflowOncoanalyser.groupByMeta(
             WorkflowOncoanalyser.restoreMeta(VIRUSBREAKEND.out.tsv, ch_inputs),
             ch_virusinterpreter_inputs_purple,
-            ch_cwm_out,
+            ch_cwm_out.somatic,
         )
 
         // Virus Interpreter
