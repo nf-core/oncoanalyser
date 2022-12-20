@@ -56,7 +56,7 @@ process ORANGE {
             \\
             -sage_somatic_tumor_sample_bqr_plot ${sage_somatic_bqr} \\
             -sage_somatic_ref_sample_bqr_plot ${sage_germline_bqr} \\
-            -sage_germline_gene_coverage_tsv ${sage_germlien_coverage} \\
+            -sage_germline_gene_coverage_tsv ${sage_germline_coverage} \\
             \\
             -purple_qc_file ${purple_dir}/${meta.tumor_id}.purple.qc \\
             -purple_purity_tsv ${purple_dir}/${meta.tumor_id}.purple.purity.tsv \\
