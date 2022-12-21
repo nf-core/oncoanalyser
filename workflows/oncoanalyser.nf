@@ -1149,7 +1149,7 @@ workflow ONCOANALYSER {
             hmf_data.driver_gene_panel,
             hmf_data.cohort_mapping,
             hmf_data.cohort_percentiles,
-            "5.23 (oncoanalyser 0.0.1dev)",
+            "5.23 [oncoanalyser]",
         )
 
         // Set outputs
