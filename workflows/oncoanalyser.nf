@@ -54,8 +54,6 @@ if (params.input) { ch_input = file(params.input) } else { exit 1, 'Input sample
 //
 // MODULES
 //
-include { CHECK_SAMPLESHEET } from '../modules/local/check_samplesheet/main'
-
 include { AMBER             } from '../modules/local/amber/main'
 include { CHORD             } from '../modules/local/chord/main'
 include { COBALT            } from '../modules/local/cobalt/main'
