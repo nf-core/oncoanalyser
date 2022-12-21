@@ -1,4 +1,4 @@
-process SLICE {
+process CUSTOM_SLICE {
     tag "${meta.id}"
     label 'process_single'
 

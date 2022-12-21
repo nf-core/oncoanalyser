@@ -8,11 +8,11 @@ process CUPPA_VISUALISER {
     tuple val(meta), path(cuppa_csv)
 
     output:
+    tuple val(meta), path('*conclusion.txt')     , emit: conclusion
+    tuple val(meta), path('*cup_report.pdf')     , emit: report
     tuple val(meta), path('*report.summary.png') , emit: summary_plot
     tuple val(meta), path('*report.features.png'), emit: feature_plot
-    path '*chart.png'
-    path '*conclusion.txt'
-    path '*cup_report.pdf'
+    tuple val(meta), path('*chart.png')          , emit: chart_plot
     path 'versions.yml'                          , emit: versions
 
     when:
@@ -37,12 +37,11 @@ process CUPPA_VISUALISER {
 
     stub:
     """
-    touch ${meta.id}.cuppa.chart.png
-    touch ${meta.id}.cuppa.conclusion.txt
     touch ${meta.id}.cuppa.conclusion.txt
     touch ${meta.id}_cup_report.pdf
-    touch ${meta.id}.cup.report.features.png
     touch ${meta.id}.cup.report.summary.png
+    touch ${meta.id}.cup.report.features.png
+    touch ${meta.id}.cuppa.chart.png
     echo -e '${task.process}:\\n  stub: noversions\\n' > versions.yml
     """
 }

@@ -1,0 +1,58 @@
+name: virusinterpreter
+description: Filters and annotates VIRUSBreakend calls
+keywords:
+  - viral
+  - integration
+  - annotation
+  - filtering
+tools:
+  - virusinterpreter:
+      description: Performs filtering and annotation of VIRUSBreakend calls
+      homepage: https://github.com/hartwigmedical/hmftools/tree/master/virus-interpreter
+      documentation: https://github.com/hartwigmedical/hmftools/tree/master/virus-interpreter
+      licence: ["GPL v3"]
+input:
+  - meta:
+      type: map
+      description: |
+        Groovy Map containing sample information
+        e.g. [id: 'sample_id']
+  - virus_tsv:
+      type: file
+      description: VIRUSBreakend summary file
+      pattern: "*.{tsv}"
+  - purple_purity:
+      type: file
+      description: PURPLE purity file
+      pattern: "*.{tsv}"
+  - purple_qc:
+      type: file
+      description: PURPLE QC file
+      pattern: "*.{qc}"
+  - wgs_metrics:
+      type: file
+      description: Somatic collectwgsmetrics file
+  - taxonomy_db:
+      type: file
+      description: Virus Interpreter taxonomy database file
+      pattern: "*.{tsv}"
+  - reporting_db:
+      type: file
+      description: Virus Interpreter reporting database file
+      pattern: "*.{tsv}"
+output:
+  - meta:
+      type: map
+      description: |
+        Groovy Map containing sample information
+        e.g. [id: 'sample_id']
+  - virusinterpreter:
+      type: file
+      description: Virus Interpreter output file
+      pattern: "*.{tsv}"
+  - versions:
+      type: file
+      description: File containing software versions
+      pattern: "versions.yml"
+authors:
+  - "@scwatts"

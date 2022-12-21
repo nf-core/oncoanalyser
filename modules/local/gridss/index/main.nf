@@ -1,4 +1,4 @@
-process INDEX {
+process GRIDSS_INDEX {
     tag "${genome_fasta.name}"
     label 'process_single'
 

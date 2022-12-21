@@ -1,4 +1,4 @@
-process EXTRACT_AND_INDEX_CONTIG {
+process CUSTOM_EXTRACTCONTIG {
     tag "${contig_name}"
     label 'process_single'
 

@@ -1,5 +1,5 @@
-name: "PAVE_somatic"
-description: PAVE annotates a somatic variant VCF with gene and transcript coding and protein effects
+name: pave_somatic
+description: Annotate small variant VCF with gene, transcript coding and protein effects
 keywords:
   - pave
   - annotation
@@ -8,23 +8,20 @@ keywords:
   - protein
   - vcf
 tools:
-  - "PAVE":
-      description: "PAVE annotates a somatic variant VCF with gene and transcript coding and protein effects."
-      homepage: "https://github.com/hartwigmedical/hmftools/tree/master/pave"
-      documentation: "https://github.com/hartwigmedical/hmftools/tree/master/pave"
-      tool_dev_url: "https://github.com/hartwigmedical/hmftools/tree/master/pave"
-      doi: ""
-      licence: "['GPL v3']"
-
+  - pave:
+      description: Annotates small variant VCF with gene, transcript coding and protein effects.
+      homepage: https://github.com/hartwigmedical/hmftools/tree/master/pave
+      documentation: https://github.com/hartwigmedical/hmftools/tree/master/pave
+      licence: ['GPL v3']
 input:
   - meta:
       type: map
       description: |
         Groovy Map containing sample information
-        e.g. [['sample_name', 'tumor']: 'sample_tumor']
+        e.g. [id: 'sample_id']
   - sage_vcf:
       type: file
-      description: SAGE VCF
+      description: SAGE VCF file
       pattern: "*.{vcf.gz}"
   - genome_fasta:
       type: file
@@ -37,29 +34,27 @@ input:
   - genome_ver:
       type: string
       description: Reference genome version
-  - sage_pon_file:
+  - sage_pong:
       type: file
       description: SAGE PON file
       pattern: "*.{tsv.gz}"
-  - mappability_bed:
+  - segment_mappability:
       type: file
-      description: HMF mappability BED
+      description: Segment mappability file
       pattern: "*.{bed.gz}"
   - driver_gene_panel:
       type: file
-      description: HMF Driver Gene Panel file
+      description: Driver gene panel file
       pattern: "*.{tsv}"
-  - ensembl_data_dir:
+  - ensembl_data_resources:
       type: directory
-      description: HMF Ensembl Data Cache directory
-      pattern: "*.{tsv}"
-
+      description: HMF ensembl data resources directory
 output:
   - meta:
       type: map
       description: |
         Groovy Map containing sample information
-        e.g. [['sample_name', 'tumor']: 'sample_tumor']
+        e.g. [id: 'sample_id']
   - vcf:
       type: file
       description: PAVE VCF file
@@ -72,6 +67,5 @@ output:
       type: file
       description: File containing software versions
       pattern: "versions.yml"
-
 authors:
   - "@scwatts"

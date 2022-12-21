@@ -2,9 +2,9 @@
 // Linx is an annotation, interpretation and visualisation tool for structural variants.
 //
 
-include { LINX_GERMLINE } from '../../modules/local/linx/germline/main'
-include { LINX_SOMATIC  } from '../../modules/local/linx/somatic/main'
-include { VISUALISER    } from '../../modules/local/linx/visualiser/main'
+include { LINX_GERMLINE   } from '../../modules/local/linx/germline/main'
+include { LINX_SOMATIC    } from '../../modules/local/linx/somatic/main'
+include { LINX_VISUALISER } from '../../modules/local/linx/visualiser/main'
 
 workflow LINX {
     take:
@@ -44,17 +44,17 @@ workflow LINX {
         )
         ch_versions = ch_versions.mix(LINX_SOMATIC.out.versions)
 
-        VISUALISER(
+        LINX_VISUALISER(
             LINX_SOMATIC.out.annotation_dir,
             ref_data_genome_version,
             ref_data_ensembl_data_resources,
         )
-        ch_versions = ch_versions.mix(VISUALISER.out.versions)
+        ch_versions = ch_versions.mix(LINX_VISUALISER.out.versions)
 
         // channel: [val(meta), linx_annotation_dir, linx_visualiser_dir]
         ch_linx_somatic_out = WorkflowOncoanalyser.groupByMeta(
             LINX_SOMATIC.out.annotation_dir,
-            VISUALISER.out.visualiser_dir,
+            LINX_VISUALISER.out.visualiser_dir,
         )
 
     emit:

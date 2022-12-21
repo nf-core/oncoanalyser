@@ -1,30 +1,24 @@
-name: gridss_assemble
-description: Assemble SVs with GRIDSS
+name: virusbreakend
+description: Detect viral integration from WGS data
 keywords:
-  - assemble
-  - sv
+  - viral
+  - integration
 tools:
-  - gridss:
-      description: GRIDSS is a module software suite containing tools useful for the detection of genomic rearrangements.
-      homepage: https://github.com/PapenfussLab/gridss
-      documentation: https://github.com/PapenfussLab/gridss
-      licence: ["GPL >=3"]
+  - virusbreakend:
+      description: Performs detection of viral intergation from WGS data
+      homepage: https://github.com/PapenfussLab/gridss/blob/master/VIRUSBreakend_Readme.md
+      documentation: https://github.com/PapenfussLab/gridss/blob/master/VIRUSBreakend_Readme.md
+      licence: ["GPL v3"]
 input:
   - meta:
       type: map
       description: |
         Groovy Map containing sample information
         e.g. [id: 'sample_id']
-  - bams:
-      type: list
-      description: List of BAM files
+  - bam:
+      type: file
+      description: BAM file
       pattern: "*.{bam}"
-  - preprocess_dirs:
-      type: list
-      description: List of GRIDSS preprocess output directories
-  - labels:
-      type: list
-      description: List of labels corresponding to BAMs and GRIDSS preprocess output directories
   - gridss_config:
       type: file
       description: Optional GRIDSS configuration file (optional)
@@ -51,19 +45,23 @@ input:
       type: file
       description: Reference genome assembly GRIDSS index file
       pattern: "*.{gridsscache}"
-  - blocklist:
-      type: file
-      description: GRIDSS blocklist file
-      pattern: "*.{bed.gz}"
+  - virusbreakenddb:
+      type: directory
+      description: VIRUSBreakend database directory
 output:
   - meta:
       type: map
       description: |
         Groovy Map containing sample information
         e.g. [id: 'sample_id']
-  - assembly_dir:
-      type: directory
-      description: GRIDSS assemble output directory
+  - tsv:
+      type: file
+      description: Summary file
+      pattern: "*.{tsv}"
+  - vcf:
+      type: file
+      description: VCF file
+      pattern: "*.{vcf.gz}"
   - versions:
       type: file
       description: File containing software versions

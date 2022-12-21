@@ -1,4 +1,4 @@
-process PREPROCESS {
+process GRIDSS_PREPROCESS {
     tag "${meta.id}"
     label 'process_medium'
 

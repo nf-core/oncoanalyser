@@ -1,4 +1,4 @@
-process ANNOTATE {
+process GRIDSS_ANNOTATE {
   tag "${meta.id}"
   label 'process_single'
 

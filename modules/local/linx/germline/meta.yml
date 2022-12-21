@@ -1,54 +1,49 @@
-name: "LINX_germline"
+name: linx_germline
 description: Generate LINX germline annotation data
 keywords:
-  - linx
   - germline
   - sv
   - annotation
 tools:
-  - "LINX":
-      description: "LINX is an annotation, interpretation and visualisation tool for structural variants."
-      homepage: "https://github.com/hartwigmedical/hmftools/tree/master/linx"
-      documentation: "https://github.com/hartwigmedical/hmftools/tree/master/linx"
-      tool_dev_url: "https://github.com/hartwigmedical/hmftools/tree/master/linx"
-      doi: ""
-      licence: "['GPL v3']"
-
+  - linx:
+      description: An annotation, interpretation and visualisation tool for structural variants.
+      homepage: https://github.com/hartwigmedical/hmftools/tree/master/linx
+      documentation: https://github.com/hartwigmedical/hmftools/tree/master/linx
+      licence: ["GPL v3"]
 input:
   - meta:
       type: map
       description: |
         Groovy Map containing sample information
-        e.g. [['sample_name', 'normal']: 'sample_normal']
+        e.g. [id: 'sample_id']
   - gridss_sv:
       type: file
-      description: GRIPSS hard filtered VCF
+      description: GRIPSS hard filtered VCF file
       pattern: "*.{vcf.gz}"
   - genome_ver:
       type: string
       description: Reference genome version
-  - fragile_sites:
+  - fragile_regions:
       type: file
-      description: LINX fragile sites file
+      description: LINX fragile regions file
       pattern: "*.{csv}"
   - lines:
       type: file
       description: LINEs file
       pattern: "*.{csv}"
-  - ensembl_data_dir:
+  - ensembl_data_resources:
       type: directory
-      description: HMF Ensembl Data Cache directory
+      description: HMF ensembl data resources directory
   - driver_gene_panel:
       type: file
-      description: HMF Driver Gene Panel file
+      description: Driver gene panel file
       pattern: "*.{csv}"
-
 output:
   - meta:
       type: map
       description: |
         Groovy Map containing sample information
-        e.g. [['sample_name', 'normal']: 'sample_normal']
+        e.g. [id: 'sample_id']
   - annotation_dir:
       type: directory
       description: LINX annotation output directory
@@ -56,6 +51,5 @@ output:
       type: file
       description: File containing software versions
       pattern: "versions.yml"
-
 authors:
   - "@scwatts"

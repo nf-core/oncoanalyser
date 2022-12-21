@@ -1,4 +1,4 @@
-process LINX_REPORT {
+process GPGR_LINX {
     tag "${meta.id}"
     label 'process_single'
 

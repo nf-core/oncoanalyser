@@ -4,10 +4,10 @@
 import Constants
 import Utils
 
-include { ANNOTATE          } from '../../modules/local/gridss/annotate/main'
-include { ASSEMBLE          } from '../../modules/local/gridss/assemble/main'
-include { CALL              } from '../../modules/local/gridss/call/main'
-include { PREPROCESS        } from '../../modules/local/gridss/preprocess/main'
+include { GRIDSS_ANNOTATE          } from '../../modules/local/gridss/annotate/main'
+include { GRIDSS_ASSEMBLE          } from '../../modules/local/gridss/assemble/main'
+include { GRIDSS_CALL              } from '../../modules/local/gridss/call/main'
+include { GRIDSS_PREPROCESS        } from '../../modules/local/gridss/preprocess/main'
 
 workflow GRIDSS {
     take:
@@ -51,7 +51,7 @@ workflow GRIDSS {
             }
 
         // Preprocess reads
-        PREPROCESS(
+        GRIDSS_PREPROCESS(
             ch_preprocess_inputs,
             gridss_config,
             ref_data_genome_fasta,
@@ -61,13 +61,13 @@ workflow GRIDSS {
             ref_data_genome_bwa_index_image,
             ref_data_genome_gridss_index,
         )
-        ch_versions = ch_versions.mix(PREPROCESS.out.versions)
+        ch_versions = ch_versions.mix(GRIDSS_PREPROCESS.out.versions)
 
         // Gather BAMs and outputs from preprocessing for each tumor/normal set
         // channel: [subject_id, [[val(meta_gridss), bam, preprocess_dir], ...]]
         ch_bams_and_preprocess = WorkflowOncoanalyser.groupByMeta(
             ch_preprocess_inputs,
-            PREPROCESS.out.preprocess_dir,
+            GRIDSS_PREPROCESS.out.preprocess_dir,
         )
         .map { [it[0].subject_id, it] }
         .groupTuple(size: 2)
@@ -83,7 +83,7 @@ workflow GRIDSS {
             }
 
         // Assemble variants
-        ASSEMBLE(
+        GRIDSS_ASSEMBLE(
             ch_assemble_inputs,
             gridss_config,
             ref_data_genome_fasta,
@@ -94,13 +94,13 @@ workflow GRIDSS {
             ref_data_genome_gridss_index,
             ref_data_gridss_blacklist,
         )
-        ch_versions = ch_versions.mix(ASSEMBLE.out.versions)
+        ch_versions = ch_versions.mix(GRIDSS_ASSEMBLE.out.versions)
 
         // Prepare inputs for variant calling
         // channel: [val(meta_gridss), [bams], assemble_dir, [labels]]
         ch_call_inputs = WorkflowOncoanalyser.groupByMeta(
             ch_assemble_inputs,
-            ASSEMBLE.out.assemble_dir,
+            GRIDSS_ASSEMBLE.out.assemble_dir,
             flatten: false,
         )
             .map { data ->
@@ -111,7 +111,7 @@ workflow GRIDSS {
             }
 
         // Call variants
-        CALL(
+        GRIDSS_CALL(
             ch_call_inputs,
             gridss_config,
             ref_data_genome_fasta,
@@ -122,18 +122,18 @@ workflow GRIDSS {
             ref_data_genome_gridss_index,
             ref_data_gridss_blacklist,
         )
-        ch_versions = ch_versions.mix(CALL.out.versions)
+        ch_versions = ch_versions.mix(GRIDSS_CALL.out.versions)
 
         // Annotate variants with RepeatMasker
-        ANNOTATE(
-            CALL.out.vcf,
+        GRIDSS_ANNOTATE(
+            GRIDSS_CALL.out.vcf,
         )
 
         // Reunite final VCF with the corresponding input meta object
         ch_out = Channel.empty()
             .concat(
                 ch_inputs.map { meta, tbam, nbam -> [meta.id, meta] },
-                ANNOTATE.out.vcf.map { meta, vcf -> [meta.id, vcf] },
+                GRIDSS_ANNOTATE.out.vcf.map { meta, vcf -> [meta.id, vcf] },
             )
             .groupTuple(size: 2)
             .map { id, other -> other.flatten() }

@@ -15,9 +15,9 @@ process ORANGE {
     val pipeline_version
 
     output:
-    path '*.orange.json'
-    path '*.orange.pdf'
-    path 'versions.yml', emit: versions
+    tuple val(meta), path('*.orange.pdf') , emit: pdf
+    tuple val(meta), path('*.orange.json'), emit: json
+    path 'versions.yml'                   , emit: versions
 
     when:
     task.ext.when == null || task.ext.when

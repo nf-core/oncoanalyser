@@ -1,30 +1,26 @@
-name: "PAVE_germline"
-description: PAVE annotates a somatic variant VCF with gene and transcript coding and protein effects
+name: pave_germline
+description: Annotate small variant VCF with gene, transcript coding and protein effects
 keywords:
-  - pave
   - annotation
   - gene
   - transcript
   - protein
   - vcf
 tools:
-  - "PAVE":
-      description: "PAVE annotates a somatic variant VCF with gene and transcript coding and protein effects."
-      homepage: "https://github.com/hartwigmedical/hmftools/tree/master/pave"
-      documentation: "https://github.com/hartwigmedical/hmftools/tree/master/pave"
-      tool_dev_url: "https://github.com/hartwigmedical/hmftools/tree/master/pave"
-      doi: ""
-      licence: "['GPL v3']"
-
+  - pave:
+      description: Annotates small variant VCF with gene, transcript coding and protein effects.
+      homepage: https://github.com/hartwigmedical/hmftools/tree/master/pave
+      documentation: https://github.com/hartwigmedical/hmftools/tree/master/pave
+      licence: ['GPL v3']
 input:
   - meta:
       type: map
       description: |
         Groovy Map containing sample information
-        e.g. [['sample_name', 'tumor']: 'sample_tumor']
+        e.g. [id: 'sample_id']
   - sage_vcf:
       type: file
-      description: SAGE VCF
+      description: SAGE VCF file
       pattern: "*.{vcf.gz}"
   - genome_fasta:
       type: file
@@ -37,37 +33,35 @@ input:
   - genome_ver:
       type: string
       description: Reference genome version
-  - sage_blacklist_bed:
+  - sage_blocklist_regions:
       type: file
-      description: SAGE blacklist BED
+      description: SAGE regions blocklist file
       pattern: "*.{bed}"
-  - sage_blacklist_vcf:
+  - sage_blocklist_sites:
       type: file
-      description: SAGE blacklist VCF
+      description: SAGE sites blocklist file
       pattern: "*.{vcf.gz}"
-  - clinvar_vcf:
+  - clinvar_annotations:
       type: file
-      description: HMF ClinVar VCF
+      description: ClinVar annotations VCF file
       pattern: "*.{vcf.gz}"
-  - mappability_bed:
+  - segment_mappability:
       type: file
-      description: HMF mappability BED
+      description: Segment mappability file
       pattern: "*.{bed.gz}"
   - driver_gene_panel:
       type: file
-      description: HMF Driver Gene Panel file
+      description: Driver gene panel file
       pattern: "*.{tsv}"
-  - ensembl_data_dir:
+  - ensembl_data_resources:
       type: directory
-      description: HMF Ensembl Data Cache directory
-      pattern: "*.{tsv}"
-
+      description: HMF ensembl data resources directory
 output:
   - meta:
       type: map
       description: |
         Groovy Map containing sample information
-        e.g. [['sample_name', 'tumor']: 'sample_tumor']
+        e.g. [id: 'sample_id']
   - vcf:
       type: file
       description: PAVE VCF file
@@ -80,6 +74,5 @@ output:
       type: file
       description: File containing software versions
       pattern: "versions.yml"
-
 authors:
   - "@scwatts"

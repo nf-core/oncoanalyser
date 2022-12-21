@@ -1,4 +1,4 @@
-process ASSEMBLE {
+process GRIDSS_ASSEMBLE {
     tag "${meta.id}"
     label 'process_medium'
 

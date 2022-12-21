@@ -59,8 +59,8 @@ include { CHORD             } from '../modules/local/chord/main'
 include { COBALT            } from '../modules/local/cobalt/main'
 include { CUPPA_CLASSIFIER  } from '../modules/local/cuppa/classifier/main'
 include { CUPPA_VISUALISER  } from '../modules/local/cuppa/visualiser/main'
+include { GPGR_LINX         } from '../modules/local/gpgr/linx/main'
 include { ISOFOX            } from '../modules/local/isofox/main'
-include { LINX_REPORT       } from '../modules/local/gpgr/linx_report/main'
 include { ORANGE            } from '../modules/local/orange/main'
 include { PEACH             } from '../modules/local/peach/main'
 include { PROTECT           } from '../modules/local/protect/main'
@@ -831,23 +831,23 @@ workflow ONCOANALYSER {
         // MODULE: Run gpgr to generate a LINX report
         //
         // Create inputs and create process-specific meta
-        // channel: [meta(meta_linx_report), anno_dir, vis_dir]
-        ch_linx_report_inputs = ch_linx_somatic_out
+        // channel: [meta(meta_gpgr_linx), anno_dir, vis_dir]
+        ch_gpgr_linx_inputs = ch_linx_somatic_out
             .map { meta, anno_dir, vis_dir ->
-                def meta_linx_report = [
+                def meta_gpgr_linx = [
                     key: meta.id,
                     id: meta.get(['sample_name', Constants.DataType.TUMOR]),
                 ]
-                return [meta_linx_report, anno_dir, vis_dir]
+                return [meta_gpgr_linx, anno_dir, vis_dir]
             }
 
         // Run process
-        LINX_REPORT(
-            ch_linx_report_inputs,
+        GPGR_LINX(
+            ch_gpgr_linx_inputs,
         )
 
         // Set outputs
-        ch_versions = ch_versions.mix(LINX_REPORT.out.versions)
+        ch_versions = ch_versions.mix(GPGR_LINX.out.versions)
     }
 
     //
