@@ -1,0 +1,129 @@
+name: orange
+description: Summarise key outputs of the HMF toolkit
+keywords:
+  - cancer report
+tools:
+  - orange:
+      description: Summarises key outputs of the HMF toolkit
+      homepage: https://github.com/hartwigmedical/hmftools/tree/master/orange
+      documentation: https://github.com/hartwigmedical/hmftools/tree/master/orange
+      licence: ["GPL v3"]
+input:
+  - meta:
+      type: map
+      description: |
+        Groovy Map containing sample information
+        e.g. [id: 'sample_id', tumor_id: 'tumor_name', normal_id: 'normal_name']
+  - bam_metrics_somatic:
+      type: file
+      description: Somatic collectwgsmetrics file
+  - bam_metrics_germline:
+      type: file
+      description: Germline collectwgsmetrics file
+  - flagstat_somatic:
+      type: file
+      description: Somatic SAMtools flagstat output file
+  - flagstat_germline:
+      type: file
+      description: Somatic SAMtools flagstat output file
+  - chord_prediction:
+      type: file
+      description: CHORD prediction file
+      pattern: "*.{txt}"
+  - lilac_dir:
+      type: directory
+      description: LILAC output directory
+  - sage_somatic_bqr:
+      type: file
+      description: SAGE somatic tumor BQR plot file
+      pattern: "*.{png}"
+  - sage_germline_bqr:
+      type: file
+      description: SAGE somatic normal BQR plot file
+      pattern: "*.{png}"
+  - sage_germline_coverage:
+      type: file
+      description: SAGE germline coverage file
+      pattern: "*.{tsv}"
+  - purple_dir:
+      type: directory
+      description: PURPLE output directory
+  - linx_somatic_anno_dir:
+      type: directory
+      description: LINX somatic annotation output directory
+  - linx_somatic_plot_dir:
+      type: directory
+      description: LINX somatic plot output directory
+  - linx_germline_anno_dir:
+      type: directory
+      description: LINX germline annotation output directory
+  - protect:
+      type: file
+      description: PROTECT output file
+      pattern: "*.{tsv}"
+  - peach_genotype:
+      type: file
+      description: PEACH genotype file
+      pattern: "*.{tsv}"
+  - cuppa:
+      type: file
+      description: CUPPA classification file
+      pattern: "*.{csv}"
+  - cuppa_summary_plot:
+      type: file
+      description: CUPPA summary plot file
+      pattern: "*.{png}"
+  - cuppa_feature_plot:
+      type: file
+      description: CUPPA feature plot file
+      pattern: "*.{png}"
+  - virusinterpreter:
+      type: file
+      description: Virus Interpreter annotations file
+      pattern: "*.{tsv}"
+  - genome_ver:
+      type: string
+      description: Reference genome version
+  - disease_ontology:
+      type: string
+      description: Disease ontology file
+      pattern: "*.{json}"
+  - known_fusion_data:
+      type: file
+      description: Known susions data file
+      pattern: "*.{bedpe}"
+  - driver_gene_panel:
+      type: file
+      description: Driver gene panel file
+      pattern: "*.{csv}"
+  - cohort_mapping:
+      type: file
+      description: HMF cohort mapping file
+      pattern: "*.{tsv}"
+  - cohort_percentiles:
+      type: file
+      description: HMF cohort percentiles file
+      pattern: "*.{tsv}"
+  - pipeline_version:
+      type: string
+      description: Pipeline version to display in report
+output:
+  - meta:
+      type: map
+      description: |
+        Groovy Map containing sample information
+        e.g. [id: 'sample_id']
+  - pdf:
+      type: file
+      description: Report file
+      pattern: "*.{pdf}"
+  - json:
+      type: directory
+      description: Compiled JSON output file
+      pattern: "*.{json}"
+  - versions:
+      type: file
+      description: File containing software versions
+      pattern: "versions.yml"
+authors:
+  - "@scwatts"

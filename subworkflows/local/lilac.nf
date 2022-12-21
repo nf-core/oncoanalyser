@@ -3,11 +3,11 @@
 //
 import Constants
 
-include { EXTRACT_AND_INDEX_CONTIG              } from '../../modules/local/custom/lilac_extract_and_index_contig/main'
-include { REALIGN_READS                         } from '../../modules/local/custom/lilac_realign_reads_lilac/main'
-include { SLICE                                 } from '../../modules/local/custom/lilac_slice/main'
+include { CUSTOM_EXTRACTCONTIG   } from '../../modules/local/custom/lilac_extract_and_index_contig/main'
+include { CUSTOM_REALIGNREADS    } from '../../modules/local/custom/lilac_realign_reads_lilac/main'
+include { CUSTOM_SLICE           } from '../../modules/local/custom/lilac_slice/main'
 
-include { LILAC as LILAC_PROCESS                } from '../../modules/local/lilac/main'
+include { LILAC as LILAC_PROCESS } from '../../modules/local/lilac/main'
 
 workflow LILAC {
     take:
@@ -53,33 +53,33 @@ workflow LILAC {
         // Apply slicing to unique files only
         // channel: [val(meta_lilac), bam, bai, bed]
         ch_slice_inputs_unique = WorkflowLilac.getUniqueInputFiles(ch_slice_inputs)
-        SLICE(
+        CUSTOM_SLICE(
             ch_slice_inputs_unique,
         )
-        ch_versions = ch_versions.mix(SLICE.out.versions)
+        ch_versions = ch_versions.mix(CUSTOM_SLICE.out.versions)
 
         // Realign contigs if using 38 (use of ALT contigs implied)
         // channel: [val(meta_lilac), bam, bai]
-        ch_slices_out = SLICE.out.bam
+        ch_slices_out = CUSTOM_SLICE.out.bam
         if (params.ref_data_genome_type == 'alt') {
             // Align reads with chr6
             // NOTE(SW): the aim of this process is to take reads mapping to ALT contigs and align them
             // to the three relevant HLA genes on chr6. All reads including those previously mapped to chr6
             // are realigned for consistency.
-            EXTRACT_AND_INDEX_CONTIG(
+            CUSTOM_EXTRACTCONTIG(
                 'chr6',
                 ref_data_genome_fasta,
                 ref_data_genome_fai,
             )
-            ch_versions = ch_versions.mix(EXTRACT_AND_INDEX_CONTIG.out.versions)
+            ch_versions = ch_versions.mix(CUSTOM_EXTRACTCONTIG.out.versions)
 
-            REALIGN_READS(
-                SLICE.out.bam,
-                EXTRACT_AND_INDEX_CONTIG.out.contig,
-                EXTRACT_AND_INDEX_CONTIG.out.bwa_indices,
+            CUSTOM_REALIGNREADS(
+                CUSTOM_SLICE.out.bam,
+                CUSTOM_EXTRACTCONTIG.out.contig,
+                CUSTOM_EXTRACTCONTIG.out.bwa_indices,
             )
-            ch_slices_out = REALIGN_READS.out.bam
-            ch_versions = ch_versions.mix(REALIGN_READS.out.versions)
+            ch_slices_out = CUSTOM_REALIGNREADS.out.bam
+            ch_versions = ch_versions.mix(CUSTOM_REALIGNREADS.out.versions)
         }
 
 

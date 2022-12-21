@@ -1,4 +1,4 @@
-process EXTRACT_TARBALL {
+process CUSTOM_EXTRACTTARBALL {
     label 'process_single'
 
     container 'public.ecr.aws/ubuntu/ubuntu:20.04_stable'

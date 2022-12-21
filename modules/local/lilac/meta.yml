@@ -1,41 +1,48 @@
-name: "LILAC"
-description: LILAC is a WGS tool for HLA typing and somatic CNV and SNV calling
+name: lilac
+description: Type HLA alleles and call somatic structural variants
 keywords:
-  - lilac
+  - hla
+  - typing
+  - sv
 tools:
-  - "LILAC":
-      description: "LILAC is a WGS tool for HLA typing and somatic CNV and SNV calling."
-      homepage: "https://github.com/hartwigmedical/hmftools/tree/master/lilac"
-      documentation: "https://github.com/hartwigmedical/hmftools/tree/master/lilac"
-      tool_dev_url: "https://github.com/hartwigmedical/hmftools/tree/master/lilac"
-      doi: ""
-      licence: "['GPL v3']"
-
+  - lilac:
+      description: Performs HLA typing and calls somatic structural variants
+      homepage: https://github.com/hartwigmedical/hmftools/tree/master/lilac
+      documentation: https://github.com/hartwigmedical/hmftools/tree/master/lilac
+      licence: ["GPL v3"]
 input:
   - meta:
       type: map
       description: |
         Groovy Map containing sample information
-        e.g. ['subject_name': 'subject', ['sample_name', 'tumor']: 'sample_tumor', [['sample_name', 'normal']]: 'sample_normal']
-  - tumor_bam:
+        e.g. [id: 'sample_id', tumor_id: 'tumor_name', normal_id: 'normal_name']
+  - normal_wgs_bam:
       type: file
-      description: Optional tumor BAM file
+      description: Normal WGS BAM file
       pattern: "*.{bam}"
-  - normal_bam:
+  - normal_wgs_bai:
       type: file
-      description: Normal BAM file
-      pattern: "*.{bam}"
-  - tumor_bai:
-      type: file
-      description: Optional tumor BAI file
+      description: Normal WGS BAI file
       pattern: "*.{bai}"
-  - normal_bai:
+  - tumor_wgs_bam:
       type: file
-      description: Normal BAI file
+      description: Normal WGS BAM file (optional)
+      pattern: "*.{bam}"
+  - tumor_wgs_bai:
+      type: file
+      description: Tumor WGS BAI file (optional)
+      pattern: "*.{bai}"
+  - tumor_wts_bam:
+      type: file
+      description: Normal WTS BAM file (optional)
+      pattern: "*.{bam}"
+  - tumor_wts_bai:
+      type: file
+      description: Tumor WTS BAI file (optional)
       pattern: "*.{bai}"
   - purple_dir:
       type: directory
-      description: Optional PURPLE output directory
+      description: PURPLE output directory (optional)
   - genome_fasta:
       type: file
       description: Reference genome assembly fa file
@@ -43,16 +50,15 @@ input:
   - genome_ver:
       type: string
       description: Reference genome version
-  - lilac_resource_dir:
+  - lilac_resources:
       type: directory
-      description: LILAC resource directory
-
+      description: LILAC resources directory
 output:
   - meta:
       type: map
       description: |
         Groovy Map containing sample information
-        e.g. ['subject_name': 'subject', ['sample_name', 'tumor']: 'sample_tumor', [['sample_name', 'normal']]: 'sample_normal']
+        e.g. [id: 'sample_id', tumor_id: 'tumor_name', normal_id: 'normal_name']
   - lilac_dir:
       type: file
       description: LILAC output directory
@@ -60,6 +66,5 @@ output:
       type: file
       description: File containing software versions
       pattern: "versions.yml"
-
 authors:
   - "@scwatts"

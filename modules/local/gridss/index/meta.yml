@@ -1,7 +1,7 @@
-name: gridss_preprocess
-description: Preprocess reads for GRIDSS
+name: gridss_index
+description: Create GRIDSS indices
 keywords:
-  - preprocessing
+  - index
   - sv
 tools:
   - gridss:
@@ -10,18 +10,6 @@ tools:
       documentation: https://github.com/PapenfussLab/gridss
       licence: ["GPL >=3"]
 input:
-  - meta:
-      type: map
-      description: |
-        Groovy Map containing sample information
-        e.g. [id: 'sample_id']
-  - bam:
-      type: file
-      description: BAM file
-      pattern: "*.{bam}"
-  - gridss_config:
-      type: file
-      description: Optional GRIDSS configuration file (optional)
   - genome_fasta:
       type: file
       description: Reference genome assembly fa file
@@ -32,28 +20,36 @@ input:
       pattern: "*.{fai}"
   - genome_dict:
       type: file
-      description: Reference genome assembly dict file
+      description: Reference genome assembly dict file (optional)
       pattern: "*.{dict}"
   - genome_bwa_index_dir:
       type: directory
-      description: Directory containing reference genome assembly BWA index
+      description: Directory containing reference genome assembly BWA index (optional)
   - genome_bwa_index_image:
       type: file
-      description: Reference genome assembly BWA index img file
+      description: Reference genome assembly BWA index img file (optional)
       pattern: "*.{img}"
-  - genome_gridss_index:
-      type: file
-      description: Reference genome assembly GRIDSS index file
-      pattern: "*.{gridsscache}"
+  - indices:
+      type: string
+      description: List of indices to create
 output:
   - meta:
       type: map
       description: |
         Groovy Map containing sample information
         e.g. [id: 'sample_id']
-  - preprocess_dir:
-      type: directory
-      description: GRIDSS preprocess output directory
+  - dict:
+      type: file
+      description: Reference genome dictionary file
+      pattern: "*.{dict}"
+  - img:
+      type: file
+      description: Reference genome BWA index image file
+      pattern: "*.{img}"
+  - index:
+      type: file
+      description: Reference genome GRIDSS index file
+      pattern: "*.{gridsscache}"
   - versions:
       type: file
       description: File containing software versions

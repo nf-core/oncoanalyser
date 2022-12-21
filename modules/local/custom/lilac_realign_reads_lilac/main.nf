@@ -1,4 +1,4 @@
-process REALIGN_READS {
+process CUSTOM_REALIGNREADS {
     tag "${meta.id}"
     label 'process_low'
 

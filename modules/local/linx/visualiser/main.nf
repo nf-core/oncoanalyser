@@ -1,4 +1,4 @@
-process VISUALISER {
+process LINX_VISUALISER {
     tag "${meta.id}"
     label 'process_medium'
 

@@ -6,9 +6,9 @@ include { SAMTOOLS_FAIDX         } from '../../modules/nf-core/samtools/faidx/ma
 include { SAMTOOLS_DICT          } from '../../modules/nf-core/samtools/dict/main'
 include { BWA_INDEX              } from '../../modules/nf-core/bwa/index/main'
 
-include { EXTRACT_TARBALL as EXTRACT_TARBALL_VIRUSBREAKENDDB } from '../../modules/local/custom/extract_tarball/main'
-include { INDEX as GRIDSS_BWA_INDEX_IMAGE                    } from '../../modules/local/gridss/index/main'
-include { INDEX as GRIDSS_INDEX                              } from '../../modules/local/gridss/index/main'
+include { CUSTOM_EXTRACTTARBALL                  } from '../../modules/local/custom/extract_tarball/main'
+include { GRIDSS_INDEX as GRIDSS_BWA_INDEX_IMAGE } from '../../modules/local/gridss/index/main'
+include { GRIDSS_INDEX as GRIDSS_INDEX           } from '../../modules/local/gridss/index/main'
 
 workflow PREPARE_REFERENCE {
     take:
@@ -90,8 +90,8 @@ workflow PREPARE_REFERENCE {
                     [id: 'virusbreakenddb'],
                     file(params.ref_data_virusbreakenddb_path),
                 ]
-                EXTRACT_TARBALL_VIRUSBREAKENDDB(ch_virusbreakenddb_inputs)
-                ch_virusbreakenddb = EXTRACT_TARBALL_VIRUSBREAKENDDB.out.dir
+                CUSTOM_EXTRACTTARBALL(ch_virusbreakenddb_inputs)
+                ch_virusbreakenddb = CUSTOM_EXTRACTTARBALL.out.dir
             } else {
                 ch_virusbreakenddb = file(params.ref_data_virusbreakenddb_path)
             }
