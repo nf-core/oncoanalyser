@@ -35,6 +35,7 @@ class Constants {
         PURPLE,
         SAGE,
         SIGS,
+        SVPREP,
         VIRUSINTERPRETER,
     }
 

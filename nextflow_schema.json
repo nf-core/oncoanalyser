@@ -186,6 +186,14 @@
                     "fa_icon": "far fa-folder-open",
                     "hidden": true
                 },
+                "ref_data_sv_prep_blocklist": {
+                    "type": "string",
+                    "format": "file-path",
+                    "pattern": "^\\S+\\.bed$",
+                    "description": "Path to SV Prep blocklist file.",
+                    "fa_icon": "far fa-file-code",
+                    "hidden": true
+                },
                 "ref_data_gridss_pon_breakends": {
                     "type": "string",
                     "format": "file-path",
