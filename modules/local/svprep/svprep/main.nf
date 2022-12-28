@@ -11,7 +11,6 @@ process SVPREP {
     path sv_blocklist
     path known_fusions
     val write_types
-    val calc_fragment_length
 
     output:
     tuple val(meta), path("*.sorted.bam")           , emit: bam
@@ -25,7 +24,6 @@ process SVPREP {
     def args = task.ext.args ?: ''
     def write_types_arg = write_types ? "-write_types \'${write_types}\'" : ''
     def existing_juction_file_arg = junctions ? "-existing_junction_file ${junctions}" : ""
-    def calc_fragment_length_arg = calc_fragment_length ? "-calc_fragment_length" : ""
 
     """
     java \\
@@ -40,7 +38,6 @@ process SVPREP {
             -known_fusion_bed ${known_fusions} \\
             ${write_types_arg} \\
             ${existing_juction_file_arg} \\
-            ${calc_fragment_length_arg} \\
             -threads ${task.cpus} \\
             -output_dir ./
 
