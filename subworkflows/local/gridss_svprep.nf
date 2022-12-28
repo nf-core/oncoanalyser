@@ -51,7 +51,6 @@ workflow GRIDSS_SVPREP {
             ref_data_sv_prep_blocklist,
             ref_data_known_fusions,
             'JUNCTIONS;BAM;FRAGMENT_LENGTH_DIST', // -write_types argument switch and value
-            false,                                // -calc_fragment_length argument switch
         )
         ch_versions = ch_versions.mix(SVPREP_TUMOR.out.versions)
 
@@ -75,7 +74,6 @@ workflow GRIDSS_SVPREP {
             ref_data_sv_prep_blocklist,
             ref_data_known_fusions,
             false, // -write_types argument switch and value
-            true,  // -calc_fragment_length argument switch
         )
         ch_versions = ch_versions.mix(SVPREP_NORMAL.out.versions)
 
