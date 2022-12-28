@@ -132,6 +132,8 @@ def createHmfDataMap(hmf_data_base, params_only) {
         gc_profile:                   'ref_data_gc_profile',
         // CUPPA
         cuppa_resources:              'ref_data_cuppa_resources',
+        // SVPREP
+        'sv_prep_blocklist':          'ref_data_sv_prep_blocklist',
         // GRIDSS
         gridss_pon_breakends:         'ref_data_gridss_pon_breakends',
         gridss_pon_breakpoints:       'ref_data_gridss_pon_breakpoints',
