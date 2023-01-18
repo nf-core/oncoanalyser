@@ -36,7 +36,6 @@ process LINX_GERMLINE {
             -fragile_site_file ${fragile_regions} \\
             -line_element_file ${lines} \\
             -ensembl_data_dir ${ensembl_data_resources} \\
-            -check_drivers \\
             -driver_gene_panel ${driver_gene_panel} \\
             -germine_pon_sgl_file ${pon_breakends} \\
             -germine_pon_sv_file ${pon_breakpoints} \\
