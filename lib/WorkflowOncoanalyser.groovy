@@ -16,13 +16,6 @@ class WorkflowOncoanalyser {
     //
     public static void initialise(params, workflow, log) {
 
-        // NOTE(SW): restricting allowable genome values to GRCh37_hmf for now
-        if (params.genome != 'GRCh37_hmf') {
-            log.error "ERROR: currently only the GRCh37_hmf genome is supported but got \"${params.genome}\"" +
-                ", please adjust the --genome argument accordingly."
-            System.exit(1)
-        }
-
         // TODO(SW): allow users to set all appropriate reference genomes manually in config or CLI, including version and type (see below)
 
         if (!params.genome) {
@@ -38,6 +31,13 @@ class WorkflowOncoanalyser {
                 "  Currently, the available genome are:\n" +
                 "  ${params.genomes.keySet().join(", ")}\n" +
                 "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
+            System.exit(1)
+        }
+
+        // NOTE(SW): restricting allowable genome values to GRCh37_hmf for now
+        if (params.genome != 'GRCh37_hmf') {
+            log.error "ERROR: currently only the GRCh37_hmf genome is supported but got \"${params.genome}\"" +
+                ", please adjust the --genome argument accordingly."
             System.exit(1)
         }
 
