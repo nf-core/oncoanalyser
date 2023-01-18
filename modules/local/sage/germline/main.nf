@@ -17,9 +17,10 @@ process SAGE_GERMLINE {
     path ensembl_data_resources
 
     output:
-    tuple val(meta), path("${meta.tumor_id}.sage_germline.vcf.gz"), emit: vcf
-    tuple val(meta), path('*gene.coverage.tsv')                   , emit: gene_coverage, optional: true
-    path 'versions.yml'                                           , emit: versions
+    tuple val(meta), path("${meta.tumor_id}.sage.germline.vcf.gz")         , emit: vcf
+    tuple val(meta), path("${meta.tumor_id}.sage.germline.filtered.vcf.gz"), emit: vcf_filtered
+    tuple val(meta), path('*gene.coverage.tsv')                            , emit: gene_coverage, optional: true
+    path 'versions.yml'                                                    , emit: versions
 
     when:
     task.ext.when == null || task.ext.when
@@ -52,7 +53,9 @@ process SAGE_GERMLINE {
             -mnv_filter_enabled false \\
             -panel_only \\
             -threads ${task.cpus} \\
-            -out ./${meta.tumor_id}.sage_germline.vcf.gz
+            -out ./${meta.tumor_id}.sage.germline.vcf.gz
+
+    bcftools view -f 'PASS' -o ${meta.tumor_id}.sage.germline.filtered.vcf.gz ${meta.tumor_id}.sage.germline.vcf.gz
 
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":
@@ -62,7 +65,8 @@ process SAGE_GERMLINE {
 
     stub:
     """
-    touch "${meta.tumor_id}.sage_germline.vcf.gz"
+    touch "${meta.tumor_id}.sage.germline.vcf.gz"
+    touch "${meta.tumor_id}.sage.germline.filtered.vcf.gz"
     touch "${meta.tumor_id}.gene.coverage.tsv"
     echo -e '${task.process}:\\n  stub: noversions\\n' > versions.yml
     """
