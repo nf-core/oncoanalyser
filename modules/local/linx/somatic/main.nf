@@ -39,6 +39,7 @@ process LINX_SOMATIC {
             -known_fusion_file ${known_fusion_data} \\
             -check_drivers \\
             -driver_gene_panel ${driver_gene_panel} \\
+            -write_vis_data \\
             -output_dir linx_somatic/
 
     cat <<-END_VERSIONS > versions.yml
