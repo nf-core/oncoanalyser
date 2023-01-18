@@ -120,7 +120,7 @@ workflow ONCOANALYSER {
     hmf_data = PREPARE_REFERENCE.out.hmf_data
 
     // Set up channel with common inputs for several processes
-    if (run.amber || run.cobalt || run.pave || run.lilac) {
+    if (run.amber || run.cobalt || run.sage || run.lilac) {
         // channel: [val(meta), tumor_bam, normal_bam, tumor_bai, normal_bai]
         ch_bams_and_indices = ch_inputs
             .map { meta ->
