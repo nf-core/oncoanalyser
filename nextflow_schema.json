@@ -392,7 +392,7 @@
                     "fa_icon": "far fa-file-code",
                     "hidden": true
                 },
-                "ref_data_ensembl_data_dir": {
+                "ref_data_ensembl_data_resources": {
                     "type": "string",
                     "format": "directory-path",
                     "description": "Path to HMF Ensembl data cache directory.",
