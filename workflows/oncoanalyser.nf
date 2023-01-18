@@ -471,6 +471,7 @@ workflow ONCOANALYSER {
             .map { meta, sage_vcf ->
                 def pave_meta = [
                     key: meta.id,
+                    // NOTE(SW): use of tumor sample name for PAVE germline is correct
                     id: meta.get(['sample_name', Constants.DataType.TUMOR]),
                 ]
                 return [pave_meta, sage_vcf]
