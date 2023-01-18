@@ -1,4 +1,5 @@
-// NOTE(SW): logic that determines BQR outputs assumes '-out' is a path that includes at least one directory
+// NOTE(SW): logic that determines BQR outputs assumes '-out' is a path that includes at least
+// leading one directory
 
 process SAGE_SOMATIC {
     tag "${meta.id}"
