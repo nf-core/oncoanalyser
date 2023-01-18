@@ -19,6 +19,7 @@ workflow PAVE {
         ref_data_segment_mappability    //    file: /path/to/segment_mappability
         ref_data_driver_gene_panel      //    file: /path/to/driver_gene_panel
         ref_data_ensembl_data_resources //    file: /path/to/ensembl_data_resources/
+        ref_data_gnomad_pon_dir         //    file: /path/to/gnomad_pon_dir/
 
     main:
         // Channel for version.yml files
@@ -49,6 +50,7 @@ workflow PAVE {
             ref_data_segment_mappability,
             ref_data_driver_gene_panel,
             ref_data_ensembl_data_resources,
+            ref_data_gnomad_pon_dir,
         )
         ch_versions = ch_versions.mix(PAVE_SOMATIC.out.versions)
 
