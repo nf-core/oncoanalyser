@@ -18,12 +18,13 @@ process SAGE_SOMATIC {
     path ensembl_data_resources
 
     output:
-    tuple val(meta), path("${meta.tumor_id}.sage_somatic.vcf.gz"), emit: vcf
-    tuple val(meta), path("${meta.tumor_id}.sage.bqr.png")       , emit: tumor_bqr_png, optional: true
-    tuple val(meta), path("${meta.normal_id}.sage.bqr.png")      , emit: normal_bqr_png, optional: true
-    path '*gene.coverage.tsv'                                    , emit: gene_coverage, optional: true
-    path '*sage.bqr.tsv'                                         , emit: bqr_tsv, optional: true
-    path 'versions.yml'                                          , emit: versions
+    tuple val(meta), path("${meta.tumor_id}.sage.somatic.vcf.gz")         , emit: vcf
+    tuple val(meta), path("${meta.tumor_id}.sage.somatic.filtered.vcf.gz"), emit: vcf_filtered
+    tuple val(meta), path("${meta.tumor_id}.sage.bqr.png")                , emit: tumor_bqr_png, optional: true
+    tuple val(meta), path("${meta.normal_id}.sage.bqr.png")               , emit: normal_bqr_png, optional: true
+    path '*gene.coverage.tsv'                                             , emit: gene_coverage, optional: true
+    path '*sage.bqr.tsv'                                                  , emit: bqr_tsv, optional: true
+    path 'versions.yml'                                                   , emit: versions
 
     when:
     task.ext.when == null || task.ext.when
@@ -50,7 +51,9 @@ process SAGE_SOMATIC {
             -write_bqr_data \\
             -write_bqr_plot \\
             -threads ${task.cpus} \\
-            -out ./${meta.tumor_id}.sage_somatic.vcf.gz
+            -out ./${meta.tumor_id}.sage.somatic.vcf.gz
+
+    bcftools view -f 'PASS' -o ${meta.tumor_id}.sage.somatic.filtered.vcf.gz ${meta.tumor_id}.sage.somatic.vcf.gz
 
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":
@@ -60,7 +63,8 @@ process SAGE_SOMATIC {
 
     stub:
     """
-    touch "${meta.tumor_id}.sage_somatic.vcf.gz"
+    touch "${meta.tumor_id}.sage.somatic.vcf.gz"
+    touch "${meta.tumor_id}.sage.somatic.filtered.vcf.gz"
     touch "${meta.tumor_id}.sage.bqr.png"
     touch "${meta.normal_id}.sage.bqr.png"
     echo -e '${task.process}:\\n  stub: noversions\\n' > versions.yml
