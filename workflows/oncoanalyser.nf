@@ -821,6 +821,8 @@ workflow ONCOANALYSER {
             hmf_data.ensembl_data_resources,
             hmf_data.known_fusion_data,
             hmf_data.driver_gene_panel,
+            hmf_data.gridss_pon_breakends,
+            hmf_data.gridss_pon_breakpoints,
         )
 
         // Set outputs, restoring original meta
