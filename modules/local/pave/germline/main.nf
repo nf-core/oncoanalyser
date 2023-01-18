@@ -49,6 +49,7 @@ process PAVE_GERMLINE {
             -mappability_bed ${segment_mappability} \\
             -vcf_file ${sage_vcf} \\
             -read_pass_only \\
+            -write_pass_only \\
             -output_dir ./
 
     # NOTE(SW): hard coded since there is no reliable way to obtain version information.
