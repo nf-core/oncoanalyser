@@ -15,6 +15,7 @@ process PAVE_SOMATIC {
     path segment_mappability
     path driver_gene_panel
     path ensembl_data_resources
+    path gnomad_pon_dir
 
     output:
     tuple val(meta), path("*.vcf.gz")    , emit: vcf
@@ -26,7 +27,18 @@ process PAVE_SOMATIC {
 
     script:
     def args = task.ext.args ?: ''
-    def pon_filters = "HOTSPOT:5:5;PANEL:2:5;UNKNOWN:2:0"
+    def pon_filters
+    def gnomad_args
+    if (genome_ver == '37') {
+        pon_filters = 'HOTSPOT:10:5;PANEL:6:5;UNKNOWN:6:0'
+        gnomad_args = ''
+    } else if (genome_ver == '38') {
+        pon_filters = 'HOTSPOT:5:5;PANEL:2:5;UNKNOWN:2:0'
+        gnomad_args = "-gnomad_freq_dir \"${gnomad_pon_dir}\" -gnomad_load_chr_on_demand"
+    } else {
+        log.error "got bad genome version: ${genome_ver}"
+        System.exit(1)
+    }
 
     """
     java \\
@@ -42,6 +54,7 @@ process PAVE_SOMATIC {
             -mappability_bed ${segment_mappability} \\
             -vcf_file ${sage_vcf} \\
             -read_pass_only \\
+            ${gnomad_args} \\
             -output_dir ./
 
     # NOTE(SW): hard coded since there is no reliable way to obtain version information.

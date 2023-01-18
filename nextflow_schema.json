@@ -399,6 +399,13 @@
                     "fa_icon": "far fa-folder-open",
                     "hidden": true
                 },
+                "ref_data_gnomad_pon_dir": {
+                    "type": "string",
+                    "format": "directory-path",
+                    "description": "Path to HMF gnomAD PON directory.",
+                    "fa_icon": "far fa-folder-open",
+                    "hidden": true
+                },
                 "ref_data_known_fusion_data": {
                     "type": "string",
                     "format": "file-path",

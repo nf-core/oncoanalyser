@@ -498,6 +498,7 @@ workflow ONCOANALYSER {
             hmf_data.segment_mappability,
             hmf_data.driver_gene_panel,
             hmf_data.ensembl_data_resources,
+            hmf_data.gnomad_pon_dir,
         )
 
         // Set outputs, restoring original meta
