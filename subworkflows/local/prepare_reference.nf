@@ -6,9 +6,11 @@ include { SAMTOOLS_FAIDX         } from '../../modules/nf-core/samtools/faidx/ma
 include { SAMTOOLS_DICT          } from '../../modules/nf-core/samtools/dict/main'
 include { BWA_INDEX              } from '../../modules/nf-core/bwa/index/main'
 
-include { CUSTOM_EXTRACTTARBALL                  } from '../../modules/local/custom/extract_tarball/main'
-include { GRIDSS_INDEX as GRIDSS_BWA_INDEX_IMAGE } from '../../modules/local/gridss/index/main'
-include { GRIDSS_INDEX as GRIDSS_INDEX           } from '../../modules/local/gridss/index/main'
+include { CUSTOM_EXTRACTTARBALL as DECOMP_BWA_INDEX        } from '../../modules/local/custom/extract_tarball/main'
+include { CUSTOM_EXTRACTTARBALL as DECOMP_HMF_DATA         } from '../../modules/local/custom/extract_tarball/main'
+include { CUSTOM_EXTRACTTARBALL as DECOMP_VIRUSBREAKEND_DB } from '../../modules/local/custom/extract_tarball/main'
+include { GRIDSS_INDEX as GRIDSS_BWA_INDEX_IMAGE           } from '../../modules/local/gridss/index/main'
+include { GRIDSS_INDEX as GRIDSS_INDEX                     } from '../../modules/local/gridss/index/main'
 
 workflow PREPARE_REFERENCE {
     take:
@@ -49,11 +51,20 @@ workflow PREPARE_REFERENCE {
         ch_genome_bwa_index_image = file(params.ref_data_genome_bwa_index_image)
         ch_genome_gridss_index = file(params.ref_data_genome_gridss_index)
         if (run.gridss || run.virusinterpreter) {
+            // NOTE(SW): the BWA index directory can be provided as a compressed tarball
             if (!params.ref_data_genome_bwa_index) {
                 BWA_INDEX([[:], ch_genome_fasta])
                 ch_genome_bwa_index = BWA_INDEX.out.index.map { it[1] }
                 ch_versions = ch_versions.mix(BWA_INDEX.out.versions)
+            } else if (params.ref_data_genome_bwa_index.endsWith('.tar.gz')) {
+                ch_genome_bwa_index_inputs = [
+                    [id: 'bwa_index'],
+                    file(params.ref_data_genome_bwa_index),
+                ]
+                DECOMP_BWA_INDEX(ch_genome_bwa_index_inputs)
+                ch_genome_bwa_index = DECOMP_BWA_INDEX.out.dir
             }
+
             if (!params.ref_data_genome_bwa_index_image) {
                 GRIDSS_BWA_INDEX_IMAGE(
                     ch_genome_fasta,
@@ -81,7 +92,7 @@ workflow PREPARE_REFERENCE {
         }
 
         //
-        // Set VIRUSBreakend database paths / stage, unpack if required
+        // Set VIRUSBreakend database path / stage, unpack if required
         //
         ch_virusbreakenddb = Channel.empty()
         if (run.virusinterpreter) {
@@ -90,18 +101,33 @@ workflow PREPARE_REFERENCE {
                     [id: 'virusbreakenddb'],
                     file(params.ref_data_virusbreakenddb_path),
                 ]
-                CUSTOM_EXTRACTTARBALL(ch_virusbreakenddb_inputs)
-                ch_virusbreakenddb = CUSTOM_EXTRACTTARBALL.out.dir
+                DECOMP_VIRUSBREAKEND_DB(ch_virusbreakenddb_inputs)
+                ch_virusbreakenddb = DECOMP_VIRUSBREAKEND_DB.out.dir
             } else {
                 ch_virusbreakenddb = file(params.ref_data_virusbreakenddb_path)
             }
         }
 
         //
-        // Set HMF reference paths
+        // Set HMF reference paths / stage, unpack if required
         //
-        if (params.ref_data_hmf_data_base) {
-            ch_hmf_data = createHmfDataMap(params.ref_data_hmf_data_base, false /* params_only */)
+        if (params.ref_data_hmf_data_path.endsWith('tar.gz')) {
+            // Decompress and set paths
+            ch_hmf_data_inputs = [
+                [id: 'hmf_data'],
+                file(params.ref_data_hmf_data_path),
+            ]
+            DECOMP_HMF_DATA(ch_hmf_data_inputs)
+
+            ch_hmf_data = DECOMP_HMF_DATA.out.dir
+                .collect()
+                .map { dir_list ->
+                    assert dir_list.size() == 1
+                    return createHmfDataMap(dir_list[0], false /* params_only */)
+                }
+        } else if (params.ref_data_hmf_data_path) {
+            // If provided as path to directory, set paths
+            ch_hmf_data = createHmfDataMap(params.ref_data_hmf_data_path, false /* params_only */)
         } else {
             // If no HMF data bundle is supplied we construct from *only* params
             ch_hmf_data = createHmfDataMap(null, true /* params_only */)
@@ -122,7 +148,7 @@ workflow PREPARE_REFERENCE {
         versions               = ch_versions                    // channel: [versions.yml]
 }
 
-def createHmfDataMap(hmf_data_base, params_only) {
+def createHmfDataMap(hmf_data_path, params_only) {
     // NOTE(SW): this code provides an explicit mapping between user exposed HMF data params and
     // their corresponding internal representation
     def params_mapping = [
@@ -180,7 +206,7 @@ def createHmfDataMap(hmf_data_base, params_only) {
         segment_mappability:          'ref_data_segment_mappability',
     ]
     params_mapping.collectEntries { k, v ->
-        [k, getHmfDataFileObject(v, k, hmf_data_base, params_only)]
+        [k, getHmfDataFileObject(v, k, hmf_data_path, params_only)]
     }
 }
 

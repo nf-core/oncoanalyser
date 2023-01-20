@@ -62,11 +62,11 @@ class WorkflowOncoanalyser {
             params.ref_data_genome_type = 'no_alt'
         }
 
-        if (!params.containsKey('ref_data_hmf_data_base')) {
+        if (!params.containsKey('ref_data_hmf_data_path')) {
             if (params.ref_data_genome_version == '37') {
-                params.ref_data_hmf_data_base = Constants.HMF_DATA_37_BASE
+                params.ref_data_hmf_data_path = Constants.HMF_DATA_37_PATH
             } else if (params.ref_data_genome_version == '38') {
-                params.ref_data_hmf_data_base = Constants.HMF_DATA_38_BASE
+                params.ref_data_hmf_data_path = Constants.HMF_DATA_38_PATH
             } else {
                 assert false : "Got a bad genome version: ${params.ref_data_genome_version}"
             }
