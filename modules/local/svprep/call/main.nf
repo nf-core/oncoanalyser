@@ -63,7 +63,8 @@ process CALL {
     # Run
     gridss_svprep \\
         ${args} \\
-        --jvmheap ${task.memory.giga}g \\
+        --jvmheap ${task.memory.giga - task.ext.otherJvmHeap.giga}g \\
+        --otherjvmheap ${task.ext.otherJvmHeap.giga}g \\
         --jar ${task.ext.jarPath} \\
         --steps call \\
         --labels ${labels_arg} \\
