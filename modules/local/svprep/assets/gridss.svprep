@@ -71,10 +71,14 @@ Usage: gridss [options] -r <reference.fa> -o <output.vcf.gz> -a <assembly.bam> i
     -b/bams: comma separated full-path BAM files
     -f/filtered_bams: comma separated full-path filtered BAM files
     --jvmheap: size of JVM heap for the high-memory component of assembly and variant calling. (Default: $jvmheap)
+    --otherjvmheap: size of JVM heap for everything else. Useful to prevent
+        java out of memory errors when using large (>4Gb) reference genomes.
+        Note that some parts of assembly and variant calling use this heap
+        size. (Default: $otherjvmheap)
     "
 
 OPTIONS=r:o:a:t:j:w:e:s:c:l:b:f:
-LONGOPTS=reference:,output:,assembly:,threads:,jar:,workingdir:,jvmheap:,blacklist:,steps:,configuration:,labels:,bams:,filtered_bams:
+LONGOPTS=reference:,output:,assembly:,threads:,jar:,workingdir:,jvmheap:,otherjvmheap:,blacklist:,steps:,configuration:,labels:,bams:,filtered_bams:
 ! PARSED=$(getopt --options=$OPTIONS --longoptions=$LONGOPTS --name "$0" -- "$@")
 if [[ ${PIPESTATUS[0]} -ne 0 ]]; then
 	# e.g. return value is 1
@@ -136,6 +140,10 @@ while [[ $# -gt 0 ]]; do
 			;;
 		--jvmheap)
 			jvmheap="$2"
+			shift 2
+			;;
+		--otherjvmheap)
+			otherjvmheap="$2"
 			shift 2
 			;;
 		-t|--threads)

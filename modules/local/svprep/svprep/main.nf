@@ -1,3 +1,6 @@
+// NOTE(SW): providing a 1GB memory buffer since SV Prep v1.0.1 is often killed due to exceeding
+// allocated memory
+
 process SVPREP {
     tag "${meta.id}"
     label 'process_medium'
@@ -27,7 +30,7 @@ process SVPREP {
 
     """
     java \\
-        -Xmx${task.memory.giga}g \\
+        -Xmx${task.memory.giga - 1}g \\
         -jar ${task.ext.jarPath} \\
             ${args} \\
             -sample ${meta.id} \\
