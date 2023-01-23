@@ -2,7 +2,7 @@ process PEACH {
     tag "${meta.id}"
     label 'process_single'
 
-    container 'docker.io/scwatts/peach:1.6--0'
+    container 'docker.io/scwatts/peach:1.7--0'
 
     input:
     tuple val(meta), path(germline_vcf)
@@ -19,7 +19,7 @@ process PEACH {
 
     script:
     def args = task.ext.args ?: ''
-    def tool_version = '1.6'
+    def tool_version = '1.7'
 
     """
     python ${task.ext.scriptPath} \\

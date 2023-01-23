@@ -27,7 +27,7 @@ RUN \
   pip install 'TransVar==2.5.8.20190813'
 
 RUN \
-  git clone https://github.com/hartwigmedical/peach.git -b v1.6 /opt/peach/
+  git clone https://github.com/hartwigmedical/peach.git -b v1.7 /opt/peach/
 
 RUN \
   apt-get remove -y build-essential git && \

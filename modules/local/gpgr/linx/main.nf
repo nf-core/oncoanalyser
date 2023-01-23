@@ -2,7 +2,7 @@ process GPGR_LINX {
     tag "${meta.id}"
     label 'process_single'
 
-    container 'ghcr.io/umccr/gpgr:1.3.0'
+    container 'ghcr.io/umccr/gpgr:1.4.1'
 
     input:
     tuple val(meta), path(linx_annotation), path(linx_visualiser)

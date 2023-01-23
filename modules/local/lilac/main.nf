@@ -2,7 +2,7 @@ process LILAC {
     tag "${meta.id}"
     label 'process_medium'
 
-    container 'docker.io/scwatts/lilac:1.1--0'
+    container 'docker.io/scwatts/lilac:1.4.2--0'
 
     input:
     tuple val(meta), path(normal_wgs_bam), path(normal_wgs_bai), path(tumor_wgs_bam), path(tumor_wgs_bai), path(tumor_wts_bam), path(tumor_wts_bai), path(purple_dir)
@@ -23,8 +23,8 @@ process LILAC {
     def tumor_wgs_bam_arg = tumor_wgs_bam ? "-tumor_bam ${tumor_wgs_bam}" : ''
     def tumor_wts_bam_arg = tumor_wts_bam ? "-rna_bam ${tumor_wts_bam}" : ''
     def purple_args = purple_dir ? """
-        -gene_copy_number_file ${purple_dir}/${sample_name}.purple.cnv.gene.tsv \\
-        -somatic_variants_file ${purple_dir}/${sample_name}.purple.sv.vcf.gz \\
+        -gene_copy_number ${purple_dir}/${sample_name}.purple.cnv.gene.tsv \\
+        -somatic_vcf ${purple_dir}/${sample_name}.purple.sv.vcf.gz \\
     """ : ''
 
     """
@@ -46,7 +46,7 @@ process LILAC {
     # NOTE(SW): hard coded since there is no reliable way to obtain version information.
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":
-        lilac: 1.1
+        lilac: 1.4.2
     END_VERSIONS
     """
 

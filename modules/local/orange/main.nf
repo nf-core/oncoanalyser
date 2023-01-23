@@ -1,8 +1,10 @@
+// NOTE(SW): reference files for Isfox aren't currently available (-isofox_gene_distribution_csv, -isofox_alt_sj_cohort_csv)
+
 process ORANGE {
     tag "${meta.id}"
     label 'process_single'
 
-    container 'docker.io/scwatts/orange:1.10--0'
+    container 'docker.io/scwatts/orange:1.10.2--0'
 
     input:
     tuple val(meta), path(bam_metrics_somatic), path(bam_metrics_germline), path(flagstat_somatic), path(flagstat_germline), path(chord_prediction), path(lilac_dir), path(sage_somatic_bqr), path(sage_germline_bqr), path(sage_germline_coverage), path(purple_dir), path(linx_somatic_anno_dir), path(linx_somatic_plot_dir), path(linx_germline_anno_dir), path(protect), path(peach_genotype), path(cuppa), path(cuppa_summary_plot), path(cuppa_feature_plot), path(virusinterpreter)
@@ -78,8 +80,8 @@ process ORANGE {
             -linx_plot_directory ${linx_somatic_plot_dir} \\
             \\
             -cuppa_result_csv ${cuppa} \\
-            -cuppa_feature_plot ${cuppa_summary_plot} \\
-            -cuppa_summary_plot ${cuppa_feature_plot} \\
+            -cuppa_feature_plot ${cuppa_feature_plot} \\
+            -cuppa_summary_plot ${cuppa_summary_plot} \\
             \\
             -peach_genotype_tsv ${peach_genotype} \\
             -protect_evidence_tsv ${protect} \\

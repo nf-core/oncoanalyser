@@ -34,7 +34,7 @@ input:
   - genome_ver:
       type: string
       description: Reference genome version
-  - sage_pong:
+  - sage_pon:
       type: file
       description: SAGE PON file
       pattern: "*.{tsv.gz}"

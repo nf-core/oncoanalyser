@@ -10,7 +10,7 @@ RUN \
 
 RUN \
   mkdir -p /opt/sigs/ && \
-  wget -O /opt/sigs/sigs.jar 'https://github.com/hartwigmedical/hmftools/releases/download/sigs-v1.0/sigs_v1.0.jar'
+  wget -O /opt/sigs/sigs.jar 'https://github.com/hartwigmedical/hmftools/releases/download/sigs-v1.1/sigs_v1.1.jar
 
 USER mambauser
 

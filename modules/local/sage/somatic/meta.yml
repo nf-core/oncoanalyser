@@ -52,9 +52,9 @@ input:
       type: file
       description: SAGE somatic known hotspots file
       pattern: "*.{vcf.gz}"
-  - sage_coding_panel:
+  - sage_actionable_panel:
       type: file
-      description: SAGE coding gene panel file
+      description: SAGE actionable gene panel file
       pattern: "*.{bed.gz}"
   - sage_highconf_regions:
       type: file

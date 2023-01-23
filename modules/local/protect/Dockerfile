@@ -10,7 +10,7 @@ RUN \
 
 RUN \
   mkdir -p /opt/protect/ && \
-  wget -O /opt/protect/protect.jar 'https://github.com/hartwigmedical/hmftools/releases/download/protect-v2.2/protect.jar'
+  wget -O /opt/protect/protect.jar 'https://github.com/hartwigmedical/hmftools/releases/download/protect-v2.3/protect.jar'
 
 USER mambauser
 

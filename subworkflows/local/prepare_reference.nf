@@ -134,10 +134,11 @@ def createHmfDataMap(hmf_data_base, params_only) {
         cuppa_resources:              'ref_data_cuppa_resources',
         // SVPREP
         'sv_prep_blocklist':          'ref_data_sv_prep_blocklist',
-        // GRIDSS
+        // GRIDSS, GRIPSS
         gridss_pon_breakends:         'ref_data_gridss_pon_breakends',
         gridss_pon_breakpoints:       'ref_data_gridss_pon_breakpoints',
         gridss_region_blocklist:      'ref_data_gridss_region_blocklist',
+        repeatmasker_annotations:     'ref_data_repeatmasker_annotations',
         // Isofox
         isofox_counts:                'ref_data_isofox_counts',
         isofox_gc_ratios:             'ref_data_isofox_gc_ratios',
@@ -157,8 +158,8 @@ def createHmfDataMap(hmf_data_base, params_only) {
         clinvar_annotations:          'ref_data_clinvar_annotations',
         sage_blocklist_regions:       'ref_data_sage_blocklist_regions',
         sage_blocklist_sites:         'ref_data_sage_blocklist_sites',
-        sage_coding_panel:            'ref_data_sage_coding_panel',
-        sage_coverage_panel_germline: 'ref_data_sage_coverage_panel_germline',
+        sage_actionable_panel:        'ref_data_sage_actionable_panel',
+        sage_coverage_panel:          'ref_data_sage_coverage_panel',
         sage_highconf_regions:        'ref_data_sage_highconf_regions',
         sage_known_hotspots_germline: 'ref_data_sage_known_hotspots_germline',
         sage_known_hotspots_somatic:  'ref_data_sage_known_hotspots_somatic',
@@ -193,6 +194,13 @@ def getHmfDataFileObject(pk, hk, base_dir, params_only) {
     } else if (!hmfdata_paths.containsKey(hk)) {
         assert false : "bad key for params.hmfdata_paths.${params.genome_version}: ${hk}"
     } else {
+
+      // NOTE(SW): allow paths to optionally set by checking for and returning '[]' values
+      def value = hmfdata_paths.getAt(hk)
+      if (value == []) {
+          return value
+      }
+
       def base_dir_noslash = base_dir.toString().replaceAll('/$', '')
       return file("${base_dir_noslash}/${hmfdata_paths.getAt(hk)}", checkIfExists: true)
     }

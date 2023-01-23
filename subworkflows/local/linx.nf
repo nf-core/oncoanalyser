@@ -16,8 +16,6 @@ workflow LINX {
         ref_data_ensembl_data_resources //    file: /path/to/ensembl_data_resources/
         ref_data_known_fusion_data      //    file: /path/to/known_fusion_data
         ref_data_driver_gene_panel      //    file: /path/to/driver_gene_panel
-        ref_data_gridss_pon_breakends   //    file: /path/to/gridss_pon_breakends
-        ref_data_gridss_pon_breakpoints //    file: /path/to/gridss_pon_breakpoints
 
     main:
         // Channel for versions.yml files
@@ -27,12 +25,9 @@ workflow LINX {
         LINX_GERMLINE(
             ch_linx_germline_inputs,
             ref_data_genome_version,
-            ref_data_linx_fragile_regions,
             ref_data_linx_lines,
             ref_data_ensembl_data_resources,
             ref_data_driver_gene_panel,
-            ref_data_gridss_pon_breakends,
-            ref_data_gridss_pon_breakpoints,
         )
         ch_versions = ch_versions.mix(LINX_GERMLINE.out.versions)
 

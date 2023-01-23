@@ -14,8 +14,8 @@ workflow SAGE {
         ref_data_genome_version               //     val: genome version
         ref_data_sage_known_hotspots_germline //    file: /path/to/sage_known_hotspots_germline
         ref_data_sage_known_hotspots_somatic  //    file: /path/to/sage_known_hotspots_somatic
-        ref_data_sage_coding_panel            //    file: /path/to/sage_coding_panel
-        ref_data_sage_coverage_panel_germline //    file: /path/to/sage_coverage_panel_germline
+        ref_data_sage_actionable_panel        //    file: /path/to/sage_actionable_panel
+        ref_data_sage_coverage_panel          //    file: /path/to/sage_coverage_panel
         ref_data_sage_highconf_regions        //    file: /path/to/sage_highconf_regions
         ref_data_sage_pon                     //    file: /path/to/sage_pon
         ref_data_segment_mappability          //    file: /path/to/segment_mappability
@@ -34,8 +34,8 @@ workflow SAGE {
             ref_data_genome_dict,
             ref_data_genome_version,
             ref_data_sage_known_hotspots_germline,
-            ref_data_sage_coding_panel,
-            ref_data_sage_coverage_panel_germline,
+            ref_data_sage_actionable_panel,
+            ref_data_sage_coverage_panel,
             ref_data_sage_highconf_regions,
             ref_data_ensembl_data_resources,
         )
@@ -49,7 +49,7 @@ workflow SAGE {
             ref_data_genome_dict,
             ref_data_genome_version,
             ref_data_sage_known_hotspots_somatic,
-            ref_data_sage_coding_panel,
+            ref_data_sage_actionable_panel,
             ref_data_sage_highconf_regions,
             ref_data_ensembl_data_resources,
         )

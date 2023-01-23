@@ -406,6 +406,7 @@ workflow ONCOANALYSER {
             hmf_data.gridss_pon_breakends,
             hmf_data.gridss_pon_breakpoints,
             hmf_data.known_fusions,
+            hmf_data.repeatmasker_annotations,
         )
 
         // Set outputs, restoring original meta
@@ -449,8 +450,8 @@ workflow ONCOANALYSER {
             PREPARE_REFERENCE.out.genome_version,
             hmf_data.sage_known_hotspots_germline,
             hmf_data.sage_known_hotspots_somatic,
-            hmf_data.sage_coding_panel,
-            hmf_data.sage_coverage_panel_germline,
+            hmf_data.sage_actionable_panel,
+            hmf_data.sage_coverage_panel,
             hmf_data.sage_highconf_regions,
             hmf_data.sage_pon,
             hmf_data.segment_mappability,
@@ -842,8 +843,6 @@ workflow ONCOANALYSER {
             hmf_data.ensembl_data_resources,
             hmf_data.known_fusion_data,
             hmf_data.driver_gene_panel,
-            hmf_data.gridss_pon_breakends,
-            hmf_data.gridss_pon_breakpoints,
         )
 
         // Set outputs, restoring original meta
@@ -889,6 +888,7 @@ workflow ONCOANALYSER {
             run.chord ? ch_chord_out : WorkflowOncoanalyser.getInput(ch_inputs, [Constants.FileType.CHORD_PREDICTION, Constants.DataType.TUMOR]),
             run.purple ? ch_purple_out : WorkflowOncoanalyser.getInput(ch_inputs, [Constants.FileType.PURPLE_DIR, Constants.DataType.TUMOR_NORMAL]),
             run.linx ? ch_linx_anno : WorkflowOncoanalyser.getInput(ch_inputs, [Constants.FileType.LINX_ANNO_DIR, Constants.DataType.TUMOR_NORMAL]),
+            run.lilac ? ch_lilac_out : WorkflowOncoanalyser.getInput(ch_inputs, [Constants.FileType.LILAC_DIR, Constants.DataType.NORMAL]),
             run.virusinterpreter ? ch_virusinterpreter_out : WorkflowOncoanalyser.getInput(ch_inputs, [Constants.FileType.VIRUSINTERPRETER_TSV, Constants.DataType.TUMOR]),
         )
 
@@ -912,6 +912,7 @@ workflow ONCOANALYSER {
           ch_protect_inputs,
           PREPARE_REFERENCE.out.genome_version,
           hmf_data.serve_resources,
+          hmf_data.driver_gene_panel,
           hmf_data.disease_ontology,
         )
 
@@ -1173,7 +1174,7 @@ workflow ONCOANALYSER {
             hmf_data.driver_gene_panel,
             hmf_data.cohort_mapping,
             hmf_data.cohort_percentiles,
-            "5.23 [oncoanalyser]",
+            "5.31 [oncoanalyser]",
         )
 
         // Set outputs
