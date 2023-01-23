@@ -2,7 +2,7 @@ process SIGS {
     tag "${meta.id}"
     label 'process_low'
 
-    container 'docker.io/scwatts/sigs:1.0--0'
+    container 'docker.io/scwatts/sigs:1.1--0'
 
     input:
     tuple val(meta), path(smlv_vcf)
@@ -32,7 +32,7 @@ process SIGS {
     # NOTE(SW): hard coded since there is no reliable way to obtain version information.
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":
-        sigs: 1.0
+        sigs: 1.1
     END_VERSIONS
     """
 

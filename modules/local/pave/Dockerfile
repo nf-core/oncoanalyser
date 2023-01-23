@@ -10,7 +10,7 @@ RUN \
 
 RUN \
   mkdir -p /opt/pave/ && \
-  wget -O /opt/pave/pave.jar 'https://github.com/hartwigmedical/hmftools/releases/download/pave-v1.2.2/pave_v1.2.rc2.jar'
+  wget -O /opt/pave/pave.jar 'https://github.com/hartwigmedical/hmftools/releases/download/pave-v1.4/pave_v1.4.jar'
 
 USER mambauser
 

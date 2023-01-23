@@ -2,7 +2,7 @@ process SVPREP {
     tag "${meta.id}"
     label 'process_medium'
 
-    container 'docker.io/scwatts/svprep:1.1--0'
+    container 'docker.io/scwatts/svprep:1.0.1--0'
 
     input:
     tuple val(meta), path(bam), path(bai), path(junctions)
@@ -45,7 +45,7 @@ process SVPREP {
 
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":
-        sage: \$(java -jar ${task.ext.jarPath} 2>&1 | head -n1 | sed 's/^.*SvPrep version: //')
+        svprep: \$(java -jar ${task.ext.jarPath} 2>&1 | head -n1 | sed 's/^.*SvPrep version: //')
     END_VERSIONS
     """
 

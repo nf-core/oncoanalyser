@@ -2,7 +2,7 @@ process CUPPA_CLASSIFIER {
     tag "${meta.id}"
     label 'process_low'
 
-    container 'docker.io/scwatts/cuppa:1.6--0'
+    container 'docker.io/scwatts/cuppa:1.7.1--0'
 
     input:
     tuple val(meta), path(isofox_dir), path(purple_dir), path(linx_dir), path(virusinterpreter)
@@ -18,7 +18,6 @@ process CUPPA_CLASSIFIER {
     script:
     def args = task.ext.args ?: ''
     def categories_arg = isofox_dir ? 'ALL' : 'DNA'
-    def gene_exp_arg = isofox_dir ? "-sample_gene_exp_file sample_data/${meta.id}.isf.gene_data.csv" : ''
 
     """
     # Symlink input files into a single directory
@@ -33,15 +32,12 @@ process CUPPA_CLASSIFIER {
             -ref_data_dir ${cuppa_resources} \\
             -sample_data ${meta.id} \\
             -sample_data_dir sample_data/ \\
-            -sample_sv_file sample_data/${meta.id}.purple.sv.vcf.gz \\
-            -sample_somatic_vcf sample_data/${meta.id}.purple.somatic.vcf.gz \\
-            ${gene_exp_arg} \\
             -output_dir ./
 
     # NOTE(SW): hard coded since there is no reliable way to obtain version information.
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":
-        cuppa: 1.6
+        cuppa: 1.7.1
     END_VERSIONS
     """
 

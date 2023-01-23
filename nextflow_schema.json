@@ -213,8 +213,15 @@
                 "ref_data_gridss_region_blocklist": {
                     "type": "string",
                     "format": "file-path",
-                    "pattern": "^\\S+\\.bed.gz$",
+                    "pattern": "^\\S+\\.bed\\.gz$",
                     "description": "Path to GRIDSS blocklist file.",
+                    "fa_icon": "far fa-file-code",
+                    "hidden": true
+                },
+                "ref_data_repeatmasker_annotations": {
+                    "type": "string",
+                    "format": "file-path",
+                    "description": "Path to RepeastMasker annotations file.",
                     "fa_icon": "far fa-file-code",
                     "hidden": true
                 },
@@ -312,19 +319,19 @@
                     "fa_icon": "far fa-file-code",
                     "hidden": true
                 },
-                "ref_data_sage_coding_panel": {
+                "ref_data_sage_actionable_panel": {
                     "type": "string",
                     "format": "file-path",
                     "pattern": "^\\S+\\.bed\\.gz$",
-                    "description": "Path to somatic SAGE coding panel file.",
+                    "description": "Path to somatic SAGE actionable panel file.",
                     "fa_icon": "far fa-file-code",
                     "hidden": true
                 },
-                "ref_data_sage_coverage_panel_germline": {
+                "ref_data_sage_coverage_panel": {
                     "type": "string",
                     "format": "file-path",
                     "pattern": "^\\S+\\.bed\\.gz$",
-                    "description": "Path to HMF SAGE germline coverage panel file.",
+                    "description": "Path to HMF SAGE coverage panel file.",
                     "fa_icon": "far fa-file-code",
                     "hidden": true
                 },

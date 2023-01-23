@@ -2,17 +2,14 @@ process LINX_GERMLINE {
     tag "${meta.id}"
     label 'process_low'
 
-    container 'docker.io/scwatts/linx:1.19.1--0'
+    container 'docker.io/scwatts/linx:1.22--0'
 
     input:
     tuple val(meta), path(gripss_sv)
     val genome_ver
-    path fragile_regions
     path lines
     path ensembl_data_resources
     path driver_gene_panel
-    path pon_breakends
-    path pon_breakpoints
 
     output:
     tuple val(meta), path('linx_germline/'), emit: annotation_dir
@@ -33,12 +30,9 @@ process LINX_GERMLINE {
             -germline \\
             -ref_genome_version ${genome_ver} \\
             -sv_vcf ${gripss_sv} \\
-            -fragile_site_file ${fragile_regions} \\
             -line_element_file ${lines} \\
             -ensembl_data_dir ${ensembl_data_resources} \\
             -driver_gene_panel ${driver_gene_panel} \\
-            -germine_pon_sgl_file ${pon_breakends} \\
-            -germine_pon_sv_file ${pon_breakpoints} \\
             -output_dir linx_germline/
 
     cat <<-END_VERSIONS > versions.yml

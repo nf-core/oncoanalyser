@@ -43,6 +43,9 @@ input:
       type: file
       description: HMF Known Fusions file
       pattern: "*.{bedpe}"
+  - repeatmasker_annotations:
+      type: file
+      description: RepeatMasker annotations file
 output:
   - meta:
       type: map

@@ -10,12 +10,13 @@ RUN \
 
 RUN \
   mkdir -p /opt/sage/ && \
-  wget -O /opt/sage/sage.jar 'https://github.com/hartwigmedical/hmftools/releases/download/sage-v3.0.3/sage_v3.0_rc3.jar'
+  wget -O /opt/sage/sage.jar 'https://github.com/hartwigmedical/hmftools/releases/download/sage-v3.2.3/sage_v3.2.3.jar'
 
 USER mambauser
 
 RUN \
   micromamba install -y -n base -c bioconda -c conda-forge \
+    'bcftools ==1.16' \
     bioconductor-genomicranges \
     bioconductor-variantannotation \
     font-ttf-dejavu \

@@ -1,5 +1,3 @@
-// NOTE(SW): PAVE gnomad filtering is not yet documented but is used in Pipeline5:
-//  - cluster/src/main/java/com/hartwig/pipeline/tertiary/pave/PaveArguments.java#L27-L28
 // NOTE(SW): use of tumor sample name here is consistent with pipeline5
 //  - cluster/src/main/java/com/hartwig/pipeline/tertiary/pave/PaveGermline.java#L35-L39
 //  - cluster/src/main/java/com/hartwig/pipeline/tertiary/pave/PaveArguments.java#L34-L44
@@ -8,7 +6,7 @@ process PAVE_GERMLINE {
     tag "${meta.id}"
     label 'process_medium'
 
-    container 'docker.io/scwatts/pave:1.2.2--0'
+    container 'docker.io/scwatts/pave:1.4--0'
 
     input:
     tuple val(meta), path(sage_vcf)
@@ -49,13 +47,12 @@ process PAVE_GERMLINE {
             -mappability_bed ${segment_mappability} \\
             -vcf_file ${sage_vcf} \\
             -read_pass_only \\
-            -write_pass_only \\
             -output_dir ./
 
     # NOTE(SW): hard coded since there is no reliable way to obtain version information.
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":
-        pave: 1.2.2
+        pave: 1.4
     END_VERSIONS
     """
 

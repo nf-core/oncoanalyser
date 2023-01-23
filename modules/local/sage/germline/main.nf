@@ -2,7 +2,7 @@ process SAGE_GERMLINE {
     tag "${meta.id}"
     label 'process_medium'
 
-    container 'docker.io/scwatts/sage:3.0.3--0'
+    container 'docker.io/scwatts/sage:3.2.3--0'
 
     input:
     tuple val(meta), path(tumor_bam), path(normal_bam), path(tumor_bai), path(normal_bai)
@@ -11,8 +11,8 @@ process SAGE_GERMLINE {
     path genome_dict
     val genome_ver
     path sage_known_hotspots_germline
-    path sage_coding_panel
-    path sage_coverage_panel_germline
+    path sage_actionable_panel
+    path sage_coverage_panel
     path sage_highconf_regions
     path ensembl_data_resources
 
@@ -33,15 +33,15 @@ process SAGE_GERMLINE {
         -Xmx${task.memory.giga}g \\
         -jar ${task.ext.jarPath} \\
             ${args} \\
-            -reference ${meta.tumor_id} \\
-            -reference_bam ${tumor_bam} \\
             -tumor ${meta.normal_id} \\
             -tumor_bam ${normal_bam} \\
+            -reference ${meta.tumor_id} \\
+            -reference_bam ${tumor_bam} \\
             -ref_genome_version ${genome_ver} \\
             -ref_genome ${genome_fasta} \\
             -hotspots ${sage_known_hotspots_germline} \\
-            -panel_bed ${sage_coding_panel} \\
-            -coverage_bed ${sage_coverage_panel_germline} \\
+            -panel_bed ${sage_actionable_panel} \\
+            -coverage_bed ${sage_coverage_panel} \\
             -high_confidence_bed ${sage_highconf_regions} \\
             -ensembl_data_dir ${ensembl_data_resources} \\
             -hotspot_min_tumor_qual 50 \\
@@ -50,7 +50,7 @@ process SAGE_GERMLINE {
             -hotspot_max_germline_rel_raw_base_qual 100 \\
             -panel_max_germline_vaf 100 \\
             -panel_max_germline_rel_raw_base_qual 100 \\
-            -mnv_filter_enabled false \\
+            -ref_sample_count 0 \\
             -panel_only \\
             -threads ${task.cpus} \\
             -out ./${meta.tumor_id}.sage.germline.vcf.gz

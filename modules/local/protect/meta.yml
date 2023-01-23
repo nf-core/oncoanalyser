@@ -16,6 +16,23 @@ input:
       description: |
         Groovy Map containing sample information
         e.g. [id: 'sample_id', tumor_id: 'tumor_name', normal_id: 'normal_name']
+  - chord_prediction:
+      type: file
+      description: CHORD prediction file
+      pattern: "*.{txt}"
+  - purple_dir:
+      type: directory
+      description: PURPLE output directory
+  - linx_dir:
+      type: directory
+      description: LINX somatic annotation output directory
+  - lilac_dir:
+      type: directory
+      description: LILAC output directory
+  - virusinterpreter:
+      type: file
+      description: Virus Interpreter annotations file
+      pattern: "*.{tsv}"
   - genome_ver:
       type: string
       description: Reference genome version
