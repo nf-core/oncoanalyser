@@ -158,7 +158,13 @@ class WorkflowOncoanalyser {
     }
 
     public static getInput(ch, key) {
-        return ch.map { meta -> [meta, meta.getAt(key)] }
+        return ch.map { meta ->
+            if (meta.containsKey(key)) {
+                return [meta, meta.getAt(key)]
+            } else {
+                return [:]
+            }
+        }
     }
 
     public static joinMeta(Map named_args, ch_a, ch_b) {
