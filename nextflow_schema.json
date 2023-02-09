@@ -96,10 +96,9 @@
                     "hidden": true,
                     "help_text": "Do not load `igenomes.config` when running the pipeline. You may choose this option if you observe c lashes between custom parameters and those supplied in `igenomes.config`."
                 },
-                "ref_data_hmf_data_base": {
+                "ref_data_hmf_data_path": {
                     "type": "string",
-                    "format": "directory-path",
-                    "description": "Path to HMF data base directory or URL.",
+                    "description": "Path to HMF data.",
                     "fa_icon": "far fa-folder-open"
                 },
                 "ref_data_virusbreakenddb_path": {
