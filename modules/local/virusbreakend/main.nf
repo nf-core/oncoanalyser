@@ -29,6 +29,9 @@ process VIRUSBREAKEND {
     def args = task.ext.args ?: ''
 
     """
+    # Symlink BWA indices next to assembly FASTA
+    ln -s \$(find -L ${genome_bwa_index_dir} -type f) ./
+
     virusbreakend \\
         --jar ${task.ext.jarPath} \\
         --gridssargs "--jvmheap ${task.memory.giga}g" \\
