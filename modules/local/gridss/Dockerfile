@@ -15,10 +15,19 @@ RUN \
     'gridss==2.13.2' && \
   micromamba clean --all --yes
 
+# NOTE(SW): required to correctly check SAMtools version built by Conda
 RUN \
   sed -i \
     -e '209s/grep samtools/head -n1 | grep samtools/' \
     /opt/conda/share/gridss-2.13.2-1/gridss_extract_overlapping_fragments
+
+# NOTE(SW): required to run tests on compute with low resources; without the
+# change this GRIDSS invoke will attempt to allocate the default 30 GB of
+# memory even when `--gridssargs` is set
+RUN \
+  sed -i \
+    -e '779a \\t\t$gridssargs \\' \
+    /opt/conda/share/gridss-2.13.2-1/virusbreakend
 
 RUN \
   ln -sf \
