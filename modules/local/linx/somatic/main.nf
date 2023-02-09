@@ -12,6 +12,7 @@ process LINX_SOMATIC {
     path ensembl_data_resources
     path known_fusion_data
     path driver_gene_panel
+    path gene_id_file
 
     output:
     tuple val(meta), path('linx_somatic/'), emit: annotation_dir
@@ -22,6 +23,7 @@ process LINX_SOMATIC {
 
     script:
     def args = task.ext.args ?: ''
+    def gene_id_file_arg = gene_id_file ? "-gene_id_file ${gene_id_file}" : ''
 
     """
     java \\
@@ -32,6 +34,7 @@ process LINX_SOMATIC {
             -ref_genome_version ${genome_ver} \\
             -sv_vcf ${purple_dir}/${meta.id}.purple.sv.vcf.gz \\
             -purple_dir ${purple_dir} \\
+            ${gene_id_file_arg} \\
             -fragile_site_file ${fragile_regions} \\
             -line_element_file ${lines} \\
             -ensembl_data_dir ${ensembl_data_resources} \\

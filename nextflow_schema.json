@@ -66,6 +66,11 @@
                     "type": "string",
                     "description": "Path to GRIDSS configuration file.",
                     "fa_icon": "fas fa-cog"
+                },
+                "linx_gene_id_file": {
+                    "type": "string",
+                    "description": "Path to LINX gene ID file.",
+                    "fa_icon": "fas fa-cog"
                 }
             }
         },
