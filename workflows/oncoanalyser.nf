@@ -31,12 +31,16 @@ run = Constants.Process
 def checkPathParamList = [
     params.input,
     params.gridss_config,
+    params.linx_gene_id_file,
 ]
 
 for (param in checkPathParamList) { if (param) { file(param, checkIfExists: true) } }
 
 // Check mandatory parameters
 if (params.input) { ch_input = file(params.input) } else { exit 1, 'Input samplesheet not specified!' }
+
+// Create Path objects for some input files
+linx_gene_id_file = params.linx_gene_id_file ? file(params.linx_gene_id_file) : []
 
 /*
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -843,6 +847,7 @@ workflow ONCOANALYSER {
             hmf_data.ensembl_data_resources,
             hmf_data.known_fusion_data,
             hmf_data.driver_gene_panel,
+            linx_gene_id_file,
         )
 
         // Set outputs, restoring original meta

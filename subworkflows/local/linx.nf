@@ -16,6 +16,7 @@ workflow LINX {
         ref_data_ensembl_data_resources //    file: /path/to/ensembl_data_resources/
         ref_data_known_fusion_data      //    file: /path/to/known_fusion_data
         ref_data_driver_gene_panel      //    file: /path/to/driver_gene_panel
+        gene_id_file                    //    file: /path/to/linx_gene_id_file
 
     main:
         // Channel for versions.yml files
@@ -40,6 +41,7 @@ workflow LINX {
             ref_data_ensembl_data_resources,
             ref_data_known_fusion_data,
             ref_data_driver_gene_panel,
+            gene_id_file,
         )
         ch_versions = ch_versions.mix(LINX_SOMATIC.out.versions)
 
