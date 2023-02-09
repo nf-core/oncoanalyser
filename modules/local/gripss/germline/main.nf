@@ -50,15 +50,15 @@ process GRIPSS_GERMLINE {
 
     stub:
     """
-    cat <<EOF > ${meta.normal_id}.gripss.filtered.vcf.gz
+    cat <<EOF > ${meta.normal_id}.gripss.filtered.germline.vcf.gz
     ##fileformat=VCFv4.1
     ##contig=<ID=.>
-    #CHROM	POS	ID	REF	ALT	QUAL	FILTER	INFO
-    .	.	.	.	.	.	.
+    #CHROM      POS     ID      REF     ALT     QUAL    FILTER  INFO
+    .   .       .       .       .       .       .
     EOF
-    touch ${meta.normal_id}.gripss.filtered.vcf.gz.tbi
-    touch ${meta.normal_id}.gripss.vcf.gz
-    touch ${meta.normal_id}.gripss.vcf.gz.tbi
+    touch ${meta.normal_id}.gripss.filtered.germline.vcf.gz.tbi
+    touch ${meta.normal_id}.gripss.germline.vcf.gz
+    touch ${meta.normal_id}.gripss.germline.vcf.gz.tbi
     echo -e '${task.process}:\\n  stub: noversions\\n' > versions.yml
     """
 }

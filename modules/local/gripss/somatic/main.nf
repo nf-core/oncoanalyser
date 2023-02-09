@@ -51,15 +51,15 @@ process GRIPSS_SOMATIC {
 
     stub:
     """
-    cat <<EOF > ${meta.tumor_id}.gripss.filtered.vcf.gz
+    cat <<EOF > ${meta.tumor_id}.gripss.filtered.somatic.vcf.gz
     ##fileformat=VCFv4.1
     ##contig=<ID=.>
     #CHROM	POS	ID	REF	ALT	QUAL	FILTER	INFO
     .	.	.	.	.	.	.
     EOF
-    touch ${meta.tumor_id}.gripss.filtered.vcf.gz.tbi
-    touch ${meta.tumor_id}.gripss.vcf.gz
-    touch ${meta.tumor_id}.gripss.vcf.gz.tbi
+    touch ${meta.tumor_id}.gripss.filtered.somatic.vcf.gz.tbi
+    touch ${meta.tumor_id}.gripss.somatic.vcf.gz
+    touch ${meta.tumor_id}.gripss.somatic.vcf.gz.tbi
     echo -e '${task.process}:\\n  stub: noversions\\n' > versions.yml
     """
 }
