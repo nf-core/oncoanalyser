@@ -6,6 +6,7 @@ process ISOFOX {
 
     input:
     tuple val(meta), path(bam), path(bai)
+    val functions
     path genome_fasta
     path genome_fai
     val genome_ver
@@ -22,6 +23,7 @@ process ISOFOX {
 
     script:
     def args = task.ext.args ?: ''
+    def functions_arg = functions ? "-functions \'${functions}\'" : ''
 
     """
     mkdir -p isofox/
@@ -32,6 +34,7 @@ process ISOFOX {
             ${args} \\
             -sample ${meta.id} \\
             -bam_file ${bam} \\
+            ${functions_arg} \\
             -ref_genome ${genome_fasta} \\
             -ref_genome_version ${genome_ver} \\
             -ensembl_data_dir ${ensembl_data_resources} \\

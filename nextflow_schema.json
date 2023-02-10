@@ -71,6 +71,12 @@
                     "type": "string",
                     "description": "Path to LINX gene ID file.",
                     "fa_icon": "fas fa-cog"
+                },
+                "isofox_functions": {
+                    "type": "string",
+                    "description": "Semicolon-separated list of Isofox functions to run",
+                    "default": "TRANSCRIPT_COUNTS;ALT_SPLICE_JUNCTIONS;FUSIONS;RETAINED_INTRONS",
+                    "fa_icon": "fas fa-cog"
                 }
             }
         },
