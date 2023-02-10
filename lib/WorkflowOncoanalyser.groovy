@@ -88,19 +88,6 @@ class WorkflowOncoanalyser {
                 System.exit(1)
             }
         }
-
-        // Download region file for collectwgsmetrics if in test mode
-        // NOTE(SW): this will be removed as part of the overhaul for testing
-        if (workflow.profile.contains('test')) {
-            def stage_dir = new File(workflow.workDir.toString(), 'stage/manual/')
-            def interval_file = new File(stage_dir, 'collectwgsmetrics.interval_list')
-            if (! interval_file.exists()) {
-                stage_dir.mkdirs()
-                interval_file.createNewFile()
-                interval_file << new URL (params.ref_data_wgsmetrics_intervals_url).getText()
-            }
-            params.ref_data_wgsmetrics_intervals_local = interval_file
-        }
     }
 
     public static groupByMeta(Map named_args, ... channels) {
