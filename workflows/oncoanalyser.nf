@@ -164,6 +164,7 @@ workflow ONCOANALYSER {
         // Run process
         ISOFOX(
             ch_isofox_inputs,
+            params.isofox_functions,
             PREPARE_REFERENCE.out.genome_fasta,
             PREPARE_REFERENCE.out.genome_fai,
             PREPARE_REFERENCE.out.genome_version,
