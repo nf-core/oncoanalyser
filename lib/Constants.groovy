@@ -8,7 +8,7 @@ class Constants {
     static String HMF_DATA_37_PATH = 'https://pub-29f2e5b2b7384811bdbbcba44f8b5083.r2.dev/hmf_reference_data/repacks/5.31_37_0.0.1.tar.gz'
     static String HMF_DATA_38_PATH = null
 
-    static String VIRUSBREAKENDDB_PATH = 'https://virusbreakend.s3.us-east-2.amazonaws.com/virusbreakenddb_20210401.tar.gz'
+    static String VIRUSBREAKENDDB_PATH = 'https://pub-29f2e5b2b7384811bdbbcba44f8b5083.r2.dev/virusbreakend/virusbreakenddb_20210401.tar.gz'
 
     static enum PipelineMode {
         FULL,
