@@ -24,6 +24,8 @@ process ISOFOX {
     script:
     def args = task.ext.args ?: ''
     def functions_arg = functions ? "-functions \'${functions}\'" : ''
+    def exp_counts_arg = exp_counts ? "-exp_counts_file ${exp_counts}" : ''
+    def exp_gc_ratios_arg = exp_gc_ratios ? "-exp_gc_ratios_file ${exp_gc_ratios}" : ''
 
     """
     mkdir -p isofox/
@@ -38,8 +40,8 @@ process ISOFOX {
             -ref_genome ${genome_fasta} \\
             -ref_genome_version ${genome_ver} \\
             -ensembl_data_dir ${ensembl_data_resources} \\
-            -exp_counts_file ${exp_counts} \\
-            -exp_gc_ratios_file ${exp_gc_ratios} \\
+            ${exp_counts_arg} \\
+            ${exp_gc_ratios_arg} \\
             -output_dir ./isofox/ \\
             -threads ${task.cpus}
 

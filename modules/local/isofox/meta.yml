@@ -39,11 +39,11 @@ input:
       description: HMF ensembl data resources directory
   - exp_counts:
       type: file
-      description: Isofox expected counts file
+      description: Isofox expected counts file (optional)
       pattern: "*.{csv}"
   - exp_gc_ratios:
       type: file
-      description: Isofox expected GC ratio counts file
+      description: Isofox expected GC ratio counts file (optional)
       pattern: "*.{csv}"
 output:
   - meta:

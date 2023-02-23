@@ -77,6 +77,12 @@
                     "description": "Semicolon-separated list of Isofox functions to run",
                     "default": "TRANSCRIPT_COUNTS;ALT_SPLICE_JUNCTIONS;FUSIONS;RETAINED_INTRONS",
                     "fa_icon": "fas fa-cog"
+                },
+                "use_isofox_exp_counts_cache": {
+                    "type": "boolean",
+                    "description": "Use the 151 bp read expected counts provided by the HMF bundle for Isofox",
+                    "default": false,
+                    "fa_icon": "fas fa-cog"
                 }
             }
         },
