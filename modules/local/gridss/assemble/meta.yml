@@ -27,7 +27,7 @@ input:
       description: List of labels corresponding to BAMs and GRIDSS preprocess output directories
   - gridss_config:
       type: file
-      description: Optional GRIDSS configuration file (optional)
+      description: GRIDSS configuration file (optional)
   - genome_fasta:
       type: file
       description: Reference genome assembly fa file

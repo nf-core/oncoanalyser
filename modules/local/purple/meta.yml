@@ -42,11 +42,11 @@ input:
       pattern: "*.{vcf.gz.tbi}"
   - smlv_tumor_vcf:
       type: file
-      description: Optional small variant tumor VCF file
+      description: Small variant tumor VCF file (optional)
       pattern: "*.{vcf.gz}"
   - smlv_normal_vcf:
       type: file
-      description: Optional small variant normal VCF file
+      description: Small variant normal VCF file (optional)
       pattern: "*.{vcf.gz}"
   - genome_fasta:
       type: file
