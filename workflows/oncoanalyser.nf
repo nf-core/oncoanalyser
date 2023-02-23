@@ -161,6 +161,16 @@ workflow ONCOANALYSER {
                 return [meta_isofox, bam, "${bam}.bai"]
             }
 
+        // Set Isofox cache files
+        // NOTE(SW): the Isofox expected count file is read length dependent so required users to explicitly use expect
+        // counts generated for 151 bp reads that is available in the HMF reference bundle. When not specifying an
+        // expected count file, Isofox will automatically create one for the computed read length. However, doing so
+        // greatly increases runtime.
+        // NOTE(SW): consider alternative approaches for using the expected count file e.g. generate once at runtime,
+        // then use for all samples; generate all possible read lengths outside of pipeline and store on a remote for
+        // retrieval at runtime (requires inference of read length)
+        isofox_counts = params.use_isofox_exp_counts_cache ? hmf_data.isofox_counts : []
+
         // Run process
         ISOFOX(
             ch_isofox_inputs,
@@ -169,7 +179,7 @@ workflow ONCOANALYSER {
             PREPARE_REFERENCE.out.genome_fai,
             PREPARE_REFERENCE.out.genome_version,
             hmf_data.ensembl_data_resources,
-            hmf_data.isofox_counts,
+            isofox_counts,
             hmf_data.isofox_gc_ratios,
         )
 
