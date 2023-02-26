@@ -6,7 +6,7 @@ class Constants {
     static List GENOMES_ALT              = ['GRCh38', 'hg38']
 
     static String HMF_DATA_37_PATH = 'https://pub-29f2e5b2b7384811bdbbcba44f8b5083.r2.dev/hmf_reference_data/repacks/5.31_37_0.0.1.tar.gz'
-    static String HMF_DATA_38_PATH = null
+    static String HMF_DATA_38_PATH = 'https://pub-29f2e5b2b7384811bdbbcba44f8b5083.r2.dev/hmf_reference_data/repacks/5.31_38_0.0.1.tar.gz'
 
     static String VIRUSBREAKENDDB_PATH = 'https://pub-29f2e5b2b7384811bdbbcba44f8b5083.r2.dev/virusbreakend/virusbreakenddb_20210401.tar.gz'
 
@@ -14,7 +14,6 @@ class Constants {
         FULL,
         MANUAL,
         GRIDSS_PURPLE_LINX,
-        CUPPA,
     }
 
     static enum Process {
@@ -22,13 +21,11 @@ class Constants {
         CHORD,
         COBALT,
         COLLECTWGSMETRICS,
-        CUPPA,
         GRIDSS,
         GRIPSS,
         ISOFOX,
         LILAC,
         LINX,
-        ORANGE,
         PAVE,
         PEACH,
         PROTECT,
@@ -63,16 +60,5 @@ class Constants {
         PURPLE_DIR,
         SAGE_VCF,
         VIRUSINTERPRETER_TSV,
-        // ORANGE specific
-        CHORD_PREDICTION,
-        CUPPA_CSV,
-        CUPPA_FEATURE_PLOT,
-        CUPPA_SUMMARY_PLOT,
-        FLAGSTAT,
-        LINX_PLOT_DIR,
-        PEACH_TSV,
-        PROTECT_TSV,
-        SAGE_BQR,
-        SAGE_COVERAGE,
     }
 }
