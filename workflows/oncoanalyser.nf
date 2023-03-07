@@ -1028,6 +1028,7 @@ workflow ONCOANALYSER {
         // Run process
         CUPPA_CLASSIFIER(
             ch_cuppa_inputs,
+            PREPARE_REFERENCE.out.genome_version,
             hmf_data.cuppa_resources,
         )
 

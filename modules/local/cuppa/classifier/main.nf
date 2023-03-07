@@ -2,10 +2,11 @@ process CUPPA_CLASSIFIER {
     tag "${meta.id}"
     label 'process_low'
 
-    container 'docker.io/scwatts/cuppa:1.7.1--0'
+    container 'docker.io/scwatts/cuppa:1.8--0'
 
     input:
     tuple val(meta), path(isofox_dir), path(purple_dir), path(linx_dir), path(virusinterpreter)
+    val ref_genome_ver
     path cuppa_resources
 
     output:
@@ -32,12 +33,13 @@ process CUPPA_CLASSIFIER {
             -ref_data_dir ${cuppa_resources} \\
             -sample_data ${meta.id} \\
             -sample_data_dir sample_data/ \\
+            -ref_genome_version ${ref_genome_ver} \\
             -output_dir ./
 
     # NOTE(SW): hard coded since there is no reliable way to obtain version information.
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":
-        cuppa: 1.7.1
+        cuppa: 1.8
     END_VERSIONS
     """
 

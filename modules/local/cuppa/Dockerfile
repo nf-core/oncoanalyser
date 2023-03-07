@@ -10,9 +10,9 @@ RUN \
 
 RUN \
   mkdir -p /opt/cuppa/ && \
-  wget -O /opt/cuppa/cuppa.jar 'https://github.com/hartwigmedical/hmftools/releases/download/cuppa-v1.7.1/cuppa.jar'
+  wget -O /opt/cuppa/cuppa.jar 'https://github.com/hartwigmedical/hmftools/releases/download/cuppa-v1.8/cuppa_v1.8.jar'
 
-ARG URL_BASE=https://raw.githubusercontent.com/hartwigmedical/hmftools/cuppa-v1.7.1
+ARG URL_BASE=https://raw.githubusercontent.com/hartwigmedical/hmftools/cuppa-v1.8
 ARG URL_BASE_CHART=${URL_BASE}/cuppa/src/main/resources/cuppa-chart
 ARG URL_BASE_REPORT=${URL_BASE}/cuppa/src/main/resources/r
 ARG DIR_BASE=/opt/cuppa
