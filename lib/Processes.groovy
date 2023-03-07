@@ -30,6 +30,21 @@ class Processes {
                     Constants.Process.SVPREP,
                 ]
                 break
+            case Constants.PipelineMode.CUPPA:
+                processes = [
+                    Constants.Process.AMBER,
+                    Constants.Process.COBALT,
+                    Constants.Process.COLLECTWGSMETRICS,
+                    Constants.Process.CUPPA,
+                    Constants.Process.GRIDSS,
+                    Constants.Process.GRIPSS,
+                    Constants.Process.ISOFOX,
+                    Constants.Process.LINX,
+                    Constants.Process.PURPLE,
+                    Constants.Process.SVPREP,
+                    Constants.Process.VIRUSINTERPRETER,
+                ]
+                break
             default:
                 log.error "\nERROR: we should never have come here"
                 System.exit(1)
