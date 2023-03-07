@@ -53,6 +53,7 @@ class Constants {
         AMBER_DIR,
         COBALT_DIR,
         COLLECTWGSMETRICS,
+        FLAGSTAT,
         GRIDSS_VCF,
         GRIPSS_HARD_VCF,
         GRIPSS_SOFT_VCF,
