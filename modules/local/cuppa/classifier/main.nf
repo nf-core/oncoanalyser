@@ -2,7 +2,7 @@ process CUPPA_CLASSIFIER {
     tag "${meta.id}"
     label 'process_low'
 
-    container 'docker.io/scwatts/cuppa:1.8--0'
+    container 'docker.io/scwatts/cuppa:1.8--1'
 
     input:
     tuple val(meta), path(isofox_dir), path(purple_dir), path(linx_dir), path(virusinterpreter)
