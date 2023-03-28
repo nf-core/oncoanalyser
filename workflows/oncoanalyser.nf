@@ -1074,22 +1074,35 @@ workflow ONCOANALYSER {
         // channel: [val(meta), isofox_dir, purple_dir, linx_dir, virusinterpreter]
         ch_cuppa_inputs_source = WorkflowOncoanalyser.groupByMeta(
             ch_cuppa_inputs_isofox,
-            run.purple ? ch_purple_out : WorkflowOncoanalyser.getInput(ch_inputs, Constants.INPUT.PURPLE_DIR),
-            run.linx ? ch_linx_anno : WorkflowOncoanalyser.getInput(ch_inputs, Constants.INPUT.LINX_ANNO_DIR_TUMOR),
-            run.virusinterpreter ? ch_virusinterpreter_out : WorkflowOncoanalyser.getInput(ch_inputs, Constants.INPUT.VIRUSINTERPRETER_TSV),
+            run.purple ? ch_purple_out : WorkflowOncoanalyser.getInput(ch_inputs, Constants.INPUT.PURPLE_DIR, type: 'optional'),
+            run.linx ? ch_linx_anno : WorkflowOncoanalyser.getInput(ch_inputs, Constants.INPUT.LINX_ANNO_DIR_TUMOR, type: 'optional'),
+            run.virusinterpreter ? ch_virusinterpreter_out : WorkflowOncoanalyser.getInput(ch_inputs, Constants.INPUT.VIRUSINTERPRETER_TSV, type: 'optional'),
             flatten_mode: 'nonrecursive',
         )
 
         // Create inputs and create process-specific meta
         // channel: [val(meta_cuppa), isofox_dir, purple_dir, linx_dir, virusinterpreter]
         ch_cuppa_inputs = ch_cuppa_inputs_source
-            .map {
-                def meta = it[0]
-                def meta_cuppa = [
-                    key: meta.id,
-                    id: Utils.getTumorWgsSampleName(meta),
-                ]
-                return [meta_cuppa, *it[1..-1]]
+            .map { data ->
+                def meta = data[0]
+                def meta_cuppa = [key: meta.id]
+
+                def sample_name_wgs = meta.getAt(['sample_name', Constants.SampleType.TUMOR, Constants.SequenceType.WGS])
+                def sample_name_wts = meta.getAt(['sample_name', Constants.SampleType.TUMOR, Constants.SequenceType.WTS])
+
+                if (sample_name_wgs && sample_name_wts) {
+                    meta_cuppa.id = sample_name_wgs
+                    meta_cuppa.id_wts = sample_name_wts
+                } else if (sample_name_wgs) {
+                    meta_cuppa.id = sample_name_wgs
+                } else if (sample_name_wts) {
+                    meta_cuppa.id = sample_name_wts
+                } else {
+                    log.error "ERROR: no sample name for: ${meta}"
+                    System.exit(1)
+                }
+
+                return [meta_cuppa, *data[1..-1]]
             }
 
         // Run process

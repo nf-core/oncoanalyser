@@ -21,13 +21,13 @@ input:
       description: Isofox output directory (optional)
   - purple_dir:
       type: directory
-      description: PURPLE output directory
+      description: PURPLE output directory (optional)
   - linx_dir:
       type: directory
-      description: LINX output directory
+      description: LINX output directory (optional)
   - virusinterpreter:
       type: file
-      description: Virus Interpreter annotations file
+      description: Virus Interpreter annotations file (optional)
       pattern: "*.{tsv}"
   - cuppa_resources:
       type: directory
