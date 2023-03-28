@@ -39,21 +39,13 @@ class Constants {
         VIRUSINTERPRETER,
     }
 
-    static enum DataType {
-        TUMOR,
-        NORMAL,
-        TUMOR_NORMAL,
-    }
-
     static enum FileType {
         // Generic
-        BAM_WGS,
-        BAM_WTS,
+        BAM,
         // Process
         AMBER_DIR,
         COBALT_DIR,
         COLLECTWGSMETRICS,
-        FLAGSTAT,
         GRIDSS_VCF,
         GRIPSS_HARD_VCF,
         GRIPSS_SOFT_VCF,
@@ -76,4 +68,61 @@ class Constants {
         SAGE_BQR,
         SAGE_COVERAGE,
     }
+
+    static enum SampleType {
+        TUMOR,
+        NORMAL,
+        TUMOR_NORMAL,
+    }
+
+    static enum SequenceType {
+        WGS,
+        WGTS,
+        WTS,
+    }
+
+    static Map META_PLACEHOLDER = [meta_placeholder: null]
+
+    static Map INPUT = [
+        ISOFOX_DIR:             [FileType.ISOFOX_DIR,           SampleType.TUMOR,        SequenceType.WTS],
+
+        AMBER_DIR:              [FileType.AMBER_DIR,            SampleType.TUMOR_NORMAL, SequenceType.WGS],
+        COBALT_DIR:             [FileType.COBALT_DIR,           SampleType.TUMOR_NORMAL, SequenceType.WGS],
+
+        BAMTOOLS_TXT_TUMOR:     [FileType.BAMTOOLS_TXT,         SampleType.TUMOR,        SequenceType.WGS],
+        BAMTOOLS_TXT_NORMAL:    [FileType.BAMTOOLS_TXT,         SampleType.NORMAL,       SequenceType.WGS],
+
+        SAGE_VCF_TUMOR:         [FileType.SAGE_VCF,             SampleType.TUMOR,        SequenceType.WGS],
+        SAGE_VCF_NORMAL:        [FileType.SAGE_VCF,             SampleType.NORMAL,       SequenceType.WGS],
+        SAGE_BQR_TUMOR:         [FileType.SAGE_BQR,             SampleType.TUMOR,        SequenceType.WGS],
+        SAGE_BQR_NORMAL:        [FileType.SAGE_BQR,             SampleType.NORMAL,       SequenceType.WGS],
+        SAGE_COVERAGE:          [FileType.SAGE_COVERAGE,        SampleType.NORMAL,       SequenceType.WGS],
+
+        PAVE_VCF_TUMOR:         [FileType.PAVE_VCF,             SampleType.TUMOR,        SequenceType.WGS],
+        PAVE_VCF_NORMAL:        [FileType.PAVE_VCF,             SampleType.NORMAL,       SequenceType.WGS],
+
+        GRIDSS_VCF:             [FileType.GRIDSS_VCF,           SampleType.TUMOR_NORMAL, SequenceType.WGS],
+
+        GRIPSS_HARD_VCF_TUMOR:  [FileType.GRIPSS_HARD_VCF,      SampleType.TUMOR,        SequenceType.WGS],
+        GRIPSS_SOFT_VCF_TUMOR:  [FileType.GRIPSS_SOFT_VCF,      SampleType.TUMOR,        SequenceType.WGS],
+        GRIPSS_HARD_VCF_NORMAL: [FileType.GRIPSS_HARD_VCF,      SampleType.NORMAL,       SequenceType.WGS],
+        GRIPSS_SOFT_VCF_NORMAL: [FileType.GRIPSS_SOFT_VCF,      SampleType.NORMAL,       SequenceType.WGS],
+
+        PURPLE_DIR:             [FileType.PURPLE_DIR,           SampleType.TUMOR_NORMAL, SequenceType.WGS],
+
+        LINX_PLOT_DIR_TUMOR:    [FileType.LINX_PLOT_DIR,        SampleType.TUMOR,        SequenceType.WGS],
+        LINX_ANNO_DIR_TUMOR:    [FileType.LINX_ANNO_DIR,        SampleType.TUMOR,        SequenceType.WGS],
+        LINX_ANNO_DIR_NORMAL:   [FileType.LINX_ANNO_DIR,        SampleType.NORMAL,       SequenceType.WGS],
+
+        CHORD_PREDICTION:       [FileType.CHORD_PREDICTION,     SampleType.TUMOR,        SequenceType.WGS],
+        LILAC_DIR:              [FileType.LILAC_DIR,            SampleType.NORMAL,       SequenceType.WGS],
+        PEACH_TSV:              [FileType.PEACH_TSV,            SampleType.NORMAL,       SequenceType.WGS],
+        PROTECT_TSV:            [FileType.PROTECT_TSV,          SampleType.TUMOR,        SequenceType.WGS],
+
+        VIRUSINTERPRETER_TSV:   [FileType.VIRUSINTERPRETER_TSV, SampleType.TUMOR,        SequenceType.WGS],
+
+        CUPPA_CSV:              [FileType.CUPPA_CSV,            SampleType.TUMOR,        SequenceType.WGTS],
+        CUPPA_FEATURE_PLOT:     [FileType.CUPPA_FEATURE_PLOT,   SampleType.TUMOR,        SequenceType.WGTS],
+        CUPPA_SUMMARY_PLOT:     [FileType.CUPPA_SUMMARY_PLOT,   SampleType.TUMOR,        SequenceType.WGTS],
+    ]
 }

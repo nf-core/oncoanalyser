@@ -108,6 +108,10 @@ class WorkflowOncoanalyser {
             }
 
         r = Channel.empty().mix(*r)
+
+        // NOTE(SW): As of Nextflow 22.10.6, groupTuple requires a matching meta /and/ an additional element to complete without error, these placeholders are filtered in the groupByMeta function
+        r = r.filter { it[0] != Constants.META_PLACEHOLDER }
+
         r = r
             .groupTuple(size: channels.size())
             .map { data ->
@@ -120,8 +124,8 @@ class WorkflowOncoanalyser {
                 return [meta, *values_list]
             }
 
-        if (named_args.get('flatten', true)) {
-            def flatten_mode = named_args.get('flatten_mode', 'recursive')
+        if (named_args.getOrDefault('flatten', true)) {
+            def flatten_mode = named_args.getOrDefault('flatten_mode', 'recursive')
             if (flatten_mode == 'recursive') {
                 r = r.map { it.flatten() }
             } else if (flatten_mode == 'nonrecursive') {
@@ -144,23 +148,35 @@ class WorkflowOncoanalyser {
         return groupByMeta([:], *channels)
     }
 
-    public static getInput(ch, key) {
+    public static getInput(Map named_args, ch, key) {
+        def input_type = named_args.getOrDefault('type', 'required')
         return ch.map { meta ->
             if (meta.containsKey(key)) {
                 return [meta, meta.getAt(key)]
+            } else if (input_type == 'required') {
+                return [Constants.META_PLACEHOLDER, null]
+            } else if (input_type == 'optional') {
+                return [meta, []]
             } else {
-                return [:]
+                System.err.println "ERROR: got bad input type: ${input_type}"
+                System.exit(1)
             }
         }
     }
 
+    // NOTE(SW): function signature required to catch where no named arguments are passed
+    public static getInput(ch, key) {
+        return getInput([:], ch, key)
+    }
+
+
     public static joinMeta(Map named_args, ch_a, ch_b) {
         // NOTE(SW): the cross operator is used to allow many-to-one relationship between ch_output
         // and ch_metas
-        def key_a = named_args.get('key_a', 'id')
-        def key_b = named_args.get('key_b', 'key')
-        def ch_ready_a = ch_a.map { [it[0].get(key_b), it[1..-1]] }
-        def ch_ready_b = ch_b.map { meta -> [meta.get(key_a), meta] }
+        def key_a = named_args.getOrDefault('key_a', 'id')
+        def key_b = named_args.getOrDefault('key_b', 'key')
+        def ch_ready_a = ch_a.map { [it[0].getAt(key_b), it[1..-1]] }
+        def ch_ready_b = ch_b.map { meta -> [meta.getAt(key_a), meta] }
         return ch_ready_b
             .cross(ch_ready_a)
             .map { b, a ->

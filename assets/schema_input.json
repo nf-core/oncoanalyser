@@ -24,6 +24,10 @@
                 "pattern": "^\\S+$",
                 "errorMessage": "sample_type must be provided and cannot contain spaces"
             },
+            "sequence_type": {
+                "pattern": "^\\S+$",
+                "errorMessage": "sequence_type must be provided and cannot contain spaces"
+            },
             "filetype": {
                 "pattern": "^\\S+$",
                 "errorMessage": "filetype must be provided and cannot contain spaces"

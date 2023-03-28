@@ -2,7 +2,7 @@
 // SV Prep is a BAM filter designed to select only reads relevant to SV events run prior to GRIDSS.
 // GRIDSS is a software suite containing tools useful for the detection of genomic rearrangements.
 //
-import Constants
+import Utils
 
 include { ASSEMBLE        as GRIDSS_ASSEMBLE        } from '../../modules/local/svprep/assemble/main'
 include { CALL            as GRIDSS_CALL            } from '../../modules/local/svprep/call/main'
@@ -36,11 +36,11 @@ workflow GRIDSS_SVPREP {
             .map { meta ->
                 def meta_svprep = [
                     key: meta.id,
-                    id: meta.get(['sample_name', Constants.DataType.TUMOR]),
+                    id: Utils.getTumorWgsSampleName(meta),
                     sample_type: 'tumor',
                 ]
-                def bam_tumor = meta.get([Constants.FileType.BAM_WGS, Constants.DataType.TUMOR])
-                return [meta_svprep, bam_tumor, "${bam_tumor}.bai", []]
+                def tumor_bam = Utils.getTumorWgsBam(meta)
+                return [meta_svprep, tumor_bam, "${tumor_bam}.bai", []]
             }
 
         // Filter tumor BAM
@@ -60,11 +60,11 @@ workflow GRIDSS_SVPREP {
             .map { meta, junctions_tumor ->
                 def meta_svprep = [
                     key: meta.id,
-                    id: meta.get(['sample_name', Constants.DataType.NORMAL]),
+                    id: Utils.getNormalWgsSampleName(meta),
                     sample_type: 'normal',
                 ]
-                def bam_normal = meta.get([Constants.FileType.BAM_WGS, Constants.DataType.NORMAL])
-                return [meta_svprep, bam_normal, "${bam_normal}.bai", junctions_tumor]
+                def normal_bam = Utils.getNormalWgsBam(meta)
+                return [meta_svprep, normal_bam, "${normal_bam}.bai", junctions_tumor]
             }
 
         SVPREP_NORMAL(
@@ -189,15 +189,15 @@ workflow GRIDSS_SVPREP {
             GRIDSS_CALL.out.vcf.map { meta, vcf -> [meta.id, vcf] },
         )
             .map { id, meta, vcf ->
-                def tbam = meta.get([Constants.FileType.BAM_WGS, Constants.DataType.TUMOR])
-                def nbam = meta.get([Constants.FileType.BAM_WGS, Constants.DataType.NORMAL])
+                def tbam = Utils.getTumorWgsBam(meta)
+                def nbam = Utils.getNormalWgsBam(meta)
                 def meta_svprep = [id: meta.id]
                 return [
                     meta_svprep,
                     [nbam, tbam],
                     ["${nbam}.bai", "${tbam}.bai"],
                     vcf,
-                    [meta.get(['sample_name', Constants.DataType.NORMAL]), meta.get(['sample_name', Constants.DataType.TUMOR])],
+                    [Utils.getNormalWgsSampleName(meta), Utils.getTumorWgsSampleName(meta)],
                 ]
             }
 
