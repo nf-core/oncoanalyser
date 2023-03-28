@@ -19,9 +19,9 @@ class Constants {
 
     static enum Process {
         AMBER,
+        BAMTOOLS,
         CHORD,
         COBALT,
-        COLLECTWGSMETRICS,
         CUPPA,
         GRIDSS,
         GRIPSS,
@@ -44,14 +44,14 @@ class Constants {
         BAM,
         // Process
         AMBER_DIR,
+        BAMTOOLS_TXT,
         COBALT_DIR,
-        COLLECTWGSMETRICS,
         GRIDSS_VCF,
         GRIPSS_HARD_VCF,
         GRIPSS_SOFT_VCF,
         ISOFOX_DIR,
-        LINX_ANNO_DIR,
         LILAC_DIR,
+        LINX_ANNO_DIR,
         PAVE_VCF,
         PURPLE_DIR,
         SAGE_VCF,

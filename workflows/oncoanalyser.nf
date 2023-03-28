@@ -59,6 +59,7 @@ linx_gene_id_file = params.linx_gene_id_file ? file(params.linx_gene_id_file) : 
 // MODULES
 //
 include { AMBER             } from '../modules/local/amber/main'
+include { BAMTOOLS          } from '../modules/local/bamtools/main'
 include { CHORD             } from '../modules/local/chord/main'
 include { COBALT            } from '../modules/local/cobalt/main'
 include { CUPPA_CLASSIFIER  } from '../modules/local/cuppa/classifier/main'
@@ -96,7 +97,6 @@ include { SAGE              } from '../subworkflows/local/sage'
 // MODULES
 //
 include { CUSTOM_DUMPSOFTWAREVERSIONS } from '../modules/nf-core/custom/dumpsoftwareversions/main'
-include { PICARD_COLLECTWGSMETRICS    } from '../modules/nf-core/picard/collectwgsmetrics/main'
 include { SAMTOOLS_FLAGSTAT           } from '../modules/nf-core/samtools/flagstat/main'
 
 /*
@@ -194,40 +194,40 @@ workflow ONCOANALYSER {
     }
 
     //
-    // MODULE: Run PICARD_COLLECTWGSMETRICS to generate stats required for downstream processes
+    // MODULE: Run Bam Tools to generate stats required for downstream processes
     //
-    if (run.virusinterpreter || run.orange) {
+    if (run.bamtools) {
         // Create inputs and create process-specific meta
-        // NOTE(SW): CUPPA only requires collectwgsmetrics for the tumor sample in the upstream
-        // process Virus Interpreter but ORANGE currently requires collectwgsmetrics for both tumor
+        // NOTE(SW): CUPPA only requires metrics for the tumor sample in the upstream
+        // process Virus Interpreter but ORANGE currently requires metrics for both tumor
         // and normal sample
-        // channel: [val(meta_cwm), bam_wgs]
-        ch_cwm_inputs_all = ch_inputs_wgs.present
+        // channel: [val(meta_bamtools), bam, bai]
+        ch_bamtools_inputs_all = ch_inputs_wgs.present
             .flatMap { meta ->
                 def sample_types = run.orange ? [Constants.SampleType.TUMOR, Constants.SampleType.NORMAL] : [Constants.SampleType.TUMOR]
                 return sample_types
                     .collect { sample_type ->
-                        def bam = meta.getAt([Constants.FileType.BAM, sample_type, Constants.SequenceType.WGS])
-                        def sample_name = meta.getAt(['sample_name', sample_type, Constants.SequenceType.WGS])
-                        def meta_cwm = [
+                        def bam = meta.get([Constants.FileType.BAM, sample_type, Constants.SequenceType.WGS])
+                        def sample_name = meta.get(['sample_name', sample_type, Constants.SequenceType.WGS])
+                        def meta_bamtools = [
                             key: meta.id,
                             id: sample_name,
                             // NOTE(SW): must use string representation for caching purposes
                             sample_type_str: sample_type.name(),
                         ]
-                        return [meta_cwm, bam]
+                        return [meta_bamtools, bam, "${bam}.bai"]
                     }
             }
 
         // Collapse duplicate files e.g. repeated normal BAMs for multiple tumor samples
         // NOTE(SW): no effective blocking by .groupTuple() as we're not dependent
         // on any process
-        // channel: [val(meta_cwm), bam_wgs]
-        ch_cwm_inputs = ch_cwm_inputs_all
+        // channel: [val(meta_bamtools), bam, bai]
+        ch_bamtools_inputs = ch_bamtools_inputs_all
             .map { [it[1..-1], it[0]] }
             .groupTuple()
-            .map { filepaths, meta_cwm ->
-                def (keys, sample_names, sample_type_strs) = meta_cwm
+            .map { filepaths, meta_bamtools ->
+                def (keys, sample_names, sample_type_strs) = meta_bamtools
                     .collect {
                         [it.key, it.id, it.sample_type_str]
                     }
@@ -237,37 +237,38 @@ workflow ONCOANALYSER {
                 assert sample_type_strs_unique.size() == 1
                 def sample_type_str = sample_type_strs_unique[0]
 
-                def meta_cwm_new = [
+                def meta_bamtools_new = [
                     keys: keys,
                     id: sample_names.join('__'),
                     id_simple: keys.join('__'),
                     sample_type_str: sample_type_str,
                 ]
-                return [meta_cwm_new, *filepaths]
+                return [meta_bamtools_new, *filepaths]
             }
 
         // Run process
-        PICARD_COLLECTWGSMETRICS(
-            ch_cwm_inputs,
+        BAMTOOLS(
+            ch_bamtools_inputs,
             PREPARE_REFERENCE.out.genome_fasta,
+            PREPARE_REFERENCE.out.genome_version,
         )
 
         // Set outputs, process outputs and restore original meta
-        ch_versions = ch_versions.mix(PICARD_COLLECTWGSMETRICS.out.versions)
+        ch_versions = ch_versions.mix(BAMTOOLS.out.versions)
 
         // Replicate outputs to reverse unique operation
-        // channel: [val(meta_cwm_individual), sample_type_str, metrics]
-        ch_cwm_out_individual = PICARD_COLLECTWGSMETRICS.out.metrics
-            .flatMap { meta_cwm_shared, metrics ->
-                meta_cwm_shared.keys.collect { key ->
-                    return [meta_cwm_shared + [key: key], meta_cwm_shared.sample_type_str, metrics]
+        // channel: [val(meta_bamtools_individual), sample_type_str, metrics]
+        ch_bamtools_out_individual = BAMTOOLS.out.metrics
+            .flatMap { meta_bamtools_shared, metrics ->
+                meta_bamtools_shared.keys.collect { key ->
+                    return [meta_bamtools_shared + [key: key], meta_bamtools_shared.sample_type_str, metrics]
                 }
             }
 
         // Match outputs to original meta and set output
         // channel (tumor): [val(meta), metrics]
         // channel (normal): [val(meta), metrics]
-        ch_cwm_out = WorkflowOncoanalyser.restoreMeta(ch_cwm_out_individual, ch_inputs)
+        ch_bamtools_out = WorkflowOncoanalyser.restoreMeta(ch_bamtools_out_individual, ch_inputs)
             .branch { meta, sample_type_str, metrics ->
                 def sample_type = Utils.getEnumFromString(sample_type_str, Constants.SampleType)
                 somatic: sample_type == Constants.SampleType.TUMOR
@@ -836,7 +837,7 @@ workflow ONCOANALYSER {
         ch_virusinterpreter_inputs_full = WorkflowOncoanalyser.groupByMeta(
             WorkflowOncoanalyser.restoreMeta(VIRUSBREAKEND.out.tsv, ch_inputs),
             ch_virusinterpreter_inputs_purple_files,
-            ch_cwm_out.somatic,
+            run.bamtools ? ch_bamtools_out.somatic : WorkflowOncoanalyser.getInput(ch_inputs, Constants.INPUT.INPUT_BAMTOOLS_TXT_TUMOR),
         )
 
         // Virus Interpreter
@@ -1218,8 +1219,8 @@ workflow ONCOANALYSER {
         // Select input source
         // NOTE(SW): we could consider not allowing inputs from the samplesheet here since this nothing follows
         ch_orange_inputs_source = WorkflowOncoanalyser.groupByMeta(
-            ch_cwm_out.somatic,
-            ch_cwm_out.germline,
+            run.bamtools ? ch_bamtools_out.somatic : WorkflowOncoanalyser.getInput(ch_inputs, Constants.INPUT.INPUT_BAMTOOLS_TXT_TUMOR),
+            run.bamtools ? ch_bamtools_out.germline: WorkflowOncoanalyser.getInput(ch_inputs, Constants.INPUT.INPUT_BAMTOOLS_TXT_NORMAL),
             ch_orange_inputs_flagstat.somatic,
             ch_orange_inputs_flagstat.germline,
             run.chord ? ch_chord_out : WorkflowOncoanalyser.getInput(ch_inputs, Constants.INPUT.CHORD),
