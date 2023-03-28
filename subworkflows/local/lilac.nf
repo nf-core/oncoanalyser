@@ -2,6 +2,7 @@
 // LILAC is a WGS tool for HLA typing and somatic CNV and SNV calling
 //
 import Constants
+import Utils
 
 include { CUSTOM_EXTRACTCONTIG   } from '../../modules/local/custom/lilac_extract_and_index_contig/main'
 include { CUSTOM_REALIGNREADS    } from '../../modules/local/custom/lilac_realign_reads_lilac/main'
@@ -84,17 +85,17 @@ workflow LILAC {
 
 
         // Re-replicate and flow expected file count into meta
-        // channel: [val(meta_lilac), [filetype_str, sample_type_str, bam, bai]]
+        // channel: [val(meta_lilac), [sequence_type_str, sample_type_str, bam, bai]]
         ch_slices_out_individual = ch_slices_out
             .flatMap{ data ->
                 def meta_lilac = data[0]
                 def fps = data[1..-1]
                 meta_lilac.keys.collect { key ->
-                    return [[key: key], [meta_lilac.filetype_str, meta_lilac.sample_type_str, *fps]]
+                    return [[key: key], [meta_lilac.sequence_type_str, meta_lilac.sample_type_str, *fps]]
                 }
             }
         // Adding expected file count
-        // channel: [val(meta_lilac), [filetype_str, sample_type_str, bam, bai]]
+        // channel: [val(meta_lilac), [sequence_type_str, sample_type_str, bam, bai]]
         ch_slices_ready = WorkflowOncoanalyser.joinMeta(
             ch_slices_out_individual,
             ch_slice_meta_individual,
@@ -114,27 +115,65 @@ workflow LILAC {
             ch_metas,
         )
 
-        // Add PURPLE output to finalise LILAC input channel
+        // Get inputs from PURPLE
+        // channel: [val(meta), gene_cn]
+        ch_lilac_inputs_gene_cn = ch_purple_dir
+            .map { meta, purple_dir ->
+                if (purple_dir == []) {
+                    return [meta, []]
+                }
+
+                def tumor_id = Utils.getTumorWgsSampleName(meta)
+                def gene_cn = file(purple_dir).resolve("${tumor_id}.purple.cnv.gene.tsv")
+                return gene_cn.exists() ? [meta, gene_cn] : [meta, []]
+            }
+
+        // channel: [val(meta), smlv_vcf]
+        ch_lilac_inputs_smlv_vcf = ch_purple_dir
+            .map { meta, purple_dir ->
+                if (purple_dir == []) {
+                    return [meta, []]
+                }
+
+                def tumor_id = Utils.getTumorWgsSampleName(meta)
+                def smlv_vcf = file(purple_dir).resolve("${tumor_id}.purple.somatic.vcf.gz")
+                return smlv_vcf.exists() ? [meta, smlv_vcf] : [meta, []]
+            }
+
         // channel: [val(meta), normal_wgs_bam, normal_wgs_bai, tumor_wgs_bam, tumor_wgs_bai, tumor_wts_bam, tumor_wts_bai, purple_dir]
         ch_lilac_inputs_full = WorkflowOncoanalyser.groupByMeta(
             ch_lilac_inputs_slices,
-            ch_purple_dir,
+            ch_lilac_inputs_gene_cn,
+            ch_lilac_inputs_smlv_vcf,
             flatten_mode: 'nonrecursive',
         )
 
-        // Run LILAC
-        // channel: [val(meta_lilac), normal_wgs_bam, normal_wgs_bai, tumor_wgs_bam, tumor_wgs_bai, tumor_wts_bam, tumor_wts_bai, purple_dir]
+        // Create final input channel for LILAC, remove samples with only WTS BAMs
+        // channel: [val(meta_lilac), normal_wgs_bam, normal_wgs_bai, tumor_wgs_bam, tumor_wgs_bai, tumor_wts_bam, tumor_wts_bai, gene_cn, smlv_vcf]]
         ch_lilac_inputs = ch_lilac_inputs_full
             .map {
                 def meta = it[0]
+                def fps = it[1..-1]
+
+                // LILAC requires either tumor or normal WGS BAM
+                if (fps[0] == [] && fps[2] == []) {
+                    return Constants.META_PLACEHOLDER
+                }
+
+                def tumor_id_key = ['sample_name', Constants.SampleType.TUMOR, Constants.SequenceType.WGS]
+                def normal_id_key = ['sample_name', Constants.SampleType.NORMAL, Constants.SequenceType.WGS]
+
                 def meta_lilac = [
                     key: meta.id,
                     id: meta.id,
-                    tumor_id: meta.get(['sample_name', Constants.DataType.TUMOR]),
-                    normal_id: meta.get(['sample_name', Constants.DataType.NORMAL]),
+                    tumor_id: meta.containsKey(tumor_id_key) ? meta.getAt(tumor_id_key) : '',
+                    normal_id: meta.containsKey(normal_id_key) ? meta.getAt(normal_id_key) : '',
                 ]
-                return [meta_lilac, *it[1..-1]]
+                return [meta_lilac, *fps]
             }
+            .filter { it != Constants.META_PLACEHOLDER }
+
+        // Run LILAC
         LILAC_PROCESS(
             ch_lilac_inputs,
             ref_data_genome_fasta,

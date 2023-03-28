@@ -14,20 +14,20 @@ class WorkflowLilac {
         def d = ch
             .flatMap { meta, nbam_wgs, nbai_wgs, tbam_wgs, tbai_wgs, tbam_wts, tbai_wts ->
                 def data = [
-                    [nbam_wgs, nbai_wgs, Constants.FileType.BAM_WGS, Constants.DataType.NORMAL],
-                    [tbam_wgs, tbai_wgs, Constants.FileType.BAM_WGS, Constants.DataType.TUMOR],
-                    [tbam_wts, tbai_wts, Constants.FileType.BAM_WTS, Constants.DataType.TUMOR],
+                    [nbam_wgs, nbai_wgs, Constants.SequenceType.WGS, Constants.SampleType.NORMAL],
+                    [tbam_wgs, tbai_wgs, Constants.SequenceType.WGS, Constants.SampleType.TUMOR],
+                    [tbam_wts, tbai_wts, Constants.SequenceType.WTS, Constants.SampleType.TUMOR],
                 ]
                 def data_present = data.findAll { it[0] }
                 data_present
-                    .collect { bam, bai, filetype, sample_type ->
-                        def sample_name = meta.get(['sample_name', sample_type])
+                    .collect { bam, bai, sequence_type, sample_type ->
+                        def sample_name = meta.getAt(['sample_name', sample_type, sequence_type])
                         def meta_lilac = [
                             key: meta.id,
                             id: sample_name,
                             // NOTE(SW): must use string representation for caching purposes
                             sample_type_str: sample_type.name(),
-                            filetype_str: filetype.name(),
+                            sequence_type_str: sequence_type.name(),
                             count: data_present.size(),
                         ]
                         return [meta_lilac, bam, bai]
@@ -44,18 +44,18 @@ class WorkflowLilac {
             .groupTuple()
             .map { filepaths, meta_lilac ->
                 // NOTE(SW): pattern needs to be generalised
-                def (keys, sample_names, filetype_strs, sample_type_strs) = meta_lilac
-                    .collect { [it.key, it.id, it.filetype_str, it.sample_type_str] }
+                def (keys, sample_names, sequence_type_strs, sample_type_strs) = meta_lilac
+                    .collect { [it.key, it.id, it.sequence_type_str, it.sample_type_str] }
                     .transpose()
                 def sample_type_str = getValue(sample_type_strs)
-                def filetype_str = getValue(filetype_strs)
+                def sequence_type_str = getValue(sequence_type_strs)
 
                 def key = keys.join('__')
                 def meta_lilac_new = [
                     keys: keys,
                     id: sample_names.join('__'),
                     id_simple: keys.join('__'),
-                    filetype_str: filetype_str,
+                    sequence_type_str: sequence_type_str,
                     sample_type_str: sample_type_str,
                 ]
                 return [meta_lilac_new, *filepaths]
@@ -75,20 +75,20 @@ class WorkflowLilac {
                 assert metas.unique().size() == 1
                 def meta = metas[0]
                 def data = [:]
-                values.each { filetype_str, sample_type_str, bam, bai ->
-                    def sample_type = Utils.getEnumFromString(sample_type_str, Constants.DataType)
-                    def filetype = Utils.getEnumFromString(filetype_str, Constants.FileType)
-                    data[[sample_type, filetype, 'bam']] = bam
-                    data[[sample_type, filetype, 'bai']] = bai
+                values.each { sequence_type_str, sample_type_str, bam, bai ->
+                    def sample_type = Utils.getEnumFromString(sample_type_str, Constants.SampleType)
+                    def sequence_type = Utils.getEnumFromString(sequence_type_str, Constants.SequenceType)
+                    data[[sample_type, sequence_type, 'bam']] = bam
+                    data[[sample_type, sequence_type, 'bai']] = bai
                 }
                 return [
                     meta,
-                    data.get([Constants.DataType.NORMAL, Constants.FileType.BAM_WGS, 'bam'], []),
-                    data.get([Constants.DataType.NORMAL, Constants.FileType.BAM_WGS, 'bai'], []),
-                    data.get([Constants.DataType.TUMOR, Constants.FileType.BAM_WGS, 'bam'], []),
-                    data.get([Constants.DataType.TUMOR, Constants.FileType.BAM_WGS, 'bai'], []),
-                    data.get([Constants.DataType.TUMOR, Constants.FileType.BAM_WTS, 'bam'], []),
-                    data.get([Constants.DataType.TUMOR, Constants.FileType.BAM_WTS, 'bai'], []),
+                    data.get([Constants.SampleType.NORMAL, Constants.SequenceType.WGS, 'bam'], []),
+                    data.get([Constants.SampleType.NORMAL, Constants.SequenceType.WGS, 'bai'], []),
+                    data.get([Constants.SampleType.TUMOR, Constants.SequenceType.WGS, 'bam'], []),
+                    data.get([Constants.SampleType.TUMOR, Constants.SequenceType.WGS, 'bai'], []),
+                    data.get([Constants.SampleType.TUMOR, Constants.SequenceType.WTS, 'bam'], []),
+                    data.get([Constants.SampleType.TUMOR, Constants.SequenceType.WTS, 'bai'], []),
                 ]
             }
         return d

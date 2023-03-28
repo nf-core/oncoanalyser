@@ -40,9 +40,14 @@ input:
       type: file
       description: Tumor WTS BAI file (optional)
       pattern: "*.{bai}"
-  - purple_dir:
-      type: directory
-      description: PURPLE output directory (optional)
+  - gene_cn:
+      type: file
+      description: PURPLE somatic gene copy number file (optional)
+      pattern: "*.{tsv}"
+  - smlv_vcf:
+      type: file
+      description: PURPLE somatic small variant VCF file (optional)
+      pattern: "*.{vcf.gz}"
   - genome_fasta:
       type: file
       description: Reference genome assembly fa file

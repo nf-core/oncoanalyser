@@ -66,4 +66,41 @@ class Utils {
     static public getFileObject(path) {
         return path ? Nextflow.file(path) : []
     }
+
+
+    // Sample names
+    static public getTumorWgsSampleName(meta) {
+        return getMetaEntry(meta, ['sample_name', Constants.SampleType.TUMOR, Constants.SequenceType.WGS])
+    }
+
+    static public getTumorWtsSampleName(meta) {
+        return getMetaEntry(meta, ['sample_name', Constants.SampleType.TUMOR, Constants.SequenceType.WTS])
+    }
+
+    static public getNormalWgsSampleName(meta) {
+        return getMetaEntry(meta, ['sample_name', Constants.SampleType.NORMAL, Constants.SequenceType.WGS])
+    }
+
+
+    // Files
+    static public getTumorWgsBam(meta) {
+        return getMetaEntry(meta, [Constants.FileType.BAM, Constants.SampleType.TUMOR, Constants.SequenceType.WGS])
+    }
+
+    static public getNormalWgsBam(meta) {
+        return getMetaEntry(meta, [Constants.FileType.BAM, Constants.SampleType.NORMAL, Constants.SequenceType.WGS])
+    }
+
+    static public getTumorWtsBam(meta) {
+        return getMetaEntry(meta, [Constants.FileType.BAM, Constants.SampleType.TUMOR, Constants.SequenceType.WTS])
+    }
+
+
+    static public getMetaEntry(meta, key) {
+        if (! meta.containsKey(key)) {
+            System.err.println "\nERROR: meta does not contain key ${key}: ${meta}"
+            System.exit(1)
+        }
+        return meta.getAt(key)
+    }
 }

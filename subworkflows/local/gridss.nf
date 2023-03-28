@@ -10,7 +10,7 @@ include { GRIDSS_PREPROCESS        } from '../../modules/local/gridss/preprocess
 
 workflow GRIDSS {
     take:
-        ch_inputs                       // channel: [val(meta), bam_tumor, bam_normal]
+        ch_inputs                       // channel: [val(meta), tumor_bam, normal_bam]
         gridss_config                   //    file: /path/to/gridss_config (optional)
         ref_data_genome_fasta           //    file: /path/to/genome_fasta
         ref_data_genome_fai             //    file: /path/to/genome_fai
@@ -28,19 +28,19 @@ workflow GRIDSS {
         // channel: [val(meta_gridss), bam]
         ch_preprocess_inputs = ch_inputs
             .flatMap { meta, tbam, nbam ->
-                def sample_types = [Constants.DataType.TUMOR, Constants.DataType.NORMAL]
+                def sample_types = [Constants.SampleType.TUMOR, Constants.SampleType.NORMAL]
                 sample_types
                     .collect { sample_type ->
                         def bam_fp
-                        if (sample_type == Constants.DataType.TUMOR) {
+                        if (sample_type == Constants.SampleType.TUMOR) {
                             bam_fp = tbam
-                        } else if (sample_type == Constants.DataType.NORMAL) {
+                        } else if (sample_type == Constants.SampleType.NORMAL) {
                             bam_fp = nbam
                         } else {
                             assert false : "got bad sample type"
                         }
                         def meta_gridss = [
-                            id: meta.get(['sample_name', sample_type]),
+                            id: meta.get(['sample_name', sample_type, Constants.SequenceType.WGS]),
                             // NOTE(SW): must use string representation for caching purposes
                             sample_type_str: sample_type.name(),
                             subject_id: meta.id,
@@ -75,8 +75,8 @@ workflow GRIDSS {
         // channel: [val(meta_gridss), [bams], [preprocess_dirs], [labels]]
         ch_assemble_inputs = ch_bams_and_preprocess
             .map { subject_id, entries ->
-                def (tmeta, tbam, tpreprocess) = get_sample_type_entry(entries, Constants.DataType.TUMOR)
-                def (nmeta, nbam, npreprocess) = get_sample_type_entry(entries, Constants.DataType.NORMAL)
+                def (tmeta, tbam, tpreprocess) = get_sample_type_entry(entries, Constants.SampleType.TUMOR)
+                def (nmeta, nbam, npreprocess) = get_sample_type_entry(entries, Constants.SampleType.NORMAL)
                 def meta_gridss = [id: tmeta.subject_id]
                 return [meta_gridss, [nbam, tbam], [npreprocess, tpreprocess], [nmeta.id, tmeta.id]]
             }
@@ -141,6 +141,6 @@ workflow GRIDSS {
 def get_sample_type_entry(entries, sample_type) {
     entries.find { e ->
         def meta = e[0]
-        return Utils.getEnumFromString(meta.sample_type_str, Constants.DataType) == sample_type
+        return Utils.getEnumFromString(meta.sample_type_str, Constants.SampleType) == sample_type
     }
 }

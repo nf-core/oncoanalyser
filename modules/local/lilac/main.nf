@@ -5,7 +5,7 @@ process LILAC {
     container 'docker.io/scwatts/lilac:1.4.2--0'
 
     input:
-    tuple val(meta), path(normal_wgs_bam), path(normal_wgs_bai), path(tumor_wgs_bam), path(tumor_wgs_bai), path(tumor_wts_bam), path(tumor_wts_bai), path(purple_dir)
+    tuple val(meta), path(normal_wgs_bam), path(normal_wgs_bai), path(tumor_wgs_bam), path(tumor_wgs_bai), path(tumor_wts_bam), path(tumor_wts_bai), path(gene_cn), path(smlv_vcf)
     path genome_fasta
     val genome_ver
     path lilac_resources, stageAs: 'lilac_resources'
@@ -22,10 +22,8 @@ process LILAC {
     def sample_name = getSampleName(meta, tumor_wgs_bam, normal_wgs_bam)
     def tumor_wgs_bam_arg = tumor_wgs_bam ? "-tumor_bam ${tumor_wgs_bam}" : ''
     def tumor_wts_bam_arg = tumor_wts_bam ? "-rna_bam ${tumor_wts_bam}" : ''
-    def purple_args = purple_dir ? """
-        -gene_copy_number ${purple_dir}/${sample_name}.purple.cnv.gene.tsv \\
-        -somatic_vcf ${purple_dir}/${sample_name}.purple.sv.vcf.gz \\
-    """ : ''
+    def gene_cn_arg = gene_cn ? "-gene_copy_number ${gene_cn}" : ''
+    def smlv_vcf_arg = smlv_vcf ? "-somatic_vcf ${smlv_vcf}" : ''
 
     """
     java \\
@@ -39,7 +37,8 @@ process LILAC {
             -ref_genome_version ${genome_ver} \\
             -ref_genome ${genome_fasta} \\
             -resource_dir ${lilac_resources} \\
-            ${purple_args.replaceAll('\\n', '')} \\
+            ${gene_cn_arg} \\
+            ${smlv_vcf_arg} \\
             -threads ${task.cpus} \\
             -output_dir lilac/
 

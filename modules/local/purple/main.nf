@@ -26,8 +26,13 @@ process PURPLE {
 
     script:
     def args = task.ext.args ?: ''
+
+    def sv_vcf_arg = sv_hard_vcf ? "-structural_vcf ${sv_hard_vcf}" : ''
+    def sv_lowconf_vcf_fp = sv_soft_vcf ? "-sv_recovery_vcf ${sv_soft_vcf}" : ''
+
     def smlv_tumor_vcf_fp = smlv_tumor_vcf ?: ''
     def smlv_normal_vcf_fp = smlv_normal_vcf ?: ''
+
     def germline_del_arg = germline_del ? "-germline_del_freq_file ${germline_del}" : ''
 
     """
@@ -52,8 +57,8 @@ process PURPLE {
             ${args} \\
             -tumor ${meta.tumor_id} \\
             -reference ${meta.normal_id} \\
-            -sv_recovery_vcf ${sv_soft_vcf} \\
-            -structural_vcf ${sv_hard_vcf} \\
+            ${sv_vcf_arg} \\
+            ${sv_lowconf_vcf_fp} \\
             \${smlv_tumor_vcf_arg} \\
             \${smlv_normal_vcf_arg} \\
             -amber ${amber} \\
