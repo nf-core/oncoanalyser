@@ -33,8 +33,8 @@ process CUSTOM_REALIGNREADS {
         ${reference} \\
         ${meta.id}_R1.fastq.gz \\
         ${meta.id}_R2.fastq.gz | \\
-        samtools sort -T tmp -o ${meta.id}_realigned.bam
-    samtools index ${meta.id}_realigned.bam
+        samtools sort -T tmp -o ${bam.baseName}.realigned.bam
+    samtools index ${bam.baseName}.realigned.bam
 
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":
@@ -46,7 +46,7 @@ process CUSTOM_REALIGNREADS {
 
     stub:
     """
-    touch ${meta.id}_realigned.bam ${meta.id}_realigned.bam.bai
+    touch ${bam.baseName}.realigned.bam ${bam.baseName}.realigned.bam.bai
     echo -e '${task.process}:\\n  stub: noversions\\n' > versions.yml
     """
 }
