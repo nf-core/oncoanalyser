@@ -32,4 +32,11 @@ process SAMTOOLS_FLAGSTAT {
         samtools: \$(echo \$(samtools --version 2>&1) | sed 's/^.*samtools //; s/Using.*\$//')
     END_VERSIONS
     """
+
+    stub:
+    def prefix = task.ext.prefix ?: "${meta.id}"
+    """
+    touch ${prefix}.flagstat
+    echo -e '${task.process}:\\n  stub: noversions\\n' > versions.yml
+    """
 }
