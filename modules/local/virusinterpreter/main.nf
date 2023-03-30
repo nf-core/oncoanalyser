@@ -23,7 +23,7 @@ process VIRUSINTERPRETER {
     mkdir -p virusinterpreter/
 
     java \\
-        -Xmx${task.memory.giga}g \\
+        -Xmx${Math.round(task.memory.bytes * 0.95)} \\
         -jar ${task.ext.jarPath} \\
             -sample_id ${meta.id} \\
             -purple_purity_tsv ${purple_purity} \\

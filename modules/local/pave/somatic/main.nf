@@ -40,7 +40,7 @@ process PAVE_SOMATIC {
 
     """
     java \\
-        -Xmx${task.memory.giga}g \\
+        -Xmx${Math.round(task.memory.bytes * 0.95)} \\
         -jar ${task.ext.jarPath} \\
             -sample ${meta.id} \\
             -ref_genome_version ${genome_ver} \\

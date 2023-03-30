@@ -56,7 +56,7 @@ process CUPPA_CLASSIFIER {
     fi;
 
     java \\
-        -Xmx${task.memory.giga}g \\
+        -Xmx${Math.round(task.memory.bytes * 0.95)} \\
         -jar ${task.ext.jarPath} \\
             -categories ${categories_val} \\
             -ref_data_dir ${cuppa_resources} \\

@@ -22,7 +22,7 @@ process SIGS {
     mkdir -p sigs/
 
     java \\
-        -Xmx${task.memory.giga}g \\
+        -Xmx${Math.round(task.memory.bytes * 0.95)} \\
         -jar ${task.ext.jarPath} \\
             -sample ${meta.tumor_id} \\
             -somatic_vcf_file ${smlv_vcf} \\

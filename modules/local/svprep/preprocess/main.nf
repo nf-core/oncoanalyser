@@ -31,7 +31,7 @@ process PREPROCESS {
 
     gridss_svprep \\
         ${args} \\
-        --jvmheap ${task.memory.giga}g \\
+        --jvmheap ${Math.round(task.memory.bytes * 0.95)} \\
         --jar ${task.ext.jarPath} \\
         --steps preprocess \\
         --reference ${genome_fasta} \\

@@ -65,8 +65,8 @@ process ASSEMBLE {
     # Run
     gridss_svprep \\
         ${args} \\
-        --jvmheap ${task.memory.giga - task.ext.otherJvmHeap.giga}g \\
-        --otherjvmheap ${task.ext.otherJvmHeap.giga}g \\
+        --jvmheap ${Math.round((task.memory.bytes - task.ext.otherJvmHeap.bytes) * 0.95)} \\
+        --otherjvmheap ${task.ext.otherJvmHeap.bytes} \\
         --jar ${task.ext.jarPath} \\
         --steps assemble \\
         --labels ${labels_arg} \\

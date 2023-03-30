@@ -34,7 +34,7 @@ process VIRUSBREAKEND {
 
     virusbreakend \\
         --jar ${task.ext.jarPath} \\
-        --gridssargs "--jvmheap ${task.memory.giga}g" \\
+        --gridssargs "--jvmheap ${Math.round(task.memory.bytes * 0.95)}" \\
         --threads ${task.cpus} \\
         --db ${virusbreakenddb.toString().replaceAll("/\$", "")}/ \\
         --output ${meta.id}.virusbreakend.vcf \\
