@@ -36,7 +36,7 @@ process ORANGE {
 
     java \\
         --add-opens java.base/java.time=ALL-UNNAMED \\
-        -Xmx${task.memory.giga}g \\
+        -Xmx${Math.round(task.memory.bytes * 0.95)} \\
         -jar ${task.ext.jarPath} \\
             \\
             -tumor_sample_id ${meta.tumor_id} \\

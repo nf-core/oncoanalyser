@@ -27,7 +27,7 @@ process LILAC {
 
     """
     java \\
-        -Xmx${task.memory.giga}g \\
+        -Xmx${Math.round(task.memory.bytes * 0.95)} \\
         -jar ${task.ext.jarPath} \\
             ${args} \\
             -sample ${sample_name} \\

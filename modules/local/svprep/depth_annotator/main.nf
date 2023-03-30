@@ -25,7 +25,7 @@ process DEPTH_ANNOTATOR {
 
     """
     java \\
-        -Xmx${task.memory.giga}g \\
+        -Xmx${Math.round(task.memory.bytes * 0.95)} \\
         -cp ${task.ext.jarPath} com.hartwig.hmftools.svprep.depth.DepthAnnotator \\
             ${args} \\
             -input_vcf ${vcf} \\

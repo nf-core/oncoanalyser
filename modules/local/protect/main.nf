@@ -23,7 +23,7 @@ process PROTECT {
 
     """
     java \\
-        -Xmx${task.memory.giga}g \\
+        -Xmx${Math.round(task.memory.bytes * 0.95)} \\
         -jar ${task.ext.jarPath} \\
             -tumor_sample_id ${meta.tumor_id} \\
             -reference_sample_id ${meta.normal_id} \\
