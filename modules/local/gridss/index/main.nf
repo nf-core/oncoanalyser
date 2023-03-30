@@ -32,19 +32,20 @@ process GRIDSS_INDEX {
     ln -s \$(find -L ${genome_bwa_index_dir} -type f) ./
 
     # Run
-    java -Xmx${Math.round(task.memory.bytes * 0.95)} \\
-      -XX:ParallelGCThreads=${task.cpus} \\
-      -Dsamjdk.reference_fasta=${genome_fasta} \\
-      -Dsamjdk.use_async_io_read_samtools=true \\
-      -Dsamjdk.use_async_io_write_samtools=true \\
-      -Dsamjdk.use_async_io_write_tribble=true \\
-      -Dsamjdk.buffer_size=4194304 \\
-      -Dsamjdk.async_io_read_threads=${task.cpus} \\
-      -cp ${task.ext.jarPath} \\
-          REFERENCE_SEQUENCE=${genome_fasta} \\
-          CREATE_SEQUENCE_DICTIONARY=${sequence_dict_arg} \\
-          CREATE_BWA_INDEX_IMAGE=${bwa_index_image_arg} \\
-          CREATE_GRIDSS_REFERENCE_CACHE=${gridss_index_arg}
+    java \\
+        -Xmx${Math.round(task.memory.bytes * 0.95)} \\
+        -XX:ParallelGCThreads=${task.cpus} \\
+        -Dsamjdk.reference_fasta=${genome_fasta} \\
+        -Dsamjdk.use_async_io_read_samtools=true \\
+        -Dsamjdk.use_async_io_write_samtools=true \\
+        -Dsamjdk.use_async_io_write_tribble=true \\
+        -Dsamjdk.buffer_size=4194304 \\
+        -Dsamjdk.async_io_read_threads=${task.cpus} \\
+        -cp ${task.ext.jarPath} \\
+            REFERENCE_SEQUENCE=${genome_fasta} \\
+            CREATE_SEQUENCE_DICTIONARY=${sequence_dict_arg} \\
+            CREATE_BWA_INDEX_IMAGE=${bwa_index_image_arg} \\
+            CREATE_GRIDSS_REFERENCE_CACHE=${gridss_index_arg}
 
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":
@@ -60,4 +61,3 @@ process GRIDSS_INDEX {
     echo -e '${task.process}:\\n  stub: noversions\\n' > versions.yml
     """
 }
-
