@@ -27,7 +27,7 @@ process SVPREP {
 
     """
     java \\
-        -Xmx${Math.round(task.memory.bytes * 0.95)} \\
+        -Xmx${Math.round(task.memory.bytes * 0.75)} \\
         -jar ${task.ext.jarPath} \\
             ${args} \\
             -sample ${meta.id} \\
