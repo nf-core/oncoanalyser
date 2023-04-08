@@ -26,7 +26,7 @@ process CUSTOM_SLICE {
         ${bam} | \\
         samtools sort -T tmp -o ${bam.baseName}.sliced.bam
 
-    samtools index ${bam_name}.sliced.bam
+    samtools index ${bam.baseName}.sliced.bam
 
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":
