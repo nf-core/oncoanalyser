@@ -725,7 +725,7 @@ workflow ONCOANALYSER {
                     ch_inputs_wgs.absent.map { meta -> [meta, []] },
                 )
         } else {
-            ch_lilac_inputs_purple = WorkflowOncoanalyser.getInput(meta, Constants.INPUT.PURPLE_DIR, type: 'optional')
+            ch_lilac_inputs_purple = WorkflowOncoanalyser.getInput(ch_inputs, Constants.INPUT.PURPLE_DIR, type: 'optional')
         }
 
         // Create channel with all available input BAMs
