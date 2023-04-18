@@ -174,7 +174,13 @@ workflow ONCOANALYSER {
         // NOTE(SW): consider alternative approaches for using the expected count file e.g. generate once at runtime,
         // then use for all samples; generate all possible read lengths outside of pipeline and store on a remote for
         // retrieval at runtime (requires inference of read length)
-        isofox_counts = params.use_isofox_exp_counts_cache ? hmf_data.isofox_counts : []
+
+        // TODO(SW): this must be improved to allow users to set input file, use cache, or generate at runtime;
+        // currently does not update functions
+        // NOTE(SW): forcing use of cache for now since this feature is incomplete
+
+        //isofox_counts = params.use_isofox_exp_counts_cache ? hmf_data.isofox_counts : []
+        isofox_counts = hmf_data.isofox_counts
 
         // Run process
         ISOFOX(
