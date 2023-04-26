@@ -1,4 +1,4 @@
-process DEPTH_ANNOTATOR {
+process SVPREP_DEPTH_ANNOTATOR {
     tag "${meta.id}"
     label 'process_medium'
 

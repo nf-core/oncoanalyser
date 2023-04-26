@@ -39,13 +39,13 @@ WorkflowMain.initialise(workflow, params, log)
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 */
 
-include { ONCOANALYSER } from './workflows/oncoanalyser'
+include { WGTS } from './workflows/wgts'
 
 //
 // WORKFLOW: Run main nf-core/oncoanalyser analysis pipeline
 //
 workflow NFCORE_ONCOANALYSER {
-    ONCOANALYSER()
+    WGTS()
 }
 
 /*

@@ -24,21 +24,21 @@ input:
   - cobalt:
       type: directory
       description: COBALT output directory
-  - sv_hard_vcf:
+  - sv_vcf:
       type: file
-      description: GRIPSS hard filtered VCF file
+      description: GRIPSS VCF file
       pattern: "*.{vcf.gz}"
-  - sv_hard_vcf_index:
+  - sv_vcf_index:
       type: file
-      description: GRIPSS hard filtered VCF index file
+      description: GRIPSS VCF index file
       pattern: "*.{vcf.gz.tbi}"
-  - sv_soft_vcf:
+  - sv_unfiltered_vcf:
       type: file
-      description: GRIPSS soft filtered VCF file
+      description: GRIPSS unfiltered VCF file
       pattern: "*.{vcf.gz}"
-  - sv_soft_vcf_index:
+  - sv_unfiltered_vcf_index:
       type: file
-      description: GRIPSS soft filtered VCF index file
+      description: GRIPSS unfiltered VCF index file
       pattern: "*.{vcf.gz.tbi}"
   - smlv_tumor_vcf:
       type: file

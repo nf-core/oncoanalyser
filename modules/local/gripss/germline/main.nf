@@ -15,8 +15,8 @@ process GRIPSS_GERMLINE {
     path repeatmasker_annotations
 
     output:
-    tuple val(meta), path('*gripss.filtered.germline.vcf.gz'), path('*gripss.filtered.germline.vcf.gz.tbi'), emit: vcf_hard
-    tuple val(meta), path('*.gripss.germline.vcf.gz'), path('*.gripss.germline.vcf.gz.tbi')                , emit: vcf_soft
+    tuple val(meta), path('*gripss.filtered.germline.vcf.gz'), path('*gripss.filtered.germline.vcf.gz.tbi'), emit: vcf
+    tuple val(meta), path('*.gripss.germline.vcf.gz'), path('*.gripss.germline.vcf.gz.tbi')                , emit: vcf_unfiltered
     path 'versions.yml'                                                                                    , emit: versions
 
     when:
