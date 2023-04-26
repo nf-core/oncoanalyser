@@ -17,10 +17,10 @@ process SAGE_GERMLINE {
     path ensembl_data_resources
 
     output:
-    tuple val(meta), path("${meta.tumor_id}.sage.germline.vcf.gz")         , emit: vcf
-    tuple val(meta), path("${meta.tumor_id}.sage.germline.filtered.vcf.gz"), emit: vcf_filtered
-    tuple val(meta), path('*gene.coverage.tsv')                            , emit: gene_coverage, optional: true
-    path 'versions.yml'                                                    , emit: versions
+    tuple val(meta), path('*.sage.germline.vcf.gz'), path('*.sage.germline.vcf.gz.tbi')                  , emit: vcf
+    tuple val(meta), path('*.sage.germline.filtered.vcf.gz'), path('*.sage.germline.filtered.vcf.gz.tbi'), emit: vcf_filtered
+    tuple val(meta), path('*gene.coverage.tsv')                                                          , emit: gene_coverage, optional: true
+    path 'versions.yml'                                                                                  , emit: versions
 
     when:
     task.ext.when == null || task.ext.when
@@ -57,6 +57,9 @@ process SAGE_GERMLINE {
 
     bcftools view -f 'PASS' -o ${meta.tumor_id}.sage.germline.filtered.vcf.gz ${meta.tumor_id}.sage.germline.vcf.gz
 
+    bcftools index -t ${meta.tumor_id}.sage.germline.vcf.gz
+    bcftools index -t ${meta.tumor_id}.sage.germline.filtered.vcf.gz
+
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":
         sage: \$(java -jar ${task.ext.jarPath} | head -n1 | sed 's/.*Sage version: //')
@@ -66,7 +69,9 @@ process SAGE_GERMLINE {
     stub:
     """
     touch "${meta.tumor_id}.sage.germline.vcf.gz"
+    touch "${meta.tumor_id}.sage.germline.vcf.gz.tbi"
     touch "${meta.tumor_id}.sage.germline.filtered.vcf.gz"
+    touch "${meta.tumor_id}.sage.germline.filtered.vcf.gz.tbi"
     touch "${meta.tumor_id}.gene.coverage.tsv"
     echo -e '${task.process}:\\n  stub: noversions\\n' > versions.yml
     """
