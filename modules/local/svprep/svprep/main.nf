@@ -2,7 +2,7 @@ process SVPREP {
     tag "${meta.id}"
     label 'process_medium'
 
-    container 'docker.io/scwatts/svprep:1.0.1--0'
+    container 'docker.io/scwatts/svprep:1.1--0'
 
     input:
     tuple val(meta), path(bam), path(bai), path(junctions)

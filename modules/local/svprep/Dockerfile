@@ -5,7 +5,7 @@ USER root
 
 RUN \
   mkdir -p /opt/svprep/ && \
-  wget -O /opt/svprep/svprep.jar 'https://github.com/hartwigmedical/hmftools/releases/download/sv-prep-v1.0.1/sv-prep_v1.0.1.jar'
+  wget -O /opt/svprep/svprep.jar 'https://github.com/hartwigmedical/hmftools/releases/download/sv-prep-v1.1/sv-prep_v1.1.jar'
 
 COPY assets/gridss.svprep /opt/svprep/gridss_svprep
 RUN \
