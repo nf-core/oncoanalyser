@@ -15,8 +15,8 @@ process GRIPSS_SOMATIC {
     path repeatmasker_annotations
 
     output:
-    tuple val(meta), path('*.gripss.filtered.somatic.vcf.gz'), path('*.gripss.filtered.somatic.vcf.gz.tbi'), emit: vcf_hard
-    tuple val(meta), path('*.gripss.somatic.vcf.gz'), path('*.gripss.somatic.vcf.gz.tbi')                  , emit: vcf_soft
+    tuple val(meta), path('*.gripss.filtered.somatic.vcf.gz'), path('*.gripss.filtered.somatic.vcf.gz.tbi'), emit: vcf
+    tuple val(meta), path('*.gripss.somatic.vcf.gz'), path('*.gripss.somatic.vcf.gz.tbi')                  , emit: vcf_unfiltered
     path 'versions.yml'                                                                                    , emit: versions
 
     when:

@@ -52,13 +52,13 @@ output:
       description: |
         Groovy Map containing sample information
         e.g. [id: 'sample_id', tumor_id: 'tumor_name', normal_id: 'normal_name']
-  - vcf_hard:
+  - vcf:
       type: list
       description: Hard filtered VCF file and index file
       pattern: "*.{vcf.gz,vcf.gz.tbi}"
-  - vcf_soft:
+  - vcf_unfiltered:
       type: list
-      description: Soft filtered VCF file and index file
+      description: Unfiltered VCF file and index file
       pattern: "*.{vcf.gz,vcf.gz.tbi}"
   - versions:
       type: file

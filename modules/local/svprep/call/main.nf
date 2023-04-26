@@ -1,4 +1,4 @@
-process CALL {
+process GRIDSS_CALL {
     tag "${meta.id}"
     label 'process_medium'
 

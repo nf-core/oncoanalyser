@@ -47,8 +47,8 @@ class Constants {
         BAMTOOLS_TXT,
         COBALT_DIR,
         GRIDSS_VCF,
-        GRIPSS_HARD_VCF,
-        GRIPSS_SOFT_VCF,
+        GRIPSS_VCF,
+        GRIPSS_UNFILTERED_VCF,
         ISOFOX_DIR,
         LILAC_DIR,
         LINX_ANNO_DIR,
@@ -103,10 +103,10 @@ class Constants {
 
         GRIDSS_VCF:             [FileType.GRIDSS_VCF,           SampleType.TUMOR_NORMAL, SequenceType.WGS],
 
-        GRIPSS_HARD_VCF_TUMOR:  [FileType.GRIPSS_HARD_VCF,      SampleType.TUMOR,        SequenceType.WGS],
-        GRIPSS_SOFT_VCF_TUMOR:  [FileType.GRIPSS_SOFT_VCF,      SampleType.TUMOR,        SequenceType.WGS],
-        GRIPSS_HARD_VCF_NORMAL: [FileType.GRIPSS_HARD_VCF,      SampleType.NORMAL,       SequenceType.WGS],
-        GRIPSS_SOFT_VCF_NORMAL: [FileType.GRIPSS_SOFT_VCF,      SampleType.NORMAL,       SequenceType.WGS],
+        GRIPSS_VCF_TUMOR:       [FileType.GRIPSS_VCF,           SampleType.TUMOR,        SequenceType.WGS],
+        GRIPSS_VCF_NORMAL:      [FileType.GRIPSS_VCF,           SampleType.NORMAL,       SequenceType.WGS],
+        GRIPSS_UNFILTERED_VCF_TUMOR:  [FileType.GRIPSS_UNFILTERED_VCF,  SampleType.TUMOR,   SequenceType.WGS],
+        GRIPSS_UNFILTERED_VCF_NORMAL: [FileType.GRIPSS_UNFILTERED_VCF,  SampleType.NORMAL,  SequenceType.WGS],
 
         PURPLE_DIR:             [FileType.PURPLE_DIR,           SampleType.TUMOR_NORMAL, SequenceType.WGS],
 

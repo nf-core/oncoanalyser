@@ -4,14 +4,14 @@
 //
 import Utils
 
-include { ASSEMBLE        as GRIDSS_ASSEMBLE        } from '../../modules/local/svprep/assemble/main'
-include { CALL            as GRIDSS_CALL            } from '../../modules/local/svprep/call/main'
-include { PREPROCESS      as GRIDSS_PREPROCESS      } from '../../modules/local/svprep/preprocess/main'
-include { SVPREP          as SVPREP_NORMAL          } from '../../modules/local/svprep/svprep/main'
-include { SVPREP          as SVPREP_TUMOR           } from '../../modules/local/svprep/svprep/main'
-include { DEPTH_ANNOTATOR as SVPREP_DEPTH_ANNOTATOR } from '../../modules/local/svprep/depth_annotator/main'
+include { GRIDSS_ASSEMBLE as ASSEMBLE               } from '../../modules/local/svprep/assemble/main'
+include { GRIDSS_CALL as CALL                       } from '../../modules/local/svprep/call/main'
+include { SVPREP_DEPTH_ANNOTATOR as DEPTH_ANNOTATOR } from '../../modules/local/svprep/depth_annotator/main'
+include { GRIDSS_PREPROCESS as PREPROCESS           } from '../../modules/local/svprep/preprocess/main'
+include { SVPREP as SVPREP_NORMAL                   } from '../../modules/local/svprep/svprep/main'
+include { SVPREP as SVPREP_TUMOR                    } from '../../modules/local/svprep/svprep/main'
 
-workflow GRIDSS_SVPREP {
+workflow GRIDSS_SVPREP_CALLING {
     take:
         ch_inputs                       // channel: [val(meta)]
         gridss_config                   //    file: /path/to/gridss_config (optional)
@@ -103,7 +103,7 @@ workflow GRIDSS_SVPREP {
             )
 
         // Preprocess reads
-        GRIDSS_PREPROCESS(
+        PREPROCESS(
             ch_preprocess_inputs,
             gridss_config,
             ref_data_genome_fasta,
@@ -113,13 +113,13 @@ workflow GRIDSS_SVPREP {
             ref_data_genome_bwa_index_image,
             ref_data_genome_gridss_index,
         )
-        ch_versions = ch_versions.mix(GRIDSS_PREPROCESS.out.versions)
+        ch_versions = ch_versions.mix(PREPROCESS.out.versions)
 
         // Gather BAMs and outputs from preprocessing for each tumor/normal set
         // channel: [key, [[val(meta_gridss), bam, bam_filtered, preprocess_dir], ...]]
         ch_bams_and_preprocess = WorkflowOncoanalyser.groupByMeta(
             ch_preprocess_inputs,
-            GRIDSS_PREPROCESS.out.preprocess_dir,
+            PREPROCESS.out.preprocess_dir,
         )
         .map { [it[0].key, it] }
         .groupTuple(size: 2)
@@ -141,7 +141,7 @@ workflow GRIDSS_SVPREP {
             }
 
         // Assemble variants
-        GRIDSS_ASSEMBLE(
+        ASSEMBLE(
             ch_assemble_inputs,
             gridss_config,
             ref_data_genome_fasta,
@@ -152,13 +152,13 @@ workflow GRIDSS_SVPREP {
             ref_data_genome_gridss_index,
             ref_data_gridss_blocklist,
         )
-        ch_versions = ch_versions.mix(GRIDSS_ASSEMBLE.out.versions)
+        ch_versions = ch_versions.mix(ASSEMBLE.out.versions)
 
         // Prepare inputs for variant calling
         // channel: [val(meta_gridss), [bams], [bams_filtered], assemble_dir, [labels]]
         ch_call_inputs = WorkflowOncoanalyser.groupByMeta(
             ch_assemble_inputs,
-            GRIDSS_ASSEMBLE.out.assemble_dir,
+            ASSEMBLE.out.assemble_dir,
             flatten: false,
         )
             .map { data ->
@@ -169,7 +169,7 @@ workflow GRIDSS_SVPREP {
             }
 
         // Call variants
-        GRIDSS_CALL(
+        CALL(
             ch_call_inputs,
             gridss_config,
             ref_data_genome_fasta,
@@ -180,13 +180,13 @@ workflow GRIDSS_SVPREP {
             ref_data_genome_gridss_index,
             ref_data_gridss_blocklist,
         )
-        ch_versions = ch_versions.mix(GRIDSS_CALL.out.versions)
+        ch_versions = ch_versions.mix(CALL.out.versions)
 
         // Prepare inputs for depth annotation, restore original meta
         // channel: [val(meta_svprep), [bams], [bais], vcf, [labels]]
         ch_depth_inputs = WorkflowOncoanalyser.groupByMeta(
             ch_inputs.map { meta -> [meta.id, meta] },
-            GRIDSS_CALL.out.vcf.map { meta, vcf -> [meta.id, vcf] },
+            CALL.out.vcf.map { meta, vcf -> [meta.id, vcf] },
         )
             .map { id, meta, vcf ->
                 def tbam = Utils.getTumorWgsBam(meta)
@@ -202,7 +202,7 @@ workflow GRIDSS_SVPREP {
             }
 
         // Add depth annotations to SVs
-        SVPREP_DEPTH_ANNOTATOR(
+        DEPTH_ANNOTATOR(
             ch_depth_inputs,
             ref_data_genome_fasta,
             ref_data_genome_version,
@@ -212,7 +212,7 @@ workflow GRIDSS_SVPREP {
         ch_out = Channel.empty()
             .concat(
                 ch_inputs.map { meta -> [meta.id, meta] },
-                SVPREP_DEPTH_ANNOTATOR.out.vcf.map { meta, vcf -> [meta.id, vcf] },
+                DEPTH_ANNOTATOR.out.vcf.map { meta, vcf -> [meta.id, vcf] },
             )
             .groupTuple(size: 2)
             .map { id, other -> other.flatten() }

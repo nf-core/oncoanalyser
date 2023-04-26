@@ -4,13 +4,13 @@
 import Constants
 import Utils
 
-include { GRIDSS_ASSEMBLE          } from '../../modules/local/gridss/assemble/main'
-include { GRIDSS_CALL              } from '../../modules/local/gridss/call/main'
-include { GRIDSS_PREPROCESS        } from '../../modules/local/gridss/preprocess/main'
+include { GRIDSS_ASSEMBLE as ASSEMBLE     } from '../../modules/local/gridss/assemble/main'
+include { GRIDSS_CALL as CALL             } from '../../modules/local/gridss/call/main'
+include { GRIDSS_PREPROCESS as PREPROCESS }  from '../../modules/local/gridss/preprocess/main'
 
-workflow GRIDSS {
+workflow GRIDSS_CALLING {
     take:
-        ch_inputs                       // channel: [val(meta), tumor_bam, normal_bam]
+        ch_inputs                       // channel: [val(meta)]
         gridss_config                   //    file: /path/to/gridss_config (optional)
         ref_data_genome_fasta           //    file: /path/to/genome_fasta
         ref_data_genome_fai             //    file: /path/to/genome_fai
@@ -24,9 +24,16 @@ workflow GRIDSS {
         // Channel for version.yml files
         ch_versions = Channel.empty()
 
+        ch_inputs_bam_bai = ch_inputs
+            .map { meta ->
+                def tumor_bam = Utils.getTumorWgsBam(meta)
+                def normal_bam = Utils.getNormalWgsBam(meta)
+                [meta, tumor_bam, normal_bam]
+            }
+
         // Build a channel of individual BAMs for preprocessing
         // channel: [val(meta_gridss), bam]
-        ch_preprocess_inputs = ch_inputs
+        ch_preprocess_inputs = ch_inputs_bam_bai
             .flatMap { meta, tbam, nbam ->
                 def sample_types = [Constants.SampleType.TUMOR, Constants.SampleType.NORMAL]
                 sample_types
@@ -50,7 +57,7 @@ workflow GRIDSS {
             }
 
         // Preprocess reads
-        GRIDSS_PREPROCESS(
+        PREPROCESS(
             ch_preprocess_inputs,
             gridss_config,
             ref_data_genome_fasta,
@@ -60,13 +67,13 @@ workflow GRIDSS {
             ref_data_genome_bwa_index_image,
             ref_data_genome_gridss_index,
         )
-        ch_versions = ch_versions.mix(GRIDSS_PREPROCESS.out.versions)
+        ch_versions = ch_versions.mix(PREPROCESS.out.versions)
 
         // Gather BAMs and outputs from preprocessing for each tumor/normal set
         // channel: [subject_id, [[val(meta_gridss), bam, preprocess_dir], ...]]
         ch_bams_and_preprocess = WorkflowOncoanalyser.groupByMeta(
             ch_preprocess_inputs,
-            GRIDSS_PREPROCESS.out.preprocess_dir,
+            PREPROCESS.out.preprocess_dir,
         )
         .map { [it[0].subject_id, it] }
         .groupTuple(size: 2)
@@ -82,7 +89,7 @@ workflow GRIDSS {
             }
 
         // Assemble variants
-        GRIDSS_ASSEMBLE(
+        ASSEMBLE(
             ch_assemble_inputs,
             gridss_config,
             ref_data_genome_fasta,
@@ -93,13 +100,13 @@ workflow GRIDSS {
             ref_data_genome_gridss_index,
             ref_data_gridss_blacklist,
         )
-        ch_versions = ch_versions.mix(GRIDSS_ASSEMBLE.out.versions)
+        ch_versions = ch_versions.mix(ASSEMBLE.out.versions)
 
         // Prepare inputs for variant calling
         // channel: [val(meta_gridss), [bams], assemble_dir, [labels]]
         ch_call_inputs = WorkflowOncoanalyser.groupByMeta(
             ch_assemble_inputs,
-            GRIDSS_ASSEMBLE.out.assemble_dir,
+            ASSEMBLE.out.assemble_dir,
             flatten: false,
         )
             .map { data ->
@@ -110,7 +117,7 @@ workflow GRIDSS {
             }
 
         // Call variants
-        GRIDSS_CALL(
+        CALL(
             ch_call_inputs,
             gridss_config,
             ref_data_genome_fasta,
@@ -121,13 +128,13 @@ workflow GRIDSS {
             ref_data_genome_gridss_index,
             ref_data_gridss_blacklist,
         )
-        ch_versions = ch_versions.mix(GRIDSS_CALL.out.versions)
+        ch_versions = ch_versions.mix(CALL.out.versions)
 
         // Reunite final VCF with the corresponding input meta object
         ch_out = Channel.empty()
             .concat(
-                ch_inputs.map { meta, tbam, nbam -> [meta.id, meta] },
-                GRIDSS_CALL.out.vcf.map { meta, vcf -> [meta.id, vcf] },
+                ch_inputs_bam_bai.map { meta, tbam, nbam -> [meta.id, meta] },
+                CALL.out.vcf.map { meta, vcf -> [meta.id, vcf] },
             )
             .groupTuple(size: 2)
             .map { id, other -> other.flatten() }

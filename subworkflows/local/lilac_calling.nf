@@ -7,20 +7,76 @@ import Utils
 include { CUSTOM_EXTRACTCONTIG   } from '../../modules/local/custom/lilac_extract_and_index_contig/main'
 include { CUSTOM_REALIGNREADS    } from '../../modules/local/custom/lilac_realign_reads_lilac/main'
 include { CUSTOM_SLICE           } from '../../modules/local/custom/lilac_slice/main'
+include { LILAC                  } from '../../modules/local/lilac/main'
 
-include { LILAC as LILAC_PROCESS } from '../../modules/local/lilac/main'
-
-workflow LILAC {
+workflow LILAC_CALLING {
     take:
-        ch_bams                     // channel: [val(meta), normal_wgs_bam, normal_wgs_bai, tumor_wgs_bam, tumor_wgs_bai, tumor_wts_bam, tumor_wts_bai]
-        ch_purple_dir               // channel: [val(meta), purple_dir]
+        // Sample data
+        ch_inputs
+        ch_inputs_wgs_present
+        ch_inputs_wgs_absent
+        ch_inputs_wts_present
+        ch_inputs_wts_absent
+        ch_purple
+
+        // Reference data
         ref_data_genome_fasta       //    file: /path/to/genome_fasta
         ref_data_genome_fai         //    file: /path/to/genome_fai
         ref_data_lilac_resource_dir //    file: /path/to/lilac_resource_dir/
 
+        // Params
+        run
+
     main:
         // Channel for version.yml files
         ch_versions = Channel.empty()
+
+        // Select input sources
+        // channel: [val(meta), purple_dir]
+        if (run.purple) {
+            ch_lilac_inputs_purple = Channel.empty()
+                .mix(
+                    ch_purple,
+                    ch_inputs_wgs_absent.map { meta -> [meta, []] },
+                )
+        } else {
+            ch_lilac_inputs_purple = WorkflowOncoanalyser.getInput(ch_inputs, Constants.INPUT.PURPLE_DIR, type: 'optional')
+        }
+
+        // Create channel with all available input BAMs
+        // First obtain WTS BAMs
+        // channel: [val(meta), wts_bam, wts_bai]
+        ch_lilac_bams_wts = Channel.empty()
+            .mix(
+                ch_inputs_wts_present.map { meta ->
+                    def bam = Utils.getTumorWtsBam(meta)
+                    return [meta, bam, "${bam}.bai"]
+                },
+                ch_inputs_wts_absent.map { meta -> [meta, [], []] },
+            )
+
+        ch_lilac_bams_wgs = Channel.empty()
+            .mix(
+                ch_inputs_wgs_present.map { meta ->
+                    def tumor_bam = Utils.getTumorWgsBam(meta)
+                    def normal_bam = Utils.getNormalWgsBam(meta)
+                    [meta, tumor_bam, normal_bam, "${tumor_bam}.bai", "${normal_bam}.bai"]
+                },
+                ch_inputs_wgs_absent.map { meta -> [meta, [], [], [], []] },
+            )
+
+        // Combine WGS and WTS BAMs
+        // channel: [val(meta), normal_wgs_bam, normal_wgs_bai, tumor_wgs_bam, tumor_wgs_bai, tumor_wts_bam, tumor_wts_bai]
+        ch_lilac_bams = WorkflowOncoanalyser.groupByMeta(
+            ch_lilac_bams_wts,
+            ch_lilac_bams_wgs,
+            flatten_mode: 'nonrecursive',
+        )
+            .map { data ->
+                def meta = data[0]
+                def (tbam_wts, tbai_wts, tbam_wgs, nbam_wgs, tbai_wgs, nbai_wgs) = data[1..-1]
+                return [meta, nbam_wgs, nbai_wgs, tbam_wgs, tbai_wgs, tbam_wts, tbai_wts]
+            }
 
         // Slice HLA regions
         ch_slice_bed = ref_data_lilac_resource_dir
@@ -44,7 +100,7 @@ workflow LILAC {
         // NOTE(SW): orphaned reads are sometimes obtained, this is the slicing procedure used
         // in Pipeline5, see LilacBamSlicer.java#L115
         // channel: [val(meta_lilac), bam, bai, bed]
-        ch_slice_inputs = WorkflowLilac.getSliceInputs(ch_bams, ch_slice_bed)
+        ch_slice_inputs = WorkflowLilac.getSliceInputs(ch_lilac_bams, ch_slice_bed)
         // Isolate meta containing expected file count to use for non-blocking groupTuple later
         ch_slice_meta_individual = ch_slice_inputs
             .map {
@@ -108,7 +164,7 @@ workflow LILAC {
 
         // Restore original meta so we can join with PURPLE directory
         // channel: [val(meta)]
-        ch_metas = ch_bams.map { return it[0] }
+        ch_metas = ch_lilac_bams.map { return it[0] }
         // channel: [val(meta), normal_wgs_bam, normal_wgs_bai, tumor_wgs_bam, tumor_wgs_bai, tumor_wts_bam, tumor_wts_bai]
         ch_lilac_inputs_slices = WorkflowOncoanalyser.restoreMeta(
             ch_slices_organised,
@@ -117,7 +173,7 @@ workflow LILAC {
 
         // Get inputs from PURPLE
         // channel: [val(meta), gene_cn]
-        ch_lilac_inputs_gene_cn = ch_purple_dir
+        ch_lilac_inputs_gene_cn = ch_purple
             .map { meta, purple_dir ->
                 if (purple_dir == []) {
                     return [meta, []]
@@ -129,7 +185,7 @@ workflow LILAC {
             }
 
         // channel: [val(meta), smlv_vcf]
-        ch_lilac_inputs_smlv_vcf = ch_purple_dir
+        ch_lilac_inputs_smlv_vcf = ch_purple
             .map { meta, purple_dir ->
                 if (purple_dir == []) {
                     return [meta, []]
@@ -174,16 +230,19 @@ workflow LILAC {
             .filter { it != Constants.META_PLACEHOLDER }
 
         // Run LILAC
-        LILAC_PROCESS(
+        LILAC(
             ch_lilac_inputs,
             ref_data_genome_fasta,
             params.ref_data_genome_version,
             ref_data_lilac_resource_dir,
         )
-        ch_versions = ch_versions.mix(LILAC_PROCESS.out.versions)
+
+        // Set outputs, restoring original meta
+        ch_versions = ch_versions.mix(LILAC.out.versions)
+        ch_outputs = WorkflowOncoanalyser.restoreMeta(LILAC.out.lilac_dir, ch_inputs)
 
     emit:
-        results = LILAC_PROCESS.out.lilac_dir // channel: [val(meta_lilac), lilac_dir]
+        lilac_dir = ch_outputs // channel: [val(meta), lilac_dir]
 
-        versions = ch_versions                // channel: [versions.yml]
+        versions = ch_versions // channel: [versions.yml]
 }

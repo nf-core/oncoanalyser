@@ -5,7 +5,7 @@ process PURPLE {
     container 'docker.io/scwatts/purple:3.7.1--0'
 
     input:
-    tuple val(meta), path(amber), path(cobalt), path(sv_hard_vcf), path(sv_hard_vcf_index), path(sv_soft_vcf), path(sv_soft_vcf_index), path(smlv_tumor_vcf), path(smlv_normal_vcf)
+    tuple val(meta), path(amber), path(cobalt), path(sv_vcf), path(sv_vcf_index), path(sv_unfiltered_vcf), path(sv_unfiltered_vcf_index), path(smlv_tumor_vcf), path(smlv_normal_vcf)
     path genome_fasta
     path genome_fai
     path genome_dict
@@ -27,8 +27,8 @@ process PURPLE {
     script:
     def args = task.ext.args ?: ''
 
-    def sv_vcf_arg = sv_hard_vcf ? "-structural_vcf ${sv_hard_vcf}" : ''
-    def sv_lowconf_vcf_fp = sv_soft_vcf ? "-sv_recovery_vcf ${sv_soft_vcf}" : ''
+    def sv_vcf_arg = sv_vcf ? "-structural_vcf ${sv_vcf}" : ''
+    def sv_lowconf_vcf_fp = sv_unfiltered_vcf ? "-sv_recovery_vcf ${sv_unfiltered_vcf}" : ''
 
     def smlv_tumor_vcf_fp = smlv_tumor_vcf ?: ''
     def smlv_normal_vcf_fp = smlv_normal_vcf ?: ''
@@ -91,6 +91,7 @@ process PURPLE {
     """
     mkdir purple/
     touch purple/${meta.tumor_id}.purple.cnv.gene.tsv
+    touch purple/${meta.tumor_id}.purple.cnv.somatic.tsv
     touch purple/${meta.tumor_id}.purple.driver.catalog.germline.tsv
     touch purple/${meta.tumor_id}.purple.driver.catalog.somatic.tsv
     touch purple/${meta.tumor_id}.purple.germline.vcf.gz
