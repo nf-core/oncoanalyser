@@ -123,16 +123,7 @@ workflow PREPARE_REFERENCE {
                 .collect()
                 .map { dir_list ->
                     assert dir_list.size() == 1
-
-                    // NOTE(SW): use of toString() in getHmfDataFileObject() fails to parse S3 URIs,
-                    // so must handle here (encountered with workDir set as S3 e.g. in NF Tower)
-                    def dirpath = dir_list[0].toUri().toString()
-                    // NOTE(SW): S3Path.toUri() includes an extra forward slash in the URI or path,
-                    // which is removed here. Unsure whether this occurs in other URIs types.
-                    if (dirpath.startsWith('s3:///')) {
-                        dirpath = dirpath.replaceFirst(/^s3:\/\/\//, 's3://')
-                    }
-
+                    def dirpath = dir_list[0].toUriString()
                     return createHmfDataMap(dirpath, false /* params_only */)
                 }
         } else if (params.ref_data_hmf_data_path) {
