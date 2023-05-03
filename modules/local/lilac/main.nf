@@ -31,14 +31,14 @@ process LILAC {
         -jar ${task.ext.jarPath} \\
             ${args} \\
             -sample ${sample_name} \\
+            -reference_bam ${normal_wgs_bam} \\
             ${tumor_wgs_bam_arg} \\
             ${tumor_wts_bam_arg} \\
-            -reference_bam ${normal_wgs_bam} \\
-            -ref_genome_version ${genome_ver} \\
-            -ref_genome ${genome_fasta} \\
-            -resource_dir ${lilac_resources} \\
-            ${gene_cn_arg} \\
             ${smlv_vcf_arg} \\
+            ${gene_cn_arg} \\
+            -ref_genome ${genome_fasta} \\
+            -ref_genome_version ${genome_ver} \\
+            -resource_dir ${lilac_resources} \\
             -threads ${task.cpus} \\
             -output_dir lilac/
 

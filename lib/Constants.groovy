@@ -23,6 +23,7 @@ class Constants {
         CHORD,
         COBALT,
         CUPPA,
+        FLAGSTAT,
         GRIDSS,
         GRIPSS,
         ISOFOX,
@@ -30,8 +31,6 @@ class Constants {
         LINX,
         ORANGE,
         PAVE,
-        PEACH,
-        PROTECT,
         PURPLE,
         SAGE,
         SIGS,
@@ -58,13 +57,10 @@ class Constants {
         VIRUSINTERPRETER_TSV,
         // ORANGE specific
         CHORD_PREDICTION,
-        CUPPA_CSV,
-        CUPPA_FEATURE_PLOT,
-        CUPPA_SUMMARY_PLOT,
+        SIGS,
+        CUPPA_DIR,
         FLAGSTAT,
         LINX_PLOT_DIR,
-        PEACH_TSV,
-        PROTECT_TSV,
         SAGE_BQR,
         SAGE_COVERAGE,
     }
@@ -92,6 +88,9 @@ class Constants {
         BAMTOOLS_TXT_TUMOR:     [FileType.BAMTOOLS_TXT,         SampleType.TUMOR,        SequenceType.WGS],
         BAMTOOLS_TXT_NORMAL:    [FileType.BAMTOOLS_TXT,         SampleType.NORMAL,       SequenceType.WGS],
 
+        FLAGSTAT_TUMOR:         [FileType.FLAGSTAT,             SampleType.TUMOR,        SequenceType.WGS],
+        FLAGSTAT_NORMAL:        [FileType.FLAGSTAT,             SampleType.NORMAL,       SequenceType.WGS],
+
         SAGE_VCF_TUMOR:         [FileType.SAGE_VCF,             SampleType.TUMOR,        SequenceType.WGS],
         SAGE_VCF_NORMAL:        [FileType.SAGE_VCF,             SampleType.NORMAL,       SequenceType.WGS],
         SAGE_BQR_TUMOR:         [FileType.SAGE_BQR,             SampleType.TUMOR,        SequenceType.WGS],
@@ -115,14 +114,11 @@ class Constants {
         LINX_ANNO_DIR_NORMAL:   [FileType.LINX_ANNO_DIR,        SampleType.NORMAL,       SequenceType.WGS],
 
         CHORD_PREDICTION:       [FileType.CHORD_PREDICTION,     SampleType.TUMOR,        SequenceType.WGS],
+        SIGS:                   [FileType.SIGS,                 SampleType.TUMOR,        SequenceType.WGS],
         LILAC_DIR:              [FileType.LILAC_DIR,            SampleType.NORMAL,       SequenceType.WGS],
-        PEACH_TSV:              [FileType.PEACH_TSV,            SampleType.NORMAL,       SequenceType.WGS],
-        PROTECT_TSV:            [FileType.PROTECT_TSV,          SampleType.TUMOR,        SequenceType.WGS],
 
         VIRUSINTERPRETER_TSV:   [FileType.VIRUSINTERPRETER_TSV, SampleType.TUMOR,        SequenceType.WGS],
 
-        CUPPA_CSV:              [FileType.CUPPA_CSV,            SampleType.TUMOR,        SequenceType.WGTS],
-        CUPPA_FEATURE_PLOT:     [FileType.CUPPA_FEATURE_PLOT,   SampleType.TUMOR,        SequenceType.WGTS],
-        CUPPA_SUMMARY_PLOT:     [FileType.CUPPA_SUMMARY_PLOT,   SampleType.TUMOR,        SequenceType.WGTS],
+        CUPPA_DIR:              [FileType.CUPPA_DIR,            SampleType.TUMOR,        SequenceType.WGTS],
     ]
 }

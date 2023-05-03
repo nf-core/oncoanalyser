@@ -2,13 +2,11 @@ process LINX_SOMATIC {
     tag "${meta.id}"
     label 'process_low'
 
-    container 'docker.io/scwatts/linx:1.22--0'
+    container 'docker.io/scwatts/linx:1.23.2--0'
 
     input:
     tuple val(meta), path(purple_dir)
     val genome_ver
-    path fragile_regions
-    path lines
     path ensembl_data_resources
     path known_fusion_data
     path driver_gene_panel
@@ -31,12 +29,10 @@ process LINX_SOMATIC {
         -jar ${task.ext.jarPath} \\
             ${args} \\
             -sample ${meta.id} \\
-            -ref_genome_version ${genome_ver} \\
             -sv_vcf ${purple_dir}/${meta.id}.purple.sv.vcf.gz \\
             -purple_dir ${purple_dir} \\
             ${gene_id_file_arg} \\
-            -fragile_site_file ${fragile_regions} \\
-            -line_element_file ${lines} \\
+            -ref_genome_version ${genome_ver} \\
             -ensembl_data_dir ${ensembl_data_resources} \\
             -check_fusions \\
             -known_fusion_file ${known_fusion_data} \\

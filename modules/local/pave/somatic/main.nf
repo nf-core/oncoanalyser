@@ -2,7 +2,7 @@ process PAVE_SOMATIC {
     tag "${meta.id}"
     label 'process_medium'
 
-    container 'docker.io/scwatts/pave:1.4--0'
+    container 'docker.io/scwatts/pave:1.4.3--0'
 
     input:
     tuple val(meta), path(sage_vcf)
@@ -43,22 +43,21 @@ process PAVE_SOMATIC {
         -Xmx${Math.round(task.memory.bytes * 0.95)} \\
         -jar ${task.ext.jarPath} \\
             -sample ${meta.id} \\
-            -ref_genome_version ${genome_ver} \\
+            -vcf_file ${sage_vcf} \\
             -ref_genome ${genome_fasta} \\
-            -ensembl_data_dir ${ensembl_data_resources} \\
-            -driver_gene_panel ${driver_gene_panel} \\
+            -ref_genome_version ${genome_ver} \\
             -pon_file ${sage_pon} \\
             -pon_filters "${pon_filters}" \\
+            -driver_gene_panel ${driver_gene_panel} \\
             -mappability_bed ${segment_mappability} \\
-            -vcf_file ${sage_vcf} \\
-            -read_pass_only \\
+            -ensembl_data_dir ${ensembl_data_resources} \\
             ${gnomad_args} \\
+            -read_pass_only \\
             -output_dir ./
 
-    # NOTE(SW): hard coded since there is no reliable way to obtain version information.
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":
-        pave: 1.4
+        pave: \$(java -jar ${task.ext.jarPath} 2>&1 | sed -n 's/^.*version: //p')
     END_VERSIONS
     """
 

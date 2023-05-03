@@ -264,22 +264,6 @@
                     "fa_icon": "far fa-folder-open",
                     "hidden": true
                 },
-                "ref_data_linx_fragile_regions": {
-                    "type": "string",
-                    "format": "file-path",
-                    "pattern": "^\\S+\\.csv$",
-                    "description": "Path to LINX fragile sites file.",
-                    "fa_icon": "far fa-file-code",
-                    "hidden": true
-                },
-                "ref_data_linx_lines": {
-                    "type": "string",
-                    "format": "file-path",
-                    "pattern": "^\\S+\\.csv$",
-                    "description": "Path to LINX LINEs file.",
-                    "fa_icon": "far fa-file-code",
-                    "hidden": true
-                },
                 "ref_data_cohort_mapping": {
                     "type": "string",
                     "format": "file-path",
@@ -296,19 +280,20 @@
                     "fa_icon": "far fa-file-code",
                     "hidden": true
                 },
-                "ref_data_peach_panel": {
+                "ref_data_alt_sj_distribution": {
                     "type": "string",
                     "format": "file-path",
-                    "pattern": "^\\S+\\.json$",
-                    "description": "Path to PEACH panel file.",
+                    "pattern": "^\\S+\\.csv.gz$",
+                    "description": "Path to ORANGE alternative splice junction distribution file.",
                     "fa_icon": "far fa-file-code",
                     "hidden": true
                 },
-                "ref_data_serve_resources": {
+                "ref_data_gene_exp_distribution": {
                     "type": "string",
-                    "format": "directory-path",
-                    "description": "Path to SERVE resource directory.",
-                    "fa_icon": "far fa-folder-open",
+                    "format": "file-path",
+                    "pattern": "^\\S+\\.csv.gz$",
+                    "description": "Path to ORANGE gene expression distribution file.",
+                    "fa_icon": "far fa-file-code",
                     "hidden": true
                 },
                 "ref_data_clinvar_annotations": {

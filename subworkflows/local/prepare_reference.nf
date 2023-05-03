@@ -171,16 +171,11 @@ def createHmfDataMap(hmf_data_path, params_only) {
         isofox_gc_ratios:             'ref_data_isofox_gc_ratios',
         // LILAC
         lilac_resources:              'ref_data_lilac_resources',
-        // LINX
-        linx_fragile_regions:         'ref_data_linx_fragile_regions',
-        linx_lines:                   'ref_data_linx_lines',
         // ORANGE
         cohort_mapping:               'ref_data_cohort_mapping',
         cohort_percentiles:           'ref_data_cohort_percentiles',
-        // PEACH
-        peach_panel:                  'ref_data_peach_panel',
-        // PROTECT
-        serve_resources:              'ref_data_serve_resources',
+        alt_sj_distribution:          'ref_data_alt_sj_distribution',
+        gene_exp_distribution:        'ref_data_gene_exp_distribution',
         // SAGE
         clinvar_annotations:          'ref_data_clinvar_annotations',
         sage_blocklist_regions:       'ref_data_sage_blocklist_regions',

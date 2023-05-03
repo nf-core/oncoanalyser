@@ -2,12 +2,11 @@ process LINX_GERMLINE {
     tag "${meta.id}"
     label 'process_low'
 
-    container 'docker.io/scwatts/linx:1.22--0'
+    container 'docker.io/scwatts/linx:1.23.2--0'
 
     input:
-    tuple val(meta), path(gripss_sv)
+    tuple val(meta), path(sv_vcf)
     val genome_ver
-    path lines
     path ensembl_data_resources
     path driver_gene_panel
 
@@ -27,10 +26,9 @@ process LINX_GERMLINE {
         -jar ${task.ext.jarPath} \\
             ${args} \\
             -sample ${meta.id} \\
+            -sv_vcf ${purple_dir}/${meta.id}.purple.sv.germline.vcf.gz \\
             -germline \\
             -ref_genome_version ${genome_ver} \\
-            -sv_vcf ${gripss_sv} \\
-            -line_element_file ${lines} \\
             -ensembl_data_dir ${ensembl_data_resources} \\
             -driver_gene_panel ${driver_gene_panel} \\
             -output_dir linx_germline/

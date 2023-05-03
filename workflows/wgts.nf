@@ -56,24 +56,17 @@ linx_gene_id_file = params.linx_gene_id_file ? file(params.linx_gene_id_file) : 
 */
 
 //
-// MODULES
-//
-include { CHORD            } from '../modules/local/chord/main'
-include { ISOFOX           } from '../modules/local/isofox/main'
-include { PEACH            } from '../modules/local/peach/main'
-include { PROTECT          } from '../modules/local/protect/main'
-include { SIGS             } from '../modules/local/sigs/main'
-
-//
 // SUBWORKFLOWS
 //
 include { AMBER_PROFILING       } from '../subworkflows/local/amber_profiling'
 include { BAMTOOLS_METRICS      } from '../subworkflows/local/bamtools_metrics'
+include { CHORD_PREDICTION      } from '../subworkflows/local/chord_prediction'
 include { COBALT_PROFILING      } from '../subworkflows/local/cobalt_profiling'
 include { CUPPA_PREDICTION      } from '../subworkflows/local/cuppa_prediction'
 include { GRIDSS_CALLING        } from '../subworkflows/local/gridss_calling'
 include { GRIDSS_SVPREP_CALLING } from '../subworkflows/local/gridss_svprep_calling'
 include { GRIPSS_FILTERING      } from '../subworkflows/local/gripss_filtering'
+include { ISOFOX_QUANTIFICATION } from '../subworkflows/local/isofox_quantification'
 include { LILAC_CALLING         } from '../subworkflows/local/lilac_calling'
 include { LINX_ANNOTATION       } from '../subworkflows/local/linx_annotation'
 include { LINX_PLOTTING         } from '../subworkflows/local/linx_plotting'
@@ -83,6 +76,7 @@ include { PREPARE_INPUT         } from '../subworkflows/local/prepare_input'
 include { PREPARE_REFERENCE     } from '../subworkflows/local/prepare_reference'
 include { PURPLE_CALLING        } from '../subworkflows/local/purple_calling'
 include { SAGE_CALLING          } from '../subworkflows/local/sage_calling'
+include { SIGS_FITTING          } from '../subworkflows/local/sigs_fitting'
 include { VIRUSBREAKEND_CALLING } from '../subworkflows/local/virusbreakend_calling'
 
 /*
@@ -154,50 +148,24 @@ workflow WGTS {
     // channel: [meta, isofox_dir]
     ch_isofox_out = Channel.empty()
     if (run.isofox) {
-        // Create inputs and create process-specific meta
-        // channel: [meta_isofox, tumor_bam_wts]
-        ch_isofox_inputs = ch_inputs_wts.present
-            .map { meta ->
-                def bam = Utils.getTumorWtsBam(meta)
-                def meta_isofox = [key: meta.id, id: Utils.getTumorWtsSampleName(meta)]
-                return [meta_isofox, bam, "${bam}.bai"]
-            }
 
-        // Set Isofox cache files
-        // NOTE(SW): the Isofox expected count file is read length dependent so required users to explicitly use expect
-        // counts generated for 151 bp reads that is available in the HMF reference bundle. When not specifying an
-        // expected count file, Isofox will automatically create one for the computed read length. However, doing so
-        // greatly increases runtime.
-        // NOTE(SW): consider alternative approaches for using the expected count file e.g. generate once at runtime,
-        // then use for all samples; generate all possible read lengths outside of pipeline and store on a remote for
-        // retrieval at runtime (requires inference of read length)
-
-        // TODO(SW): this must be improved to allow users to set input file, use cache, or generate at runtime;
-        // currently does not update functions
-        // NOTE(SW): forcing use of cache for now since this feature is incomplete
-
-        //isofox_counts = params.use_isofox_exp_counts_cache ? hmf_data.isofox_counts : []
-        isofox_counts = hmf_data.isofox_counts
-
-        // Run process
-        ISOFOX(
-            ch_isofox_inputs,
-            params.isofox_functions,
+        ISOFOX_QUANTIFICATION(
+            ch_inputs_wts.present,
             PREPARE_REFERENCE.out.genome_fasta,
             PREPARE_REFERENCE.out.genome_fai,
             PREPARE_REFERENCE.out.genome_version,
             hmf_data.ensembl_data_resources,
-            isofox_counts,
+            hmf_data.isofox_counts,
             hmf_data.isofox_gc_ratios,
+            params.isofox_functions,
         )
 
-        // Set outputs, restoring original meta
-        ch_versions = ch_versions.mix(ISOFOX.out.versions)
-        ch_isofox_out = ch_isofox_out.mix(WorkflowOncoanalyser.restoreMeta(ISOFOX.out.isofox_dir, ch_inputs))
+        ch_versions = ch_versions.mix(ISOFOX_QUANTIFICATION.out.versions)
+        ch_isofox_out = ch_isofox_out.mix(ISOFOX_QUANTIFICATION.out.isofox_dir)
     }
 
     //
-    // MODULE: Run Bam Tools to generate stats required for downstream processes
+    // SUBWORKFLOW: Run Bam Tools to generate stats required for downstream processes
     //
     // channel: [val(meta), metrics]
     ch_bamtools_somatic_out = Channel.empty()
@@ -217,7 +185,7 @@ workflow WGTS {
     }
 
     //
-    // MODULE: Run AMBER to obtain b-allele frequencies
+    // SUBWORKFLOW: Run AMBER to obtain b-allele frequencies
     //
     // channel: [val(meta), amber_dir]
     ch_amber_out = Channel.empty()
@@ -234,7 +202,7 @@ workflow WGTS {
     }
 
     //
-    // MODULE: Run COBALT to obtain read ratios
+    // SUBWORKFLOW: Run COBALT to obtain read ratios
     //
     // channel: [val(meta), cobalt_dir]
     ch_cobalt_out = Channel.empty()
@@ -295,12 +263,12 @@ workflow WGTS {
     }
 
     //
-    // MODULE: Run GRIPSS to filter GRIDSS SV calls
+    // SUBWORKFLOW: Run GRIPSS to filter GRIDSS SV calls
     //
     // channel: [val(meta), vcf, tbi]
     ch_gripss_somatic_out = Channel.empty()
-    ch_gripss_somatic_unfiltered_out = Channel.empty()
     ch_gripss_germline_out = Channel.empty()
+    ch_gripss_somatic_unfiltered_out = Channel.empty()
     if (run.gripss) {
 
         GRIPSS_FILTERING(
@@ -318,8 +286,8 @@ workflow WGTS {
 
         ch_versions = ch_versions.mix(GRIPSS_FILTERING.out.versions)
         ch_gripss_somatic_out = ch_gripss_somatic_out.mix(GRIPSS_FILTERING.out.somatic)
-        ch_gripss_somatic_unfiltered_out = ch_gripss_somatic_unfiltered_out.mix(GRIPSS_FILTERING.out.somatic_unfiltered)
         ch_gripss_germline_out = ch_gripss_germline_out.mix(GRIPSS_FILTERING.out.germline)
+        ch_gripss_somatic_unfiltered_out = ch_gripss_somatic_unfiltered_out.mix(GRIPSS_FILTERING.out.somatic_unfiltered)
     }
 
     //
@@ -406,6 +374,7 @@ workflow WGTS {
             ch_pave_somatic_out,
             ch_pave_germline_out,
             ch_gripss_somatic_out,
+            ch_gripss_germline_out,
             ch_gripss_somatic_unfiltered_out,
             PREPARE_REFERENCE.out.genome_fasta,
             PREPARE_REFERENCE.out.genome_fai,
@@ -425,87 +394,75 @@ workflow WGTS {
     }
 
     //
-    // MODULE: Run Sigs to fit somatic smlv to signature definitions
+    // SUBWORKFLOW: Group structural variants into higher order events with LINX
     //
-    if (run.sigs) {
-        // Select input sources
-        // channel: [val(meta), purple_dir]
-        if (run.purple) {
-            ch_sigs_inputs_source = ch_purple_out
-        } else {
-            ch_sigs_inputs_source = WorkflowOncoanalyser.getInput(ch_inputs, Constants.INPUT.PURPLE_DIR)
-        }
+    // channel: [val(meta), linx_annotation_dir]
+    ch_linx_somatic_out = Channel.empty()
+    ch_linx_germline_out = Channel.empty()
+    // channel: [val(meta), linx_visualiser_dir]
+    ch_linx_somatic_plot_out = Channel.empty()
+    if (run.linx) {
 
-        // Create inputs and create process-specific meta
-        // channel: [val(meta_sigs), smlv_vcf]
-        ch_sigs_inputs = ch_sigs_inputs_source
-            .map { meta, purple_dir ->
-                def tumor_id = Utils.getTumorWgsSampleName(meta)
-                def smlv_vcf = file(purple_dir).resolve("${tumor_id}.purple.somatic.vcf.gz")
-
-                // Require smlv VCF from the PURPLE directory
-                if (!smlv_vcf.exists()) {
-                    return Constants.META_PLACEHOLDER
-                }
-
-                def meta_sigs = [
-                    id: meta.id,
-                    tumor_id: meta.getAt(['sample_name', Constants.SampleType.TUMOR]),
-                ]
-                return [meta_sigs, smlv_vcf]
-            }
-            .filter { it[0] != Constants.META_PLACEHOLDER }
-
-        SIGS(
-          ch_sigs_inputs,
-          hmf_data.sigs_signatures,
+        LINX_ANNOTATION(
+            ch_inputs,
+            ch_purple_out,
+            PREPARE_REFERENCE.out.genome_version,
+            hmf_data.ensembl_data_resources,
+            hmf_data.known_fusion_data,
+            hmf_data.driver_gene_panel,
+            linx_gene_id_file,
+            run,
         )
 
-        // Set outputs
-        ch_versions = ch_versions.mix(SIGS.out.versions)
+        ch_versions = ch_versions.mix(LINX_ANNOTATION.out.versions)
+        ch_linx_somatic_out = ch_linx_somatic_out.mix(LINX_ANNOTATION.out.somatic)
+        ch_linx_germline_out = ch_linx_germline_out.mix(LINX_ANNOTATION.out.germline)
+
+        LINX_PLOTTING(
+            ch_inputs,
+            ch_linx_somatic_out,
+            PREPARE_REFERENCE.out.genome_version,
+            hmf_data.ensembl_data_resources,
+        )
+
+        ch_versions = ch_versions.mix(LINX_PLOTTING.out.versions)
+        ch_linx_somatic_plot_out = ch_linx_somatic_plot_out.mix(LINX_PLOTTING.out.visualiser_dir)
     }
 
     //
-    // MODULE: Run CHORD to predict HR deficiency status
+    // SUBWORKFLOW: Run Sigs to fit somatic smlv to signature definitions
+    //
+    // channel: [val(meta), sigs_dir]
+    ch_sigs_out = Channel.empty()
+    if (run.sigs) {
+
+        SIGS_FITTING(
+            ch_inputs,
+            ch_purple_out,
+            hmf_data.sigs_signatures,
+            run,
+        )
+
+        ch_versions = ch_versions.mix(SIGS_FITTING.out.versions)
+        ch_sigs_out = ch_sigs_out.mix(SIGS_FITTING.out.sigs_dir)
+    }
+
+    //
+    // SUBWORKFLOW: Run CHORD to predict HR deficiency status
     //
     // channel: [val(meta), chord_prediction]
     ch_chord_out = Channel.empty()
     if (run.chord) {
-        // Select input sources
-        // channel: [val(meta), purple_dir]
-        if (run.purple) {
-          ch_chord_inputs_source = ch_purple_out
-        } else {
-          ch_chord_inputs_source = WorkflowOncoanalyser.getInput(ch_inputs, Constants.INPUT.PURPLE_DIR)
-        }
 
-        // Create inputs and create process-specific meta
-        // channel: [val(meta), smlv_vcf, sv_vcf]
-        ch_chord_inputs = ch_chord_inputs_source
-            .map { meta, purple_dir ->
-                def tumor_id = Utils.getTumorWgsSampleName(meta)
-                def smlv_vcf = file(purple_dir).resolve("${tumor_id}.purple.somatic.vcf.gz")
-                def sv_vcf = file(purple_dir).resolve("${tumor_id}.purple.sv.vcf.gz")
-
-                // Require both SV and smlv VCF from the PURPLE directory
-                if (!smlv_vcf.exists() || !sv_vcf.exists()) {
-                    return Constants.META_PLACEHOLDER
-                }
-
-                def meta_chord = [key: meta.id, id: meta.id]
-                return [meta_chord, smlv_vcf, sv_vcf]
-            }
-            .filter { it[0] != Constants.META_PLACEHOLDER }
-
-        // Run process
-        CHORD(
-          ch_chord_inputs,
-          PREPARE_REFERENCE.out.genome_version,
+        CHORD_PREDICTION(
+            ch_inputs,
+            ch_purple_out,
+            PREPARE_REFERENCE.out.genome_version,
+            run,
         )
 
-        // Set outputs, restoring original meta
-        ch_versions = ch_versions.mix(CHORD.out.versions)
-        ch_chord_out = ch_chord_out.mix(WorkflowOncoanalyser.restoreMeta(CHORD.out.prediction, ch_inputs))
+        ch_versions = ch_versions.mix(CHORD_PREDICTION.out.versions)
+        ch_chord_out = ch_chord_out.mix(CHORD_PREDICTION.out.prediction)
     }
 
     //
@@ -536,6 +493,7 @@ workflow WGTS {
     //
     // SUBWORKFLOW: Run VIRUSBreakend and Virus Interpreter to quantify viral content
     //
+    // channel: [val(meta), virusinterpreter]
     ch_virusinterpreter_out = Channel.empty()
     if (run.virusinterpreter) {
 
@@ -561,145 +519,10 @@ workflow WGTS {
     }
 
     //
-    // SUBWORKFLOW: Group structural variants into higher order events with LINX
-    //
-    // channel: [val(meta), linx_annotation_dir]
-    ch_linx_somatic_out = Channel.empty()
-    ch_linx_germline_out = Channel.empty()
-    // channel: [val(meta), linx_visualiser_dir]
-    ch_linx_somatic_plot_out = Channel.empty()
-    if (run.linx) {
-
-        LINX_ANNOTATION(
-            ch_inputs,
-            ch_gripss_germline_out,
-            ch_purple_out,
-            PREPARE_REFERENCE.out.genome_version,
-            hmf_data.linx_fragile_regions,
-            hmf_data.linx_lines,
-            hmf_data.ensembl_data_resources,
-            hmf_data.known_fusion_data,
-            hmf_data.driver_gene_panel,
-            linx_gene_id_file,
-            run,
-        )
-
-        ch_versions = ch_versions.mix(LINX_ANNOTATION.out.versions)
-        ch_linx_somatic_out = ch_linx_somatic_out.mix(LINX_ANNOTATION.out.somatic)
-        ch_linx_germline_out = ch_linx_germline_out.mix(LINX_ANNOTATION.out.germline)
-
-        LINX_PLOTTING(
-            ch_inputs,
-            ch_linx_somatic_out,
-            PREPARE_REFERENCE.out.genome_version,
-            hmf_data.ensembl_data_resources,
-        )
-
-        ch_versions = ch_versions.mix(LINX_PLOTTING.out.versions)
-        ch_linx_somatic_plot_out = ch_linx_somatic_plot_out.mix(LINX_PLOTTING.out.visualiser_dir)
-    }
-
-    //
-    // MODULE: Run PROTECT to match somatic genomic features with treatment evidence
-    //
-    // channel: [val(meta), protect]
-    ch_protect_out = Channel.empty()
-    if (run.protect) {
-        // Select input sources
-        // channel: [val(meta), chord_prediction, purple_dir, linx_dir, virusinterpreter]
-        ch_protect_inputs_source = WorkflowOncoanalyser.groupByMeta(
-            run.chord ? ch_chord_out : WorkflowOncoanalyser.getInput(ch_inputs, Constants.INPUT.CHORD_PREDICTION),
-            run.purple ? ch_purple_out : WorkflowOncoanalyser.getInput(ch_inputs, Constants.INPUT.PURPLE_DIR),
-            run.linx ? ch_linx_somatic_out : WorkflowOncoanalyser.getInput(ch_inputs, Constants.INPUT.LINX_ANNO_DIR_TUMOR),
-            run.lilac ? ch_lilac_out : WorkflowOncoanalyser.getInput(ch_inputs, Constants.INPUT.LILAC_DIR),
-            run.virusinterpreter ? ch_virusinterpreter_out : WorkflowOncoanalyser.getInput(ch_inputs, Constants.INPUT.VIRUSINTERPRETER_TSV),
-        )
-
-        // Create process-specific meta
-        // channel: [val(meta_protect), chord_prediction, purple_dir, linx_dir, virusinterpreter]
-        ch_protect_inputs = ch_protect_inputs_source
-            .map {
-                def meta = it[0]
-                def other = it[1..-1]
-                def meta_protect = [
-                    key: meta.id,
-                    id: meta.id,
-                    tumor_id: Utils.getTumorWgsSampleName(meta),
-                    normal_id: Utils.getNormalWgsSampleName(meta),
-              ]
-              return [meta_protect, *other]
-            }
-
-        // Run process
-        PROTECT(
-          ch_protect_inputs,
-          PREPARE_REFERENCE.out.genome_version,
-          hmf_data.serve_resources,
-          hmf_data.driver_gene_panel,
-          hmf_data.disease_ontology,
-        )
-
-        // Set outputs, restoring original meta
-        ch_versions = ch_versions.mix(PROTECT.out.versions)
-        ch_protect_out = ch_protect_out.mix(WorkflowOncoanalyser.restoreMeta(PROTECT.out.tsv, ch_inputs))
-    }
-
-    //
-    // MODULE: Run PEACH to match germline SNVs with pharmacogenetic evidence
-    //
-    // channel: [val(meta), peach_genotype]
-    ch_peach_out = Channel.empty()
-    if (run.peach) {
-        // Select input sources
-        // channel: [val(meta), purple_dir]
-        if (run.purple) {
-            ch_peach_inputs_source = ch_purple_out
-        } else {
-            ch_peach_inputs_source = WorkflowOncoanalyser.getInput(ch_inputs, Constants.INPUT.PURPLE_DIR)
-        }
-
-        // Create inputs and create process-specific meta
-        // channel: [meta_peach, purple_germline_vcf]
-        ch_peach_inputs = ch_peach_inputs_source
-            .map { meta, purple_dir ->
-                def meta_peach = [
-                    key: meta.id,
-                    id: meta.id,
-                    tumor_id: Utils.getTumorWgsSampleName(meta),
-                    normal_id: Utils.getNormalWgsSampleName(meta),
-                ]
-                def tumor_id = Utils.getTumorWgsSampleName(meta)
-                def purple_germline_vcf = file(purple_dir).resolve("${tumor_id}.purple.germline.vcf.gz")
-
-                if (!purple_germline_vcf.exists()) {
-                    return Constants.META_PLACEHOLDER
-                }
-
-                return [meta_peach, purple_germline_vcf]
-            }
-            .filter { it[0] != Constants.META_PLACEHOLDER }
-
-        // Run process
-        PEACH(
-            ch_peach_inputs,
-            PREPARE_REFERENCE.out.genome_version,
-            hmf_data.peach_panel,
-        )
-
-        // Set outputs, restoring original meta
-        ch_versions = ch_versions.mix(PEACH.out.versions)
-        ch_peach_out = ch_peach_out.mix(WorkflowOncoanalyser.restoreMeta(PEACH.out.genotype, ch_inputs))
-    }
-
-    //
     // SUBWORKFLOW: Run CUPPA predict tissue of origin
     //
-    // channel: [val(meta), cuppa_results]
+    // channel: [val(meta), cuppa_dir]
     ch_cuppa_out = Channel.empty()
-    // channel: [val(meta), cuppa_summary_plot]
-    ch_cuppa_summary_plot_out = Channel.empty()
-    // channel: [val(meta), cuppa_feature_plot]
-    ch_cuppa_feature_plot_out = Channel.empty()
     if (run.cuppa) {
 
         CUPPA_PREDICTION(
@@ -715,9 +538,7 @@ workflow WGTS {
         )
 
         ch_versions = ch_versions.mix(CUPPA_PREDICTION.out.versions)
-        ch_cuppa_out = ch_cuppa_out.mix(CUPPA_PREDICTION.out.csv)
-        ch_cuppa_summary_plot_out = ch_cuppa_summary_plot_out.mix(CUPPA_PREDICTION.out.summary_plot)
-        ch_cuppa_feature_plot_out = ch_cuppa_feature_plot_out.mix(CUPPA_PREDICTION.out.feature_plot)
+        ch_cuppa_out = ch_cuppa_out.mix(CUPPA_PREDICTION.out.cuppa_dir)
     }
 
     //
@@ -730,8 +551,6 @@ workflow WGTS {
             ch_inputs_wgs.present,
             ch_bamtools_somatic_out,
             ch_bamtools_germline_out,
-            ch_chord_out,
-            ch_lilac_out,
             ch_sage_somatic_tumor_bqr_out,
             ch_sage_somatic_normal_bqr_out,
             ch_sage_germline_coverage_out,
@@ -739,18 +558,21 @@ workflow WGTS {
             ch_linx_somatic_out,
             ch_linx_somatic_plot_out,
             ch_linx_germline_out,
-            ch_protect_out,
-            ch_peach_out,
-            ch_cuppa_out,
-            ch_cuppa_feature_plot_out,
-            ch_cuppa_summary_plot_out,
             ch_virusinterpreter_out,
+            ch_chord_out,
+            ch_sigs_out,
+            ch_lilac_out,
+            ch_cuppa_out,
+            ch_isofox_out,
             PREPARE_REFERENCE.out.genome_version,
             hmf_data.disease_ontology,
-            hmf_data.known_fusion_data,
-            hmf_data.driver_gene_panel,
             hmf_data.cohort_mapping,
             hmf_data.cohort_percentiles,
+            hmf_data.known_fusion_data,
+            hmf_data.driver_gene_panel,
+            hmf_data.ensembl_data_resources,
+            hmf_data.alt_sj_distribution,
+            hmf_data.gene_exp_distribution,
             run,
         )
 
@@ -760,7 +582,6 @@ workflow WGTS {
     //
     // MODULE: Pipeline reporting
     //
-    // Run process
     CUSTOM_DUMPSOFTWAREVERSIONS(
         ch_versions.unique().collectFile(name: 'collated_versions.yml')
     )

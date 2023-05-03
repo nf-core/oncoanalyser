@@ -1,19 +1,20 @@
-// NOTE(SW): reference files for Isfox aren't currently available (-isofox_gene_distribution_csv, -isofox_alt_sj_cohort_csv)
-
 process ORANGE {
     tag "${meta.id}"
     label 'process_single'
 
-    container 'docker.io/scwatts/orange:1.10.2--0'
+    container 'docker.io/scwatts/orange:2.3--0'
 
     input:
-    tuple val(meta), path(bam_metrics_somatic), path(bam_metrics_germline), path(flagstat_somatic), path(flagstat_germline), path(chord_prediction), path(lilac_dir), path(sage_somatic_bqr), path(sage_germline_bqr), path(sage_germline_coverage), path(purple_dir), path(linx_somatic_anno_dir), path(linx_somatic_plot_dir), path(linx_germline_anno_dir), path(protect), path(peach_genotype), path(cuppa), path(cuppa_summary_plot), path(cuppa_feature_plot), path(virusinterpreter)
+    tuple val(meta), path(bam_metrics_somatic), path(bam_metrics_germline), path(flagstat_somatic), path(flagstat_germline), path(sage_somatic_bqr), path(sage_germline_bqr), path(sage_germline_coverage), path(purple_dir), path(linx_somatic_anno_dir), path(linx_somatic_plot_dir), path(linx_germline_anno_dir), path(virusinterpreter), path(chord_prediction), path(sigs_tsv), path(lilac_dir), path(cuppa_dir), path(isofox_dir)
     val genome_ver
     path disease_ontology
-    path known_fusion_data
-    path driver_gene_panel
     path cohort_mapping
     path cohort_percentiles
+    path known_fusion_data
+    path driver_gene_panel
+    path ensembl_data_resources
+    path isofox_alt_sj
+    path isofox_gene_distribution
     val pipeline_version
 
     output:
@@ -28,70 +29,80 @@ process ORANGE {
     def args = task.ext.args ?: ''
     def pipeline_version_str = pipeline_version ?: 'not specified'
 
+    def virusinterpreter_arg = virusinterpreter ? "-annotated_virus_tsv ${virusinterpreter}" : ''
+    def chord_arg = chord_prediction ? "-chord_prediction_txt ${chord_prediction}" : ''
+    def sigs_arg = sigs_tsv ? "-sigs_allocation_tsv ${sigs_tsv}" : ''
+    def cuppa_csv_arg = cuppa_dir ? "-cuppa_result_csv ${cuppa_dir}/${meta.tumor_wgs_id}.cup.data.csv" : ''
+    def cuppa_feature_arg = cuppa_dir ? "-cuppa_feature_plot ${cuppa_dir}/${meta.tumor_wgs_id}.cup.report.features.png" : ''
+    def cuppa_summary_arg = cuppa_dir ? "-cuppa_summary_plot ${cuppa_dir}/${meta.tumor_wgs_id}.cup.report.summary.png" : ''
+
+    def normal_id_arg = meta.containsKey('normal_wgs_id') ? "-reference_sample_id ${meta.normal_wgs_id}" : ''
+    def normal_metrics_arg = bam_metrics_germline ? "-ref_sample_wgs_metrics_file ${bam_metrics_germline}" : ''
+    def normal_flagstat_arg = flagstat_germline ? "-ref_sample_flagstat_file ${flagstat_germline}" : ''
+    def normal_sage_somatic_bqr_arg = sage_somatic_normal_bqr ? "-sage_somatic_ref_sample_bqr_plot ${sage_somatic_normal_bqr}" : ''
+    def normal_sage_coverage_arg = sage_germline_coverage ? "-sage_germline_gene_coverage_tsv ${sage_germline_coverage}" : ''
+    def normal_linx_arg = linx_germline_anno_dir ? "-linx_germline_data_directory ${linx_germline_anno_dir}" : ''
+
+    def rna_id_arg = meta.containsKey('tumor_wts_id') ? "-reference_sample_id ${meta.tumor_wts_id}" : ''
+    def isofox_summary_csv_arg = isofox_dir ? "-isofox_summary_csv ${isofox_dir}/${meta.tumor_wts_id}.isf.summary.csv" : ''
+    def isofox_gene_csv_arg = isofox_dir ? "-isofox_summary_csv ${isofox_dir}/${meta.tumor_wts_id}.isf.gene_data.csv" : ''
+    def isofox_fusion_csv_arg = isofox_dir ? "-isofox_gene_data_csv ${isofox_dir}/${meta.tumor_wts_id}.isf.fusions.csv" : ''
+    def isofox_alt_sj_csv_arg = isofox_dir ? "-isofox_fusion_csv ${isofox_dir}/${meta.tumor_wts_id}.isf.alt_splice_junc.csv" : ''
+
+    def isofox_gene_distribution_arg = isofox_gene_distribution ? "-isofox_gene_distribution_csv ${isofox_gene_distribution}" : ''
+    def isofox_alt_sj_arg = isofox_alt_sj ? "-isofox_alt_sj_cohort_csv ${isofox_alt_sj}" : ''
+
     """
     echo "${pipeline_version_str}" > pipeline_version.txt
 
-    # NOTE(SW): '--add-opens java.base/java.time=ALL-UNNAMED' resolves issue writing JSON, see:
-    # https://stackoverflow.com/questions/70412805/what-does-this-error-mean-java-lang-reflect-inaccessibleobjectexception-unable/70878195#70878195
-
     java \\
-        --add-opens java.base/java.time=ALL-UNNAMED \\
         -Xmx${Math.round(task.memory.bytes * 0.95)} \\
         -jar ${task.ext.jarPath} \\
             \\
-            -tumor_sample_id ${meta.tumor_id} \\
-            -reference_sample_id ${meta.normal_id} \\
-            \\
+            -experiment_date \$(date +%y%m%d) \\
             -pipeline_version_file pipeline_version.txt \\
-            -ref_genome_version ${genome_ver} \\
+            -add_disclaimer \\
+            \\
+            -tumor_sample_id ${meta.tumor_wgs_id} \\
             -primary_tumor_doids "" \\
-            -max_evidence_level C \\
-            \\
             -tumor_sample_wgs_metrics_file ${bam_metrics_somatic} \\
-            -ref_sample_wgs_metrics_file ${bam_metrics_germline} \\
             -tumor_sample_flagstat_file ${flagstat_somatic} \\
-            -ref_sample_flagstat_file ${flagstat_germline} \\
-            \\
-            -chord_prediction_txt ${chord_prediction} \\
-            -lilac_result_csv ${lilac_dir}/${meta.tumor_id}.lilac.csv \\
-            -lilac_qc_csv ${lilac_dir}/${meta.tumor_id}.lilac.qc.csv \\
-            \\
-            -sage_somatic_tumor_sample_bqr_plot ${sage_somatic_bqr} \\
-            -sage_somatic_ref_sample_bqr_plot ${sage_germline_bqr} \\
-            -sage_germline_gene_coverage_tsv ${sage_germline_coverage} \\
-            \\
-            -purple_qc_file ${purple_dir}/${meta.tumor_id}.purple.qc \\
-            -purple_purity_tsv ${purple_dir}/${meta.tumor_id}.purple.purity.tsv \\
-            -purple_gene_copy_number_tsv ${purple_dir}/${meta.tumor_id}.purple.cnv.gene.tsv \\
-            -purple_somatic_copy_number_tsv ${purple_dir}/${meta.tumor_id}.purple.cnv.somatic.tsv \\
-            -purple_somatic_driver_catalog_tsv ${purple_dir}/${meta.tumor_id}.driver.catalog.somatic.tsv \\
-            -purple_somatic_variant_vcf ${purple_dir}/${meta.tumor_id}.purple.somatic.vcf.gz \\
-            -purple_germline_driver_catalog_tsv ${purple_dir}/${meta.tumor_id}.driver.catalog.germline.tsv \\
-            -purple_germline_deletion_tsv ${purple_dir}/${meta.tumor_id}.purple.germline.deletion.tsv \\
-            -purple_germline_variant_vcf ${purple_dir}/${meta.tumor_id}.purple.germline.vcf.gz \\
+            -sage_somatic_tumor_sample_bqr_plot ${sage_somatic_tumor_bqr} \\
+            -purple_data_directory ${purple_dir} \\
             -purple_plot_directory ${purple_dir}/plot/ \\
-            \\
-            -linx_breakend_tsv ${linx_somatic_anno_dir}/${meta.tumor_id}.linx.breakend.tsv \\
-            -linx_structural_variant_tsv ${linx_somatic_anno_dir}/${meta.tumor_id}.linx.svs.tsv \\
-            -linx_driver_tsv ${linx_somatic_anno_dir}/${meta.tumor_id}.linx.drivers.tsv \\
-            -linx_driver_catalog_tsv ${linx_somatic_anno_dir}/${meta.tumor_id}.linx.driver.catalog.tsv \\
-            -linx_fusion_tsv ${linx_somatic_anno_dir}/${meta.tumor_id}.linx.fusion.tsv \\
-            -linx_germline_disruption_tsv ${linx_germline_anno_dir}/${meta.normal_id}.linx.germline.disruption.tsv \\
+            -linx_somatic_data_directory ${linx_somatic_anno_dir} \\
             -linx_plot_directory ${linx_somatic_plot_dir} \\
+            -lilac_result_csv ${lilac_dir}/${meta.tumor_wgs_id}.lilac.csv \\
+            -lilac_qc_csv ${lilac_dir}/${meta.tumor_wgs_id}.lilac.qc.csv \\
+            ${virusinterpreter_arg} \\
+            ${chord_arg} \\
+            ${sigs_tsv} \\
+            ${cuppa_csv_arg} \\
+            ${cuppa_feature_arg} \\
+            ${cuppa_summary_arg} \\
             \\
-            -cuppa_result_csv ${cuppa} \\
-            -cuppa_feature_plot ${cuppa_feature_plot} \\
-            -cuppa_summary_plot ${cuppa_summary_plot} \\
+            ${normal_id_arg} \\
+            ${normal_metrics_arg} \\
+            ${normal_flagstat_arg} \\
+            ${normal_sage_somatic_bqr_arg} \\
+            ${normal_sage_coverage_arg} \\
+            ${normal_linx_arg} \\
             \\
-            -peach_genotype_tsv ${peach_genotype} \\
-            -protect_evidence_tsv ${protect} \\
-            -annotated_virus_tsv ${virusinterpreter} \\
+            ${rna_id_arg} \\
+            ${isofox_summary_csv_arg} \\
+            ${isofox_gene_csv_arg} \\
+            ${isofox_fusion_csv_arg} \\
+            ${isofox_alt_sj_csv_arg} \\
             \\
+            -ref_genome_version ${genome_ver} \\
             -doid_json ${disease_ontology} \\
-            -known_fusion_file ${known_fusion_data} \\
-            -driver_gene_panel_tsv ${driver_gene_panel} \\
             -cohort_mapping_tsv ${cohort_mapping} \\
             -cohort_percentiles_tsv ${cohort_percentiles} \\
+            -known_fusion_file ${known_fusion_data} \\
+            -driver_gene_panel_tsv ${driver_gene_panel} \\
+            -ensembl_data_directory ${ensembl_data_resources} \\
+            ${isofox_gene_distribution_arg} \\
+            ${isofox_alt_sj_arg} \\
             -output_dir ./
 
     cat <<-END_VERSIONS > versions.yml
@@ -102,8 +113,8 @@ process ORANGE {
 
     stub:
     """
-    touch "${meta.tumor_id}.orange.json"
-    touch "${meta.tumor_id}.orange.pdf"
+    touch "${meta.tumor_wgs_id}.orange.json"
+    touch "${meta.tumor_wgs_id}.orange.pdf"
     echo -e '${task.process}:\\n  stub: noversions\\n' > versions.yml
     """
 }

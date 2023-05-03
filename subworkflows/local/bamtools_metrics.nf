@@ -107,7 +107,6 @@ workflow BAMTOOLS_METRICS {
                 germline: sample_type == Constants.SampleType.NORMAL
                     return [meta, metrics]
             }
-        ch_versions = ch_versions.mix(BAMTOOLS.out.versions)
 
     emit:
         somatic  = ch_outputs.somatic  // channel: [val(meta), metrics]

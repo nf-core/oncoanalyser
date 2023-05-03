@@ -4,11 +4,19 @@ ARG GH_BASE_URL='https://github.com/hartwigmedical/hmftools'
 USER root
 
 RUN \
-  mkdir -p /opt/svprep/ && \
-  wget -O /opt/svprep/svprep.jar 'https://github.com/hartwigmedical/hmftools/releases/download/sv-prep-v1.1/sv-prep_v1.1.jar'
+  apt-get update && \
+  apt-get install -y patch && \
+  apt-get clean && \
+  rm -rf /var/lib/apt/lists/*
 
-COPY assets/gridss.svprep /opt/svprep/gridss_svprep
 RUN \
+  mkdir -p /opt/svprep/ && \
+  wget -O /opt/svprep/svprep.jar 'https://github.com/hartwigmedical/hmftools/releases/download/sv-prep-v1.1/sv-prep_v1.1.jar' && \
+  wget -O /opt/svprep/gridss_svprep 'https://raw.githubusercontent.com/hartwigmedical/hmftools/sv-prep-v1.1/sv-prep/src/main/resources/gridss/gridss.run.sh'
+
+COPY assets/gridss_svprep.patch /tmp/
+RUN \
+  patch -lp1 -d /opt/svprep/ /tmp/gridss_svprep.patch && \
   chmod 755 /opt/svprep/gridss_svprep && \
   ln -s /opt/svprep/gridss_svprep /usr/local/bin/
 

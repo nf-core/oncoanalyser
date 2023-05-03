@@ -24,13 +24,14 @@ process BAMTOOLS {
         -Xmx${Math.round(task.memory.bytes * 0.95)} \\
         -cp ${task.ext.jarPath} \\
         com.hartwig.hmftools.bamtools.metrics.BamMetrics \\
-        -sample ${meta.id} \\
-        -bam_file ${bam} \\
-        -ref_genome ${genome_fasta} \\
-        -ref_genome_version ${genome_ver} \\
-        -threads ${task.cpus} \\
-        -write_old_style \\
-        -output_dir ./
+            -sample ${meta.id} \\
+            -bam_file ${bam} \\
+            -ref_genome ${genome_fasta} \\
+            -ref_genome_version ${genome_ver} \\
+            -threads ${task.cpus} \\
+            -write_old_style \\
+            -log_level INFO \\
+            -output_dir ./
 
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":

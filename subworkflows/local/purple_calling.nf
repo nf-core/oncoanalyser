@@ -13,7 +13,8 @@ workflow PURPLE_CALLING {
         ch_smlv_somatic
         ch_smlv_germline
         ch_sv_somatic
-        ch_sv_somatic_recovery
+        ch_sv_germline
+        ch_sv_somatic_unfiltered
 
         // Reference data
         ref_data_genome_fasta
@@ -35,28 +36,37 @@ workflow PURPLE_CALLING {
         ch_versions = Channel.empty()
 
         // Select input sources
-        // channel: [val(meta), sv_vcf, sv_tbi, sv_recovery_vcf, sv_recovery_tbi]
+        // channel: [val(meta), sv_tumor_vcf, sv_tumor_tbi, sv_tumor_unfiltered_vcf, sv_tumor_unfiltered_tbi]
         ch_purple_inputs_sv = Channel.empty()
         if (run.gripss) {
             // NOTE(SW): GRIPSS will be run for all WGS entries, so no optionals here
             ch_purple_inputs_sv = WorkflowOncoanalyser.groupByMeta(
                 ch_sv_somatic,
-                ch_sv_somatic_recovery,
+                ch_sv_somatic_unfiltered,
+                ch_sv_germline,
             )
         } else {
             ch_purple_inputs_sv = WorkflowOncoanalyser.groupByMeta(
                 WorkflowOncoanalyser.getInput(ch_inputs, Constants.INPUT.GRIPSS_VCF_TUMOR, type: 'optional'),
                 WorkflowOncoanalyser.getInput(ch_inputs, Constants.INPUT.GRIPSS_UNFILTERED_VCF_TUMOR, type: 'optional'),
+                WorkflowOncoanalyser.getInput(ch_inputs, Constants.INPUT.GRIPSS_VCF_NORMAL, type: 'optional'),
                 flatten_mode: 'nonrecursive',
             )
-              .map { meta, vcf, vcf_unfiltered->
-                  def tbi            = vcf == []            ? [] : "${vcf}.tbi"
-                  def tbi_unfiltered = vcf_unfiltered == [] ? [] : "${vcf_unfiltered}.tbi"
-                  return [meta, vcf, tbi, vcf_unfiltered, tbi_unfiltered]
+              .map {
+
+                  def meta = it[0]
+                  def vcfs = it[1..-1]
+
+                  def files = vcfs.collectMany { vcf ->
+                      def tbi = vcf == [] ? [] : "${vcf}.tbi"
+                      return [vcf, tbi]
+                  }
+
+                  return [meta, *files]
               }
         }
 
-        // channel: [val(meta), amber_dir, cobalt_dir, sv_vcf, sv_tbi, sv_recovery_vcf, sv_recovery_tbi, smlv_tumor_vcf, smlv_normal_vcf]
+        // channel: [val(meta), amber_dir, cobalt_dir, sv_tumor_vcf, sv_tumor_tbi, sv_tumor_unfiltered_vcf, sv_tumor_unfiltered_tbi, smlv_tumor_vcf, smlv_normal_vcf]
         ch_purple_inputs_source = WorkflowOncoanalyser.groupByMeta(
             // Required inputs
             run.amber ? ch_amber: WorkflowOncoanalyser.getInput(ch_inputs, Constants.INPUT.AMBER_DIR),
@@ -69,18 +79,17 @@ workflow PURPLE_CALLING {
         )
 
         // Create process-specific meta
-        // channel: [val(meta_purple), amber_dir, cobalt_dir, sv_vcf, sv_tbi, sv_recovery_vcf, sv_recovery_tbi, smlv_tumor_vcf, smlv_normal_vcf]
+        // channel: [val(meta_purple), amber_dir, cobalt_dir, sv_tumor_vcf, sv_tumor_tbi, sv_tumor_unfiltered_vcf, sv_tumor_unfiltered_tbi, smlv_tumor_vcf, smlv_normal_vcf]
         ch_purple_inputs = ch_purple_inputs_source
             .map {
                 def meta = it[0]
-                def other = it[1..-1]
                 def meta_purple = [
                     key: meta.id,
                     id: meta.id,
                     tumor_id: Utils.getTumorWgsSampleName(meta),
                     normal_id: Utils.getNormalWgsSampleName(meta),
               ]
-              return [meta_purple, *other]
+              return [meta_purple, *it[1..-1]]
             }
 
         PURPLE(
