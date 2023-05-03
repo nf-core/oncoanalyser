@@ -2,7 +2,7 @@ process SVPREP {
     tag "${meta.id}"
     label 'process_medium'
 
-    container 'docker.io/scwatts/svprep:1.1--0'
+    container 'docker.io/scwatts/svprep:1.1--1'
 
     input:
     tuple val(meta), path(bam), path(bai), path(junctions)
@@ -23,7 +23,7 @@ process SVPREP {
     script:
     def args = task.ext.args ?: ''
     def write_types_arg = write_types ? "-write_types \'${write_types}\'" : ''
-    def existing_juction_file_arg = junctions ? "-existing_junction_file ${junctions}" : ""
+    def existing_juction_file_arg = junctions ? "-existing_junction_file ${junctions}" : ''
 
     """
     java \\
@@ -41,7 +41,12 @@ process SVPREP {
             -threads ${task.cpus} \\
             -output_dir ./
 
-    samtools sort -O bam "${meta.id}.sv_prep.bam" -o "${meta.id}.sv_prep.sorted.bam"
+    samtools sort \\
+        -@ ${task.cpus} \\
+        -m ${min(Math.round(task.memory.mega * 0.95), 4096)}K \\
+        -T ${meta.id}.sv_prep.tmp \\
+        -o ${meta.id}.sv_prep.sorted.bam \\
+        ${meta.id}.sv_prep.bam
 
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":

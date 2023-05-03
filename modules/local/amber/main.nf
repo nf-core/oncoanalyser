@@ -29,9 +29,9 @@ process AMBER {
             -reference ${meta.normal_id} \\
             -reference_bam ${normal_bam} \\
             -ref_genome_version ${ref_genome_ver} \\
-            -output_dir amber/ \\
+            -loci ${loci} \\
             -threads ${task.cpus} \\
-            -loci ${loci}
+            -output_dir amber/
 
     # NOTE(SW): hard coded since there is no reliable way to obtain version information.
     cat <<-END_VERSIONS > versions.yml

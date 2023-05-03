@@ -2,7 +2,7 @@ process LINX_VISUALISER {
     tag "${meta.id}"
     label 'process_medium'
 
-    container 'docker.io/scwatts/linx:1.22--0'
+    container 'docker.io/scwatts/linx:1.23.2--0'
 
     input:
     tuple val(meta), path(linx)
@@ -26,13 +26,13 @@ process LINX_VISUALISER {
         com.hartwig.hmftools.linx.visualiser.SvVisualiser \\
             ${args} \\
             -sample ${meta.id} \\
+            -vis_file_dir ${linx} \\
             -ref_genome_version ${genome_ver} \\
             -ensembl_data_dir ${ensembl_data_resources} \\
-            -plot_out linx_visualiser/plot \\
-            -data_out linx_visualiser/data \\
-            -vis_file_dir ${linx} \\
             -circos ${task.ext.path_circos} \\
-            -threads ${task.cpus}
+            -threads ${task.cpus} \\
+            -plot_out linx_visualiser/plot \\
+            -data_out linx_visualiser/data
 
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":

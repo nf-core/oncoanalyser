@@ -33,8 +33,8 @@ class Processes {
             case Constants.PipelineMode.CUPPA:
                 processes = [
                     Constants.Process.AMBER,
+                    Constants.Process.BAMTOOLS,
                     Constants.Process.COBALT,
-                    Constants.Process.COLLECTWGSMETRICS,
                     Constants.Process.CUPPA,
                     Constants.Process.GRIDSS,
                     Constants.Process.GRIPSS,

@@ -3,8 +3,7 @@
 //
 import Constants
 
-include { CUPPA_CLASSIFIER as CLASSIFIER } from '../../modules/local/cuppa/classifier/main'
-include { CUPPA_VISUALISER as VISUALISER } from '../../modules/local/cuppa/visualiser/main'
+include { CUPPA } from '../../modules/local/cuppa/main'
 
 workflow CUPPA_PREDICTION {
     take:
@@ -75,29 +74,17 @@ workflow CUPPA_PREDICTION {
                 return [meta_cuppa, *data[1..-1]]
             }
 
-        CLASSIFIER(
+        CUPPA(
             ch_cuppa_inputs,
             ref_data_genome_version,
             ref_data_cuppa_resources,
         )
 
-        VISUALISER(
-            CLASSIFIER.out.csv,
-        )
-
         // Set outputs, restoring original meta
-        ch_csv = WorkflowOncoanalyser.restoreMeta(CLASSIFIER.out.csv, ch_inputs)
-        ch_summary_plot = WorkflowOncoanalyser.restoreMeta(VISUALISER.out.summary_plot, ch_inputs)
-        ch_feature_plot = WorkflowOncoanalyser.restoreMeta(VISUALISER.out.feature_plot, ch_inputs)
-        ch_versions = ch_versions.mix(
-            VISUALISER.out.versions,
-            CLASSIFIER.out.versions,
-        )
+        ch_output = WorkflowOncoanalyser.restoreMeta(CUPPA.out.cuppa_dir, ch_inputs)
 
     emit:
-        csv = ch_csv
-        summary_plot = ch_summary_plot
-        feature_plot = ch_feature_plot
+        cuppa_dir = ch_output
 
-        versions  = ch_versions // channel: [versions.yml]
+        versions  = CUPPA.out.versions  // channel: [versions.yml]
 }

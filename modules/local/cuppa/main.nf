@@ -1,8 +1,8 @@
-process CUPPA_CLASSIFIER {
+process CUPPA {
     tag "${meta.id}"
     label 'process_low'
 
-    container 'docker.io/scwatts/cuppa:1.8--1'
+    container 'docker.io/scwatts/cuppa:1.8--2'
 
     input:
     tuple val(meta), path(isofox_dir), path(purple_dir), path(linx_dir), path(virusinterpreter)
@@ -10,8 +10,8 @@ process CUPPA_CLASSIFIER {
     path cuppa_resources
 
     output:
-    tuple val(meta), path('*csv'), emit: csv
-    path 'versions.yml'          , emit: versions
+    tuple val(meta), path('cuppa/'), emit: cuppa_dir
+    path 'versions.yml'            , emit: versions
 
     when:
     task.ext.when == null || task.ext.when
@@ -58,12 +58,18 @@ process CUPPA_CLASSIFIER {
     java \\
         -Xmx${Math.round(task.memory.bytes * 0.95)} \\
         -jar ${task.ext.jarPath} \\
-            -categories ${categories_val} \\
-            -ref_data_dir ${cuppa_resources} \\
             -sample_data ${meta.id} \\
             -sample_data_dir sample_data/ \\
+            -categories ${categories_val} \\
+            -ref_data_dir ${cuppa_resources} \\
             -ref_genome_version ${ref_genome_ver} \\
-            -output_dir ./
+            -create_pdf \\
+            -output_dir ./cuppa/
+
+    python ${task.ext.chartScriptPath} \\
+        -sample ${meta.id} \\
+        -sample_data cuppa/${meta.id}.cup.data.csv \\
+        -output_dir ./cuppa/
 
     # NOTE(SW): hard coded since there is no reliable way to obtain version information.
     cat <<-END_VERSIONS > versions.yml
@@ -75,6 +81,11 @@ process CUPPA_CLASSIFIER {
     stub:
     """
     touch ${meta.id}.cup.data.csv
+    touch ${meta.id}.cuppa.conclusion.txt
+    touch ${meta.id}_cup_report.pdf
+    touch ${meta.id}.cup.report.summary.png
+    touch ${meta.id}.cup.report.features.png
+    touch ${meta.id}.cuppa.chart.png
     echo -e '${task.process}:\\n  stub: noversions\\n' > versions.yml
     """
 }

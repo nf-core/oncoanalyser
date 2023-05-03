@@ -2,7 +2,7 @@ process SVPREP_DEPTH_ANNOTATOR {
     tag "${meta.id}"
     label 'process_medium'
 
-    container 'docker.io/scwatts/svprep:1.1--0'
+    container 'docker.io/scwatts/svprep:1.1--1'
 
     input:
     tuple val(meta), path(bams), path(bais), path(vcf), val(labels)
@@ -29,12 +29,12 @@ process SVPREP_DEPTH_ANNOTATOR {
         -cp ${task.ext.jarPath} com.hartwig.hmftools.svprep.depth.DepthAnnotator \\
             ${args} \\
             -input_vcf ${vcf} \\
-            -output_vcf sv.svprep.gridss.depths.vcf.gz \\
             -samples ${labels_arg} \\
             -bam_files ${bams_arg} \\
             -ref_genome ${genome_fasta} \\
             -ref_genome_version ${genome_ver} \\
-            -threads ${task.cpus}
+            -threads ${task.cpus} \\
+            -output_vcf sv.svprep.gridss.depths.vcf.gz
 
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":

@@ -2,10 +2,10 @@ process PURPLE {
     tag "${meta.id}"
     label 'process_low'
 
-    container 'docker.io/scwatts/purple:3.7.1--0'
+    container 'docker.io/scwatts/purple:3.8.2--0'
 
     input:
-    tuple val(meta), path(amber), path(cobalt), path(sv_vcf), path(sv_vcf_index), path(sv_unfiltered_vcf), path(sv_unfiltered_vcf_index), path(smlv_tumor_vcf), path(smlv_normal_vcf)
+    tuple val(meta), path(amber), path(cobalt), path(sv_tumor_vcf), path(sv_tumor_tbi), path(sv_tumor_unfiltered_vcf), path(sv_tumor_unfiltered_tbi), path(sv_normal_vcf), path(sv_normal_tbi), path(smlv_tumor_vcf), path(smlv_normal_vcf)
     path genome_fasta
     path genome_fai
     path genome_dict
@@ -27,8 +27,10 @@ process PURPLE {
     script:
     def args = task.ext.args ?: ''
 
-    def sv_vcf_arg = sv_vcf ? "-structural_vcf ${sv_vcf}" : ''
-    def sv_lowconf_vcf_fp = sv_unfiltered_vcf ? "-sv_recovery_vcf ${sv_unfiltered_vcf}" : ''
+    def sv_tumor_vcf_arg = sv_tumor_vcf ? "-somatic_sv_vcf ${sv_tumor_vcf}" : ''
+    def sv_normal_vcf_arg = sv_normal_vcf ? "-germline_sv_vcf ${sv_normal_vcf}" : ''
+
+    def sv_tumor_recovery_vcf_arg = sv_tumor_unfiltered_vcf ? "-sv_recovery_vcf ${sv_tumor_unfiltered_vcf}" : ''
 
     def smlv_tumor_vcf_fp = smlv_tumor_vcf ?: ''
     def smlv_normal_vcf_fp = smlv_normal_vcf ?: ''
@@ -42,13 +44,13 @@ process PURPLE {
         fp=\${1}
         fn=\${fp##*/}
         if [[ "\${fp}" != '' ]]; then
-            fp_out="prepared__\${2}__\${fn}"
-            bcftools filter -Oz -e 'FORMAT/AD[*]="."' "\${fp}" > \${fp_out}
+            fp_out=prepared__\${2}__\${fn}
+            bcftools view -e 'FORMAT/AD[*]="."' -o \${fp_out} \${fp}
             echo "-\${2} \${fp_out}"
         fi
     }
-    smlv_tumor_vcf_arg=\$(get_smlv_arg "${smlv_tumor_vcf_fp}" somatic_vcf)
-    smlv_normal_vcf_arg=\$(get_smlv_arg "${smlv_normal_vcf_fp}" germline_vcf)
+    smlv_tumor_vcf_arg=\$(get_smlv_arg ${smlv_tumor_vcf_fp} somatic_vcf)
+    smlv_normal_vcf_arg=\$(get_smlv_arg ${smlv_normal_vcf_fp} germline_vcf)
 
     # Run PURPLE
     java \\
@@ -57,29 +59,24 @@ process PURPLE {
             ${args} \\
             -tumor ${meta.tumor_id} \\
             -reference ${meta.normal_id} \\
-            ${sv_vcf_arg} \\
-            ${sv_lowconf_vcf_fp} \\
-            \${smlv_tumor_vcf_arg} \\
-            \${smlv_normal_vcf_arg} \\
             -amber ${amber} \\
             -cobalt ${cobalt} \\
-            -output_dir purple/ \\
-            -gc_profile ${gc_profile} \\
-            -run_drivers \\
+            ${sv_tumor_vcf} \\
+            ${sv_normal_vcf} \\
+            ${sv_tumor_recovery_vcf_arg} \\
+            \${smlv_tumor_vcf_arg} \\
+            \${smlv_normal_vcf_arg} \\
+            -ref_genome ${genome_fasta} \\
+            -ref_genome_version ${genome_ver} \\
             -driver_gene_panel ${driver_gene_panel} \\
             -ensembl_data_dir ${ensembl_data_resources} \\
             -somatic_hotspots ${sage_known_hotspots_somatic} \\
             -germline_hotspots ${sage_known_hotspots_germline} \\
             ${germline_del_arg} \\
-            -ref_genome ${genome_fasta} \\
-            -ref_genome_version ${genome_ver} \\
+            -gc_profile ${gc_profile} \\
+            -circos ${task.ext.circosPath} \\
             -threads ${task.cpus} \\
-            -circos ${task.ext.circosPath}
-
-    # PURPLE can fail silently, check that at least the PURPLE SV VCF is created
-    if [[ ! -s "purple/${meta.tumor_id}.purple.sv.vcf.gz" ]]; then
-        exit 1;
-    fi
+            -output_dir purple/
 
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":
@@ -95,9 +92,11 @@ process PURPLE {
     touch purple/${meta.tumor_id}.purple.driver.catalog.germline.tsv
     touch purple/${meta.tumor_id}.purple.driver.catalog.somatic.tsv
     touch purple/${meta.tumor_id}.purple.germline.vcf.gz
+    touch purple/${meta.tumor_id}.purple.germline.vcf.gz
     touch purple/${meta.tumor_id}.purple.purity.tsv
     touch purple/${meta.tumor_id}.purple.qc
     touch purple/${meta.tumor_id}.purple.somatic.vcf.gz
+    touch purple/${meta.tumor_id}.purple.sv.germline.vcf.gz
     touch purple/${meta.tumor_id}.purple.sv.vcf.gz
     echo -e '${task.process}:\\n  stub: noversions\\n' > versions.yml
     """

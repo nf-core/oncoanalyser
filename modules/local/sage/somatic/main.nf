@@ -1,11 +1,10 @@
-// NOTE(SW): logic that determines BQR outputs assumes '-out' is a path that includes at least
-// leading one directory
+// NOTE(SW): logic that determines BQR outputs assumes '-out' is a path that includes at least leading one directory
 
 process SAGE_SOMATIC {
     tag "${meta.id}"
     label 'process_medium'
 
-    container 'docker.io/scwatts/sage:3.2.3--0'
+    container 'docker.io/scwatts/sage:3.2.5--0'
 
     input:
     tuple val(meta), path(tumor_bam), path(normal_bam), path(tumor_bai), path(normal_bai)
@@ -23,7 +22,7 @@ process SAGE_SOMATIC {
     tuple val(meta), path('*.sage.somatic.filtered.vcf.gz'), path('*.sage.somatic.filtered.vcf.gz.tbi'), emit: vcf_filtered
     tuple val(meta), path("${meta.tumor_id}.sage.bqr.png")                                             , emit: tumor_bqr_png, optional: true
     tuple val(meta), path("${meta.normal_id}.sage.bqr.png")                                            , emit: normal_bqr_png, optional: true
-    path '*gene.coverage.tsv'                                                                          , emit: gene_coverage, optional: true
+    tuple val(meta), path('*gene.coverage.tsv')                                                        , emit: gene_coverage, optional: true
     path '*sage.bqr.tsv'                                                                               , emit: bqr_tsv, optional: true
     path 'versions.yml'                                                                                , emit: versions
 
@@ -42,8 +41,8 @@ process SAGE_SOMATIC {
             -reference_bam ${normal_bam} \\
             -tumor ${meta.tumor_id} \\
             -tumor_bam ${tumor_bam} \\
-            -ref_genome_version ${genome_ver} \\
             -ref_genome ${genome_fasta} \\
+            -ref_genome_version ${genome_ver} \\
             -hotspots ${sage_known_hotspots_somatic} \\
             -panel_bed ${sage_actionable_panel} \\
             -coverage_bed ${sage_actionable_panel} \\
@@ -71,8 +70,11 @@ process SAGE_SOMATIC {
     touch "${meta.tumor_id}.sage.somatic.vcf.gz.tbi"
     touch "${meta.tumor_id}.sage.somatic.filtered.vcf.gz"
     touch "${meta.tumor_id}.sage.somatic.filtered.vcf.gz.tbi"
+    touch "${meta.tumor_id}.gene.coverage.tsv"
     touch "${meta.tumor_id}.sage.bqr.png"
+    touch "${meta.tumor_id}.sage.bqr.tsv"
     touch "${meta.normal_id}.sage.bqr.png"
+    touch "${meta.normal_id}.sage.bqr.tsv"
     echo -e '${task.process}:\\n  stub: noversions\\n' > versions.yml
     """
 }

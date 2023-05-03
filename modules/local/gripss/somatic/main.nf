@@ -2,7 +2,7 @@ process GRIPSS_SOMATIC {
     tag "${meta.id}"
     label 'process_low'
 
-    container 'docker.io/scwatts/gripss:2.3.2--0'
+    container 'docker.io/scwatts/gripss:2.3.5--0'
 
     input:
     tuple val(meta), path(gridss_vcf)
@@ -15,9 +15,9 @@ process GRIPSS_SOMATIC {
     path repeatmasker_annotations
 
     output:
-    tuple val(meta), path('*.gripss.filtered.somatic.vcf.gz'), path('*.gripss.filtered.somatic.vcf.gz.tbi'), emit: vcf
-    tuple val(meta), path('*.gripss.somatic.vcf.gz'), path('*.gripss.somatic.vcf.gz.tbi')                  , emit: vcf_unfiltered
-    path 'versions.yml'                                                                                    , emit: versions
+    tuple val(meta), path('*.filtered.somatic.vcf.gz'), path('*.filtered.somatic.vcf.gz.tbi'), emit: vcf
+    tuple val(meta), path('*.gripss.somatic.vcf.gz'), path('*.gripss.somatic.vcf.gz.tbi')    , emit: vcf_unfiltered
+    path 'versions.yml'                                                                      , emit: versions
 
     when:
     task.ext.when == null || task.ext.when
@@ -32,31 +32,25 @@ process GRIPSS_SOMATIC {
             ${args} \\
             -sample ${meta.tumor_id} \\
             -reference ${meta.normal_id} \\
-            -ref_genome_version ${genome_ver} \\
+            -vcf ${gridss_vcf} \\
             -ref_genome ${genome_fasta} \\
+            -ref_genome_version ${genome_ver} \\
             -pon_sgl_file ${pon_breakends} \\
             -pon_sv_file ${pon_breakpoints} \\
             -known_hotspot_file ${known_fusions} \\
             -repeat_mask_file ${repeatmasker_annotations} \\
-            -vcf ${gridss_vcf} \\
             -output_id somatic \\
             -output_dir ./
 
-    # NOTE(SW): hard coded since there is no reliable way to obtain version information
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":
-        gripss: 2.3.2
+        gripss: \$(java -jar ${task.ext.jarPath} | sed -n '1s/^.*version: //p')
     END_VERSIONS
     """
 
     stub:
     """
-    cat <<EOF > ${meta.tumor_id}.gripss.filtered.somatic.vcf.gz
-    ##fileformat=VCFv4.1
-    ##contig=<ID=.>
-    #CHROM	POS	ID	REF	ALT	QUAL	FILTER	INFO
-    .	.	.	.	.	.	.
-    EOF
+    touch ${meta.tumor_id}.gripss.filtered.somatic.vcf.gz
     touch ${meta.tumor_id}.gripss.filtered.somatic.vcf.gz.tbi
     touch ${meta.tumor_id}.gripss.somatic.vcf.gz
     touch ${meta.tumor_id}.gripss.somatic.vcf.gz.tbi

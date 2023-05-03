@@ -16,20 +16,15 @@ input:
       description: |
         Groovy Map containing sample information
         e.g. [id: 'sample_id']
-  - gridss_sv:
-      type: file
-      description: GRIPSS hard filtered VCF file
-      pattern: "*.{vcf.gz}"
+  - purple_dir:
+      type: directory
+      description: PURPLE output directory
   - genome_ver:
       type: string
       description: Reference genome version
   - fragile_regions:
       type: file
       description: LINX fragile regions file
-      pattern: "*.{csv}"
-  - lines:
-      type: file
-      description: LINEs file
       pattern: "*.{csv}"
   - ensembl_data_resources:
       type: directory

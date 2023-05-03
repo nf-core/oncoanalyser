@@ -1,12 +1,12 @@
-// NOTE(SW): use of tumor sample name here is consistent with pipeline5
-//  - cluster/src/main/java/com/hartwig/pipeline/tertiary/pave/PaveGermline.java#L35-L39
-//  - cluster/src/main/java/com/hartwig/pipeline/tertiary/pave/PaveArguments.java#L34-L44
+// NOTE(SW): use of tumor sample name here is consistent with Pipeline5
+//  - https://github.com/hartwigmedical/pipeline5/blob/v5.32/cluster/src/main/java/com/hartwig/pipeline/tertiary/pave/PaveGermline.java#L35-L39
+//  - https://github.com/hartwigmedical/pipeline5/blob/v5.32/cluster/src/main/java/com/hartwig/pipeline/tertiary/pave/PaveArguments.java#L34-L44
 
 process PAVE_GERMLINE {
     tag "${meta.id}"
     label 'process_medium'
 
-    container 'docker.io/scwatts/pave:1.4--0'
+    container 'docker.io/scwatts/pave:1.4.3--0'
 
     input:
     tuple val(meta), path(sage_vcf)
@@ -37,22 +37,21 @@ process PAVE_GERMLINE {
         -jar ${task.ext.jarPath} \\
             ${args} \\
             -sample ${meta.id} \\
-            -ref_genome_version ${genome_ver} \\
+            -vcf_file ${sage_vcf} \\
             -ref_genome ${genome_fasta} \\
-            -ensembl_data_dir ${ensembl_data_resources} \\
-            -driver_gene_panel ${driver_gene_panel} \\
+            -ref_genome_version ${genome_ver} \\
             -clinvar_vcf ${clinvar_annotations} \\
+            -driver_gene_panel ${driver_gene_panel} \\
+            -mappability_bed ${segment_mappability} \\
+            -ensembl_data_dir ${ensembl_data_resources} \\
             -blacklist_bed ${sage_blocklist_regions} \\
             -blacklist_vcf ${sage_blocklist_sites} \\
-            -mappability_bed ${segment_mappability} \\
-            -vcf_file ${sage_vcf} \\
             -read_pass_only \\
             -output_dir ./
 
-    # NOTE(SW): hard coded since there is no reliable way to obtain version information.
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":
-        pave: 1.4
+        pave: \$(java -jar ${task.ext.jarPath} 2>&1 | sed -n 's/^.*version: //p')
     END_VERSIONS
     """
 

@@ -1,5 +1,5 @@
-name: cuppa_visualiser
-description: Visualise tissue of origin predictions
+name: cuppa_classifier
+description: Predict tumor sample tissue of origin
 keywords:
   - cup
   - tumor
@@ -16,16 +16,32 @@ input:
       description: |
         Groovy Map containing sample information
         e.g. [id: 'sample_id']
-  - csv:
+  - isofox_dir:
+      type: directory
+      description: Isofox output directory (optional)
+  - purple_dir:
+      type: directory
+      description: PURPLE output directory (optional)
+  - linx_dir:
+      type: directory
+      description: LINX output directory (optional)
+  - virusinterpreter:
       type: file
-      description: CUPPA classification output file
-      pattern: "*.{csv}"
+      description: Virus Interpreter annotations file (optional)
+      pattern: "*.{tsv}"
+  - cuppa_resources:
+      type: directory
+      description: CUPPA resource directory
 output:
   - meta:
       type: map
       description: |
         Groovy Map containing sample information
         e.g. [id: 'sample_id']
+  - csv:
+      type: file
+      description: Classification file
+      pattern: "*.{csv}"
   - conclusion:
       type: file
       description: Conclusion file
