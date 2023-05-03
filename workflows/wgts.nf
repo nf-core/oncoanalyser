@@ -105,41 +105,18 @@ workflow WGTS {
     // channel: [versions.yml]
     ch_versions = Channel.empty()
 
-    // Get inputs from samplesheet
+    // Get inputs from samplesheet, assign more human readable variable
     // channel: [val(meta)]
     PREPARE_INPUT(
         samplesheet,
     )
     ch_inputs = PREPARE_INPUT.out.data
 
-    // Split inputs WTS and WGS
-    // NOTE(SW): assuming there are only t/n pairs i.e. no tumor-only or normal-only
-
-    // channel (present): [val(meta)]
-    // channel (absent): [val(meta)]
-    ch_inputs_wgs = ch_inputs
-        .branch { meta ->
-            def key_tumor = [Constants.FileType.BAM, Constants.SampleType.TUMOR, Constants.SequenceType.WGS]
-            def key_normal = [Constants.FileType.BAM, Constants.SampleType.NORMAL, Constants.SequenceType.WGS]
-            present: meta.containsKey(key_tumor) && meta.containsKey(key_normal)
-                return meta
-            absent: true
-                return meta
-        }
-
-    // channel (present): [val(meta)]
-    // channel (absent): [val(meta)]
-    ch_inputs_wts = ch_inputs
-        .branch { meta ->
-            def key = [Constants.FileType.BAM, Constants.SampleType.TUMOR, Constants.SequenceType.WTS]
-            present: meta.containsKey(key)
-                return meta
-            absent: ! meta.containsKey(key)
-                return meta
-        }
-
-    // Set up reference data and unpack HMF data map for convenience
-    PREPARE_REFERENCE(run)
+    // Set up reference data, assign more human readable variables
+    PREPARE_REFERENCE(
+        run,
+    )
+    ref_data = PREPARE_REFERENCE.out
     hmf_data = PREPARE_REFERENCE.out.hmf_data
 
     //
@@ -150,10 +127,10 @@ workflow WGTS {
     if (run.isofox) {
 
         ISOFOX_QUANTIFICATION(
-            ch_inputs_wts.present,
-            PREPARE_REFERENCE.out.genome_fasta,
-            PREPARE_REFERENCE.out.genome_fai,
-            PREPARE_REFERENCE.out.genome_version,
+            ch_inputs,
+            ref_data.genome_fasta,
+            ref_data.genome_fai,
+            ref_data.genome_version,
             hmf_data.ensembl_data_resources,
             hmf_data.isofox_counts,
             hmf_data.isofox_gc_ratios,
@@ -173,9 +150,9 @@ workflow WGTS {
     if (run.bamtools) {
 
         BAMTOOLS_METRICS(
-            ch_inputs_wgs.present,
-            PREPARE_REFERENCE.out.genome_fasta,
-            PREPARE_REFERENCE.out.genome_version,
+            ch_inputs,
+            ref_data.genome_fasta,
+            ref_data.genome_version,
             run,
         )
 
@@ -192,8 +169,8 @@ workflow WGTS {
     if (run.amber) {
 
         AMBER_PROFILING(
-            ch_inputs_wgs.present,
-            PREPARE_REFERENCE.out.genome_version,
+            ch_inputs,
+            ref_data.genome_version,
             hmf_data.heterozygous_sites,
         )
 
@@ -209,7 +186,7 @@ workflow WGTS {
     if (run.cobalt) {
 
         COBALT_PROFILING(
-            ch_inputs_wgs.present,
+            ch_inputs,
             hmf_data.gc_profile,
         )
 
@@ -226,15 +203,15 @@ workflow WGTS {
         if (run.svprep) {
 
             GRIDSS_SVPREP_CALLING(
-                ch_inputs_wgs.present,
+                ch_inputs,
                 gridss_config,
-                PREPARE_REFERENCE.out.genome_fasta,
-                PREPARE_REFERENCE.out.genome_version,
-                PREPARE_REFERENCE.out.genome_fai,
-                PREPARE_REFERENCE.out.genome_dict,
-                PREPARE_REFERENCE.out.genome_bwa_index,
-                PREPARE_REFERENCE.out.genome_bwa_index_image,
-                PREPARE_REFERENCE.out.genome_gridss_index,
+                ref_data.genome_fasta,
+                ref_data.genome_version,
+                ref_data.genome_fai,
+                ref_data.genome_dict,
+                ref_data.genome_bwa_index,
+                ref_data.genome_bwa_index_image,
+                ref_data.genome_gridss_index,
                 hmf_data.gridss_region_blocklist,
                 hmf_data.sv_prep_blocklist,
                 hmf_data.known_fusions,
@@ -246,14 +223,14 @@ workflow WGTS {
         } else {
 
             GRIDSS_CALLING(
-                ch_inputs_wgs.present,
+                ch_inputs,
                 gridss_config,
-                PREPARE_REFERENCE.out.genome_fasta,
-                PREPARE_REFERENCE.out.genome_fai,
-                PREPARE_REFERENCE.out.genome_dict,
-                PREPARE_REFERENCE.out.genome_bwa_index,
-                PREPARE_REFERENCE.out.genome_bwa_index_image,
-                PREPARE_REFERENCE.out.genome_gridss_index,
+                ref_data.genome_fasta,
+                ref_data.genome_fai,
+                ref_data.genome_dict,
+                ref_data.genome_bwa_index,
+                ref_data.genome_bwa_index_image,
+                ref_data.genome_gridss_index,
                 hmf_data.gridss_region_blocklist,
             )
 
@@ -274,9 +251,9 @@ workflow WGTS {
         GRIPSS_FILTERING(
             ch_inputs,
             ch_gridss_out,
-            PREPARE_REFERENCE.out.genome_fasta,
-            PREPARE_REFERENCE.out.genome_fai,
-            PREPARE_REFERENCE.out.genome_version,
+            ref_data.genome_fasta,
+            ref_data.genome_fai,
+            ref_data.genome_version,
             hmf_data.gridss_pon_breakends,
             hmf_data.gridss_pon_breakpoints,
             hmf_data.known_fusions,
@@ -304,11 +281,11 @@ workflow WGTS {
     if (run.sage) {
 
         SAGE_CALLING(
-            ch_inputs_wgs.present,
-            PREPARE_REFERENCE.out.genome_fasta,
-            PREPARE_REFERENCE.out.genome_fai,
-            PREPARE_REFERENCE.out.genome_dict,
-            PREPARE_REFERENCE.out.genome_version,
+            ch_inputs,
+            ref_data.genome_fasta,
+            ref_data.genome_fai,
+            ref_data.genome_dict,
+            ref_data.genome_version,
             hmf_data.sage_known_hotspots_germline,
             hmf_data.sage_known_hotspots_somatic,
             hmf_data.sage_actionable_panel,
@@ -341,9 +318,9 @@ workflow WGTS {
             ch_inputs,
             ch_sage_germline_vcf_out,
             ch_sage_somatic_vcf_out,
-            PREPARE_REFERENCE.out.genome_fasta,
-            PREPARE_REFERENCE.out.genome_fai,
-            PREPARE_REFERENCE.out.genome_version,
+            ref_data.genome_fasta,
+            ref_data.genome_fai,
+            ref_data.genome_version,
             hmf_data.sage_pon,
             hmf_data.sage_blocklist_regions,
             hmf_data.sage_blocklist_sites,
@@ -376,10 +353,10 @@ workflow WGTS {
             ch_gripss_somatic_out,
             ch_gripss_germline_out,
             ch_gripss_somatic_unfiltered_out,
-            PREPARE_REFERENCE.out.genome_fasta,
-            PREPARE_REFERENCE.out.genome_fai,
-            PREPARE_REFERENCE.out.genome_dict,
-            PREPARE_REFERENCE.out.genome_version,
+            ref_data.genome_fasta,
+            ref_data.genome_fai,
+            ref_data.genome_dict,
+            ref_data.genome_version,
             hmf_data.gc_profile,
             hmf_data.sage_known_hotspots_somatic,
             hmf_data.sage_known_hotspots_germline,
@@ -406,7 +383,7 @@ workflow WGTS {
         LINX_ANNOTATION(
             ch_inputs,
             ch_purple_out,
-            PREPARE_REFERENCE.out.genome_version,
+            ref_data.genome_version,
             hmf_data.ensembl_data_resources,
             hmf_data.known_fusion_data,
             hmf_data.driver_gene_panel,
@@ -421,7 +398,7 @@ workflow WGTS {
         LINX_PLOTTING(
             ch_inputs,
             ch_linx_somatic_out,
-            PREPARE_REFERENCE.out.genome_version,
+            ref_data.genome_version,
             hmf_data.ensembl_data_resources,
         )
 
@@ -457,7 +434,7 @@ workflow WGTS {
         CHORD_PREDICTION(
             ch_inputs,
             ch_purple_out,
-            PREPARE_REFERENCE.out.genome_version,
+            ref_data.genome_version,
             run,
         )
 
@@ -472,16 +449,11 @@ workflow WGTS {
     ch_lilac_out = Channel.empty()
     if (run.lilac) {
 
-        // TODO(SW): improve interface here
         LILAC_CALLING(
             ch_inputs,
-            ch_inputs_wgs.present,
-            ch_inputs_wgs.absent,
-            ch_inputs_wts.present,
-            ch_inputs_wts.absent,
             ch_purple_out,
-            PREPARE_REFERENCE.out.genome_fasta,
-            PREPARE_REFERENCE.out.genome_fai,
+            ref_data.genome_fasta,
+            ref_data.genome_fai,
             hmf_data.lilac_resources,
             run,
         )
@@ -498,16 +470,16 @@ workflow WGTS {
     if (run.virusinterpreter) {
 
         VIRUSBREAKEND_CALLING(
-            ch_inputs_wgs.present,
+            ch_inputs,
             ch_purple_out,
             ch_bamtools_somatic_out,
-            PREPARE_REFERENCE.out.genome_fasta,
-            PREPARE_REFERENCE.out.genome_fai,
-            PREPARE_REFERENCE.out.genome_dict,
-            PREPARE_REFERENCE.out.genome_bwa_index,
-            PREPARE_REFERENCE.out.genome_bwa_index_image,
-            PREPARE_REFERENCE.out.genome_gridss_index,
-            PREPARE_REFERENCE.out.virusbreakenddb,
+            ref_data.genome_fasta,
+            ref_data.genome_fai,
+            ref_data.genome_dict,
+            ref_data.genome_bwa_index,
+            ref_data.genome_bwa_index_image,
+            ref_data.genome_gridss_index,
+            ref_data.virusbreakenddb,
             hmf_data.virus_taxonomy_db,
             hmf_data.virus_reporting_db,
             run,
@@ -527,12 +499,11 @@ workflow WGTS {
 
         CUPPA_PREDICTION(
             ch_inputs,
-            ch_inputs_wts.absent,
             ch_isofox_out,
             ch_purple_out,
             ch_linx_somatic_out,
             ch_virusinterpreter_out,
-            PREPARE_REFERENCE.out.genome_version,
+            ref_data.genome_version,
             hmf_data.cuppa_resources,
             run,
         )
@@ -548,7 +519,6 @@ workflow WGTS {
 
         ORANGE_REPORTING(
             ch_inputs,
-            ch_inputs_wgs.present,
             ch_bamtools_somatic_out,
             ch_bamtools_germline_out,
             ch_sage_somatic_tumor_bqr_out,
@@ -564,7 +534,7 @@ workflow WGTS {
             ch_lilac_out,
             ch_cuppa_out,
             ch_isofox_out,
-            PREPARE_REFERENCE.out.genome_version,
+            ref_data.genome_version,
             hmf_data.disease_ontology,
             hmf_data.cohort_mapping,
             hmf_data.cohort_percentiles,

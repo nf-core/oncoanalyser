@@ -6,13 +6,13 @@ import Utils
 
 include { ORANGE } from '../../modules/local/orange/main'
 
-include { FLAGSTAT_METRICS } from './flagstat_metrics'
+include { CHANNEL_GROUP_INPUTS } from './channel_group_inputs'
+include { FLAGSTAT_METRICS     } from './flagstat_metrics'
 
 workflow ORANGE_REPORTING {
     take:
         // Sample data
         ch_inputs
-        ch_inputs_wgs
         ch_bamtools_somatic
         ch_bamtools_germline
         ch_sage_somatic_tumor_bqr
@@ -47,6 +47,11 @@ workflow ORANGE_REPORTING {
         // Channel for version.yml files
         ch_versions = Channel.empty()
 
+        // Get input meta groups
+        CHANNEL_GROUP_INPUTS(
+            ch_inputs,
+        )
+
         //
         // SUBWORKFLOW: Run SAMtools flagstat to generate stats required for ORANGE
         //
@@ -56,7 +61,7 @@ workflow ORANGE_REPORTING {
         if (run.flagstat) {
 
             FLAGSTAT_METRICS(
-                ch_inputs_wgs,
+                CHANNEL_GROUP_INPUTS.out.wgs_present,
             )
 
             ch_versions = ch_versions.mix(FLAGSTAT_METRICS.out.versions)

@@ -6,6 +6,8 @@ import Utils
 
 include { BAMTOOLS } from '../../modules/local/bamtools/main'
 
+include { CHANNEL_GROUP_INPUTS } from './channel_group_inputs'
+
 workflow BAMTOOLS_METRICS {
     take:
         // Sample data
@@ -22,12 +24,17 @@ workflow BAMTOOLS_METRICS {
         // Channel for version.yml files
         ch_versions = Channel.empty()
 
+        // Get input meta groups
+        CHANNEL_GROUP_INPUTS(
+            ch_inputs,
+        )
+
         // Select input sources
         // NOTE(SW): CUPPA only requires metrics for the tumor sample in the upstream
         // process Virus Interpreter but ORANGE currently requires metrics for both tumor
         // and normal sample
         // channel: [val(meta_bamtools), bam, bai]
-        ch_bamtools_inputs_all = ch_inputs
+        ch_bamtools_inputs_all = CHANNEL_GROUP_INPUTS.out.wgs_present
             .flatMap { meta ->
                 def sample_types
                 if (run.orange) {

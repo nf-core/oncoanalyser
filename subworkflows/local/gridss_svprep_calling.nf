@@ -11,6 +11,8 @@ include { GRIDSS_PREPROCESS as PREPROCESS           } from '../../modules/local/
 include { SVPREP as SVPREP_NORMAL                   } from '../../modules/local/svprep/svprep/main'
 include { SVPREP as SVPREP_TUMOR                    } from '../../modules/local/svprep/svprep/main'
 
+include { CHANNEL_GROUP_INPUTS } from './channel_group_inputs'
+
 workflow GRIDSS_SVPREP_CALLING {
     take:
         ch_inputs                       // channel: [val(meta)]
@@ -30,9 +32,14 @@ workflow GRIDSS_SVPREP_CALLING {
         // Channel for version.yml files
         ch_versions = Channel.empty()
 
+        // Get input meta groups
+        CHANNEL_GROUP_INPUTS(
+            ch_inputs,
+        )
+
         // Prepare tumor sample inputs
         // channel: [val(meta_svprep), bam_tumor, bai_tumor, []]
-        ch_svprep_tumor_inputs = ch_inputs
+        ch_svprep_tumor_inputs = CHANNEL_GROUP_INPUTS.out.wgs_present
             .map { meta ->
                 def meta_svprep = [
                     key: meta.id,
@@ -185,7 +192,7 @@ workflow GRIDSS_SVPREP_CALLING {
         // Prepare inputs for depth annotation, restore original meta
         // channel: [val(meta_svprep), [bams], [bais], vcf, [labels]]
         ch_depth_inputs = WorkflowOncoanalyser.groupByMeta(
-            ch_inputs.map { meta -> [meta.id, meta] },
+            CHANNEL_GROUP_INPUTS.out.wgs_present.map { meta -> [meta.id, meta] },
             CALL.out.vcf.map { meta, vcf -> [meta.id, vcf] },
         )
             .map { id, meta, vcf ->
@@ -211,7 +218,7 @@ workflow GRIDSS_SVPREP_CALLING {
         // Reunite final VCF with the corresponding input meta object
         ch_out = Channel.empty()
             .concat(
-                ch_inputs.map { meta -> [meta.id, meta] },
+                CHANNEL_GROUP_INPUTS.out.wgs_present.map { meta -> [meta.id, meta] },
                 DEPTH_ANNOTATOR.out.vcf.map { meta, vcf -> [meta.id, vcf] },
             )
             .groupTuple(size: 2)

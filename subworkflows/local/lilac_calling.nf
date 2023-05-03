@@ -9,14 +9,12 @@ include { CUSTOM_REALIGNREADS    } from '../../modules/local/custom/lilac_realig
 include { CUSTOM_SLICE           } from '../../modules/local/custom/lilac_slice/main'
 include { LILAC                  } from '../../modules/local/lilac/main'
 
+include { CHANNEL_GROUP_INPUTS } from './channel_group_inputs'
+
 workflow LILAC_CALLING {
     take:
         // Sample data
         ch_inputs
-        ch_inputs_wgs_present
-        ch_inputs_wgs_absent
-        ch_inputs_wts_present
-        ch_inputs_wts_absent
         ch_purple
 
         // Reference data
@@ -31,13 +29,18 @@ workflow LILAC_CALLING {
         // Channel for version.yml files
         ch_versions = Channel.empty()
 
+        // Get input meta groups
+        CHANNEL_GROUP_INPUTS(
+            ch_inputs,
+        )
+
         // Select input sources
         // channel: [val(meta), purple_dir]
         if (run.purple) {
             ch_lilac_inputs_purple = Channel.empty()
                 .mix(
                     ch_purple,
-                    ch_inputs_wgs_absent.map { meta -> [meta, []] },
+                    CHANNEL_GROUP_INPUTS.out.wgs_absent.map { meta -> [meta, []] },
                 )
         } else {
             ch_lilac_inputs_purple = WorkflowOncoanalyser.getInput(ch_inputs, Constants.INPUT.PURPLE_DIR, type: 'optional')
@@ -48,21 +51,21 @@ workflow LILAC_CALLING {
         // channel: [val(meta), wts_bam, wts_bai]
         ch_lilac_bams_wts = Channel.empty()
             .mix(
-                ch_inputs_wts_present.map { meta ->
+                CHANNEL_GROUP_INPUTS.out.wts_present.map { meta ->
                     def bam = Utils.getTumorWtsBam(meta)
                     return [meta, bam, "${bam}.bai"]
                 },
-                ch_inputs_wts_absent.map { meta -> [meta, [], []] },
+                CHANNEL_GROUP_INPUTS.out.wts_absent.map { meta -> [meta, [], []] },
             )
 
         ch_lilac_bams_wgs = Channel.empty()
             .mix(
-                ch_inputs_wgs_present.map { meta ->
+                CHANNEL_GROUP_INPUTS.out.wgs_present.map { meta ->
                     def tumor_bam = Utils.getTumorWgsBam(meta)
                     def normal_bam = Utils.getNormalWgsBam(meta)
                     [meta, tumor_bam, normal_bam, "${tumor_bam}.bai", "${normal_bam}.bai"]
                 },
-                ch_inputs_wgs_absent.map { meta -> [meta, [], [], [], []] },
+                CHANNEL_GROUP_INPUTS.out.wgs_absent.map { meta -> [meta, [], [], [], []] },
             )
 
         // Combine WGS and WTS BAMs

@@ -7,6 +7,8 @@ import Utils
 include { VIRUSBREAKEND    } from '../../modules/local/virusbreakend/main'
 include { VIRUSINTERPRETER } from '../../modules/local/virusinterpreter/main'
 
+include { CHANNEL_GROUP_INPUTS } from './channel_group_inputs'
+
 workflow VIRUSBREAKEND_CALLING {
     take:
         // Sample data
@@ -33,10 +35,15 @@ workflow VIRUSBREAKEND_CALLING {
         // Channel for version.yml files
         ch_versions = Channel.empty()
 
+        // Get input meta groups
+        CHANNEL_GROUP_INPUTS(
+            ch_inputs,
+        )
+
         // VIRUSBreakend
         // Create inputs and create process-specific meta
         // channel: [val(meta_virus), tumor_bam]
-        ch_virusbreakend_inputs = ch_inputs
+        ch_virusbreakend_inputs = CHANNEL_GROUP_INPUTS.out.wgs_present
             .map { meta ->
                 def meta_virus = [
                     key: meta.id,

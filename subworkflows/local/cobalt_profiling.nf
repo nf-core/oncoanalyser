@@ -5,6 +5,8 @@ import Utils
 
 include { COBALT } from '../../modules/local/cobalt/main'
 
+include { CHANNEL_GROUP_INPUTS } from './channel_group_inputs'
+
 workflow COBALT_PROFILING {
     take:
         // Sample data
@@ -17,9 +19,14 @@ workflow COBALT_PROFILING {
         // Channel for version.yml files
         ch_versions = Channel.empty()
 
+        // Get input meta groups
+        CHANNEL_GROUP_INPUTS(
+            ch_inputs,
+        )
+
         // Select input sources
         // channel: [meta_cobalt, tumor_bam_wgs, normal_bam_wgs, tumor_bai_wgs, normal_bai_wgs]
-        ch_cobalt_inputs = ch_inputs
+        ch_cobalt_inputs = CHANNEL_GROUP_INPUTS.out.wgs_present
             .map { meta ->
                 def meta_cobalt = [
                     key: meta.id,

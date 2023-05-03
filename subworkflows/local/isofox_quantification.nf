@@ -5,6 +5,8 @@ import Utils
 
 include { ISOFOX } from '../../modules/local/isofox/main'
 
+include { CHANNEL_GROUP_INPUTS } from './channel_group_inputs'
+
 workflow ISOFOX_QUANTIFICATION {
     take:
         // Sample data
@@ -26,9 +28,14 @@ workflow ISOFOX_QUANTIFICATION {
         // Channel for version.yml files
         ch_versions = Channel.empty()
 
+        // Get input meta groups
+        CHANNEL_GROUP_INPUTS(
+            ch_inputs,
+        )
+
         // Create inputs and create process-specific meta
         // channel: [meta_isofox, tumor_bam_wts]
-        ch_isofox_inputs = ch_inputs
+        ch_isofox_inputs = CHANNEL_GROUP_INPUTS.out.wts_present
             .map { meta ->
                 def bam = Utils.getTumorWtsBam(meta)
                 def meta_isofox = [key: meta.id, id: Utils.getTumorWtsSampleName(meta)]
