@@ -5,6 +5,8 @@
 include { SAGE_GERMLINE as GERMLINE } from '../../modules/local/sage/germline/main'
 include { SAGE_SOMATIC as SOMATIC   } from '../../modules/local/sage/somatic/main'
 
+include { CHANNEL_GROUP_INPUTS } from './channel_group_inputs'
+
 workflow SAGE_CALLING {
     take:
         ch_inputs                             // channel: [val(meta)]
@@ -26,8 +28,13 @@ workflow SAGE_CALLING {
         // Channel for version.yml files
         ch_versions = Channel.empty()
 
+        // Get input meta groups
+        CHANNEL_GROUP_INPUTS(
+            ch_inputs,
+        )
+
         // Get inputs
-        ch_sage_inputs = ch_inputs
+        ch_sage_inputs = CHANNEL_GROUP_INPUTS.out.wgs_present
             .map { meta ->
                 def meta_sage = [
                     key: meta.id,

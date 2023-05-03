@@ -5,11 +5,12 @@ import Constants
 
 include { CUPPA } from '../../modules/local/cuppa/main'
 
+include { CHANNEL_GROUP_INPUTS } from './channel_group_inputs'
+
 workflow CUPPA_PREDICTION {
     take:
         // Sample data
         ch_inputs
-        ch_inputs_wts_absent
         ch_isofox
         ch_purple
         ch_linx
@@ -26,6 +27,11 @@ workflow CUPPA_PREDICTION {
         // Channel for version.yml files
         ch_versions = Channel.empty()
 
+        // Get input meta groups
+        CHANNEL_GROUP_INPUTS(
+            ch_inputs,
+        )
+
         // Select input sources
         // channel: [val(meta), isofox_dir]
         ch_cuppa_inputs_isofox = Channel.empty()
@@ -34,7 +40,7 @@ workflow CUPPA_PREDICTION {
             ch_cuppa_inputs_isofox = ch_cuppa_inputs_isofox
                 .mix(
                     ch_isofox,
-                    ch_inputs_wts_absent.map { meta -> [meta, []] },
+                    CHANNEL_GROUP_INPUTS.out.wts_absent.map { meta -> [meta, []] },
                 )
         } else {
             ch_cuppa_inputs_isofox = WorkflowOncoanalyser.getInput(ch_inputs, Constants.INPUT.ISOFOX, type: 'optional')

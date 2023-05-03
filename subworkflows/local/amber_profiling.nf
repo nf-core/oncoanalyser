@@ -5,6 +5,8 @@ import Utils
 
 include { AMBER } from '../../modules/local/amber/main'
 
+include { CHANNEL_GROUP_INPUTS } from './channel_group_inputs'
+
 workflow AMBER_PROFILING {
     take:
         // Sample data
@@ -18,9 +20,14 @@ workflow AMBER_PROFILING {
         // Channel for version.yml files
         ch_versions = Channel.empty()
 
+        // Get input meta groups
+        CHANNEL_GROUP_INPUTS(
+            ch_inputs,
+        )
+
         // Select input sources
         // channel: [val(meta_amber), tumor_bam_wgs, normal_bam_wgs, tumor_bai_wgs, normal_bai_wgs]
-        ch_amber_inputs = ch_inputs
+        ch_amber_inputs = CHANNEL_GROUP_INPUTS.out.wgs_present
             .map { meta ->
                 def meta_amber = [
                     key: meta.id,

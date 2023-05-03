@@ -8,6 +8,8 @@ include { GRIDSS_ASSEMBLE as ASSEMBLE     } from '../../modules/local/gridss/ass
 include { GRIDSS_CALL as CALL             } from '../../modules/local/gridss/call/main'
 include { GRIDSS_PREPROCESS as PREPROCESS }  from '../../modules/local/gridss/preprocess/main'
 
+include { CHANNEL_GROUP_INPUTS } from './channel_group_inputs'
+
 workflow GRIDSS_CALLING {
     take:
         ch_inputs                       // channel: [val(meta)]
@@ -24,7 +26,13 @@ workflow GRIDSS_CALLING {
         // Channel for version.yml files
         ch_versions = Channel.empty()
 
-        ch_inputs_bam_bai = ch_inputs
+        // Get input meta groups
+        CHANNEL_GROUP_INPUTS(
+            ch_inputs,
+        )
+
+        // Gather BAMs and BAIs
+        ch_inputs_bam_bai = CHANNEL_GROUP_INPUTS.out.wgs_present
             .map { meta ->
                 def tumor_bam = Utils.getTumorWgsBam(meta)
                 def normal_bam = Utils.getNormalWgsBam(meta)
