@@ -9,9 +9,9 @@ import Utils
 
 class WorkflowLilac {
 
-    public static getSliceInputs(ch, ch_slice_bed) {
+    public static getSliceInputs(ch) {
         // channel: [val(meta_lilac), bam, bai]
-        def d = ch
+        return ch
             .flatMap { meta, nbam_wgs, nbai_wgs, tbam_wgs, tbai_wgs, tbam_wts, tbai_wts ->
                 def data = [
                     [nbam_wgs, nbai_wgs, Constants.SequenceType.WGS, Constants.SampleType.NORMAL],
@@ -33,12 +33,10 @@ class WorkflowLilac {
                         return [meta_lilac, bam, bai]
                     }
             }
-        // channel: [val(meta_lilac), bam, bai, bed]
-        return d.combine(ch_slice_bed)
     }
 
     public static getUniqueInputFiles(ch) {
-        // channel: [val(meta_lilac), bam, bai, bed]
+        // channel: [val(meta_lilac), bam, bai]
         def d = ch
             .map { [it[1..-1], it[0]] }
             .groupTuple()

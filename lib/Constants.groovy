@@ -14,6 +14,8 @@ class Constants {
 
     static String VIRUSBREAKENDDB_PATH = 'https://pub-29f2e5b2b7384811bdbbcba44f8b5083.r2.dev/virusbreakend/virusbreakenddb_20210401.tar.gz'
 
+    static String HLA_SLICE_BED_GRCH38_ALT_PATH = 'https://pub-29f2e5b2b7384811bdbbcba44f8b5083.r2.dev/umccr_reference_data/other/hla_slice/grch38_alt.plus_homologous.bed'
+
     static enum PipelineMode {
         FULL,
         MANUAL,
