@@ -52,6 +52,11 @@
                     "description": "Pipeline mode to use.",
                     "fa_icon": "fas fa-diagram-project"
                 },
+                "force_genome": {
+                    "type": "boolean",
+                    "description": "Skip check for restricted genome.",
+                    "fa_icon": "fas fa-palette"
+                },
                 "processes_exclude": {
                     "type": "string",
                     "description": "Pipeline processes to exclude.",
@@ -94,9 +99,18 @@
             "properties": {
                 "genome": {
                     "type": "string",
-                    "description": "Name of iGenomes reference.",
+                    "description": "Name of genome reference.",
+                    "fa_icon": "fas fa-book"
+                },
+                "genome_version": {
+                    "description": "Reference genome version.",
                     "fa_icon": "fas fa-book",
-                    "help_text": "If using a reference genome configured in the pipeline using iGenomes, use this parameter to give the ID for the reference. This is then used to build the full paths for all required reference genome files e.g. `--genome GRCh38`. \n\nSee the [nf-core website docs](https://nf-co.re/usage/reference_genomes) for more details."
+                    "hidden": true
+                },
+                "genome_type": {
+                    "description": "Reference genome type.",
+                    "fa_icon": "fas fa-book",
+                    "hidden": true
                 },
                 "igenomes_base": {
                     "type": "string",

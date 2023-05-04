@@ -58,8 +58,9 @@ class WorkflowMain {
             NfcoreSchema.validateParameters(workflow, params, log)
         }
 
+        // NOTE(SW): this is now deferred until after we set defaults in subworkflows
         // Print parameter summary log to screen
-        log.info paramsSummaryLog(workflow, params, log)
+        //log.info paramsSummaryLog(workflow, params, log)
 
         // Check that a -profile or Nextflow config has been provided to run the pipeline
         NfcoreTemplate.checkConfigProvided(workflow, log)
