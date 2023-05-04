@@ -49,6 +49,8 @@ input:
   - ensembl_data_resources:
       type: directory
       description: HMF ensembl data resources directory
+  - gnomad_resource:
+      description: gnomAD resource
 output:
   - meta:
       type: map
