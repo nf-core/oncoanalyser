@@ -12,12 +12,48 @@ import Constants
 class WorkflowOncoanalyser {
 
     //
+    // Set parameter defaults where required
+    //
+    public static void setParamsDefaults(params, log) {
+
+        if (params.containsKey('genome_version')) {
+            params.ref_data_genome_version = params.genome_version.toString()
+        } else if (Constants.GENOMES_VERSION_37.contains(params.genome)) {
+            params.ref_data_genome_version = '37'
+        } else if (Constants.GENOMES_VERSION_38.contains(params.genome)) {
+            params.ref_data_genome_version = '38'
+        } else {
+            log.error "ERROR: Got a bad genome version: ${params.ref_data_genome_version}"
+            System.exit(1)
+        }
+
+        if (params.containsKey('genome_type')) {
+            params.ref_data_genome_type = params.genome_type
+        } else if (Constants.GENOMES_ALT.contains(params.genome)) {
+            params.ref_data_genome_type = 'alt'
+        } else if (Constants.GENOMES_DEFINED.contains(params.genome)) {
+            params.ref_data_genome_type = 'no_alt'
+        } else {
+            log.error "ERROR: Got a bad genome type: ${params.ref_data_genome_type}"
+            System.exit(1)
+        }
+
+        if (!params.containsKey('ref_data_hmf_data_path')) {
+            if (params.ref_data_genome_version == '37') {
+                params.ref_data_hmf_data_path = Constants.HMF_DATA_37_PATH
+            } else if (params.ref_data_genome_version == '38') {
+                params.ref_data_hmf_data_path = Constants.HMF_DATA_38_PATH
+            }
+        }
+
+        if (!params.containsKey('ref_data_virusbreakenddb_path')) {
+            params.ref_data_virusbreakenddb_path = Constants.VIRUSBREAKENDDB_PATH
+        }
+
+    //
     // Check and validate parameters
     //
-    public static void initialise(params, workflow, log) {
-
-        // TODO(SW): allow users to set all appropriate reference genomes manually in config or CLI, including version and type (see below)
-
+    public static void validateParams(params, log) {
         if (!params.genome) {
             log.error "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n" +
                 "  Genome must be set using the --genome CLI argument or in a configuration file.\n" +
@@ -34,53 +70,47 @@ class WorkflowOncoanalyser {
             System.exit(1)
         }
 
-        // NOTE(SW): restricting allowable genome values to GRCh37_hmf for now
-        if (params.genome != 'GRCh37_hmf' && params.genome != 'GRCh38_hmf') {
-            log.error "ERROR: currently only the GRCh37_hmf and GRCh38_hmf genomes are supported but got \"${params.genome}\"" +
-                ", please adjust the --genome argument accordingly."
-            System.exit(1)
+        if (!Constants.GENOMES_SUPPORTED.contains(params.genome)) {
+            if (!params.containsKey('force_genome')) {
+              log.warn "currently only the GRCh37_hmf and GRCh38_hmf genomes are supported but forcing to " +
+                  "proceed with \"${params.genome}\""
+            } else {
+              log.error "ERROR: currently only the GRCh37_hmf and GRCh38_hmf genomes are supported but got \"${params.genome}\"" +
+                  ", please adjust the --genome argument accordingly."
+              System.exit(1)
+            }
         }
 
-        if (Constants.GENOMES_VERSION_37.contains(params.genome)) {
-            params.ref_data_genome_version = '37'
-        } else if (Constants.GENOMES_VERSION_38.contains(params.genome)) {
-            params.ref_data_genome_version = '38'
-        } else {
-            def genome_version_list_all = Constants.GENOMES_VERSION_37 + Constants.GENOMES_VERSION_38
+        if (!params.ref_data_genome_version) {
             log.error "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n" +
-                "  Genome '${params.genome}' is not defined in genome version list.                 \n" +
+                "  Genome version wasn't provided and genome '${params.genome}' is not defined in   \n" +
+                "  genome version list.\n" +
                 "  Currently, the list of genomes in the version list include:\n" +
-                "  ${genome_version_list_all.join(", ")}\n" +
+                "  ${Constants.GENOMES_DEFINED.join(", ")}\n" +
                 "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
             System.exit(1)
         }
 
-        // TODO(SW): when allowing user to set custom genome, require this to be explicitly set
-        if (Constants.GENOMES_ALT.contains(params.genome)) {
-            params.ref_data_genome_type = 'alt'
-        } else {
-            params.ref_data_genome_type = 'no_alt'
+        if (!params.ref_data_genome_type) {
+            log.error "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n" +
+                "  Genome type wasn't provided and genome '${params.genome}' is not defined in      \n" +
+                "  genome version list.\n" +
+                "  Currently, the list of genomes in the version list include:\n" +
+                "  ${Constants.GENOMES_DEINFED.join(", ")}\n" +
+                "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
+            System.exit(1)
         }
 
-        if (!params.containsKey('ref_data_hmf_data_path')) {
-            if (params.ref_data_genome_version == '37') {
-                params.ref_data_hmf_data_path = Constants.HMF_DATA_37_PATH
-            } else if (params.ref_data_genome_version == '38') {
-                params.ref_data_hmf_data_path = Constants.HMF_DATA_38_PATH
-            } else {
-                assert false : "Got a bad genome version: ${params.ref_data_genome_version}"
-            }
+        if (!params.ref_data_hmf_data_path) {
+            log.error "ERROR: HMF data path wasn't provided"
+            System.exit(1)
         }
 
-        if (!params.containsKey('ref_data_virusbreakenddb_path')) {
-            params.ref_data_virusbreakenddb_path = Constants.VIRUSBREAKENDDB_PATH
-        }
-
+        // NOTE(SW): this could be moved to the wgts.nf where we check that input files exist
         def null_check = [
            'ref_data_genome_fasta',
            'ref_data_genome_type',
            'ref_data_genome_version',
-           'ref_data_virusbreakenddb_path',
         ]
         null_check.each { k ->
             if (!params[k]) {
@@ -88,6 +118,15 @@ class WorkflowOncoanalyser {
                 System.exit(1)
             }
         }
+    }
+
+    public static String paramsSummaryLog(workflow, params, log) {
+        def summary_log = ''
+        summary_log += NfcoreTemplate.logo(workflow, params.monochrome_logs)
+        summary_log += NfcoreSchema.paramsSummaryLog(workflow, params)
+        summary_log += '\n' + WorkflowMain.citation(workflow) + '\n'
+        summary_log += NfcoreTemplate.dashedLine(params.monochrome_logs)
+        log.info summary_log
     }
 
     public static groupByMeta(Map named_args, ... channels) {

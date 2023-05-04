@@ -1,9 +1,13 @@
 class Constants {
 
     // NOTE(SW): the HMF reference data files are incompatible with hg19 due to different contig naming
-    static List GENOMES_VERSION_37       = ['GRCh37_hmf', 'GRCh37']
-    static List GENOMES_VERSION_38       = ['GRCh38_hmf', 'GRCh38', 'hg38']
-    static List GENOMES_ALT              = ['GRCh38', 'hg38']
+    static List GENOMES_VERSION_37 = ['GRCh37_hmf', 'GRCh37']
+    static List GENOMES_VERSION_38 = ['GRCh38_hmf', 'GRCh38', 'hg38']
+    static List GENOMES_ALT        = ['GRCh38', 'hg38']
+
+    static List GENOMES_SUPPORTED  = ['GRCh37_hmf', 'GRCh38_hmf']
+    static List GENOMES_DEFINED    = Constants.GENOMES_VERSION_37 + Constants.GENOMES_VERSION_38
+
 
     static String HMF_DATA_37_PATH = 'https://pub-29f2e5b2b7384811bdbbcba44f8b5083.r2.dev/hmf_reference_data/repacks/5.31_37_0.0.1.tar.gz'
     static String HMF_DATA_38_PATH = 'https://pub-29f2e5b2b7384811bdbbcba44f8b5083.r2.dev/hmf_reference_data/repacks/5.32+dev1_38_0.0.1.tar.gz'

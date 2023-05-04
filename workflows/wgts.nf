@@ -9,10 +9,13 @@ import Utils
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 */
 
-def summary_params = NfcoreSchema.paramsSummaryMap(workflow, params)
+// Set defaults and validate parameters
+WorkflowOncoanalyser.setParamsDefaults(params, log)
+WorkflowOncoanalyser.validateParams(params, log)
 
-// Validate input parameters
-WorkflowOncoanalyser.initialise(params, workflow, log)
+// Get parameter summary and also print to console
+def summary_params = NfcoreSchema.paramsSummaryMap(workflow, params)
+WorkflowOncoanalyser.paramsSummaryLog(workflow, params, log)
 
 // Set processes to run
 processes = Processes.setProcesses(params.mode, log)
@@ -34,6 +37,12 @@ def checkPathParamList = [
     params.linx_gene_id_file,
 ]
 
+// Conditional requirements
+if (run.virusinterpreter) {
+    checkPathParamList.add(params.ref_data_virusbreakenddb_path)
+}
+
+// TODO(SW): consider whether we should check for null entries here for errors to be more informative
 for (param in checkPathParamList) { if (param) { file(param, checkIfExists: true) } }
 
 // Check mandatory parameters
