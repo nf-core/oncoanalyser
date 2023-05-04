@@ -24,7 +24,7 @@ workflow PAVE_ANNOTATION {
         ref_data_segment_mappability    //    file: /path/to/segment_mappability
         ref_data_driver_gene_panel      //    file: /path/to/driver_gene_panel
         ref_data_ensembl_data_resources //    file: /path/to/ensembl_data_resources/
-        ref_data_gnomad_pon_dir         //    file: /path/to/gnomad_pon_dir/
+        ref_data_gnomad_resource        //    file: /path/to/gnomad_resource
 
         // Params
         run
@@ -88,7 +88,7 @@ workflow PAVE_ANNOTATION {
             ref_data_segment_mappability,
             ref_data_driver_gene_panel,
             ref_data_ensembl_data_resources,
-            ref_data_gnomad_pon_dir,
+            ref_data_gnomad_resource,
         )
 
         // Set outputs

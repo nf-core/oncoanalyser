@@ -435,11 +435,11 @@
                     "fa_icon": "far fa-folder-open",
                     "hidden": true
                 },
-                "ref_data_gnomad_pon_dir": {
+                "ref_data_gnomad_resource": {
                     "type": "string",
-                    "format": "directory-path",
-                    "description": "Path to HMF gnomAD PON directory.",
-                    "fa_icon": "far fa-folder-open",
+                    "format": "file-path",
+                    "description": "Path to HMF gnomAD resource.",
+                    "fa_icon": "far fa-file-code",
                     "hidden": true
                 },
                 "ref_data_known_fusion_data": {

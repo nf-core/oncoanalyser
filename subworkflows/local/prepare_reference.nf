@@ -196,7 +196,7 @@ def createHmfDataMap(hmf_data_path, params_only) {
         disease_ontology:             'ref_data_disease_ontology',
         driver_gene_panel:            'ref_data_driver_gene_panel',
         ensembl_data_resources:       'ref_data_ensembl_data_resources',
-        gnomad_pon_dir:               'ref_data_gnomad_pon_dir',
+        gnomad_resource:              'ref_data_gnomad_resource',
         known_fusion_data:            'ref_data_known_fusion_data',
         known_fusions:                'ref_data_known_fusions',
         purple_germline_del:          'ref_data_purple_germline_del',
