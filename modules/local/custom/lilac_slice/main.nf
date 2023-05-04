@@ -5,7 +5,8 @@ process CUSTOM_SLICE {
     container 'quay.io/biocontainers/samtools:1.15.1--h1170115_0'
 
     input:
-    tuple val(meta), path(bam), path(bai), path(bed)
+    tuple val(meta), path(bam), path(bai)
+    path(bed)
 
     output:
     tuple val(meta), path("*sliced.bam"), path("*sliced.bam.bai"), emit: bam

@@ -50,6 +50,11 @@ class WorkflowOncoanalyser {
             params.ref_data_virusbreakenddb_path = Constants.VIRUSBREAKENDDB_PATH
         }
 
+        if (params.ref_data_genome_version == '38' && params.ref_data_genome_type == 'alt' && !params.containsKey('ref_data_hla_slice_bed')) {
+            params.ref_data_hla_slice_bed = Constants.HLA_SLICE_BED_GRCH38_ALT_PATH
+        }
+    }
+
     //
     // Check and validate parameters
     //

@@ -171,6 +171,7 @@ def createHmfDataMap(hmf_data_path, params_only) {
         isofox_gc_ratios:             'ref_data_isofox_gc_ratios',
         // LILAC
         lilac_resources:              'ref_data_lilac_resources',
+        hla_slice_bed:                'ref_data_hla_slice_bed',
         // ORANGE
         cohort_mapping:               'ref_data_cohort_mapping',
         cohort_percentiles:           'ref_data_cohort_percentiles',

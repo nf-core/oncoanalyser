@@ -21,6 +21,7 @@ workflow LILAC_CALLING {
         ref_data_genome_fasta       //    file: /path/to/genome_fasta
         ref_data_genome_fai         //    file: /path/to/genome_fai
         ref_data_lilac_resource_dir //    file: /path/to/lilac_resource_dir/
+        ref_data_hla_slice_bed
 
         // Params
         run
@@ -82,22 +83,11 @@ workflow LILAC_CALLING {
             }
 
         // Slice HLA regions
-        ch_slice_bed = ref_data_lilac_resource_dir
-            .map { lilac_dir ->
-                def filename
-                if (params.ref_data_genome_type == 'no_alt') {
-                    filename = "hla.${params.ref_data_genome_version}.bed"
-                } else {
-                    filename = "hla.38.alt.umccr.bed"
-                }
-                def filepath = lilac_dir.resolve(filename).toUriString()
-                return file(filepath, checkIfExists: true)
-            }
         // NOTE(SW): here I remove duplicate files so that we only process each input once
         // NOTE(SW): orphaned reads are sometimes obtained, this is the slicing procedure used
         // in Pipeline5, see LilacBamSlicer.java#L115
-        // channel: [val(meta_lilac), bam, bai, bed]
-        ch_slice_inputs = WorkflowLilac.getSliceInputs(ch_lilac_bams, ch_slice_bed)
+        // channel: [val(meta_lilac), bam, bai]
+        ch_slice_inputs = WorkflowLilac.getSliceInputs(ch_lilac_bams)
         // Isolate meta containing expected file count to use for non-blocking groupTuple later
         ch_slice_meta_individual = ch_slice_inputs
             .map {
@@ -105,10 +95,11 @@ workflow LILAC_CALLING {
                 return [key: meta_lilac.key, count: meta_lilac.count]
             }
         // Apply slicing to unique files only
-        // channel: [val(meta_lilac), bam, bai, bed]
+        // channel: [val(meta_lilac), bam, bai]
         ch_slice_inputs_unique = WorkflowLilac.getUniqueInputFiles(ch_slice_inputs)
         CUSTOM_SLICE(
             ch_slice_inputs_unique,
+            ref_data_hla_slice_bed,
         )
         ch_versions = ch_versions.mix(CUSTOM_SLICE.out.versions)
 

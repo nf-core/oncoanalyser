@@ -138,6 +138,12 @@
                     "description": "Path to VIRUSBreakend database.",
                     "fa_icon": "far fa-file-code"
                 },
+                "ref_data_hla_slice_bed": {
+                    "format": "file-path",
+                    "pattern": "^\\S+\\.bed$",
+                    "description": "Path to HLA slice BED file.",
+                    "fa_icon": "far fa-file-code"
+                },
                 "ref_data_genome_fasta": {
                     "type": "string",
                     "format": "file-path",
