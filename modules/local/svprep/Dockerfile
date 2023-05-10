@@ -16,7 +16,7 @@ RUN \
 
 COPY assets/gridss_svprep.patch /tmp/
 RUN \
-  patch -lp1 -d /opt/svprep/ /tmp/gridss_svprep.patch && \
+  patch -lp1 -i /tmp/gridss_svprep.patch /opt/svprep/gridss_svprep && \
   chmod 755 /opt/svprep/gridss_svprep && \
   ln -s /opt/svprep/gridss_svprep /usr/local/bin/
 

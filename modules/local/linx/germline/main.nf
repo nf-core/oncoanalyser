@@ -26,7 +26,7 @@ process LINX_GERMLINE {
         -jar ${task.ext.jarPath} \\
             ${args} \\
             -sample ${meta.id} \\
-            -sv_vcf ${purple_dir}/${meta.id}.purple.sv.germline.vcf.gz \\
+            -sv_vcf ${sv_vcf} \\
             -germline \\
             -ref_genome_version ${genome_ver} \\
             -ensembl_data_dir ${ensembl_data_resources} \\

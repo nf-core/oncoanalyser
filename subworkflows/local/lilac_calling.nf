@@ -118,15 +118,21 @@ workflow LILAC_CALLING {
             )
             ch_versions = ch_versions.mix(CUSTOM_EXTRACTCONTIG.out.versions)
 
+            ch_slice_bams = CUSTOM_SLICE.out.bam
+                .branch { meta_lilac, bam, bai ->
+                    def sequence_type = Utils.getEnumFromString(meta_lilac.sequence_type_str, Constants.SequenceType)
+                    wgs: sequence_type == Constants.SequenceType.WGS
+                    wts: sequence_type == Constants.SequenceType.WTS
+                }
+
             CUSTOM_REALIGNREADS(
-                CUSTOM_SLICE.out.bam,
+                ch_slice_bams.wgs,
                 CUSTOM_EXTRACTCONTIG.out.contig,
                 CUSTOM_EXTRACTCONTIG.out.bwa_indices,
             )
-            ch_slices_out = CUSTOM_REALIGNREADS.out.bam
+            ch_slices_out = Channel.empty().mix(CUSTOM_REALIGNREADS.out.bam, ch_slice_bams.wts)
             ch_versions = ch_versions.mix(CUSTOM_REALIGNREADS.out.versions)
         }
-
 
         // Re-replicate and flow expected file count into meta
         // channel: [val(meta_lilac), [sequence_type_str, sample_type_str, bam, bai]]

@@ -5,7 +5,7 @@ process ORANGE {
     container 'docker.io/scwatts/orange:2.3--0'
 
     input:
-    tuple val(meta), path(bam_metrics_somatic), path(bam_metrics_germline), path(flagstat_somatic), path(flagstat_germline), path(sage_somatic_bqr), path(sage_germline_bqr), path(sage_germline_coverage), path(purple_dir), path(linx_somatic_anno_dir), path(linx_somatic_plot_dir), path(linx_germline_anno_dir), path(virusinterpreter), path(chord_prediction), path(sigs_tsv), path(lilac_dir), path(cuppa_dir), path(isofox_dir)
+    tuple val(meta), path(bam_metrics_somatic), path(bam_metrics_germline), path(flagstat_somatic), path(flagstat_germline), path(sage_somatic_bqr), path(sage_germline_bqr), path(sage_germline_coverage), path(purple_dir), path(linx_somatic_anno_dir), path(linx_somatic_plot_dir), path(linx_germline_anno_dir), path(virusinterpreter), path(chord_prediction), path(sigs_dir), path(lilac_dir), path(cuppa_dir), path(isofox_dir)
     val genome_ver
     path disease_ontology
     path cohort_mapping
@@ -31,23 +31,22 @@ process ORANGE {
 
     def virusinterpreter_arg = virusinterpreter ? "-annotated_virus_tsv ${virusinterpreter}" : ''
     def chord_arg = chord_prediction ? "-chord_prediction_txt ${chord_prediction}" : ''
-    def sigs_arg = sigs_tsv ? "-sigs_allocation_tsv ${sigs_tsv}" : ''
+    def sigs_arg = sigs_tsv ? "-sigs_allocation_tsv ${sigs_dir}/${meta.tumor_wgs_id}.sig.allocation.tsv" : ''
     def cuppa_csv_arg = cuppa_dir ? "-cuppa_result_csv ${cuppa_dir}/${meta.tumor_wgs_id}.cup.data.csv" : ''
-    def cuppa_feature_arg = cuppa_dir ? "-cuppa_feature_plot ${cuppa_dir}/${meta.tumor_wgs_id}.cup.report.features.png" : ''
     def cuppa_summary_arg = cuppa_dir ? "-cuppa_summary_plot ${cuppa_dir}/${meta.tumor_wgs_id}.cup.report.summary.png" : ''
 
     def normal_id_arg = meta.containsKey('normal_wgs_id') ? "-reference_sample_id ${meta.normal_wgs_id}" : ''
     def normal_metrics_arg = bam_metrics_germline ? "-ref_sample_wgs_metrics_file ${bam_metrics_germline}" : ''
     def normal_flagstat_arg = flagstat_germline ? "-ref_sample_flagstat_file ${flagstat_germline}" : ''
-    def normal_sage_somatic_bqr_arg = sage_somatic_normal_bqr ? "-sage_somatic_ref_sample_bqr_plot ${sage_somatic_normal_bqr}" : ''
+    def normal_sage_somatic_bqr_arg = sage_germline_bqr ? "-sage_somatic_ref_sample_bqr_plot ${sage_germline_bqr}" : ''
     def normal_sage_coverage_arg = sage_germline_coverage ? "-sage_germline_gene_coverage_tsv ${sage_germline_coverage}" : ''
     def normal_linx_arg = linx_germline_anno_dir ? "-linx_germline_data_directory ${linx_germline_anno_dir}" : ''
 
-    def rna_id_arg = meta.containsKey('tumor_wts_id') ? "-reference_sample_id ${meta.tumor_wts_id}" : ''
+    def rna_id_arg = meta.containsKey('tumor_wts_id') ? "-rna_sample_id ${meta.tumor_wts_id}" : ''
     def isofox_summary_csv_arg = isofox_dir ? "-isofox_summary_csv ${isofox_dir}/${meta.tumor_wts_id}.isf.summary.csv" : ''
-    def isofox_gene_csv_arg = isofox_dir ? "-isofox_summary_csv ${isofox_dir}/${meta.tumor_wts_id}.isf.gene_data.csv" : ''
-    def isofox_fusion_csv_arg = isofox_dir ? "-isofox_gene_data_csv ${isofox_dir}/${meta.tumor_wts_id}.isf.fusions.csv" : ''
-    def isofox_alt_sj_csv_arg = isofox_dir ? "-isofox_fusion_csv ${isofox_dir}/${meta.tumor_wts_id}.isf.alt_splice_junc.csv" : ''
+    def isofox_gene_csv_arg = isofox_dir ? "-isofox_gene_data_csv ${isofox_dir}/${meta.tumor_wts_id}.isf.gene_data.csv" : ''
+    def isofox_fusion_csv_arg = isofox_dir ? "-isofox_fusion_csv ${isofox_dir}/${meta.tumor_wts_id}.isf.fusions.csv" : ''
+    def isofox_alt_sj_csv_arg = isofox_dir ? "-isofox_alt_splice_junction_csv ${isofox_dir}/${meta.tumor_wts_id}.isf.alt_splice_junc.csv" : ''
 
     def isofox_gene_distribution_arg = isofox_gene_distribution ? "-isofox_gene_distribution_csv ${isofox_gene_distribution}" : ''
     def isofox_alt_sj_arg = isofox_alt_sj ? "-isofox_alt_sj_cohort_csv ${isofox_alt_sj}" : ''
@@ -55,19 +54,22 @@ process ORANGE {
     """
     echo "${pipeline_version_str}" > pipeline_version.txt
 
+    # NOTE(SW): '--add-opens java.base/java.time=ALL-UNNAMED' resolves issue writing JSON, see:
+    # https://stackoverflow.com/questions/70412805/what-does-this-error-mean-java-lang-reflect-inaccessibleobjectexception-unable/70878195#70878195
+
     java \\
+        --add-opens java.base/java.time=ALL-UNNAMED \\
         -Xmx${Math.round(task.memory.bytes * 0.95)} \\
         -jar ${task.ext.jarPath} \\
             \\
             -experiment_date \$(date +%y%m%d) \\
             -pipeline_version_file pipeline_version.txt \\
-            -add_disclaimer \\
             \\
             -tumor_sample_id ${meta.tumor_wgs_id} \\
             -primary_tumor_doids "" \\
             -tumor_sample_wgs_metrics_file ${bam_metrics_somatic} \\
             -tumor_sample_flagstat_file ${flagstat_somatic} \\
-            -sage_somatic_tumor_sample_bqr_plot ${sage_somatic_tumor_bqr} \\
+            -sage_somatic_tumor_sample_bqr_plot ${sage_somatic_bqr} \\
             -purple_data_directory ${purple_dir} \\
             -purple_plot_directory ${purple_dir}/plot/ \\
             -linx_somatic_data_directory ${linx_somatic_anno_dir} \\
@@ -76,9 +78,8 @@ process ORANGE {
             -lilac_qc_csv ${lilac_dir}/${meta.tumor_wgs_id}.lilac.qc.csv \\
             ${virusinterpreter_arg} \\
             ${chord_arg} \\
-            ${sigs_tsv} \\
+            ${sigs_arg} \\
             ${cuppa_csv_arg} \\
-            ${cuppa_feature_arg} \\
             ${cuppa_summary_arg} \\
             \\
             ${normal_id_arg} \\

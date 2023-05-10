@@ -69,8 +69,6 @@ process SAGE_GERMLINE {
             -out ./${meta.tumor_id}.sage.germline.vcf.gz
 
     bcftools view -f 'PASS' -o ${meta.tumor_id}.sage.germline.filtered.vcf.gz ${meta.tumor_id}.sage.germline.vcf.gz
-
-    bcftools index -t ${meta.tumor_id}.sage.germline.vcf.gz
     bcftools index -t ${meta.tumor_id}.sage.germline.filtered.vcf.gz
 
     cat <<-END_VERSIONS > versions.yml

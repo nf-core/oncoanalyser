@@ -54,8 +54,6 @@ process SAGE_SOMATIC {
             -out ./${meta.tumor_id}.sage.somatic.vcf.gz
 
     bcftools view -f 'PASS' -o ${meta.tumor_id}.sage.somatic.filtered.vcf.gz ${meta.tumor_id}.sage.somatic.vcf.gz
-
-    bcftools index -t ${meta.tumor_id}.sage.somatic.vcf.gz
     bcftools index -t ${meta.tumor_id}.sage.somatic.filtered.vcf.gz
 
     cat <<-END_VERSIONS > versions.yml

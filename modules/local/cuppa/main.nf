@@ -7,7 +7,7 @@ process CUPPA {
     input:
     tuple val(meta), path(isofox_dir), path(purple_dir), path(linx_dir), path(virusinterpreter)
     val ref_genome_ver
-    path cuppa_resources
+    path cuppa_resources, stageAs: 'cuppa_reference_data'
 
     output:
     tuple val(meta), path('cuppa/'), emit: cuppa_dir
@@ -40,20 +40,22 @@ process CUPPA {
     # Symlink input files into a single directory
     mkdir -p sample_data/
     if [[ ${categories_val} == 'DNA' || ${categories_val} == 'ALL' ]]; then
-        find -L ${purple_dir} ${linx_dir} ${virusinterpreter} -mindepth 1 -maxdepth 1 -type f -exec ln -fs ../{} sample_data/ \\;
+        find -L ${purple_dir} ${linx_dir} ${virusinterpreter} -maxdepth 1 -type f -exec ln -fs ../{} sample_data/ \\;
     fi
 
     if [[ ${categories_val} == 'RNA' ]]; then
-        find -L ${isofox_dir} -mindepth 1 -maxdepth 1 -type f -exec ln -fs ../{} sample_data/ \\;
+        find -L ${isofox_dir} -maxdepth 1 -type f -exec ln -fs ../{} sample_data/ \\;
     elif [[ ${categories_val} == 'ALL' ]]; then
         # NOTE(SW): CUPPA requires that the WTS sample name matches the WGS sample name
-        for fp in \$(find -L ${isofox_dir} -mindepth 1 -maxdepth 1 -type f); do
+        for fp in \$(find -L ${isofox_dir} -maxdepth 1 -type f); do
             fn_out=\$(sed 's/^${meta.id_wts}/${meta.id}/' <<< \${fp##*/});
             cp \${fp} sample_data/\${fn_out}
         done;
         # Rename identifier in the summary file
         sed -i 's/^${meta.id_wts}/${meta.id}/g' sample_data/${meta.id}.isf.summary.csv
     fi;
+
+    mkdir -p cuppa/
 
     java \\
         -Xmx${Math.round(task.memory.bytes * 0.95)} \\
@@ -80,12 +82,13 @@ process CUPPA {
 
     stub:
     """
-    touch ${meta.id}.cup.data.csv
-    touch ${meta.id}.cuppa.conclusion.txt
-    touch ${meta.id}_cup_report.pdf
-    touch ${meta.id}.cup.report.summary.png
-    touch ${meta.id}.cup.report.features.png
-    touch ${meta.id}.cuppa.chart.png
+    mkdir -p cuppa/
+    touch cuppa/${meta.id}.cup.data.csv
+    touch cuppa/${meta.id}.cuppa.conclusion.txt
+    touch cuppa/${meta.id}_cup_report.pdf
+    touch cuppa/${meta.id}.cup.report.summary.png
+    touch cuppa/${meta.id}.cup.report.features.png
+    touch cuppa/${meta.id}.cuppa.chart.png
     echo -e '${task.process}:\\n  stub: noversions\\n' > versions.yml
     """
 }
