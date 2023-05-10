@@ -2,7 +2,7 @@ process GPGR_LINX {
     tag "${meta.id}"
     label 'process_single'
 
-    container 'ghcr.io/umccr/gpgr:1.4.1'
+    container 'docker.io/scwatts/gpgr:1.4.3'
 
     input:
     tuple val(meta), path(linx_annotation), path(linx_visualiser)
@@ -23,7 +23,7 @@ process GPGR_LINX {
         --sample ${meta.id} \\
         --plot ${linx_visualiser}/ \\
         --table ${linx_annotation}/ \\
-        --out ${meta.id}_linx.html;
+        --out ${meta.id}_linx.html
 
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":

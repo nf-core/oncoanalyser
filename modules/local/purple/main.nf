@@ -61,8 +61,8 @@ process PURPLE {
             -reference ${meta.normal_id} \\
             -amber ${amber} \\
             -cobalt ${cobalt} \\
-            ${sv_tumor_vcf} \\
-            ${sv_normal_vcf} \\
+            ${sv_tumor_vcf_arg} \\
+            ${sv_normal_vcf_arg} \\
             ${sv_tumor_recovery_vcf_arg} \\
             \${smlv_tumor_vcf_arg} \\
             \${smlv_normal_vcf_arg} \\

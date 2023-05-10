@@ -65,8 +65,8 @@ workflow PREPARE_INPUT {
 
                         def filetype_tbi = [
                             Constants.FileType.GRIDSS_VCF,
-                            Constants.FileType.GRIPSS_HARD_VCF,
-                            Constants.FileType.GRIPSS_SOFT_VCF,
+                            Constants.FileType.GRIPSS_VCF,
+                            Constants.FileType.GRIPSS_UNFILTERED_VCF,
                         ]
 
                         def index_ext

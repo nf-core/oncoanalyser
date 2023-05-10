@@ -50,6 +50,7 @@ workflow LINX_ANNOTATION {
 
                 return [meta_linx, sv_vcf]
             }
+            .filter { it != Constants.META_PLACEHOLDER }
 
         // channel: [val(meta_linx), purple_dir]
         ch_linx_inputs_somatic = ch_linx_inputs_source
