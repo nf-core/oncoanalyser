@@ -18,9 +18,9 @@ process ORANGE {
     val pipeline_version
 
     output:
-    tuple val(meta), path('*.orange.pdf') , emit: pdf
-    tuple val(meta), path('*.orange.json'), emit: json
-    path 'versions.yml'                   , emit: versions
+    tuple val(meta), path('output/*.orange.pdf') , emit: pdf
+    tuple val(meta), path('output/*.orange.json'), emit: json
+    path 'versions.yml'                          , emit: versions
 
     when:
     task.ext.when == null || task.ext.when
@@ -113,7 +113,7 @@ process ORANGE {
             -ensembl_data_directory ${ensembl_data_resources} \\
             ${isofox_gene_distribution_arg} \\
             ${isofox_alt_sj_arg} \\
-            -output_dir ./
+            -output_dir ./output/
 
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":
