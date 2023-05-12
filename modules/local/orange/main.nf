@@ -31,7 +31,7 @@ process ORANGE {
 
     def virusinterpreter_arg = virusinterpreter ? "-annotated_virus_tsv ${virusinterpreter}" : ''
     def chord_arg = chord_prediction ? "-chord_prediction_txt ${chord_prediction}" : ''
-    def sigs_arg = sigs_tsv ? "-sigs_allocation_tsv ${sigs_dir}/${meta.tumor_wgs_id}.sig.allocation.tsv" : ''
+    def sigs_arg = sigs_dir ? "-sigs_allocation_tsv ${sigs_dir}/${meta.tumor_wgs_id}.sig.allocation.tsv" : ''
     def cuppa_csv_arg = cuppa_dir ? "-cuppa_result_csv ${cuppa_dir}/${meta.tumor_wgs_id}.cup.data.csv" : ''
     def cuppa_summary_arg = cuppa_dir ? "-cuppa_summary_plot ${cuppa_dir}/${meta.tumor_wgs_id}.cup.report.summary.png" : ''
 
