@@ -63,7 +63,7 @@ class Constants {
         VIRUSINTERPRETER_TSV,
         // ORANGE specific
         CHORD_PREDICTION,
-        SIGS,
+        SIGS_DIR,
         CUPPA_DIR,
         FLAGSTAT,
         LINX_PLOT_DIR,
@@ -120,7 +120,7 @@ class Constants {
         LINX_ANNO_DIR_NORMAL:   [FileType.LINX_ANNO_DIR,        SampleType.NORMAL,       SequenceType.WGS],
 
         CHORD_PREDICTION:       [FileType.CHORD_PREDICTION,     SampleType.TUMOR,        SequenceType.WGS],
-        SIGS:                   [FileType.SIGS,                 SampleType.TUMOR,        SequenceType.WGS],
+        SIGS_DIR:               [FileType.SIGS_DIR,             SampleType.TUMOR,        SequenceType.WGS],
         LILAC_DIR:              [FileType.LILAC_DIR,            SampleType.NORMAL,       SequenceType.WGS],
 
         VIRUSINTERPRETER_TSV:   [FileType.VIRUSINTERPRETER_TSV, SampleType.TUMOR,        SequenceType.WGS],
