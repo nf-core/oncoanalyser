@@ -98,11 +98,11 @@ process ORANGE {
             ${normal_sage_coverage_arg} \\
             ${normal_linx_arg} \\
             \\
-            ${rna_id_arg} \\
-            ${isofox_summary_csv_arg} \\
-            ${isofox_gene_csv_arg} \\
-            ${isofox_fusion_csv_arg} \\
-            ${isofox_alt_sj_csv_arg} \\
+            \\ #${rna_id_arg} \\
+            \\ #${isofox_summary_csv_arg} \\
+            \\ #${isofox_gene_csv_arg} \\
+            \\ #${isofox_fusion_csv_arg} \\
+            \\ #${isofox_alt_sj_csv_arg} \\
             \\
             -ref_genome_version ${genome_ver} \\
             -doid_json ${disease_ontology} \\
