@@ -123,8 +123,9 @@ process ORANGE {
 
     stub:
     """
-    touch "${meta.tumor_wgs_id}.orange.json"
-    touch "${meta.tumor_wgs_id}.orange.pdf"
+    mkdir -p output/
+    touch output/${meta.tumor_wgs_id}.orange.json
+    touch output/${meta.tumor_wgs_id}.orange.pdf
     echo -e '${task.process}:\\n  stub: noversions\\n' > versions.yml
     """
 }
