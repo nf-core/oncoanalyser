@@ -4,10 +4,10 @@
 import Constants
 import Utils
 
-include { CUSTOM_EXTRACTCONTIG   } from '../../modules/local/custom/lilac_extract_and_index_contig/main'
-include { CUSTOM_REALIGNREADS    } from '../../modules/local/custom/lilac_realign_reads_lilac/main'
-include { CUSTOM_SLICE           } from '../../modules/local/custom/lilac_slice/main'
-include { LILAC                  } from '../../modules/local/lilac/main'
+include { CUSTOM_EXTRACTCONTIG as EXTRACTCONTIG } from '../../modules/local/custom/lilac_extract_and_index_contig/main'
+include { CUSTOM_REALIGNREADS as REALIGNREADS   } from '../../modules/local/custom/lilac_realign_reads_lilac/main'
+include { CUSTOM_SLICE as SLICEBAM              } from '../../modules/local/custom/lilac_slice/main'
+include { LILAC                                 } from '../../modules/local/lilac/main'
 
 include { CHANNEL_GROUP_INPUTS } from './channel_group_inputs'
 
@@ -97,41 +97,41 @@ workflow LILAC_CALLING {
         // Apply slicing to unique files only
         // channel: [val(meta_lilac), bam, bai]
         ch_slice_inputs_unique = WorkflowLilac.getUniqueInputFiles(ch_slice_inputs)
-        CUSTOM_SLICE(
+        SLICEBAM(
             ch_slice_inputs_unique,
             ref_data_hla_slice_bed,
         )
-        ch_versions = ch_versions.mix(CUSTOM_SLICE.out.versions)
+        ch_versions = ch_versions.mix(SLICEBAM.out.versions)
 
         // Realign contigs if using 38 (use of ALT contigs implied)
         // channel: [val(meta_lilac), bam, bai]
-        ch_slices_out = CUSTOM_SLICE.out.bam
+        ch_slices_out = SLICEBAM.out.bam
         if (params.ref_data_genome_type == 'alt') {
             // Align reads with chr6
             // NOTE(SW): the aim of this process is to take reads mapping to ALT contigs and align them
             // to the three relevant HLA genes on chr6. All reads including those previously mapped to chr6
             // are realigned for consistency.
-            CUSTOM_EXTRACTCONTIG(
+            EXTRACTCONTIG(
                 'chr6',
                 ref_data_genome_fasta,
                 ref_data_genome_fai,
             )
-            ch_versions = ch_versions.mix(CUSTOM_EXTRACTCONTIG.out.versions)
+            ch_versions = ch_versions.mix(EXTRACTCONTIG.out.versions)
 
-            ch_slice_bams = CUSTOM_SLICE.out.bam
+            ch_slice_bams = SLICEBAM.out.bam
                 .branch { meta_lilac, bam, bai ->
                     def sequence_type = Utils.getEnumFromString(meta_lilac.sequence_type_str, Constants.SequenceType)
                     wgs: sequence_type == Constants.SequenceType.WGS
                     wts: sequence_type == Constants.SequenceType.WTS
                 }
 
-            CUSTOM_REALIGNREADS(
+            REALIGNREADS(
                 ch_slice_bams.wgs,
-                CUSTOM_EXTRACTCONTIG.out.contig,
-                CUSTOM_EXTRACTCONTIG.out.bwa_indices,
+                EXTRACTCONTIG.out.contig,
+                EXTRACTCONTIG.out.bwa_indices,
             )
-            ch_slices_out = Channel.empty().mix(CUSTOM_REALIGNREADS.out.bam, ch_slice_bams.wts)
-            ch_versions = ch_versions.mix(CUSTOM_REALIGNREADS.out.versions)
+            ch_slices_out = Channel.empty().mix(REALIGNREADS.out.bam, ch_slice_bams.wts)
+            ch_versions = ch_versions.mix(REALIGNREADS.out.versions)
         }
 
         // Re-replicate and flow expected file count into meta
