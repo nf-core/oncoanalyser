@@ -76,13 +76,13 @@ class WorkflowOncoanalyser {
         }
 
         if (!Constants.GENOMES_SUPPORTED.contains(params.genome)) {
-            if (!params.containsKey('force_genome')) {
-              log.warn "currently only the GRCh37_hmf and GRCh38_hmf genomes are supported but forcing to " +
-                  "proceed with \"${params.genome}\""
+            if (!params.containsKey('force_genome') || !params.force_genome) {
+                log.error "ERROR: currently only the GRCh37_hmf and GRCh38_hmf genomes are supported but got \"${params.genome}\"" +
+                    ", please adjust the --genome argument accordingly or override with --force_genome."
+                System.exit(1)
             } else {
-              log.error "ERROR: currently only the GRCh37_hmf and GRCh38_hmf genomes are supported but got \"${params.genome}\"" +
-                  ", please adjust the --genome argument accordingly."
-              System.exit(1)
+                log.warn "currently only the GRCh37_hmf and GRCh38_hmf genomes are supported but forcing to " +
+                    "proceed with \"${params.genome}\""
             }
         }
 
