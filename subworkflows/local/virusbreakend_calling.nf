@@ -86,6 +86,7 @@ workflow VIRUSBREAKEND_CALLING {
                 }
                 return [meta, purple_purity, purple_qc]
             }
+            .filter { it != Constants.META_PLACEHOLDER }
 
         // channel: [val(meta), virus_tsv, purple_purity, purple_qc, wgs_metrics]
         ch_virusinterpreter_inputs_full = WorkflowOncoanalyser.groupByMeta(
