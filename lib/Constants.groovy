@@ -9,8 +9,8 @@ class Constants {
     static List GENOMES_DEFINED    = Constants.GENOMES_VERSION_37 + Constants.GENOMES_VERSION_38
 
 
-    static String HMF_DATA_37_PATH = 'https://pub-29f2e5b2b7384811bdbbcba44f8b5083.r2.dev/hmf_reference_data/repacks/5.31_37_0.0.1.tar.gz'
-    static String HMF_DATA_38_PATH = 'https://pub-29f2e5b2b7384811bdbbcba44f8b5083.r2.dev/hmf_reference_data/repacks/5.32+dev1_38_0.0.1.tar.gz'
+    static String HMF_DATA_37_PATH = 'https://pub-29f2e5b2b7384811bdbbcba44f8b5083.r2.dev/hmf_reference_data/repacks/5.32_37_0.0.1.tar.gz'
+    static String HMF_DATA_38_PATH = 'https://pub-29f2e5b2b7384811bdbbcba44f8b5083.r2.dev/hmf_reference_data/repacks/5.32_38_0.0.1.tar.gz'
 
     static String VIRUSBREAKENDDB_PATH = 'https://pub-29f2e5b2b7384811bdbbcba44f8b5083.r2.dev/virusbreakend/virusbreakenddb_20210401.tar.gz'
 
