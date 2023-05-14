@@ -50,7 +50,7 @@ workflow SIGS_FITTING {
                 ]
                 return [meta_sigs, smlv_vcf]
             }
-            .filter { it[0] != Constants.META_PLACEHOLDER }
+            .filter { it != Constants.META_PLACEHOLDER }
 
         SIGS(
           ch_sigs_inputs,

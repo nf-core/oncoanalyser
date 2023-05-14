@@ -46,7 +46,7 @@ workflow CHORD_PREDICTION {
                 def meta_chord = [key: meta.id, id: meta.id]
                 return [meta_chord, smlv_vcf, sv_vcf]
             }
-            .filter { it[0] != Constants.META_PLACEHOLDER }
+            .filter { it != Constants.META_PLACEHOLDER }
 
         // Run process
         CHORD(
