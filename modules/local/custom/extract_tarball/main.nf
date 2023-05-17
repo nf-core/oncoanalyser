@@ -1,7 +1,7 @@
 process CUSTOM_EXTRACTTARBALL {
     label 'process_single'
 
-    container 'public.ecr.aws/ubuntu/ubuntu:20.04_stable'
+    container 'docker.io/ubuntu:20.04'
 
     input:
     tuple val(meta), path(tarball)
