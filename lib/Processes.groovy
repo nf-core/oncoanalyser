@@ -4,44 +4,58 @@ import Utils
 
 class Processes {
 
-    public static setProcesses(mode_str, log) {
-        def mode_enum = Utils.getEnumFromString(mode_str, Constants.PipelineMode)
-        if (!mode_enum) {
-            def workflows_str = Utils.getEnumNames(Constants.PipelineMode).join('\n  - ')
-            log.error "\nERROR: recieved invalid pipeline mode: '${mode_str}'. Valid options are:\n  - ${workflows_str}"
-            System.exit(1)
+    public static setProcesses(run_mode, manual_select, log) {
+        def processes = []
+
+        if (manual_select) {
+            return processes
         }
 
-        def processes = []
-        switch(mode_enum) {
-            case Constants.PipelineMode.FULL:
-                processes = Constants.Process.values() as List
-                break
-            case Constants.PipelineMode.MANUAL:
-                break
-            case Constants.PipelineMode.GRIDSS_PURPLE_LINX:
-                processes = [
-                    Constants.Process.AMBER,
-                    Constants.Process.COBALT,
-                    Constants.Process.GRIDSS,
-                    Constants.Process.GRIPSS,
-                    Constants.Process.LINX,
-                    Constants.Process.PURPLE,
-                    Constants.Process.SVPREP,
-                ]
-                break
-            case Constants.PipelineMode.CUPPA:
+        switch(run_mode) {
+            case Constants.RunMode.WGS:
                 processes = [
                     Constants.Process.AMBER,
                     Constants.Process.BAMTOOLS,
+                    Constants.Process.CHORD,
                     Constants.Process.COBALT,
                     Constants.Process.CUPPA,
+                    Constants.Process.FLAGSTAT,
+                    Constants.Process.GRIDSS,
+                    Constants.Process.GRIPSS,
+                    Constants.Process.LILAC,
+                    Constants.Process.LINX,
+                    Constants.Process.ORANGE,
+                    Constants.Process.PAVE,
+                    Constants.Process.PURPLE,
+                    Constants.Process.SAGE,
+                    Constants.Process.SIGS,
+                    Constants.Process.VIRUSINTERPRETER,
+                ]
+                break
+            case Constants.RunMode.WTS:
+                processes = [
+                    Constants.Process.CUPPA,
+                    Constants.Process.ISOFOX,
+                ]
+                break
+            case Constants.RunMode.WGTS:
+                processes = [
+                    Constants.Process.AMBER,
+                    Constants.Process.BAMTOOLS,
+                    Constants.Process.CHORD,
+                    Constants.Process.COBALT,
+                    Constants.Process.CUPPA,
+                    Constants.Process.FLAGSTAT,
                     Constants.Process.GRIDSS,
                     Constants.Process.GRIPSS,
                     Constants.Process.ISOFOX,
+                    Constants.Process.LILAC,
                     Constants.Process.LINX,
+                    Constants.Process.ORANGE,
+                    Constants.Process.PAVE,
                     Constants.Process.PURPLE,
-                    Constants.Process.SVPREP,
+                    Constants.Process.SAGE,
+                    Constants.Process.SIGS,
                     Constants.Process.VIRUSINTERPRETER,
                 ]
                 break
@@ -50,6 +64,20 @@ class Processes {
                 System.exit(1)
         }
         return processes
+    }
+
+    public static getRunStages(run_mode, include, exclude, manual_select, log) {
+        def processes = this.setProcesses(run_mode, manual_select, log)
+        def include_list = this.getProcessList(include, log)
+        def exclude_list = this.getProcessList(exclude, log)
+        this.checkIncludeExcludeList(include_list, exclude_list, log)
+
+        processes.addAll(include_list)
+        processes.removeAll(exclude_list)
+
+        return Constants.Process
+            .values()
+            .collectEntries { p -> [p.name().toLowerCase(), p in processes] }
     }
 
     public static getProcessList(process_str, log) {

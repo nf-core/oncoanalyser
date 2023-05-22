@@ -8,37 +8,44 @@ include { SAMTOOLS_FLAGSTAT } from '../../modules/nf-core/samtools/flagstat/main
 
 workflow FLAGSTAT_METRICS {
     take:
+        // Sample data
         ch_inputs
+
+        // Params
+        run_config
 
     main:
         // Channel for version.yml files
         ch_versions = Channel.empty()
 
         // Select input source
-        // channel (present): [val(meta), sample_type, flagstat]
-        // channel (absent): [val(meta)]
-        ch_inputs_flagstat = ch_inputs
-            .flatMap { meta -> [Constants.SampleType.TUMOR, Constants.SampleType.NORMAL].collect { [meta, it] } }
-            .branch { meta, sample_type ->
-                def key = [Constants.FileType.FLAGSTAT, sample_type, Constants.SequenceType.WGS]
-                present: meta.containsKey(key)
-                    return [meta, sample_type, meta.getAt(key)]
-                absent: ! meta.containsKey(key)
-            }
-
-        // Create inputs and create process-specific meta
+        // Select input sources
         // channel: [val(meta_flagstat), bam, bai]
-        ch_flagstat_inputs_all = ch_inputs_flagstat.absent
-            .map { meta, sample_type ->
-                def bam = meta.getAt([Constants.FileType.BAM, sample_type, Constants.SequenceType.WGS])
-                def sample_name = meta.getAt(['sample_name', sample_type, Constants.SequenceType.WGS])
-                def meta_flagstat = [
+        ch_flagstat_inputs_all = ch_inputs
+            .flatMap { meta ->
+                def inputs = []
+
+                def meta_flagstat_tumor = [
                     key: meta.id,
-                    id: sample_name,
+                    id: Utils.getTumorSampleName(meta, run_config.mode),
                     // NOTE(SW): must use string representation for caching purposes
-                    sample_type_str: sample_type.name(),
+                    sample_type_str: Constants.SampleType.TUMOR.name(),
                 ]
-                return [meta_flagstat, bam, "${bam}.bai"]
+                def tumor_bam = Utils.getTumorBam(meta, run_config.mode)
+                inputs.add([meta_flagstat_tumor, tumor_bam, "${tumor_bam}.bai"])
+
+                if (run_config.type == Constants.RunType.TUMOR_NORMAL) {
+                    def meta_flagstat_normal = [
+                        key: meta.id,
+                        id: Utils.getNormalWgsSampleName(meta),
+                        // NOTE(SW): must use string representation for caching purposes
+                        sample_type_str: Constants.SampleType.NORMAL.name(),
+                    ]
+                    def normal_bam = Utils.getNormalWgsBam(meta)
+                    inputs.add([meta_flagstat_normal, normal_bam, "${normal_bam}.bai"])
+                }
+
+                return inputs
             }
 
         // Collapse duplicate files e.g. repeated normal BAMs for multiple tumor samples
@@ -72,10 +79,11 @@ workflow FLAGSTAT_METRICS {
         )
 
         // Set version
+        ch_versions = ch_versions.mix(SAMTOOLS_FLAGSTAT.out.versions)
 
         // Replicate outputs to reverse unique operation
         // channel: [val(meta_flagstat_individual), flagstat]
-        ch_flagstat_out = SAMTOOLS_FLAGSTAT.out.flagstat
+        ch_flagstat_out_individual = SAMTOOLS_FLAGSTAT.out.flagstat
             .flatMap { meta_flagstat_shared, flagstat ->
                 def sample_type = Utils.getEnumFromString(meta_flagstat_shared.sample_type_str, Constants.SampleType)
                 meta_flagstat_shared.keys.collect { key ->
@@ -83,14 +91,10 @@ workflow FLAGSTAT_METRICS {
                 }
             }
 
-        // Combine input flagstat channels, restoring original meta where required, split by sample type
+        // Set outputs
         // channel (somatic): [val(meta), flagstat]
         // channel (germline): [val(meta), flagstat]
-        ch_outputs = Channel.empty()
-            .concat(
-                ch_inputs_flagstat.present,
-                WorkflowOncoanalyser.restoreMeta(ch_flagstat_out, ch_inputs),
-            )
+        ch_outputs = WorkflowOncoanalyser.restoreMeta(ch_flagstat_out_individual, ch_inputs)
             .branch { meta, sample_type, flagstat ->
                 somatic: sample_type == Constants.SampleType.TUMOR
                     return [meta, flagstat]

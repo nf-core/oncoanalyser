@@ -16,6 +16,9 @@ process PURPLE {
     path driver_gene_panel
     path ensembl_data_resources
     path germline_del
+    path target_region_bed
+    path target_region_ratios
+    path target_region_msi_indels
 
     output:
     tuple val(meta), path('purple/'), emit: purple_dir
@@ -27,6 +30,8 @@ process PURPLE {
     script:
     def args = task.ext.args ?: ''
 
+    def reference_arg = meta.containsKey('normal_id') ? "-reference ${meta.normal_id}" : ''
+
     def sv_tumor_vcf_arg = sv_tumor_vcf ? "-somatic_sv_vcf ${sv_tumor_vcf}" : ''
     def sv_normal_vcf_arg = sv_normal_vcf ? "-germline_sv_vcf ${sv_normal_vcf}" : ''
 
@@ -35,7 +40,12 @@ process PURPLE {
     def smlv_tumor_vcf_fp = smlv_tumor_vcf ?: ''
     def smlv_normal_vcf_fp = smlv_normal_vcf ?: ''
 
+    def sage_known_hotspots_germline_arg = sage_known_hotspots_germline ? "-germline_hotspots ${sage_known_hotspots_germline}" : ''
     def germline_del_arg = germline_del ? "-germline_del_freq_file ${germline_del}" : ''
+
+    def target_region_bed_arg = target_region_bed ? "-target_regions_bed ${target_region_bed}" : ''
+    def target_region_ratios_arg = target_region_ratios ? "-target_regions_ratios ${target_region_ratios}" : ''
+    def target_region_msi_indels_arg = target_region_msi_indels ? "-target_regions_msi_indels ${target_region_msi_indels}" : ''
 
     """
     # For provided smlv VCFs, filter records that do not contain the required FORMAT/AD field and
@@ -58,7 +68,7 @@ process PURPLE {
         -jar ${task.ext.jarPath} \\
             ${args} \\
             -tumor ${meta.tumor_id} \\
-            -reference ${meta.normal_id} \\
+            ${reference_arg} \\
             -amber ${amber} \\
             -cobalt ${cobalt} \\
             ${sv_tumor_vcf_arg} \\
@@ -71,7 +81,10 @@ process PURPLE {
             -driver_gene_panel ${driver_gene_panel} \\
             -ensembl_data_dir ${ensembl_data_resources} \\
             -somatic_hotspots ${sage_known_hotspots_somatic} \\
-            -germline_hotspots ${sage_known_hotspots_germline} \\
+            ${sage_known_hotspots_germline_arg} \\
+            ${target_region_bed_arg} \\
+            ${target_region_ratios_arg} \\
+            ${target_region_msi_indels_arg} \\
             ${germline_del_arg} \\
             -gc_profile ${gc_profile} \\
             -circos ${task.ext.circosPath} \\

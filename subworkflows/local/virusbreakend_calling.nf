@@ -7,8 +7,6 @@ import Utils
 include { VIRUSBREAKEND    } from '../../modules/local/virusbreakend/main'
 include { VIRUSINTERPRETER } from '../../modules/local/virusinterpreter/main'
 
-include { CHANNEL_GROUP_INPUTS } from './channel_group_inputs'
-
 workflow VIRUSBREAKEND_CALLING {
     take:
         // Sample data
@@ -27,29 +25,24 @@ workflow VIRUSBREAKEND_CALLING {
         ref_data_virus_taxonomy_db
         ref_data_virus_reporting_db
 
-        // Parameters
-        run
+        // Params
         gridss_config
+        run_config
 
     main:
         // Channel for version.yml files
         ch_versions = Channel.empty()
 
-        // Get input meta groups
-        CHANNEL_GROUP_INPUTS(
-            ch_inputs,
-        )
-
         // VIRUSBreakend
         // Create inputs and create process-specific meta
         // channel: [val(meta_virus), tumor_bam]
-        ch_virusbreakend_inputs = CHANNEL_GROUP_INPUTS.out.wgs_present
+        ch_virusbreakend_inputs = ch_inputs
             .map { meta ->
                 def meta_virus = [
                     key: meta.id,
                     id: meta.id,
                 ]
-                return [meta_virus, Utils.getTumorWgsBam(meta)]
+                return [meta_virus, Utils.getTumorBam(meta, run_config.mode)]
             }
 
         // Run process
@@ -66,7 +59,7 @@ workflow VIRUSBREAKEND_CALLING {
         )
 
         // Create inputs and create process-specific meta
-        if (run.purple) {
+        if (run_config.stages.purple) {
             ch_virusinterpreter_inputs_purple = ch_purple
         } else {
             ch_virusinterpreter_inputs_purple = WorkflowOncoanalyser.getInput(ch_inputs, Constants.INPUT.PURPLE_DIR)
@@ -74,25 +67,25 @@ workflow VIRUSBREAKEND_CALLING {
 
         // channel: [val(meta), purple_qc, wgs_metrics]
         ch_virusinterpreter_inputs_purple_files = ch_virusinterpreter_inputs_purple
-            .filter { it[0] != Constants.META_PLACEHOLDER }
+            .filter { it[0] != Constants.PLACEHOLDER_META }
             .map { meta, purple_dir ->
-                def tumor_id = Utils.getTumorWgsSampleName(meta)
+                def tumor_id = Utils.getTumorSampleName(meta, run_config.mode)
                 def purple_purity = file(purple_dir).resolve("${tumor_id}.purple.purity.tsv")
                 def purple_qc = file(purple_dir).resolve("${tumor_id}.purple.qc")
 
                 // Require both purity and QC files from the PURPLE directory
                 if (!purple_purity.exists() || !purple_qc.exists()) {
-                    return Constants.META_PLACEHOLDER
+                    return Constants.PLACEHOLDER_META
                 }
                 return [meta, purple_purity, purple_qc]
             }
-            .filter { it != Constants.META_PLACEHOLDER }
+            .filter { it != Constants.PLACEHOLDER_META }
 
         // channel: [val(meta), virus_tsv, purple_purity, purple_qc, wgs_metrics]
         ch_virusinterpreter_inputs_full = WorkflowOncoanalyser.groupByMeta(
             WorkflowOncoanalyser.restoreMeta(VIRUSBREAKEND.out.tsv, ch_inputs),
             ch_virusinterpreter_inputs_purple_files,
-            run.bamtools ? ch_bamtools_somatic : WorkflowOncoanalyser.getInput(ch_inputs, Constants.INPUT.INPUT_BAMTOOLS_TUMOR),
+            run_config.stages.bamtools ? ch_bamtools_somatic : WorkflowOncoanalyser.getInput(ch_inputs, Constants.INPUT.INPUT_BAMTOOLS_TUMOR),
         )
 
         // Virus Interpreter
@@ -103,7 +96,7 @@ workflow VIRUSBREAKEND_CALLING {
                 def meta = it[0]
                 def meta_virus = [
                     key: meta.id,
-                    id: Utils.getTumorWgsSampleName(meta),
+                    id: Utils.getTumorSampleName(meta, run_config.mode),
                 ]
                 return [meta_virus, *it[1..-1]]
             }

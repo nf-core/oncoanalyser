@@ -2,9 +2,9 @@
 // Prepare reference data as required
 //
 
-include { SAMTOOLS_FAIDX         } from '../../modules/nf-core/samtools/faidx/main'
-include { SAMTOOLS_DICT          } from '../../modules/nf-core/samtools/dict/main'
-include { BWA_INDEX              } from '../../modules/nf-core/bwa/index/main'
+include { SAMTOOLS_FAIDX } from '../../modules/nf-core/samtools/faidx/main'
+include { SAMTOOLS_DICT  } from '../../modules/nf-core/samtools/dict/main'
+include { BWA_INDEX      } from '../../modules/nf-core/bwa/index/main'
 
 include { CUSTOM_EXTRACTTARBALL as DECOMP_BWA_INDEX        } from '../../modules/local/custom/extract_tarball/main'
 include { CUSTOM_EXTRACTTARBALL as DECOMP_HMF_DATA         } from '../../modules/local/custom/extract_tarball/main'
@@ -14,7 +14,7 @@ include { GRIDSS_INDEX as GRIDSS_INDEX                     } from '../../modules
 
 workflow PREPARE_REFERENCE {
     take:
-        run // map: stages to run
+        run_config // map: run configuration
 
     main:
         // Channel for version.yml files
@@ -50,7 +50,7 @@ workflow PREPARE_REFERENCE {
         ch_genome_bwa_index = file(params.ref_data_genome_bwa_index)
         ch_genome_bwa_index_image = file(params.ref_data_genome_bwa_index_image)
         ch_genome_gridss_index = file(params.ref_data_genome_gridss_index)
-        if (run.gridss || run.virusinterpreter) {
+        if (run_config.stages.gridss || run_config.stages.virusinterpreter) {
             // NOTE(SW): the BWA index directory can be provided as a compressed tarball
             if (!params.ref_data_genome_bwa_index) {
                 BWA_INDEX([[:], ch_genome_fasta])
@@ -95,7 +95,7 @@ workflow PREPARE_REFERENCE {
         // Set VIRUSBreakend database path / stage, unpack if required
         //
         ch_virusbreakenddb = Channel.empty()
-        if (run.virusinterpreter) {
+        if (run_config.stages.virusinterpreter) {
             if (params.ref_data_virusbreakenddb_path.endsWith('.tar.gz')) {
                 ch_virusbreakenddb_inputs = [
                     [id: 'virusbreakenddb'],
@@ -111,8 +111,8 @@ workflow PREPARE_REFERENCE {
         //
         // Set HMF reference paths / stage, unpack if required
         //
+        hmf_data_paths = params.hmf_data_paths[params.ref_data_genome_version]
         if (params.ref_data_hmf_data_path.endsWith('tar.gz')) {
-            // Decompress and set paths
             ch_hmf_data_inputs = [
                 [id: 'hmf_data'],
                 file(params.ref_data_hmf_data_path),
@@ -124,14 +124,10 @@ workflow PREPARE_REFERENCE {
                 .map { dir_list ->
                     assert dir_list.size() == 1
                     def dirpath = dir_list[0].toUriString()
-                    return createHmfDataMap(dirpath, false /* params_only */)
+                    return createDataMap(hmf_data_paths, dirpath)
                 }
-        } else if (params.ref_data_hmf_data_path) {
-            // If provided as path to directory, set paths
-            ch_hmf_data = createHmfDataMap(params.ref_data_hmf_data_path, false /* params_only */)
         } else {
-            // If no HMF data bundle is supplied we construct from *only* params
-            ch_hmf_data = createHmfDataMap(null, true /* params_only */)
+            ch_hmf_data = createDataMap(hmf_data_paths, params.ref_data_hmf_data_path)
         }
 
     emit:
@@ -149,82 +145,15 @@ workflow PREPARE_REFERENCE {
         versions               = ch_versions                    // channel: [versions.yml]
 }
 
-def createHmfDataMap(hmf_data_path, params_only) {
-    // NOTE(SW): this code provides an explicit mapping between user exposed HMF data params and
-    // their corresponding internal representation
-    def params_mapping = [
-        // AMBER
-        heterozygous_sites:           'ref_data_heterozygous_sites',
-        // COBALT
-        gc_profile:                   'ref_data_gc_profile',
-        // CUPPA
-        cuppa_resources:              'ref_data_cuppa_resources',
-        // SVPREP
-        'sv_prep_blocklist':          'ref_data_sv_prep_blocklist',
-        // GRIDSS, GRIPSS
-        gridss_pon_breakends:         'ref_data_gridss_pon_breakends',
-        gridss_pon_breakpoints:       'ref_data_gridss_pon_breakpoints',
-        gridss_region_blocklist:      'ref_data_gridss_region_blocklist',
-        repeatmasker_annotations:     'ref_data_repeatmasker_annotations',
-        // Isofox
-        isofox_counts:                'ref_data_isofox_counts',
-        isofox_gc_ratios:             'ref_data_isofox_gc_ratios',
-        // LILAC
-        lilac_resources:              'ref_data_lilac_resources',
-        hla_slice_bed:                'ref_data_hla_slice_bed',
-        // ORANGE
-        cohort_mapping:               'ref_data_cohort_mapping',
-        cohort_percentiles:           'ref_data_cohort_percentiles',
-        alt_sj_distribution:          'ref_data_alt_sj_distribution',
-        gene_exp_distribution:        'ref_data_gene_exp_distribution',
-        // SAGE
-        clinvar_annotations:          'ref_data_clinvar_annotations',
-        sage_blocklist_regions:       'ref_data_sage_blocklist_regions',
-        sage_blocklist_sites:         'ref_data_sage_blocklist_sites',
-        sage_actionable_panel:        'ref_data_sage_actionable_panel',
-        sage_coverage_panel:          'ref_data_sage_coverage_panel',
-        sage_highconf_regions:        'ref_data_sage_highconf_regions',
-        sage_known_hotspots_germline: 'ref_data_sage_known_hotspots_germline',
-        sage_known_hotspots_somatic:  'ref_data_sage_known_hotspots_somatic',
-        sage_pon:                     'ref_data_sage_pon',
-        // SIGS
-        sigs_signatures:              'ref_data_sigs_signatures',
-        // Virus Interpreter
-        virus_reporting_db:           'ref_data_virus_reporting_db',
-        virus_taxonomy_db:            'ref_data_virus_taxonomy_db',
-        // Misc
-        disease_ontology:             'ref_data_disease_ontology',
-        driver_gene_panel:            'ref_data_driver_gene_panel',
-        ensembl_data_resources:       'ref_data_ensembl_data_resources',
-        gnomad_resource:              'ref_data_gnomad_resource',
-        known_fusion_data:            'ref_data_known_fusion_data',
-        known_fusions:                'ref_data_known_fusions',
-        purple_germline_del:          'ref_data_purple_germline_del',
-        segment_mappability:          'ref_data_segment_mappability',
-    ]
-    params_mapping.collectEntries { k, v ->
-        [k, getHmfDataFileObject(v, k, hmf_data_path, params_only)]
-    }
+def createDataMap(entries, ref_data_path) {
+    return entries
+        .collectEntries { name, path ->
+            def ref_data_file = getRefdataFile(path, ref_data_path)
+            return [name, ref_data_file]
+        }
 }
 
-def getHmfDataFileObject(pk, hk, base_dir, params_only) {
-    def hmfdata_paths = params.hmfdata_paths.getAt(params.ref_data_genome_version)
-    if (params.containsKey(pk)) {
-        return file(params.getAt(pk), checkIfExists: true)
-    } else if (params_only) {
-        log.error "ERROR: no entry for ${pk} found in params but is required as no HMF data base path provided"
-        System.exit(1)
-    } else if (!hmfdata_paths.containsKey(hk)) {
-        assert false : "bad key for params.hmfdata_paths.${params.genome_version}: ${hk}"
-    } else {
-
-      // NOTE(SW): allow paths to optionally set by checking for and returning '[]' values
-      def value = hmfdata_paths.getAt(hk)
-      if (value == []) {
-          return value
-      }
-
-      def base_dir_noslash = base_dir.toString().replaceAll('/$', '')
-      return file("${base_dir_noslash}/${hmfdata_paths.getAt(hk)}", checkIfExists: true)
-    }
+def getRefdataFile(filepath, ref_data_path) {
+    def data_path_noslash = ref_data_path.toString().replaceAll('/$', '')
+    return file("${data_path_noslash}/${filepath}", checkIfExists: true)
 }

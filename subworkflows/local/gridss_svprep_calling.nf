@@ -11,12 +11,11 @@ include { GRIDSS_PREPROCESS as PREPROCESS           } from '../../modules/local/
 include { SVPREP as SVPREP_NORMAL                   } from '../../modules/local/svprep/svprep/main'
 include { SVPREP as SVPREP_TUMOR                    } from '../../modules/local/svprep/svprep/main'
 
-include { CHANNEL_GROUP_INPUTS } from './channel_group_inputs'
-
 workflow GRIDSS_SVPREP_CALLING {
     take:
         // Sample data
         ch_inputs                       // channel: [val(meta)]
+        gridss_config                   //    file: /path/to/gridss_config (optional)
 
         // Reference data
         ref_data_genome_fasta           //    file: /path/to/genome_fasta
@@ -31,27 +30,25 @@ workflow GRIDSS_SVPREP_CALLING {
         ref_data_known_fusions          //    file: /path/to/known_fusions
 
         // Params
-        gridss_config                   //    file: /path/to/gridss_config (optional)
+        run_config
 
     main:
         // Channel for version.yml files
         ch_versions = Channel.empty()
 
-        // Get input meta groups
-        CHANNEL_GROUP_INPUTS(
-            ch_inputs,
-        )
-
+        //
+        // MODULE: SV Prep (tumor)
+        //
         // Prepare tumor sample inputs
         // channel: [val(meta_svprep), bam_tumor, bai_tumor, []]
-        ch_svprep_tumor_inputs = CHANNEL_GROUP_INPUTS.out.wgs_present
+        ch_svprep_tumor_inputs = ch_inputs
             .map { meta ->
                 def meta_svprep = [
                     key: meta.id,
-                    id: Utils.getTumorWgsSampleName(meta),
+                    id: Utils.getTumorSampleName(meta, run_config.mode),
                     sample_type: 'tumor',
                 ]
-                def tumor_bam = Utils.getTumorWgsBam(meta)
+                def tumor_bam = Utils.getTumorBam(meta, run_config.mode)
                 return [meta_svprep, tumor_bam, "${tumor_bam}.bai", []]
             }
 
@@ -66,47 +63,60 @@ workflow GRIDSS_SVPREP_CALLING {
         )
         ch_versions = ch_versions.mix(SVPREP_TUMOR.out.versions)
 
-        // Prepare normal sample inputs
-        // channel: [val(meta_svprep), bam_normal, bai_normal, junctions_tumor]
-        ch_svprep_normal_inputs = WorkflowOncoanalyser.restoreMeta(SVPREP_TUMOR.out.junctions, ch_inputs)
-            .map { meta, junctions_tumor ->
-                def meta_svprep = [
-                    key: meta.id,
-                    id: Utils.getNormalWgsSampleName(meta),
-                    sample_type: 'normal',
-                ]
-                def normal_bam = Utils.getNormalWgsBam(meta)
-                return [meta_svprep, normal_bam, "${normal_bam}.bai", junctions_tumor]
-            }
-
-        SVPREP_NORMAL(
-            ch_svprep_normal_inputs,
-            ref_data_genome_fasta,
-            ref_data_genome_version,
-            ref_data_sv_prep_blocklist,
-            ref_data_known_fusions,
-            false, // -write_types argument switch and value
-        )
-        ch_versions = ch_versions.mix(SVPREP_NORMAL.out.versions)
-
         // channel: [val(meta_gridss), bam_tumor, bam_tumor_filtered]
         ch_preprocess_inputs_tumor = WorkflowOncoanalyser.groupByMeta(
             SVPREP_TUMOR.out.bam,
             ch_svprep_tumor_inputs,
         )
-            .map { meta_svprep, bam_filtered, bam, bai ->
+            .map { meta_svprep, bam_filtered, bam, bai, jnc_optional ->
                 return [meta_svprep, bam, bam_filtered]
             }
 
+        //
+        // MODULE: SV Prep (normal)
+        //
         // channel: [val(meta_gridss), bam_normal, bam_normal_filtered]
-        ch_preprocess_inputs_normal = WorkflowOncoanalyser.groupByMeta(
-            SVPREP_NORMAL.out.bam,
-            ch_svprep_normal_inputs,
-        )
-            .map { meta_svprep, bam_filtered, bam, bai, junctions ->
-                return [meta_svprep, bam, bam_filtered]
-            }
+        ch_preprocess_inputs_normal = Channel.empty()
+        if (run_config.type == Constants.RunType.TUMOR_NORMAL) {
 
+            assert [Constants.RunMode.WGS, Constants.RunMode.WGTS].contains(run_config.mode)
+
+            // Prepare normal sample inputs
+            // channel: [val(meta_svprep), bam_normal, bai_normal, junctions_tumor]
+            ch_svprep_normal_inputs = WorkflowOncoanalyser.restoreMeta(SVPREP_TUMOR.out.junctions, ch_inputs)
+                .map { meta, junctions_tumor ->
+                    def meta_svprep = [
+                        key: meta.id,
+                        id: Utils.getNormalWgsSampleName(meta),
+                        sample_type: 'normal',
+                    ]
+                    def normal_bam = Utils.getNormalWgsBam(meta)
+                    return [meta_svprep, normal_bam, "${normal_bam}.bai", junctions_tumor]
+                }
+
+            SVPREP_NORMAL(
+                ch_svprep_normal_inputs,
+                ref_data_genome_fasta,
+                ref_data_genome_version,
+                ref_data_sv_prep_blocklist,
+                ref_data_known_fusions,
+                false, // -write_types argument switch and value
+            )
+            ch_versions = ch_versions.mix(SVPREP_NORMAL.out.versions)
+
+            // channel: [val(meta_gridss), bam_normal, bam_normal_filtered]
+            ch_preprocess_inputs_normal = WorkflowOncoanalyser.groupByMeta(
+                SVPREP_NORMAL.out.bam,
+                ch_svprep_normal_inputs,
+            )
+                .map { meta_svprep, bam_filtered, bam, bai, junctions ->
+                    return [meta_svprep, bam, bam_filtered]
+                }
+        }
+
+        //
+        // MODULE: GRIDSS preprocess
+        //
         // channel: [val(meta_gridss), bam, bam_filtered]
         ch_preprocess_inputs = Channel.empty()
             .mix(
@@ -129,27 +139,51 @@ workflow GRIDSS_SVPREP_CALLING {
 
         // Gather BAMs and outputs from preprocessing for each tumor/normal set
         // channel: [key, [[val(meta_gridss), bam, bam_filtered, preprocess_dir], ...]]
+        preprocess_group_tuple_size = run_config.type == Constants.RunType.TUMOR_NORMAL ? 2 : 1
         ch_bams_and_preprocess = WorkflowOncoanalyser.groupByMeta(
             ch_preprocess_inputs,
             PREPROCESS.out.preprocess_dir,
         )
         .map { [it[0].key, it] }
-        .groupTuple(size: 2)
+        .groupTuple(size: preprocess_group_tuple_size)
 
+        //
+        // MODULE: GRIDSS assemble
+        //
         // Order and organise inputs for assembly
         // channel: [val(meta_gridss), [bams], [bams_filtered], [preprocess_dirs], [labels]]
         ch_assemble_inputs = ch_bams_and_preprocess
             .map { key, entries ->
                 def (tmeta, tbam, tbam_filtered, tpreprocess) = entries.find { e -> e[0].sample_type == 'tumor' }
-                def (nmeta, nbam, nbam_filtered, npreprocess) = entries.find { e -> e[0].sample_type == 'normal' }
                 def meta_gridss = [id: tmeta.key]
-                return [
-                    meta_gridss,
-                    [nbam, tbam],
-                    [nbam_filtered, tbam_filtered],
-                    [npreprocess, tpreprocess],
-                    [nmeta.id, tmeta.id],
-                ]
+
+                def data = []
+                if (run_config.type == Constants.RunType.TUMOR_ONLY) {
+
+                    data = [
+                        meta_gridss,
+                        tbam,
+                        tbam_filtered,
+                        tpreprocess,
+                        tmeta.id,
+                    ]
+
+                } else if (run_config.type == Constants.RunType.TUMOR_NORMAL) {
+
+                    def (nmeta, nbam, nbam_filtered, npreprocess) = entries.find { e -> e[0].sample_type == 'normal' }
+                    data = [
+                        meta_gridss,
+                        [nbam, tbam],
+                        [nbam_filtered, tbam_filtered],
+                        [npreprocess, tpreprocess],
+                        [nmeta.id, tmeta.id],
+                    ]
+
+                } else {
+                    assert false
+                }
+
+                return data
             }
 
         // Assemble variants
@@ -166,6 +200,9 @@ workflow GRIDSS_SVPREP_CALLING {
         )
         ch_versions = ch_versions.mix(ASSEMBLE.out.versions)
 
+        //
+        // MODULE: GRIDSS call
+        //
         // Prepare inputs for variant calling
         // channel: [val(meta_gridss), [bams], [bams_filtered], assemble_dir, [labels]]
         ch_call_inputs = WorkflowOncoanalyser.groupByMeta(
@@ -194,23 +231,48 @@ workflow GRIDSS_SVPREP_CALLING {
         )
         ch_versions = ch_versions.mix(CALL.out.versions)
 
+        //
+        // MODULE: SV Prep depth annotation
+        //
         // Prepare inputs for depth annotation, restore original meta
         // channel: [val(meta_svprep), [bams], [bais], vcf, [labels]]
         ch_depth_inputs = WorkflowOncoanalyser.groupByMeta(
-            CHANNEL_GROUP_INPUTS.out.wgs_present.map { meta -> [meta.id, meta] },
+            ch_inputs.map { meta -> [meta.id, meta] },
             CALL.out.vcf.map { meta, vcf -> [meta.id, vcf] },
         )
             .map { id, meta, vcf ->
-                def tbam = Utils.getTumorWgsBam(meta)
-                def nbam = Utils.getNormalWgsBam(meta)
+                def tbam = Utils.getTumorBam(meta, run_config.mode)
                 def meta_svprep = [id: meta.id]
-                return [
-                    meta_svprep,
-                    [nbam, tbam],
-                    ["${nbam}.bai", "${tbam}.bai"],
-                    vcf,
-                    [Utils.getNormalWgsSampleName(meta), Utils.getTumorWgsSampleName(meta)],
-                ]
+
+                def data = []
+                if (run_config.type == Constants.RunType.TUMOR_ONLY) {
+
+                    data = [
+                        meta_svprep,
+                        tbam,
+                        "${tbam}.bai",
+                        vcf,
+                        Utils.getTumorSampleName(meta, run_config.mode),
+                    ]
+
+                } else if (run_config.type == Constants.RunType.TUMOR_NORMAL) {
+
+                    def nbam = Utils.getNormalWgsBam(meta)
+
+                    data = [
+                        meta_svprep,
+                        [nbam, tbam],
+                        ["${nbam}.bai", "${tbam}.bai"],
+                        vcf,
+                        [Utils.getNormalWgsSampleName(meta), Utils.getTumorWgsSampleName(meta)],
+                    ]
+
+                } else {
+                    assert false
+                }
+
+                return data
+
             }
 
         // Add depth annotations to SVs
@@ -223,7 +285,7 @@ workflow GRIDSS_SVPREP_CALLING {
         // Reunite final VCF with the corresponding input meta object
         ch_out = Channel.empty()
             .concat(
-                CHANNEL_GROUP_INPUTS.out.wgs_present.map { meta -> [meta.id, meta] },
+                ch_inputs.map { meta -> [meta.id, meta] },
                 DEPTH_ANNOTATOR.out.vcf.map { meta, vcf -> [meta.id, vcf] },
             )
             .groupTuple(size: 2)

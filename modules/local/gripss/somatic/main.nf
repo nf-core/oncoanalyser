@@ -13,11 +13,12 @@ process GRIPSS_SOMATIC {
     path pon_breakpoints
     path known_fusions
     path repeatmasker_annotations
+    path target_regions_bed
 
     output:
-    tuple val(meta), path('*.filtered.somatic.vcf.gz'), path('*.filtered.somatic.vcf.gz.tbi'), emit: vcf
-    tuple val(meta), path('*.gripss.somatic.vcf.gz'), path('*.gripss.somatic.vcf.gz.tbi')    , emit: vcf_unfiltered
-    path 'versions.yml'                                                                      , emit: versions
+    tuple val(meta), path('*.gripss.filtered{,.somatic}.vcf.gz'), path('*.gripss.filtered{,.somatic}.vcf.gz.tbi'), emit: vcf
+    tuple val(meta), path('*.gripss{,.somatic}.vcf.gz'), path('*.gripss{,.somatic}.vcf.gz.tbi')                  , emit: vcf_unfiltered
+    path 'versions.yml'                                                                                          , emit: versions
 
     when:
     task.ext.when == null || task.ext.when
@@ -25,13 +26,17 @@ process GRIPSS_SOMATIC {
     script:
     def args = task.ext.args ?: ''
 
+    def reference_arg = meta.containsKey('normal_id') ? "-reference ${meta.normal_id}" : ''
+    def target_regions_bed_arg = target_regions_bed ? "-target_regions_bed ${target_regions_bed}" : ''
+    def output_id_arg = meta.containsKey('normal_id') ? '-output_id somatic' : ''
+
     """
     java \\
         -Xmx${Math.round(task.memory.bytes * 0.95)} \\
         -jar ${task.ext.jarPath} \\
             ${args} \\
             -sample ${meta.tumor_id} \\
-            -reference ${meta.normal_id} \\
+            ${reference_arg} \\
             -vcf ${gridss_vcf} \\
             -ref_genome ${genome_fasta} \\
             -ref_genome_version ${genome_ver} \\
@@ -39,7 +44,8 @@ process GRIPSS_SOMATIC {
             -pon_sv_file ${pon_breakpoints} \\
             -known_hotspot_file ${known_fusions} \\
             -repeat_mask_file ${repeatmasker_annotations} \\
-            -output_id somatic \\
+            ${target_regions_bed_arg} \\
+            ${output_id_arg} \\
             -output_dir ./
 
     cat <<-END_VERSIONS > versions.yml

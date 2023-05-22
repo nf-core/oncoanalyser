@@ -15,8 +15,8 @@ workflow SIGS_FITTING {
         // Reference data
         ref_data_sigs_signatures
 
-        // Parameters
-        run
+        // Params
+        run_config
 
     main:
         // Channel for version.yml files
@@ -24,7 +24,7 @@ workflow SIGS_FITTING {
 
         // Select input sources
         // channel: [val(meta), purple_dir]
-        if (run.purple) {
+        if (run_config.stages.purple) {
             ch_sigs_inputs_source = ch_purple
         } else {
             ch_sigs_inputs_source = WorkflowOncoanalyser.getInput(ch_inputs, Constants.INPUT.PURPLE_DIR)
@@ -40,7 +40,7 @@ workflow SIGS_FITTING {
 
                 // Require smlv VCF from the PURPLE directory
                 if (!smlv_vcf.exists()) {
-                    return Constants.META_PLACEHOLDER
+                    return Constants.PLACEHOLDER_META
                 }
 
                 def meta_sigs = [
@@ -50,7 +50,7 @@ workflow SIGS_FITTING {
                 ]
                 return [meta_sigs, smlv_vcf]
             }
-            .filter { it != Constants.META_PLACEHOLDER }
+            .filter { it != Constants.PLACEHOLDER_META }
 
         SIGS(
           ch_sigs_inputs,

@@ -9,18 +9,23 @@ class Constants {
     static List GENOMES_DEFINED    = Constants.GENOMES_VERSION_37 + Constants.GENOMES_VERSION_38
 
 
-    static String HMF_DATA_37_PATH = 'https://pub-29f2e5b2b7384811bdbbcba44f8b5083.r2.dev/hmf_reference_data/repacks/5.32_37_0.0.2.tar.gz'
-    static String HMF_DATA_38_PATH = 'https://pub-29f2e5b2b7384811bdbbcba44f8b5083.r2.dev/hmf_reference_data/repacks/5.32_38_0.0.2.tar.gz'
+    static String HMF_DATA_37_PATH = 'https://pub-29f2e5b2b7384811bdbbcba44f8b5083.r2.dev/hmf_reference_data/hmftools/5.32_37_0.0.3.tar.gz'
+    static String HMF_DATA_38_PATH = 'https://pub-29f2e5b2b7384811bdbbcba44f8b5083.r2.dev/hmf_reference_data/hmftools/5.32_38_0.0.3.tar.gz'
+
 
     static String VIRUSBREAKENDDB_PATH = 'https://pub-29f2e5b2b7384811bdbbcba44f8b5083.r2.dev/virusbreakend/virusbreakenddb_20210401.tar.gz'
 
     static String HLA_SLICE_BED_GRCH38_ALT_PATH = 'https://pub-29f2e5b2b7384811bdbbcba44f8b5083.r2.dev/umccr_reference_data/other/hla_slice/grch38_alt.plus_homologous.bed'
 
-    static enum PipelineMode {
-        FULL,
-        MANUAL,
-        GRIDSS_PURPLE_LINX,
-        CUPPA,
+    static enum RunType {
+        TUMOR_NORMAL,
+        TUMOR_ONLY,
+    }
+
+    static enum RunMode {
+        WGS,
+        WGTS,
+        WTS,
     }
 
     static enum Process {
@@ -40,7 +45,6 @@ class Constants {
         PURPLE,
         SAGE,
         SIGS,
-        SVPREP,
         VIRUSINTERPRETER,
     }
 
@@ -83,48 +87,163 @@ class Constants {
         WTS,
     }
 
-    static Map META_PLACEHOLDER = [meta_placeholder: null]
+    static Map PLACEHOLDER_META = [meta_placeholder: null]
+    static List PLACEHOLDER_OPTIONAL_CHANNEL = []
 
     static Map INPUT = [
-        ISOFOX_DIR:             [FileType.ISOFOX_DIR,           SampleType.TUMOR,        SequenceType.WTS],
 
-        AMBER_DIR:              [FileType.AMBER_DIR,            SampleType.TUMOR_NORMAL, SequenceType.WGS],
-        COBALT_DIR:             [FileType.COBALT_DIR,           SampleType.TUMOR_NORMAL, SequenceType.WGS],
+        ISOFOX_DIR: [
+            FileType.ISOFOX_DIR,
+            SampleType.TUMOR,
+            SequenceType.WTS
+        ],
 
-        BAMTOOLS_TUMOR:         [FileType.BAMTOOLS,             SampleType.TUMOR,        SequenceType.WGS],
-        BAMTOOLS_NORMAL:        [FileType.BAMTOOLS,             SampleType.NORMAL,       SequenceType.WGS],
+        AMBER_DIR: [
+            FileType.AMBER_DIR,
+            [SampleType.TUMOR, SampleType.TUMOR_NORMAL],
+            SequenceType.WGS,
+        ],
+        COBALT_DIR: [
+            FileType.COBALT_DIR,
+            [SampleType.TUMOR, SampleType.TUMOR_NORMAL],
+            SequenceType.WGS,
+        ],
 
-        FLAGSTAT_TUMOR:         [FileType.FLAGSTAT,             SampleType.TUMOR,        SequenceType.WGS],
-        FLAGSTAT_NORMAL:        [FileType.FLAGSTAT,             SampleType.NORMAL,       SequenceType.WGS],
+        BAMTOOLS_TUMOR: [
+            FileType.BAMTOOLS,
+            SampleType.TUMOR,
+            SequenceType.WGS,
+        ],
+        BAMTOOLS_NORMAL: [
+            FileType.BAMTOOLS,
+            SampleType.NORMAL,
+            SequenceType.WGS,
+        ],
 
-        SAGE_VCF_TUMOR:         [FileType.SAGE_VCF,             SampleType.TUMOR,        SequenceType.WGS],
-        SAGE_VCF_NORMAL:        [FileType.SAGE_VCF,             SampleType.NORMAL,       SequenceType.WGS],
-        SAGE_BQR_TUMOR:         [FileType.SAGE_BQR,             SampleType.TUMOR,        SequenceType.WGS],
-        SAGE_BQR_NORMAL:        [FileType.SAGE_BQR,             SampleType.NORMAL,       SequenceType.WGS],
-        SAGE_COVERAGE:          [FileType.SAGE_COVERAGE,        SampleType.NORMAL,       SequenceType.WGS],
+        FLAGSTAT_TUMOR: [
+            FileType.FLAGSTAT,
+            SampleType.TUMOR,
+            SequenceType.WGS,
+        ],
+        FLAGSTAT_NORMAL: [
+            FileType.FLAGSTAT,
+            SampleType.NORMAL,
+            SequenceType.WGS
+        ],
 
-        PAVE_VCF_TUMOR:         [FileType.PAVE_VCF,             SampleType.TUMOR,        SequenceType.WGS],
-        PAVE_VCF_NORMAL:        [FileType.PAVE_VCF,             SampleType.NORMAL,       SequenceType.WGS],
+        SAGE_VCF_TUMOR: [
+            FileType.SAGE_VCF,
+            SampleType.TUMOR,
+            SequenceType.WGS,
+        ],
+        SAGE_VCF_NORMAL: [
+            FileType.SAGE_VCF,
+            SampleType.NORMAL,
+            SequenceType.WGS
+        ],
+        SAGE_BQR_TUMOR: [
+            FileType.SAGE_BQR,
+            SampleType.TUMOR,
+            SequenceType.WGS,
+        ],
+        SAGE_BQR_NORMAL: [
+            FileType.SAGE_BQR,
+            SampleType.NORMAL,
+            SequenceType.WGS
+        ],
+        SAGE_COVERAGE: [
+            FileType.SAGE_COVERAGE,
+            SampleType.NORMAL,
+            SequenceType.WGS
+        ],
 
-        GRIDSS_VCF:             [FileType.GRIDSS_VCF,           SampleType.TUMOR_NORMAL, SequenceType.WGS],
+        PAVE_VCF_TUMOR: [
+            FileType.PAVE_VCF,
+            SampleType.TUMOR,
+            SequenceType.WGS,
+        ],
+        PAVE_VCF_NORMAL: [
+            FileType.PAVE_VCF,
+            SampleType.NORMAL,
+            SequenceType.WGS
+        ],
 
-        GRIPSS_VCF_TUMOR:       [FileType.GRIPSS_VCF,           SampleType.TUMOR,        SequenceType.WGS],
-        GRIPSS_VCF_NORMAL:      [FileType.GRIPSS_VCF,           SampleType.NORMAL,       SequenceType.WGS],
-        GRIPSS_UNFILTERED_VCF_TUMOR:  [FileType.GRIPSS_UNFILTERED_VCF,  SampleType.TUMOR,   SequenceType.WGS],
-        GRIPSS_UNFILTERED_VCF_NORMAL: [FileType.GRIPSS_UNFILTERED_VCF,  SampleType.NORMAL,  SequenceType.WGS],
+        GRIDSS_VCF: [
+            FileType.GRIDSS_VCF,
+            [SampleType.TUMOR, SampleType.TUMOR_NORMAL],
+            SequenceType.WGS,
+        ],
 
-        PURPLE_DIR:             [FileType.PURPLE_DIR,           SampleType.TUMOR_NORMAL, SequenceType.WGS],
+        GRIPSS_VCF_TUMOR: [
+            FileType.GRIPSS_VCF,
+            [SampleType.TUMOR, SampleType.TUMOR_NORMAL],
+            SequenceType.WGS,
+        ],
+        GRIPSS_VCF_NORMAL: [
+            FileType.GRIPSS_VCF,
+            SampleType.NORMAL,
+            SequenceType.WGS
+        ],
+        GRIPSS_UNFILTERED_VCF_TUMOR: [
+            FileType.GRIPSS_UNFILTERED_VCF,
+            [SampleType.TUMOR, SampleType.TUMOR_NORMAL],
+            SequenceType.WGS,
+        ],
+        GRIPSS_UNFILTERED_VCF_NORMAL: [
+            FileType.GRIPSS_UNFILTERED_VCF,
+            SampleType.NORMAL,
+            SequenceType.WGS
+        ],
 
-        LINX_PLOT_DIR_TUMOR:    [FileType.LINX_PLOT_DIR,        SampleType.TUMOR,        SequenceType.WGS],
-        LINX_ANNO_DIR_TUMOR:    [FileType.LINX_ANNO_DIR,        SampleType.TUMOR,        SequenceType.WGS],
-        LINX_ANNO_DIR_NORMAL:   [FileType.LINX_ANNO_DIR,        SampleType.NORMAL,       SequenceType.WGS],
+        PURPLE_DIR: [
+            FileType.PURPLE_DIR,
+            [SampleType.TUMOR, SampleType.TUMOR_NORMAL],
+            SequenceType.WGS,
+        ],
 
-        CHORD_PREDICTION:       [FileType.CHORD_PREDICTION,     SampleType.TUMOR,        SequenceType.WGS],
-        SIGS_DIR:               [FileType.SIGS_DIR,             SampleType.TUMOR,        SequenceType.WGS],
-        LILAC_DIR:              [FileType.LILAC_DIR,            SampleType.NORMAL,       SequenceType.WGS],
+        LINX_PLOT_DIR_TUMOR: [
+            FileType.LINX_PLOT_DIR,
+            SampleType.TUMOR,
+            SequenceType.WGS,
+        ],
+        LINX_ANNO_DIR_TUMOR: [
+            FileType.LINX_ANNO_DIR,
+            SampleType.TUMOR,
+            SequenceType.WGS,
+        ],
+        LINX_ANNO_DIR_NORMAL: [
+            FileType.LINX_ANNO_DIR,
+            SampleType.NORMAL,
+            SequenceType.WGS
+        ],
 
-        VIRUSINTERPRETER_TSV:   [FileType.VIRUSINTERPRETER_TSV, SampleType.TUMOR,        SequenceType.WGS],
+        CHORD_PREDICTION: [
+            FileType.CHORD_PREDICTION,
+            SampleType.TUMOR,
+            SequenceType.WGS
+        ],
+        SIGS_DIR: [
+            FileType.SIGS_DIR,
+            SampleType.TUMOR,
+            SequenceType.WGS
+        ],
+        LILAC_DIR: [
+            FileType.LILAC_DIR,
+            [SampleType.TUMOR, SampleType.NORMAL, SampleType.TUMOR_NORMAL],
+            [SequenceType.WGS, SequenceType.WGTS],
+        ],
 
-        CUPPA_DIR:              [FileType.CUPPA_DIR,            SampleType.TUMOR,        SequenceType.WGTS],
+        VIRUSINTERPRETER_TSV: [
+            FileType.VIRUSINTERPRETER_TSV,
+            SampleType.TUMOR,
+            SequenceType.WGS
+        ],
+
+        CUPPA_DIR: [
+            FileType.CUPPA_DIR,
+            SampleType.TUMOR,
+            [SequenceType.WGS, SequenceType.WTS, SequenceType.WGTS],
+        ],
+
     ]
 }

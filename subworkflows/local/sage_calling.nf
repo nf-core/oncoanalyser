@@ -5,8 +5,6 @@
 include { SAGE_GERMLINE as GERMLINE } from '../../modules/local/sage/germline/main'
 include { SAGE_SOMATIC as SOMATIC   } from '../../modules/local/sage/somatic/main'
 
-include { CHANNEL_GROUP_INPUTS } from './channel_group_inputs'
-
 workflow SAGE_CALLING {
     take:
         // Sample data
@@ -22,47 +20,73 @@ workflow SAGE_CALLING {
         ref_data_sage_actionable_panel        //    file: /path/to/sage_actionable_panel
         ref_data_sage_coverage_panel          //    file: /path/to/sage_coverage_panel
         ref_data_sage_highconf_regions        //    file: /path/to/sage_highconf_regions
-        ref_data_sage_pon                     //    file: /path/to/sage_pon
         ref_data_segment_mappability          //    file: /path/to/segment_mappability
         ref_data_driver_gene_panel            //    file: /path/to/driver_gene_panel
         ref_data_ensembl_data_resources       //    file: /path/to/ensembl_data_resources/
+        ref_data_ensembl_data_resources       //    file: /path/to/ensembl_data_resources/
+
+        // Params
+        run_config
 
     main:
         // Channel for version.yml files
         ch_versions = Channel.empty()
 
-        // Get input meta groups
-        CHANNEL_GROUP_INPUTS(
-            ch_inputs,
-        )
-
         // Get inputs
-        ch_sage_inputs = CHANNEL_GROUP_INPUTS.out.wgs_present
+        ch_sage_inputs = ch_inputs
             .map { meta ->
                 def meta_sage = [
                     key: meta.id,
                     id: meta.id,
-                    tumor_id: Utils.getTumorWgsSampleName(meta),
-                    normal_id: Utils.getNormalWgsSampleName(meta),
+                    tumor_id: Utils.getTumorSampleName(meta, run_config.mode),
                 ]
-                def tumor_bam = Utils.getTumorWgsBam(meta)
-                def normal_bam = Utils.getNormalWgsBam(meta)
-                return [meta_sage, tumor_bam, normal_bam, "${tumor_bam}.bai", "${normal_bam}.bai"]
+
+                def tumor_bam = Utils.getTumorBam(meta, run_config.mode)
+
+                def normal_bam = []
+                def normal_bai = []
+
+                if (run_config.type == Constants.RunType.TUMOR_NORMAL) {
+
+                    assert [Constants.RunMode.WGS, Constants.RunMode.WGTS].contains(run_config.mode)
+
+                    meta_sage.normal_id = Utils.getNormalWgsSampleName(meta)
+                    normal_bam = Utils.getNormalWgsBam(meta)
+                    normal_bai = "${normal_bam}.bai"
+
+                }
+
+                return [meta_sage, tumor_bam, normal_bam, "${tumor_bam}.bai", normal_bai]
             }
 
-        GERMLINE(
-            ch_sage_inputs,
-            ref_data_genome_fasta,
-            ref_data_genome_fai,
-            ref_data_genome_dict,
-            ref_data_genome_version,
-            ref_data_sage_known_hotspots_germline,
-            ref_data_sage_actionable_panel,
-            ref_data_sage_coverage_panel,
-            ref_data_sage_highconf_regions,
-            ref_data_ensembl_data_resources,
-        )
+        //
+        // MODULE: SAGE germline
+        //
+        ch_germline_vcf_out = Channel.empty()
+        ch_germline_coverage_out = Channel.empty()
+        if (run_config.type == Constants.RunType.TUMOR_NORMAL) {
 
+            GERMLINE(
+                ch_sage_inputs,
+                ref_data_genome_fasta,
+                ref_data_genome_fai,
+                ref_data_genome_dict,
+                ref_data_genome_version,
+                ref_data_sage_known_hotspots_germline,
+                ref_data_sage_actionable_panel,
+                ref_data_sage_coverage_panel,
+                ref_data_sage_highconf_regions,
+                ref_data_ensembl_data_resources,
+            )
+
+            ch_versions = ch_versions.mix(GERMLINE.out.versions)
+            ch_germline_vcf_out = WorkflowOncoanalyser.restoreMeta(GERMLINE.out.vcf_filtered, ch_inputs)
+            ch_germline_coverage_out = WorkflowOncoanalyser.restoreMeta(GERMLINE.out.gene_coverage, ch_inputs)
+        }
+
+        //
+        // MODULE: SAGE somatic
+        //
         SOMATIC(
             ch_sage_inputs,
             ref_data_genome_fasta,
@@ -71,17 +95,12 @@ workflow SAGE_CALLING {
             ref_data_genome_version,
             ref_data_sage_known_hotspots_somatic,
             ref_data_sage_actionable_panel,
+            ref_data_sage_coverage_panel,
             ref_data_sage_highconf_regions,
             ref_data_ensembl_data_resources,
         )
 
-        ch_versions = ch_versions.mix(
-            GERMLINE.out.versions,
-            SOMATIC.out.versions,
-        )
-
-        ch_germline_vcf_out = WorkflowOncoanalyser.restoreMeta(GERMLINE.out.vcf_filtered, ch_inputs)
-        ch_germline_coverage_out = WorkflowOncoanalyser.restoreMeta(GERMLINE.out.gene_coverage, ch_inputs)
+        ch_versions = ch_versions.mix(SOMATIC.out.versions)
         ch_somatic_vcf_out = WorkflowOncoanalyser.restoreMeta(SOMATIC.out.vcf_filtered, ch_inputs)
         ch_somatic_tumor_bqr_out = WorkflowOncoanalyser.restoreMeta(SOMATIC.out.tumor_bqr_png, ch_inputs)
         ch_somatic_normal_bqr_out = WorkflowOncoanalyser.restoreMeta(SOMATIC.out.normal_bqr_png, ch_inputs)

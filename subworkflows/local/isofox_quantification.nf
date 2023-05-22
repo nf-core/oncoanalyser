@@ -5,8 +5,6 @@ import Utils
 
 include { ISOFOX } from '../../modules/local/isofox/main'
 
-include { CHANNEL_GROUP_INPUTS } from './channel_group_inputs'
-
 workflow ISOFOX_QUANTIFICATION {
     take:
         // Sample data
@@ -23,24 +21,24 @@ workflow ISOFOX_QUANTIFICATION {
         // Params
         isofox_functions
         //use_isofox_exp_counts_cache
+        run_config
 
     main:
         // Channel for version.yml files
         ch_versions = Channel.empty()
 
-        // Get input meta groups
-        CHANNEL_GROUP_INPUTS(
-            ch_inputs,
-        )
-
         // Create inputs and create process-specific meta
         // channel: [meta_isofox, tumor_bam_wts]
-        ch_isofox_inputs = CHANNEL_GROUP_INPUTS.out.wts_present
-            .map { meta ->
-                def bam = Utils.getTumorWtsBam(meta)
-                def meta_isofox = [key: meta.id, id: Utils.getTumorWtsSampleName(meta)]
-                return [meta_isofox, bam, "${bam}.bai"]
-            }
+        if (run_config.stages.isofox) {
+            ch_isofox_inputs = ch_inputs
+                .map { meta ->
+                    def bam = Utils.getTumorWtsBam(meta)
+                    def meta_isofox = [key: meta.id, id: Utils.getTumorWtsSampleName(meta)]
+                    return [meta_isofox, bam, "${bam}.bai"]
+                }
+        } else {
+            ch_isofox_inputs = WorkflowOncoanalyser.getInput(ch_inputs, Constants.INPUT.ISOFOX_DIR, type: 'optional')
+        }
 
         // Set Isofox cache files
         // NOTE(SW): the Isofox expected count file is read length dependent so required users to explicitly use expect

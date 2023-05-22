@@ -9,26 +9,12 @@ import Utils
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 */
 
-// Set defaults and validate parameters
-WorkflowOncoanalyser.setParamsDefaults(params, log)
-WorkflowOncoanalyser.validateParams(params, log)
-
 // Get parameter summary and also print to console
 def summary_params = NfcoreSchema.paramsSummaryMap(workflow, params)
 WorkflowOncoanalyser.paramsSummaryLog(workflow, params, log)
 
-// Set processes to run
-processes = Processes.setProcesses(params.mode, log)
-processes_include = Processes.getProcessList(params.processes_include, log)
-processes_exclude = Processes.getProcessList(params.processes_exclude, log)
-Processes.checkIncludeExcludeList(processes_include, processes_exclude, log)
-
-processes.addAll(processes_include)
-processes.removeAll(processes_exclude)
-
-run = Constants.Process
-    .values()
-    .collectEntries { p -> [p.name().toLowerCase(), p in processes] }
+// Get run config
+run_config = WorkflowOncoanalyser.getRunConfig(params, log)
 
 // Check input path parameters to see if they exist
 def checkPathParamList = [
@@ -38,11 +24,11 @@ def checkPathParamList = [
 ]
 
 // Conditional requirements
-if (run.virusinterpreter) {
+if (run_config.stages.virusinterpreter) {
     checkPathParamList.add(params.ref_data_virusbreakenddb_path)
 }
 
-if (run.lilac && params.ref_data_genome_version == '38' && params.ref_data_genome_type == 'alt') {
+if (run_config.stages.lilac && params.ref_data_genome_version == '38' && params.ref_data_genome_type == 'alt') {
     checkPathParamList.add(params.ref_data_hla_slice_bed)
 }
 
@@ -76,7 +62,6 @@ include { BAMTOOLS_METRICS      } from '../subworkflows/local/bamtools_metrics'
 include { CHORD_PREDICTION      } from '../subworkflows/local/chord_prediction'
 include { COBALT_PROFILING      } from '../subworkflows/local/cobalt_profiling'
 include { CUPPA_PREDICTION      } from '../subworkflows/local/cuppa_prediction'
-include { GRIDSS_CALLING        } from '../subworkflows/local/gridss_calling'
 include { GRIDSS_SVPREP_CALLING } from '../subworkflows/local/gridss_svprep_calling'
 include { GRIPSS_FILTERING      } from '../subworkflows/local/gripss_filtering'
 include { ISOFOX_QUANTIFICATION } from '../subworkflows/local/isofox_quantification'
@@ -123,12 +108,13 @@ workflow WGTS {
     // channel: [val(meta)]
     PREPARE_INPUT(
         samplesheet,
+        run_config,
     )
     ch_inputs = PREPARE_INPUT.out.data
 
     // Set up reference data, assign more human readable variables
     PREPARE_REFERENCE(
-        run,
+        run_config,
     )
     ref_data = PREPARE_REFERENCE.out
     hmf_data = PREPARE_REFERENCE.out.hmf_data
@@ -138,7 +124,7 @@ workflow WGTS {
     //
     // channel: [meta, isofox_dir]
     ch_isofox_out = Channel.empty()
-    if (run.isofox) {
+    if (run_config.stages.isofox) {
 
         ISOFOX_QUANTIFICATION(
             ch_inputs,
@@ -149,6 +135,7 @@ workflow WGTS {
             hmf_data.isofox_counts,
             hmf_data.isofox_gc_ratios,
             params.isofox_functions,
+            run_config,
         )
 
         ch_versions = ch_versions.mix(ISOFOX_QUANTIFICATION.out.versions)
@@ -161,13 +148,13 @@ workflow WGTS {
     // channel: [val(meta), metrics]
     ch_bamtools_somatic_out = Channel.empty()
     ch_bamtools_germline_out = Channel.empty()
-    if (run.bamtools) {
+    if (run_config.stages.bamtools) {
 
         BAMTOOLS_METRICS(
             ch_inputs,
             ref_data.genome_fasta,
             ref_data.genome_version,
-            run,
+            run_config,
         )
 
         ch_versions = ch_versions.mix(BAMTOOLS_METRICS.out.versions)
@@ -180,12 +167,13 @@ workflow WGTS {
     //
     // channel: [val(meta), amber_dir]
     ch_amber_out = Channel.empty()
-    if (run.amber) {
+    if (run_config.stages.amber) {
 
         AMBER_PROFILING(
             ch_inputs,
             ref_data.genome_version,
             hmf_data.heterozygous_sites,
+            run_config,
         )
 
         ch_versions = ch_versions.mix(AMBER_PROFILING.out.versions)
@@ -197,11 +185,14 @@ workflow WGTS {
     //
     // channel: [val(meta), cobalt_dir]
     ch_cobalt_out = Channel.empty()
-    if (run.cobalt) {
+    if (run_config.stages.cobalt) {
 
         COBALT_PROFILING(
             ch_inputs,
             hmf_data.gc_profile,
+            hmf_data.diploid_bed,
+            [],  // panel_target_region_normalisation
+            run_config,
         )
 
         ch_versions = ch_versions.mix(COBALT_PROFILING.out.versions)
@@ -213,44 +204,27 @@ workflow WGTS {
     //
     // channel: [val(meta), gridss_vcf]
     ch_gridss_out = Channel.empty()
-    if (run.gridss) {
-        if (run.svprep) {
+    if (run_config.stages.gridss) {
 
-            GRIDSS_SVPREP_CALLING(
-                ch_inputs,
-                ref_data.genome_fasta,
-                ref_data.genome_version,
-                ref_data.genome_fai,
-                ref_data.genome_dict,
-                ref_data.genome_bwa_index,
-                ref_data.genome_bwa_index_image,
-                ref_data.genome_gridss_index,
-                hmf_data.gridss_region_blocklist,
-                hmf_data.sv_prep_blocklist,
-                hmf_data.known_fusions,
-                gridss_config,
-            )
+        GRIDSS_SVPREP_CALLING(
+            ch_inputs,
+            gridss_config,
+            ref_data.genome_fasta,
+            ref_data.genome_version,
+            ref_data.genome_fai,
+            ref_data.genome_dict,
+            ref_data.genome_bwa_index,
+            ref_data.genome_bwa_index_image,
+            ref_data.genome_gridss_index,
+            hmf_data.gridss_region_blocklist,
+            hmf_data.sv_prep_blocklist,
+            hmf_data.known_fusions,
+            run_config,
+        )
 
-            ch_versions = ch_versions.mix(GRIDSS_SVPREP_CALLING.out.versions)
-            ch_gridss_out = ch_gridss_out.mix(GRIDSS_SVPREP_CALLING.out.results)
+        ch_versions = ch_versions.mix(GRIDSS_SVPREP_CALLING.out.versions)
+        ch_gridss_out = ch_gridss_out.mix(GRIDSS_SVPREP_CALLING.out.results)
 
-        } else {
-
-            GRIDSS_CALLING(
-                ch_inputs,
-                ref_data.genome_fasta,
-                ref_data.genome_fai,
-                ref_data.genome_dict,
-                ref_data.genome_bwa_index,
-                ref_data.genome_bwa_index_image,
-                ref_data.genome_gridss_index,
-                hmf_data.gridss_region_blocklist,
-                gridss_config,
-            )
-
-            ch_versions = ch_versions.mix(GRIDSS_CALLING.out.versions)
-            ch_gridss_out = ch_gridss_out.mix(GRIDSS_CALLING.out.results)
-        }
     }
 
     //
@@ -260,7 +234,7 @@ workflow WGTS {
     ch_gripss_somatic_out = Channel.empty()
     ch_gripss_germline_out = Channel.empty()
     ch_gripss_somatic_unfiltered_out = Channel.empty()
-    if (run.gripss) {
+    if (run_config.stages.gripss) {
 
         GRIPSS_FILTERING(
             ch_inputs,
@@ -272,7 +246,8 @@ workflow WGTS {
             hmf_data.gridss_pon_breakpoints,
             hmf_data.known_fusions,
             hmf_data.repeatmasker_annotations,
-            run,
+            [],
+            run_config,
         )
 
         ch_versions = ch_versions.mix(GRIPSS_FILTERING.out.versions)
@@ -292,7 +267,7 @@ workflow WGTS {
     // channel: [val(meta), bqr_plot]
     ch_sage_somatic_tumor_bqr_out = Channel.empty()
     ch_sage_somatic_normal_bqr_out = Channel.empty()
-    if (run.sage) {
+    if (run_config.stages.sage) {
 
         SAGE_CALLING(
             ch_inputs,
@@ -305,13 +280,12 @@ workflow WGTS {
             hmf_data.sage_actionable_panel,
             hmf_data.sage_coverage_panel,
             hmf_data.sage_highconf_regions,
-            hmf_data.sage_pon,
             hmf_data.segment_mappability,
             hmf_data.driver_gene_panel,
             hmf_data.ensembl_data_resources,
+            run_config,
         )
 
-        // Set outputs, restoring original meta
         ch_versions = ch_versions.mix(SAGE_CALLING.out.versions)
         ch_sage_germline_vcf_out = ch_sage_germline_vcf_out.mix(SAGE_CALLING.out.germline_vcf)
         ch_sage_germline_coverage_out = ch_sage_germline_coverage_out.mix(SAGE_CALLING.out.germline_coverage)
@@ -326,7 +300,7 @@ workflow WGTS {
     // channel: [val(meta), pave_vcf]
     ch_pave_germline_out = Channel.empty()
     ch_pave_somatic_out = Channel.empty()
-    if (run.pave) {
+    if (run_config.stages.pave) {
 
         PAVE_ANNOTATION(
             ch_inputs,
@@ -336,6 +310,7 @@ workflow WGTS {
             ref_data.genome_fai,
             ref_data.genome_version,
             hmf_data.sage_pon,
+            [],  // sage_pon_artefacts
             hmf_data.sage_blocklist_regions,
             hmf_data.sage_blocklist_sites,
             hmf_data.clinvar_annotations,
@@ -343,7 +318,7 @@ workflow WGTS {
             hmf_data.driver_gene_panel,
             hmf_data.ensembl_data_resources,
             hmf_data.gnomad_resource,
-            run,
+            run_config,
         )
 
         ch_versions = ch_versions.mix(PAVE_ANNOTATION.out.versions)
@@ -356,7 +331,7 @@ workflow WGTS {
     //
     // channel: [val(meta), purple_dir]
     ch_purple_out = Channel.empty()
-    if (run.purple) {
+    if (run_config.stages.purple) {
 
         PURPLE_CALLING(
             ch_inputs,
@@ -377,7 +352,10 @@ workflow WGTS {
             hmf_data.driver_gene_panel,
             hmf_data.ensembl_data_resources,
             hmf_data.purple_germline_del,
-            run,
+            [],
+            [],
+            [],
+            run_config,
         )
 
         ch_versions = ch_versions.mix(PURPLE_CALLING.out.versions)
@@ -390,7 +368,7 @@ workflow WGTS {
     // channel: [val(meta), append_vcf]
     ch_sage_somatic_append_vcf = Channel.empty()
     ch_sage_germline_append_vcf = Channel.empty()
-    if (run.orange) {
+    if (run_config.mode == Constants.RunMode.WGTS && run_config.stages.orange) {
 
         // NOTE(SW): currently used only for ORANGE but will also be used for Neo once implemented
 
@@ -400,7 +378,7 @@ workflow WGTS {
             ref_data.genome_fasta,
             ref_data.genome_fai,
             ref_data.genome_dict,
-            run,
+            run_config,
         )
 
         ch_versions = ch_versions.mix(SAGE_APPEND.out.versions)
@@ -416,7 +394,7 @@ workflow WGTS {
     ch_linx_germline_out = Channel.empty()
     // channel: [val(meta), linx_visualiser_dir]
     ch_linx_somatic_plot_out = Channel.empty()
-    if (run.linx) {
+    if (run_config.stages.linx) {
 
         LINX_ANNOTATION(
             ch_inputs,
@@ -426,7 +404,7 @@ workflow WGTS {
             hmf_data.known_fusion_data,
             hmf_data.driver_gene_panel,
             linx_gene_id_file,
-            run,
+            run_config,
         )
 
         ch_versions = ch_versions.mix(LINX_ANNOTATION.out.versions)
@@ -438,6 +416,7 @@ workflow WGTS {
             ch_linx_somatic_out,
             ref_data.genome_version,
             hmf_data.ensembl_data_resources,
+            run_config,
         )
 
         ch_versions = ch_versions.mix(LINX_PLOTTING.out.versions)
@@ -449,13 +428,13 @@ workflow WGTS {
     //
     // channel: [val(meta), sigs_dir]
     ch_sigs_out = Channel.empty()
-    if (run.sigs) {
+    if (run_config.stages.sigs) {
 
         SIGS_FITTING(
             ch_inputs,
             ch_purple_out,
             hmf_data.sigs_signatures,
-            run,
+            run_config,
         )
 
         ch_versions = ch_versions.mix(SIGS_FITTING.out.versions)
@@ -467,13 +446,13 @@ workflow WGTS {
     //
     // channel: [val(meta), chord_prediction]
     ch_chord_out = Channel.empty()
-    if (run.chord) {
+    if (run_config.stages.chord) {
 
         CHORD_PREDICTION(
             ch_inputs,
             ch_purple_out,
             ref_data.genome_version,
-            run,
+            run_config,
         )
 
         ch_versions = ch_versions.mix(CHORD_PREDICTION.out.versions)
@@ -485,7 +464,7 @@ workflow WGTS {
     //
     // channel: [val(meta), lilac_dir]
     ch_lilac_out = Channel.empty()
-    if (run.lilac) {
+    if (run_config.stages.lilac) {
 
         // Select HLA slice BED
         if (params.ref_data_genome_type == 'no_alt') {
@@ -503,7 +482,7 @@ workflow WGTS {
             ref_data.genome_fai,
             hmf_data.lilac_resources,
             ref_data_hla_slice_bed,
-            run,
+            run_config,
         )
 
         ch_versions = ch_versions.mix(LILAC_CALLING.out.versions)
@@ -515,7 +494,7 @@ workflow WGTS {
     //
     // channel: [val(meta), virusinterpreter]
     ch_virusinterpreter_out = Channel.empty()
-    if (run.virusinterpreter) {
+    if (run_config.stages.virusinterpreter) {
 
         VIRUSBREAKEND_CALLING(
             ch_inputs,
@@ -530,8 +509,8 @@ workflow WGTS {
             ref_data.virusbreakenddb,
             hmf_data.virus_taxonomy_db,
             hmf_data.virus_reporting_db,
-            run,
             gridss_config,
+            run_config,
         )
 
         ch_versions = ch_versions.mix(VIRUSBREAKEND_CALLING.out.versions)
@@ -543,7 +522,7 @@ workflow WGTS {
     //
     // channel: [val(meta), cuppa_dir]
     ch_cuppa_out = Channel.empty()
-    if (run.cuppa) {
+    if (run_config.stages.cuppa) {
 
         CUPPA_PREDICTION(
             ch_inputs,
@@ -553,7 +532,7 @@ workflow WGTS {
             ch_virusinterpreter_out,
             ref_data.genome_version,
             hmf_data.cuppa_resources,
-            run,
+            run_config,
         )
 
         ch_versions = ch_versions.mix(CUPPA_PREDICTION.out.versions)
@@ -563,7 +542,7 @@ workflow WGTS {
     //
     // SUBWORKFLOW: Run ORANGE to generate static PDF report
     //
-    if (run.orange) {
+    if (run_config.stages.orange) {
 
         ORANGE_REPORTING(
             ch_inputs,
@@ -593,7 +572,7 @@ workflow WGTS {
             hmf_data.ensembl_data_resources,
             hmf_data.alt_sj_distribution,
             hmf_data.gene_exp_distribution,
-            run,
+            run_config,
         )
 
         ch_versions = ch_versions.mix(ORANGE_REPORTING.out.versions)

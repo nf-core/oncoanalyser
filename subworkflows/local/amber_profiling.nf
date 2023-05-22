@@ -1,11 +1,9 @@
 //
-// AMBER determines b-allele frequencies for downstream CNV calling
+// AMBER determines b-allele frequencies at predetermined positions
 //
 import Utils
 
 include { AMBER } from '../../modules/local/amber/main'
-
-include { CHANNEL_GROUP_INPUTS } from './channel_group_inputs'
 
 workflow AMBER_PROFILING {
     take:
@@ -13,38 +11,49 @@ workflow AMBER_PROFILING {
         ch_inputs                   // channel: [val(meta)]
 
         // Reference data
-        ref_data_genome_version     //     val: genome version
-        ref_data_heterozygous_sites //    file: /path/to/heterozygous_sites
+        ref_data_genome_version
+        heterozygous_sites
+
+        // Params
+        run_config
 
     main:
         // Channel for version.yml files
         ch_versions = Channel.empty()
 
-        // Get input meta groups
-        CHANNEL_GROUP_INPUTS(
-            ch_inputs,
-        )
-
         // Select input sources
-        // channel: [val(meta_amber), tumor_bam_wgs, normal_bam_wgs, tumor_bai_wgs, normal_bai_wgs]
-        ch_amber_inputs = CHANNEL_GROUP_INPUTS.out.wgs_present
+        // channel: [val(meta_amber), tumor_bam, normal_bam, tumor_bai, normal_bai]
+        ch_amber_inputs = ch_inputs
             .map { meta ->
                 def meta_amber = [
                     key: meta.id,
                     id: meta.id,
-                    tumor_id: Utils.getTumorWgsSampleName(meta),
-                    normal_id: Utils.getNormalWgsSampleName(meta),
+                    tumor_id: Utils.getTumorSampleName(meta, run_config.mode),
                 ]
-                def tumor_bam = Utils.getTumorWgsBam(meta)
-                def normal_bam = Utils.getNormalWgsBam(meta)
-                [meta_amber, tumor_bam, normal_bam, "${tumor_bam}.bai", "${normal_bam}.bai"]
+
+                def tumor_bam = Utils.getTumorBam(meta, run_config.mode)
+
+                def normal_bam = []
+                def normal_bai = []
+
+                if (run_config.type == Constants.RunType.TUMOR_NORMAL) {
+
+                    assert [Constants.RunMode.WGS, Constants.RunMode.WGTS].contains(run_config.mode)
+
+                    meta_amber.normal_id = Utils.getNormalWgsSampleName(meta)
+                    normal_bam = Utils.getNormalWgsBam(meta)
+                    normal_bai = "${normal_bam}.bai"
+
+                }
+
+                [meta_amber, tumor_bam, normal_bam, "${tumor_bam}.bai", normal_bai]
             }
 
         // Run process
         AMBER(
             ch_amber_inputs,
             ref_data_genome_version,
-            ref_data_heterozygous_sites,
+            heterozygous_sites,
         )
 
         // Set outputs, restoring original meta

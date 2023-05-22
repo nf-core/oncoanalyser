@@ -16,6 +16,9 @@ workflow LINX_PLOTTING {
         ref_data_genome_version         //     val: genome version
         ref_data_ensembl_data_resources //    file: /path/to/ensembl_data_resources/
 
+        // Params
+        run_config
+
     main:
         // Channel for versions.yml files
         ch_versions = Channel.empty()
@@ -26,7 +29,7 @@ workflow LINX_PLOTTING {
             .map { meta, anno_dir ->
                 def meta_linx = [
                     key: meta.id,
-                    id: Utils.getTumorWgsSampleName(meta),
+                    id: Utils.getTumorSampleName(meta, run_config.mode),
                 ]
                 return [meta_linx, anno_dir]
             }
@@ -51,7 +54,7 @@ workflow LINX_PLOTTING {
             .map { meta, anno_dir, vis_dir ->
                 def meta_gpgr_linx = [
                     key: meta.id,
-                    id: Utils.getTumorWgsSampleName(meta),
+                    id: Utils.getTumorSampleName(meta, run_config.mode),
                 ]
                 return [meta_gpgr_linx, anno_dir, vis_dir]
             }

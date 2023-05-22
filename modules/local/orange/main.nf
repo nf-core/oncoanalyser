@@ -31,9 +31,9 @@ process ORANGE {
 
     def virusinterpreter_arg = virusinterpreter ? "-annotated_virus_tsv ${virusinterpreter}" : ''
     def chord_arg = chord_prediction ? "-chord_prediction_txt ${chord_prediction}" : ''
-    def sigs_arg = sigs_dir ? "-sigs_allocation_tsv ${sigs_dir}/${meta.tumor_wgs_id}.sig.allocation.tsv" : ''
-    def cuppa_csv_arg = cuppa_dir ? "-cuppa_result_csv ${cuppa_dir}/${meta.tumor_wgs_id}.cup.data.csv" : ''
-    def cuppa_summary_arg = cuppa_dir ? "-cuppa_summary_plot ${cuppa_dir}/${meta.tumor_wgs_id}.cup.report.summary.png" : ''
+    def sigs_arg = sigs_dir ? "-sigs_allocation_tsv ${sigs_dir}/${meta.tumor_id}.sig.allocation.tsv" : ''
+    def cuppa_csv_arg = cuppa_dir ? "-cuppa_result_csv ${cuppa_dir}/${meta.tumor_id}.cup.data.csv" : ''
+    def cuppa_summary_arg = cuppa_dir ? "-cuppa_summary_plot ${cuppa_dir}/${meta.tumor_id}.cup.report.summary.png" : ''
 
     def normal_id_arg = meta.containsKey('normal_wgs_id') ? "-reference_sample_id ${meta.normal_wgs_id}" : ''
     def normal_metrics_arg = bam_metrics_germline ? "-ref_sample_wgs_metrics_file ${bam_metrics_germline}" : ''
@@ -60,7 +60,7 @@ process ORANGE {
         mkdir -p normal_linx__prepared/;
         for fp in ${linx_germline_anno_dir}/*; do
             fn=\${fp##*/};
-            ln -s ../${linx_germline_anno_dir}/\${fn} normal_linx__prepared/\$(sed 's/${meta.normal_wgs_id}/${meta.tumor_wgs_id}/' <<< \${fn});
+            ln -s ../${linx_germline_anno_dir}/\${fn} normal_linx__prepared/\$(sed 's/${meta.normal_wgs_id}/${meta.tumor_id}/' <<< \${fn});
         done;
     fi
 
@@ -72,8 +72,8 @@ process ORANGE {
         purple_dir_local=purple__prepared;
         mkdir -p \${purple_dir_local}/;
         find -L ${purple_dir} -maxdepth 1 -exec ln -fs ../{} \${purple_dir_local}/ \\;
-        ln -sf ../${smlv_somatic_vcf} \${purple_dir_local}/${meta.tumor_wgs_id}.purple.somatic.vcf.gz;
-        ln -sf ../${smlv_germline_vcf} \${purple_dir_local}/${meta.tumor_wgs_id}.purple.germline.vcf.gz;
+        ln -sf ../${smlv_somatic_vcf} \${purple_dir_local}/${meta.tumor_id}.purple.somatic.vcf.gz;
+        ln -sf ../${smlv_germline_vcf} \${purple_dir_local}/${meta.tumor_id}.purple.germline.vcf.gz;
     fi
 
     # NOTE(SW): '--add-opens java.base/java.time=ALL-UNNAMED' resolves issue writing JSON, see:
@@ -89,10 +89,8 @@ process ORANGE {
             -experiment_date \$(date +%y%m%d) \\
             -pipeline_version_file pipeline_version.txt \\
             \\
-            -tumor_sample_id ${meta.tumor_wgs_id} \\
-            \\
+            -tumor_sample_id ${meta.tumor_id} \\
             -primary_tumor_doids 162 \\
-            \\
             -tumor_sample_wgs_metrics_file ${bam_metrics_somatic} \\
             -tumor_sample_flagstat_file ${flagstat_somatic} \\
             -sage_somatic_tumor_sample_bqr_plot ${sage_somatic_bqr} \\
@@ -100,8 +98,8 @@ process ORANGE {
             -purple_plot_directory \${purple_dir_local}/plot/ \\
             -linx_somatic_data_directory ${linx_somatic_anno_dir} \\
             -linx_plot_directory ${linx_somatic_plot_dir} \\
-            -lilac_result_csv ${lilac_dir}/${meta.tumor_wgs_id}.lilac.csv \\
-            -lilac_qc_csv ${lilac_dir}/${meta.tumor_wgs_id}.lilac.qc.csv \\
+            -lilac_result_csv ${lilac_dir}/${meta.tumor_id}.lilac.csv \\
+            -lilac_qc_csv ${lilac_dir}/${meta.tumor_id}.lilac.qc.csv \\
             ${virusinterpreter_arg} \\
             ${chord_arg} \\
             ${sigs_arg} \\
@@ -141,8 +139,8 @@ process ORANGE {
     stub:
     """
     mkdir -p output/
-    touch output/${meta.tumor_wgs_id}.orange.json
-    touch output/${meta.tumor_wgs_id}.orange.pdf
+    touch output/${meta.tumor_id}.orange.json
+    touch output/${meta.tumor_id}.orange.pdf
     echo -e '${task.process}:\\n  stub: noversions\\n' > versions.yml
     """
 }

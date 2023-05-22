@@ -52,7 +52,7 @@ process CUPPA {
             cp \${fp} sample_data/\${fn_out}
         done;
         # Rename identifier in the summary file
-        sed -i 's/^${meta.id_wts}/${meta.id}/g' sample_data/${meta.id}.isf.summary.csv
+        sed -i 's/^${meta.id_wts}/${meta.id}/g' sample_data/${meta.id}.isf.summary.csv;
     fi;
 
     mkdir -p cuppa/
@@ -68,10 +68,12 @@ process CUPPA {
             -create_pdf \\
             -output_dir ./cuppa/
 
-    python ${task.ext.chartScriptPath} \\
-        -sample ${meta.id} \\
-        -sample_data cuppa/${meta.id}.cup.data.csv \\
-        -output_dir ./cuppa/
+    if [[ ${categories_val} == 'DNA' || ${categories_val} == 'ALL' ]]; then
+        python ${task.ext.chartScriptPath} \\
+            -sample ${meta.id} \\
+            -sample_data cuppa/${meta.id}.cup.data.csv \\
+            -output_dir ./cuppa/;
+    fi
 
     # NOTE(SW): hard coded since there is no reliable way to obtain version information.
     cat <<-END_VERSIONS > versions.yml
