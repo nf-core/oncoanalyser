@@ -10,6 +10,7 @@ process PAVE_SOMATIC {
     path genome_fai
     val genome_ver
     path sage_pon
+    path sage_pon_artefacts
     path segment_mappability
     path driver_gene_panel
     path ensembl_data_resources
@@ -25,6 +26,9 @@ process PAVE_SOMATIC {
 
     script:
     def args = task.ext.args ?: ''
+
+    def pon_artefact_arg = sage_pon_artefacts ? "-pon_artefact_file ${sage_pon_artefacts}" : ''
+
     def pon_filters
     def gnomad_args
     if (genome_ver == '37') {
@@ -48,6 +52,7 @@ process PAVE_SOMATIC {
             -ref_genome_version ${genome_ver} \\
             -pon_file ${sage_pon} \\
             -pon_filters "${pon_filters}" \\
+            ${pon_artefact_arg} \\
             -driver_gene_panel ${driver_gene_panel} \\
             -mappability_bed ${segment_mappability} \\
             -ensembl_data_dir ${ensembl_data_resources} \\

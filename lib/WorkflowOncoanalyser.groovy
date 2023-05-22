@@ -8,6 +8,8 @@ import nextflow.Channel
 import nextflow.Nextflow
 
 import Constants
+import Processes
+import Utils
 
 class WorkflowOncoanalyser {
 
@@ -16,6 +18,10 @@ class WorkflowOncoanalyser {
     //
     public static void setParamsDefaults(params, log) {
 
+        // Set defaults common to all run configuration
+
+        def default_invalid = false
+
         if (params.containsKey('genome_version')) {
             params.ref_data_genome_version = params.genome_version.toString()
         } else if (Constants.GENOMES_VERSION_37.contains(params.genome)) {
@@ -23,8 +29,7 @@ class WorkflowOncoanalyser {
         } else if (Constants.GENOMES_VERSION_38.contains(params.genome)) {
             params.ref_data_genome_version = '38'
         } else {
-            log.error "ERROR: Got a bad genome version: ${params.ref_data_genome_version}"
-            System.exit(1)
+            default_invalid = true
         }
 
         if (params.containsKey('genome_type')) {
@@ -34,8 +39,7 @@ class WorkflowOncoanalyser {
         } else if (Constants.GENOMES_DEFINED.contains(params.genome)) {
             params.ref_data_genome_type = 'no_alt'
         } else {
-            log.error "ERROR: Got a bad genome type: ${params.ref_data_genome_type}"
-            System.exit(1)
+            default_invalid = true
         }
 
         if (!params.containsKey('ref_data_hmf_data_path')) {
@@ -46,12 +50,45 @@ class WorkflowOncoanalyser {
             }
         }
 
-        if (!params.containsKey('ref_data_virusbreakenddb_path')) {
-            params.ref_data_virusbreakenddb_path = Constants.VIRUSBREAKENDDB_PATH
+        // Bad configuration, catch in validateParams
+        if (default_invalid) {
+            return
         }
 
-        if (params.ref_data_genome_version == '38' && params.ref_data_genome_type == 'alt' && !params.containsKey('ref_data_hla_slice_bed')) {
-            params.ref_data_hla_slice_bed = Constants.HLA_SLICE_BED_GRCH38_ALT_PATH
+        // Set defaults specific to run configuration without attempting to validate
+
+        def run_mode
+        if (params.containsKey('run_mode')) {
+            run_mode = Utils.getRunMode(params.run_mode, log)
+        } else {
+            // Bad configuration, catch in validateParams
+            return
+        }
+
+        if (run_mode == Constants.RunMode.WTS) {
+            if (!params.containsKey('run_type')) {
+                params.run_type = 'tumor_only'
+            }
+        }
+
+        def stages = Processes.getRunStages(
+            run_mode,
+            params.processes_include,
+            params.processes_exclude,
+            params.processes_manual,
+            log,
+        )
+
+        if (stages.virusinterpreter) {
+            if (!params.containsKey('ref_data_virusbreakenddb_path')) {
+                params.ref_data_virusbreakenddb_path = Constants.VIRUSBREAKENDDB_PATH
+            }
+        }
+
+        if (stages.lilac) {
+            if (params.ref_data_genome_version == '38' && params.ref_data_genome_type == 'alt' && !params.containsKey('ref_data_hla_slice_bed')) {
+                params.ref_data_hla_slice_bed = Constants.HLA_SLICE_BED_GRCH38_ALT_PATH
+            }
         }
     }
 
@@ -59,15 +96,18 @@ class WorkflowOncoanalyser {
     // Check and validate parameters
     //
     public static void validateParams(params, log) {
+
+        // Common parameters
+
         if (!params.genome) {
-            log.error "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n" +
+            log.error "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n" +
                 "  Genome must be set using the --genome CLI argument or in a configuration file.\n" +
                 "  Currently, the available genome are:\n" +
                 "  ${params.genomes.keySet().join(", ")}\n" +
                 "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
             System.exit(1)
         } else if (!params.genomes.containsKey(params.genome)) {
-            log.error "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n" +
+            log.error "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n" +
                 "  Genome '${params.genome}' not found in any config files provided to the pipeline.\n" +
                 "  Currently, the available genome are:\n" +
                 "  ${params.genomes.keySet().join(", ")}\n" +
@@ -87,7 +127,7 @@ class WorkflowOncoanalyser {
         }
 
         if (!params.ref_data_genome_version) {
-            log.error "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n" +
+            log.error "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n" +
                 "  Genome version wasn't provided and genome '${params.genome}' is not defined in   \n" +
                 "  genome version list.\n" +
                 "  Currently, the list of genomes in the version list include:\n" +
@@ -97,7 +137,7 @@ class WorkflowOncoanalyser {
         }
 
         if (!params.ref_data_genome_type) {
-            log.error "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n" +
+            log.error "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n" +
                 "  Genome type wasn't provided and genome '${params.genome}' is not defined in      \n" +
                 "  genome version list.\n" +
                 "  Currently, the list of genomes in the version list include:\n" +
@@ -123,6 +163,45 @@ class WorkflowOncoanalyser {
                 System.exit(1)
             }
         }
+
+        // Run configuration specific parameters
+
+        if (!params.run_mode) {
+            def run_modes = Utils.getEnumNames(Constants.RunMode).join('\n    - ')
+            log.error "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n" +
+                "  Run mode must be set using the --run_mode CLI argument or in a configuration  \n" +
+                "  file.\n" +
+                "  Currently, the available run modes are:\n" +
+                "    - ${run_modes}\n" +
+                "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
+            System.exit(1)
+        }
+
+        if (!params.run_type) {
+            def run_types = Utils.getEnumNames(Constants.RunType).join('\n    - ')
+            log.error "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n" +
+                "  Run type must be set using the --run_type CLI argument or in a configuration  \n" +
+                "  file.\n" +
+                "  Currently, the available run types are:\n" +
+                "    - ${run_types}\n" +
+                "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
+            System.exit(1)
+        }
+
+        def run_mode = Utils.getRunMode(params.run_mode, log)
+        def run_type = Utils.getRunType(params.run_type, log)
+
+        if (run_mode == Constants.RunMode.WTS) {
+            if (run_type != Constants.RunType.TUMOR_ONLY) {
+                log.error "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n" +
+                    "  The WTS run mode does not support tumor/normal data, please adjust the CLI \n" +
+                    "  --run_type option or corresponding configuration file.\n" +
+                    "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
+                System.exit(1)
+            }
+
+        }
+
     }
 
     public static String paramsSummaryLog(workflow, params, log) {
@@ -132,6 +211,24 @@ class WorkflowOncoanalyser {
         summary_log += '\n' + WorkflowMain.citation(workflow) + '\n'
         summary_log += NfcoreTemplate.dashedLine(params.monochrome_logs)
         log.info summary_log
+    }
+
+    public static getRunConfig(params, log) {
+        def run_mode = Utils.getRunMode(params.run_mode, log)
+        def run_type = Utils.getRunType(params.run_type, log)
+        def stages = Processes.getRunStages(
+            run_mode,
+            params.processes_include,
+            params.processes_exclude,
+            params.processes_manual,
+            log,
+        )
+
+        return [
+            mode: run_mode,
+            type: run_type,
+            stages: stages,
+        ]
     }
 
     public static groupByMeta(Map named_args, ... channels) {
@@ -154,7 +251,7 @@ class WorkflowOncoanalyser {
         r = Channel.empty().mix(*r)
 
         // NOTE(SW): As of Nextflow 22.10.6, groupTuple requires a matching meta /and/ an additional element to complete without error, these placeholders are filtered in the groupByMeta function
-        r = r.filter { it[0] != Constants.META_PLACEHOLDER }
+        r = r.filter { it[0] != Constants.PLACEHOLDER_META }
 
         r = r
             .groupTuple(size: channels.size())
@@ -169,7 +266,7 @@ class WorkflowOncoanalyser {
             }
 
         if (named_args.getOrDefault('flatten', true)) {
-            def flatten_mode = named_args.getOrDefault('flatten_mode', 'recursive')
+            def flatten_mode = named_args.getOrDefault('flatten_mode', 'nonrecursive')
             if (flatten_mode == 'recursive') {
                 r = r.map { it.flatten() }
             } else if (flatten_mode == 'nonrecursive') {
@@ -195,10 +292,20 @@ class WorkflowOncoanalyser {
     public static getInput(Map named_args, ch, key) {
         def input_type = named_args.getOrDefault('type', 'required')
         return ch.map { meta ->
-            if (meta.containsKey(key)) {
-                return [meta, meta.getAt(key)]
-            } else if (input_type == 'required') {
-                return [Constants.META_PLACEHOLDER, null]
+            def result
+            for (key_combination in key.combinations()) {
+                if (meta.containsKey(key_combination)) {
+                    result = [meta, meta.getAt(key_combination)]
+                    break
+                }
+            }
+
+            if (result) {
+                return result
+            }
+
+            if (input_type == 'required') {
+                return [Constants.PLACEHOLDER_META, null]
             } else if (input_type == 'optional') {
                 return [meta, []]
             } else {

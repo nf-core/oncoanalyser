@@ -5,7 +5,7 @@ process LILAC {
     container 'docker.io/scwatts/lilac:1.4.2--0'
 
     input:
-    tuple val(meta), path(normal_wgs_bam), path(normal_wgs_bai), path(tumor_wgs_bam), path(tumor_wgs_bai), path(tumor_wts_bam), path(tumor_wts_bai), path(gene_cn), path(smlv_vcf)
+    tuple val(meta), path(normal_wgs_bam), path(normal_wgs_bai), path(tumor_bam), path(tumor_bai), path(tumor_wts_bam), path(tumor_wts_bai), path(gene_cn), path(smlv_vcf)
     path genome_fasta
     val genome_ver
     path lilac_resources, stageAs: 'lilac_resources'
@@ -19,9 +19,12 @@ process LILAC {
 
     script:
     def args = task.ext.args ?: ''
-    def sample_name = getSampleName(meta, tumor_wgs_bam, normal_wgs_bam)
-    def tumor_wgs_bam_arg = tumor_wgs_bam ? "-tumor_bam ${tumor_wgs_bam}" : ''
+    def sample_name = getSampleName(meta, tumor_bam, normal_wgs_bam)
+
+    def normal_bam_arg = normal_wgs_bam ? "-reference_bam ${normal_wgs_bam}" : ''
+    def tumor_bam_arg = tumor_bam ? "-tumor_bam ${tumor_bam}" : ''
     def tumor_wts_bam_arg = tumor_wts_bam ? "-rna_bam ${tumor_wts_bam}" : ''
+
     def gene_cn_arg = gene_cn ? "-gene_copy_number ${gene_cn}" : ''
     def smlv_vcf_arg = smlv_vcf ? "-somatic_vcf ${smlv_vcf}" : ''
 
@@ -31,8 +34,8 @@ process LILAC {
         -jar ${task.ext.jarPath} \\
             ${args} \\
             -sample ${sample_name} \\
-            -reference_bam ${normal_wgs_bam} \\
-            ${tumor_wgs_bam_arg} \\
+            ${normal_bam_arg} \\
+            ${tumor_bam_arg} \\
             ${tumor_wts_bam_arg} \\
             ${smlv_vcf_arg} \\
             ${gene_cn_arg} \\

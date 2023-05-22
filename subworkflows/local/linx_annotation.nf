@@ -21,7 +21,7 @@ workflow LINX_ANNOTATION {
         gene_id_file                    //    file: /path/to/linx_gene_id_file
 
         // Params
-        run
+        run_config
 
     main:
         // Channel for versions.yml files
@@ -29,45 +29,62 @@ workflow LINX_ANNOTATION {
 
         // Select input sources
         // channel: [val(meta), purple_dir]
-        ch_linx_inputs_source = run.purple ? ch_purple : WorkflowOncoanalyser.getInput(ch_inputs, Constants.INPUT.PURPLE_DIR)
+        ch_linx_inputs_source = run_config.stages.purple ? ch_purple : WorkflowOncoanalyser.getInput(ch_inputs, Constants.INPUT.PURPLE_DIR)
 
-        // Create inputs and create process-specific meta
-        // channel: [val(meta_linx), sv_vcf]
-        ch_linx_inputs_germline = ch_linx_inputs_source
-            .map { meta, purple_dir ->
+        //
+        // MODULE: LINX germline annotation
+        //
+        ch_linx_germline_out = Channel.empty()
+        if (run_config.type == Constants.RunType.TUMOR_NORMAL) {
 
-                def tumor_id = Utils.getTumorWgsSampleName(meta)
-                def sv_vcf = file(purple_dir).resolve("${tumor_id}.purple.sv.vcf.gz")
+            // Create germline inputs and create process-specific meta
+            // channel: [val(meta_linx), sv_vcf]
+            ch_linx_inputs_germline = ch_linx_inputs_source
+                .map { meta, purple_dir ->
 
-                if (!sv_vcf.exists()) {
-                    return Constants.META_PLACEHOLDER
+                    def tumor_id = Utils.getTumorSampleName(meta, run_config.mode)
+                    def sv_vcf = file(purple_dir).resolve("${tumor_id}.purple.sv.germline.vcf.gz")
+
+                    if (!sv_vcf.exists()) {
+                        return Constants.PLACEHOLDER_META
+                    }
+
+                    def meta_linx = [
+                        key: meta.id,
+                        id: Utils.getNormalWgsSampleName(meta),
+                    ]
+
+                    return [meta_linx, sv_vcf]
                 }
+                .filter { it != Constants.PLACEHOLDER_META }
 
-                def meta_linx = [
-                    key: meta.id,
-                    id: Utils.getNormalWgsSampleName(meta),
-                ]
 
-                return [meta_linx, sv_vcf]
-            }
-            .filter { it != Constants.META_PLACEHOLDER }
+            GERMLINE(
+                ch_linx_inputs_germline,
+                ref_data_genome_version,
+                ref_data_ensembl_data_resources,
+                ref_data_driver_gene_panel,
+            )
 
+            // Set outputs, restoring original meta
+            ch_versions = ch_versions.mix(GERMLINE.out.versions)
+            // channel: [val(meta), linx_annotation_dir]
+            ch_linx_germline_out = WorkflowOncoanalyser.restoreMeta(GERMLINE.out.annotation_dir, ch_inputs)
+        }
+
+        //
+        // MODULE: LINX somatic annotation
+        //
+        // Create somatic inputs and create process-specific meta
         // channel: [val(meta_linx), purple_dir]
         ch_linx_inputs_somatic = ch_linx_inputs_source
             .map { meta, purple_dir ->
                 def meta_linx = [
                     key: meta.id,
-                    id: Utils.getTumorWgsSampleName(meta),
+                    id: Utils.getTumorSampleName(meta, run_config.mode),
                 ]
                 return [meta_linx, purple_dir]
             }
-
-        GERMLINE(
-            ch_linx_inputs_germline,
-            ref_data_genome_version,
-            ref_data_ensembl_data_resources,
-            ref_data_driver_gene_panel,
-        )
 
         SOMATIC(
             ch_linx_inputs_somatic,
@@ -79,14 +96,9 @@ workflow LINX_ANNOTATION {
         )
 
         // Set outputs, restoring original meta
-        ch_versions = ch_versions.mix(
-            SOMATIC.out.versions,
-            GERMLINE.out.versions,
-        )
-
+        ch_versions = ch_versions.mix(SOMATIC.out.versions)
         // channel: [val(meta), linx_annotation_dir]
         ch_linx_somatic_out = WorkflowOncoanalyser.restoreMeta(SOMATIC.out.annotation_dir, ch_inputs)
-        ch_linx_germline_out = WorkflowOncoanalyser.restoreMeta(GERMLINE.out.annotation_dir, ch_inputs)
 
     emit:
         somatic       = ch_linx_somatic_out       // channel: [val(meta), linx_annotation_dir]

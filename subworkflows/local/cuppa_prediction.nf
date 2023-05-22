@@ -1,11 +1,9 @@
 //
-// XXX
+// CUPPA predicts tissue of origin from molecular profiles
 //
 import Constants
 
 include { CUPPA } from '../../modules/local/cuppa/main'
-
-include { CHANNEL_GROUP_INPUTS } from './channel_group_inputs'
 
 workflow CUPPA_PREDICTION {
     take:
@@ -20,38 +18,23 @@ workflow CUPPA_PREDICTION {
         ref_data_genome_version
         ref_data_cuppa_resources
 
-        // Parameters
-        run
+        // Params
+        run_config
 
     main:
         // Channel for version.yml files
         ch_versions = Channel.empty()
 
-        // Get input meta groups
-        CHANNEL_GROUP_INPUTS(
-            ch_inputs,
-        )
-
         // Select input sources
         // channel: [val(meta), isofox_dir]
-        ch_cuppa_inputs_isofox = Channel.empty()
-        if (run.isofox) {
-            // Take Isofox output and supplement with placeholders for missing; i.e. allow optional
-            ch_cuppa_inputs_isofox = ch_cuppa_inputs_isofox
-                .mix(
-                    ch_isofox,
-                    CHANNEL_GROUP_INPUTS.out.wts_absent.map { meta -> [meta, []] },
-                )
-        } else {
-            ch_cuppa_inputs_isofox = WorkflowOncoanalyser.getInput(ch_inputs, Constants.INPUT.ISOFOX, type: 'optional')
-        }
+        ch_cuppa_inputs_isofox = run_config.stages.isofox ? ch_isofox : WorkflowOncoanalyser.getInput(ch_inputs, Constants.INPUT.ISOFOX_DIR, type: 'optional')
 
         // channel: [val(meta), isofox_dir, purple_dir, linx_dir, virusinterpreter]
         ch_cuppa_inputs_source = WorkflowOncoanalyser.groupByMeta(
             ch_cuppa_inputs_isofox,
-            run.purple ? ch_purple : WorkflowOncoanalyser.getInput(ch_inputs, Constants.INPUT.PURPLE_DIR, type: 'optional'),
-            run.linx ? ch_linx : WorkflowOncoanalyser.getInput(ch_inputs, Constants.INPUT.LINX_ANNO_DIR_TUMOR, type: 'optional'),
-            run.virusinterpreter ? ch_virusinterpreter : WorkflowOncoanalyser.getInput(ch_inputs, Constants.INPUT.VIRUSINTERPRETER_TSV, type: 'optional'),
+            run_config.stages.purple ? ch_purple : WorkflowOncoanalyser.getInput(ch_inputs, Constants.INPUT.PURPLE_DIR, type: 'optional'),
+            run_config.stages.linx ? ch_linx : WorkflowOncoanalyser.getInput(ch_inputs, Constants.INPUT.LINX_ANNO_DIR_TUMOR, type: 'optional'),
+            run_config.stages.virusinterpreter ? ch_virusinterpreter : WorkflowOncoanalyser.getInput(ch_inputs, Constants.INPUT.VIRUSINTERPRETER_TSV, type: 'optional'),
             flatten_mode: 'nonrecursive',
         )
 
@@ -62,19 +45,19 @@ workflow CUPPA_PREDICTION {
                 def meta = data[0]
                 def meta_cuppa = [key: meta.id]
 
-                def sample_name_wgs = meta.getAt(['sample_name', Constants.SampleType.TUMOR, Constants.SequenceType.WGS])
-                def sample_name_wts = meta.getAt(['sample_name', Constants.SampleType.TUMOR, Constants.SequenceType.WTS])
-
-                if (sample_name_wgs && sample_name_wts) {
-                    meta_cuppa.id = sample_name_wgs
-                    meta_cuppa.id_wts = sample_name_wts
-                } else if (sample_name_wgs) {
-                    meta_cuppa.id = sample_name_wgs
-                } else if (sample_name_wts) {
-                    meta_cuppa.id = sample_name_wts
-                } else {
-                    log.error "ERROR: no sample name for: ${meta}"
-                    System.exit(1)
+                switch (run_config.mode) {
+                    case Constants.RunMode.WGS:
+                        meta_cuppa.id = meta.getAt(['sample_name', Constants.SampleType.TUMOR, Constants.SequenceType.WGS])
+                        break
+                    case Constants.RunMode.WTS:
+                        meta_cuppa.id = meta.getAt(['sample_name', Constants.SampleType.TUMOR, Constants.SequenceType.WTS])
+                        break
+                    case Constants.RunMode.WGTS:
+                        meta_cuppa.id = meta.getAt(['sample_name', Constants.SampleType.TUMOR, Constants.SequenceType.WGS])
+                        meta_cuppa.id_wts = meta.getAt(['sample_name', Constants.SampleType.TUMOR, Constants.SequenceType.WTS])
+                        break
+                    default:
+                        assert false
                 }
 
                 return [meta_cuppa, *data[1..-1]]

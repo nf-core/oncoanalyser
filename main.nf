@@ -1,4 +1,7 @@
 #!/usr/bin/env nextflow
+import Utils
+import Constants
+
 /*
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     nf-core/oncoanalyser
@@ -32,6 +35,9 @@ params.ref_data_genome_gridss_index    = WorkflowMain.getGenomeAttribute(params,
 */
 
 WorkflowMain.initialise(workflow, params, log)
+WorkflowOncoanalyser.setParamsDefaults(params, log)
+WorkflowOncoanalyser.validateParams(params, log)
+
 
 /*
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -44,8 +50,16 @@ include { WGTS } from './workflows/wgts'
 //
 // WORKFLOW: Run main nf-core/oncoanalyser analysis pipeline
 //
+
+run_mode = Utils.getRunMode(params.run_mode, log)
+
 workflow NFCORE_ONCOANALYSER {
-    WGTS()
+    run_modes_wgts = [Constants.RunMode.WGS, Constants.RunMode.WTS, Constants.RunMode.WGTS]
+    if (run_modes_wgts.contains(run_mode)) {
+        WGTS()
+    } else {
+        assert false
+    }
 }
 
 /*

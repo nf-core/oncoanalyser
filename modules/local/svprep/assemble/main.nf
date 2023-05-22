@@ -26,7 +26,8 @@ process GRIDSS_ASSEMBLE {
     def args = task.ext.args ?: ''
     def config_arg = gridss_config ? "--configuration ${gridss_config}" : ''
     def output_dirname = 'gridss_assemble'
-    def labels_arg = labels.join(',')
+    def labels_list = labels instanceof List ? labels : [labels]
+    def labels_arg = labels_list.join(',')
     // NOTE(SW): Nextflow implicitly casts List<TaskPath> to an atomic TaskPath, hence the required check below
     def bams_list = bams instanceof List ? bams : [bams]
     def bams_arg = "--bams ${bams_list.join(',')}"

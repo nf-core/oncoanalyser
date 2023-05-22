@@ -14,6 +14,7 @@ process SAGE_SOMATIC {
     val genome_ver
     path sage_known_hotspots_somatic
     path sage_actionable_panel
+    path sage_coverage_panel
     path sage_highconf_regions
     path ensembl_data_resources
 
@@ -32,20 +33,23 @@ process SAGE_SOMATIC {
     script:
     def args = task.ext.args ?: ''
 
+    def reference_arg = meta.containsKey('normal_id') ? "-reference ${meta.normal_id}" : ''
+    def reference_bam_arg = normal_bam ? "-reference_bam ${normal_bam}" : ''
+
     """
     java \\
         -Xmx${Math.round(task.memory.bytes * 0.95)} \\
         -jar ${task.ext.jarPath} \\
             ${args} \\
-            -reference ${meta.normal_id} \\
-            -reference_bam ${normal_bam} \\
+            ${reference_arg} \\
+            ${reference_bam_arg} \\
             -tumor ${meta.tumor_id} \\
             -tumor_bam ${tumor_bam} \\
             -ref_genome ${genome_fasta} \\
             -ref_genome_version ${genome_ver} \\
             -hotspots ${sage_known_hotspots_somatic} \\
             -panel_bed ${sage_actionable_panel} \\
-            -coverage_bed ${sage_actionable_panel} \\
+            -coverage_bed ${sage_coverage_panel} \\
             -high_confidence_bed ${sage_highconf_regions} \\
             -ensembl_data_dir ${ensembl_data_resources} \\
             -write_bqr_data \\

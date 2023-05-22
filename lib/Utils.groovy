@@ -69,6 +69,15 @@ class Utils {
 
 
     // Sample names
+    static public getTumorSampleName(meta, run_mode) {
+
+        // NOTE(SW): this should /only/ be used to get panel or WGS tumor sample name, WTS sample name retrieval is not supported
+
+        def sequence_type = Constants.SequenceType.WGS
+
+        return getMetaEntry(meta, ['sample_name', Constants.SampleType.TUMOR, sequence_type])
+    }
+
     static public getTumorWgsSampleName(meta) {
         return getMetaEntry(meta, ['sample_name', Constants.SampleType.TUMOR, Constants.SequenceType.WGS])
     }
@@ -83,6 +92,15 @@ class Utils {
 
 
     // Files
+    static public getTumorBam(meta, run_mode) {
+
+        // NOTE(SW): this should /only/ be used to get panel or WGS tumor BAM, WTS BAM retrieval is not supported
+
+        def sequence_type = Constants.SequenceType.WGS
+
+        return getMetaEntry(meta, [Constants.FileType.BAM, Constants.SampleType.TUMOR, sequence_type])
+    }
+
     static public getTumorWgsBam(meta) {
         return getMetaEntry(meta, [Constants.FileType.BAM, Constants.SampleType.TUMOR, Constants.SequenceType.WGS])
     }
@@ -102,5 +120,27 @@ class Utils {
             System.exit(1)
         }
         return meta.getAt(key)
+    }
+
+
+    static public getRunMode(run_mode, log) {
+        def run_mode_enum = Utils.getEnumFromString(run_mode, Constants.RunMode)
+        if (!run_mode_enum) {
+            def run_modes_str = Utils.getEnumNames(Constants.RunMode).join('\n  - ')
+            log.error "\nERROR: recieved an invalid run mode: '${run_mode}'. Valid options are:\n  - ${run_modes_str}"
+            System.exit(1)
+        }
+        return run_mode_enum
+    }
+
+
+    static public getRunType(run_type, log) {
+        def run_type_enum = Utils.getEnumFromString(run_type, Constants.RunType)
+        if (!run_type_enum) {
+            def run_types_str = Utils.getEnumNames(Constants.RunType).join('\n  - ')
+            log.error "\nERROR: recieved an invalid run type: '${run_type}'. Valid options are:\n  - ${run_types_str}"
+            System.exit(1)
+        }
+        return run_type_enum
     }
 }

@@ -18,7 +18,8 @@ process SVPREP_DEPTH_ANNOTATOR {
 
     script:
     def args = task.ext.args ?: ''
-    def labels_arg = labels.join(',')
+    def labels_list = labels instanceof List ? labels : [labels]
+    def labels_arg = labels_list.join(',')
     // NOTE(SW): Nextflow implicitly casts List<TaskPath> to an atomic TaskPath, hence the required check below
     def bams_list = bams instanceof List ? bams : [bams]
     def bams_arg = "${bams_list.join(',')}"

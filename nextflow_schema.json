@@ -46,16 +46,25 @@
                     "help_text": "Set this parameter to your e-mail address to get a summary e-mail with details of the run sent to you when the workflow exits. If set in your user config file (`~/.nextflow/config`) then you don't need to specify this on the command line for every run.",
                     "pattern": "^([a-zA-Z0-9_\\-\\.]+)@([a-zA-Z0-9_\\-\\.]+)\\.([a-zA-Z]{2,5})$"
                 },
-                "mode": {
+                "run_type": {
                     "type": "string",
-                    "default": "full",
-                    "description": "Pipeline mode to use.",
+                    "description": "Pipeline run type.",
+                    "fa_icon": "fas fa-diagram-project"
+                },
+                "run_mode": {
+                    "type": "string",
+                    "description": "Pipeline run mode.",
                     "fa_icon": "fas fa-diagram-project"
                 },
                 "force_genome": {
                     "type": "boolean",
                     "description": "Skip check for restricted genome.",
                     "fa_icon": "fas fa-palette"
+                },
+                "processes_manual": {
+                    "type": "boolean",
+                    "description": "Run only processes manually provided in processes_include.",
+                    "fa_icon": "fas fa-diagram-project"
                 },
                 "processes_exclude": {
                     "type": "string",
@@ -188,289 +197,6 @@
                     "format": "file-path",
                     "pattern": "^\\S+\\.gridsscache$",
                     "description": "Path to reference genome GRIDSS index file.",
-                    "fa_icon": "far fa-file-code",
-                    "hidden": true
-                }
-            }
-        },
-        "hmf_data_options": {
-            "title": "HMF data options",
-            "type": "object",
-            "fa_icon": "fas fa-dna",
-            "description": "HMF data files for the workflow.",
-            "properties": {
-                "ref_data_heterozygous_sites": {
-                    "type": "string",
-                    "format": "file-path",
-                    "pattern": "^\\S+\\.vcf\\.gz$",
-                    "description": "Path to AMBER loci file.",
-                    "fa_icon": "far fa-file-code",
-                    "hidden": true
-                },
-                "ref_data_gc_profile": {
-                    "type": "string",
-                    "format": "file-path",
-                    "pattern": "^\\S+\\.cnp",
-                    "description": "Path to COBALT GC profile file.",
-                    "fa_icon": "far fa-file-code",
-                    "hidden": true
-                },
-                "ref_data_cuppa_resources": {
-                    "type": "string",
-                    "format": "directory-path",
-                    "description": "Path to CUPPA reference file directory.",
-                    "fa_icon": "far fa-folder-open",
-                    "hidden": true
-                },
-                "ref_data_sv_prep_blocklist": {
-                    "type": "string",
-                    "format": "file-path",
-                    "pattern": "^\\S+\\.bed$",
-                    "description": "Path to SV Prep blocklist file.",
-                    "fa_icon": "far fa-file-code",
-                    "hidden": true
-                },
-                "ref_data_gridss_pon_breakends": {
-                    "type": "string",
-                    "format": "file-path",
-                    "pattern": "^\\S+\\.bed\\.gz",
-                    "description": "Path to GRIDSS breakend PON file.",
-                    "fa_icon": "far fa-file-code",
-                    "hidden": true
-                },
-                "ref_data_gridss_pon_breakpoints": {
-                    "type": "string",
-                    "format": "file-path",
-                    "pattern": "^\\S+\\.bedpe\\.gz$",
-                    "description": "Path to GRIDSS breakpoint PON file.",
-                    "fa_icon": "far fa-file-code",
-                    "hidden": true
-                },
-                "ref_data_gridss_region_blocklist": {
-                    "type": "string",
-                    "format": "file-path",
-                    "pattern": "^\\S+\\.bed\\.gz$",
-                    "description": "Path to GRIDSS blocklist file.",
-                    "fa_icon": "far fa-file-code",
-                    "hidden": true
-                },
-                "ref_data_repeatmasker_annotations": {
-                    "type": "string",
-                    "format": "file-path",
-                    "description": "Path to RepeastMasker annotations file.",
-                    "fa_icon": "far fa-file-code",
-                    "hidden": true
-                },
-                "ref_data_isofox_counts": {
-                    "type": "string",
-                    "format": "file-path",
-                    "pattern": "^\\S+\\.csv$",
-                    "description": "Path to Isofox expected read counts file.",
-                    "fa_icon": "far fa-file-code",
-                    "hidden": true
-                },
-                "ref_data_isofox_gc_ratios": {
-                    "type": "string",
-                    "format": "file-path",
-                    "pattern": "^\\S+\\.csv$",
-                    "description": "Path to Isofox expected GC ratios file.",
-                    "fa_icon": "far fa-file-code",
-                    "hidden": true
-                },
-                "ref_data_lilac_resources": {
-                    "type": "string",
-                    "format": "directory-path",
-                    "description": "Path to LILAC resource directory.",
-                    "fa_icon": "far fa-folder-open",
-                    "hidden": true
-                },
-                "ref_data_cohort_mapping": {
-                    "type": "string",
-                    "format": "file-path",
-                    "pattern": "^\\S+\\.tsv$",
-                    "description": "Path to ORANGE cohort mapping file.",
-                    "fa_icon": "far fa-file-code",
-                    "hidden": true
-                },
-                "ref_data_cohort_percentiles": {
-                    "type": "string",
-                    "format": "file-path",
-                    "pattern": "^\\S+\\.tsv$",
-                    "description": "Path to ORANGE cohort percentiles file.",
-                    "fa_icon": "far fa-file-code",
-                    "hidden": true
-                },
-                "ref_data_alt_sj_distribution": {
-                    "type": "string",
-                    "format": "file-path",
-                    "pattern": "^\\S+\\.csv.gz$",
-                    "description": "Path to ORANGE alternative splice junction distribution file.",
-                    "fa_icon": "far fa-file-code",
-                    "hidden": true
-                },
-                "ref_data_gene_exp_distribution": {
-                    "type": "string",
-                    "format": "file-path",
-                    "pattern": "^\\S+\\.csv.gz$",
-                    "description": "Path to ORANGE gene expression distribution file.",
-                    "fa_icon": "far fa-file-code",
-                    "hidden": true
-                },
-                "ref_data_clinvar_annotations": {
-                    "type": "string",
-                    "format": "file-path",
-                    "pattern": "^\\S+\\.vcf\\.gz$",
-                    "description": "Path to HMF ClinVar annotations VCF file.",
-                    "fa_icon": "far fa-file-code",
-                    "hidden": true
-                },
-                "ref_data_sage_blocklist_regions": {
-                    "type": "string",
-                    "format": "file-path",
-                    "pattern": "^\\S+\\.vcf\\.gz$",
-                    "description": "Path to HMF SAGE known blocklist VCF file.",
-                    "fa_icon": "far fa-file-code",
-                    "hidden": true
-                },
-                "ref_data_sage_blocklist_sites": {
-                    "type": "string",
-                    "format": "file-path",
-                    "pattern": "^\\S+\\.bed$",
-                    "description": "Path to HMF SAGE known blocklist BED file.",
-                    "fa_icon": "far fa-file-code",
-                    "hidden": true
-                },
-                "ref_data_sage_actionable_panel": {
-                    "type": "string",
-                    "format": "file-path",
-                    "pattern": "^\\S+\\.bed\\.gz$",
-                    "description": "Path to somatic SAGE actionable panel file.",
-                    "fa_icon": "far fa-file-code",
-                    "hidden": true
-                },
-                "ref_data_sage_coverage_panel": {
-                    "type": "string",
-                    "format": "file-path",
-                    "pattern": "^\\S+\\.bed\\.gz$",
-                    "description": "Path to HMF SAGE coverage panel file.",
-                    "fa_icon": "far fa-file-code",
-                    "hidden": true
-                },
-                "ref_data_sage_highconf_regions": {
-                    "type": "string",
-                    "format": "file-path",
-                    "pattern": "^\\S+\\.bed\\.gz$",
-                    "description": "Path to HMF distributed high confidence regions file.",
-                    "fa_icon": "far fa-file-code",
-                    "hidden": true
-                },
-                "ref_data_sage_known_hotspots_germline": {
-                    "type": "string",
-                    "format": "file-path",
-                    "pattern": "^\\S+\\.vcf\\.gz$",
-                    "description": "Path to germline SAGE known hotspots file.",
-                    "fa_icon": "far fa-file-code",
-                    "hidden": true
-                },
-                "ref_data_sage_known_hotspots_somatic": {
-                    "type": "string",
-                    "format": "file-path",
-                    "pattern": "^\\S+\\.vcf\\.gz$",
-                    "description": "Path to somatic SAGE known hotspots file.",
-                    "fa_icon": "far fa-file-code",
-                    "hidden": true
-                },
-                "ref_data_sage_pon": {
-                    "type": "string",
-                    "format": "file-path",
-                    "pattern": "^\\S+\\.tsv\\.gz$",
-                    "description": "Path to HMF SAGE panel of normals file.",
-                    "fa_icon": "far fa-file-code",
-                    "hidden": true
-                },
-                "ref_data_sigs_signatures": {
-                    "type": "string",
-                    "format": "file-path",
-                    "pattern": "^\\S+\\.csv$",
-                    "description": "Path to signature definition file.",
-                    "fa_icon": "far fa-file-code",
-                    "hidden": true
-                },
-                "ref_data_virus_reporting_db": {
-                    "type": "string",
-                    "format": "file-path",
-                    "pattern": "^\\S+\\.tsv$",
-                    "description": "Path to Virus Interpreter reporting file.",
-                    "fa_icon": "far fa-file-code",
-                    "hidden": true
-                },
-                "ref_data_virus_taxonomy_db": {
-                    "type": "string",
-                    "format": "file-path",
-                    "pattern": "^\\S+\\.tsv$",
-                    "description": "Path to Virus Interpreter taxonomy file.",
-                    "fa_icon": "far fa-file-code",
-                    "hidden": true
-                },
-                "ref_data_disease_ontology": {
-                    "type": "string",
-                    "format": "file-path",
-                    "pattern": "^\\S+\\.json$",
-                    "description": "Path to disease ontology file.",
-                    "fa_icon": "far fa-file-code",
-                    "hidden": true
-                },
-                "ref_data_driver_gene_panel": {
-                    "type": "string",
-                    "format": "file-path",
-                    "pattern": "^\\S+\\.tsv$",
-                    "description": "Path to HMF driver gene panel file.",
-                    "fa_icon": "far fa-file-code",
-                    "hidden": true
-                },
-                "ref_data_ensembl_data_resources": {
-                    "type": "string",
-                    "format": "directory-path",
-                    "description": "Path to HMF Ensembl data cache directory.",
-                    "fa_icon": "far fa-folder-open",
-                    "hidden": true
-                },
-                "ref_data_gnomad_resource": {
-                    "type": "string",
-                    "format": "file-path",
-                    "description": "Path to HMF gnomAD resource.",
-                    "fa_icon": "far fa-file-code",
-                    "hidden": true
-                },
-                "ref_data_known_fusion_data": {
-                    "type": "string",
-                    "format": "file-path",
-                    "pattern": "^\\S+\\.csv$",
-                    "description": "Path to HMF known fusions data file.",
-                    "fa_icon": "far fa-file-code",
-                    "hidden": true
-                },
-                "ref_data_known_fusions": {
-                    "type": "string",
-                    "format": "file-path",
-                    "pattern": "^\\S+\\.bedpe$",
-                    "description": "Path to HMF known fusions file.",
-                    "fa_icon": "far fa-file-code",
-                    "hidden": true
-                },
-                "ref_data_purple_germline_del": {
-                    "type": "string",
-                    "format": "file-path",
-                    "pattern": "^\\S+\\.csv$",
-                    "description": "Path to HMF PURPLE germline cohort deletion frequency file.",
-                    "fa_icon": "far fa-file-code",
-                    "hidden": true
-                },
-                "ref_data_segment_mappability": {
-                    "type": "string",
-                    "format": "file-path",
-                    "pattern": "^\\S+\\.bed\\.gz$",
-                    "description": "Path to HMF mappability file.",
                     "fa_icon": "far fa-file-code",
                     "hidden": true
                 }
@@ -654,9 +380,6 @@
         },
         {
             "$ref": "#/definitions/reference_data_options"
-        },
-        {
-            "$ref": "#/definitions/hmf_data_options"
         },
         {
             "$ref": "#/definitions/institutional_config_options"

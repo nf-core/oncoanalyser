@@ -58,7 +58,7 @@ class WorkflowMain {
             NfcoreSchema.validateParameters(workflow, params, log)
         }
 
-        // NOTE(SW): this is now deferred until after we set defaults in subworkflows
+        // NOTE(SW): this is now deferred until after we set defaults
         // Print parameter summary log to screen
         //log.info paramsSummaryLog(workflow, params, log)
 

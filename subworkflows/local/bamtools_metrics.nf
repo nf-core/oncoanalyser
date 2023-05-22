@@ -1,12 +1,10 @@
 //
-// XXX
+// Bam Tools calculates summary statistics for BAMs
 //
 import Constants
 import Utils
 
 include { BAMTOOLS } from '../../modules/local/bamtools/main'
-
-include { CHANNEL_GROUP_INPUTS } from './channel_group_inputs'
 
 workflow BAMTOOLS_METRICS {
     take:
@@ -18,43 +16,39 @@ workflow BAMTOOLS_METRICS {
         ref_data_genome_version
 
         // Params
-        run
+        run_config
 
     main:
         // Channel for version.yml files
         ch_versions = Channel.empty()
 
-        // Get input meta groups
-        CHANNEL_GROUP_INPUTS(
-            ch_inputs,
-        )
-
         // Select input sources
-        // NOTE(SW): CUPPA only requires metrics for the tumor sample in the upstream
-        // process Virus Interpreter but ORANGE currently requires metrics for both tumor
-        // and normal sample
         // channel: [val(meta_bamtools), bam, bai]
-        ch_bamtools_inputs_all = CHANNEL_GROUP_INPUTS.out.wgs_present
+        ch_bamtools_inputs_all = ch_inputs
             .flatMap { meta ->
-                def sample_types
-                if (run.orange) {
-                    sample_types = [Constants.SampleType.TUMOR, Constants.SampleType.NORMAL]
-                } else {
-                    sample_types = [Constants.SampleType.TUMOR]
+                def inputs = []
+
+                def meta_bamtools_tumor = [
+                    key: meta.id,
+                    id: Utils.getTumorSampleName(meta, run_config.mode),
+                    // NOTE(SW): must use string representation for caching purposes
+                    sample_type_str: Constants.SampleType.TUMOR.name(),
+                ]
+                def tumor_bam = Utils.getTumorBam(meta, run_config.mode)
+                inputs.add([meta_bamtools_tumor, tumor_bam, "${tumor_bam}.bai"])
+
+                if (run_config.type == Constants.RunType.TUMOR_NORMAL) {
+                    def meta_bamtools_normal = [
+                        key: meta.id,
+                        id: Utils.getNormalWgsSampleName(meta),
+                        // NOTE(SW): must use string representation for caching purposes
+                        sample_type_str: Constants.SampleType.NORMAL.name(),
+                    ]
+                    def normal_bam = Utils.getNormalWgsBam(meta)
+                    inputs.add([meta_bamtools_normal, normal_bam, "${normal_bam}.bai"])
                 }
 
-                return sample_types
-                    .collect { sample_type ->
-                        def bam = meta.get([Constants.FileType.BAM, sample_type, Constants.SequenceType.WGS])
-                        def sample_name = meta.get(['sample_name', sample_type, Constants.SequenceType.WGS])
-                        def meta_bamtools = [
-                            key: meta.id,
-                            id: sample_name,
-                            // NOTE(SW): must use string representation for caching purposes
-                            sample_type_str: sample_type.name(),
-                        ]
-                        return [meta_bamtools, bam, "${bam}.bai"]
-                    }
+                return inputs
             }
 
         // Collapse duplicate files e.g. repeated normal BAMs for multiple tumor samples
@@ -91,7 +85,7 @@ workflow BAMTOOLS_METRICS {
             ref_data_genome_version,
         )
 
-        // Set outputs, process outputs and restore original meta
+        // Set version
         ch_versions = ch_versions.mix(BAMTOOLS.out.versions)
 
         // Replicate outputs to reverse unique operation

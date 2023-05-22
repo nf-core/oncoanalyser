@@ -1,11 +1,9 @@
 //
-// COBALT determines tumor/normal read ratios for downstream CNV calling
+// COBALT calculates read ratios between tumor and normal samples
 //
 import Utils
 
 include { COBALT } from '../../modules/local/cobalt/main'
-
-include { CHANNEL_GROUP_INPUTS } from './channel_group_inputs'
 
 workflow COBALT_PROFILING {
     take:
@@ -13,36 +11,55 @@ workflow COBALT_PROFILING {
         ch_inputs           // channel: [val(meta)]
 
         // Reference data
-        ref_data_gc_profile //    file: /path/to/gc_profile
+        gc_profile
+        diploid_bed
+        target_region_normalisation
+
+        // Params
+        run_config
 
     main:
         // Channel for version.yml files
         ch_versions = Channel.empty()
 
-        // Get input meta groups
-        CHANNEL_GROUP_INPUTS(
-            ch_inputs,
-        )
-
         // Select input sources
-        // channel: [meta_cobalt, tumor_bam_wgs, normal_bam_wgs, tumor_bai_wgs, normal_bai_wgs]
-        ch_cobalt_inputs = CHANNEL_GROUP_INPUTS.out.wgs_present
+        // channel: [meta_cobalt, tumor_bam, normal_bam, tumor_bai, normal_bai]
+        ch_cobalt_inputs = ch_inputs
             .map { meta ->
                 def meta_cobalt = [
                     key: meta.id,
                     id: meta.id,
-                    tumor_id: Utils.getTumorWgsSampleName(meta),
-                    normal_id: Utils.getNormalWgsSampleName(meta),
+                    tumor_id: Utils.getTumorSampleName(meta, run_config.mode),
                 ]
-                def tumor_bam = Utils.getTumorWgsBam(meta)
-                def normal_bam = Utils.getNormalWgsBam(meta)
-                return [meta_cobalt, tumor_bam, normal_bam, "${tumor_bam}.bai", "${normal_bam}.bai"]
+                def tumor_bam = Utils.getTumorBam(meta, run_config.mode)
+
+                def normal_bam = []
+                def normal_bai = []
+
+                if (run_config.type == Constants.RunType.TUMOR_NORMAL) {
+
+                    assert [Constants.RunMode.WGS, Constants.RunMode.WGTS].contains(run_config.mode)
+
+                    meta_cobalt.normal_id = Utils.getNormalWgsSampleName(meta)
+                    normal_bam = Utils.getNormalWgsBam(meta)
+                    normal_bai = "${normal_bam}.bai"
+
+                }
+
+                return [meta_cobalt, tumor_bam, normal_bam, "${tumor_bam}.bai", normal_bai]
             }
+
+        // Set reference files on run type
+        if (run_config.type != Constants.RunType.TUMOR_ONLY) {
+            diploid_bed = []
+        }
 
         // Run process
         COBALT(
             ch_cobalt_inputs,
-            ref_data_gc_profile,
+            gc_profile,
+            diploid_bed,
+            target_region_normalisation,
         )
 
         // Set outputs, restoring original meta

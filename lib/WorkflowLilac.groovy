@@ -9,13 +9,13 @@ import Utils
 
 class WorkflowLilac {
 
-    public static getSliceInputs(ch) {
+    public static getSliceInputs(ch, tumor_sequence_type) {
         // channel: [val(meta_lilac), bam, bai]
         return ch
             .flatMap { meta, nbam_wgs, nbai_wgs, tbam_wgs, tbai_wgs, tbam_wts, tbai_wts ->
                 def data = [
                     [nbam_wgs, nbai_wgs, Constants.SequenceType.WGS, Constants.SampleType.NORMAL],
-                    [tbam_wgs, tbai_wgs, Constants.SequenceType.WGS, Constants.SampleType.TUMOR],
+                    [tbam_wgs, tbai_wgs, tumor_sequence_type, Constants.SampleType.TUMOR],
                     [tbam_wts, tbai_wts, Constants.SequenceType.WTS, Constants.SampleType.TUMOR],
                 ]
                 def data_present = data.findAll { it[0] }
@@ -61,7 +61,7 @@ class WorkflowLilac {
         return d
     }
 
-    public static sortSlices(ch) {
+    public static sortSlices(ch, tumor_sequence_type) {
         // Gather and order files from same grouping using non-blocked groupTuple via provided file counts
         // channel: [val(meta_lilac), normal_wgs_bam, normal_wgs_bai, tumor_wgs_bam, tumor_wgs_bai, tumor_wts_bam, tumor_wts_bai]
         def d = ch
@@ -83,8 +83,8 @@ class WorkflowLilac {
                     meta,
                     data.get([Constants.SampleType.NORMAL, Constants.SequenceType.WGS, 'bam'], []),
                     data.get([Constants.SampleType.NORMAL, Constants.SequenceType.WGS, 'bai'], []),
-                    data.get([Constants.SampleType.TUMOR, Constants.SequenceType.WGS, 'bam'], []),
-                    data.get([Constants.SampleType.TUMOR, Constants.SequenceType.WGS, 'bai'], []),
+                    data.get([Constants.SampleType.TUMOR, tumor_sequence_type, 'bam'], []),
+                    data.get([Constants.SampleType.TUMOR, tumor_sequence_type, 'bai'], []),
                     data.get([Constants.SampleType.TUMOR, Constants.SequenceType.WTS, 'bam'], []),
                     data.get([Constants.SampleType.TUMOR, Constants.SequenceType.WTS, 'bai'], []),
                 ]

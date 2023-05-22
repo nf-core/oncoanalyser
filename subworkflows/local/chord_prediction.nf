@@ -1,5 +1,5 @@
 //
-// XXX
+// CHORD predicts HR status
 //
 import Constants
 import Utils
@@ -16,7 +16,7 @@ workflow CHORD_PREDICTION {
         ref_data_genome_version
 
         // Params
-        run
+        run_config
 
     main:
         // Channel for version.yml files
@@ -24,7 +24,7 @@ workflow CHORD_PREDICTION {
 
         // Select input sources
         // channel: [val(meta), purple_dir]
-        if (run.purple) {
+        if (run_config.stages.purple) {
           ch_chord_inputs_source = ch_purple
         } else {
           ch_chord_inputs_source = WorkflowOncoanalyser.getInput(ch_inputs, Constants.INPUT.PURPLE_DIR)
@@ -40,13 +40,13 @@ workflow CHORD_PREDICTION {
 
                 // Require both SV and smlv VCF from the PURPLE directory
                 if (!smlv_vcf.exists() || !sv_vcf.exists()) {
-                    return Constants.META_PLACEHOLDER
+                    return Constants.PLACEHOLDER_META
                 }
 
                 def meta_chord = [key: meta.id, id: meta.id]
                 return [meta_chord, smlv_vcf, sv_vcf]
             }
-            .filter { it != Constants.META_PLACEHOLDER }
+            .filter { it != Constants.PLACEHOLDER_META }
 
         // Run process
         CHORD(

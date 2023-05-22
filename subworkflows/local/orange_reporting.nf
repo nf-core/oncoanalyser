@@ -6,8 +6,7 @@ import Utils
 
 include { ORANGE } from '../../modules/local/orange/main'
 
-include { CHANNEL_GROUP_INPUTS } from './channel_group_inputs'
-include { FLAGSTAT_METRICS     } from './flagstat_metrics'
+include { FLAGSTAT_METRICS } from './flagstat_metrics'
 
 workflow ORANGE_REPORTING {
     take:
@@ -43,16 +42,11 @@ workflow ORANGE_REPORTING {
         ref_data_isofox_gene_distribution
 
         // Params
-        run
+        run_config
 
     main:
         // Channel for version.yml files
         ch_versions = Channel.empty()
-
-        // Get input meta groups
-        CHANNEL_GROUP_INPUTS(
-            ch_inputs,
-        )
 
         //
         // SUBWORKFLOW: Run SAMtools flagstat to generate stats required for ORANGE
@@ -60,10 +54,11 @@ workflow ORANGE_REPORTING {
         // channel: [val(meta), metrics]
         ch_flagstat_somatic_out = Channel.empty()
         ch_flagstat_germline_out = Channel.empty()
-        if (run.flagstat) {
+        if (run_config.stages.flagstat) {
 
             FLAGSTAT_METRICS(
-                CHANNEL_GROUP_INPUTS.out.wgs_present,
+                ch_inputs,
+                run_config,
             )
 
             ch_versions = ch_versions.mix(FLAGSTAT_METRICS.out.versions)
@@ -74,62 +69,75 @@ workflow ORANGE_REPORTING {
         //
         // MODULE: Run ORANGE
         //
+        // Create placeholders for tumor-only
+        if (run_config.type == Constants.RunType.TUMOR_ONLY) {
+            ch_bamtools_germline = ch_inputs.map { meta -> [meta, []] }
+            ch_sage_germline_append = ch_inputs.map { meta -> [meta, []] }
+            ch_flagstat_germline_out = ch_inputs.map { meta -> [meta, []] }
+            ch_sage_germline_coverage = ch_inputs.map { meta -> [meta, []] }
+            ch_linx_germline_annotation = ch_inputs.map { meta -> [meta, []] }
+            ch_sage_somatic_normal_bqr = ch_inputs.map { meta -> [meta, []] }
+        }
+
         // Get PURPLE input source for processing
-        ch_orange_inputs_purple_dir = run.purple ? ch_purple : WorkflowOncoanalyser.getInput(ch_inputs, Constants.INPUT.PURPLE_DIR)
+        ch_orange_inputs_purple_dir = run_config.stages.purple ? ch_purple : WorkflowOncoanalyser.getInput(ch_inputs, Constants.INPUT.PURPLE_DIR)
 
         // Get input smlv somatic VCF from either PURPLE or SAGE append
-        // NOTE(SW): a better test would be WTS or WGTS; this will be implemented as run mode (WGS/WTS/WGTS,
-        // panel, MRD) along with input type (tumor-only, tumor/normal)
-        // channel: [meta, smlv_somatic_vcf, smlv_germline_vcf]
-        ch_orange_inputs_smlv_vcfs_append = WorkflowOncoanalyser.groupByMeta(
-            ch_sage_somatic_append,
-            ch_sage_germline_append,
-        )
-            // NOTE(SW): using .join for selection only
-            .join(CHANNEL_GROUP_INPUTS.out.wts_present)
+        if (run_config.mode == Constants.RunMode.WGS) {
 
-        // channel: [meta, smlv_somatic_vcf, smlv_germline_vcf]
-        ch_orange_inputs_smlv_vcfs_purple_dir = CHANNEL_GROUP_INPUTS.out.wts_absent
-            .join(ch_orange_inputs_purple_dir)
-            .map { meta, purple_dir ->
-                def tumor_id = Utils.getTumorWgsSampleName(meta)
-                def smlv_somatic_vcf = file(purple_dir).resolve("${tumor_id}.purple.somatic.vcf.gz")
-                def smlv_germline_vcf = file(purple_dir).resolve("${tumor_id}.purple.germline.vcf.gz")
+            ch_orange_inputs_smlv_vcfs = ch_orange_inputs_purple_dir
+                .map { meta, purple_dir ->
+                    def tumor_id = Utils.getTumorSampleName(meta, run_config.mode)
 
-                // Require smlv somatic VCF from the PURPLE directory
-                if (!smlv_somatic_vcf.exists() || !smlv_germline_vcf.exists()) {
-                    return Constants.META_PLACEHOLDER
+                    def smlv_somatic_vcf = []
+                    def smlv_germline_vcf = []
+
+                    def smlv_somatic_vcf_path = file(purple_dir).resolve("${tumor_id}.purple.somatic.vcf.gz")
+                    def smlv_germline_vcf_path = file(purple_dir).resolve("${tumor_id}.purple.germline.vcf.gz")
+
+                    if (smlv_somatic_vcf_path.exists()) {
+                        smlv_somatic_vcf = smlv_somatic_vcf_path
+                    }
+
+                    // NOTE(SW): can only evaluate to true with WGS tumor/normal
+                    if (smlv_germline_vcf_path.exists()) {
+                        smlv_germline_vcf = smlv_germline_vcf_path
+                    }
+
+                    return [meta, smlv_somatic_vcf, smlv_germline_vcf]
                 }
 
-                return [meta, smlv_somatic_vcf, smlv_germline_vcf]
-            }
+        } else if (run_config.mode == Constants.RunMode.WGTS) {
 
-        ch_orange_inputs_smlv_vcfs = Channel.empty()
-            .mix(
-                ch_orange_inputs_smlv_vcfs_append,
-                ch_orange_inputs_smlv_vcfs_purple_dir,
+            ch_orange_inputs_smlv_vcfs = WorkflowOncoanalyser.groupByMeta(
+                ch_sage_somatic_append,
+                ch_sage_germline_append,
             )
+
+        } else {
+            ch_orange_inputs_smlv_vcfs = ch_inputs.map { meta -> [meta, [], []] }
+        }
 
         // Select input source
         ch_orange_inputs_source = WorkflowOncoanalyser.groupByMeta(
-            run.bamtools ? ch_bamtools_somatic : WorkflowOncoanalyser.getInput(ch_inputs, Constants.INPUT.BAMTOOLS_TUMOR),
-            run.bamtools ? ch_bamtools_germline : WorkflowOncoanalyser.getInput(ch_inputs, Constants.INPUT.BAMTOOLS_NORMAL, type: 'optional'),
-            run.flagstat ? ch_flagstat_somatic_out : WorkflowOncoanalyser.getInput(ch_inputs, Constants.INPUT.FLAGSTAT_TUMOR),
-            run.flagstat ? ch_flagstat_germline_out : WorkflowOncoanalyser.getInput(ch_inputs, Constants.INPUT.FLAGSTAT_NORMAL, type: 'optional'),
-            run.sage ? ch_sage_somatic_tumor_bqr : WorkflowOncoanalyser.getInput(ch_inputs, Constants.INPUT.SAGE_BQR_TUMOR),
-            run.sage ? ch_sage_somatic_normal_bqr : WorkflowOncoanalyser.getInput(ch_inputs, Constants.INPUT.SAGE_BQR_NORMAL, type: 'optional'),
-            run.sage ? ch_sage_germline_coverage : WorkflowOncoanalyser.getInput(ch_inputs, Constants.INPUT.SAGE_COVERAGE, type: 'optional'),
+            run_config.stages.bamtools ? ch_bamtools_somatic : WorkflowOncoanalyser.getInput(ch_inputs, Constants.INPUT.BAMTOOLS_TUMOR),
+            run_config.stages.bamtools ? ch_bamtools_germline : WorkflowOncoanalyser.getInput(ch_inputs, Constants.INPUT.BAMTOOLS_NORMAL, type: 'optional'),
+            run_config.stages.flagstat ? ch_flagstat_somatic_out : WorkflowOncoanalyser.getInput(ch_inputs, Constants.INPUT.FLAGSTAT_TUMOR),
+            run_config.stages.flagstat ? ch_flagstat_germline_out : WorkflowOncoanalyser.getInput(ch_inputs, Constants.INPUT.FLAGSTAT_NORMAL, type: 'optional'),
+            run_config.stages.sage ? ch_sage_somatic_tumor_bqr : WorkflowOncoanalyser.getInput(ch_inputs, Constants.INPUT.SAGE_BQR_TUMOR),
+            run_config.stages.sage ? ch_sage_somatic_normal_bqr : WorkflowOncoanalyser.getInput(ch_inputs, Constants.INPUT.SAGE_BQR_NORMAL, type: 'optional'),
+            run_config.stages.sage ? ch_sage_germline_coverage : WorkflowOncoanalyser.getInput(ch_inputs, Constants.INPUT.SAGE_COVERAGE, type: 'optional'),
             ch_orange_inputs_purple_dir,
             ch_orange_inputs_smlv_vcfs,
-            run.linx ? ch_linx_somatic_annotation : WorkflowOncoanalyser.getInput(ch_inputs, Constants.INPUT.LINX_ANNO_DIR_TUMOR),
-            run.linx ? ch_linx_somatic_plot : WorkflowOncoanalyser.getInput(ch_inputs, Constants.INPUT.LINX_PLOT_DIR_TUMOR),
-            run.linx ? ch_linx_germline_annotation : WorkflowOncoanalyser.getInput(ch_inputs, Constants.INPUT.LINX_PLOT_DIR_NORMAL, type: 'optional'),
-            run.virusinterpreter ? ch_virusinterpreter : WorkflowOncoanalyser.getInput(ch_inputs, Constants.INPUT.VIRUSINTERPRETER_TSV, type: 'optional'),
-            run.chord ? ch_chord : WorkflowOncoanalyser.getInput(ch_inputs, Constants.INPUT.CHORD_PREDICITION, type: 'optional'),
-            run.sigs ? ch_sigs : WorkflowOncoanalyser.getInput(ch_inputs, Constants.INPUT.SIGS_DIR, type: 'optional'),
-            run.lilac ? ch_lilac : WorkflowOncoanalyser.getInput(ch_inputs, Constants.INPUT.LILAC_DIR),
-            run.cuppa ? ch_cuppa : WorkflowOncoanalyser.getInput(ch_inputs, Constants.INPUT.CUPPA_DIR, type: 'optional'),
-            run.isofox ? ch_isofox : WorkflowOncoanalyser.getInput(ch_inputs, Constants.INPUT.ISOFOX_DIR, type: 'optional'),
+            run_config.stages.linx ? ch_linx_somatic_annotation : WorkflowOncoanalyser.getInput(ch_inputs, Constants.INPUT.LINX_ANNO_DIR_TUMOR),
+            run_config.stages.linx ? ch_linx_somatic_plot : WorkflowOncoanalyser.getInput(ch_inputs, Constants.INPUT.LINX_PLOT_DIR_TUMOR),
+            run_config.stages.linx ? ch_linx_germline_annotation : WorkflowOncoanalyser.getInput(ch_inputs, Constants.INPUT.LINX_ANNO_DIR_NORMAL, type: 'optional'),
+            run_config.stages.virusinterpreter ? ch_virusinterpreter : WorkflowOncoanalyser.getInput(ch_inputs, Constants.INPUT.VIRUSINTERPRETER_TSV, type: 'optional'),
+            run_config.stages.chord ? ch_chord : WorkflowOncoanalyser.getInput(ch_inputs, Constants.INPUT.CHORD_PREDICTION, type: 'optional'),
+            run_config.stages.sigs ? ch_sigs : WorkflowOncoanalyser.getInput(ch_inputs, Constants.INPUT.SIGS_DIR, type: 'optional'),
+            run_config.stages.lilac ? ch_lilac : WorkflowOncoanalyser.getInput(ch_inputs, Constants.INPUT.LILAC_DIR),
+            run_config.stages.cuppa ? ch_cuppa : WorkflowOncoanalyser.getInput(ch_inputs, Constants.INPUT.CUPPA_DIR, type: 'optional'),
+            run_config.stages.isofox ? ch_isofox : WorkflowOncoanalyser.getInput(ch_inputs, Constants.INPUT.ISOFOX_DIR, type: 'optional'),
             flatten_mode: 'nonrecursive',
         )
 
@@ -144,7 +152,7 @@ workflow ORANGE_REPORTING {
                 def meta_orange = [
                     key: meta.id,
                     id: meta.id,
-                    tumor_wgs_id: Utils.getTumorWgsSampleName(meta),
+                    tumor_id: Utils.getTumorSampleName(meta, run_config.mode),
                 ]
 
                 // Add optional identifiers to meta

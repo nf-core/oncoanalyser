@@ -7,7 +7,7 @@ process AMBER {
     input:
     tuple val(meta), path(tumor_bam), path(normal_bam), path(tumor_bai), path(normal_bai)
     val ref_genome_ver
-    path loci
+    path heterozygous_sites
 
     output:
     tuple val(meta), path('amber/'), emit: amber_dir
@@ -19,6 +19,9 @@ process AMBER {
     script:
     def args = task.ext.args ?: ''
 
+    def reference_arg = meta.containsKey('normal_id') ? "-reference ${meta.normal_id}" : ''
+    def reference_bam_arg = normal_bam ? "-reference_bam ${normal_bam}" : ''
+
     """
     java \\
         -Xmx${Math.round(task.memory.bytes * 0.95)} \\
@@ -26,10 +29,10 @@ process AMBER {
             ${args} \\
             -tumor ${meta.tumor_id} \\
             -tumor_bam ${tumor_bam} \\
-            -reference ${meta.normal_id} \\
-            -reference_bam ${normal_bam} \\
+            ${reference_arg} \\
+            ${reference_bam_arg} \\
             -ref_genome_version ${ref_genome_ver} \\
-            -loci ${loci} \\
+            -loci ${heterozygous_sites} \\
             -threads ${task.cpus} \\
             -output_dir amber/
 
