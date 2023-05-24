@@ -1,5 +1,5 @@
 //
-// XXX
+// AMBER determines b-allele frequencies for downstream CNV calling
 //
 import Utils
 
@@ -10,11 +10,11 @@ include { CHANNEL_GROUP_INPUTS } from './channel_group_inputs'
 workflow AMBER_PROFILING {
     take:
         // Sample data
-        ch_inputs
+        ch_inputs                   // channel: [val(meta)]
 
         // Reference data
-        ref_data_genome_version
-        ref_data_heterozygous_sites
+        ref_data_genome_version     //     val: genome version
+        ref_data_heterozygous_sites //    file: /path/to/heterozygous_sites
 
     main:
         // Channel for version.yml files

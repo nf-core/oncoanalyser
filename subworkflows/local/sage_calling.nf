@@ -9,7 +9,10 @@ include { CHANNEL_GROUP_INPUTS } from './channel_group_inputs'
 
 workflow SAGE_CALLING {
     take:
+        // Sample data
         ch_inputs                             // channel: [val(meta)]
+
+        // Reference data
         ref_data_genome_fasta                 //    file: /path/to/genome_fasta
         ref_data_genome_fai                   //    file: /path/to/genome_fai
         ref_data_genome_dict                  //    file: /path/to/genome_dict

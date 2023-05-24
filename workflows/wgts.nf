@@ -217,7 +217,6 @@ workflow WGTS {
 
             GRIDSS_SVPREP_CALLING(
                 ch_inputs,
-                gridss_config,
                 ref_data.genome_fasta,
                 ref_data.genome_version,
                 ref_data.genome_fai,
@@ -228,6 +227,7 @@ workflow WGTS {
                 hmf_data.gridss_region_blocklist,
                 hmf_data.sv_prep_blocklist,
                 hmf_data.known_fusions,
+                gridss_config,
             )
 
             ch_versions = ch_versions.mix(GRIDSS_SVPREP_CALLING.out.versions)
@@ -237,7 +237,6 @@ workflow WGTS {
 
             GRIDSS_CALLING(
                 ch_inputs,
-                gridss_config,
                 ref_data.genome_fasta,
                 ref_data.genome_fai,
                 ref_data.genome_dict,
@@ -245,6 +244,7 @@ workflow WGTS {
                 ref_data.genome_bwa_index_image,
                 ref_data.genome_gridss_index,
                 hmf_data.gridss_region_blocklist,
+                gridss_config,
             )
 
             ch_versions = ch_versions.mix(GRIDSS_CALLING.out.versions)
@@ -255,7 +255,7 @@ workflow WGTS {
     //
     // SUBWORKFLOW: Run GRIPSS to filter GRIDSS SV calls
     //
-    // channel: [val(meta), vcf, tbi]
+    // channel: [val(meta), gripss_vcf, gripss_tbi]
     ch_gripss_somatic_out = Channel.empty()
     ch_gripss_germline_out = Channel.empty()
     ch_gripss_somatic_unfiltered_out = Channel.empty()

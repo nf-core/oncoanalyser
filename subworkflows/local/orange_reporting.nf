@@ -40,7 +40,7 @@ workflow ORANGE_REPORTING {
         ref_data_isofox_alt_sj
         ref_data_isofox_gene_distribution
 
-        // Parameters
+        // Params
         run
 
     main:
