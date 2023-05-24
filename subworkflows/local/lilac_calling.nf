@@ -166,8 +166,11 @@ workflow LILAC_CALLING {
         )
 
         // Get inputs from PURPLE
+        // Set PURPLE directory source first
+        ch_purple_dir_source = run.purple ? ch_purple : WorkflowOncoanalyser.getInput(ch_inputs, Constants.INPUT.PURPLE_DIR)
+
         // channel: [val(meta), gene_cn]
-        ch_lilac_inputs_gene_cn = ch_purple
+        ch_lilac_inputs_gene_cn = ch_purple_dir_source
             .map { meta, purple_dir ->
                 if (purple_dir == []) {
                     return [meta, []]
@@ -179,7 +182,7 @@ workflow LILAC_CALLING {
             }
 
         // channel: [val(meta), smlv_vcf]
-        ch_lilac_inputs_smlv_vcf = ch_purple
+        ch_lilac_inputs_smlv_vcf = ch_purple_dir_source
             .map { meta, purple_dir ->
                 if (purple_dir == []) {
                     return [meta, []]
