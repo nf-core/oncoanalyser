@@ -49,7 +49,7 @@ class Constants {
         BAM,
         // Process
         AMBER_DIR,
-        BAMTOOLS_TXT,
+        BAMTOOLS,
         COBALT_DIR,
         GRIDSS_VCF,
         GRIPSS_VCF,
@@ -91,8 +91,8 @@ class Constants {
         AMBER_DIR:              [FileType.AMBER_DIR,            SampleType.TUMOR_NORMAL, SequenceType.WGS],
         COBALT_DIR:             [FileType.COBALT_DIR,           SampleType.TUMOR_NORMAL, SequenceType.WGS],
 
-        BAMTOOLS_TXT_TUMOR:     [FileType.BAMTOOLS_TXT,         SampleType.TUMOR,        SequenceType.WGS],
-        BAMTOOLS_TXT_NORMAL:    [FileType.BAMTOOLS_TXT,         SampleType.NORMAL,       SequenceType.WGS],
+        BAMTOOLS_TUMOR:         [FileType.BAMTOOLS,             SampleType.TUMOR,        SequenceType.WGS],
+        BAMTOOLS_NORMAL:        [FileType.BAMTOOLS,             SampleType.NORMAL,       SequenceType.WGS],
 
         FLAGSTAT_TUMOR:         [FileType.FLAGSTAT,             SampleType.TUMOR,        SequenceType.WGS],
         FLAGSTAT_NORMAL:        [FileType.FLAGSTAT,             SampleType.NORMAL,       SequenceType.WGS],
