@@ -88,6 +88,7 @@ include { PAVE_ANNOTATION       } from '../subworkflows/local/pave_annotation'
 include { PREPARE_INPUT         } from '../subworkflows/local/prepare_input'
 include { PREPARE_REFERENCE     } from '../subworkflows/local/prepare_reference'
 include { PURPLE_CALLING        } from '../subworkflows/local/purple_calling'
+include { SAGE_APPEND           } from '../subworkflows/local/sage_append'
 include { SAGE_CALLING          } from '../subworkflows/local/sage_calling'
 include { SIGS_FITTING          } from '../subworkflows/local/sigs_fitting'
 include { VIRUSBREAKEND_CALLING } from '../subworkflows/local/virusbreakend_calling'
@@ -384,6 +385,30 @@ workflow WGTS {
     }
 
     //
+    // SUBWORKFLOW: Append WTS data to SAGE VCF
+    //
+    // channel: [val(meta), append_vcf]
+    ch_sage_somatic_append_vcf = Channel.empty()
+    ch_sage_germline_append_vcf = Channel.empty()
+    if (run.orange) {
+
+        // NOTE(SW): currently used only for ORANGE but will also be used for Neo once implemented
+
+        SAGE_APPEND(
+            ch_inputs,
+            ch_purple_out,
+            ref_data.genome_fasta,
+            ref_data.genome_fai,
+            ref_data.genome_dict,
+            run,
+        )
+
+        ch_versions = ch_versions.mix(SAGE_APPEND.out.versions)
+        ch_sage_somatic_append_vcf = ch_sage_somatic_append_vcf.mix(SAGE_APPEND.out.somatic_vcf)
+        ch_sage_germline_append_vcf = ch_sage_germline_append_vcf.mix(SAGE_APPEND.out.germline_vcf)
+    }
+
+    //
     // SUBWORKFLOW: Group structural variants into higher order events with LINX
     //
     // channel: [val(meta), linx_annotation_dir]
@@ -547,6 +572,8 @@ workflow WGTS {
             ch_sage_somatic_tumor_bqr_out,
             ch_sage_somatic_normal_bqr_out,
             ch_sage_germline_coverage_out,
+            ch_sage_somatic_append_vcf,
+            ch_sage_germline_append_vcf,
             ch_purple_out,
             ch_linx_somatic_out,
             ch_linx_somatic_plot_out,
