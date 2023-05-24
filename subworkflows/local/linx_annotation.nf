@@ -20,7 +20,7 @@ workflow LINX_ANNOTATION {
         ref_data_driver_gene_panel      //    file: /path/to/driver_gene_panel
         gene_id_file                    //    file: /path/to/linx_gene_id_file
 
-        // Parameters
+        // Params
         run
 
     main:

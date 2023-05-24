@@ -15,7 +15,7 @@ workflow CHORD_PREDICTION {
         // Reference data
         ref_data_genome_version
 
-        // Parameters
+        // Params
         run
 
     main:

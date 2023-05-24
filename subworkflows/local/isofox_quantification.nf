@@ -20,7 +20,7 @@ workflow ISOFOX_QUANTIFICATION {
         ref_data_isofox_counts
         ref_data_isofox_gc_ratios
 
-        // Parameters
+        // Params
         isofox_functions
         //use_isofox_exp_counts_cache
 

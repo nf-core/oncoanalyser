@@ -20,7 +20,7 @@ workflow GRIPSS_FILTERING {
         known_fusions            //    file: /path/to/known_fusions
         repeatmasker_annotations //    file: /path/to/repeatmasker_annotations
 
-        // Parameters
+        // Params
         run
 
     main:
@@ -83,5 +83,5 @@ workflow GRIPSS_FILTERING {
         somatic_unfiltered  = ch_somatic_unfiltered_out  // channel: [val(meta), vcf, tbi]
         germline_unfiltered = ch_germline_unfiltered_out // channel: [val(meta), vcf, tbi]
 
-        versions = ch_versions     // channel: [versions.yml]
+        versions = ch_versions                           // channel: [versions.yml]
 }

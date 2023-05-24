@@ -7,7 +7,6 @@ include { PAVE_SOMATIC as SOMATIC   } from '../../modules/local/pave/somatic/mai
 
 workflow PAVE_ANNOTATION {
     take:
-
         // Sample data
         ch_inputs                       // channel: [val(meta)]
         ch_sage_germline_vcf            // channel: [val(meta), sage_germline_vcf]
@@ -103,5 +102,5 @@ workflow PAVE_ANNOTATION {
         germline = ch_germline_out // channel: [val(meta), pave_vcf]
         somatic = ch_somatic_out   // channel: [val(meta), pave_vcf]
 
-        versions = ch_versions           // channel: [versions.yml]
+        versions = ch_versions     // channel: [versions.yml]
 }

@@ -12,8 +12,10 @@ include { CHANNEL_GROUP_INPUTS } from './channel_group_inputs'
 
 workflow GRIDSS_CALLING {
     take:
+        // Sample data
         ch_inputs                       // channel: [val(meta)]
-        gridss_config                   //    file: /path/to/gridss_config (optional)
+
+        // Reference data
         ref_data_genome_fasta           //    file: /path/to/genome_fasta
         ref_data_genome_fai             //    file: /path/to/genome_fai
         ref_data_genome_dict            //    file: /path/to/genome_dict
@@ -21,6 +23,9 @@ workflow GRIDSS_CALLING {
         ref_data_genome_bwa_index_image //    file: /path/to/genome_bwa_index_image
         ref_data_genome_gridss_index    //    file: /path/to/genome_gridss_index
         ref_data_gridss_blacklist       //     val: /path/to/gridss_blacklist
+
+        // Params
+        gridss_config                   //    file: /path/to/gridss_config (optional)
 
     main:
         // Channel for version.yml files

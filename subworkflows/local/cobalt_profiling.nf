@@ -1,5 +1,5 @@
 //
-// XXX
+// COBALT determines tumor/normal read ratios for downstream CNV calling
 //
 import Utils
 
@@ -10,10 +10,10 @@ include { CHANNEL_GROUP_INPUTS } from './channel_group_inputs'
 workflow COBALT_PROFILING {
     take:
         // Sample data
-        ch_inputs
+        ch_inputs           // channel: [val(meta)]
 
         // Reference data
-        ref_data_gc_profile
+        ref_data_gc_profile //    file: /path/to/gc_profile
 
     main:
         // Channel for version.yml files

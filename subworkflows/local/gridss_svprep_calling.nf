@@ -15,8 +15,10 @@ include { CHANNEL_GROUP_INPUTS } from './channel_group_inputs'
 
 workflow GRIDSS_SVPREP_CALLING {
     take:
+        // Sample data
         ch_inputs                       // channel: [val(meta)]
-        gridss_config                   //    file: /path/to/gridss_config (optional)
+
+        // Reference data
         ref_data_genome_fasta           //    file: /path/to/genome_fasta
         ref_data_genome_version         //     val: genome version
         ref_data_genome_fai             //    file: /path/to/genome_fai
@@ -27,6 +29,9 @@ workflow GRIDSS_SVPREP_CALLING {
         ref_data_gridss_blocklist       //     val: /path/to/gridss_blocklist
         ref_data_sv_prep_blocklist      //    file: /path/to/sv_prep_blocklist
         ref_data_known_fusions          //    file: /path/to/known_fusions
+
+        // Params
+        gridss_config                   //    file: /path/to/gridss_config (optional)
 
     main:
         // Channel for version.yml files
