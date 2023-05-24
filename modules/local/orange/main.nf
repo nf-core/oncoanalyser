@@ -5,7 +5,7 @@ process ORANGE {
     container 'docker.io/scwatts/orange:2.3--0'
 
     input:
-    tuple val(meta), path(bam_metrics_somatic), path(bam_metrics_germline), path(flagstat_somatic), path(flagstat_germline), path(sage_somatic_bqr), path(sage_germline_bqr), path(sage_germline_coverage), path(purple_dir), path(linx_somatic_anno_dir), path(linx_somatic_plot_dir), path(linx_germline_anno_dir), path(virusinterpreter), path(chord_prediction), path(sigs_dir), path(lilac_dir), path(cuppa_dir), path(isofox_dir)
+    tuple val(meta), path(bam_metrics_somatic), path(bam_metrics_germline), path(flagstat_somatic), path(flagstat_germline), path(sage_somatic_bqr), path(sage_germline_bqr), path(sage_germline_coverage), path(purple_dir), path(smlv_somatic_vcf), path(smlv_germline_vcf), path(linx_somatic_anno_dir), path(linx_somatic_plot_dir), path(linx_germline_anno_dir), path(virusinterpreter), path(chord_prediction), path(sigs_dir), path(lilac_dir), path(cuppa_dir), path(isofox_dir)
     val genome_ver
     path disease_ontology
     path cohort_mapping
@@ -55,6 +55,7 @@ process ORANGE {
     """
     echo "${pipeline_version_str}" > pipeline_version.txt
 
+    # Replace identifiers as required
     if [[ -n "${normal_linx_arg}" ]]; then
         mkdir -p normal_linx__prepared/;
         for fp in ${linx_germline_anno_dir}/*; do
@@ -63,8 +64,22 @@ process ORANGE {
         done;
     fi
 
+    # When WTS data is present, ORANGE expects the somatic SAGE VCF to have appended WTS data; CS indicates this should
+    # occur after PURPLE. Since ORANGE only collects the somatic SAGE VCF from the PURPLE output directory, we must
+    # prepare accordingly
+    purple_dir_local=${purple_dir}
+    if [[ -n "${rna_id_arg}" ]]; then
+        purple_dir_local=purple__prepared;
+        mkdir -p \${purple_dir_local}/;
+        find -L ${purple_dir} -maxdepth 1 -exec ln -fs ../{} \${purple_dir_local}/ \\;
+        ln -sf ../${smlv_somatic_vcf} \${purple_dir_local}/${meta.tumor_wgs_id}.purple.somatic.vcf.gz;
+        ln -sf ../${smlv_germline_vcf} \${purple_dir_local}/${meta.tumor_wgs_id}.purple.germline.vcf.gz;
+    fi
+
     # NOTE(SW): '--add-opens java.base/java.time=ALL-UNNAMED' resolves issue writing JSON, see:
     # https://stackoverflow.com/questions/70412805/what-does-this-error-mean-java-lang-reflect-inaccessibleobjectexception-unable/70878195#70878195
+
+    # NOTE(SW): DOID label: 162 [cancer]; Hartwig cohort group: unknown
 
     java \\
         --add-opens java.base/java.time=ALL-UNNAMED \\
@@ -75,12 +90,14 @@ process ORANGE {
             -pipeline_version_file pipeline_version.txt \\
             \\
             -tumor_sample_id ${meta.tumor_wgs_id} \\
-            -primary_tumor_doids "" \\
+            \\
+            -primary_tumor_doids 162 \\
+            \\
             -tumor_sample_wgs_metrics_file ${bam_metrics_somatic} \\
             -tumor_sample_flagstat_file ${flagstat_somatic} \\
             -sage_somatic_tumor_sample_bqr_plot ${sage_somatic_bqr} \\
-            -purple_data_directory ${purple_dir} \\
-            -purple_plot_directory ${purple_dir}/plot/ \\
+            -purple_data_directory \${purple_dir_local} \\
+            -purple_plot_directory \${purple_dir_local}/plot/ \\
             -linx_somatic_data_directory ${linx_somatic_anno_dir} \\
             -linx_plot_directory ${linx_somatic_plot_dir} \\
             -lilac_result_csv ${lilac_dir}/${meta.tumor_wgs_id}.lilac.csv \\
@@ -98,11 +115,11 @@ process ORANGE {
             ${normal_sage_coverage_arg} \\
             ${normal_linx_arg} \\
             \\
-            \\ #${rna_id_arg} \\
-            \\ #${isofox_summary_csv_arg} \\
-            \\ #${isofox_gene_csv_arg} \\
-            \\ #${isofox_fusion_csv_arg} \\
-            \\ #${isofox_alt_sj_csv_arg} \\
+            ${rna_id_arg} \\
+            ${isofox_summary_csv_arg} \\
+            ${isofox_gene_csv_arg} \\
+            ${isofox_fusion_csv_arg} \\
+            ${isofox_alt_sj_csv_arg} \\
             \\
             -ref_genome_version ${genome_ver} \\
             -doid_json ${disease_ontology} \\

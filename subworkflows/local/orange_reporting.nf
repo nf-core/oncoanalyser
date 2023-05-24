@@ -18,6 +18,8 @@ workflow ORANGE_REPORTING {
         ch_sage_somatic_tumor_bqr
         ch_sage_somatic_normal_bqr
         ch_sage_germline_coverage
+        ch_sage_somatic_append
+        ch_sage_germline_append
         ch_purple
         ch_linx_somatic_annotation
         ch_linx_somatic_plot
@@ -72,6 +74,42 @@ workflow ORANGE_REPORTING {
         //
         // MODULE: Run ORANGE
         //
+        // Get PURPLE input source for processing
+        ch_orange_inputs_purple_dir = run.purple ? ch_purple : WorkflowOncoanalyser.getInput(ch_inputs, Constants.INPUT.PURPLE_DIR)
+
+        // Get input smlv somatic VCF from either PURPLE or SAGE append
+        // NOTE(SW): a better test would be WTS or WGTS; this will be implemented as run mode (WGS/WTS/WGTS,
+        // panel, MRD) along with input type (tumor-only, tumor/normal)
+        // channel: [meta, smlv_somatic_vcf, smlv_germline_vcf]
+        ch_orange_inputs_smlv_vcfs_append = WorkflowOncoanalyser.groupByMeta(
+            ch_sage_somatic_append,
+            ch_sage_germline_append,
+        )
+            // NOTE(SW): using .join for selection only
+            .join(CHANNEL_GROUP_INPUTS.out.wts_present)
+
+        // channel: [meta, smlv_somatic_vcf, smlv_germline_vcf]
+        ch_orange_inputs_smlv_vcfs_purple_dir = CHANNEL_GROUP_INPUTS.out.wts_absent
+            .join(ch_orange_inputs_purple_dir)
+            .map { meta, purple_dir ->
+                def tumor_id = Utils.getTumorWgsSampleName(meta)
+                def smlv_somatic_vcf = file(purple_dir).resolve("${tumor_id}.purple.somatic.vcf.gz")
+                def smlv_germline_vcf = file(purple_dir).resolve("${tumor_id}.purple.germline.vcf.gz")
+
+                // Require smlv somatic VCF from the PURPLE directory
+                if (!smlv_somatic_vcf.exists() || !smlv_germline_vcf.exists()) {
+                    return Constants.META_PLACEHOLDER
+                }
+
+                return [meta, smlv_somatic_vcf, smlv_germline_vcf]
+            }
+
+        ch_orange_inputs_smlv_vcfs = Channel.empty()
+            .mix(
+                ch_orange_inputs_smlv_vcfs_append,
+                ch_orange_inputs_smlv_vcfs_purple_dir,
+            )
+
         // Select input source
         ch_orange_inputs_source = WorkflowOncoanalyser.groupByMeta(
             run.bamtools ? ch_bamtools_somatic : WorkflowOncoanalyser.getInput(ch_inputs, Constants.INPUT.BAMTOOLS_TUMOR),
@@ -81,7 +119,8 @@ workflow ORANGE_REPORTING {
             run.sage ? ch_sage_somatic_tumor_bqr : WorkflowOncoanalyser.getInput(ch_inputs, Constants.INPUT.SAGE_BQR_TUMOR),
             run.sage ? ch_sage_somatic_normal_bqr : WorkflowOncoanalyser.getInput(ch_inputs, Constants.INPUT.SAGE_BQR_NORMAL, type: 'optional'),
             run.sage ? ch_sage_germline_coverage : WorkflowOncoanalyser.getInput(ch_inputs, Constants.INPUT.SAGE_COVERAGE, type: 'optional'),
-            run.purple ? ch_purple : WorkflowOncoanalyser.getInput(ch_inputs, Constants.INPUT.PURPLE_DIR),
+            ch_orange_inputs_purple_dir,
+            ch_orange_inputs_smlv_vcfs,
             run.linx ? ch_linx_somatic_annotation : WorkflowOncoanalyser.getInput(ch_inputs, Constants.INPUT.LINX_ANNO_DIR_TUMOR),
             run.linx ? ch_linx_somatic_plot : WorkflowOncoanalyser.getInput(ch_inputs, Constants.INPUT.LINX_PLOT_DIR_TUMOR),
             run.linx ? ch_linx_germline_annotation : WorkflowOncoanalyser.getInput(ch_inputs, Constants.INPUT.LINX_PLOT_DIR_NORMAL, type: 'optional'),
