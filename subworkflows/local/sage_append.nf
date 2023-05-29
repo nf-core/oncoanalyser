@@ -55,7 +55,7 @@ workflow SAGE_APPEND {
 
                 def sage_meta = [
                     key: meta.id,
-                    id: tumor_id,
+                    id: meta.id,
                     tumor_wts_id: Utils.getTumorWtsSampleName(meta),
                     wgs_id: tumor_id,
                 ]
@@ -80,7 +80,7 @@ workflow SAGE_APPEND {
 
                 def sage_meta = [
                     key: meta.id,
-                    id: normal_id,
+                    id: meta.id,
                     tumor_wts_id: Utils.getTumorWtsSampleName(meta),
                     wgs_id: normal_id,
                 ]
