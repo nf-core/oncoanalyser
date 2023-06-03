@@ -69,8 +69,8 @@ workflow PURPLE_CALLING {
         // channel: [val(meta), amber_dir, cobalt_dir, sv_tumor_vcf, sv_tumor_tbi, sv_tumor_unfiltered_vcf, sv_tumor_unfiltered_tbi, smlv_tumor_vcf, smlv_normal_vcf]
         ch_purple_inputs_source = WorkflowOncoanalyser.groupByMeta(
             // Required inputs
-            run.amber ? ch_amber: WorkflowOncoanalyser.getInput(ch_inputs, Constants.INPUT.AMBER_DIR),
-            run.cobalt ? ch_cobalt: WorkflowOncoanalyser.getInput(ch_inputs, Constants.INPUT.COBALT_DIR),
+            run.amber ? ch_amber : WorkflowOncoanalyser.getInput(ch_inputs, Constants.INPUT.AMBER_DIR),
+            run.cobalt ? ch_cobalt : WorkflowOncoanalyser.getInput(ch_inputs, Constants.INPUT.COBALT_DIR),
             // Optional inputs
             ch_purple_inputs_sv,
             run.pave ? ch_smlv_somatic : WorkflowOncoanalyser.getInput(ch_inputs, Constants.INPUT.PAVE_VCF_TUMOR, type: 'optional'),
