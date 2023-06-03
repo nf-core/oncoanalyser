@@ -49,8 +49,8 @@ process PURPLE {
             echo "-\${2} \${fp_out}"
         fi
     }
-    smlv_tumor_vcf_arg=\$(get_smlv_arg ${smlv_tumor_vcf_fp} somatic_vcf)
-    smlv_normal_vcf_arg=\$(get_smlv_arg ${smlv_normal_vcf_fp} germline_vcf)
+    smlv_tumor_vcf_arg=\$(get_smlv_arg "${smlv_tumor_vcf_fp}" somatic_vcf)
+    smlv_normal_vcf_arg=\$(get_smlv_arg "${smlv_normal_vcf_fp}" germline_vcf)
 
     # Run PURPLE
     java \\
