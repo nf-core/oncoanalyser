@@ -35,9 +35,9 @@ params.ref_data_genome_gridss_index    = WorkflowMain.getGenomeAttribute(params,
 */
 
 WorkflowMain.initialise(workflow, params, log)
-WorkflowOncoanalyser.setParamsDefaults(params, log)
-WorkflowOncoanalyser.validateParams(params, log)
-
+WorkflowMain.setParamsDefaults(params, log)
+WorkflowMain.validateParams(params, log)
+WorkflowMain.paramsSummaryLog(workflow, params, log)
 
 /*
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -74,6 +74,26 @@ workflow NFCORE_ONCOANALYSER {
 //
 workflow {
     NFCORE_ONCOANALYSER()
+}
+
+/*
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    COMPLETION EMAIL AND SUMMARY
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+*/
+
+workflow.onComplete {
+
+    def summary_params = NfcoreSchema.paramsSummaryMap(workflow, params)
+
+    if (params.email || params.email_on_fail) {
+        NfcoreTemplate.email(workflow, params, summary_params, projectDir, log)
+    }
+
+    NfcoreTemplate.summary(workflow, params, log)
+    if (params.hook_url) {
+        NfcoreTemplate.adaptivecard(workflow, params, summary_params, projectDir, log)
+    }
 }
 
 /*

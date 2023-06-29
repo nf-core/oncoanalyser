@@ -32,7 +32,7 @@ class WorkflowMain {
     }
 
     //
-    // Print parameter summary log to screen
+    // Print parameter summary log
     //
     public static String paramsSummaryLog(workflow, params, log) {
         def summary_log = ''
@@ -40,7 +40,7 @@ class WorkflowMain {
         summary_log += NfcoreSchema.paramsSummaryLog(workflow, params)
         summary_log += '\n' + citation(workflow) + '\n'
         summary_log += NfcoreTemplate.dashedLine(params.monochrome_logs)
-        return summary_log
+        log.info summary_log
     }
 
     //
@@ -57,10 +57,6 @@ class WorkflowMain {
         if (params.validate_params) {
             NfcoreSchema.validateParameters(workflow, params, log)
         }
-
-        // NOTE(SW): this is now deferred until after we set defaults
-        // Print parameter summary log to screen
-        //log.info paramsSummaryLog(workflow, params, log)
 
         // Check that a -profile or Nextflow config has been provided to run the pipeline
         NfcoreTemplate.checkConfigProvided(workflow, log)
@@ -89,5 +85,215 @@ class WorkflowMain {
             }
         }
         return null
+    }
+
+
+    //
+    // Set parameter defaults where required
+    //
+    public static void setParamsDefaults(params, log) {
+
+        // Set defaults common to all run configuration
+
+        def default_invalid = false
+
+        if (params.containsKey('genome_version')) {
+            params.ref_data_genome_version = params.genome_version.toString()
+        } else if (Constants.GENOMES_VERSION_37.contains(params.genome)) {
+            params.ref_data_genome_version = '37'
+        } else if (Constants.GENOMES_VERSION_38.contains(params.genome)) {
+            params.ref_data_genome_version = '38'
+        } else {
+            default_invalid = true
+        }
+
+        if (params.containsKey('genome_type')) {
+            params.ref_data_genome_type = params.genome_type
+        } else if (Constants.GENOMES_ALT.contains(params.genome)) {
+            params.ref_data_genome_type = 'alt'
+        } else if (Constants.GENOMES_DEFINED.contains(params.genome)) {
+            params.ref_data_genome_type = 'no_alt'
+        } else {
+            default_invalid = true
+        }
+
+        if (!params.containsKey('ref_data_hmf_data_path')) {
+            if (params.ref_data_genome_version == '37') {
+                params.ref_data_hmf_data_path = Constants.HMF_DATA_37_PATH
+            } else if (params.ref_data_genome_version == '38') {
+                params.ref_data_hmf_data_path = Constants.HMF_DATA_38_PATH
+            }
+        }
+
+        // Bad configuration, catch in validateParams
+        if (default_invalid) {
+            return
+        }
+
+        // Set defaults specific to run configuration without attempting to validate
+
+        def run_mode
+        if (params.containsKey('run_mode')) {
+            run_mode = Utils.getRunMode(params.run_mode, log)
+        } else {
+            // Bad configuration, catch in validateParams
+            return
+        }
+
+        if (run_mode == Constants.RunMode.WTS) {
+            if (!params.containsKey('run_type')) {
+                params.run_type = 'tumor_only'
+            }
+        }
+
+        def stages = Processes.getRunStages(
+            run_mode,
+            params.processes_include,
+            params.processes_exclude,
+            params.processes_manual,
+            log,
+        )
+
+        if (stages.virusinterpreter) {
+            if (!params.containsKey('ref_data_virusbreakenddb_path')) {
+                params.ref_data_virusbreakenddb_path = Constants.VIRUSBREAKENDDB_PATH
+            }
+        }
+
+        if (stages.lilac) {
+            if (params.ref_data_genome_version == '38' && params.ref_data_genome_type == 'alt' && !params.containsKey('ref_data_hla_slice_bed')) {
+                params.ref_data_hla_slice_bed = Constants.HLA_SLICE_BED_GRCH38_ALT_PATH
+            }
+        }
+    }
+
+    //
+    // Check and validate parameters
+    //
+    public static void validateParams(params, log) {
+
+        // Common parameters
+
+        if (!params.genome) {
+            log.error "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n" +
+                "  Genome must be set using the --genome CLI argument or in a configuration file.\n" +
+                "  Currently, the available genome are:\n" +
+                "  ${params.genomes.keySet().join(", ")}\n" +
+                "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
+            System.exit(1)
+        } else if (!params.genomes.containsKey(params.genome)) {
+            log.error "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n" +
+                "  Genome '${params.genome}' not found in any config files provided to the pipeline.\n" +
+                "  Currently, the available genome are:\n" +
+                "  ${params.genomes.keySet().join(", ")}\n" +
+                "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
+            System.exit(1)
+        }
+
+        if (!Constants.GENOMES_SUPPORTED.contains(params.genome)) {
+            if (!params.containsKey('force_genome') || !params.force_genome) {
+                log.error "ERROR: currently only the GRCh37_hmf and GRCh38_hmf genomes are supported but got ${params.genome}" +
+                    ", please adjust the --genome argument accordingly or override with --force_genome."
+                System.exit(1)
+            } else {
+                log.warn "currently only the GRCh37_hmf and GRCh38_hmf genomes are supported but forcing to " +
+                    "proceed with \"${params.genome}\""
+            }
+        }
+
+        if (!params.ref_data_genome_version) {
+            log.error "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n" +
+                "  Genome version wasn't provided and genome '${params.genome}' is not defined in   \n" +
+                "  genome version list.\n" +
+                "  Currently, the list of genomes in the version list include:\n" +
+                "  ${Constants.GENOMES_DEFINED.join(", ")}\n" +
+                "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
+            System.exit(1)
+        }
+
+        if (!params.ref_data_genome_type) {
+            log.error "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n" +
+                "  Genome type wasn't provided and genome '${params.genome}' is not defined in      \n" +
+                "  genome version list.\n" +
+                "  Currently, the list of genomes in the version list include:\n" +
+                "  ${Constants.GENOMES_DEINFED.join(", ")}\n" +
+                "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
+            System.exit(1)
+        }
+
+        if (!params.ref_data_hmf_data_path) {
+            log.error "ERROR: HMF data path wasn't provided"
+            System.exit(1)
+        }
+
+        // NOTE(SW): this could be moved to the wgts.nf where we check that input files exist
+        def null_check = [
+           'ref_data_genome_fasta',
+           'ref_data_genome_type',
+           'ref_data_genome_version',
+        ]
+        null_check.each { k ->
+            if (!params[k]) {
+                log.error "ERROR: '${k}' cannot be set to null in any configuration and must be adjusted or removed to proceed."
+                System.exit(1)
+            }
+        }
+
+        // Run configuration specific parameters
+
+        if (!params.run_mode) {
+            def run_modes = Utils.getEnumNames(Constants.RunMode).join('\n    - ')
+            log.error "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n" +
+                "  Run mode must be set using the --run_mode CLI argument or in a configuration  \n" +
+                "  file.\n" +
+                "  Currently, the available run modes are:\n" +
+                "    - ${run_modes}\n" +
+                "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
+            System.exit(1)
+        }
+
+        if (!params.run_type) {
+            def run_types = Utils.getEnumNames(Constants.RunType).join('\n    - ')
+            log.error "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n" +
+                "  Run type must be set using the --run_type CLI argument or in a configuration  \n" +
+                "  file.\n" +
+                "  Currently, the available run types are:\n" +
+                "    - ${run_types}\n" +
+                "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
+            System.exit(1)
+        }
+
+        def run_mode = Utils.getRunMode(params.run_mode, log)
+        def run_type = Utils.getRunType(params.run_type, log)
+
+        if (run_mode == Constants.RunMode.WTS) {
+            if (run_type != Constants.RunType.TUMOR_ONLY) {
+                log.error "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n" +
+                    "  The WTS run mode does not support tumor/normal data, please adjust the CLI \n" +
+                    "  --run_type option or corresponding configuration file.\n" +
+                    "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
+                System.exit(1)
+            }
+
+        }
+
+    }
+
+    public static getRunConfig(params, log) {
+        def run_mode = Utils.getRunMode(params.run_mode, log)
+        def run_type = Utils.getRunType(params.run_type, log)
+        def stages = Processes.getRunStages(
+            run_mode,
+            params.processes_include,
+            params.processes_exclude,
+            params.processes_manual,
+            log,
+        )
+
+        return [
+            mode: run_mode,
+            type: run_type,
+            stages: stages,
+        ]
     }
 }
