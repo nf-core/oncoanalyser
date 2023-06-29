@@ -9,12 +9,8 @@ import Utils
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 */
 
-// Get parameter summary and also print to console
-def summary_params = NfcoreSchema.paramsSummaryMap(workflow, params)
-WorkflowOncoanalyser.paramsSummaryLog(workflow, params, log)
-
-// Get run config
-run_config = WorkflowOncoanalyser.getRunConfig(params, log)
+// Get run config and parameter summary
+run_config = WorkflowMain.getRunConfig(params, log)
 
 // Check input path parameters to see if they exist
 def checkPathParamList = [
@@ -584,22 +580,6 @@ workflow WGTS {
     CUSTOM_DUMPSOFTWAREVERSIONS(
         ch_versions.unique().collectFile(name: 'collated_versions.yml')
     )
-}
-
-/*
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-    COMPLETION EMAIL AND SUMMARY
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-*/
-
-workflow.onComplete {
-    if (params.email || params.email_on_fail) {
-        NfcoreTemplate.email(workflow, params, summary_params, projectDir, log)
-    }
-    NfcoreTemplate.summary(workflow, params, log)
-    if (params.hook_url) {
-        NfcoreTemplate.adaptivecard(workflow, params, summary_params, projectDir, log)
-    }
 }
 
 /*
