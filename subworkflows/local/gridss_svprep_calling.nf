@@ -242,7 +242,10 @@ workflow GRIDSS_SVPREP_CALLING {
         )
             .map { id, meta, vcf ->
                 def tbam = Utils.getTumorBam(meta, run_config.mode)
-                def meta_svprep = [id: meta.id]
+                def meta_svprep = [
+                    id: meta.id,
+                    tumor_id: Utils.getTumorSampleName(meta, run_config.mode),
+                ]
 
                 def data = []
                 if (run_config.type == Constants.RunType.TUMOR_ONLY) {

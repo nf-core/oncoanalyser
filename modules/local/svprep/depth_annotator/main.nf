@@ -10,8 +10,9 @@ process SVPREP_DEPTH_ANNOTATOR {
     val genome_ver
 
     output:
-    tuple val(meta), path("*.vcf.gz"), emit: vcf
-    path 'versions.yml'              , emit: versions
+    tuple val(meta), path("${meta.tumor_id}.gridss.vcf.gz"), emit: vcf
+    path("${meta.tumor_id}.gridss.vcf.gz.tbi")             , emit: tbi
+    path 'versions.yml'                                    , emit: versions
 
     when:
     task.ext.when == null || task.ext.when
@@ -35,7 +36,7 @@ process SVPREP_DEPTH_ANNOTATOR {
             -ref_genome ${genome_fasta} \\
             -ref_genome_version ${genome_ver} \\
             -threads ${task.cpus} \\
-            -output_vcf sv.svprep.gridss.depths.vcf.gz
+            -output_vcf ${meta.tumor_id}.gridss.vcf.gz
 
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":
@@ -45,7 +46,8 @@ process SVPREP_DEPTH_ANNOTATOR {
 
     stub:
     """
-    touch sv_vcf.depths.vcf.gz
+    touch ${meta.tumor_id}.gridss.vcf.gz
+    touch ${meta.tumor_id}.gridss.vcf.gz.tbi
     echo -e '${task.process}:\\n  stub: noversions\\n' > versions.yml
     """
 }
