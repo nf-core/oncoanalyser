@@ -1,6 +1,7 @@
 //
-// Linx is an annotation, interpretation and visualisation tool for structural variants.
+// LINX annotates and interprets structural variants
 //
+
 import Constants
 import Utils
 
@@ -10,35 +11,37 @@ include { LINX_SOMATIC as SOMATIC   } from '../../modules/local/linx/somatic/mai
 workflow LINX_ANNOTATION {
     take:
         // Sample data
-        ch_inputs                       // channel: [val(meta)]
-        ch_purple                       // channel: [val(meta), purple_dir]
+        ch_inputs              // channel: [mandatory] [ meta ]
+        ch_purple              // channel: [optional]  [ meta, purple_dir ]
 
         // Reference data
-        ref_data_genome_version         //     val: genome version
-        ref_data_ensembl_data_resources //    file: /path/to/ensembl_data_resources/
-        ref_data_known_fusion_data      //    file: /path/to/known_fusion_data
-        ref_data_driver_gene_panel      //    file: /path/to/driver_gene_panel
-        gene_id_file                    //    file: /path/to/linx_gene_id_file
+        genome_version         // channel: [mandatory] genome version
+        ensembl_data_resources // channel: [mandatory] /path/to/ensembl_data_resources/
+        known_fusion_data      // channel: [mandatory] /path/to/known_fusion_data
+        driver_gene_panel      // channel: [mandatory] /path/to/driver_gene_panel
+        gene_id_file           // channel: [mandatory] /path/to/linx_gene_id_file
 
         // Params
-        run_config
+        run_config             // channel: [mandatory] run configuration
 
     main:
         // Channel for versions.yml files
+        // channel: [ versions.yml ]
         ch_versions = Channel.empty()
 
         // Select input sources
-        // channel: [val(meta), purple_dir]
+        // channel: [ meta, purple_dir ]
         ch_linx_inputs_source = run_config.stages.purple ? ch_purple : WorkflowOncoanalyser.getInput(ch_inputs, Constants.INPUT.PURPLE_DIR)
 
         //
         // MODULE: LINX germline annotation
         //
+        // channel: [ meta, sv_vcf ]
         ch_linx_germline_out = Channel.empty()
         if (run_config.type == Constants.RunType.TUMOR_NORMAL) {
 
             // Create germline inputs and create process-specific meta
-            // channel: [val(meta_linx), sv_vcf]
+            // channel: [ meta_linx, sv_vcf ]
             ch_linx_inputs_germline = ch_linx_inputs_source
                 .map { meta, purple_dir ->
 
@@ -61,14 +64,13 @@ workflow LINX_ANNOTATION {
 
             GERMLINE(
                 ch_linx_inputs_germline,
-                ref_data_genome_version,
-                ref_data_ensembl_data_resources,
-                ref_data_driver_gene_panel,
+                genome_version,
+                ensembl_data_resources,
+                driver_gene_panel,
             )
 
             // Set outputs, restoring original meta
             ch_versions = ch_versions.mix(GERMLINE.out.versions)
-            // channel: [val(meta), linx_annotation_dir]
             ch_linx_germline_out = WorkflowOncoanalyser.restoreMeta(GERMLINE.out.annotation_dir, ch_inputs)
         }
 
@@ -76,7 +78,7 @@ workflow LINX_ANNOTATION {
         // MODULE: LINX somatic annotation
         //
         // Create somatic inputs and create process-specific meta
-        // channel: [val(meta_linx), purple_dir]
+        // channel: [ meta_linx, purple_dir ]
         ch_linx_inputs_somatic = ch_linx_inputs_source
             .map { meta, purple_dir ->
                 def meta_linx = [
@@ -88,21 +90,20 @@ workflow LINX_ANNOTATION {
 
         SOMATIC(
             ch_linx_inputs_somatic,
-            ref_data_genome_version,
-            ref_data_ensembl_data_resources,
-            ref_data_known_fusion_data,
-            ref_data_driver_gene_panel,
+            genome_version,
+            ensembl_data_resources,
+            known_fusion_data,
+            driver_gene_panel,
             gene_id_file,
         )
 
         // Set outputs, restoring original meta
         ch_versions = ch_versions.mix(SOMATIC.out.versions)
-        // channel: [val(meta), linx_annotation_dir]
         ch_linx_somatic_out = WorkflowOncoanalyser.restoreMeta(SOMATIC.out.annotation_dir, ch_inputs)
 
     emit:
-        somatic       = ch_linx_somatic_out       // channel: [val(meta), linx_annotation_dir]
-        germline      = ch_linx_germline_out      // channel: [val(meta), linx_annotation_dir]
+        somatic       = ch_linx_somatic_out  // channel: [ meta, linx_annotation_dir ]
+        germline      = ch_linx_germline_out // channel: [ meta, linx_annotation_dir ]
 
-        versions      = ch_versions               // channel: [versions.yml]
+        versions      = ch_versions          // channel: [ versions.yml ]
 }

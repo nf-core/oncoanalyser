@@ -9,9 +9,9 @@ process SAGE_SOMATIC {
     input:
     tuple val(meta), path(tumor_bam), path(normal_bam), path(tumor_bai), path(normal_bai)
     path genome_fasta
+    val genome_ver
     path genome_fai
     path genome_dict
-    val genome_ver
     path sage_known_hotspots_somatic
     path sage_actionable_panel
     path sage_coverage_panel

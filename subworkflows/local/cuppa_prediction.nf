@@ -1,6 +1,7 @@
 //
 // CUPPA predicts tissue of origin from molecular profiles
 //
+
 import Constants
 
 include { CUPPA } from '../../modules/local/cuppa/main'
@@ -8,28 +9,29 @@ include { CUPPA } from '../../modules/local/cuppa/main'
 workflow CUPPA_PREDICTION {
     take:
         // Sample data
-        ch_inputs
-        ch_isofox
-        ch_purple
-        ch_linx
-        ch_virusinterpreter
+        ch_inputs           // channel: [mandatory] [ meta ]
+        ch_isofox           // channel: [optional]  [ meta, isofox_dir ]
+        ch_purple           // channel: [optional]  [ meta, purple_dir ]
+        ch_linx             // channel: [optional]  [ meta, linx_annotation_dir ]
+        ch_virusinterpreter // channel: [optional]  [ meta, virusinterpreter ]
 
         // Reference data
-        ref_data_genome_version
-        ref_data_cuppa_resources
+        genome_version      // channel: [mandatory] genome version
+        cuppa_resources     // channel: [mandatory] /path/to/cuppa_resources/
 
         // Params
-        run_config
+        run_config          // channel: [mandatory] run configuration
 
     main:
         // Channel for version.yml files
+        // channel: [ versions.yml ]
         ch_versions = Channel.empty()
 
         // Select input sources
-        // channel: [val(meta), isofox_dir]
+        // channel: [ meta, isofox_dir ]
         ch_cuppa_inputs_isofox = run_config.stages.isofox ? ch_isofox : WorkflowOncoanalyser.getInput(ch_inputs, Constants.INPUT.ISOFOX_DIR, type: 'optional')
 
-        // channel: [val(meta), isofox_dir, purple_dir, linx_dir, virusinterpreter]
+        // channel: [ meta, isofox_dir, purple_dir, linx_annotation_dir, virusinterpreter ]
         ch_cuppa_inputs_source = WorkflowOncoanalyser.groupByMeta(
             ch_cuppa_inputs_isofox,
             run_config.stages.purple ? ch_purple : WorkflowOncoanalyser.getInput(ch_inputs, Constants.INPUT.PURPLE_DIR, type: 'optional'),
@@ -39,7 +41,7 @@ workflow CUPPA_PREDICTION {
         )
 
         // Create inputs and create process-specific meta
-        // channel: [val(meta_cuppa), isofox_dir, purple_dir, linx_dir, virusinterpreter]
+        // channel: [ meta_cuppa, isofox_dir, purple_dir, linx_annotation_dir, virusinterpreter ]
         ch_cuppa_inputs = ch_cuppa_inputs_source
             .map { data ->
                 def meta = data[0]
@@ -65,15 +67,15 @@ workflow CUPPA_PREDICTION {
 
         CUPPA(
             ch_cuppa_inputs,
-            ref_data_genome_version,
-            ref_data_cuppa_resources,
+            genome_version,
+            cuppa_resources,
         )
 
         // Set outputs, restoring original meta
         ch_output = WorkflowOncoanalyser.restoreMeta(CUPPA.out.cuppa_dir, ch_inputs)
 
     emit:
-        cuppa_dir = ch_output
+        cuppa_dir = ch_output           // channel: [ meta, cuppa_dir ]
 
-        versions  = CUPPA.out.versions  // channel: [versions.yml]
+        versions  = CUPPA.out.versions  // channel: [ versions.yml ]
 }

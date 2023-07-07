@@ -1,6 +1,7 @@
 //
-// XXX
+// Isofox estimates transcript abundance, detects novel SJs, and identifies fusion events
 //
+
 import Utils
 
 include { ISOFOX } from '../../modules/local/isofox/main'
@@ -8,27 +9,28 @@ include { ISOFOX } from '../../modules/local/isofox/main'
 workflow ISOFOX_QUANTIFICATION {
     take:
         // Sample data
-        ch_inputs
+        ch_inputs              // channel: [mandatory] [ meta ]
 
         // Reference data
-        ref_data_genome_fasta
-        ref_data_genome_fai
-        ref_data_genome_version
-        ref_data_ensembl_data_resources
-        ref_data_isofox_counts
-        ref_data_isofox_gc_ratios
+        genome_fasta           // channel: [mandatory] /path/to/genome_fasta
+        genome_version         // channel: [mandatory] genome version
+        genome_fai             // channel: [mandatory] /path/to/genome_fai
+        ensembl_data_resources // channel: [mandatory] /path/to/ensembl_data_resources/
+        isofox_counts          // channel: [mandatory] /path/to/isofox_counts
+        isofox_gc_ratios       // channel: [mandatory] /path/to/isofox_gc_ratios
 
         // Params
-        isofox_functions
+        isofox_functions       //  string: [optional] isofox functions
         //use_isofox_exp_counts_cache
-        run_config
+        run_config             // channel: [mandatory] run configuration
 
     main:
         // Channel for version.yml files
+        // channel: [ versions.yml ]
         ch_versions = Channel.empty()
 
         // Create inputs and create process-specific meta
-        // channel: [meta_isofox, tumor_bam_wts]
+        // channel: [ meta_isofox, tumor_bam_wts ]
         if (run_config.stages.isofox) {
             ch_isofox_inputs = ch_inputs
                 .map { meta ->
@@ -53,19 +55,19 @@ workflow ISOFOX_QUANTIFICATION {
         // currently does not update functions
         // NOTE(SW): forcing use of cache for now since this feature is incomplete
 
-        //isofox_counts = params.use_isofox_exp_counts_cache ? ref_data_isofox_counts : []
-        isofox_counts = ref_data_isofox_counts
+        //isofox_counts = params.use_isofox_exp_counts_cache ? isofox_counts : []
+        isofox_counts = isofox_counts
 
         // Run process
         ISOFOX(
             ch_isofox_inputs,
             isofox_functions,
-            ref_data_genome_fasta,
-            ref_data_genome_fai,
-            ref_data_genome_version,
-            ref_data_ensembl_data_resources,
+            genome_fasta,
+            genome_version,
+            genome_fai,
+            ensembl_data_resources,
             isofox_counts,
-            ref_data_isofox_gc_ratios,
+            isofox_gc_ratios,
         )
 
         // Set outputs, restoring original meta
@@ -73,7 +75,7 @@ workflow ISOFOX_QUANTIFICATION {
         ch_versions = ch_versions.mix(ISOFOX.out.versions)
 
     emit:
-        isofox_dir = ch_outputs // channel: [val(meta), isofox_dir]
+        isofox_dir = ch_outputs // channel: [ meta, isofox_dir ]
 
-        versions  = ch_versions // channel: [versions.yml]
+        versions  = ch_versions // channel: [ versions.yml ]
 }

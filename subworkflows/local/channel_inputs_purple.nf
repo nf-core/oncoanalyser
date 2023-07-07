@@ -1,22 +1,23 @@
 //
-// XXX
+// Construct PURPLE input channel
 //
+
 import Constants
 
 workflow CHANNEL_INPUTS_PURPLE {
     take:
         // Sample data
-        ch_inputs
-        ch_amber
-        ch_cobalt
-        ch_smlv_somatic
-        ch_smlv_germline
-        ch_sv_somatic
-        ch_sv_germline
-        ch_sv_somatic_unfiltered
+        ch_inputs                // channel: [mandatory] [ meta ]
+        ch_amber                 // channel: [mandatory] [ meta, amber_dir ]
+        ch_cobalt                // channel: [mandatory] [ meta, cobalt_dir ]
+        ch_smlv_somatic          // channel: [optional]  [ meta, pave_vcf ]
+        ch_smlv_germline         // channel: [optional]  [ meta, pave_vcf ]
+        ch_sv_somatic            // channel: [optional]  [ meta, gripss_vcf, gripss_tbi ]
+        ch_sv_germline           // channel: [optional]  [ meta, gripss_vcf, gripss_tbi ]
+        ch_sv_somatic_unfiltered // channel: [optional]  [ meta, gripss_vcf, gripss_tbi ]
 
         // Params
-        run_config
+        run_config               // channel: [mandatory] run configuration
 
     main:
         // Set input sources
@@ -49,7 +50,6 @@ workflow CHANNEL_INPUTS_PURPLE {
         }
 
         // Combine into single channel
-        // channel: [val(meta), amber_dir, cobalt_dir, sv_tumor_vcf, sv_tumor_tbi, sv_tumor_unfiltered_vcf, sv_tumor_unfiltered_tbi, smlv_tumor_vcf, smlv_normal_vcf]
         ch_purple_inputs_source = WorkflowOncoanalyser.groupByMeta(
             ch_amber_source,
             ch_cobalt_source,
@@ -61,7 +61,7 @@ workflow CHANNEL_INPUTS_PURPLE {
         )
 
     emit:
-        ch_purple_inputs_source
+        ch_purple_inputs_source // channel: [ meta, amber_dir, cobalt_dir, sv_somatic_vcf, sv_somatic_tbi, sv_somatic_unfiltered_vcf, sv_somatic_unfiltered_tbi, sv_germline_vcf, sv_germline_tbi, smlv_somatic_vcf, smlv_germline_vcf ]
 }
 
 def getGripssSampleSheetInput(ch_inputs, input_type) {

@@ -1,6 +1,7 @@
 //
 // LILAC is a WGS tool for HLA typing and somatic CNV and SNV calling
 //
+
 import Constants
 import Utils
 
@@ -12,24 +13,26 @@ include { LILAC                                 } from '../../modules/local/lila
 workflow LILAC_CALLING {
     take:
         // Sample data
-        ch_inputs
-        ch_purple
+        ch_inputs          // channel: [mandatory] [ meta ]
+        ch_purple          // channel: [optional]  [ meta, purple_dir ]
 
         // Reference data
-        ref_data_genome_fasta       //    file: /path/to/genome_fasta
-        ref_data_genome_fai         //    file: /path/to/genome_fai
-        ref_data_lilac_resource_dir //    file: /path/to/lilac_resource_dir/
-        ref_data_hla_slice_bed
+        genome_fasta       // channel: [mandatory] /path/to/genome_fasta
+        genome_version     // channel: [mandatory] genome version
+        genome_fai         // channel: [mandatory] /path/to/genome_fai
+        lilac_resource_dir // channel: [mandatory] /path/to/lilac_resource_dir/
+        hla_slice_bed      // channel: [mandatory] /path/to/hla_slice_bed
 
         // Params
-        run_config
+        run_config         // channel: [mandatory] run configuration
 
     main:
         // Channel for version.yml files
+        // channel: [ versions.yml ]
         ch_versions = Channel.empty()
 
         // Select input sources
-        // channel: [val(meta), purple_dir]
+        // channel: [ meta, purple_dir ]
         if (run_config.stages.purple) {
             ch_lilac_inputs_purple = ch_purple
         } else {
@@ -37,7 +40,7 @@ workflow LILAC_CALLING {
         }
 
         // Create channel with all available input BAMs
-        // channel: [val(meta), wts_bam, wts_bai]
+        // channel: [ meta, wts_bam, wts_bai ]
         ch_lilac_bams_wts = Channel.empty()
         if (run_config.mode == Constants.RunMode.WTS || run_config.mode == Constants.RunMode.WGTS) {
             ch_lilac_bams_wts = ch_inputs
@@ -49,7 +52,7 @@ workflow LILAC_CALLING {
             ch_lilac_bams_wts = ch_inputs.map { meta -> [meta, [], []] }
         }
 
-        // channel: [val(meta), bam, bai]
+        // channel: [ meta, bam, bai ]
         ch_lilac_bams = Channel.empty()
         if (run_config.mode == Constants.RunMode.WGS || run_config.mode == Constants.RunMode.WGTS) {
 
@@ -74,7 +77,7 @@ workflow LILAC_CALLING {
         }
 
         // Combine BAMs
-        // channel: [val(meta), normal_wgs_bam, normal_wgs_bai, tumor_bam, tumor_bai, tumor_wts_bam, tumor_wts_bai]
+        // channel: [ meta, normal_wgs_bam, normal_wgs_bai, tumor_bam, tumor_bai, tumor_wts_bam, tumor_wts_bai ]
         ch_lilac_bams = WorkflowOncoanalyser.groupByMeta(
             ch_lilac_bams_wts,
             ch_lilac_bams,
@@ -100,7 +103,7 @@ workflow LILAC_CALLING {
         // NOTE(SW): here I remove duplicate files so that we only process each input once
         // NOTE(SW): orphaned reads are sometimes obtained, this is the slicing procedure used
         // in Pipeline5, see LilacBamSlicer.java#L115
-        // channel: [val(meta_lilac), bam, bai]
+        // channel: [ meta_lilac, bam, bai ]
         ch_slice_inputs = WorkflowLilac.getSliceInputs(ch_lilac_bams, tumor_sequence_type)
         // Isolate meta containing expected file count to use for non-blocking groupTuple later
         ch_slice_meta_individual = ch_slice_inputs
@@ -109,16 +112,16 @@ workflow LILAC_CALLING {
                 return [key: meta_lilac.key, count: meta_lilac.count]
             }
         // Apply slicing to unique files only
-        // channel: [val(meta_lilac), bam, bai]
+        // channel: [ meta_lilac, bam, bai ]
         ch_slice_inputs_unique = WorkflowLilac.getUniqueInputFiles(ch_slice_inputs)
         SLICEBAM(
             ch_slice_inputs_unique,
-            ref_data_hla_slice_bed,
+            hla_slice_bed,
         )
         ch_versions = ch_versions.mix(SLICEBAM.out.versions)
 
         // Realign contigs if using 38 (use of ALT contigs implied)
-        // channel: [val(meta_lilac), bam, bai]
+        // channel: [ meta_lilac, bam, bai ]
         ch_slices_out = SLICEBAM.out.bam
         if (params.ref_data_genome_type == 'alt') {
             // Align reads with chr6
@@ -127,8 +130,8 @@ workflow LILAC_CALLING {
             // are realigned for consistency.
             EXTRACTCONTIG(
                 'chr6',
-                ref_data_genome_fasta,
-                ref_data_genome_fai,
+                genome_fasta,
+                genome_fai,
             )
             ch_versions = ch_versions.mix(EXTRACTCONTIG.out.versions)
 
@@ -150,7 +153,7 @@ workflow LILAC_CALLING {
         }
 
         // Re-replicate and flow expected file count into meta
-        // channel: [val(meta_lilac), [sequence_type_str, sample_type_str, bam, bai]]
+        // channel: [ meta_lilac, [sequence_type_str, sample_type_str, bam, bai] ]
         ch_slices_out_individual = ch_slices_out
             .flatMap{ data ->
                 def meta_lilac = data[0]
@@ -160,7 +163,7 @@ workflow LILAC_CALLING {
                 }
             }
         // Adding expected file count
-        // channel: [val(meta_lilac), [sequence_type_str, sample_type_str, bam, bai]]
+        // channel: [ meta_lilac, [sequence_type_str, sample_type_str, bam, bai] ]
         ch_slices_ready = WorkflowOncoanalyser.joinMeta(
             ch_slices_out_individual,
             ch_slice_meta_individual,
@@ -168,7 +171,7 @@ workflow LILAC_CALLING {
         )
 
         // Gather and order files from same grouping using non-blocked groupTuple via provided file counts
-        // channel: [val(meta_lilac), normal_wgs_bam, normal_wgs_bai, tumor_bam, tumor_bai, tumor_wts_bam, tumor_wts_bai]
+        // channel: [ meta_lilac, normal_wgs_bam, normal_wgs_bai, tumor_bam, tumor_bai, tumor_wts_bam, tumor_wts_bai ]
         ch_slices_organised = WorkflowLilac.sortSlices(ch_slices_ready, tumor_sequence_type)
 
         // Restore original meta so we can join with PURPLE directory
@@ -181,7 +184,7 @@ workflow LILAC_CALLING {
         )
 
         // Get inputs from PURPLE
-        // channel: [val(meta), gene_cn]
+        // channel: [ meta, gene_cn ]
         ch_lilac_inputs_gene_cn = ch_lilac_inputs_purple
             .map { meta, purple_dir ->
                 if (purple_dir == []) {
@@ -193,7 +196,7 @@ workflow LILAC_CALLING {
                 return gene_cn.exists() ? [meta, gene_cn] : [meta, []]
             }
 
-        // channel: [val(meta), smlv_vcf]
+        // channel: [ meta, smlv_vcf ]
         ch_lilac_inputs_smlv_vcf = ch_lilac_inputs_purple
             .map { meta, purple_dir ->
                 if (purple_dir == []) {
@@ -205,7 +208,7 @@ workflow LILAC_CALLING {
                 return smlv_vcf.exists() ? [meta, smlv_vcf] : [meta, []]
             }
 
-        // channel: [val(meta), normal_wgs_bam, normal_wgs_bai, tumor_bam, tumor_bai, tumor_wts_bam, tumor_wts_bai, purple_dir]
+        // channel: [ meta, normal_wgs_bam, normal_wgs_bai, tumor_bam, tumor_bai, tumor_wts_bam, tumor_wts_bai, purple_dir ]
         ch_lilac_inputs_full = WorkflowOncoanalyser.groupByMeta(
             ch_lilac_inputs_slices,
             ch_lilac_inputs_gene_cn,
@@ -214,7 +217,7 @@ workflow LILAC_CALLING {
         )
 
         // Create final input channel for LILAC, remove samples with only WTS BAMs
-        // channel: [val(meta_lilac), normal_wgs_bam, normal_wgs_bai, tumor_bam, tumor_bai, tumor_wts_bam, tumor_wts_bai, gene_cn, smlv_vcf]]
+        // channel: [ meta_lilac, normal_wgs_bam, normal_wgs_bai, tumor_bam, tumor_bai, tumor_wts_bam, tumor_wts_bai, gene_cn, smlv_vcf ]
         ch_lilac_inputs = ch_lilac_inputs_full
             .map {
                 def meta = it[0]
@@ -241,9 +244,9 @@ workflow LILAC_CALLING {
         // Run LILAC
         LILAC(
             ch_lilac_inputs,
-            ref_data_genome_fasta,
-            params.ref_data_genome_version,
-            ref_data_lilac_resource_dir,
+            genome_fasta,
+            genome_version,
+            lilac_resource_dir,
         )
 
         // Set outputs, restoring original meta
@@ -251,7 +254,7 @@ workflow LILAC_CALLING {
         ch_outputs = WorkflowOncoanalyser.restoreMeta(LILAC.out.lilac_dir, ch_inputs)
 
     emit:
-        lilac_dir = ch_outputs // channel: [val(meta), lilac_dir]
+        lilac_dir = ch_outputs // channel: [ meta, lilac_dir ]
 
-        versions = ch_versions // channel: [versions.yml]
+        versions = ch_versions // channel: [ versions.yml ]
 }

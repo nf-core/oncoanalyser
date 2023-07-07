@@ -1,6 +1,7 @@
 //
-// CHORD predicts HR status
+// CHORD predicts HR status for tumor samples
 //
+
 import Constants
 import Utils
 
@@ -9,21 +10,22 @@ include { CHORD } from '../../modules/local/chord/main'
 workflow CHORD_PREDICTION {
     take:
         // Sample data
-        ch_inputs
-        ch_purple
+        ch_inputs      // channel: [mandatory] [ meta ]
+        ch_purple      // channel: [mandatory] [ meta, purple_dir ]
 
         // Reference data
-        ref_data_genome_version
+        genome_version // channel: [mandatory] genome version
 
         // Params
-        run_config
+        run_config     // channel: [mandatory] run configuration
 
     main:
         // Channel for version.yml files
+        // channel: [ versions.yml ]
         ch_versions = Channel.empty()
 
         // Select input sources
-        // channel: [val(meta), purple_dir]
+        // channel: [ meta, purple_dir ]
         if (run_config.stages.purple) {
           ch_chord_inputs_source = ch_purple
         } else {
@@ -31,7 +33,7 @@ workflow CHORD_PREDICTION {
         }
 
         // Create inputs and create process-specific meta
-        // channel: [val(meta), smlv_vcf, sv_vcf]
+        // channel: [ meta, smlv_vcf, sv_vcf ]
         ch_chord_inputs = ch_chord_inputs_source
             .map { meta, purple_dir ->
                 def tumor_id = Utils.getTumorWgsSampleName(meta)
@@ -51,7 +53,7 @@ workflow CHORD_PREDICTION {
         // Run process
         CHORD(
           ch_chord_inputs,
-          ref_data_genome_version,
+          genome_version,
         )
 
         // Set outputs, restoring original meta
@@ -59,8 +61,8 @@ workflow CHORD_PREDICTION {
         ch_versions = ch_versions.mix(CHORD.out.versions)
 
     emit:
-        prediction = ch_outputs // channel: [val(meta), prediction]
+        prediction = ch_outputs // channel: [ meta, prediction ]
 
-        versions = ch_versions  // channel: [versions.yml]
+        versions = ch_versions  // channel: [ versions.yml ]
 }
 

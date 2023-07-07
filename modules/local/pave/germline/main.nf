@@ -11,8 +11,8 @@ process PAVE_GERMLINE {
     input:
     tuple val(meta), path(sage_vcf)
     path genome_fasta
-    path genome_fai
     val genome_ver
+    path genome_fai
     path sage_blocklist_regions
     path sage_blocklist_sites
     path clinvar_annotations

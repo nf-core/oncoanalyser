@@ -1,6 +1,7 @@
 //
-// XXX
+// SAMtools flagstat generates statistics for read alignments from the SAM FLAG field
 //
+
 import Constants
 import Utils
 
@@ -9,18 +10,19 @@ include { SAMTOOLS_FLAGSTAT } from '../../modules/nf-core/samtools/flagstat/main
 workflow FLAGSTAT_METRICS {
     take:
         // Sample data
-        ch_inputs
+        ch_inputs  // channel: [mandatory] [ meta ]
 
         // Params
-        run_config
+        run_config // channel: [mandatory] run configuration
 
     main:
         // Channel for version.yml files
+        // channel: [ versions.yml ]
         ch_versions = Channel.empty()
 
         // Select input source
         // Select input sources
-        // channel: [val(meta_flagstat), bam, bai]
+        // channel: [ meta_flagstat, bam, bai ]
         ch_flagstat_inputs_all = ch_inputs
             .flatMap { meta ->
                 def inputs = []
@@ -49,7 +51,7 @@ workflow FLAGSTAT_METRICS {
             }
 
         // Collapse duplicate files e.g. repeated normal BAMs for multiple tumor samples
-        // channel: [val(meta_flagstat_shared), bam, bai]
+        // channel: [ meta_flagstat_shared, bam, bai ]
         ch_flagstat_inputs = ch_flagstat_inputs_all
             .map { [it[1..-1], it[0]] }
             .groupTuple()
@@ -82,7 +84,7 @@ workflow FLAGSTAT_METRICS {
         ch_versions = ch_versions.mix(SAMTOOLS_FLAGSTAT.out.versions)
 
         // Replicate outputs to reverse unique operation
-        // channel: [val(meta_flagstat_individual), flagstat]
+        // channel: [ meta_flagstat_individual, flagstat ]
         ch_flagstat_out_individual = SAMTOOLS_FLAGSTAT.out.flagstat
             .flatMap { meta_flagstat_shared, flagstat ->
                 def sample_type = Utils.getEnumFromString(meta_flagstat_shared.sample_type_str, Constants.SampleType)
@@ -92,8 +94,8 @@ workflow FLAGSTAT_METRICS {
             }
 
         // Set outputs
-        // channel (somatic): [val(meta), flagstat]
-        // channel (germline): [val(meta), flagstat]
+        // channel (somatic): [ meta, flagstat ]
+        // channel (germline): [ meta, flagstat ]
         ch_outputs = WorkflowOncoanalyser.restoreMeta(ch_flagstat_out_individual, ch_inputs)
             .branch { meta, sample_type, flagstat ->
                 somatic: sample_type == Constants.SampleType.TUMOR
@@ -104,8 +106,8 @@ workflow FLAGSTAT_METRICS {
         ch_versions = ch_versions.mix(SAMTOOLS_FLAGSTAT.out.versions)
 
     emit:
-        somatic  = ch_outputs.somatic  // channel: [val(meta), metrics]
-        germline = ch_outputs.germline // channel: [val(meta), metrics]
+        somatic  = ch_outputs.somatic  // channel: [ meta, metrics ]
+        germline = ch_outputs.germline // channel: [ meta, metrics ]
 
-        versions = ch_versions         // channel: [versions.yml]
+        versions = ch_versions         // channel: [ versions.yml ]
 }

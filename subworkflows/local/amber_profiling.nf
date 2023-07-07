@@ -1,6 +1,7 @@
 //
 // AMBER determines b-allele frequencies at predetermined positions
 //
+
 import Utils
 
 include { AMBER } from '../../modules/local/amber/main'
@@ -8,21 +9,22 @@ include { AMBER } from '../../modules/local/amber/main'
 workflow AMBER_PROFILING {
     take:
         // Sample data
-        ch_inputs                   // channel: [val(meta)]
+        ch_inputs          // channel: [mandatory] [ meta ]
 
         // Reference data
-        ref_data_genome_version
-        heterozygous_sites
+        genome_version     // channel: [mandatory] genome version
+        heterozygous_sites // channel: [optional]  /path/to/heterozygous_sites
 
         // Params
-        run_config
+        run_config         // channel: [mandatory] run configuration
 
     main:
         // Channel for version.yml files
+        // channel: [ versions.yml ]
         ch_versions = Channel.empty()
 
         // Select input sources
-        // channel: [val(meta_amber), tumor_bam, normal_bam, tumor_bai, normal_bai]
+        // channel: [ meta_amber, tumor_bam, normal_bam, tumor_bai, normal_bai ]
         ch_amber_inputs = ch_inputs
             .map { meta ->
                 def meta_amber = [
@@ -52,7 +54,7 @@ workflow AMBER_PROFILING {
         // Run process
         AMBER(
             ch_amber_inputs,
-            ref_data_genome_version,
+            genome_version,
             heterozygous_sites,
         )
 
@@ -61,7 +63,7 @@ workflow AMBER_PROFILING {
         ch_versions = ch_versions.mix(AMBER.out.versions)
 
     emit:
-        amber_dir = ch_outputs  // channel: [val(meta), amber_dir]
+        amber_dir = ch_outputs  // channel: [ meta, amber_dir ]
 
-        versions  = ch_versions // channel: [versions.yml]
+        versions  = ch_versions // channel: [ versions.yml ]
 }

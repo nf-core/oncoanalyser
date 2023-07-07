@@ -1,6 +1,7 @@
 //
 // SAGE append adds WTS data to an existing SAGE VCF
 //
+
 import Constants
 
 include { SAGE_APPEND as SOMATIC } from '../../modules/local/sage/append/main'
@@ -9,23 +10,24 @@ include { SAGE_APPEND as GERMLINE } from '../../modules/local/sage/append/main'
 workflow SAGE_APPEND {
     take:
         // Sample data
-        ch_inputs             // channel: [val(meta)]
-        ch_purple_dir         // channel: [val(meta), purple_dir]
+        ch_inputs     // channel: [mandatory] [ meta ]
+        ch_purple_dir // channel: [mandatory] [ meta, purple_dir ]
 
         // Reference data
-        ref_data_genome_fasta //    file: /path/to/genome_fasta
-        ref_data_genome_fai   //    file: /path/to/genome_fai
-        ref_data_genome_dict  //    file: /path/to/genome_dict
+        genome_fasta  // channel: [mandatory] /path/to/genome_fasta
+        genome_fai    // channel: [mandatory] /path/to/genome_fai
+        genome_dict   // channel: [mandatory] /path/to/genome_dict
 
         // Params
-        run_config
+        run_config    // channel: [mandatory] run configuration
 
     main:
         // Channel for version.yml files
+        // channel: [ versions.yml ]
         ch_versions = Channel.empty()
 
         // Select input sources
-        // channel: [meta, purple_dir, tumor_wts_bam, tumor_wts_bai]
+        // channel: [ meta, purple_dir, tumor_wts_bam, tumor_wts_bai ]
         ch_sage_append_inputs_source = WorkflowOncoanalyser.groupByMeta(
             run_config.stages.purple ? ch_purple_dir : WorkflowOncoanalyser.getInput(ch_inputs, Constants.INPUT.PURPLE_DIR),
             ch_inputs
@@ -38,10 +40,11 @@ workflow SAGE_APPEND {
         //
         // MODULE: SAGE append germline
         //
+        // channel: [ meta, sage_append_vcf ]
         ch_germline_vcf = Channel.empty()
         if (run_config.type == Constants.RunType.TUMOR_NORMAL) {
 
-            // channel: [sage_meta, purple_germline_smlv_vcf, tumor_wts_bam]
+            // channel: [ sage_meta, purple_germline_smlv_vcf, tumor_wts_bam ]
             ch_sage_germline_append_inputs = ch_sage_append_inputs_source
                 .map { meta, purple_dir, bam, bai ->
                     def tumor_id = Utils.getTumorWgsSampleName(meta)
@@ -66,9 +69,9 @@ workflow SAGE_APPEND {
 
             GERMLINE(
                 ch_sage_germline_append_inputs,
-                ref_data_genome_fasta,
-                ref_data_genome_fai,
-                ref_data_genome_dict,
+                genome_fasta,
+                genome_fai,
+                genome_dict,
             )
 
             // Set outputs, restoring original meta
@@ -81,7 +84,7 @@ workflow SAGE_APPEND {
         //
         // NOTE(SW): revise to reduce repetition
         // Create inputs and create process-specific meta
-        // channel: [sage_meta, purple_somatic_smlv_vcf, tumor_wts_bam]
+        // channel: [ sage_meta, purple_somatic_smlv_vcf, tumor_wts_bam ]
         ch_sage_somatic_append_inputs = ch_sage_append_inputs_source
             .map { meta, purple_dir, bam, bai ->
                 def tumor_id = Utils.getTumorWgsSampleName(meta)
@@ -104,9 +107,9 @@ workflow SAGE_APPEND {
 
         SOMATIC(
             ch_sage_somatic_append_inputs,
-            ref_data_genome_fasta,
-            ref_data_genome_fai,
-            ref_data_genome_dict,
+            genome_fasta,
+            genome_fai,
+            genome_dict,
         )
 
         // Set outputs, restoring original meta
@@ -114,8 +117,8 @@ workflow SAGE_APPEND {
         ch_versions = ch_versions.mix(SOMATIC.out.versions)
 
     emit:
-        somatic_vcf  = ch_somatic_vcf  // channel: [val(meta), somatic_vcf]
-        germline_vcf = ch_germline_vcf // channel: [val(meta), germline_vcf]
+        somatic_vcf  = ch_somatic_vcf  // channel: [ meta, sage_append_vcf ]
+        germline_vcf = ch_germline_vcf // channel: [ meta, sage_append_vcf ]
 
-        versions     = ch_versions     // channel: [versions.yml]
+        versions     = ch_versions     // channel: [ versions.yml ]
 }

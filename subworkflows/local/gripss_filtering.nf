@@ -8,32 +8,32 @@ include { GRIPSS_SOMATIC as SOMATIC   } from '../../modules/local/gripss/somatic
 workflow GRIPSS_FILTERING {
     take:
         // Sample inputs
-        ch_inputs                // channel: [val(meta)]
-        ch_gridss                // channel: [val(meta), gridss_vcf]
+        ch_inputs                // channel: [mandatory] [ meta ]
+        ch_gridss                // channel: [mandatory] [ meta, gridss_vcf ]
 
         // Reference data
-        ref_data_genome_fasta    //    file: /path/to/genome_fasta
-        ref_data_genome_fai      //    file: /path/to/genome_fai
-        ref_data_genome_version  //     val: genome version
-        breakend_pon             //    file: /path/to/breakend_pon
-        breakpoint_pon           //    file: /path/to/breakpoint_pon
-        known_fusions            //    file: /path/to/known_fusions
-        repeatmasker_annotations //    file: /path/to/repeatmasker_annotations
-        target_regions_bed
+        genome_fasta             // channel: [mandatory] /path/to/genome_fasta
+        genome_version           // channel: [mandatory] genome version
+        genome_fai               // channel: [mandatory] /path/to/genome_fai
+        breakend_pon             // channel: [mandatory] /path/to/breakend_pon
+        breakpoint_pon           // channel: [mandatory] /path/to/breakpoint_pon
+        known_fusions            // channel: [mandatory] /path/to/known_fusions
+        repeatmasker_annotations // channel: [mandatory] /path/to/repeatmasker_annotations
+        target_regions_bed       // channel: [optional]  /path/to/target_regions_bed
 
         // Params
-        run_config
+        run_config               // channel: [mandatory] run configuration
 
     main:
         // Channel for version.yml files
+        // channel: [ versions.yml ]
         ch_versions = Channel.empty()
 
         // Select input source
-        // channel: [val(meta), gridss_vcf]
         ch_gripss_inputs_source = run_config.stages.gridss ? ch_gridss : WorkflowOncoanalyser.getInput(ch_inputs, Constants.INPUT.GRIDSS_VCF)
 
         // Create inputs and create process-specific meta
-        // channel: [val(meta_gripss), gridss_vcf]
+        // channel: [ meta_gripss, gridss_vcf ]
         ch_gripss_inputs = ch_gripss_inputs_source
             .filter { it[0] != Constants.PLACEHOLDER_META }
             .map { meta, gridss_vcf ->
@@ -54,15 +54,16 @@ workflow GRIPSS_FILTERING {
         //
         // MODULE: GRIPSS germline
         //
+        // channel: [ meta, gripss_vcf, gripss_tbi ]
         ch_germline_out = Channel.empty()
         ch_germline_unfiltered_out = Channel.empty()
         if (run_config.type == Constants.RunType.TUMOR_NORMAL) {
 
             GERMLINE(
                 ch_gripss_inputs,
-                ref_data_genome_fasta,
-                ref_data_genome_fai,
-                ref_data_genome_version,
+                genome_fasta,
+                genome_version,
+                genome_fai,
                 breakend_pon,
                 breakpoint_pon,
                 known_fusions,
@@ -80,9 +81,9 @@ workflow GRIPSS_FILTERING {
         //
         SOMATIC(
             ch_gripss_inputs,
-            ref_data_genome_fasta,
-            ref_data_genome_fai,
-            ref_data_genome_version,
+            genome_fasta,
+            genome_version,
+            genome_fai,
             breakend_pon,
             breakpoint_pon,
             known_fusions,
@@ -95,10 +96,10 @@ workflow GRIPSS_FILTERING {
         ch_somatic_unfiltered_out = WorkflowOncoanalyser.restoreMeta(SOMATIC.out.vcf_unfiltered, ch_inputs)
 
     emit:
-        somatic             = ch_somatic_out             // channel: [val(meta), vcf, tbi]
-        germline            = ch_germline_out            // channel: [val(meta), vcf, tbi]
-        somatic_unfiltered  = ch_somatic_unfiltered_out  // channel: [val(meta), vcf, tbi]
-        germline_unfiltered = ch_germline_unfiltered_out // channel: [val(meta), vcf, tbi]
+        somatic             = ch_somatic_out             // channel: [ meta, gripss_vcf, gripss_tbi ]
+        germline            = ch_germline_out            // channel: [ meta, gripss_vcf, gripss_tbi ]
+        somatic_unfiltered  = ch_somatic_unfiltered_out  // channel: [ meta, gripss_vcf, gripss_tbi ]
+        germline_unfiltered = ch_germline_unfiltered_out // channel: [ meta, gripss_vcf, gripss_tbi ]
 
-        versions = ch_versions                           // channel: [versions.yml]
+        versions = ch_versions                           // channel: [ versions.yml ]
 }
