@@ -1,5 +1,5 @@
 //
-// PAVE annotates somatic and germline variant VCFs with gene and transcript coding and protein effects.
+// PAVE annotates somatic and germline variant VCFs with gene and transcript coding and protein effects
 //
 
 include { PAVE_GERMLINE as GERMLINE } from '../../modules/local/pave/germline/main'
@@ -8,26 +8,26 @@ include { PAVE_SOMATIC as SOMATIC   } from '../../modules/local/pave/somatic/mai
 workflow PAVE_ANNOTATION {
     take:
         // Sample data
-        ch_inputs                       // channel: [val(meta)]
-        ch_sage_germline_vcf            // channel: [val(meta), sage_germline_vcf]
-        ch_sage_somatic_vcf             // channel: [val(meta), sage_somatic_vcf]
+        ch_inputs              // channel: [mandatory] [ meta ]
+        ch_sage_germline_vcf   // channel: [optional]  [ meta, sage_germline_vcf ]
+        ch_sage_somatic_vcf    // channel: [mandatory] [ meta, sage_somatic_vcf ]
 
         // Reference data
-        ref_data_genome_fasta           //    file: /path/to/genome_fasta
-        ref_data_genome_fai             //    file: /path/to/genome_fai
-        ref_data_genome_version         //     val: genome version
-        ref_data_sage_pon               //    file: /path/to/sage_pon
-        ref_data_sage_pon_artefacts     //    file: /path/to/sage_pon_artefacts
-        ref_data_sage_blocklist_regions //    file: /path/to/sage_blocklist_regions
-        ref_data_sage_blocklist_sites   //    file: /path/to/sage_blocklist_sites
-        ref_data_clinvar_annotations    //    file: /path/to/clinvar_annotations
-        ref_data_segment_mappability    //    file: /path/to/segment_mappability
-        ref_data_driver_gene_panel      //    file: /path/to/driver_gene_panel
-        ref_data_ensembl_data_resources //    file: /path/to/ensembl_data_resources/
-        ref_data_gnomad_resource        //    file: /path/to/gnomad_resource
+        genome_fasta           // channel: [mandatory] /path/to/genome_fasta
+        genome_version         // channel: [mandatory] genome version
+        genome_fai             // channel: [mandatory] /path/to/genome_fai
+        sage_pon               // channel: [mandatory] /path/to/sage_pon
+        sage_pon_artefacts     // channel: [mandatory] /path/to/sage_pon_artefacts
+        sage_blocklist_regions // channel: [mandatory] /path/to/sage_blocklist_regions
+        sage_blocklist_sites   // channel: [mandatory] /path/to/sage_blocklist_sites
+        clinvar_annotations    // channel: [mandatory] /path/to/clinvar_annotations
+        segment_mappability    // channel: [mandatory] /path/to/segment_mappability
+        driver_gene_panel      // channel: [mandatory] /path/to/driver_gene_panel
+        ensembl_data_resources // channel: [mandatory] /path/to/ensembl_data_resources/
+        gnomad_resource        // channel: [mandatory] /path/to/gnomad_resource
 
         // Params
-        run_config
+        run_config             // channel: [mandatory] run configuration
 
     main:
         // Channel for version.yml files
@@ -67,15 +67,15 @@ workflow PAVE_ANNOTATION {
 
             GERMLINE(
                 ch_pave_germline_inputs,
-                ref_data_genome_fasta,
-                ref_data_genome_fai,
-                ref_data_genome_version,
-                ref_data_sage_blocklist_regions,
-                ref_data_sage_blocklist_sites,
-                ref_data_clinvar_annotations,
-                ref_data_segment_mappability,
-                ref_data_driver_gene_panel,
-                ref_data_ensembl_data_resources,
+                genome_fasta,
+                genome_version,
+                genome_fai,
+                sage_blocklist_regions,
+                sage_blocklist_sites,
+                clinvar_annotations,
+                segment_mappability,
+                driver_gene_panel,
+                ensembl_data_resources,
             )
 
             ch_versions = ch_versions.mix(GERMLINE.out.versions)
@@ -99,15 +99,15 @@ workflow PAVE_ANNOTATION {
 
         SOMATIC(
             ch_pave_somatic_inputs,
-            ref_data_genome_fasta,
-            ref_data_genome_fai,
-            ref_data_genome_version,
-            ref_data_sage_pon,
-            ref_data_sage_pon_artefacts,
-            ref_data_segment_mappability,
-            ref_data_driver_gene_panel,
-            ref_data_ensembl_data_resources,
-            ref_data_gnomad_resource,
+            genome_fasta,
+            genome_version,
+            genome_fai,
+            sage_pon,
+            sage_pon_artefacts,
+            segment_mappability,
+            driver_gene_panel,
+            ensembl_data_resources,
+            gnomad_resource,
         )
 
         ch_versions = ch_versions.mix(SOMATIC.out.versions)

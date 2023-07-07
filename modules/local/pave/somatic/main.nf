@@ -7,8 +7,8 @@ process PAVE_SOMATIC {
     input:
     tuple val(meta), path(sage_vcf)
     path genome_fasta
-    path genome_fai
     val genome_ver
+    path genome_fai
     path sage_pon
     path sage_pon_artefacts
     path segment_mappability

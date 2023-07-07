@@ -1,6 +1,7 @@
 //
-// XXX
+// Sigs fits trinucleotide signature definitions with sample SNV counts
 //
+
 import Constants
 import Utils
 
@@ -9,21 +10,22 @@ include { SIGS } from '../../modules/local/sigs/main'
 workflow SIGS_FITTING {
     take:
         // Sample data
-        ch_inputs
-        ch_purple
+        ch_inputs       // channel: [mandatory] [ meta ]
+        ch_purple       // channel: [mandatory] [ meta, purple_dir ]
 
         // Reference data
-        ref_data_sigs_signatures
+        sigs_signatures // channel: [mandatory] /path/to/sigs_signatures
 
         // Params
-        run_config
+        run_config      // channel: [mandatory] run configuration
 
     main:
         // Channel for version.yml files
+        // channel: [ versions.yml ]
         ch_versions = Channel.empty()
 
         // Select input sources
-        // channel: [val(meta), purple_dir]
+        // channel: [ meta, purple_dir ]
         if (run_config.stages.purple) {
             ch_sigs_inputs_source = ch_purple
         } else {
@@ -31,7 +33,7 @@ workflow SIGS_FITTING {
         }
 
         // Create inputs and create process-specific meta
-        // channel: [val(meta_sigs), smlv_vcf]
+        // channel: [ meta_sigs, smlv_vcf ]
         ch_sigs_inputs = ch_sigs_inputs_source
             .map { meta, purple_dir ->
 
@@ -54,7 +56,7 @@ workflow SIGS_FITTING {
 
         SIGS(
           ch_sigs_inputs,
-          ref_data_sigs_signatures,
+          sigs_signatures,
         )
 
         // Set outputs, restoring original meta
@@ -62,7 +64,7 @@ workflow SIGS_FITTING {
         ch_versions = ch_versions.mix(SIGS.out.versions)
 
     emit:
-        sigs_dir = ch_outputs  // channel: [val(meta), sigs_dir]
+        sigs_dir = ch_outputs  // channel: [ meta, sigs_dir ]
 
-        versions = ch_versions // channel: [versions.yml]
+        versions = ch_versions // channel: [ versions.yml ]
 }

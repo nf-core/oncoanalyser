@@ -9,7 +9,7 @@ import Utils
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 */
 
-// Get run config and parameter summary
+// Get run config
 run_config = WorkflowMain.getRunConfig(params, log)
 
 // Check input path parameters to see if they exist
@@ -97,11 +97,11 @@ gridss_config = Utils.getFileObject(params.gridss_config)
 
 workflow WGTS {
     // Create channel for versions
-    // channel: [versions.yml]
+    // channel: [ versions.yml ]
     ch_versions = Channel.empty()
 
     // Get inputs from samplesheet, assign more human readable variable
-    // channel: [val(meta)]
+    // channel: [ meta ]
     PREPARE_INPUT(
         samplesheet,
         run_config,
@@ -118,15 +118,15 @@ workflow WGTS {
     //
     // MODULE: Run Isofox to analyse WTS data
     //
-    // channel: [meta, isofox_dir]
+    // channel: [ meta, isofox_dir ]
     ch_isofox_out = Channel.empty()
     if (run_config.stages.isofox) {
 
         ISOFOX_QUANTIFICATION(
             ch_inputs,
             ref_data.genome_fasta,
-            ref_data.genome_fai,
             ref_data.genome_version,
+            ref_data.genome_fai,
             hmf_data.ensembl_data_resources,
             hmf_data.isofox_counts,
             hmf_data.isofox_gc_ratios,
@@ -141,7 +141,7 @@ workflow WGTS {
     //
     // SUBWORKFLOW: Run Bam Tools to generate stats required for downstream processes
     //
-    // channel: [val(meta), metrics]
+    // channel: [ meta, metrics ]
     ch_bamtools_somatic_out = Channel.empty()
     ch_bamtools_germline_out = Channel.empty()
     if (run_config.stages.bamtools) {
@@ -161,7 +161,7 @@ workflow WGTS {
     //
     // SUBWORKFLOW: Run AMBER to obtain b-allele frequencies
     //
-    // channel: [val(meta), amber_dir]
+    // channel: [ meta, amber_dir ]
     ch_amber_out = Channel.empty()
     if (run_config.stages.amber) {
 
@@ -179,7 +179,7 @@ workflow WGTS {
     //
     // SUBWORKFLOW: Run COBALT to obtain read ratios
     //
-    // channel: [val(meta), cobalt_dir]
+    // channel: [ meta, cobalt_dir ]
     ch_cobalt_out = Channel.empty()
     if (run_config.stages.cobalt) {
 
@@ -198,13 +198,12 @@ workflow WGTS {
     //
     // SUBWORKFLOW: Call structural variants with GRIDSS
     //
-    // channel: [val(meta), gridss_vcf]
+    // channel: [ meta, gridss_vcf ]
     ch_gridss_out = Channel.empty()
     if (run_config.stages.gridss) {
 
         GRIDSS_SVPREP_CALLING(
             ch_inputs,
-            gridss_config,
             ref_data.genome_fasta,
             ref_data.genome_version,
             ref_data.genome_fai,
@@ -215,6 +214,7 @@ workflow WGTS {
             hmf_data.gridss_region_blocklist,
             hmf_data.sv_prep_blocklist,
             hmf_data.known_fusions,
+            gridss_config,
             run_config,
         )
 
@@ -226,7 +226,7 @@ workflow WGTS {
     //
     // SUBWORKFLOW: Run GRIPSS to filter GRIDSS SV calls
     //
-    // channel: [val(meta), gripss_vcf, gripss_tbi]
+    // channel: [ meta, gripss_vcf, gripss_tbi ]
     ch_gripss_somatic_out = Channel.empty()
     ch_gripss_germline_out = Channel.empty()
     ch_gripss_somatic_unfiltered_out = Channel.empty()
@@ -236,8 +236,8 @@ workflow WGTS {
             ch_inputs,
             ch_gridss_out,
             ref_data.genome_fasta,
-            ref_data.genome_fai,
             ref_data.genome_version,
+            ref_data.genome_fai,
             hmf_data.gridss_pon_breakends,
             hmf_data.gridss_pon_breakpoints,
             hmf_data.known_fusions,
@@ -255,12 +255,12 @@ workflow WGTS {
     //
     // SUBWORKFLOW: call SNV, MNV, and small INDELS with SAGE
     //
-    // channel: [val(meta), sage_vcf, sage_tbi]
+    // channel: [ meta, sage_vcf, sage_tbi ]
     ch_sage_germline_vcf_out = Channel.empty()
     ch_sage_somatic_vcf_out = Channel.empty()
-    // channel: [val(meta), sage_coverage]
+    // channel: [ meta, sage_coverage ]
     ch_sage_germline_coverage_out = Channel.empty()
-    // channel: [val(meta), bqr_plot]
+    // channel: [ meta, sage_bqr_plot ]
     ch_sage_somatic_tumor_bqr_out = Channel.empty()
     ch_sage_somatic_normal_bqr_out = Channel.empty()
     if (run_config.stages.sage) {
@@ -268,9 +268,9 @@ workflow WGTS {
         SAGE_CALLING(
             ch_inputs,
             ref_data.genome_fasta,
+            ref_data.genome_version,
             ref_data.genome_fai,
             ref_data.genome_dict,
-            ref_data.genome_version,
             hmf_data.sage_known_hotspots_germline,
             hmf_data.sage_known_hotspots_somatic,
             hmf_data.sage_actionable_panel,
@@ -293,7 +293,7 @@ workflow WGTS {
     //
     // SUBWORKFLOW: Annotate variants with PAVE
     //
-    // channel: [val(meta), pave_vcf]
+    // channel: [ meta, pave_vcf ]
     ch_pave_germline_out = Channel.empty()
     ch_pave_somatic_out = Channel.empty()
     if (run_config.stages.pave) {
@@ -303,8 +303,8 @@ workflow WGTS {
             ch_sage_germline_vcf_out,
             ch_sage_somatic_vcf_out,
             ref_data.genome_fasta,
-            ref_data.genome_fai,
             ref_data.genome_version,
+            ref_data.genome_fai,
             hmf_data.sage_pon,
             [],  // sage_pon_artefacts
             hmf_data.sage_blocklist_regions,
@@ -325,7 +325,7 @@ workflow WGTS {
     //
     // SUBWORKFLOW: Call CNVs, infer purity and ploidy, and recover low quality SVs with PURPLE
     //
-    // channel: [val(meta), purple_dir]
+    // channel: [ meta, purple_dir ]
     ch_purple_out = Channel.empty()
     if (run_config.stages.purple) {
 
@@ -339,9 +339,9 @@ workflow WGTS {
             ch_gripss_germline_out,
             ch_gripss_somatic_unfiltered_out,
             ref_data.genome_fasta,
+            ref_data.genome_version,
             ref_data.genome_fai,
             ref_data.genome_dict,
-            ref_data.genome_version,
             hmf_data.gc_profile,
             hmf_data.sage_known_hotspots_somatic,
             hmf_data.sage_known_hotspots_germline,
@@ -361,7 +361,7 @@ workflow WGTS {
     //
     // SUBWORKFLOW: Append WTS data to SAGE VCF
     //
-    // channel: [val(meta), append_vcf]
+    // channel: [ meta, sage_append_vcf ]
     ch_sage_somatic_append_vcf = Channel.empty()
     ch_sage_germline_append_vcf = Channel.empty()
     if (run_config.mode == Constants.RunMode.WGTS && run_config.stages.orange) {
@@ -385,7 +385,7 @@ workflow WGTS {
     //
     // SUBWORKFLOW: Group structural variants into higher order events with LINX
     //
-    // channel: [val(meta), linx_annotation_dir]
+    // channel: [ meta, linx_annotation_dir ]
     ch_linx_somatic_out = Channel.empty()
     ch_linx_germline_out = Channel.empty()
     // channel: [val(meta), linx_visualiser_dir]
@@ -422,7 +422,7 @@ workflow WGTS {
     //
     // SUBWORKFLOW: Run Sigs to fit somatic smlv to signature definitions
     //
-    // channel: [val(meta), sigs_dir]
+    // channel: [ meta, sigs_dir ]
     ch_sigs_out = Channel.empty()
     if (run_config.stages.sigs) {
 
@@ -440,7 +440,7 @@ workflow WGTS {
     //
     // SUBWORKFLOW: Run CHORD to predict HR deficiency status
     //
-    // channel: [val(meta), chord_prediction]
+    // channel: [ meta, chord_prediction ]
     ch_chord_out = Channel.empty()
     if (run_config.stages.chord) {
 
@@ -458,7 +458,7 @@ workflow WGTS {
     //
     // SUBWORKFLOW: Run LILAC for HLA typing and somatic CNV and SNV calling
     //
-    // channel: [val(meta), lilac_dir]
+    // channel: [ meta, lilac_dir ]
     ch_lilac_out = Channel.empty()
     if (run_config.stages.lilac) {
 
@@ -475,6 +475,7 @@ workflow WGTS {
             ch_inputs,
             ch_purple_out,
             ref_data.genome_fasta,
+            ref_data.genome_version,
             ref_data.genome_fai,
             hmf_data.lilac_resources,
             ref_data_hla_slice_bed,
@@ -488,7 +489,7 @@ workflow WGTS {
     //
     // SUBWORKFLOW: Run VIRUSBreakend and Virus Interpreter to quantify viral content
     //
-    // channel: [val(meta), virusinterpreter]
+    // channel: [ meta, virusinterpreter ]
     ch_virusinterpreter_out = Channel.empty()
     if (run_config.stages.virusinterpreter) {
 
@@ -516,7 +517,7 @@ workflow WGTS {
     //
     // SUBWORKFLOW: Run CUPPA predict tissue of origin
     //
-    // channel: [val(meta), cuppa_dir]
+    // channel: [ meta, cuppa_dir ]
     ch_cuppa_out = Channel.empty()
     if (run_config.stages.cuppa) {
 

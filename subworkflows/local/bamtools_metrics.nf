@@ -1,6 +1,7 @@
 //
 // Bam Tools calculates summary statistics for BAMs
 //
+
 import Constants
 import Utils
 
@@ -9,21 +10,22 @@ include { BAMTOOLS } from '../../modules/local/bamtools/main'
 workflow BAMTOOLS_METRICS {
     take:
         // Sample data
-        ch_inputs
+        ch_inputs      // channel: [mandatory] [ meta ]
 
         // Reference data
-        ref_data_genome_fasta
-        ref_data_genome_version
+        genome_fasta   // channel: [mandatory] /path/to/genome_fasta
+        genome_version // channel: [mandatory] genome version
 
         // Params
-        run_config
+        run_config     // channel: [mandatory] run configuration
 
     main:
         // Channel for version.yml files
+        // channel: [ versions.yml ]
         ch_versions = Channel.empty()
 
         // Select input sources
-        // channel: [val(meta_bamtools), bam, bai]
+        // channel: [ meta_bamtools, bam, bai ]
         ch_bamtools_inputs_all = ch_inputs
             .flatMap { meta ->
                 def inputs = []
@@ -54,7 +56,7 @@ workflow BAMTOOLS_METRICS {
         // Collapse duplicate files e.g. repeated normal BAMs for multiple tumor samples
         // NOTE(SW): no effective blocking by .groupTuple() as we're not dependent
         // on any process
-        // channel: [val(meta_bamtools), bam, bai]
+        // channel: [ meta_bamtools, bam, bai ]
         ch_bamtools_inputs = ch_bamtools_inputs_all
             .map { [it[1..-1], it[0]] }
             .groupTuple()
@@ -81,15 +83,15 @@ workflow BAMTOOLS_METRICS {
         // Run process
         BAMTOOLS(
             ch_bamtools_inputs,
-            ref_data_genome_fasta,
-            ref_data_genome_version,
+            genome_fasta,
+            genome_version,
         )
 
         // Set version
         ch_versions = ch_versions.mix(BAMTOOLS.out.versions)
 
         // Replicate outputs to reverse unique operation
-        // channel: [val(meta_bamtools_individual), sample_type_str, metrics]
+        // channel: [ meta_bamtools_individual, sample_type_str, metrics ]
         ch_bamtools_out_individual = BAMTOOLS.out.metrics
             .flatMap { meta_bamtools_shared, metrics ->
                 meta_bamtools_shared.keys.collect { key ->
@@ -98,8 +100,6 @@ workflow BAMTOOLS_METRICS {
             }
 
         // Set outputs
-        // channel (somatic): [val(meta), metrics]
-        // channel (germline): [val(meta), metrics]
         ch_outputs = WorkflowOncoanalyser.restoreMeta(ch_bamtools_out_individual, ch_inputs)
             .branch { meta, sample_type_str, metrics ->
                 def sample_type = Utils.getEnumFromString(sample_type_str, Constants.SampleType)
@@ -110,8 +110,8 @@ workflow BAMTOOLS_METRICS {
             }
 
     emit:
-        somatic  = ch_outputs.somatic  // channel: [val(meta), metrics]
-        germline = ch_outputs.germline // channel: [val(meta), metrics]
+        somatic  = ch_outputs.somatic  // channel: [ meta, metrics ]
+        germline = ch_outputs.germline // channel: [ meta, metrics ]
 
-        versions = ch_versions         // channel: [versions.yml]
+        versions = ch_versions         // channel: [ versions.yml ]
 }

@@ -7,9 +7,9 @@ process PURPLE {
     input:
     tuple val(meta), path(amber), path(cobalt), path(sv_tumor_vcf), path(sv_tumor_tbi), path(sv_tumor_unfiltered_vcf), path(sv_tumor_unfiltered_tbi), path(sv_normal_vcf), path(sv_normal_tbi), path(smlv_tumor_vcf), path(smlv_normal_vcf)
     path genome_fasta
+    val genome_ver
     path genome_fai
     path genome_dict
-    val genome_ver
     path gc_profile
     path sage_known_hotspots_somatic
     path sage_known_hotspots_germline

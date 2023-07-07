@@ -1,7 +1,8 @@
 //
-// SV Prep is a BAM filter designed to select only reads relevant to SV events run prior to GRIDSS.
-// GRIDSS is a software suite containing tools useful for the detection of genomic rearrangements.
+// SV Prep selects only reads relevant to SV events run prior to execution of GRIDSS.
+// GRIDSS detects structural variants, and reports breakends and breakpoints.
 //
+
 import Utils
 
 include { GRIDSS_ASSEMBLE as ASSEMBLE               } from '../../modules/local/svprep/assemble/main'
@@ -14,33 +15,34 @@ include { SVPREP as SVPREP_TUMOR                    } from '../../modules/local/
 workflow GRIDSS_SVPREP_CALLING {
     take:
         // Sample data
-        ch_inputs                       // channel: [val(meta)]
-        gridss_config                   //    file: /path/to/gridss_config (optional)
+        ch_inputs              // channel: [mandatory] [ meta ]
 
         // Reference data
-        ref_data_genome_fasta           //    file: /path/to/genome_fasta
-        ref_data_genome_version         //     val: genome version
-        ref_data_genome_fai             //    file: /path/to/genome_fai
-        ref_data_genome_dict            //    file: /path/to/genome_dict
-        ref_data_genome_bwa_index       //    file: /path/to/genome_bwa_index_dir/
-        ref_data_genome_bwa_index_image //    file: /path/to/genome_bwa_index_image
-        ref_data_genome_gridss_index    //    file: /path/to/genome_gridss_index
-        ref_data_gridss_blocklist       //     val: /path/to/gridss_blocklist
-        ref_data_sv_prep_blocklist      //    file: /path/to/sv_prep_blocklist
-        ref_data_known_fusions          //    file: /path/to/known_fusions
+        genome_fasta           // channel: [mandatory] /path/to/genome_fasta
+        genome_version         // channel: [mandatory] genome version
+        genome_fai             // channel: [mandatory] /path/to/genome_fai
+        genome_dict            // channel: [mandatory] /path/to/genome_dict
+        genome_bwa_index       // channel: [mandatory] /path/to/genome_bwa_index_dir/
+        genome_bwa_index_image // channel: [mandatory] /path/to/genome_bwa_index_image
+        genome_gridss_index    // channel: [mandatory] /path/to/genome_gridss_index
+        gridss_blocklist       // channel: [mandatory] /path/to/gridss_blocklist
+        sv_prep_blocklist      // channel: [mandatory] /path/to/sv_prep_blocklist
+        known_fusions          // channel: [mandatory] /path/to/known_fusions
 
         // Params
-        run_config
+        gridss_config          // channel: [optional] /path/to/gridss_config
+        run_config             // channel: [mandatory] run configuration
 
     main:
         // Channel for version.yml files
+        // channel: [ versions.yml ]
         ch_versions = Channel.empty()
 
         //
         // MODULE: SV Prep (tumor)
         //
         // Prepare tumor sample inputs
-        // channel: [val(meta_svprep), bam_tumor, bai_tumor, []]
+        // channel: [ meta_svprep, bam_tumor, bai_tumor, [] ]
         ch_svprep_tumor_inputs = ch_inputs
             .map { meta ->
                 def meta_svprep = [
@@ -55,15 +57,15 @@ workflow GRIDSS_SVPREP_CALLING {
         // Filter tumor BAM
         SVPREP_TUMOR(
             ch_svprep_tumor_inputs,
-            ref_data_genome_fasta,
-            ref_data_genome_version,
-            ref_data_sv_prep_blocklist,
-            ref_data_known_fusions,
+            genome_fasta,
+            genome_version,
+            sv_prep_blocklist,
+            known_fusions,
             'JUNCTIONS;BAM;FRAGMENT_LENGTH_DIST', // -write_types argument switch and value
         )
         ch_versions = ch_versions.mix(SVPREP_TUMOR.out.versions)
 
-        // channel: [val(meta_gridss), bam_tumor, bam_tumor_filtered]
+        // channel: [ meta_gridss, bam_tumor, bam_tumor_filtered ]
         ch_preprocess_inputs_tumor = WorkflowOncoanalyser.groupByMeta(
             SVPREP_TUMOR.out.bam,
             ch_svprep_tumor_inputs,
@@ -75,7 +77,7 @@ workflow GRIDSS_SVPREP_CALLING {
         //
         // MODULE: SV Prep (normal)
         //
-        // channel: [val(meta_gridss), bam_normal, bam_normal_filtered]
+        // channel: [ meta_gridss, bam_normal, bam_normal_filtered ]
         ch_preprocess_inputs_normal = Channel.empty()
         if (run_config.type == Constants.RunType.TUMOR_NORMAL) {
 
@@ -96,15 +98,15 @@ workflow GRIDSS_SVPREP_CALLING {
 
             SVPREP_NORMAL(
                 ch_svprep_normal_inputs,
-                ref_data_genome_fasta,
-                ref_data_genome_version,
-                ref_data_sv_prep_blocklist,
-                ref_data_known_fusions,
+                genome_fasta,
+                genome_version,
+                sv_prep_blocklist,
+                known_fusions,
                 false, // -write_types argument switch and value
             )
             ch_versions = ch_versions.mix(SVPREP_NORMAL.out.versions)
 
-            // channel: [val(meta_gridss), bam_normal, bam_normal_filtered]
+            // channel: [ meta_gridss, bam_normal, bam_normal_filtered ]
             ch_preprocess_inputs_normal = WorkflowOncoanalyser.groupByMeta(
                 SVPREP_NORMAL.out.bam,
                 ch_svprep_normal_inputs,
@@ -117,7 +119,7 @@ workflow GRIDSS_SVPREP_CALLING {
         //
         // MODULE: GRIDSS preprocess
         //
-        // channel: [val(meta_gridss), bam, bam_filtered]
+        // channel: [ meta_gridss, bam, bam_filtered ]
         ch_preprocess_inputs = Channel.empty()
             .mix(
                 ch_preprocess_inputs_tumor,
@@ -128,17 +130,17 @@ workflow GRIDSS_SVPREP_CALLING {
         PREPROCESS(
             ch_preprocess_inputs,
             gridss_config,
-            ref_data_genome_fasta,
-            ref_data_genome_fai,
-            ref_data_genome_dict,
-            ref_data_genome_bwa_index,
-            ref_data_genome_bwa_index_image,
-            ref_data_genome_gridss_index,
+            genome_fasta,
+            genome_fai,
+            genome_dict,
+            genome_bwa_index,
+            genome_bwa_index_image,
+            genome_gridss_index,
         )
         ch_versions = ch_versions.mix(PREPROCESS.out.versions)
 
         // Gather BAMs and outputs from preprocessing for each tumor/normal set
-        // channel: [key, [[val(meta_gridss), bam, bam_filtered, preprocess_dir], ...]]
+        // channel: [key, [[ meta_gridss, bam, bam_filtered, preprocess_dir], ...] ]
         preprocess_group_tuple_size = run_config.type == Constants.RunType.TUMOR_NORMAL ? 2 : 1
         ch_bams_and_preprocess = WorkflowOncoanalyser.groupByMeta(
             ch_preprocess_inputs,
@@ -151,7 +153,7 @@ workflow GRIDSS_SVPREP_CALLING {
         // MODULE: GRIDSS assemble
         //
         // Order and organise inputs for assembly
-        // channel: [val(meta_gridss), [bams], [bams_filtered], [preprocess_dirs], [labels]]
+        // channel: [ meta_gridss, [bams], [bams_filtered], [preprocess_dirs], [labels] ]
         ch_assemble_inputs = ch_bams_and_preprocess
             .map { key, entries ->
                 def (tmeta, tbam, tbam_filtered, tpreprocess) = entries.find { e -> e[0].sample_type == 'tumor' }
@@ -190,13 +192,13 @@ workflow GRIDSS_SVPREP_CALLING {
         ASSEMBLE(
             ch_assemble_inputs,
             gridss_config,
-            ref_data_genome_fasta,
-            ref_data_genome_fai,
-            ref_data_genome_dict,
-            ref_data_genome_bwa_index,
-            ref_data_genome_bwa_index_image,
-            ref_data_genome_gridss_index,
-            ref_data_gridss_blocklist,
+            genome_fasta,
+            genome_fai,
+            genome_dict,
+            genome_bwa_index,
+            genome_bwa_index_image,
+            genome_gridss_index,
+            gridss_blocklist,
         )
         ch_versions = ch_versions.mix(ASSEMBLE.out.versions)
 
@@ -204,7 +206,7 @@ workflow GRIDSS_SVPREP_CALLING {
         // MODULE: GRIDSS call
         //
         // Prepare inputs for variant calling
-        // channel: [val(meta_gridss), [bams], [bams_filtered], assemble_dir, [labels]]
+        // channel: [ meta_gridss, [bams], [bams_filtered], assemble_dir, [labels] ]
         ch_call_inputs = WorkflowOncoanalyser.groupByMeta(
             ch_assemble_inputs,
             ASSEMBLE.out.assemble_dir,
@@ -221,13 +223,13 @@ workflow GRIDSS_SVPREP_CALLING {
         CALL(
             ch_call_inputs,
             gridss_config,
-            ref_data_genome_fasta,
-            ref_data_genome_fai,
-            ref_data_genome_dict,
-            ref_data_genome_bwa_index,
-            ref_data_genome_bwa_index_image,
-            ref_data_genome_gridss_index,
-            ref_data_gridss_blocklist,
+            genome_fasta,
+            genome_fai,
+            genome_dict,
+            genome_bwa_index,
+            genome_bwa_index_image,
+            genome_gridss_index,
+            gridss_blocklist,
         )
         ch_versions = ch_versions.mix(CALL.out.versions)
 
@@ -235,7 +237,7 @@ workflow GRIDSS_SVPREP_CALLING {
         // MODULE: SV Prep depth annotation
         //
         // Prepare inputs for depth annotation, restore original meta
-        // channel: [val(meta_svprep), [bams], [bais], vcf, [labels]]
+        // channel: [ meta_svprep, [bams], [bais], vcf, [labels] ]
         ch_depth_inputs = WorkflowOncoanalyser.groupByMeta(
             ch_inputs.map { meta -> [meta.id, meta] },
             CALL.out.vcf.map { meta, vcf -> [meta.id, vcf] },
@@ -281,8 +283,8 @@ workflow GRIDSS_SVPREP_CALLING {
         // Add depth annotations to SVs
         DEPTH_ANNOTATOR(
             ch_depth_inputs,
-            ref_data_genome_fasta,
-            ref_data_genome_version,
+            genome_fasta,
+            genome_version,
         )
 
         // Reunite final VCF with the corresponding input meta object
@@ -295,7 +297,7 @@ workflow GRIDSS_SVPREP_CALLING {
             .map { id, other -> other.flatten() }
 
     emit:
-        results  = ch_out      // channel: [val(meta), vcf]
+        results  = ch_out      // channel: [ meta, vcf ]
 
-        versions = ch_versions // channel: [versions.yml]
+        versions = ch_versions // channel: [ versions.yml ]
 }

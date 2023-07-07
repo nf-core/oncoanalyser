@@ -1,3 +1,7 @@
+//
+// Prepare input data
+//
+
 import Constants
 import Utils
 
@@ -5,10 +9,10 @@ import Utils
 workflow PREPARE_INPUT {
     take:
         // Sample data
-        ch_samplesheet
+        ch_samplesheet // channel: [mandatory] /path/to/samplesheet
 
         // Params
-        run_config
+        run_config     // channel: [mandatory] run configuration
 
     main:
 

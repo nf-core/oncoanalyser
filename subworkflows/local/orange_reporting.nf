@@ -1,6 +1,7 @@
 //
-// XXX
+// ORANGE collates outputs of hmftools into a static PDF report
 //
+
 import Constants
 import Utils
 
@@ -11,47 +12,48 @@ include { FLAGSTAT_METRICS } from './flagstat_metrics'
 workflow ORANGE_REPORTING {
     take:
         // Sample data
-        ch_inputs
-        ch_bamtools_somatic
-        ch_bamtools_germline
-        ch_sage_somatic_tumor_bqr
-        ch_sage_somatic_normal_bqr
-        ch_sage_germline_coverage
-        ch_sage_somatic_append
-        ch_sage_germline_append
-        ch_purple
-        ch_linx_somatic_annotation
-        ch_linx_somatic_plot
-        ch_linx_germline_annotation
-        ch_virusinterpreter
-        ch_chord
-        ch_sigs
-        ch_lilac
-        ch_cuppa
-        ch_isofox
+        ch_inputs                   // channel: [mandatory] [ meta ]
+        ch_bamtools_somatic         // channel: [mandatory] [ meta, metrics ]
+        ch_bamtools_germline        // channel: [optional]  [ meta, metrics ]
+        ch_sage_somatic_tumor_bqr   // channel: [mandatory] [ meta, sage_bqr_plot ]
+        ch_sage_somatic_normal_bqr  // channel: [optional]  [ meta, sage_bqr_plot ]
+        ch_sage_germline_coverage   // channel: [optional]  [ meta, sage_coverage ]
+        ch_sage_somatic_append      // channel: [optional]  [ meta, sage_append_vcf ]
+        ch_sage_germline_append     // channel: [optional]  [ meta, sage_append_vcf ]
+        ch_purple                   // channel: [mandatory] [ meta, purple_dir ]
+        ch_linx_somatic_annotation  // channel: [mandatory] [ meta, linx_annotation_dir ]
+        ch_linx_somatic_plot        // channel: [mandatory] [ meta, linx_visualiser_dir ]
+        ch_linx_germline_annotation // channel: [optional]  [ meta, linx_annotation_dir ]
+        ch_virusinterpreter         // channel: [optional]  [ meta, virusinterpreter ]
+        ch_chord                    // channel: [optional]  [ meta, chord_prediction ]
+        ch_sigs                     // channel: [optional]  [ meta, sigs_dir ]
+        ch_lilac                    // channel: [mandatory] [ meta, lilac_dir ]
+        ch_cuppa                    // channel: [optional]  [ meta, cuppa_dir ]
+        ch_isofox                   // channel: [optional]  [ meta, isofox_dir ]
 
         // Reference data
-        ref_data_genome_version
-        ref_data_disease_ontology
-        ref_data_cohort_mapping
-        ref_data_cohort_percentiles
-        ref_data_known_fusion_data
-        ref_data_driver_gene_panel
-        ref_data_ensembl_data_resources
-        ref_data_isofox_alt_sj
-        ref_data_isofox_gene_distribution
+        genome_version              // channel: [mandatory] genome version
+        disease_ontology            // channel: [mandatory] /path/to/disease_ontology
+        cohort_mapping              // channel: [mandatory] /path/to/cohort_mapping
+        cohort_percentiles          // channel: [mandatory] /path/to/cohort_percentiles
+        known_fusion_data           // channel: [mandatory] /path/to/known_fusion_data
+        driver_gene_panel           // channel: [mandatory] /path/to/driver_gene_panel
+        ensembl_data_resources      // channel: [mandatory] /path/to/ensembl_data_resources/
+        isofox_alt_sj               // channel: [mandatory] /path/to/isofox_alt_sj
+        isofox_gene_distribution    // channel: [mandatory] /path/to/isofox_gene_distribution
 
         // Params
-        run_config
+        run_config                  // channel: [mandatory] run configuration
 
     main:
         // Channel for version.yml files
+        // channel: [ versions.yml ]
         ch_versions = Channel.empty()
 
         //
         // SUBWORKFLOW: Run SAMtools flagstat to generate stats required for ORANGE
         //
-        // channel: [val(meta), metrics]
+        // channel: [ meta, metrics ]
         ch_flagstat_somatic_out = Channel.empty()
         ch_flagstat_germline_out = Channel.empty()
         if (run_config.stages.flagstat) {
@@ -83,6 +85,7 @@ workflow ORANGE_REPORTING {
         ch_orange_inputs_purple_dir = run_config.stages.purple ? ch_purple : WorkflowOncoanalyser.getInput(ch_inputs, Constants.INPUT.PURPLE_DIR)
 
         // Get input smlv somatic VCF from either PURPLE or SAGE append
+        // channel: [ meta, sage_somatic_vcf, sage_germline_vcf ]
         if (run_config.mode == Constants.RunMode.WGS) {
 
             ch_orange_inputs_smlv_vcfs = ch_orange_inputs_purple_dir
@@ -169,15 +172,15 @@ workflow ORANGE_REPORTING {
         // Run process
         ORANGE(
             ch_orange_inputs,
-            ref_data_genome_version,
-            ref_data_disease_ontology,
-            ref_data_cohort_mapping,
-            ref_data_cohort_percentiles,
-            ref_data_known_fusion_data,
-            ref_data_driver_gene_panel,
-            ref_data_ensembl_data_resources,
-            ref_data_isofox_alt_sj,
-            ref_data_isofox_gene_distribution,
+            genome_version,
+            disease_ontology,
+            cohort_mapping,
+            cohort_percentiles,
+            known_fusion_data,
+            driver_gene_panel,
+            ensembl_data_resources,
+            isofox_alt_sj,
+            isofox_gene_distribution,
             "5.32 [oncoanalyser]",
         )
 
@@ -185,5 +188,5 @@ workflow ORANGE_REPORTING {
         ch_versions = ch_versions.mix(ORANGE.out.versions)
 
     emit:
-        versions  = ch_versions // channel: [versions.yml]
+        versions  = ch_versions // channel: [ versions.yml ]
 }

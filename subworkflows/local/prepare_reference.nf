@@ -14,10 +14,11 @@ include { GRIDSS_INDEX as GRIDSS_INDEX                     } from '../../modules
 
 workflow PREPARE_REFERENCE {
     take:
-        run_config // map: run configuration
+        run_config // channel: [mandatory] run configuration
 
     main:
         // Channel for version.yml files
+        // channel: [ versions.yml ]
         ch_versions = Channel.empty()
 
         //
@@ -142,7 +143,7 @@ workflow PREPARE_REFERENCE {
         virusbreakenddb        = ch_virusbreakenddb             // path: VIRUSBreakend database
         hmf_data               = ch_hmf_data                    // map:  HMF data paths
 
-        versions               = ch_versions                    // channel: [versions.yml]
+        versions               = ch_versions                    // channel: [ versions.yml ]
 }
 
 def createDataMap(entries, ref_data_path) {

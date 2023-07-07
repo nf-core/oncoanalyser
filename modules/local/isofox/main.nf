@@ -8,8 +8,8 @@ process ISOFOX {
     tuple val(meta), path(bam), path(bai)
     val functions
     path genome_fasta
-    path genome_fai
     val genome_ver
+    path genome_fai
     path ensembl_data_resources
     path exp_counts
     path exp_gc_ratios

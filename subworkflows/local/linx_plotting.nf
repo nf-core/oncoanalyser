@@ -1,6 +1,7 @@
 //
-// XXX
+// LINX plotting visualises clusters structural variants
 //
+
 import Utils
 
 include { GPGR_LINX as GPGR             } from '../../modules/local/gpgr/linx/main'
@@ -9,22 +10,23 @@ include { LINX_VISUALISER as VISUALISER } from '../../modules/local/linx/visuali
 workflow LINX_PLOTTING {
     take:
         // Sample data
-        ch_inputs
-        ch_annotations
+        ch_inputs              // channel: [mandatory] [ meta ]
+        ch_annotations         // channel: [mandatory] [ meta, linx_annotation_dir ]
 
         // Reference data
-        ref_data_genome_version         //     val: genome version
-        ref_data_ensembl_data_resources //    file: /path/to/ensembl_data_resources/
+        genome_version         // channel: [mandatory] genome version
+        ensembl_data_resources // channel: [mandatory] /path/to/ensembl_data_resources/
 
         // Params
-        run_config
+        run_config             // channel: [mandatory] run configuration
 
     main:
         // Channel for versions.yml files
+        // channel: [ versions.yml ]
         ch_versions = Channel.empty()
 
         // Select input sources
-        // channel: [val(meta_linx), anno_dir]
+        // channel: [ meta_linx, linx_annotation_dir ]
         ch_linx_visualiser_inputs = ch_annotations
             .map { meta, anno_dir ->
                 def meta_linx = [
@@ -36,8 +38,8 @@ workflow LINX_PLOTTING {
 
         VISUALISER(
             ch_linx_visualiser_inputs,
-            ref_data_genome_version,
-            ref_data_ensembl_data_resources,
+            genome_version,
+            ensembl_data_resources,
         )
 
         // Set outputs, restoring original meta
@@ -46,7 +48,7 @@ workflow LINX_PLOTTING {
 
 
         // Create inputs and create process-specific meta
-        // channel: [meta(meta_gpgr_linx), anno_dir, vis_dir]
+        // channel: [ meta_gpgr_linx, linx_annotation_dir, visualiser_dir ]
         ch_gpgr_linx_inputs = WorkflowOncoanalyser.groupByMeta(
             ch_annotations,
             ch_visualiser_out,
@@ -66,7 +68,7 @@ workflow LINX_PLOTTING {
         ch_versions = ch_versions.mix(GPGR.out.versions)
 
     emit:
-        visualiser_dir = ch_visualiser_out // channel: [val(meta), visualiser_dir]
+        visualiser_dir = ch_visualiser_out // channel: [ meta, visualiser_dir]
 
-        versions = ch_versions             // channel: [versions.yml]
+        versions = ch_versions             // channel: [ versions.yml ]
 }
