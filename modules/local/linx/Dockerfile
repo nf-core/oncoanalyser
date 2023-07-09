@@ -14,11 +14,14 @@ RUN \
 
 USER mambauser
 
+# NOTE(SW): LINX currently (v1.23.6) requires R <4.1.0, see https://github.com/hartwigmedical/hmftools/issues/329
+
 RUN \
   micromamba install -y -n base -c bioconda -c conda-forge \
     bioconductor-gviz \
     'circos >=0.69.6' \
     'openjdk >=8' \
+    'r-base == 4.1.3' \
     r-cowplot \
     r-dplyr \
     r-ggplot2 \
