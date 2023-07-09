@@ -2,7 +2,7 @@ process LINX_SOMATIC {
     tag "${meta.id}"
     label 'process_low'
 
-    container 'docker.io/scwatts/linx:1.23.2--0'
+    container 'docker.io/scwatts/linx:1.23.2--1'
 
     input:
     tuple val(meta), path(purple_dir)
