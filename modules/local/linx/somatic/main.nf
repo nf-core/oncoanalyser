@@ -2,7 +2,7 @@ process LINX_SOMATIC {
     tag "${meta.id}"
     label 'process_low'
 
-    container 'docker.io/scwatts/linx:1.23.2--1'
+    container 'docker.io/scwatts/linx:1.24--0'
 
     input:
     tuple val(meta), path(purple_dir)
@@ -34,16 +34,14 @@ process LINX_SOMATIC {
             ${gene_id_file_arg} \\
             -ref_genome_version ${genome_ver} \\
             -ensembl_data_dir ${ensembl_data_resources} \\
-            -check_fusions \\
             -known_fusion_file ${known_fusion_data} \\
-            -check_drivers \\
             -driver_gene_panel ${driver_gene_panel} \\
             -write_vis_data \\
             -output_dir linx_somatic/
 
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":
-        linx: \$(java -jar ${task.ext.jarPath} | sed 's/^.*LINX version: //')
+        linx: \$(java -jar ${task.ext.jarPath} | sed 's/^.*Linx version: //')
     END_VERSIONS
     """
 

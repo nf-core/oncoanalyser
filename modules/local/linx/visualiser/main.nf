@@ -2,7 +2,7 @@ process LINX_VISUALISER {
     tag "${meta.id}"
     label 'process_medium'
 
-    container 'docker.io/scwatts/linx:1.23.2--1'
+    container 'docker.io/scwatts/linx:1.24--0'
 
     input:
     tuple val(meta), path(linx)
@@ -40,7 +40,7 @@ process LINX_VISUALISER {
 
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":
-        linx: \$(java -jar ${task.ext.jarPath} | sed 's/^.*LINX version: //')
+        linx: \$(java -jar ${task.ext.jarPath} | sed 's/^.*Linx version: //')
     END_VERSIONS
     """
 

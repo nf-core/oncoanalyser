@@ -10,11 +10,9 @@ RUN \
 
 RUN \
   mkdir -p /opt/linx/ && \
-  wget -O /opt/linx/linx.jar 'https://github.com/hartwigmedical/hmftools/releases/download/linx-v1.23.2/linx_v1.23.2.jar'
+  wget -O /opt/linx/linx.jar 'https://github.com/hartwigmedical/hmftools/releases/download/linx-v1.24/linx_v1.24.jar'
 
 USER mambauser
-
-# NOTE(SW): LINX currently (v1.23.6) requires R <4.1.0, see https://github.com/hartwigmedical/hmftools/issues/329
 
 RUN \
   micromamba install -y -n base -c bioconda -c conda-forge \
