@@ -72,6 +72,14 @@ workflow LILAC_CALLING {
                     [meta, tumor_bam, normal_bam, "${tumor_bam}.bai", normal_bai]
                 }
 
+        } else if (run_config.mode == Constants.RunMode.PANEL) {
+
+            ch_lilac_bams = ch_inputs
+                .map { meta ->
+                    def tumor_bam = Utils.getTumorBam(meta, run_config.mode)
+                    [meta, tumor_bam, [], "${tumor_bam}.bai", []]
+                }
+
         } else {
             ch_lilac_bams = ch_inputs.map { meta -> [meta, [], [], [], []] }
         }
@@ -81,6 +89,9 @@ workflow LILAC_CALLING {
             case Constants.RunMode.WGS:
             case Constants.RunMode.WGTS:
                 tumor_sequence_type = Constants.SequenceType.WGS
+                break
+            case Constants.RunMode.PANEL:
+                tumor_sequence_type = Constants.SequenceType.TARGETTED
                 break
             default:
                 assert false

@@ -121,6 +121,11 @@
                     "fa_icon": "fas fa-book",
                     "hidden": true
                 },
+                "panel": {
+                    "type": "string",
+                    "description": "Name of pane to use.",
+                    "fa_icon": "fas fa-book"
+                },
                 "igenomes_base": {
                     "type": "string",
                     "format": "directory-path",
@@ -139,6 +144,11 @@
                 "ref_data_hmf_data_path": {
                     "type": "string",
                     "description": "Path to HMF data.",
+                    "fa_icon": "far fa-folder-open"
+                },
+                "ref_data_panel_data_path": {
+                    "type": "string",
+                    "description": "Path to panel data.",
                     "fa_icon": "far fa-folder-open"
                 },
                 "ref_data_virusbreakenddb_path": {

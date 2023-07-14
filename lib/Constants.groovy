@@ -8,9 +8,17 @@ class Constants {
     static List GENOMES_SUPPORTED  = ['GRCh37_hmf', 'GRCh38_hmf']
     static List GENOMES_DEFINED    = Constants.GENOMES_VERSION_37 + Constants.GENOMES_VERSION_38
 
+    static List PANELS_DEFINED     = ['hmf', 'tso500']
+
 
     static String HMF_DATA_37_PATH = 'https://pub-29f2e5b2b7384811bdbbcba44f8b5083.r2.dev/hmf_reference_data/hmftools/5.33_37--0.tar.gz'
     static String HMF_DATA_38_PATH = 'https://pub-29f2e5b2b7384811bdbbcba44f8b5083.r2.dev/hmf_reference_data/hmftools/5.33_38--0.tar.gz'
+
+
+    static String HMF_PANEL_38_PATH = 'https://pub-29f2e5b2b7384811bdbbcba44f8b5083.r2.dev/hmf_reference_data/panels/hmf_5.33_38--0.tar.gz'
+
+    static String TSO500_PANEL_37_PATH = 'https://pub-29f2e5b2b7384811bdbbcba44f8b5083.r2.dev/hmf_reference_data/panels/tso500_5.33_37--0.tar.gz'
+    static String TSO500_PANEL_38_PATH = 'https://pub-29f2e5b2b7384811bdbbcba44f8b5083.r2.dev/hmf_reference_data/panels/tso500_5.33_38--0.tar.gz'
 
 
     static String VIRUSBREAKENDDB_PATH = 'https://pub-29f2e5b2b7384811bdbbcba44f8b5083.r2.dev/virusbreakend/virusbreakenddb_20210401.tar.gz'
@@ -23,6 +31,7 @@ class Constants {
     }
 
     static enum RunMode {
+        PANEL,
         WGS,
         WGTS,
         WTS,
@@ -81,6 +90,7 @@ class Constants {
     }
 
     static enum SequenceType {
+        TARGETTED,
         WGS,
         WGTS,
         WTS,
@@ -100,18 +110,18 @@ class Constants {
         AMBER_DIR: [
             FileType.AMBER_DIR,
             [SampleType.TUMOR, SampleType.TUMOR_NORMAL],
-            SequenceType.WGS,
+            [SequenceType.TARGETTED, SequenceType.WGS]
         ],
         COBALT_DIR: [
             FileType.COBALT_DIR,
             [SampleType.TUMOR, SampleType.TUMOR_NORMAL],
-            SequenceType.WGS,
+            [SequenceType.TARGETTED, SequenceType.WGS]
         ],
 
         BAMTOOLS_TUMOR: [
             FileType.BAMTOOLS,
             SampleType.TUMOR,
-            SequenceType.WGS,
+            [SequenceType.TARGETTED, SequenceType.WGS],
         ],
         BAMTOOLS_NORMAL: [
             FileType.BAMTOOLS,
@@ -122,7 +132,7 @@ class Constants {
         FLAGSTAT_TUMOR: [
             FileType.FLAGSTAT,
             SampleType.TUMOR,
-            SequenceType.WGS,
+            [SequenceType.TARGETTED, SequenceType.WGS],
         ],
         FLAGSTAT_NORMAL: [
             FileType.FLAGSTAT,
@@ -133,7 +143,7 @@ class Constants {
         SAGE_VCF_TUMOR: [
             FileType.SAGE_VCF,
             SampleType.TUMOR,
-            SequenceType.WGS,
+            [SequenceType.TARGETTED, SequenceType.WGS],
         ],
         SAGE_VCF_NORMAL: [
             FileType.SAGE_VCF,
@@ -143,7 +153,7 @@ class Constants {
         SAGE_DIR_TUMOR: [
             FileType.SAGE_DIR,
             SampleType.TUMOR,
-            SequenceType.WGS,
+            [SequenceType.TARGETTED, SequenceType.WGS],
         ],
         SAGE_DIR_NORMAL: [
             FileType.SAGE_DIR,
@@ -154,7 +164,7 @@ class Constants {
         PAVE_VCF_TUMOR: [
             FileType.PAVE_VCF,
             SampleType.TUMOR,
-            SequenceType.WGS,
+            [SequenceType.TARGETTED, SequenceType.WGS],
         ],
         PAVE_VCF_NORMAL: [
             FileType.PAVE_VCF,
@@ -165,13 +175,13 @@ class Constants {
         GRIDSS_VCF: [
             FileType.GRIDSS_VCF,
             [SampleType.TUMOR, SampleType.TUMOR_NORMAL],
-            SequenceType.WGS,
+            [SequenceType.TARGETTED, SequenceType.WGS],
         ],
 
         GRIPSS_VCF_TUMOR: [
             FileType.GRIPSS_VCF,
             [SampleType.TUMOR, SampleType.TUMOR_NORMAL],
-            SequenceType.WGS,
+            [SequenceType.TARGETTED, SequenceType.WGS],
         ],
         GRIPSS_VCF_NORMAL: [
             FileType.GRIPSS_VCF,
@@ -181,7 +191,7 @@ class Constants {
         GRIPSS_UNFILTERED_VCF_TUMOR: [
             FileType.GRIPSS_UNFILTERED_VCF,
             [SampleType.TUMOR, SampleType.TUMOR_NORMAL],
-            SequenceType.WGS,
+            [SequenceType.TARGETTED, SequenceType.WGS],
         ],
         GRIPSS_UNFILTERED_VCF_NORMAL: [
             FileType.GRIPSS_UNFILTERED_VCF,
@@ -192,18 +202,18 @@ class Constants {
         PURPLE_DIR: [
             FileType.PURPLE_DIR,
             [SampleType.TUMOR, SampleType.TUMOR_NORMAL],
-            SequenceType.WGS,
+            [SequenceType.TARGETTED, SequenceType.WGS],
         ],
 
         LINX_PLOT_DIR_TUMOR: [
             FileType.LINX_PLOT_DIR,
             SampleType.TUMOR,
-            SequenceType.WGS,
+            [SequenceType.TARGETTED, SequenceType.WGS],
         ],
         LINX_ANNO_DIR_TUMOR: [
             FileType.LINX_ANNO_DIR,
             SampleType.TUMOR,
-            SequenceType.WGS,
+            [SequenceType.TARGETTED, SequenceType.WGS],
         ],
         LINX_ANNO_DIR_NORMAL: [
             FileType.LINX_ANNO_DIR,
@@ -224,7 +234,7 @@ class Constants {
         LILAC_DIR: [
             FileType.LILAC_DIR,
             [SampleType.TUMOR, SampleType.NORMAL, SampleType.TUMOR_NORMAL],
-            [SequenceType.WGS, SequenceType.WGTS],
+            [SequenceType.TARGETTED, SequenceType.WGS, SequenceType.WGTS],
         ],
 
         VIRUSINTERPRETER_TSV: [

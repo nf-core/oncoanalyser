@@ -8,6 +8,7 @@ include { BWA_INDEX      } from '../../modules/nf-core/bwa/index/main'
 
 include { CUSTOM_EXTRACTTARBALL as DECOMP_BWA_INDEX        } from '../../modules/local/custom/extract_tarball/main'
 include { CUSTOM_EXTRACTTARBALL as DECOMP_HMF_DATA         } from '../../modules/local/custom/extract_tarball/main'
+include { CUSTOM_EXTRACTTARBALL as DECOMP_PANEL_DATA       } from '../../modules/local/custom/extract_tarball/main'
 include { CUSTOM_EXTRACTTARBALL as DECOMP_VIRUSBREAKEND_DB } from '../../modules/local/custom/extract_tarball/main'
 include { GRIDSS_INDEX as GRIDSS_BWA_INDEX_IMAGE           } from '../../modules/local/gridss/index/main'
 include { GRIDSS_INDEX as GRIDSS_INDEX                     } from '../../modules/local/gridss/index/main'
@@ -131,6 +132,36 @@ workflow PREPARE_REFERENCE {
             ch_hmf_data = createDataMap(hmf_data_paths, params.ref_data_hmf_data_path)
         }
 
+        //
+        // Set panel reference paths / stage, unpack if required
+        //
+        ch_panel_data = Channel.empty()
+        if (run_config.mode == Constants.RunMode.PANEL) {
+
+            // NOTE(SW): consider approach to implement custom panel support
+
+            panel_data_paths_versions = params.panel_data_paths[params.panel]
+            panel_data_paths = panel_data_paths_versions[params.ref_data_genome_version]
+
+            if (params.ref_data_panel_data_path.endsWith('tar.gz')) {
+                ch_panel_data_inputs = [
+                    [id: 'panel_data'],
+                    file(params.ref_data_panel_data_path),
+                ]
+                DECOMP_PANEL_DATA(ch_panel_data_inputs)
+
+                ch_panel_data = DECOMP_PANEL_DATA.out.dir
+                    .collect()
+                    .map { dir_list ->
+                        assert dir_list.size() == 1
+                        def dirpath = dir_list[0].toUriString()
+                        return createDataMap(panel_data_paths, dirpath)
+                    }
+            } else {
+                ch_panel_data = createDataMap(panel_data_paths, params.ref_data_panel_data_path)
+            }
+        }
+
     emit:
         genome_fasta           = ch_genome_fasta                // path: genome_fasta
         genome_fai             = ch_genome_fai                  // path: genome_fai
@@ -142,6 +173,7 @@ workflow PREPARE_REFERENCE {
 
         virusbreakenddb        = ch_virusbreakenddb             // path: VIRUSBreakend database
         hmf_data               = ch_hmf_data                    // map:  HMF data paths
+        panel_data             = ch_panel_data                  // map:  Panel data paths
 
         versions               = ch_versions                    // channel: [ versions.yml ]
 }

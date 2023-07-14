@@ -45,7 +45,8 @@ WorkflowMain.paramsSummaryLog(workflow, params, log)
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 */
 
-include { WGTS } from './workflows/wgts'
+include { PANEL } from './workflows/panel'
+include { WGTS  } from './workflows/wgts'
 
 //
 // WORKFLOW: Run main nf-core/oncoanalyser analysis pipeline
@@ -57,6 +58,8 @@ workflow NFCORE_ONCOANALYSER {
     run_modes_wgts = [Constants.RunMode.WGS, Constants.RunMode.WTS, Constants.RunMode.WGTS]
     if (run_modes_wgts.contains(run_mode)) {
         WGTS()
+    } else if (run_mode == Constants.RunMode.PANEL) {
+        PANEL()
     } else {
         assert false
     }

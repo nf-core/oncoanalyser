@@ -146,6 +146,25 @@ class WorkflowMain {
             }
         }
 
+        if (run_mode == Constants.RunMode.PANEL) {
+
+            if (!params.containsKey('run_type')) {
+                params.run_type = 'tumor_only'
+            }
+
+            // Attempt to set default panel data path; make no assumption on valid 'panel' value
+            if (!params.containsKey('ref_data_panel_data_path') && params.containsKey('panel')) {
+                if (params.panel == 'hmf' && params.ref_data_genome_version == '38') {
+                    params.ref_data_panel_data_path = Constants.HMF_PANEL_38_PATH
+                } else if (params.panel == 'tso500' && params.ref_data_genome_version == '37') {
+                    params.ref_data_panel_data_path = Constants.TSO500_PANEL_37_PATH
+                } else if (params.panel == 'tso500' && params.ref_data_genome_version == '38') {
+                    params.ref_data_panel_data_path = Constants.TSO500_PANEL_38_PATH
+                }
+            }
+
+        }
+
         def stages = Processes.getRunStages(
             run_mode,
             params.processes_include,
@@ -271,6 +290,43 @@ class WorkflowMain {
                 log.error "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n" +
                     "  The WTS run mode does not support tumor/normal data, please adjust the CLI \n" +
                     "  --run_type option or corresponding configuration file.\n" +
+                    "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
+                System.exit(1)
+            }
+
+        }
+
+        if (run_mode == Constants.RunMode.PANEL) {
+
+            if (run_type != Constants.RunType.TUMOR_ONLY) {
+                log.error "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n" +
+                    "  The panel run mode does not support tumor/normal data, please adjust the CLI \n" +
+                    "  --run_type option or corresponding configuration file.\n" +
+                    "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
+                System.exit(1)
+            }
+
+            if (!params.containsKey('panel')) {
+                def panels = Constants.PANELS_DEFINED.join('\n    - ')
+                log.error "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n" +
+                    "  A panel is required to be set using the --panel CLI argument or in a \n" +
+                    "  configuration file.\n" +
+                    "  Currently, the available panels are:\n" +
+                    "    - ${panels}\n" +
+                    "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
+                System.exit(1)
+            } else if (!Constants.PANELS_DEFINED.contains(params.panel)) {
+                def panels = Constants.PANELS_DEFINED.join('\n    - ')
+                log.error "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n" +
+                    "  The ${params.panel} is not defined. Currently, the available panels are:\n" +
+                    "    - ${panels}\n" +
+                    "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
+                System.exit(1)
+            }
+
+            if (params.panel == 'hmf' && params.ref_data_genome_version == '37') {
+                log.error "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n" +
+                    "  The Hartwig panel (hmf) is not available for the GRCh37 reference genome.\n" +
                     "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
                 System.exit(1)
             }

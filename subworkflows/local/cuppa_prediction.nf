@@ -58,6 +58,9 @@ workflow CUPPA_PREDICTION {
                         meta_cuppa.id = meta.getAt(['sample_name', Constants.SampleType.TUMOR, Constants.SequenceType.WGS])
                         meta_cuppa.id_wts = meta.getAt(['sample_name', Constants.SampleType.TUMOR, Constants.SequenceType.WTS])
                         break
+                    case Constants.RunMode.PANEL:
+                        meta_cuppa.id = meta.getAt(['sample_name', Constants.SampleType.TUMOR, Constants.SequenceType.TARGETTED])
+                        break
                     default:
                         assert false
                 }

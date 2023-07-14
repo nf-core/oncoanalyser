@@ -28,7 +28,9 @@ workflow PREPARE_INPUT {
             assert false
         }
 
-        if (run_config.mode == Constants.RunMode.WGS) {
+        if (run_config.mode == Constants.RunMode.PANEL) {
+            sequence_types_allowed = [Constants.SequenceType.TARGETTED]
+        } else if (run_config.mode == Constants.RunMode.WGS) {
             sequence_types_allowed = [Constants.SequenceType.WGS]
         } else if (run_config.mode == Constants.RunMode.WTS) {
             sequence_types_allowed = [Constants.SequenceType.WTS]
@@ -192,7 +194,13 @@ workflow PREPARE_INPUT {
                     }
 
                     def required_sample_types
-                    if (run_config.mode == Constants.RunMode.WGS) {
+                    if (run_config.mode == Constants.RunMode.PANEL) {
+
+                        required_sample_types = [
+                            [Constants.SampleType.TUMOR, Constants.SequenceType.TARGETTED],
+                        ]
+
+                    } else if (run_config.mode == Constants.RunMode.WGS) {
 
                         if (run_config.type == Constants.RunType.TUMOR_ONLY) {
                             required_sample_types = [

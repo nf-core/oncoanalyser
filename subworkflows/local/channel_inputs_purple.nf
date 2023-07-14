@@ -42,13 +42,16 @@ workflow CHANNEL_INPUTS_PURPLE {
         ch_smlv_germline_source = run_config.stages.pave ? ch_smlv_germline : WorkflowOncoanalyser.getInput(ch_inputs, Constants.INPUT.PAVE_VCF_NORMAL, type: 'optional')
 
         // Adjust for run type and mode
-        // NOTE(SW): Hartwig indicated unfiltered SVs should not be used for recovery in tumor-only mode
         if (run_config.type == Constants.RunType.TUMOR_ONLY) {
 
             ch_sv_germline_source = ch_inputs.map { meta -> [meta, [], []] }
             ch_smlv_germline_source = ch_inputs.map { meta -> [meta, []] }
-            ch_sv_somatic_unfiltered_source = ch_inputs.map { meta -> [meta, [], []] }
 
+        }
+
+        // NOTE(SW): Hartwig indicated unfiltered SVs should not be used for recovery in panel or tumor-only mode
+        if (run_config.mode == Constants.RunMode.PANEL || run_config.type == Constants.RunType.TUMOR_ONLY) {
+            ch_sv_somatic_unfiltered_source = ch_inputs.map { meta -> [meta, [], []] }
         }
 
         // Combine into single channel
