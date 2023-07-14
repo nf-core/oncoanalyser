@@ -73,7 +73,12 @@ class Utils {
 
         // NOTE(SW): this should /only/ be used to get panel or WGS tumor sample name, WTS sample name retrieval is not supported
 
-        def sequence_type = Constants.SequenceType.WGS
+        def sequence_type
+        if (run_mode == Constants.RunMode.PANEL) {
+            sequence_type = Constants.SequenceType.TARGETTED
+        } else if (run_mode == Constants.RunMode.WGS || run_mode == Constants.RunMode.WGTS) {
+            sequence_type = Constants.SequenceType.WGS
+        }
 
         return getMetaEntry(meta, ['sample_name', Constants.SampleType.TUMOR, sequence_type])
     }
@@ -96,7 +101,12 @@ class Utils {
 
         // NOTE(SW): this should /only/ be used to get panel or WGS tumor BAM, WTS BAM retrieval is not supported
 
-        def sequence_type = Constants.SequenceType.WGS
+        def sequence_type
+        if (run_mode == Constants.RunMode.PANEL) {
+            sequence_type = Constants.SequenceType.TARGETTED
+        } else if (run_mode == Constants.RunMode.WGS || run_mode == Constants.RunMode.WGTS) {
+            sequence_type = Constants.SequenceType.WGS
+        }
 
         return getMetaEntry(meta, [Constants.FileType.BAM, Constants.SampleType.TUMOR, sequence_type])
     }

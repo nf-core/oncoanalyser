@@ -1,1 +1,437 @@
-// PLACEHOLDER
+import Constants
+import Processes
+import Utils
+
+
+/*
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    VALIDATE INPUTS
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+*/
+
+// Get run config
+run_config = WorkflowMain.getRunConfig(params, log)
+
+// Check input path parameters to see if they exist
+def checkPathParamList = [
+    params.input,
+    params.linx_gene_id_file,
+]
+
+// Conditional requirements
+if (run_config.stages.gridss) {
+    if (params.containsKey('gridss_config')) {
+        checkPathParamList.add(params.gridss_config)
+    }
+}
+
+if (run_config.stages.lilac) {
+    if (params.ref_data_genome_version == '38' && params.ref_data_genome_type == 'alt' && params.containsKey('ref_data_hla_slice_bed')) {
+        checkPathParamList.add(params.ref_data_hla_slice_bed)
+    }
+}
+
+// TODO(SW): consider whether we should check for null entries here for errors to be more informative
+for (param in checkPathParamList) { if (param) { file(param, checkIfExists: true) } }
+
+// Check mandatory parameters
+if (params.input) { ch_input = file(params.input) } else { exit 1, 'Input samplesheet not specified!' }
+
+// Create Path objects for some input files
+linx_gene_id_file = params.linx_gene_id_file ? file(params.linx_gene_id_file) : []
+
+/*
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    CONFIG FILES
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+*/
+
+
+/*
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    IMPORT LOCAL MODULES/SUBWORKFLOWS
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+*/
+
+//
+// SUBWORKFLOWS
+//
+include { AMBER_PROFILING       } from '../subworkflows/local/amber_profiling'
+include { BAMTOOLS_METRICS      } from '../subworkflows/local/bamtools_metrics'
+include { COBALT_PROFILING      } from '../subworkflows/local/cobalt_profiling'
+include { GRIDSS_SVPREP_CALLING } from '../subworkflows/local/gridss_svprep_calling'
+include { GRIPSS_FILTERING      } from '../subworkflows/local/gripss_filtering'
+include { LILAC_CALLING         } from '../subworkflows/local/lilac_calling'
+include { LINX_ANNOTATION       } from '../subworkflows/local/linx_annotation'
+include { LINX_PLOTTING         } from '../subworkflows/local/linx_plotting'
+include { ORANGE_REPORTING      } from '../subworkflows/local/orange_reporting'
+include { PAVE_ANNOTATION       } from '../subworkflows/local/pave_annotation'
+include { PREPARE_INPUT         } from '../subworkflows/local/prepare_input'
+include { PREPARE_REFERENCE     } from '../subworkflows/local/prepare_reference'
+include { PURPLE_CALLING        } from '../subworkflows/local/purple_calling'
+include { SAGE_CALLING          } from '../subworkflows/local/sage_calling'
+
+/*
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    IMPORT NF-CORE MODULES/SUBWORKFLOWS
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+*/
+
+//
+// MODULES
+//
+include { CUSTOM_DUMPSOFTWAREVERSIONS } from '../modules/nf-core/custom/dumpsoftwareversions/main'
+
+/*
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    RUN MAIN WORKFLOW
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+*/
+
+// Get absolute file paths
+samplesheet = Utils.getFileObject(params.input)
+
+workflow PANEL {
+
+    // Create channel for versions
+    // channel: [ versions.yml ]
+    ch_versions = Channel.empty()
+
+    // Get inputs from samplesheet, assign more human readable variable
+    // channel: [ meta ]
+    PREPARE_INPUT(
+        samplesheet,
+        run_config,
+    )
+    ch_inputs = PREPARE_INPUT.out.data
+
+    // Set up reference data, assign more human readable variables
+    PREPARE_REFERENCE(
+        run_config,
+    )
+    ref_data = PREPARE_REFERENCE.out
+    hmf_data = PREPARE_REFERENCE.out.hmf_data
+    panel_data = PREPARE_REFERENCE.out.panel_data
+
+    // Set GRIDSS config
+    gridss_config = params.containsKey('gridss_config') ? file(params.gridss_config) : hmf_data.gridss_config
+
+    //
+    // SUBWORKFLOW: Run Bam Tools to generate stats required for downstream processes
+    //
+    // channel: [ meta, metrics ]
+    ch_bamtools_somatic_out = Channel.empty()
+    if (run_config.stages.bamtools) {
+
+        BAMTOOLS_METRICS(
+            ch_inputs,
+            ref_data.genome_fasta,
+            ref_data.genome_version,
+            run_config,
+        )
+
+        ch_versions = ch_versions.mix(BAMTOOLS_METRICS.out.versions)
+        ch_bamtools_somatic_out = ch_bamtools_somatic_out.mix(BAMTOOLS_METRICS.out.somatic)
+    }
+
+
+    //
+    // SUBWORKFLOW: Run AMBER to obtain b-allele frequencies
+    //
+    // channel: [ meta, amber_dir ]
+    ch_amber_out = Channel.empty()
+    if (run_config.stages.amber) {
+
+        AMBER_PROFILING(
+            ch_inputs,
+            ref_data.genome_version,
+            hmf_data.heterozygous_sites,
+            run_config,
+        )
+
+        ch_versions = ch_versions.mix(AMBER_PROFILING.out.versions)
+        ch_amber_out = ch_amber_out.mix(AMBER_PROFILING.out.amber_dir)
+    }
+
+    //
+    // SUBWORKFLOW: Run COBALT to obtain read ratios
+    //
+    // channel: [ meta, cobalt_dir ]
+    ch_cobalt_out = Channel.empty()
+    if (run_config.stages.cobalt) {
+
+        COBALT_PROFILING(
+            ch_inputs,
+            hmf_data.gc_profile,
+            hmf_data.diploid_bed,
+            panel_data.target_region_normalisation,
+            run_config,
+        )
+
+        ch_versions = ch_versions.mix(COBALT_PROFILING.out.versions)
+        ch_cobalt_out = ch_cobalt_out.mix(COBALT_PROFILING.out.cobalt_dir)
+    }
+
+    //
+    // SUBWORKFLOW: Call structural variants with GRIDSS
+    //
+    // channel: [ meta, gridss_vcf ]
+    ch_gridss_out = Channel.empty()
+    if (run_config.stages.gridss) {
+
+        GRIDSS_SVPREP_CALLING(
+            ch_inputs,
+            ref_data.genome_fasta,
+            ref_data.genome_version,
+            ref_data.genome_fai,
+            ref_data.genome_dict,
+            ref_data.genome_bwa_index,
+            ref_data.genome_bwa_index_image,
+            ref_data.genome_gridss_index,
+            hmf_data.gridss_region_blocklist,
+            hmf_data.sv_prep_blocklist,
+            hmf_data.known_fusions,
+            gridss_config,
+            run_config,
+        )
+
+        ch_versions = ch_versions.mix(GRIDSS_SVPREP_CALLING.out.versions)
+        ch_gridss_out = ch_gridss_out.mix(GRIDSS_SVPREP_CALLING.out.results)
+    }
+
+    //
+    // SUBWORKFLOW: Run GRIPSS to filter GRIDSS SV calls
+    //
+    // channel: [ meta, vcf, tbi ]
+    ch_gripss_somatic_out = Channel.empty()
+    ch_gripss_somatic_unfiltered_out = Channel.empty()
+    if (run_config.stages.gripss) {
+
+        GRIPSS_FILTERING(
+            ch_inputs,
+            ch_gridss_out,
+            ref_data.genome_fasta,
+            ref_data.genome_version,
+            ref_data.genome_fai,
+            hmf_data.gridss_pon_breakends,
+            hmf_data.gridss_pon_breakpoints,
+            hmf_data.known_fusions,
+            hmf_data.repeatmasker_annotations,
+            panel_data.target_region_bed,
+            run_config,
+        )
+
+        ch_versions = ch_versions.mix(GRIPSS_FILTERING.out.versions)
+        ch_gripss_somatic_out = ch_gripss_somatic_out.mix(GRIPSS_FILTERING.out.somatic)
+        ch_gripss_somatic_unfiltered_out = ch_gripss_somatic_unfiltered_out.mix(GRIPSS_FILTERING.out.somatic_unfiltered)
+    }
+
+    //
+    // SUBWORKFLOW: call SNV, MNV, and small INDELS with SAGE
+    //
+    // channel: [ meta, sage_vcf, sage_tbi ]
+    ch_sage_somatic_vcf_out = Channel.empty()
+    // channel: [ meta, sage_dir ]
+    ch_sage_somatic_dir_out = Channel.empty()
+    if (run_config.stages.sage) {
+
+        SAGE_CALLING(
+            ch_inputs,
+            ref_data.genome_fasta,
+            ref_data.genome_version,
+            ref_data.genome_fai,
+            ref_data.genome_dict,
+            [],  // sage_known_hotspots_germline
+            hmf_data.sage_known_hotspots_somatic,
+            panel_data.sage_actionable_panel,
+            panel_data.sage_coverage_panel,
+            hmf_data.sage_highconf_regions,
+            hmf_data.segment_mappability,
+            panel_data.driver_gene_panel,
+            hmf_data.ensembl_data_resources,
+            run_config,
+        )
+
+        ch_versions = ch_versions.mix(SAGE_CALLING.out.versions)
+        ch_sage_somatic_vcf_out = ch_sage_somatic_vcf_out.mix(SAGE_CALLING.out.somatic_vcf)
+        ch_sage_somatic_dir_out = ch_sage_somatic_dir_out.mix(SAGE_CALLING.out.somatic_dir)
+    }
+
+    //
+    // SUBWORKFLOW: Annotate variants with PAVE
+    //
+    // channel: [ meta, pave_vcf ]
+    ch_pave_somatic_out = Channel.empty()
+    if (run_config.stages.pave) {
+
+        PAVE_ANNOTATION(
+            ch_inputs,
+            [],  // ch_sage_germline_vcf_out
+            ch_sage_somatic_vcf_out,
+            ref_data.genome_fasta,
+            ref_data.genome_version,
+            ref_data.genome_fai,
+            hmf_data.sage_pon,
+            panel_data.pon_artefacts,
+            hmf_data.sage_blocklist_regions,
+            hmf_data.sage_blocklist_sites,
+            hmf_data.clinvar_annotations,
+            hmf_data.segment_mappability,
+            panel_data.driver_gene_panel,
+            hmf_data.ensembl_data_resources,
+            hmf_data.gnomad_resource,
+            run_config,
+        )
+
+        ch_versions = ch_versions.mix(PAVE_ANNOTATION.out.versions)
+        ch_pave_somatic_out = ch_pave_somatic_out.mix(PAVE_ANNOTATION.out.somatic)
+    }
+
+    //
+    // SUBWORKFLOW: Call CNVs, infer purity and ploidy, and recover low quality SVs with PURPLE
+    //
+    // channel: [ meta, purple_dir ]
+    ch_purple_out = Channel.empty()
+    if (run_config.stages.purple) {
+
+        PURPLE_CALLING(
+            ch_inputs,
+            ch_amber_out,
+            ch_cobalt_out,
+            ch_pave_somatic_out,
+            [],  // ch_pave_germline_out
+            ch_gripss_somatic_out,
+            [],  // ch_gripss_germline_out
+            [],  // ch_gripss_somatic_unfiltered_out,
+            ref_data.genome_fasta,
+            ref_data.genome_version,
+            ref_data.genome_fai,
+            ref_data.genome_dict,
+            hmf_data.gc_profile,
+            hmf_data.sage_known_hotspots_somatic,
+            [],  // sage_known_hotspots_germline
+            panel_data.driver_gene_panel,
+            hmf_data.ensembl_data_resources,
+            [],  // purple_germline_del
+            panel_data.target_region_bed,
+            panel_data.target_region_ratios,
+            panel_data.target_region_msi_indels,
+            run_config,
+        )
+
+        ch_versions = ch_versions.mix(PURPLE_CALLING.out.versions)
+        ch_purple_out = ch_purple_out.mix(PURPLE_CALLING.out.purple_dir)
+    }
+
+    //
+    // SUBWORKFLOW: Group structural variants into higher order events with LINX
+    //
+    // channel: [ meta, linx_annotation_dir ]
+    ch_linx_somatic_out = Channel.empty()
+    // channel: [ meta, linx_visualiser_dir ]
+    ch_linx_somatic_plot_out = Channel.empty()
+    if (run_config.stages.linx) {
+
+        LINX_ANNOTATION(
+            ch_inputs,
+            ch_purple_out,
+            ref_data.genome_version,
+            hmf_data.ensembl_data_resources,
+            hmf_data.known_fusion_data,
+            panel_data.driver_gene_panel,
+            linx_gene_id_file,
+            run_config,
+        )
+
+        ch_versions = ch_versions.mix(LINX_ANNOTATION.out.versions)
+        ch_linx_somatic_out = ch_linx_somatic_out.mix(LINX_ANNOTATION.out.somatic)
+
+        LINX_PLOTTING(
+            ch_inputs,
+            ch_linx_somatic_out,
+            ref_data.genome_version,
+            hmf_data.ensembl_data_resources,
+            run_config,
+        )
+
+        ch_versions = ch_versions.mix(LINX_PLOTTING.out.versions)
+        ch_linx_somatic_plot_out = ch_linx_somatic_plot_out.mix(LINX_PLOTTING.out.visualiser_dir)
+    }
+
+    //
+    // SUBWORKFLOW: Run LILAC for HLA typing and somatic CNV and SNV calling
+    //
+    // channel: [ meta, lilac_dir ]
+    ch_lilac_out = Channel.empty()
+    if (run_config.stages.lilac) {
+
+        // Set HLA slice BED if provided in params
+        ref_data_hla_slice_bed = params.containsKey('ref_data_hla_slice_bed') ? params.ref_data_hla_slice_bed : []
+
+        LILAC_CALLING(
+            ch_inputs,
+            ch_purple_out,
+            ref_data.genome_fasta,
+            ref_data.genome_version,
+            ref_data.genome_fai,
+            hmf_data.lilac_resources,
+            ref_data_hla_slice_bed,
+            run_config,
+        )
+
+        ch_versions = ch_versions.mix(LILAC_CALLING.out.versions)
+        ch_lilac_out = ch_lilac_out.mix(LILAC_CALLING.out.lilac_dir)
+    }
+
+    //
+    // SUBWORKFLOW: Run ORANGE to generate static PDF report
+    //
+    if (run_config.stages.orange) {
+
+        ORANGE_REPORTING(
+            ch_inputs,
+            ch_bamtools_somatic_out,
+            [],  //ch_bamtools_germline_out
+            ch_sage_somatic_dir_out,
+            [],  // ch_sage_germline_dir_out
+            [],  // ch_sage_somatic_append_vcf
+            [],  // ch_sage_germline_append_vcf
+            ch_purple_out,
+            ch_linx_somatic_out,
+            ch_linx_somatic_plot_out,
+            [],  // ch_linx_germline_out
+            [],  // ch_virusinterpreter_out
+            [],  // ch_chord_out
+            [],  // ch_sigs_out
+            ch_lilac_out,
+            [],  // ch_cuppa_out
+            [],  // ch_isofox_out
+            ref_data.genome_version,
+            hmf_data.disease_ontology,
+            hmf_data.cohort_mapping,
+            hmf_data.cohort_percentiles,
+            hmf_data.known_fusion_data,
+            panel_data.driver_gene_panel,
+            hmf_data.ensembl_data_resources,
+            [],  // alt_sj_distribution
+            [],  // gene_exp_distribution
+            run_config,
+        )
+
+        ch_versions = ch_versions.mix(ORANGE_REPORTING.out.versions)
+    }
+
+    //
+    // MODULE: Pipeline reporting
+    //
+    CUSTOM_DUMPSOFTWAREVERSIONS(
+        ch_versions.unique().collectFile(name: 'collated_versions.yml')
+    )
+
+}
+
+/*
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    THE END
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+*/

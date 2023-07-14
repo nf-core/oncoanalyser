@@ -10,7 +10,7 @@ process PAVE_SOMATIC {
     val genome_ver
     path genome_fai
     path sage_pon
-    path sage_pon_artefacts
+    path pon_artefacts
     path segment_mappability
     path driver_gene_panel
     path ensembl_data_resources
@@ -27,7 +27,7 @@ process PAVE_SOMATIC {
     script:
     def args = task.ext.args ?: ''
 
-    def pon_artefact_arg = sage_pon_artefacts ? "-pon_artefact_file ${sage_pon_artefacts}" : ''
+    def pon_artefact_arg = pon_artefacts ? "-pon_artefact_file ${pon_artefacts}" : ''
 
     def pon_filters
     def gnomad_args

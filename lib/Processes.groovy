@@ -59,6 +59,22 @@ class Processes {
                     Constants.Process.VIRUSINTERPRETER,
                 ]
                 break
+            case Constants.RunMode.PANEL:
+                processes = [
+                    Constants.Process.AMBER,
+                    Constants.Process.BAMTOOLS,
+                    Constants.Process.COBALT,
+                    Constants.Process.FLAGSTAT,
+                    Constants.Process.GRIDSS,
+                    Constants.Process.GRIPSS,
+                    Constants.Process.LILAC,
+                    Constants.Process.LINX,
+                    Constants.Process.ORANGE,
+                    Constants.Process.PAVE,
+                    Constants.Process.PURPLE,
+                    Constants.Process.SAGE,
+                ]
+                break
             default:
                 log.error "\nERROR: we should never have come here"
                 System.exit(1)

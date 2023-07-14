@@ -84,7 +84,7 @@ workflow ORANGE_REPORTING {
 
         // Get input smlv somatic VCF from either PURPLE or SAGE append
         // channel: [ meta, sage_somatic_vcf, sage_germline_vcf ]
-        if (run_config.mode == Constants.RunMode.WGS) {
+        if (run_config.mode == Constants.RunMode.WGS || run_config.mode == Constants.RunMode.PANEL) {
 
             ch_orange_inputs_smlv_vcfs = ch_orange_inputs_purple_dir
                 .map { meta, purple_dir ->
