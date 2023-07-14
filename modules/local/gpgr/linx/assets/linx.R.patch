@@ -1,0 +1,12 @@
+diff --git a/R/linx.R b/R/linx.R
+index c1f3176..a74fa8e 100644
+--- a/R/linx.R
++++ b/R/linx.R
+@@ -132,6 +132,7 @@ LINX_DESCRIPTIONS <- tibble::tribble(
+     "[KNOWN_PAIR, PROMISCUOUS_5, PROMISCUOUS_3, PROMISCUOUS_BOTH, EXON_DEL_DUP, ",
+     "IG_PROMISCUOUS, IG_KNOWN_PAIR, KNOWN_PAIR_UNMMABLE_3 or NONE (if no match is found)"
+   ),
++  "fusion", "reportableReasons", "c", "Reason for non-reportable status",
+   "fusion", "phased", "c", "Set to 1 if a phased fusion can be formed (after allowing for exon skipping)",
+   "fusion", "likelihood", "c", ".",
+   "fusion", "chainLength", "d", "0 for simple fusions.  If fusion is chained equal to the total length of segments chained between 5' and 3' partners",
