@@ -40,8 +40,7 @@ process ORANGE {
     def normal_flagstat_arg = flagstat_germline ? "-ref_sample_flagstat_file ${flagstat_germline}" : ''
     def normal_sage_somatic_bqr_arg = sage_germline_bqr ? "-sage_somatic_ref_sample_bqr_plot ${sage_germline_bqr}" : ''
     def normal_sage_coverage_arg = sage_germline_coverage ? "-sage_germline_gene_coverage_tsv ${sage_germline_coverage}" : ''
-    // NOTE(SW): LINX germline outputs are processed below to contain tumor id in the filename as required by ORANGE
-    def normal_linx_arg = linx_germline_anno_dir ? "-linx_germline_data_directory normal_linx__prepared/" : ''
+    def normal_linx_arg = linx_germline_anno_dir ? "-linx_germline_data_directory ${linx_germline_anno_dir}" : ''
 
     def rna_id_arg = meta.containsKey('tumor_wts_id') ? "-rna_sample_id ${meta.tumor_wts_id}" : ''
     def isofox_summary_csv_arg = isofox_dir ? "-isofox_summary_csv ${isofox_dir}/${meta.tumor_wts_id}.isf.summary.csv" : ''
@@ -54,15 +53,6 @@ process ORANGE {
 
     """
     echo "${pipeline_version_str}" > pipeline_version.txt
-
-    # Replace identifiers as required
-    if [[ -n "${normal_linx_arg}" ]]; then
-        mkdir -p normal_linx__prepared/;
-        for fp in ${linx_germline_anno_dir}/*; do
-            fn=\${fp##*/};
-            ln -s ../${linx_germline_anno_dir}/\${fn} normal_linx__prepared/\$(sed 's/${meta.normal_wgs_id}/${meta.tumor_id}/' <<< \${fn});
-        done;
-    fi
 
     # When WTS data is present, ORANGE expects the somatic SAGE VCF to have appended WTS data; CS indicates this should
     # occur after PURPLE. Since ORANGE only collects the somatic SAGE VCF from the PURPLE output directory, we must

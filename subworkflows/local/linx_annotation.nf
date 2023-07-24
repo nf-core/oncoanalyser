@@ -54,7 +54,7 @@ workflow LINX_ANNOTATION {
 
                     def meta_linx = [
                         key: meta.id,
-                        id: Utils.getNormalWgsSampleName(meta),
+                        id: tumor_id,
                     ]
 
                     return [meta_linx, sv_vcf]
