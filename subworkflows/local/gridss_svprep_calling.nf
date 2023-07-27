@@ -61,7 +61,7 @@ workflow GRIDSS_SVPREP_CALLING {
             genome_version,
             sv_prep_blocklist,
             known_fusions,
-            'JUNCTIONS;BAM;FRAGMENT_LENGTH_DIST', // -write_types argument switch and value
+            'JUNCTIONS;BAM;FRAGMENT_LENGTH_DIST', // -write_types argument
         )
         ch_versions = ch_versions.mix(SVPREP_TUMOR.out.versions)
 
@@ -102,7 +102,7 @@ workflow GRIDSS_SVPREP_CALLING {
                 genome_version,
                 sv_prep_blocklist,
                 known_fusions,
-                false, // -write_types argument switch and value
+                'JUNCTIONS;BAM;FRAGMENT_LENGTH_DIST', // -write_types argument
             )
             ch_versions = ch_versions.mix(SVPREP_NORMAL.out.versions)
 
