@@ -24,8 +24,10 @@ if (run_config.stages.virusinterpreter) {
     checkPathParamList.add(params.ref_data_virusbreakenddb_path)
 }
 
-if (run_config.stages.lilac && params.ref_data_genome_version == '38' && params.ref_data_genome_type == 'alt') {
-    checkPathParamList.add(params.ref_data_hla_slice_bed)
+if (run_config.stages.lilac) {
+    if (params.ref_data_genome_version == '38' && params.ref_data_genome_type == 'alt' && params.containsKey('ref_data_hla_slice_bed')) {
+        checkPathParamList.add(params.ref_data_hla_slice_bed)
+    }
 }
 
 // TODO(SW): consider whether we should check for null entries here for errors to be more informative
@@ -462,14 +464,8 @@ workflow WGTS {
     ch_lilac_out = Channel.empty()
     if (run_config.stages.lilac) {
 
-        // Select HLA slice BED
-        if (params.ref_data_genome_type == 'no_alt') {
-            ref_data_hla_slice_bed = hmf_data.hla_slice_bed.collect()
-        } else if (params.ref_data_genome_type == 'alt' && params.ref_data_genome_version == '38') {
-            ref_data_hla_slice_bed = params.ref_data_hla_slice_bed
-        } else {
-            assert false
-        }
+        // Set HLA slice BED if provided in params
+        ref_data_hla_slice_bed = params.containsKey('ref_data_hla_slice_bed') ? params.ref_data_hla_slice_bed : []
 
         LILAC_CALLING(
             ch_inputs,
