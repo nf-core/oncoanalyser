@@ -15,11 +15,16 @@ run_config = WorkflowMain.getRunConfig(params, log)
 // Check input path parameters to see if they exist
 def checkPathParamList = [
     params.input,
-    params.gridss_config,
     params.linx_gene_id_file,
 ]
 
 // Conditional requirements
+if (run_config.stages.gridss) {
+    if (params.containsKey('gridss_config')) {
+        checkPathParamList.add(params.gridss_config)
+    }
+}
+
 if (run_config.stages.virusinterpreter) {
     checkPathParamList.add(params.ref_data_virusbreakenddb_path)
 }
@@ -95,7 +100,6 @@ include { CUSTOM_DUMPSOFTWAREVERSIONS } from '../modules/nf-core/custom/dumpsoft
 
 // Get absolute file paths
 samplesheet = Utils.getFileObject(params.input)
-gridss_config = Utils.getFileObject(params.gridss_config)
 
 workflow WGTS {
     // Create channel for versions
@@ -116,6 +120,9 @@ workflow WGTS {
     )
     ref_data = PREPARE_REFERENCE.out
     hmf_data = PREPARE_REFERENCE.out.hmf_data
+
+    // Set GRIDSS config
+    gridss_config = params.containsKey('gridss_config') ? file(params.gridss_config) : hmf_data.gridss_config
 
     //
     // MODULE: Run Isofox to analyse WTS data
