@@ -2,7 +2,7 @@ process GRIDSS_PREPROCESS {
     tag "${meta.id}"
     label 'process_medium'
 
-    container 'docker.io/scwatts/svprep:1.1--1'
+    container 'docker.io/scwatts/svprep:1.2.1--0'
 
     input:
     tuple val(meta), path(bam), path(bam_filtered)
@@ -43,9 +43,11 @@ process GRIDSS_PREPROCESS {
         --filtered_bams ${bam_filtered} \\
         --output placeholder
 
+    # NOTE(SW): partially hard coded since there is no reliable way to obtain version information.
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":
         gridss: \$(java -cp ${task.ext.jarPath} gridss.CallVariants --version 2>&1 | sed 's/-gridss//')
+        svprep: 1.2.1
     END_VERSIONS
     """
 

@@ -2,7 +2,7 @@ process SVPREP {
     tag "${meta.id}"
     label 'process_medium'
 
-    container 'docker.io/scwatts/svprep:1.1--1'
+    container 'docker.io/scwatts/svprep:1.2.1--0'
 
     input:
     tuple val(meta), path(bam), path(bai), path(junctions)
@@ -14,7 +14,7 @@ process SVPREP {
 
     output:
     tuple val(meta), path("*.sorted.bam")           , emit: bam
-    tuple val(meta), path("*.sv_prep.junctions.csv"), emit: junctions
+    tuple val(meta), path("*.sv_prep.junctions.tsv"), emit: junctions
     path 'versions.yml'                             , emit: versions
 
     when:
@@ -48,16 +48,17 @@ process SVPREP {
         -o ${meta.id}.sv_prep.sorted.bam \\
         ${meta.id}.sv_prep.bam
 
+    # NOTE(SW): partially hard coded since there is no reliable way to obtain version information.
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":
-        svprep: \$(java -jar ${task.ext.jarPath} 2>&1 | head -n1 | sed 's/^.*SvPrep version: //')
+        svprep: 1.2.1
     END_VERSIONS
     """
 
     stub:
     """
     touch "${meta.id}.sv_prep.sorted.bam"
-    touch "${meta.id}.sv_prep.junctions.csv"
+    touch "${meta.id}.sv_prep.junctions.tsv"
     echo -e '${task.process}:\\n  stub: noversions\\n' > versions.yml
     """
 }
