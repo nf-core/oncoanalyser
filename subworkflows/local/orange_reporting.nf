@@ -15,17 +15,16 @@ workflow ORANGE_REPORTING {
         ch_inputs                   // channel: [mandatory] [ meta ]
         ch_bamtools_somatic         // channel: [mandatory] [ meta, metrics ]
         ch_bamtools_germline        // channel: [optional]  [ meta, metrics ]
-        ch_sage_somatic_tumor_bqr   // channel: [mandatory] [ meta, sage_bqr_plot ]
-        ch_sage_somatic_normal_bqr  // channel: [optional]  [ meta, sage_bqr_plot ]
-        ch_sage_germline_coverage   // channel: [optional]  [ meta, sage_coverage ]
+        ch_sage_somatic             // channel: [mandatory] [ meta, sage_dir ]
+        ch_sage_germline            // channel: [optional]  [ meta, sage_dir ]
         ch_sage_somatic_append      // channel: [optional]  [ meta, sage_append_vcf ]
         ch_sage_germline_append     // channel: [optional]  [ meta, sage_append_vcf ]
         ch_purple                   // channel: [mandatory] [ meta, purple_dir ]
         ch_linx_somatic_annotation  // channel: [mandatory] [ meta, linx_annotation_dir ]
         ch_linx_somatic_plot        // channel: [mandatory] [ meta, linx_visualiser_dir ]
         ch_linx_germline_annotation // channel: [optional]  [ meta, linx_annotation_dir ]
-        ch_virusinterpreter         // channel: [optional]  [ meta, virusinterpreter ]
-        ch_chord                    // channel: [optional]  [ meta, chord_prediction ]
+        ch_virusinterpreter         // channel: [optional]  [ meta, virusinterpreter_dir ]
+        ch_chord                    // channel: [optional]  [ meta, chord_dir ]
         ch_sigs                     // channel: [optional]  [ meta, sigs_dir ]
         ch_lilac                    // channel: [mandatory] [ meta, lilac_dir ]
         ch_cuppa                    // channel: [optional]  [ meta, cuppa_dir ]
@@ -39,8 +38,8 @@ workflow ORANGE_REPORTING {
         known_fusion_data           // channel: [mandatory] /path/to/known_fusion_data
         driver_gene_panel           // channel: [mandatory] /path/to/driver_gene_panel
         ensembl_data_resources      // channel: [mandatory] /path/to/ensembl_data_resources/
-        isofox_alt_sj               // channel: [mandatory] /path/to/isofox_alt_sj
-        isofox_gene_distribution    // channel: [mandatory] /path/to/isofox_gene_distribution
+        isofox_alt_sj               // channel: [optional]  /path/to/isofox_alt_sj
+        isofox_gene_distribution    // channel: [optional]  /path/to/isofox_gene_distribution
 
         // Params
         run_config                  // channel: [mandatory] run configuration
@@ -73,12 +72,11 @@ workflow ORANGE_REPORTING {
         //
         // Create placeholders for tumor-only
         if (run_config.type == Constants.RunType.TUMOR_ONLY) {
-            ch_bamtools_germline = ch_inputs.map { meta -> [meta, []] }
-            ch_sage_germline_append = ch_inputs.map { meta -> [meta, []] }
             ch_flagstat_germline_out = ch_inputs.map { meta -> [meta, []] }
-            ch_sage_germline_coverage = ch_inputs.map { meta -> [meta, []] }
+            ch_bamtools_germline = ch_inputs.map { meta -> [meta, []] }
+            ch_sage_germline = ch_inputs.map { meta -> [meta, []] }
+            ch_sage_germline_append = ch_inputs.map { meta -> [meta, []] }
             ch_linx_germline_annotation = ch_inputs.map { meta -> [meta, []] }
-            ch_sage_somatic_normal_bqr = ch_inputs.map { meta -> [meta, []] }
         }
 
         // Get PURPLE input source for processing
@@ -127,16 +125,15 @@ workflow ORANGE_REPORTING {
             run_config.stages.bamtools ? ch_bamtools_germline : WorkflowOncoanalyser.getInput(ch_inputs, Constants.INPUT.BAMTOOLS_NORMAL, type: 'optional'),
             run_config.stages.flagstat ? ch_flagstat_somatic_out : WorkflowOncoanalyser.getInput(ch_inputs, Constants.INPUT.FLAGSTAT_TUMOR),
             run_config.stages.flagstat ? ch_flagstat_germline_out : WorkflowOncoanalyser.getInput(ch_inputs, Constants.INPUT.FLAGSTAT_NORMAL, type: 'optional'),
-            run_config.stages.sage ? ch_sage_somatic_tumor_bqr : WorkflowOncoanalyser.getInput(ch_inputs, Constants.INPUT.SAGE_BQR_TUMOR),
-            run_config.stages.sage ? ch_sage_somatic_normal_bqr : WorkflowOncoanalyser.getInput(ch_inputs, Constants.INPUT.SAGE_BQR_NORMAL, type: 'optional'),
-            run_config.stages.sage ? ch_sage_germline_coverage : WorkflowOncoanalyser.getInput(ch_inputs, Constants.INPUT.SAGE_COVERAGE, type: 'optional'),
+            run_config.stages.sage ? ch_sage_somatic : WorkflowOncoanalyser.getInput(ch_inputs, Constants.INPUT.SAGE_DIR_TUMOR),
+            run_config.stages.sage ? ch_sage_germline : WorkflowOncoanalyser.getInput(ch_inputs, Constants.INPUT.SAGE_DIR_NORMAL, type: 'optional'),
             ch_orange_inputs_purple_dir,
             ch_orange_inputs_smlv_vcfs,
             run_config.stages.linx ? ch_linx_somatic_annotation : WorkflowOncoanalyser.getInput(ch_inputs, Constants.INPUT.LINX_ANNO_DIR_TUMOR),
             run_config.stages.linx ? ch_linx_somatic_plot : WorkflowOncoanalyser.getInput(ch_inputs, Constants.INPUT.LINX_PLOT_DIR_TUMOR),
             run_config.stages.linx ? ch_linx_germline_annotation : WorkflowOncoanalyser.getInput(ch_inputs, Constants.INPUT.LINX_ANNO_DIR_NORMAL, type: 'optional'),
             run_config.stages.virusinterpreter ? ch_virusinterpreter : WorkflowOncoanalyser.getInput(ch_inputs, Constants.INPUT.VIRUSINTERPRETER_TSV, type: 'optional'),
-            run_config.stages.chord ? ch_chord : WorkflowOncoanalyser.getInput(ch_inputs, Constants.INPUT.CHORD_PREDICTION, type: 'optional'),
+            run_config.stages.chord ? ch_chord : WorkflowOncoanalyser.getInput(ch_inputs, Constants.INPUT.CHORD_DIR, type: 'optional'),
             run_config.stages.sigs ? ch_sigs : WorkflowOncoanalyser.getInput(ch_inputs, Constants.INPUT.SIGS_DIR, type: 'optional'),
             run_config.stages.lilac ? ch_lilac : WorkflowOncoanalyser.getInput(ch_inputs, Constants.INPUT.LILAC_DIR),
             run_config.stages.cuppa ? ch_cuppa : WorkflowOncoanalyser.getInput(ch_inputs, Constants.INPUT.CUPPA_DIR, type: 'optional'),

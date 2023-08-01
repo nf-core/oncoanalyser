@@ -4,7 +4,7 @@ process SAGE_SOMATIC {
     tag "${meta.id}"
     label 'process_medium'
 
-    container 'docker.io/scwatts/sage:3.2.5--0'
+    container 'docker.io/scwatts/sage:3.3--0'
 
     input:
     tuple val(meta), path(tumor_bam), path(normal_bam), path(tumor_bai), path(normal_bai)
@@ -19,13 +19,10 @@ process SAGE_SOMATIC {
     path ensembl_data_resources
 
     output:
-    tuple val(meta), path('*.sage.somatic.vcf.gz'), path('*.sage.somatic.vcf.gz.tbi')                  , emit: vcf
-    tuple val(meta), path('*.sage.somatic.filtered.vcf.gz'), path('*.sage.somatic.filtered.vcf.gz.tbi'), emit: vcf_filtered
-    tuple val(meta), path("${meta.tumor_id}.sage.bqr.png")                                             , emit: tumor_bqr_png, optional: true
-    tuple val(meta), path("${meta.normal_id}.sage.bqr.png")                                            , emit: normal_bqr_png, optional: true
-    tuple val(meta), path('*gene.coverage.tsv')                                                        , emit: gene_coverage, optional: true
-    path '*sage.bqr.tsv'                                                                               , emit: bqr_tsv, optional: true
-    path 'versions.yml'                                                                                , emit: versions
+    tuple val(meta), path('sage_somatic/*.sage.somatic.vcf.gz'), path('sage_somatic/*.sage.somatic.vcf.gz.tbi')                  , emit: vcf
+    tuple val(meta), path('sage_somatic/*.sage.somatic.filtered.vcf.gz'), path('sage_somatic/*.sage.somatic.filtered.vcf.gz.tbi'), emit: vcf_filtered
+    tuple val(meta), path('sage_somatic/')                                                                                       , emit: sage_dir
+    path 'versions.yml'                                                                                                          , emit: versions
 
     when:
     task.ext.when == null || task.ext.when
@@ -37,6 +34,8 @@ process SAGE_SOMATIC {
     def reference_bam_arg = normal_bam ? "-reference_bam ${normal_bam}" : ''
 
     """
+    mkdir -p sage_somatic/
+
     java \\
         -Xmx${Math.round(task.memory.bytes * 0.95)} \\
         -jar ${task.ext.jarPath} \\
@@ -55,28 +54,34 @@ process SAGE_SOMATIC {
             -write_bqr_data \\
             -write_bqr_plot \\
             -threads ${task.cpus} \\
-            -out ./${meta.tumor_id}.sage.somatic.vcf.gz
+            -out sage_somatic/${meta.tumor_id}.sage.somatic.vcf.gz
 
-    bcftools view -f 'PASS' -o ${meta.tumor_id}.sage.somatic.filtered.vcf.gz ${meta.tumor_id}.sage.somatic.vcf.gz
-    bcftools index -t ${meta.tumor_id}.sage.somatic.filtered.vcf.gz
+    bcftools view \\
+        -f 'PASS' \\
+        -o sage_somatic/${meta.tumor_id}.sage.somatic.filtered.vcf.gz \\
+        sage_somatic/${meta.tumor_id}.sage.somatic.vcf.gz
 
+    bcftools index -t sage_somatic/${meta.tumor_id}.sage.somatic.filtered.vcf.gz
+
+    # NOTE(SW): hard coded since there is no reliable way to obtain version information.
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":
-        sage: \$(java -jar ${task.ext.jarPath} | head -n1 | sed 's/.*Sage version: //')
+        sage: 3.3
     END_VERSIONS
     """
 
     stub:
     """
-    touch "${meta.tumor_id}.sage.somatic.vcf.gz"
-    touch "${meta.tumor_id}.sage.somatic.vcf.gz.tbi"
-    touch "${meta.tumor_id}.sage.somatic.filtered.vcf.gz"
-    touch "${meta.tumor_id}.sage.somatic.filtered.vcf.gz.tbi"
-    touch "${meta.tumor_id}.gene.coverage.tsv"
-    touch "${meta.tumor_id}.sage.bqr.png"
-    touch "${meta.tumor_id}.sage.bqr.tsv"
-    touch "${meta.normal_id}.sage.bqr.png"
-    touch "${meta.normal_id}.sage.bqr.tsv"
+    mkdir -p sage_somatic/
+    touch sage_somatic/${meta.tumor_id}.sage.somatic.vcf.gz
+    touch sage_somatic/${meta.tumor_id}.sage.somatic.vcf.gz.tbi
+    touch sage_somatic/${meta.tumor_id}.sage.somatic.filtered.vcf.gz
+    touch sage_somatic/${meta.tumor_id}.sage.somatic.filtered.vcf.gz.tbi
+    touch sage_somatic/${meta.tumor_id}.gene.coverage.tsv
+    touch sage_somatic/${meta.tumor_id}.sage.bqr.png
+    touch sage_somatic/${meta.tumor_id}.sage.bqr.tsv
+    touch sage_somatic/${meta.normal_id}.sage.bqr.png
+    touch sage_somatic/${meta.normal_id}.sage.bqr.tsv
     echo -e '${task.process}:\\n  stub: noversions\\n' > versions.yml
     """
 }

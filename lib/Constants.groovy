@@ -9,8 +9,8 @@ class Constants {
     static List GENOMES_DEFINED    = Constants.GENOMES_VERSION_37 + Constants.GENOMES_VERSION_38
 
 
-    static String HMF_DATA_37_PATH = 'https://pub-29f2e5b2b7384811bdbbcba44f8b5083.r2.dev/hmf_reference_data/hmftools/5.32_37_0.0.4.tar.gz'
-    static String HMF_DATA_38_PATH = 'https://pub-29f2e5b2b7384811bdbbcba44f8b5083.r2.dev/hmf_reference_data/hmftools/5.32_38_0.0.4.tar.gz'
+    static String HMF_DATA_37_PATH = 'https://pub-29f2e5b2b7384811bdbbcba44f8b5083.r2.dev/hmf_reference_data/hmftools/5.33_37--0.tar.gz'
+    static String HMF_DATA_38_PATH = 'https://pub-29f2e5b2b7384811bdbbcba44f8b5083.r2.dev/hmf_reference_data/hmftools/5.33_38--0.tar.gz'
 
 
     static String VIRUSBREAKENDDB_PATH = 'https://pub-29f2e5b2b7384811bdbbcba44f8b5083.r2.dev/virusbreakend/virusbreakenddb_20210401.tar.gz'
@@ -66,13 +66,12 @@ class Constants {
         SAGE_VCF,
         VIRUSINTERPRETER_TSV,
         // ORANGE specific
-        CHORD_PREDICTION,
+        CHORD_DIR,
         SIGS_DIR,
         CUPPA_DIR,
         FLAGSTAT,
         LINX_PLOT_DIR,
-        SAGE_BQR,
-        SAGE_COVERAGE,
+        SAGE_DIR,
     }
 
     static enum SampleType {
@@ -141,18 +140,13 @@ class Constants {
             SampleType.NORMAL,
             SequenceType.WGS
         ],
-        SAGE_BQR_TUMOR: [
-            FileType.SAGE_BQR,
+        SAGE_DIR_TUMOR: [
+            FileType.SAGE_DIR,
             SampleType.TUMOR,
             SequenceType.WGS,
         ],
-        SAGE_BQR_NORMAL: [
-            FileType.SAGE_BQR,
-            SampleType.NORMAL,
-            SequenceType.WGS
-        ],
-        SAGE_COVERAGE: [
-            FileType.SAGE_COVERAGE,
+        SAGE_DIR_NORMAL: [
+            FileType.SAGE_DIR,
             SampleType.NORMAL,
             SequenceType.WGS
         ],
@@ -217,8 +211,8 @@ class Constants {
             SequenceType.WGS
         ],
 
-        CHORD_PREDICTION: [
-            FileType.CHORD_PREDICTION,
+        CHORD_DIR: [
+            FileType.CHORD_DIR,
             SampleType.TUMOR,
             SequenceType.WGS
         ],

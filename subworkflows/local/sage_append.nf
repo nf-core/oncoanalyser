@@ -10,16 +10,17 @@ include { SAGE_APPEND as GERMLINE } from '../../modules/local/sage/append/main'
 workflow SAGE_APPEND {
     take:
         // Sample data
-        ch_inputs     // channel: [mandatory] [ meta ]
-        ch_purple_dir // channel: [mandatory] [ meta, purple_dir ]
+        ch_inputs      // channel: [mandatory] [ meta ]
+        ch_purple_dir  // channel: [mandatory] [ meta, purple_dir ]
 
         // Reference data
-        genome_fasta  // channel: [mandatory] /path/to/genome_fasta
-        genome_fai    // channel: [mandatory] /path/to/genome_fai
-        genome_dict   // channel: [mandatory] /path/to/genome_dict
+        genome_fasta   // channel: [mandatory] /path/to/genome_fasta
+        genome_version // channel: [mandatory] genome version
+        genome_fai     // channel: [mandatory] /path/to/genome_fai
+        genome_dict    // channel: [mandatory] /path/to/genome_dict
 
         // Params
-        run_config    // channel: [mandatory] run configuration
+        run_config     // channel: [mandatory] run configuration
 
     main:
         // Channel for version.yml files
@@ -70,6 +71,7 @@ workflow SAGE_APPEND {
             GERMLINE(
                 ch_sage_germline_append_inputs,
                 genome_fasta,
+                genome_version,
                 genome_fai,
                 genome_dict,
             )
@@ -108,6 +110,7 @@ workflow SAGE_APPEND {
         SOMATIC(
             ch_sage_somatic_append_inputs,
             genome_fasta,
+            genome_version,
             genome_fai,
             genome_dict,
         )

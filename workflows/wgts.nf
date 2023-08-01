@@ -251,7 +251,7 @@ workflow WGTS {
             hmf_data.gridss_pon_breakpoints,
             hmf_data.known_fusions,
             hmf_data.repeatmasker_annotations,
-            [],
+            [],  // target_region_bed
             run_config,
         )
 
@@ -267,11 +267,9 @@ workflow WGTS {
     // channel: [ meta, sage_vcf, sage_tbi ]
     ch_sage_germline_vcf_out = Channel.empty()
     ch_sage_somatic_vcf_out = Channel.empty()
-    // channel: [ meta, sage_coverage ]
-    ch_sage_germline_coverage_out = Channel.empty()
-    // channel: [ meta, sage_bqr_plot ]
-    ch_sage_somatic_tumor_bqr_out = Channel.empty()
-    ch_sage_somatic_normal_bqr_out = Channel.empty()
+    // channel: [ meta, sage_dir ]
+    ch_sage_germline_dir_out = Channel.empty()
+    ch_sage_somatic_dir_out = Channel.empty()
     if (run_config.stages.sage) {
 
         SAGE_CALLING(
@@ -293,10 +291,9 @@ workflow WGTS {
 
         ch_versions = ch_versions.mix(SAGE_CALLING.out.versions)
         ch_sage_germline_vcf_out = ch_sage_germline_vcf_out.mix(SAGE_CALLING.out.germline_vcf)
-        ch_sage_germline_coverage_out = ch_sage_germline_coverage_out.mix(SAGE_CALLING.out.germline_coverage)
         ch_sage_somatic_vcf_out = ch_sage_somatic_vcf_out.mix(SAGE_CALLING.out.somatic_vcf)
-        ch_sage_somatic_tumor_bqr_out = ch_sage_somatic_tumor_bqr_out.mix(SAGE_CALLING.out.somatic_tumor_bqr)
-        ch_sage_somatic_normal_bqr_out = ch_sage_somatic_normal_bqr_out.mix(SAGE_CALLING.out.somatic_normal_bqr)
+        ch_sage_germline_dir_out = ch_sage_germline_dir_out.mix(SAGE_CALLING.out.germline_dir)
+        ch_sage_somatic_dir_out = ch_sage_somatic_dir_out.mix(SAGE_CALLING.out.somatic_dir)
     }
 
     //
@@ -357,9 +354,9 @@ workflow WGTS {
             hmf_data.driver_gene_panel,
             hmf_data.ensembl_data_resources,
             hmf_data.purple_germline_del,
-            [],
-            [],
-            [],
+            [],  // target_region_bed
+            [],  // target_region_ratios
+            [],  // target_region_msi_indels
             run_config,
         )
 
@@ -381,6 +378,7 @@ workflow WGTS {
             ch_inputs,
             ch_purple_out,
             ref_data.genome_fasta,
+            ref_data.genome_version,
             ref_data.genome_fai,
             ref_data.genome_dict,
             run_config,
@@ -449,7 +447,7 @@ workflow WGTS {
     //
     // SUBWORKFLOW: Run CHORD to predict HR deficiency status
     //
-    // channel: [ meta, chord_prediction ]
+    // channel: [ meta, chord_dir ]
     ch_chord_out = Channel.empty()
     if (run_config.stages.chord) {
 
@@ -461,7 +459,7 @@ workflow WGTS {
         )
 
         ch_versions = ch_versions.mix(CHORD_PREDICTION.out.versions)
-        ch_chord_out = ch_chord_out.mix(CHORD_PREDICTION.out.prediction)
+        ch_chord_out = ch_chord_out.mix(CHORD_PREDICTION.out.chord_dir)
     }
 
     //
@@ -492,7 +490,7 @@ workflow WGTS {
     //
     // SUBWORKFLOW: Run VIRUSBreakend and Virus Interpreter to quantify viral content
     //
-    // channel: [ meta, virusinterpreter ]
+    // channel: [ meta, virusinterpreter_dir ]
     ch_virusinterpreter_out = Channel.empty()
     if (run_config.stages.virusinterpreter) {
 
@@ -548,9 +546,8 @@ workflow WGTS {
             ch_inputs,
             ch_bamtools_somatic_out,
             ch_bamtools_germline_out,
-            ch_sage_somatic_tumor_bqr_out,
-            ch_sage_somatic_normal_bqr_out,
-            ch_sage_germline_coverage_out,
+            ch_sage_somatic_dir_out,
+            ch_sage_germline_dir_out,
             ch_sage_somatic_append_vcf,
             ch_sage_germline_append_vcf,
             ch_purple_out,

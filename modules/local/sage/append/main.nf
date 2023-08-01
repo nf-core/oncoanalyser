@@ -2,11 +2,12 @@ process SAGE_APPEND {
     tag "${meta.id}"
     label 'process_medium'
 
-    container 'docker.io/scwatts/sage:3.2.5--0'
+    container 'docker.io/scwatts/sage:3.3--0'
 
     input:
     tuple val(meta), path(vcf), path(bam), path(bai)
     path genome_fasta
+    val genome_ver
     path genome_fai
     path genome_dict
 
@@ -29,12 +30,14 @@ process SAGE_APPEND {
             -reference ${meta.tumor_wts_id} \\
             -reference_bam ${bam} \\
             -ref_genome ${genome_fasta} \\
+            -ref_genome_version ${genome_ver} \\
             -threads ${task.cpus} \\
-            -out ./${meta.wgs_id}.sage.append.vcf.gz
+            -out ${meta.wgs_id}.sage.append.vcf.gz
 
+    # NOTE(SW): hard coded since there is no reliable way to obtain version information.
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":
-        sage: \$(java -jar ${task.ext.jarPath} | head -n1 | sed 's/.*Sage version: //')
+        sage: 3.3
     END_VERSIONS
     """
 

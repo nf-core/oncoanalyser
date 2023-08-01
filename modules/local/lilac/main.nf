@@ -2,10 +2,10 @@ process LILAC {
     tag "${meta.id}"
     label 'process_medium'
 
-    container 'docker.io/scwatts/lilac:1.4.2--0'
+    container 'docker.io/scwatts/lilac:1.5--0'
 
     input:
-    tuple val(meta), path(normal_wgs_bam), path(normal_wgs_bai), path(tumor_bam), path(tumor_bai), path(tumor_wts_bam), path(tumor_wts_bai), path(gene_cn), path(smlv_vcf)
+    tuple val(meta), path(normal_wgs_bam), path(normal_wgs_bai), path(tumor_bam), path(tumor_bai), path(tumor_wts_bam), path(tumor_wts_bai), path(purple_dir)
     path genome_fasta
     val genome_ver
     path lilac_resources, stageAs: 'lilac_resources'
@@ -25,8 +25,7 @@ process LILAC {
     def tumor_bam_arg = tumor_bam ? "-tumor_bam ${tumor_bam}" : ''
     def tumor_wts_bam_arg = tumor_wts_bam ? "-rna_bam ${tumor_wts_bam}" : ''
 
-    def gene_cn_arg = gene_cn ? "-gene_copy_number ${gene_cn}" : ''
-    def smlv_vcf_arg = smlv_vcf ? "-somatic_vcf ${smlv_vcf}" : ''
+    def purple_dir_arg = purple_dir ? "-purple_dir ${purple_dir}" : ''
 
     """
     java \\
@@ -37,8 +36,7 @@ process LILAC {
             ${normal_bam_arg} \\
             ${tumor_bam_arg} \\
             ${tumor_wts_bam_arg} \\
-            ${smlv_vcf_arg} \\
-            ${gene_cn_arg} \\
+            ${purple_dir_arg} \\
             -ref_genome ${genome_fasta} \\
             -ref_genome_version ${genome_ver} \\
             -resource_dir ${lilac_resources} \\
@@ -48,7 +46,7 @@ process LILAC {
     # NOTE(SW): hard coded since there is no reliable way to obtain version information.
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":
-        lilac: 1.4.2
+        lilac: 1.5
     END_VERSIONS
     """
 

@@ -10,7 +10,7 @@ RUN \
 
 RUN \
   mkdir -p /opt/virusinterpreter/ && \
-  wget -O /opt/virusinterpreter/virusinterpreter.jar 'https://github.com/hartwigmedical/hmftools/releases/download/virus-interpreter-v1.2/virus-interpreter.jar'
+  wget -O /opt/virusinterpreter/virusinterpreter.jar 'https://github.com/hartwigmedical/hmftools/releases/download/virus-interpreter-v1.3/virus-interpreter_v1.3.jar'
 
 USER mambauser
 

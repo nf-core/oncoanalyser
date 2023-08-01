@@ -27,13 +27,13 @@ workflow PURPLE_CALLING {
         genome_dict                  // channel: [mandatory] /path/to/genome_dict
         gc_profile                   // channel: [mandatory] /path/to/gc_profile
         sage_known_hotspots_somatic  // channel: [mandatory] /path/to/sage_known_hotspots_somatic
-        sage_known_hotspots_germline // channel: [mandatory] /path/to/sage_known_hotspots_germline
+        sage_known_hotspots_germline // channel: [optional]  /path/to/sage_known_hotspots_germline
         driver_gene_panel            // channel: [mandatory] /path/to/driver_gene_panel
         ensembl_data_resources       // channel: [mandatory] /path/to/ensembl_data_resources/
-        purple_germline_del          // channel: [mandatory] /path/to/purple_germline_del
-        target_region_bed            // channel: [mandatory] /path/to/target_region_bed
-        target_region_ratios         // channel: [mandatory] /path/to/target_region_ratios
-        target_region_msi_indels     // channel: [mandatory] /path/to/target_region_msi_indels
+        purple_germline_del          // channel: [optional]  /path/to/purple_germline_del
+        target_region_bed            // channel: [optional]  /path/to/target_region_bed
+        target_region_ratios         // channel: [optional]  /path/to/target_region_ratios
+        target_region_msi_indels     // channel: [optional]  /path/to/target_region_msi_indels
 
         // Params
         run_config                   // channel: [mandatory] run configuration

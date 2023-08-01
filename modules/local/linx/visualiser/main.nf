@@ -33,7 +33,7 @@ process LINX_VISUALISER {
             -vis_file_dir ${linx} \\
             -ref_genome_version ${genome_ver} \\
             -ensembl_data_dir ${ensembl_data_resources} \\
-            -circos ${task.ext.path_circos} \\
+            -circos ${task.ext.circosPath} \\
             -threads ${task.cpus} \\
             -plot_out linx_visualiser/plot/ \\
             -data_out linx_visualiser/data/
