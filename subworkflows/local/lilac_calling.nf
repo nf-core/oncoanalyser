@@ -184,7 +184,7 @@ workflow LILAC_CALLING {
 
         }
 
-        // Combine non-WTS and WTS BAMs
+        // Combine non-WTS and WTS BAMs, and order as required
         // channel: [ meta, normal_wgs_bam, normal_wgs_bai, tumor_bam, tumor_bai, tumor_wts_bam, tumor_wts_bai ]
         ch_lilac_bams_combined = WorkflowOncoanalyser.groupByMeta(
             ch_lilac_bams_wts,
@@ -197,43 +197,16 @@ workflow LILAC_CALLING {
                 return [meta, nbam, nbai, tbam, tbai, tbam_wts, tbai_wts]
             }
 
-        // Get PURPLE inputs
-        // channel: [ meta, gene_cn ]
-        ch_lilac_inputs_gene_cn = ch_lilac_inputs_purple
-            .map { meta, purple_dir ->
-
-                if (purple_dir == []) {
-                    return [meta, []]
-                }
-
-                def tumor_id = Utils.getTumorSampleName(meta, run_config.mode)
-                def gene_cn = file(purple_dir).resolve("${tumor_id}.purple.cnv.gene.tsv")
-                return gene_cn.exists() ? [meta, gene_cn] : [meta, []]
-            }
-
-        // channel: [ meta, smlv_vcf ]
-        ch_lilac_inputs_smlv_vcf = ch_lilac_inputs_purple
-            .map { meta, purple_dir ->
-                if (purple_dir == []) {
-                    return [meta, []]
-                }
-
-                def tumor_id = Utils.getTumorSampleName(meta, run_config.mode)
-                def smlv_vcf = file(purple_dir).resolve("${tumor_id}.purple.somatic.vcf.gz")
-                return smlv_vcf.exists() ? [meta, smlv_vcf] : [meta, []]
-            }
-
         // Add PURPLE inputs
-        // channel: [ meta, normal_wgs_bam, normal_wgs_bai, tumor_bam, tumor_bai, tumor_wts_bam, tumor_wts_bai, gene_cn, smlv_vcf ]
+        // channel: [ meta, normal_wgs_bam, normal_wgs_bai, tumor_bam, tumor_bai, tumor_wts_bam, tumor_wts_bai, purple_dir ]
         ch_lilac_inputs_full = WorkflowOncoanalyser.groupByMeta(
             ch_lilac_bams_combined,
-            ch_lilac_inputs_gene_cn,
-            ch_lilac_inputs_smlv_vcf,
+            ch_purple,
             flatten_mode: 'nonrecursive',
         )
 
         // Create final input channel for LILAC, remove samples with only WTS BAMs
-        // channel: [ meta_lilac, normal_wgs_bam, normal_wgs_bai, tumor_bam, tumor_bai, tumor_wts_bam, tumor_wts_bai, gene_cn, smlv_vcf ]
+        // channel: [ meta_lilac, normal_wgs_bam, normal_wgs_bai, tumor_bam, tumor_bai, tumor_wts_bam, tumor_wts_bai, purple_dir ]
         ch_lilac_inputs = ch_lilac_inputs_full
             .map {
                 def meta = it[0]

@@ -273,7 +273,6 @@ workflow PREPARE_INPUT {
       data = ch_inputs
 }
 
-
 def process_sample_name(sample_name, key_sample_name, meta) {
     if (meta.containsKey(key_sample_name) && meta[key_sample_name] != sample_name) {
         log.error "\nERROR: got unexpected sample name for ${key}/${meta[key_sample_name]}: ${sample_name}"

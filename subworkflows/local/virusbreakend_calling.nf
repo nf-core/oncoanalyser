@@ -67,32 +67,16 @@ workflow VIRUSBREAKEND_CALLING {
             ch_virusinterpreter_inputs_purple = WorkflowOncoanalyser.getInput(ch_inputs, Constants.INPUT.PURPLE_DIR)
         }
 
-        // channel: [ meta, purple_qc, wgs_metrics ]
-        ch_virusinterpreter_inputs_purple_files = ch_virusinterpreter_inputs_purple
-            .filter { it[0] != Constants.PLACEHOLDER_META }
-            .map { meta, purple_dir ->
-                def tumor_id = Utils.getTumorSampleName(meta, run_config.mode)
-                def purple_purity = file(purple_dir).resolve("${tumor_id}.purple.purity.tsv")
-                def purple_qc = file(purple_dir).resolve("${tumor_id}.purple.qc")
-
-                // Require both purity and QC files from the PURPLE directory
-                if (!purple_purity.exists() || !purple_qc.exists()) {
-                    return Constants.PLACEHOLDER_META
-                }
-                return [meta, purple_purity, purple_qc]
-            }
-            .filter { it != Constants.PLACEHOLDER_META }
-
-        // channel: [ meta, virus_tsv, purple_purity, purple_qc, wgs_metrics ]
+        // channel: [ meta, virus_tsv, purple_dir, wgs_metrics ]
         ch_virusinterpreter_inputs_full = WorkflowOncoanalyser.groupByMeta(
             WorkflowOncoanalyser.restoreMeta(VIRUSBREAKEND.out.tsv, ch_inputs),
-            ch_virusinterpreter_inputs_purple_files,
+            ch_virusinterpreter_inputs_purple,
             run_config.stages.bamtools ? ch_bamtools_somatic : WorkflowOncoanalyser.getInput(ch_inputs, Constants.INPUT.INPUT_BAMTOOLS_TUMOR),
         )
 
         // Virus Interpreter
         // Create inputs and create process-specific meta
-        // channel: [ meta_virus, virus_tsv, purple_purity, purple_qc, wgs_metrics ]
+        // channel: [ meta_virus, virus_tsv, purple_dir, wgs_metrics ]
         ch_virusinterpreter_inputs = ch_virusinterpreter_inputs_full
             .map {
                 def meta = it[0]
@@ -111,14 +95,14 @@ workflow VIRUSBREAKEND_CALLING {
         )
 
         // Set outputs, restoring original meta
-        ch_outputs = WorkflowOncoanalyser.restoreMeta(VIRUSINTERPRETER.out.virusinterpreter, ch_inputs)
+        ch_outputs = WorkflowOncoanalyser.restoreMeta(VIRUSINTERPRETER.out.virusinterpreter_dir, ch_inputs)
         ch_versions = ch_versions.mix(
             VIRUSINTERPRETER.out.versions,
             VIRUSBREAKEND.out.versions,
         )
 
     emit:
-        virusinterpreter = ch_outputs  // channel: [ meta, virusinterpreter ]
+        virusinterpreter = ch_outputs  // channel: [ meta, virusinterpreter_dir ]
 
         versions         = ch_versions // channel: [ versions.yml ]
 }

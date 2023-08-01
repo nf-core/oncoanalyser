@@ -17,7 +17,7 @@ workflow PAVE_ANNOTATION {
         genome_version         // channel: [mandatory] genome version
         genome_fai             // channel: [mandatory] /path/to/genome_fai
         sage_pon               // channel: [mandatory] /path/to/sage_pon
-        sage_pon_artefacts     // channel: [mandatory] /path/to/sage_pon_artefacts
+        sage_pon_artefacts     // channel: [optional]  /path/to/sage_pon_artefacts
         sage_blocklist_regions // channel: [mandatory] /path/to/sage_blocklist_regions
         sage_blocklist_sites   // channel: [mandatory] /path/to/sage_blocklist_sites
         clinvar_annotations    // channel: [mandatory] /path/to/clinvar_annotations
@@ -76,6 +76,7 @@ workflow PAVE_ANNOTATION {
                 segment_mappability,
                 driver_gene_panel,
                 ensembl_data_resources,
+                gnomad_resource,
             )
 
             ch_versions = ch_versions.mix(GERMLINE.out.versions)

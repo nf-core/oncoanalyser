@@ -9,9 +9,8 @@ process CHORD {
     val genome_ver
 
     output:
-    tuple val(meta), path('*_chord_prediction.txt'), emit: prediction
-    path '*_chord_signatures.txt'                  , emit: signatures
-    path 'versions.yml'                            , emit: versions
+    tuple val(meta), path('chord/'), emit: chord_dir
+    path 'versions.yml'            , emit: versions
 
     when:
     task.ext.when == null || task.ext.when
@@ -20,16 +19,19 @@ process CHORD {
     def args = task.ext.args ?: ''
 
     """
+    mkdir -p chord/
+
     extractSigPredictHRD.R \\
         ./ \\
         ${meta.id} \\
         ${smlv_vcf} \\
         ${sv_vcf} \\
         ${genome_ver} \\
-        ${meta.id}_chord_signatures.txt \\
-        ${meta.id}_chord_prediction.txt
+        chord_signatures.txt \\
+        chord_prediction.txt
 
-    # NOTE(SW): hard coded since there is no reliable way to obtain version information.
+    mv ${meta.id}_chord_signatures.txt ${meta.id}_chord_prediction.txt chord/
+
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":
         CHORD: \$(R -s -e "message(packageVersion('CHORD'))")
@@ -39,8 +41,9 @@ process CHORD {
 
     stub:
     """
-    touch ${meta.id}_chord_signatures.txt
-    touch ${meta.id}_chord_prediction.txt
+    mkdir -p chord/
+    touch chord/${meta.id}_chord_signatures.txt
+    touch chord/${meta.id}_chord_prediction.txt
     echo -e '${task.process}:\\n  stub: noversions\\n' > versions.yml
     """
 }

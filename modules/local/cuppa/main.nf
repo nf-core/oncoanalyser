@@ -2,7 +2,7 @@ process CUPPA {
     tag "${meta.id}"
     label 'process_low'
 
-    container 'docker.io/scwatts/cuppa:1.8--2'
+    container 'docker.io/scwatts/cuppa:1.8.1--0'
 
     input:
     tuple val(meta), path(isofox_dir), path(purple_dir), path(linx_dir), path(virusinterpreter)
@@ -60,25 +60,25 @@ process CUPPA {
     java \\
         -Xmx${Math.round(task.memory.bytes * 0.95)} \\
         -jar ${task.ext.jarPath} \\
-            -sample_data ${meta.id} \\
+            -sample ${meta.id} \\
             -sample_data_dir sample_data/ \\
             -categories ${categories_val} \\
             -ref_data_dir ${cuppa_resources} \\
             -ref_genome_version ${ref_genome_ver} \\
             -create_pdf \\
-            -output_dir ./cuppa/
+            -output_dir cuppa/
 
     if [[ ${categories_val} == 'DNA' || ${categories_val} == 'ALL' ]]; then
         python ${task.ext.chartScriptPath} \\
             -sample ${meta.id} \\
             -sample_data cuppa/${meta.id}.cup.data.csv \\
-            -output_dir ./cuppa/;
+            -output_dir cuppa/;
     fi
 
     # NOTE(SW): hard coded since there is no reliable way to obtain version information.
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":
-        cuppa: 1.8
+        cuppa: 1.8.1
     END_VERSIONS
     """
 

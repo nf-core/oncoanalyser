@@ -45,7 +45,7 @@ workflow CHORD_PREDICTION {
                     return Constants.PLACEHOLDER_META
                 }
 
-                def meta_chord = [key: meta.id, id: meta.id]
+                def meta_chord = [key: meta.id, id: tumor_id]
                 return [meta_chord, smlv_vcf, sv_vcf]
             }
             .filter { it != Constants.PLACEHOLDER_META }
@@ -57,12 +57,11 @@ workflow CHORD_PREDICTION {
         )
 
         // Set outputs, restoring original meta
-        ch_outputs = WorkflowOncoanalyser.restoreMeta(CHORD.out.prediction, ch_inputs)
+        ch_outputs = WorkflowOncoanalyser.restoreMeta(CHORD.out.chord_dir, ch_inputs)
         ch_versions = ch_versions.mix(CHORD.out.versions)
 
     emit:
-        prediction = ch_outputs // channel: [ meta, prediction ]
+        chord_dir = ch_outputs // channel: [ meta, chord_dir ]
 
-        versions = ch_versions  // channel: [ versions.yml ]
+        versions = ch_versions // channel: [ versions.yml ]
 }
-

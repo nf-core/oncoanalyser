@@ -10,7 +10,7 @@ RUN \
 
 RUN \
   mkdir -p /opt/bamtools/ && \
-  wget -O /opt/bamtools/bamtools.jar 'https://github.com/hartwigmedical/hmftools/releases/download/bam-tools-v1.0.1/bam-tools_v1.0.1.jar'
+  wget -O /opt/bamtools/bamtools.jar 'https://github.com/hartwigmedical/hmftools/releases/download/bam-tools-v1.1/bam-tools_v1.1.jar'
 
 USER mambauser
 
