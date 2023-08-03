@@ -12,7 +12,7 @@ tools:
 input:
   - genome_fasta:
       type: file
-      description: Reference genome assembly fa file
+      description: Reference genome assembly FASTA file
       pattern: "*.{fa,fasta}"
   - genome_fai:
       type: file

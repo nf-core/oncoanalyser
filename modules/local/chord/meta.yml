@@ -21,7 +21,7 @@ input:
       pattern: "*.{vcf.gz}"
   - sv_vcf:
       type: file
-      description: GRIPSS structural variant VCF file with PURPLE annotations
+      description: PURPLE SV VCF file
       pattern: "*.{vcf.gz}"
   - genome_ver:
       type: string

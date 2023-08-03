@@ -22,15 +22,15 @@ input:
       pattern: "*.{vcf.gz}"
   - genome_fasta:
       type: file
-      description: Reference genome assembly fa file
+      description: Reference genome assembly FASTA file
       pattern: "*.{fa,fasta}"
+  - genome_ver:
+      type: string
+      description: Reference genome version
   - genome_fai:
       type: file
       description: Reference genome assembly fai file
       pattern: "*.{fai}"
-  - genome_ver:
-      type: string
-      description: Reference genome version
   - pon_breakends:
       type: file
       description: GRIDSS breakend PON file

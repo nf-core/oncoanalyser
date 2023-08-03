@@ -34,9 +34,9 @@ input:
   - genome_ver:
       type: string
       description: Reference genome version
-  - loci:
+  - heterozygous_sites:
       type: file
-      description: AMBER loci file
+      description: AMBER heterozygous sites file
       pattern: "*.{vcf.gz}"
 output:
   - meta:

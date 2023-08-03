@@ -5,7 +5,7 @@ process CUPPA {
     container 'docker.io/scwatts/cuppa:1.8.1--0'
 
     input:
-    tuple val(meta), path(isofox_dir), path(purple_dir), path(linx_dir), path(virusinterpreter)
+    tuple val(meta), path(isofox_dir), path(purple_dir), path(linx_dir), path(virusinterpreter_dir)
     val ref_genome_ver
     path cuppa_resources, stageAs: 'cuppa_reference_data'
 
@@ -40,7 +40,7 @@ process CUPPA {
     # Symlink input files into a single directory
     mkdir -p sample_data/
     if [[ ${categories_val} == 'DNA' || ${categories_val} == 'ALL' ]]; then
-        find -L ${purple_dir} ${linx_dir} ${virusinterpreter} -maxdepth 1 -type f -exec ln -fs ../{} sample_data/ \\;
+        find -L ${purple_dir} ${linx_dir} ${virusinterpreter_dir} -maxdepth 1 -type f -exec ln -fs ../{} sample_data/ \\;
     fi
 
     if [[ ${categories_val} == 'RNA' ]]; then

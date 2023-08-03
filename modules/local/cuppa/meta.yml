@@ -25,10 +25,9 @@ input:
   - linx_dir:
       type: directory
       description: LINX output directory (optional)
-  - virusinterpreter:
-      type: file
-      description: Virus Interpreter annotations file (optional)
-      pattern: "*.{tsv}"
+  - virusinterpreter_dir:
+      type: directory
+      description: Virus Interpreter output directory (optional)
   - cuppa_resources:
       type: directory
       description: CUPPA resource directory
@@ -38,30 +37,9 @@ output:
       description: |
         Groovy Map containing sample information
         e.g. [id: 'sample_id']
-  - csv:
-      type: file
-      description: Classification file
-      pattern: "*.{csv}"
-  - conclusion:
-      type: file
-      description: Conclusion file
-      pattern: "*.{txt}"
-  - report:
-      type: file
-      description: Report PDF file
-      pattern: "*.{pdf}"
-  - summary_plot:
-      type: file
-      description: Summary plot file
-      pattern: "*.{png}"
-  - feature_plot:
-      type: file
-      description: Feature plot file
-      pattern: "*.{png}"
-  - chart_plot:
-      type: file
-      description: Chart plot file
-      pattern: "*.{png}"
+  - cuppa_dir:
+      type: directory
+      description: CUPPA output directory
   - versions:
       type: file
       description: File containing software versions

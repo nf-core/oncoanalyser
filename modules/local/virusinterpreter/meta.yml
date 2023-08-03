@@ -21,14 +21,9 @@ input:
       type: file
       description: VIRUSBreakend summary file
       pattern: "*.{tsv}"
-  - purple_purity:
-      type: file
-      description: PURPLE purity file
-      pattern: "*.{tsv}"
-  - purple_qc:
-      type: file
-      description: PURPLE QC file
-      pattern: "*.{qc}"
+  - purple_dir:
+      type: directory
+      description: PURPLE output directory
   - wgs_metrics:
       type: file
       description: Somatic collectwgsmetrics file
@@ -46,10 +41,9 @@ output:
       description: |
         Groovy Map containing sample information
         e.g. [id: 'sample_id']
-  - virusinterpreter:
-      type: file
-      description: Virus Interpreter output file
-      pattern: "*.{tsv}"
+  - virusinterpreter_dir:
+      type: directory
+      description: Virus Interpreter output direcotry
   - versions:
       type: file
       description: File containing software versions

@@ -34,15 +34,23 @@ input:
       pattern: "*.{bai}"
   - gc_profile:
       type: file
-      description: COBALT GC Profile file
+      description: GC profile file
       pattern: "*.{cnp}"
+  - diploid_regions:
+      type: file
+      description: Diploid regions file (optional)
+      pattern: "*.{bed.gz}"
+  - target_region_normalisation:
+      type: file
+      description: Normalisation file (optional)
+      pattern: "*.{bed.gz}"
 output:
   - meta:
       type: map
       description: |
         Groovy Map containing sample information
         e.g. [id: 'sample_id', tumor_id: 'tumor_name', normal_id: 'normal_name']
-  - cobalt:
+  - cobalt_dir:
       type: directory
       description: COBALT output directory
   - versions:

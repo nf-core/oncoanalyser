@@ -19,11 +19,9 @@ input:
   - bams:
       type: list
       description: BAM files
-      pattern: "*.{bam}"
   - bai:
       type: list
       description: BAI files
-      pattern: "*.{bai}"
   - vcf:
       type: file
       description: VCF file
@@ -33,7 +31,7 @@ input:
       description: List of labels corresponding to BAMs and GRIDSS preprocess output directories
   - genome_fasta:
       type: file
-      description: Reference genome assembly fa file
+      description: Reference genome assembly FASTA file
       pattern: "*.{fa,fasta}"
   - genome_ver:
       type: string
@@ -48,6 +46,10 @@ output:
       type: file
       description: VCF file
       pattern: "*.{vcf.gz}"
+  - tbi:
+      type: file
+      description: VCF index file
+      pattern: "*.{vcf.gz.tbi}"
   - versions:
       type: file
       description: File containing software versions

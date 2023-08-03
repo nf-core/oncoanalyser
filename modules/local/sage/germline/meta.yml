@@ -35,8 +35,11 @@ input:
       pattern: "*.{bai}"
   - genome_fasta:
       type: file
-      description: Reference genome assembly fa file
+      description: Reference genome assembly FASTA file
       pattern: "*.{fa,fasta}"
+  - genome_ver:
+      type: string
+      description: Reference genome version
   - genome_fai:
       type: file
       description: Reference genome assembly fai file
@@ -45,9 +48,6 @@ input:
       type: file
       description: Reference genome assembly dict file
       pattern: "*.{dict}"
-  - genome_ver:
-      type: string
-      description: Reference genome version
   - sage_known_hotspots_germline:
       type: file
       description: SAGE germline known hotspots file
@@ -77,10 +77,13 @@ output:
       type: file
       description: VCF file
       pattern: "*.{vcf.gz}"
-  - gene_coverage:
+  - vcf_filtered:
       type: file
-      description: Gene coverage file
-      pattern: "*.{tsv}"
+      description: Filtered VCF file
+      pattern: "*.{vcf.gz}"
+  - sage_dir:
+      type: directory
+      description: SAGE output directory
   - versions:
       type: file
       description: File containing software versions

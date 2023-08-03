@@ -25,19 +25,22 @@ input:
       pattern: "*.{vcf.gz}"
   - genome_fasta:
       type: file
-      description: Reference genome assembly fa file
+      description: Reference genome assembly FASTA file
       pattern: "*.{fa,fasta}"
+  - genome_ver:
+      type: string
+      description: Reference genome version
   - genome_fai:
       type: file
       description: Reference genome assembly fai file
       pattern: "*.{fai}"
-  - genome_ver:
-      type: string
-      description: Reference genome version
   - sage_pon:
       type: file
       description: SAGE PON file
       pattern: "*.{tsv.gz}"
+  - pon_artefacts:
+      type: file
+      description: Taregeted sequencing PON artefacts file (optional)
   - segment_mappability:
       type: file
       description: Segment mappability file

@@ -5,7 +5,7 @@ process GPGR_LINX {
     container 'docker.io/scwatts/gpgr:1.4.5'
 
     input:
-    tuple val(meta), path(linx_annotation), path(linx_visualiser)
+    tuple val(meta), path(linx_annotation_dir), path(linx_visualiser_dir)
 
     output:
     tuple val(meta), path('*_linx.html'), emit: html
@@ -21,8 +21,8 @@ process GPGR_LINX {
     gpgr.R linx \\
         ${args} \\
         --sample ${meta.id} \\
-        --plot ${linx_visualiser}/ \\
-        --table ${linx_annotation}/ \\
+        --plot ${linx_visualiser_dir}/ \\
+        --table ${linx_annotation_dir}/ \\
         --out ${meta.id}_linx.html
 
     cat <<-END_VERSIONS > versions.yml
