@@ -7,7 +7,7 @@ process GRIPSS_GERMLINE {
     input:
     tuple val(meta), path(gridss_vcf)
     path genome_fasta
-    val genome_version
+    val genome_ver
     path genome_fai
     path pon_breakends
     path pon_breakpoints
@@ -35,7 +35,7 @@ process GRIPSS_GERMLINE {
             -vcf ${gridss_vcf} \\
             -germline \\
             -ref_genome ${genome_fasta} \\
-            -ref_genome_version ${genome_version} \\
+            -ref_genome_version ${genome_ver} \\
             -pon_sgl_file ${pon_breakends} \\
             -pon_sv_file ${pon_breakpoints} \\
             -known_hotspot_file ${known_fusions} \\

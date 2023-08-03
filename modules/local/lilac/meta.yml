@@ -18,11 +18,11 @@ input:
         e.g. [id: 'sample_id', tumor_id: 'tumor_name', normal_id: 'normal_name']
   - normal_wgs_bam:
       type: file
-      description: Normal WGS BAM file
+      description: Normal WGS BAM file (optional)
       pattern: "*.{bam}"
   - normal_wgs_bai:
       type: file
-      description: Normal WGS BAI file
+      description: Normal WGS BAI file (optional)
       pattern: "*.{bai}"
   - tumor_wgs_bam:
       type: file
@@ -40,17 +40,12 @@ input:
       type: file
       description: Tumor WTS BAI file (optional)
       pattern: "*.{bai}"
-  - gene_cn:
-      type: file
-      description: PURPLE somatic gene copy number file (optional)
-      pattern: "*.{tsv}"
-  - smlv_vcf:
-      type: file
-      description: PURPLE somatic small variant VCF file (optional)
-      pattern: "*.{vcf.gz}"
+  - purple_dir:
+      type: directory
+      description: PURPLE output directory (optional)
   - genome_fasta:
       type: file
-      description: Reference genome assembly fa file
+      description: Reference genome assembly FASTA file
       pattern: "*.{fa,fasta}"
   - genome_ver:
       type: string

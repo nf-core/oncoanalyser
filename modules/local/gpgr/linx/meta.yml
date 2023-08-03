@@ -17,10 +17,10 @@ input:
       description: |
         Groovy Map containing sample information
         e.g. [id: 'sample_id']
-  - linx_annotation:
+  - linx_annotation_dir:
       type: directory
       description: Somatic LINX annotation output directory
-  - linx_visualiser:
+  - linx_visualiser_dir:
       type: directory
       description: Somatic LINX visualiser output directory
 output:

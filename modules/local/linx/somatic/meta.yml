@@ -22,20 +22,12 @@ input:
   - genome_ver:
       type: string
       description: Reference genome version
-  - fragile_regions:
-      type: file
-      description: LINX fragile regions file
-      pattern: "*.{csv}"
-  - lines:
-      type: file
-      description: LINEs file
-      pattern: "*.{csv}"
   - ensembl_data_resources:
       type: directory
       description: HMF ensembl data resources directory
   - known_fusion_data:
       type: file
-      description: Known susions data file
+      description: Known fusions data file
       pattern: "*.{bedpe}"
   - driver_gene_panel:
       type: file
@@ -43,7 +35,7 @@ input:
       pattern: "*.{csv}"
   - gene_id_file:
       type: file
-      description: Ensembl gene ID file
+      description: Ensembl gene ID file (optional)
       pattern: "*.{csv}"
 output:
   - meta:

@@ -35,8 +35,11 @@ input:
       pattern: "*.{bai}"
   - genome_fasta:
       type: file
-      description: Reference genome assembly fa file
+      description: Reference genome assembly FASTA file
       pattern: "*.{fa,fasta}"
+  - genome_ver:
+      type: string
+      description: Reference genome version
   - genome_fai:
       type: file
       description: Reference genome assembly fai file
@@ -45,9 +48,6 @@ input:
       type: file
       description: Reference genome assembly dict file
       pattern: "*.{dict}"
-  - genome_ver:
-      type: string
-      description: Reference genome version
   - sage_known_hotspots_somatic:
       type: file
       description: SAGE somatic known hotspots file
@@ -55,6 +55,10 @@ input:
   - sage_actionable_panel:
       type: file
       description: SAGE actionable gene panel file
+      pattern: "*.{bed.gz}"
+  - sage_coverage_panel:
+      type: file
+      description: SAGE coverage gene panel file
       pattern: "*.{bed.gz}"
   - sage_highconf_regions:
       type: file
@@ -73,22 +77,13 @@ output:
       type: file
       description: SAGE VCF file
       pattern: "*.{vcf.gz}"
-  - tumor_bqr_png:
+  - vcf_filtered:
       type: file
-      description: Tumor BQR plot file
-      pattern: "*.{png}"
-  - normal_bqr_png:
-      type: file
-      description: Normal BQR plot file
-      pattern: "*.{png}"
-  - gene_coverage:
-      type: file
-      description: Gene coverage output file
-      pattern: "*.{tsv}"
-  - bqr_tsv:
-      type: file
-      description: BQR data files
-      pattern: "*.{tsv}"
+      description: Filtered VCF file
+      pattern: "*.{vcf.gz}"
+  - sage_dir:
+      type: directory
+      description: SAGE output directory
   - versions:
       type: file
       description: File containing software versions

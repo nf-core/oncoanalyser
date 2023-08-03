@@ -24,21 +24,29 @@ input:
   - cobalt:
       type: directory
       description: COBALT output directory
-  - sv_vcf:
+  - sv_tumor_vcf:
       type: file
-      description: GRIPSS VCF file
+      description: GRIPSS somatic VCF file (optional)
       pattern: "*.{vcf.gz}"
-  - sv_vcf_index:
+  - sv_tumor_tbi:
       type: file
-      description: GRIPSS VCF index file
+      description: GRIPSS somatic VCF index file (optional)
       pattern: "*.{vcf.gz.tbi}"
-  - sv_unfiltered_vcf:
+  - sv_tumor_unfiltered_vcf:
       type: file
-      description: GRIPSS unfiltered VCF file
+      description: GRIPSS unfiltered somatic VCF file (optional)
       pattern: "*.{vcf.gz}"
-  - sv_unfiltered_vcf_index:
+  - sv_tumor_unfiltered_tbi:
       type: file
-      description: GRIPSS unfiltered VCF index file
+      description: GRIPSS unfiltered somatic VCF index file (optional)
+      pattern: "*.{vcf.gz.tbi}"
+  - sv_normal_vcf:
+      type: file
+      description: GRIPSS germline VCF file (optional)
+      pattern: "*.{vcf.gz}"
+  - sv_normal_tbi:
+      type: file
+      description: GRIPSS germline VCF index file (optional)
       pattern: "*.{vcf.gz.tbi}"
   - smlv_tumor_vcf:
       type: file
@@ -50,8 +58,11 @@ input:
       pattern: "*.{vcf.gz}"
   - genome_fasta:
       type: file
-      description: Reference genome assembly fa file
+      description: Reference genome assembly FASTA file
       pattern: "*.{fa,fasta}"
+  - genome_ver:
+      type: string
+      description: Reference genome version
   - genome_fai:
       type: file
       description: Reference genome assembly fai file
@@ -60,12 +71,9 @@ input:
       type: file
       description: Reference genome assembly dict file
       pattern: "*.{dict}"
-  - genome_ver:
-      type: string
-      description: Reference genome version
   - gc_profile:
       type: file
-      description: COBALT GC profile file
+      description: GC profile file
       pattern: "*.{cnp}"
   - sage_known_hotspots_somatic:
       type: file
@@ -84,8 +92,19 @@ input:
       description: HMF ensembl data resources directory
   - germline_del:
       type: file
-      description: Cohort frequency for germline deletions
+      description: Cohort frequency for germline deletions (optional)
       pattern: "*.{csv}"
+  - target_regions_bed:
+      type: file
+      description: Target regions BED file (optional)
+  - target_regions_ratios:
+      type: file
+      description: Target regions ratios file (optional)
+      pattern: "*.{tsv}"
+  - target_regions_msi_indels:
+      type: file
+      description: Target regions MSI/INDELS file (optional)
+      pattern: "*.{tsv}"
 output:
   - meta:
       type: map

@@ -19,35 +19,28 @@ input:
       description: Somatic collectwgsmetrics file
   - bam_metrics_germline:
       type: file
-      description: Germline collectwgsmetrics file
+      description: Germline collectwgsmetrics file (optional)
   - flagstat_somatic:
       type: file
       description: Somatic SAMtools flagstat output file
   - flagstat_germline:
       type: file
-      description: Somatic SAMtools flagstat output file
-  - chord_prediction:
-      type: file
-      description: CHORD prediction file
-      pattern: "*.{txt}"
-  - lilac_dir:
+      description: Somatic SAMtools flagstat output file (optional)
+  - sage_dir:
       type: directory
-      description: LILAC output directory
-  - sage_somatic_bqr:
-      type: file
-      description: SAGE somatic tumor BQR plot file
-      pattern: "*.{png}"
-  - sage_germline_bqr:
-      type: file
-      description: SAGE somatic normal BQR plot file
-      pattern: "*.{png}"
-  - sage_germline_coverage:
-      type: file
-      description: SAGE germline coverage file
-      pattern: "*.{tsv}"
+      description: SAGE somatic output directory
+  - sage_germline_dir:
+      type: directory
+      description: SAGE germline output directory (optional)
   - purple_dir:
       type: directory
       description: PURPLE output directory
+  - smlv_somatic_vcf:
+      type: file
+      description: Small somatic variant VCF file (annotated with RNA data) (optional)
+  - smlv_germline_vcf:
+      type: file
+      description: Small germline variant VCF file (annotated with RNA data) (optional)
   - linx_somatic_anno_dir:
       type: directory
       description: LINX somatic annotation output directory
@@ -56,46 +49,32 @@ input:
       description: LINX somatic plot output directory
   - linx_germline_anno_dir:
       type: directory
-      description: LINX germline annotation output directory
-  - protect:
-      type: file
-      description: PROTECT output file
-      pattern: "*.{tsv}"
-  - peach_genotype:
-      type: file
-      description: PEACH genotype file
-      pattern: "*.{tsv}"
-  - cuppa:
-      type: file
-      description: CUPPA classification file
-      pattern: "*.{csv}"
-  - cuppa_summary_plot:
-      type: file
-      description: CUPPA summary plot file
-      pattern: "*.{png}"
-  - cuppa_feature_plot:
-      type: file
-      description: CUPPA feature plot file
-      pattern: "*.{png}"
-  - virusinterpreter:
-      type: file
-      description: Virus Interpreter annotations file
-      pattern: "*.{tsv}"
+      description: LINX germline annotation output directory (optional)
+  - virusinterpreter_dir:
+      type: directory
+      description: Virus Interpreter output directory (optional)
+  - chord_dir:
+      type: directory
+      description: CHORD output directory (optional)
+  - sigs_dir:
+      type: directory
+      description: Sigs output directory (optional)
+  - lilac_dir:
+      type: directory
+      description: LILAC output directory
+  - cuppa_dir:
+      type: directory
+      description: CUPPA output directory (optional)
+  - isofox_dir:
+      type: directory
+      description: Isofox output directory (optional)
   - genome_ver:
       type: string
       description: Reference genome version
   - disease_ontology:
-      type: string
+      type: file
       description: Disease ontology file
       pattern: "*.{json}"
-  - known_fusion_data:
-      type: file
-      description: Known susions data file
-      pattern: "*.{bedpe}"
-  - driver_gene_panel:
-      type: file
-      description: Driver gene panel file
-      pattern: "*.{csv}"
   - cohort_mapping:
       type: file
       description: HMF cohort mapping file
@@ -104,6 +83,25 @@ input:
       type: file
       description: HMF cohort percentiles file
       pattern: "*.{tsv}"
+  - known_fusion_data:
+      type: file
+      description: Known fusions data file
+      pattern: "*.{bedpe}"
+  - driver_gene_panel:
+      type: file
+      description: Driver gene panel file
+      pattern: "*.{csv}"
+  - ensembl_data_resources:
+      type: directory
+      description: HMF ensembl data resources directory
+  - isofox_alt_sj:
+      type: file
+      description: Isofox cohort alternate slice junction file
+      pattern: "*.{csv}"
+  - isofox_gene_distribution:
+      type: file
+      description: Isofox cohort gene expression file
+      pattern: "*.{csv}"
   - pipeline_version:
       type: string
       description: Pipeline version to display in report
@@ -118,7 +116,7 @@ output:
       description: Report file
       pattern: "*.{pdf}"
   - json:
-      type: directory
+      type: file
       description: Compiled JSON output file
       pattern: "*.{json}"
   - versions:

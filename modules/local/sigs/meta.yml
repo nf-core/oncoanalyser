@@ -17,7 +17,7 @@ input:
         e.g. [id: 'sample_id', tumor_id: 'tumor_name']
   - smlv_vcf:
       type: file
-      description: Tumor small variant VCF file
+      description: Small somatic variant VCF file
       pattern: "*.{vcf.gz}"
   - signatures:
       type: file

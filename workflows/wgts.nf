@@ -512,7 +512,7 @@ workflow WGTS {
         )
 
         ch_versions = ch_versions.mix(VIRUSBREAKEND_CALLING.out.versions)
-        ch_virusinterpreter_out = ch_virusinterpreter_out.mix(VIRUSBREAKEND_CALLING.out.virusinterpreter)
+        ch_virusinterpreter_out = ch_virusinterpreter_out.mix(VIRUSBREAKEND_CALLING.out.virusinterpreter_dir)
     }
 
     //

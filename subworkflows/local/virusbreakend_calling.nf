@@ -102,7 +102,7 @@ workflow VIRUSBREAKEND_CALLING {
         )
 
     emit:
-        virusinterpreter = ch_outputs  // channel: [ meta, virusinterpreter_dir ]
+        virusinterpreter_dir = ch_outputs  // channel: [ meta, virusinterpreter_dir ]
 
-        versions         = ch_versions // channel: [ versions.yml ]
+        versions             = ch_versions // channel: [ versions.yml ]
 }

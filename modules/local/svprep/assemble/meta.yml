@@ -18,11 +18,9 @@ input:
   - bams:
       type: list
       description: List of BAM files
-      pattern: "*.{bam}"
   - bams_filtered:
       type: list
       description: List of filtered BAM files
-      pattern: "*.{bam}"
   - preprocess_dirs:
       type: list
       description: List of GRIDSS preprocess output directories
@@ -34,7 +32,7 @@ input:
       description: GRIDSS configuration file (optional)
   - genome_fasta:
       type: file
-      description: Reference genome assembly fa file
+      description: Reference genome assembly FASTA file
       pattern: "*.{fa,fasta}"
   - genome_fai:
       type: file

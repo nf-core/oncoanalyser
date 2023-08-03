@@ -5,7 +5,7 @@ process LINX_VISUALISER {
     container 'docker.io/scwatts/linx:1.24.1--0'
 
     input:
-    tuple val(meta), path(linx)
+    tuple val(meta), path(linx_annotation_dir)
     val genome_ver
     path ensembl_data_resources
 
@@ -30,7 +30,7 @@ process LINX_VISUALISER {
         com.hartwig.hmftools.linx.visualiser.SvVisualiser \\
             ${args} \\
             -sample ${meta.id} \\
-            -vis_file_dir ${linx} \\
+            -vis_file_dir ${linx_annotation_dir} \\
             -ref_genome_version ${genome_ver} \\
             -ensembl_data_dir ${ensembl_data_resources} \\
             -circos ${task.ext.circosPath} \\
