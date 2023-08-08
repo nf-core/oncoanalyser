@@ -25,10 +25,10 @@ process SAGE_GERMLINE {
     path ensembl_data_resources
 
     output:
-    tuple val(meta), path('sage_germline/*.sage.germline.vcf.gz'), path('sage_germline/*.sage.germline.vcf.gz.tbi')                  , emit: vcf
-    tuple val(meta), path('sage_germline/*.sage.germline.filtered.vcf.gz'), path('sage_germline/*.sage.germline.filtered.vcf.gz.tbi'), emit: vcf_filtered
-    tuple val(meta), path('sage_germline/')                                                                                          , emit: sage_dir
-    path 'versions.yml'                                                                                                              , emit: versions
+    tuple val(meta), path('germline/*.sage.germline.vcf.gz'), path('germline/*.sage.germline.vcf.gz.tbi')                  , emit: vcf
+    tuple val(meta), path('germline/*.sage.germline.filtered.vcf.gz'), path('germline/*.sage.germline.filtered.vcf.gz.tbi'), emit: vcf_filtered
+    tuple val(meta), path('germline/')                                                                                     , emit: sage_dir
+    path 'versions.yml'                                                                                                    , emit: versions
 
     when:
     task.ext.when == null || task.ext.when
@@ -37,7 +37,7 @@ process SAGE_GERMLINE {
     def args = task.ext.args ?: ''
 
     """
-    mkdir sage_germline/
+    mkdir germline/
 
     java \\
         -Xmx${Math.round(task.memory.bytes * 0.95)} \\
@@ -65,14 +65,14 @@ process SAGE_GERMLINE {
             -write_bqr_data \\
             -write_bqr_plot \\
             -threads ${task.cpus} \\
-            -out sage_germline/${meta.tumor_id}.sage.germline.vcf.gz
+            -out germline/${meta.tumor_id}.sage.germline.vcf.gz
 
     bcftools view \\
         -f 'PASS' \\
-        -o sage_germline/${meta.tumor_id}.sage.germline.filtered.vcf.gz \\
-        sage_germline/${meta.tumor_id}.sage.germline.vcf.gz
+        -o germline/${meta.tumor_id}.sage.germline.filtered.vcf.gz \\
+        germline/${meta.tumor_id}.sage.germline.vcf.gz
 
-    bcftools index -t sage_germline/${meta.tumor_id}.sage.germline.filtered.vcf.gz
+    bcftools index -t germline/${meta.tumor_id}.sage.germline.filtered.vcf.gz
 
     # NOTE(SW): hard coded since there is no reliable way to obtain version information.
     cat <<-END_VERSIONS > versions.yml
@@ -83,16 +83,16 @@ process SAGE_GERMLINE {
 
     stub:
     """
-    mkdir -p sage_germline/
-    touch sage_germline/${meta.tumor_id}.sage.germline.vcf.gz
-    touch sage_germline/${meta.tumor_id}.sage.germline.vcf.gz.tbi
-    touch sage_germline/${meta.tumor_id}.sage.germline.filtered.vcf.gz
-    touch sage_germline/${meta.tumor_id}.sage.germline.filtered.vcf.gz.tbi
-    touch sage_germline/${meta.tumor_id}.sage.bqr.png
-    touch sage_germline/${meta.tumor_id}.sage.bqr.tsv
-    touch sage_germline/${meta.normal_id}.sage.bqr.png
-    touch sage_germline/${meta.normal_id}.sage.bqr.tsv
-    touch sage_germline/${meta.normal_id}.gene.coverage.tsv
+    mkdir -p germline/
+    touch germline/${meta.tumor_id}.sage.germline.vcf.gz
+    touch germline/${meta.tumor_id}.sage.germline.vcf.gz.tbi
+    touch germline/${meta.tumor_id}.sage.germline.filtered.vcf.gz
+    touch germline/${meta.tumor_id}.sage.germline.filtered.vcf.gz.tbi
+    touch germline/${meta.tumor_id}.sage.bqr.png
+    touch germline/${meta.tumor_id}.sage.bqr.tsv
+    touch germline/${meta.normal_id}.sage.bqr.png
+    touch germline/${meta.normal_id}.sage.bqr.tsv
+    touch germline/${meta.normal_id}.gene.coverage.tsv
     echo -e '${task.process}:\\n  stub: noversions\\n' > versions.yml
     """
 }

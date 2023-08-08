@@ -19,10 +19,10 @@ process SAGE_SOMATIC {
     path ensembl_data_resources
 
     output:
-    tuple val(meta), path('sage_somatic/*.sage.somatic.vcf.gz'), path('sage_somatic/*.sage.somatic.vcf.gz.tbi')                  , emit: vcf
-    tuple val(meta), path('sage_somatic/*.sage.somatic.filtered.vcf.gz'), path('sage_somatic/*.sage.somatic.filtered.vcf.gz.tbi'), emit: vcf_filtered
-    tuple val(meta), path('sage_somatic/')                                                                                       , emit: sage_dir
-    path 'versions.yml'                                                                                                          , emit: versions
+    tuple val(meta), path('somatic/*.sage.somatic.vcf.gz'), path('somatic/*.sage.somatic.vcf.gz.tbi')                  , emit: vcf
+    tuple val(meta), path('somatic/*.sage.somatic.filtered.vcf.gz'), path('somatic/*.sage.somatic.filtered.vcf.gz.tbi'), emit: vcf_filtered
+    tuple val(meta), path('somatic/')                                                                                  , emit: sage_dir
+    path 'versions.yml'                                                                                                , emit: versions
 
     when:
     task.ext.when == null || task.ext.when
@@ -34,7 +34,7 @@ process SAGE_SOMATIC {
     def reference_bam_arg = normal_bam ? "-reference_bam ${normal_bam}" : ''
 
     """
-    mkdir -p sage_somatic/
+    mkdir -p somatic/
 
     java \\
         -Xmx${Math.round(task.memory.bytes * 0.95)} \\
@@ -54,14 +54,14 @@ process SAGE_SOMATIC {
             -write_bqr_data \\
             -write_bqr_plot \\
             -threads ${task.cpus} \\
-            -out sage_somatic/${meta.tumor_id}.sage.somatic.vcf.gz
+            -out somatic/${meta.tumor_id}.sage.somatic.vcf.gz
 
     bcftools view \\
         -f 'PASS' \\
-        -o sage_somatic/${meta.tumor_id}.sage.somatic.filtered.vcf.gz \\
-        sage_somatic/${meta.tumor_id}.sage.somatic.vcf.gz
+        -o somatic/${meta.tumor_id}.sage.somatic.filtered.vcf.gz \\
+        somatic/${meta.tumor_id}.sage.somatic.vcf.gz
 
-    bcftools index -t sage_somatic/${meta.tumor_id}.sage.somatic.filtered.vcf.gz
+    bcftools index -t somatic/${meta.tumor_id}.sage.somatic.filtered.vcf.gz
 
     # NOTE(SW): hard coded since there is no reliable way to obtain version information.
     cat <<-END_VERSIONS > versions.yml
@@ -72,16 +72,16 @@ process SAGE_SOMATIC {
 
     stub:
     """
-    mkdir -p sage_somatic/
-    touch sage_somatic/${meta.tumor_id}.sage.somatic.vcf.gz
-    touch sage_somatic/${meta.tumor_id}.sage.somatic.vcf.gz.tbi
-    touch sage_somatic/${meta.tumor_id}.sage.somatic.filtered.vcf.gz
-    touch sage_somatic/${meta.tumor_id}.sage.somatic.filtered.vcf.gz.tbi
-    touch sage_somatic/${meta.tumor_id}.gene.coverage.tsv
-    touch sage_somatic/${meta.tumor_id}.sage.bqr.png
-    touch sage_somatic/${meta.tumor_id}.sage.bqr.tsv
-    touch sage_somatic/${meta.normal_id}.sage.bqr.png
-    touch sage_somatic/${meta.normal_id}.sage.bqr.tsv
+    mkdir -p somatic/
+    touch somatic/${meta.tumor_id}.sage.somatic.vcf.gz
+    touch somatic/${meta.tumor_id}.sage.somatic.vcf.gz.tbi
+    touch somatic/${meta.tumor_id}.sage.somatic.filtered.vcf.gz
+    touch somatic/${meta.tumor_id}.sage.somatic.filtered.vcf.gz.tbi
+    touch somatic/${meta.tumor_id}.gene.coverage.tsv
+    touch somatic/${meta.tumor_id}.sage.bqr.png
+    touch somatic/${meta.tumor_id}.sage.bqr.tsv
+    touch somatic/${meta.normal_id}.sage.bqr.png
+    touch somatic/${meta.normal_id}.sage.bqr.tsv
     echo -e '${task.process}:\\n  stub: noversions\\n' > versions.yml
     """
 }
