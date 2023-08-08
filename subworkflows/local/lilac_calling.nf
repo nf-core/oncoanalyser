@@ -212,7 +212,7 @@ workflow LILAC_CALLING {
         // channel: [ meta, normal_wgs_bam, normal_wgs_bai, tumor_bam, tumor_bai, tumor_wts_bam, tumor_wts_bai, purple_dir ]
         ch_lilac_inputs_full = WorkflowOncoanalyser.groupByMeta(
             ch_lilac_bams_combined,
-            ch_purple,
+            ch_lilac_inputs_purple,
             flatten_mode: 'nonrecursive',
         )
 
