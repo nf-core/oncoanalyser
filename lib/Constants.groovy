@@ -73,7 +73,7 @@ class Constants {
         PAVE_VCF,
         PURPLE_DIR,
         SAGE_VCF,
-        VIRUSINTERPRETER_TSV,
+        VIRUSINTERPRETER_DIR,
         // ORANGE specific
         CHORD_DIR,
         SIGS_DIR,
@@ -237,8 +237,8 @@ class Constants {
             [SequenceType.TARGETTED, SequenceType.WGS, SequenceType.WGTS],
         ],
 
-        VIRUSINTERPRETER_TSV: [
-            FileType.VIRUSINTERPRETER_TSV,
+        VIRUSINTERPRETER_DIR: [
+            FileType.VIRUSINTERPRETER_DIR,
             SampleType.TUMOR,
             SequenceType.WGS
         ],
