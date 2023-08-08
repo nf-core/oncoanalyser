@@ -79,6 +79,13 @@ workflow ORANGE_REPORTING {
             ch_linx_germline_annotation = ch_inputs.map { meta -> [meta, []] }
         }
 
+        // Do not pass WTS reference files when not required
+        // NOTE(SW): ORANGE v2.6.0 will crash if WTS reference files but not WTS sample files provided
+        if (run_config.mode != Constants.RunMode.WTS && run_config.mode != Constants.RunMode.WGTS) {
+            isofox_alt_sj = []
+            isofox_gene_distribution = []
+        }
+
         // Get PURPLE input source for processing
         ch_orange_inputs_purple_dir = run_config.stages.purple ? ch_purple : WorkflowOncoanalyser.getInput(ch_inputs, Constants.INPUT.PURPLE_DIR)
 
