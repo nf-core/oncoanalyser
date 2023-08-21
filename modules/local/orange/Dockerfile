@@ -10,7 +10,7 @@ RUN \
 
 RUN \
   mkdir -p /opt/orange/ && \
-  wget -O /opt/orange/orange.jar 'https://github.com/hartwigmedical/hmftools/releases/download/orange-v2.6.0/orange_v2.6.0.jar'
+  wget -O /opt/orange/orange.jar 'https://github.com/hartwigmedical/hmftools/releases/download/orange-v2.7.0/orange_v2.7.0.jar'
 
 USER mambauser
 
