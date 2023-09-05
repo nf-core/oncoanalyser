@@ -2,7 +2,7 @@ process PURPLE {
     tag "${meta.id}"
     label 'process_low'
 
-    container 'docker.io/scwatts/purple:3.9--0'
+    container 'docker.io/scwatts/purple:3.9.2--0'
 
     input:
     tuple val(meta), path(amber), path(cobalt), path(sv_tumor_vcf), path(sv_tumor_tbi), path(sv_tumor_unfiltered_vcf), path(sv_tumor_unfiltered_tbi), path(sv_normal_vcf), path(sv_normal_tbi), path(smlv_tumor_vcf), path(smlv_normal_vcf)
