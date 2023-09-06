@@ -43,7 +43,6 @@ process SVPREP {
 
     samtools sort \\
         -@ ${task.cpus} \\
-        -m ${Math.round(task.memory.bytes * 0.95 / 1024 / task.cpus)}K \\
         -T ${meta.id}.sv_prep.tmp \\
         -o ${meta.id}.sv_prep.sorted.bam \\
         ${meta.id}.sv_prep.bam
