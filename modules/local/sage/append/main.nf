@@ -2,7 +2,7 @@ process SAGE_APPEND {
     tag "${meta.id}"
     label 'process_medium'
 
-    container 'docker.io/scwatts/sage:3.3--0'
+    container 'docker.io/scwatts/sage:3.3.1--0'
 
     input:
     tuple val(meta), path(vcf), path(bam), path(bai)
