@@ -91,6 +91,7 @@ process GRIDSS_ASSEMBLE {
     stub:
     """
     mkdir -p gridss_assemble/
+    touch gridss_assemble/placeholder
     echo -e '${task.process}:\\n  stub: noversions\\n' > versions.yml
     """
 }
