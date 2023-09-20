@@ -41,7 +41,7 @@ process BAMTOOLS {
 
     stub:
     """
-    mkdir -p ${meta.id}.wgsmetrics
+    touch ${meta.id}.wgsmetrics
     echo -e '${task.process}:\\n  stub: noversions\\n' > versions.yml
     """
 }

@@ -47,6 +47,7 @@ process LINX_VISUALISER {
     stub:
     """
     mkdir -p linx_visualiser/plot/
+    touch linx_visualiser/plot/placeholder
     echo -e '${task.process}:\n  stub: noversions\n' > versions.yml
     """
 }

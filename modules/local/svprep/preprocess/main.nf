@@ -54,6 +54,7 @@ process GRIDSS_PREPROCESS {
     stub:
     """
     mkdir -p gridss_preprocess/${meta.id}.sv_prep.sorted.bam.gridss.working/
+    touch gridss_preprocess/${meta.id}.sv_prep.sorted.bam.gridss.working/placeholder
     echo -e '${task.process}:\\n  stub: noversions\\n' > versions.yml
     """
 }
