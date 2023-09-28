@@ -185,7 +185,7 @@ workflow ORANGE_REPORTING {
             ensembl_data_resources,
             isofox_alt_sj,
             isofox_gene_distribution,
-            "5.32 [oncoanalyser]",
+            "5.33 [oncoanalyser]",
         )
 
         // Set outputs
