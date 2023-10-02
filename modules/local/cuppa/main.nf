@@ -48,11 +48,11 @@ process CUPPA {
     elif [[ ${categories_val} == 'ALL' ]]; then
         # NOTE(SW): CUPPA requires that the WTS sample name matches the WGS sample name
         for fp in \$(find -L ${isofox_dir} -maxdepth 1 -type f); do
-            fn_out=\$(sed 's/^${meta.id_wts}/${meta.id}/' <<< \${fp##*/});
+            fn_out=\$(sed 's/^${meta.id_rna}/${meta.id}/' <<< \${fp##*/});
             cp \${fp} sample_data/\${fn_out}
         done;
         # Rename identifier in the summary file
-        sed -i 's/^${meta.id_wts}/${meta.id}/g' sample_data/${meta.id}.isf.summary.csv;
+        sed -i 's/^${meta.id_rna}/${meta.id}/g' sample_data/${meta.id}.isf.summary.csv;
     fi;
 
     mkdir -p cuppa/

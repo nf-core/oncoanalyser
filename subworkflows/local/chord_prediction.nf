@@ -36,7 +36,7 @@ workflow CHORD_PREDICTION {
         // channel: [ meta, smlv_vcf, sv_vcf ]
         ch_chord_inputs = ch_chord_inputs_source
             .map { meta, purple_dir ->
-                def tumor_id = Utils.getTumorWgsSampleName(meta)
+                def tumor_id = Utils.getTumorDnaSampleName(meta)
                 def smlv_vcf = file(purple_dir).resolve("${tumor_id}.purple.somatic.vcf.gz")
                 def sv_vcf = file(purple_dir).resolve("${tumor_id}.purple.sv.vcf.gz")
 

@@ -65,11 +65,11 @@ workflow PURPLE_CALLING {
                 def meta_purple = [
                     key: meta.id,
                     id: meta.id,
-                    tumor_id: Utils.getTumorSampleName(meta, run_config.mode),
+                    tumor_id: Utils.getTumorDnaSampleName(meta),
                 ]
 
                 if (run_config.type == Constants.RunType.TUMOR_NORMAL) {
-                    meta_purple.normal_id = Utils.getNormalWgsSampleName(meta)
+                    meta_purple.normal_id = Utils.getNormalDnaSampleName(meta)
                 }
 
                 return [meta_purple, *it[1..-1]]

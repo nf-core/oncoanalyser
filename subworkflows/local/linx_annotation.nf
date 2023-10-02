@@ -45,7 +45,7 @@ workflow LINX_ANNOTATION {
             ch_linx_inputs_germline = ch_linx_inputs_source
                 .map { meta, purple_dir ->
 
-                    def tumor_id = Utils.getTumorSampleName(meta, run_config.mode)
+                    def tumor_id = Utils.getTumorDnaSampleName(meta)
                     def sv_vcf = file(purple_dir).resolve("${tumor_id}.purple.sv.germline.vcf.gz")
 
                     if (!sv_vcf.exists()) {
@@ -83,7 +83,7 @@ workflow LINX_ANNOTATION {
             .map { meta, purple_dir ->
                 def meta_linx = [
                     key: meta.id,
-                    id: Utils.getTumorSampleName(meta, run_config.mode),
+                    id: Utils.getTumorDnaSampleName(meta),
                 ]
                 return [meta_linx, purple_dir]
             }

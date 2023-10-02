@@ -34,13 +34,13 @@ process ORANGE {
     def sigs_dir_arg = sigs_dir ? "-sigs_dir ${sigs_dir}" : ''
     def cuppa_dir_arg = cuppa_dir ? "-cuppa_dir ${cuppa_dir}" : ''
 
-    def normal_id_arg = meta.containsKey('normal_wgs_id') ? "-reference_sample_id ${meta.normal_wgs_id}" : ''
+    def normal_id_arg = meta.containsKey('normal_dna_id') ? "-reference_sample_id ${meta.normal_dna_id}" : ''
     def normal_metrics_arg = bam_metrics_germline ? "-ref_sample_wgs_metrics_file ${bam_metrics_germline}" : ''
     def normal_flagstat_arg = flagstat_germline ? "-ref_sample_flagstat_file ${flagstat_germline}" : ''
     def normal_sage_dir = sage_germline_dir ? "-sage_germline_dir ${sage_germline_dir}" : ''
     def normal_linx_arg = linx_germline_anno_dir ? "-linx_germline_dir ${linx_germline_anno_dir}" : ''
 
-    def rna_id_arg = meta.containsKey('tumor_wts_id') ? "-rna_sample_id ${meta.tumor_wts_id}" : ''
+    def rna_id_arg = meta.containsKey('tumor_rna_id') ? "-rna_sample_id ${meta.tumor_rna_id}" : ''
     def isofox_dir_arg = isofox_dir ? '-isofox_dir isofox_dir__prepared/' : ''
 
     def isofox_gene_distribution_arg = isofox_gene_distribution ? "-isofox_gene_distribution ${isofox_gene_distribution}" : ''
@@ -64,7 +64,7 @@ process ORANGE {
 
         mkdir -p isofox_dir__prepared/;
         for fp in ${isofox_dir}/*; do
-            ln -s ../\${fp} isofox_dir__prepared/\$(sed 's/${meta.tumor_wts_id}/${meta.tumor_id}/' <<< \${fp##*/});
+            ln -s ../\${fp} isofox_dir__prepared/\$(sed 's/${meta.tumor_rna_id}/${meta.tumor_id}/' <<< \${fp##*/});
         done;
 
     fi

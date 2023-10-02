@@ -48,18 +48,15 @@ workflow CUPPA_PREDICTION {
                 def meta_cuppa = [key: meta.id]
 
                 switch (run_config.mode) {
-                    case Constants.RunMode.WGS:
-                        meta_cuppa.id = meta.getAt(['sample_name', Constants.SampleType.TUMOR, Constants.SequenceType.WGS])
+                    case Constants.RunMode.DNA:
+                        meta_cuppa.id = meta.getAt(['sample_name', Constants.SampleType.TUMOR, Constants.SequenceType.DNA])
                         break
-                    case Constants.RunMode.WTS:
-                        meta_cuppa.id = meta.getAt(['sample_name', Constants.SampleType.TUMOR, Constants.SequenceType.WTS])
+                    case Constants.RunMode.RNA:
+                        meta_cuppa.id = meta.getAt(['sample_name', Constants.SampleType.TUMOR, Constants.SequenceType.RNA])
                         break
-                    case Constants.RunMode.WGTS:
-                        meta_cuppa.id = meta.getAt(['sample_name', Constants.SampleType.TUMOR, Constants.SequenceType.WGS])
-                        meta_cuppa.id_wts = meta.getAt(['sample_name', Constants.SampleType.TUMOR, Constants.SequenceType.WTS])
-                        break
-                    case Constants.RunMode.PANEL:
-                        meta_cuppa.id = meta.getAt(['sample_name', Constants.SampleType.TUMOR, Constants.SequenceType.TARGETTED])
+                    case Constants.RunMode.DNA_RNA:
+                        meta_cuppa.id = meta.getAt(['sample_name', Constants.SampleType.TUMOR, Constants.SequenceType.DNA])
+                        meta_cuppa.id_rna = meta.getAt(['sample_name', Constants.SampleType.TUMOR, Constants.SequenceType.RNA])
                         break
                     default:
                         assert false

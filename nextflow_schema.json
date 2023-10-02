@@ -61,6 +61,11 @@
                     "description": "Skip check for restricted genome.",
                     "fa_icon": "fas fa-palette"
                 },
+                "targeted": {
+                    "type": "boolean",
+                    "description": "Run in targeted mode.",
+                    "fa_icon": "fas fa-diagram-project"
+                },
                 "processes_manual": {
                     "type": "boolean",
                     "description": "Run only processes manually provided in processes_include.",

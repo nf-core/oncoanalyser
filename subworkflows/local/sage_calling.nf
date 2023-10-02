@@ -40,10 +40,10 @@ workflow SAGE_CALLING {
                 def meta_sage = [
                     key: meta.id,
                     id: meta.id,
-                    tumor_id: Utils.getTumorSampleName(meta, run_config.mode),
+                    tumor_id: Utils.getTumorDnaSampleName(meta),
                 ]
 
-                def tumor_bam = Utils.getTumorBam(meta, run_config.mode)
+                def tumor_bam = Utils.getTumorDnaBam(meta)
 
                 def normal_bam = []
                 def normal_bai = []
@@ -52,8 +52,8 @@ workflow SAGE_CALLING {
 
                     assert [Constants.RunMode.WGS, Constants.RunMode.WGTS].contains(run_config.mode)
 
-                    meta_sage.normal_id = Utils.getNormalWgsSampleName(meta)
-                    normal_bam = Utils.getNormalWgsBam(meta)
+                    meta_sage.normal_id = Utils.getNormalDnaSampleName(meta)
+                    normal_bam = Utils.getNormalDnaBam(meta)
                     normal_bai = "${normal_bam}.bai"
 
                 }

@@ -37,7 +37,7 @@ workflow SIGS_FITTING {
         ch_sigs_inputs = ch_sigs_inputs_source
             .map { meta, purple_dir ->
 
-                def tumor_id = Utils.getTumorWgsSampleName(meta)
+                def tumor_id = Utils.getTumorDnaSampleName(meta)
                 def smlv_vcf = file(purple_dir).resolve("${tumor_id}.purple.somatic.vcf.gz")
 
                 // Require smlv VCF from the PURPLE directory

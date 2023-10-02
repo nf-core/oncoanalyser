@@ -27,12 +27,12 @@ process SAGE_APPEND {
         -cp ${task.ext.jarPath} com.hartwig.hmftools.sage.append.SageAppendApplication \\
             ${args} \\
             -input_vcf ${vcf} \\
-            -reference ${meta.tumor_wts_id} \\
+            -reference ${meta.tumor_rna_id} \\
             -reference_bam ${bam} \\
             -ref_genome ${genome_fasta} \\
             -ref_genome_version ${genome_ver} \\
             -threads ${task.cpus} \\
-            -out ${meta.wgs_id}.sage.append.vcf.gz
+            -out ${meta.dna_id}.sage.append.vcf.gz
 
     # NOTE(SW): hard coded since there is no reliable way to obtain version information.
     cat <<-END_VERSIONS > versions.yml
@@ -43,7 +43,7 @@ process SAGE_APPEND {
 
     stub:
     """
-    touch "${meta.wgs_id}.sage.append.vcf.gz"
+    touch "${meta.dna_id}.sage.append.vcf.gz"
     echo -e '${task.process}:\\n  stub: noversions\\n' > versions.yml
     """
 }

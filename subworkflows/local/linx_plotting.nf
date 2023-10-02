@@ -31,7 +31,7 @@ workflow LINX_PLOTTING {
             .map { meta, anno_dir ->
                 def meta_linx = [
                     key: meta.id,
-                    id: Utils.getTumorSampleName(meta, run_config.mode),
+                    id: Utils.getTumorDnaSampleName(meta),
                 ]
                 return [meta_linx, anno_dir]
             }
@@ -56,7 +56,7 @@ workflow LINX_PLOTTING {
             .map { meta, anno_dir, vis_dir ->
                 def meta_gpgr_linx = [
                     key: meta.id,
-                    id: Utils.getTumorSampleName(meta, run_config.mode),
+                    id: Utils.getTumorDnaSampleName(meta),
                 ]
                 return [meta_gpgr_linx, anno_dir, vis_dir]
             }
@@ -68,7 +68,7 @@ workflow LINX_PLOTTING {
         ch_versions = ch_versions.mix(GPGR.out.versions)
 
     emit:
-        visualiser_dir = ch_visualiser_out // channel: [ meta, visualiser_dir]
+        visualiser_dir = ch_visualiser_out // channel: [ meta, visualiser_dir ]
 
         versions = ch_versions             // channel: [ versions.yml ]
 }

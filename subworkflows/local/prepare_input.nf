@@ -28,17 +28,23 @@ workflow PREPARE_INPUT {
             assert false
         }
 
-        if (run_config.mode == Constants.RunMode.PANEL) {
-            sequence_types_allowed = [Constants.SequenceType.TARGETTED]
-        } else if (run_config.mode == Constants.RunMode.WGS) {
-            sequence_types_allowed = [Constants.SequenceType.WGS]
-        } else if (run_config.mode == Constants.RunMode.WTS) {
-            sequence_types_allowed = [Constants.SequenceType.WTS]
-        } else if (run_config.mode == Constants.RunMode.WGTS) {
-            sequence_types_allowed = [Constants.SequenceType.WGS, Constants.SequenceType.WTS]
+        if (run_config.mode == Constants.RunMode.DNA) {
+            sequence_types_allowed = [Constants.SequenceType.DNA]
+        } else if (run_config.mode == Constants.RunMode.RNA) {
+            sequence_types_allowed = [Constants.SequenceType.RNA]
+        } else if (run_config.mode == Constants.RunMode.DNA_RNA) {
+            sequence_types_allowed = [Constants.SequenceType.DNA, Constants.SequenceType.RNA]
         } else {
             assert false
         }
+
+
+
+
+        // TODO(SW): ensure that config enforces targeted cannot be RNA only
+
+
+
 
         ch_inputs = Channel.of(ch_samplesheet)
             .splitCsv(header: true)
@@ -76,6 +82,13 @@ workflow PREPARE_INPUT {
                     }
 
 
+
+
+                    // TODO(SW): understand whether this does (or why it doesn't) failure on DNA_RNA inputs (e.g. CUPPA)
+
+
+
+
                     // Sequence type
                     def sequence_type_enum = Utils.getEnumFromString(it.sequence_type, Constants.SequenceType)
                     if (!sequence_type_enum) {
@@ -109,6 +122,14 @@ workflow PREPARE_INPUT {
                     }
                     input_types_seen.push(key_input_type)
 
+
+
+
+                    // TODO(SW): implement index finding when not provided in samplesheet
+
+
+
+
                     // Check for relevant indices
                     if (!workflow.stubRun) {
                         def filetype_bai = [
@@ -137,7 +158,6 @@ workflow PREPARE_INPUT {
                             }
                         }
                     }
-
 
                     // Sample name
                     def key_sample_name
@@ -181,6 +201,10 @@ workflow PREPARE_INPUT {
                 return meta
             }
 
+
+
+
+            /*
             // Check we have the required sample types for the specified run configuration
             ch_inputs
                 .map { meta ->
@@ -204,12 +228,12 @@ workflow PREPARE_INPUT {
 
                         if (run_config.type == Constants.RunType.TUMOR_ONLY) {
                             required_sample_types = [
-                                [Constants.SampleType.TUMOR, Constants.SequenceType.WGS],
+                                [Constants.SampleType.TUMOR, Constants.SequenceType.DNA],
                             ]
                         } else if (run_config.type == Constants.RunType.TUMOR_NORMAL) {
                             required_sample_types = [
-                                [Constants.SampleType.TUMOR, Constants.SequenceType.WGS],
-                                [Constants.SampleType.NORMAL, Constants.SequenceType.WGS],
+                                [Constants.SampleType.TUMOR, Constants.SequenceType.DNA],
+                                [Constants.SampleType.NORMAL, Constants.SequenceType.DNA],
                             ]
                         } else {
                             assert false
@@ -218,21 +242,21 @@ workflow PREPARE_INPUT {
                     } else if (run_config.mode == Constants.RunMode.WTS) {
 
                         required_sample_types = [
-                            [Constants.SampleType.TUMOR, Constants.SequenceType.WTS],
+                            [Constants.SampleType.TUMOR, Constants.SequenceType.RNA],
                         ]
 
                     } else if (run_config.mode == Constants.RunMode.WGTS) {
 
                         if (run_config.type == Constants.RunType.TUMOR_ONLY) {
                             required_sample_types = [
-                                [Constants.SampleType.TUMOR, Constants.SequenceType.WGS],
-                                [Constants.SampleType.TUMOR, Constants.SequenceType.WTS],
+                                [Constants.SampleType.TUMOR, Constants.SequenceType.DNA],
+                                [Constants.SampleType.TUMOR, Constants.SequenceType.RNA],
                             ]
                         } else if (run_config.type == Constants.RunType.TUMOR_NORMAL) {
                             required_sample_types = [
-                                [Constants.SampleType.TUMOR, Constants.SequenceType.WGS],
-                                [Constants.SampleType.TUMOR, Constants.SequenceType.WTS],
-                                [Constants.SampleType.NORMAL, Constants.SequenceType.WGS],
+                                [Constants.SampleType.TUMOR, Constants.SequenceType.DNA],
+                                [Constants.SampleType.TUMOR, Constants.SequenceType.RNA],
+                                [Constants.SampleType.NORMAL, Constants.SequenceType.DNA],
                             ]
                         } else {
                             assert false
@@ -276,6 +300,10 @@ workflow PREPARE_INPUT {
                     }
 
                 }
+            */
+
+
+
 
     emit:
       data = ch_inputs
