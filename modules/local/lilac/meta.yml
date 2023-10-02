@@ -18,27 +18,27 @@ input:
         e.g. [id: 'sample_id', tumor_id: 'tumor_name', normal_id: 'normal_name']
   - normal_dna_bam:
       type: file
-      description: Normal WGS BAM file (optional)
+      description: Normal DNA BAM file (optional)
       pattern: "*.{bam}"
   - normal_dna_bai:
       type: file
-      description: Normal WGS BAI file (optional)
+      description: Normal DNA BAI file (optional)
       pattern: "*.{bai}"
   - tumor_dna_bam:
       type: file
-      description: Normal WGS BAM file (optional)
+      description: Normal DNA BAM file (optional)
       pattern: "*.{bam}"
   - tumor_dna_bai:
       type: file
-      description: Tumor WGS BAI file (optional)
+      description: Tumor DNA BAI file (optional)
       pattern: "*.{bai}"
   - tumor_rna_bam:
       type: file
-      description: Normal WTS BAM file (optional)
+      description: Normal RNA BAM file (optional)
       pattern: "*.{bam}"
   - tumor_rna_bai:
       type: file
-      description: Tumor WTS BAI file (optional)
+      description: Tumor RNA BAI file (optional)
       pattern: "*.{bai}"
   - purple_dir:
       type: directory

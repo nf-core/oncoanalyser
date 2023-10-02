@@ -50,7 +50,7 @@ workflow SAGE_CALLING {
 
                 if (run_config.type == Constants.RunType.TUMOR_NORMAL) {
 
-                    assert [Constants.RunMode.WGS, Constants.RunMode.WGTS].contains(run_config.mode)
+                    assert [Constants.RunMode.DNA, Constants.RunMode.DNA_RNA].contains(run_config.mode)
 
                     meta_sage.normal_id = Utils.getNormalDnaSampleName(meta)
                     normal_bam = Utils.getNormalDnaBam(meta)

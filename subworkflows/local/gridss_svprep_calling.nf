@@ -81,7 +81,7 @@ workflow GRIDSS_SVPREP_CALLING {
         ch_preprocess_inputs_normal = Channel.empty()
         if (run_config.type == Constants.RunType.TUMOR_NORMAL) {
 
-            assert [Constants.RunMode.WGS, Constants.RunMode.WGTS].contains(run_config.mode)
+            assert [Constants.RunMode.DNA, Constants.RunMode.DNA_RNA].contains(run_config.mode)
 
             // Prepare normal sample inputs
             // channel: [val(meta_svprep), bam_normal, bai_normal, junctions_tumor]

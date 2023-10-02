@@ -50,7 +50,7 @@ workflow CHANNEL_INPUTS_PURPLE {
         }
 
         // NOTE(SW): Hartwig indicated unfiltered SVs should not be used for recovery in panel or tumor-only mode
-        if (run_config.mode == Constants.RunMode.PANEL || run_config.type == Constants.RunType.TUMOR_ONLY) {
+        if (params.targeted === true || run_config.type == Constants.RunType.TUMOR_ONLY) {
             ch_sv_somatic_unfiltered_source = ch_inputs.map { meta -> [meta, [], []] }
         }
 
