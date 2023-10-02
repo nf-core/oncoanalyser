@@ -79,9 +79,9 @@ workflow ORANGE_REPORTING {
             ch_linx_germline_annotation = ch_inputs.map { meta -> [meta, []] }
         }
 
-        // Do not pass WTS reference files when not required
-        // NOTE(SW): ORANGE v2.6.0 will crash if WTS reference files but not WTS sample files provided
-        if (run_config.mode != Constants.RunMode.WTS && run_config.mode != Constants.RunMode.WGTS) {
+        // Do not pass RNA reference files when not required
+        // NOTE(SW): ORANGE v2.6.0 will crash if RNA reference files but not RNA sample files provided
+        if (run_config.mode != Constants.RunMode.RNA && run_config.mode != Constants.RunMode.DNA_RNA) {
             isofox_alt_sj = []
             isofox_gene_distribution = []
         }
@@ -91,7 +91,7 @@ workflow ORANGE_REPORTING {
 
         // Get input smlv somatic VCF from either PURPLE or SAGE append
         // channel: [ meta, sage_somatic_vcf, sage_germline_vcf ]
-        if (run_config.mode == Constants.RunMode.WGS || run_config.mode == Constants.RunMode.PANEL) {
+        if (run_config.mode == Constants.RunMode.DNA) {
 
             ch_orange_inputs_smlv_vcfs = ch_orange_inputs_purple_dir
                 .map { meta, purple_dir ->
@@ -107,7 +107,7 @@ workflow ORANGE_REPORTING {
                         smlv_somatic_vcf = smlv_somatic_vcf_path
                     }
 
-                    // NOTE(SW): can only evaluate to true with WGS tumor/normal
+                    // NOTE(SW): can only evaluate to true with DNA tumor/normal
                     if (smlv_germline_vcf_path.exists()) {
                         smlv_germline_vcf = smlv_germline_vcf_path
                     }
@@ -115,7 +115,7 @@ workflow ORANGE_REPORTING {
                     return [meta, smlv_somatic_vcf, smlv_germline_vcf]
                 }
 
-        } else if (run_config.mode == Constants.RunMode.WGTS) {
+        } else if (run_config.mode == Constants.RunMode.DNA_RNA) {
 
             ch_orange_inputs_smlv_vcfs = WorkflowOncoanalyser.groupByMeta(
                 ch_sage_somatic_append,

@@ -224,7 +224,7 @@ workflow PREPARE_INPUT {
                             [Constants.SampleType.TUMOR, Constants.SequenceType.TARGETTED],
                         ]
 
-                    } else if (run_config.mode == Constants.RunMode.WGS) {
+                    } else if (run_config.mode == Constants.RunMode.DNA) {
 
                         if (run_config.type == Constants.RunType.TUMOR_ONLY) {
                             required_sample_types = [
@@ -239,13 +239,13 @@ workflow PREPARE_INPUT {
                             assert false
                         }
 
-                    } else if (run_config.mode == Constants.RunMode.WTS) {
+                    } else if (run_config.mode == Constants.RunMode.RNA) {
 
                         required_sample_types = [
                             [Constants.SampleType.TUMOR, Constants.SequenceType.RNA],
                         ]
 
-                    } else if (run_config.mode == Constants.RunMode.WGTS) {
+                    } else if (run_config.mode == Constants.RunMode.DNA_RNA) {
 
                         if (run_config.type == Constants.RunType.TUMOR_ONLY) {
                             required_sample_types = [

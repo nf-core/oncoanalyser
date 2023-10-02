@@ -4,7 +4,7 @@ import Utils
 
 class Processes {
 
-    public static setProcesses(run_mode, manual_select, log) {
+    public static setProcesses(run_mode, manual_select, targeted_mode, log) {
         def processes = []
 
         if (manual_select) {
@@ -12,7 +12,8 @@ class Processes {
         }
 
         switch(run_mode) {
-            case Constants.RunMode.WGS:
+
+            case Constants.RunMode.DNA:
                 processes = [
                     Constants.Process.AMBER,
                     Constants.Process.BAMTOOLS,
@@ -32,13 +33,15 @@ class Processes {
                     Constants.Process.VIRUSINTERPRETER,
                 ]
                 break
-            case Constants.RunMode.WTS:
+
+            case Constants.RunMode.RNA:
                 processes = [
                     Constants.Process.CUPPA,
                     Constants.Process.ISOFOX,
                 ]
                 break
-            case Constants.RunMode.WGTS:
+
+            case Constants.RunMode.DNA_RNA:
                 processes = [
                     Constants.Process.AMBER,
                     Constants.Process.BAMTOOLS,
@@ -59,31 +62,34 @@ class Processes {
                     Constants.Process.VIRUSINTERPRETER,
                 ]
                 break
-            case Constants.RunMode.PANEL:
-                processes = [
-                    Constants.Process.AMBER,
-                    Constants.Process.BAMTOOLS,
-                    Constants.Process.COBALT,
-                    Constants.Process.FLAGSTAT,
-                    Constants.Process.GRIDSS,
-                    Constants.Process.GRIPSS,
-                    Constants.Process.LILAC,
-                    Constants.Process.LINX,
-                    Constants.Process.ORANGE,
-                    Constants.Process.PAVE,
-                    Constants.Process.PURPLE,
-                    Constants.Process.SAGE,
-                ]
-                break
+
+            //case Constants.RunMode.PANEL:
+            //    processes = [
+            //        Constants.Process.AMBER,
+            //        Constants.Process.BAMTOOLS,
+            //        Constants.Process.COBALT,
+            //        Constants.Process.FLAGSTAT,
+            //        Constants.Process.GRIDSS,
+            //        Constants.Process.GRIPSS,
+            //        Constants.Process.LILAC,
+            //        Constants.Process.LINX,
+            //        Constants.Process.ORANGE,
+            //        Constants.Process.PAVE,
+            //        Constants.Process.PURPLE,
+            //        Constants.Process.SAGE,
+            //    ]
+            //    break
+
             default:
                 log.error "\nERROR: we should never have come here"
                 System.exit(1)
         }
+
         return processes
     }
 
-    public static getRunStages(run_mode, include, exclude, manual_select, log) {
-        def processes = this.setProcesses(run_mode, manual_select, log)
+    public static getRunStages(run_mode, include, exclude, manual_select, targeted_mode, log) {
+        def processes = this.setProcesses(run_mode, manual_select, targeted_mode, log)
         def include_list = this.getProcessList(include, log)
         def exclude_list = this.getProcessList(exclude, log)
         this.checkIncludeExcludeList(include_list, exclude_list, log)

@@ -165,11 +165,23 @@ class WorkflowMain {
 
         }
 
+
+
+
+        if (params.targeted === true) {
+            log.error "\nERROR: process selection for targeted mode not implemented yet"
+            System.exit(1)
+        }
+
+
+
+
         def stages = Processes.getRunStages(
             run_mode,
             params.processes_include,
             params.processes_exclude,
             params.processes_manual,
+            params.targeted,
             log,
         )
 
@@ -347,6 +359,7 @@ class WorkflowMain {
             params.processes_include,
             params.processes_exclude,
             params.processes_manual,
+            params.targeted,
             log,
         )
 

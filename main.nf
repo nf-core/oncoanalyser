@@ -55,13 +55,10 @@ include { WGTS  } from './workflows/wgts'
 run_mode = Utils.getRunMode(params.run_mode, log)
 
 workflow NFCORE_ONCOANALYSER {
-    run_modes_wgts = [Constants.RunMode.WGS, Constants.RunMode.WTS, Constants.RunMode.WGTS]
-    if (run_modes_wgts.contains(run_mode)) {
+    if (params.targeted == false) {
         WGTS()
-    } else if (run_mode == Constants.RunMode.PANEL) {
-        PANEL()
     } else {
-        assert false
+        //TARGETED()
     }
 }
 

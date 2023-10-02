@@ -125,7 +125,7 @@ workflow WGTS {
     gridss_config = params.containsKey('gridss_config') ? file(params.gridss_config) : hmf_data.gridss_config
 
     //
-    // MODULE: Run Isofox to analyse WTS data
+    // MODULE: Run Isofox to analyse RNA data
     //
     // channel: [ meta, isofox_dir ]
     ch_isofox_out = Channel.empty()
@@ -365,12 +365,12 @@ workflow WGTS {
     }
 
     //
-    // SUBWORKFLOW: Append WTS data to SAGE VCF
+    // SUBWORKFLOW: Append RNA data to SAGE VCF
     //
     // channel: [ meta, sage_append_vcf ]
     ch_sage_somatic_append_vcf = Channel.empty()
     ch_sage_germline_append_vcf = Channel.empty()
-    if (run_config.mode == Constants.RunMode.WGTS && run_config.stages.orange) {
+    if (run_config.mode == Constants.RunMode.DNA_RNA && run_config.stages.orange) {
 
         // NOTE(SW): currently used only for ORANGE but will also be used for Neo once implemented
 
