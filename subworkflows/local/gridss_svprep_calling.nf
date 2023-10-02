@@ -47,10 +47,10 @@ workflow GRIDSS_SVPREP_CALLING {
             .map { meta ->
                 def meta_svprep = [
                     key: meta.id,
-                    id: Utils.getTumorSampleName(meta, run_config.mode),
+                    id: Utils.getTumorDnaSampleName(meta),
                     sample_type: 'tumor',
                 ]
-                def tumor_bam = Utils.getTumorBam(meta, run_config.mode)
+                def tumor_bam = Utils.getTumorDnaBam(meta)
                 return [meta_svprep, tumor_bam, "${tumor_bam}.bai", []]
             }
 
@@ -89,10 +89,10 @@ workflow GRIDSS_SVPREP_CALLING {
                 .map { meta, junctions_tumor ->
                     def meta_svprep = [
                         key: meta.id,
-                        id: Utils.getNormalWgsSampleName(meta),
+                        id: Utils.getNormalDnaSampleName(meta),
                         sample_type: 'normal',
                     ]
-                    def normal_bam = Utils.getNormalWgsBam(meta)
+                    def normal_bam = Utils.getNormalDnaBam(meta)
                     return [meta_svprep, normal_bam, "${normal_bam}.bai", junctions_tumor]
                 }
 
@@ -243,10 +243,10 @@ workflow GRIDSS_SVPREP_CALLING {
             CALL.out.vcf.map { meta, vcf -> [meta.id, vcf] },
         )
             .map { id, meta, vcf ->
-                def tbam = Utils.getTumorBam(meta, run_config.mode)
+                def tbam = Utils.getTumorDnaBam(meta)
                 def meta_svprep = [
                     id: meta.id,
-                    tumor_id: Utils.getTumorSampleName(meta, run_config.mode),
+                    tumor_id: Utils.getTumorDnaSampleName(meta)
                 ]
 
                 def data = []
@@ -257,19 +257,19 @@ workflow GRIDSS_SVPREP_CALLING {
                         tbam,
                         "${tbam}.bai",
                         vcf,
-                        Utils.getTumorSampleName(meta, run_config.mode),
+                        Utils.getTumorDnaSampleName(meta),
                     ]
 
                 } else if (run_config.type == Constants.RunType.TUMOR_NORMAL) {
 
-                    def nbam = Utils.getNormalWgsBam(meta)
+                    def nbam = Utils.getNormalDnaBam(meta)
 
                     data = [
                         meta_svprep,
                         [nbam, tbam],
                         ["${nbam}.bai", "${tbam}.bai"],
                         vcf,
-                        [Utils.getNormalWgsSampleName(meta), Utils.getTumorWgsSampleName(meta)],
+                        [Utils.getNormalDnaSampleName(meta), Utils.getTumorDnaSampleName(meta)],
                     ]
 
                 } else {

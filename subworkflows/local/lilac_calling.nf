@@ -40,32 +40,32 @@ workflow LILAC_CALLING {
         }
 
         // Create channels for available input BAMs
-        // channel: [ meta, wts_bam, wts_bai ]
-        ch_lilac_bams_wts = Channel.empty()
-        if (run_config.mode == Constants.RunMode.WTS || run_config.mode == Constants.RunMode.WGTS) {
-            ch_lilac_bams_wts = ch_inputs
+        // channel: [ meta, rna_bam, rna_bai ]
+        ch_lilac_bams_rna = Channel.empty()
+        if (run_config.mode == Constants.RunMode.RNA || run_config.mode == Constants.RunMode.DNA_RNA) {
+            ch_lilac_bams_rna = ch_inputs
                 .map { meta ->
-                    def bam = Utils.getTumorWtsBam(meta)
+                    def bam = Utils.getTumorRnaBam(meta)
                     return [meta, bam, "${bam}.bai"]
                 }
         } else {
-            ch_lilac_bams_wts = ch_inputs.map { meta -> [meta, [], []] }
+            ch_lilac_bams_rna = ch_inputs.map { meta -> [meta, [], []] }
         }
 
         // channel: [ meta, bam, bai ]
         ch_lilac_bams = Channel.empty()
-        if (run_config.mode == Constants.RunMode.WGS || run_config.mode == Constants.RunMode.WGTS) {
+        if (run_config.mode == Constants.RunMode.DNA || run_config.mode == Constants.RunMode.DNA_RNA) {
 
             ch_lilac_bams = ch_inputs
                 .map { meta ->
 
-                    def tumor_bam = Utils.getTumorWgsBam(meta)
+                    def tumor_bam = Utils.getTumorDnaBam(meta)
 
                     def normal_bam = []
                     def normal_bai = []
 
                     if (run_config.type == Constants.RunType.TUMOR_NORMAL) {
-                        normal_bam = Utils.getNormalWgsBam(meta)
+                        normal_bam = Utils.getNormalDnaBam(meta)
                         normal_bai = "${normal_bam}.bai"
                     }
 
@@ -84,19 +84,6 @@ workflow LILAC_CALLING {
             ch_lilac_bams = ch_inputs.map { meta -> [meta, [], [], [], []] }
         }
 
-        // Set tumor sequence type for non-WTS input (i.e. WGS or panel)
-        switch(run_config.mode) {
-            case Constants.RunMode.WGS:
-            case Constants.RunMode.WGTS:
-                tumor_sequence_type = Constants.SequenceType.WGS
-                break
-            case Constants.RunMode.PANEL:
-                tumor_sequence_type = Constants.SequenceType.TARGETTED
-                break
-            default:
-                assert false
-        }
-
         // Realign reads mapping to HLA regions and homologus regions if using reference genome with ALT contigs
         // NOTE(SW): the aim of this process is to take reads mapping to ALT contigs and align them to the three
         // relevant HLA genes on chr6. All reads including those previously mapped to chr6 are realigned for
@@ -105,7 +92,7 @@ workflow LILAC_CALLING {
         ch_lilac_bams = ch_lilac_bams
         if (params.ref_data_genome_type == 'alt') {
 
-            // Split non-WTS BAMs into tumor and normal, accounting for optional input
+            // Split DNA BAMs into tumor and normal, accounting for optional input
             // channel: [ meta_extra, bam, bai ]
             ch_slice_bams = ch_lilac_bams
                 .flatMap { meta, tumor_bam, normal_bam, tumor_bai, normal_bai ->
@@ -127,9 +114,9 @@ workflow LILAC_CALLING {
 
                     def sample_name
                     if (meta.sequence_type == 'tumor') {
-                        sample_name = meta[['sample_name', Constants.SampleType.TUMOR, tumor_sequence_type]]
+                        sample_name = meta[['sample_name', Constants.SampleType.TUMOR, Constants.SequenceType.DNA]]
                     } else if (meta.sequence_type == 'normal') {
-                        sample_name = meta[['sample_name', Constants.SampleType.NORMAL, Constants.SequenceType.WGS]]
+                        sample_name = meta[['sample_name', Constants.SampleType.NORMAL, Constants.SequenceType.DNA]]
                     }
 
                     def meta_slice = [
@@ -195,41 +182,41 @@ workflow LILAC_CALLING {
 
         }
 
-        // Combine non-WTS and WTS BAMs, and order as required
-        // channel: [ meta, normal_wgs_bam, normal_wgs_bai, tumor_bam, tumor_bai, tumor_wts_bam, tumor_wts_bai ]
+        // Combine DNA and RNA BAMs, and order as required
+        // channel: [ meta, normal_dna_bam, normal_dna_bai, tumor_bam, tumor_bai, tumor_rna_bam, tumor_rna_bai ]
         ch_lilac_bams_combined = WorkflowOncoanalyser.groupByMeta(
-            ch_lilac_bams_wts,
+            ch_lilac_bams_rna,
             ch_lilac_bams,
             flatten_mode: 'nonrecursive',
         )
             .map { data ->
                 def meta = data[0]
-                def (tbam_wts, tbai_wts, tbam, nbam, tbai, nbai) = data[1..-1]
-                return [meta, nbam, nbai, tbam, tbai, tbam_wts, tbai_wts]
+                def (tbam_rna, tbai_rna, tbam, nbam, tbai, nbai) = data[1..-1]
+                return [meta, nbam, nbai, tbam, tbai, tbam_rna, tbai_rna]
             }
 
         // Add PURPLE inputs
-        // channel: [ meta, normal_wgs_bam, normal_wgs_bai, tumor_bam, tumor_bai, tumor_wts_bam, tumor_wts_bai, purple_dir ]
+        // channel: [ meta, normal_dna_bam, normal_dna_bai, tumor_bam, tumor_bai, tumor_rna_bam, tumor_rna_bai, purple_dir ]
         ch_lilac_inputs_full = WorkflowOncoanalyser.groupByMeta(
             ch_lilac_bams_combined,
             ch_lilac_inputs_purple,
             flatten_mode: 'nonrecursive',
         )
 
-        // Create final input channel for LILAC, remove samples with only WTS BAMs
-        // channel: [ meta_lilac, normal_wgs_bam, normal_wgs_bai, tumor_bam, tumor_bai, tumor_wts_bam, tumor_wts_bai, purple_dir ]
+        // Create final input channel for LILAC, remove samples with only RNA BAMs
+        // channel: [ meta_lilac, normal_dna_bam, normal_dna_bai, tumor_bam, tumor_bai, tumor_rna_bam, tumor_rna_bai, purple_dir ]
         ch_lilac_inputs = ch_lilac_inputs_full
             .map {
                 def meta = it[0]
                 def fps = it[1..-1]
 
-                // LILAC requires either tumor or normal WGS BAM
+                // LILAC requires either tumor or normal DNA BAM
                 if (fps[0] == [] && fps[2] == []) {
                     return Constants.PLACEHOLDER_META
                 }
 
-                def normal_id_key = ['sample_name', Constants.SampleType.NORMAL, Constants.SequenceType.WGS]
-                def tumor_id_key = ['sample_name', Constants.SampleType.TUMOR, tumor_sequence_type]
+                def normal_id_key = ['sample_name', Constants.SampleType.NORMAL, Constants.SequenceType.DNA]
+                def tumor_id_key = ['sample_name', Constants.SampleType.TUMOR, Constants.SequenceType.DNA]
 
                 def meta_lilac = [
                     key: meta.id,

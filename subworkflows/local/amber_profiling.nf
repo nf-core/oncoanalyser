@@ -30,20 +30,20 @@ workflow AMBER_PROFILING {
                 def meta_amber = [
                     key: meta.id,
                     id: meta.id,
-                    tumor_id: Utils.getTumorSampleName(meta, run_config.mode),
+                    tumor_id: Utils.getTumorDnaSampleName(meta),
                 ]
 
-                def tumor_bam = Utils.getTumorBam(meta, run_config.mode)
+                def tumor_bam = Utils.getTumorDnaBam(meta)
 
                 def normal_bam = []
                 def normal_bai = []
 
                 if (run_config.type == Constants.RunType.TUMOR_NORMAL) {
 
-                    assert [Constants.RunMode.WGS, Constants.RunMode.WGTS].contains(run_config.mode)
+                    assert [Constants.RunMode.DNA, Constants.RunMode.DNA_RNA].contains(run_config.mode)
 
-                    meta_amber.normal_id = Utils.getNormalWgsSampleName(meta)
-                    normal_bam = Utils.getNormalWgsBam(meta)
+                    meta_amber.normal_id = Utils.getNormalDnaSampleName(meta)
+                    normal_bam = Utils.getNormalDnaBam(meta)
                     normal_bai = "${normal_bam}.bai"
 
                 }

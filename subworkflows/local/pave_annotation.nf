@@ -60,7 +60,7 @@ workflow PAVE_ANNOTATION {
                     def pave_meta = [
                         key: meta.id,
                         // NOTE(SW): use of tumor sample name for PAVE germline is correct
-                        id: Utils.getTumorSampleName(meta, run_config.mode),
+                        id: Utils.getTumorDnaSampleName(meta),
                     ]
                     return [pave_meta, sage_vcf]
                 }
@@ -93,7 +93,7 @@ workflow PAVE_ANNOTATION {
             .map { meta, sage_vcf, sage_tbi ->
                 def pave_meta = [
                     key: meta.id,
-                    id: Utils.getTumorSampleName(meta, run_config.mode),
+                    id: Utils.getTumorDnaSampleName(meta),
                 ]
                 return [pave_meta, sage_vcf]
             }

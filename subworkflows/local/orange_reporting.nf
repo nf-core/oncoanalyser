@@ -95,7 +95,7 @@ workflow ORANGE_REPORTING {
 
             ch_orange_inputs_smlv_vcfs = ch_orange_inputs_purple_dir
                 .map { meta, purple_dir ->
-                    def tumor_id = Utils.getTumorSampleName(meta, run_config.mode)
+                    def tumor_id = Utils.getTumorDnaSampleName(meta)
 
                     def smlv_somatic_vcf = []
                     def smlv_germline_vcf = []
@@ -153,21 +153,21 @@ workflow ORANGE_REPORTING {
                 def meta = it[0]
 
                 // NOTE(SW): these attributes are optional
-                def normal_wgs_id = meta.getAt(['sample_name', Constants.SampleType.NORMAL, Constants.SequenceType.WGS])
-                def tumor_wts_id = meta.getAt(['sample_name', Constants.SampleType.TUMOR, Constants.SequenceType.WTS])
+                def normal_dna_id = meta.getAt(['sample_name', Constants.SampleType.NORMAL, Constants.SequenceType.DNA])
+                def tumor_rna_id = meta.getAt(['sample_name', Constants.SampleType.TUMOR, Constants.SequenceType.RNA])
 
                 def meta_orange = [
                     key: meta.id,
                     id: meta.id,
-                    tumor_id: Utils.getTumorSampleName(meta, run_config.mode),
+                    tumor_id: Utils.getTumorDnaSampleName(meta),
                 ]
 
                 // Add optional identifiers to meta
-                if (normal_wgs_id) {
-                    meta_orange.normal_wgs_id = normal_wgs_id
+                if (normal_dna_id) {
+                    meta_orange.normal_dna_id = normal_dna_id
                 }
-                if (tumor_wts_id) {
-                    meta_orange.tumor_wts_id = tumor_wts_id
+                if (tumor_rna_id) {
+                    meta_orange.tumor_rna_id = tumor_rna_id
                 }
 
                 return [meta_orange, *it[1..-1]]

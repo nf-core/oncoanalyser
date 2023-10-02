@@ -41,11 +41,11 @@ workflow GRIPSS_FILTERING {
                 def meta_gripss = [
                     key: meta.id,
                     id: meta.id,
-                    tumor_id: Utils.getTumorSampleName(meta, run_config.mode),
+                    tumor_id: Utils.getTumorDnaSampleName(meta),
                 ]
 
                 if (run_config.type == Constants.RunType.TUMOR_NORMAL) {
-                    meta_gripss.normal_id = Utils.getNormalWgsSampleName(meta)
+                    meta_gripss.normal_id = Utils.getNormalDnaSampleName(meta)
                 }
 
                 return [meta_gripss, gridss_vcf]

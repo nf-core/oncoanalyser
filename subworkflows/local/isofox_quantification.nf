@@ -30,12 +30,12 @@ workflow ISOFOX_QUANTIFICATION {
         ch_versions = Channel.empty()
 
         // Create inputs and create process-specific meta
-        // channel: [ meta_isofox, tumor_bam_wts ]
+        // channel: [ meta_isofox, tumor_bam_rna ]
         if (run_config.stages.isofox) {
             ch_isofox_inputs = ch_inputs
                 .map { meta ->
-                    def bam = Utils.getTumorWtsBam(meta)
-                    def meta_isofox = [key: meta.id, id: Utils.getTumorWtsSampleName(meta)]
+                    def bam = Utils.getTumorRnaBam(meta)
+                    def meta_isofox = [key: meta.id, id: Utils.getTumorRnaSampleName(meta)]
                     return [meta_isofox, bam, "${bam}.bai"]
                 }
         } else {

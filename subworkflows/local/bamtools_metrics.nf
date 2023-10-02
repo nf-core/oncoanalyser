@@ -32,21 +32,21 @@ workflow BAMTOOLS_METRICS {
 
                 def meta_bamtools_tumor = [
                     key: meta.id,
-                    id: Utils.getTumorSampleName(meta, run_config.mode),
+                    id: Utils.getTumorDnaSampleName(meta),
                     // NOTE(SW): must use string representation for caching purposes
                     sample_type_str: Constants.SampleType.TUMOR.name(),
                 ]
-                def tumor_bam = Utils.getTumorBam(meta, run_config.mode)
+                def tumor_bam = Utils.getTumorDnaBam(meta)
                 inputs.add([meta_bamtools_tumor, tumor_bam, "${tumor_bam}.bai"])
 
                 if (run_config.type == Constants.RunType.TUMOR_NORMAL) {
                     def meta_bamtools_normal = [
                         key: meta.id,
-                        id: Utils.getNormalWgsSampleName(meta),
+                        id: Utils.getNormalDnaSampleName(meta),
                         // NOTE(SW): must use string representation for caching purposes
                         sample_type_str: Constants.SampleType.NORMAL.name(),
                     ]
-                    def normal_bam = Utils.getNormalWgsBam(meta)
+                    def normal_bam = Utils.getNormalDnaBam(meta)
                     inputs.add([meta_bamtools_normal, normal_bam, "${normal_bam}.bai"])
                 }
 

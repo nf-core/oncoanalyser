@@ -69,58 +69,30 @@ class Utils {
 
 
     // Sample names
-    static public getTumorSampleName(meta, run_mode) {
-
-        // NOTE(SW): this should /only/ be used to get panel or WGS tumor sample name, WTS sample name retrieval is not supported
-
-        def sequence_type
-        if (run_mode == Constants.RunMode.PANEL) {
-            sequence_type = Constants.SequenceType.TARGETTED
-        } else if (run_mode == Constants.RunMode.WGS || run_mode == Constants.RunMode.WGTS) {
-            sequence_type = Constants.SequenceType.WGS
-        }
-
-        return getMetaEntry(meta, ['sample_name', Constants.SampleType.TUMOR, sequence_type])
+    static public getTumorDnaSampleName(meta) {
+        return getMetaEntry(meta, ['sample_name', Constants.SampleType.TUMOR, Constants.SequenceType.DNA])
     }
 
-    static public getTumorWgsSampleName(meta) {
-        return getMetaEntry(meta, ['sample_name', Constants.SampleType.TUMOR, Constants.SequenceType.WGS])
+    static public getTumorRnaSampleName(meta) {
+        return getMetaEntry(meta, ['sample_name', Constants.SampleType.TUMOR, Constants.SequenceType.RNA])
     }
 
-    static public getTumorWtsSampleName(meta) {
-        return getMetaEntry(meta, ['sample_name', Constants.SampleType.TUMOR, Constants.SequenceType.WTS])
-    }
-
-    static public getNormalWgsSampleName(meta) {
-        return getMetaEntry(meta, ['sample_name', Constants.SampleType.NORMAL, Constants.SequenceType.WGS])
+    static public getNormalDnaSampleName(meta) {
+        return getMetaEntry(meta, ['sample_name', Constants.SampleType.NORMAL, Constants.SequenceType.DNA])
     }
 
 
     // Files
-    static public getTumorBam(meta, run_mode) {
-
-        // NOTE(SW): this should /only/ be used to get panel or WGS tumor BAM, WTS BAM retrieval is not supported
-
-        def sequence_type
-        if (run_mode == Constants.RunMode.PANEL) {
-            sequence_type = Constants.SequenceType.TARGETTED
-        } else if (run_mode == Constants.RunMode.WGS || run_mode == Constants.RunMode.WGTS) {
-            sequence_type = Constants.SequenceType.WGS
-        }
-
-        return getMetaEntry(meta, [Constants.FileType.BAM, Constants.SampleType.TUMOR, sequence_type])
+    static public getTumorDnaBam(meta) {
+        return getMetaEntry(meta, [Constants.FileType.BAM, Constants.SampleType.TUMOR, Constants.SequenceType.DNA])
     }
 
-    static public getTumorWgsBam(meta) {
-        return getMetaEntry(meta, [Constants.FileType.BAM, Constants.SampleType.TUMOR, Constants.SequenceType.WGS])
+    static public getTumorRnaBam(meta) {
+        return getMetaEntry(meta, [Constants.FileType.BAM, Constants.SampleType.TUMOR, Constants.SequenceType.RNA])
     }
 
-    static public getNormalWgsBam(meta) {
-        return getMetaEntry(meta, [Constants.FileType.BAM, Constants.SampleType.NORMAL, Constants.SequenceType.WGS])
-    }
-
-    static public getTumorWtsBam(meta) {
-        return getMetaEntry(meta, [Constants.FileType.BAM, Constants.SampleType.TUMOR, Constants.SequenceType.WTS])
+    static public getNormalDnaBam(meta) {
+        return getMetaEntry(meta, [Constants.FileType.BAM, Constants.SampleType.NORMAL, Constants.SequenceType.DNA])
     }
 
 

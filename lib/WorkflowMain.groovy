@@ -140,13 +140,13 @@ class WorkflowMain {
             return
         }
 
-        if (run_mode == Constants.RunMode.WTS) {
+        if (run_mode == Constants.RunMode.RNA) {
             if (!params.containsKey('run_type')) {
                 params.run_type = 'tumor_only'
             }
         }
 
-        if (run_mode == Constants.RunMode.PANEL) {
+        if (params.targeted === true) {
 
             if (!params.containsKey('run_type')) {
                 params.run_type = 'tumor_only'
@@ -285,7 +285,7 @@ class WorkflowMain {
         def run_mode = Utils.getRunMode(params.run_mode, log)
         def run_type = Utils.getRunType(params.run_type, log)
 
-        if (run_mode == Constants.RunMode.WTS) {
+        if (run_mode == Constants.RunMode.RNA) {
             if (run_type != Constants.RunType.TUMOR_ONLY) {
                 log.error "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n" +
                     "  The WTS run mode does not support tumor/normal data, please adjust the CLI \n" +
@@ -296,7 +296,7 @@ class WorkflowMain {
 
         }
 
-        if (run_mode == Constants.RunMode.PANEL) {
+        if (params.targeted === true) {
 
             if (run_type != Constants.RunType.TUMOR_ONLY) {
                 log.error "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n" +
@@ -307,6 +307,7 @@ class WorkflowMain {
             }
 
             if (!params.containsKey('panel')) {
+
                 def panels = Constants.PANELS_DEFINED.join('\n    - ')
                 log.error "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n" +
                     "  A panel is required to be set using the --panel CLI argument or in a \n" +
@@ -315,13 +316,16 @@ class WorkflowMain {
                     "    - ${panels}\n" +
                     "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
                 System.exit(1)
+
             } else if (!Constants.PANELS_DEFINED.contains(params.panel)) {
+
                 def panels = Constants.PANELS_DEFINED.join('\n    - ')
                 log.error "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n" +
                     "  The ${params.panel} is not defined. Currently, the available panels are:\n" +
                     "    - ${panels}\n" +
                     "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
                 System.exit(1)
+
             }
 
             if (params.panel == 'hmf' && params.ref_data_genome_version == '37') {

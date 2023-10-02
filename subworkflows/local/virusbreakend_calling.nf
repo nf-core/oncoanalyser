@@ -44,7 +44,7 @@ workflow VIRUSBREAKEND_CALLING {
                     key: meta.id,
                     id: meta.id,
                 ]
-                return [meta_virus, Utils.getTumorBam(meta, run_config.mode)]
+                return [meta_virus, Utils.getTumorDnaBam(meta)]
             }
 
         // Run process
@@ -82,7 +82,7 @@ workflow VIRUSBREAKEND_CALLING {
                 def meta = it[0]
                 def meta_virus = [
                     key: meta.id,
-                    id: Utils.getTumorSampleName(meta, run_config.mode),
+                    id: Utils.getTumorDnaSampleName(meta),
                 ]
                 return [meta_virus, *it[1..-1]]
             }
