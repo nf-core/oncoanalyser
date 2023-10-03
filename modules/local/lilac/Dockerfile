@@ -10,7 +10,7 @@ RUN \
 
 RUN \
   mkdir -p /opt/lilac/ && \
-  wget -O /opt/lilac/lilac.jar 'https://github.com/hartwigmedical/hmftools/releases/download/lilac-v1.5.1/lilac_v1.5.1.jar'
+  wget -O /opt/lilac/lilac.jar 'https://github.com/hartwigmedical/hmftools/releases/download/lilac-v1.5.2/lilac_v1.5.2.jar'
 
 USER mambauser
 
