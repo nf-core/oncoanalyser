@@ -91,6 +91,30 @@
                     "description": "Path to LINX gene ID file.",
                     "fa_icon": "fas fa-cog"
                 },
+                "isofox_read_length": {
+                    "description": "User defined RNA read length used for Isofox.",
+                    "fa_icon": "fas fa-cog"
+                },
+                "isofox_gc_ratios": {
+                    "type": "string",
+                    "description": "User defined Isofox expected GC ratios file.",
+                    "fa_icon": "fas fa-cog"
+                },
+                "isofox_counts": {
+                    "type": "string",
+                    "description": "User defined Isofox expected counts files (read length dependent).",
+                    "fa_icon": "fas fa-cog"
+                },
+                "isofox_tpm_norm": {
+                    "type": "string",
+                    "description": "User defined Isofox TPM normalisation file for panel data.",
+                    "fa_icon": "fas fa-cog"
+                },
+                "isofox_gene_ids": {
+                    "type": "string",
+                    "description": "User defined Isofox gene list file for panel data.",
+                    "fa_icon": "fas fa-cog"
+                },
                 "isofox_functions": {
                     "type": "string",
                     "description": "Semicolon-separated list of Isofox functions to run",
