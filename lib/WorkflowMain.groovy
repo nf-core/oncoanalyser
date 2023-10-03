@@ -336,6 +336,14 @@ class WorkflowMain {
                 System.exit(1)
             }
 
+            def rna_run = run_mode == Constants.RunMode.RNA || run_mode == Constants.RunMode.DNA_RNA
+            if (rna_run && params.panel != 'tso500') {
+                log.error "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n" +
+                    "  Currently only the TSO500 panel (tso500) supports RNA analysis.\n" +
+                    "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
+                System.exit(1)
+            }
+
         }
 
     }
