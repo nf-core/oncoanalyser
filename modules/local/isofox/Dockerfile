@@ -10,7 +10,7 @@ RUN \
 
 RUN \
   mkdir -p /opt/isofox/ && \
-  wget -O /opt/isofox/isofox.jar 'https://github.com/hartwigmedical/hmftools/releases/download/isofox-v1.6.2/isofox_v1.6.2.jar'
+  wget -O /opt/isofox/isofox.jar 'https://github.com/hartwigmedical/hmftools/releases/download/isofox-v1.7/isofox_v1.7.jar'
 
 USER mambauser
 

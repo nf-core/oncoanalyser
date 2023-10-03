@@ -23,6 +23,12 @@ input:
       type: file
       description: BAI file
       pattern: "*.{bai}"
+  - functions:
+      type: string
+      description: Isofox functions to run
+  - read_length:
+      type: integer
+      description: Read length
   - genome_fasta:
       type: file
       description: Reference genome assembly FASTA file
@@ -44,6 +50,14 @@ input:
   - exp_gc_ratios:
       type: file
       description: Isofox expected GC ratio counts file (optional)
+      pattern: "*.{csv}"
+  - gene_ids:
+      type: file
+      description: Isofox gene ID file (optional)
+      pattern: "*.{csv}"
+  - tmp_norm:
+      type: file
+      description: Isofox TPM noramlisation file (optional)
       pattern: "*.{csv}"
 output:
   - meta:
