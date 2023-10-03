@@ -139,7 +139,10 @@ workflow WGTS {
             hmf_data.ensembl_data_resources,
             hmf_data.isofox_counts,
             hmf_data.isofox_gc_ratios,
+            [],  // isofox_gene_ids
+            [],  // isofox_tpm_norm
             params.isofox_functions,
+            params.isofox_read_length,
             run_config,
         )
 
