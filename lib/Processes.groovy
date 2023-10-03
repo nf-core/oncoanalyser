@@ -11,78 +11,44 @@ class Processes {
             return processes
         }
 
-        switch(run_mode) {
+        if (run_mode === Constants.RunMode.DNA || run_mode === Constants.RunMode.DNA_RNA) {
 
-            case Constants.RunMode.DNA:
-                processes = [
-                    Constants.Process.AMBER,
-                    Constants.Process.BAMTOOLS,
+            processes += [
+                Constants.Process.AMBER,
+                Constants.Process.BAMTOOLS,
+                Constants.Process.COBALT,
+                Constants.Process.FLAGSTAT,
+                Constants.Process.GRIDSS,
+                Constants.Process.GRIPSS,
+                Constants.Process.LILAC,
+                Constants.Process.LINX,
+                Constants.Process.ORANGE,
+                Constants.Process.PAVE,
+                Constants.Process.PURPLE,
+                Constants.Process.SAGE,
+            ]
+
+            if (targeted_mode === false) {
+                processes += [
                     Constants.Process.CHORD,
-                    Constants.Process.COBALT,
                     Constants.Process.CUPPA,
-                    Constants.Process.FLAGSTAT,
-                    Constants.Process.GRIDSS,
-                    Constants.Process.GRIPSS,
-                    Constants.Process.LILAC,
-                    Constants.Process.LINX,
-                    Constants.Process.ORANGE,
-                    Constants.Process.PAVE,
-                    Constants.Process.PURPLE,
-                    Constants.Process.SAGE,
                     Constants.Process.SIGS,
                     Constants.Process.VIRUSINTERPRETER,
                 ]
-                break
+            }
 
-            case Constants.RunMode.RNA:
-                processes = [
-                    Constants.Process.CUPPA,
-                    Constants.Process.ISOFOX,
-                ]
-                break
+        }
 
-            case Constants.RunMode.DNA_RNA:
-                processes = [
-                    Constants.Process.AMBER,
-                    Constants.Process.BAMTOOLS,
-                    Constants.Process.CHORD,
-                    Constants.Process.COBALT,
-                    Constants.Process.CUPPA,
-                    Constants.Process.FLAGSTAT,
-                    Constants.Process.GRIDSS,
-                    Constants.Process.GRIPSS,
-                    Constants.Process.ISOFOX,
-                    Constants.Process.LILAC,
-                    Constants.Process.LINX,
-                    Constants.Process.ORANGE,
-                    Constants.Process.PAVE,
-                    Constants.Process.PURPLE,
-                    Constants.Process.SAGE,
-                    Constants.Process.SIGS,
-                    Constants.Process.VIRUSINTERPRETER,
-                ]
-                break
+        if (run_mode === Constants.RunMode.RNA || run_mode === Constants.RunMode.DNA_RNA) {
 
-            //case Constants.RunMode.PANEL:
-            //    processes = [
-            //        Constants.Process.AMBER,
-            //        Constants.Process.BAMTOOLS,
-            //        Constants.Process.COBALT,
-            //        Constants.Process.FLAGSTAT,
-            //        Constants.Process.GRIDSS,
-            //        Constants.Process.GRIPSS,
-            //        Constants.Process.LILAC,
-            //        Constants.Process.LINX,
-            //        Constants.Process.ORANGE,
-            //        Constants.Process.PAVE,
-            //        Constants.Process.PURPLE,
-            //        Constants.Process.SAGE,
-            //    ]
-            //    break
+            processes += [Constants.Process.ISOFOX]
 
-            default:
-                log.error "\nERROR: we should never have come here"
-                System.exit(1)
+            // TODO(SW): understand whether Hartwig will offer RNA-only panel processing
+
+            if (targeted_mode === false) {
+                processes += [Constants.Process.CUPPA]
+            }
+
         }
 
         return processes
