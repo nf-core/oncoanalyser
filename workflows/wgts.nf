@@ -15,6 +15,8 @@ run_config = WorkflowMain.getRunConfig(params, log)
 // Check input path parameters to see if they exist
 def checkPathParamList = [
     params.input,
+    params.isofox_counts,
+    params.isofox_gc_ratios,
     params.linx_gene_id_file,
 ]
 
@@ -131,14 +133,17 @@ workflow WGTS {
     ch_isofox_out = Channel.empty()
     if (run_config.stages.isofox) {
 
+        isofox_counts = params.isofox_counts ? file(params.isofox_counts) : hmf_data.isofox_counts
+        isofox_gc_ratios = params.isofox_gc_ratios ? file(params.isofox_gc_ratios) : hmf_data.isofox_gc_ratios
+
         ISOFOX_QUANTIFICATION(
             ch_inputs,
             ref_data.genome_fasta,
             ref_data.genome_version,
             ref_data.genome_fai,
             hmf_data.ensembl_data_resources,
-            hmf_data.isofox_counts,
-            hmf_data.isofox_gc_ratios,
+            isofox_counts,
+            isofox_gc_ratios,
             [],  // isofox_gene_ids
             [],  // isofox_tpm_norm
             params.isofox_functions,
@@ -371,8 +376,8 @@ workflow WGTS {
     // SUBWORKFLOW: Append RNA data to SAGE VCF
     //
     // channel: [ meta, sage_append_vcf ]
-    ch_sage_somatic_append_vcf = Channel.empty()
-    ch_sage_germline_append_vcf = Channel.empty()
+    ch_sage_somatic_append_out = Channel.empty()
+    ch_sage_germline_append_out = Channel.empty()
     if (run_config.mode == Constants.RunMode.DNA_RNA && run_config.stages.orange) {
 
         // NOTE(SW): currently used only for ORANGE but will also be used for Neo once implemented
@@ -388,8 +393,8 @@ workflow WGTS {
         )
 
         ch_versions = ch_versions.mix(SAGE_APPEND.out.versions)
-        ch_sage_somatic_append_vcf = ch_sage_somatic_append_vcf.mix(SAGE_APPEND.out.somatic_vcf)
-        ch_sage_germline_append_vcf = ch_sage_germline_append_vcf.mix(SAGE_APPEND.out.germline_vcf)
+        ch_sage_somatic_append_out = ch_sage_somatic_append_out.mix(SAGE_APPEND.out.somatic_vcf)
+        ch_sage_germline_append_out = ch_sage_germline_append_out.mix(SAGE_APPEND.out.germline_vcf)
     }
 
     //
@@ -551,8 +556,8 @@ workflow WGTS {
             ch_bamtools_germline_out,
             ch_sage_somatic_dir_out,
             ch_sage_germline_dir_out,
-            ch_sage_somatic_append_vcf,
-            ch_sage_germline_append_vcf,
+            ch_sage_somatic_append_out,
+            ch_sage_germline_append_out,
             ch_purple_out,
             ch_linx_somatic_out,
             ch_linx_somatic_plot_out,

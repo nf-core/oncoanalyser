@@ -15,6 +15,10 @@ run_config = WorkflowMain.getRunConfig(params, log)
 // Check input path parameters to see if they exist
 def checkPathParamList = [
     params.input,
+    params.isofox_counts,
+    params.isofox_gc_ratios,
+    params.isofox_gene_ids,
+    params.isofox_tpm_norm,
     params.linx_gene_id_file,
 ]
 
@@ -61,6 +65,7 @@ include { BAMTOOLS_METRICS      } from '../subworkflows/local/bamtools_metrics'
 include { COBALT_PROFILING      } from '../subworkflows/local/cobalt_profiling'
 include { GRIDSS_SVPREP_CALLING } from '../subworkflows/local/gridss_svprep_calling'
 include { GRIPSS_FILTERING      } from '../subworkflows/local/gripss_filtering'
+include { ISOFOX_QUANTIFICATION } from '../subworkflows/local/isofox_quantification'
 include { LILAC_CALLING         } from '../subworkflows/local/lilac_calling'
 include { LINX_ANNOTATION       } from '../subworkflows/local/linx_annotation'
 include { LINX_PLOTTING         } from '../subworkflows/local/linx_plotting'
@@ -69,6 +74,7 @@ include { PAVE_ANNOTATION       } from '../subworkflows/local/pave_annotation'
 include { PREPARE_INPUT         } from '../subworkflows/local/prepare_input'
 include { PREPARE_REFERENCE     } from '../subworkflows/local/prepare_reference'
 include { PURPLE_CALLING        } from '../subworkflows/local/purple_calling'
+include { SAGE_APPEND           } from '../subworkflows/local/sage_append'
 include { SAGE_CALLING          } from '../subworkflows/local/sage_calling'
 
 /*
@@ -115,6 +121,38 @@ workflow PANEL {
 
     // Set GRIDSS config
     gridss_config = params.containsKey('gridss_config') ? file(params.gridss_config) : hmf_data.gridss_config
+
+    //
+    // MODULE: Run Isofox to analyse RNA data
+    //
+    // channel: [ meta, isofox_dir ]
+    ch_isofox_out = Channel.empty()
+    if (run_config.stages.isofox) {
+
+        isofox_counts = params.isofox_counts ? file(params.isofox_counts) : hmf_data.isofox_counts
+        isofox_gc_ratios = params.isofox_gc_ratios ? file(params.isofox_gc_ratios) : hmf_data.isofox_gc_ratios
+
+        isofox_gene_ids = params.isofox_gene_ids ? file(params.isofox_gene_ids) : panel_data.isofox_gene_ids
+        isofox_tpm_norm = params.isofox_tpm_norm ? file(params.isofox_tpm_norm) : panel_data.isofox_tpm_norm
+
+        ISOFOX_QUANTIFICATION(
+            ch_inputs,
+            ref_data.genome_fasta,
+            ref_data.genome_version,
+            ref_data.genome_fai,
+            hmf_data.ensembl_data_resources,
+            isofox_counts,
+            isofox_gc_ratios,
+            isofox_gene_ids,
+            isofox_tpm_norm,
+            params.isofox_functions,
+            params.isofox_read_length,
+            run_config,
+        )
+
+        ch_versions = ch_versions.mix(ISOFOX_QUANTIFICATION.out.versions)
+        ch_isofox_out = ch_isofox_out.mix(ISOFOX_QUANTIFICATION.out.isofox_dir)
+    }
 
     //
     // SUBWORKFLOW: Run Bam Tools to generate stats required for downstream processes
@@ -324,6 +362,29 @@ workflow PANEL {
     }
 
     //
+    // SUBWORKFLOW: Append RNA data to SAGE VCF
+    //
+    // channel: [ meta, sage_append_vcf ]
+    ch_sage_somatic_append_out = Channel.empty()
+    if (run_config.mode == Constants.RunMode.DNA_RNA && run_config.stages.orange) {
+
+        // NOTE(SW): currently used only for ORANGE but will also be used for Neo once implemented
+
+        SAGE_APPEND(
+            ch_inputs,
+            ch_purple_out,
+            ref_data.genome_fasta,
+            ref_data.genome_version,
+            ref_data.genome_fai,
+            ref_data.genome_dict,
+            run_config,
+        )
+
+        ch_versions = ch_versions.mix(SAGE_APPEND.out.versions)
+        ch_sage_somatic_append_out = ch_sage_somatic_append_out.mix(SAGE_APPEND.out.somatic_vcf)
+    }
+
+    //
     // SUBWORKFLOW: Group structural variants into higher order events with LINX
     //
     // channel: [ meta, linx_annotation_dir ]
@@ -394,8 +455,8 @@ workflow PANEL {
             [],  //ch_bamtools_germline_out
             ch_sage_somatic_dir_out,
             [],  // ch_sage_germline_dir_out
-            [],  // ch_sage_somatic_append_vcf
-            [],  // ch_sage_germline_append_vcf
+            ch_sage_somatic_append_out,
+            [],  // ch_sage_germline_append_out
             ch_purple_out,
             ch_linx_somatic_out,
             ch_linx_somatic_plot_out,
@@ -405,7 +466,7 @@ workflow PANEL {
             [],  // ch_sigs_out
             ch_lilac_out,
             [],  // ch_cuppa_out
-            [],  // ch_isofox_out
+            ch_isofox_out,
             ref_data.genome_version,
             hmf_data.disease_ontology,
             hmf_data.cohort_mapping,
