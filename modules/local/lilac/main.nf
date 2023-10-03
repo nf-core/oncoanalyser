@@ -22,7 +22,7 @@ process LILAC {
     def sample_name = getSampleName(meta, tumor_dna_bam, normal_dna_bam)
 
     def normal_bam_arg = normal_dna_bam ? "-reference_bam ${normal_dna_bam}" : ''
-    def tumor_dna_bam_arg = tumor_dna_bam ? "-tumor_dna_bam ${tumor_dna_bam}" : ''
+    def tumor_dna_bam_arg = tumor_dna_bam ? "-tumor_bam ${tumor_dna_bam}" : ''
     def tumor_rna_bam_arg = tumor_rna_bam ? "-rna_bam ${tumor_rna_bam}" : ''
 
     def purple_dir_arg = purple_dir ? "-purple_dir ${purple_dir}" : ''
