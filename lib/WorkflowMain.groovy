@@ -141,9 +141,11 @@ class WorkflowMain {
         }
 
         if (run_mode == Constants.RunMode.RNA) {
+
             if (!params.containsKey('run_type')) {
                 params.run_type = 'tumor_only'
             }
+
         }
 
         if (params.targeted === true) {
