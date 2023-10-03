@@ -45,8 +45,8 @@ WorkflowMain.paramsSummaryLog(workflow, params, log)
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 */
 
-include { PANEL } from './workflows/panel'
-include { WGTS  } from './workflows/wgts'
+include { TARGETED  } from './workflows/targeted'
+include { WGTS      } from './workflows/wgts'
 
 //
 // WORKFLOW: Run main nf-core/oncoanalyser analysis pipeline
@@ -58,7 +58,7 @@ workflow NFCORE_ONCOANALYSER {
     if (params.targeted == false) {
         WGTS()
     } else {
-        //TARGETED()
+        TARGETED()
     }
 }
 

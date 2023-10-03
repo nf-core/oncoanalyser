@@ -97,7 +97,7 @@ include { CUSTOM_DUMPSOFTWAREVERSIONS } from '../modules/nf-core/custom/dumpsoft
 // Get absolute file paths
 samplesheet = Utils.getFileObject(params.input)
 
-workflow PANEL {
+workflow TARGETED {
 
     // Create channel for versions
     // channel: [ versions.yml ]
