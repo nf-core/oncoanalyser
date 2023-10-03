@@ -25,6 +25,11 @@ class Constants {
 
     static String HLA_SLICE_BED_GRCH38_ALT_PATH = 'https://pub-29f2e5b2b7384811bdbbcba44f8b5083.r2.dev/umccr_reference_data/other/hla_slice/grch38_alt.plus_homologous.bed'
 
+
+    static Integer DEFAULT_ISOFOX_READ_LENGTH_WTS = 151
+    static Integer DEFAULT_ISOFOX_READ_LENGTH_TARGETED = 93
+
+
     static enum RunType {
         TUMOR_NORMAL,
         TUMOR_ONLY,

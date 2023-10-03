@@ -185,6 +185,17 @@ class WorkflowMain {
                 params.ref_data_hla_slice_bed = Constants.HLA_SLICE_BED_GRCH38_ALT_PATH
             }
         }
+
+        if (stages.isofox && !params.containsKey('isofox_read_length')) {
+
+            if (params.targeted === false) {
+                params.isofox_read_length = Constants.DEFAULT_ISOFOX_READ_LENGTH_WTS
+            } else {
+                params.isofox_read_length = Constants.DEFAULT_ISOFOX_READ_LENGTH_TARGETED
+            }
+
+        }
+
     }
 
     //
