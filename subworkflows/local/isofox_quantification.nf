@@ -44,22 +44,6 @@ workflow ISOFOX_QUANTIFICATION {
             ch_isofox_inputs = WorkflowOncoanalyser.getInput(ch_inputs, Constants.INPUT.ISOFOX_DIR, type: 'optional')
         }
 
-        // Set Isofox cache files
-        // NOTE(SW): the Isofox expected count file is read length dependent so required users to explicitly use expect
-        // counts generated for 151 bp reads that is available in the HMF reference bundle. When not specifying an
-        // expected count file, Isofox will automatically create one for the computed read length. However, doing so
-        // greatly increases runtime.
-        // NOTE(SW): consider alternative approaches for using the expected count file e.g. generate once at runtime,
-        // then use for all samples; generate all possible read lengths outside of pipeline and store on a remote for
-        // retrieval at runtime (requires inference of read length)
-
-        // TODO(SW): this must be improved to allow users to set input file, use cache, or generate at runtime;
-        // currently does not update functions
-        // NOTE(SW): forcing use of cache for now since this feature is incomplete
-
-        //isofox_counts = params.use_isofox_exp_counts_cache ? isofox_counts : []
-        isofox_counts = isofox_counts
-
         // Run process
         ISOFOX(
             ch_isofox_inputs,
