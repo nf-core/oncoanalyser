@@ -18,10 +18,12 @@ workflow ISOFOX_QUANTIFICATION {
         ensembl_data_resources // channel: [mandatory] /path/to/ensembl_data_resources/
         isofox_counts          // channel: [mandatory] /path/to/isofox_counts
         isofox_gc_ratios       // channel: [mandatory] /path/to/isofox_gc_ratios
+        isofox_gene_ids        // channel: [optional]  /path/to/gene_ids
+        isofox_tpm_norm        // channel: [optional]  /path/to/tpm_norm
 
         // Params
-        isofox_functions       //  string: [optional] isofox functions
-        //use_isofox_exp_counts_cache
+        isofox_functions       //  string: [optional]  isofox functions
+        isofox_read_length     //  string: [mandatory] isofox_read_length
         run_config             // channel: [mandatory] run configuration
 
     main:
@@ -62,12 +64,15 @@ workflow ISOFOX_QUANTIFICATION {
         ISOFOX(
             ch_isofox_inputs,
             isofox_functions,
+            isofox_read_length,
             genome_fasta,
             genome_version,
             genome_fai,
             ensembl_data_resources,
             isofox_counts,
             isofox_gc_ratios,
+            isofox_gene_ids,
+            isofox_tpm_norm,
         )
 
         // Set outputs, restoring original meta
