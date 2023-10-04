@@ -30,15 +30,9 @@ class Constants {
     static Integer DEFAULT_ISOFOX_READ_LENGTH_TARGETED = 93
 
 
-    static enum RunType {
-        TUMOR_NORMAL,
-        TUMOR_ONLY,
-    }
-
     static enum RunMode {
-        DNA,
-        RNA,
-        DNA_RNA,
+        TARGETED,
+        WGTS,
     }
 
     static enum Process {
@@ -70,8 +64,11 @@ class Constants {
         BAMTOOLS,
         COBALT_DIR,
         GRIDSS_VCF,
+        GRIDSS_VCF_TBI,
         GRIPSS_VCF,
+        GRIPSS_VCF_TBI,
         GRIPSS_UNFILTERED_VCF,
+        GRIPSS_UNFILTERED_VCF_TBI,
         ISOFOX_DIR,
         LILAC_DIR,
         LINX_ANNO_DIR,

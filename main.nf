@@ -36,8 +36,8 @@ params.ref_data_genome_gridss_index    = WorkflowMain.getGenomeAttribute(params,
 
 WorkflowMain.initialise(workflow, params, log)
 WorkflowMain.setParamsDefaults(params, log)
-WorkflowMain.validateParams(params, log)
-WorkflowMain.paramsSummaryLog(workflow, params, log)
+//WorkflowMain.validateParams(params, log)
+//WorkflowMain.paramsSummaryLog(workflow, params, log)
 
 /*
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -45,20 +45,32 @@ WorkflowMain.paramsSummaryLog(workflow, params, log)
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 */
 
-include { TARGETED  } from './workflows/targeted'
+//include { TARGETED  } from './workflows/targeted'
 include { WGTS      } from './workflows/wgts'
 
 //
 // WORKFLOW: Run main nf-core/oncoanalyser analysis pipeline
 //
 
-run_mode = Utils.getRunMode(params.run_mode, log)
+
+
+
+
+//run_mode = Utils.getRunMode(params.run_mode, log)
+
+
+
+
+include { PREPARE_INPUT } from './subworkflows/local/prepare_input'
+
+
+
 
 workflow NFCORE_ONCOANALYSER {
     if (params.targeted == false) {
         WGTS()
     } else {
-        TARGETED()
+        //TARGETED()
     }
 }
 

@@ -16,51 +16,61 @@ workflow AMBER_PROFILING {
         heterozygous_sites // channel: [optional]  /path/to/heterozygous_sites
 
         // Params
-        run_config         // channel: [mandatory] run configuration
+        //run_config         // channel: [mandatory] run configuration
 
     main:
         // Channel for version.yml files
         // channel: [ versions.yml ]
         ch_versions = Channel.empty()
 
-        // Select input sources
-        // channel: [ meta_amber, tumor_bam, normal_bam, tumor_bai, normal_bai ]
-        ch_amber_inputs = ch_inputs
-            .map { meta ->
-                def meta_amber = [
-                    key: meta.id,
-                    id: meta.id,
-                    tumor_id: Utils.getTumorDnaSampleName(meta),
-                ]
+        //// Select input sources
+        //// channel: [ meta_amber, tumor_bam, normal_bam, tumor_bai, normal_bai ]
+        //ch_amber_inputs = ch_inputs
+        //    .map { meta ->
+        //        def meta_amber = [
+        //            key: meta.id,
+        //            id: meta.id,
+        //            tumor_id: Utils.getTumorDnaSampleName(meta),
+        //        ]
 
-                def tumor_bam = Utils.getTumorDnaBam(meta)
+        //        def tumor_bam = Utils.getTumorDnaBam(meta)
 
-                def normal_bam = []
-                def normal_bai = []
+        //        def normal_bam = []
+        //        def normal_bai = []
 
-                if (run_config.type == Constants.RunType.TUMOR_NORMAL) {
+        //        if (run_config.type == Constants.RunType.TUMOR_NORMAL) {
 
-                    assert [Constants.RunMode.DNA, Constants.RunMode.DNA_RNA].contains(run_config.mode)
+        //            assert [Constants.RunMode.DNA, Constants.RunMode.DNA_RNA].contains(run_config.mode)
 
-                    meta_amber.normal_id = Utils.getNormalDnaSampleName(meta)
-                    normal_bam = Utils.getNormalDnaBam(meta)
-                    normal_bai = "${normal_bam}.bai"
+        //            meta_amber.normal_id = Utils.getNormalDnaSampleName(meta)
+        //            normal_bam = Utils.getNormalDnaBam(meta)
+        //            normal_bai = "${normal_bam}.bai"
 
-                }
+        //        }
 
-                [meta_amber, tumor_bam, normal_bam, "${tumor_bam}.bai", normal_bai]
-            }
+        //        [meta_amber, tumor_bam, normal_bam, "${tumor_bam}.bai", normal_bai]
+        //    }
 
-        // Run process
-        AMBER(
-            ch_amber_inputs,
-            genome_version,
-            heterozygous_sites,
-        )
+        //// Run process
+        //AMBER(
+        //    ch_amber_inputs,
+        //    genome_version,
+        //    heterozygous_sites,
+        //)
 
-        // Set outputs, restoring original meta
-        ch_outputs = WorkflowOncoanalyser.restoreMeta(AMBER.out.amber_dir, ch_inputs)
-        ch_versions = ch_versions.mix(AMBER.out.versions)
+        //// Set outputs, restoring original meta
+        //ch_outputs = WorkflowOncoanalyser.restoreMeta(AMBER.out.amber_dir, ch_inputs)
+        //ch_versions = ch_versions.mix(AMBER.out.versions)
+
+
+
+
+
+        ch_outputs = Channel.empty()
+
+
+
+
 
     emit:
         amber_dir = ch_outputs  // channel: [ meta, amber_dir ]

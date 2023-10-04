@@ -168,11 +168,9 @@ class WorkflowMain {
         }
 
         def stages = Processes.getRunStages(
-            run_mode,
             params.processes_include,
             params.processes_exclude,
             params.processes_manual,
-            params.targeted,
             log,
         )
 
@@ -361,22 +359,22 @@ class WorkflowMain {
 
     }
 
-    public static getRunConfig(params, log) {
-        def run_mode = Utils.getRunMode(params.run_mode, log)
-        def run_type = Utils.getRunType(params.run_type, log)
+    public static getRunConfig(params, metas, log) {
+
+        def run_mode = Utils.getRunMode(params.mode, log)
+
         def stages = Processes.getRunStages(
-            run_mode,
             params.processes_include,
             params.processes_exclude,
             params.processes_manual,
-            params.targeted,
             log,
         )
 
         return [
             mode: run_mode,
-            type: run_type,
             stages: stages,
+            has_dna: metas.any { it.containsKey([Constants.SampleType.TUMOR, Constants.SequenceType.DNA]) },
+            has_rna: metas.any { it.containsKey([Constants.SampleType.TUMOR, Constants.SequenceType.RNA]) },
         ]
     }
 }
