@@ -359,7 +359,7 @@ class WorkflowMain {
 
     }
 
-    public static getRunConfig(params, metas, log) {
+    public static getRunConfig(params, inputs, log) {
 
         def run_mode = Utils.getRunMode(params.mode, log)
 
@@ -373,8 +373,8 @@ class WorkflowMain {
         return [
             mode: run_mode,
             stages: stages,
-            has_dna: metas.any { it.containsKey([Constants.SampleType.TUMOR, Constants.SequenceType.DNA]) },
-            has_rna: metas.any { it.containsKey([Constants.SampleType.TUMOR, Constants.SequenceType.RNA]) },
+            has_dna: inputs.any { it.containsKey([Constants.SampleType.TUMOR, Constants.SequenceType.DNA]) },
+            has_rna: inputs.any { it.containsKey([Constants.SampleType.TUMOR, Constants.SequenceType.RNA]) },
         ]
     }
 }

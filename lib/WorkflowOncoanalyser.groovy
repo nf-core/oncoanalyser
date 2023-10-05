@@ -106,7 +106,7 @@ class WorkflowOncoanalyser {
     public static joinMeta(Map named_args, ch_a, ch_b) {
         // NOTE(SW): the cross operator is used to allow many-to-one relationship between ch_output
         // and ch_metas
-        def key_a = named_args.getOrDefault('key_a', 'id')
+        def key_a = named_args.getOrDefault('key_a', 'group_id')
         def key_b = named_args.getOrDefault('key_b', 'key')
         def ch_ready_a = ch_a.map { [it[0].getAt(key_b), it[1..-1]] }
         def ch_ready_b = ch_b.map { meta -> [meta.getAt(key_a), meta] }

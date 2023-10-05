@@ -70,38 +70,35 @@ class Utils {
 
     // Sample names
     static public getTumorDnaSampleName(meta) {
-        return getMetaEntry(meta, ['sample_name', Constants.SampleType.TUMOR, Constants.SequenceType.DNA])
+        def meta_sample = meta[Constants.SampleType.TUMOR, Constants.SequenceType.DNA]
+        return meta_sample['sample_id']
     }
 
     static public getTumorRnaSampleName(meta) {
-        return getMetaEntry(meta, ['sample_name', Constants.SampleType.TUMOR, Constants.SequenceType.RNA])
+        def meta_sample = meta[Constants.SampleType.TUMOR, Constants.SequenceType.RNA]
+        return meta_sample['sample_id']
     }
 
     static public getNormalDnaSampleName(meta) {
-        return getMetaEntry(meta, ['sample_name', Constants.SampleType.NORMAL, Constants.SequenceType.DNA])
+        def meta_sample = meta[Constants.SampleType.NORMAL, Constants.SequenceType.DNA]
+        return meta_sample['sample_id']
     }
 
 
     // Files
     static public getTumorDnaBam(meta) {
-        return getMetaEntry(meta, [Constants.FileType.BAM, Constants.SampleType.TUMOR, Constants.SequenceType.DNA])
+        def meta_sample = meta[Constants.SampleType.TUMOR, Constants.SequenceType.DNA]
+        return meta_sample[Constants.FileType.BAM]
     }
 
     static public getTumorRnaBam(meta) {
-        return getMetaEntry(meta, [Constants.FileType.BAM, Constants.SampleType.TUMOR, Constants.SequenceType.RNA])
+        def meta_sample = meta[Constants.SampleType.TUMOR, Constants.SequenceType.RNA]
+        return meta_sample[Constants.FileType.BAM]
     }
 
     static public getNormalDnaBam(meta) {
-        return getMetaEntry(meta, [Constants.FileType.BAM, Constants.SampleType.NORMAL, Constants.SequenceType.DNA])
-    }
-
-
-    static public getMetaEntry(meta, key) {
-        if (! meta.containsKey(key)) {
-            System.err.println "\nERROR: meta does not contain key ${key}: ${meta}"
-            System.exit(1)
-        }
-        return meta.getAt(key)
+        def meta_sample = meta[Constants.SampleType.NORMAL, Constants.SequenceType.DNA]
+        return meta_sample[Constants.FileType.BAM]
     }
 
 
@@ -113,16 +110,5 @@ class Utils {
             System.exit(1)
         }
         return run_mode_enum
-    }
-
-
-    static public getRunType(run_type, log) {
-        def run_type_enum = Utils.getEnumFromString(run_type, Constants.RunType)
-        if (!run_type_enum) {
-            def run_types_str = Utils.getEnumNames(Constants.RunType).join('\n  - ')
-            log.error "\nERROR: recieved an invalid run type: '${run_type}'. Valid options are:\n  - ${run_types_str}"
-            System.exit(1)
-        }
-        return run_type_enum
     }
 }

@@ -27,6 +27,12 @@ workflow CUPPA_PREDICTION {
         // channel: [ versions.yml ]
         ch_versions = Channel.empty()
 
+
+
+
+
+
+
         // Select input sources
         // channel: [ meta, isofox_dir ]
         ch_cuppa_inputs_isofox = run_config.stages.isofox ? ch_isofox : WorkflowOncoanalyser.getInput(ch_inputs, Constants.INPUT.ISOFOX_DIR, type: 'optional')
@@ -39,6 +45,11 @@ workflow CUPPA_PREDICTION {
             run_config.stages.virusinterpreter ? ch_virusinterpreter : WorkflowOncoanalyser.getInput(ch_inputs, Constants.INPUT.VIRUSINTERPRETER_DIR, type: 'optional'),
             flatten_mode: 'nonrecursive',
         )
+
+
+
+
+
 
         // Create inputs and create process-specific meta
         // channel: [ meta_cuppa, isofox_dir, purple_dir, linx_annotation_dir, virusinterpreter_dir ]
