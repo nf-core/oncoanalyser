@@ -24,25 +24,25 @@ workflow ISOFOX_QUANTIFICATION {
         // Params
         isofox_functions       //  string: [optional]  isofox functions
         isofox_read_length     //  string: [mandatory] isofox_read_length
-        run_config             // channel: [mandatory] run configuration
+        //run_config             // channel: [mandatory] run configuration
 
     main:
         // Channel for version.yml files
         // channel: [ versions.yml ]
         ch_versions = Channel.empty()
 
-        // Create inputs and create process-specific meta
-        // channel: [ meta_isofox, tumor_bam_rna ]
-        if (run_config.stages.isofox) {
-            ch_isofox_inputs = ch_inputs
-                .map { meta ->
-                    def bam = Utils.getTumorRnaBam(meta)
-                    def meta_isofox = [key: meta.id, id: Utils.getTumorRnaSampleName(meta)]
-                    return [meta_isofox, bam, "${bam}.bai"]
-                }
-        } else {
-            ch_isofox_inputs = WorkflowOncoanalyser.getInput(ch_inputs, Constants.INPUT.ISOFOX_DIR, type: 'optional')
-        }
+        //// Create inputs and create process-specific meta
+        //// channel: [ meta_isofox, tumor_bam_rna ]
+        //if (run_config.stages.isofox) {
+        //    ch_isofox_inputs = ch_inputs
+        //        .map { meta ->
+        //            def bam = Utils.getTumorRnaBam(meta)
+        //            def meta_isofox = [key: meta.id, id: Utils.getTumorRnaSampleName(meta)]
+        //            return [meta_isofox, bam, "${bam}.bai"]
+        //        }
+        //} else {
+        //    ch_isofox_inputs = WorkflowOncoanalyser.getInput(ch_inputs, Constants.INPUT.ISOFOX_DIR, type: 'optional')
+        //}
 
         // Run process
         ISOFOX(

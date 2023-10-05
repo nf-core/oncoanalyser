@@ -71,7 +71,28 @@ class WorkflowOncoanalyser {
         return groupByMeta([:], *channels)
     }
 
-    public static getInput(Map named_args, ch, key) {
+    public static getInput(Map named_args, meta, key) {
+
+        def result
+        def (key_filetype, key_filetypes, key_sequencetypes) = key
+
+        for (key_sample in [key_filetypes, key_sequencetypes].combinations()) {
+            if (meta.containsKey(key_sample) && meta[key_sample].containsKey(key_filetype)) {
+                // NOTE(SW): could return early here then false below
+                return meta[key_sample].getAt(key_filetype)
+                break
+            }
+        }
+
+        if (result) {
+            return result
+        } else {
+            return false
+        }
+
+
+
+        /*
         def input_type = named_args.getOrDefault('type', 'required')
         return ch.map { meta ->
             def result
@@ -95,6 +116,8 @@ class WorkflowOncoanalyser {
                 System.exit(1)
             }
         }
+        */
+
     }
 
     // NOTE(SW): function signature required to catch where no named arguments are passed

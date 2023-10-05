@@ -20,16 +20,24 @@ workflow AMBER_PROFILING {
         // channel: [ versions.yml ]
         ch_versions = Channel.empty()
 
-        ch_inputs_sorted  = ch_inputs.branch {
-            def key = [Constants.SampleType.TUMOR, Constants.SequenceType.DNA]
-            def has_bam = it.containsKey(key) && it[key].containsKey(Constants.FileType.BAM)
-            exec: has_bam
-            skip: !has_bam
+        // Sort inputs
+        ch_inputs_sorted = ch_inputs.branch { meta ->
+
+            //def key = [Constants.SampleType.TUMOR, Constants.SequenceType.DNA]
+            //def has_bam = meta.containsKey(key) && meta[key].containsKey(Constants.FileType.BAM)
+
+            ////def has_bam = Utils.hasTumorDnaBam(meta)
+            //def existing_input = WorkflowOncoanalyser.getInput(meta, Constants.INPUT.AMBER_DIR)
+
+            existing: Utils.hasExistingInput(meta, Constants.INPUT.AMBER_DIR)
+            runnable: Utils.hasTumorDnaBam(meta)
+            // NOTE(SW): skip would be included where this entry requires optional AMBER input later on
+            //skip: true
         }
 
-        // Select input sources
+        // Create process input channel
         // channel: [ meta_amber, tumor_bam, normal_bam, tumor_bai, normal_bai ]
-        ch_amber_inputs = ch_inputs_sorted.exec
+        ch_amber_inputs = ch_inputs_sorted.runnable
             .map { meta ->
 
                 def tumor_id = Utils.getTumorDnaSampleName(meta)
@@ -66,7 +74,7 @@ workflow AMBER_PROFILING {
         // Set outputs, restoring original meta
         ch_outputs = Channel.empty()
             .mix(
-                ch_inputs_sorted.skip.map { [it, []] },
+                ch_inputs_sorted.existing,
                 WorkflowOncoanalyser.restoreMeta(AMBER.out.amber_dir, ch_inputs),
             )
         ch_versions = ch_versions.mix(AMBER.out.versions)

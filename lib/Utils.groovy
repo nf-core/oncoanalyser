@@ -87,8 +87,12 @@ class Utils {
 
     // Files
     static public getTumorDnaBam(meta) {
-        def meta_sample = meta[Constants.SampleType.TUMOR, Constants.SequenceType.DNA]
-        return meta_sample[Constants.FileType.BAM]
+        def meta_sample = meta.getOrDefault([Constants.SampleType.TUMOR, Constants.SequenceType.DNA], [:])
+        return meta_sample.getOrDefault(Constants.FileType.BAM, null)
+    }
+
+    static public getTumorDnaBam(meta) {
+        return getTumorDnaBam(meta) !== null
     }
 
     static public getTumorRnaBam(meta) {
@@ -111,4 +115,23 @@ class Utils {
         }
         return run_mode_enum
     }
+
+
+
+    public static getInput(meta, key) {
+
+        def result
+        def (key_filetype, key_filetypes, key_sequencetypes) = key
+
+        for (key_sample in [key_filetypes, key_sequencetypes].combinations()) {
+            if (meta.containsKey(key_sample) && meta[key_sample].containsKey(key_filetype)) {
+                return meta[key_sample].getAt(key_filetype)
+            }
+        }
+    }
+
+    public static hasExistingInputs(meta, key) {
+        return getInput(meta, key) !== null
+    }
+
 }

@@ -235,43 +235,43 @@ workflow WGTS {
 
 
 
-
-    // How do we know whether a sample is tumor_only or tumor/normal. Currently basing this on presence of BAMs
-    //   * where odes this impact when not using BAMs?
-    //   * tumor_only resuming from SAGE; how does information feed to PURPLE?
-    //     * this should be fine since germline will be filled if available else set as empty
+    /*
 
 
+    //
+    // MODULE: Run Isofox to analyse RNA data
+    //
+    // channel: [ meta, isofox_dir ]
+    ch_isofox_out = Channel.empty()
+    if (run_config.stages.isofox) {
+
+        isofox_counts = params.isofox_counts ? file(params.isofox_counts) : hmf_data.isofox_counts
+        isofox_gc_ratios = params.isofox_gc_ratios ? file(params.isofox_gc_ratios) : hmf_data.isofox_gc_ratios
+
+        ISOFOX_QUANTIFICATION(
+            ch_inputs,
+            ref_data.genome_fasta,
+            ref_data.genome_version,
+            ref_data.genome_fai,
+            hmf_data.ensembl_data_resources,
+            isofox_counts,
+            isofox_gc_ratios,
+            [],  // isofox_gene_ids
+            [],  // isofox_tpm_norm
+            params.isofox_functions,
+            params.isofox_read_length,
+            //run_config,
+        )
+
+        ch_versions = ch_versions.mix(ISOFOX_QUANTIFICATION.out.versions)
+        ch_isofox_out = ch_isofox_out.mix(ISOFOX_QUANTIFICATION.out.isofox_dir)
+    }
 
 
-    ////
-    //// MODULE: Run Isofox to analyse RNA data
-    ////
-    //// channel: [ meta, isofox_dir ]
-    //ch_isofox_out = Channel.empty()
-    //if (run_config.stages.isofox) {
 
-    //    isofox_counts = params.isofox_counts ? file(params.isofox_counts) : hmf_data.isofox_counts
-    //    isofox_gc_ratios = params.isofox_gc_ratios ? file(params.isofox_gc_ratios) : hmf_data.isofox_gc_ratios
+    */
 
-    //    ISOFOX_QUANTIFICATION(
-    //        ch_inputs,
-    //        ref_data.genome_fasta,
-    //        ref_data.genome_version,
-    //        ref_data.genome_fai,
-    //        hmf_data.ensembl_data_resources,
-    //        isofox_counts,
-    //        isofox_gc_ratios,
-    //        [],  // isofox_gene_ids
-    //        [],  // isofox_tpm_norm
-    //        params.isofox_functions,
-    //        params.isofox_read_length,
-    //        run_config,
-    //    )
 
-    //    ch_versions = ch_versions.mix(ISOFOX_QUANTIFICATION.out.versions)
-    //    ch_isofox_out = ch_isofox_out.mix(ISOFOX_QUANTIFICATION.out.isofox_dir)
-    //}
 
     ////
     //// SUBWORKFLOW: Run Bam Tools to generate stats required for downstream processes
@@ -310,7 +310,8 @@ workflow WGTS {
         ch_amber_out = ch_amber_out.mix(AMBER_PROFILING.out.amber_dir)
     }
 
-    ch_amber_out.view()
+
+
 
 
 
