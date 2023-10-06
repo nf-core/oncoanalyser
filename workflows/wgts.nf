@@ -78,7 +78,7 @@ include { ISOFOX_QUANTIFICATION } from '../subworkflows/local/isofox_quantificat
 //include { LINX_ANNOTATION       } from '../subworkflows/local/linx_annotation'
 //include { LINX_PLOTTING         } from '../subworkflows/local/linx_plotting'
 //include { ORANGE_REPORTING      } from '../subworkflows/local/orange_reporting'
-//include { PAVE_ANNOTATION       } from '../subworkflows/local/pave_annotation'
+include { PAVE_ANNOTATION       } from '../subworkflows/local/pave_annotation'
 include { PREPARE_INPUT         } from '../subworkflows/local/prepare_input'
 include { PREPARE_REFERENCE     } from '../subworkflows/local/prepare_reference'
 //include { PURPLE_CALLING        } from '../subworkflows/local/purple_calling'
@@ -341,37 +341,42 @@ workflow WGTS {
 
     }
 
-    ////
-    //// SUBWORKFLOW: Annotate variants with PAVE
-    ////
-    //// channel: [ meta, pave_vcf ]
-    //ch_pave_germline_out = Channel.empty()
-    //ch_pave_somatic_out = Channel.empty()
-    //if (run_config.stages.pave) {
+    //
+    // SUBWORKFLOW: Annotate variants with PAVE
+    //
+    // channel: [ meta, pave_vcf ]
+    ch_pave_germline_out = Channel.empty()
+    ch_pave_somatic_out = Channel.empty()
+    if (run_config.stages.pave) {
 
-    //    PAVE_ANNOTATION(
-    //        ch_inputs,
-    //        ch_sage_germline_vcf_out,
-    //        ch_sage_somatic_vcf_out,
-    //        ref_data.genome_fasta,
-    //        ref_data.genome_version,
-    //        ref_data.genome_fai,
-    //        hmf_data.sage_pon,
-    //        [],  // sage_pon_artefacts
-    //        hmf_data.sage_blocklist_regions,
-    //        hmf_data.sage_blocklist_sites,
-    //        hmf_data.clinvar_annotations,
-    //        hmf_data.segment_mappability,
-    //        hmf_data.driver_gene_panel,
-    //        hmf_data.ensembl_data_resources,
-    //        hmf_data.gnomad_resource,
-    //        run_config,
-    //    )
+        PAVE_ANNOTATION(
+            ch_inputs,
+            ch_sage_germline_vcf_out,
+            ch_sage_somatic_vcf_out,
+            ref_data.genome_fasta,
+            ref_data.genome_version,
+            ref_data.genome_fai,
+            hmf_data.sage_pon,
+            [],  // sage_pon_artefacts
+            hmf_data.sage_blocklist_regions,
+            hmf_data.sage_blocklist_sites,
+            hmf_data.clinvar_annotations,
+            hmf_data.segment_mappability,
+            hmf_data.driver_gene_panel,
+            hmf_data.ensembl_data_resources,
+            hmf_data.gnomad_resource,
+        )
 
-    //    ch_versions = ch_versions.mix(PAVE_ANNOTATION.out.versions)
-    //    ch_pave_germline_out = ch_pave_germline_out.mix(PAVE_ANNOTATION.out.germline)
-    //    ch_pave_somatic_out = ch_pave_somatic_out.mix(PAVE_ANNOTATION.out.somatic)
-    //}
+        ch_versions = ch_versions.mix(PAVE_ANNOTATION.out.versions)
+        ch_pave_germline_out = ch_pave_germline_out.mix(PAVE_ANNOTATION.out.germline)
+        ch_pave_somatic_out = ch_pave_somatic_out.mix(PAVE_ANNOTATION.out.somatic)
+
+    } else {
+
+        ch_pave_germline_out = ch_pave_germline_out.mix(PAVE_ANNOTATION.out.germline)
+        ch_pave_somatic_out = ch_pave_somatic_out.mix(PAVE_ANNOTATION.out.somatic)
+
+    }
 
     ////
     //// SUBWORKFLOW: Call CNVs, infer purity and ploidy, and recover low quality SVs with PURPLE
