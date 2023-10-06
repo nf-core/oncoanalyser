@@ -24,7 +24,6 @@ workflow AMBER_PROFILING {
         // channel: [ meta ]
         ch_inputs_sorted = ch_inputs.branch { meta ->
             runnable: Utils.hasTumorDnaBam(meta)
-            existing: Utils.hasExistingInput(meta, Constants.INPUT.AMBER_DIR)
             skip: true
         }
 
@@ -70,7 +69,6 @@ workflow AMBER_PROFILING {
         ch_outputs = Channel.empty()
             .mix(
                 WorkflowOncoanalyser.restoreMeta(AMBER.out.amber_dir, ch_inputs),
-                ch_inputs_sorted.existing.map { meta -> [meta, Utils.getInput(meta, Constants.INPUT.AMBER_DIR)] },
                 ch_inputs_sorted.skip.map { meta -> [meta, []] },
             )
 

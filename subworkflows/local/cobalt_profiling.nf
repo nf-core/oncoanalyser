@@ -27,7 +27,7 @@ workflow COBALT_PROFILING {
         ch_inputs_sorted = ch_inputs.branch { meta ->
             runnable_tn: Utils.hasTumorDnaBam(meta) && Utils.hasNormalDnaBam(meta)
             runnable_to: Utils.hasTumorDnaBam(meta)
-            existing: Utils.hasExistingInput(meta, Constants.INPUT.COBALT_DIR)
+            skip: Utils.hasTumorDnaBam(meta)
         }
 
         // First set diploid BED input for tumor/normal and tumor only samples
@@ -78,7 +78,6 @@ workflow COBALT_PROFILING {
         ch_outputs = Channel.empty()
             .mix(
                 WorkflowOncoanalyser.restoreMeta(COBALT.out.cobalt_dir, ch_inputs),
-                ch_inputs_sorted.existing.map { meta -> [meta, Utils.getInput(meta, Constants.INPUT.COBALT_DIR)] },
                 ch_inputs_sorted.skip.map { meta -> [meta, []] },
             )
 
