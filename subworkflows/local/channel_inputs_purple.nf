@@ -20,6 +20,32 @@ workflow CHANNEL_INPUTS_PURPLE {
         run_config               // channel: [mandatory] run configuration
 
     main:
+
+
+
+        // operating on basis of a runnable check
+        //   * some logic to check whether required inputs are present
+        //     * moving to strongly adhere, we could emit all non-runnable placeholders and merge/group here
+        //     * then robust logic to check inputs to determine runnability
+        //
+        //
+        //
+        //       * replace non-empty input with samplesheet inputs
+        //
+        //         * DECIDE WHEN THIS IS DONE: TWO CASES:
+        //              * stage run and stage NOT run
+        //
+        //
+        //
+        //       * then evaluate
+        //
+        //   * stages not run also need to be handled right at merge
+        //     * this is where the run_config.stages.gripss (etc) are checked
+        //     * initially intended to be handled by samplesheet retrieval, though now required earlier for merging
+        //       * could an else block be added to call of the process subworkflow to generate these there?
+
+
+
         // Set input sources
         ch_amber_source = run_config.stages.amber ? ch_amber : WorkflowOncoanalyser.getInput(ch_inputs, Constants.INPUT.AMBER_DIR)
         ch_cobalt_source = run_config.stages.cobalt ? ch_cobalt : WorkflowOncoanalyser.getInput(ch_inputs, Constants.INPUT.COBALT_DIR)

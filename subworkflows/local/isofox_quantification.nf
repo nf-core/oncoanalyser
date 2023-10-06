@@ -31,6 +31,7 @@ workflow ISOFOX_QUANTIFICATION {
         ch_versions = Channel.empty()
 
         // Sort inputs
+        // channel: [ meta ]
         ch_inputs_sorted = ch_inputs.branch { meta ->
             runnable: Utils.hasTumorRnaBam(meta)
             existing: Utils.hasExistingInput(meta, Constants.INPUT.ISOFOX_DIR)
@@ -67,12 +68,14 @@ workflow ISOFOX_QUANTIFICATION {
         )
 
         // Set outputs, restoring original meta
+        // channel: [ meta, isofox_dir ]
         ch_outputs = Channel.empty()
             .mix(
                 WorkflowOncoanalyser.restoreMeta(ISOFOX.out.isofox_dir, ch_inputs),
                 ch_inputs_sorted.existing.map { meta -> [meta, Utils.getInput(meta, Constants.INPUT.ISOFOX_DIR)] },
                 ch_inputs_sorted.skip.map { meta -> [meta, []] },
             )
+
         ch_versions = ch_versions.mix(ISOFOX.out.versions)
 
     emit:

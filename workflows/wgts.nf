@@ -159,6 +159,8 @@ workflow WGTS {
 
         ch_versions = ch_versions.mix(ISOFOX_QUANTIFICATION.out.versions)
         ch_isofox_out = ch_isofox_out.mix(ISOFOX_QUANTIFICATION.out.isofox_dir)
+    } else {
+        ch_isofox_out = ch_inputs.map { meta -> [meta, []] }
     }
 
     ////
@@ -196,6 +198,8 @@ workflow WGTS {
 
         ch_versions = ch_versions.mix(AMBER_PROFILING.out.versions)
         ch_amber_out = ch_amber_out.mix(AMBER_PROFILING.out.amber_dir)
+    } else {
+        ch_amber_out = ch_inputs.map { meta -> [meta, []] }
     }
 
     //
@@ -214,6 +218,8 @@ workflow WGTS {
 
         ch_versions = ch_versions.mix(COBALT_PROFILING.out.versions)
         ch_cobalt_out = ch_cobalt_out.mix(COBALT_PROFILING.out.cobalt_dir)
+    } else {
+        ch_cobalt_out = ch_inputs.map { meta -> [meta, []] }
     }
 
     ////

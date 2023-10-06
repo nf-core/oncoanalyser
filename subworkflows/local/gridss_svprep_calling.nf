@@ -42,11 +42,13 @@ workflow GRIDSS_SVPREP_CALLING {
         ch_inputs_sorted = ch_inputs.branch { meta ->
             runnable_tn: Utils.hasTumorDnaBam(meta) && Utils.hasNormalDnaBam(meta)
             runnable_to: Utils.hasTumorDnaBam(meta)
-            existing: Utils.hasExistingInput(meta, Constants.INPUT.AMBER_DIR)
+            existing: Utils.hasExistingInput(meta, Constants.INPUT.GRIDSS_VCF)
         }
 
 
 
+
+        /*
 
         // Has GRIDSS VCF
 
@@ -333,6 +335,10 @@ workflow GRIDSS_SVPREP_CALLING {
             )
             .groupTuple(size: 2)
             .map { id, other -> other.flatten() }
+
+        */
+
+        ch_out = Channel.empty()
 
     emit:
         results  = ch_out      // channel: [ meta, vcf ]

@@ -79,6 +79,7 @@ workflow COBALT_PROFILING {
             .mix(
                 WorkflowOncoanalyser.restoreMeta(COBALT.out.cobalt_dir, ch_inputs),
                 ch_inputs_sorted.existing.map { meta -> [meta, Utils.getInput(meta, Constants.INPUT.COBALT_DIR)] },
+                ch_inputs_sorted.skip.map { meta -> [meta, []] },
             )
 
         ch_versions = ch_versions.mix(COBALT.out.versions)
