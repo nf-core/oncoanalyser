@@ -32,14 +32,14 @@ input:
       type: file
       description: Normal BAI file
       pattern: "*.{bai}"
-  - gc_profile:
-      type: file
-      description: GC profile file
-      pattern: "*.{cnp}"
   - diploid_regions:
       type: file
       description: Diploid regions file (optional)
       pattern: "*.{bed.gz}"
+  - gc_profile:
+      type: file
+      description: GC profile file
+      pattern: "*.{cnp}"
   - target_region_normalisation:
       type: file
       description: Normalisation file (optional)

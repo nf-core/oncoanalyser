@@ -24,25 +24,32 @@ workflow ISOFOX_QUANTIFICATION {
         // Params
         isofox_functions       //  string: [optional]  isofox functions
         isofox_read_length     //  string: [mandatory] isofox_read_length
-        //run_config             // channel: [mandatory] run configuration
 
     main:
         // Channel for version.yml files
         // channel: [ versions.yml ]
         ch_versions = Channel.empty()
 
-        //// Create inputs and create process-specific meta
-        //// channel: [ meta_isofox, tumor_bam_rna ]
-        //if (run_config.stages.isofox) {
-        //    ch_isofox_inputs = ch_inputs
-        //        .map { meta ->
-        //            def bam = Utils.getTumorRnaBam(meta)
-        //            def meta_isofox = [key: meta.id, id: Utils.getTumorRnaSampleName(meta)]
-        //            return [meta_isofox, bam, "${bam}.bai"]
-        //        }
-        //} else {
-        //    ch_isofox_inputs = WorkflowOncoanalyser.getInput(ch_inputs, Constants.INPUT.ISOFOX_DIR, type: 'optional')
-        //}
+        // Sort inputs
+        ch_inputs_sorted = ch_inputs.branch { meta ->
+            runnable: Utils.hasTumorRnaBam(meta)
+            existing: Utils.hasExistingInput(meta, Constants.INPUT.ISOFOX_DIR)
+            skip: true
+        }
+
+        // Create process input channel
+        // channel: [ meta_isofox, tumor_bam_rna ]
+        ch_isofox_inputs = ch_inputs_sorted.runnable
+            .map { meta ->
+
+                def tumor_id = Utils.getTumorRnaSampleName(meta)
+                def meta_isofox = [
+                    key: meta.group_id,
+                    id: "${meta.group_id}__${tumor_id}",
+                ]
+
+                return [meta_isofox, Utils.getTumorRnaBam(meta), Utils.getTumorRnaBai(meta)]
+            }
 
         // Run process
         ISOFOX(
@@ -60,7 +67,12 @@ workflow ISOFOX_QUANTIFICATION {
         )
 
         // Set outputs, restoring original meta
-        ch_outputs = WorkflowOncoanalyser.restoreMeta(ISOFOX.out.isofox_dir, ch_inputs)
+        ch_outputs = Channel.empty()
+            .mix(
+                WorkflowOncoanalyser.restoreMeta(ISOFOX.out.isofox_dir, ch_inputs),
+                ch_inputs_sorted.existing.map { meta -> [meta, Utils.getInput(meta, Constants.INPUT.ISOFOX_DIR)] },
+                ch_inputs_sorted.skip.map { meta -> [meta, []] },
+            )
         ch_versions = ch_versions.mix(ISOFOX.out.versions)
 
     emit:

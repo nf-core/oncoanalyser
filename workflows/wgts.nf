@@ -2,185 +2,78 @@ import Constants
 import Processes
 import Utils
 
-
-import nextflow.splitter.SplitterEx
-
-def inputs = nextflow.splitter.SplitterEx.splitCsv(file(params.input), [header: true])
-    .groupBy { it['group_id'] }
-    .collect { group_id, entries ->
-
-        def meta = [group_id: group_id]
-        def sample_keys = [] as Set
-
-        // Process each entry
-        entries.each {
-            // Add subject id if absent or check if current matches existing
-            if (meta.containsKey('subject_id') && meta.subject_id != it.subject_id) {
-                log.error "\nERROR: got unexpected subject name for ${group_id}/${meta.subject_id}: ${it.subject_id}"
-                System.exit(1)
-            } else {
-                meta.subject_id = it.subject_id
-            }
-
-
-            // Sample type
-            def sample_type_enum = Utils.getEnumFromString(it.sample_type, Constants.SampleType)
-            if (!sample_type_enum) {
-                def sample_type_str = Utils.getEnumNames(Constants.SampleType).join('\n  - ')
-                log.error "\nERROR: received invalid sample type: '${it.sample_type}'. Valid options are:\n  - ${sample_type_str}"
-                System.exit(1)
-            }
-
-            // Sequence type
-            def sequence_type_enum = Utils.getEnumFromString(it.sequence_type, Constants.SequenceType)
-            if (!sequence_type_enum) {
-                def sequence_type_str = Utils.getEnumNames(Constants.SequenceType).join('\n  - ')
-                log.error "\nERROR: received invalid sequence type: '${it.sequence_type}'. Valid options are:\n  - ${sequence_type_str}"
-                System.exit(1)
-            }
-
-            // Filetype
-            def filetype_enum = Utils.getEnumFromString(it.filetype, Constants.FileType)
-            if (!filetype_enum) {
-                def filetype_str = Utils.getEnumNames(Constants.FileType).join('\n  - ')
-                log.error "\nERROR: received invalid file type: '${it.filetype}'. Valid options are:\n  - ${filetype_str}"
-                System.exit(1)
-            }
-
-            def sample_key = [sample_type_enum, sequence_type_enum]
-            def meta_sample = meta.get(sample_key, [sample_id: it.sample_id])
-
-            if (meta_sample.sample_id != it.sample_id) {
-                log.error "\nERROR: got unexpected sample name for ${group_id}/${sample_type_enum} (${sequence_type_enum}): ${sample_name}"
-                System.exit(1)
-            }
-
-            if (meta_sample.containsKey(filetype_enum)) {
-                log.error "\nERROR: got duplicate file for ${group_id}/${sample_type_enum} (${sequence_type_enum}): ${filetype_enum}"
-                System.exit(1)
-            }
-
-            meta_sample[filetype_enum] = it.filepath
-
-            // Record sample key to simplify iteration later on
-            sample_keys << sample_key
-
-        }
-
-        // Check that required indexes are provided or are accessible
-        sample_keys.each { sample_key ->
-
-            if (workflow.stubRun) {
-                return
-            }
-
-            meta[sample_key]*.key.each { key ->
-
-                // NOTE(SW): I was going to use two maps but was unable to get an enum map to compile
-
-                def index_enum
-                def index_str
-
-                if (key === Constants.FileType.BAM) {
-                    index_enum = Constants.FileType.BAI
-                    index_str = 'bai'
-                } else if (key === Constants.FileType.GRIDSS_VCF) {
-                    index_enum = Constants.FileType.GRIDSS_VCF_TBI
-                    index_str = 'vcf'
-                } else if (key === Constants.FileType.GRIPSS_VCF) {
-                    index_enum = Constants.FileType.GRIPSS_VCF_TBI
-                    index_str = 'vcf'
-                } else if (key === Constants.FileType.GRIPSS_UNFILTERED_VCF) {
-                    index_enum = Constants.FileType.GRIPSS_UNFILTERED_VCF_TBI
-                    index_str = 'vcf'
-                } else {
-                    return
-                }
-
-                if (meta[sample_key].containsKey(index_enum)) {
-                    return
-                }
-
-                def fp = meta[sample_key][key]
-                def index_fp = file("${fp}.${index_str}")
-                if (!index_fp.exists()) {
-                    log.error "\nERROR: No index provided or found for ${fp}"
-                    System.exit(1)
-                }
-            }
-        }
-
-        return meta
-    }
-
-
 /*
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     VALIDATE INPUTS
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 */
 
+
+// Parse input samplesheet
+// NOTE(SW): this is done early and outside of gpars so that we can access synchronously and prior to pipeline execution
+inputs = Utils.parseInput(params.input, workflow.stubRun)
+
 // Get run config
 run_config = WorkflowMain.getRunConfig(params, inputs, log)
 
-//// Check input path parameters to see if they exist
-//def checkPathParamList = [
-//    params.input,
-//    params.isofox_counts,
-//    params.isofox_gc_ratios,
-//    params.linx_gene_id_file,
-//]
+// Check input path parameters to see if they exist
+def checkPathParamList = [
+    params.input,
+    params.isofox_counts,
+    params.isofox_gc_ratios,
+    params.linx_gene_id_file,
+]
+
+// Conditional requirements
+if (run_config.stages.gridss) {
+    if (params.containsKey('gridss_config')) {
+        checkPathParamList.add(params.gridss_config)
+    }
+}
+
+if (run_config.stages.virusinterpreter) {
+    checkPathParamList.add(params.ref_data_virusbreakenddb_path)
+}
+
+if (run_config.stages.lilac) {
+    if (params.ref_data_genome_version == '38' && params.ref_data_genome_type == 'alt' && params.containsKey('ref_data_hla_slice_bed')) {
+        checkPathParamList.add(params.ref_data_hla_slice_bed)
+    }
+}
+
+// TODO(SW): consider whether we should check for null entries here for errors to be more informative
+for (param in checkPathParamList) { if (param) { file(param, checkIfExists: true) } }
+
+// Check mandatory parameters
+if (params.input) { ch_input = file(params.input) } else { exit 1, 'Input samplesheet not specified!' }
+
+// Create Path objects for some input files
+linx_gene_id_file = params.linx_gene_id_file ? file(params.linx_gene_id_file) : []
+
+/*
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    CONFIG FILES
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+*/
+
+
+/*
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    IMPORT LOCAL MODULES/SUBWORKFLOWS
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+*/
+
 //
-//// Conditional requirements
-//if (run_config.stages.gridss) {
-//    if (params.containsKey('gridss_config')) {
-//        checkPathParamList.add(params.gridss_config)
-//    }
-//}
+// SUBWORKFLOWS
 //
-//if (run_config.stages.virusinterpreter) {
-//    checkPathParamList.add(params.ref_data_virusbreakenddb_path)
-//}
-//
-//if (run_config.stages.lilac) {
-//    if (params.ref_data_genome_version == '38' && params.ref_data_genome_type == 'alt' && params.containsKey('ref_data_hla_slice_bed')) {
-//        checkPathParamList.add(params.ref_data_hla_slice_bed)
-//    }
-//}
-//
-//// TODO(SW): consider whether we should check for null entries here for errors to be more informative
-//for (param in checkPathParamList) { if (param) { file(param, checkIfExists: true) } }
-//
-//// Check mandatory parameters
-//if (params.input) { ch_input = file(params.input) } else { exit 1, 'Input samplesheet not specified!' }
-//
-//// Create Path objects for some input files
-//linx_gene_id_file = params.linx_gene_id_file ? file(params.linx_gene_id_file) : []
-//
-///*
-//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-//    CONFIG FILES
-//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-//*/
-//
-//
-///*
-//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-//    IMPORT LOCAL MODULES/SUBWORKFLOWS
-//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-//*/
-//
-////
-//// SUBWORKFLOWS
-////
 include { AMBER_PROFILING       } from '../subworkflows/local/amber_profiling'
-//include { BAMTOOLS_METRICS      } from '../subworkflows/local/bamtools_metrics'
+include { BAMTOOLS_METRICS      } from '../subworkflows/local/bamtools_metrics'
 //include { CHORD_PREDICTION      } from '../subworkflows/local/chord_prediction'
-//include { COBALT_PROFILING      } from '../subworkflows/local/cobalt_profiling'
+include { COBALT_PROFILING      } from '../subworkflows/local/cobalt_profiling'
 //include { CUPPA_PREDICTION      } from '../subworkflows/local/cuppa_prediction'
 //include { GRIDSS_SVPREP_CALLING } from '../subworkflows/local/gridss_svprep_calling'
 //include { GRIPSS_FILTERING      } from '../subworkflows/local/gripss_filtering'
-//include { ISOFOX_QUANTIFICATION } from '../subworkflows/local/isofox_quantification'
+include { ISOFOX_QUANTIFICATION } from '../subworkflows/local/isofox_quantification'
 //include { LILAC_CALLING         } from '../subworkflows/local/lilac_calling'
 //include { LINX_ANNOTATION       } from '../subworkflows/local/linx_annotation'
 //include { LINX_PLOTTING         } from '../subworkflows/local/linx_plotting'
@@ -193,23 +86,23 @@ include { PREPARE_REFERENCE     } from '../subworkflows/local/prepare_reference'
 //include { SAGE_CALLING          } from '../subworkflows/local/sage_calling'
 //include { SIGS_FITTING          } from '../subworkflows/local/sigs_fitting'
 //include { VIRUSBREAKEND_CALLING } from '../subworkflows/local/virusbreakend_calling'
+
+/*
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    IMPORT NF-CORE MODULES/SUBWORKFLOWS
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+*/
+
 //
-///*
-//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-//    IMPORT NF-CORE MODULES/SUBWORKFLOWS
-//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-//*/
+// MODULES
 //
-////
-//// MODULES
-////
-//include { CUSTOM_DUMPSOFTWAREVERSIONS } from '../modules/nf-core/custom/dumpsoftwareversions/main'
-//
-///*
-//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-//    RUN MAIN WORKFLOW
-//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-//*/
+include { CUSTOM_DUMPSOFTWAREVERSIONS } from '../modules/nf-core/custom/dumpsoftwareversions/main'
+
+/*
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    RUN MAIN WORKFLOW
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+*/
 
 // Get absolute file paths
 samplesheet = Utils.getFileObject(params.input)
@@ -233,11 +126,6 @@ workflow WGTS {
     // Set GRIDSS config
     gridss_config = params.containsKey('gridss_config') ? file(params.gridss_config) : hmf_data.gridss_config
 
-
-
-    /*
-
-
     //
     // MODULE: Run Isofox to analyse RNA data
     //
@@ -259,19 +147,19 @@ workflow WGTS {
             [],  // isofox_gene_ids
             [],  // isofox_tpm_norm
             params.isofox_functions,
-            params.isofox_read_length,
-            //run_config,
+
+
+            // TODO(SW): restore param defaults
+            //params.isofox_read_length,
+            151,
+
+
+
         )
 
         ch_versions = ch_versions.mix(ISOFOX_QUANTIFICATION.out.versions)
         ch_isofox_out = ch_isofox_out.mix(ISOFOX_QUANTIFICATION.out.isofox_dir)
     }
-
-
-
-    */
-
-
 
     ////
     //// SUBWORKFLOW: Run Bam Tools to generate stats required for downstream processes
@@ -310,87 +198,23 @@ workflow WGTS {
         ch_amber_out = ch_amber_out.mix(AMBER_PROFILING.out.amber_dir)
     }
 
-
-
-
-
-
-
-    // For RNA we will end with all empty inputs to PURPLE - how is this to be handled?
-    //   * two paths: optional and nothing
-    //     * e.g. AMBER is non-optional
-
-    // For germline inputs
-    //   * uncertainity right now
-    //     * must get germline from channel or attempt from samplesheet
-    //     * though since all germline should be treated as optional, this will be fine I think
-
-    // Determine what is optional
-    //   * Sequence type:
-    //     * RNA:
-    //       * CUPPA: PURPLE, LINX, Virus Interpreter
-    //     * DNA:
-    //       * CUPPA: Isofox
     //
-    //   * Run type (DNA sequence type)
-    //     * tumor only
-    //       * Any germline BUT ONLY when TUMOR DNA is present
-    //     * tumor/normal
-    //       * N/a
-
-
-
-
-
-    // For a stage
-    //  * get existing from samplesheet, remaining runnable, and non-runnable
-    //  * run process for existing
-    //  * merge new and existing outputs
-    //  * where applicable, add optional (i.e. empty) outputs
-    //    * e.g. PURPLE since it is optionally required for CUPPA, which must run for RNA only
-    //    * how does LILAC work with RNA only?
+    // SUBWORKFLOW: Run COBALT to obtain read ratios
     //
-    // Caveats
-    //  * if providing mid-stage outputs such as PURPLE, earlier stages will still be run if not disabled or
-    //    outputs provided
-    //  * additional process logic may be required to select runnable
-    //    * e.g. if all inputs are optional then at least one (or n) need to be provided
-    //    * I don't think this situation exists though
+    // channel: [ meta, cobalt_dir ]
+    ch_cobalt_out = Channel.empty()
+    if (run_config.stages.cobalt) {
 
+        COBALT_PROFILING(
+            ch_inputs,
+            hmf_data.gc_profile,
+            hmf_data.diploid_bed,
+            [],  // panel_target_region_normalisation
+        )
 
-
-
-
-
-    //// >>> I dont /think/ I need to add any placeholders
-    ////   * but how to allow RNA CUPPA i.e. empty PURPLE
-    ////   * need to accommodate truly empty/optional inputs
-    ////      * use PLACEHOLDER
-
-
-
-
-
-
-
-    ////
-    //// SUBWORKFLOW: Run COBALT to obtain read ratios
-    ////
-    //// channel: [ meta, cobalt_dir ]
-    //ch_cobalt_out = Channel.empty()
-    //if (run_config.stages.cobalt) {
-
-    //    COBALT_PROFILING(
-    //        ch_inputs,
-    //        hmf_data.gc_profile,
-    //        hmf_data.diploid_bed,
-    //        [],  // panel_target_region_normalisation
-    //        run_config,
-    //    )
-
-    //    ch_versions = ch_versions.mix(COBALT_PROFILING.out.versions)
-    //    ch_cobalt_out = ch_cobalt_out.mix(COBALT_PROFILING.out.cobalt_dir)
-    //}
+        ch_versions = ch_versions.mix(COBALT_PROFILING.out.versions)
+        ch_cobalt_out = ch_cobalt_out.mix(COBALT_PROFILING.out.cobalt_dir)
+    }
 
     ////
     //// SUBWORKFLOW: Call structural variants with GRIDSS

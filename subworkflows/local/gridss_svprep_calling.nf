@@ -38,20 +38,45 @@ workflow GRIDSS_SVPREP_CALLING {
         // channel: [ versions.yml ]
         ch_versions = Channel.empty()
 
+        // Sort inputs
+        ch_inputs_sorted = ch_inputs.branch { meta ->
+            runnable_tn: Utils.hasTumorDnaBam(meta) && Utils.hasNormalDnaBam(meta)
+            runnable_to: Utils.hasTumorDnaBam(meta)
+            existing: Utils.hasExistingInput(meta, Constants.INPUT.AMBER_DIR)
+        }
+
+
+
+
+        // Has GRIDSS VCF
+
+
+
+
         //
         // MODULE: SV Prep (tumor)
         //
         // Prepare tumor sample inputs
         // channel: [ meta_svprep, bam_tumor, bai_tumor, [] ]
-        ch_svprep_tumor_inputs = ch_inputs
+        ch_svprep_tumor_inputs = Channel.empty()
+            .mix(
+                ch_inputs_sorted.runnable_to,
+                ch_inputs_sorted.runnable_tn,
+            )
             .map { meta ->
+
+                def tumor_id = Utils.getTumorDnaSampleName(meta)
                 def meta_svprep = [
-                    key: meta.id,
-                    id: Utils.getTumorDnaSampleName(meta),
+                    key: meta.group_id,
+                    id: "${meta.group_id}__${tumor_id}",
                     sample_type: 'tumor',
                 ]
+
                 def tumor_bam = Utils.getTumorDnaBam(meta)
-                return [meta_svprep, tumor_bam, "${tumor_bam}.bai", []]
+                def tumor_bai = Utils.getTumorDnaBai(meta)
+
+                return [meta_svprep, tumor_bam, tumor_bai, []]
+
             }
 
         // Filter tumor BAM
@@ -61,7 +86,7 @@ workflow GRIDSS_SVPREP_CALLING {
             genome_version,
             sv_prep_blocklist,
             known_fusions,
-            'JUNCTIONS;BAM;FRAGMENT_LENGTH_DIST', // -write_types argument
+            'JUNCTIONS;BAM;FRAGMENT_LENGTH_DIST',  // -write_types argument
         )
         ch_versions = ch_versions.mix(SVPREP_TUMOR.out.versions)
 
@@ -73,6 +98,19 @@ workflow GRIDSS_SVPREP_CALLING {
             .map { meta_svprep, bam_filtered, bam, bai, jnc_optional ->
                 return [meta_svprep, bam, bam_filtered]
             }
+
+
+
+
+
+
+        // Must metas with /normal BAMs/ and tumor BAMs sorted separately
+        //   * merge with SVPREP_TUMOR
+        //   * otherwise straight to preprocess
+
+
+
+
 
         //
         // MODULE: SV Prep (normal)

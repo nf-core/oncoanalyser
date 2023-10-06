@@ -21,18 +21,10 @@ workflow AMBER_PROFILING {
         ch_versions = Channel.empty()
 
         // Sort inputs
+        // channel: [ meta ]
         ch_inputs_sorted = ch_inputs.branch { meta ->
-
-            //def key = [Constants.SampleType.TUMOR, Constants.SequenceType.DNA]
-            //def has_bam = meta.containsKey(key) && meta[key].containsKey(Constants.FileType.BAM)
-
-            ////def has_bam = Utils.hasTumorDnaBam(meta)
-            //def existing_input = WorkflowOncoanalyser.getInput(meta, Constants.INPUT.AMBER_DIR)
-
-            existing: Utils.hasExistingInput(meta, Constants.INPUT.AMBER_DIR)
             runnable: Utils.hasTumorDnaBam(meta)
-            // NOTE(SW): skip would be included where this entry requires optional AMBER input later on
-            //skip: true
+            existing: Utils.hasExistingInput(meta, Constants.INPUT.AMBER_DIR)
         }
 
         // Create process input channel
@@ -48,6 +40,7 @@ workflow AMBER_PROFILING {
                 ]
 
                 def tumor_bam = Utils.getTumorDnaBam(meta)
+                def tumor_bai = Utils.getTumorDnaBai(meta)
 
                 def normal_bam = []
                 def normal_bai = []
@@ -57,11 +50,11 @@ workflow AMBER_PROFILING {
 
                     meta_amber.normal_id = Utils.getNormalDnaSampleName(meta)
                     normal_bam = Utils.getNormalDnaBam(meta)
-                    normal_bai = "${normal_bam}.bai"
+                    normal_bai = Utils.getNormalDnaBai(meta)
 
                 }
 
-                [meta_amber, tumor_bam, normal_bam, "${tumor_bam}.bai", normal_bai]
+                [meta_amber, tumor_bam, normal_bam, tumor_bai, normal_bai]
             }
 
         // Run process
@@ -72,11 +65,13 @@ workflow AMBER_PROFILING {
         )
 
         // Set outputs, restoring original meta
+        // channel: [ meta, amber_dir ]
         ch_outputs = Channel.empty()
             .mix(
-                ch_inputs_sorted.existing,
                 WorkflowOncoanalyser.restoreMeta(AMBER.out.amber_dir, ch_inputs),
+                ch_inputs_sorted.existing.map { meta -> [meta, Utils.getInput(meta, Constants.INPUT.AMBER_DIR)] },
             )
+
         ch_versions = ch_versions.mix(AMBER.out.versions)
 
     emit:
