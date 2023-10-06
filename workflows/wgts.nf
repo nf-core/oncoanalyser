@@ -71,8 +71,8 @@ include { BAMTOOLS_METRICS      } from '../subworkflows/local/bamtools_metrics'
 //include { CHORD_PREDICTION      } from '../subworkflows/local/chord_prediction'
 include { COBALT_PROFILING      } from '../subworkflows/local/cobalt_profiling'
 //include { CUPPA_PREDICTION      } from '../subworkflows/local/cuppa_prediction'
-//include { GRIDSS_SVPREP_CALLING } from '../subworkflows/local/gridss_svprep_calling'
-//include { GRIPSS_FILTERING      } from '../subworkflows/local/gripss_filtering'
+include { GRIDSS_SVPREP_CALLING } from '../subworkflows/local/gridss_svprep_calling'
+include { GRIPSS_FILTERING      } from '../subworkflows/local/gripss_filtering'
 include { ISOFOX_QUANTIFICATION } from '../subworkflows/local/isofox_quantification'
 //include { LILAC_CALLING         } from '../subworkflows/local/lilac_calling'
 //include { LINX_ANNOTATION       } from '../subworkflows/local/linx_annotation'
@@ -83,7 +83,7 @@ include { PREPARE_INPUT         } from '../subworkflows/local/prepare_input'
 include { PREPARE_REFERENCE     } from '../subworkflows/local/prepare_reference'
 //include { PURPLE_CALLING        } from '../subworkflows/local/purple_calling'
 //include { SAGE_APPEND           } from '../subworkflows/local/sage_append'
-//include { SAGE_CALLING          } from '../subworkflows/local/sage_calling'
+include { SAGE_CALLING          } from '../subworkflows/local/sage_calling'
 //include { SIGS_FITTING          } from '../subworkflows/local/sigs_fitting'
 //include { VIRUSBREAKEND_CALLING } from '../subworkflows/local/virusbreakend_calling'
 
@@ -159,8 +159,11 @@ workflow WGTS {
 
         ch_versions = ch_versions.mix(ISOFOX_QUANTIFICATION.out.versions)
         ch_isofox_out = ch_isofox_out.mix(ISOFOX_QUANTIFICATION.out.isofox_dir)
+
     } else {
+
         ch_isofox_out = ch_inputs.map { meta -> [meta, []] }
+
     }
 
     ////
@@ -198,8 +201,11 @@ workflow WGTS {
 
         ch_versions = ch_versions.mix(AMBER_PROFILING.out.versions)
         ch_amber_out = ch_amber_out.mix(AMBER_PROFILING.out.amber_dir)
+
     } else {
+
         ch_amber_out = ch_inputs.map { meta -> [meta, []] }
+
     }
 
     //
@@ -218,101 +224,122 @@ workflow WGTS {
 
         ch_versions = ch_versions.mix(COBALT_PROFILING.out.versions)
         ch_cobalt_out = ch_cobalt_out.mix(COBALT_PROFILING.out.cobalt_dir)
+
     } else {
+
         ch_cobalt_out = ch_inputs.map { meta -> [meta, []] }
+
     }
 
-    ////
-    //// SUBWORKFLOW: Call structural variants with GRIDSS
-    ////
-    //// channel: [ meta, gridss_vcf ]
-    //ch_gridss_out = Channel.empty()
-    //if (run_config.stages.gridss) {
+    //
+    // SUBWORKFLOW: Call structural variants with GRIDSS
+    //
+    // channel: [ meta, gridss_vcf ]
+    ch_gridss_out = Channel.empty()
+    if (run_config.stages.gridss) {
 
-    //    GRIDSS_SVPREP_CALLING(
-    //        ch_inputs,
-    //        ref_data.genome_fasta,
-    //        ref_data.genome_version,
-    //        ref_data.genome_fai,
-    //        ref_data.genome_dict,
-    //        ref_data.genome_bwa_index,
-    //        ref_data.genome_bwa_index_image,
-    //        ref_data.genome_gridss_index,
-    //        hmf_data.gridss_region_blocklist,
-    //        hmf_data.sv_prep_blocklist,
-    //        hmf_data.known_fusions,
-    //        gridss_config,
-    //        run_config,
-    //    )
+        GRIDSS_SVPREP_CALLING(
+            ch_inputs,
+            ref_data.genome_fasta,
+            ref_data.genome_version,
+            ref_data.genome_fai,
+            ref_data.genome_dict,
+            ref_data.genome_bwa_index,
+            ref_data.genome_bwa_index_image,
+            ref_data.genome_gridss_index,
+            hmf_data.gridss_region_blocklist,
+            hmf_data.sv_prep_blocklist,
+            hmf_data.known_fusions,
+            gridss_config,
+        )
 
-    //    ch_versions = ch_versions.mix(GRIDSS_SVPREP_CALLING.out.versions)
-    //    ch_gridss_out = ch_gridss_out.mix(GRIDSS_SVPREP_CALLING.out.results)
+        ch_versions = ch_versions.mix(GRIDSS_SVPREP_CALLING.out.versions)
+        ch_gridss_out = ch_gridss_out.mix(GRIDSS_SVPREP_CALLING.out.vcf)
 
-    //}
+    } else {
 
-    ////
-    //// SUBWORKFLOW: Run GRIPSS to filter GRIDSS SV calls
-    ////
-    //// channel: [ meta, gripss_vcf, gripss_tbi ]
-    //ch_gripss_somatic_out = Channel.empty()
-    //ch_gripss_germline_out = Channel.empty()
-    //ch_gripss_somatic_unfiltered_out = Channel.empty()
-    //if (run_config.stages.gripss) {
+        ch_gridss_out = ch_inputs.map { meta -> [meta, []] }
 
-    //    GRIPSS_FILTERING(
-    //        ch_inputs,
-    //        ch_gridss_out,
-    //        ref_data.genome_fasta,
-    //        ref_data.genome_version,
-    //        ref_data.genome_fai,
-    //        hmf_data.gridss_pon_breakends,
-    //        hmf_data.gridss_pon_breakpoints,
-    //        hmf_data.known_fusions,
-    //        hmf_data.repeatmasker_annotations,
-    //        [],  // target_region_bed
-    //        run_config,
-    //    )
+    }
 
-    //    ch_versions = ch_versions.mix(GRIPSS_FILTERING.out.versions)
-    //    ch_gripss_somatic_out = ch_gripss_somatic_out.mix(GRIPSS_FILTERING.out.somatic)
-    //    ch_gripss_germline_out = ch_gripss_germline_out.mix(GRIPSS_FILTERING.out.germline)
-    //    ch_gripss_somatic_unfiltered_out = ch_gripss_somatic_unfiltered_out.mix(GRIPSS_FILTERING.out.somatic_unfiltered)
-    //}
+    //
+    // SUBWORKFLOW: Run GRIPSS to filter GRIDSS SV calls
+    //
+    // channel: [ meta, gripss_vcf, gripss_tbi ]
+    ch_gripss_somatic_out = Channel.empty()
+    ch_gripss_germline_out = Channel.empty()
+    ch_gripss_somatic_unfiltered_out = Channel.empty()
+    if (run_config.stages.gripss) {
 
-    ////
-    //// SUBWORKFLOW: call SNV, MNV, and small INDELS with SAGE
-    ////
-    //// channel: [ meta, sage_vcf, sage_tbi ]
-    //ch_sage_germline_vcf_out = Channel.empty()
-    //ch_sage_somatic_vcf_out = Channel.empty()
-    //// channel: [ meta, sage_dir ]
-    //ch_sage_germline_dir_out = Channel.empty()
-    //ch_sage_somatic_dir_out = Channel.empty()
-    //if (run_config.stages.sage) {
+        GRIPSS_FILTERING(
+            ch_inputs,
+            ch_gridss_out,
+            ref_data.genome_fasta,
+            ref_data.genome_version,
+            ref_data.genome_fai,
+            hmf_data.gridss_pon_breakends,
+            hmf_data.gridss_pon_breakpoints,
+            hmf_data.known_fusions,
+            hmf_data.repeatmasker_annotations,
+            [],  // target_region_bed
+        )
 
-    //    SAGE_CALLING(
-    //        ch_inputs,
-    //        ref_data.genome_fasta,
-    //        ref_data.genome_version,
-    //        ref_data.genome_fai,
-    //        ref_data.genome_dict,
-    //        hmf_data.sage_known_hotspots_germline,
-    //        hmf_data.sage_known_hotspots_somatic,
-    //        hmf_data.sage_actionable_panel,
-    //        hmf_data.sage_coverage_panel,
-    //        hmf_data.sage_highconf_regions,
-    //        hmf_data.segment_mappability,
-    //        hmf_data.driver_gene_panel,
-    //        hmf_data.ensembl_data_resources,
-    //        run_config,
-    //    )
+        ch_versions = ch_versions.mix(GRIPSS_FILTERING.out.versions)
+        ch_gripss_somatic_out = ch_gripss_somatic_out.mix(GRIPSS_FILTERING.out.somatic)
+        ch_gripss_germline_out = ch_gripss_germline_out.mix(GRIPSS_FILTERING.out.germline)
+        ch_gripss_somatic_unfiltered_out = ch_gripss_somatic_unfiltered_out.mix(GRIPSS_FILTERING.out.somatic_unfiltered)
 
-    //    ch_versions = ch_versions.mix(SAGE_CALLING.out.versions)
-    //    ch_sage_germline_vcf_out = ch_sage_germline_vcf_out.mix(SAGE_CALLING.out.germline_vcf)
-    //    ch_sage_somatic_vcf_out = ch_sage_somatic_vcf_out.mix(SAGE_CALLING.out.somatic_vcf)
-    //    ch_sage_germline_dir_out = ch_sage_germline_dir_out.mix(SAGE_CALLING.out.germline_dir)
-    //    ch_sage_somatic_dir_out = ch_sage_somatic_dir_out.mix(SAGE_CALLING.out.somatic_dir)
-    //}
+    } else {
+
+        ch_inputs
+            .map { meta -> [meta, [], []] }
+            .tap(ch_gripss_somatic_out)
+            .tap(ch_gripss_germline_out)
+            .tap(ch_gripss_somatic_unfiltered_out)
+
+    }
+
+    //
+    // SUBWORKFLOW: call SNV, MNV, and small INDELS with SAGE
+    //
+    // channel: [ meta, sage_vcf, sage_tbi ]
+    ch_sage_germline_vcf_out = Channel.empty()
+    ch_sage_somatic_vcf_out = Channel.empty()
+    // channel: [ meta, sage_dir ]
+    ch_sage_germline_dir_out = Channel.empty()
+    ch_sage_somatic_dir_out = Channel.empty()
+    if (run_config.stages.sage) {
+
+        SAGE_CALLING(
+            ch_inputs,
+            ref_data.genome_fasta,
+            ref_data.genome_version,
+            ref_data.genome_fai,
+            ref_data.genome_dict,
+            hmf_data.sage_known_hotspots_germline,
+            hmf_data.sage_known_hotspots_somatic,
+            hmf_data.sage_actionable_panel,
+            hmf_data.sage_coverage_panel,
+            hmf_data.sage_highconf_regions,
+            hmf_data.segment_mappability,
+            hmf_data.driver_gene_panel,
+            hmf_data.ensembl_data_resources,
+        )
+
+        ch_versions = ch_versions.mix(SAGE_CALLING.out.versions)
+        ch_sage_germline_vcf_out = ch_sage_germline_vcf_out.mix(SAGE_CALLING.out.germline_vcf)
+        ch_sage_somatic_vcf_out = ch_sage_somatic_vcf_out.mix(SAGE_CALLING.out.somatic_vcf)
+        ch_sage_germline_dir_out = ch_sage_germline_dir_out.mix(SAGE_CALLING.out.germline_dir)
+        ch_sage_somatic_dir_out = ch_sage_somatic_dir_out.mix(SAGE_CALLING.out.somatic_dir)
+
+    } else {
+
+        ch_sage_germline_vcf_out = ch_inputs.map { meta -> [meta, [], []] }
+        ch_sage_somatic_vcf_out = ch_inputs.map { meta -> [meta, [], []] }
+        ch_sage_germline_dir_out = ch_inputs.map { meta -> [meta, []] }
+        ch_sage_somatic_dir_out = ch_inputs.map { meta -> [meta, []] }
+
+    }
 
     ////
     //// SUBWORKFLOW: Annotate variants with PAVE

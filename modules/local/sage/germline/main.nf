@@ -1,11 +1,3 @@
-// NOTE(SW): use of tumor and normal sample names here is consistent with Pipeline5
-//  - https://github.com/hartwigmedical/pipeline5/blob/v5.32/cluster/src/main/java/com/hartwig/pipeline/calling/sage/SageCommandBuilder.java#L95-L96
-//  - https://github.com/hartwigmedical/pipeline5/blob/v5.32/cluster/src/main/java/com/hartwig/pipeline/calling/sage/SageCommandBuilder.java#L112-L118
-
-// NOTE(SW): logic that determines BQR outputs assumes '-out' is a path that includes at least leading one directory
-
-// TODO(SW): check whether intentional sample name switch for germline also affects BQR outputs
-
 process SAGE_GERMLINE {
     tag "${meta.id}"
     label 'process_medium'

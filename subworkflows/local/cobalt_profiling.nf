@@ -73,6 +73,8 @@ workflow COBALT_PROFILING {
             target_region_normalisation,
         )
 
+        ch_versions = ch_versions.mix(COBALT.out.versions)
+
         // Set outputs, restoring original meta
         // channel: [ meta, cobalt_dir ]
         ch_outputs = Channel.empty()
@@ -80,10 +82,6 @@ workflow COBALT_PROFILING {
                 WorkflowOncoanalyser.restoreMeta(COBALT.out.cobalt_dir, ch_inputs),
                 ch_inputs_sorted.skip.map { meta -> [meta, []] },
             )
-
-        ch_versions = ch_versions.mix(COBALT.out.versions)
-
-        ch_outputs = Channel.empty()
 
     emit:
         cobalt_dir = ch_outputs  // channel: [ meta, cobalt_dir ]

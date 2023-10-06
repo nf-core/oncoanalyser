@@ -31,7 +31,6 @@ workflow GRIDSS_SVPREP_CALLING {
 
         // Params
         gridss_config          // channel: [optional] /path/to/gridss_config
-        run_config             // channel: [mandatory] run configuration
 
     main:
         // Channel for version.yml files
@@ -45,20 +44,10 @@ workflow GRIDSS_SVPREP_CALLING {
             skip: true
         }
 
-
-
-
-        /*
-
-        // Has GRIDSS VCF
-
-
-
-
         //
         // MODULE: SV Prep (tumor)
         //
-        // Prepare tumor sample inputs
+        // Create process input channel
         // channel: [ meta_svprep, bam_tumor, bai_tumor, [] ]
         ch_svprep_tumor_inputs = Channel.empty()
             .mix(
@@ -72,6 +61,8 @@ workflow GRIDSS_SVPREP_CALLING {
                     key: meta.group_id,
                     id: "${meta.group_id}__${tumor_id}",
                     sample_type: 'tumor',
+                    // NOTE(SW): slightly redundant since we have this information then lose it with .mix above
+                    group_size: Utils.hasNormalDnaBam(meta) ? 2 : 1
                 ]
 
                 def tumor_bam = Utils.getTumorDnaBam(meta)
@@ -81,7 +72,7 @@ workflow GRIDSS_SVPREP_CALLING {
 
             }
 
-        // Filter tumor BAM
+        // Run process
         SVPREP_TUMOR(
             ch_svprep_tumor_inputs,
             genome_fasta,
@@ -90,6 +81,7 @@ workflow GRIDSS_SVPREP_CALLING {
             known_fusions,
             'JUNCTIONS;BAM;FRAGMENT_LENGTH_DIST',  // -write_types argument
         )
+
         ch_versions = ch_versions.mix(SVPREP_TUMOR.out.versions)
 
         // channel: [ meta_gridss, bam_tumor, bam_tumor_filtered ]
@@ -101,64 +93,56 @@ workflow GRIDSS_SVPREP_CALLING {
                 return [meta_svprep, bam, bam_filtered]
             }
 
-
-
-
-
-
-        // Must metas with /normal BAMs/ and tumor BAMs sorted separately
-        //   * merge with SVPREP_TUMOR
-        //   * otherwise straight to preprocess
-
-
-
-
-
         //
         // MODULE: SV Prep (normal)
         //
+        // Create process input channel
+        // NOTE(SW): this implicitly selects only entries present in ch_inputs_sorted.runnable_tn
+        // channel: [ meta_svprep, bam_normal, bai_normal, junctions_tumor ]
+        ch_svprep_normal_inputs = WorkflowOncoanalyser.restoreMeta(SVPREP_TUMOR.out.junctions, ch_inputs_sorted.runnable_tn)
+            .map { meta, junctions_tumor ->
+
+                def normal_id = Utils.getNormalDnaSampleName(meta)
+                def meta_svprep = [
+                    key: meta.group_id,
+                    id: "${meta.group_id}__${normal_id}",
+                    sample_type: 'normal',
+                    group_size: 2,  // Assumption holds since germline only is not supported and we source from runnable_tn
+                ]
+
+                def normal_bam = Utils.getNormalDnaBam(meta)
+                def normal_bai = Utils.getNormalDnaBai(meta)
+
+                return [meta_svprep, normal_bam, normal_bai, junctions_tumor]
+
+            }
+
+        // Run process
+        SVPREP_NORMAL(
+            ch_svprep_normal_inputs,
+            genome_fasta,
+            genome_version,
+            sv_prep_blocklist,
+            known_fusions,
+            'JUNCTIONS;BAM;FRAGMENT_LENGTH_DIST', // -write_types argument
+        )
+
+        ch_versions = ch_versions.mix(SVPREP_NORMAL.out.versions)
+
         // channel: [ meta_gridss, bam_normal, bam_normal_filtered ]
-        ch_preprocess_inputs_normal = Channel.empty()
-        if (run_config.type == Constants.RunType.TUMOR_NORMAL) {
-
-            assert [Constants.RunMode.DNA, Constants.RunMode.DNA_RNA].contains(run_config.mode)
-
-            // Prepare normal sample inputs
-            // channel: [val(meta_svprep), bam_normal, bai_normal, junctions_tumor]
-            ch_svprep_normal_inputs = WorkflowOncoanalyser.restoreMeta(SVPREP_TUMOR.out.junctions, ch_inputs)
-                .map { meta, junctions_tumor ->
-                    def meta_svprep = [
-                        key: meta.id,
-                        id: Utils.getNormalDnaSampleName(meta),
-                        sample_type: 'normal',
-                    ]
-                    def normal_bam = Utils.getNormalDnaBam(meta)
-                    return [meta_svprep, normal_bam, "${normal_bam}.bai", junctions_tumor]
-                }
-
-            SVPREP_NORMAL(
-                ch_svprep_normal_inputs,
-                genome_fasta,
-                genome_version,
-                sv_prep_blocklist,
-                known_fusions,
-                'JUNCTIONS;BAM;FRAGMENT_LENGTH_DIST', // -write_types argument
-            )
-            ch_versions = ch_versions.mix(SVPREP_NORMAL.out.versions)
-
-            // channel: [ meta_gridss, bam_normal, bam_normal_filtered ]
-            ch_preprocess_inputs_normal = WorkflowOncoanalyser.groupByMeta(
-                SVPREP_NORMAL.out.bam,
-                ch_svprep_normal_inputs,
-            )
-                .map { meta_svprep, bam_filtered, bam, bai, junctions ->
-                    return [meta_svprep, bam, bam_filtered]
-                }
-        }
+        ch_preprocess_inputs_normal = WorkflowOncoanalyser.groupByMeta(
+            SVPREP_NORMAL.out.bam,
+            ch_svprep_normal_inputs,
+        )
+            // Switching meta name here from meta_svprep
+            .map { meta_gridss, bam_filtered, bam, bai, junctions ->
+                return [meta_gridss, bam, bam_filtered]
+            }
 
         //
         // MODULE: GRIDSS preprocess
         //
+        // Create process input channel
         // channel: [ meta_gridss, bam, bam_filtered ]
         ch_preprocess_inputs = Channel.empty()
             .mix(
@@ -166,7 +150,7 @@ workflow GRIDSS_SVPREP_CALLING {
                 ch_preprocess_inputs_normal,
             )
 
-        // Preprocess reads
+        // Run process
         PREPROCESS(
             ch_preprocess_inputs,
             gridss_config,
@@ -177,30 +161,50 @@ workflow GRIDSS_SVPREP_CALLING {
             genome_bwa_index_image,
             genome_gridss_index,
         )
+
         ch_versions = ch_versions.mix(PREPROCESS.out.versions)
 
-        // Gather BAMs and outputs from preprocessing for each tumor/normal set
-        // channel: [key, [[ meta_gridss, bam, bam_filtered, preprocess_dir], ...] ]
-        preprocess_group_tuple_size = run_config.type == Constants.RunType.TUMOR_NORMAL ? 2 : 1
+        // Gather BAMs and outputs from preprocessing for each tumor/normal and tumor only set
+        // channel: [key, [[meta_gridss, bam, bam_filtered, preprocess_dir], ...] ]
         ch_bams_and_preprocess = WorkflowOncoanalyser.groupByMeta(
             ch_preprocess_inputs,
             PREPROCESS.out.preprocess_dir,
         )
-        .map { [it[0].key, it] }
-        .groupTuple(size: preprocess_group_tuple_size)
+            .map {
+                def meta_gridss = it[0]
+                def other = it[1..-1]
+                [groupKey(meta_gridss.key, meta_gridss.group_size), [meta_gridss, *other]]
+            }
+            .groupTuple()
 
         //
         // MODULE: GRIDSS assemble
         //
-        // Order and organise inputs for assembly
-        // channel: [ meta_gridss, [bams], [bams_filtered], [preprocess_dirs], [labels] ]
+        // Create process input channel
+        // channel: tumor/normal: [ meta_gridss, [bams], [bams_filtered], [preprocess_dirs], [labels] ]
+        // channel: tumor only:   [ meta_gridss, bam, bam_filtered, preprocess_dir, label ]
         ch_assemble_inputs = ch_bams_and_preprocess
             .map { key, entries ->
-                def (tmeta, tbam, tbam_filtered, tpreprocess) = entries.find { e -> e[0].sample_type == 'tumor' }
-                def meta_gridss = [id: tmeta.key]
+
+                assert entries.size() == 1 || entries.size() == 2
+
+                def tumor_entry = entries.find { e -> e[0].sample_type == 'tumor' }
+                def normal_entry = entries.find { e -> e[0].sample_type == 'normal' }
+
+                assert tumor_entry !== null
+
+                def (tmeta, tbam, tbam_filtered, tpreprocess) = tumor_entry
+                def meta_gridss = [
+                    // Effectively meta.group_id, and both are required. Reminder:
+                    //   * key: channel element grouping
+                    //   * id: task tag
+                    key: tmeta.key,
+                    id: tmeta.key,
+                ]
 
                 def data = []
-                if (run_config.type == Constants.RunType.TUMOR_ONLY) {
+
+                if (normal_entry === null) {
 
                     data = [
                         meta_gridss,
@@ -210,9 +214,9 @@ workflow GRIDSS_SVPREP_CALLING {
                         tmeta.id,
                     ]
 
-                } else if (run_config.type == Constants.RunType.TUMOR_NORMAL) {
+                } else {
 
-                    def (nmeta, nbam, nbam_filtered, npreprocess) = entries.find { e -> e[0].sample_type == 'normal' }
+                    def (nmeta, nbam, nbam_filtered, npreprocess) = normal_entry
                     data = [
                         meta_gridss,
                         [nbam, tbam],
@@ -221,14 +225,12 @@ workflow GRIDSS_SVPREP_CALLING {
                         [nmeta.id, tmeta.id],
                     ]
 
-                } else {
-                    assert false
                 }
 
                 return data
             }
 
-        // Assemble variants
+        // Run process
         ASSEMBLE(
             ch_assemble_inputs,
             gridss_config,
@@ -240,12 +242,13 @@ workflow GRIDSS_SVPREP_CALLING {
             genome_gridss_index,
             gridss_blocklist,
         )
+
         ch_versions = ch_versions.mix(ASSEMBLE.out.versions)
 
         //
         // MODULE: GRIDSS call
         //
-        // Prepare inputs for variant calling
+        // Create process input channel
         // channel: [ meta_gridss, [bams], [bams_filtered], assemble_dir, [labels] ]
         ch_call_inputs = WorkflowOncoanalyser.groupByMeta(
             ch_assemble_inputs,
@@ -253,13 +256,13 @@ workflow GRIDSS_SVPREP_CALLING {
             flatten: false,
         )
             .map { data ->
-                def meta = data[0]
+                def meta_gridss = data[0]
                 def (bams, bams_filtered, preprocess_dirs, labels) = data[1]
                 def (assemble_dir) = data[2]
-                return [meta, bams, bams_filtered, assemble_dir, labels]
+                return [meta_gridss, bams, bams_filtered, assemble_dir, labels]
             }
 
-        // Call variants
+        // Run process
         CALL(
             ch_call_inputs,
             gridss_config,
@@ -271,45 +274,50 @@ workflow GRIDSS_SVPREP_CALLING {
             genome_gridss_index,
             gridss_blocklist,
         )
+
         ch_versions = ch_versions.mix(CALL.out.versions)
 
         //
         // MODULE: SV Prep depth annotation
         //
-        // Prepare inputs for depth annotation, restore original meta
-        // channel: [ meta_svprep, [bams], [bais], vcf, [labels] ]
-        ch_depth_inputs = WorkflowOncoanalyser.groupByMeta(
-            ch_inputs.map { meta -> [meta.id, meta] },
-            CALL.out.vcf.map { meta, vcf -> [meta.id, vcf] },
-        )
-            .map { id, meta, vcf ->
-                def tbam = Utils.getTumorDnaBam(meta)
+        // Restore original meta, create process input channel
+        // channel: tumor/normal: [ meta_svprep, [bams], [bais], vcf, [labels] ]
+        // channel: tumor only:   [ meta_svprep, bam, bai, vcf, label ]
+        ch_depth_inputs = WorkflowOncoanalyser.restoreMeta(CALL.out.vcf, ch_inputs)
+            .map { meta, vcf ->
+
+                // NOTE(SW): germline only is not currently supported
+                assert Utils.hasTumorDnaBam(meta)
+
                 def meta_svprep = [
-                    id: meta.id,
+                    // Both are required. Reminder:
+                    //   * key: channel element grouping
+                    //   * id: task tag
+                    key: meta.group_id,
+                    id: meta.group_id,
                     tumor_id: Utils.getTumorDnaSampleName(meta)
                 ]
 
                 def data = []
-                if (run_config.type == Constants.RunType.TUMOR_ONLY) {
+
+                if (Utils.hasNormalDnaBam(meta)) {
 
                     data = [
                         meta_svprep,
-                        tbam,
-                        "${tbam}.bai",
-                        vcf,
-                        Utils.getTumorDnaSampleName(meta),
-                    ]
-
-                } else if (run_config.type == Constants.RunType.TUMOR_NORMAL) {
-
-                    def nbam = Utils.getNormalDnaBam(meta)
-
-                    data = [
-                        meta_svprep,
-                        [nbam, tbam],
-                        ["${nbam}.bai", "${tbam}.bai"],
+                        [Utils.getNormalDnaBam(meta), Utils.getTumorDnaBam(meta)],
+                        [Utils.getNormalDnaBai(meta), Utils.getTumorDnaBai(meta)],
                         vcf,
                         [Utils.getNormalDnaSampleName(meta), Utils.getTumorDnaSampleName(meta)],
+                    ]
+
+                } else if (Utils.hasTumorDnaBam(meta)) {
+
+                    data = [
+                        meta_svprep,
+                        Utils.getTumorDnaBam(meta),
+                        Utils.getTumorDnaBai(meta),
+                        vcf,
+                        Utils.getTumorDnaSampleName(meta),
                     ]
 
                 } else {
@@ -317,31 +325,27 @@ workflow GRIDSS_SVPREP_CALLING {
                 }
 
                 return data
-
             }
 
-        // Add depth annotations to SVs
+        // Add depth annotations to calls
         DEPTH_ANNOTATOR(
             ch_depth_inputs,
             genome_fasta,
             genome_version,
         )
 
-        // Reunite final VCF with the corresponding input meta object
-        ch_out = Channel.empty()
-            .concat(
-                ch_inputs.map { meta -> [meta.id, meta] },
-                DEPTH_ANNOTATOR.out.vcf.map { meta, vcf -> [meta.id, vcf] },
+        ch_versions = ch_versions.mix(DEPTH_ANNOTATOR.out.versions)
+
+        // Set outputs, restoring original meta
+        // channel: [ meta, gridss_vcf ]
+        ch_outputs = Channel.empty()
+            .mix(
+                WorkflowOncoanalyser.restoreMeta(DEPTH_ANNOTATOR.out.vcf, ch_inputs),
+                ch_inputs_sorted.skip.map { meta -> [meta, []] },
             )
-            .groupTuple(size: 2)
-            .map { id, other -> other.flatten() }
-
-        */
-
-        ch_out = Channel.empty()
 
     emit:
-        results  = ch_out      // channel: [ meta, vcf ]
+        vcf      = ch_outputs  // channel: [ meta, vcf ]
 
         versions = ch_versions // channel: [ versions.yml ]
 }
