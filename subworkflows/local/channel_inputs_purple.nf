@@ -18,32 +18,20 @@ workflow CHANNEL_INPUTS_PURPLE {
 
     main:
 
+        ch_inputs_combined = WorkflowOncoanalyser.groupByMeta(
+            ch_amber,
+            ch_cobalt,
+            ch_sv_somatic,
+            ch_sv_somatic_unfiltered,
+            ch_sv_germline,
+            ch_smlv_somatic,
+            ch_smlv_germline,
+        )
+            .map { d ->
 
-        //ch_inputs_combined = WorkflowOncoanalyser.groupByMeta(
-        //    ch_amber,
-        //    ch_cobalt,
-        //    ch_sv_somatic,
-        //    ch_sv_somatic_unfiltered,
-        //    ch_sv_germline,
-        //    ch_smlv_somatic,
-        //    ch_smlv_germline,
-        //)
+                // Select sources here
 
-        //ch_inputs_combined.view()
-
-
-
-        // CANNOT MERGE UNTIL ALL SAMPLESHEET INPUTS ARE RETRIEVED
-        // ALTERNATIVELY, EXISTING SHOULD HAVE EMPTY ENTRY
-
-
-        ch_amber.collect().map { ['amber', it] }.view()
-        ch_cobalt.collect().map { ['cobalt', it] }.view()
-        ch_sv_somatic.collect().map { ['sv_somatic', it] }.view()
-        ch_sv_somatic_unfiltered.collect().map { ['sv_somatic_unfiltered', it] }.view()
-        ch_sv_germline.collect().map { ['sv_germline', it] }.view()
-        ch_smlv_somatic.collect().map { ['smlv_somatic', it] }.view()
-        ch_smlv_germline.collect().map { ['smlv_germline', it] }.view()
+            }
 
 
 

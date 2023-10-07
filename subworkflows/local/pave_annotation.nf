@@ -43,11 +43,8 @@ workflow PAVE_ANNOTATION {
                 }
             }
             .branch { meta, sage_vcf ->
-
-                // NOTE(SW): I'm currently relying on presence of tumor and/or normal BAMs in the samplesheet to infer
-                // whether a sample is tumor/normal or tumor only. I'd like to see a more directly, reliable method used
-
-                runnable: Utils.hasTumorDnaBam(meta) && Utils.hasNormalDnaBam(meta) && sage_vcf
+                def has_existing = Utils.hasExistingInput(meta, Constants.INPUTS.PAVE_VCF_NORMAL)
+                runnable: Utils.hasTumorDnaBam(meta) && Utils.hasNormalDnaBam(meta) && sage_vcf && !has_existing
                 skip: true
                     return meta
             }
@@ -97,12 +94,10 @@ workflow PAVE_ANNOTATION {
                 }
             }
             .branch { meta, sage_vcf ->
-
-                // NOTE(SW): I'm currently relying on presence of tumor and/or normal BAMs in the samplesheet to infer
-                // whether a sample is tumor/normal or tumor only. I'd like to see a more directly, reliable method used
-
-                runnable: Utils.hasTumorDnaBam(meta) && sage_vcf
+                def has_existing = Utils.hasExistingInput(meta, Constants.INPUTS.PAVE_VCF_TUMOR)
+                runnable: Utils.hasTumorDnaBam(meta) && sage_vcf && !has_existing
                 skip: true
+                    return meta
             }
 
         // Create process input channel
@@ -141,13 +136,13 @@ workflow PAVE_ANNOTATION {
         ch_somatic_out = Channel.empty()
             .mix(
                 WorkflowOncoanalyser.restoreMeta(SOMATIC.out.vcf, ch_inputs),
-                ch_sage_germline_inputs_sorted.skip.map { meta -> [meta, []] },
+                ch_sage_somatic_inputs_sorted.skip.map { meta -> [meta, []] },
             )
 
         ch_germline_out = Channel.empty()
             .mix(
                 WorkflowOncoanalyser.restoreMeta(GERMLINE.out.vcf, ch_inputs),
-                ch_sage_somatic_inputs_sorted.skip.map { meta -> [meta, []] },
+                ch_sage_germline_inputs_sorted.skip.map { meta -> [meta, []] },
             )
 
     emit:

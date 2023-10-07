@@ -71,15 +71,15 @@ workflow GRIPSS_FILTERING {
         //
         // MODULE: GRIPSS germline
         //
-        // Create germline input channel, set aside addition entries that cannot be run
-        // channel: runnable: [ meta_gridss, gripss_vcf ]
-        // channel: skip: [ meta_gridss ]
+        // Create germline input channel, set aside additional entries that cannot be run
+        // channel: runnable: [ meta_gripss, gripss_vcf ]
+        // channel: skip: [ meta_gripss ]
         ch_gripss_germline_inputs = ch_gripss_inputs
-            .branch {
-                def meta_gridss = it[0]
-                runnable: meta_gridss.sample_type == 'tumor_normal'
+            .branch { meta_gripss, gripss_vcf ->
+                def has_existing = Utils.hasExistingInput(meta, Constants.INPUTS.GRIPSS_VCF_NORMAL)
+                runnable: meta_gripss.sample_type == 'tumor_normal' && !has_existing
                 skip: true
-                    return meta_gridss
+                    return meta_gripss
             }
 
         // Run process
@@ -99,8 +99,20 @@ workflow GRIPSS_FILTERING {
         //
         // MODULE: GRIPSS somatic
         //
+        // Create somatic input channel, set aside additional entries that cannot be run
+        // channel: runnable: [ meta_gripss, gripss_vcf ]
+        // channel: skip: [ meta_gripss ]
+        ch_gripss_somatic_inputs = ch_gripss_inputs
+            .branch { meta_gripss, gripss_vcf ->
+                def has_existing = Utils.hasExistingInput(meta, Constants.INPUTS.GRIPSS_VCF_TUMOR)
+                runnable: !has_existing
+                skip: true
+                    return meta_gripss
+            }
+
+        // Run process
         SOMATIC(
-            ch_gripss_inputs,
+            ch_gripss_somatic_inputs.runnable,
             genome_fasta,
             genome_version,
             genome_fai,
@@ -119,12 +131,14 @@ workflow GRIPSS_FILTERING {
         ch_somatic_out = Channel.empty()
             .mix(
                 WorkflowOncoanalyser.restoreMeta(SOMATIC.out.vcf, ch_inputs),
+                WorkflowOncoanalyser.restoreMeta(ch_gripss_somatic_inputs.skip, ch_inputs).map { meta -> [meta, [], []] },
                 ch_inputs_sorted.skip.map { meta -> [meta, [], []] },
             )
 
         ch_somatic_unfiltered_out = Channel.empty()
             .mix(
                 WorkflowOncoanalyser.restoreMeta(SOMATIC.out.vcf_unfiltered, ch_inputs),
+                WorkflowOncoanalyser.restoreMeta(ch_gripss_somatic_inputs.skip, ch_inputs).map { meta -> [meta, [], []] },
                 ch_inputs_sorted.skip.map { meta -> [meta, [], []] },
             )
 

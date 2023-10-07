@@ -33,7 +33,8 @@ workflow ISOFOX_QUANTIFICATION {
         // Sort inputs
         // channel: [ meta ]
         ch_inputs_sorted = ch_inputs.branch { meta ->
-            runnable: Utils.hasTumorRnaBam(meta)
+            def has_existing = Utils.hasExistingInput(meta, Constants.INPUTS.ISOFOX_DIR)
+            runnable: Utils.hasTumorRnaBam(meta) && !has_existing
             skip: true
         }
 

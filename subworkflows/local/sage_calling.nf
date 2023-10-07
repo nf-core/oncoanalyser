@@ -96,9 +96,10 @@ workflow SAGE_CALLING {
         // channel: runnable: [ meta_sage, tbam, nbam, tbai, nbai ]
         // channel: skip: [ meta_sage ]
         ch_sage_germline_inputs = ch_sage_inputs
-            .branch {
-                def meta_sage = it[0]
-                runnable: meta_sage.sample_type == 'tumor_normal'
+            .branch { d ->
+                def meta_sage = d[0]
+                def has_existing = Utils.hasExistingInput(meta, Constants.INPUTS.SAGE_VCF_NORMAL)
+                runnable: meta_sage.sample_type == 'tumor_normal' && !has_existing
                 skip: true
                     return meta_sage
             }
@@ -122,9 +123,20 @@ workflow SAGE_CALLING {
         //
         // MODULE: SAGE somatic
         //
+        // Create somatic input channel, set aside additional entires that cannot be run
+        // channel: runnable: [ meta_sage, tbam, nbam, tbai, nbai ]
+        // channel: skip: [ meta_sage ]
+        ch_sage_somatic_inputs = ch_sage_inputs
+            .branch { d ->
+                def meta_sage = d[0]
+                def has_existing = Utils.hasExistingInput(meta, Constants.INPUTS.SAGE_VCF_TUMOR)
+                runnable: meta_sage.sample_type == 'tumor_normal' && !has_existing
+                skip: true
+                    return meta_sage
+            }
         // Run process
         SOMATIC(
-            ch_sage_inputs,
+            ch_sage_somatic_inputs.runnable,
             genome_fasta,
             genome_version,
             genome_fai,
@@ -144,6 +156,7 @@ workflow SAGE_CALLING {
         ch_somatic_vcf_out = Channel.empty()
             .mix(
                 WorkflowOncoanalyser.restoreMeta(SOMATIC.out.vcf_filtered, ch_inputs),
+                WorkflowOncoanalyser.restoreMeta(ch_sage_somatic_inputs.skip, ch_inputs).map { meta -> [meta, [], []] },
                 ch_inputs_sorted.skip.map { meta -> [meta, [], []] },
             )
 
@@ -159,6 +172,7 @@ workflow SAGE_CALLING {
         ch_somatic_dir = Channel.empty()
             .mix(
                 WorkflowOncoanalyser.restoreMeta(SOMATIC.out.sage_dir, ch_inputs),
+                WorkflowOncoanalyser.restoreMeta(ch_sage_somatic_inputs.skip, ch_inputs).map { meta -> [meta, []] },
                 ch_inputs_sorted.skip.map { meta -> [meta, []] },
             )
 

@@ -25,8 +25,9 @@ workflow COBALT_PROFILING {
         // NOTE(SW): germline mode is not currently supported
         // channel: [ meta ]
         ch_inputs_sorted = ch_inputs.branch { meta ->
-            runnable_tn: Utils.hasTumorDnaBam(meta) && Utils.hasNormalDnaBam(meta)
-            runnable_to: Utils.hasTumorDnaBam(meta)
+            def has_existing = Utils.hasExistingInput(meta, Constants.INPUTS.COBALT_DIR)
+            runnable_tn: Utils.hasTumorDnaBam(meta) && Utils.hasNormalDnaBam(meta) && !has_existing
+            runnable_to: Utils.hasTumorDnaBam(meta) && !has_existing
             skip: true
         }
 
