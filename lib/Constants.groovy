@@ -184,13 +184,28 @@ class Constants {
             [SampleType.TUMOR, SampleType.TUMOR_NORMAL],
             SequenceType.DNA,
         ],
+        GRIPSS_VCF_TUMOR_TBI: [
+            FileType.GRIPSS_VCF_TBI,
+            [SampleType.TUMOR, SampleType.TUMOR_NORMAL],
+            SequenceType.DNA,
+        ],
         GRIPSS_VCF_NORMAL: [
             FileType.GRIPSS_VCF,
             SampleType.NORMAL,
             SequenceType.DNA,
         ],
+        GRIPSS_VCF_NORMAL_TBI: [
+            FileType.GRIPSS_VCF_TBI,
+            SampleType.NORMAL,
+            SequenceType.DNA,
+        ],
         GRIPSS_UNFILTERED_VCF_TUMOR: [
             FileType.GRIPSS_UNFILTERED_VCF,
+            [SampleType.TUMOR, SampleType.TUMOR_NORMAL],
+            SequenceType.DNA,
+        ],
+        GRIPSS_UNFILTERED_VCF_TUMOR_TBI: [
+            FileType.GRIPSS_UNFILTERED_VCF_TBI,
             [SampleType.TUMOR, SampleType.TUMOR_NORMAL],
             SequenceType.DNA,
         ],

@@ -36,11 +36,10 @@ workflow PAVE_ANNOTATION {
         // Select input sources and sort
         ch_sage_germline_inputs_sorted = ch_sage_germline_vcf
             .map { meta, sage_vcf, sage_tbi ->
-                if (Utils.hasExistingInput(meta, Constants.INPUT.SAGE_VCF_NORMAL)) {
-                    return [meta, Utils.getInputs(meta, Constants.INPUT.SAGE_VCF_NORMAL)]
-                } else {
-                    return [meta, sage_vcf]
-                }
+                return [
+                    meta,
+                    Utils.selectCurrentOrExisting(sage_vcf, meta, Constants.INPUT.SAGE_VCF_NORMAL)
+                ]
             }
             .branch { meta, sage_vcf ->
                 def has_existing = Utils.hasExistingInput(meta, Constants.INPUT.PAVE_VCF_NORMAL)
@@ -87,11 +86,10 @@ workflow PAVE_ANNOTATION {
         // Select input sources and sort
         ch_sage_somatic_inputs_sorted = ch_sage_somatic_vcf
             .map { meta, sage_vcf, sage_tbi ->
-                if (Utils.hasExistingInput(meta, Constants.INPUT.SAGE_VCF_TUMOR)) {
-                    return [meta, Utils.getInputs(meta, Constants.INPUT.SAGE_VCF_TUMOR)]
-                } else {
-                    return [meta, sage_vcf]
-                }
+                return [
+                    meta,
+                    Utils.selectCurrentOrExisting(sage_vcf, meta, Constants.INPUT.SAGE_VCF_TUMOR)
+                ]
             }
             .branch { meta, sage_vcf ->
                 def has_existing = Utils.hasExistingInput(meta, Constants.INPUT.PAVE_VCF_TUMOR)

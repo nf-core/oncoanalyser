@@ -29,11 +29,10 @@ workflow GRIPSS_FILTERING {
         // Select input sources and sort
         ch_inputs_sorted = ch_gridss
             .map { meta, gridss_vcf ->
-                if (Utils.hasExistingInput(meta, Constants.INPUT.GRIDSS_VCF)) {
-                    return [meta, Utils.getInput(meta, Constants.INPUT.GRIDSS_VCF)]
-                } else {
-                    return [meta, gridss_vcf]
-                }
+                return [
+                    meta,
+                    Utils.selectCurrentOrExisting(gridss_vcf, meta, Constants.INPUT.GRIDSS_VCF)
+                ]
             }
             .branch { meta, gridss_vcf ->
                 runnable: gridss_vcf
@@ -54,6 +53,7 @@ workflow GRIPSS_FILTERING {
 
                 runnable: has_tumor_normal && !has_existing
                 skip: true
+                    return meta
             }
 
         // Create process input channel
@@ -98,6 +98,7 @@ workflow GRIPSS_FILTERING {
 
                 runnable: has_tumor && !has_existing
                 skip: true
+                    return meta
             }
 
         // Create process input channel

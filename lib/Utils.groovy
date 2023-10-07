@@ -273,4 +273,12 @@ class Utils {
         return getInput(meta, key) !== null
     }
 
+    public static selectCurrentOrExisting(val, meta, key) {
+        if (hasExistingInput(meta, key)) {
+          return getInput(meta, key)
+        } else {
+          return val
+        }
+    }
+
 }
