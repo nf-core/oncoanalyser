@@ -74,7 +74,7 @@ include { COBALT_PROFILING      } from '../subworkflows/local/cobalt_profiling'
 include { GRIDSS_SVPREP_CALLING } from '../subworkflows/local/gridss_svprep_calling'
 include { GRIPSS_FILTERING      } from '../subworkflows/local/gripss_filtering'
 include { ISOFOX_QUANTIFICATION } from '../subworkflows/local/isofox_quantification'
-//include { LILAC_CALLING         } from '../subworkflows/local/lilac_calling'
+include { LILAC_CALLING         } from '../subworkflows/local/lilac_calling'
 include { LINX_ANNOTATION       } from '../subworkflows/local/linx_annotation'
 include { LINX_PLOTTING         } from '../subworkflows/local/linx_plotting'
 //include { ORANGE_REPORTING      } from '../subworkflows/local/orange_reporting'
@@ -535,30 +535,45 @@ workflow WGTS {
     //    ch_chord_out = ch_chord_out.mix(CHORD_PREDICTION.out.chord_dir)
     //}
 
-    ////
-    //// SUBWORKFLOW: Run LILAC for HLA typing and somatic CNV and SNV calling
-    ////
-    //// channel: [ meta, lilac_dir ]
-    //ch_lilac_out = Channel.empty()
-    //if (run_config.stages.lilac) {
+    //
+    // SUBWORKFLOW: Run LILAC for HLA typing and somatic CNV and SNV calling
+    //
+    // channel: [ meta, lilac_dir ]
+    ch_lilac_out = Channel.empty()
+    if (run_config.stages.lilac) {
 
-    //    // Set HLA slice BED if provided in params
-    //    ref_data_hla_slice_bed = params.containsKey('ref_data_hla_slice_bed') ? params.ref_data_hla_slice_bed : []
 
-    //    LILAC_CALLING(
-    //        ch_inputs,
-    //        ch_purple_out,
-    //        ref_data.genome_fasta,
-    //        ref_data.genome_version,
-    //        ref_data.genome_fai,
-    //        hmf_data.lilac_resources,
-    //        ref_data_hla_slice_bed,
-    //        run_config,
-    //    )
 
-    //    ch_versions = ch_versions.mix(LILAC_CALLING.out.versions)
-    //    ch_lilac_out = ch_lilac_out.mix(LILAC_CALLING.out.lilac_dir)
-    //}
+
+
+
+        // Set HLA slice BED if provided in params
+        ref_data_hla_slice_bed = params.containsKey('ref_data_hla_slice_bed') ? params.ref_data_hla_slice_bed : []
+
+
+
+
+
+
+        LILAC_CALLING(
+            ch_inputs,
+            ch_purple_out,
+            ref_data.genome_fasta,
+            ref_data.genome_version,
+            ref_data.genome_fai,
+            hmf_data.lilac_resources,
+            ref_data_hla_slice_bed,
+        )
+
+        ch_versions = ch_versions.mix(LILAC_CALLING.out.versions)
+
+        ch_lilac_out = ch_lilac_out.mix(LILAC_CALLING.out.lilac_dir)
+
+    } else {
+
+        ch_lilac_out = ch_inputs.map { meta -> [meta, []] }
+
+    }
 
     ////
     //// SUBWORKFLOW: Run VIRUSBreakend and Virus Interpreter to quantify viral content
