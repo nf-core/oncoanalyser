@@ -81,7 +81,7 @@ include { ISOFOX_QUANTIFICATION } from '../subworkflows/local/isofox_quantificat
 include { PAVE_ANNOTATION       } from '../subworkflows/local/pave_annotation'
 include { PREPARE_INPUT         } from '../subworkflows/local/prepare_input'
 include { PREPARE_REFERENCE     } from '../subworkflows/local/prepare_reference'
-//include { PURPLE_CALLING        } from '../subworkflows/local/purple_calling'
+include { PURPLE_CALLING        } from '../subworkflows/local/purple_calling'
 //include { SAGE_APPEND           } from '../subworkflows/local/sage_append'
 include { SAGE_CALLING          } from '../subworkflows/local/sage_calling'
 //include { SIGS_FITTING          } from '../subworkflows/local/sigs_fitting'
@@ -291,11 +291,9 @@ workflow WGTS {
 
     } else {
 
-        ch_inputs
-            .map { meta -> [meta, [], []] }
-            .tap(ch_gripss_somatic_out)
-            .tap(ch_gripss_germline_out)
-            .tap(ch_gripss_somatic_unfiltered_out)
+        ch_gripss_somatic_out = ch_inputs.map { meta -> [meta, [], []] }
+        ch_gripss_germline_out = ch_inputs.map { meta -> [meta, [], []] }
+        ch_gripss_somatic_unfiltered_out = ch_inputs.map { meta -> [meta, [], []] }
 
     }
 
@@ -373,46 +371,50 @@ workflow WGTS {
 
     } else {
 
-        ch_pave_germline_out = ch_pave_germline_out.mix(PAVE_ANNOTATION.out.germline)
-        ch_pave_somatic_out = ch_pave_somatic_out.mix(PAVE_ANNOTATION.out.somatic)
+        ch_pave_germline_out = ch_inputs.map { meta -> [meta, []] }
+        ch_pave_somatic_out = ch_inputs.map { meta -> [meta, []] }
 
     }
 
-    ////
-    //// SUBWORKFLOW: Call CNVs, infer purity and ploidy, and recover low quality SVs with PURPLE
-    ////
-    //// channel: [ meta, purple_dir ]
-    //ch_purple_out = Channel.empty()
-    //if (run_config.stages.purple) {
+    //
+    // SUBWORKFLOW: Call CNVs, infer purity and ploidy, and recover low quality SVs with PURPLE
+    //
+    // channel: [ meta, purple_dir ]
+    ch_purple_out = Channel.empty()
+    if (run_config.stages.purple) {
 
-    //    PURPLE_CALLING(
-    //        ch_inputs,
-    //        ch_amber_out,
-    //        ch_cobalt_out,
-    //        ch_pave_somatic_out,
-    //        ch_pave_germline_out,
-    //        ch_gripss_somatic_out,
-    //        ch_gripss_germline_out,
-    //        ch_gripss_somatic_unfiltered_out,
-    //        ref_data.genome_fasta,
-    //        ref_data.genome_version,
-    //        ref_data.genome_fai,
-    //        ref_data.genome_dict,
-    //        hmf_data.gc_profile,
-    //        hmf_data.sage_known_hotspots_somatic,
-    //        hmf_data.sage_known_hotspots_germline,
-    //        hmf_data.driver_gene_panel,
-    //        hmf_data.ensembl_data_resources,
-    //        hmf_data.purple_germline_del,
-    //        [],  // target_region_bed
-    //        [],  // target_region_ratios
-    //        [],  // target_region_msi_indels
-    //        run_config,
-    //    )
+        PURPLE_CALLING(
+            ch_inputs,
+            ch_amber_out,
+            ch_cobalt_out,
+            ch_pave_somatic_out,
+            ch_pave_germline_out,
+            ch_gripss_somatic_out,
+            ch_gripss_germline_out,
+            ch_gripss_somatic_unfiltered_out,
+            ref_data.genome_fasta,
+            ref_data.genome_version,
+            ref_data.genome_fai,
+            ref_data.genome_dict,
+            hmf_data.gc_profile,
+            hmf_data.sage_known_hotspots_somatic,
+            hmf_data.sage_known_hotspots_germline,
+            hmf_data.driver_gene_panel,
+            hmf_data.ensembl_data_resources,
+            hmf_data.purple_germline_del,
+            [],  // target_region_bed
+            [],  // target_region_ratios
+            [],  // target_region_msi_indels
+        )
 
-    //    ch_versions = ch_versions.mix(PURPLE_CALLING.out.versions)
-    //    ch_purple_out = ch_purple_out.mix(PURPLE_CALLING.out.purple_dir)
-    //}
+        ch_versions = ch_versions.mix(PURPLE_CALLING.out.versions)
+        ch_purple_out = ch_purple_out.mix(PURPLE_CALLING.out.purple_dir)
+
+    } else {
+
+        ch_purple_out = ch_inputs.map { meta -> [meta, []] }
+
+    }
 
     ////
     //// SUBWORKFLOW: Append RNA data to SAGE VCF

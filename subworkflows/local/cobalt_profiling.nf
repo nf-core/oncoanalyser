@@ -27,7 +27,7 @@ workflow COBALT_PROFILING {
         ch_inputs_sorted = ch_inputs.branch { meta ->
             runnable_tn: Utils.hasTumorDnaBam(meta) && Utils.hasNormalDnaBam(meta)
             runnable_to: Utils.hasTumorDnaBam(meta)
-            skip: Utils.hasTumorDnaBam(meta)
+            skip: true
         }
 
         // First set diploid BED input for tumor/normal and tumor only samples

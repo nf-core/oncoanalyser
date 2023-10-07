@@ -35,10 +35,10 @@ workflow GRIPSS_FILTERING {
                     return [meta, gridss_vcf]
                 }
             }
-            .branch {
-                // Runnable status conditioned on presence of gridss_vcf (it[1])
-                runnable: it[1]
+            .branch { meta, gridss_vcf ->
+                runnable: gridss_vcf
                 skip: true
+                    return meta
             }
 
         // Create general process input channel
@@ -71,17 +71,20 @@ workflow GRIPSS_FILTERING {
         //
         // MODULE: GRIPSS germline
         //
-        // Create germline input channel
-        // channel: [ meta, gripss_vcf ]
+        // Create germline input channel, set aside addition entries that cannot be run
+        // channel: runnable: [ meta_gridss, gripss_vcf ]
+        // channel: skip: [ meta_gridss ]
         ch_gripss_germline_inputs = ch_gripss_inputs
-            .filter {
+            .branch {
                 def meta_gridss = it[0]
-                return meta_gridss.sample_type == 'tumor_normal'
+                runnable: meta_gridss.sample_type == 'tumor_normal'
+                skip: true
+                    return meta_gridss
             }
 
         // Run process
         GERMLINE(
-            ch_gripss_germline_inputs,
+            ch_gripss_germline_inputs.runnable,
             genome_fasta,
             genome_version,
             genome_fai,
@@ -128,12 +131,14 @@ workflow GRIPSS_FILTERING {
         ch_germline_out = Channel.empty()
             .mix(
                 WorkflowOncoanalyser.restoreMeta(GERMLINE.out.vcf, ch_inputs),
+                WorkflowOncoanalyser.restoreMeta(ch_gripss_germline_inputs.skip, ch_inputs).map { meta -> [meta, [], []] },
                 ch_inputs_sorted.skip.map { meta -> [meta, [], []] },
             )
 
         ch_germline_unfiltered_out = Channel.empty()
             .mix(
                 WorkflowOncoanalyser.restoreMeta(GERMLINE.out.vcf_unfiltered, ch_inputs),
+                WorkflowOncoanalyser.restoreMeta(ch_gripss_germline_inputs.skip, ch_inputs).map { meta -> [meta, [], []] },
                 ch_inputs_sorted.skip.map { meta -> [meta, [], []] },
             )
 

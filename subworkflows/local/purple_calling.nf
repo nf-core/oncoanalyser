@@ -35,9 +35,6 @@ workflow PURPLE_CALLING {
         target_region_ratios         // channel: [optional]  /path/to/target_region_ratios
         target_region_msi_indels     // channel: [optional]  /path/to/target_region_msi_indels
 
-        // Params
-        run_config                   // channel: [mandatory] run configuration
-
     main:
         // Channel for version.yml files
         // channel: [ versions.yml ]
@@ -54,8 +51,10 @@ workflow PURPLE_CALLING {
             ch_sv_somatic,
             ch_sv_germline,
             ch_sv_somatic_unfiltered,
-            run_config,
         )
+
+        /*
+
 
         // Create process-specific meta
         // channel: [ meta_purple, amber_dir, cobalt_dir, sv_somatic_vcf, sv_somatic_tbi, sv_somatic_unfiltered_vcf, sv_somatic_unfiltered_tbi, sv_germline_vcf, sv_germline_tbi, smlv_somatic_vcf, smlv_germline_vcf ]
@@ -94,6 +93,9 @@ workflow PURPLE_CALLING {
 
         ch_outputs = WorkflowOncoanalyser.restoreMeta(PURPLE.out.purple_dir, ch_inputs)
         ch_versions = ch_versions.mix(PURPLE.out.versions)
+        */
+
+        ch_outputs = Channel.empty()
 
     emit:
         purple_dir = ch_outputs  // channel: [ meta, purple_dir ]

@@ -131,14 +131,38 @@ class WorkflowOncoanalyser {
         // and ch_metas
         def key_a = named_args.getOrDefault('key_a', 'group_id')
         def key_b = named_args.getOrDefault('key_b', 'key')
-        def ch_ready_a = ch_a.map { [it[0].getAt(key_b), it[1..-1]] }
+
+        // Prepare channels
+        def ch_ready_a = ch_a.map {
+            // We must handle cases where only a process-specific meta is provided, this occurs during process skipping
+            // and a meta restore is required to create placeholders in the output.
+
+            if (it instanceof HashMap) {
+                return it.getAt(key_b)
+            } else {
+                return [it[0].getAt(key_b), it[1..-1]]
+            }
+
+        }
         def ch_ready_b = ch_b.map { meta -> [meta.getAt(key_a), meta] }
+
         return ch_ready_b
             .cross(ch_ready_a)
             .map { b, a ->
-                def (ka, values) = a
-                def (kb, meta) = b
-                return [meta, *values]
+
+                // As above, we must accommodate process-specific meta only channel elements, and we would expect just
+                // the key to be present for such cases. Otherwise we expect the same key plus additional values in a
+                // Collection object.
+
+                if (a instanceof Collection) {
+                    def (ka, values) = a
+                    def (kb, meta) = b
+                    return [meta, *values]
+                } else {
+                    def (kb, meta) = b
+                    return meta
+                }
+
             }
     }
 

@@ -92,17 +92,20 @@ workflow SAGE_CALLING {
         //
         // MODULE: SAGE germline
         //
-        // Create germline input channel
-        // channel: [ meta_sage, tbam, nbam, tbai, nbai ]
+        // Create germline input channel, set aside additional entires that cannot be run
+        // channel: runnable: [ meta_sage, tbam, nbam, tbai, nbai ]
+        // channel: skip: [ meta_sage ]
         ch_sage_germline_inputs = ch_sage_inputs
-            .filter {
+            .branch {
                 def meta_sage = it[0]
-                return meta_sage.sample_type == 'tumor_normal'
+                runnable: meta_sage.sample_type == 'tumor_normal'
+                skip: true
+                    return meta_sage
             }
 
         // Run process
         GERMLINE(
-            ch_sage_germline_inputs,
+            ch_sage_germline_inputs.runnable,
             genome_fasta,
             genome_version,
             genome_fai,
@@ -148,6 +151,7 @@ workflow SAGE_CALLING {
         ch_germline_vcf_out = Channel.empty()
             .mix(
                 WorkflowOncoanalyser.restoreMeta(GERMLINE.out.vcf_filtered, ch_inputs),
+                WorkflowOncoanalyser.restoreMeta(ch_sage_germline_inputs.skip, ch_inputs).map { meta -> [meta, [], []] },
                 ch_inputs_sorted.skip.map { meta -> [meta, [], []] },
             )
 
@@ -162,6 +166,7 @@ workflow SAGE_CALLING {
         ch_germline_dir = Channel.empty()
             .mix(
                 WorkflowOncoanalyser.restoreMeta(GERMLINE.out.sage_dir, ch_inputs),
+                WorkflowOncoanalyser.restoreMeta(ch_sage_germline_inputs.skip, ch_inputs).map { meta -> [meta, []] },
                 ch_inputs_sorted.skip.map { meta -> [meta, []] },
             )
 

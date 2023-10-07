@@ -49,6 +49,7 @@ workflow PAVE_ANNOTATION {
 
                 runnable: Utils.hasTumorDnaBam(meta) && Utils.hasNormalDnaBam(meta) && sage_vcf
                 skip: true
+                    return meta
             }
 
         // Create process input channel
