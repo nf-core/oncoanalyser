@@ -37,6 +37,8 @@ workflow PAVE_ANNOTATION {
         // MODULE: PAVE germline
         //
         // Select input sources and sort
+        // channel: runnable: [ meta, sage_vcf ]
+        // channel: skip: [ meta ]
         ch_sage_germline_inputs_sorted = ch_sage_germline_vcf
             .map { meta, sage_vcf, sage_tbi ->
                 return [

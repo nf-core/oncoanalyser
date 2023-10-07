@@ -82,7 +82,7 @@ include { PAVE_ANNOTATION       } from '../subworkflows/local/pave_annotation'
 include { PREPARE_INPUT         } from '../subworkflows/local/prepare_input'
 include { PREPARE_REFERENCE     } from '../subworkflows/local/prepare_reference'
 include { PURPLE_CALLING        } from '../subworkflows/local/purple_calling'
-//include { SAGE_APPEND           } from '../subworkflows/local/sage_append'
+include { SAGE_APPEND           } from '../subworkflows/local/sage_append'
 include { SAGE_CALLING          } from '../subworkflows/local/sage_calling'
 //include { SIGS_FITTING          } from '../subworkflows/local/sigs_fitting'
 //include { VIRUSBREAKEND_CALLING } from '../subworkflows/local/virusbreakend_calling'
@@ -416,30 +416,35 @@ workflow WGTS {
 
     }
 
-    ////
-    //// SUBWORKFLOW: Append RNA data to SAGE VCF
-    ////
-    //// channel: [ meta, sage_append_vcf ]
-    //ch_sage_somatic_append_out = Channel.empty()
-    //ch_sage_germline_append_out = Channel.empty()
-    //if (run_config.mode == Constants.RunMode.DNA_RNA && run_config.stages.orange) {
+    //
+    // SUBWORKFLOW: Append RNA data to SAGE VCF
+    //
+    // channel: [ meta, sage_append_vcf ]
+    ch_sage_somatic_append_out = Channel.empty()
+    ch_sage_germline_append_out = Channel.empty()
+    if (run_config.stages.orange) {
 
-    //    // NOTE(SW): currently used only for ORANGE but will also be used for Neo once implemented
+        // NOTE(SW): currently used only for ORANGE but will also be used for Neo once implemented
 
-    //    SAGE_APPEND(
-    //        ch_inputs,
-    //        ch_purple_out,
-    //        ref_data.genome_fasta,
-    //        ref_data.genome_version,
-    //        ref_data.genome_fai,
-    //        ref_data.genome_dict,
-    //        run_config,
-    //    )
+        SAGE_APPEND(
+            ch_inputs,
+            ch_purple_out,
+            ref_data.genome_fasta,
+            ref_data.genome_version,
+            ref_data.genome_fai,
+            ref_data.genome_dict,
+        )
 
-    //    ch_versions = ch_versions.mix(SAGE_APPEND.out.versions)
-    //    ch_sage_somatic_append_out = ch_sage_somatic_append_out.mix(SAGE_APPEND.out.somatic_vcf)
-    //    ch_sage_germline_append_out = ch_sage_germline_append_out.mix(SAGE_APPEND.out.germline_vcf)
-    //}
+        ch_versions = ch_versions.mix(SAGE_APPEND.out.versions)
+        ch_sage_somatic_append_out = ch_sage_somatic_append_out.mix(SAGE_APPEND.out.somatic_vcf)
+        ch_sage_germline_append_out = ch_sage_germline_append_out.mix(SAGE_APPEND.out.germline_vcf)
+
+    } else {
+
+        ch_sage_somatic_append_out = ch_inputs.map { meta -> [meta, []] }
+        ch_sage_germline_append_out = ch_inputs.map { meta -> [meta, []] }
+
+    }
 
     ////
     //// SUBWORKFLOW: Group structural variants into higher order events with LINX

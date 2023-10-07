@@ -13,11 +13,11 @@ workflow PURPLE_CALLING {
         ch_inputs                    // channel: [mandatory] [ meta ]
         ch_amber                     // channel: [mandatory] [ meta, amber_dir ]
         ch_cobalt                    // channel: [mandatory] [ meta, cobalt_dir ]
-        ch_smlv_somatic              // channel: [optional]  [ meta, pave_vcf ]
-        ch_smlv_germline             // channel: [optional]  [ meta, pave_vcf ]
-        ch_sv_somatic                // channel: [optional]  [ meta, gripss_vcf, gripss_tbi ]
-        ch_sv_germline               // channel: [optional]  [ meta, gripss_vcf, gripss_tbi ]
-        ch_sv_somatic_unfiltered     // channel: [optional]  [ meta, gripss_vcf, gripss_tbi ]
+        ch_smlv_somatic              // channel: [mandatory] [ meta, pave_vcf ]
+        ch_smlv_germline             // channel: [mandatory] [ meta, pave_vcf ]
+        ch_sv_somatic                // channel: [mandatory] [ meta, gripss_vcf, gripss_tbi ]
+        ch_sv_germline               // channel: [mandatory] [ meta, gripss_vcf, gripss_tbi ]
+        ch_sv_somatic_unfiltered     // channel: [mandatory] [ meta, gripss_vcf, gripss_tbi ]
 
         // Reference data
         genome_fasta                 // channel: [mandatory] /path/to/genome_fasta

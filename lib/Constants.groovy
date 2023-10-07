@@ -75,6 +75,7 @@ class Constants {
         PAVE_VCF,
         PURPLE_DIR,
         SAGE_VCF,
+        SAGE_APPEND_VCF,
         VIRUSINTERPRETER_DIR,
         // ORANGE specific
         CHORD_DIR,
@@ -160,6 +161,16 @@ class Constants {
             FileType.SAGE_DIR,
             SampleType.NORMAL,
             SequenceType.DNA,
+        ],
+        SAGE_APPEND_VCF_TUMOR: [
+            FileType.SAGE_APPEND_VCF,
+            SampleType.TUMOR,
+            [SequenceType.DNA_RNA],
+        ],
+        SAGE_APPEND_VCF_NORMAL: [
+            FileType.SAGE_APPEND_VCF,
+            SampleType.NORMAL,
+            [SequenceType.DNA_RNA],
         ],
 
         PAVE_VCF_TUMOR: [

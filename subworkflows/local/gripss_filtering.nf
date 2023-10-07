@@ -30,6 +30,8 @@ workflow GRIPSS_FILTERING {
         ch_versions = Channel.empty()
 
         // Select input sources and sort
+        // channel: runnable: [ meta, gridss_vcf ]
+        // channel: skip: [ meta ]
         ch_inputs_sorted = ch_gridss
             .map { meta, gridss_vcf ->
                 return [
@@ -64,14 +66,14 @@ workflow GRIPSS_FILTERING {
         ch_gripss_germline_inputs = ch_inputs_germline_sorted.runnable
             .map { meta, gridss_vcf ->
 
-                  def meta_gripss = [
-                      key: meta.group_id,
-                      id: meta.group_id,
-                      tumor_id: Utils.getTumorDnaSampleName(meta),
-                      normal_id: Utils.getNormalDnaSampleName(meta),
-                  ]
+                def meta_gripss = [
+                    key: meta.group_id,
+                    id: meta.group_id,
+                    tumor_id: Utils.getTumorDnaSampleName(meta),
+                    normal_id: Utils.getNormalDnaSampleName(meta),
+                ]
 
-                  return [meta_gripss, gridss_vcf]
+                return [meta_gripss, gridss_vcf]
             }
 
         // Run process
