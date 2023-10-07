@@ -26,6 +26,20 @@ workflow GRIPSS_FILTERING {
         // channel: [ versions.yml ]
         ch_versions = Channel.empty()
 
+
+
+
+        // Consider completely separating somatic and germline processing
+        // I guess get existing GRIDSS VCF makes sense
+        // Skip conditions:
+        //   * no GRIDSS input (existing or computed)
+        //   * incompatibile input (e.g. GRIDSS tumor-only can't run germline)
+        //   * existing input (e.g. GRIDSS VCF tumor for somatic)
+
+        // This also affects SAGE
+
+
+
         // Select input sources and sort
         ch_inputs_sorted = ch_gridss
             .map { meta, gridss_vcf ->
@@ -40,6 +54,11 @@ workflow GRIPSS_FILTERING {
                 skip: true
                     return meta
             }
+
+
+
+
+
 
         // Create general process input channel
         // channel: [ meta_gripss, gridss_vcf ]
