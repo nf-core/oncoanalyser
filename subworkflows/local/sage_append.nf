@@ -32,7 +32,7 @@ workflow SAGE_APPEND {
             .map { meta, purple_dir ->
                 return [
                     meta,
-                    Utils.selectCurrentOrExisting(purple_dir, meta, Constants.INPUT.PURPLE_DIR)
+                    Utils.selectCurrentOrExisting(purple_dir, meta, Constants.INPUT.PURPLE_DIR),
                 ]
             }
             .branch { meta, purple_dir ->
@@ -65,7 +65,6 @@ workflow SAGE_APPEND {
         // channel: [ meta_append, purple_smlv_vcf, tumor_rna_bam, tumor_rna_bai ]
         ch_sage_append_germline_inputs = ch_inputs_germline_sorted.runnable
             .map { meta, purple_dir ->
-
                 def tumor_dna_id = Utils.getTumorDnaSampleName(meta)
 
                 def tumor_rna_bam = Utils.getTumorRnaBam(meta)

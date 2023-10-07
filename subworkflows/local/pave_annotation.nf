@@ -43,7 +43,7 @@ workflow PAVE_ANNOTATION {
             .map { meta, sage_vcf, sage_tbi ->
                 return [
                     meta,
-                    Utils.selectCurrentOrExisting(sage_vcf, meta, Constants.INPUT.SAGE_VCF_NORMAL)
+                    Utils.selectCurrentOrExisting(sage_vcf, meta, Constants.INPUT.SAGE_VCF_NORMAL),
                 ]
             }
             .branch { meta, sage_vcf ->
@@ -93,7 +93,7 @@ workflow PAVE_ANNOTATION {
             .map { meta, sage_vcf, sage_tbi ->
                 return [
                     meta,
-                    Utils.selectCurrentOrExisting(sage_vcf, meta, Constants.INPUT.SAGE_VCF_TUMOR)
+                    Utils.selectCurrentOrExisting(sage_vcf, meta, Constants.INPUT.SAGE_VCF_TUMOR),
                 ]
             }
             .branch { meta, sage_vcf ->

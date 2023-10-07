@@ -36,7 +36,7 @@ workflow GRIPSS_FILTERING {
             .map { meta, gridss_vcf ->
                 return [
                     meta,
-                    Utils.selectCurrentOrExisting(gridss_vcf, meta, Constants.INPUT.GRIDSS_VCF)
+                    Utils.selectCurrentOrExisting(gridss_vcf, meta, Constants.INPUT.GRIDSS_VCF),
                 ]
             }
             .branch { meta, gridss_vcf ->

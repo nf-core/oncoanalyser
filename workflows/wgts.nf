@@ -75,8 +75,8 @@ include { GRIDSS_SVPREP_CALLING } from '../subworkflows/local/gridss_svprep_call
 include { GRIPSS_FILTERING      } from '../subworkflows/local/gripss_filtering'
 include { ISOFOX_QUANTIFICATION } from '../subworkflows/local/isofox_quantification'
 //include { LILAC_CALLING         } from '../subworkflows/local/lilac_calling'
-//include { LINX_ANNOTATION       } from '../subworkflows/local/linx_annotation'
-//include { LINX_PLOTTING         } from '../subworkflows/local/linx_plotting'
+include { LINX_ANNOTATION       } from '../subworkflows/local/linx_annotation'
+include { LINX_PLOTTING         } from '../subworkflows/local/linx_plotting'
 //include { ORANGE_REPORTING      } from '../subworkflows/local/orange_reporting'
 include { PAVE_ANNOTATION       } from '../subworkflows/local/pave_annotation'
 include { PREPARE_INPUT         } from '../subworkflows/local/prepare_input'
@@ -446,42 +446,58 @@ workflow WGTS {
 
     }
 
-    ////
-    //// SUBWORKFLOW: Group structural variants into higher order events with LINX
-    ////
-    //// channel: [ meta, linx_annotation_dir ]
-    //ch_linx_somatic_out = Channel.empty()
-    //ch_linx_germline_out = Channel.empty()
-    //// channel: [val(meta), linx_visualiser_dir]
-    //ch_linx_somatic_plot_out = Channel.empty()
-    //if (run_config.stages.linx) {
+    //
+    // SUBWORKFLOW: Group structural variants into higher order events with LINX
+    //
+    // channel: [ meta, linx_annotation_dir ]
+    ch_linx_somatic_out = Channel.empty()
+    ch_linx_germline_out = Channel.empty()
+    if (run_config.stages.linx) {
 
-    //    LINX_ANNOTATION(
-    //        ch_inputs,
-    //        ch_purple_out,
-    //        ref_data.genome_version,
-    //        hmf_data.ensembl_data_resources,
-    //        hmf_data.known_fusion_data,
-    //        hmf_data.driver_gene_panel,
-    //        linx_gene_id_file,
-    //        run_config,
-    //    )
+        LINX_ANNOTATION(
+            ch_inputs,
+            ch_purple_out,
+            ref_data.genome_version,
+            hmf_data.ensembl_data_resources,
+            hmf_data.known_fusion_data,
+            hmf_data.driver_gene_panel,
+            linx_gene_id_file,
+        )
 
-    //    ch_versions = ch_versions.mix(LINX_ANNOTATION.out.versions)
-    //    ch_linx_somatic_out = ch_linx_somatic_out.mix(LINX_ANNOTATION.out.somatic)
-    //    ch_linx_germline_out = ch_linx_germline_out.mix(LINX_ANNOTATION.out.germline)
+        ch_versions = ch_versions.mix(LINX_ANNOTATION.out.versions)
 
-    //    LINX_PLOTTING(
-    //        ch_inputs,
-    //        ch_linx_somatic_out,
-    //        ref_data.genome_version,
-    //        hmf_data.ensembl_data_resources,
-    //        run_config,
-    //    )
+        ch_linx_somatic_out = ch_linx_somatic_out.mix(LINX_ANNOTATION.out.somatic)
+        ch_linx_germline_out = ch_linx_germline_out.mix(LINX_ANNOTATION.out.germline)
 
-    //    ch_versions = ch_versions.mix(LINX_PLOTTING.out.versions)
-    //    ch_linx_somatic_plot_out = ch_linx_somatic_plot_out.mix(LINX_PLOTTING.out.visualiser_dir)
-    //}
+    } else {
+
+        ch_linx_somatic_out = ch_inputs.map { meta -> [meta, []] }
+        ch_linx_germline_out = ch_inputs.map { meta -> [meta, []] }
+
+    }
+
+    //
+    // SUBWORKFLOW: Visualise LINX annotations
+    //
+    // channel: [ meta, linx_visualiser_dir ]
+    ch_linx_somatic_plot_out = Channel.empty()
+    if (run_config.stages.linx) {
+
+        LINX_PLOTTING(
+            ch_inputs,
+            ch_linx_somatic_out,
+            ref_data.genome_version,
+            hmf_data.ensembl_data_resources,
+        )
+
+        ch_versions = ch_versions.mix(LINX_PLOTTING.out.versions)
+        ch_linx_somatic_plot_out = ch_linx_somatic_plot_out.mix(LINX_PLOTTING.out.visualiser_dir)
+
+    } else {
+
+        ch_linx_somatic_plot_out = ch_inputs.map { meta -> [meta, []] }
+
+    }
 
     ////
     //// SUBWORKFLOW: Run Sigs to fit somatic smlv to signature definitions
