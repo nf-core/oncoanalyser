@@ -37,76 +37,47 @@ workflow SAGE_CALLING {
             skip: true
         }
 
-        // Create general process input channel
-        // channel: tumor/normal: [ meta_sage, tbam, nbam, tbai, nbai ]
-        // channel: tumor only:   [ meta_sage, tbam, [], tbai, [] ]
-        ch_sage_inputs = ch_inputs_sorted.runnable
-            .map { meta ->
-
-                // NOTE(SW): germline only is not currently supported
-                assert Utils.hasTumorDnaBam(meta)
-
-                def meta_sage = [
-                    // Both are required. Reminder:
-                    //   * key: channel element grouping
-                    //   * id: task tag
-                    key: meta.group_id,
-                    id: meta.group_id,
-                    tumor_id: Utils.getTumorDnaSampleName(meta)
-                ]
-
-                def data = []
-
-                if (Utils.hasNormalDnaBam(meta)) {
-
-                    meta_sage.normal_id = Utils.getNormalDnaSampleName(meta)
-                    meta_sage.sample_type = 'tumor_normal'
-
-                    data = [
-                        meta_sage,
-                        Utils.getTumorDnaBam(meta),
-                        Utils.getNormalDnaBam(meta),
-                        Utils.getTumorDnaBai(meta),
-                        Utils.getNormalDnaBai(meta),
-                    ]
-
-                } else if (Utils.hasTumorDnaBam(meta)) {
-
-                    meta_sage.sample_type = 'tumor_only'
-
-                    data = [
-                        meta_sage,
-                        Utils.getTumorDnaBam(meta),
-                        [],
-                        Utils.getTumorDnaBai(meta),
-                        [],
-                    ]
-
-                } else {
-                    assert false
-                }
-
-                return data
-            }
-
         //
         // MODULE: SAGE germline
         //
-        // Create germline input channel, set aside additional entires that cannot be run
-        // channel: runnable: [ meta_sage, tbam, nbam, tbai, nbai ]
-        // channel: skip: [ meta_sage ]
-        ch_sage_germline_inputs = ch_sage_inputs
-            .branch { d ->
-                def meta_sage = d[0]
-                def has_existing = Utils.hasExistingInput(meta, Constants.INPUTS.SAGE_VCF_NORMAL)
-                runnable: meta_sage.sample_type == 'tumor_normal' && !has_existing
+        // Select inputs that are eligible to run
+        // channel: [ meta ]
+        ch_inputs_germline_sorted = ch_inputs_sorted.runnable
+            .branch { meta ->
+                def has_tumor_normal = Utils.hasTumorDnaBam(meta) && Utils.hasNormalDnaBam(meta)
+                def has_existing = Utils.hasExistingInput(meta, Constants.INPUT.SAGE_VCF_NORMAL)
+
+                runnable: has_tumor_normal && !has_existing
                 skip: true
-                    return meta_sage
+            }
+
+        // Create process input channel
+        // channel: [ meta_sage, tbam, nbam, tbai, nbai ]
+        ch_sage_germline_inputs = ch_inputs_germline_sorted.runnable
+            .map { meta ->
+
+                def meta_sage = [
+                    key: meta.group_id,
+                    id: meta.group_id,
+                    tumor_id: Utils.getTumorDnaSampleName(meta),
+                    normal_id: Utils.getTumorDnaSampleName(meta),
+                ]
+
+                data = [
+                    meta_sage,
+                    Utils.getTumorDnaBam(meta),
+                    Utils.getNormalDnaBam(meta),
+                    Utils.getTumorDnaBai(meta),
+                    Utils.getNormalDnaBai(meta),
+                ]
+
+                return data
+
             }
 
         // Run process
         GERMLINE(
-            ch_sage_germline_inputs.runnable,
+            ch_sage_germline_inputs,
             genome_fasta,
             genome_version,
             genome_fai,
@@ -123,20 +94,61 @@ workflow SAGE_CALLING {
         //
         // MODULE: SAGE somatic
         //
-        // Create somatic input channel, set aside additional entires that cannot be run
-        // channel: runnable: [ meta_sage, tbam, nbam, tbai, nbai ]
-        // channel: skip: [ meta_sage ]
-        ch_sage_somatic_inputs = ch_sage_inputs
-            .branch { d ->
-                def meta_sage = d[0]
-                def has_existing = Utils.hasExistingInput(meta, Constants.INPUTS.SAGE_VCF_TUMOR)
-                runnable: meta_sage.sample_type == 'tumor_normal' && !has_existing
+        // Select inputs that are eligible to run
+        // channel: [ meta ]
+        ch_inputs_somatic_sorted = ch_inputs_sorted.runnable
+            .branch { meta ->
+                def has_tumor = Utils.hasTumorDnaBam(meta)
+                def has_existing = Utils.hasExistingInput(meta, Constants.INPUT.SAGE_VCF_TUMOR)
+
+                runnable: has_tumor && !has_existing
                 skip: true
-                    return meta_sage
             }
+
+        // Create process input channel
+        // channel: tumor/normal: [ meta_sage, tbam, nbam, tbai, nbai ]
+        // channel: tumor only: [ meta_sage, tbam, [], tbai, [] ]
+        ch_sage_somatic_inputs = ch_inputs_somatic_sorted.runnable
+            .map { meta ->
+
+                def meta_sage = [
+                    key: meta.group_id,
+                    id: meta.group_id,
+                    tumor_id: Utils.getTumorDnaSampleName(meta),
+                ]
+
+                def data = []
+                if (Utils.hasNormalDnaBam(meta)) {
+
+                    meta_sage.normal_id = Utils.getNormalDnaSampleName(meta)
+
+                    data = [
+                        meta_sage,
+                        Utils.getTumorDnaBam(meta),
+                        Utils.getNormalDnaBam(meta),
+                        Utils.getTumorDnaBai(meta),
+                        Utils.getNormalDnaBai(meta),
+                    ]
+
+                } else {
+
+                    data = [
+                        meta_sage,
+                        Utils.getTumorDnaBam(meta),
+                        [],
+                        Utils.getTumorDnaBai(meta),
+                        [],
+                    ]
+
+                }
+
+                return data
+
+            }
+
         // Run process
         SOMATIC(
-            ch_sage_somatic_inputs.runnable,
+            ch_sage_somatic_inputs,
             genome_fasta,
             genome_version,
             genome_fai,
@@ -151,12 +163,11 @@ workflow SAGE_CALLING {
         ch_versions = ch_versions.mix(SOMATIC.out.versions)
 
         // Set outputs, restoring original meta
-        // NOTE(SW): look to reduce repetitiveness here
         // channel: [ meta, sage_vcf, sage_tbi ]
         ch_somatic_vcf_out = Channel.empty()
             .mix(
                 WorkflowOncoanalyser.restoreMeta(SOMATIC.out.vcf_filtered, ch_inputs),
-                WorkflowOncoanalyser.restoreMeta(ch_sage_somatic_inputs.skip, ch_inputs).map { meta -> [meta, [], []] },
+                ch_inputs_somatic_sorted.skip.map { meta -> [meta, [], []] },
                 ch_inputs_sorted.skip.map { meta -> [meta, [], []] },
             )
 
@@ -164,7 +175,7 @@ workflow SAGE_CALLING {
         ch_germline_vcf_out = Channel.empty()
             .mix(
                 WorkflowOncoanalyser.restoreMeta(GERMLINE.out.vcf_filtered, ch_inputs),
-                WorkflowOncoanalyser.restoreMeta(ch_sage_germline_inputs.skip, ch_inputs).map { meta -> [meta, [], []] },
+                ch_inputs_germline_sorted.skip.map { meta -> [meta, [], []] },
                 ch_inputs_sorted.skip.map { meta -> [meta, [], []] },
             )
 
@@ -172,7 +183,7 @@ workflow SAGE_CALLING {
         ch_somatic_dir = Channel.empty()
             .mix(
                 WorkflowOncoanalyser.restoreMeta(SOMATIC.out.sage_dir, ch_inputs),
-                WorkflowOncoanalyser.restoreMeta(ch_sage_somatic_inputs.skip, ch_inputs).map { meta -> [meta, []] },
+                ch_inputs_somatic_sorted.skip.map { meta -> [meta, []] },
                 ch_inputs_sorted.skip.map { meta -> [meta, []] },
             )
 
@@ -180,7 +191,7 @@ workflow SAGE_CALLING {
         ch_germline_dir = Channel.empty()
             .mix(
                 WorkflowOncoanalyser.restoreMeta(GERMLINE.out.sage_dir, ch_inputs),
-                WorkflowOncoanalyser.restoreMeta(ch_sage_germline_inputs.skip, ch_inputs).map { meta -> [meta, []] },
+                ch_inputs_germline_sorted.skip.map { meta -> [meta, []] },
                 ch_inputs_sorted.skip.map { meta -> [meta, []] },
             )
 
@@ -190,5 +201,5 @@ workflow SAGE_CALLING {
         germline_dir = ch_germline_dir     // channel: [ meta, sage_dir ]
         somatic_dir  = ch_somatic_dir      // channel: [ meta, sage_dir ]
 
-        versions           = ch_versions   // channel: [ versions.yml ]
+        versions     = ch_versions         // channel: [ versions.yml ]
 }

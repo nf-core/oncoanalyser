@@ -43,7 +43,7 @@ workflow PAVE_ANNOTATION {
                 }
             }
             .branch { meta, sage_vcf ->
-                def has_existing = Utils.hasExistingInput(meta, Constants.INPUTS.PAVE_VCF_NORMAL)
+                def has_existing = Utils.hasExistingInput(meta, Constants.INPUT.PAVE_VCF_NORMAL)
                 runnable: Utils.hasTumorDnaBam(meta) && Utils.hasNormalDnaBam(meta) && sage_vcf && !has_existing
                 skip: true
                     return meta
@@ -94,7 +94,7 @@ workflow PAVE_ANNOTATION {
                 }
             }
             .branch { meta, sage_vcf ->
-                def has_existing = Utils.hasExistingInput(meta, Constants.INPUTS.PAVE_VCF_TUMOR)
+                def has_existing = Utils.hasExistingInput(meta, Constants.INPUT.PAVE_VCF_TUMOR)
                 runnable: Utils.hasTumorDnaBam(meta) && sage_vcf && !has_existing
                 skip: true
                     return meta
