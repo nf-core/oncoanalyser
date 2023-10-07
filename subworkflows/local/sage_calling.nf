@@ -2,6 +2,9 @@
 // SAGE is a precise and highly sensitive somatic SNV, MNV and small INDEL caller
 //
 
+import Constants
+import Utils
+
 include { SAGE_GERMLINE as GERMLINE } from '../../modules/local/sage/germline/main'
 include { SAGE_SOMATIC as SOMATIC   } from '../../modules/local/sage/somatic/main'
 

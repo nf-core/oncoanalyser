@@ -2,6 +2,9 @@
 // GRIPSS performs SV filtering.
 //
 
+import Constants
+import Utils
+
 include { GRIPSS_GERMLINE as GERMLINE } from '../../modules/local/gripss/germline/main'
 include { GRIPSS_SOMATIC as SOMATIC   } from '../../modules/local/gripss/somatic/main'
 

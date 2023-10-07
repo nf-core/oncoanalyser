@@ -3,6 +3,7 @@
 // GRIDSS detects structural variants, and reports breakends and breakpoints.
 //
 
+import Constants
 import Utils
 
 include { GRIDSS_ASSEMBLE as ASSEMBLE               } from '../../modules/local/svprep/assemble/main'
