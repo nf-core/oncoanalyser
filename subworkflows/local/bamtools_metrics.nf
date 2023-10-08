@@ -21,39 +21,15 @@ workflow BAMTOOLS_METRICS {
         // channel: [ versions.yml ]
         ch_versions = Channel.empty()
 
-
-        // // NOTE(SW): I previously collapsed multiple normals to avoid processing duplication, however I'm now moving
-        // // towards allowing multiple tumors per subject/group. This means that each normal should only be specified
-        // // exactly once. I will not plan to support multiple tumor and normal combinations, this instead will required
-        // // duplicate processing for some tasks but this workflow modality is likely to be a rare use-case.
-
-
-        // Select inputs and then runnable/skip
-
-        // Collapse by filepath
-        //   * this must be generalised
-
-        // Run process
-
-        // Replicate by files
-        //   * this must be generalised
-
-        // Set all outputs i.e. add skip
-
-
-
         // Sort inputs
-        // channel: runnable: [ meta ]
-        // channel: skip: [ meta ]
+        // channel: [ meta ]
         ch_inputs_sorted = ch_inputs
             .branch { meta ->
 
                 def has_tumor_dna = Utils.hasTumorDnaBam(meta)
                 def has_normal_dna = Utils.hasNormalDnaBam(meta)
 
-                def has_existing = Utils.hasExistingInput(meta, Constants.INPUT.BAMTOOLS_TUMOR)
-
-                runnable: (has_tumor_dna || has_normal_dna) && !has_existing
+                runnable: has_tumor_dna || has_normal_dna
                 skip: true
             }
 
@@ -85,98 +61,35 @@ workflow BAMTOOLS_METRICS {
                 ]
             }
             .branch { meta_extra, bam, bai ->
-                runnable: bam && bai
+
+                def input_key
+                if (meta_extra.sample_type == 'tumor') {
+                    input_key = Constants.INPUT.BAMTOOLS_TUMOR
+                } else if (meta_extra.sample_type == 'normal') {
+                    input_key = Constants.INPUT.BAMTOOLS_NORMAL
+                } else {
+                    assert false
+                }
+
+                def has_existing = Utils.hasExistingInput(meta_extra, input_key)
+
+                runnable: bam && bai && !has_existing
                 skip: true
                     return meta_extra
             }
 
-
-        // Collapse duplicate files
-        ch_bams_bais_dedup = ch_bams_bais_sorted.runnable
-            .map { meta_extra, bam, bai ->
-                return [[bam, bai], meta_extra]
-            }
-            .groupTuple()
-            .map { fps, meta_extras ->
-
-                def key = meta_extras.collect { meta_extra -> meta_extra.key }
-                def meta_bamtools = [
-                    id: key.join('__'),
-                ]
-
-                return [key, meta_extras, fps]
-            }
-            .multiMap { key, meta_extras, fps ->
-
-            }
-            .view()
-
         // Create process input channel
-
-
-
-
-
-
-        /*
-
-
-
-
-        // Select input sources
         // channel: [ meta_bamtools, bam, bai ]
-        ch_bamtools_inputs_all = ch_inputs
-            .flatMap { meta ->
-                def inputs = []
+        ch_bamtools_inputs = ch_bams_bais_sorted.runnable
+            .map { meta_extra, bam, bai ->
 
-                def meta_bamtools_tumor = [
-                    key: meta.id,
-                    id: Utils.getTumorDnaSampleName(meta),
-                    // NOTE(SW): must use string representation for caching purposes
-                    sample_type_str: Constants.SampleType.TUMOR.name(),
+                def meta_bamtools = [
+                    key: meta_extra.group_id,
+                    id: meta_extra.group_id,
+                    sample_type: meta_extra.sample_type,
                 ]
-                def tumor_bam = Utils.getTumorDnaBam(meta)
-                inputs.add([meta_bamtools_tumor, tumor_bam, "${tumor_bam}.bai"])
 
-                if (run_config.type == Constants.RunType.TUMOR_NORMAL) {
-                    def meta_bamtools_normal = [
-                        key: meta.id,
-                        id: Utils.getNormalDnaSampleName(meta),
-                        // NOTE(SW): must use string representation for caching purposes
-                        sample_type_str: Constants.SampleType.NORMAL.name(),
-                    ]
-                    def normal_bam = Utils.getNormalDnaBam(meta)
-                    inputs.add([meta_bamtools_normal, normal_bam, "${normal_bam}.bai"])
-                }
-
-                return inputs
-            }
-
-        // Collapse duplicate files e.g. repeated normal BAMs for multiple tumor samples
-        // NOTE(SW): no effective blocking by .groupTuple() as we're not dependent
-        // on any process
-        // channel: [ meta_bamtools, bam, bai ]
-        ch_bamtools_inputs = ch_bamtools_inputs_all
-            .map { [it[1..-1], it[0]] }
-            .groupTuple()
-            .map { filepaths, meta_bamtools ->
-                def (keys, sample_names, sample_type_strs) = meta_bamtools
-                    .collect {
-                        [it.key, it.id, it.sample_type_str]
-                    }
-                    .transpose()
-
-                def sample_type_strs_unique = sample_type_strs.unique(false)
-                assert sample_type_strs_unique.size() == 1
-                def sample_type_str = sample_type_strs_unique[0]
-
-                def meta_bamtools_new = [
-                    keys: keys,
-                    id: sample_names.join('__'),
-                    id_simple: keys.join('__'),
-                    sample_type_str: sample_type_str,
-                ]
-                return [meta_bamtools_new, *filepaths]
+                return [meta_bamtools, bam, bai]
             }
 
         // Run process
@@ -186,44 +99,36 @@ workflow BAMTOOLS_METRICS {
             genome_version,
         )
 
-        // Set version
         ch_versions = ch_versions.mix(BAMTOOLS.out.versions)
 
-        // Replicate outputs to reverse unique operation
-        // channel: [ meta_bamtools_individual, sample_type_str, metrics ]
-        ch_bamtools_out_individual = BAMTOOLS.out.metrics
-            .flatMap { meta_bamtools_shared, metrics ->
-                meta_bamtools_shared.keys.collect { key ->
-                    return [meta_bamtools_shared + [key: key], meta_bamtools_shared.sample_type_str, metrics]
-                }
+        // Sort outputs into tumor and normal channels, adding partial skip entries
+        // channel: [ meta_bamtools, metrics ]
+        ch_outputs_sorted = Channel.empty()
+            .mix(
+                BAMTOOLS.out.metrics,
+                ch_bams_bais_sorted.skip.map { meta -> [meta, []] },
+            )
+            .branch { meta_bamtools, metrics ->
+                tumor: meta_bamtools.sample_type == 'tumor'
+                normal: meta_bamtools.sample_type == 'normal'
             }
 
-        // Set outputs
-        ch_outputs = WorkflowOncoanalyser.restoreMeta(ch_bamtools_out_individual, ch_inputs)
-            .branch { meta, sample_type_str, metrics ->
-                def sample_type = Utils.getEnumFromString(sample_type_str, Constants.SampleType)
-                somatic: sample_type == Constants.SampleType.TUMOR
-                    return [meta, metrics]
-                germline: sample_type == Constants.SampleType.NORMAL
-                    return [meta, metrics]
-            }
+        // Set outputs, restoring original meta, including full skip entries
+        ch_somatic_metrics = Channel.empty()
+            .mix(
+                WorkflowOncoanalyser.restoreMeta(ch_outputs_sorted.tumor, ch_inputs),
+                ch_inputs_sorted.skip.map { meta -> [meta, []] },
+            )
 
-
-
-        */
-
-        ch_outputs = ch_inputs
-            .multiMap {
-                somatic: it
-                germline: it
-            }
-
-
-
+        ch_germline_metrics = Channel.empty()
+            .mix(
+                WorkflowOncoanalyser.restoreMeta(ch_outputs_sorted.normal, ch_inputs),
+                ch_inputs_sorted.skip.map { meta -> [meta, []] },
+            )
 
     emit:
-        somatic  = ch_outputs.somatic  // channel: [ meta, metrics ]
-        germline = ch_outputs.germline // channel: [ meta, metrics ]
+        somatic  = ch_somatic_metrics  // channel: [ meta, metrics ]
+        germline = ch_germline_metrics // channel: [ meta, metrics ]
 
         versions = ch_versions         // channel: [ versions.yml ]
 }

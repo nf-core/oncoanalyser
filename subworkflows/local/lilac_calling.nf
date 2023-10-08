@@ -29,8 +29,7 @@ workflow LILAC_CALLING {
         ch_versions = Channel.empty()
 
         // Sort inputs
-        // channel: runnable: [ meta ]
-        // channel: skip: [ meta ]
+        // channel: [ meta ]
         ch_inputs_sorted = ch_inputs
             .branch { meta ->
 
@@ -188,7 +187,7 @@ workflow LILAC_CALLING {
             }
 
         //
-        // MODULE: LILAC HLA characterisation
+        // MODULE: LILAC
         //
         // Create process input channel
         // channel: [ meta_lilac, normal_dna_bam, normal_dna_bai, tumor_dna_bam, tumor_dna_bai, tumor_rna_bam, tumor_rna_bai, purple_dir ]

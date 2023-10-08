@@ -34,23 +34,31 @@ workflow VIRUSBREAKEND_CALLING {
         // channel: [ versions.yml ]
         ch_versions = Channel.empty()
 
+        // Sort inputs
+        // NOTE(SW): VIRUSBreakend inputs are not allowed in the samplesheet, so aren't considered
+        // channel: [ meta ]
+        ch_inputs_sorted = ch_inputs
+            .branch { meta ->
 
+                def has_existing = Utils.hasExistingInput(meta, Constants.INPUT.VIRUSINTERPRETER_DIR)
 
+                runnable: Utils.hasTumorDnaBam(meta) && !has_existing
+                skip: true
+            }
 
-        /*
-
-
-
-
-        // VIRUSBreakend
-        // Create inputs and create process-specific meta
+        //
+        // MODULE: VIRUSBreakend
+        //
+        // Create process input channel
         // channel: [ meta_virus, tumor_bam ]
-        ch_virusbreakend_inputs = ch_inputs
+        ch_virusbreakend_inputs = ch_inputs_sorted.runnable
             .map { meta ->
+
                 def meta_virus = [
-                    key: meta.id,
-                    id: meta.id,
+                    id: meta.group_id,
+                    key: meta.group_id,
                 ]
+
                 return [meta_virus, Utils.getTumorDnaBam(meta)]
             }
 
@@ -67,31 +75,54 @@ workflow VIRUSBREAKEND_CALLING {
             virusbreakenddb,
         )
 
-        // Create inputs and create process-specific meta
-        if (run_config.stages.purple) {
-            ch_virusinterpreter_inputs_purple = ch_purple
-        } else {
-            ch_virusinterpreter_inputs_purple = WorkflowOncoanalyser.getInput(ch_inputs, Constants.INPUT.PURPLE_DIR)
-        }
+        ch_versions = ch_versions.mix(VIRUSBREAKEND.out.versions)
 
-        // channel: [ meta, virus_tsv, purple_dir, wgs_metrics ]
-        ch_virusinterpreter_inputs_full = WorkflowOncoanalyser.groupByMeta(
-            WorkflowOncoanalyser.restoreMeta(VIRUSBREAKEND.out.tsv, ch_inputs),
-            ch_virusinterpreter_inputs_purple,
-            run_config.stages.bamtools ? ch_bamtools_somatic : WorkflowOncoanalyser.getInput(ch_inputs, Constants.INPUT.INPUT_BAMTOOLS_TUMOR),
+        //
+        // MODULE: Virus Interpreter
+        //
+        // Select input sources
+        // channel: [ meta, virus_tsv, purple_dir, metrics ]
+        ch_virusinterpreter_inputs_selected = WorkflowOncoanalyser.groupByMeta(
+              WorkflowOncoanalyser.restoreMeta(VIRUSBREAKEND.out.tsv, ch_inputs),
+              ch_purple,
+              ch_bamtools_somatic,
         )
+            .map { meta, virus_tsv, purple_dir, metrics ->
 
-        // Virus Interpreter
-        // Create inputs and create process-specific meta
-        // channel: [ meta_virus, virus_tsv, purple_dir, wgs_metrics ]
-        ch_virusinterpreter_inputs = ch_virusinterpreter_inputs_full
-            .map {
-                def meta = it[0]
-                def meta_virus = [
-                    key: meta.id,
-                    id: Utils.getTumorDnaSampleName(meta),
+                def inputs = [
+                    virus_tsv,
+                    Utils.selectCurrentOrExisting(purple_dir, meta, Constants.INPUT.PURPLE_DIR),
+                    Utils.selectCurrentOrExisting(metrics, meta, Constants.INPUT.BAMTOOLS_TUMOR),
                 ]
-                return [meta_virus, *it[1..-1]]
+
+                return [meta, *inputs]
+            }
+
+        // Sort inputs
+        // channel: [ meta, virus_tsv, purple_dir, metrics ]
+        // channel: skip: [ meta ]
+        ch_virusinterpreter_inputs_sorted = ch_virusinterpreter_inputs_selected
+            .branch { meta, virus_tsv, purple_dir, metrics ->
+                runnable: virus_tsv && purple_dir && metrics
+                skip: true
+                    return meta
+            }
+
+        // Create process input channel
+        // channel: [ meta_virus, virus_tsv, purple_dir, metrics ]
+        ch_virusinterpreter_inputs = ch_virusinterpreter_inputs_sorted.runnable
+            .map { d ->
+
+                def meta = d[0]
+                def inputs = d[1..-1]
+
+                def meta_virus = [
+                    key: meta.group_id,
+                    id: meta.group_id,
+                    tumor_id: Utils.getTumorDnaSampleName(meta),
+                ]
+
+                return [meta_virus, *inputs]
             }
 
         // Run process
@@ -101,19 +132,16 @@ workflow VIRUSBREAKEND_CALLING {
             virus_reporting_db,
         )
 
+        ch_versions = ch_versions.mix(VIRUSINTERPRETER.out.versions)
+
         // Set outputs, restoring original meta
-        ch_outputs = WorkflowOncoanalyser.restoreMeta(VIRUSINTERPRETER.out.virusinterpreter_dir, ch_inputs)
-        ch_versions = ch_versions.mix(
-            VIRUSINTERPRETER.out.versions,
-            VIRUSBREAKEND.out.versions,
-        )
-
-
-        */
-
-
+        // channel: [ meta, virusinterpreter_dir ]
         ch_outputs = Channel.empty()
-
+            .mix(
+                WorkflowOncoanalyser.restoreMeta(VIRUSINTERPRETER.out.virusinterpreter_dir, ch_inputs),
+                ch_virusinterpreter_inputs_sorted.skip.map { meta -> [meta, []] },
+                ch_inputs_sorted.skip.map { meta -> [meta, []] },
+            )
 
     emit:
         virusinterpreter_dir = ch_outputs  // channel: [ meta, virusinterpreter_dir ]

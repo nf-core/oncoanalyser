@@ -25,7 +25,7 @@ process VIRUSINTERPRETER {
     java \\
         -Xmx${Math.round(task.memory.bytes * 0.95)} \\
         -jar ${task.ext.jarPath} \\
-            -sample ${meta.id} \\
+            -sample ${meta.tumor_id} \\
             -purple_dir ${purple_dir} \\
             -tumor_sample_wgs_metrics_file ${wgs_metrics} \\
             -virus_breakend_tsv ${virus_tsv} \\

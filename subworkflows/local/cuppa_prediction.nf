@@ -10,10 +10,10 @@ workflow CUPPA_PREDICTION {
     take:
         // Sample data
         ch_inputs           // channel: [mandatory] [ meta ]
-        ch_isofox           // channel: [optional]  [ meta, isofox_dir ]
-        ch_purple           // channel: [optional]  [ meta, purple_dir ]
-        ch_linx             // channel: [optional]  [ meta, linx_annotation_dir ]
-        ch_virusinterpreter // channel: [optional]  [ meta, virusinterpreter_dir ]
+        ch_isofox           // channel: [mandatory] [ meta, isofox_dir ]
+        ch_purple           // channel: [mandatory] [ meta, purple_dir ]
+        ch_linx             // channel: [mandatory] [ meta, linx_annotation_dir ]
+        ch_virusinterpreter // channel: [mandatory] [ meta, virusinterpreter_dir ]
 
         // Reference data
         genome_version      // channel: [mandatory] genome version
@@ -24,74 +24,93 @@ workflow CUPPA_PREDICTION {
         // channel: [ versions.yml ]
         ch_versions = Channel.empty()
 
-
-
-
-        /*
-
-
         // Select input sources
-        // channel: [ meta, isofox_dir ]
-        ch_cuppa_inputs_isofox = run_config.stages.isofox ? ch_isofox : WorkflowOncoanalyser.getInput(ch_inputs, Constants.INPUT.ISOFOX_DIR, type: 'optional')
-
         // channel: [ meta, isofox_dir, purple_dir, linx_annotation_dir, virusinterpreter_dir ]
-        ch_cuppa_inputs_source = WorkflowOncoanalyser.groupByMeta(
-            ch_cuppa_inputs_isofox,
-            run_config.stages.purple ? ch_purple : WorkflowOncoanalyser.getInput(ch_inputs, Constants.INPUT.PURPLE_DIR, type: 'optional'),
-            run_config.stages.linx ? ch_linx : WorkflowOncoanalyser.getInput(ch_inputs, Constants.INPUT.LINX_ANNO_DIR_TUMOR, type: 'optional'),
-            run_config.stages.virusinterpreter ? ch_virusinterpreter : WorkflowOncoanalyser.getInput(ch_inputs, Constants.INPUT.VIRUSINTERPRETER_DIR, type: 'optional'),
-            flatten_mode: 'nonrecursive',
+        ch_inputs_selected = WorkflowOncoanalyser.groupByMeta(
+            ch_isofox,
+            ch_purple,
+            ch_linx,
+            ch_virusinterpreter,
         )
+            .map { meta, isofox_dir, purple_dir, linx_annotation_dir, virusinterpreter_dir ->
 
+                def inputs = [
+                    Utils.selectCurrentOrExisting(isofox_dir, meta, Constants.INPUT.ISOFOX_DIR),
+                    Utils.selectCurrentOrExisting(purple_dir, meta, Constants.INPUT.PURPLE_DIR),
+                    Utils.selectCurrentOrExisting(linx_annotation_dir, meta, Constants.INPUT.LINX_ANNO_DIR_TUMOR),
+                    Utils.selectCurrentOrExisting(virusinterpreter_dir, meta, Constants.INPUT.VIRUSINTERPRETER_DIR),
+                ]
 
-
-
-
-
-        // Create inputs and create process-specific meta
-        // channel: [ meta_cuppa, isofox_dir, purple_dir, linx_annotation_dir, virusinterpreter_dir ]
-        ch_cuppa_inputs = ch_cuppa_inputs_source
-            .map { data ->
-                def meta = data[0]
-                def meta_cuppa = [key: meta.id]
-
-                switch (run_config.mode) {
-                    case Constants.RunMode.DNA:
-                        meta_cuppa.id = meta.getAt(['sample_name', Constants.SampleType.TUMOR, Constants.SequenceType.DNA])
-                        break
-                    case Constants.RunMode.RNA:
-                        meta_cuppa.id = meta.getAt(['sample_name', Constants.SampleType.TUMOR, Constants.SequenceType.RNA])
-                        break
-                    case Constants.RunMode.DNA_RNA:
-                        meta_cuppa.id = meta.getAt(['sample_name', Constants.SampleType.TUMOR, Constants.SequenceType.DNA])
-                        meta_cuppa.id_rna = meta.getAt(['sample_name', Constants.SampleType.TUMOR, Constants.SequenceType.RNA])
-                        break
-                    default:
-                        assert false
-                }
-
-                return [meta_cuppa, *data[1..-1]]
+                return [meta, *inputs]
             }
 
+        // Sort inputs
+        // channel: runnable: [ meta, isofox_dir, purple_dir, linx_annotation_dir, virusinterpreter_dir ]
+        // channel: skip: [ meta ]
+        ch_inputs_sorted = ch_inputs_selected
+            .branch{ meta, isofox_dir, purple_dir, linx_annotation_dir, virusinterpreter_dir ->
+
+                def has_existing = Utils.hasExistingInput(meta, Constants.INPUT.PURPLE_DIR)
+
+                runnable: isofox_dir || (purple_dir && linx_annotation_dir) && !has_existing
+                skip: true
+                    return meta
+            }
+
+        // Create process input channel
+        // channel: [ meta, isofox_dir, purple_dir, linx_annotation_dir, virusinterpreter_dir ]
+        ch_cuppa_inputs = ch_inputs_sorted.runnable
+            .map { meta, isofox_dir, purple_dir, linx_annotation_dir, virusinterpreter_dir ->
+
+                def meta_cuppa = [
+                    key: meta.group_id,
+                    id: meta.group_id,
+                ]
+
+                def has_dna = (purple_dir && linx_annotation_dir)
+                def has_rna = isofox_dir
+
+                if (has_dna && has_rna) {
+
+                    meta_cuppa.sample_id = Utils.getTumorDnaSampleName(meta)
+                    meta_cuppa.sample_rna_id = Utils.getTumorRnaSampleName(meta)
+
+                } else if (has_dna) {
+
+                    meta_cuppa.sample_id = Utils.getTumorDnaSampleName(meta)
+
+                } else if (has_rna) {
+
+                    meta_cuppa.sample_id = Utils.getTumorRnaSampleName(meta)
+
+                } else {
+
+                    assert false
+
+                }
+
+                return [meta_cuppa, isofox_dir, purple_dir, linx_annotation_dir, virusinterpreter_dir]
+            }
+
+        // Run process
         CUPPA(
             ch_cuppa_inputs,
             genome_version,
             cuppa_resources,
         )
 
+        ch_versions = ch_versions.mix(CUPPA.out.versions)
+
         // Set outputs, restoring original meta
-        ch_output = WorkflowOncoanalyser.restoreMeta(CUPPA.out.cuppa_dir, ch_inputs)
-
-        */
-
-
-        // Remember to add versions
-
-
-        ch_output = Channel.empty()
+        // channel: [ meta, cuppa_dir ]
+        ch_outputs = Channel.empty()
+            .mix(
+                WorkflowOncoanalyser.restoreMeta(CUPPA.out.cuppa_dir, ch_inputs),
+                ch_inputs_sorted.skip.map { meta -> [meta, []] },
+            )
 
     emit:
-        cuppa_dir = ch_output   // channel: [ meta, cuppa_dir ]
+        cuppa_dir = ch_outputs  // channel: [ meta, cuppa_dir ]
 
         versions  = ch_versions // channel: [ versions.yml ]
 }

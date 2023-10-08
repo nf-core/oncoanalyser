@@ -606,65 +606,65 @@ workflow WGTS {
 
     }
 
-    ////
-    //// SUBWORKFLOW: Run VIRUSBreakend and Virus Interpreter to quantify viral content
-    ////
-    //// channel: [ meta, virusinterpreter_dir ]
-    //ch_virusinterpreter_out = Channel.empty()
-    //if (run_config.stages.virusinterpreter) {
+    //
+    // SUBWORKFLOW: Run VIRUSBreakend and Virus Interpreter to quantify viral content
+    //
+    // channel: [ meta, virusinterpreter_dir ]
+    ch_virusinterpreter_out = Channel.empty()
+    if (run_config.stages.virusinterpreter) {
 
-    //    VIRUSBREAKEND_CALLING(
-    //        ch_inputs,
-    //        ch_purple_out,
-    //        ch_bamtools_somatic_out,
-    //        ref_data.genome_fasta,
-    //        ref_data.genome_fai,
-    //        ref_data.genome_dict,
-    //        ref_data.genome_bwa_index,
-    //        ref_data.genome_bwa_index_image,
-    //        ref_data.genome_gridss_index,
-    //        ref_data.virusbreakenddb,
-    //        hmf_data.virus_taxonomy_db,
-    //        hmf_data.virus_reporting_db,
-    //        gridss_config,
-    //    )
+        VIRUSBREAKEND_CALLING(
+            ch_inputs,
+            ch_purple_out,
+            ch_bamtools_somatic_out,
+            ref_data.genome_fasta,
+            ref_data.genome_fai,
+            ref_data.genome_dict,
+            ref_data.genome_bwa_index,
+            ref_data.genome_bwa_index_image,
+            ref_data.genome_gridss_index,
+            ref_data.virusbreakenddb,
+            hmf_data.virus_taxonomy_db,
+            hmf_data.virus_reporting_db,
+            gridss_config,
+        )
 
-    //    ch_versions = ch_versions.mix(VIRUSBREAKEND_CALLING.out.versions)
+        ch_versions = ch_versions.mix(VIRUSBREAKEND_CALLING.out.versions)
 
-    //    ch_virusinterpreter_out = ch_virusinterpreter_out.mix(VIRUSBREAKEND_CALLING.out.virusinterpreter_dir)
+        ch_virusinterpreter_out = ch_virusinterpreter_out.mix(VIRUSBREAKEND_CALLING.out.virusinterpreter_dir)
 
-    //} else {
+    } else {
 
-    //    ch_virusinterpreter_out = ch_inputs.map { meta -> [meta, []] }
+        ch_virusinterpreter_out = ch_inputs.map { meta -> [meta, []] }
 
-    //}
+    }
 
-    ////
-    //// SUBWORKFLOW: Run CUPPA predict tissue of origin
-    ////
-    //// channel: [ meta, cuppa_dir ]
-    //ch_cuppa_out = Channel.empty()
-    //if (run_config.stages.cuppa) {
+    //
+    // SUBWORKFLOW: Run CUPPA predict tissue of origin
+    //
+    // channel: [ meta, cuppa_dir ]
+    ch_cuppa_out = Channel.empty()
+    if (run_config.stages.cuppa) {
 
-    //    CUPPA_PREDICTION(
-    //        ch_inputs,
-    //        ch_isofox_out,
-    //        ch_purple_out,
-    //        ch_linx_somatic_out,
-    //        ch_virusinterpreter_out,
-    //        ref_data.genome_version,
-    //        hmf_data.cuppa_resources,
-    //    )
+        CUPPA_PREDICTION(
+            ch_inputs,
+            ch_isofox_out,
+            ch_purple_out,
+            ch_linx_somatic_out,
+            ch_virusinterpreter_out,
+            ref_data.genome_version,
+            hmf_data.cuppa_resources,
+        )
 
-    //    ch_versions = ch_versions.mix(CUPPA_PREDICTION.out.versions)
+        ch_versions = ch_versions.mix(CUPPA_PREDICTION.out.versions)
 
-    //    ch_cuppa_out = ch_cuppa_out.mix(CUPPA_PREDICTION.out.cuppa_dir)
+        ch_cuppa_out = ch_cuppa_out.mix(CUPPA_PREDICTION.out.cuppa_dir)
 
-    //} else {
+    } else {
 
-    //    ch_cuppa_out = ch_inputs.map { meta -> [meta, []] }
+        ch_cuppa_out = ch_inputs.map { meta -> [meta, []] }
 
-    //}
+    }
 
     // TODO(SW): FIRST COMPELTE FLAGSTAT ABOVE
 

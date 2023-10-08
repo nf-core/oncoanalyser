@@ -47,7 +47,9 @@ workflow PAVE_ANNOTATION {
                 ]
             }
             .branch { meta, sage_vcf ->
+
                 def has_existing = Utils.hasExistingInput(meta, Constants.INPUT.PAVE_VCF_NORMAL)
+
                 runnable: Utils.hasTumorDnaBam(meta) && Utils.hasNormalDnaBam(meta) && sage_vcf && !has_existing
                 skip: true
                     return meta
@@ -89,6 +91,8 @@ workflow PAVE_ANNOTATION {
         // MODULE: PAVE somatic
         //
         // Select input sources and sort
+        // channel: runnable: [ meta, sage_vcf ]
+        // channel: skip: [ meta ]
         ch_sage_somatic_inputs_sorted = ch_sage_somatic_vcf
             .map { meta, sage_vcf, sage_tbi ->
                 return [
@@ -97,7 +101,9 @@ workflow PAVE_ANNOTATION {
                 ]
             }
             .branch { meta, sage_vcf ->
+
                 def has_existing = Utils.hasExistingInput(meta, Constants.INPUT.PAVE_VCF_TUMOR)
+
                 runnable: Utils.hasTumorDnaBam(meta) && sage_vcf && !has_existing
                 skip: true
                     return meta

@@ -48,11 +48,11 @@ process CUPPA {
     elif [[ ${categories_val} == 'ALL' ]]; then
         # NOTE(SW): CUPPA requires that the RNA sample name matches the DNA sample name
         for fp in \$(find -L ${isofox_dir} -maxdepth 1 -type f); do
-            fn_out=\$(sed 's/^${meta.id_rna}/${meta.id}/' <<< \${fp##*/});
+            fn_out=\$(sed 's/^${meta.sample_rna_id}/${meta.sample_id}/' <<< \${fp##*/});
             cp \${fp} sample_data/\${fn_out}
         done;
         # Rename identifier in the summary file
-        sed -i 's/^${meta.id_rna}/${meta.id}/g' sample_data/${meta.id}.isf.summary.csv;
+        sed -i 's/^${meta.sample_rna_id}/${meta.sample_id}/g' sample_data/${meta.sample_id}.isf.summary.csv;
     fi;
 
     mkdir -p cuppa/
@@ -60,7 +60,7 @@ process CUPPA {
     java \\
         -Xmx${Math.round(task.memory.bytes * 0.95)} \\
         -jar ${task.ext.jarPath} \\
-            -sample ${meta.id} \\
+            -sample ${meta.sample_id} \\
             -sample_data_dir sample_data/ \\
             -categories ${categories_val} \\
             -ref_data_dir ${cuppa_resources} \\
@@ -70,8 +70,8 @@ process CUPPA {
 
     if [[ ${categories_val} == 'DNA' || ${categories_val} == 'ALL' ]]; then
         python ${task.ext.chartScriptPath} \\
-            -sample ${meta.id} \\
-            -sample_data cuppa/${meta.id}.cup.data.csv \\
+            -sample ${meta.sample_id} \\
+            -sample_data cuppa/${meta.sample_id}.cup.data.csv \\
             -output_dir cuppa/;
     fi
 
@@ -85,12 +85,12 @@ process CUPPA {
     stub:
     """
     mkdir -p cuppa/
-    touch cuppa/${meta.id}.cup.data.csv
-    touch cuppa/${meta.id}.cuppa.conclusion.txt
-    touch cuppa/${meta.id}_cup_report.pdf
-    touch cuppa/${meta.id}.cup.report.summary.png
-    touch cuppa/${meta.id}.cup.report.features.png
-    touch cuppa/${meta.id}.cuppa.chart.png
+    touch cuppa/${meta.sample_id}.cup.data.csv
+    touch cuppa/${meta.sample_id}.cuppa.conclusion.txt
+    touch cuppa/${meta.sample_id}_cup_report.pdf
+    touch cuppa/${meta.sample_id}.cup.report.summary.png
+    touch cuppa/${meta.sample_id}.cup.report.features.png
+    touch cuppa/${meta.sample_id}.cuppa.chart.png
     echo -e '${task.process}:\\n  stub: noversions\\n' > versions.yml
     """
 }

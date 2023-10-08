@@ -41,7 +41,7 @@ workflow PURPLE_CALLING {
 
         // Select input sources
         // channel: [ meta, amber_dir, cobalt_dir, sv_somatic_vcf, sv_somatic_tbi, sv_somatic_unfiltered_vcf, sv_somatic_unfiltered_tbi, sv_germline_vcf, sv_germline_tbi, smlv_somatic_vcf, smlv_germline_vcf ]
-        ch_purple_inputs_selected = WorkflowOncoanalyser.groupByMeta(
+        ch_inputs_selected = WorkflowOncoanalyser.groupByMeta(
             ch_amber,
             ch_cobalt,
             ch_sv_somatic,
@@ -70,13 +70,12 @@ workflow PURPLE_CALLING {
                 ]
 
                 return [meta, *inputs]
-
             }
 
         // Sort inputs
         // channel: runnable: [ meta, amber_dir, cobalt_dir, sv_somatic_vcf, sv_somatic_tbi, sv_somatic_unfiltered_vcf, sv_somatic_unfiltered_tbi, sv_germline_vcf, sv_germline_tbi, smlv_somatic_vcf, smlv_germline_vcf ]
         // channel: skip: [ meta ]
-        ch_inputs_sorted = ch_purple_inputs_selected
+        ch_inputs_sorted = ch_inputs_selected
             .branch { d ->
                 def meta = d[0]
                 def amber_dir = d[1]
@@ -89,13 +88,13 @@ workflow PURPLE_CALLING {
                     return meta
             }
 
-        // Create process-specific meta
+        // Create process input channel
         // channel: [ meta_purple, amber_dir, cobalt_dir, sv_somatic_vcf, sv_somatic_tbi, sv_somatic_unfiltered_vcf, sv_somatic_unfiltered_tbi, sv_germline_vcf, sv_germline_tbi, smlv_somatic_vcf, smlv_germline_vcf ]
         ch_purple_inputs = ch_inputs_sorted.runnable
-            .map {
+            .map { d ->
 
-                def meta = it[0]
-                def inputs = it[1..-1]
+                def meta = d[0]
+                def inputs = d[1..-1]
 
                 def meta_purple = [
                     key: meta.group_id,

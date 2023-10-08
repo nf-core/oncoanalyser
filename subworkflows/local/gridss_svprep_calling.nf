@@ -39,6 +39,7 @@ workflow GRIDSS_SVPREP_CALLING {
         ch_versions = Channel.empty()
 
         // Sort inputs
+        // channel: [ meta ]
         ch_inputs_sorted = ch_inputs
             .branch { meta ->
                 def has_existing = Utils.hasExistingInput(meta, Constants.INPUT.GRIDSS_VCF)
