@@ -48,7 +48,7 @@ workflow ISOFOX_QUANTIFICATION {
                 def tumor_id = Utils.getTumorRnaSampleName(meta)
                 def meta_isofox = [
                     key: meta.group_id,
-                    id: "${meta.group_id}__${tumor_id}",
+                    id: meta.group_id,
                 ]
 
                 return [meta_isofox, Utils.getTumorRnaBam(meta), Utils.getTumorRnaBai(meta)]

@@ -63,7 +63,7 @@ workflow PAVE_ANNOTATION {
                 def tumor_id = Utils.getTumorDnaSampleName(meta)
                 def meta_pave = [
                     key: meta.group_id,
-                    id: "${meta.group_id}__${tumor_id}",
+                    id: meta.group_id,
                     tumor_id: tumor_id,
                 ]
 
@@ -117,7 +117,7 @@ workflow PAVE_ANNOTATION {
                 def tumor_id = Utils.getTumorDnaSampleName(meta)
                 def meta_pave = [
                     key: meta.group_id,
-                    id: "${meta.group_id}__${tumor_id}",
+                    id: meta.group_id,
                     tumor_id: tumor_id,
                 ]
 

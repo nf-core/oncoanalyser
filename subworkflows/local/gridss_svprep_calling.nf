@@ -42,7 +42,9 @@ workflow GRIDSS_SVPREP_CALLING {
         // channel: [ meta ]
         ch_inputs_sorted = ch_inputs
             .branch { meta ->
+
                 def has_existing = Utils.hasExistingInput(meta, Constants.INPUT.GRIDSS_VCF)
+
                 runnable_tn: Utils.hasTumorDnaBam(meta) && Utils.hasNormalDnaBam(meta) && !has_existing
                 runnable_to: Utils.hasTumorDnaBam(meta) && !has_existing
                 skip: true
@@ -63,7 +65,8 @@ workflow GRIDSS_SVPREP_CALLING {
                 def tumor_id = Utils.getTumorDnaSampleName(meta)
                 def meta_svprep = [
                     key: meta.group_id,
-                    id: "${meta.group_id}__${tumor_id}",
+                    id: meta.group_id,
+                    sample_id: tumor_id,
                     sample_type: 'tumor',
                     // NOTE(SW): slightly redundant since we have this information then lose it with .mix above
                     group_size: Utils.hasNormalDnaBam(meta) ? 2 : 1
@@ -109,7 +112,8 @@ workflow GRIDSS_SVPREP_CALLING {
                 def normal_id = Utils.getNormalDnaSampleName(meta)
                 def meta_svprep = [
                     key: meta.group_id,
-                    id: "${meta.group_id}__${normal_id}",
+                    id: meta.group_id,
+                    sample_id: normal_id,
                     sample_type: 'normal',
                     group_size: 2,  // Assumption holds since germline only is not supported and we source from runnable_tn
                 ]
@@ -153,6 +157,17 @@ workflow GRIDSS_SVPREP_CALLING {
                 ch_preprocess_inputs_tumor,
                 ch_preprocess_inputs_normal,
             )
+            .map { meta_svprep, bam, bam_filtered ->
+
+                def meta_gridss = [
+                    key: meta_svprep.key,
+                    id: "${meta_svprep.id}__${meta_svprep.sample_id}",
+                    sample_type: meta_svprep.sample_type,
+                    group_size: meta_svprep.group_size,
+                ]
+
+                return [meta_gridss, bam, bam_filtered]
+            }
 
         // Run process
         PREPROCESS(
@@ -294,9 +309,6 @@ workflow GRIDSS_SVPREP_CALLING {
                 assert Utils.hasTumorDnaBam(meta)
 
                 def meta_svprep = [
-                    // Both are required. Reminder:
-                    //   * key: channel element grouping
-                    //   * id: task tag
                     key: meta.group_id,
                     id: meta.group_id,
                     tumor_id: Utils.getTumorDnaSampleName(meta)
