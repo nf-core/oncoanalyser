@@ -25,12 +25,13 @@ workflow COBALT_PROFILING {
         // Sort inputs
         // NOTE(SW): germline mode is not currently supported
         // channel: [ meta ]
-        ch_inputs_sorted = ch_inputs.branch { meta ->
-            def has_existing = Utils.hasExistingInput(meta, Constants.INPUT.COBALT_DIR)
-            runnable_tn: Utils.hasTumorDnaBam(meta) && Utils.hasNormalDnaBam(meta) && !has_existing
-            runnable_to: Utils.hasTumorDnaBam(meta) && !has_existing
-            skip: true
-        }
+        ch_inputs_sorted = ch_inputs
+            .branch { meta ->
+                def has_existing = Utils.hasExistingInput(meta, Constants.INPUT.COBALT_DIR)
+                runnable_tn: Utils.hasTumorDnaBam(meta) && Utils.hasNormalDnaBam(meta) && !has_existing
+                runnable_to: Utils.hasTumorDnaBam(meta) && !has_existing
+                skip: true
+            }
 
         // First set diploid BED input for tumor/normal and tumor only samples
         // NOTE(SW): since the diploid BED is provided as a channel, I seem to be only able to include via channel ops

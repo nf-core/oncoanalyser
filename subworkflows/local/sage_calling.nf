@@ -35,10 +35,11 @@ workflow SAGE_CALLING {
 
         // Sort inputs
         // channel: [ meta ]
-        ch_inputs_sorted = ch_inputs.branch { meta ->
-            runnable: Utils.hasTumorDnaBam(meta)
-            skip: true
-        }
+        ch_inputs_sorted = ch_inputs
+            .branch { meta ->
+                runnable: Utils.hasTumorDnaBam(meta)
+                skip: true
+            }
 
         //
         // MODULE: SAGE germline

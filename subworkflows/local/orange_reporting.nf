@@ -7,12 +7,12 @@ import Utils
 
 include { ORANGE } from '../../modules/local/orange/main'
 
-include { FLAGSTAT_METRICS } from './flagstat_metrics'
-
 workflow ORANGE_REPORTING {
     take:
         // Sample data
         ch_inputs                   // channel: [mandatory] [ meta ]
+        ch_flagstat_somatic         // channel: [mandatory] [ meta, flagstat]
+        ch_flagstat_germline        // channel: [optional]  [ meta, metrics ]
         ch_bamtools_somatic         // channel: [mandatory] [ meta, metrics ]
         ch_bamtools_germline        // channel: [optional]  [ meta, metrics ]
         ch_sage_somatic             // channel: [mandatory] [ meta, sage_dir ]
@@ -41,38 +41,14 @@ workflow ORANGE_REPORTING {
         isofox_alt_sj               // channel: [optional]  /path/to/isofox_alt_sj
         isofox_gene_distribution    // channel: [optional]  /path/to/isofox_gene_distribution
 
-        // Params
-        run_config                  // channel: [mandatory] run configuration
-
     main:
         // Channel for version.yml files
         // channel: [ versions.yml ]
         ch_versions = Channel.empty()
 
-        //
-        // SUBWORKFLOW: Run SAMtools flagstat to generate stats required for ORANGE
-        //
-        // channel: [ meta, metrics ]
-        ch_flagstat_somatic_out = Channel.empty()
-        ch_flagstat_germline_out = Channel.empty()
-        if (run_config.stages.flagstat) {
-
-            FLAGSTAT_METRICS(
-                ch_inputs,
-                run_config,
-            )
-
-            ch_versions = ch_versions.mix(FLAGSTAT_METRICS.out.versions)
-            ch_flagstat_somatic_out = ch_flagstat_somatic_out.mix(FLAGSTAT_METRICS.out.somatic)
-            ch_flagstat_germline_out = ch_flagstat_germline_out.mix(FLAGSTAT_METRICS.out.germline)
-        }
-
-        //
-        // MODULE: Run ORANGE
-        //
         // Create placeholders for tumor-only
         if (run_config.type == Constants.RunType.TUMOR_ONLY) {
-            ch_flagstat_germline_out = ch_inputs.map { meta -> [meta, []] }
+            ch_flagstat_germline = ch_inputs.map { meta -> [meta, []] }
             ch_bamtools_germline = ch_inputs.map { meta -> [meta, []] }
             ch_sage_germline = ch_inputs.map { meta -> [meta, []] }
             ch_sage_germline_append = ch_inputs.map { meta -> [meta, []] }
@@ -130,8 +106,8 @@ workflow ORANGE_REPORTING {
         ch_orange_inputs_source = WorkflowOncoanalyser.groupByMeta(
             run_config.stages.bamtools ? ch_bamtools_somatic : WorkflowOncoanalyser.getInput(ch_inputs, Constants.INPUT.BAMTOOLS_TUMOR),
             run_config.stages.bamtools ? ch_bamtools_germline : WorkflowOncoanalyser.getInput(ch_inputs, Constants.INPUT.BAMTOOLS_NORMAL, type: 'optional'),
-            run_config.stages.flagstat ? ch_flagstat_somatic_out : WorkflowOncoanalyser.getInput(ch_inputs, Constants.INPUT.FLAGSTAT_TUMOR),
-            run_config.stages.flagstat ? ch_flagstat_germline_out : WorkflowOncoanalyser.getInput(ch_inputs, Constants.INPUT.FLAGSTAT_NORMAL, type: 'optional'),
+            run_config.stages.flagstat ? ch_flagstat_somatic : WorkflowOncoanalyser.getInput(ch_inputs, Constants.INPUT.FLAGSTAT_TUMOR),
+            run_config.stages.flagstat ? ch_flagstat_germline : WorkflowOncoanalyser.getInput(ch_inputs, Constants.INPUT.FLAGSTAT_NORMAL, type: 'optional'),
             run_config.stages.sage ? ch_sage_somatic : WorkflowOncoanalyser.getInput(ch_inputs, Constants.INPUT.SAGE_DIR_TUMOR),
             run_config.stages.sage ? ch_sage_germline : WorkflowOncoanalyser.getInput(ch_inputs, Constants.INPUT.SAGE_DIR_NORMAL, type: 'optional'),
             ch_orange_inputs_purple_dir,

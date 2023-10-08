@@ -16,13 +16,112 @@ workflow BAMTOOLS_METRICS {
         genome_fasta   // channel: [mandatory] /path/to/genome_fasta
         genome_version // channel: [mandatory] genome version
 
-        // Params
-        run_config     // channel: [mandatory] run configuration
-
     main:
         // Channel for version.yml files
         // channel: [ versions.yml ]
         ch_versions = Channel.empty()
+
+
+        // // NOTE(SW): I previously collapsed multiple normals to avoid processing duplication, however I'm now moving
+        // // towards allowing multiple tumors per subject/group. This means that each normal should only be specified
+        // // exactly once. I will not plan to support multiple tumor and normal combinations, this instead will required
+        // // duplicate processing for some tasks but this workflow modality is likely to be a rare use-case.
+
+
+        // Select inputs and then runnable/skip
+
+        // Collapse by filepath
+        //   * this must be generalised
+
+        // Run process
+
+        // Replicate by files
+        //   * this must be generalised
+
+        // Set all outputs i.e. add skip
+
+
+
+        // Sort inputs
+        // channel: runnable: [ meta ]
+        // channel: skip: [ meta ]
+        ch_inputs_sorted = ch_inputs
+            .branch { meta ->
+
+                def has_tumor_dna = Utils.hasTumorDnaBam(meta)
+                def has_normal_dna = Utils.hasNormalDnaBam(meta)
+
+                def has_existing = Utils.hasExistingInput(meta, Constants.INPUT.BAMTOOLS_TUMOR)
+
+                runnable: (has_tumor_dna || has_normal_dna) && !has_existing
+                skip: true
+            }
+
+        // Flatten into BAM/BAI pairs, select inputs that are eligible to run
+        // channel: runnable: [ meta_extra, bam, bai ]
+        // channel: skip: [ meta_extra ]
+        ch_bams_bais_sorted = ch_inputs_sorted.runnable
+            .flatMap { meta ->
+
+                def tumor_bam = []
+                def tumor_bai = []
+
+                def normal_bam = []
+                def normal_bai = []
+
+                if (Utils.hasTumorDnaBam(meta)) {
+                    tumor_bam = Utils.getTumorDnaBam(meta)
+                    tumor_bai = Utils.getTumorDnaBai(meta)
+                }
+
+                if (Utils.hasNormalDnaBam(meta)) {
+                    normal_bam = Utils.getNormalDnaBam(meta)
+                    normal_bai = Utils.getNormalDnaBai(meta)
+                }
+
+                return [
+                    [[key: meta.group_id, *:meta, sample_type: 'tumor'], tumor_bam, tumor_bai],
+                    [[key: meta.group_id, *:meta, sample_type: 'normal'], normal_bam, normal_bai],
+                ]
+            }
+            .branch { meta_extra, bam, bai ->
+                runnable: bam && bai
+                skip: true
+                    return meta_extra
+            }
+
+
+        // Collapse duplicate files
+        ch_bams_bais_dedup = ch_bams_bais_sorted.runnable
+            .map { meta_extra, bam, bai ->
+                return [[bam, bai], meta_extra]
+            }
+            .groupTuple()
+            .map { fps, meta_extras ->
+
+                def key = meta_extras.collect { meta_extra -> meta_extra.key }
+                def meta_bamtools = [
+                    id: key.join('__'),
+                ]
+
+                return [key, meta_extras, fps]
+            }
+            .multiMap { key, meta_extras, fps ->
+
+            }
+            .view()
+
+        // Create process input channel
+
+
+
+
+
+
+        /*
+
+
+
 
         // Select input sources
         // channel: [ meta_bamtools, bam, bai ]
@@ -108,6 +207,19 @@ workflow BAMTOOLS_METRICS {
                 germline: sample_type == Constants.SampleType.NORMAL
                     return [meta, metrics]
             }
+
+
+
+        */
+
+        ch_outputs = ch_inputs
+            .multiMap {
+                somatic: it
+                germline: it
+            }
+
+
+
 
     emit:
         somatic  = ch_outputs.somatic  // channel: [ meta, metrics ]

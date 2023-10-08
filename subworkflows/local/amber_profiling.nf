@@ -23,11 +23,12 @@ workflow AMBER_PROFILING {
 
         // Sort inputs
         // channel: [ meta ]
-        ch_inputs_sorted = ch_inputs.branch { meta ->
-            def has_existing = Utils.hasExistingInput(meta, Constants.INPUT.AMBER_DIR)
-            runnable: Utils.hasTumorDnaBam(meta) && !has_existing
-            skip: true
-        }
+        ch_inputs_sorted = ch_inputs
+            .branch { meta ->
+                def has_existing = Utils.hasExistingInput(meta, Constants.INPUT.AMBER_DIR)
+                runnable: Utils.hasTumorDnaBam(meta) && !has_existing
+                skip: true
+            }
 
         // Create process input channel
         // channel: [ meta_amber, tumor_bam, normal_bam, tumor_bai, normal_bai ]

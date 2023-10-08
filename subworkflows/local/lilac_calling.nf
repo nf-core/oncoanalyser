@@ -44,7 +44,7 @@ workflow LILAC_CALLING {
             }
 
         // Create channel for DNA BAMs
-        // channel: [ meta, tumor_bam, tumor_bai, normal_bam, normal_bai ]
+        // channel: [ meta, tumor_dna_bam, tumor_dna_bai, normal_dna_bam, normal_dna_bai ]
         ch_dna_inputs = ch_inputs_sorted.runnable
             .map { meta ->
 
@@ -158,7 +158,7 @@ workflow LILAC_CALLING {
                 }
 
             // Restore meta, pair tumor and normal BAMs
-            // channel: [ meta, tumor_bam, tumor_bai, normal_bam, normal_bai ]
+            // channel: [ meta, tumor_dna_bam, tumor_dna_bai, normal_dna_bam, normal_dna_bai ]
             ch_dna_inputs_ready = WorkflowOncoanalyser.groupByMeta(
                 WorkflowOncoanalyser.restoreMeta(ch_slice_reunited_bams.tumor, ch_inputs),
                 WorkflowOncoanalyser.restoreMeta(ch_slice_reunited_bams.normal, ch_inputs),
@@ -166,12 +166,13 @@ workflow LILAC_CALLING {
 
         } else {
 
-            // channel: [ meta, tumor_bam, tumor_bai, normal_bam, normal_bai ]
+            // channel: [ meta, tumor_dna_bam, tumor_dna_bai, normal_dna_bam, normal_dna_bai ]
             ch_dna_inputs_ready = ch_dna_inputs
 
         }
 
         // Create channel for RNA BAMs
+        // channel: [ meta, tumor_rna_bam, tumor_rna_bai ]
         ch_rna_inputs_ready = ch_inputs
             .map { meta ->
 

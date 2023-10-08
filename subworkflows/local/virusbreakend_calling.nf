@@ -28,12 +28,19 @@ workflow VIRUSBREAKEND_CALLING {
 
         // Params
         gridss_config          // channel: [optional] /path/to/gridss_config
-        run_config             // channel: [mandatory] run configuration
 
     main:
         // Channel for version.yml files
         // channel: [ versions.yml ]
         ch_versions = Channel.empty()
+
+
+
+
+        /*
+
+
+
 
         // VIRUSBreakend
         // Create inputs and create process-specific meta
@@ -100,6 +107,13 @@ workflow VIRUSBREAKEND_CALLING {
             VIRUSINTERPRETER.out.versions,
             VIRUSBREAKEND.out.versions,
         )
+
+
+        */
+
+
+        ch_outputs = Channel.empty()
+
 
     emit:
         virusinterpreter_dir = ch_outputs  // channel: [ meta, virusinterpreter_dir ]

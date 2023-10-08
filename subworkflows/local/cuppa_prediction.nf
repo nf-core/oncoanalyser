@@ -19,9 +19,6 @@ workflow CUPPA_PREDICTION {
         genome_version      // channel: [mandatory] genome version
         cuppa_resources     // channel: [mandatory] /path/to/cuppa_resources/
 
-        // Params
-        run_config          // channel: [mandatory] run configuration
-
     main:
         // Channel for version.yml files
         // channel: [ versions.yml ]
@@ -30,7 +27,7 @@ workflow CUPPA_PREDICTION {
 
 
 
-
+        /*
 
 
         // Select input sources
@@ -85,8 +82,16 @@ workflow CUPPA_PREDICTION {
         // Set outputs, restoring original meta
         ch_output = WorkflowOncoanalyser.restoreMeta(CUPPA.out.cuppa_dir, ch_inputs)
 
-    emit:
-        cuppa_dir = ch_output           // channel: [ meta, cuppa_dir ]
+        */
 
-        versions  = CUPPA.out.versions  // channel: [ versions.yml ]
+
+        // Remember to add versions
+
+
+        ch_output = Channel.empty()
+
+    emit:
+        cuppa_dir = ch_output   // channel: [ meta, cuppa_dir ]
+
+        versions  = ch_versions // channel: [ versions.yml ]
 }
