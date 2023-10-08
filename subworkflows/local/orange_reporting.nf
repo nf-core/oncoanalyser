@@ -46,6 +46,8 @@ workflow ORANGE_REPORTING {
         // channel: [ versions.yml ]
         ch_versions = Channel.empty()
 
+        /*
+
         // Create placeholders for tumor-only
         if (run_config.type == Constants.RunType.TUMOR_ONLY) {
             ch_flagstat_germline = ch_inputs.map { meta -> [meta, []] }
@@ -166,6 +168,8 @@ workflow ORANGE_REPORTING {
 
         // Set outputs
         ch_versions = ch_versions.mix(ORANGE.out.versions)
+
+        */
 
     emit:
         versions  = ch_versions // channel: [ versions.yml ]

@@ -72,13 +72,13 @@ include { BAMTOOLS_METRICS      } from '../subworkflows/local/bamtools_metrics'
 include { COBALT_PROFILING      } from '../subworkflows/local/cobalt_profiling'
 include { CUPPA_PREDICTION      } from '../subworkflows/local/cuppa_prediction'
 include { GRIDSS_SVPREP_CALLING } from '../subworkflows/local/gridss_svprep_calling'
-//include { FLAGSTAT_METRICS      } from '../subworkflows/local/flagstat_metrics'
+include { FLAGSTAT_METRICS      } from '../subworkflows/local/flagstat_metrics'
 include { GRIPSS_FILTERING      } from '../subworkflows/local/gripss_filtering'
 include { ISOFOX_QUANTIFICATION } from '../subworkflows/local/isofox_quantification'
 include { LILAC_CALLING         } from '../subworkflows/local/lilac_calling'
 include { LINX_ANNOTATION       } from '../subworkflows/local/linx_annotation'
 include { LINX_PLOTTING         } from '../subworkflows/local/linx_plotting'
-//include { ORANGE_REPORTING      } from '../subworkflows/local/orange_reporting'
+include { ORANGE_REPORTING      } from '../subworkflows/local/orange_reporting'
 include { PAVE_ANNOTATION       } from '../subworkflows/local/pave_annotation'
 include { PREPARE_INPUT         } from '../subworkflows/local/prepare_input'
 include { PREPARE_REFERENCE     } from '../subworkflows/local/prepare_reference'
@@ -480,29 +480,29 @@ workflow WGTS {
 
     }
 
-    ////
-    //// SUBWORKFLOW: Run SAMtools flagstat to generate stats required for ORANGE
-    ////
-    //// channel: [ meta, metrics ]
-    //ch_flagstat_somatic_out = Channel.empty()
-    //ch_flagstat_germline_out = Channel.empty()
-    //if (run_config.stages.orange && run_config.stages.flagstat) {
+    //
+    // SUBWORKFLOW: Run SAMtools flagstat to generate stats required for ORANGE
+    //
+    // channel: [ meta, metrics ]
+    ch_flagstat_somatic_out = Channel.empty()
+    ch_flagstat_germline_out = Channel.empty()
+    if (run_config.stages.orange && run_config.stages.flagstat) {
 
-    //    FLAGSTAT_METRICS(
-    //        ch_inputs,
-    //    )
+        FLAGSTAT_METRICS(
+            ch_inputs,
+        )
 
-    //    ch_versions = ch_versions.mix(FLAGSTAT_METRICS.out.versions)
+        ch_versions = ch_versions.mix(FLAGSTAT_METRICS.out.versions)
 
-    //    ch_flagstat_somatic_out = ch_flagstat_somatic_out.mix(FLAGSTAT_METRICS.out.somatic)
-    //    ch_flagstat_germline_out = ch_flagstat_germline_out.mix(FLAGSTAT_METRICS.out.germline)
+        ch_flagstat_somatic_out = ch_flagstat_somatic_out.mix(FLAGSTAT_METRICS.out.somatic)
+        ch_flagstat_germline_out = ch_flagstat_germline_out.mix(FLAGSTAT_METRICS.out.germline)
 
-    //} else {
+    } else {
 
-    //    ch_flagstat_somatic_out = ch_inputs.map { meta -> [meta, []} }
-    //    ch_flagstat_germline_out = ch_inputs.map { meta -> [meta, []} }
+        ch_flagstat_somatic_out = ch_inputs.map { meta -> [meta, []] }
+        ch_flagstat_germline_out = ch_inputs.map { meta -> [meta, []] }
 
-    //}
+    }
 
     //
     // SUBWORKFLOW: Run Bam Tools to generate stats required for downstream processes
@@ -666,53 +666,51 @@ workflow WGTS {
 
     }
 
-    // TODO(SW): FIRST COMPELTE FLAGSTAT ABOVE
+    //
+    // SUBWORKFLOW: Run ORANGE to generate static PDF report
+    //
+    if (run_config.stages.orange) {
 
-    ////
-    //// SUBWORKFLOW: Run ORANGE to generate static PDF report
-    ////
-    //if (run_config.stages.orange) {
+        ORANGE_REPORTING(
+            ch_inputs,
+            ch_flagstat_somatic_out,
+            ch_flagstat_germline_out,
+            ch_bamtools_somatic_out,
+            ch_bamtools_germline_out,
+            ch_sage_somatic_dir_out,
+            ch_sage_germline_dir_out,
+            ch_sage_somatic_append_out,
+            ch_sage_germline_append_out,
+            ch_purple_out,
+            ch_linx_somatic_out,
+            ch_linx_somatic_plot_out,
+            ch_linx_germline_out,
+            ch_virusinterpreter_out,
+            ch_chord_out,
+            ch_sigs_out,
+            ch_lilac_out,
+            ch_cuppa_out,
+            ch_isofox_out,
+            ref_data.genome_version,
+            hmf_data.disease_ontology,
+            hmf_data.cohort_mapping,
+            hmf_data.cohort_percentiles,
+            hmf_data.known_fusion_data,
+            hmf_data.driver_gene_panel,
+            hmf_data.ensembl_data_resources,
+            hmf_data.alt_sj_distribution,
+            hmf_data.gene_exp_distribution,
+        )
 
-    //    ORANGE_REPORTING(
-    //        ch_inputs,
-    //        ch_flagstat_somatic_out,
-    //        ch_flagstat_germline_out,
-    //        ch_bamtools_somatic_out,
-    //        ch_bamtools_germline_out,
-    //        ch_sage_somatic_dir_out,
-    //        ch_sage_germline_dir_out,
-    //        ch_sage_somatic_append_out,
-    //        ch_sage_germline_append_out,
-    //        ch_purple_out,
-    //        ch_linx_somatic_out,
-    //        ch_linx_somatic_plot_out,
-    //        ch_linx_germline_out,
-    //        ch_virusinterpreter_out,
-    //        ch_chord_out,
-    //        ch_sigs_out,
-    //        ch_lilac_out,
-    //        ch_cuppa_out,
-    //        ch_isofox_out,
-    //        ref_data.genome_version,
-    //        hmf_data.disease_ontology,
-    //        hmf_data.cohort_mapping,
-    //        hmf_data.cohort_percentiles,
-    //        hmf_data.known_fusion_data,
-    //        hmf_data.driver_gene_panel,
-    //        hmf_data.ensembl_data_resources,
-    //        hmf_data.alt_sj_distribution,
-    //        hmf_data.gene_exp_distribution,
-    //    )
+        ch_versions = ch_versions.mix(ORANGE_REPORTING.out.versions)
+    }
 
-    //    ch_versions = ch_versions.mix(ORANGE_REPORTING.out.versions)
-    //}
-
-    ////
-    //// MODULE: Pipeline reporting
-    ////
-    //CUSTOM_DUMPSOFTWAREVERSIONS(
-    //    ch_versions.unique().collectFile(name: 'collated_versions.yml')
-    //)
+    //
+    // MODULE: Pipeline reporting
+    //
+    CUSTOM_DUMPSOFTWAREVERSIONS(
+        ch_versions.unique().collectFile(name: 'collated_versions.yml')
+    )
 }
 
 /*

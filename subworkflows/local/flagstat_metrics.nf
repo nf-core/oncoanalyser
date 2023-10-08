@@ -20,6 +20,8 @@ workflow FLAGSTAT_METRICS {
         // channel: [ versions.yml ]
         ch_versions = Channel.empty()
 
+        /*
+
         // Select input source
         // Select input sources
         // channel: [ meta_flagstat, bam, bai ]
@@ -104,6 +106,14 @@ workflow FLAGSTAT_METRICS {
                     return [meta, flagstat]
             }
         ch_versions = ch_versions.mix(SAMTOOLS_FLAGSTAT.out.versions)
+
+        */
+
+        ch_outputs = ch_inputs
+          .multiMap{ meta ->
+              somatic: [meta, []]
+              germline: [meta, []]
+          }
 
     emit:
         somatic  = ch_outputs.somatic  // channel: [ meta, metrics ]
