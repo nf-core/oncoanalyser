@@ -90,34 +90,6 @@ class WorkflowOncoanalyser {
             return false
         }
 
-
-
-        /*
-        def input_type = named_args.getOrDefault('type', 'required')
-        return ch.map { meta ->
-            def result
-            for (key_combination in key.combinations()) {
-                if (meta.containsKey(key_combination)) {
-                    result = [meta, meta.getAt(key_combination)]
-                    break
-                }
-            }
-
-            if (result) {
-                return result
-            }
-
-            if (input_type == 'required') {
-                return [Constants.PLACEHOLDER_META, null]
-            } else if (input_type == 'optional') {
-                return [meta, []]
-            } else {
-                System.err.println "ERROR: got bad input type: ${input_type}"
-                System.exit(1)
-            }
-        }
-        */
-
     }
 
     // NOTE(SW): function signature required to catch where no named arguments are passed
@@ -125,46 +97,19 @@ class WorkflowOncoanalyser {
         return getInput([:], ch, key)
     }
 
-
     public static joinMeta(Map named_args, ch_a, ch_b) {
         // NOTE(SW): the cross operator is used to allow many-to-one relationship between ch_output
         // and ch_metas
         def key_a = named_args.getOrDefault('key_a', 'group_id')
         def key_b = named_args.getOrDefault('key_b', 'key')
-
-        // Prepare channels
-        def ch_ready_a = ch_a.map {
-            // We must handle cases where only a process-specific meta is provided, this occurs during process skipping
-            // and a meta restore is required to create placeholders in the output.
-
-            return [it[0].getAt(key_b), it[1..-1]]
-
-            if (it instanceof HashMap) {
-                return it.getAt(key_b)
-            } else {
-                return [it[0].getAt(key_b), it[1..-1]]
-            }
-
-        }
+        def ch_ready_a = ch_a.map { [it[0].getAt(key_b), it[1..-1]] }
         def ch_ready_b = ch_b.map { meta -> [meta.getAt(key_a), meta] }
-
         return ch_ready_b
             .cross(ch_ready_a)
             .map { b, a ->
-
-                // As above, we must accommodate process-specific meta only channel elements, and we would expect just
-                // the key to be present for such cases. Otherwise we expect the same key plus additional values in a
-                // Collection object.
-
-                if (a instanceof Collection) {
-                    def (ka, values) = a
-                    def (kb, meta) = b
-                    return [meta, *values]
-                } else {
-                    def (kb, meta) = b
-                    return meta
-                }
-
+                def (ka, values) = a
+                def (kb, meta) = b
+                return [meta, *values]
             }
     }
 
