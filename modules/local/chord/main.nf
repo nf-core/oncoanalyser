@@ -23,7 +23,7 @@ process CHORD {
 
     extractSigPredictHRD.R \\
         ./ \\
-        ${meta.id} \\
+        ${meta.sample_id} \\
         ${smlv_vcf} \\
         ${sv_vcf} \\
         ${genome_ver} \\
@@ -42,8 +42,8 @@ process CHORD {
     stub:
     """
     mkdir -p chord/
-    touch chord/${meta.id}_chord_signatures.txt
-    touch chord/${meta.id}_chord_prediction.txt
+    touch chord/${meta.sample_id}_chord_signatures.txt
+    touch chord/${meta.sample_id}_chord_prediction.txt
     echo -e '${task.process}:\\n  stub: noversions\\n' > versions.yml
     """
 }

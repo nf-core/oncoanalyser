@@ -77,9 +77,13 @@ workflow LILAC_CALLING {
             // channel: skip: [ meta_extra ]
             ch_realign_inputs_sorted = ch_dna_inputs
                 .flatMap { meta, tumor_bam, tumor_bai, normal_bam, normal_bai ->
+
+                    def tumor_sample_id = Utils.hasTumorDnaBam(meta) ? Utils.getTumorDnaSampleName(meta) : []
+                    def normal_sample_id = Utils.hasNormalDnaBam(meta) ? Utils.getNormalDnaSampleName(meta) : []
+
                     return [
-                        [[key: meta.group_id, *:meta, sample_type: 'tumor'], tumor_bam, tumor_bai],
-                        [[key: meta.group_id, *:meta, sample_type: 'normal'], normal_bam, normal_bai],
+                        [[key: meta.group_id, *:meta, sample_id: tumor_sample_id, sample_type: 'tumor'], tumor_bam, tumor_bai],
+                        [[key: meta.group_id, *:meta, sample_id: normal_sample_id, sample_type: 'normal'], normal_bam, normal_bai],
                     ]
                 }
                 .branch { meta_extra, bam, bai ->
@@ -96,18 +100,10 @@ workflow LILAC_CALLING {
             ch_slice_inputs = ch_realign_inputs_sorted.runnable
                 .map { meta_extra, bam, bai ->
 
-                    def sample_id
-                    if (meta_extra.sample_type == 'tumor') {
-                        sample_id = Utils.getTumorDnaSampleName(meta_extra)
-                    } else if (meta_extra.sample_type == 'normal') {
-                        sample_id = Utils.getNormalDnaSampleName(meta_extra)
-                    } else {
-                        assert false
-                    }
-
                     def meta_realign = [
                         key: meta_extra.group_id,
-                        id: "${meta_extra.group_id}__${sample_id}",
+                        id: "${meta_extra.group_id}__${meta_extra.sample_id}",
+                        sample_id: meta_extra.sample_id,
                         sample_type: meta_extra.sample_type,
                     ]
 

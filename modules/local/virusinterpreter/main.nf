@@ -25,7 +25,7 @@ process VIRUSINTERPRETER {
     java \\
         -Xmx${Math.round(task.memory.bytes * 0.95)} \\
         -jar ${task.ext.jarPath} \\
-            -sample ${meta.tumor_id} \\
+            -sample ${meta.sample_id} \\
             -purple_dir ${purple_dir} \\
             -tumor_sample_wgs_metrics_file ${wgs_metrics} \\
             -virus_breakend_tsv ${virus_tsv} \\
@@ -42,7 +42,7 @@ process VIRUSINTERPRETER {
     stub:
     """
     mkdir -p virusinterpreter/
-    touch virusinterpreter/${meta.id}.virus.annotated.tsv
+    touch virusinterpreter/${meta.sample_id}.virus.annotated.tsv
     echo -e '${task.process}:\\n  stub: noversions\\n' > versions.yml
     """
 }

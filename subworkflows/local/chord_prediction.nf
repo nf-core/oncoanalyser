@@ -50,12 +50,14 @@ workflow CHORD_PREDICTION {
         ch_chord_inputs = ch_inputs_sorted.runnable
             .map { meta, purple_dir ->
 
+                def tumor_id = Utils.getTumorDnaSampleName(meta)
+
                 def meta_chord = [
                     key: meta.group_id,
                     id: meta.group_id,
+                    sample_id: tumor_id,
                 ]
 
-                def tumor_id = Utils.getTumorDnaSampleName(meta)
                 def smlv_vcf = file(purple_dir).resolve("${tumor_id}.purple.somatic.vcf.gz")
                 def sv_vcf = file(purple_dir).resolve("${tumor_id}.purple.sv.vcf.gz")
 

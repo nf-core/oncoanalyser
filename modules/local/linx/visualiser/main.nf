@@ -29,7 +29,7 @@ process LINX_VISUALISER {
         -cp ${task.ext.jarPath} \\
         com.hartwig.hmftools.linx.visualiser.SvVisualiser \\
             ${args} \\
-            -sample ${meta.id} \\
+            -sample ${meta.sample_id} \\
             -vis_file_dir ${linx_annotation_dir} \\
             -ref_genome_version ${genome_ver} \\
             -ensembl_data_dir ${ensembl_data_resources} \\

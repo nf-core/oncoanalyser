@@ -24,7 +24,7 @@ process BAMTOOLS {
         -Xmx${Math.round(task.memory.bytes * 0.95)} \\
         -cp ${task.ext.jarPath} \\
         com.hartwig.hmftools.bamtools.metrics.BamMetrics \\
-            -sample ${meta.id} \\
+            -sample ${meta.sample_id} \\
             -bam_file ${bam} \\
             -ref_genome ${genome_fasta} \\
             -ref_genome_version ${genome_ver} \\
@@ -41,7 +41,7 @@ process BAMTOOLS {
 
     stub:
     """
-    touch ${meta.id}.wgsmetrics
+    touch ${meta.sample_id}.wgsmetrics
     echo -e '${task.process}:\\n  stub: noversions\\n' > versions.yml
     """
 }

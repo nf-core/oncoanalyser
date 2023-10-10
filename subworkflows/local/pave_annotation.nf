@@ -60,11 +60,10 @@ workflow PAVE_ANNOTATION {
         ch_pave_germline_inputs = ch_sage_germline_inputs_sorted.runnable
             .map { meta, sage_vcf ->
 
-                def tumor_id = Utils.getTumorDnaSampleName(meta)
                 def meta_pave = [
                     key: meta.group_id,
                     id: meta.group_id,
-                    tumor_id: tumor_id,
+                    sample_id: Utils.getTumorDnaSampleName(meta),
                 ]
 
                 return [meta_pave, sage_vcf]
@@ -114,11 +113,10 @@ workflow PAVE_ANNOTATION {
         ch_pave_somatic_inputs = ch_sage_somatic_inputs_sorted.runnable
             .map { meta, sage_vcf ->
 
-                def tumor_id = Utils.getTumorDnaSampleName(meta)
                 def meta_pave = [
                     key: meta.group_id,
                     id: meta.group_id,
-                    tumor_id: tumor_id,
+                    sample_id: Utils.getTumorDnaSampleName(meta),
                 ]
 
                 return [meta_pave, sage_vcf]

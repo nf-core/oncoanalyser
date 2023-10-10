@@ -86,6 +86,7 @@ workflow FLAGSTAT_METRICS {
                 def meta_flagstat = [
                     key: meta_extra.group_id,
                     id: "${meta_extra.group_id}__${meta_extra.sample_id}",
+                    sample_id: meta_extra.sample_id,
                     sample_type: meta_extra.sample_type,
                 ]
 

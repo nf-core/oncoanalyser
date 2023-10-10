@@ -55,8 +55,9 @@ workflow VIRUSBREAKEND_CALLING {
             .map { meta ->
 
                 def meta_virus = [
-                    id: meta.group_id,
                     key: meta.group_id,
+                    id: meta.group_id,
+                    sample_id: Utils.getTumorDnaSampleName(meta),
                 ]
 
                 return [meta_virus, Utils.getTumorDnaBam(meta)]
@@ -119,7 +120,7 @@ workflow VIRUSBREAKEND_CALLING {
                 def meta_virus = [
                     key: meta.group_id,
                     id: meta.group_id,
-                    tumor_id: Utils.getTumorDnaSampleName(meta),
+                    sample_id: Utils.getTumorDnaSampleName(meta),
                 ]
 
                 return [meta_virus, *inputs]

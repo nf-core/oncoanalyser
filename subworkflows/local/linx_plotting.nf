@@ -53,6 +53,7 @@ workflow LINX_PLOTTING {
                 def meta_linx = [
                     key: meta.group_id,
                     id: meta.group_id,
+                    sample_id: Utils.getTumorDnaSampleName(meta),
                 ]
 
                 return [meta_linx, annotation_dir]
@@ -81,6 +82,7 @@ workflow LINX_PLOTTING {
                 def meta_gpgr_linx = [
                     key: meta.group_id,
                     id: meta.group_id,
+                    sample_id: Utils.getTumorDnaSampleName(meta),
                 ]
 
                 return [meta_gpgr_linx, annotation_dir, visualiser_dir]
