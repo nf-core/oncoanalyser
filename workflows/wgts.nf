@@ -68,7 +68,7 @@ linx_gene_id_file = params.linx_gene_id_file ? file(params.linx_gene_id_file) : 
 //
 include { AMBER_PROFILING       } from '../subworkflows/local/amber_profiling'
 include { BAMTOOLS_METRICS      } from '../subworkflows/local/bamtools_metrics'
-//include { CHORD_PREDICTION      } from '../subworkflows/local/chord_prediction'
+include { CHORD_PREDICTION      } from '../subworkflows/local/chord_prediction'
 include { COBALT_PROFILING      } from '../subworkflows/local/cobalt_profiling'
 include { CUPPA_PREDICTION      } from '../subworkflows/local/cuppa_prediction'
 include { GRIDSS_SVPREP_CALLING } from '../subworkflows/local/gridss_svprep_calling'
@@ -85,7 +85,7 @@ include { PREPARE_REFERENCE     } from '../subworkflows/local/prepare_reference'
 include { PURPLE_CALLING        } from '../subworkflows/local/purple_calling'
 include { SAGE_APPEND           } from '../subworkflows/local/sage_append'
 include { SAGE_CALLING          } from '../subworkflows/local/sage_calling'
-//include { SIGS_FITTING          } from '../subworkflows/local/sigs_fitting'
+include { SIGS_FITTING          } from '../subworkflows/local/sigs_fitting'
 include { VIRUSBREAKEND_CALLING } from '../subworkflows/local/virusbreakend_calling'
 
 /*
@@ -530,41 +530,51 @@ workflow WGTS {
 
     }
 
-    ////
-    //// SUBWORKFLOW: Run Sigs to fit somatic smlv to signature definitions
-    ////
-    //// channel: [ meta, sigs_dir ]
-    //ch_sigs_out = Channel.empty()
-    //if (run_config.stages.sigs) {
+    //
+    // SUBWORKFLOW: Run Sigs to fit somatic smlv to signature definitions
+    //
+    // channel: [ meta, sigs_dir ]
+    ch_sigs_out = Channel.empty()
+    if (run_config.stages.sigs) {
 
-    //    SIGS_FITTING(
-    //        ch_inputs,
-    //        ch_purple_out,
-    //        hmf_data.sigs_signatures,
-    //        run_config,
-    //    )
+        SIGS_FITTING(
+            ch_inputs,
+            ch_purple_out,
+            hmf_data.sigs_signatures,
+        )
 
-    //    ch_versions = ch_versions.mix(SIGS_FITTING.out.versions)
-    //    ch_sigs_out = ch_sigs_out.mix(SIGS_FITTING.out.sigs_dir)
-    //}
+        ch_versions = ch_versions.mix(SIGS_FITTING.out.versions)
 
-    ////
-    //// SUBWORKFLOW: Run CHORD to predict HR deficiency status
-    ////
-    //// channel: [ meta, chord_dir ]
-    //ch_chord_out = Channel.empty()
-    //if (run_config.stages.chord) {
+        ch_sigs_out = ch_sigs_out.mix(SIGS_FITTING.out.sigs_dir)
 
-    //    CHORD_PREDICTION(
-    //        ch_inputs,
-    //        ch_purple_out,
-    //        ref_data.genome_version,
-    //        run_config,
-    //    )
+    } else {
 
-    //    ch_versions = ch_versions.mix(CHORD_PREDICTION.out.versions)
-    //    ch_chord_out = ch_chord_out.mix(CHORD_PREDICTION.out.chord_dir)
-    //}
+        ch_sigs_out = ch_inputs.map { meta -> [meta, []] }
+
+    }
+
+    //
+    // SUBWORKFLOW: Run CHORD to predict HR deficiency status
+    //
+    // channel: [ meta, chord_dir ]
+    ch_chord_out = Channel.empty()
+    if (run_config.stages.chord) {
+
+        CHORD_PREDICTION(
+            ch_inputs,
+            ch_purple_out,
+            ref_data.genome_version,
+        )
+
+        ch_versions = ch_versions.mix(CHORD_PREDICTION.out.versions)
+
+        ch_chord_out = ch_chord_out.mix(CHORD_PREDICTION.out.chord_dir)
+
+    } else {
+
+        ch_chord_out = ch_inputs.map { meta -> [meta, []] }
+
+    }
 
     //
     // SUBWORKFLOW: Run LILAC for HLA typing and somatic CNV and SNV calling
@@ -673,10 +683,10 @@ workflow WGTS {
 
         ORANGE_REPORTING(
             ch_inputs,
-            ch_flagstat_somatic_out,
-            ch_flagstat_germline_out,
             ch_bamtools_somatic_out,
             ch_bamtools_germline_out,
+            ch_flagstat_somatic_out,
+            ch_flagstat_germline_out,
             ch_sage_somatic_dir_out,
             ch_sage_germline_dir_out,
             ch_sage_somatic_append_out,

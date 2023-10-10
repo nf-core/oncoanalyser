@@ -42,10 +42,11 @@ workflow COBALT_PROFILING {
                 ch_inputs_sorted.runnable_to.combine(diploid_bed),
             )
 
-        // Select input sources
-        // channel: [ meta_cobalt, tumor_bam, normal_bam, tumor_bai, normal_bai, diploid_bed ]
+        // Create process input channel
+        // channel: sample_data: [ meta_cobalt, tumor_bam, normal_bam, tumor_bai, normal_bai ]
+        // channel: diploid_bed: [ diploid_bed ]
         ch_cobalt_inputs = ch_inputs_runnable
-            .map { meta, diploid_bed ->
+            .multiMap { meta, diploid_bed ->
 
                 def tumor_id = Utils.getTumorDnaSampleName(meta)
                 def meta_cobalt = [
@@ -66,13 +67,15 @@ workflow COBALT_PROFILING {
                     normal_bai = Utils.getNormalDnaBai(meta)
                 }
 
-                return [meta_cobalt, tumor_bam, normal_bam, tumor_bai, normal_bai, diploid_bed]
+                sample_data: [meta_cobalt, tumor_bam, normal_bam, tumor_bai, normal_bai]
+                diploid_bed: diploid_bed
             }
 
         // Run process
         COBALT(
-            ch_cobalt_inputs,
+            ch_cobalt_inputs.sample_data,
             gc_profile,
+            ch_cobalt_inputs.diploid_bed,
             target_region_normalisation,
         )
 

@@ -39,25 +39,30 @@ workflow BAMTOOLS_METRICS {
         ch_bams_bais_sorted = ch_inputs_sorted.runnable
             .flatMap { meta ->
 
+                def tumor_sample_id = []
                 def tumor_bam = []
                 def tumor_bai = []
 
+                def normal_sample_id = []
                 def normal_bam = []
                 def normal_bai = []
 
+
                 if (Utils.hasTumorDnaBam(meta)) {
+                    tumor_sample_id = Utils.getTumorDnaSampleName(meta)
                     tumor_bam = Utils.getTumorDnaBam(meta)
                     tumor_bai = Utils.getTumorDnaBai(meta)
                 }
 
                 if (Utils.hasNormalDnaBam(meta)) {
+                    normal_sample_id = Utils.getNormalDnaSampleName(meta)
                     normal_bam = Utils.getNormalDnaBam(meta)
                     normal_bai = Utils.getNormalDnaBai(meta)
                 }
 
                 return [
-                    [[key: meta.group_id, *:meta, sample_type: 'tumor'], tumor_bam, tumor_bai],
-                    [[key: meta.group_id, *:meta, sample_type: 'normal'], normal_bam, normal_bai],
+                    [[key: meta.group_id, *:meta, sample_id: tumor_sample_id, sample_type: 'tumor'], tumor_bam, tumor_bai],
+                    [[key: meta.group_id, *:meta, sample_id: normal_sample_id, sample_type: 'normal'], normal_bam, normal_bai],
                 ]
             }
             .branch { meta_extra, bam, bai ->
@@ -85,7 +90,7 @@ workflow BAMTOOLS_METRICS {
 
                 def meta_bamtools = [
                     key: meta_extra.group_id,
-                    id: meta_extra.group_id,
+                    id: "${meta_extra.group_id}__${meta_extra.sample_id}",
                     sample_type: meta_extra.sample_type,
                 ]
 

@@ -98,7 +98,7 @@ workflow LINX_PLOTTING {
         ch_visualiser_out = Channel.empty()
             .mix(
                 WorkflowOncoanalyser.restoreMeta(VISUALISER.out.visualiser_dir, ch_inputs),
-                ch_inputs_sorted.skip.map { meta -> [meta, [], []] },
+                ch_inputs_sorted.skip.map { meta -> [meta, []] },
             )
 
     emit:

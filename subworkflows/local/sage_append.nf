@@ -49,6 +49,7 @@ workflow SAGE_APPEND {
         // channel: skip: [ meta ]
         ch_inputs_germline_sorted = ch_inputs_sorted.runnable
             .branch { meta, purple_dir ->
+
                 def tumor_dna_id = Utils.getTumorDnaSampleName(meta)
 
                 def has_normal_dna = Utils.hasNormalDnaBam(meta)
@@ -149,15 +150,15 @@ workflow SAGE_APPEND {
         ch_somatic_vcf = Channel.empty()
             .mix(
                 WorkflowOncoanalyser.restoreMeta(SOMATIC.out.vcf, ch_inputs),
-                ch_inputs_somatic_sorted.skip.map { meta -> [meta, [], []] },
-                ch_inputs_sorted.skip.map { meta -> [meta, [], []] },
+                ch_inputs_somatic_sorted.skip.map { meta -> [meta, []] },
+                ch_inputs_sorted.skip.map { meta -> [meta, []] },
             )
 
         ch_germline_vcf = Channel.empty()
             .mix(
                 WorkflowOncoanalyser.restoreMeta(GERMLINE.out.vcf, ch_inputs),
-                ch_inputs_germline_sorted.skip.map { meta -> [meta, [], []] },
-                ch_inputs_sorted.skip.map { meta -> [meta, [], []] },
+                ch_inputs_germline_sorted.skip.map { meta -> [meta, []] },
+                ch_inputs_sorted.skip.map { meta -> [meta, []] },
             )
 
     emit:

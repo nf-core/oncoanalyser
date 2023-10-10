@@ -5,7 +5,7 @@ process ORANGE {
     container 'docker.io/scwatts/orange:2.7.0--0'
 
     input:
-    tuple val(meta), path(bam_metrics_somatic), path(bam_metrics_germline), path(flagstat_somatic), path(flagstat_germline), path(sage_dir), path(sage_germline_dir), path(purple_dir), path(smlv_somatic_vcf), path(smlv_germline_vcf), path(linx_somatic_anno_dir), path(linx_somatic_plot_dir), path(linx_germline_anno_dir), path(virusinterpreter_dir), path(chord_dir), path(sigs_dir), path(lilac_dir), path(cuppa_dir), path(isofox_dir)
+    tuple val(meta), path(bam_metrics_somatic), path(bam_metrics_germline), path(flagstat_somatic), path(flagstat_germline), path(sage_somatic_dir), path(sage_germline_dir), path(smlv_somatic_vcf), path(smlv_germline_vcf), path(purple_dir), path(linx_somatic_anno_dir), path(linx_somatic_plot_dir), path(linx_germline_anno_dir), path(virusinterpreter_dir), path(chord_dir), path(sigs_dir), path(lilac_dir), path(cuppa_dir), path(isofox_dir)
     val genome_ver
     path disease_ontology
     path cohort_mapping

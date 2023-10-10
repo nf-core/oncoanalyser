@@ -12,69 +12,84 @@ workflow FLAGSTAT_METRICS {
         // Sample data
         ch_inputs  // channel: [mandatory] [ meta ]
 
-        // Params
-        run_config // channel: [mandatory] run configuration
-
     main:
         // Channel for version.yml files
         // channel: [ versions.yml ]
         ch_versions = Channel.empty()
 
-        /*
+        // Sort inputs
+        // channel: [ meta ]
+        ch_inputs_sorted = ch_inputs
+            .branch { meta ->
 
-        // Select input source
-        // Select input sources
-        // channel: [ meta_flagstat, bam, bai ]
-        ch_flagstat_inputs_all = ch_inputs
-            .flatMap { meta ->
-                def inputs = []
+                def has_tumor_dna = Utils.hasTumorDnaBam(meta)
+                def has_normal_dna = Utils.hasNormalDnaBam(meta)
 
-                def meta_flagstat_tumor = [
-                    key: meta.id,
-                    id: Utils.getTumorDnaSampleName(meta),
-                    // NOTE(SW): must use string representation for caching purposes
-                    sample_type_str: Constants.SampleType.TUMOR.name(),
-                ]
-                def tumor_bam = Utils.getTumorDnaBam(meta)
-                inputs.add([meta_flagstat_tumor, tumor_bam, "${tumor_bam}.bai"])
-
-                if (run_config.type == Constants.RunType.TUMOR_NORMAL) {
-                    def meta_flagstat_normal = [
-                        key: meta.id,
-                        id: Utils.getNormalDnaSampleName(meta),
-                        // NOTE(SW): must use string representation for caching purposes
-                        sample_type_str: Constants.SampleType.NORMAL.name(),
-                    ]
-                    def normal_bam = Utils.getNormalDnaBam(meta)
-                    inputs.add([meta_flagstat_normal, normal_bam, "${normal_bam}.bai"])
-                }
-
-                return inputs
+                runnable: has_tumor_dna || has_normal_dna
+                skip: true
             }
 
-        // Collapse duplicate files e.g. repeated normal BAMs for multiple tumor samples
-        // channel: [ meta_flagstat_shared, bam, bai ]
-        ch_flagstat_inputs = ch_flagstat_inputs_all
-            .map { [it[1..-1], it[0]] }
-            .groupTuple()
-            .map { filepaths, meta_flagstat ->
-                def (keys, sample_names, sample_type_strs) = meta_flagstat
-                    .collect {
-                        [it.key, it.id, it.sample_type_str]
-                    }
-                    .transpose()
+        // Flatten into BAM/BAI pairs, select inputs that are eligible to run
+        // channel: runnable: [ meta_extra, bam, bai ]
+        // channel: skip: [ meta_extra ]
+        ch_bams_bais_sorted = ch_inputs_sorted.runnable
+            .flatMap { meta ->
 
-                def sample_type_strs_unique = sample_type_strs.unique(false)
-                assert sample_type_strs_unique.size() == 1
-                def sample_type_str = sample_type_strs_unique[0]
+                def tumor_sample_id = []
+                def tumor_bam = []
+                def tumor_bai = []
 
-                def meta_flagstat_new = [
-                    keys: keys,
-                    id: sample_names.join('__'),
-                    id_simple: keys.join('__'),
-                    sample_type_str: sample_type_str,
+                def normal_sample_id = []
+                def normal_bam = []
+                def normal_bai = []
+
+                if (Utils.hasTumorDnaBam(meta)) {
+                    tumor_sample_id = Utils.getTumorDnaSampleName(meta)
+                    tumor_bam = Utils.getTumorDnaBam(meta)
+                    tumor_bai = Utils.getTumorDnaBai(meta)
+                }
+
+                if (Utils.hasNormalDnaBam(meta)) {
+                    normal_sample_id = Utils.getNormalDnaSampleName(meta)
+                    normal_bam = Utils.getNormalDnaBam(meta)
+                    normal_bai = Utils.getNormalDnaBai(meta)
+                }
+
+                return [
+                    [[key: meta.group_id, *:meta, sample_id: tumor_sample_id, sample_type: 'tumor'], tumor_bam, tumor_bai],
+                    [[key: meta.group_id, *:meta, sample_id: normal_sample_id, sample_type: 'normal'], normal_bam, normal_bai],
                 ]
-                return [meta_flagstat_new, *filepaths]
+            }
+            .branch { meta_extra, bam, bai ->
+
+                def input_key
+                if (meta_extra.sample_type == 'tumor') {
+                    input_key = Constants.INPUT.BAMTOOLS_TUMOR
+                } else if (meta_extra.sample_type == 'normal') {
+                    input_key = Constants.INPUT.BAMTOOLS_NORMAL
+                } else {
+                    assert false
+                }
+
+                def has_existing = Utils.hasExistingInput(meta_extra, input_key)
+
+                runnable: bam && bai && !has_existing
+                skip: true
+                    return meta_extra
+            }
+
+        // Create process input channel
+        // channel: [ meta_flagstat, bam, bai ]
+        ch_flagstat_inputs = ch_bams_bais_sorted.runnable
+            .map { meta_extra, bam, bai ->
+
+                def meta_flagstat = [
+                    key: meta_extra.group_id,
+                    id: "${meta_extra.group_id}__${meta_extra.sample_id}",
+                    sample_type: meta_extra.sample_type,
+                ]
+
+                return [meta_flagstat, bam, bai]
             }
 
         // Run process
@@ -82,42 +97,36 @@ workflow FLAGSTAT_METRICS {
             ch_flagstat_inputs,
         )
 
-        // Set version
         ch_versions = ch_versions.mix(SAMTOOLS_FLAGSTAT.out.versions)
 
-        // Replicate outputs to reverse unique operation
-        // channel: [ meta_flagstat_individual, flagstat ]
-        ch_flagstat_out_individual = SAMTOOLS_FLAGSTAT.out.flagstat
-            .flatMap { meta_flagstat_shared, flagstat ->
-                def sample_type = Utils.getEnumFromString(meta_flagstat_shared.sample_type_str, Constants.SampleType)
-                meta_flagstat_shared.keys.collect { key ->
-                    return [meta_flagstat_shared + [key: key], sample_type, flagstat]
-                }
+        // Sort outputs into tumor and normal channels, adding partial skip entries
+        // channel: [ meta_flagstat, metrics ]
+        ch_outputs_sorted = Channel.empty()
+            .mix(
+                SAMTOOLS_FLAGSTAT.out.flagstat,
+                ch_bams_bais_sorted.skip.map { meta -> [meta, []] },
+            )
+            .branch { meta_flagstat, metrics ->
+                tumor: meta_flagstat.sample_type == 'tumor'
+                normal: meta_flagstat.sample_type == 'normal'
             }
 
-        // Set outputs
-        // channel (somatic): [ meta, flagstat ]
-        // channel (germline): [ meta, flagstat ]
-        ch_outputs = WorkflowOncoanalyser.restoreMeta(ch_flagstat_out_individual, ch_inputs)
-            .branch { meta, sample_type, flagstat ->
-                somatic: sample_type == Constants.SampleType.TUMOR
-                    return [meta, flagstat]
-                germline: sample_type == Constants.SampleType.NORMAL
-                    return [meta, flagstat]
-            }
-        ch_versions = ch_versions.mix(SAMTOOLS_FLAGSTAT.out.versions)
+        // Set outputs, restoring original meta, including full skip entries
+        ch_somatic_metrics = Channel.empty()
+            .mix(
+                WorkflowOncoanalyser.restoreMeta(ch_outputs_sorted.tumor, ch_inputs),
+                ch_inputs_sorted.skip.map { meta -> [meta, []] },
+            )
 
-        */
-
-        ch_outputs = ch_inputs
-          .multiMap{ meta ->
-              somatic: [meta, []]
-              germline: [meta, []]
-          }
+        ch_germline_metrics = Channel.empty()
+            .mix(
+                WorkflowOncoanalyser.restoreMeta(ch_outputs_sorted.normal, ch_inputs),
+                ch_inputs_sorted.skip.map { meta -> [meta, []] },
+            )
 
     emit:
-        somatic  = ch_outputs.somatic  // channel: [ meta, metrics ]
-        germline = ch_outputs.germline // channel: [ meta, metrics ]
+        somatic  = ch_somatic_metrics  // channel: [ meta, metrics ]
+        germline = ch_germline_metrics // channel: [ meta, metrics ]
 
         versions = ch_versions         // channel: [ versions.yml ]
 }

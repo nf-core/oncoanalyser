@@ -11,24 +11,24 @@ workflow ORANGE_REPORTING {
     take:
         // Sample data
         ch_inputs                   // channel: [mandatory] [ meta ]
-        ch_flagstat_somatic         // channel: [mandatory] [ meta, flagstat]
-        ch_flagstat_germline        // channel: [optional]  [ meta, metrics ]
         ch_bamtools_somatic         // channel: [mandatory] [ meta, metrics ]
-        ch_bamtools_germline        // channel: [optional]  [ meta, metrics ]
+        ch_bamtools_germline        // channel: [mandatory] [ meta, metrics ]
+        ch_flagstat_somatic         // channel: [mandatory] [ meta, metrics ]
+        ch_flagstat_germline        // channel: [mandatory] [ meta, metrics ]
         ch_sage_somatic             // channel: [mandatory] [ meta, sage_dir ]
-        ch_sage_germline            // channel: [optional]  [ meta, sage_dir ]
-        ch_sage_somatic_append      // channel: [optional]  [ meta, sage_append_vcf ]
-        ch_sage_germline_append     // channel: [optional]  [ meta, sage_append_vcf ]
+        ch_sage_germline            // channel: [mandatory] [ meta, sage_dir ]
+        ch_sage_somatic_append      // channel: [mandatory] [ meta, sage_append_vcf ]
+        ch_sage_germline_append     // channel: [mandatory] [ meta, sage_append_vcf ]
         ch_purple                   // channel: [mandatory] [ meta, purple_dir ]
         ch_linx_somatic_annotation  // channel: [mandatory] [ meta, linx_annotation_dir ]
         ch_linx_somatic_plot        // channel: [mandatory] [ meta, linx_visualiser_dir ]
-        ch_linx_germline_annotation // channel: [optional]  [ meta, linx_annotation_dir ]
-        ch_virusinterpreter         // channel: [optional]  [ meta, virusinterpreter_dir ]
-        ch_chord                    // channel: [optional]  [ meta, chord_dir ]
-        ch_sigs                     // channel: [optional]  [ meta, sigs_dir ]
+        ch_linx_germline_annotation // channel: [mandatory] [ meta, linx_annotation_dir ]
+        ch_virusinterpreter         // channel: [mandatory] [ meta, virusinterpreter_dir ]
+        ch_chord                    // channel: [mandatory] [ meta, chord_dir ]
+        ch_sigs                     // channel: [mandatory] [ meta, sigs_dir ]
         ch_lilac                    // channel: [mandatory] [ meta, lilac_dir ]
-        ch_cuppa                    // channel: [optional]  [ meta, cuppa_dir ]
-        ch_isofox                   // channel: [optional]  [ meta, isofox_dir ]
+        ch_cuppa                    // channel: [mandatory] [ meta, cuppa_dir ]
+        ch_isofox                   // channel: [mandatory] [ meta, isofox_dir ]
 
         // Reference data
         genome_version              // channel: [mandatory] genome version
@@ -46,114 +46,175 @@ workflow ORANGE_REPORTING {
         // channel: [ versions.yml ]
         ch_versions = Channel.empty()
 
-        /*
+        // Set expected input ordering and size
+        input_expected_size = 18
 
-        // Create placeholders for tumor-only
-        if (run_config.type == Constants.RunType.TUMOR_ONLY) {
-            ch_flagstat_germline = ch_inputs.map { meta -> [meta, []] }
-            ch_bamtools_germline = ch_inputs.map { meta -> [meta, []] }
-            ch_sage_germline = ch_inputs.map { meta -> [meta, []] }
-            ch_sage_germline_append = ch_inputs.map { meta -> [meta, []] }
-            ch_linx_germline_annotation = ch_inputs.map { meta -> [meta, []] }
-        }
+        dna_tumor_input_indexes = [
+            0,   // bamtools_somatic
+            2,   // flagstat_somatic
+            4,   // sage_somatic
+            8,   // purple_dir
+            9,   // linx_somatic_annotation
+            10,  // linx_somatic_plot_dir
+            15,  // lilac_dir
+        ]
 
-        // Do not pass RNA reference files when not required
-        // NOTE(SW): ORANGE v2.6.0 will crash if RNA reference files but not RNA sample files provided
-        if (run_config.mode != Constants.RunMode.RNA && run_config.mode != Constants.RunMode.DNA_RNA) {
-            isofox_alt_sj = []
-            isofox_gene_distribution = []
-        }
+        dna_normal_input_indexes = [
+            1,   // bamtools_germline
+            3,   // flagstat_germline
+            5,   // sage_germline
+            11,  // linx_germline_annotation
+        ]
 
-        // Get PURPLE input source for processing
-        ch_orange_inputs_purple_dir = run_config.stages.purple ? ch_purple : WorkflowOncoanalyser.getInput(ch_inputs, Constants.INPUT.PURPLE_DIR)
+        rna_tumor_input_indexes = [
+            6,   // sage_somatic_append
+            // NOTE(SW): needed since tumor-only RNA is not supported? TSO500 RNA to be seen...
+            7,   // sage_germline_append
+            17,  // isofox_dir
+        ]
 
-        // Get input smlv somatic VCF from either PURPLE or SAGE append
-        // channel: [ meta, sage_somatic_vcf, sage_germline_vcf ]
-        if (run_config.mode == Constants.RunMode.DNA) {
+        // Select input sources
+        // channel: [ meta, tbt_metrics, nbt_metrics, tfs_metrics, nfs_metrics, tsage_dir, nsage_dir, tsage_append, nsage_append, purple_dir, tlinx_anno_dir, tlinx_plot_dir, nlinx_anno_dir, virusinterpreter_dir, chord_dir, sigs_dir, lilac_dir, cuppa_dir, isofox_dir ]
+        ch_inputs_selected = WorkflowOncoanalyser.groupByMeta(
+            ch_bamtools_somatic,
+            ch_bamtools_germline,
+            ch_flagstat_somatic,
+            ch_flagstat_germline,
+            ch_sage_somatic,
+            ch_sage_germline,
+            ch_sage_somatic_append,
+            ch_sage_germline_append,
+            ch_purple,
+            ch_linx_somatic_annotation,
+            ch_linx_somatic_plot,
+            ch_linx_germline_annotation,
+            ch_virusinterpreter,
+            ch_chord,
+            ch_sigs,
+            ch_lilac,
+            ch_cuppa,
+            ch_isofox,
+        )
+            .map { d ->
 
-            ch_orange_inputs_smlv_vcfs = ch_orange_inputs_purple_dir
-                .map { meta, purple_dir ->
-                    def tumor_id = Utils.getTumorDnaSampleName(meta)
+                def meta = d[0]
+                def inputs = d[1..-1]
 
-                    def smlv_somatic_vcf = []
-                    def smlv_germline_vcf = []
+                assert inputs.size() == input_expected_size
 
-                    def smlv_somatic_vcf_path = file(purple_dir).resolve("${tumor_id}.purple.somatic.vcf.gz")
-                    def smlv_germline_vcf_path = file(purple_dir).resolve("${tumor_id}.purple.germline.vcf.gz")
+                // NOTE(SW): avoiding further complexity with loops etc
 
-                    if (smlv_somatic_vcf_path.exists()) {
-                        smlv_somatic_vcf = smlv_somatic_vcf_path
-                    }
+                def inputs_selected = [
+                    Utils.selectCurrentOrExisting(inputs[0], meta, Constants.INPUT.BAMTOOLS_TUMOR),
+                    Utils.selectCurrentOrExisting(inputs[1], meta, Constants.INPUT.BAMTOOLS_NORMAL),
+                    Utils.selectCurrentOrExisting(inputs[2], meta, Constants.INPUT.FLAGSTAT_TUMOR),
+                    Utils.selectCurrentOrExisting(inputs[3], meta, Constants.INPUT.FLAGSTAT_NORMAL),
+                    Utils.selectCurrentOrExisting(inputs[4], meta, Constants.INPUT.SAGE_VCF_TUMOR),
+                    Utils.selectCurrentOrExisting(inputs[5], meta, Constants.INPUT.SAGE_VCF_NORMAL),
+                    Utils.selectCurrentOrExisting(inputs[6], meta, Constants.INPUT.SAGE_APPEND_VCF_TUMOR),
+                    Utils.selectCurrentOrExisting(inputs[7], meta, Constants.INPUT.SAGE_APPEND_VCF_NORMAL),
+                    Utils.selectCurrentOrExisting(inputs[8], meta, Constants.INPUT.PURPLE_DIR),
+                    Utils.selectCurrentOrExisting(inputs[9], meta, Constants.INPUT.LINX_ANNO_DIR_TUMOR),
+                    Utils.selectCurrentOrExisting(inputs[10], meta, Constants.INPUT.LINX_PLOT_DIR_TUMOR),
+                    Utils.selectCurrentOrExisting(inputs[11], meta, Constants.INPUT.LINX_ANNO_DIR_NORMAL),
+                    Utils.selectCurrentOrExisting(inputs[12], meta, Constants.INPUT.VIRUSINTERPRETER_DIR),
+                    Utils.selectCurrentOrExisting(inputs[13], meta, Constants.INPUT.CHORD_DIR),
+                    Utils.selectCurrentOrExisting(inputs[14], meta, Constants.INPUT.SIGS_DIR),
+                    Utils.selectCurrentOrExisting(inputs[15], meta, Constants.INPUT.LILAC_DIR),
+                    Utils.selectCurrentOrExisting(inputs[16], meta, Constants.INPUT.CUPPA_DIR),
+                    Utils.selectCurrentOrExisting(inputs[17], meta, Constants.INPUT.ISOFOX_DIR),
+                ]
 
-                    // NOTE(SW): can only evaluate to true with DNA tumor/normal
-                    if (smlv_germline_vcf_path.exists()) {
-                        smlv_germline_vcf = smlv_germline_vcf_path
-                    }
+                return [meta, *inputs_selected]
+            }
 
-                    return [meta, smlv_somatic_vcf, smlv_germline_vcf]
-                }
+        // Sort inputs
+        // channel: runnable: [ meta, tbt_metrics, nbt_metrics, tfs_metrics, nfs_metrics, tsage_dir, nsage_dir, tsage_append, nsage_append, purple_dir, tlinx_anno_dir, tlinx_plot_dir, nlinx_anno_dir, virusinterpreter_dir, chord_dir, sigs_dir, lilac_dir, cuppa_dir, isofox_dir ]
+        // channel: skip: [ meta ]
+        ch_inputs_sorted = ch_inputs_selected
+            .branch { d ->
 
-        } else if (run_config.mode == Constants.RunMode.DNA_RNA) {
+                def meta = d[0]
+                def inputs = d[1..-1]
 
-            ch_orange_inputs_smlv_vcfs = WorkflowOncoanalyser.groupByMeta(
-                ch_sage_somatic_append,
-                ch_sage_germline_append,
+                def has_dna_tumor = dna_tumor_input_indexes
+                    .collect { i -> inputs[i] }
+                    .every()
+
+                def has_rna_tumor = rna_tumor_input_indexes
+                    .collect { i -> inputs[i] }
+                    .every()
+
+                runnable_dna_and_rna: has_dna_tumor && has_rna_tumor
+                runnable_dna: has_dna_tumor
+                skip: true
+                    return meta
+            }
+
+        // First set RNA reference files
+        // NOTE(SW): since the RNA reference files are provided as channels, I seem to be only able to include via channel ops
+        // channel: [ meta, tbt_metrics, nbt_metrics, tfs_metrics, nfs_metrics, tsage_dir, nsage_dir, tsage_append, nsage_append, purple_dir, tlinx_anno_dir, tlinx_plot_dir, nlinx_anno_dir, virusinterpreter_dir, chord_dir, sigs_dir, lilac_dir, cuppa_dir, isofox_dir, isofox_alt_sj, isofox_gene_distribution ]
+        ch_inputs_runnable = Channel.empty()
+            .mix(
+                ch_inputs_sorted.runnable_dna.map { d -> [*d, [], []] },
+                ch_inputs_sorted.runnable_dna_and_rna
+                    .combine(isofox_alt_sj)
+                    .combine(isofox_gene_distribution),
             )
 
-        } else {
-            ch_orange_inputs_smlv_vcfs = ch_inputs.map { meta -> [meta, [], []] }
-        }
+        // Create process input channel
+        // channel: sample_data: [ meta, tbt_metrics, nbt_metrics, tfs_metrics, nfs_metrics, tsage_dir, nsage_dir, tsmlv_vcf, nsmlv_vcf, purple_dir, tlinx_anno_dir, tlinx_plot_dir, nlinx_anno_dir, virusinterpreter_dir, chord_dir, sigs_dir, lilac_dir, cuppa_dir, isofox_dir ]
+        // channel: isofox_alt_sj: [ isofox_alt_sj ]
+        // channel: isofox_gene_distribution: [ isofox_gene_distribution ]
+        ch_orange_inputs = ch_inputs_runnable
+            .multiMap { d ->
 
-        // Select input source
-        ch_orange_inputs_source = WorkflowOncoanalyser.groupByMeta(
-            run_config.stages.bamtools ? ch_bamtools_somatic : WorkflowOncoanalyser.getInput(ch_inputs, Constants.INPUT.BAMTOOLS_TUMOR),
-            run_config.stages.bamtools ? ch_bamtools_germline : WorkflowOncoanalyser.getInput(ch_inputs, Constants.INPUT.BAMTOOLS_NORMAL, type: 'optional'),
-            run_config.stages.flagstat ? ch_flagstat_somatic : WorkflowOncoanalyser.getInput(ch_inputs, Constants.INPUT.FLAGSTAT_TUMOR),
-            run_config.stages.flagstat ? ch_flagstat_germline : WorkflowOncoanalyser.getInput(ch_inputs, Constants.INPUT.FLAGSTAT_NORMAL, type: 'optional'),
-            run_config.stages.sage ? ch_sage_somatic : WorkflowOncoanalyser.getInput(ch_inputs, Constants.INPUT.SAGE_DIR_TUMOR),
-            run_config.stages.sage ? ch_sage_germline : WorkflowOncoanalyser.getInput(ch_inputs, Constants.INPUT.SAGE_DIR_NORMAL, type: 'optional'),
-            ch_orange_inputs_purple_dir,
-            ch_orange_inputs_smlv_vcfs,
-            run_config.stages.linx ? ch_linx_somatic_annotation : WorkflowOncoanalyser.getInput(ch_inputs, Constants.INPUT.LINX_ANNO_DIR_TUMOR),
-            run_config.stages.linx ? ch_linx_somatic_plot : WorkflowOncoanalyser.getInput(ch_inputs, Constants.INPUT.LINX_PLOT_DIR_TUMOR),
-            run_config.stages.linx ? ch_linx_germline_annotation : WorkflowOncoanalyser.getInput(ch_inputs, Constants.INPUT.LINX_ANNO_DIR_NORMAL, type: 'optional'),
-            run_config.stages.virusinterpreter ? ch_virusinterpreter : WorkflowOncoanalyser.getInput(ch_inputs, Constants.INPUT.VIRUSINTERPRETER_DIR, type: 'optional'),
-            run_config.stages.chord ? ch_chord : WorkflowOncoanalyser.getInput(ch_inputs, Constants.INPUT.CHORD_DIR, type: 'optional'),
-            run_config.stages.sigs ? ch_sigs : WorkflowOncoanalyser.getInput(ch_inputs, Constants.INPUT.SIGS_DIR, type: 'optional'),
-            run_config.stages.lilac ? ch_lilac : WorkflowOncoanalyser.getInput(ch_inputs, Constants.INPUT.LILAC_DIR),
-            run_config.stages.cuppa ? ch_cuppa : WorkflowOncoanalyser.getInput(ch_inputs, Constants.INPUT.CUPPA_DIR, type: 'optional'),
-            run_config.stages.isofox ? ch_isofox : WorkflowOncoanalyser.getInput(ch_inputs, Constants.INPUT.ISOFOX_DIR, type: 'optional'),
-            flatten_mode: 'nonrecursive',
-        )
+                def meta = d[0]
+                def inputs = d[1..-3]
 
-        ch_orange_inputs = ch_orange_inputs_source
-            .map {
-                def meta = it[0]
-
-                // NOTE(SW): these attributes are optional
-                def normal_dna_id = meta.getAt(['sample_name', Constants.SampleType.NORMAL, Constants.SequenceType.DNA])
-                def tumor_rna_id = meta.getAt(['sample_name', Constants.SampleType.TUMOR, Constants.SequenceType.RNA])
+                def isofox_alt_sj = d[-2]
+                def isofox_gene_distribution = d[-1]
 
                 def meta_orange = [
-                    key: meta.id,
-                    id: meta.id,
+                    key: meta.group_id,
+                    id: meta.group_id,
                     tumor_id: Utils.getTumorDnaSampleName(meta),
                 ]
 
-                // Add optional identifiers to meta
-                if (normal_dna_id) {
-                    meta_orange.normal_dna_id = normal_dna_id
-                }
-                if (tumor_rna_id) {
-                    meta_orange.tumor_rna_id = tumor_rna_id
+                def inputs_selected = inputs.clone()
+
+                // Require all normal DNA inputs to be present else clear them
+                def has_dna_normal = dna_normal_input_indexes
+                    .collect { i -> inputs[i] }
+                    .every()
+
+                if (has_dna_normal) {
+                    meta_orange.normal_dna_id = Utils.getNormalDnaSampleName(meta)
+                } else {
+                    dna_normal_input_indexes.each { i -> inputs_selected[i] = [] }
                 }
 
-                return [meta_orange, *it[1..-1]]
+                // Require all tumor RNA inputs to be present else clear them
+                def has_rna_tumor = rna_tumor_input_indexes
+                    .collect { i -> inputs[i] }
+                    .every()
+
+                if (has_rna_tumor) {
+                    meta_orange.tumor_rna_id = Utils.getTumorRnaSampleName(meta)
+                } else {
+                    rna_tumor_input_indexes.each { i -> inputs_selected[i] = [] }
+                }
+
+                assert inputs_selected.size() == input_expected_size
+
+                sample_data: [meta_orange, *inputs_selected]
+                isofox_alt_sj: isofox_alt_sj
+                isofox_gene_distribution: isofox_gene_distribution
             }
 
         // Run process
         ORANGE(
-            ch_orange_inputs,
+            ch_orange_inputs.sample_data,
             genome_version,
             disease_ontology,
             cohort_mapping,
@@ -161,15 +222,12 @@ workflow ORANGE_REPORTING {
             known_fusion_data,
             driver_gene_panel,
             ensembl_data_resources,
-            isofox_alt_sj,
-            isofox_gene_distribution,
+            ch_orange_inputs.isofox_alt_sj,
+            ch_orange_inputs.isofox_gene_distribution,
             "5.33 [oncoanalyser]",
         )
 
-        // Set outputs
         ch_versions = ch_versions.mix(ORANGE.out.versions)
-
-        */
 
     emit:
         versions  = ch_versions // channel: [ versions.yml ]

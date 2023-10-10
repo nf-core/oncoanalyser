@@ -5,8 +5,9 @@ process COBALT {
     container 'docker.io/scwatts/cobalt:1.15.2--0'
 
     input:
-    tuple val(meta), path(tumor_bam), path(normal_bam), path(tumor_bai), path(normal_bai), path(diploid_regions)
+    tuple val(meta), path(tumor_bam), path(normal_bam), path(tumor_bai), path(normal_bai)
     path gc_profile
+    path diploid_regions
     path target_region_normalisation
 
     output:

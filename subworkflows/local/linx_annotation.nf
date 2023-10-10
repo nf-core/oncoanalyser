@@ -143,7 +143,7 @@ workflow LINX_ANNOTATION {
         ch_germline_out = Channel.empty()
             .mix(
                 WorkflowOncoanalyser.restoreMeta(GERMLINE.out.annotation_dir, ch_inputs),
-                ch_inputs_somatic_sorted.skip.map { meta -> [meta, []] },
+                ch_inputs_germline_sorted.skip.map { meta -> [meta, []] },
                 ch_inputs_sorted.skip.map { meta -> [meta, []] },
             )
 
