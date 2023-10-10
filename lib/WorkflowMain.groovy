@@ -133,7 +133,7 @@ class WorkflowMain {
         // Set defaults specific to run configuration without attempting to validate
 
         def run_mode
-        if (params.containsKey('mode') && params.mode != null) {
+        if (params.containsKey('mode') && params.mode !== null) {
             run_mode = Utils.getRunMode(params.mode, log)
         } else {
             // Bad configuration, catch in validateParams

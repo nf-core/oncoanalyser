@@ -136,7 +136,7 @@ workflow PREPARE_REFERENCE {
         // Set panel reference paths / stage, unpack if required
         //
         ch_panel_data = Channel.empty()
-        if (run_config.TARGETED) {
+        if (run_config.mode === Constants.RunMode.TARGETED) {
 
             // NOTE(SW): consider approach to implement custom panel support
 

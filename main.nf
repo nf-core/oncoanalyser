@@ -45,7 +45,7 @@ WorkflowMain.paramsSummaryLog(workflow, params, log)
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 */
 
-//include { TARGETED  } from './workflows/targeted'
+include { TARGETED  } from './workflows/targeted'
 include { WGTS      } from './workflows/wgts'
 
 //
@@ -58,7 +58,7 @@ workflow NFCORE_ONCOANALYSER {
     if (run_mode === Constants.RunMode.WGTS) {
         WGTS()
     } else if (run_mode === Constants.RunMode.TARGETED) {
-        //TARGETED()
+        TARGETED()
     } else {
         assert false
     }

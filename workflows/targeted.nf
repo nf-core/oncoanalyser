@@ -10,10 +10,10 @@ import Utils
 */
 // Parse input samplesheet
 // NOTE(SW): this is done early and outside of gpars so that we can access synchronously and prior to pipeline execution
-inputs = Utils.parseInput(params.input, params.mode, workflow.stubRun, log)
+inputs = Utils.parseInput(params.input, workflow.stubRun, log)
 
 // Get run config
-run_config = WorkflowMain.getRunConfig(params, log)
+run_config = WorkflowMain.getRunConfig(params, inputs, log)
 
 // Validate inputs
 Utils.validateInput(inputs, run_config, log)
@@ -68,6 +68,7 @@ linx_gene_id_file = params.linx_gene_id_file ? file(params.linx_gene_id_file) : 
 include { AMBER_PROFILING       } from '../subworkflows/local/amber_profiling'
 include { BAMTOOLS_METRICS      } from '../subworkflows/local/bamtools_metrics'
 include { COBALT_PROFILING      } from '../subworkflows/local/cobalt_profiling'
+include { FLAGSTAT_METRICS      } from '../subworkflows/local/flagstat_metrics'
 include { GRIDSS_SVPREP_CALLING } from '../subworkflows/local/gridss_svprep_calling'
 include { GRIPSS_FILTERING      } from '../subworkflows/local/gripss_filtering'
 include { ISOFOX_QUANTIFICATION } from '../subworkflows/local/isofox_quantification'
@@ -107,13 +108,9 @@ workflow TARGETED {
     // channel: [ versions.yml ]
     ch_versions = Channel.empty()
 
-    // Get inputs from samplesheet, assign more human readable variable
+    // Create input channel from parsed CSV
     // channel: [ meta ]
-    PREPARE_INPUT(
-        samplesheet,
-        run_config,
-    )
-    ch_inputs = PREPARE_INPUT.out.data
+    ch_inputs = Channel.fromList(inputs)
 
     // Set up reference data, assign more human readable variables
     PREPARE_REFERENCE(
@@ -151,31 +148,17 @@ workflow TARGETED {
             isofox_tpm_norm,
             params.isofox_functions,
             params.isofox_read_length,
-            run_config,
         )
 
         ch_versions = ch_versions.mix(ISOFOX_QUANTIFICATION.out.versions)
+
         ch_isofox_out = ch_isofox_out.mix(ISOFOX_QUANTIFICATION.out.isofox_dir)
+
+    } else {
+
+        ch_isofox_out = ch_inputs.map { meta -> [meta, []] }
+
     }
-
-    //
-    // SUBWORKFLOW: Run Bam Tools to generate stats required for downstream processes
-    //
-    // channel: [ meta, metrics ]
-    ch_bamtools_somatic_out = Channel.empty()
-    if (run_config.stages.bamtools) {
-
-        BAMTOOLS_METRICS(
-            ch_inputs,
-            ref_data.genome_fasta,
-            ref_data.genome_version,
-            run_config,
-        )
-
-        ch_versions = ch_versions.mix(BAMTOOLS_METRICS.out.versions)
-        ch_bamtools_somatic_out = ch_bamtools_somatic_out.mix(BAMTOOLS_METRICS.out.somatic)
-    }
-
 
     //
     // SUBWORKFLOW: Run AMBER to obtain b-allele frequencies
@@ -188,11 +171,15 @@ workflow TARGETED {
             ch_inputs,
             ref_data.genome_version,
             hmf_data.heterozygous_sites,
-            run_config,
         )
 
         ch_versions = ch_versions.mix(AMBER_PROFILING.out.versions)
         ch_amber_out = ch_amber_out.mix(AMBER_PROFILING.out.amber_dir)
+
+    } else {
+
+        ch_amber_out = ch_inputs.map { meta -> [meta, []] }
+
     }
 
     //
@@ -207,11 +194,16 @@ workflow TARGETED {
             hmf_data.gc_profile,
             hmf_data.diploid_bed,
             panel_data.target_region_normalisation,
-            run_config,
         )
 
         ch_versions = ch_versions.mix(COBALT_PROFILING.out.versions)
+
         ch_cobalt_out = ch_cobalt_out.mix(COBALT_PROFILING.out.cobalt_dir)
+
+    } else {
+
+        ch_cobalt_out = ch_inputs.map { meta -> [meta, []] }
+
     }
 
     //
@@ -234,11 +226,16 @@ workflow TARGETED {
             hmf_data.sv_prep_blocklist,
             hmf_data.known_fusions,
             gridss_config,
-            run_config,
         )
 
         ch_versions = ch_versions.mix(GRIDSS_SVPREP_CALLING.out.versions)
-        ch_gridss_out = ch_gridss_out.mix(GRIDSS_SVPREP_CALLING.out.results)
+
+        ch_gridss_out = ch_gridss_out.mix(GRIDSS_SVPREP_CALLING.out.vcf)
+
+    } else {
+
+        ch_gridss_out = ch_inputs.map { meta -> [meta, []] }
+
     }
 
     //
@@ -246,6 +243,7 @@ workflow TARGETED {
     //
     // channel: [ meta, vcf, tbi ]
     ch_gripss_somatic_out = Channel.empty()
+    ch_gripss_germline_out = Channel.empty()
     ch_gripss_somatic_unfiltered_out = Channel.empty()
     if (run_config.stages.gripss) {
 
@@ -260,20 +258,30 @@ workflow TARGETED {
             hmf_data.known_fusions,
             hmf_data.repeatmasker_annotations,
             panel_data.target_region_bed,
-            run_config,
         )
 
         ch_versions = ch_versions.mix(GRIPSS_FILTERING.out.versions)
+
         ch_gripss_somatic_out = ch_gripss_somatic_out.mix(GRIPSS_FILTERING.out.somatic)
+        ch_gripss_germline_out = ch_gripss_germline_out.mix(GRIPSS_FILTERING.out.germline)
         ch_gripss_somatic_unfiltered_out = ch_gripss_somatic_unfiltered_out.mix(GRIPSS_FILTERING.out.somatic_unfiltered)
+
+    } else {
+
+        ch_gripss_somatic_out = ch_inputs.map { meta -> [meta, [], []] }
+        ch_gripss_germline_out = ch_inputs.map { meta -> [meta, [], []] }
+        ch_gripss_somatic_unfiltered_out = ch_inputs.map { meta -> [meta, [], []] }
+
     }
 
     //
     // SUBWORKFLOW: call SNV, MNV, and small INDELS with SAGE
     //
     // channel: [ meta, sage_vcf, sage_tbi ]
+    ch_sage_germline_vcf_out = Channel.empty()
     ch_sage_somatic_vcf_out = Channel.empty()
     // channel: [ meta, sage_dir ]
+    ch_sage_germline_dir_out = Channel.empty()
     ch_sage_somatic_dir_out = Channel.empty()
     if (run_config.stages.sage) {
 
@@ -291,24 +299,35 @@ workflow TARGETED {
             hmf_data.segment_mappability,
             panel_data.driver_gene_panel,
             hmf_data.ensembl_data_resources,
-            run_config,
         )
 
         ch_versions = ch_versions.mix(SAGE_CALLING.out.versions)
+
+        ch_sage_germline_vcf_out = ch_sage_germline_vcf_out.mix(SAGE_CALLING.out.germline_vcf)
         ch_sage_somatic_vcf_out = ch_sage_somatic_vcf_out.mix(SAGE_CALLING.out.somatic_vcf)
+        ch_sage_germline_dir_out = ch_sage_germline_dir_out.mix(SAGE_CALLING.out.germline_dir)
         ch_sage_somatic_dir_out = ch_sage_somatic_dir_out.mix(SAGE_CALLING.out.somatic_dir)
+
+    } else {
+
+        ch_sage_germline_vcf_out = ch_inputs.map { meta -> [meta, [], []] }
+        ch_sage_somatic_vcf_out = ch_inputs.map { meta -> [meta, [], []] }
+        ch_sage_germline_dir_out = ch_inputs.map { meta -> [meta, []] }
+        ch_sage_somatic_dir_out = ch_inputs.map { meta -> [meta, []] }
+
     }
 
     //
     // SUBWORKFLOW: Annotate variants with PAVE
     //
     // channel: [ meta, pave_vcf ]
+    ch_pave_germline_out = Channel.empty()
     ch_pave_somatic_out = Channel.empty()
     if (run_config.stages.pave) {
 
         PAVE_ANNOTATION(
             ch_inputs,
-            [],  // ch_sage_germline_vcf_out
+            ch_sage_germline_vcf_out,
             ch_sage_somatic_vcf_out,
             ref_data.genome_fasta,
             ref_data.genome_version,
@@ -322,11 +341,18 @@ workflow TARGETED {
             panel_data.driver_gene_panel,
             hmf_data.ensembl_data_resources,
             hmf_data.gnomad_resource,
-            run_config,
         )
 
         ch_versions = ch_versions.mix(PAVE_ANNOTATION.out.versions)
+
+        ch_pave_germline_out = ch_pave_germline_out.mix(PAVE_ANNOTATION.out.germline)
         ch_pave_somatic_out = ch_pave_somatic_out.mix(PAVE_ANNOTATION.out.somatic)
+
+    } else {
+
+        ch_pave_germline_out = ch_inputs.map { meta -> [meta, []] }
+        ch_pave_somatic_out = ch_inputs.map { meta -> [meta, []] }
+
     }
 
     //
@@ -341,10 +367,10 @@ workflow TARGETED {
             ch_amber_out,
             ch_cobalt_out,
             ch_pave_somatic_out,
-            [],  // ch_pave_germline_out
+            ch_pave_germline_out,
             ch_gripss_somatic_out,
-            [],  // ch_gripss_germline_out
-            [],  // ch_gripss_somatic_unfiltered_out,
+            ch_gripss_germline_out,
+            ch_gripss_somatic_unfiltered_out,
             ref_data.genome_fasta,
             ref_data.genome_version,
             ref_data.genome_fai,
@@ -358,11 +384,16 @@ workflow TARGETED {
             panel_data.target_region_bed,
             panel_data.target_region_ratios,
             panel_data.target_region_msi_indels,
-            run_config,
         )
 
         ch_versions = ch_versions.mix(PURPLE_CALLING.out.versions)
+
         ch_purple_out = ch_purple_out.mix(PURPLE_CALLING.out.purple_dir)
+
+    } else {
+
+        ch_purple_out = ch_inputs.map { meta -> [meta, []] }
+
     }
 
     //
@@ -370,7 +401,8 @@ workflow TARGETED {
     //
     // channel: [ meta, sage_append_vcf ]
     ch_sage_somatic_append_out = Channel.empty()
-    if (run_config.mode == Constants.RunMode.DNA_RNA && run_config.stages.orange) {
+    ch_sage_germline_append_out = Channel.empty()
+    if (run_config.stages.orange) {
 
         // NOTE(SW): currently used only for ORANGE but will also be used for Neo once implemented
 
@@ -381,11 +413,18 @@ workflow TARGETED {
             ref_data.genome_version,
             ref_data.genome_fai,
             ref_data.genome_dict,
-            run_config,
         )
 
         ch_versions = ch_versions.mix(SAGE_APPEND.out.versions)
+
         ch_sage_somatic_append_out = ch_sage_somatic_append_out.mix(SAGE_APPEND.out.somatic_vcf)
+        ch_sage_germline_append_out = ch_sage_germline_append_out.mix(SAGE_APPEND.out.germline_vcf)
+
+    } else {
+
+        ch_sage_somatic_append_out = ch_inputs.map { meta -> [meta, []] }
+        ch_sage_germline_append_out = ch_inputs.map { meta -> [meta, []] }
+
     }
 
     //
@@ -393,8 +432,7 @@ workflow TARGETED {
     //
     // channel: [ meta, linx_annotation_dir ]
     ch_linx_somatic_out = Channel.empty()
-    // channel: [ meta, linx_visualiser_dir ]
-    ch_linx_somatic_plot_out = Channel.empty()
+    ch_linx_germline_out = Channel.empty()
     if (run_config.stages.linx) {
 
         LINX_ANNOTATION(
@@ -405,22 +443,92 @@ workflow TARGETED {
             hmf_data.known_fusion_data,
             panel_data.driver_gene_panel,
             linx_gene_id_file,
-            run_config,
         )
 
         ch_versions = ch_versions.mix(LINX_ANNOTATION.out.versions)
+
         ch_linx_somatic_out = ch_linx_somatic_out.mix(LINX_ANNOTATION.out.somatic)
+        ch_linx_germline_out = ch_linx_germline_out.mix(LINX_ANNOTATION.out.germline)
+
+    } else {
+
+        ch_linx_somatic_out = ch_inputs.map { meta -> [meta, []] }
+        ch_linx_germline_out = ch_inputs.map { meta -> [meta, []] }
+
+    }
+
+    //
+    // SUBWORKFLOW: Visualise LINX annotations
+    //
+    // channel: [ meta, linx_visualiser_dir ]
+    ch_linx_somatic_plot_out = Channel.empty()
+    if (run_config.stages.linx) {
 
         LINX_PLOTTING(
             ch_inputs,
             ch_linx_somatic_out,
             ref_data.genome_version,
             hmf_data.ensembl_data_resources,
-            run_config,
         )
 
         ch_versions = ch_versions.mix(LINX_PLOTTING.out.versions)
+
         ch_linx_somatic_plot_out = ch_linx_somatic_plot_out.mix(LINX_PLOTTING.out.visualiser_dir)
+
+    } else {
+
+        ch_linx_somatic_plot_out = ch_inputs.map { meta -> [meta, []] }
+
+    }
+
+    //
+    // SUBWORKFLOW: Run SAMtools flagstat to generate stats required for ORANGE
+    //
+    // channel: [ meta, metrics ]
+    ch_flagstat_somatic_out = Channel.empty()
+    ch_flagstat_germline_out = Channel.empty()
+    if (run_config.stages.orange && run_config.stages.flagstat) {
+
+        FLAGSTAT_METRICS(
+            ch_inputs,
+        )
+
+        ch_versions = ch_versions.mix(FLAGSTAT_METRICS.out.versions)
+
+        ch_flagstat_somatic_out = ch_flagstat_somatic_out.mix(FLAGSTAT_METRICS.out.somatic)
+        ch_flagstat_germline_out = ch_flagstat_germline_out.mix(FLAGSTAT_METRICS.out.germline)
+
+    } else {
+
+        ch_flagstat_somatic_out = ch_inputs.map { meta -> [meta, []] }
+        ch_flagstat_germline_out = ch_inputs.map { meta -> [meta, []] }
+
+    }
+
+    //
+    // SUBWORKFLOW: Run Bam Tools to generate stats required for downstream processes
+    //
+    // channel: [ meta, metrics ]
+    ch_bamtools_somatic_out = Channel.empty()
+    ch_bamtools_germline_out = Channel.empty()
+    if (run_config.stages.bamtools) {
+
+        BAMTOOLS_METRICS(
+            ch_inputs,
+            ref_data.genome_fasta,
+            ref_data.genome_version,
+        )
+
+        ch_versions = ch_versions.mix(BAMTOOLS_METRICS.out.versions)
+
+        ch_bamtools_somatic_out = ch_bamtools_somatic_out.mix(BAMTOOLS_METRICS.out.somatic)
+        ch_bamtools_germline_out = ch_bamtools_germline_out.mix(BAMTOOLS_METRICS.out.germline)
+
+    } else {
+
+        ch_bamtools_somatic_out = ch_inputs.map { meta -> [meta, []] }
+        ch_bamtools_germline_out = ch_inputs.map { meta -> [meta, []] }
+
     }
 
     //
@@ -430,8 +538,18 @@ workflow TARGETED {
     ch_lilac_out = Channel.empty()
     if (run_config.stages.lilac) {
 
+
+
+
+
+
         // Set HLA slice BED if provided in params
         ref_data_hla_slice_bed = params.containsKey('ref_data_hla_slice_bed') ? params.ref_data_hla_slice_bed : []
+
+
+
+
+
 
         LILAC_CALLING(
             ch_inputs,
@@ -441,11 +559,16 @@ workflow TARGETED {
             ref_data.genome_fai,
             hmf_data.lilac_resources,
             ref_data_hla_slice_bed,
-            run_config,
         )
 
         ch_versions = ch_versions.mix(LILAC_CALLING.out.versions)
+
         ch_lilac_out = ch_lilac_out.mix(LILAC_CALLING.out.lilac_dir)
+
+    } else {
+
+        ch_lilac_out = ch_inputs.map { meta -> [meta, []] }
+
     }
 
     //
@@ -453,23 +576,31 @@ workflow TARGETED {
     //
     if (run_config.stages.orange) {
 
+        // Create placeholder channels for empty remaining channels
+        ch_chord_out = ch_inputs.map { meta -> [meta, []] }
+        ch_cuppa_out = ch_inputs.map { meta -> [meta, []] }
+        ch_sigs_out = ch_inputs.map { meta -> [meta, []] }
+        ch_virusinterpreter_out = ch_inputs.map { meta -> [meta, []] }
+
         ORANGE_REPORTING(
             ch_inputs,
             ch_bamtools_somatic_out,
-            [],  //ch_bamtools_germline_out
+            ch_bamtools_germline_out,
+            ch_flagstat_somatic_out,
+            ch_flagstat_germline_out,
             ch_sage_somatic_dir_out,
-            [],  // ch_sage_germline_dir_out
+            ch_sage_germline_dir_out,
             ch_sage_somatic_append_out,
-            [],  // ch_sage_germline_append_out
+            ch_sage_germline_append_out,
             ch_purple_out,
             ch_linx_somatic_out,
             ch_linx_somatic_plot_out,
-            [],  // ch_linx_germline_out
-            [],  // ch_virusinterpreter_out
-            [],  // ch_chord_out
-            [],  // ch_sigs_out
+            ch_linx_germline_out,
+            ch_virusinterpreter_out,
+            ch_chord_out,
+            ch_sigs_out,
             ch_lilac_out,
-            [],  // ch_cuppa_out
+            ch_cuppa_out,
             ch_isofox_out,
             ref_data.genome_version,
             hmf_data.disease_ontology,
@@ -478,9 +609,8 @@ workflow TARGETED {
             hmf_data.known_fusion_data,
             panel_data.driver_gene_panel,
             hmf_data.ensembl_data_resources,
-            [],  // alt_sj_distribution
-            [],  // gene_exp_distribution
-            run_config,
+            hmf_data.alt_sj_distribution,
+            hmf_data.gene_exp_distribution,
         )
 
         ch_versions = ch_versions.mix(ORANGE_REPORTING.out.versions)
@@ -492,7 +622,6 @@ workflow TARGETED {
     CUSTOM_DUMPSOFTWAREVERSIONS(
         ch_versions.unique().collectFile(name: 'collated_versions.yml')
     )
-
 }
 
 /*

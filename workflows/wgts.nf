@@ -71,8 +71,8 @@ include { BAMTOOLS_METRICS      } from '../subworkflows/local/bamtools_metrics'
 include { CHORD_PREDICTION      } from '../subworkflows/local/chord_prediction'
 include { COBALT_PROFILING      } from '../subworkflows/local/cobalt_profiling'
 include { CUPPA_PREDICTION      } from '../subworkflows/local/cuppa_prediction'
-include { GRIDSS_SVPREP_CALLING } from '../subworkflows/local/gridss_svprep_calling'
 include { FLAGSTAT_METRICS      } from '../subworkflows/local/flagstat_metrics'
+include { GRIDSS_SVPREP_CALLING } from '../subworkflows/local/gridss_svprep_calling'
 include { GRIPSS_FILTERING      } from '../subworkflows/local/gripss_filtering'
 include { ISOFOX_QUANTIFICATION } from '../subworkflows/local/isofox_quantification'
 include { LILAC_CALLING         } from '../subworkflows/local/lilac_calling'
@@ -151,6 +151,7 @@ workflow WGTS {
         )
 
         ch_versions = ch_versions.mix(ISOFOX_QUANTIFICATION.out.versions)
+
         ch_isofox_out = ch_isofox_out.mix(ISOFOX_QUANTIFICATION.out.isofox_dir)
 
     } else {
@@ -173,6 +174,7 @@ workflow WGTS {
         )
 
         ch_versions = ch_versions.mix(AMBER_PROFILING.out.versions)
+
         ch_amber_out = ch_amber_out.mix(AMBER_PROFILING.out.amber_dir)
 
     } else {
@@ -196,6 +198,7 @@ workflow WGTS {
         )
 
         ch_versions = ch_versions.mix(COBALT_PROFILING.out.versions)
+
         ch_cobalt_out = ch_cobalt_out.mix(COBALT_PROFILING.out.cobalt_dir)
 
     } else {
@@ -227,6 +230,7 @@ workflow WGTS {
         )
 
         ch_versions = ch_versions.mix(GRIDSS_SVPREP_CALLING.out.versions)
+
         ch_gridss_out = ch_gridss_out.mix(GRIDSS_SVPREP_CALLING.out.vcf)
 
     } else {
@@ -258,6 +262,7 @@ workflow WGTS {
         )
 
         ch_versions = ch_versions.mix(GRIPSS_FILTERING.out.versions)
+
         ch_gripss_somatic_out = ch_gripss_somatic_out.mix(GRIPSS_FILTERING.out.somatic)
         ch_gripss_germline_out = ch_gripss_germline_out.mix(GRIPSS_FILTERING.out.germline)
         ch_gripss_somatic_unfiltered_out = ch_gripss_somatic_unfiltered_out.mix(GRIPSS_FILTERING.out.somatic_unfiltered)
@@ -298,6 +303,7 @@ workflow WGTS {
         )
 
         ch_versions = ch_versions.mix(SAGE_CALLING.out.versions)
+
         ch_sage_germline_vcf_out = ch_sage_germline_vcf_out.mix(SAGE_CALLING.out.germline_vcf)
         ch_sage_somatic_vcf_out = ch_sage_somatic_vcf_out.mix(SAGE_CALLING.out.somatic_vcf)
         ch_sage_germline_dir_out = ch_sage_germline_dir_out.mix(SAGE_CALLING.out.germline_dir)
@@ -339,6 +345,7 @@ workflow WGTS {
         )
 
         ch_versions = ch_versions.mix(PAVE_ANNOTATION.out.versions)
+
         ch_pave_germline_out = ch_pave_germline_out.mix(PAVE_ANNOTATION.out.germline)
         ch_pave_somatic_out = ch_pave_somatic_out.mix(PAVE_ANNOTATION.out.somatic)
 
@@ -381,6 +388,7 @@ workflow WGTS {
         )
 
         ch_versions = ch_versions.mix(PURPLE_CALLING.out.versions)
+
         ch_purple_out = ch_purple_out.mix(PURPLE_CALLING.out.purple_dir)
 
     } else {
@@ -464,6 +472,7 @@ workflow WGTS {
         )
 
         ch_versions = ch_versions.mix(LINX_PLOTTING.out.versions)
+
         ch_linx_somatic_plot_out = ch_linx_somatic_plot_out.mix(LINX_PLOTTING.out.visualiser_dir)
 
     } else {
