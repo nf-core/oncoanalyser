@@ -64,7 +64,7 @@ workflow SAGE_CALLING {
                     key: meta.group_id,
                     id: meta.group_id,
                     tumor_id: Utils.getTumorDnaSampleName(meta),
-                    normal_id: Utils.getTumorDnaSampleName(meta),
+                    normal_id: Utils.getNormalDnaSampleName(meta),
                 ]
 
                 data = [
