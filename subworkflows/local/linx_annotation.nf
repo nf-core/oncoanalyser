@@ -73,6 +73,7 @@ workflow LINX_ANNOTATION {
                 def meta_linx = [
                     key: meta.group_id,
                     id: meta.group_id,
+                    sample_id: tumor_id,
                 ]
 
                 return [meta_linx, sv_vcf]
@@ -113,6 +114,7 @@ workflow LINX_ANNOTATION {
                 def meta_linx = [
                     key: meta.group_id,
                     id: meta.group_id,
+                    sample_id: Utils.getTumorDnaSampleName(meta),
                 ]
 
                 return [meta_linx, purple_dir]

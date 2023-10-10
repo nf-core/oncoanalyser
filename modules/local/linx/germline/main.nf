@@ -25,7 +25,7 @@ process LINX_GERMLINE {
         -Xmx${Math.round(task.memory.bytes * 0.95)} \\
         -jar ${task.ext.jarPath} \\
             ${args} \\
-            -sample ${meta.id} \\
+            -sample ${meta.sample_id} \\
             -sv_vcf ${sv_vcf} \\
             -germline \\
             -ref_genome_version ${genome_ver} \\
