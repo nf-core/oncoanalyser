@@ -35,11 +35,10 @@ workflow AMBER_PROFILING {
         ch_amber_inputs = ch_inputs_sorted.runnable
             .map { meta ->
 
-                def tumor_id = Utils.getTumorDnaSampleName(meta)
                 def meta_amber = [
                     key: meta.group_id,
                     id: meta.group_id,
-                    tumor_id: tumor_id,
+                    tumor_id: Utils.getTumorDnaSampleName(meta),
                 ]
 
                 def tumor_bam = Utils.getTumorDnaBam(meta)
@@ -48,8 +47,7 @@ workflow AMBER_PROFILING {
                 def normal_bam = []
                 def normal_bai = []
 
-                def normal_key = [Constants.SampleType.NORMAL, Constants.SequenceType.DNA]
-                if (meta.containsKey(normal_key) && meta[normal_key].containsKey(Constants.FileType.BAM)) {
+                if (Utils.hasNormalDnaBam(meta)) {
 
                     meta_amber.normal_id = Utils.getNormalDnaSampleName(meta)
                     normal_bam = Utils.getNormalDnaBam(meta)

@@ -68,13 +68,14 @@ workflow LINX_ANNOTATION {
             .map { meta, purple_dir ->
 
                 def tumor_id = Utils.getTumorDnaSampleName(meta)
-                def sv_vcf = file(purple_dir).resolve("${tumor_id}.purple.sv.germline.vcf.gz")
 
                 def meta_linx = [
                     key: meta.group_id,
                     id: meta.group_id,
                     sample_id: tumor_id,
                 ]
+
+                def sv_vcf = file(purple_dir).resolve("${tumor_id}.purple.sv.germline.vcf.gz")
 
                 return [meta_linx, sv_vcf]
             }

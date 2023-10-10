@@ -48,11 +48,10 @@ workflow COBALT_PROFILING {
         ch_cobalt_inputs = ch_inputs_runnable
             .multiMap { meta, diploid_bed ->
 
-                def tumor_id = Utils.getTumorDnaSampleName(meta)
                 def meta_cobalt = [
                     key: meta.group_id,
                     id: meta.group_id,
-                    tumor_id: tumor_id,
+                    tumor_id: Utils.getTumorDnaSampleName(meta),
                 ]
 
                 def tumor_bam = Utils.getTumorDnaBam(meta)
@@ -62,9 +61,11 @@ workflow COBALT_PROFILING {
                 def normal_bai = []
 
                 if (Utils.hasNormalDnaBam(meta)) {
+
                     meta_cobalt.normal_id = Utils.getNormalDnaSampleName(meta)
                     normal_bam = Utils.getNormalDnaBam(meta)
                     normal_bai = Utils.getNormalDnaBai(meta)
+
                 }
 
                 sample_data: [meta_cobalt, tumor_bam, normal_bam, tumor_bai, normal_bai]

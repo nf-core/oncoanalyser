@@ -66,11 +66,8 @@ workflow SAGE_APPEND {
         // channel: [ meta_append, purple_smlv_vcf, tumor_rna_bam, tumor_rna_bai ]
         ch_sage_append_germline_inputs = ch_inputs_germline_sorted.runnable
             .map { meta, purple_dir ->
-                def tumor_dna_id = Utils.getTumorDnaSampleName(meta)
 
-                def tumor_rna_bam = Utils.getTumorRnaBam(meta)
-                def tumor_rna_bai = Utils.getTumorRnaBai(meta)
-                def purple_smlv_vcf = file(purple_dir).resolve("${tumor_dna_id}.purple.germline.vcf.gz")
+                def tumor_dna_id = Utils.getTumorDnaSampleName(meta)
 
                 def meta_append = [
                     key: meta.group_id,
@@ -78,6 +75,10 @@ workflow SAGE_APPEND {
                     tumor_rna_id: Utils.getTumorRnaSampleName(meta),
                     dna_id: Utils.getNormalDnaSampleName(meta),
                 ]
+
+                def tumor_rna_bam = Utils.getTumorRnaBam(meta)
+                def tumor_rna_bai = Utils.getTumorRnaBai(meta)
+                def purple_smlv_vcf = file(purple_dir).resolve("${tumor_dna_id}.purple.germline.vcf.gz")
 
                 return [meta_append, purple_smlv_vcf, tumor_rna_bam, tumor_rna_bai]
             }
@@ -120,16 +121,16 @@ workflow SAGE_APPEND {
 
                 def tumor_dna_id = Utils.getTumorDnaSampleName(meta)
 
-                def tumor_rna_bam = Utils.getTumorRnaBam(meta)
-                def tumor_rna_bai = Utils.getTumorRnaBai(meta)
-                def purple_smlv_vcf = file(purple_dir).resolve("${tumor_dna_id}.purple.somatic.vcf.gz")
-
                 def meta_append = [
                     key: meta.group_id,
                     id: meta.group_id,
                     tumor_rna_id: Utils.getTumorRnaSampleName(meta),
                     dna_id: Utils.getTumorDnaSampleName(meta),
                 ]
+
+                def tumor_rna_bam = Utils.getTumorRnaBam(meta)
+                def tumor_rna_bai = Utils.getTumorRnaBai(meta)
+                def purple_smlv_vcf = file(purple_dir).resolve("${tumor_dna_id}.purple.somatic.vcf.gz")
 
                 return [meta_append, purple_smlv_vcf, tumor_rna_bam, tumor_rna_bai]
             }

@@ -30,7 +30,7 @@ process CHORD {
         chord_signatures.txt \\
         chord_prediction.txt
 
-    mv ${meta.id}_chord_signatures.txt ${meta.id}_chord_prediction.txt chord/
+    mv ${meta.sample_id}_chord_signatures.txt ${meta.sample_id}_chord_prediction.txt chord/
 
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":

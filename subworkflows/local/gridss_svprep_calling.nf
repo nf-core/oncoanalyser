@@ -62,11 +62,10 @@ workflow GRIDSS_SVPREP_CALLING {
             )
             .map { meta ->
 
-                def tumor_id = Utils.getTumorDnaSampleName(meta)
                 def meta_svprep = [
                     key: meta.group_id,
                     id: meta.group_id,
-                    sample_id: tumor_id,
+                    sample_id: Utils.getTumorDnaSampleName(meta),
                     sample_type: 'tumor',
                     // NOTE(SW): slightly redundant since we have this information then lose it with .mix above
                     group_size: Utils.hasNormalDnaBam(meta) ? 2 : 1
@@ -109,11 +108,10 @@ workflow GRIDSS_SVPREP_CALLING {
         ch_svprep_normal_inputs = WorkflowOncoanalyser.restoreMeta(SVPREP_TUMOR.out.junctions, ch_inputs_sorted.runnable_tn)
             .map { meta, junctions_tumor ->
 
-                def normal_id = Utils.getNormalDnaSampleName(meta)
                 def meta_svprep = [
                     key: meta.group_id,
                     id: meta.group_id,
-                    sample_id: normal_id,
+                    sample_id: Utils.getNormalDnaSampleName(meta),
                     sample_type: 'normal',
                     group_size: 2,  // Assumption holds since germline only is not supported and we source from runnable_tn
                 ]
