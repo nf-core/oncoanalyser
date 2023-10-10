@@ -137,6 +137,8 @@ class WorkflowOncoanalyser {
             // We must handle cases where only a process-specific meta is provided, this occurs during process skipping
             // and a meta restore is required to create placeholders in the output.
 
+            return [it[0].getAt(key_b), it[1..-1]]
+
             if (it instanceof HashMap) {
                 return it.getAt(key_b)
             } else {

@@ -584,18 +584,8 @@ workflow WGTS {
     ch_lilac_out = Channel.empty()
     if (run_config.stages.lilac) {
 
-
-
-
-
-
-        // Set HLA slice BED if provided in params
+        // Use HLA slice BED if provided in params or set as default requirement
         ref_data_hla_slice_bed = params.containsKey('ref_data_hla_slice_bed') ? params.ref_data_hla_slice_bed : []
-
-
-
-
-
 
         LILAC_CALLING(
             ch_inputs,

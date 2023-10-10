@@ -538,18 +538,8 @@ workflow TARGETED {
     ch_lilac_out = Channel.empty()
     if (run_config.stages.lilac) {
 
-
-
-
-
-
         // Set HLA slice BED if provided in params
         ref_data_hla_slice_bed = params.containsKey('ref_data_hla_slice_bed') ? params.ref_data_hla_slice_bed : []
-
-
-
-
-
 
         LILAC_CALLING(
             ch_inputs,
