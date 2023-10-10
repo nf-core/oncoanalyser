@@ -9,7 +9,7 @@ import nextflow.splitter.SplitterEx
 
 class Utils {
 
-    public static parseInput(input_fp_str, stub_run) {
+    public static parseInput(input_fp_str, stub_run, log) {
 
         // NOTE(SW): using Nextflow .splitCsv channel operator, hence sould be easily interchangable
 
@@ -25,7 +25,7 @@ class Utils {
                 entries.each {
                     // Add subject id if absent or check if current matches existing
                     if (meta.containsKey('subject_id') && meta.subject_id != it.subject_id) {
-                        log.error "\nERROR: got unexpected subject name for ${group_id}/${meta.subject_id}: ${it.subject_id}"
+                        log.error "got unexpected subject name for ${group_id} ${meta.subject_id}: ${it.subject_id}"
                         System.exit(1)
                     } else {
                         meta.subject_id = it.subject_id
@@ -36,7 +36,7 @@ class Utils {
                     def sample_type_enum = Utils.getEnumFromString(it.sample_type, Constants.SampleType)
                     if (!sample_type_enum) {
                         def sample_type_str = Utils.getEnumNames(Constants.SampleType).join('\n  - ')
-                        log.error "\nERROR: received invalid sample type: '${it.sample_type}'. Valid options are:\n  - ${sample_type_str}"
+                        log.error "received invalid sample type: '${it.sample_type}'. Valid options are:\n  - ${sample_type_str}"
                         System.exit(1)
                     }
 
@@ -44,7 +44,7 @@ class Utils {
                     def sequence_type_enum = Utils.getEnumFromString(it.sequence_type, Constants.SequenceType)
                     if (!sequence_type_enum) {
                         def sequence_type_str = Utils.getEnumNames(Constants.SequenceType).join('\n  - ')
-                        log.error "\nERROR: received invalid sequence type: '${it.sequence_type}'. Valid options are:\n  - ${sequence_type_str}"
+                        log.error "received invalid sequence type: '${it.sequence_type}'. Valid options are:\n  - ${sequence_type_str}"
                         System.exit(1)
                     }
 
@@ -52,7 +52,7 @@ class Utils {
                     def filetype_enum = Utils.getEnumFromString(it.filetype, Constants.FileType)
                     if (!filetype_enum) {
                         def filetype_str = Utils.getEnumNames(Constants.FileType).join('\n  - ')
-                        log.error "\nERROR: received invalid file type: '${it.filetype}'. Valid options are:\n  - ${filetype_str}"
+                        log.error "received invalid file type: '${it.filetype}'. Valid options are:\n  - ${filetype_str}"
                         System.exit(1)
                     }
 
@@ -60,12 +60,12 @@ class Utils {
                     def meta_sample = meta.get(sample_key, [sample_id: it.sample_id])
 
                     if (meta_sample.sample_id != it.sample_id) {
-                        log.error "\nERROR: got unexpected sample name for ${group_id}/${sample_type_enum} (${sequence_type_enum}): ${sample_name}"
+                        log.error "got unexpected sample name for ${group_id} ${sample_type_enum}/${sequence_type_enum}: ${sample_name}"
                         System.exit(1)
                     }
 
                     if (meta_sample.containsKey(filetype_enum)) {
-                        log.error "\nERROR: got duplicate file for ${group_id}/${sample_type_enum} (${sequence_type_enum}): ${filetype_enum}"
+                        log.error "got duplicate file for ${group_id} ${sample_type_enum}/${sequence_type_enum}: ${filetype_enum}"
                         System.exit(1)
                     }
 
@@ -110,7 +110,8 @@ class Utils {
                         def index_fp = nextflow.Nextflow.file("${fp}.${index_str}")
 
                         if (!index_fp.exists() && !stub_run) {
-                            log.error "\nERROR: No index provided or found for ${fp}"
+                            def (sample_type, sequence_type) = sample_key
+                            log.error "no index provided or found for ${meta.group_id} ${sample_type}/${sequence_type}: ${key}: ${fp}"
                             System.exit(1)
                         }
 
@@ -121,6 +122,64 @@ class Utils {
 
                 return meta
             }
+
+        return inputs
+    }
+
+    public static void validateInput(inputs, run_config, log) {
+
+        def sample_keys = [
+            [Constants.SampleType.TUMOR, Constants.SequenceType.DNA],
+            [Constants.SampleType.TUMOR, Constants.SequenceType.RNA],
+            [Constants.SampleType.NORMAL, Constants.SequenceType.DNA],
+        ]
+
+        inputs.each { meta ->
+
+            // Require BAMs for each defined sample type
+            // NOTE(SW): repeating key pairs above to avoid having to duplicate error messages
+            sample_keys.each { key ->
+
+                if (!meta.containsKey(key)) {
+                    return
+                }
+
+                def (sample_type, sequence_type) = key
+
+                if (!meta[key].containsKey(Constants.FileType.BAM)) {
+                    log.error "no BAM provided for ${meta.group_id} ${sample_type}/${sequence_type}\n\n" +
+                        "NB: BAMs are always required as they are the basis to determine input sample type."
+                    System.exit(1)
+                }
+
+            }
+
+            // Do not allow normal DNA in targeted mode and restrict targeted RNA analysis to TSO500
+            if (run_config.mode === Constants.RunMode.TARGETED) {
+
+                if (Utils.hasNormalDnaBam(meta)) {
+                    log.error "targeted mode is not compatible with the normal DNA BAM provided for ${meta.group_id}\n\n" +
+                        "The targeted workflow supports only tumor DNA BAMs (and tumor RNA BAMs for TSO500)"
+                    System.exit(1)
+                }
+
+                // Restrict targeted RNA inputs to TSO500
+                if (Utils.hasTumorRnaBam(meta) && run_config.panel != 'tso500') {
+                    def panel = run_config.panel.toUpperCase()
+                    log.error "the ${panel} panel is not compatible with the tumor RNA BAM provided for ${meta.group_id}\n\n" +
+                        "Only the TSO500 panel supports tumor RNA analysis"
+                    System.exit(1)
+                }
+
+            }
+
+            // Do not allow normal DNA only
+            if (Utils.hasNormalDnaBam(meta) && !Utils.hasTumorDnaBam(meta)) {
+                log.error "germline only mode not supported, found only a normal DNA BAM for ${meta.group_id}\n"
+                System.exit(1)
+            }
+
+        }
     }
 
     //
@@ -249,7 +308,7 @@ class Utils {
         def run_mode_enum = Utils.getEnumFromString(run_mode, Constants.RunMode)
         if (!run_mode_enum) {
             def run_modes_str = Utils.getEnumNames(Constants.RunMode).join('\n  - ')
-            log.error "\nERROR: recieved an invalid run mode: '${run_mode}'. Valid options are:\n  - ${run_modes_str}"
+            log.error "recieved an invalid run mode: '${run_mode}'. Valid options are:\n  - ${run_modes_str}"
             System.exit(1)
         }
         return run_mode_enum

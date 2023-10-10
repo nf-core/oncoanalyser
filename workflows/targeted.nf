@@ -8,13 +8,18 @@ import Utils
     VALIDATE INPUTS
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 */
+// Parse input samplesheet
+// NOTE(SW): this is done early and outside of gpars so that we can access synchronously and prior to pipeline execution
+inputs = Utils.parseInput(params.input, params.mode, workflow.stubRun, log)
 
 // Get run config
 run_config = WorkflowMain.getRunConfig(params, log)
 
+// Validate inputs
+Utils.validateInput(inputs, run_config, log)
+
 // Check input path parameters to see if they exist
 def checkPathParamList = [
-    params.input,
     params.isofox_counts,
     params.isofox_gc_ratios,
     params.isofox_gene_ids,
@@ -71,7 +76,6 @@ include { LINX_ANNOTATION       } from '../subworkflows/local/linx_annotation'
 include { LINX_PLOTTING         } from '../subworkflows/local/linx_plotting'
 include { ORANGE_REPORTING      } from '../subworkflows/local/orange_reporting'
 include { PAVE_ANNOTATION       } from '../subworkflows/local/pave_annotation'
-include { PREPARE_INPUT         } from '../subworkflows/local/prepare_input'
 include { PREPARE_REFERENCE     } from '../subworkflows/local/prepare_reference'
 include { PURPLE_CALLING        } from '../subworkflows/local/purple_calling'
 include { SAGE_APPEND           } from '../subworkflows/local/sage_append'

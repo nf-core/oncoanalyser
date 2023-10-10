@@ -12,7 +12,7 @@ workflow PAVE_ANNOTATION {
     take:
         // Sample data
         ch_inputs              // channel: [mandatory] [ meta ]
-        ch_sage_germline_vcf   // channel: [optional]  [ meta, sage_germline_vcf, sage_somatic_tbi ]
+        ch_sage_germline_vcf   // channel: [mandatory] [ meta, sage_germline_vcf, sage_somatic_tbi ]
         ch_sage_somatic_vcf    // channel: [mandatory] [ meta, sage_somatic_vcf, sage_somatic_tbi ]
 
         // Reference data
