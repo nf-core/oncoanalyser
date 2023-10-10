@@ -162,6 +162,7 @@ workflow GRIDSS_SVPREP_CALLING {
                 def meta_gridss = [
                     key: meta_svprep.key,
                     id: "${meta_svprep.id}__${meta_svprep.sample_id}",
+                    sample_id: meta_svprep.sample_id,
                     sample_type: meta_svprep.sample_type,
                     group_size: meta_svprep.group_size,
                 ]
@@ -230,7 +231,7 @@ workflow GRIDSS_SVPREP_CALLING {
                         tbam,
                         tbam_filtered,
                         tpreprocess,
-                        tmeta.id,
+                        tmeta.sample_id,
                     ]
 
                 } else {
@@ -241,7 +242,7 @@ workflow GRIDSS_SVPREP_CALLING {
                         [nbam, tbam],
                         [nbam_filtered, tbam_filtered],
                         [npreprocess, tpreprocess],
-                        [nmeta.id, tmeta.id],
+                        [nmeta.sample_id, tmeta.sample_id],
                     ]
 
                 }
@@ -316,17 +317,7 @@ workflow GRIDSS_SVPREP_CALLING {
 
                 def data = []
 
-                if (Utils.hasNormalDnaBam(meta)) {
-
-                    data = [
-                        meta_svprep,
-                        [Utils.getNormalDnaBam(meta), Utils.getTumorDnaBam(meta)],
-                        [Utils.getNormalDnaBai(meta), Utils.getTumorDnaBai(meta)],
-                        vcf,
-                        [Utils.getNormalDnaSampleName(meta), Utils.getTumorDnaSampleName(meta)],
-                    ]
-
-                } else if (Utils.hasTumorDnaBam(meta)) {
+                if (Utils.hasTumorDnaBam(meta)) {
 
                     data = [
                         meta_svprep,
@@ -334,6 +325,16 @@ workflow GRIDSS_SVPREP_CALLING {
                         Utils.getTumorDnaBai(meta),
                         vcf,
                         Utils.getTumorDnaSampleName(meta),
+                    ]
+
+                } else if (Utils.hasNormalDnaBam(meta)) {
+
+                    data = [
+                        meta_svprep,
+                        [Utils.getNormalDnaBam(meta), Utils.getTumorDnaBam(meta)],
+                        [Utils.getNormalDnaBai(meta), Utils.getTumorDnaBai(meta)],
+                        vcf,
+                        [Utils.getNormalDnaSampleName(meta), Utils.getTumorDnaSampleName(meta)],
                     ]
 
                 } else {
