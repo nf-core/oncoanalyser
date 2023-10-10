@@ -45,10 +45,10 @@ workflow ISOFOX_QUANTIFICATION {
         ch_isofox_inputs = ch_inputs_sorted.runnable
             .map { meta ->
 
-                def tumor_id = Utils.getTumorRnaSampleName(meta)
                 def meta_isofox = [
                     key: meta.group_id,
                     id: meta.group_id,
+                    sample_id: Utils.getTumorRnaSampleName(meta),
                 ]
 
                 return [meta_isofox, Utils.getTumorRnaBam(meta), Utils.getTumorRnaBai(meta)]
