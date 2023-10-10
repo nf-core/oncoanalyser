@@ -203,6 +203,14 @@ workflow LILAC_CALLING {
                     id: meta.group_id,
                 ]
 
+                if (Utils.hasTumorDnaBam(meta)) {
+                    meta_lilac.tumor_id = Utils.getTumorDnaSampleName(meta)
+                }
+
+                if (Utils.hasNormalDnaBam(meta)) {
+                    meta_lilac.normal_id = Utils.getNormalDnaSampleName(meta)
+                }
+
                 return [meta_lilac, nbam_dna, nbai_dna, tbam_dna, tbai_dna, tbam_rna, tbai_rna, purple_dir]
             }
 
