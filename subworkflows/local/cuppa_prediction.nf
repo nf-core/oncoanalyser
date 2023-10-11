@@ -48,11 +48,25 @@ workflow CUPPA_PREDICTION {
         // channel: runnable: [ meta, isofox_dir, purple_dir, linx_annotation_dir, virusinterpreter_dir ]
         // channel: skip: [ meta ]
         ch_inputs_sorted = ch_inputs_selected
-            .branch{ meta, isofox_dir, purple_dir, linx_annotation_dir, virusinterpreter_dir ->
+            .branch { meta, isofox_dir, purple_dir, linx_annotation_dir, virusinterpreter_dir ->
+
+                // Run the following:
+                //   - tumor DNA and normal DNA
+                //   - tumor DNA and normal DNA, and tumor RNA
+                //   - tumor RNA only
+                //
+                // Do not run the following:
+                //   - tumor DNA only
+                //   - panel mode (controlled by excluded from targeted subworkflow)
+                //
+                // (run exclusions currently done basis for presence of normal DNA)
 
                 def has_existing = Utils.hasExistingInput(meta, Constants.INPUT.PURPLE_DIR)
+                def has_normal_dna = Utils.hasNormalDnaBam(meta)
 
-                runnable: isofox_dir || (purple_dir && linx_annotation_dir) && !has_existing
+                def has_runnable_inputs = isofox_dir || (purple_dir && linx_annotation_dir && has_normal_dna)
+
+                runnable: has_runnable_inputs && !has_existing
                 skip: true
                     return meta
             }

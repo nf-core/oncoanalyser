@@ -23,8 +23,8 @@ workflow ISOFOX_QUANTIFICATION {
         isofox_tpm_norm        // channel: [optional]  /path/to/tpm_norm
 
         // Params
-        isofox_functions       //  string: [optional]  isofox functions
-        isofox_read_length     //  string: [mandatory] isofox_read_length
+        isofox_functions       //  string: [optional]  Isofox functions
+        isofox_read_length     //  string: [mandatory] Isofox read length
 
     main:
         // Channel for version.yml files

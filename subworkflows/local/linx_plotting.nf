@@ -11,12 +11,12 @@ include { LINX_VISUALISER as VISUALISER } from '../../modules/local/linx/visuali
 workflow LINX_PLOTTING {
     take:
         // Sample data
-        ch_inputs              // channel: [mandatory] [ meta ]
-        ch_annotations         // channel: [mandatory] [ meta, annotation_dir ]
+        ch_inputs                     // channel: [mandatory] [ meta ]
+        ch_annotations                // channel: [mandatory] [ meta, annotation_dir ]
 
         // Reference data
-        genome_version         // channel: [mandatory] genome version
-        ensembl_data_resources // channel: [mandatory] /path/to/ensembl_data_resources/
+        genome_version                // channel: [mandatory] genome version
+        ensembl_data_resources        // channel: [mandatory] /path/to/ensembl_data_resources/
 
     main:
         // Channel for versions.yml files
@@ -72,10 +72,10 @@ workflow LINX_PLOTTING {
         // MODULE: gpgr LINX report
         //
         // Create process input channel
-        // channel: [ meta_gpgr, annotation_dir, visualiser_dir ]
+        // channel: [ meta_gpgr, annotation_dir, visualiser_dir_all ]
         ch_gpgr_linx_inputs = WorkflowOncoanalyser.groupByMeta(
             ch_inputs_sorted.runnable,
-            WorkflowOncoanalyser.restoreMeta(VISUALISER.out.visualiser_dir, ch_inputs),
+            WorkflowOncoanalyser.restoreMeta(VISUALISER.out.visualiser_dir_all, ch_inputs),
         )
             .map { meta, annotation_dir, visualiser_dir ->
 
@@ -96,15 +96,23 @@ workflow LINX_PLOTTING {
         ch_versions = ch_versions.mix(GPGR.out.versions)
 
         // Set outputs, restoring original meta
-        // channel: [ meta, visualiser_dir ]
-        ch_visualiser_out = Channel.empty()
+        // channel: [ meta, visualiser_dir_all ]
+        ch_visualiser_all_out = Channel.empty()
             .mix(
-                WorkflowOncoanalyser.restoreMeta(VISUALISER.out.visualiser_dir, ch_inputs),
+                WorkflowOncoanalyser.restoreMeta(VISUALISER.out.visualiser_dir_all, ch_inputs),
+                ch_inputs_sorted.skip.map { meta -> [meta, []] },
+            )
+
+        // channel: [ meta, visualiser_dir_reportable ]
+        ch_visualiser_reportable_out = Channel.empty()
+            .mix(
+                WorkflowOncoanalyser.restoreMeta(VISUALISER.out.visualiser_dir_reportable, ch_inputs),
                 ch_inputs_sorted.skip.map { meta -> [meta, []] },
             )
 
     emit:
-        visualiser_dir = ch_visualiser_out // channel: [ meta, visualiser_dir ]
+        visualiser_dir_all        = ch_visualiser_all_out        // channel: [ meta, visualiser_dir_all ]
+        visualiser_dir_reportable = ch_visualiser_reportable_out // channel: [ meta, visualiser_dir_reportable ]
 
-        versions = ch_versions             // channel: [ versions.yml ]
+        versions = ch_versions                                   // channel: [ versions.yml ]
 }

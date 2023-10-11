@@ -460,8 +460,8 @@ workflow WGTS {
     //
     // SUBWORKFLOW: Visualise LINX annotations
     //
-    // channel: [ meta, linx_visualiser_dir ]
-    ch_linx_somatic_plot_out = Channel.empty()
+    // channel: [ meta, linx_visualiser_dir_reportable ]
+    ch_linx_somatic_plot_reportable_out = Channel.empty()
     if (run_config.stages.linx) {
 
         LINX_PLOTTING(
@@ -473,11 +473,11 @@ workflow WGTS {
 
         ch_versions = ch_versions.mix(LINX_PLOTTING.out.versions)
 
-        ch_linx_somatic_plot_out = ch_linx_somatic_plot_out.mix(LINX_PLOTTING.out.visualiser_dir)
+        ch_linx_somatic_plot_reportable_out = ch_linx_somatic_plot_reportable_out.mix(LINX_PLOTTING.out.visualiser_dir_reportable)
 
     } else {
 
-        ch_linx_somatic_plot_out = ch_inputs.map { meta -> [meta, []] }
+        ch_linx_somatic_plot_reportable_out = ch_inputs.map { meta -> [meta, []] }
 
     }
 
@@ -684,7 +684,7 @@ workflow WGTS {
             ch_sage_germline_append_out,
             ch_purple_out,
             ch_linx_somatic_out,
-            ch_linx_somatic_plot_out,
+            ch_linx_somatic_plot_reportable_out,
             ch_linx_germline_out,
             ch_virusinterpreter_out,
             ch_chord_out,
