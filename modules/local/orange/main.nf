@@ -60,7 +60,10 @@ process ORANGE {
         mkdir -p \${purple_dir_local}/;
         find -L ${purple_dir} -maxdepth 1 -exec ln -fs ../{} \${purple_dir_local}/ \\;
         ln -sf ../${smlv_somatic_vcf} \${purple_dir_local}/${meta.tumor_id}.purple.somatic.vcf.gz;
-        ln -sf ../${smlv_germline_vcf} \${purple_dir_local}/${meta.tumor_id}.purple.germline.vcf.gz;
+
+        if [[ -n "${smlv_germline_vcf}" ]]; then
+            ln -sf ../${smlv_germline_vcf} \${purple_dir_local}/${meta.tumor_id}.purple.germline.vcf.gz;
+        fi;
 
         mkdir -p isofox_dir__prepared/;
         for fp in ${isofox_dir}/*; do

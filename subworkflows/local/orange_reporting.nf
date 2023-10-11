@@ -68,10 +68,10 @@ workflow ORANGE_REPORTING {
 
         rna_tumor_input_indexes = [
             6,   // sage_somatic_append
-            // NOTE(SW): needed since tumor-only RNA is not supported? TSO500 RNA to be seen...
-            7,   // sage_germline_append
             17,  // isofox_dir
         ]
+
+        rna_sage_germline_append_index = 7  // sage_germline_append
 
         // Select input sources
         // channel: [ meta, tbt_metrics, nbt_metrics, tfs_metrics, nfs_metrics, tsage_dir, nsage_dir, tsage_append, nsage_append, purple_dir, tlinx_anno_dir, tlinx_plot_dir, nlinx_anno_dir, virusinterpreter_dir, chord_dir, sigs_dir, lilac_dir, cuppa_dir, isofox_dir ]
@@ -195,7 +195,15 @@ workflow ORANGE_REPORTING {
                 }
 
                 // Require all tumor RNA inputs to be present else clear them
-                def has_rna_tumor = rna_tumor_input_indexes
+                // SAGE append germline is only required when normal DNA is present
+                def rna_tumor_input_indexes_ready
+                if (has_dna_normal) {
+                    rna_tumor_input_indexes_ready = [*rna_tumor_input_indexes, rna_sage_germline_append_index]
+                } else {
+                    rna_tumor_input_indexes_ready = rna_tumor_input_indexes.clone()
+                }
+
+                def has_rna_tumor = rna_tumor_input_indexes_ready
                     .collect { i -> inputs[i] }
                     .every()
 
