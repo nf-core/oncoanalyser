@@ -315,17 +315,7 @@ workflow GRIDSS_SVPREP_CALLING {
 
                 def data = []
 
-                if (Utils.hasTumorDnaBam(meta)) {
-
-                    data = [
-                        meta_svprep,
-                        Utils.getTumorDnaBam(meta),
-                        Utils.getTumorDnaBai(meta),
-                        vcf,
-                        Utils.getTumorDnaSampleName(meta),
-                    ]
-
-                } else if (Utils.hasNormalDnaBam(meta)) {
+                if (Utils.hasNormalDnaBam(meta)) {
 
                     data = [
                         meta_svprep,
@@ -333,6 +323,16 @@ workflow GRIDSS_SVPREP_CALLING {
                         [Utils.getNormalDnaBai(meta), Utils.getTumorDnaBai(meta)],
                         vcf,
                         [Utils.getNormalDnaSampleName(meta), Utils.getTumorDnaSampleName(meta)],
+                    ]
+
+                } else if (Utils.hasTumorDnaBam(meta)) {
+
+                    data = [
+                        meta_svprep,
+                        Utils.getTumorDnaBam(meta),
+                        Utils.getTumorDnaBai(meta),
+                        vcf,
+                        Utils.getTumorDnaSampleName(meta),
                     ]
 
                 } else {
