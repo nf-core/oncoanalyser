@@ -89,7 +89,7 @@ process ORANGE {
             -primary_tumor_doids 162 \\
             -tumor_sample_wgs_metrics_file ${bam_metrics_somatic} \\
             -tumor_sample_flagstat_file ${flagstat_somatic} \\
-            -sage_dir ${sage_dir} \\
+            -sage_dir ${sage_somatic_dir} \\
             -purple_dir \${purple_dir_local} \\
             -purple_plot_dir \${purple_dir_local}/plot/ \\
             -linx_dir ${linx_somatic_anno_dir} \\
