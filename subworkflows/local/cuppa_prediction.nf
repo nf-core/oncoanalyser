@@ -81,19 +81,26 @@ workflow CUPPA_PREDICTION {
                     id: meta.group_id,
                 ]
 
-                def has_dna = (purple_dir && linx_annotation_dir)
-                def has_rna = isofox_dir
+                def has_tumor_dna = Utils.hasTumorDnaBam(meta)
+                def has_normal_dna = Utils.hasNormalDnaBam(meta)
+                def has_tumor_rna = Utils.hasTumorRnaBam(meta)
 
-                if (has_dna && has_rna) {
+                def has_dna_inputs = (purple_dir && linx_annotation_dir)
+                def has_rna_inputs = isofox_dir
+
+                def run_dna = has_dna_inputs && has_tumor_dna && has_normal_dna
+                def run_rna = has_rna_inputs && has_tumor_rna
+
+                if (run_dna && run_rna) {
 
                     meta_cuppa.sample_id = Utils.getTumorDnaSampleName(meta)
                     meta_cuppa.sample_rna_id = Utils.getTumorRnaSampleName(meta)
 
-                } else if (has_dna) {
+                } else if (run_dna) {
 
                     meta_cuppa.sample_id = Utils.getTumorDnaSampleName(meta)
 
-                } else if (has_rna) {
+                } else if (run_rna) {
 
                     meta_cuppa.sample_id = Utils.getTumorRnaSampleName(meta)
 
