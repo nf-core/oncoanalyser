@@ -31,6 +31,9 @@ input:
   - cuppa_resources:
       type: directory
       description: CUPPA resource directory
+  - classifer:
+      type: string
+      description: CUPPA classifier to use
 output:
   - meta:
       type: map

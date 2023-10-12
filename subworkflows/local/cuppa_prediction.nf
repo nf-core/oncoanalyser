@@ -72,9 +72,10 @@ workflow CUPPA_PREDICTION {
             }
 
         // Create process input channel
-        // channel: [ meta, isofox_dir, purple_dir, linx_annotation_dir, virusinterpreter_dir ]
+        // channel: sample_data: [ meta, isofox_dir, purple_dir, linx_annotation_dir, virusinterpreter_dir ]
+        // channel: classifer: [ classifier ]
         ch_cuppa_inputs = ch_inputs_sorted.runnable
-            .map { meta, isofox_dir, purple_dir, linx_annotation_dir, virusinterpreter_dir ->
+            .multiMap{ meta, isofox_dir, purple_dir, linx_annotation_dir, virusinterpreter_dir ->
 
                 def meta_cuppa = [
                     key: meta.group_id,
@@ -91,16 +92,24 @@ workflow CUPPA_PREDICTION {
                 def run_dna = has_dna_inputs && has_tumor_dna && has_normal_dna
                 def run_rna = has_rna_inputs && has_tumor_rna
 
+                def classifier
+
                 if (run_dna && run_rna) {
+
+                    classifier = 'ALL'
 
                     meta_cuppa.sample_id = Utils.getTumorDnaSampleName(meta)
                     meta_cuppa.sample_rna_id = Utils.getTumorRnaSampleName(meta)
 
                 } else if (run_dna) {
 
+                    classifier = 'DNA'
+
                     meta_cuppa.sample_id = Utils.getTumorDnaSampleName(meta)
 
                 } else if (run_rna) {
+
+                    classifier = 'RNA'
 
                     meta_cuppa.sample_id = Utils.getTumorRnaSampleName(meta)
 
@@ -110,14 +119,16 @@ workflow CUPPA_PREDICTION {
 
                 }
 
-                return [meta_cuppa, isofox_dir, purple_dir, linx_annotation_dir, virusinterpreter_dir]
+                sample_data: [meta_cuppa, isofox_dir, purple_dir, linx_annotation_dir, virusinterpreter_dir]
+                classifier: classifier
             }
 
         // Run process
         CUPPA(
-            ch_cuppa_inputs,
+            ch_cuppa_inputs.sample_data,
             genome_version,
             cuppa_resources,
+            ch_cuppa_inputs.classifier,
         )
 
         ch_versions = ch_versions.mix(CUPPA.out.versions)
