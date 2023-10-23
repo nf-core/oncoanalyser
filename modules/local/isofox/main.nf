@@ -2,7 +2,7 @@ process ISOFOX {
     tag "${meta.id}"
     label 'process_medium'
 
-    container 'docker.io/scwatts/isofox:1.7--0'
+    container 'docker.io/scwatts/isofox:1.7.1--0'
 
     input:
     tuple val(meta), path(bam), path(bai)
