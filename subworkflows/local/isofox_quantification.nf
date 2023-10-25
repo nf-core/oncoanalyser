@@ -2,6 +2,7 @@
 // Isofox estimates transcript abundance, detects novel SJs, and identifies fusion events
 //
 
+import Constants
 import Utils
 
 include { ISOFOX } from '../../modules/local/isofox/main'
@@ -22,27 +23,36 @@ workflow ISOFOX_QUANTIFICATION {
         isofox_tpm_norm        // channel: [optional]  /path/to/tpm_norm
 
         // Params
-        isofox_functions       //  string: [optional]  isofox functions
-        isofox_read_length     //  string: [mandatory] isofox_read_length
-        run_config             // channel: [mandatory] run configuration
+        isofox_functions       //  string: [optional]  Isofox functions
+        isofox_read_length     //  string: [mandatory] Isofox read length
 
     main:
         // Channel for version.yml files
         // channel: [ versions.yml ]
         ch_versions = Channel.empty()
 
-        // Create inputs and create process-specific meta
+        // Sort inputs
+        // channel: [ meta ]
+        ch_inputs_sorted = ch_inputs
+            .branch { meta ->
+                def has_existing = Utils.hasExistingInput(meta, Constants.INPUT.ISOFOX_DIR)
+                runnable: Utils.hasTumorRnaBam(meta) && !has_existing
+                skip: true
+            }
+
+        // Create process input channel
         // channel: [ meta_isofox, tumor_bam_rna ]
-        if (run_config.stages.isofox) {
-            ch_isofox_inputs = ch_inputs
-                .map { meta ->
-                    def bam = Utils.getTumorRnaBam(meta)
-                    def meta_isofox = [key: meta.id, id: Utils.getTumorRnaSampleName(meta)]
-                    return [meta_isofox, bam, "${bam}.bai"]
-                }
-        } else {
-            ch_isofox_inputs = WorkflowOncoanalyser.getInput(ch_inputs, Constants.INPUT.ISOFOX_DIR, type: 'optional')
-        }
+        ch_isofox_inputs = ch_inputs_sorted.runnable
+            .map { meta ->
+
+                def meta_isofox = [
+                    key: meta.group_id,
+                    id: meta.group_id,
+                    sample_id: Utils.getTumorRnaSampleName(meta),
+                ]
+
+                return [meta_isofox, Utils.getTumorRnaBam(meta), Utils.getTumorRnaBai(meta)]
+            }
 
         // Run process
         ISOFOX(
@@ -59,9 +69,15 @@ workflow ISOFOX_QUANTIFICATION {
             isofox_tpm_norm,
         )
 
-        // Set outputs, restoring original meta
-        ch_outputs = WorkflowOncoanalyser.restoreMeta(ISOFOX.out.isofox_dir, ch_inputs)
         ch_versions = ch_versions.mix(ISOFOX.out.versions)
+
+        // Set outputs, restoring original meta
+        // channel: [ meta, isofox_dir ]
+        ch_outputs = Channel.empty()
+            .mix(
+                WorkflowOncoanalyser.restoreMeta(ISOFOX.out.isofox_dir, ch_inputs),
+                ch_inputs_sorted.skip.map { meta -> [meta, []] },
+            )
 
     emit:
         isofox_dir = ch_outputs // channel: [ meta, isofox_dir ]

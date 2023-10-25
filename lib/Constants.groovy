@@ -30,15 +30,9 @@ class Constants {
     static Integer DEFAULT_ISOFOX_READ_LENGTH_TARGETED = 93
 
 
-    static enum RunType {
-        TUMOR_NORMAL,
-        TUMOR_ONLY,
-    }
-
     static enum RunMode {
-        DNA,
-        RNA,
-        DNA_RNA,
+        TARGETED,
+        WGTS,
     }
 
     static enum Process {
@@ -70,14 +64,18 @@ class Constants {
         BAMTOOLS,
         COBALT_DIR,
         GRIDSS_VCF,
+        GRIDSS_VCF_TBI,
         GRIPSS_VCF,
+        GRIPSS_VCF_TBI,
         GRIPSS_UNFILTERED_VCF,
+        GRIPSS_UNFILTERED_VCF_TBI,
         ISOFOX_DIR,
         LILAC_DIR,
         LINX_ANNO_DIR,
         PAVE_VCF,
         PURPLE_DIR,
         SAGE_VCF,
+        SAGE_APPEND_VCF,
         VIRUSINTERPRETER_DIR,
         // ORANGE specific
         CHORD_DIR,
@@ -164,6 +162,16 @@ class Constants {
             SampleType.NORMAL,
             SequenceType.DNA,
         ],
+        SAGE_APPEND_VCF_TUMOR: [
+            FileType.SAGE_APPEND_VCF,
+            SampleType.TUMOR,
+            [SequenceType.DNA_RNA],
+        ],
+        SAGE_APPEND_VCF_NORMAL: [
+            FileType.SAGE_APPEND_VCF,
+            SampleType.NORMAL,
+            [SequenceType.DNA_RNA],
+        ],
 
         PAVE_VCF_TUMOR: [
             FileType.PAVE_VCF,
@@ -187,13 +195,28 @@ class Constants {
             [SampleType.TUMOR, SampleType.TUMOR_NORMAL],
             SequenceType.DNA,
         ],
+        GRIPSS_VCF_TUMOR_TBI: [
+            FileType.GRIPSS_VCF_TBI,
+            [SampleType.TUMOR, SampleType.TUMOR_NORMAL],
+            SequenceType.DNA,
+        ],
         GRIPSS_VCF_NORMAL: [
             FileType.GRIPSS_VCF,
             SampleType.NORMAL,
             SequenceType.DNA,
         ],
+        GRIPSS_VCF_NORMAL_TBI: [
+            FileType.GRIPSS_VCF_TBI,
+            SampleType.NORMAL,
+            SequenceType.DNA,
+        ],
         GRIPSS_UNFILTERED_VCF_TUMOR: [
             FileType.GRIPSS_UNFILTERED_VCF,
+            [SampleType.TUMOR, SampleType.TUMOR_NORMAL],
+            SequenceType.DNA,
+        ],
+        GRIPSS_UNFILTERED_VCF_TUMOR_TBI: [
+            FileType.GRIPSS_UNFILTERED_VCF_TBI,
             [SampleType.TUMOR, SampleType.TUMOR_NORMAL],
             SequenceType.DNA,
         ],

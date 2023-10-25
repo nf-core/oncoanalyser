@@ -12,7 +12,7 @@ workflow LINX_ANNOTATION {
     take:
         // Sample data
         ch_inputs              // channel: [mandatory] [ meta ]
-        ch_purple              // channel: [optional]  [ meta, purple_dir ]
+        ch_purple              // channel: [mandatory] [ meta, purple_dir ]
 
         // Reference data
         genome_version         // channel: [mandatory] genome version
@@ -21,75 +21,109 @@ workflow LINX_ANNOTATION {
         driver_gene_panel      // channel: [mandatory] /path/to/driver_gene_panel
         gene_id_file           // channel: [mandatory] /path/to/linx_gene_id_file
 
-        // Params
-        run_config             // channel: [mandatory] run configuration
-
     main:
         // Channel for versions.yml files
         // channel: [ versions.yml ]
         ch_versions = Channel.empty()
 
-        // Select input sources
-        // channel: [ meta, purple_dir ]
-        ch_linx_inputs_source = run_config.stages.purple ? ch_purple : WorkflowOncoanalyser.getInput(ch_inputs, Constants.INPUT.PURPLE_DIR)
+        // Select input sources and sort
+        // channel: runnable: [ meta, purple_dir ]
+        // channel: skip: [ meta ]
+        ch_inputs_sorted = ch_purple
+            .map { meta, purple_dir ->
+                return [
+                    meta,
+                    Utils.selectCurrentOrExisting(purple_dir, meta, Constants.INPUT.PURPLE_DIR),
+                ]
+            }
+            .branch { meta, purple_dir ->
+                runnable: purple_dir
+                skip: true
+                    return meta
+            }
 
         //
         // MODULE: LINX germline annotation
         //
+        // Select inputs that are eligible to run
+        // channel: runnable: [ meta, purple_dir ]
+        // channel: skip: [ meta ]
+        ch_inputs_germline_sorted = ch_inputs_sorted.runnable
+            .branch { meta, purple_dir ->
+
+                def tumor_id = Utils.getTumorDnaSampleName(meta)
+
+                def has_tumor_normal = Utils.hasTumorDnaBam(meta) && Utils.hasNormalDnaBam(meta)
+                def has_sv_germline_vcf = file(purple_dir).resolve("${tumor_id}.purple.sv.germline.vcf.gz")
+                def has_existing = Utils.hasExistingInput(meta, Constants.INPUT.PURPLE_DIR)
+
+                runnable: has_tumor_normal && has_sv_germline_vcf && !has_existing
+                skip: true
+                    return meta
+            }
+
+        // Create process input channel
         // channel: [ meta, sv_vcf ]
-        ch_linx_germline_out = Channel.empty()
-        if (run_config.type == Constants.RunType.TUMOR_NORMAL) {
+        ch_linx_germline_inputs = ch_inputs_germline_sorted.runnable
+            .map { meta, purple_dir ->
 
-            // Create germline inputs and create process-specific meta
-            // channel: [ meta_linx, sv_vcf ]
-            ch_linx_inputs_germline = ch_linx_inputs_source
-                .map { meta, purple_dir ->
+                def tumor_id = Utils.getTumorDnaSampleName(meta)
 
-                    def tumor_id = Utils.getTumorDnaSampleName(meta)
-                    def sv_vcf = file(purple_dir).resolve("${tumor_id}.purple.sv.germline.vcf.gz")
+                def meta_linx = [
+                    key: meta.group_id,
+                    id: meta.group_id,
+                    sample_id: tumor_id,
+                ]
 
-                    if (!sv_vcf.exists()) {
-                        return Constants.PLACEHOLDER_META
-                    }
+                def sv_vcf = file(purple_dir).resolve("${tumor_id}.purple.sv.germline.vcf.gz")
 
-                    def meta_linx = [
-                        key: meta.id,
-                        id: tumor_id,
-                    ]
+                return [meta_linx, sv_vcf]
+            }
 
-                    return [meta_linx, sv_vcf]
-                }
-                .filter { it != Constants.PLACEHOLDER_META }
+        // Run process
+        GERMLINE(
+            ch_linx_germline_inputs,
+            genome_version,
+            ensembl_data_resources,
+            driver_gene_panel,
+        )
 
-
-            GERMLINE(
-                ch_linx_inputs_germline,
-                genome_version,
-                ensembl_data_resources,
-                driver_gene_panel,
-            )
-
-            // Set outputs, restoring original meta
-            ch_versions = ch_versions.mix(GERMLINE.out.versions)
-            ch_linx_germline_out = WorkflowOncoanalyser.restoreMeta(GERMLINE.out.annotation_dir, ch_inputs)
-        }
+        ch_versions = ch_versions.mix(GERMLINE.out.versions)
 
         //
         // MODULE: LINX somatic annotation
         //
-        // Create somatic inputs and create process-specific meta
-        // channel: [ meta_linx, purple_dir ]
-        ch_linx_inputs_somatic = ch_linx_inputs_source
+        // Select inputs that are eligible to run
+        // channel: runnable: [ meta, purple_dir ]
+        // channel: skip: [ meta ]
+        ch_inputs_somatic_sorted = ch_inputs_sorted.runnable
+            .branch { meta, purple_dir ->
+
+                def has_tumor = Utils.hasTumorDnaBam(meta)
+                def has_existing = Utils.hasExistingInput(meta, Constants.INPUT.PURPLE_DIR)
+
+                runnable: has_tumor && !has_existing
+                skip: true
+                    return meta
+            }
+
+        // Create process input channel
+        // channel: [ meta, purple_dir ]
+        ch_linx_somatic_inputs = ch_inputs_somatic_sorted.runnable
             .map { meta, purple_dir ->
+
                 def meta_linx = [
-                    key: meta.id,
-                    id: Utils.getTumorDnaSampleName(meta),
+                    key: meta.group_id,
+                    id: meta.group_id,
+                    sample_id: Utils.getTumorDnaSampleName(meta),
                 ]
+
                 return [meta_linx, purple_dir]
             }
 
+        // Run process
         SOMATIC(
-            ch_linx_inputs_somatic,
+            ch_linx_somatic_inputs,
             genome_version,
             ensembl_data_resources,
             known_fusion_data,
@@ -97,13 +131,28 @@ workflow LINX_ANNOTATION {
             gene_id_file,
         )
 
-        // Set outputs, restoring original meta
         ch_versions = ch_versions.mix(SOMATIC.out.versions)
-        ch_linx_somatic_out = WorkflowOncoanalyser.restoreMeta(SOMATIC.out.annotation_dir, ch_inputs)
+
+
+        // Set outputs, restoring original meta
+        // channel: [ meta, linx_annotation_dir ]
+        ch_somatic_out = Channel.empty()
+            .mix(
+                WorkflowOncoanalyser.restoreMeta(SOMATIC.out.annotation_dir, ch_inputs),
+                ch_inputs_somatic_sorted.skip.map { meta -> [meta, []] },
+                ch_inputs_sorted.skip.map { meta -> [meta, []] },
+            )
+
+        ch_germline_out = Channel.empty()
+            .mix(
+                WorkflowOncoanalyser.restoreMeta(GERMLINE.out.annotation_dir, ch_inputs),
+                ch_inputs_germline_sorted.skip.map { meta -> [meta, []] },
+                ch_inputs_sorted.skip.map { meta -> [meta, []] },
+            )
 
     emit:
-        somatic       = ch_linx_somatic_out  // channel: [ meta, linx_annotation_dir ]
-        germline      = ch_linx_germline_out // channel: [ meta, linx_annotation_dir ]
+        somatic       = ch_somatic_out  // channel: [ meta, linx_annotation_dir ]
+        germline      = ch_germline_out // channel: [ meta, linx_annotation_dir ]
 
-        versions      = ch_versions          // channel: [ versions.yml ]
+        versions      = ch_versions     // channel: [ versions.yml ]
 }

@@ -26,21 +26,21 @@ input:
   - flagstat_germline:
       type: file
       description: Somatic SAMtools flagstat output file (optional)
-  - sage_dir:
+  - sage_somatic_dir:
       type: directory
       description: SAGE somatic output directory
   - sage_germline_dir:
       type: directory
       description: SAGE germline output directory (optional)
-  - purple_dir:
-      type: directory
-      description: PURPLE output directory
   - smlv_somatic_vcf:
       type: file
       description: Small somatic variant VCF file (annotated with RNA data) (optional)
   - smlv_germline_vcf:
       type: file
       description: Small germline variant VCF file (annotated with RNA data) (optional)
+  - purple_dir:
+      type: directory
+      description: PURPLE output directory
   - linx_somatic_anno_dir:
       type: directory
       description: LINX somatic annotation output directory

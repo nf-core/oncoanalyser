@@ -19,7 +19,7 @@ process SAMTOOLS_FLAGSTAT {
 
     script:
     def args = task.ext.args ?: ''
-    def prefix = task.ext.prefix ?: "${meta.id}"
+    def prefix = task.ext.prefix ?: "${meta.sample_id}"
     """
     samtools \\
         flagstat \\
@@ -34,7 +34,7 @@ process SAMTOOLS_FLAGSTAT {
     """
 
     stub:
-    def prefix = task.ext.prefix ?: "${meta.id}"
+    def prefix = task.ext.prefix ?: "${meta.sample_id}"
     """
     touch ${prefix}.flagstat
     echo -e '${task.process}:\\n  stub: noversions\\n' > versions.yml

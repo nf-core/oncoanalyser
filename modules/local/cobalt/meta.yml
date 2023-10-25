@@ -22,7 +22,7 @@ input:
       pattern: "*.{bam}"
   - normal_bam:
       type: file
-      description: Normal BAM file
+      description: Normal BAM file (optional)
       pattern: "*.{bam}"
   - tumor_bai:
       type: file
@@ -30,7 +30,7 @@ input:
       pattern: "*.{bai}"
   - normal_bai:
       type: file
-      description: Normal BAI file
+      description: Normal BAI file (optional)
       pattern: "*.{bai}"
   - gc_profile:
       type: file

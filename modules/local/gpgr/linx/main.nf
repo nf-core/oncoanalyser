@@ -20,10 +20,10 @@ process GPGR_LINX {
     """
     gpgr.R linx \\
         ${args} \\
-        --sample ${meta.id} \\
+        --sample ${meta.sample_id} \\
         --plot ${linx_visualiser_dir}/ \\
         --table ${linx_annotation_dir}/ \\
-        --out ${meta.id}_linx.html
+        --out ${meta.sample_id}_linx.html
 
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":
@@ -34,7 +34,7 @@ process GPGR_LINX {
 
     stub:
     """
-    touch ${meta.id}_linx.html
+    touch ${meta.sample_id}_linx.html
     echo -e '${task.process}:\n  stub: noversions\n' > versions.yml
     """
 }

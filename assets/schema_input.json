@@ -7,18 +7,18 @@
     "items": {
         "type": "object",
         "properties": {
-            "id": {
+            "group_id": {
                 "type": "string",
                 "pattern": "^\\S+$",
-                "errorMessage": "id must be provided and cannot contain spaces"
+                "errorMessage": "group_id must be provided and cannot contain spaces"
             },
-            "subject_name": {
+            "subject_id": {
                 "pattern": "^\\S+$",
-                "errorMessage": "subject_name must be provided and cannot contain spaces"
+                "errorMessage": "subject_id must be provided and cannot contain spaces"
             },
-            "sample_name": {
+            "sample_id": {
                 "pattern": "^\\S+$",
-                "errorMessage": "subject_name must be provided and cannot contain spaces"
+                "errorMessage": "subject_id must be provided and cannot contain spaces"
             },
             "sample_type": {
                 "pattern": "^\\S+$",

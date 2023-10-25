@@ -20,19 +20,19 @@ process CUSTOM_REALIGNREADS {
     def args = task.ext.args ?: ''
 
     """
-    sambamba sort -n ${bam} -o ${meta.id}_sorted.bam
-    samtools fastq -@${task.threads} ${meta.id}_sorted.bam \\
-            -1 ${meta.id}_R1.fastq.gz \\
-            -2 ${meta.id}_R2.fastq.gz \\
-            -0 ${meta.id}_other.fastq.gz \\
-            -s ${meta.id}_singleton.fastq.gz;
+    sambamba sort -n ${bam} -o ${meta.sample_id}_sorted.bam
+    samtools fastq -@${task.threads} ${meta.sample_id}_sorted.bam \\
+            -1 ${meta.sample_id}_R1.fastq.gz \\
+            -2 ${meta.sample_id}_R2.fastq.gz \\
+            -0 ${meta.sample_id}_other.fastq.gz \\
+            -s ${meta.sample_id}_singleton.fastq.gz;
 
     bwa mem \\
         -t${task.cpus} \\
         -Y \\
         ${reference} \\
-        ${meta.id}_R1.fastq.gz \\
-        ${meta.id}_R2.fastq.gz | \\
+        ${meta.sample_id}_R1.fastq.gz \\
+        ${meta.sample_id}_R2.fastq.gz | \\
         samtools sort -T tmp -o ${bam.baseName}.realigned.bam
     samtools index ${bam.baseName}.realigned.bam
 

@@ -23,9 +23,10 @@ workflow PREPARE_REFERENCE {
         ch_versions = Channel.empty()
 
         //
-        // Set reference genome FASTA for consistency
+        // Set some variables for brevity
         //
         ch_genome_fasta = file(params.ref_data_genome_fasta)
+        run_virusinterpreter = run_config.mode !== Constants.RunMode.TARGETED && run_config.stages.virusinterpreter
 
         //
         // Create .fai and .dict for reference genome if required
@@ -52,7 +53,7 @@ workflow PREPARE_REFERENCE {
         ch_genome_bwa_index = file(params.ref_data_genome_bwa_index)
         ch_genome_bwa_index_image = file(params.ref_data_genome_bwa_index_image)
         ch_genome_gridss_index = file(params.ref_data_genome_gridss_index)
-        if (run_config.stages.gridss || run_config.stages.virusinterpreter) {
+        if (run_config.has_dna && (run_config.stages.gridss || run_virusinterpreter)) {
             // NOTE(SW): the BWA index directory can be provided as a compressed tarball
             if (!params.ref_data_genome_bwa_index) {
                 BWA_INDEX([[:], ch_genome_fasta])
@@ -97,7 +98,7 @@ workflow PREPARE_REFERENCE {
         // Set VIRUSBreakend database path / stage, unpack if required
         //
         ch_virusbreakenddb = Channel.empty()
-        if (run_config.stages.virusinterpreter) {
+        if (run_config.has_dna && run_virusinterpreter) {
             if (params.ref_data_virusbreakenddb_path.endsWith('.tar.gz')) {
                 ch_virusbreakenddb_inputs = [
                     [id: 'virusbreakenddb'],
@@ -136,7 +137,7 @@ workflow PREPARE_REFERENCE {
         // Set panel reference paths / stage, unpack if required
         //
         ch_panel_data = Channel.empty()
-        if (params.targeted === true) {
+        if (run_config.mode === Constants.RunMode.TARGETED) {
 
             // NOTE(SW): consider approach to implement custom panel support
 

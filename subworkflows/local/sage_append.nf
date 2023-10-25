@@ -3,6 +3,7 @@
 //
 
 import Constants
+import Utils
 
 include { SAGE_APPEND as SOMATIC } from '../../modules/local/sage/append/main'
 include { SAGE_APPEND as GERMLINE } from '../../modules/local/sage/append/main'
@@ -19,105 +20,147 @@ workflow SAGE_APPEND {
         genome_fai     // channel: [mandatory] /path/to/genome_fai
         genome_dict    // channel: [mandatory] /path/to/genome_dict
 
-        // Params
-        run_config     // channel: [mandatory] run configuration
-
     main:
         // Channel for version.yml files
         // channel: [ versions.yml ]
         ch_versions = Channel.empty()
 
-        // Select input sources
-        // channel: [ meta, purple_dir, tumor_rna_bam, tumor_rna_bai ]
-        ch_sage_append_inputs_source = WorkflowOncoanalyser.groupByMeta(
-            run_config.stages.purple ? ch_purple_dir : WorkflowOncoanalyser.getInput(ch_inputs, Constants.INPUT.PURPLE_DIR),
-            ch_inputs
-                .map { meta ->
-                    def bam = Utils.getTumorRnaBam(meta)
-                    return [meta, bam, "${bam}.bai"]
-                },
-        )
-
-        //
-        // MODULE: SAGE append germline
-        //
-        // channel: [ meta, sage_append_vcf ]
-        ch_germline_vcf = Channel.empty()
-        if (run_config.type == Constants.RunType.TUMOR_NORMAL) {
-
-            // channel: [ sage_meta, purple_germline_smlv_vcf, tumor_rna_bam ]
-            ch_sage_germline_append_inputs = ch_sage_append_inputs_source
-                .map { meta, purple_dir, bam, bai ->
-                    def tumor_id = Utils.getTumorDnaSampleName(meta)
-                    def normal_id = Utils.getNormalDnaSampleName(meta)
-
-                    def purple_smlv_vcf = file(purple_dir).resolve("${tumor_id}.purple.germline.vcf.gz")
-
-                    // Require both germline smlv from the PURPLE directory
-                    if (!purple_smlv_vcf.exists()) {
-                        return Constants.PLACEHOLDER_META
-                    }
-
-                    def sage_meta = [
-                        key: meta.id,
-                        id: meta.id,
-                        tumor_rna_id: Utils.getTumorRnaSampleName(meta),
-                        dna_id: normal_id,
-                    ]
-                    return [sage_meta, purple_smlv_vcf, bam, bai]
-                }
-                .filter { it != Constants.PLACEHOLDER_META }
-
-            GERMLINE(
-                ch_sage_germline_append_inputs,
-                genome_fasta,
-                genome_version,
-                genome_fai,
-                genome_dict,
-            )
-
-            // Set outputs, restoring original meta
-            ch_germline_vcf = WorkflowOncoanalyser.restoreMeta(GERMLINE.out.vcf, ch_inputs)
-            ch_versions = ch_versions.mix(GERMLINE.out.versions)
-        }
-
-        //
-        // MODULE: SAGE append germline
-        //
-        // NOTE(SW): revise to reduce repetition
-        // Create inputs and create process-specific meta
-        // channel: [ sage_meta, purple_somatic_smlv_vcf, tumor_rna_bam ]
-        ch_sage_somatic_append_inputs = ch_sage_append_inputs_source
-            .map { meta, purple_dir, bam, bai ->
-                def tumor_id = Utils.getTumorDnaSampleName(meta)
-                def purple_smlv_vcf = file(purple_dir).resolve("${tumor_id}.purple.somatic.vcf.gz")
-
-                // Require both somatic smlv from the PURPLE directory
-                if (!purple_smlv_vcf.exists()) {
-                    return Constants.PLACEHOLDER_META
-                }
-
-                def sage_meta = [
-                    key: meta.id,
-                    id: meta.id,
-                    tumor_rna_id: Utils.getTumorRnaSampleName(meta),
-                    dna_id: tumor_id,
+        // Select input sources and sort
+        // channel: runnable: [ meta, purple_dir ]
+        // channel: skip: [ meta ]
+        ch_inputs_sorted = ch_purple_dir
+            .map { meta, purple_dir ->
+                return [
+                    meta,
+                    Utils.selectCurrentOrExisting(purple_dir, meta, Constants.INPUT.PURPLE_DIR),
                 ]
-                return [sage_meta, purple_smlv_vcf, bam, bai]
             }
-            .filter { it != Constants.PLACEHOLDER_META }
+            .branch { meta, purple_dir ->
+                runnable: purple_dir
+                skip: true
+                    return meta
+            }
 
-        SOMATIC(
-            ch_sage_somatic_append_inputs,
+        //
+        // MODULE: SAGE append germline
+        //
+        // Select inputs that are eligible to run
+        // channel: runnable: [ meta, purple_dir ]
+        // channel: skip: [ meta ]
+        ch_inputs_germline_sorted = ch_inputs_sorted.runnable
+            .branch { meta, purple_dir ->
+
+                def tumor_dna_id = Utils.getTumorDnaSampleName(meta)
+
+                def has_normal_dna = Utils.hasNormalDnaBam(meta)
+                def has_tumor_rna = Utils.hasTumorRnaBam(meta)
+                def has_smlv_germline = file(purple_dir).resolve("${tumor_dna_id}.purple.germline.vcf.gz")
+                def has_existing = Utils.hasExistingInput(meta, Constants.INPUT.SAGE_APPEND_VCF_NORMAL)
+
+                runnable: has_normal_dna && has_tumor_rna && has_smlv_germline && !has_existing
+                skip: true
+                    return meta
+            }
+
+        // Create process input channel
+        // channel: [ meta_append, purple_smlv_vcf, tumor_rna_bam, tumor_rna_bai ]
+        ch_sage_append_germline_inputs = ch_inputs_germline_sorted.runnable
+            .map { meta, purple_dir ->
+
+                def tumor_dna_id = Utils.getTumorDnaSampleName(meta)
+
+                def meta_append = [
+                    key: meta.group_id,
+                    id: meta.group_id,
+                    tumor_rna_id: Utils.getTumorRnaSampleName(meta),
+                    dna_id: Utils.getNormalDnaSampleName(meta),
+                ]
+
+                def tumor_rna_bam = Utils.getTumorRnaBam(meta)
+                def tumor_rna_bai = Utils.getTumorRnaBai(meta)
+                def purple_smlv_vcf = file(purple_dir).resolve("${tumor_dna_id}.purple.germline.vcf.gz")
+
+                return [meta_append, purple_smlv_vcf, tumor_rna_bam, tumor_rna_bai]
+            }
+
+        // Run process
+        GERMLINE(
+            ch_sage_append_germline_inputs,
             genome_fasta,
             genome_version,
             genome_fai,
             genome_dict,
         )
 
-        // Set outputs, restoring original meta
-        ch_somatic_vcf = WorkflowOncoanalyser.restoreMeta(SOMATIC.out.vcf, ch_inputs)
+        ch_versions = ch_versions.mix(GERMLINE.out.versions)
+
+        //
+        // MODULE: SAGE append somatic
+        //
+        // Select inputs that are eligible to run
+        // channel: runnable: [ meta, purple_dir ]
+        // channel: skip: [ meta ]
+        ch_inputs_somatic_sorted = ch_inputs_sorted.runnable
+            .branch { meta, purple_dir ->
+                def tumor_dna_id = Utils.getTumorDnaSampleName(meta)
+
+                def has_tumor_dna = Utils.hasTumorDnaBam(meta)
+                def has_tumor_rna = Utils.hasTumorRnaBam(meta)
+                def has_smlv_somatic = file(purple_dir).resolve("${tumor_dna_id}.purple.somatic.vcf.gz")
+                def has_existing = Utils.hasExistingInput(meta, Constants.INPUT.SAGE_APPEND_VCF_TUMOR)
+
+                runnable: has_tumor_dna && has_tumor_rna && has_smlv_somatic && !has_existing
+                skip: true
+                    return meta
+            }
+
+        // Create process input channel
+        // channel: [ meta_append, purple_smlv_vcf, tumor_rna_bam, tumor_rna_bai ]
+        ch_sage_append_somatic_inputs = ch_inputs_somatic_sorted.runnable
+            .map { meta, purple_dir ->
+
+                def tumor_dna_id = Utils.getTumorDnaSampleName(meta)
+
+                def meta_append = [
+                    key: meta.group_id,
+                    id: meta.group_id,
+                    tumor_rna_id: Utils.getTumorRnaSampleName(meta),
+                    dna_id: Utils.getTumorDnaSampleName(meta),
+                ]
+
+                def tumor_rna_bam = Utils.getTumorRnaBam(meta)
+                def tumor_rna_bai = Utils.getTumorRnaBai(meta)
+                def purple_smlv_vcf = file(purple_dir).resolve("${tumor_dna_id}.purple.somatic.vcf.gz")
+
+                return [meta_append, purple_smlv_vcf, tumor_rna_bam, tumor_rna_bai]
+            }
+
+        // Run process
+        SOMATIC(
+            ch_sage_append_somatic_inputs,
+            genome_fasta,
+            genome_version,
+            genome_fai,
+            genome_dict,
+        )
+
         ch_versions = ch_versions.mix(SOMATIC.out.versions)
+
+        // Set outputs, restoring original meta
+        // channel: [ meta, sage_append_vcf ]
+        ch_somatic_vcf = Channel.empty()
+            .mix(
+                WorkflowOncoanalyser.restoreMeta(SOMATIC.out.vcf, ch_inputs),
+                ch_inputs_somatic_sorted.skip.map { meta -> [meta, []] },
+                ch_inputs_sorted.skip.map { meta -> [meta, []] },
+            )
+
+        ch_germline_vcf = Channel.empty()
+            .mix(
+                WorkflowOncoanalyser.restoreMeta(GERMLINE.out.vcf, ch_inputs),
+                ch_inputs_germline_sorted.skip.map { meta -> [meta, []] },
+                ch_inputs_sorted.skip.map { meta -> [meta, []] },
+            )
 
     emit:
         somatic_vcf  = ch_somatic_vcf  // channel: [ meta, sage_append_vcf ]

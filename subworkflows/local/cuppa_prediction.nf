@@ -10,17 +10,14 @@ workflow CUPPA_PREDICTION {
     take:
         // Sample data
         ch_inputs           // channel: [mandatory] [ meta ]
-        ch_isofox           // channel: [optional]  [ meta, isofox_dir ]
-        ch_purple           // channel: [optional]  [ meta, purple_dir ]
-        ch_linx             // channel: [optional]  [ meta, linx_annotation_dir ]
-        ch_virusinterpreter // channel: [optional]  [ meta, virusinterpreter_dir ]
+        ch_isofox           // channel: [mandatory] [ meta, isofox_dir ]
+        ch_purple           // channel: [mandatory] [ meta, purple_dir ]
+        ch_linx             // channel: [mandatory] [ meta, linx_annotation_dir ]
+        ch_virusinterpreter // channel: [mandatory] [ meta, virusinterpreter_dir ]
 
         // Reference data
         genome_version      // channel: [mandatory] genome version
         cuppa_resources     // channel: [mandatory] /path/to/cuppa_resources/
-
-        // Params
-        run_config          // channel: [mandatory] run configuration
 
     main:
         // Channel for version.yml files
@@ -28,54 +25,124 @@ workflow CUPPA_PREDICTION {
         ch_versions = Channel.empty()
 
         // Select input sources
-        // channel: [ meta, isofox_dir ]
-        ch_cuppa_inputs_isofox = run_config.stages.isofox ? ch_isofox : WorkflowOncoanalyser.getInput(ch_inputs, Constants.INPUT.ISOFOX_DIR, type: 'optional')
-
         // channel: [ meta, isofox_dir, purple_dir, linx_annotation_dir, virusinterpreter_dir ]
-        ch_cuppa_inputs_source = WorkflowOncoanalyser.groupByMeta(
-            ch_cuppa_inputs_isofox,
-            run_config.stages.purple ? ch_purple : WorkflowOncoanalyser.getInput(ch_inputs, Constants.INPUT.PURPLE_DIR, type: 'optional'),
-            run_config.stages.linx ? ch_linx : WorkflowOncoanalyser.getInput(ch_inputs, Constants.INPUT.LINX_ANNO_DIR_TUMOR, type: 'optional'),
-            run_config.stages.virusinterpreter ? ch_virusinterpreter : WorkflowOncoanalyser.getInput(ch_inputs, Constants.INPUT.VIRUSINTERPRETER_DIR, type: 'optional'),
-            flatten_mode: 'nonrecursive',
+        ch_inputs_selected = WorkflowOncoanalyser.groupByMeta(
+            ch_isofox,
+            ch_purple,
+            ch_linx,
+            ch_virusinterpreter,
         )
+            .map { meta, isofox_dir, purple_dir, linx_annotation_dir, virusinterpreter_dir ->
 
-        // Create inputs and create process-specific meta
-        // channel: [ meta_cuppa, isofox_dir, purple_dir, linx_annotation_dir, virusinterpreter_dir ]
-        ch_cuppa_inputs = ch_cuppa_inputs_source
-            .map { data ->
-                def meta = data[0]
-                def meta_cuppa = [key: meta.id]
+                def inputs = [
+                    Utils.selectCurrentOrExisting(isofox_dir, meta, Constants.INPUT.ISOFOX_DIR),
+                    Utils.selectCurrentOrExisting(purple_dir, meta, Constants.INPUT.PURPLE_DIR),
+                    Utils.selectCurrentOrExisting(linx_annotation_dir, meta, Constants.INPUT.LINX_ANNO_DIR_TUMOR),
+                    Utils.selectCurrentOrExisting(virusinterpreter_dir, meta, Constants.INPUT.VIRUSINTERPRETER_DIR),
+                ]
 
-                switch (run_config.mode) {
-                    case Constants.RunMode.DNA:
-                        meta_cuppa.id = meta.getAt(['sample_name', Constants.SampleType.TUMOR, Constants.SequenceType.DNA])
-                        break
-                    case Constants.RunMode.RNA:
-                        meta_cuppa.id = meta.getAt(['sample_name', Constants.SampleType.TUMOR, Constants.SequenceType.RNA])
-                        break
-                    case Constants.RunMode.DNA_RNA:
-                        meta_cuppa.id = meta.getAt(['sample_name', Constants.SampleType.TUMOR, Constants.SequenceType.DNA])
-                        meta_cuppa.id_rna = meta.getAt(['sample_name', Constants.SampleType.TUMOR, Constants.SequenceType.RNA])
-                        break
-                    default:
-                        assert false
-                }
-
-                return [meta_cuppa, *data[1..-1]]
+                return [meta, *inputs]
             }
 
+        // Sort inputs
+        // channel: runnable: [ meta, isofox_dir, purple_dir, linx_annotation_dir, virusinterpreter_dir ]
+        // channel: skip: [ meta ]
+        ch_inputs_sorted = ch_inputs_selected
+            .branch { meta, isofox_dir, purple_dir, linx_annotation_dir, virusinterpreter_dir ->
+
+                // Run the following:
+                //   - tumor DNA and normal DNA
+                //   - tumor DNA and normal DNA, and tumor RNA
+                //   - tumor RNA only
+                //
+                // Do not run the following:
+                //   - tumor DNA only
+                //   - panel mode (controlled by excluded from targeted subworkflow)
+                //
+                // (run exclusions currently done basis for presence of normal DNA)
+
+                def has_existing = Utils.hasExistingInput(meta, Constants.INPUT.PURPLE_DIR)
+                def has_normal_dna = Utils.hasNormalDnaBam(meta)
+
+                def has_runnable_inputs = isofox_dir || (purple_dir && linx_annotation_dir && has_normal_dna)
+
+                runnable: has_runnable_inputs && !has_existing
+                skip: true
+                    return meta
+            }
+
+        // Create process input channel
+        // channel: sample_data: [ meta, isofox_dir, purple_dir, linx_annotation_dir, virusinterpreter_dir ]
+        // channel: classifer: [ classifier ]
+        ch_cuppa_inputs = ch_inputs_sorted.runnable
+            .multiMap{ meta, isofox_dir, purple_dir, linx_annotation_dir, virusinterpreter_dir ->
+
+                def meta_cuppa = [
+                    key: meta.group_id,
+                    id: meta.group_id,
+                ]
+
+                def has_tumor_dna = Utils.hasTumorDnaBam(meta)
+                def has_normal_dna = Utils.hasNormalDnaBam(meta)
+                def has_tumor_rna = Utils.hasTumorRnaBam(meta)
+
+                def has_dna_inputs = (purple_dir && linx_annotation_dir)
+                def has_rna_inputs = isofox_dir
+
+                def run_dna = has_dna_inputs && has_tumor_dna && has_normal_dna
+                def run_rna = has_rna_inputs && has_tumor_rna
+
+                def classifier
+
+                if (run_dna && run_rna) {
+
+                    classifier = 'ALL'
+
+                    meta_cuppa.sample_id = Utils.getTumorDnaSampleName(meta)
+                    meta_cuppa.sample_rna_id = Utils.getTumorRnaSampleName(meta)
+
+                } else if (run_dna) {
+
+                    classifier = 'DNA'
+
+                    meta_cuppa.sample_id = Utils.getTumorDnaSampleName(meta)
+
+                } else if (run_rna) {
+
+                    classifier = 'RNA'
+
+                    meta_cuppa.sample_id = Utils.getTumorRnaSampleName(meta)
+
+                } else {
+
+                    assert false
+
+                }
+
+                sample_data: [meta_cuppa, isofox_dir, purple_dir, linx_annotation_dir, virusinterpreter_dir]
+                classifier: classifier
+            }
+
+        // Run process
         CUPPA(
-            ch_cuppa_inputs,
+            ch_cuppa_inputs.sample_data,
             genome_version,
             cuppa_resources,
+            ch_cuppa_inputs.classifier,
         )
 
+        ch_versions = ch_versions.mix(CUPPA.out.versions)
+
         // Set outputs, restoring original meta
-        ch_output = WorkflowOncoanalyser.restoreMeta(CUPPA.out.cuppa_dir, ch_inputs)
+        // channel: [ meta, cuppa_dir ]
+        ch_outputs = Channel.empty()
+            .mix(
+                WorkflowOncoanalyser.restoreMeta(CUPPA.out.cuppa_dir, ch_inputs),
+                ch_inputs_sorted.skip.map { meta -> [meta, []] },
+            )
 
     emit:
-        cuppa_dir = ch_output           // channel: [ meta, cuppa_dir ]
+        cuppa_dir = ch_outputs  // channel: [ meta, cuppa_dir ]
 
-        versions  = CUPPA.out.versions  // channel: [ versions.yml ]
+        versions  = ch_versions // channel: [ versions.yml ]
 }

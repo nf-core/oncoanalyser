@@ -71,7 +71,7 @@ class WorkflowMain {
 
         // Check input has been provided
         if (!params.input) {
-            log.error "Please provide an input samplesheet to the pipeline e.g. '--input samplesheet.csv'"
+            log.error "no samplesheet provided, please supply one on the CLI with --input or in a configuation file."
             System.exit(1)
         }
     }
@@ -133,26 +133,14 @@ class WorkflowMain {
         // Set defaults specific to run configuration without attempting to validate
 
         def run_mode
-        if (params.containsKey('run_mode')) {
-            run_mode = Utils.getRunMode(params.run_mode, log)
+        if (params.containsKey('mode') && params.mode !== null) {
+            run_mode = Utils.getRunMode(params.mode, log)
         } else {
             // Bad configuration, catch in validateParams
             return
         }
 
-        if (run_mode == Constants.RunMode.RNA) {
-
-            if (!params.containsKey('run_type')) {
-                params.run_type = 'tumor_only'
-            }
-
-        }
-
-        if (params.targeted === true) {
-
-            if (!params.containsKey('run_type')) {
-                params.run_type = 'tumor_only'
-            }
+        if (run_mode === Constants.RunMode.TARGETED) {
 
             // Attempt to set default panel data path; make no assumption on valid 'panel' value
             if (!params.containsKey('ref_data_panel_data_path') && params.containsKey('panel')) {
@@ -168,11 +156,9 @@ class WorkflowMain {
         }
 
         def stages = Processes.getRunStages(
-            run_mode,
             params.processes_include,
             params.processes_exclude,
             params.processes_manual,
-            params.targeted,
             log,
         )
 
@@ -190,9 +176,9 @@ class WorkflowMain {
 
         if (stages.isofox && !params.containsKey('isofox_read_length')) {
 
-            if (params.targeted === false) {
+            if (run_mode === Constants.RunMode.WGTS) {
                 params.isofox_read_length = Constants.DEFAULT_ISOFOX_READ_LENGTH_WTS
-            } else {
+            } else if (run_mode === Constants.RunMode.TARGETED) {
                 params.isofox_read_length = Constants.DEFAULT_ISOFOX_READ_LENGTH_TARGETED
             }
 
@@ -208,7 +194,7 @@ class WorkflowMain {
         // Common parameters
 
         if (!params.genome) {
-            log.error "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n" +
+            log.error "\n~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n" +
                 "  Genome must be set using the --genome CLI argument or in a configuration file.\n" +
                 "  Currently, the available genome are:\n" +
                 "  ${params.genomes.keySet().join(", ")}\n" +
@@ -274,10 +260,10 @@ class WorkflowMain {
 
         // Run configuration specific parameters
 
-        if (!params.run_mode) {
+        if (!params.mode) {
             def run_modes = Utils.getEnumNames(Constants.RunMode).join('\n    - ')
-            log.error "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n" +
-                "  Run mode must be set using the --run_mode CLI argument or in a configuration  \n" +
+            log.error "\n~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n" +
+                "  Run mode must be set using the --mode CLI argument or in a configuration  \n" +
                 "  file.\n" +
                 "  Currently, the available run modes are:\n" +
                 "    - ${run_modes}\n" +
@@ -285,45 +271,14 @@ class WorkflowMain {
             System.exit(1)
         }
 
-        if (!params.run_type) {
-            def run_types = Utils.getEnumNames(Constants.RunType).join('\n    - ')
-            log.error "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n" +
-                "  Run type must be set using the --run_type CLI argument or in a configuration  \n" +
-                "  file.\n" +
-                "  Currently, the available run types are:\n" +
-                "    - ${run_types}\n" +
-                "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
-            System.exit(1)
-        }
+        def run_mode = Utils.getRunMode(params.mode, log)
 
-        def run_mode = Utils.getRunMode(params.run_mode, log)
-        def run_type = Utils.getRunType(params.run_type, log)
-
-        if (run_mode == Constants.RunMode.RNA) {
-            if (run_type != Constants.RunType.TUMOR_ONLY) {
-                log.error "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n" +
-                    "  The WTS run mode does not support tumor/normal data, please adjust the CLI \n" +
-                    "  --run_type option or corresponding configuration file.\n" +
-                    "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
-                System.exit(1)
-            }
-
-        }
-
-        if (params.targeted === true) {
-
-            if (run_type != Constants.RunType.TUMOR_ONLY) {
-                log.error "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n" +
-                    "  The panel run mode does not support tumor/normal data, please adjust the CLI \n" +
-                    "  --run_type option or corresponding configuration file.\n" +
-                    "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
-                System.exit(1)
-            }
+        if (run_mode === Constants.RunMode.TARGETED) {
 
             if (!params.containsKey('panel')) {
 
                 def panels = Constants.PANELS_DEFINED.join('\n    - ')
-                log.error "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n" +
+                log.error "\n~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n" +
                     "  A panel is required to be set using the --panel CLI argument or in a \n" +
                     "  configuration file.\n" +
                     "  Currently, the available panels are:\n" +
@@ -334,7 +289,7 @@ class WorkflowMain {
             } else if (!Constants.PANELS_DEFINED.contains(params.panel)) {
 
                 def panels = Constants.PANELS_DEFINED.join('\n    - ')
-                log.error "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n" +
+                log.error "\n~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n" +
                     "  The ${params.panel} is not defined. Currently, the available panels are:\n" +
                     "    - ${panels}\n" +
                     "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
@@ -343,16 +298,8 @@ class WorkflowMain {
             }
 
             if (params.panel == 'hmf' && params.ref_data_genome_version == '37') {
-                log.error "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n" +
+                log.error "\n~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n" +
                     "  The Hartwig panel (hmf) is not available for the GRCh37 reference genome.\n" +
-                    "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
-                System.exit(1)
-            }
-
-            def rna_run = run_mode == Constants.RunMode.RNA || run_mode == Constants.RunMode.DNA_RNA
-            if (rna_run && params.panel != 'tso500') {
-                log.error "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n" +
-                    "  Currently only the TSO500 panel (tso500) supports RNA analysis.\n" +
                     "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
                 System.exit(1)
             }
@@ -361,22 +308,23 @@ class WorkflowMain {
 
     }
 
-    public static getRunConfig(params, log) {
-        def run_mode = Utils.getRunMode(params.run_mode, log)
-        def run_type = Utils.getRunType(params.run_type, log)
+    public static getRunConfig(params, inputs, log) {
+
+        def run_mode = Utils.getRunMode(params.mode, log)
+
         def stages = Processes.getRunStages(
-            run_mode,
             params.processes_include,
             params.processes_exclude,
             params.processes_manual,
-            params.targeted,
             log,
         )
 
         return [
             mode: run_mode,
-            type: run_type,
+            panel: run_mode === Constants.RunMode.TARGETED ? params.panel : null,
             stages: stages,
+            has_dna: inputs.any { it.containsKey([Constants.SampleType.TUMOR, Constants.SequenceType.DNA]) },
+            has_rna: inputs.any { it.containsKey([Constants.SampleType.TUMOR, Constants.SequenceType.RNA]) },
         ]
     }
 }
