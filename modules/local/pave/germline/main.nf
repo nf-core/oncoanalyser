@@ -46,7 +46,7 @@ process PAVE_GERMLINE {
         -Xmx${Math.round(task.memory.bytes * 0.95)} \\
         -jar ${task.ext.jarPath} \\
             ${args} \\
-            -sample ${meta.id} \\
+            -sample ${meta.sample_id} \\
             -vcf_file ${sage_vcf} \\
             -ref_genome ${genome_fasta} \\
             -ref_genome_version ${genome_ver} \\
@@ -70,7 +70,7 @@ process PAVE_GERMLINE {
 
     stub:
     """
-    touch ${meta.id}.sage.pave_germline.vcf.gz{,.tbi}
+    touch ${meta.sample_id}.sage.pave_germline.vcf.gz{,.tbi}
     echo -e '${task.process}:\\n  stub: noversions\\n' > versions.yml
     """
 }

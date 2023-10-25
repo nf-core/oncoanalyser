@@ -2,6 +2,9 @@
 // GRIPSS performs SV filtering.
 //
 
+import Constants
+import Utils
+
 include { GRIPSS_GERMLINE as GERMLINE } from '../../modules/local/gripss/germline/main'
 include { GRIPSS_SOMATIC as SOMATIC   } from '../../modules/local/gripss/somatic/main'
 
@@ -21,66 +24,109 @@ workflow GRIPSS_FILTERING {
         repeatmasker_annotations // channel: [mandatory] /path/to/repeatmasker_annotations
         target_regions_bed       // channel: [optional]  /path/to/target_regions_bed
 
-        // Params
-        run_config               // channel: [mandatory] run configuration
-
     main:
         // Channel for version.yml files
         // channel: [ versions.yml ]
         ch_versions = Channel.empty()
 
-        // Select input source
-        ch_gripss_inputs_source = run_config.stages.gridss ? ch_gridss : WorkflowOncoanalyser.getInput(ch_inputs, Constants.INPUT.GRIDSS_VCF)
+        // Select input sources and sort
+        // channel: runnable: [ meta, gridss_vcf ]
+        // channel: skip: [ meta ]
+        ch_inputs_sorted = ch_gridss
+            .map { meta, gridss_vcf ->
+                return [
+                    meta,
+                    Utils.selectCurrentOrExisting(gridss_vcf, meta, Constants.INPUT.GRIDSS_VCF),
+                ]
+            }
+            .branch { meta, gridss_vcf ->
+                runnable: gridss_vcf
+                skip: true
+                    return meta
+            }
 
-        // Create inputs and create process-specific meta
+        //
+        // MODULE: GRIPSS germline
+        //
+        // Select inputs that are eligible to run
+        // channel: runnable: [ meta, gridss_vcf ]
+        // channel: skip: [ meta ]
+        ch_inputs_germline_sorted = ch_inputs_sorted.runnable
+            .branch { meta, gridss_vcf ->
+                def has_tumor_normal = Utils.hasTumorDnaBam(meta) && Utils.hasNormalDnaBam(meta)
+                def has_existing = Utils.hasExistingInput(meta, Constants.INPUT.GRIPSS_VCF_NORMAL)
+
+                runnable: has_tumor_normal && !has_existing
+                skip: true
+                    return meta
+            }
+
+        // Create process input channel
         // channel: [ meta_gripss, gridss_vcf ]
-        ch_gripss_inputs = ch_gripss_inputs_source
-            .filter { it[0] != Constants.PLACEHOLDER_META }
+        ch_gripss_germline_inputs = ch_inputs_germline_sorted.runnable
             .map { meta, gridss_vcf ->
 
                 def meta_gripss = [
-                    key: meta.id,
-                    id: meta.id,
+                    key: meta.group_id,
+                    id: meta.group_id,
                     tumor_id: Utils.getTumorDnaSampleName(meta),
+                    normal_id: Utils.getNormalDnaSampleName(meta),
                 ]
 
-                if (run_config.type == Constants.RunType.TUMOR_NORMAL) {
+                return [meta_gripss, gridss_vcf]
+            }
+
+        // Run process
+        GERMLINE(
+            ch_gripss_germline_inputs,
+            genome_fasta,
+            genome_version,
+            genome_fai,
+            breakend_pon,
+            breakpoint_pon,
+            known_fusions,
+            repeatmasker_annotations,
+        )
+
+        ch_versions = ch_versions.mix(GERMLINE.out.versions)
+
+        //
+        // MODULE: GRIPSS somatic
+        //
+        // Select inputs that are eligible to run
+        // channel: runnable: [ meta, gridss_vcf ]
+        // channel: skip: [ meta ]
+        ch_inputs_somatic_sorted = ch_inputs_sorted.runnable
+            .branch { meta, gridss_vcf ->
+                def has_tumor = Utils.hasTumorDnaBam(meta)
+                def has_existing = Utils.hasExistingInput(meta, Constants.INPUT.GRIPSS_VCF_TUMOR)
+
+                runnable: has_tumor && !has_existing
+                skip: true
+                    return meta
+            }
+
+        // Create process input channel
+        // channel: [ meta_gripss, gridss_vcf ]
+        ch_gripss_somatic_inputs = ch_inputs_somatic_sorted.runnable
+            .map { meta, gridss_vcf ->
+
+                  def meta_gripss = [
+                      key: meta.group_id,
+                      id: meta.group_id,
+                      tumor_id: Utils.getTumorDnaSampleName(meta),
+                  ]
+
+                if (Utils.hasNormalDnaBam(meta)) {
                     meta_gripss.normal_id = Utils.getNormalDnaSampleName(meta)
                 }
 
                 return [meta_gripss, gridss_vcf]
             }
 
-        //
-        // MODULE: GRIPSS germline
-        //
-        // channel: [ meta, gripss_vcf, gripss_tbi ]
-        ch_germline_out = Channel.empty()
-        ch_germline_unfiltered_out = Channel.empty()
-        if (run_config.type == Constants.RunType.TUMOR_NORMAL) {
-
-            GERMLINE(
-                ch_gripss_inputs,
-                genome_fasta,
-                genome_version,
-                genome_fai,
-                breakend_pon,
-                breakpoint_pon,
-                known_fusions,
-                repeatmasker_annotations,
-            )
-
-            ch_versions = ch_versions.mix(GERMLINE.out.versions)
-            ch_germline_out = WorkflowOncoanalyser.restoreMeta(GERMLINE.out.vcf, ch_inputs)
-            ch_germline_unfiltered_out = WorkflowOncoanalyser.restoreMeta(GERMLINE.out.vcf_unfiltered, ch_inputs)
-
-        }
-
-        //
-        // MODULE: GRIPSS somatic
-        //
+        // Run process
         SOMATIC(
-            ch_gripss_inputs,
+            ch_gripss_somatic_inputs,
             genome_fasta,
             genome_version,
             genome_fai,
@@ -92,8 +138,36 @@ workflow GRIPSS_FILTERING {
         )
 
         ch_versions = ch_versions.mix(SOMATIC.out.versions)
-        ch_somatic_out = WorkflowOncoanalyser.restoreMeta(SOMATIC.out.vcf, ch_inputs)
-        ch_somatic_unfiltered_out = WorkflowOncoanalyser.restoreMeta(SOMATIC.out.vcf_unfiltered, ch_inputs)
+
+        // Set outputs, restoring original meta
+        // channel: [ meta, gripss_vcf, gripss_tbi ]
+        ch_somatic_out = Channel.empty()
+            .mix(
+                WorkflowOncoanalyser.restoreMeta(SOMATIC.out.vcf, ch_inputs),
+                ch_inputs_somatic_sorted.skip.map { meta -> [meta, [], []] },
+                ch_inputs_sorted.skip.map { meta -> [meta, [], []] },
+            )
+
+        ch_somatic_unfiltered_out = Channel.empty()
+            .mix(
+                WorkflowOncoanalyser.restoreMeta(SOMATIC.out.vcf_unfiltered, ch_inputs),
+                ch_inputs_somatic_sorted.skip.map { meta -> [meta, [], []] },
+                ch_inputs_sorted.skip.map { meta -> [meta, [], []] },
+            )
+
+        ch_germline_out = Channel.empty()
+            .mix(
+                WorkflowOncoanalyser.restoreMeta(GERMLINE.out.vcf, ch_inputs),
+                ch_inputs_germline_sorted.skip.map { meta -> [meta, [], []] },
+                ch_inputs_sorted.skip.map { meta -> [meta, [], []] },
+            )
+
+        ch_germline_unfiltered_out = Channel.empty()
+            .mix(
+                WorkflowOncoanalyser.restoreMeta(GERMLINE.out.vcf_unfiltered, ch_inputs),
+                ch_inputs_germline_sorted.skip.map { meta -> [meta, [], []] },
+                ch_inputs_sorted.skip.map { meta -> [meta, [], []] },
+            )
 
     emit:
         somatic             = ch_somatic_out             // channel: [ meta, gripss_vcf, gripss_tbi ]

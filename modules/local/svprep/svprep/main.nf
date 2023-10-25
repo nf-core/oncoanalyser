@@ -30,7 +30,7 @@ process SVPREP {
         -Xmx${Math.round(task.memory.bytes * 0.75)} \\
         -jar ${task.ext.jarPath} \\
             ${args} \\
-            -sample ${meta.id} \\
+            -sample ${meta.sample_id} \\
             -bam_file ${bam} \\
             -ref_genome ${genome_fasta} \\
             -ref_genome_version ${genome_ver} \\
@@ -43,9 +43,9 @@ process SVPREP {
 
     samtools sort \\
         -@ ${task.cpus} \\
-        -T ${meta.id}.sv_prep.tmp \\
-        -o ${meta.id}.sv_prep.sorted.bam \\
-        ${meta.id}.sv_prep.bam
+        -T ${meta.sample_id}.sv_prep.tmp \\
+        -o ${meta.sample_id}.sv_prep.sorted.bam \\
+        ${meta.sample_id}.sv_prep.bam
 
     # NOTE(SW): partially hard coded since there is no reliable way to obtain version information.
     cat <<-END_VERSIONS > versions.yml
@@ -56,8 +56,8 @@ process SVPREP {
 
     stub:
     """
-    touch "${meta.id}.sv_prep.sorted.bam"
-    touch "${meta.id}.sv_prep.junctions.tsv"
+    touch "${meta.sample_id}.sv_prep.sorted.bam"
+    touch "${meta.sample_id}.sv_prep.junctions.tsv"
     echo -e '${task.process}:\\n  stub: noversions\\n' > versions.yml
     """
 }

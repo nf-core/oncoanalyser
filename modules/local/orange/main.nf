@@ -5,7 +5,7 @@ process ORANGE {
     container 'docker.io/scwatts/orange:2.7.0--0'
 
     input:
-    tuple val(meta), path(bam_metrics_somatic), path(bam_metrics_germline), path(flagstat_somatic), path(flagstat_germline), path(sage_dir), path(sage_germline_dir), path(purple_dir), path(smlv_somatic_vcf), path(smlv_germline_vcf), path(linx_somatic_anno_dir), path(linx_somatic_plot_dir), path(linx_germline_anno_dir), path(virusinterpreter_dir), path(chord_dir), path(sigs_dir), path(lilac_dir), path(cuppa_dir), path(isofox_dir)
+    tuple val(meta), path(bam_metrics_somatic), path(bam_metrics_germline), path(flagstat_somatic), path(flagstat_germline), path(sage_somatic_dir), path(sage_germline_dir), path(smlv_somatic_vcf), path(smlv_germline_vcf), path(purple_dir), path(linx_somatic_anno_dir), path(linx_somatic_plot_dir), path(linx_germline_anno_dir), path(virusinterpreter_dir), path(chord_dir), path(sigs_dir), path(lilac_dir), path(cuppa_dir), path(isofox_dir)
     val genome_ver
     path disease_ontology
     path cohort_mapping
@@ -60,7 +60,10 @@ process ORANGE {
         mkdir -p \${purple_dir_local}/;
         find -L ${purple_dir} -maxdepth 1 -exec ln -fs ../{} \${purple_dir_local}/ \\;
         ln -sf ../${smlv_somatic_vcf} \${purple_dir_local}/${meta.tumor_id}.purple.somatic.vcf.gz;
-        ln -sf ../${smlv_germline_vcf} \${purple_dir_local}/${meta.tumor_id}.purple.germline.vcf.gz;
+
+        if [[ -n "${smlv_germline_vcf}" ]]; then
+            ln -sf ../${smlv_germline_vcf} \${purple_dir_local}/${meta.tumor_id}.purple.germline.vcf.gz;
+        fi;
 
         mkdir -p isofox_dir__prepared/;
         for fp in ${isofox_dir}/*; do
@@ -89,7 +92,7 @@ process ORANGE {
             -primary_tumor_doids 162 \\
             -tumor_sample_wgs_metrics_file ${bam_metrics_somatic} \\
             -tumor_sample_flagstat_file ${flagstat_somatic} \\
-            -sage_dir ${sage_dir} \\
+            -sage_dir ${sage_somatic_dir} \\
             -purple_dir \${purple_dir_local} \\
             -purple_plot_dir \${purple_dir_local}/plot/ \\
             -linx_dir ${linx_somatic_anno_dir} \\

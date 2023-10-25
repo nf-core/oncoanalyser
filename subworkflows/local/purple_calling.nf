@@ -3,10 +3,9 @@
 //
 
 import Constants
+import Utils
 
 include { PURPLE } from '../../modules/local/purple/main'
-
-include { CHANNEL_INPUTS_PURPLE } from './channel_inputs_purple'
 
 workflow PURPLE_CALLING {
     take:
@@ -14,11 +13,11 @@ workflow PURPLE_CALLING {
         ch_inputs                    // channel: [mandatory] [ meta ]
         ch_amber                     // channel: [mandatory] [ meta, amber_dir ]
         ch_cobalt                    // channel: [mandatory] [ meta, cobalt_dir ]
-        ch_smlv_somatic              // channel: [optional]  [ meta, pave_vcf ]
-        ch_smlv_germline             // channel: [optional]  [ meta, pave_vcf ]
-        ch_sv_somatic                // channel: [optional]  [ meta, gripss_vcf, gripss_tbi ]
-        ch_sv_germline               // channel: [optional]  [ meta, gripss_vcf, gripss_tbi ]
-        ch_sv_somatic_unfiltered     // channel: [optional]  [ meta, gripss_vcf, gripss_tbi ]
+        ch_smlv_somatic              // channel: [mandatory] [ meta, pave_vcf ]
+        ch_smlv_germline             // channel: [mandatory] [ meta, pave_vcf ]
+        ch_sv_somatic                // channel: [mandatory] [ meta, gripss_vcf, gripss_tbi ]
+        ch_sv_germline               // channel: [mandatory] [ meta, gripss_vcf, gripss_tbi ]
+        ch_sv_somatic_unfiltered     // channel: [mandatory] [ meta, gripss_vcf, gripss_tbi ]
 
         // Reference data
         genome_fasta                 // channel: [mandatory] /path/to/genome_fasta
@@ -35,9 +34,6 @@ workflow PURPLE_CALLING {
         target_region_ratios         // channel: [optional]  /path/to/target_region_ratios
         target_region_msi_indels     // channel: [optional]  /path/to/target_region_msi_indels
 
-        // Params
-        run_config                   // channel: [mandatory] run configuration
-
     main:
         // Channel for version.yml files
         // channel: [ versions.yml ]
@@ -45,36 +41,76 @@ workflow PURPLE_CALLING {
 
         // Select input sources
         // channel: [ meta, amber_dir, cobalt_dir, sv_somatic_vcf, sv_somatic_tbi, sv_somatic_unfiltered_vcf, sv_somatic_unfiltered_tbi, sv_germline_vcf, sv_germline_tbi, smlv_somatic_vcf, smlv_germline_vcf ]
-        CHANNEL_INPUTS_PURPLE(
-            ch_inputs,
+        ch_inputs_selected = WorkflowOncoanalyser.groupByMeta(
             ch_amber,
             ch_cobalt,
+            ch_sv_somatic,
+            ch_sv_somatic_unfiltered,
+            ch_sv_germline,
             ch_smlv_somatic,
             ch_smlv_germline,
-            ch_sv_somatic,
-            ch_sv_germline,
-            ch_sv_somatic_unfiltered,
-            run_config,
         )
+            .map { d ->
 
-        // Create process-specific meta
+                def meta = d[0]
+
+                // NOTE(SW): avoiding further complexity with loops etc
+
+                def inputs = [
+                    Utils.selectCurrentOrExisting(d[1], meta, Constants.INPUT.AMBER_DIR),
+                    Utils.selectCurrentOrExisting(d[2], meta, Constants.INPUT.COBALT_DIR),
+                    Utils.selectCurrentOrExisting(d[3], meta, Constants.INPUT.GRIPSS_VCF_TUMOR),
+                    Utils.selectCurrentOrExisting(d[4], meta, Constants.INPUT.GRIPSS_VCF_TUMOR_TBI),
+                    Utils.selectCurrentOrExisting(d[5], meta, Constants.INPUT.GRIPSS_UNFILTERED_VCF_TUMOR),
+                    Utils.selectCurrentOrExisting(d[6], meta, Constants.INPUT.GRIPSS_UNFILTERED_VCF_TUMOR_TBI),
+                    Utils.selectCurrentOrExisting(d[7], meta, Constants.INPUT.GRIPSS_VCF_NORMAL),
+                    Utils.selectCurrentOrExisting(d[8], meta, Constants.INPUT.GRIPSS_VCF_NORMAL_TBI),
+                    Utils.selectCurrentOrExisting(d[9], meta, Constants.INPUT.PAVE_VCF_TUMOR),
+                    Utils.selectCurrentOrExisting(d[10], meta, Constants.INPUT.PAVE_VCF_NORMAL),
+                ]
+
+                return [meta, *inputs]
+            }
+
+        // Sort inputs
+        // channel: runnable: [ meta, amber_dir, cobalt_dir, sv_somatic_vcf, sv_somatic_tbi, sv_somatic_unfiltered_vcf, sv_somatic_unfiltered_tbi, sv_germline_vcf, sv_germline_tbi, smlv_somatic_vcf, smlv_germline_vcf ]
+        // channel: skip: [ meta ]
+        ch_inputs_sorted = ch_inputs_selected
+            .branch { d ->
+                def meta = d[0]
+                def amber_dir = d[1]
+                def cobalt_dir = d[2]
+
+                def has_existing = Utils.hasExistingInput(meta, Constants.INPUT.PURPLE_DIR)
+
+                runnable: amber_dir && cobalt_dir && !has_existing
+                skip: true
+                    return meta
+            }
+
+        // Create process input channel
         // channel: [ meta_purple, amber_dir, cobalt_dir, sv_somatic_vcf, sv_somatic_tbi, sv_somatic_unfiltered_vcf, sv_somatic_unfiltered_tbi, sv_germline_vcf, sv_germline_tbi, smlv_somatic_vcf, smlv_germline_vcf ]
-        ch_purple_inputs = CHANNEL_INPUTS_PURPLE.out
-            .map {
-                def meta = it[0]
+        ch_purple_inputs = ch_inputs_sorted.runnable
+            .map { d ->
+
+                def meta = d[0]
+                def inputs = d[1..-1]
+
                 def meta_purple = [
-                    key: meta.id,
-                    id: meta.id,
+                    key: meta.group_id,
+                    id: meta.group_id,
                     tumor_id: Utils.getTumorDnaSampleName(meta),
                 ]
 
-                if (run_config.type == Constants.RunType.TUMOR_NORMAL) {
+                if (Utils.hasNormalDnaBam(meta)) {
                     meta_purple.normal_id = Utils.getNormalDnaSampleName(meta)
                 }
 
-                return [meta_purple, *it[1..-1]]
+                return [meta_purple, *inputs]
+
             }
 
+        // Run process
         PURPLE(
             ch_purple_inputs,
             genome_fasta,
@@ -92,8 +128,15 @@ workflow PURPLE_CALLING {
             target_region_msi_indels,
         )
 
-        ch_outputs = WorkflowOncoanalyser.restoreMeta(PURPLE.out.purple_dir, ch_inputs)
         ch_versions = ch_versions.mix(PURPLE.out.versions)
+
+        // Set outputs, restoring original meta
+        // channel: [ meta, purple_dir ]
+        ch_outputs = Channel.empty()
+            .mix(
+                WorkflowOncoanalyser.restoreMeta(PURPLE.out.purple_dir, ch_inputs),
+                ch_inputs_sorted.skip.map { meta -> [meta, []] },
+            )
 
     emit:
         purple_dir = ch_outputs  // channel: [ meta, purple_dir ]

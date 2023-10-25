@@ -71,30 +71,25 @@ class WorkflowOncoanalyser {
         return groupByMeta([:], *channels)
     }
 
-    public static getInput(Map named_args, ch, key) {
-        def input_type = named_args.getOrDefault('type', 'required')
-        return ch.map { meta ->
-            def result
-            for (key_combination in key.combinations()) {
-                if (meta.containsKey(key_combination)) {
-                    result = [meta, meta.getAt(key_combination)]
-                    break
-                }
-            }
+    public static getInput(Map named_args, meta, key) {
 
-            if (result) {
-                return result
-            }
+        def result
+        def (key_filetype, key_filetypes, key_sequencetypes) = key
 
-            if (input_type == 'required') {
-                return [Constants.PLACEHOLDER_META, null]
-            } else if (input_type == 'optional') {
-                return [meta, []]
-            } else {
-                System.err.println "ERROR: got bad input type: ${input_type}"
-                System.exit(1)
+        for (key_sample in [key_filetypes, key_sequencetypes].combinations()) {
+            if (meta.containsKey(key_sample) && meta[key_sample].containsKey(key_filetype)) {
+                // NOTE(SW): could return early here then false below
+                return meta[key_sample].getAt(key_filetype)
+                break
             }
         }
+
+        if (result) {
+            return result
+        } else {
+            return false
+        }
+
     }
 
     // NOTE(SW): function signature required to catch where no named arguments are passed
@@ -102,11 +97,10 @@ class WorkflowOncoanalyser {
         return getInput([:], ch, key)
     }
 
-
     public static joinMeta(Map named_args, ch_a, ch_b) {
         // NOTE(SW): the cross operator is used to allow many-to-one relationship between ch_output
         // and ch_metas
-        def key_a = named_args.getOrDefault('key_a', 'id')
+        def key_a = named_args.getOrDefault('key_a', 'group_id')
         def key_b = named_args.getOrDefault('key_b', 'key')
         def ch_ready_a = ch_a.map { [it[0].getAt(key_b), it[1..-1]] }
         def ch_ready_b = ch_b.map { meta -> [meta.getAt(key_a), meta] }

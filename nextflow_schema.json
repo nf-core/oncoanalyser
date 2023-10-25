@@ -46,25 +46,20 @@
                     "help_text": "Set this parameter to your e-mail address to get a summary e-mail with details of the run sent to you when the workflow exits. If set in your user config file (`~/.nextflow/config`) then you don't need to specify this on the command line for every run.",
                     "pattern": "^([a-zA-Z0-9_\\-\\.]+)@([a-zA-Z0-9_\\-\\.]+)\\.([a-zA-Z]{2,5})$"
                 },
-                "run_type": {
+                "mode": {
                     "type": "string",
-                    "description": "Pipeline run type.",
+                    "description": "Workflow run mode.",
                     "fa_icon": "fas fa-diagram-project"
                 },
-                "run_mode": {
+                "panel": {
                     "type": "string",
-                    "description": "Pipeline run mode.",
-                    "fa_icon": "fas fa-diagram-project"
+                    "description": "Name of pane to use.",
+                    "fa_icon": "fas fa-book"
                 },
                 "force_genome": {
                     "type": "boolean",
                     "description": "Skip check for restricted genome.",
                     "fa_icon": "fas fa-palette"
-                },
-                "targeted": {
-                    "type": "boolean",
-                    "description": "Run in targeted mode.",
-                    "fa_icon": "fas fa-diagram-project"
                 },
                 "processes_manual": {
                     "type": "boolean",
@@ -143,11 +138,6 @@
                     "description": "Reference genome type.",
                     "fa_icon": "fas fa-book",
                     "hidden": true
-                },
-                "panel": {
-                    "type": "string",
-                    "description": "Name of pane to use.",
-                    "fa_icon": "fas fa-book"
                 },
                 "igenomes_base": {
                     "type": "string",

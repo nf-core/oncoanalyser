@@ -15,8 +15,8 @@ process GRIDSS_PREPROCESS {
     path genome_gridss_index
 
     output:
-    tuple val(meta), path("gridss_preprocess/${meta.id}.sv_prep.sorted.bam.gridss.working/"), emit: preprocess_dir
-    path 'versions.yml'                                                                     , emit: versions
+    tuple val(meta), path("gridss_preprocess/${meta.sample_id}.sv_prep.sorted.bam.gridss.working/"), emit: preprocess_dir
+    path 'versions.yml'                                                                            , emit: versions
 
     when:
     task.ext.when == null || task.ext.when
@@ -38,7 +38,7 @@ process GRIDSS_PREPROCESS {
         --workingdir gridss_preprocess/ \\
         --threads ${task.cpus} \\
         ${config_arg} \\
-        --labels ${meta.id} \\
+        --labels ${meta.sample_id} \\
         --bams ${bam} \\
         --filtered_bams ${bam_filtered} \\
         --output placeholder
@@ -53,8 +53,8 @@ process GRIDSS_PREPROCESS {
 
     stub:
     """
-    mkdir -p gridss_preprocess/${meta.id}.sv_prep.sorted.bam.gridss.working/
-    touch gridss_preprocess/${meta.id}.sv_prep.sorted.bam.gridss.working/placeholder
+    mkdir -p gridss_preprocess/${meta.sample_id}.sv_prep.sorted.bam.gridss.working/
+    touch gridss_preprocess/${meta.sample_id}.sv_prep.sorted.bam.gridss.working/placeholder
     echo -e '${task.process}:\\n  stub: noversions\\n' > versions.yml
     """
 }

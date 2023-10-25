@@ -51,15 +51,18 @@ include { WGTS      } from './workflows/wgts'
 //
 // WORKFLOW: Run main nf-core/oncoanalyser analysis pipeline
 //
-
-run_mode = Utils.getRunMode(params.run_mode, log)
+run_mode = Utils.getRunMode(params.mode, log)
 
 workflow NFCORE_ONCOANALYSER {
-    if (params.targeted == false) {
+
+    if (run_mode === Constants.RunMode.WGTS) {
         WGTS()
-    } else {
+    } else if (run_mode === Constants.RunMode.TARGETED) {
         TARGETED()
+    } else {
+        assert false
     }
+
 }
 
 /*

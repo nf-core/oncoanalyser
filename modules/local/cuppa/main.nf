@@ -8,6 +8,7 @@ process CUPPA {
     tuple val(meta), path(isofox_dir), path(purple_dir), path(linx_dir), path(virusinterpreter_dir)
     val ref_genome_ver
     path cuppa_resources, stageAs: 'cuppa_reference_data'
+    val classifier
 
     output:
     tuple val(meta), path('cuppa/'), emit: cuppa_dir
@@ -19,40 +20,23 @@ process CUPPA {
     script:
     def args = task.ext.args ?: ''
 
-    def has_rna = isofox_dir
-    def has_dna = purple_dir || linx_dir
-    if (has_dna && (!purple_dir || !linx_dir)) {
-        exit 1, "ERROR: CUPPA_CLASSIFIER: DNA classification requires both PURPLE and LINX inputs"
-    }
-
-    def categories_val
-    if (has_dna && has_rna) {
-        categories_val = 'ALL'
-    } else if (has_dna) {
-        categories_val = 'DNA'
-    } else if (has_rna) {
-        categories_val = 'RNA'
-    } else {
-        exit 1, "ERROR: CUPPA_CLASSIFIER: either PURPLE and LINX inputs or Isofox inputs are required"
-    }
-
     """
     # Symlink input files into a single directory
     mkdir -p sample_data/
-    if [[ ${categories_val} == 'DNA' || ${categories_val} == 'ALL' ]]; then
+    if [[ ${classifier} == 'DNA' || ${classifier} == 'ALL' ]]; then
         find -L ${purple_dir} ${linx_dir} ${virusinterpreter_dir} -maxdepth 1 -type f -exec ln -fs ../{} sample_data/ \\;
     fi
 
-    if [[ ${categories_val} == 'RNA' ]]; then
+    if [[ ${classifier} == 'RNA' ]]; then
         find -L ${isofox_dir} -maxdepth 1 -type f -exec ln -fs ../{} sample_data/ \\;
-    elif [[ ${categories_val} == 'ALL' ]]; then
+    elif [[ ${classifier} == 'ALL' ]]; then
         # NOTE(SW): CUPPA requires that the RNA sample name matches the DNA sample name
         for fp in \$(find -L ${isofox_dir} -maxdepth 1 -type f); do
-            fn_out=\$(sed 's/^${meta.id_rna}/${meta.id}/' <<< \${fp##*/});
+            fn_out=\$(sed 's/^${meta.sample_rna_id}/${meta.sample_id}/' <<< \${fp##*/});
             cp \${fp} sample_data/\${fn_out}
         done;
         # Rename identifier in the summary file
-        sed -i 's/^${meta.id_rna}/${meta.id}/g' sample_data/${meta.id}.isf.summary.csv;
+        sed -i 's/^${meta.sample_rna_id}/${meta.sample_id}/g' sample_data/${meta.sample_id}.isf.summary.csv;
     fi;
 
     mkdir -p cuppa/
@@ -60,18 +44,18 @@ process CUPPA {
     java \\
         -Xmx${Math.round(task.memory.bytes * 0.95)} \\
         -jar ${task.ext.jarPath} \\
-            -sample ${meta.id} \\
+            -sample ${meta.sample_id} \\
             -sample_data_dir sample_data/ \\
-            -categories ${categories_val} \\
+            -categories ${classifier} \\
             -ref_data_dir ${cuppa_resources} \\
             -ref_genome_version ${ref_genome_ver} \\
             -create_pdf \\
             -output_dir cuppa/
 
-    if [[ ${categories_val} == 'DNA' || ${categories_val} == 'ALL' ]]; then
+    if [[ ${classifier} == 'DNA' || ${classifier} == 'ALL' ]]; then
         python ${task.ext.chartScriptPath} \\
-            -sample ${meta.id} \\
-            -sample_data cuppa/${meta.id}.cup.data.csv \\
+            -sample ${meta.sample_id} \\
+            -sample_data cuppa/${meta.sample_id}.cup.data.csv \\
             -output_dir cuppa/;
     fi
 
@@ -85,12 +69,12 @@ process CUPPA {
     stub:
     """
     mkdir -p cuppa/
-    touch cuppa/${meta.id}.cup.data.csv
-    touch cuppa/${meta.id}.cuppa.conclusion.txt
-    touch cuppa/${meta.id}_cup_report.pdf
-    touch cuppa/${meta.id}.cup.report.summary.png
-    touch cuppa/${meta.id}.cup.report.features.png
-    touch cuppa/${meta.id}.cuppa.chart.png
+    touch cuppa/${meta.sample_id}.cup.data.csv
+    touch cuppa/${meta.sample_id}.cuppa.conclusion.txt
+    touch cuppa/${meta.sample_id}_cup_report.pdf
+    touch cuppa/${meta.sample_id}.cup.report.summary.png
+    touch cuppa/${meta.sample_id}.cup.report.features.png
+    touch cuppa/${meta.sample_id}.cuppa.chart.png
     echo -e '${task.process}:\\n  stub: noversions\\n' > versions.yml
     """
 }

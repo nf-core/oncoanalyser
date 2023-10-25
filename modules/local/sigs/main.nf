@@ -24,7 +24,7 @@ process SIGS {
     java \\
         -Xmx${Math.round(task.memory.bytes * 0.95)} \\
         -jar ${task.ext.jarPath} \\
-            -sample ${meta.tumor_id} \\
+            -sample ${meta.sample_id} \\
             -somatic_vcf_file ${smlv_vcf} \\
             -signatures_file ${signatures} \\
             -output_dir sigs/

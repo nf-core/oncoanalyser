@@ -5,8 +5,182 @@
 import org.yaml.snakeyaml.Yaml
 
 import nextflow.Nextflow
+import nextflow.splitter.SplitterEx
 
 class Utils {
+
+    public static parseInput(input_fp_str, stub_run, log) {
+
+        // NOTE(SW): using Nextflow .splitCsv channel operator, hence sould be easily interchangable
+
+        def input_fp = nextflow.Nextflow.file(input_fp_str)
+        def inputs = nextflow.splitter.SplitterEx.splitCsv(input_fp, [header: true])
+            .groupBy { it['group_id'] }
+            .collect { group_id, entries ->
+
+                def meta = [group_id: group_id]
+                def sample_keys = [] as Set
+
+                // Process each entry
+                entries.each {
+                    // Add subject id if absent or check if current matches existing
+                    if (meta.containsKey('subject_id') && meta.subject_id != it.subject_id) {
+                        log.error "got unexpected subject name for ${group_id} ${meta.subject_id}: ${it.subject_id}"
+                        System.exit(1)
+                    } else {
+                        meta.subject_id = it.subject_id
+                    }
+
+
+                    // Sample type
+                    def sample_type_enum = Utils.getEnumFromString(it.sample_type, Constants.SampleType)
+                    if (!sample_type_enum) {
+                        def sample_type_str = Utils.getEnumNames(Constants.SampleType).join('\n  - ')
+                        log.error "received invalid sample type: '${it.sample_type}'. Valid options are:\n  - ${sample_type_str}"
+                        System.exit(1)
+                    }
+
+                    // Sequence type
+                    def sequence_type_enum = Utils.getEnumFromString(it.sequence_type, Constants.SequenceType)
+                    if (!sequence_type_enum) {
+                        def sequence_type_str = Utils.getEnumNames(Constants.SequenceType).join('\n  - ')
+                        log.error "received invalid sequence type: '${it.sequence_type}'. Valid options are:\n  - ${sequence_type_str}"
+                        System.exit(1)
+                    }
+
+                    // Filetype
+                    def filetype_enum = Utils.getEnumFromString(it.filetype, Constants.FileType)
+                    if (!filetype_enum) {
+                        def filetype_str = Utils.getEnumNames(Constants.FileType).join('\n  - ')
+                        log.error "received invalid file type: '${it.filetype}'. Valid options are:\n  - ${filetype_str}"
+                        System.exit(1)
+                    }
+
+                    def sample_key = [sample_type_enum, sequence_type_enum]
+                    def meta_sample = meta.get(sample_key, [sample_id: it.sample_id])
+
+                    if (meta_sample.sample_id != it.sample_id) {
+                        log.error "got unexpected sample name for ${group_id} ${sample_type_enum}/${sequence_type_enum}: ${sample_name}"
+                        System.exit(1)
+                    }
+
+                    if (meta_sample.containsKey(filetype_enum)) {
+                        log.error "got duplicate file for ${group_id} ${sample_type_enum}/${sequence_type_enum}: ${filetype_enum}"
+                        System.exit(1)
+                    }
+
+                    meta_sample[filetype_enum] = it.filepath
+
+                    // Record sample key to simplify iteration later on
+                    sample_keys << sample_key
+
+                }
+
+                // Check that required indexes are provided or are accessible
+                sample_keys.each { sample_key ->
+
+                    meta[sample_key]*.key.each { key ->
+
+                        // NOTE(SW): I was going to use two maps but was unable to get an enum map to compile
+
+                        def index_enum
+                        def index_str
+
+                        if (key === Constants.FileType.BAM) {
+                            index_enum = Constants.FileType.BAI
+                            index_str = 'bai'
+                        } else if (key === Constants.FileType.GRIDSS_VCF) {
+                            index_enum = Constants.FileType.GRIDSS_VCF_TBI
+                            index_str = 'vcf'
+                        } else if (key === Constants.FileType.GRIPSS_VCF) {
+                            index_enum = Constants.FileType.GRIPSS_VCF_TBI
+                            index_str = 'vcf'
+                        } else if (key === Constants.FileType.GRIPSS_UNFILTERED_VCF) {
+                            index_enum = Constants.FileType.GRIPSS_UNFILTERED_VCF_TBI
+                            index_str = 'vcf'
+                        } else {
+                            return
+                        }
+
+                        if (meta[sample_key].containsKey(index_enum)) {
+                            return
+                        }
+
+                        def fp = meta[sample_key][key]
+                        def index_fp = nextflow.Nextflow.file("${fp}.${index_str}")
+
+                        if (!index_fp.exists() && !stub_run) {
+                            def (sample_type, sequence_type) = sample_key
+                            log.error "no index provided or found for ${meta.group_id} ${sample_type}/${sequence_type}: ${key}: ${fp}"
+                            System.exit(1)
+                        }
+
+                        meta[sample_key][index_enum] = index_fp
+
+                    }
+                }
+
+                return meta
+            }
+
+        return inputs
+    }
+
+    public static void validateInput(inputs, run_config, log) {
+
+        def sample_keys = [
+            [Constants.SampleType.TUMOR, Constants.SequenceType.DNA],
+            [Constants.SampleType.TUMOR, Constants.SequenceType.RNA],
+            [Constants.SampleType.NORMAL, Constants.SequenceType.DNA],
+        ]
+
+        inputs.each { meta ->
+
+            // Require BAMs for each defined sample type
+            // NOTE(SW): repeating key pairs above to avoid having to duplicate error messages
+            sample_keys.each { key ->
+
+                if (!meta.containsKey(key)) {
+                    return
+                }
+
+                def (sample_type, sequence_type) = key
+
+                if (!meta[key].containsKey(Constants.FileType.BAM)) {
+                    log.error "no BAM provided for ${meta.group_id} ${sample_type}/${sequence_type}\n\n" +
+                        "NB: BAMs are always required as they are the basis to determine input sample type."
+                    System.exit(1)
+                }
+
+            }
+
+            // Do not allow normal DNA in targeted mode and restrict targeted RNA analysis to TSO500
+            if (run_config.mode === Constants.RunMode.TARGETED) {
+
+                if (Utils.hasNormalDnaBam(meta)) {
+                    log.error "targeted mode is not compatible with the normal DNA BAM provided for ${meta.group_id}\n\n" +
+                        "The targeted workflow supports only tumor DNA BAMs (and tumor RNA BAMs for TSO500)"
+                    System.exit(1)
+                }
+
+                // Restrict targeted RNA inputs to TSO500
+                if (Utils.hasTumorRnaBam(meta) && run_config.panel != 'tso500') {
+                    def panel = run_config.panel.toUpperCase()
+                    log.error "the ${panel} panel is not compatible with the tumor RNA BAM provided for ${meta.group_id}\n\n" +
+                        "Only the TSO500 panel supports tumor RNA analysis"
+                    System.exit(1)
+                }
+
+            }
+
+            // Do not allow normal DNA only
+            if (Utils.hasNormalDnaBam(meta) && !Utils.hasTumorDnaBam(meta)) {
+                log.error "germline only mode not supported, found only a normal DNA BAM for ${meta.group_id}\n"
+                System.exit(1)
+            }
+
+        }
+    }
 
     //
     // When running with -profile conda, warn if channels have not been set-up appropriately
@@ -70,38 +244,63 @@ class Utils {
 
     // Sample names
     static public getTumorDnaSampleName(meta) {
-        return getMetaEntry(meta, ['sample_name', Constants.SampleType.TUMOR, Constants.SequenceType.DNA])
+        def meta_sample = meta[Constants.SampleType.TUMOR, Constants.SequenceType.DNA]
+        return meta_sample['sample_id']
     }
 
     static public getTumorRnaSampleName(meta) {
-        return getMetaEntry(meta, ['sample_name', Constants.SampleType.TUMOR, Constants.SequenceType.RNA])
+        def meta_sample = meta[Constants.SampleType.TUMOR, Constants.SequenceType.RNA]
+        return meta_sample['sample_id']
     }
 
     static public getNormalDnaSampleName(meta) {
-        return getMetaEntry(meta, ['sample_name', Constants.SampleType.NORMAL, Constants.SequenceType.DNA])
+        def meta_sample = meta[Constants.SampleType.NORMAL, Constants.SequenceType.DNA]
+        return meta_sample['sample_id']
     }
 
 
     // Files
     static public getTumorDnaBam(meta) {
-        return getMetaEntry(meta, [Constants.FileType.BAM, Constants.SampleType.TUMOR, Constants.SequenceType.DNA])
+        def meta_sample = meta.getOrDefault([Constants.SampleType.TUMOR, Constants.SequenceType.DNA], [:])
+        return meta_sample.getOrDefault(Constants.FileType.BAM, null)
+    }
+
+    static public getTumorDnaBai(meta) {
+        def meta_sample = meta.getOrDefault([Constants.SampleType.TUMOR, Constants.SequenceType.DNA], [:])
+        return meta_sample.getOrDefault(Constants.FileType.BAI, null)
+    }
+
+    static public hasTumorDnaBam(meta) {
+        return getTumorDnaBam(meta) !== null
     }
 
     static public getTumorRnaBam(meta) {
-        return getMetaEntry(meta, [Constants.FileType.BAM, Constants.SampleType.TUMOR, Constants.SequenceType.RNA])
+        def meta_sample = meta.getOrDefault([Constants.SampleType.TUMOR, Constants.SequenceType.RNA], [:])
+        return meta_sample.getOrDefault(Constants.FileType.BAM, null)
     }
+
+    static public getTumorRnaBai(meta) {
+        def meta_sample = meta.getOrDefault([Constants.SampleType.TUMOR, Constants.SequenceType.RNA], [:])
+        return meta_sample.getOrDefault(Constants.FileType.BAI, null)
+    }
+
+    static public hasTumorRnaBam(meta) {
+        return getTumorRnaBam(meta) !== null
+    }
+
 
     static public getNormalDnaBam(meta) {
-        return getMetaEntry(meta, [Constants.FileType.BAM, Constants.SampleType.NORMAL, Constants.SequenceType.DNA])
+        def meta_sample = meta.getOrDefault([Constants.SampleType.NORMAL, Constants.SequenceType.DNA], [:])
+        return meta_sample.getOrDefault(Constants.FileType.BAM, null)
     }
 
+    static public getNormalDnaBai(meta) {
+        def meta_sample = meta.getOrDefault([Constants.SampleType.NORMAL, Constants.SequenceType.DNA], [:])
+        return meta_sample.getOrDefault(Constants.FileType.BAI, null)
+    }
 
-    static public getMetaEntry(meta, key) {
-        if (! meta.containsKey(key)) {
-            System.err.println "\nERROR: meta does not contain key ${key}: ${meta}"
-            System.exit(1)
-        }
-        return meta.getAt(key)
+    static public hasNormalDnaBam(meta) {
+        return getNormalDnaBam(meta) !== null
     }
 
 
@@ -109,20 +308,36 @@ class Utils {
         def run_mode_enum = Utils.getEnumFromString(run_mode, Constants.RunMode)
         if (!run_mode_enum) {
             def run_modes_str = Utils.getEnumNames(Constants.RunMode).join('\n  - ')
-            log.error "\nERROR: recieved an invalid run mode: '${run_mode}'. Valid options are:\n  - ${run_modes_str}"
+            log.error "recieved an invalid run mode: '${run_mode}'. Valid options are:\n  - ${run_modes_str}"
             System.exit(1)
         }
         return run_mode_enum
     }
 
 
-    static public getRunType(run_type, log) {
-        def run_type_enum = Utils.getEnumFromString(run_type, Constants.RunType)
-        if (!run_type_enum) {
-            def run_types_str = Utils.getEnumNames(Constants.RunType).join('\n  - ')
-            log.error "\nERROR: recieved an invalid run type: '${run_type}'. Valid options are:\n  - ${run_types_str}"
-            System.exit(1)
+
+    public static getInput(meta, key) {
+
+        def result
+        def (key_filetype, key_filetypes, key_sequencetypes) = key
+
+        for (key_sample in [key_filetypes, key_sequencetypes].combinations()) {
+            if (meta.containsKey(key_sample) && meta[key_sample].containsKey(key_filetype)) {
+                return meta[key_sample].getAt(key_filetype)
+            }
         }
-        return run_type_enum
     }
+
+    public static hasExistingInput(meta, key) {
+        return getInput(meta, key) !== null
+    }
+
+    public static selectCurrentOrExisting(val, meta, key) {
+        if (hasExistingInput(meta, key)) {
+          return getInput(meta, key)
+        } else {
+          return val
+        }
+    }
+
 }

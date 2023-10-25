@@ -42,7 +42,7 @@ process ISOFOX {
         -Xmx${Math.round(task.memory.bytes * 0.95)} \\
         -jar ${task.ext.jarPath} \\
             ${args} \\
-            -sample ${meta.id} \\
+            -sample ${meta.sample_id} \\
             -bam_file ${bam} \\
             ${functions_arg} \\
             -read_length ${read_length} \\

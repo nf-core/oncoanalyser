@@ -28,8 +28,8 @@ process LINX_SOMATIC {
         -Xmx${Math.round(task.memory.bytes * 0.95)} \\
         -jar ${task.ext.jarPath} \\
             ${args} \\
-            -sample ${meta.id} \\
-            -sv_vcf ${purple_dir}/${meta.id}.purple.sv.vcf.gz \\
+            -sample ${meta.sample_id} \\
+            -sv_vcf ${purple_dir}/${meta.sample_id}.purple.sv.vcf.gz \\
             -purple_dir ${purple_dir} \\
             ${gene_id_file_arg} \\
             -ref_genome_version ${genome_ver} \\
