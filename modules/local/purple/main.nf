@@ -37,8 +37,8 @@ process PURPLE {
 
     def sv_tumor_recovery_vcf_arg = sv_tumor_unfiltered_vcf ? "-sv_recovery_vcf ${sv_tumor_unfiltered_vcf}" : ''
 
-    def smlv_tumor_vcf_fp = smlv_tumor_vcf ?: ''
-    def smlv_normal_vcf_fp = smlv_normal_vcf ?: ''
+    def smlv_tumor_vcf_arg = smlv_tumor_vcf ? "-somatic_vcf ${smlv_tumor_vcf}" : ''
+    def smlv_normal_vcf_arg = smlv_normal_vcf ? "-germline_vcf ${smlv_normal_vcf}" : ''
 
     def sage_known_hotspots_germline_arg = sage_known_hotspots_germline ? "-germline_hotspots ${sage_known_hotspots_germline}" : ''
     def germline_del_arg = germline_del ? "-germline_del_freq_file ${germline_del}" : ''
@@ -48,21 +48,6 @@ process PURPLE {
     def target_region_msi_indels_arg = target_region_msi_indels ? "-target_regions_msi_indels ${target_region_msi_indels}" : ''
 
     """
-    # For provided smlv VCFs, filter records that do not contain the required FORMAT/AD field and
-    # get argument for PURPLE
-    get_smlv_arg() {
-        fp=\${1}
-        fn=\${fp##*/}
-        if [[ "\${fp}" != '' ]]; then
-            fp_out=prepared__\${2}__\${fn}
-            bcftools view -e 'FORMAT/AD[*]="."' -o \${fp_out} \${fp}
-            echo "-\${2} \${fp_out}"
-        fi
-    }
-    smlv_tumor_vcf_arg=\$(get_smlv_arg "${smlv_tumor_vcf_fp}" somatic_vcf)
-    smlv_normal_vcf_arg=\$(get_smlv_arg "${smlv_normal_vcf_fp}" germline_vcf)
-
-    # Run PURPLE
     java \\
         -Xmx${Math.round(task.memory.bytes * 0.95)} \\
         -jar ${task.ext.jarPath} \\
@@ -74,8 +59,8 @@ process PURPLE {
             ${sv_tumor_vcf_arg} \\
             ${sv_normal_vcf_arg} \\
             ${sv_tumor_recovery_vcf_arg} \\
-            \${smlv_tumor_vcf_arg} \\
-            \${smlv_normal_vcf_arg} \\
+            ${smlv_tumor_vcf_arg} \\
+            ${smlv_normal_vcf_arg} \\
             -ref_genome ${genome_fasta} \\
             -ref_genome_version ${genome_ver} \\
             -driver_gene_panel ${driver_gene_panel} \\
