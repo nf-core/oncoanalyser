@@ -37,15 +37,13 @@ workflow PREPARE_REFERENCE {
         ch_genome_fai = params.ref_data_genome_fai ? file(params.ref_data_genome_fai) : []
         ch_genome_dict = params.ref_data_genome_dict ? file(params.ref_data_genome_dict) : []
         if (!params.ref_data_genome_fai) {
-            ch_samtools_faidx_inputs = Channel.of([[:], ch_genome_fasta])
-            SAMTOOLS_FAIDX(ch_samtools_faidx_inputs)
-            ch_genome_fai = SAMTOOLS_FAIDX.out.fai
+            SAMTOOLS_FAIDX([[:], ch_genome_fasta])
+            ch_genome_fai = SAMTOOLS_FAIDX.out.fai.map { meta, fai -> fai }
             ch_versions = ch_versions.mix(SAMTOOLS_FAIDX.out.versions)
         }
         if (!params.ref_data_genome_dict) {
-            ch_samtools_dict_inputs = Channel.of([[:], ch_genome_fasta])
-            SAMTOOLS_DICT(ch_samtools_dict_inputs)
-            ch_genome_dict = SAMTOOLS_DICT.out.dict
+            SAMTOOLS_DICT([[:], ch_genome_fasta])
+            ch_genome_dict = SAMTOOLS_DICT.out.dict.map { meta, dict -> dict }
             ch_versions = ch_versions.mix(SAMTOOLS_DICT.out.versions)
         }
 
@@ -59,7 +57,7 @@ workflow PREPARE_REFERENCE {
             // NOTE(SW): the BWA index directory can be provided as a compressed tarball
             if (!params.ref_data_genome_bwa_index) {
                 BWA_INDEX([[:], ch_genome_fasta])
-                ch_genome_bwa_index = BWA_INDEX.out.index.map { it[1] }
+                ch_genome_bwa_index = BWA_INDEX.out.index.map { meta, index -> index }
                 ch_versions = ch_versions.mix(BWA_INDEX.out.versions)
             } else if (params.ref_data_genome_bwa_index.endsWith('.tar.gz')) {
                 ch_genome_bwa_index_inputs = [
