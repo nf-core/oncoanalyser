@@ -8,7 +8,8 @@
                     "bwa/index": {
                         "branch": "master",
                         "git_sha": "9518fa4f65f3fb8cde24fde7d40333b39ec8fd65",
-                        "installed_by": ["modules"]
+                        "installed_by": ["modules"],
+                        "patch": "modules/nf-core/bwa/index/bwa-index.diff"
                     },
                     "custom/dumpsoftwareversions": {
                         "branch": "master",

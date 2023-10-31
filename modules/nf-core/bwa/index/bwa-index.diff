@@ -1,0 +1,31 @@
+Changes in module 'nf-core/bwa/index'
+--- modules/nf-core/bwa/index/main.nf
++++ modules/nf-core/bwa/index/main.nf
+@@ -24,7 +24,7 @@
+     bwa \\
+         index \\
+         $args \\
+-        -p bwa/${fasta.baseName} \\
++        -p bwa/${fasta.name} \\
+         $fasta
+ 
+     cat <<-END_VERSIONS > versions.yml
+@@ -37,11 +37,11 @@
+     """
+     mkdir bwa
+ 
+-    touch bwa/genome.amb
+-    touch bwa/genome.ann
+-    touch bwa/genome.bwt
+-    touch bwa/genome.pac
+-    touch bwa/genome.sa
++    touch bwa/genome.fasta.amb
++    touch bwa/genome.fasta.ann
++    touch bwa/genome.fasta.bwt
++    touch bwa/genome.fasta.pac
++    touch bwa/genome.fasta.sa
+ 
+     cat <<-END_VERSIONS > versions.yml
+     "${task.process}":
+
+************************************************************
