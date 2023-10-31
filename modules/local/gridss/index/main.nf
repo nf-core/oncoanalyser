@@ -41,7 +41,7 @@ process GRIDSS_INDEX {
         -Dsamjdk.use_async_io_write_tribble=true \\
         -Dsamjdk.buffer_size=4194304 \\
         -Dsamjdk.async_io_read_threads=${task.cpus} \\
-        -cp ${task.ext.jarPath} \\
+        -cp ${task.ext.jarPath} gridss.PrepareReference \\
             REFERENCE_SEQUENCE=${genome_fasta} \\
             CREATE_SEQUENCE_DICTIONARY=${sequence_dict_arg} \\
             CREATE_BWA_INDEX_IMAGE=${bwa_index_image_arg} \\
