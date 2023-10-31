@@ -60,7 +60,7 @@ class Utils {
                     def meta_sample = meta.get(sample_key, [sample_id: it.sample_id])
 
                     if (meta_sample.sample_id != it.sample_id) {
-                        log.error "got unexpected sample name for ${group_id} ${sample_type_enum}/${sequence_type_enum}: ${sample_name}"
+                        log.error "got unexpected sample name for ${group_id} ${sample_type_enum}/${sequence_type_enum}: ${it.sample_id}"
                         System.exit(1)
                     }
 

@@ -233,9 +233,9 @@ class WorkflowMain {
         if (!params.ref_data_genome_type) {
             log.error "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n" +
                 "  Genome type wasn't provided and genome '${params.genome}' is not defined in      \n" +
-                "  genome version list.\n" +
-                "  Currently, the list of genomes in the version list include:\n" +
-                "  ${Constants.GENOMES_DEINFED.join(", ")}\n" +
+                "  genome type list.\n" +
+                "  Currently, the list of genomes in the type list include:\n" +
+                "  ${Constants.GENOMES_DEFINED.join(", ")}\n" +
                 "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
             System.exit(1)
         }
