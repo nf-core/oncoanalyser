@@ -34,8 +34,8 @@ workflow PREPARE_REFERENCE {
         // The fai and dict files should always be present if using a genome preset. These are
         // always created where they are not present without checking processes to run given they
         // are used in numerous processes and have a neglibile cost to generate.
-        ch_genome_fai = file(params.ref_data_genome_fai)
-        ch_genome_dict = file(params.ref_data_genome_dict)
+        ch_genome_fai = params.ref_data_genome_fai ? file(params.ref_data_genome_fai) : []
+        ch_genome_dict = params.ref_data_genome_dict ? file(params.ref_data_genome_dict) : []
         if (!params.ref_data_genome_fai) {
             SAMTOOLS_FAIDX([:], ch_genome_fasta)
             ch_genome_fai = SAMTOOLS_FAIDX.out.fai
@@ -50,9 +50,9 @@ workflow PREPARE_REFERENCE {
         //
         // Create BWA index, BWA index image, and GRIDSS index for reference genome if required
         //
-        ch_genome_bwa_index = file(params.ref_data_genome_bwa_index)
-        ch_genome_bwa_index_image = file(params.ref_data_genome_bwa_index_image)
-        ch_genome_gridss_index = file(params.ref_data_genome_gridss_index)
+        ch_genome_bwa_index = params.ref_data_genome_bwa_index ? file(params.ref_data_genome_bwa_index) : []
+        ch_genome_bwa_index_image = params.ref_data_genome_gridss_index ? file(params.ref_data_genome_bwa_index_image) : []
+        ch_genome_gridss_index = params.ref_data_genome_gridss_index ? file(params.ref_data_genome_gridss_index) : []
         if (run_config.has_dna && (run_config.stages.gridss || run_virusinterpreter)) {
             // NOTE(SW): the BWA index directory can be provided as a compressed tarball
             if (!params.ref_data_genome_bwa_index) {
