@@ -162,7 +162,7 @@ class WorkflowMain {
             log,
         )
 
-        if (stages.virusinterpreter) {
+        if (stages.virusinterpreter && run_mode === Constants.RunMode.WGTS) {
             if (!params.containsKey('ref_data_virusbreakenddb_path')) {
                 params.ref_data_virusbreakenddb_path = Constants.VIRUSBREAKENDDB_PATH
             }
