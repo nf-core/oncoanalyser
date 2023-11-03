@@ -31,7 +31,8 @@ if (run_config.stages.gridss) {
     }
 }
 
-if (run_config.stages.virusinterpreter) {
+// Mode check required as evaluated regardless of workflow selection
+if (run_config.stages.virusinterpreter && run_config.mode !== Constants.RunMode.TARGETED) {
     checkPathParamList.add(params.ref_data_virusbreakenddb_path)
 }
 
