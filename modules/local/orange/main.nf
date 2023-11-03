@@ -52,22 +52,30 @@ process ORANGE {
     # When WTS data is present, ORANGE expects the somatic SAGE VCF to have appended WTS data; CS indicates this should
     # occur after PURPLE. Since ORANGE only collects the somatic SAGE VCF from the PURPLE output directory, we must
     # prepare accordingly
+
     # Isofox inputs are also expected to have the tumor sample ID in the filename
+
+        # Use of symlinks was causing reliability issues on HPC with Singularity, switched to full file copy instead
+
     purple_dir_local=${purple_dir}
     if [[ -n "${rna_id_arg}" ]]; then
 
         purple_dir_local=purple__prepared;
-        mkdir -p \${purple_dir_local}/;
-        find -L ${purple_dir} -maxdepth 1 -exec ln -fs ../{} \${purple_dir_local}/ \\;
-        ln -sf ../${smlv_somatic_vcf} \${purple_dir_local}/${meta.tumor_id}.purple.somatic.vcf.gz;
+
+        if [[ -d \${purple_dir_local}/ ]]; then
+          rm -r \${purple_dir_local}/;
+        fi
+
+        cp -rL ${purple_dir} \${purple_dir_local}/
+        cp -L ${smlv_somatic_vcf} \${purple_dir_local}/${meta.tumor_id}.purple.somatic.vcf.gz;
 
         if [[ -n "${smlv_germline_vcf}" ]]; then
-            ln -sf ../${smlv_germline_vcf} \${purple_dir_local}/${meta.tumor_id}.purple.germline.vcf.gz;
+            cp -L ${smlv_germline_vcf} \${purple_dir_local}/${meta.tumor_id}.purple.germline.vcf.gz;
         fi;
 
         mkdir -p isofox_dir__prepared/;
         for fp in ${isofox_dir}/*; do
-            ln -s ../\${fp} isofox_dir__prepared/\$(sed 's/${meta.tumor_rna_id}/${meta.tumor_id}/' <<< \${fp##*/});
+            cp -L \${fp} isofox_dir__prepared/\$(sed 's/${meta.tumor_rna_id}/${meta.tumor_id}/' <<< \${fp##*/});
         done;
 
     fi
