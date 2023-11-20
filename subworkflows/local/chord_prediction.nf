@@ -34,13 +34,21 @@ workflow CHORD_PREDICTION {
         ch_inputs_sorted = ch_inputs_selected
             .branch { meta, purple_dir ->
 
-                def tumor_id = Utils.getTumorDnaSampleName(meta)
+                def has_dna = Utils.hasTumorDnaBam(meta)
+
+                def tumor_id
+                def has_smlv_vcf
+                def has_sv_vcf
+
+                if (has_dna) {
+                  tumor_id = Utils.getTumorDnaSampleName(meta)
+                  has_smlv_vcf = purple_dir ? file(purple_dir).resolve("${tumor_id}.purple.somatic.vcf.gz") : []
+                  has_sv_vcf = purple_dir ? file(purple_dir).resolve("${tumor_id}.purple.sv.vcf.gz") : []
+                }
 
                 def has_existing = Utils.hasExistingInput(meta, Constants.INPUT.CHORD_DIR)
-                def has_smlv_vcf = purple_dir ? file(purple_dir).resolve("${tumor_id}.purple.somatic.vcf.gz") : []
-                def has_sv_vcf = purple_dir ? file(purple_dir).resolve("${tumor_id}.purple.sv.vcf.gz") : []
 
-                runnable: purple_dir && has_smlv_vcf && has_sv_vcf && !has_existing
+                runnable: has_dna && purple_dir && has_smlv_vcf && has_sv_vcf && !has_existing
                 skip: true
                   return meta
             }
