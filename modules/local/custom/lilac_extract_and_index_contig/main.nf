@@ -8,6 +8,7 @@ process CUSTOM_EXTRACTCONTIG {
     val contig_name
     path genome_fasta
     path genome_fai
+    val run
 
     output:
     path "*extracted.fa"  , emit: contig

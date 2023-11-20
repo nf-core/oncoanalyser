@@ -121,10 +121,16 @@ workflow LILAC_CALLING {
             //
             // MODULE: Custom extract contig (LILAC)
             //
+            // Only run if we have runnable inputs, no blocking since operating only on input metas
+            ch_extract_contig_run = ch_realign_inputs_sorted.runnable
+                .toList()
+                .map { !it.isEmpty() }
+
             EXTRACTCONTIG(
                 'chr6',
                 genome_fasta,
                 genome_fai,
+                ch_extract_contig_run,
             )
 
             ch_versions = ch_versions.mix(EXTRACTCONTIG.out.versions)
