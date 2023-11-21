@@ -213,7 +213,16 @@ workflow LILAC_CALLING {
                     meta_lilac.normal_id = Utils.getNormalDnaSampleName(meta)
                 }
 
-                return [meta_lilac, nbam_dna, nbai_dna, tbam_dna, tbai_dna, tbam_rna, tbai_rna, purple_dir]
+                return [
+                    meta_lilac,
+                    nbam_dna,
+                    nbai_dna,
+                    tbam_dna,
+                    tbai_dna,
+                    tbam_rna,
+                    tbai_rna,
+                    Utils.selectCurrentOrExisting(purple_dir, meta, Constants.INPUT.PURPLE_DIR),
+                ]
             }
 
         // Run process
