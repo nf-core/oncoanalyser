@@ -21,7 +21,7 @@ process CUSTOM_SLICE {
     """
     samtools view \\
         ${args} \\
-        -L ${bed} \\
+        --regions-file ${bed} \\
         -@${task.cpus} \\
         -Obam \\
         ${bam} | \\
