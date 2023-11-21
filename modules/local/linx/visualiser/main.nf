@@ -10,9 +10,9 @@ process LINX_VISUALISER {
     path ensembl_data_resources
 
     output:
-    tuple val(meta), path('linx_visualiser/plot_all/')       , emit: visualiser_dir_all
-    tuple val(meta), path('linx_visualiser/plot_reportable/'), emit: visualiser_dir_reportable
-    path 'versions.yml'                                      , emit: versions
+    tuple val(meta), path('linx_visualiser/all/')       , emit: visualiser_dir_all
+    tuple val(meta), path('linx_visualiser/reportable/'), emit: visualiser_dir_reportable
+    path 'versions.yml'                                 , emit: versions
 
     when:
     task.ext.when == null || task.ext.when
@@ -40,8 +40,8 @@ process LINX_VISUALISER {
             -ensembl_data_dir ${ensembl_data_resources} \\
             -circos ${task.ext.circosPath} \\
             -threads ${task.cpus} \\
-            -plot_out linx_visualiser/plot_all/ \\
-            -data_out linx_visualiser/data_all/
+            -plot_out linx_visualiser/all/ \\
+            -data_out linx_visualiser/all_data/
 
     # Rerun LINX to render only reportable cluster plots in a separate directory. While this is regenerating existing
     # cluster plots, the number of reportable plots is generally very small and I prefer to rely on the internal LINX
@@ -65,8 +65,8 @@ process LINX_VISUALISER {
             -circos ${task.ext.circosPath} \\
             -plot_reportable \\
             -threads ${task.cpus} \\
-            -plot_out linx_visualiser/plot_reportable/ \\
-            -data_out linx_visualiser/data_reportable/
+            -plot_out linx_visualiser/reportable/ \\
+            -data_out linx_visualiser/reportable_data/
 
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":
