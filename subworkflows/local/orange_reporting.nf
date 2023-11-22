@@ -21,7 +21,7 @@ workflow ORANGE_REPORTING {
         ch_sage_germline_append     // channel: [mandatory] [ meta, sage_append_vcf ]
         ch_purple                   // channel: [mandatory] [ meta, purple_dir ]
         ch_linx_somatic_annotation  // channel: [mandatory] [ meta, linx_annotation_dir ]
-        ch_linx_somatic_plot        // channel: [mandatory] [ meta, linx_visualiser_dir_reportable ]
+        ch_linx_somatic_plot        // channel: [mandatory] [ meta, linx_visualiser_dir ]
         ch_linx_germline_annotation // channel: [mandatory] [ meta, linx_annotation_dir ]
         ch_virusinterpreter         // channel: [mandatory] [ meta, virusinterpreter_dir ]
         ch_chord                    // channel: [mandatory] [ meta, chord_dir ]

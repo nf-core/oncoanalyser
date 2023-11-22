@@ -33,6 +33,7 @@ process ORANGE {
     def chord_dir_arg = chord_dir ? "-chord_dir ${chord_dir}" : ''
     def sigs_dir_arg = sigs_dir ? "-sigs_dir ${sigs_dir}" : ''
     def cuppa_dir_arg = cuppa_dir ? "-cuppa_dir ${cuppa_dir}" : ''
+    def plot_dir = linx_somatic_plot_dir.resolve('reportable/').toUriString().replaceAll('/$', '')
 
     def normal_id_arg = meta.containsKey('normal_dna_id') ? "-reference_sample_id ${meta.normal_dna_id}" : ''
     def normal_metrics_arg = bam_metrics_germline ? "-ref_sample_wgs_metrics_file ${bam_metrics_germline}" : ''
@@ -55,7 +56,7 @@ process ORANGE {
 
     # Isofox inputs are also expected to have the tumor sample ID in the filename
 
-        # Use of symlinks was causing reliability issues on HPC with Singularity, switched to full file copy instead
+    # NOTES(SW): Use of symlinks was causing reliability issues on HPC with Singularity, switched to full file copy instead
 
     purple_dir_local=${purple_dir}
     if [[ -n "${rna_id_arg}" ]]; then
@@ -79,6 +80,11 @@ process ORANGE {
         done;
 
     fi
+
+    # Set input plot directory and create it doesn't exist. See the LINX visualiser module for further info.
+    if [[ ! -e ${plot_dir}/ ]]; then
+        mkdir -p ${plot_dir}/;
+    fi;
 
     # NOTE(SW): '--add-opens java.base/java.time=ALL-UNNAMED' resolves issue writing JSON, see:
     # https://stackoverflow.com/questions/70412805/what-does-this-error-mean-java-lang-reflect-inaccessibleobjectexception-unable/70878195#70878195
@@ -104,7 +110,7 @@ process ORANGE {
             -purple_dir \${purple_dir_local} \\
             -purple_plot_dir \${purple_dir_local}/plot/ \\
             -linx_dir ${linx_somatic_anno_dir} \\
-            -linx_plot_dir ${linx_somatic_plot_dir} \\
+            -linx_plot_dir ${plot_dir}/ \\
             -lilac_dir ${lilac_dir} \\
             ${virus_dir_arg} \\
             ${chord_dir_arg} \\

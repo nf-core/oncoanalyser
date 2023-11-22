@@ -10,9 +10,8 @@ process LINX_VISUALISER {
     path ensembl_data_resources
 
     output:
-    tuple val(meta), path('linx_visualiser/all/')       , emit: visualiser_dir_all
-    tuple val(meta), path('linx_visualiser/reportable/'), emit: visualiser_dir_reportable
-    path 'versions.yml'                                 , emit: versions
+    tuple val(meta), path('plots/'), emit: plots
+    path 'versions.yml'            , emit: versions
 
     when:
     task.ext.when == null || task.ext.when
@@ -21,6 +20,16 @@ process LINX_VISUALISER {
     def args = task.ext.args ?: ''
 
     """
+    # NOTE(SW): the output plot directories are always required for ORANGE, which is straightfoward to handle with POSIX
+    # fs but more involved with FusionFS since it will not write empty directories to S3. A placeholder file can't be
+    # used in the plot directory to force FusionFS to create the directory as ORANGE will treat the placeholder as a PNG
+    # and fail. Optional outputs are possible but requires further channel logic and output to detect when complete.
+    # Instead I place the two plot output directories under a parent directory, only operating on that to allow use of a
+    # placeholder and support empty outputs when using FusionFS. Handing missing/non-existent directories are deferred
+    # to downstream processes, bypassing the need to implement further channel operations.
+
+    mkdir -p plots/
+
     # NOTE(SW): LINX v1.24.1 require trailing slashes for the -plot_out and -data_out arguments since no filesystem
     # separator is used when constructing fusion plot output filepaths.
 
@@ -40,8 +49,8 @@ process LINX_VISUALISER {
             -ensembl_data_dir ${ensembl_data_resources} \\
             -circos ${task.ext.circosPath} \\
             -threads ${task.cpus} \\
-            -plot_out linx_visualiser/all/ \\
-            -data_out linx_visualiser/all_data/
+            -plot_out plots/all/ \\
+            -data_out reportable/all_data/
 
     # Rerun LINX to render only reportable cluster plots in a separate directory. While this is regenerating existing
     # cluster plots, the number of reportable plots is generally very small and I prefer to rely on the internal LINX
@@ -65,8 +74,13 @@ process LINX_VISUALISER {
             -circos ${task.ext.circosPath} \\
             -plot_reportable \\
             -threads ${task.cpus} \\
-            -plot_out linx_visualiser/reportable/ \\
-            -data_out linx_visualiser/reportable_data/
+            -plot_out plots/reportable/ \\
+            -data_out data/reportable/
+
+    # Create placeholders to force FusionFS to create parent plot directory on S3
+    if [[ \$(ls plots/ | wc -l) -eq 0 ]]; then
+        touch plots/.keep;
+    fi;
 
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":
@@ -76,8 +90,8 @@ process LINX_VISUALISER {
 
     stub:
     """
-    mkdir -p linx_visualiser/plot_{all,reportable}/
-    touch linx_visualiser/plot_{all,reportable}/placeholder
+    mkdir -p plots/{all,reportable}/
+    touch plots/{all,reportable}/placeholder
     echo -e '${task.process}:\n  stub: noversions\n' > versions.yml
     """
 }
