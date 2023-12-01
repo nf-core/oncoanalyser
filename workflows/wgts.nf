@@ -83,6 +83,8 @@ include { ORANGE_REPORTING      } from '../subworkflows/local/orange_reporting'
 include { PAVE_ANNOTATION       } from '../subworkflows/local/pave_annotation'
 include { PREPARE_REFERENCE     } from '../subworkflows/local/prepare_reference'
 include { PURPLE_CALLING        } from '../subworkflows/local/purple_calling'
+include { READ_ALIGNMENT        } from '../subworkflows/local/read_alignment'
+include { READ_PROCESSING       } from '../subworkflows/local/read_processing'
 include { SAGE_APPEND           } from '../subworkflows/local/sage_append'
 include { SAGE_CALLING          } from '../subworkflows/local/sage_calling'
 include { SIGS_FITTING          } from '../subworkflows/local/sigs_fitting'
@@ -126,6 +128,65 @@ workflow WGTS {
 
     // Set GRIDSS config
     gridss_config = params.containsKey('gridss_config') ? file(params.gridss_config) : hmf_data.gridss_config
+
+    //
+    // SUBWORKFLOW: Align reads
+    //
+    // channel: [ meta, bam_dna ]
+    ch_dna_alignment_out = Channel.empty()
+    // channel: [ meta, bam_rna ]
+    ch_rna_alignment_out = Channel.empty()
+    // TODO(SW): set up correctly
+    if (true | run_config.stages.alignment) {
+
+        READ_ALIGNMENT(
+            ch_inputs,
+            // alignment reference files
+        )
+
+        ch_versions = ch_versions.mix(READ_ALIGNMENT.out.versions)
+
+        ch_dna_alignment_out = ch_dna_alignment_out.mix(READ_ALIGNMENT.out.dna)
+        ch_rna_alignment_out = ch_rna_alignment_out.mix(READ_ALIGNMENT.out.rna)
+
+    } else {
+
+        ch_dna_alignment_out = ch_inputs.map { meta -> [meta, []] }
+        ch_rna_alignment_out = ch_inputs.map { meta -> [meta, []] }
+
+    }
+
+    //
+    // SUBWORKFLOW: Process read alignments
+    //
+    // channel: [ meta, bam_dna ]
+    ch_dna_processed_out = Channel.empty()
+    // channel: [ meta, bam_rna ]
+    ch_rna_processed_out = Channel.empty()
+    // TODO(SW): set up correctly
+    if (true | run_config.stages.markdups) {
+
+        READ_PROCESSING(
+            ch_inputs,
+            ch_dna_alignment_out,
+            ch_rna_alignment_out,
+        )
+
+        ch_versions = ch_versions.mix(READ_PROCESSING.out.versions)
+
+        ch_dna_processed_out = ch_dna_processed_out.mix(READ_PROCESSING.out.dna)
+        ch_rna_processed_out = ch_rna_processed_out.mix(READ_PROCESSING.out.rna)
+
+    } else {
+
+        ch_dna_processed_out = ch_inputs.map { meta -> [meta, []] }
+        ch_rna_processed_out = ch_inputs.map { meta -> [meta, []] }
+
+    }
+
+    // TODO(SW): adjust downstream selection of input BAM
+
+    /*
 
     //
     // MODULE: Run Isofox to analyse RNA data
@@ -714,6 +775,7 @@ workflow WGTS {
     CUSTOM_DUMPSOFTWAREVERSIONS(
         ch_versions.unique().collectFile(name: 'collated_versions.yml')
     )
+    */
 }
 
 /*
