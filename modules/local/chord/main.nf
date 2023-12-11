@@ -34,8 +34,8 @@ process CHORD {
 
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":
-        CHORD: \$(R -s -e "message(packageVersion('CHORD'))")
-        mutSigExtractor: \$(R -s -e "message(packageVersion('mutSigExtractor'))")
+        CHORD: \$(R -s -e "message(packageVersion('CHORD'))" 2>&1)
+        mutSigExtractor: \$(R -s -e "message(packageVersion('mutSigExtractor'))" 2>&1)
     END_VERSIONS
     """
 
