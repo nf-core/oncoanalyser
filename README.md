@@ -77,6 +77,16 @@ The nf-core/oncoanalyser pipeline comes with documentation about the pipeline
 [usage](https://nf-co.re/oncoanalyser/usage), [parameters](https://nf-co.re/oncoanalyser/parameters) and
 [output](https://nf-co.re/oncoanalyser/output).
 
+## Version support
+
+As oncoanalyser is used in clinical settings and is subject to accreditation standards in some instances, there is a
+need for long-term stability and reliability for feature releases in order to meet operational requirements. This is
+accomplished through long-term support of several nominated feature releases, which all receive bug fixes and security
+fixes during the period of extended support.
+
+Each release that is given extended support is allocated a separate long-lived git branch with the 'stable' prefix, e.g.
+`stable/1.2.x`, `stable/1.5.x`. Feature development otherwise occurs on the `main` branch.
+
 ## Credits
 
 The oncoanalyser pipeline was written by Stephen Watts at the [University of Melbourne Centre for Cancer
