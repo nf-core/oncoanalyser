@@ -16,9 +16,9 @@
 
 ## Introduction
 
-**nf-core/oncoanalyser** is a Nextflow implementation of the comprehensive cancer RNA and DNA analysis and reporting
-pipeline from the Hartwig Medical Foundation. For detailed information on each component of the Hartwig Medical
-Foundation pipeline, please refer to [hartwigmedical/hmftools](https://github.com/hartwigmedical/hmftools/).
+**nf-core/oncoanalyser** is a Nextflow implementation of the comprehensive cancer DNA and RNA analysis and reporting
+workflow from the Hartwig Medical Foundation. For detailed information on each component of the Hartwig Medical
+Foundation workflow, please refer to [hartwigmedical/hmftools](https://github.com/hartwigmedical/hmftools/).
 
 The oncoanalyser pipeline is built using [Nextflow](https://www.nextflow.io), a workflow tool to run tasks across
 multiple compute infrastructures in a very portable manner. It uses Docker/Singularity containers making installation
