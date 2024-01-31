@@ -2,7 +2,7 @@ process GPGR_LINX {
     tag "${meta.id}"
     label 'process_single'
 
-    container 'docker.io/scwatts/gpgr:1.4.5'
+    container 'docker.io/scwatts/gpgr:1.5.0'
 
     input:
     tuple val(meta), path(linx_annotation_dir), path(linx_visualiser_dir)

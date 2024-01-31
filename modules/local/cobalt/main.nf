@@ -2,7 +2,7 @@ process COBALT {
     tag "${meta.id}"
     label 'process_medium'
 
-    container 'docker.io/scwatts/cobalt:1.15.2--0'
+    container 'docker.io/scwatts/cobalt:1.16.rc1--0'
 
     input:
     tuple val(meta), path(tumor_bam), path(normal_bam), path(tumor_bai), path(normal_bai)
@@ -41,10 +41,9 @@ process COBALT {
             ${target_region_arg} \\
             -output_dir cobalt/
 
-    # NOTE(SW): hard coded since there is no reliable way to obtain version information.
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":
-        cobalt: 1.15.2
+        cobalt: \$(java -jar ${task.ext.jarPath} -version | sed 's/^.* //')
     END_VERSIONS
     """
 

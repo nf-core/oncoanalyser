@@ -94,9 +94,10 @@ input:
       type: file
       description: Cohort frequency for germline deletions (optional)
       pattern: "*.{csv}"
-  - target_regions_bed:
+  - target_region_bed:
       type: file
       description: Target regions BED file (optional)
+      pattern: "*.{bed}"
   - target_regions_ratios:
       type: file
       description: Target regions ratios file (optional)

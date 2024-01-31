@@ -15,6 +15,7 @@ workflow AMBER_PROFILING {
         // Reference data
         genome_version     // channel: [mandatory] genome version
         heterozygous_sites // channel: [optional]  /path/to/heterozygous_sites
+        target_region_bed  // channel: [optional]  /path/to/target_region_bed
 
     main:
         // Channel for version.yml files
@@ -63,6 +64,7 @@ workflow AMBER_PROFILING {
             ch_amber_inputs,
             genome_version,
             heterozygous_sites,
+            target_region_bed,
         )
 
         ch_versions = ch_versions.mix(AMBER.out.versions)

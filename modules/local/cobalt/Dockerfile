@@ -10,7 +10,7 @@ RUN \
 
 RUN \
   mkdir -p /opt/cobalt/ && \
-  wget -O /opt/cobalt/cobalt.jar 'https://github.com/hartwigmedical/hmftools/releases/download/cobalt-v1.15.2/cobalt_v1.15.2.jar'
+  wget -O /opt/cobalt/cobalt.jar 'https://github.com/hartwigmedical/hmftools/releases/download/cobalt-v1.16.rc1/cobalt_v1.16.rc1.jar'
 
 USER mambauser
 

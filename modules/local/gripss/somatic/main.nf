@@ -2,7 +2,7 @@ process GRIPSS_SOMATIC {
     tag "${meta.id}"
     label 'process_low'
 
-    container 'docker.io/scwatts/gripss:2.3.5--0'
+    container 'docker.io/scwatts/gripss:2.4.rc1--0'
 
     input:
     tuple val(meta), path(gridss_vcf)
@@ -13,7 +13,7 @@ process GRIPSS_SOMATIC {
     path pon_breakpoints
     path known_fusions
     path repeatmasker_annotations
-    path target_regions_bed
+    path target_region_bed
 
     output:
     tuple val(meta), path('*.gripss.filtered{,.somatic}.vcf.gz'), path('*.gripss.filtered{,.somatic}.vcf.gz.tbi'), emit: vcf
@@ -27,7 +27,7 @@ process GRIPSS_SOMATIC {
     def args = task.ext.args ?: ''
 
     def reference_arg = meta.containsKey('normal_id') ? "-reference ${meta.normal_id}" : ''
-    def target_regions_bed_arg = target_regions_bed ? "-target_regions_bed ${target_regions_bed}" : ''
+    def target_regions_bed_arg = target_region_bed ? "-target_regions_bed ${target_region_bed}" : ''
     def output_id_arg = meta.containsKey('normal_id') ? '-output_id somatic' : ''
 
     """
@@ -50,7 +50,7 @@ process GRIPSS_SOMATIC {
 
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":
-        gripss: \$(java -jar ${task.ext.jarPath} | sed -n '1s/^.*version: //p')
+        gripss: \$(java -jar ${task.ext.jarPath} -version | sed 's/^.* //')
     END_VERSIONS
     """
 

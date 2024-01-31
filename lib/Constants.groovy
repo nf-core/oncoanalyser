@@ -11,14 +11,14 @@ class Constants {
     static List PANELS_DEFINED     = ['hmf', 'tso500']
 
 
-    static String HMF_DATA_37_PATH = 'https://pub-29f2e5b2b7384811bdbbcba44f8b5083.r2.dev/hmf_reference_data/hmftools/5.33_37--0.tar.gz'
-    static String HMF_DATA_38_PATH = 'https://pub-29f2e5b2b7384811bdbbcba44f8b5083.r2.dev/hmf_reference_data/hmftools/5.33_38--0.tar.gz'
+    static String HMF_DATA_37_PATH = 'https://pub-29f2e5b2b7384811bdbbcba44f8b5083.r2.dev/hmf_reference_data/hmftools/5.34_37--0.tar.gz'
+    static String HMF_DATA_38_PATH = 'https://pub-29f2e5b2b7384811bdbbcba44f8b5083.r2.dev/hmf_reference_data/hmftools/5.34_38--0.tar.gz'
 
 
     static String HMF_PANEL_38_PATH = 'https://pub-29f2e5b2b7384811bdbbcba44f8b5083.r2.dev/hmf_reference_data/panels/hmf_5.33_38--0.tar.gz'
 
-    static String TSO500_PANEL_37_PATH = 'https://pub-29f2e5b2b7384811bdbbcba44f8b5083.r2.dev/hmf_reference_data/panels/tso500_5.33_37--1.tar.gz'
-    static String TSO500_PANEL_38_PATH = 'https://pub-29f2e5b2b7384811bdbbcba44f8b5083.r2.dev/hmf_reference_data/panels/tso500_5.33_38--1.tar.gz'
+    static String TSO500_PANEL_37_PATH = 'https://pub-29f2e5b2b7384811bdbbcba44f8b5083.r2.dev/hmf_reference_data/panels/tso500_5.34_37--0.tar.gz'
+    static String TSO500_PANEL_38_PATH = 'https://pub-29f2e5b2b7384811bdbbcba44f8b5083.r2.dev/hmf_reference_data/panels/tso500_5.34_38--0.tar.gz'
 
 
     static String VIRUSBREAKENDDB_PATH = 'https://pub-29f2e5b2b7384811bdbbcba44f8b5083.r2.dev/virusbreakend/virusbreakenddb_20210401.tar.gz'
@@ -75,6 +75,7 @@ class Constants {
         PAVE_VCF,
         PURPLE_DIR,
         SAGE_VCF,
+        SAGE_VCF_TBI,
         SAGE_APPEND_VCF,
         VIRUSINTERPRETER_DIR,
         // ORANGE specific
@@ -152,6 +153,16 @@ class Constants {
             SampleType.NORMAL,
             SequenceType.DNA,
         ],
+        SAGE_VCF_TBI_TUMOR: [
+            FileType.SAGE_VCF_TBI,
+            SampleType.TUMOR,
+            SequenceType.DNA,
+        ],
+        SAGE_VCF_TBI_NORMAL: [
+            FileType.SAGE_VCF_TBI,
+            SampleType.NORMAL,
+            SequenceType.DNA,
+        ],
         SAGE_DIR_TUMOR: [
             FileType.SAGE_DIR,
             SampleType.TUMOR,
@@ -165,12 +176,12 @@ class Constants {
         SAGE_APPEND_VCF_TUMOR: [
             FileType.SAGE_APPEND_VCF,
             SampleType.TUMOR,
-            [SequenceType.DNA_RNA],
+            SequenceType.DNA_RNA,
         ],
         SAGE_APPEND_VCF_NORMAL: [
             FileType.SAGE_APPEND_VCF,
             SampleType.NORMAL,
-            [SequenceType.DNA_RNA],
+            SequenceType.DNA_RNA,
         ],
 
         PAVE_VCF_TUMOR: [

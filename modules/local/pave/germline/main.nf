@@ -1,15 +1,15 @@
 // NOTE(SW): use of tumor sample name here is consistent with Pipeline5
-//  - https://github.com/hartwigmedical/pipeline5/blob/v5.32/cluster/src/main/java/com/hartwig/pipeline/tertiary/pave/PaveGermline.java#L35-L39
-//  - https://github.com/hartwigmedical/pipeline5/blob/v5.32/cluster/src/main/java/com/hartwig/pipeline/tertiary/pave/PaveArguments.java#L34-L44
+//  - https://github.com/hartwigmedical/pipeline5/blob/v5.33/cluster/src/main/java/com/hartwig/pipeline/tertiary/pave/PaveGermline.java#L36-L41
+//  - https://github.com/hartwigmedical/pipeline5/blob/v5.33/cluster/src/main/java/com/hartwig/pipeline/tertiary/pave/PaveArguments.java#L31-L43
 
 process PAVE_GERMLINE {
     tag "${meta.id}"
     label 'process_medium'
 
-    container 'docker.io/scwatts/pave:1.5--0'
+    container 'docker.io/scwatts/pave:1.6--0'
 
     input:
-    tuple val(meta), path(sage_vcf)
+    tuple val(meta), path(sage_vcf), path(sage_tbi)
     path genome_fasta
     val genome_ver
     path genome_fai
@@ -35,7 +35,7 @@ process PAVE_GERMLINE {
     if (genome_ver == '37') {
         gnomad_args = "-gnomad_freq_file ${gnomad_resource}"
     } else if (genome_ver == '38') {
-        gnomad_args = "-gnomad_freq_dir ${gnomad_resource} -gnomad_load_chr_on_demand"
+        gnomad_args = "-gnomad_freq_dir ${gnomad_resource}"
     } else {
         log.error "got bad genome version: ${genome_ver}"
         System.exit(1)
@@ -59,12 +59,12 @@ process PAVE_GERMLINE {
             -gnomad_pon_filter -1 \\
             ${gnomad_args} \\
             -read_pass_only \\
+            -threads ${task.cpus} \\
             -output_dir ./
 
-    # NOTE(SW): hard coded since there is no reliable way to obtain version information.
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":
-        pave: 1.5
+        pave: \$(java -jar ${task.ext.jarPath} -version | sed 's/^.* //')
     END_VERSIONS
     """
 

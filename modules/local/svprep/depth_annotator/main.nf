@@ -2,7 +2,7 @@ process SVPREP_DEPTH_ANNOTATOR {
     tag "${meta.id}"
     label 'process_medium'
 
-    container 'docker.io/scwatts/svprep:1.2.2--0'
+    container 'docker.io/scwatts/svprep:1.2.3--0'
 
     input:
     tuple val(meta), path(bams), path(bais), path(vcf), val(labels)
@@ -38,10 +38,9 @@ process SVPREP_DEPTH_ANNOTATOR {
             -threads ${task.cpus} \\
             -output_vcf ${meta.tumor_id}.gridss.vcf.gz
 
-    # NOTE(SW): partially hard coded since there is no reliable way to obtain version information.
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":
-        svprep: 1.2.1
+        svprep: \$(java -jar ${task.ext.jarPath} -version | sed 's/^.* //')
     END_VERSIONS
     """
 

@@ -2,7 +2,7 @@ process GRIPSS_GERMLINE {
     tag "${meta.id}"
     label 'process_low'
 
-    container 'docker.io/scwatts/gripss:2.3.5--0'
+    container 'docker.io/scwatts/gripss:2.4.rc1--0'
 
     input:
     tuple val(meta), path(gridss_vcf)
@@ -45,7 +45,7 @@ process GRIPSS_GERMLINE {
 
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":
-        gripss: \$(java -jar ${task.ext.jarPath} | sed -n '1s/^.*version: //p')
+        gripss: \$(java -jar ${task.ext.jarPath} -version | sed 's/^.* //')
     END_VERSIONS
     """
 

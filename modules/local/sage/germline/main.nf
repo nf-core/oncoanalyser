@@ -2,7 +2,7 @@ process SAGE_GERMLINE {
     tag "${meta.id}"
     label 'process_medium'
 
-    container 'docker.io/scwatts/sage:3.3.1--0'
+    container 'docker.io/scwatts/sage:3.4.rc1--0'
 
     input:
     tuple val(meta), path(tumor_bam), path(normal_bam), path(tumor_bai), path(normal_bai)
@@ -17,10 +17,9 @@ process SAGE_GERMLINE {
     path ensembl_data_resources
 
     output:
-    tuple val(meta), path('germline/*.sage.germline.vcf.gz'), path('germline/*.sage.germline.vcf.gz.tbi')                  , emit: vcf
-    tuple val(meta), path('germline/*.sage.germline.filtered.vcf.gz'), path('germline/*.sage.germline.filtered.vcf.gz.tbi'), emit: vcf_filtered
-    tuple val(meta), path('germline/')                                                                                     , emit: sage_dir
-    path 'versions.yml'                                                                                                    , emit: versions
+    tuple val(meta), path('germline/*.sage.germline.vcf.gz'), path('germline/*.sage.germline.vcf.gz.tbi'), emit: vcf
+    tuple val(meta), path('germline/')                                                                   , emit: sage_dir
+    path 'versions.yml'                                                                                  , emit: versions
 
     when:
     task.ext.when == null || task.ext.when
@@ -57,19 +56,11 @@ process SAGE_GERMLINE {
             -write_bqr_data \\
             -write_bqr_plot \\
             -threads ${task.cpus} \\
-            -out germline/${meta.tumor_id}.sage.germline.vcf.gz
+            -output_vcf germline/${meta.tumor_id}.sage.germline.vcf.gz
 
-    bcftools view \\
-        -f 'PASS' \\
-        -o germline/${meta.tumor_id}.sage.germline.filtered.vcf.gz \\
-        germline/${meta.tumor_id}.sage.germline.vcf.gz
-
-    bcftools index -t germline/${meta.tumor_id}.sage.germline.filtered.vcf.gz
-
-    # NOTE(SW): hard coded since there is no reliable way to obtain version information.
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":
-        sage: 3.3
+        sage: \$(java -jar ${task.ext.jarPath} -version | sed 's/^.* //')
     END_VERSIONS
     """
 
@@ -78,8 +69,6 @@ process SAGE_GERMLINE {
     mkdir -p germline/
     touch germline/${meta.tumor_id}.sage.germline.vcf.gz
     touch germline/${meta.tumor_id}.sage.germline.vcf.gz.tbi
-    touch germline/${meta.tumor_id}.sage.germline.filtered.vcf.gz
-    touch germline/${meta.tumor_id}.sage.germline.filtered.vcf.gz.tbi
     touch germline/${meta.tumor_id}.sage.bqr.png
     touch germline/${meta.tumor_id}.sage.bqr.tsv
     touch germline/${meta.normal_id}.sage.bqr.png

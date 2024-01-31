@@ -22,7 +22,7 @@ workflow GRIPSS_FILTERING {
         breakpoint_pon           // channel: [mandatory] /path/to/breakpoint_pon
         known_fusions            // channel: [mandatory] /path/to/known_fusions
         repeatmasker_annotations // channel: [mandatory] /path/to/repeatmasker_annotations
-        target_regions_bed       // channel: [optional]  /path/to/target_regions_bed
+        target_region_bed        // channel: [optional]  /path/to/target_region_bed
 
     main:
         // Channel for version.yml files
@@ -134,7 +134,7 @@ workflow GRIPSS_FILTERING {
             breakpoint_pon,
             known_fusions,
             repeatmasker_annotations,
-            target_regions_bed,
+            target_region_bed,
         )
 
         ch_versions = ch_versions.mix(SOMATIC.out.versions)

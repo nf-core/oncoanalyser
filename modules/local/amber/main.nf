@@ -2,12 +2,13 @@ process AMBER {
     tag "${meta.id}"
     label 'process_medium'
 
-    container 'docker.io/scwatts/amber:3.9--3'
+    container 'docker.io/scwatts/amber:4.0.rc1--0'
 
     input:
     tuple val(meta), path(tumor_bam), path(normal_bam), path(tumor_bai), path(normal_bai)
     val ref_genome_ver
     path heterozygous_sites
+    path target_region_bed
 
     output:
     tuple val(meta), path('amber/'), emit: amber_dir
@@ -22,6 +23,8 @@ process AMBER {
     def reference_arg = meta.containsKey('normal_id') ? "-reference ${meta.normal_id}" : ''
     def reference_bam_arg = normal_bam ? "-reference_bam ${normal_bam}" : ''
 
+    def target_regions_bed_arg = target_region_bed ? "-target_regions_bed ${target_region_bed}" : ''
+
     """
     java \\
         -Xmx${Math.round(task.memory.bytes * 0.95)} \\
@@ -31,15 +34,15 @@ process AMBER {
             -tumor_bam ${tumor_bam} \\
             ${reference_arg} \\
             ${reference_bam_arg} \\
+            ${target_regions_bed_arg} \\
             -ref_genome_version ${ref_genome_ver} \\
             -loci ${heterozygous_sites} \\
             -threads ${task.cpus} \\
             -output_dir amber/
 
-    # NOTE(SW): hard coded since there is no reliable way to obtain version information.
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":
-        amber: 3.9
+        amber: \$(java -jar ${task.ext.jarPath} -version | sed 's/^.* //')
     END_VERSIONS
     """
 

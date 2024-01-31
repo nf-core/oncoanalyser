@@ -2,7 +2,7 @@ process GRIDSS_ASSEMBLE {
     tag "${meta.id}"
     label 'process_medium'
 
-    container 'docker.io/scwatts/svprep:1.2.2--0'
+    container 'docker.io/scwatts/svprep:1.2.3--0'
 
     input:
     tuple val(meta), path(bams), path(bams_filtered), path(preprocess_dirs), val(labels)
@@ -68,7 +68,7 @@ process GRIDSS_ASSEMBLE {
         ${args} \\
         --jvmheap ${Math.round((task.memory.bytes - task.ext.otherJvmHeap.bytes) * 0.95)} \\
         --otherjvmheap ${task.ext.otherJvmHeap.bytes} \\
-        --jar ${task.ext.jarPath} \\
+        --jar ${task.ext.jarPathGridss} \\
         --steps assemble \\
         --labels ${labels_arg} \\
         --reference ${genome_fasta} \\
@@ -80,11 +80,10 @@ process GRIDSS_ASSEMBLE {
         ${bams_arg} \\
         ${bams_filtered_arg}
 
-    # NOTE(SW): partially hard coded since there is no reliable way to obtain version information.
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":
-        gridss: \$(java -cp ${task.ext.jarPath} gridss.CallVariants --version 2>&1 | sed 's/-gridss//')
-        svprep: 1.2.1
+        gridss: \$(java -cp ${task.ext.jarPathGridss} gridss.CallVariants --version 2>&1 | sed 's/-gridss//')
+        svprep: \$(java -jar ${task.ext.jarPathSvPrep} -version | sed 's/^.* //')
     END_VERSIONS
     """
 

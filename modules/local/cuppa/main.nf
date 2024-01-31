@@ -59,10 +59,9 @@ process CUPPA {
             -output_dir cuppa/;
     fi
 
-    # NOTE(SW): hard coded since there is no reliable way to obtain version information.
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":
-        cuppa: 1.8.1
+        cuppa: \$(java -jar ${task.ext.jarPath} | sed -n '1s/^.* //p')
     END_VERSIONS
     """
 

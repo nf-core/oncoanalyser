@@ -139,7 +139,7 @@ process ORANGE {
 
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":
-        orange: \$(java -jar ${task.ext.jarPath} -version | sed 's/^.*version //')
+        orange: \$(java -jar ${task.ext.jarPath} -version | sed 's/^.* //')
     END_VERSIONS
     """
 

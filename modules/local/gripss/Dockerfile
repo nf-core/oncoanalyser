@@ -10,7 +10,7 @@ RUN \
 
 RUN \
   mkdir -p /opt/gripss/ && \
-  wget -O /opt/gripss/gripss.jar 'https://github.com/hartwigmedical/hmftools/releases/download/gripss-v2.3.5/gripss_v2.3.5.jar'
+  wget -O /opt/gripss/gripss.jar 'https://github.com/hartwigmedical/hmftools/releases/download/gripss-v2.4.rc1/gripss_v2.4.rc1.jar'
 
 USER mambauser
 

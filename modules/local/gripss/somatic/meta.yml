@@ -46,9 +46,10 @@ input:
   - repeatmasker_annotations:
       type: file
       description: RepeatMasker annotations file
-  - target_regions_bed:
+  - target_region_bed:
       type: file
-      description: Target regions BED file (optional)
+      description: Target region BED file (optional)
+      pattern: "*.{bed}"
 output:
   - meta:
       type: map

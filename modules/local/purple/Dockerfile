@@ -10,7 +10,7 @@ RUN \
 
 RUN \
   mkdir -p /opt/purple/ && \
-  wget -O /opt/purple/purple.jar 'https://github.com/hartwigmedical/hmftools/releases/download/purple-v3.9.2/purple_v3.9.2.jar'
+  wget -O /opt/purple/purple.jar 'https://github.com/hartwigmedical/hmftools/releases/download/purple-v4.0.rc1/purple_v4.0.rc1.jar'
 
 USER mambauser
 

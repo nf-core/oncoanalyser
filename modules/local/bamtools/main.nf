@@ -2,7 +2,7 @@ process BAMTOOLS {
     tag "${meta.id}"
     label 'process_medium'
 
-    container 'docker.io/scwatts/bamtools:1.1--0'
+    container 'docker.io/scwatts/bamtools:1.2--0'
 
     input:
     tuple val(meta), path(bam), path(bai)
@@ -35,7 +35,7 @@ process BAMTOOLS {
 
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":
-        bamtools: \$(java -jar ${task.ext.jarPath} 2>&1 | sed -n '1s/^.*BamTools version: //p')
+        bamtools: \$(java -jar ${task.ext.jarPath} | sed 's/^.* //')
     END_VERSIONS
     """
 

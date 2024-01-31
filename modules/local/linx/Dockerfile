@@ -10,7 +10,7 @@ RUN \
 
 RUN \
   mkdir -p /opt/linx/ && \
-  wget -O /opt/linx/linx.jar 'https://github.com/hartwigmedical/hmftools/releases/download/linx-v1.24.1/linx_v1.24.1.jar'
+  wget -O /opt/linx/linx.jar 'https://github.com/hartwigmedical/hmftools/releases/download/linx-v1.25/linx_v1.25.jar'
 
 USER mambauser
 

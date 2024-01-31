@@ -2,7 +2,7 @@ process LINX_VISUALISER {
     tag "${meta.id}"
     label 'process_medium'
 
-    container 'docker.io/scwatts/linx:1.24.1--0'
+    container 'docker.io/scwatts/linx:1.25--0'
 
     input:
     tuple val(meta), path(linx_annotation_dir)
@@ -50,7 +50,7 @@ process LINX_VISUALISER {
             -circos ${task.ext.circosPath} \\
             -threads ${task.cpus} \\
             -plot_out plots/all/ \\
-            -data_out reportable/all_data/
+            -data_out data/all/
 
     # Rerun LINX to render only reportable cluster plots in a separate directory. While this is regenerating existing
     # cluster plots, the number of reportable plots is generally very small and I prefer to rely on the internal LINX

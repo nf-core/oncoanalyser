@@ -38,6 +38,10 @@ input:
       type: file
       description: AMBER heterozygous sites file
       pattern: "*.{vcf.gz}"
+  - target_region_bed:
+      type: file
+      description: Target region BED file (optional)
+      pattern: "*.{bed}"
 output:
   - meta:
       type: map

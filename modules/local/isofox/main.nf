@@ -58,7 +58,7 @@ process ISOFOX {
 
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":
-        isofox: \$(java -jar ${task.ext.jarPath} | sed -n '1s/^.*version: //p')
+        isofox: \$(java -jar ${task.ext.jarPath} -version | sed 's/^.* //')
     END_VERSIONS
     """
 

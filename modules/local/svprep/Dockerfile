@@ -11,8 +11,8 @@ RUN \
 
 RUN \
   mkdir -p /opt/svprep/ && \
-  wget -O /opt/svprep/svprep.jar 'https://github.com/hartwigmedical/hmftools/releases/download/sv-prep-v1.2.2/sv-prep_v1.2.2.jar' && \
-  wget -O /opt/svprep/gridss_svprep 'https://raw.githubusercontent.com/hartwigmedical/hmftools/sv-prep-v1.2.2/sv-prep/src/main/resources/gridss/gridss.run.sh'
+  wget -O /opt/svprep/svprep.jar 'https://github.com/hartwigmedical/hmftools/releases/download/sv-prep-v1.2.3/sv-prep_v1.2.3.jar' && \
+  wget -O /opt/svprep/gridss_svprep 'https://raw.githubusercontent.com/hartwigmedical/hmftools/sv-prep-v1.2.3/sv-prep/src/main/resources/gridss/gridss.run.sh'
 
 COPY assets/gridss_svprep.patch /tmp/
 RUN \

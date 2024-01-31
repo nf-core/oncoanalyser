@@ -1,10 +1,10 @@
-// NOTE(SW): logic that determines BQR outputs assumes '-out' is a path that includes at least leading one directory
+// NOTE(SW): logic that determines BQR outputs assumes '-output_vcf' is a path that includes at least leading one directory
 
 process SAGE_SOMATIC {
     tag "${meta.id}"
     label 'process_medium'
 
-    container 'docker.io/scwatts/sage:3.3.1--0'
+    container 'docker.io/scwatts/sage:3.4.rc1--0'
 
     input:
     tuple val(meta), path(tumor_bam), path(normal_bam), path(tumor_bai), path(normal_bai)
@@ -19,10 +19,9 @@ process SAGE_SOMATIC {
     path ensembl_data_resources
 
     output:
-    tuple val(meta), path('somatic/*.sage.somatic.vcf.gz'), path('somatic/*.sage.somatic.vcf.gz.tbi')                  , emit: vcf
-    tuple val(meta), path('somatic/*.sage.somatic.filtered.vcf.gz'), path('somatic/*.sage.somatic.filtered.vcf.gz.tbi'), emit: vcf_filtered
-    tuple val(meta), path('somatic/')                                                                                  , emit: sage_dir
-    path 'versions.yml'                                                                                                , emit: versions
+    tuple val(meta), path('somatic/*.sage.somatic.vcf.gz'), path('somatic/*.sage.somatic.vcf.gz.tbi'), emit: vcf
+    tuple val(meta), path('somatic/')                                                                , emit: sage_dir
+    path 'versions.yml'                                                                              , emit: versions
 
     when:
     task.ext.when == null || task.ext.when
@@ -54,19 +53,11 @@ process SAGE_SOMATIC {
             -write_bqr_data \\
             -write_bqr_plot \\
             -threads ${task.cpus} \\
-            -out somatic/${meta.tumor_id}.sage.somatic.vcf.gz
+            -output_vcf somatic/${meta.tumor_id}.sage.somatic.vcf.gz
 
-    bcftools view \\
-        -f 'PASS' \\
-        -o somatic/${meta.tumor_id}.sage.somatic.filtered.vcf.gz \\
-        somatic/${meta.tumor_id}.sage.somatic.vcf.gz
-
-    bcftools index -t somatic/${meta.tumor_id}.sage.somatic.filtered.vcf.gz
-
-    # NOTE(SW): hard coded since there is no reliable way to obtain version information.
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":
-        sage: 3.3
+        sage: \$(java -jar ${task.ext.jarPath} -version | sed 's/^.* //')
     END_VERSIONS
     """
 
@@ -75,8 +66,6 @@ process SAGE_SOMATIC {
     mkdir -p somatic/
     touch somatic/${meta.tumor_id}.sage.somatic.vcf.gz
     touch somatic/${meta.tumor_id}.sage.somatic.vcf.gz.tbi
-    touch somatic/${meta.tumor_id}.sage.somatic.filtered.vcf.gz
-    touch somatic/${meta.tumor_id}.sage.somatic.filtered.vcf.gz.tbi
     touch somatic/${meta.tumor_id}.gene.coverage.tsv
     touch somatic/${meta.tumor_id}.sage.bqr.png
     touch somatic/${meta.tumor_id}.sage.bqr.tsv

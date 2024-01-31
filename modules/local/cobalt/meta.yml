@@ -43,7 +43,7 @@ input:
   - target_region_normalisation:
       type: file
       description: Normalisation file (optional)
-      pattern: "*.{bed.gz}"
+      pattern: "*.{tsv}"
 output:
   - meta:
       type: map

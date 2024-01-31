@@ -37,16 +37,17 @@ workflow PAVE_ANNOTATION {
         // MODULE: PAVE germline
         //
         // Select input sources and sort
-        // channel: runnable: [ meta, sage_vcf ]
+        // channel: runnable: [ meta, sage_vcf, sage_tbi ]
         // channel: skip: [ meta ]
         ch_sage_germline_inputs_sorted = ch_sage_germline_vcf
             .map { meta, sage_vcf, sage_tbi ->
                 return [
                     meta,
                     Utils.selectCurrentOrExisting(sage_vcf, meta, Constants.INPUT.SAGE_VCF_NORMAL),
+                    Utils.selectCurrentOrExisting(sage_tbi, meta, Constants.INPUT.SAGE_VCF_TBI_NORMAL),
                 ]
             }
-            .branch { meta, sage_vcf ->
+            .branch { meta, sage_vcf, sage_tbi ->
 
                 def has_existing = Utils.hasExistingInput(meta, Constants.INPUT.PAVE_VCF_NORMAL)
 
@@ -56,9 +57,9 @@ workflow PAVE_ANNOTATION {
             }
 
         // Create process input channel
-        // channel: [ meta_pave, sage_vcf ]
+        // channel: [ meta_pave, sage_vcf, sage_tbi ]
         ch_pave_germline_inputs = ch_sage_germline_inputs_sorted.runnable
-            .map { meta, sage_vcf ->
+            .map { meta, sage_vcf, sage_tbi ->
 
                 def meta_pave = [
                     key: meta.group_id,
@@ -66,7 +67,7 @@ workflow PAVE_ANNOTATION {
                     sample_id: Utils.getTumorDnaSampleName(meta),
                 ]
 
-                return [meta_pave, sage_vcf]
+                return [meta_pave, sage_vcf, sage_tbi]
             }
 
         // Run process
@@ -90,16 +91,17 @@ workflow PAVE_ANNOTATION {
         // MODULE: PAVE somatic
         //
         // Select input sources and sort
-        // channel: runnable: [ meta, sage_vcf ]
+        // channel: runnable: [ meta, sage_vcf, sage_tbi ]
         // channel: skip: [ meta ]
         ch_sage_somatic_inputs_sorted = ch_sage_somatic_vcf
             .map { meta, sage_vcf, sage_tbi ->
                 return [
                     meta,
                     Utils.selectCurrentOrExisting(sage_vcf, meta, Constants.INPUT.SAGE_VCF_TUMOR),
+                    Utils.selectCurrentOrExisting(sage_tbi, meta, Constants.INPUT.SAGE_VCF_TBI_TUMOR),
                 ]
             }
-            .branch { meta, sage_vcf ->
+            .branch { meta, sage_vcf, sage_tbi ->
 
                 def has_existing = Utils.hasExistingInput(meta, Constants.INPUT.PAVE_VCF_TUMOR)
 
@@ -109,9 +111,9 @@ workflow PAVE_ANNOTATION {
             }
 
         // Create process input channel
-        // channel: [ meta_pave, sage_vcf ]
+        // channel: [ meta_pave, sage_vcf, sage_tbi ]
         ch_pave_somatic_inputs = ch_sage_somatic_inputs_sorted.runnable
-            .map { meta, sage_vcf ->
+            .map { meta, sage_vcf, sage_tbi ->
 
                 def meta_pave = [
                     key: meta.group_id,
@@ -119,8 +121,22 @@ workflow PAVE_ANNOTATION {
                     sample_id: Utils.getTumorDnaSampleName(meta),
                 ]
 
-                return [meta_pave, sage_vcf]
+                return [meta_pave, sage_vcf, sage_tbi]
             }
+
+        // Set resource files according to run mode
+        // NOTE(SW): required since certain files can be used in germline and somatic depending on mode
+        // but want to avoid duplicating as multiple inputs
+        // NOTE(SW): this pattern should be used only sparingly; implicit config from workflows is prefered
+        sage_blocklist_regions_somatic = sage_blocklist_regions
+        sage_blocklist_sites_somatic = sage_blocklist_sites
+        clinvar_annotations_somatic = clinvar_annotations
+        run_mode = Utils.getEnumFromString(params.mode, Constants.RunMode)
+        if (run_mode === Constants.RunMode.WGTS) {
+            sage_blocklist_regions_somatic = []
+            sage_blocklist_sites_somatic = []
+            clinvar_annotations_somatic = []
+        }
 
         // Run process
         SOMATIC(
@@ -130,6 +146,9 @@ workflow PAVE_ANNOTATION {
             genome_fai,
             sage_pon,
             pon_artefacts,
+            sage_blocklist_regions_somatic,
+            sage_blocklist_sites_somatic,
+            clinvar_annotations_somatic,
             segment_mappability,
             driver_gene_panel,
             ensembl_data_resources,
@@ -139,7 +158,7 @@ workflow PAVE_ANNOTATION {
         ch_versions = ch_versions.mix(SOMATIC.out.versions)
 
         // Set outputs, restoring original meta
-        // channel: [ meta, gripss_vcf, gripss_tbi ]
+        // channel: [ meta, pave_vcf ]
         ch_somatic_out = Channel.empty()
             .mix(
                 WorkflowOncoanalyser.restoreMeta(SOMATIC.out.vcf, ch_inputs),

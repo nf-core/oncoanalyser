@@ -172,6 +172,7 @@ workflow WGTS {
             ch_inputs,
             ref_data.genome_version,
             hmf_data.heterozygous_sites,
+            [],  // target_region_bed
         )
 
         ch_versions = ch_versions.mix(AMBER_PROFILING.out.versions)
