@@ -232,7 +232,7 @@ workflow ORANGE_REPORTING {
             ensembl_data_resources,
             ch_orange_inputs.isofox_alt_sj,
             ch_orange_inputs.isofox_gene_distribution,
-            "5.33 [oncoanalyser]",
+            "5.34 [oncoanalyser]",
         )
 
         ch_versions = ch_versions.mix(ORANGE.out.versions)
