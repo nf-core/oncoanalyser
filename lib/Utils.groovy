@@ -189,6 +189,21 @@ class Utils {
                 System.exit(1)
             }
 
+            // Enforce unique samples names within groups
+            def sample_ids_duplicated = sample_keys
+                .groupBy { meta.getOrDefault(it, [:]).getOrDefault('sample_id', null) }
+                .findResults { k, v -> k !== null & v.size() > 1 ? [k, v] : null }
+
+            if (sample_ids_duplicated) {
+                def duplicate_message_strs = sample_ids_duplicated.collect { sample_id, keys ->
+                    def key_strs = keys.collect { sample_type, sequence_type -> "${sample_type}/${sequence_type}" }
+                    return "  * ${sample_id}: ${key_strs.join(", ")}"
+                }
+                log.error "duplicate sample names found for ${meta.group_id}:\n\n" +
+                    "${duplicate_message_strs.join("\n")}"
+                System.exit(1)
+            }
+
         }
     }
 
