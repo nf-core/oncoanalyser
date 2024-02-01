@@ -67,6 +67,7 @@ include { ISOFOX_QUANTIFICATION } from '../subworkflows/local/isofox_quantificat
 include { LILAC_CALLING         } from '../subworkflows/local/lilac_calling'
 include { LINX_ANNOTATION       } from '../subworkflows/local/linx_annotation'
 include { LINX_PLOTTING         } from '../subworkflows/local/linx_plotting'
+include { NEO_PREDICTION        } from '../subworkflows/local/neo_prediction'
 include { ORANGE_REPORTING      } from '../subworkflows/local/orange_reporting'
 include { PAVE_ANNOTATION       } from '../subworkflows/local/pave_annotation'
 include { PREPARE_REFERENCE     } from '../subworkflows/local/prepare_reference'
@@ -719,6 +720,24 @@ workflow WGTS {
     } else {
 
         ch_virusinterpreter_out = ch_inputs.map { meta -> [meta, []] }
+
+    }
+
+    //
+    // SUBWORKFLOW: XXX
+    //
+    if (run_config.stages.neo) {
+
+        NEO_PREDICTION(
+            ch_inputs,
+            ch_isofox_out,
+            ch_purple_out,
+            ch_sage_somatic_append_out,
+            ch_lilac_out,
+            ch_linx_somatic_out,
+        )
+
+        ch_versions = ch_versions.mix(NEO_PREDICTION.out.versions)
 
     }
 
