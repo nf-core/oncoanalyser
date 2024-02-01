@@ -144,9 +144,7 @@ class WorkflowMain {
 
             // Attempt to set default panel data path; make no assumption on valid 'panel' value
             if (!params.containsKey('ref_data_panel_data_path') && params.containsKey('panel')) {
-                if (params.panel == 'hmf' && params.ref_data_genome_version == '38') {
-                    params.ref_data_panel_data_path = Constants.HMF_PANEL_38_PATH
-                } else if (params.panel == 'tso500' && params.ref_data_genome_version == '37') {
+                if (params.panel == 'tso500' && params.ref_data_genome_version == '37') {
                     params.ref_data_panel_data_path = Constants.TSO500_PANEL_37_PATH
                 } else if (params.panel == 'tso500' && params.ref_data_genome_version == '38') {
                     params.ref_data_panel_data_path = Constants.TSO500_PANEL_38_PATH
@@ -295,13 +293,6 @@ class WorkflowMain {
                     "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
                 System.exit(1)
 
-            }
-
-            if (params.panel == 'hmf' && params.ref_data_genome_version == '37') {
-                log.error "\n~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n" +
-                    "  The Hartwig panel (hmf) is not available for the GRCh37 reference genome.\n" +
-                    "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
-                System.exit(1)
             }
 
         }

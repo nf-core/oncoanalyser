@@ -8,14 +8,12 @@ class Constants {
     static List GENOMES_SUPPORTED  = ['GRCh37_hmf', 'GRCh38_hmf']
     static List GENOMES_DEFINED    = Constants.GENOMES_VERSION_37 + Constants.GENOMES_VERSION_38
 
-    static List PANELS_DEFINED     = ['hmf', 'tso500']
+    static List PANELS_DEFINED     = ['tso500']
 
 
     static String HMF_DATA_37_PATH = 'https://pub-29f2e5b2b7384811bdbbcba44f8b5083.r2.dev/hmf_reference_data/hmftools/5.34_37--0.tar.gz'
     static String HMF_DATA_38_PATH = 'https://pub-29f2e5b2b7384811bdbbcba44f8b5083.r2.dev/hmf_reference_data/hmftools/5.34_38--0.tar.gz'
 
-
-    static String HMF_PANEL_38_PATH = 'https://pub-29f2e5b2b7384811bdbbcba44f8b5083.r2.dev/hmf_reference_data/panels/hmf_5.33_38--0.tar.gz'
 
     static String TSO500_PANEL_37_PATH = 'https://pub-29f2e5b2b7384811bdbbcba44f8b5083.r2.dev/hmf_reference_data/panels/tso500_5.34_37--0.tar.gz'
     static String TSO500_PANEL_38_PATH = 'https://pub-29f2e5b2b7384811bdbbcba44f8b5083.r2.dev/hmf_reference_data/panels/tso500_5.34_38--0.tar.gz'
