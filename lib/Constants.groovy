@@ -47,6 +47,7 @@ class Constants {
         LILAC,
         LINX,
         MARKDUPS,
+        NEO,
         ORANGE,
         PAVE,
         PURPLE,
