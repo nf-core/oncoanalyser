@@ -1,4 +1,4 @@
-process ISOFOX_NEO {
+process ANNOTATE_FUSIONS {
     tag "${meta.id}"
     label 'process_medium'
 
@@ -6,7 +6,6 @@ process ISOFOX_NEO {
 
     input:
     tuple val(meta), path(bam), path(bai)
-    val functions
     val read_length
     path genome_fasta
     val genome_ver
@@ -14,8 +13,8 @@ process ISOFOX_NEO {
     path ensembl_data_resources
 
     output:
-    tuple val(meta), path('isofox/'), emit: isofox_dir
-    path 'versions.yml'             , emit: versions
+    tuple val(meta), path('annotated_fusions/'), emit: annotated_fusions_dir
+    path 'versions.yml'                        , emit: versions
 
     when:
     task.ext.when == null || task.ext.when
@@ -49,8 +48,8 @@ process ISOFOX_NEO {
 
     stub:
     """
-    mkdir -p isofox/
-    touch isofox/placeholder
+    mkdir -p annotated_fusions/
+    touch annotated_fusions/placeholder
     echo -e '${task.process}:\\n  stub: noversions\\n' > versions.yml
     """
 }

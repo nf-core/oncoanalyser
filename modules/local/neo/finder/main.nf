@@ -32,8 +32,8 @@ process NEO_FINDER {
             -ref_genome ${genome_fasta} \\
             -ref_genome_version ${genome_ver} \\
             -ensembl_data_dir ${ensembl_data_resources} \\
-            -output_dir ${output_dir} \\
             -log_debug \\
+            -output_dir ${output_dir}
 
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":
