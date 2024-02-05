@@ -5,7 +5,7 @@
 import Constants
 import Utils
 
-include { ISOFOX               } from '../../modules/local/isofox/main'
+include { ANNOTATE_FUSIONS     } from '../../modules/local/neo/annotate_fusions/main'
 include { LILAC                } from '../../modules/local/lilac/main'
 include { NEO_FINDER           } from '../../modules/local/neo/finder/main'
 include { NEO_SCORER           } from '../../modules/local/neo/scorer/main'
@@ -27,6 +27,9 @@ workflow NEO_PREDICTION{
         ensembl_data_resources // channel: [mandatory] /path/to/ensembl_data_resources/
         neo_resources          // channel: [mandatory] /path/to/neo_resources/
         cohort_tpm_medians     // channel: [mandatory] /path/to/cohort_tpm_medians/
+
+        // Params
+        isofox_read_length     //  string: [mandatory] Isofox read length
 
     main:
         // Channel for versions.yml files
@@ -68,8 +71,8 @@ workflow NEO_PREDICTION{
 
         // Create process input channel
         // channel: sample_data: [ meta, purple_dir, linx_annotation_dir ]
-        ch_finder_inputs = ch_inputs_finder_sorted.runnable
-            .map{ meta, purple_dir, linx_annotation_dir ->
+        ch_neo_finder_inputs = ch_inputs_finder_sorted.runnable
+            .map { meta, purple_dir, linx_annotation_dir ->
 
                 def meta_neo_finder = [
                     key: meta.group_id,
@@ -80,10 +83,9 @@ workflow NEO_PREDICTION{
                 return [meta_neo_finder, purple_dir, linx_annotation_dir]
             }
 
-
         // Feeding the Neo process raw inputs for demo purposes only
         NEO_FINDER(
-            ch_finder_inputs,
+            ch_neo_finder_inputs,
             genome_fasta,
             genome_version,
             ensembl_data_resources,
@@ -93,47 +95,23 @@ workflow NEO_PREDICTION{
 
         // Set outputs, restoring original meta
         // channel: [ meta, neo_finder_dir ]
-        ch_finder_outputs = WorkflowOncoanalyser.restoreMeta(NEO_FINDER.out.neo_finder_dir, ch_inputs)
+        ch_neo_finder_outputs = WorkflowOncoanalyser.restoreMeta(NEO_FINDER.out.neo_finder_dir, ch_inputs)
 
         // Step 2: When RNA is present, annotate the fusion-derived neoepitope with RNA using Isofox
 
-        /*
-
-        // Select input sources
-        // channel: [ meta, neo_finder_dir, tumor_bam_rna, tumor_bai_rna ]
-        ch_inputs_isofox_sorted = WorkflowOncoanalyser.groupByMeta(
-            ch_finder_outputs,
-            // channel: [ meta, tumor_rna_bam (optional), tumor_rna_bai (optional) ]
-            ch_inputs
-                .map { meta ->
-                    def has_rna = Utils.hasTumorRnaBam(meta)
-
-                    return [
-                        meta,
-                        has_rna ? Utils.getTumorRnaBam(meta) : [],
-                        has_rna ? Utils.getTumorRnaBai(meta) : [],
-                    ]
-                },
-
-            )
-
-        // Sort inputs
-        ch_inputs_isofox_sorted = ch_finder_outputs
-            .branch {
-
-                def has_rna = Utils.hasTumorRnaBam(meta)
-
-
-
-                runnable:
-                skip:
-                    meta
-
+        // channel: runnable: [ meta, neo_finder_dir, tumor_rna_bam, tumor_rna_bai ]
+        // channel: skip: [ meta ]
+        ch_isofox_inputs_sorted = ch_neo_finder_outputs
+            .branch { meta, neo_finder_dir ->
+                runnable: Utils.hasTumorRnaBam(meta)
+                    return [meta, neo_finder_dir, Utils.getTumorRnaBam(meta), Utils.getTumorRnaBai(meta)]
+                skip: true
+                    return meta
             }
 
         // Create process input channel
         // channel: [ meta_isofox, neo_finder_dir, tumor_bam_rna, tumor_bai_rna ]
-        ch_isofox_inputs = ch_inputs_isofox_sorted.runnable
+        ch_isofox_inputs = ch_isofox_inputs_sorted.runnable
             .map { meta, neo_finder_dir, tumor_bam_rna, tumor_bai_rna ->
 
                 def meta_isofox = [
@@ -145,8 +123,9 @@ workflow NEO_PREDICTION{
                 return [meta_isofox, Utils.getTumorRnaBam(meta), Utils.getTumorRnaBai(meta)]
             }
 
+
         // Run process
-        ISOFOX_NEO(
+        ANNOTATE_FUSIONS(
             ch_isofox_inputs,
             isofox_read_length,
             genome_fasta,
@@ -155,60 +134,30 @@ workflow NEO_PREDICTION{
             ensembl_data_resources,
         )
 
-        ch_versions = ch_versions.mix(ISOFOX.out.versions)
+        ch_versions = ch_versions.mix(ANNOTATE_FUSIONS.out.versions)
 
         // Set outputs, restoring original meta
-        // channel: [ meta, isofox_dir ]
-        ch_outputs = Channel.empty()
+        // channel: [ meta, annotated_fusions_dir ]
+        ch_annotate_fusions_outputs = Channel.empty()
             .mix(
-                WorkflowOncoanalyser.restoreMeta(ISOFOX.out.isofox_neo_dir, ch_inputs),
-                ch_inputs_sorted.skip.map { meta -> [meta, []] },
+                WorkflowOncoanalyser.restoreMeta(ANNOTATE_FUSIONS.out.annotated_fusions_dir, ch_inputs),
+                ch_isofox_inputs_sorted.skip.map { meta -> [meta, []] },
+            )
 
-        */
-
-        // ch_finder_outputs
 
         // Step 3: Run Neo's binding prediction routine for neoepitope's pHLAs, taking in Lilac HLA alleles and previously
         // derived neoepitopes with RNA annotation if it was available
 
         // Select input sources
-        // channel: [ meta, isofox_dir, purple_dir, lilac_dir, isofox_dir ]
-        // TO_DO - how to pass in the directories from step 1 and 2 (if run) above
-        ch_inputs_scorer_selected = WorkflowOncoanalyser.groupByMeta(
+        // channel: [ meta, purple_dir, isofox_dir, lilac_dir, annotate_fusions_dir, neo_finder_dir ]
+        ch_neo_scorer_inputs = WorkflowOncoanalyser.groupByMeta(
             ch_purple,
-            ch_linx,
             ch_isofox,
+            ch_lilac,
+            ch_annotate_fusions_outputs,
+            ch_neo_finder_outputs,
         )
-            .map { meta, purple_dir, lilac_dir ->
-
-                def inputs = [
-                    Utils.selectCurrentOrExisting(purple_dir, meta, Constants.INPUT.PURPLE_DIR),
-                    Utils.selectCurrentOrExisting(lilac_dir, meta, Constants.INPUT.LILAC),
-                    Utils.selectCurrentOrExisting(isofox_dir, meta, Constants.INPUT.ISOFOX),
-                ]
-
-                return [meta, *inputs]
-            }
-
-        // Sort inputs
-        // channel: runnable: [ meta, purple_dir, lilac_dir,isofox_dir ]
-        // channel: skip: [ meta ]
-        ch_inputs_scorer_sorted = ch_inputs_scorer_selected
-            .branch { meta, purple_dir, lilac_dir, isofox_dir ->
-
-                def has_normal_dna = Utils.hasNormalDnaBam(meta)
-
-                def has_runnable_inputs = purple_dir && lilac_dir && has_normal_dna
-
-                runnable: has_runnable_inputs
-                skip: true
-                    return meta
-            }
-
-        // Create process input channel
-        // channel: sample_data: [ meta, purple_dir, linx_annotation_dir ]
-        ch_scorer_inputs = ch_inputs_scorer_sorted.runnable
-            .map{ meta, purple_dir, linx_annotation_dir ->
+            .map { meta, purple_dir, isofox_dir, lilac_dir, annotate_fusions_dir, neo_finder_dir ->
 
                 def meta_neo_scorer = [
                     key: meta.group_id,
@@ -216,18 +165,25 @@ workflow NEO_PREDICTION{
                     sample_id: Utils.getTumorDnaSampleName(meta),
                 ]
 
-                return [meta_neo_scorer, purple_dir, lilac_dir, isofox_dir]
-            }
+                def inputs = [
+                    Utils.selectCurrentOrExisting(purple_dir, meta, Constants.INPUT.PURPLE_DIR),
+                    Utils.selectCurrentOrExisting(isofox_dir, meta, Constants.INPUT.ISOFOX_DIR),
+                    Utils.selectCurrentOrExisting(lilac_dir, meta, Constants.INPUT.LILAC_DIR),
+                    annotate_fusions_dir,
+                    neo_finder_dir,
+                ]
 
+                return [meta_neo_scorer, *inputs]
+            }
 
         // Feeding the Neo process raw inputs for demo purposes only
         NEO_SCORER(
-            ch_scorer_inputs,
+            ch_neo_scorer_inputs,
             genome_fasta,
             genome_version,
             ensembl_data_resources,
             neo_resources,
-            cohort_tpm_medians
+            cohort_tpm_medians,
         )
 
         ch_versions = ch_versions.mix(NEO_SCORER.out.versions)
