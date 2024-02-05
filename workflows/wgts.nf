@@ -725,6 +725,12 @@ workflow WGTS {
             ch_sage_somatic_append_out,
             ch_lilac_out,
             ch_linx_somatic_out,
+            ref_data.genome_version,
+            ref_data.genome_fasta,
+            ref_data.genome_fai,
+            hmf_data.ensembl_data_resources,
+            hmf_data.neo_resources,
+            hmf_data.cohort_tpm_medians,
         )
 
         ch_versions = ch_versions.mix(NEO_PREDICTION.out.versions)
