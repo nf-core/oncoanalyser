@@ -731,6 +731,7 @@ workflow WGTS {
             hmf_data.ensembl_data_resources,
             hmf_data.neo_resources,
             hmf_data.cohort_tpm_medians,
+            params.isofox_read_length,
         )
 
         ch_versions = ch_versions.mix(NEO_PREDICTION.out.versions)
