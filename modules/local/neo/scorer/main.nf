@@ -5,11 +5,11 @@ process NEO_SCORER {
     container 'docker.io/scwatts/neo:1.1_beta--0'
 
     input:
-    tuple val(meta), path(purple_dir), path(isofox_dir), path(lilac_dir), path(isofox_neo_dir), path(neo_finder_dir)
+    tuple val(meta), path(purple_dir), path(isofox_dir), path(lilac_dir), path(annotate_fusions_dir), path(neo_finder_dir)
     path genome_fasta
     val genome_ver
     path ensembl_data_resources
-    path neo_resources
+    path neo_resources, stageAs: 'neo_reference_data'
     path cohort_tpm_medians
 
     output:
