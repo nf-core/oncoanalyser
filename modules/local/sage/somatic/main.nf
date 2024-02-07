@@ -4,7 +4,7 @@ process SAGE_SOMATIC {
     tag "${meta.id}"
     label 'process_medium'
 
-    container 'docker.io/scwatts/sage:3.4.rc1--0'
+    container 'docker.io/scwatts/sage:3.4--0'
 
     input:
     tuple val(meta), path(tumor_bam), path(normal_bam), path(tumor_bai), path(normal_bai)

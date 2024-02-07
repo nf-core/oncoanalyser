@@ -10,7 +10,7 @@ RUN \
 
 RUN \
   mkdir -p /opt/amber/ && \
-  wget -O /opt/amber/amber.jar 'https://github.com/hartwigmedical/hmftools/releases/download/amber-v4.0.rc1/amber_v4.0.rc1.jar'
+  wget -O /opt/amber/amber.jar 'https://github.com/hartwigmedical/hmftools/releases/download/amber-v4.0/amber_v4.0.jar'
 
 USER mambauser
 

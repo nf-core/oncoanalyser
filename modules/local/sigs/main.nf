@@ -2,7 +2,7 @@ process SIGS {
     tag "${meta.id}"
     label 'process_low'
 
-    container 'docker.io/scwatts/sigs:1.1--0'
+    container 'docker.io/scwatts/sigs:1.2--0'
 
     input:
     tuple val(meta), path(smlv_vcf)
@@ -29,10 +29,9 @@ process SIGS {
             -signatures_file ${signatures} \\
             -output_dir sigs/
 
-    # NOTE(SW): version not available at CLI
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":
-        sigs: 1.1
+        sigs: \$(java -jar ${task.ext.jarPath} -version | sed 's/^.* //')
     END_VERSIONS
     """
 

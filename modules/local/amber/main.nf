@@ -2,7 +2,7 @@ process AMBER {
     tag "${meta.id}"
     label 'process_medium'
 
-    container 'docker.io/scwatts/amber:4.0.rc1--0'
+    container 'docker.io/scwatts/amber:4.0--0'
 
     input:
     tuple val(meta), path(tumor_bam), path(normal_bam), path(tumor_bai), path(normal_bai)

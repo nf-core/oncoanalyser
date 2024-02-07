@@ -2,7 +2,7 @@ process LILAC {
     tag "${meta.id}"
     label 'process_medium'
 
-    container 'docker.io/scwatts/lilac:1.6.rc1--0'
+    container 'docker.io/scwatts/lilac:1.6--0'
 
     input:
     tuple val(meta), path(normal_dna_bam), path(normal_dna_bai), path(tumor_dna_bam), path(tumor_dna_bai), path(tumor_rna_bam), path(tumor_rna_bai), path(purple_dir)
