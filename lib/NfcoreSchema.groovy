@@ -29,7 +29,12 @@ class NfcoreSchema {
         def has_error = false
         //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~//
         // Check for nextflow core params and unexpected params
-        def json = new File(getSchemaPath(workflow, schema_filename=schema_filename)).text
+        def schema_fp = new File(getSchemaPath(workflow, schema_filename=schema_filename))
+        if (! schema_fp.exists()) {
+            log.warn "Skipping parameter schema check, could not find schema at ${schema_fp}"
+            return
+        }
+        def json = schema_fp.text
         def Map schemaParams = (Map) new JsonSlurper().parseText(json).get('definitions')
         def nf_params = [
             // Options for base `nextflow` command

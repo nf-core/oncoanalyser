@@ -76,6 +76,12 @@
                     "description": "Pipeline processes to include.",
                     "fa_icon": "fas fa-diagram-project"
                 },
+                "create_stub_placeholders": {
+                    "type": "boolean",
+                    "description": "Create placeholders for reference data during stub run.",
+                    "default": false,
+                    "fa_icon": "fas fa-diagram-project"
+                },
                 "gridss_config": {
                     "type": "string",
                     "description": "Path to GRIDSS configuration file.",

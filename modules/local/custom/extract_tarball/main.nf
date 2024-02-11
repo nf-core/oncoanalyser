@@ -14,4 +14,9 @@ process CUSTOM_EXTRACTTARBALL {
     mkdir -p ${meta.id}/
     tar -xzvf ${tarball} --strip-components 1 -C ${meta.id}/
     """
+
+    stub:
+    """
+    mkdir -p ${meta.id}/
+    """
 }

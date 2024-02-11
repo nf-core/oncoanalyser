@@ -1,0 +1,43 @@
+nextflow_workflow {
+
+    name "Test AMBER subworkflow"
+    script "subworkflows/local/amber_profiling.nf"
+    workflow "AMBER_PROFILING"
+    profile "docker"
+
+    test("WGTS COLO829 mini") {
+
+        setup {
+            run("PREPARE_INPUTS") {
+                script "subworkflows/local/prepare_inputs.nf"
+                process {
+                    """
+                    input[0] = '${baseDir}/tests/samplesheets/wgts.dna.single.csv'
+                    """
+                }
+            }
+        }
+
+        when {
+            params {
+                outdir "${outputDir}"
+
+                max_cpus = 1
+                max_memory = "10.GB"
+            }
+            workflow {
+                """
+                input[0] = PREPARE_INPUTS.out.inputs
+                input[1] = '38'
+                input[2] = '/Users/stephen/repos/oncoanalyser/tests/refdata/GermlineHetPon.38.vcf.gz'
+                input[3] = []
+                """
+            }
+        }
+
+        then {
+            assert workflow.success
+        }
+
+    }
+}

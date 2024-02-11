@@ -1,0 +1,4 @@
+group_id,subject_id,sample_id,sample_type,sequence_type,filetype,filepath
+SONE-1,SUBJECT_ONE,SAMPLE_ONE_TUMOR,tumor,dna,bam,/Users/stephen/repos/hmftools_pipeline/temp/sample/sample_one_tumor.bam
+SONE-1,SUBJECT_ONE,SAMPLE_ONE_NORMAL,normal,dna,bam,/Users/stephen/repos/hmftools_pipeline/temp/sample/sample_one_normal.bam
+SONE-1,SUBJECT_ONE,SAMPLE_ONE_TUMOR_WTS,tumor,rna,bam,/Users/stephen/repos/hmftools_pipeline/temp/sample/sample_one_tumor.wts.bam

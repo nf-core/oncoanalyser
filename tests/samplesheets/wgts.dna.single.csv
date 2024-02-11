@@ -1,0 +1,3 @@
+group_id,subject_id,sample_id,sample_type,sequence_type,filetype,filepath
+COLO829,COLO829,COLO829T,tumor,dna,bam,/Users/stephen/repos/oncoanalyser/tests/sampledata/COLO829T.bam
+COLO829,COLO829,COLO829R,normal,dna,bam,/Users/stephen/repos/oncoanalyser/tests/sampledata/COLO829R.bam

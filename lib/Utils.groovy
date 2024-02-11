@@ -13,7 +13,7 @@ class Utils {
 
         // NOTE(SW): using Nextflow .splitCsv channel operator, hence sould be easily interchangable
 
-        def input_fp = nextflow.Nextflow.file(input_fp_str)
+        def input_fp = Utils.getFileObject(input_fp_str)
         def inputs = nextflow.splitter.SplitterEx.splitCsv(input_fp, [header: true])
             .groupBy { it['group_id'] }
             .collect { group_id, entries ->
@@ -126,6 +126,45 @@ class Utils {
             }
 
         return inputs
+    }
+
+    public static void createStubPlaceholders(params) {
+
+        def fps = [
+            params.ref_data_genome_fasta,
+            params.ref_data_genome_fai,
+            params.ref_data_genome_dict,
+            params.ref_data_genome_bwa_index,
+            params.ref_data_genome_bwa_index_image,
+            params.ref_data_genome_gridss_index,
+            params.ref_data_virusbreakenddb_path,
+        ]
+
+        params.hmf_data_paths[params.ref_data_genome_version]
+            .each { k, v ->
+                fps << "${params.ref_data_hmf_data_path.replaceAll('/$', '')}/${v}"
+            }
+
+        if(params.containsKey('panel')) {
+            params.panel_data_paths[params.panel][params.ref_data_genome_version]
+                .each { k, v ->
+                    fps << "${params.ref_data_panel_data_path.replaceAll('/$', '')}/${v}"
+                }
+        }
+
+        fps.each { fp_str ->
+            def fp = Utils.getFileObject(fp_str)
+
+            if (!fp_str || fp.exists()) return
+
+            if (fp_str.endsWith('/')) {
+                fp.mkdirs()
+            } else {
+                fp.getParent().mkdirs()
+                fp.toFile().createNewFile()
+            }
+        }
+
     }
 
     public static void validateInput(inputs, run_config, log) {
@@ -263,7 +302,7 @@ class Utils {
 
 
     static public getFileObject(path) {
-        return path ? Nextflow.file(path) : []
+        return path ? nextflow.Nextflow.file(path) : []
     }
 
 
