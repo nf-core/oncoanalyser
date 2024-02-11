@@ -26,66 +26,71 @@ workflow ALIGNMENT {
             skip: true
         }
 
-    // TODO(MC): Simplify this branch.
-    if (max_fastq_lines > 0) {
-        // Split fastq files using fastp.
+    // channel: [ meta_fastq, reads_fwd_fastq, reads_rev_fastq ]
+    ch_fastq_pairs = ch_meta_samples_sorted.runnable_fastq
+        .flatMap { meta ->
 
-        // Create fastp process input channel.
-        // channel: [ meta_fastq, reads_fwd_fastq, reads_rev_fastq ]
-        ch_fastp_inputs = ch_meta_samples_sorted.runnable_fastq
-            .flatMap { meta ->
-
-                def sample_key = Constants.DNA_SAMPLE_KEYS.find { key -> meta.containsKey(key) }
-                if (sample_key === null) {
-                    log.error "No DNA sample found"
-                    System.exit(1)
-                }
-
-                def sample_id = meta[sample_key]['sample_id']
-                def fastq_files = meta[sample_key][Constants.FileType.FASTQ].tokenize(';')
-
-                // TODO(MC): Validate fastq_files.
-
-                def meta_fastq_common = [:]
-                meta.each { key, value ->
-
-
-                    if (key === sample_key) {
-                        return
-                    }
-
-                    meta_fastq_common[key] = meta[key]
-                }
-                meta_fastq_common['sample_key'] = sample_key
-                meta_fastq_common['sample_id'] = sample_id
-
-                def fastq_pairs = []
-                for (i = 0; i < fastq_files.size(); i += 2) {
-                    def reads_fwd = fastq_files[i]
-                    def reads_rev = fastq_files[i + 1]
-
-                    def meta_fastq = meta_fastq_common.getClass().newInstance(meta_fastq_common)
-                    meta_fastq['read_group'] = Utils.readGroupFromFastqPath(reads_fwd)
-
-                    fastq_pairs.add([meta_fastq, reads_fwd, reads_rev])
-                }
-
-                fastq_pairs
+            def sample_key = Constants.DNA_SAMPLE_KEYS.find { key -> meta.containsKey(key) }
+            if (sample_key === null) {
+                log.error "No DNA sample found"
+                System.exit(1)
             }
 
-        FASTP(ch_fastp_inputs)
+            def sample_id = meta[sample_key]['sample_id']
+            def fastq_files = meta[sample_key][Constants.FileType.FASTQ].tokenize(';')
 
-        // TODO(MC): See WISP implementation.
-        // Create inputs for bwa mem.
-        // channel: [ meta_fastq, reads_fwd_fastq, reads_rev_fastq ]
-        ch_bwa_mem_inputs = FASTP.out.fastq.flatMap { fastq ->
+            // TODO(MC): Validate fastq_files.
 
-            def meta = fastq[0]
-            def fwd_reads = fastq[1]
-            def rev_reads = fastq[2]
+            def meta_fastq_common = [:]
+            meta.each { key, value ->
 
-            // Pair up the reads.
-            def read_pairs = [:]
+
+                if (key === sample_key) {
+                    return
+                }
+
+                meta_fastq_common[key] = meta[key]
+            }
+            meta_fastq_common['sample_key'] = sample_key
+            meta_fastq_common['sample_id'] = sample_id
+
+            def fastq_pairs = []
+            for (i = 0; i < fastq_files.size(); i += 2) {
+                def reads_fwd = fastq_files[i]
+                def reads_rev = fastq_files[i + 1]
+
+                def meta_fastq = meta_fastq_common.getClass().newInstance(meta_fastq_common)
+                meta_fastq['read_group'] = Utils.readGroupFromFastqPath(reads_fwd)
+
+                fastq_pairs.add([meta_fastq, reads_fwd, reads_rev])
+            }
+
+            fastq_pairs
+        }
+
+    // Split fastq files using fastp.
+    // channel: [ meta_fastq, reads_fwd_fastqs, reads_rev_fastqs ]
+    ch_split_fastq_pairs = Channel.empty()
+    if (max_fastq_lines > 0) {
+        FASTP(ch_fastq_pairs)
+        ch_split_fastq_pairs = FASTP.out.fastq
+    } else {
+        ch_split_fastq_pairs = ch_fastq_pairs.map { fastq_pair -> [fastq_pair[0], [fastq_pair[1]], [fastq_pair[2]]] }
+    }
+
+    // TODO(MC): See WISP implementation.
+    // Create inputs for bwa mem.
+    // channel: [ meta_fastq, reads_fwd_fastq, reads_rev_fastq ]
+    ch_bwa_mem_inputs = ch_split_fastq_pairs.flatMap { fastq ->
+        def meta = fastq[0]
+        def fwd_reads = fastq[1]
+        def rev_reads = fastq[2]
+
+        // Pair up the reads.
+        def read_pairs = [:]
+        if (fwd_reads.size() == 1) {
+            read_pairs[""] = ["000", fwd_reads[0], rev_reads[0]]
+        } else {
             fwd_reads.each { fastq_path ->
 
                 def base_name = fastq_path.getFileName().toString()
@@ -108,77 +113,30 @@ workflow ALIGNMENT {
                 assert read_pairs.containsKey(key)
                 read_pairs[key].add(fastq_path)
             }
-
-            def fastqs = []
-            read_pairs.values().each { split_fastq_pair ->
-
-                meta_fastq = meta.getClass().newInstance(meta)
-                meta_fastq['split'] = split_fastq_pair[0]
-
-                fastqs.add([meta_fastq, split_fastq_pair[1], split_fastq_pair[2]])
-            }
-
-            fastqs
         }
-    } else {
 
-        // Skip splitting fastq files using fastp.
+        def fastqs = []
+        read_pairs.values().each { split_fastq_pair ->
 
-        // Create inputs for bwa mem.
-        // channel: [ meta_fastq, reads_fwd_fastq, reads_rev_fastq ]
-        ch_bwa_mem_inputs = ch_meta_samples_sorted.runnable_fastq
-            .flatMap { meta ->
+            meta_fastq = meta.getClass().newInstance(meta)
+            meta_fastq['split'] = split_fastq_pair[0]
 
-                def sample_key = Constants.DNA_SAMPLE_KEYS.find { key -> meta.containsKey(key) }
-                if (sample_key === null) {
-                  log.error "No DNA sample found"
-                  System.exit(1)
-                }
+            fastqs.add([meta_fastq, split_fastq_pair[1], split_fastq_pair[2]])
+        }
 
-                def sample_id = meta[sample_key]['sample_id']
-                def fastq_files = meta[sample_key][Constants.FileType.FASTQ].tokenize(';')
-
-                // TODO(MC): Validate fastq_files.
-
-                def meta_fastq_common = [:]
-                meta.each { key, value ->
-
-
-                    if (key === sample_key) {
-                        return
-                    }
-
-                    meta_fastq_common[key] = meta[key]
-                }
-                meta_fastq_common['sample_key'] = sample_key
-                meta_fastq_common['sample_id'] = sample_id
-
-                def fastq_pairs = []
-                for (i = 0; i < fastq_files.size(); i += 2) {
-                    def reads_fwd = fastq_files[i]
-                    def reads_rev = fastq_files[i + 1]
-
-                    def meta_fastq = meta_fastq_common.getClass().newInstance(meta_fastq_common)
-                    meta_fastq['read_group'] = Utils.readGroupFromFastqPath(reads_fwd)
-                    meta_fastq['split'] = '000'
-
-                    fastq_pairs.add([meta_fastq, reads_fwd, reads_rev])
-                }
-
-                fastq_pairs
-            }
+        fastqs
     }
 
     // channel: [ meta_fastq, bam ]
     BWA_MEM(
-      ch_bwa_mem_inputs,
-      genome_fasta,
-      genome_bwa_index,
+        ch_bwa_mem_inputs,
+        genome_fasta,
+        genome_bwa_index,
     )
 
     // channel: [ meta_fastq, bam, bai ]
     SAMBAMBA_INDEX(
-      BWA_MEM.out.bam,
+        BWA_MEM.out.bam,
     )
 
     // Prepare input to markdups process.
@@ -208,8 +166,8 @@ workflow ALIGNMENT {
             def bais = []
             lane_bams.each { lane_bam ->
 
-              bams.add(lane_bam[1])
-              bais.add(lane_bam[2])
+                bams.add(lane_bam[1])
+                bais.add(lane_bam[2])
             }
 
             [meta_bam, bams, bais]
@@ -221,8 +179,8 @@ workflow ALIGNMENT {
 
         def sample_key = Constants.DNA_SAMPLE_KEYS.find { key -> meta.containsKey(key) }
         if (sample_key === null) {
-          log.error "No DNA sample found"
-          System.exit(1)
+            log.error "No DNA sample found"
+            System.exit(1)
         }
 
         def sample_id = meta[sample_key]['sample_id']
@@ -261,8 +219,8 @@ workflow ALIGNMENT {
 
         // TODO(MC): Safer to copy and delete unneeded fields.
         def meta = [
-          group_id: meta_bam.group_id,
-          subject_id: meta_bam.subject_id,
+            group_id: meta_bam.group_id,
+            subject_id: meta_bam.subject_id,
         ]
 
         sample = [sample_id: meta_bam.sample_id]
@@ -299,7 +257,7 @@ workflow ALIGNMENT {
             merged_sample
         }
 
-  emit:
+    emit:
     meta_bam = ch_outputs
     // TODO[MC]: Channel version outputs.
 }
