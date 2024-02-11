@@ -88,6 +88,9 @@ class Utils {
                         if (key === Constants.FileType.BAM) {
                             index_enum = Constants.FileType.BAI
                             index_str = 'bai'
+                        } else if (key === Constants.FileType.BAM_MARKDUPS) {
+                            index_enum = Constants.FileType.BAI_MARKDUPS
+                            index_str = 'bai'
                         } else if (key === Constants.FileType.GRIDSS_VCF) {
                             index_enum = Constants.FileType.GRIDSS_VCF_TBI
                             index_str = 'tbi'
@@ -177,7 +180,7 @@ class Utils {
 
         inputs.each { meta ->
 
-            // Require BAMs for each defined sample type
+            // Require BAMs or BAM_MARKDUPs or FASTQs for each defined sample type
             // NOTE(SW): repeating key pairs above to avoid having to duplicate error messages
             sample_keys.each { key ->
 
@@ -187,9 +190,12 @@ class Utils {
 
                 def (sample_type, sequence_type) = key
 
-                if (!meta[key].containsKey(Constants.FileType.BAM)) {
-                    log.error "no BAM provided for ${meta.group_id} ${sample_type}/${sequence_type}\n\n" +
-                        "NB: BAMs are always required as they are the basis to determine input sample type."
+                if (!meta[key].containsKey(Constants.FileType.BAM) &&
+                    !meta[key].containsKey(Constants.FileType.BAM_MARKDUPS) &&
+                    !meta[key].containsKey(Constants.FileType.FASTQ)) {
+
+                    log.error "no BAMs nor BAM_MARKDUPs nor FASTQs provided for ${meta.group_id} ${sample_type}/${sequence_type}\n\n" +
+                        "NB: BAMs or BAM_MARKDUPs or FASTQs are always required as they are the basis to determine input sample type."
                     System.exit(1)
                 }
 
@@ -367,6 +373,49 @@ class Utils {
         return getNormalDnaBam(meta) !== null
     }
 
+    static public getNormalDnaMarkdupsBam(meta) {
+        def meta_sample = meta.getOrDefault([Constants.SampleType.NORMAL, Constants.SequenceType.DNA], [:])
+        return meta_sample.getOrDefault(Constants.FileType.BAM_MARKDUPS, null)
+    }
+
+    static public hasNormalDnaMarkdupsBam(meta) {
+        return getNormalDnaMarkdupsBam(meta) !== null
+    }
+
+    static public getTumorDnaMarkdupsBam(meta) {
+        def meta_sample = meta.getOrDefault([Constants.SampleType.TUMOR, Constants.SequenceType.DNA], [:])
+        return meta_sample.getOrDefault(Constants.FileType.BAM_MARKDUPS, null)
+    }
+
+    static public hasTumorDnaMarkdupsBam(meta) {
+        return getTumorDnaMarkdupsBam(meta) !== null
+    }
+
+    static public hasDnaMarkdupsBam(meta) {
+        return hasNormalDnaMarkdupsBam(meta) || hasTumorDnaMarkdupsBam(meta)
+    }
+
+    static public getNormalDnaFastq(meta) {
+        def meta_sample = meta.getOrDefault([Constants.SampleType.NORMAL, Constants.SequenceType.DNA], [:])
+        return meta_sample.getOrDefault(Constants.FileType.FASTQ, null)
+    }
+
+    static public hasNormalDnaFastq(meta) {
+        return getNormalDnaFastq(meta) !== null
+    }
+
+    static public getTumorDnaFastq(meta) {
+        def meta_sample = meta.getOrDefault([Constants.SampleType.TUMOR, Constants.SequenceType.DNA], [:])
+        return meta_sample.getOrDefault(Constants.FileType.FASTQ, null)
+    }
+
+    static public hasTumorDnaFastq(meta) {
+        return getTumorDnaFastq(meta) !== null
+    }
+
+    static public hasDnaFastq(meta) {
+        return hasNormalDnaFastq(meta) || hasTumorDnaFastq(meta)
+    }
 
     static public getRunMode(run_mode, log) {
         def run_mode_enum = Utils.getEnumFromString(run_mode, Constants.RunMode)
@@ -402,6 +451,38 @@ class Utils {
         } else {
           return val
         }
+    }
+
+    // Alignment utils.
+    static public splitGroupIntoSamples(meta_group) {
+        def sample_entries = [:]
+        def common_entries = [:]
+        meta_group.each { key, value ->
+
+            if ((value instanceof java.util.Map) && value.containsKey('sample_id')) {
+                sample_entries[key] = value
+            } else {
+                common_entries[key] = value
+            }
+        }
+
+        def meta_samples  = []
+        sample_entries.each { key, value ->
+
+            def meta_sample = common_entries.getClass().newInstance(common_entries)
+            meta_sample[key] = value
+            meta_samples.add(meta_sample)
+        }
+
+        return meta_samples
+    }
+
+    static public readGroupFromFastqPath(fastq_path) {
+        def base_name = fastq_path.split('/')[-1]
+        def pattern = /^(.+)_\d+\.fastq$/
+        def matcher = base_name =~ pattern
+        assert matcher.find()
+        return matcher[0][1]
     }
 
 }

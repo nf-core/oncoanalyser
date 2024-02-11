@@ -34,21 +34,26 @@ class Constants {
     }
 
     static enum Process {
+        // TODO[MC]: Add process here.
+        BWAMEM,
         AMBER,
         BAMTOOLS,
         CHORD,
         COBALT,
         CUPPA,
+        FASTP,
         FLAGSTAT,
         GRIDSS,
         GRIPSS,
         ISOFOX,
         LILAC,
         LINX,
+        MARKDUPS,
         ORANGE,
         PAVE,
         PURPLE,
         SAGE,
+        SAMBAMBA_INDEX,
         SIGS,
         VIRUSINTERPRETER,
     }
@@ -57,6 +62,9 @@ class Constants {
         // Generic
         BAM,
         BAI,
+        BAM_MARKDUPS,
+        BAI_MARKDUPS,
+        FASTQ,
         // Process
         AMBER_DIR,
         BAMTOOLS,
@@ -97,9 +105,15 @@ class Constants {
         DNA_RNA,
     }
 
+    static List DNA_SAMPLE_KEYS = [
+        [Constants.SampleType.TUMOR, Constants.SequenceType.DNA],
+        [Constants.SampleType.NORMAL, Constants.SequenceType.DNA],
+    ]
+
     static Map PLACEHOLDER_META = [meta_placeholder: null]
     static List PLACEHOLDER_OPTIONAL_CHANNEL = []
 
+    // TODO(MC): How is this used?
     static Map INPUT = [
 
         ISOFOX_DIR: [

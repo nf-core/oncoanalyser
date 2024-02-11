@@ -15,6 +15,7 @@ inputs = Utils.parseInput(params.input, workflow.stubRun, log)
 run_config = WorkflowMain.getRunConfig(params, inputs, log)
 
 // Validate inputs
+// TODO(MC): Reexamine validation in light of fastq/bam markdups.
 Utils.validateInput(inputs, run_config, log)
 
 // Check input path parameters to see if they exist
@@ -67,6 +68,7 @@ linx_gene_id_file = params.linx_gene_id_file ? file(params.linx_gene_id_file) : 
 //
 // SUBWORKFLOWS
 //
+include { ALIGNMENT             } from '../subworkflows/local/alignment'
 include { AMBER_PROFILING       } from '../subworkflows/local/amber_profiling'
 include { BAMTOOLS_METRICS      } from '../subworkflows/local/bamtools_metrics'
 include { CHORD_PREDICTION      } from '../subworkflows/local/chord_prediction'
@@ -117,7 +119,8 @@ workflow WGTS {
 
     // Create input channel from parsed CSV
     // channel: [ meta ]
-    ch_inputs = Channel.fromList(inputs)
+    // TODO[MC]: Rename this back to original, and swap name out for current ch_inputs.
+    ch_inputs0 = Channel.fromList(inputs)
 
     // Set up reference data, assign more human readable variables
     PREPARE_REFERENCE(
@@ -126,63 +129,79 @@ workflow WGTS {
     ref_data = PREPARE_REFERENCE.out
     hmf_data = PREPARE_REFERENCE.out.hmf_data
 
+    // TODO[MC]: Skipping alignment, only running up to alignment?
+    ALIGNMENT(
+        ch_inputs0,
+        ref_data.genome_fasta,
+        ref_data.genome_fai,
+        ref_data.genome_dict,
+        ref_data.genome_bwa_index,
+        file(params.refdata_unmap_regions),
+        4 * params.max_fastq_records,
+    )
+
+    ch_inputs = ALIGNMENT.out.meta_bam
+
     // Set GRIDSS config
     gridss_config = params.containsKey('gridss_config') ? file(params.gridss_config) : hmf_data.gridss_config
 
-    //
-    // SUBWORKFLOW: Align reads
-    //
-    // channel: [ meta, bam_dna ]
-    ch_dna_alignment_out = Channel.empty()
-    // channel: [ meta, bam_rna ]
-    ch_rna_alignment_out = Channel.empty()
-    // TODO(SW): set up correctly
-    if (true | run_config.stages.alignment) {
+    // //
+    // // SUBWORKFLOW: Align reads
+    // //
+    // // channel: [ meta, bam_dna ]
+    // ch_dna_alignment_out = Channel.empty()
+    // // channel: [ meta, bam_rna ]
+    // ch_rna_alignment_out = Channel.empty()
+    // // TODO(MC): set up correctly
+    // // if (true | run_config.stages.alignment) {
 
-        READ_ALIGNMENT(
-            ch_inputs,
-            // alignment reference files
-        )
+    // //     READ_ALIGNMENT(
+    // //         ch_inputs,
+    // //         // alignment reference files
+    // //     )
 
-        ch_versions = ch_versions.mix(READ_ALIGNMENT.out.versions)
+    // //     ch_versions = ch_versions.mix(READ_ALIGNMENT.out.versions)
 
-        ch_dna_alignment_out = ch_dna_alignment_out.mix(READ_ALIGNMENT.out.dna)
-        ch_rna_alignment_out = ch_rna_alignment_out.mix(READ_ALIGNMENT.out.rna)
+    // //     ch_dna_alignment_out = ch_dna_alignment_out.mix(READ_ALIGNMENT.out.dna)
+    // //     ch_rna_alignment_out = ch_rna_alignment_out.mix(READ_ALIGNMENT.out.rna)
 
-    } else {
+    // // } else {
 
-        ch_dna_alignment_out = ch_inputs.map { meta -> [meta, []] }
-        ch_rna_alignment_out = ch_inputs.map { meta -> [meta, []] }
+    // //     ch_dna_alignment_out = ch_inputs.map { meta -> [meta, []] }
+    // //     ch_rna_alignment_out = ch_inputs.map { meta -> [meta, []] }
 
-    }
+    // // }
 
-    //
-    // SUBWORKFLOW: Process read alignments
-    //
-    // channel: [ meta, bam_dna ]
-    ch_dna_processed_out = Channel.empty()
-    // channel: [ meta, bam_rna ]
-    ch_rna_processed_out = Channel.empty()
-    // TODO(SW): set up correctly
-    if (true | run_config.stages.markdups) {
+    // ch_dna_alignment_out = ch_inputs.map { meta -> [meta, []] }
+    // ch_rna_alignment_out = ch_inputs.map { meta -> [meta, []] }
 
-        READ_PROCESSING(
-            ch_inputs,
-            ch_dna_alignment_out,
-            ch_rna_alignment_out,
-        )
+    // //
+    // // SUBWORKFLOW: Process read alignments
+    // //
+    // // channel: [ meta, bam_dna ]
+    // ch_dna_processed_out = Channel.empty()
+    // // channel: [ meta, bam_rna ]
+    // ch_rna_processed_out = Channel.empty()
+    // // TODO(SW): set up correctly
+    // if (true | run_config.stages.markdups) {
 
-        ch_versions = ch_versions.mix(READ_PROCESSING.out.versions)
+    //     READ_PROCESSING(
+    //         ch_inputs,
+    //         ch_dna_alignment_out,
+    //         ch_rna_alignment_out,
+    //     )
 
-        ch_dna_processed_out = ch_dna_processed_out.mix(READ_PROCESSING.out.dna)
-        ch_rna_processed_out = ch_rna_processed_out.mix(READ_PROCESSING.out.rna)
+    //     ch_versions = ch_versions.mix(READ_PROCESSING.out.versions)
 
-    } else {
+    //     ch_dna_processed_out = ch_dna_processed_out.mix(READ_PROCESSING.out.dna)
+    //     ch_rna_processed_out = ch_rna_processed_out.mix(READ_PROCESSING.out.rna)
 
-        ch_dna_processed_out = ch_inputs.map { meta -> [meta, []] }
-        ch_rna_processed_out = ch_inputs.map { meta -> [meta, []] }
+    // } else {
 
-    }
+    //     ch_dna_processed_out = ch_inputs.map { meta -> [meta, []] }
+    //     ch_rna_processed_out = ch_inputs.map { meta -> [meta, []] }
+
+    // }
 
     // TODO(SW): adjust downstream selection of input BAM
 
