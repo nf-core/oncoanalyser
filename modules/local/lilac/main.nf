@@ -2,7 +2,10 @@ process LILAC {
     tag "${meta.id}"
     label 'process_medium'
 
-    container 'docker.io/scwatts/lilac:1.6--0'
+    conda "${moduleDir}/environment.yml"
+    container "${ workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container ?
+        'https://depot.galaxyproject.org/singularity/hmftools-lilac:1.6--hdfd78af_0' :
+        'quay.io/biocontainers/hmftools-lilac:1.6--hdfd78af_0' }"
 
     input:
     tuple val(meta), path(normal_dna_bam), path(normal_dna_bai), path(tumor_dna_bam), path(tumor_dna_bai), path(tumor_rna_bam), path(tumor_rna_bai), path(purple_dir)
@@ -28,24 +31,23 @@ process LILAC {
     def purple_dir_arg = purple_dir ? "-purple_dir ${purple_dir}" : ''
 
     """
-    java \\
+    lilac \\
         -Xmx${Math.round(task.memory.bytes * 0.95)} \\
-        -jar ${task.ext.jarPath} \\
-            ${args} \\
-            -sample ${sample_name} \\
-            ${normal_bam_arg} \\
-            ${tumor_dna_bam_arg} \\
-            ${tumor_rna_bam_arg} \\
-            ${purple_dir_arg} \\
-            -ref_genome ${genome_fasta} \\
-            -ref_genome_version ${genome_ver} \\
-            -resource_dir ${lilac_resources} \\
-            -threads ${task.cpus} \\
-            -output_dir lilac/
+        ${args} \\
+        -sample ${sample_name} \\
+        ${normal_bam_arg} \\
+        ${tumor_dna_bam_arg} \\
+        ${tumor_rna_bam_arg} \\
+        ${purple_dir_arg} \\
+        -ref_genome ${genome_fasta} \\
+        -ref_genome_version ${genome_ver} \\
+        -resource_dir ${lilac_resources} \\
+        -threads ${task.cpus} \\
+        -output_dir lilac/
 
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":
-        lilac: \$(java -jar ${task.ext.jarPath} -version | sed 's/^.* //')
+        lilac: \$(lilac -version | sed 's/^.* //')
     END_VERSIONS
     """
 

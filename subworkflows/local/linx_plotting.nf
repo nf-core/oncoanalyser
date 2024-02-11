@@ -5,7 +5,7 @@
 import Constants
 import Utils
 
-include { GPGR_LINX as GPGR             } from '../../modules/local/gpgr/linx/main'
+include { LINXREPORT as REPORT           } from '../../modules/local/linxreport/main'
 include { LINX_VISUALISER as VISUALISER } from '../../modules/local/linx/visualiser/main'
 
 workflow LINX_PLOTTING {
@@ -89,11 +89,11 @@ workflow LINX_PLOTTING {
             }
 
         // Run process
-        GPGR(
+        REPORT(
             ch_gpgr_linx_inputs,
         )
 
-        ch_versions = ch_versions.mix(GPGR.out.versions)
+        ch_versions = ch_versions.mix(REPORT.out.versions)
 
         // Set outputs, restoring original meta
         // channel: [ meta, visualiser_dir ]

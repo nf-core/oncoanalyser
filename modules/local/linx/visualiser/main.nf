@@ -2,7 +2,10 @@ process LINX_VISUALISER {
     tag "${meta.id}"
     label 'process_medium'
 
-    container 'docker.io/scwatts/linx:1.25--0'
+    conda "${moduleDir}/../environment.yml"
+    container "${ workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container ?
+        'https://depot.galaxyproject.org/singularity/hmftools-linx:1.25--hdfd78af_0':
+        'quay.io/biocontainers/hmftools-linx:1.25--hdfd78af_0' }"
 
     input:
     tuple val(meta), path(linx_annotation_dir)
@@ -38,19 +41,18 @@ process LINX_VISUALISER {
 
     # Generate all chromosome and cluster plots by default
 
-    java \\
+    linx \\
         -Xmx${Math.round(task.memory.bytes * 0.95)} \\
-        -cp ${task.ext.jarPath} \\
         com.hartwig.hmftools.linx.visualiser.SvVisualiser \\
-            ${args} \\
-            -sample ${meta.sample_id} \\
-            -vis_file_dir ${linx_annotation_dir} \\
-            -ref_genome_version ${genome_ver} \\
-            -ensembl_data_dir ${ensembl_data_resources} \\
-            -circos ${task.ext.circosPath} \\
-            -threads ${task.cpus} \\
-            -plot_out plots/all/ \\
-            -data_out data/all/
+        ${args} \\
+        -sample ${meta.sample_id} \\
+        -vis_file_dir ${linx_annotation_dir} \\
+        -ref_genome_version ${genome_ver} \\
+        -ensembl_data_dir ${ensembl_data_resources} \\
+        -circos \$(which circos) \\
+        -threads ${task.cpus} \\
+        -plot_out plots/all/ \\
+        -data_out data/all/
 
     # Rerun LINX to render only reportable cluster plots in a separate directory. While this is regenerating existing
     # cluster plots, the number of reportable plots is generally very small and I prefer to rely on the internal LINX
@@ -62,20 +64,19 @@ process LINX_VISUALISER {
 
     # https://github.com/hartwigmedical/hmftools/blob/linx-v1.24.1/linx/src/main/java/com/hartwig/hmftools/linx/visualiser/SampleData.java#L220-L236
 
-    java \\
+    linx \\
         -Xmx${Math.round(task.memory.bytes * 0.95)} \\
-        -cp ${task.ext.jarPath} \\
         com.hartwig.hmftools.linx.visualiser.SvVisualiser \\
-            ${args} \\
-            -sample ${meta.sample_id} \\
-            -vis_file_dir ${linx_annotation_dir} \\
-            -ref_genome_version ${genome_ver} \\
-            -ensembl_data_dir ${ensembl_data_resources} \\
-            -circos ${task.ext.circosPath} \\
-            -plot_reportable \\
-            -threads ${task.cpus} \\
-            -plot_out plots/reportable/ \\
-            -data_out data/reportable/
+        ${args} \\
+        -sample ${meta.sample_id} \\
+        -vis_file_dir ${linx_annotation_dir} \\
+        -ref_genome_version ${genome_ver} \\
+        -ensembl_data_dir ${ensembl_data_resources} \\
+        -circos \$(which circos) \\
+        -plot_reportable \\
+        -threads ${task.cpus} \\
+        -plot_out plots/reportable/ \\
+        -data_out data/reportable/
 
     # Create placeholders to force FusionFS to create parent plot directory on S3
     if [[ \$(ls plots/ | wc -l) -eq 0 ]]; then
@@ -84,7 +85,7 @@ process LINX_VISUALISER {
 
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":
-        linx: \$(java -jar ${task.ext.jarPath} | sed 's/^.*Linx version: //')
+        linx: \$(linx -version | sed 's/^.* //')
     END_VERSIONS
     """
 

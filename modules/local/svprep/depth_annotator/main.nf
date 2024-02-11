@@ -2,7 +2,10 @@ process SVPREP_DEPTH_ANNOTATOR {
     tag "${meta.id}"
     label 'process_medium'
 
-    container 'docker.io/scwatts/svprep:1.2.3--0'
+    conda "${moduleDir}/../environment.yml"
+    container "${ workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container ?
+        'https://depot.galaxyproject.org/singularity/hmftools-sv-prep:1.2.3--hdfd78af_1' :
+        'quay.io/biocontainers/hmftools-sv-prep:1.2.3--hdfd78af_1' }"
 
     input:
     tuple val(meta), path(bams), path(bais), path(vcf), val(labels)
@@ -26,21 +29,21 @@ process SVPREP_DEPTH_ANNOTATOR {
     def bams_arg = "${bams_list.join(',')}"
 
     """
-    java \\
+    svprep \\
         -Xmx${Math.round(task.memory.bytes * 0.95)} \\
-        -cp ${task.ext.jarPath} com.hartwig.hmftools.svprep.depth.DepthAnnotator \\
-            ${args} \\
-            -input_vcf ${vcf} \\
-            -samples ${labels_arg} \\
-            -bam_files ${bams_arg} \\
-            -ref_genome ${genome_fasta} \\
-            -ref_genome_version ${genome_ver} \\
-            -threads ${task.cpus} \\
-            -output_vcf ${meta.tumor_id}.gridss.vcf.gz
+        com.hartwig.hmftools.svprep.depth.DepthAnnotator \\
+        ${args} \\
+        -input_vcf ${vcf} \\
+        -samples ${labels_arg} \\
+        -bam_files ${bams_arg} \\
+        -ref_genome ${genome_fasta} \\
+        -ref_genome_version ${genome_ver} \\
+        -threads ${task.cpus} \\
+        -output_vcf ${meta.tumor_id}.gridss.vcf.gz
 
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":
-        svprep: \$(java -jar ${task.ext.jarPath} -version | sed 's/^.* //')
+        svprep: \$(svprep -version | sed 's/^.* //')
     END_VERSIONS
     """
 

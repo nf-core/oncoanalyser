@@ -1,15 +1,15 @@
-name: gpgr_linx
-description: Create an interactive report for LINX
+name: linxreport
+description: LINX result reporter
 keywords:
   - report
   - linx
   - sv
   - cnv
 tools:
-  - gpgr:
-      description: Create interactive reports from genomic data
-      homepage: https://github.com/umccr/gpgr
-      documentation: https://github.com/umccr/gpgr
+  - linxreport:
+      description: LINX result reporter
+      homepage: https://github.com/umccr/linxreport
+      documentation: https://github.com/umccr/linxreport
       licence: ["MIT"]
 input:
   - meta:

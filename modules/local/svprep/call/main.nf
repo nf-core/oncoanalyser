@@ -2,7 +2,10 @@ process GRIDSS_CALL {
     tag "${meta.id}"
     label 'process_medium'
 
-    container 'docker.io/scwatts/svprep:1.2.3--0'
+    conda "${moduleDir}/../environment.yml"
+    container "${ workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container ?
+        'https://depot.galaxyproject.org/singularity/hmftools-sv-prep:1.2.3--hdfd78af_1' :
+        'quay.io/biocontainers/hmftools-sv-prep:1.2.3--hdfd78af_1' }"
 
     input:
     tuple val(meta), path(bams), path(bams_filtered), path(assemble_dir), val(labels)
@@ -66,7 +69,6 @@ process GRIDSS_CALL {
         ${args} \\
         --jvmheap ${Math.round((task.memory.bytes - task.ext.otherJvmHeap.bytes) * 0.95)} \\
         --otherjvmheap ${task.ext.otherJvmHeap.bytes} \\
-        --jar ${task.ext.jarPathGridss} \\
         --steps call \\
         --labels ${labels_arg} \\
         --reference ${genome_fasta} \\
@@ -81,8 +83,8 @@ process GRIDSS_CALL {
 
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":
-        gridss: \$(java -cp ${task.ext.jarPathGridss} gridss.CallVariants --version 2>&1 | sed 's/-gridss//')
-        svprep: \$(java -jar ${task.ext.jarPathSvPrep} -version | sed 's/^.* //')
+        gridss: \$(CallVariants --version 2>&1 | sed 's/-gridss\$//')
+        svprep: \$(svprep -version | sed 's/^.* //')
     END_VERSIONS
     """
 

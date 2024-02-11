@@ -2,7 +2,10 @@ process PURPLE {
     tag "${meta.id}"
     label 'process_low'
 
-    container 'docker.io/scwatts/purple:4.0--0'
+    conda "${moduleDir}/environment.yml"
+    container "${ workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container ?
+        'https://depot.galaxyproject.org/singularity/hmftools-purple:4.0--hdfd78af_0' :
+        'quay.io/biocontainers/hmftools-purple:4.0--hdfd78af_0' }"
 
     input:
     tuple val(meta), path(amber), path(cobalt), path(sv_tumor_vcf), path(sv_tumor_tbi), path(sv_tumor_unfiltered_vcf), path(sv_tumor_unfiltered_tbi), path(sv_normal_vcf), path(sv_normal_tbi), path(smlv_tumor_vcf), path(smlv_normal_vcf)
@@ -48,37 +51,36 @@ process PURPLE {
     def target_region_msi_indels_arg = target_region_msi_indels ? "-target_regions_msi_indels ${target_region_msi_indels}" : ''
 
     """
-    java \\
+    purple \\
         -Xmx${Math.round(task.memory.bytes * 0.95)} \\
-        -jar ${task.ext.jarPath} \\
-            ${args} \\
-            -tumor ${meta.tumor_id} \\
-            ${reference_arg} \\
-            -amber ${amber} \\
-            -cobalt ${cobalt} \\
-            ${sv_tumor_vcf_arg} \\
-            ${sv_normal_vcf_arg} \\
-            ${sv_tumor_recovery_vcf_arg} \\
-            ${smlv_tumor_vcf_arg} \\
-            ${smlv_normal_vcf_arg} \\
-            -ref_genome ${genome_fasta} \\
-            -ref_genome_version ${genome_ver} \\
-            -driver_gene_panel ${driver_gene_panel} \\
-            -ensembl_data_dir ${ensembl_data_resources} \\
-            -somatic_hotspots ${sage_known_hotspots_somatic} \\
-            ${sage_known_hotspots_germline_arg} \\
-            ${target_region_bed_arg} \\
-            ${target_region_ratios_arg} \\
-            ${target_region_msi_indels_arg} \\
-            ${germline_del_arg} \\
-            -gc_profile ${gc_profile} \\
-            -circos ${task.ext.circosPath} \\
-            -threads ${task.cpus} \\
-            -output_dir purple/
+        ${args} \\
+        -tumor ${meta.tumor_id} \\
+        ${reference_arg} \\
+        -amber ${amber} \\
+        -cobalt ${cobalt} \\
+        ${sv_tumor_vcf_arg} \\
+        ${sv_normal_vcf_arg} \\
+        ${sv_tumor_recovery_vcf_arg} \\
+        ${smlv_tumor_vcf_arg} \\
+        ${smlv_normal_vcf_arg} \\
+        -ref_genome ${genome_fasta} \\
+        -ref_genome_version ${genome_ver} \\
+        -driver_gene_panel ${driver_gene_panel} \\
+        -ensembl_data_dir ${ensembl_data_resources} \\
+        -somatic_hotspots ${sage_known_hotspots_somatic} \\
+        ${sage_known_hotspots_germline_arg} \\
+        ${target_region_bed_arg} \\
+        ${target_region_ratios_arg} \\
+        ${target_region_msi_indels_arg} \\
+        ${germline_del_arg} \\
+        -gc_profile ${gc_profile} \\
+        -circos \$(which circos) \\
+        -threads ${task.cpus} \\
+        -output_dir purple/
 
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":
-        purple: \$(java -jar ${task.ext.jarPath} -version | sed 's/^.* //')
+        purple: \$(purple -version | sed 's/^.* //')
     END_VERSIONS
     """
 

@@ -1,8 +1,11 @@
-process GPGR_LINX {
+process LINXREPORT {
     tag "${meta.id}"
     label 'process_single'
 
-    container 'docker.io/scwatts/gpgr:1.5.0'
+    conda "${moduleDir}/../environment.yml"
+    container "${ workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container ?
+        'https://depot.galaxyproject.org/singularity/r-linxreport:1.0.0--r43hdfd78af_0' :
+        'quay.io/biocontainers/r-linxreport:1.0.0--r43hdfd78af_0' }"
 
     input:
     tuple val(meta), path(linx_annotation_dir), path(linx_visualiser_dir)
@@ -25,7 +28,7 @@ process GPGR_LINX {
         mkdir -p ${plot_dir}/;
     fi;
 
-    gpgr.R linx \\
+    linxreport.R \\
         ${args} \\
         --sample ${meta.sample_id} \\
         --plot ${plot_dir}/ \\
@@ -35,7 +38,7 @@ process GPGR_LINX {
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":
         R: \$(R --version | head -n1 | sed 's/^R version \\([0-9.]\\+\\).\\+/\\1/')
-        gpgr: \$(gpgr.R --version | cut -f2 -d' ')
+        linxreport: \$(linxreport.R --version)
     END_VERSIONS
     """
 

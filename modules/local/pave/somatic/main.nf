@@ -2,7 +2,10 @@ process PAVE_SOMATIC {
     tag "${meta.id}"
     label 'process_medium'
 
-    container 'docker.io/scwatts/pave:1.6--0'
+    conda "${moduleDir}/../environment.yml"
+    container "${ workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container ?
+        'https://depot.galaxyproject.org/singularity/hmftools-pave:1.6--hdfd78af_0' :
+        'quay.io/biocontainers/hmftools-pave:1.6--hdfd78af_0' }"
 
     input:
     tuple val(meta), path(sage_vcf), path(sage_tbi)
@@ -51,31 +54,30 @@ process PAVE_SOMATIC {
     def clinvar_annotations = clinvar_annotations ? "-clinvar_vcf ${clinvar_annotations}" : ''
 
     """
-    java \\
+    pave \\
         -Xmx${Math.round(task.memory.bytes * 0.95)} \\
-        -jar ${task.ext.jarPath} \\
-            -sample ${meta.sample_id} \\
-            -vcf_file ${sage_vcf} \\
-            -ref_genome ${genome_fasta} \\
-            -ref_genome_version ${genome_ver} \\
-            -pon_file ${sage_pon} \\
-            -pon_filters "${pon_filters}" \\
-            ${pon_artefact_arg} \\
-            ${clinvar_annotations} \\
-            -driver_gene_panel ${driver_gene_panel} \\
-            -mappability_bed ${segment_mappability} \\
-            -ensembl_data_dir ${ensembl_data_resources} \\
-            ${sage_blocklist_regions_arg} \\
-            ${sage_blocklist_sites_arg} \\
-            ${pathogenic_pass_force_arg} \\
-            ${gnomad_args} \\
-            -read_pass_only \\
-            -threads ${task.cpus} \\
-            -output_dir ./
+        -sample ${meta.sample_id} \\
+        -vcf_file ${sage_vcf} \\
+        -ref_genome ${genome_fasta} \\
+        -ref_genome_version ${genome_ver} \\
+        -pon_file ${sage_pon} \\
+        -pon_filters "${pon_filters}" \\
+        ${pon_artefact_arg} \\
+        ${clinvar_annotations} \\
+        -driver_gene_panel ${driver_gene_panel} \\
+        -mappability_bed ${segment_mappability} \\
+        -ensembl_data_dir ${ensembl_data_resources} \\
+        ${sage_blocklist_regions_arg} \\
+        ${sage_blocklist_sites_arg} \\
+        ${pathogenic_pass_force_arg} \\
+        ${gnomad_args} \\
+        -read_pass_only \\
+        -threads ${task.cpus} \\
+        -output_dir ./
 
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":
-        pave: \$(java -jar ${task.ext.jarPath} -version | sed 's/^.* //')
+        pave: \$(pave -version | sed 's/^.* //')
     END_VERSIONS
     """
 

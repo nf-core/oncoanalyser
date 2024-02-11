@@ -4,7 +4,10 @@ process SAGE_SOMATIC {
     tag "${meta.id}"
     label 'process_medium'
 
-    container 'docker.io/scwatts/sage:3.4--0'
+    conda "${moduleDir}/../environment.yml"
+    container "${ workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container ?
+        'https://depot.galaxyproject.org/singularity/hmftools-sage:3.4--hdfd78af_1' :
+        'quay.io/biocontainers/hmftools-sage:3.4--hdfd78af_1' }"
 
     input:
     tuple val(meta), path(tumor_bam), path(normal_bam), path(tumor_bai), path(normal_bai)
@@ -35,29 +38,28 @@ process SAGE_SOMATIC {
     """
     mkdir -p somatic/
 
-    java \\
+    sage \\
         -Xmx${Math.round(task.memory.bytes * 0.95)} \\
-        -jar ${task.ext.jarPath} \\
-            ${args} \\
-            ${reference_arg} \\
-            ${reference_bam_arg} \\
-            -tumor ${meta.tumor_id} \\
-            -tumor_bam ${tumor_bam} \\
-            -ref_genome ${genome_fasta} \\
-            -ref_genome_version ${genome_ver} \\
-            -hotspots ${sage_known_hotspots_somatic} \\
-            -panel_bed ${sage_actionable_panel} \\
-            -coverage_bed ${sage_coverage_panel} \\
-            -high_confidence_bed ${sage_highconf_regions} \\
-            -ensembl_data_dir ${ensembl_data_resources} \\
-            -write_bqr_data \\
-            -write_bqr_plot \\
-            -threads ${task.cpus} \\
-            -output_vcf somatic/${meta.tumor_id}.sage.somatic.vcf.gz
+        ${args} \\
+        ${reference_arg} \\
+        ${reference_bam_arg} \\
+        -tumor ${meta.tumor_id} \\
+        -tumor_bam ${tumor_bam} \\
+        -ref_genome ${genome_fasta} \\
+        -ref_genome_version ${genome_ver} \\
+        -hotspots ${sage_known_hotspots_somatic} \\
+        -panel_bed ${sage_actionable_panel} \\
+        -coverage_bed ${sage_coverage_panel} \\
+        -high_confidence_bed ${sage_highconf_regions} \\
+        -ensembl_data_dir ${ensembl_data_resources} \\
+        -write_bqr_data \\
+        -write_bqr_plot \\
+        -threads ${task.cpus} \\
+        -output_vcf somatic/${meta.tumor_id}.sage.somatic.vcf.gz
 
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":
-        sage: \$(java -jar ${task.ext.jarPath} -version | sed 's/^.* //')
+        sage: \$(sage -version | sed 's/^.* //')
     END_VERSIONS
     """
 

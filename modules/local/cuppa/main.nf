@@ -2,7 +2,10 @@ process CUPPA {
     tag "${meta.id}"
     label 'process_low'
 
-    container 'docker.io/scwatts/cuppa:1.8.1--0'
+    conda "${moduleDir}/environment.yml"
+    container "${ workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container ?
+        'https://depot.galaxyproject.org/singularity/hmftools-cuppa:1.8.1--hdfd78af_0' :
+        'quay.io/biocontainers/hmftools-cuppa:1.8.1--hdfd78af_0' }"
 
     input:
     tuple val(meta), path(isofox_dir), path(purple_dir), path(linx_dir), path(virusinterpreter_dir)
@@ -41,19 +44,18 @@ process CUPPA {
 
     mkdir -p cuppa/
 
-    java \\
+    cuppa \\
         -Xmx${Math.round(task.memory.bytes * 0.95)} \\
-        -jar ${task.ext.jarPath} \\
-            -sample ${meta.sample_id} \\
-            -sample_data_dir sample_data/ \\
-            -categories ${classifier} \\
-            -ref_data_dir ${cuppa_resources} \\
-            -ref_genome_version ${ref_genome_ver} \\
-            -create_pdf \\
-            -output_dir cuppa/
+        -sample ${meta.sample_id} \\
+        -sample_data_dir sample_data/ \\
+        -categories ${classifier} \\
+        -ref_data_dir ${cuppa_resources} \\
+        -ref_genome_version ${ref_genome_ver} \\
+        -create_pdf \\
+        -output_dir cuppa/
 
     if [[ ${classifier} == 'DNA' || ${classifier} == 'ALL' ]]; then
-        python ${task.ext.chartScriptPath} \\
+        cuppa-chart \\
             -sample ${meta.sample_id} \\
             -sample_data cuppa/${meta.sample_id}.cup.data.csv \\
             -output_dir cuppa/;
@@ -61,7 +63,7 @@ process CUPPA {
 
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":
-        cuppa: \$(java -jar ${task.ext.jarPath} | sed -n '1s/^.* //p')
+        cuppa: \$(cuppa | sed -n '1s/^.* //p')
     END_VERSIONS
     """
 

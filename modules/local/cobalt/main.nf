@@ -2,7 +2,10 @@ process COBALT {
     tag "${meta.id}"
     label 'process_medium'
 
-    container 'docker.io/scwatts/cobalt:1.16--0'
+    conda "${moduleDir}/environment.yml"
+    container "${ workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container ?
+        'https://depot.galaxyproject.org/singularity/hmftools-cobalt:1.16--hdfd78af_0' :
+        'quay.io/biocontainers/hmftools-cobalt:1.16--hdfd78af_0' }"
 
     input:
     tuple val(meta), path(tumor_bam), path(normal_bam), path(tumor_bai), path(normal_bai)
@@ -27,23 +30,22 @@ process COBALT {
     def target_region_arg = target_region_normalisation ? "-target_region ${target_region_normalisation}" : ''
 
     """
-    java \\
+    cobalt \\
         -Xmx${Math.round(task.memory.bytes * 0.95)} \\
-        -jar ${task.ext.jarPath} \\
-            ${args} \\
-            -tumor ${meta.tumor_id} \\
-            -tumor_bam ${tumor_bam} \\
-            ${reference_arg} \\
-            ${reference_bam_arg} \\
-            -threads ${task.cpus} \\
-            -gc_profile ${gc_profile} \\
-            ${diploid_regions_arg} \\
-            ${target_region_arg} \\
-            -output_dir cobalt/
+        ${args} \\
+        -tumor ${meta.tumor_id} \\
+        -tumor_bam ${tumor_bam} \\
+        ${reference_arg} \\
+        ${reference_bam_arg} \\
+        -threads ${task.cpus} \\
+        -gc_profile ${gc_profile} \\
+        ${diploid_regions_arg} \\
+        ${target_region_arg} \\
+        -output_dir cobalt/
 
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":
-        cobalt: \$(java -jar ${task.ext.jarPath} -version | sed 's/^.* //')
+        cobalt: \$(cobalt -version | sed 's/^.* //')
     END_VERSIONS
     """
 

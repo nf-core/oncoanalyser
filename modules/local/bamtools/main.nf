@@ -2,7 +2,10 @@ process BAMTOOLS {
     tag "${meta.id}"
     label 'process_medium'
 
-    container 'docker.io/scwatts/bamtools:1.2--0'
+    conda "${moduleDir}/environment.yml"
+    container "${ workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container ?
+        'https://depot.galaxyproject.org/singularity/hmftools-bam-tools:1.2--hdfd78af_1' :
+        'quay.io/biocontainers/hmftools-bam-tools:1.2--hdfd78af_1' }"
 
     input:
     tuple val(meta), path(bam), path(bai)
@@ -20,22 +23,21 @@ process BAMTOOLS {
     def args = task.ext.args ?: ''
 
     """
-    java \\
+    bamtools \\
         -Xmx${Math.round(task.memory.bytes * 0.95)} \\
-        -cp ${task.ext.jarPath} \\
         com.hartwig.hmftools.bamtools.metrics.BamMetrics \\
-            -sample ${meta.sample_id} \\
-            -bam_file ${bam} \\
-            -ref_genome ${genome_fasta} \\
-            -ref_genome_version ${genome_ver} \\
-            -threads ${task.cpus} \\
-            -write_old_style \\
-            -log_level INFO \\
-            -output_dir ./
+        -sample ${meta.sample_id} \\
+        -bam_file ${bam} \\
+        -ref_genome ${genome_fasta} \\
+        -ref_genome_version ${genome_ver} \\
+        -threads ${task.cpus} \\
+        -write_old_style \\
+        -log_level INFO \\
+        -output_dir ./
 
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":
-        bamtools: \$(java -jar ${task.ext.jarPath} | sed 's/^.* //')
+        bamtools: \$(bamtools -version | sed 's/^.* //')
     END_VERSIONS
     """
 

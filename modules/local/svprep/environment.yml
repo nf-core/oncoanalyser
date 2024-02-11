@@ -1,0 +1,7 @@
+name: svprep
+channels:
+  - conda-forge
+  - bioconda
+  - defaults
+dependencies:
+  - bioconda::sv-prep=1.2.3=hdfd78af_1

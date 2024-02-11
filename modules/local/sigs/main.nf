@@ -2,7 +2,10 @@ process SIGS {
     tag "${meta.id}"
     label 'process_low'
 
-    container 'docker.io/scwatts/sigs:1.2.1--0'
+    conda "${moduleDir}/environment.yml"
+    container "${ workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container ?
+        'https://depot.galaxyproject.org/singularity/hmftools-sigs:1.2.1--hdfd78af_0' :
+        'quay.io/biocontainers/hmftools-sigs:1.2.1--hdfd78af_0' }"
 
     input:
     tuple val(meta), path(smlv_vcf)
@@ -21,17 +24,16 @@ process SIGS {
     """
     mkdir -p sigs/
 
-    java \\
+    sigs \\
         -Xmx${Math.round(task.memory.bytes * 0.95)} \\
-        -jar ${task.ext.jarPath} \\
-            -sample ${meta.sample_id} \\
-            -somatic_vcf_file ${smlv_vcf} \\
-            -signatures_file ${signatures} \\
-            -output_dir sigs/
+        -sample ${meta.sample_id} \\
+        -somatic_vcf_file ${smlv_vcf} \\
+        -signatures_file ${signatures} \\
+        -output_dir sigs/
 
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":
-        sigs: \$(java -jar ${task.ext.jarPath} -version | sed 's/^.* //')
+        sigs: \$(sigs -version | sed 's/^.* //')
     END_VERSIONS
     """
 

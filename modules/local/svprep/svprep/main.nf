@@ -2,7 +2,10 @@ process SVPREP {
     tag "${meta.id}"
     label 'process_medium'
 
-    container 'docker.io/scwatts/svprep:1.2.3--0'
+    conda "${moduleDir}/../environment.yml"
+    container "${ workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container ?
+        'https://depot.galaxyproject.org/singularity/hmftools-sv-prep:1.2.3--hdfd78af_1' :
+        'quay.io/biocontainers/hmftools-sv-prep:1.2.3--hdfd78af_1' }"
 
     input:
     tuple val(meta), path(bam), path(bai), path(junctions)
@@ -26,20 +29,19 @@ process SVPREP {
     def existing_juction_file_arg = junctions ? "-existing_junction_file ${junctions}" : ''
 
     """
-    java \\
+    svprep \\
         -Xmx${Math.round(task.memory.bytes * 0.75)} \\
-        -jar ${task.ext.jarPath} \\
-            ${args} \\
-            -sample ${meta.sample_id} \\
-            -bam_file ${bam} \\
-            -ref_genome ${genome_fasta} \\
-            -ref_genome_version ${genome_ver} \\
-            -blacklist_bed ${sv_blocklist} \\
-            -known_fusion_bed ${known_fusions} \\
-            ${write_types_arg} \\
-            ${existing_juction_file_arg} \\
-            -threads ${task.cpus} \\
-            -output_dir ./
+        ${args} \\
+        -sample ${meta.sample_id} \\
+        -bam_file ${bam} \\
+        -ref_genome ${genome_fasta} \\
+        -ref_genome_version ${genome_ver} \\
+        -blacklist_bed ${sv_blocklist} \\
+        -known_fusion_bed ${known_fusions} \\
+        ${write_types_arg} \\
+        ${existing_juction_file_arg} \\
+        -threads ${task.cpus} \\
+        -output_dir ./
 
     samtools sort \\
         -@ ${task.cpus} \\
@@ -49,7 +51,7 @@ process SVPREP {
 
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":
-        svprep: \$(java -jar ${task.ext.jarPath} -version | sed 's/^.* //')
+        svprep: \$(svprep -version | sed 's/^.* //')
     END_VERSIONS
     """
 

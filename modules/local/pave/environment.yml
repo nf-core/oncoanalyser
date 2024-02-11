@@ -1,0 +1,7 @@
+name: pave
+channels:
+  - conda-forge
+  - bioconda
+  - defaults
+dependencies:
+  - bioconda::pave=1.6

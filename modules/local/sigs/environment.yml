@@ -1,0 +1,7 @@
+name: sigs
+channels:
+  - conda-forge
+  - bioconda
+  - defaults
+dependencies:
+  - bioconda::r-sigs=1.2.1

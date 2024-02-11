@@ -4,7 +4,10 @@ process VIRUSBREAKEND {
     tag "${meta.id}"
     label 'process_high'
 
-    container 'docker.io/scwatts/gridss:2.13.2--3'
+    conda "${moduleDir}/environment.yml"
+    container "${ workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container ?
+        'https://depot.galaxyproject.org/singularity/gridss:2.13.2--h50ea8bc_3':
+        'quay.io/biocontainers/gridss:2.13.2--h50ea8bc_3' }"
 
     input:
     tuple val(meta), path(bam)
@@ -33,7 +36,6 @@ process VIRUSBREAKEND {
     ln -s \$(find -L ${genome_bwa_index_dir} -type f) ./
 
     virusbreakend \\
-        --jar ${task.ext.jarPath} \\
         --gridssargs "--jvmheap ${Math.round(task.memory.bytes * 0.95)}" \\
         --threads ${task.cpus} \\
         --db ${virusbreakenddb.toString().replaceAll("/\$", "")}/ \\
@@ -43,7 +45,7 @@ process VIRUSBREAKEND {
 
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":
-        gridss: \$(java -cp "${task.ext.jarPath}" gridss.CallVariants --version 2>&1 | sed 's/-gridss//')
+        gridss: \$(CallVariants --version 2>&1 | sed 's/-gridss\$//')
     END_VERSIONS
     """
 

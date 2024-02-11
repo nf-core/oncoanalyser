@@ -1,0 +1,7 @@
+name: linx
+channels:
+  - conda-forge
+  - bioconda
+  - defaults
+dependencies:
+  - bioconda::linx=1.25

@@ -2,7 +2,10 @@ process CHORD {
     tag "${meta.id}"
     label 'process_low'
 
-    container 'docker.io/scwatts/chord:2.00--0'
+    conda "${moduleDir}/environment.yml"
+    container "${ workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container ?
+        'https://depot.galaxyproject.org/singularity/r-chord:2.03--r43hdfd78af_0' :
+        'quay.io/biocontainers/r-chord:2.03--r43hdfd78af_0' }"
 
     input:
     tuple val(meta), path(smlv_vcf), path(sv_vcf)
@@ -19,24 +22,59 @@ process CHORD {
     def args = task.ext.args ?: ''
 
     """
-    mkdir -p chord/
+    #!/usr/bin/env Rscript
+    library('CHORD')
 
-    extractSigPredictHRD.R \\
-        ./ \\
-        ${meta.sample_id} \\
-        ${smlv_vcf} \\
-        ${sv_vcf} \\
-        ${genome_ver} \\
-        chord_signatures.txt \\
-        chord_prediction.txt
+    sampleName <- '${meta.sample_id}'
+    snvIndVcf <- '${smlv_vcf}'
+    svVcf <- '${sv_vcf}'
+    refGenomeVsn <- '${genome_ver}'
 
-    mv ${meta.sample_id}_chord_signatures.txt ${meta.sample_id}_chord_prediction.txt chord/
+    sigOutTxt <- 'chord/${meta.sample_id}_chord_signatures.txt'
+    prdOutTxt <- 'chord/${meta.sample_id}_chord_prediction.txt'
 
-    cat <<-END_VERSIONS > versions.yml
-    "${task.process}":
-        CHORD: \$(R -s -e "message(packageVersion('CHORD'))" 2>&1)
-        mutSigExtractor: \$(R -s -e "message(packageVersion('mutSigExtractor'))" 2>&1)
-    END_VERSIONS
+    dir.create('chord/')
+
+    if (refGenomeVsn == '37') {
+        library(BSgenome.Hsapiens.UCSC.hg19)
+        refGenome <- BSgenome.Hsapiens.UCSC.hg19
+    } else if (refGenomeVsn == '38') {
+        library(BSgenome.Hsapiens.UCSC.hg38)
+        refGenome <- BSgenome.Hsapiens.UCSC.hg38
+    } else {
+        stop('Unsupported ref genome version: ', refGenomeVsn, ' (should be 37 or 38)\\n')
+    }
+
+    cat('[INFO] Performing chord signature extraction\\n')
+    signatures <- CHORD::extractSigsChord(
+        vcf.snv=snvIndVcf,
+        vcf.indel=snvIndVcf,
+        vcf.sv=svVcf,
+        sample.name=sampleName,
+        sv.caller='gridss',
+        vcf.filters=list(snv='PASS', indel='PASS', sv='PASS'),
+        ref.genome=refGenome
+    )
+
+    cat('[INFO] Performing chord HRD prediction\\n')
+    prediction <- chordPredict(
+      signatures,
+      hrd.cutoff=0.5
+    )
+
+    cat('[INFO] Writing output file:', sigOutTxt,'\\n')
+    write.table(signatures, file=sigOutTxt, sep='\\t')
+
+    cat('[INFO] Writing output file:', prdOutTxt,'\\n')
+    write.table(prediction, file=prdOutTxt, sep='\\t', quote=FALSE, row.names=FALSE)
+
+    cat('[INFO] FINISHED CHORD signature extraction and HRD prediction\\n')
+
+    sink('versions.yml')
+    writeLines('"${task.process}":')
+    writeLines(paste('    CHORD:', packageVersion('CHORD')))
+    writeLines(paste('    mutSigExtractor:', packageVersion('mutSigExtractor')))
+    sink()
     """
 
     stub:

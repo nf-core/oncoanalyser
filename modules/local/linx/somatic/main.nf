@@ -2,7 +2,10 @@ process LINX_SOMATIC {
     tag "${meta.id}"
     label 'process_low'
 
-    container 'docker.io/scwatts/linx:1.25--0'
+    conda "${moduleDir}/../environment.yml"
+    container "${ workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container ?
+        'https://depot.galaxyproject.org/singularity/hmftools-linx:1.25--hdfd78af_0':
+        'quay.io/biocontainers/hmftools-linx:1.25--hdfd78af_0' }"
 
     input:
     tuple val(meta), path(purple_dir)
@@ -24,24 +27,23 @@ process LINX_SOMATIC {
     def gene_id_file_arg = gene_id_file ? "-gene_id_file ${gene_id_file}" : ''
 
     """
-    java \\
+    linx \\
         -Xmx${Math.round(task.memory.bytes * 0.95)} \\
-        -jar ${task.ext.jarPath} \\
-            ${args} \\
-            -sample ${meta.sample_id} \\
-            -sv_vcf ${purple_dir}/${meta.sample_id}.purple.sv.vcf.gz \\
-            -purple_dir ${purple_dir} \\
-            ${gene_id_file_arg} \\
-            -ref_genome_version ${genome_ver} \\
-            -ensembl_data_dir ${ensembl_data_resources} \\
-            -known_fusion_file ${known_fusion_data} \\
-            -driver_gene_panel ${driver_gene_panel} \\
-            -write_vis_data \\
-            -output_dir linx_somatic/
+        ${args} \\
+        -sample ${meta.sample_id} \\
+        -sv_vcf ${purple_dir}/${meta.sample_id}.purple.sv.vcf.gz \\
+        -purple_dir ${purple_dir} \\
+        ${gene_id_file_arg} \\
+        -ref_genome_version ${genome_ver} \\
+        -ensembl_data_dir ${ensembl_data_resources} \\
+        -known_fusion_file ${known_fusion_data} \\
+        -driver_gene_panel ${driver_gene_panel} \\
+        -write_vis_data \\
+        -output_dir linx_somatic/
 
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":
-        linx: \$(java -jar ${task.ext.jarPath} | sed 's/^.*Linx version: //')
+        linx: \$(linx -version | sed 's/^.* //')
     END_VERSIONS
     """
 

@@ -1,0 +1,7 @@
+name: orange
+channels:
+  - conda-forge
+  - bioconda
+  - defaults
+dependencies:
+  - bioconda::orange=2.7.1

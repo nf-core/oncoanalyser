@@ -2,7 +2,10 @@ process GRIPSS_GERMLINE {
     tag "${meta.id}"
     label 'process_low'
 
-    container 'docker.io/scwatts/gripss:2.4--0'
+    conda "${moduleDir}/../environment.yml"
+    container "${ workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container ?
+        'https://depot.galaxyproject.org/singularity/hmftools-gripss:2.4--hdfd78af_0' :
+        'quay.io/biocontainers/hmftools-gripss:2.4--hdfd78af_0' }"
 
     input:
     tuple val(meta), path(gridss_vcf)
@@ -26,26 +29,25 @@ process GRIPSS_GERMLINE {
     def args = task.ext.args ?: ''
 
     """
-    java \\
+    gripss \\
         -Xmx${Math.round(task.memory.bytes * 0.95)} \\
-        -jar ${task.ext.jarPath} \\
-            ${args} \\
-            -sample ${meta.normal_id} \\
-            -reference ${meta.tumor_id} \\
-            -vcf ${gridss_vcf} \\
-            -germline \\
-            -ref_genome ${genome_fasta} \\
-            -ref_genome_version ${genome_ver} \\
-            -pon_sgl_file ${pon_breakends} \\
-            -pon_sv_file ${pon_breakpoints} \\
-            -known_hotspot_file ${known_fusions} \\
-            -repeat_mask_file ${repeatmasker_annotations} \\
-            -output_id germline \\
-            -output_dir ./
+        ${args} \\
+        -sample ${meta.normal_id} \\
+        -reference ${meta.tumor_id} \\
+        -vcf ${gridss_vcf} \\
+        -germline \\
+        -ref_genome ${genome_fasta} \\
+        -ref_genome_version ${genome_ver} \\
+        -pon_sgl_file ${pon_breakends} \\
+        -pon_sv_file ${pon_breakpoints} \\
+        -known_hotspot_file ${known_fusions} \\
+        -repeat_mask_file ${repeatmasker_annotations} \\
+        -output_id germline \\
+        -output_dir ./
 
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":
-        gripss: \$(java -jar ${task.ext.jarPath} -version | sed 's/^.* //')
+        gripss: \$(gripss -version | sed 's/^.* //')
     END_VERSIONS
     """
 

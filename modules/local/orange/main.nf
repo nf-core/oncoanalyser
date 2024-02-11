@@ -2,7 +2,10 @@ process ORANGE {
     tag "${meta.id}"
     label 'process_single'
 
-    container 'docker.io/scwatts/orange:2.7.0--0'
+    conda "${moduleDir}/environment.yml"
+    container "${ workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container ?
+        'https://depot.galaxyproject.org/singularity/hmftools-orange:2.7.1--hdfd78af_0' :
+        'quay.io/biocontainers/hmftools-orange:2.7.1--hdfd78af_0' }"
 
     input:
     tuple val(meta), path(bam_metrics_somatic), path(bam_metrics_germline), path(flagstat_somatic), path(flagstat_germline), path(sage_somatic_dir), path(sage_germline_dir), path(smlv_somatic_vcf), path(smlv_germline_vcf), path(purple_dir), path(linx_somatic_anno_dir), path(linx_somatic_plot_dir), path(linx_germline_anno_dir), path(virusinterpreter_dir), path(chord_dir), path(sigs_dir), path(lilac_dir), path(cuppa_dir), path(isofox_dir)
@@ -93,53 +96,58 @@ process ORANGE {
 
     mkdir -p output/
 
+    # NOTE(SW): manually locating ORANGE install directory so that we can applu `--add-opens`, won't fix old bioconda recipe
+    orange_bin_fp=\$(which orange)
+    orange_install_dir=\$(readlink \${orange_bin_fp} | xargs dirname)
+    orange_jar=\$(dirname \${orange_bin_fp})/\${orange_install_dir}/orange.jar
+
     java \\
         --add-opens java.base/java.time=ALL-UNNAMED \\
         -Xmx${Math.round(task.memory.bytes * 0.95)} \\
-        -jar ${task.ext.jarPath} \\
-            \\
-            -experiment_date \$(date +%y%m%d) \\
-            -add_disclaimer \\
-            -pipeline_version_file pipeline_version.txt \\
-            \\
-            -tumor_sample_id ${meta.tumor_id} \\
-            -primary_tumor_doids 162 \\
-            -tumor_sample_wgs_metrics_file ${bam_metrics_somatic} \\
-            -tumor_sample_flagstat_file ${flagstat_somatic} \\
-            -sage_dir ${sage_somatic_dir} \\
-            -purple_dir \${purple_dir_local} \\
-            -purple_plot_dir \${purple_dir_local}/plot/ \\
-            -linx_dir ${linx_somatic_anno_dir} \\
-            -linx_plot_dir ${plot_dir}/ \\
-            -lilac_dir ${lilac_dir} \\
-            ${virus_dir_arg} \\
-            ${chord_dir_arg} \\
-            ${sigs_dir_arg} \\
-            ${cuppa_dir_arg} \\
-            \\
-            ${normal_id_arg} \\
-            ${normal_metrics_arg} \\
-            ${normal_flagstat_arg} \\
-            ${normal_sage_dir} \\
-            ${normal_linx_arg} \\
-            \\
-            ${rna_id_arg} \\
-            ${isofox_dir_arg} \\
-            \\
-            -ref_genome_version ${genome_ver} \\
-            -doid_json ${disease_ontology} \\
-            -cohort_mapping_tsv ${cohort_mapping} \\
-            -cohort_percentiles_tsv ${cohort_percentiles} \\
-            -known_fusion_file ${known_fusion_data} \\
-            -driver_gene_panel ${driver_gene_panel} \\
-            -ensembl_data_dir ${ensembl_data_resources} \\
-            ${isofox_gene_distribution_arg} \\
-            ${isofox_alt_sj_arg} \\
-            -output_dir output/
+        -jar \${orange_jar} \\
+          \\
+          -experiment_date \$(date +%y%m%d) \\
+          -add_disclaimer \\
+          -pipeline_version_file pipeline_version.txt \\
+          \\
+          -tumor_sample_id ${meta.tumor_id} \\
+          -primary_tumor_doids 162 \\
+          -tumor_sample_wgs_metrics_file ${bam_metrics_somatic} \\
+          -tumor_sample_flagstat_file ${flagstat_somatic} \\
+          -sage_dir ${sage_somatic_dir} \\
+          -purple_dir \${purple_dir_local} \\
+          -purple_plot_dir \${purple_dir_local}/plot/ \\
+          -linx_dir ${linx_somatic_anno_dir} \\
+          -linx_plot_dir ${plot_dir}/ \\
+          -lilac_dir ${lilac_dir} \\
+          ${virus_dir_arg} \\
+          ${chord_dir_arg} \\
+          ${sigs_dir_arg} \\
+          ${cuppa_dir_arg} \\
+          \\
+          ${normal_id_arg} \\
+          ${normal_metrics_arg} \\
+          ${normal_flagstat_arg} \\
+          ${normal_sage_dir} \\
+          ${normal_linx_arg} \\
+          \\
+          ${rna_id_arg} \\
+          ${isofox_dir_arg} \\
+          \\
+          -ref_genome_version ${genome_ver} \\
+          -doid_json ${disease_ontology} \\
+          -cohort_mapping_tsv ${cohort_mapping} \\
+          -cohort_percentiles_tsv ${cohort_percentiles} \\
+          -known_fusion_file ${known_fusion_data} \\
+          -driver_gene_panel ${driver_gene_panel} \\
+          -ensembl_data_dir ${ensembl_data_resources} \\
+          ${isofox_gene_distribution_arg} \\
+          ${isofox_alt_sj_arg} \\
+          -output_dir output/
 
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":
-        orange: \$(java -jar ${task.ext.jarPath} -version | sed 's/^.* //')
+        orange: \$(orange -version | sed 's/^.* //')
     END_VERSIONS
     """
 

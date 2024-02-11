@@ -2,7 +2,10 @@ process GRIDSS_INDEX {
     tag "${genome_fasta.name}"
     label 'process_single'
 
-    container 'docker.io/scwatts/gridss:2.13.2--3'
+    conda "${moduleDir}/../environment.yml"
+    container "${ workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container ?
+        'https://depot.galaxyproject.org/singularity/gridss:2.13.2--h50ea8bc_3' :
+        'quay.io/biocontainers/gridss:2.13.2--h50ea8bc_3' }"
 
     input:
     path genome_fasta
@@ -32,7 +35,7 @@ process GRIDSS_INDEX {
     ln -s \$(find -L ${genome_bwa_index_dir} -type f) ./
 
     # Run
-    java \\
+    PrepareReference \\
         -Xmx${Math.round(task.memory.bytes * 0.95)} \\
         -XX:ParallelGCThreads=${task.cpus} \\
         -Dsamjdk.reference_fasta=${genome_fasta} \\
@@ -41,15 +44,14 @@ process GRIDSS_INDEX {
         -Dsamjdk.use_async_io_write_tribble=true \\
         -Dsamjdk.buffer_size=4194304 \\
         -Dsamjdk.async_io_read_threads=${task.cpus} \\
-        -cp ${task.ext.jarPath} gridss.PrepareReference \\
-            REFERENCE_SEQUENCE=${genome_fasta} \\
-            CREATE_SEQUENCE_DICTIONARY=${sequence_dict_arg} \\
-            CREATE_BWA_INDEX_IMAGE=${bwa_index_image_arg} \\
-            CREATE_GRIDSS_REFERENCE_CACHE=${gridss_index_arg}
+        REFERENCE_SEQUENCE=${genome_fasta} \\
+        CREATE_SEQUENCE_DICTIONARY=${sequence_dict_arg} \\
+        CREATE_BWA_INDEX_IMAGE=${bwa_index_image_arg} \\
+        CREATE_GRIDSS_REFERENCE_CACHE=${gridss_index_arg}
 
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":
-        gridss: \$(java -cp ${task.ext.jarPath} gridss.CallVariants --version 2>&1 | sed 's/-gridss//')
+        gridss: \$(CallVariants --version 2>&1 | sed 's/-gridss\$//')
     END_VERSIONS
     """
 

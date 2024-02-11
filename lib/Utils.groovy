@@ -69,7 +69,7 @@ class Utils {
                         System.exit(1)
                     }
 
-                    meta_sample[filetype_enum] = it.filepath
+                    meta_sample[filetype_enum] = Utils.getFileObject(it.filepath)
 
                     // Record sample key to simplify iteration later on
                     sample_keys << sample_key

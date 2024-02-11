@@ -2,7 +2,10 @@ process ISOFOX {
     tag "${meta.id}"
     label 'process_medium'
 
-    container 'docker.io/scwatts/isofox:1.7.1--0'
+    conda "${moduleDir}/environment.yml"
+    container "${ workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container ?
+        'https://depot.galaxyproject.org/singularity/hmftools-isofox:1.7.1-hdfd78af_0':
+        'quay.io/biocontainers/hmftools-isofox:1.7.1--hdfd78af_0' }"
 
     input:
     tuple val(meta), path(bam), path(bai)
@@ -38,27 +41,26 @@ process ISOFOX {
     """
     mkdir -p isofox/
 
-    java \\
+    isofox \\
         -Xmx${Math.round(task.memory.bytes * 0.95)} \\
-        -jar ${task.ext.jarPath} \\
-            ${args} \\
-            -sample ${meta.sample_id} \\
-            -bam_file ${bam} \\
-            ${functions_arg} \\
-            -read_length ${read_length} \\
-            -ref_genome ${genome_fasta} \\
-            -ref_genome_version ${genome_ver} \\
-            -ensembl_data_dir ${ensembl_data_resources} \\
-            ${exp_counts_arg} \\
-            ${exp_gc_ratios_arg} \\
-            ${gene_ids_arg} \\
-            ${tpm_norm_arg} \\
-            -threads ${task.cpus} \\
-            -output_dir isofox/
+        ${args} \\
+        -sample ${meta.sample_id} \\
+        -bam_file ${bam} \\
+        ${functions_arg} \\
+        -read_length ${read_length} \\
+        -ref_genome ${genome_fasta} \\
+        -ref_genome_version ${genome_ver} \\
+        -ensembl_data_dir ${ensembl_data_resources} \\
+        ${exp_counts_arg} \\
+        ${exp_gc_ratios_arg} \\
+        ${gene_ids_arg} \\
+        ${tpm_norm_arg} \\
+        -threads ${task.cpus} \\
+        -output_dir isofox/
 
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":
-        isofox: \$(java -jar ${task.ext.jarPath} -version | sed 's/^.* //')
+        isofox: \$(isofox -version | sed 's/^.* //')
     END_VERSIONS
     """
 
