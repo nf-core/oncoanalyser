@@ -12,11 +12,11 @@ nextflow_pipeline {
                 mode "wgts"
                 genome "GRCh38_hmf"
 
-                input "${baseDir}/tests/samplesheets/wgts.dna_rna.single.csv"
+                input "${baseDir}/tests/samplesheets/wgts.dna_rna.single.stub.csv"
                 outdir "${outputDir}"
 
-                ref_data_virusbreakenddb_path "${workDir}/refdata/virusbreakenddb_20210401/"
-                ref_data_hmf_data_path "${workDir}/refdata/hmf_data/"
+                ref_data_virusbreakenddb_path "${workDir}/reference_data/virusbreakenddb_20210401/"
+                ref_data_hmf_data_path "${workDir}/reference_data/hmf_data/"
 
                 max_cpus = 1
                 max_memory = "10.GB"
@@ -41,11 +41,12 @@ nextflow_pipeline {
                 panel "tso500"
                 genome "GRCh38_hmf"
 
-                input "${baseDir}/tests/samplesheets/targeted.tso500.dna_rna.single.csv"
+                input "${baseDir}/tests/samplesheets/targeted.tso500.dna_rna.single.stub.csv"
                 outdir "${outputDir}"
 
-                ref_data_hmf_data_path "${workDir}/refdata/hmf_data/"
-                ref_data_panel_data_path "${workDir}/refdata/panel_data/"
+                ref_data_virusbreakenddb_path "${workDir}/reference_data/virusbreakenddb_20210401/"
+                ref_data_hmf_data_path "${workDir}/reference_data/hmf_data/"
+                ref_data_panel_data_path "${workDir}/reference_data/panel_data/"
 
                 max_cpus 1
                 max_memory "10.GB"

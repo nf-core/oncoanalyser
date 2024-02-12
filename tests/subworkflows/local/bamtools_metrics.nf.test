@@ -1,8 +1,8 @@
 nextflow_workflow {
 
-    name "Test AMBER subworkflow"
-    script "subworkflows/local/amber_profiling.nf"
-    workflow "AMBER_PROFILING"
+    name "Test BamTools subworkflow"
+    script "subworkflows/local/bamtools_metrics.nf"
+    workflow "BAMTOOLS_METRICS"
     profile "docker"
 
     test("WGTS COLO829 mini") {
@@ -22,15 +22,15 @@ nextflow_workflow {
             params {
                 outdir "${outputDir}"
 
-                max_cpus = 1
+                // NOTE(SW): BamTools fails when using a single thread
+                max_cpus = 2
                 max_memory = "10.GB"
             }
             workflow {
                 """
                 input[0] = PREPARE_INPUTS.out.inputs
-                input[1] = '38'
-                input[2] = '${baseDir}/test_data/reference_data/hmf_reference_data/hmftools/5.34_38--0/dna_pipeline/copy_number/AmberGermlineSites.38.tsv.gz'
-                input[3] = []
+                input[1] = '${baseDir}/test_data/reference_data/genomes/GRCh38_hmf/GCA_000001405.15_GRCh38_no_alt_analysis_set.fna'
+                input[2] = '38'
                 """
             }
         }

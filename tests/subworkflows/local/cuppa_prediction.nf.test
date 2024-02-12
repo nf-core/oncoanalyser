@@ -1,8 +1,8 @@
 nextflow_workflow {
 
-    name "Test AMBER subworkflow"
-    script "subworkflows/local/amber_profiling.nf"
-    workflow "AMBER_PROFILING"
+    name "Test CUPPA subworkflow"
+    script "subworkflows/local/cuppa_prediction.nf"
+    workflow "CUPPA_PREDICTION"
     profile "docker"
 
     test("WGTS COLO829 mini") {
@@ -28,9 +28,12 @@ nextflow_workflow {
             workflow {
                 """
                 input[0] = PREPARE_INPUTS.out.inputs
-                input[1] = '38'
-                input[2] = '${baseDir}/test_data/reference_data/hmf_reference_data/hmftools/5.34_38--0/dna_pipeline/copy_number/AmberGermlineSites.38.tsv.gz'
-                input[3] = []
+                input[1] = PREPARE_INPUTS.out.inputs.combine(Channel.of('${baseDir}/test_data/module_data/isofox/'))
+                input[2] = PREPARE_INPUTS.out.inputs.combine(Channel.of('${baseDir}/test_data/module_data/purple/'))
+                input[3] = PREPARE_INPUTS.out.inputs.combine(Channel.of('${baseDir}/test_data/module_data/linx_somatic/'))
+                input[4] = PREPARE_INPUTS.out.inputs.combine(Channel.of('${baseDir}/test_data/module_data/virusinterpreter/'))
+                input[5] = '38'
+                input[6] = '${baseDir}/test_data/reference_data/hmf_reference_data/hmftools/5.34_38--0/cuppa/'
                 """
             }
         }
