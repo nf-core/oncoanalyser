@@ -108,7 +108,7 @@ class Utils {
                             return
                         }
 
-                        def fp = meta[sample_key][key]
+                        def fp = meta[sample_key][key].toUriString()
                         def index_fp = nextflow.Nextflow.file("${fp}.${index_str}")
 
                         if (!index_fp.exists() && !stub_run) {
