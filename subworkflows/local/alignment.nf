@@ -42,8 +42,6 @@ workflow ALIGNMENT {
             def sample_id = meta[sample_key]['sample_id']
             def fastq_files = meta[sample_key][Constants.FileType.FASTQ].tokenize(';')
 
-            // TODO(MC): Validate fastq_files.
-
             def meta_fastq_common = [:]
             meta.each { key, value ->
 
@@ -219,13 +217,11 @@ workflow ALIGNMENT {
 
         def meta_bam = bam[0]
 
-        // TODO(MC): Safer to copy and delete unneeded fields.
-        def meta = [
-            group_id: meta_bam.group_id,
-            subject_id: meta_bam.subject_id,
-        ]
+        def meta = meta_bam.getClass().newInstance(meta_bam)
+        meta.remove('sample_key')
+        meta.remove('sample_id')
 
-        sample = [sample_id: meta_bam.sample_id]
+        def sample = [sample_id: meta_bam.sample_id]
         sample[Constants.FileType.BAM] = bam[1]
         sample[Constants.FileType.BAI] = bam[2]
         meta[meta_bam.sample_key] = sample
