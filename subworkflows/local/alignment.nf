@@ -14,6 +14,9 @@ workflow ALIGNMENT {
     max_fastq_lines
 
     main:
+    // channel: [ group_id, sample_count ]
+    ch_sample_counts = ch_inputs.map { meta -> [meta.group_id, Utils.groupSampleCounts(meta)] }
+
     // channel: [ meta ] (One sample per record).
     ch_meta_samples = ch_inputs.flatMap { meta -> Utils.splitGroupIntoSamples(meta) }
 
@@ -78,7 +81,6 @@ workflow ALIGNMENT {
         ch_split_fastq_pairs = ch_fastq_pairs.map { fastq_pair -> [fastq_pair[0], [fastq_pair[1]], [fastq_pair[2]]] }
     }
 
-    // TODO(MC): See WISP implementation.
     // Create inputs for bwa mem.
     // channel: [ meta_fastq, reads_fwd_fastq, reads_rev_fastq ]
     ch_bwa_mem_inputs = ch_split_fastq_pairs.flatMap { fastq ->
@@ -226,7 +228,7 @@ workflow ALIGNMENT {
         sample = [sample_id: meta_bam.sample_id]
         sample[Constants.FileType.BAM] = bam[1]
         sample[Constants.FileType.BAI] = bam[2]
-        meta[meta.sample_key] = sample
+        meta[meta_bam.sample_key] = sample
 
         meta
     }
@@ -239,11 +241,19 @@ workflow ALIGNMENT {
             ch_meta_samples_sorted.skip,
         )
 
-    // TODO(MC): Get rid of blocking.
-    // Undo split of meta records.
+    // Merge individual sample records back into group records without blocking for the whole channel to be processed.
     // channel: [ meta_bam ]
-    ch_outputs = ch_all_samples
-        .map { sample -> [sample.group_id, sample]}
+    ch_outputs = ch_sample_counts
+        .cross(
+            ch_all_samples.map { meta -> [meta.group_id, meta] }
+        )
+        .map { count_tuple, meta_tuple ->
+            def group_id = count_tuple[0]
+            def count = count_tuple[1]
+            def meta = meta_tuple[1]
+
+            tuple(groupKey(group_id, count), meta)
+        }
         .groupTuple()
         .map { key_samples ->
 

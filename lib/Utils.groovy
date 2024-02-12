@@ -477,6 +477,10 @@ class Utils {
         return meta_samples
     }
 
+    static public groupSampleCounts(meta_group) {
+        return splitGroupIntoSamples(meta_group).size()
+    }
+
     static public readGroupFromFastqPath(fastq_path) {
         def base_name = fastq_path.split('/')[-1]
         def pattern = /^(.+)_\d+\.fastq$/
