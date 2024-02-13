@@ -171,6 +171,10 @@ workflow NEO_PREDICTION{
                     cancer_type: meta[Constants.InfoField.CANCER_TYPE],
                 ]
 
+                if (Utils.hasTumorRnaBam(meta)) {
+                    meta_scorer.sample_rna_id = Utils.getTumorRnaSampleName(meta)
+                }
+
                 def inputs = [
                     Utils.selectCurrentOrExisting(isofox_dir, meta, Constants.INPUT.ISOFOX_DIR),
                     Utils.selectCurrentOrExisting(purple_dir, meta, Constants.INPUT.PURPLE_DIR),
