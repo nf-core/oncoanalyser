@@ -1,8 +1,8 @@
 nextflow_workflow {
 
-    name "Test CHORD subworkflow"
-    script "subworkflows/local/chord_prediction.nf"
-    workflow "CHORD_PREDICTION"
+    name "Test LILAC subworkflow"
+    script "subworkflows/local/lilac_calling.nf"
+    workflow "LILAC_CALLING"
     profile "docker"
 
     test("WGTS COLO829 mini") {
@@ -29,7 +29,11 @@ nextflow_workflow {
                 """
                 input[0] = PREPARE_INPUTS.out.inputs
                 input[1] = PREPARE_INPUTS.out.inputs.combine(Channel.of('${baseDir}/test_data/module_data/purple/'))
-                input[2] = '38'
+                input[2] = '${baseDir}/test_data/genomes/GRCh38_hmf/GCA_000001405.15_GRCh38_no_alt_analysis_set.fna'
+                input[3] = '38'
+                input[4] = '${baseDir}/test_data/genomes/GRCh38_hmf/samtools_index/1.16/GCA_000001405.15_GRCh38_no_alt_analysis_set.fna.fai'
+                input[5] = '${baseDir}/test_data/reference_data/hmf_reference_data/hmftools/5.34_38--0/dna_pipeline/immune/'
+                input[6] = '${baseDir}/test_data/reference_data/hmf_reference_data/hmftools/5.34_38--0/other/lilac/hla.38.bed'
                 """
             }
         }

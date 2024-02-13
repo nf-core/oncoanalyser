@@ -1,0 +1,67 @@
+nextflow_workflow {
+
+    name "Test ORANGE subworkflow"
+    script "subworkflows/local/orange_reporting.nf"
+    workflow "ORANGE_REPORTING"
+    profile "docker"
+
+    test("WGTS COLO829 mini") {
+
+        setup {
+            run("PREPARE_INPUTS") {
+                script "subworkflows/local/prepare_inputs.nf"
+                process {
+                    """
+                    input[0] = '${baseDir}/tests/samplesheets/wgts.dna_rna.single.csv'
+                    """
+                }
+            }
+        }
+
+        when {
+            params {
+                outdir = "${outputDir}"
+
+                max_cpus = 1
+                max_memory = "10.GB"
+            }
+            workflow {
+                """
+                input[0]  = PREPARE_INPUTS.out.inputs
+                input[1]  = PREPARE_INPUTS.out.inputs.combine(Channel.of('${baseDir}/test_data/module_data/bamtools/COLO829v003T.wgsmetrics'))
+                input[2]  = PREPARE_INPUTS.out.inputs.combine(Channel.of('${baseDir}/test_data/module_data/bamtools/COLO829v003R.wgsmetrics'))
+                input[3]  = PREPARE_INPUTS.out.inputs.combine(Channel.of('${baseDir}/test_data/module_data/flagstats/COLO829v003T.flagstat'))
+                input[4]  = PREPARE_INPUTS.out.inputs.combine(Channel.of('${baseDir}/test_data/module_data/flagstats/COLO829v003R.flagstat'))
+                input[5]  = PREPARE_INPUTS.out.inputs.combine(Channel.of('${baseDir}/test_data/module_data/sage/somatic/'))
+                input[6]  = PREPARE_INPUTS.out.inputs.combine(Channel.of('${baseDir}/test_data/module_data/sage/germline/'))
+                input[7]  = PREPARE_INPUTS.out.inputs.combine(Channel.of('${baseDir}/test_data/module_data/sage/append/COLO829v003T.sage.append.vcf.gz'))
+                input[8]  = PREPARE_INPUTS.out.inputs.combine(Channel.of('${baseDir}/test_data/module_data/sage/append/COLO829v003R.sage.append.vcf.gz'))
+                input[9]  = PREPARE_INPUTS.out.inputs.combine(Channel.of('${baseDir}/test_data/module_data/purple/'))
+                input[10] = PREPARE_INPUTS.out.inputs.combine(Channel.of('${baseDir}/test_data/module_data/linx/somatic_annotations/'))
+                input[11] = PREPARE_INPUTS.out.inputs.combine(Channel.of('${baseDir}/test_data/module_data/linx/somatic_plots/'))
+                input[12] = PREPARE_INPUTS.out.inputs.combine(Channel.of('${baseDir}/test_data/module_data/linx/germline_annotations/'))
+                input[13] = PREPARE_INPUTS.out.inputs.combine(Channel.of('${baseDir}/test_data/module_data/virusinterpreter/'))
+                input[14] = PREPARE_INPUTS.out.inputs.combine(Channel.of('${baseDir}/test_data/module_data/chord/'))
+                input[15] = PREPARE_INPUTS.out.inputs.combine(Channel.of('${baseDir}/test_data/module_data/sigs/'))
+                input[16] = PREPARE_INPUTS.out.inputs.combine(Channel.of('${baseDir}/test_data/module_data/lilac/'))
+                input[17] = PREPARE_INPUTS.out.inputs.combine(Channel.of('${baseDir}/test_data/module_data/cuppa/'))
+                input[18] = PREPARE_INPUTS.out.inputs.combine(Channel.of('${baseDir}/test_data/module_data/isofox/'))
+                input[19] = '38'
+                input[20] = '${baseDir}/test_data/reference_data/hmf_reference_data/hmftools/5.34_38--0/disease_ontology/doid.json'
+                input[21] = '${baseDir}/test_data/reference_data/hmf_reference_data/hmftools/5.34_38--0/orange/cohort_mapping.tsv'
+                input[22] = '${baseDir}/test_data/reference_data/hmf_reference_data/hmftools/5.34_38--0/orange/cohort_percentiles.tsv'
+                input[23] = '${baseDir}/test_data/reference_data/hmf_reference_data/hmftools/5.34_38--0/dna_pipeline/sv/known_fusion_data.38.csv'
+                input[24] = '${baseDir}/test_data/reference_data/hmf_reference_data/hmftools/5.34_38--0/dna_pipeline/common/DriverGenePanel.38.tsv'
+                input[25] = '${baseDir}/test_data/reference_data/hmf_reference_data/hmftools/5.34_38--0/dna_pipeline/common/ensembl_data/'
+                input[26] = Channel.of('${baseDir}/test_data/reference_data/hmf_reference_data/hmftools/5.34_38--0/rna_pipeline/isofox.hmf_3444.alt_sj_cohort.38.csv')
+                input[27] = Channel.of('${baseDir}/test_data/reference_data/hmf_reference_data/hmftools/5.34_38--0/rna_pipeline/isofox.hmf_3444.gene_distribution.38.csv')
+                """
+            }
+        }
+
+        then {
+            assert workflow.success
+        }
+
+    }
+}

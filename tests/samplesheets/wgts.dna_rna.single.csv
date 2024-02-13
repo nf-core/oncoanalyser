@@ -1,3 +1,4 @@
 group_id,subject_id,sample_id,sample_type,sequence_type,filetype,filepath
 COLO829,COLO829,COLO829v003T,tumor,dna,bam,meta/test_data/sample_data/COLO829T.bam
 COLO829,COLO829,COLO829v003R,normal,dna,bam,meta/test_data/sample_data/COLO829R.bam
+COLO829,COLO829,PTC_NebRNA230605,tumor,rna,bam,meta/test_data/sample_data/PTC_NebRNA230605.md.mini.bam

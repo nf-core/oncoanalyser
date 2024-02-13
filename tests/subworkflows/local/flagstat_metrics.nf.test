@@ -1,8 +1,8 @@
 nextflow_workflow {
 
-    name "Test BamTools subworkflow"
-    script "subworkflows/local/bamtools_metrics.nf"
-    workflow "BAMTOOLS_METRICS"
+    name "Test flagstat subworkflow"
+    script "subworkflows/local/flagstat_metrics.nf"
+    workflow "FLAGSTAT_METRICS"
     profile "docker"
 
     test("WGTS COLO829 mini") {
@@ -22,15 +22,12 @@ nextflow_workflow {
             params {
                 outdir = "${outputDir}"
 
-                // NOTE(SW): BamTools fails when using a single thread
-                max_cpus = 2
+                max_cpus = 1
                 max_memory = "10.GB"
             }
             workflow {
                 """
                 input[0] = PREPARE_INPUTS.out.inputs
-                input[1] = '${baseDir}/test_data/genomes/GRCh38_hmf/GCA_000001405.15_GRCh38_no_alt_analysis_set.fna'
-                input[2] = '38'
                 """
             }
         }
