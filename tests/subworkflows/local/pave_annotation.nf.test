@@ -22,7 +22,7 @@ nextflow_workflow {
             params {
                 outdir = "${outputDir}"
 
-		mode = "wgts"
+                mode = "wgts"
 
                 max_cpus = 1
                 max_memory = "10.GB"
