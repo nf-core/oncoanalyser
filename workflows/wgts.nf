@@ -147,8 +147,7 @@ workflow WGTS {
             params.max_fastq_records,
         )
 
-        // TODO(MC): Versions.
-        // ch_versions = ch_versions.mix(READ_ALIGNMENT.out.versions)
+        ch_versions = ch_versions.mix(READ_ALIGNMENT.out.versions)
 
         ch_dna_alignment_out = ch_dna_alignment_out.mix(READ_ALIGNMENT.out.dna)
         ch_rna_alignment_out = ch_rna_alignment_out.mix(READ_ALIGNMENT.out.rna)
@@ -181,8 +180,7 @@ workflow WGTS {
             file(params.refdata_unmap_regions),
         )
 
-        // TODO(MC): Versions.
-        // ch_versions = ch_versions.mix(READ_PROCESSING.out.versions)
+        ch_versions = ch_versions.mix(READ_PROCESSING.out.versions)
 
         ch_dna_processed_out = ch_dna_processed_out.mix(READ_PROCESSING.out.dna)
         ch_rna_processed_out = ch_rna_processed_out.mix(READ_PROCESSING.out.rna)

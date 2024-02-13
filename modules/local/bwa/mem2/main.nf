@@ -15,8 +15,7 @@ process BWA_MEM2 {
 
     output:
     tuple val(meta), path('*.bam'), emit: bam
-    // TODO(MC): Versions.
-    // path 'versions.yml'         , emit: versions
+    path 'versions.yml'           , emit: versions
 
     when:
     task.ext.when == null || task.ext.when
@@ -46,26 +45,18 @@ process BWA_MEM2 {
       --nthreads ${task.cpus} \\
       --out ${meta.split}.${meta.sample_id}.${meta.read_group}.bam \\
       /dev/stdin
+
+    cat <<-END_VERSIONS > versions.yml
+    "${task.process}":
+        bwamem2: 2.2.1
+        sambamba: 1.0
+    END_VERSIONS
     """
-
-    // TODO(SW): Versions.
-    // """
-    // touch bar
-
-    // cat <<-END_VERSIONS > versions.yml
-    // "${task.process}":
-    //     bwamem2: foo
-    // END_VERSIONS
-    // """
 
     stub:
     """
     touch ${meta.split}.${meta.sample_id}.${meta.read_group}.bam
-    """
 
-    // TODO(MV): Versions.
-    // """
-    // touch bar
-    // echo -e '${task.process}:\\n  stub: noversions\\n' > versions.yml
-    // """
+    echo -e '${task.process}:\\n  stub: noversions\\n' > versions.yml
+    """
 }

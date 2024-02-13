@@ -1,8 +1,6 @@
 process FASTP {
     tag "${meta.id}"
 
-    // TODO(MC): Resources?
-
     container 'docker.io/scwatts/fastp:0.23.4'
 
     input:
@@ -11,6 +9,10 @@ process FASTP {
 
     output:
     tuple val(meta), path('*_R1.fastp.fastq'), path('*_R2.fastp.fastq'), emit: fastq
+    path 'versions.yml'                                                , emit: versions
+
+    when:
+    task.ext.when == null || task.ext.when
 
     script:
     // TODO(MC): UMI flags
@@ -29,11 +31,18 @@ process FASTP {
       --split_by_lines ${4 * max_fastq_records} \\
       --out1 ${meta.sample_id}_${meta.read_group}_R1.fastp.fastq \\
       --out2 ${meta.sample_id}_${meta.read_group}_R2.fastp.fastq
+
+    cat <<-END_VERSIONS > versions.yml
+    "${task.process}":
+        fastp: 0.23.4
+    END_VERSIONS
     """
 
     stub:
     """
     touch 00{1..4}.${meta.sample_id}_${meta.read_group}_R1.fastp.fastq
     touch 00{1..4}.${meta.sample_id}_${meta.read_group}_R2.fastp.fastq
+
+    echo -e '${task.process}:\\n  stub: noversions\\n' > versions.yml
     """
 }

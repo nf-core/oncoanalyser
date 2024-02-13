@@ -1,9 +1,6 @@
 process MARKDUPS {
     tag "${meta_bam.id}"
 
-    // TODO(MC): Resources required?
-    // label 'process_low'
-
     container 'docker.io/scwatts/markdups:1.1.rc1'
 
     input:
@@ -15,35 +12,13 @@ process MARKDUPS {
 
     output:
     tuple val(meta_bam), path('*bam'), path('*bai'), emit: bam
+    path 'versions.yml'                            , emit: versions
     path '*.tsv'
 
-    // TODO(MC): Make sure this is in each.
     when:
     task.ext.when == null || task.ext.when
 
-    // TODO(MC): Versions in each.
-    // path 'versions.yml'         , emit: versions
-
-    // script:
-    // def args = task.ext.args ?: ''
-
-    // // TODO(SW): implement process
-    // """
-    // echo bar
-
-    // cat <<-END_VERSIONS > versions.yml
-    // "${task.process}":
-    //     markdups: foo
-    // END_VERSIONS
-    // """
-
-    // stub:
-    // // TODO(SW): implement stub
-    // """
-    // touch bar
-    // echo -e '${task.process}:\\n  stub: noversions\\n' > versions.yml
-    // """
-
+    script:
     // # TODO(MC): Umi flags
     //     # -multi_bam \\
     //     # -umi_enabled \\
@@ -51,7 +26,6 @@ process MARKDUPS {
     //     # -umi_duplex_delim _ \\
     //     # -umi_base_diff_stats \\
 
-    script:
     """
     java \\
       -Xmx${Math.round(task.memory.bytes * 0.95)} \\
@@ -73,6 +47,14 @@ process MARKDUPS {
         -threads 16 \\
         \\
         -output_bam ${meta_bam.sample_id}.mark_dups.bam
+
+    cat <<-END_VERSIONS > versions.yml
+    "${task.process}":
+        sambamba: 1.0
+        samtools: 1.17
+        openjdk: >=8
+        mark-dups: 1.1
+    END_VERSIONS
     """
 
     stub:
@@ -80,9 +62,11 @@ process MARKDUPS {
     touch ${meta_bam.sample_id}.mark_dups.bam
     touch ${meta_bam.sample_id}.mark_dups.bam.bai
     touch ${meta_bam.sample_id}.duplicate_freq.tsv
+
+    echo -e '${task.process}:\\n  stub: noversions\\n' > versions.yml
     """
 
-    // # TODO(MC):
+    // # TODO(MC): UMIs.
     // # touch ${meta_bam.sample_id}.umi_coord_freq.tsv
     // # touch ${meta_bam.sample_id}.umi_edit_distance.tsv
     // # touch ${meta_bam.sample_id}.umi_nucleotide_freq.tsv

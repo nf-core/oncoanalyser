@@ -34,8 +34,7 @@ class Constants {
     }
 
     static enum Process {
-        // TODO[MC]: Add process here.
-        BWAMEM,
+        BWAMEM2,
         AMBER,
         BAMTOOLS,
         CHORD,
@@ -113,7 +112,6 @@ class Constants {
     static Map PLACEHOLDER_META = [meta_placeholder: null]
     static List PLACEHOLDER_OPTIONAL_CHANNEL = []
 
-    // TODO(MC): How is this used?
     static Map INPUT = [
 
         ISOFOX_DIR: [

@@ -12,10 +12,9 @@ workflow READ_ALIGNMENT {
     max_fastq_records
 
     main:
-    // TODO(MC): Versions.
-    // // Channel for version.yml files
-    // // channel: [ versions.yml ]
-    // ch_versions = Channel.empty()
+    // Channel for version.yml files
+    // channel: [ versions.yml ]
+    ch_versions = Channel.empty()
 
     // channel: [ group_id, sample_count ]
     ch_sample_counts = ch_inputs.map { meta -> [meta.group_id, Utils.groupSampleCounts(meta)] }
@@ -110,6 +109,8 @@ workflow READ_ALIGNMENT {
             max_fastq_records,
         )
 
+        ch_versions = ch_versions.mix(FASTP.out.versions)
+
         ch_split_fastq_pairs = FASTP.out.fastq
     } else {
         ch_split_fastq_pairs = ch_fastq_pairs.map { fastq_pair -> [fastq_pair[0], [fastq_pair[1]], [fastq_pair[2]]] }
@@ -196,10 +197,14 @@ workflow READ_ALIGNMENT {
         genome_bwa_index,
     )
 
+    ch_versions = ch_versions.mix(BWA_MEM2.out.versions)
+
     // channel: [ meta_fastq, bam, bai ]
     SAMBAMBA_INDEX(
         BWA_MEM2.out.bam,
     )
+
+    ch_versions = ch_versions.mix(SAMBAMBA_INDEX.out.versions)
 
     // Merge all bam records for a single sample into a singlke record.
     // channel: [ meta ] (One sample per meta record).
@@ -288,10 +293,7 @@ workflow READ_ALIGNMENT {
 
     emit:
     dna       = ch_bwa_outputs  // channel: [ meta ]
-
     // TODO(SW): RNA alignment.
     rna       = ch_star_outputs // channel: [ meta, bam_rna ]
-
-    // TODO(MC): Versions.
-    // versions  = ch_versions     // channel: [ versions.yml ]
+    versions  = ch_versions     // channel: [ versions.yml ]
 }

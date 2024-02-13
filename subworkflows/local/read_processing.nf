@@ -12,10 +12,9 @@ workflow READ_PROCESSING {
     unmap_regions
 
     main:
-    // TODO(MC): Versions.
     // Channel for version.yml files
     // channel: [ versions.yml ]
-    // ch_versions = Channel.empty()
+    ch_versions = Channel.empty()
 
     // channel: [ group_id, sample_count ]
     ch_sample_counts = ch_inputs.map { meta -> [meta.group_id, Utils.groupSampleCounts(meta)] }
@@ -69,6 +68,8 @@ workflow READ_PROCESSING {
         genome_dict,
         unmap_regions,
     )
+
+    ch_versions = ch_versions.mix(MARKDUPS.out.versions)
 
     // Update sample information.
     // channel: [ meta ] (One sample per meta record).
@@ -128,7 +129,5 @@ workflow READ_PROCESSING {
     emit:
     dna       = ch_markduplicates_dna_out // channel: [ meta ]
     rna       = ch_markduplicates_rna_out // channel: [ meta, bam_rna ]
-
-    // TODO(MC): Versions.
-    // versions  = ch_versions               // channel: [ versions.yml ]
+    versions  = ch_versions               // channel: [ versions.yml ]
 }

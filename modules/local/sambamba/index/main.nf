@@ -8,16 +8,27 @@ process SAMBAMBA_INDEX {
 
     output:
     tuple val(meta), path(bam), path('*bai'), emit: bam
+    path 'versions.yml'                     , emit: versions
+
+    when:
+    task.ext.when == null || task.ext.when
 
     script:
     """
     sambamba index \\
       --nthreads ${task.cpus} \\
       ${meta.split}.${meta.sample_id}.${meta.read_group}.bam
+
+    cat <<-END_VERSIONS > versions.yml
+    "${task.process}":
+        sambamba: 1.0
+    END_VERSIONS
     """
 
     stub:
     """
     touch ${meta.split}.${meta.sample_id}.${meta.read_group}.bam.bai
+
+    echo -e '${task.process}:\\n  stub: noversions\\n' > versions.yml
     """
 }
