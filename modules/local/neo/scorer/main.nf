@@ -62,7 +62,7 @@ process NEO_SCORER {
 
     stub:
     """
-    mkdir -p neo/
+    mkdir -p neo_scorer/
     echo -e '${task.process}:\\n  stub: noversions\\n' > versions.yml
     """
 }
