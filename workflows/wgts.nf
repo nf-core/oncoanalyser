@@ -15,7 +15,6 @@ inputs = Utils.parseInput(params.input, workflow.stubRun, log)
 run_config = WorkflowMain.getRunConfig(params, inputs, log)
 
 // Validate inputs
-// TODO(MC): Reexamine validation in light of fastq/bam markdups.
 Utils.validateInput(inputs, run_config, log)
 
 // Check input path parameters to see if they exist
@@ -111,6 +110,14 @@ include { CUSTOM_DUMPSOFTWAREVERSIONS } from '../modules/nf-core/custom/dumpsoft
 // Get absolute file paths
 samplesheet = Utils.getFileObject(params.input)
 
+// TODO(MC): New params, and resource files, documentation and proper placement.
+// TODO(MC): Processed appearing as NULL.
+// TODO(MC): WARN: Found unexpected parameters:
+//     * --max_fastq_records: 10000000
+//     * --refdata_unmap_regions: /Users/matthewcooper/projects/oncoanalyser/hmf_reference_data/markdups/unmap_regions_37.tsv
+//     - Ignore this warning: params.schema_ignore_params = "max_fastq_records,refdata_unmap_regions"
+// TODO(MC): get error logs for amber, cobalt, and gripss
+// TODO(MC): Drop commit 'WIP: Reverting bioconda containers'.
 workflow WGTS {
     // Create channel for versions
     // channel: [ versions.yml ]

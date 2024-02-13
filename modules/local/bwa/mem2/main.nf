@@ -2,15 +2,16 @@ process BWA_MEM2 {
     tag "${meta.id}"
     label 'process_high'
 
-    // TODO(MC): Upload container.
+    // TODO(SW): Upload container.
     container 'bwa-mem2:2.2.1-sambamba'
 
     input:
     tuple val(meta), path(reads_fwd), path(reads_rev)
     path genome_fasta
-    // TODO(MC): Copied into local genome_bwa_index for ref genome 37:
+    // TODO(SW): The following resourse files are needed from gs://hmf-public/HMFtools-Resources/ref_genome/37:
     //    + Homo_sapiens.GRCh37.GATK.illumina.fasta.bwt.2bit.64
     //    + Homo_sapiens.GRCh37.GATK.illumina.fasta.0123
+    //    Similarly for ref genome 38.
     path genome_bwa_index
 
     output:
