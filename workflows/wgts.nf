@@ -714,7 +714,7 @@ workflow WGTS {
     }
 
     //
-    // SUBWORKFLOW: XXX
+    // SUBWORKFLOW: Run Neo to identify and score neoepitopes
     //
     if (run_config.stages.neo) {
 
