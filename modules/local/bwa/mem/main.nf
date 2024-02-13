@@ -1,5 +1,3 @@
-// TODO(MC): BWA MEM2: Need docker and resource files.
-
 process BWA_MEM {
     tag "${meta.id}"
 
