@@ -453,6 +453,11 @@ class Utils {
         }
     }
 
+    public static shallow_copy(obj) {
+
+        return obj.getClass().newInstance(obj)
+    }
+
     // Alignment utils.
     static public splitGroupIntoSamples(meta_group) {
         def sample_entries = [:]
