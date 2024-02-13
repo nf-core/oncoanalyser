@@ -198,10 +198,6 @@ workflow WGTS {
 
     }
 
-    // TODO(SW): adjust downstream selection of input BAM
-
-    /*
-
     //
     // MODULE: Run Isofox to analyse RNA data
     //
@@ -213,7 +209,7 @@ workflow WGTS {
         isofox_gc_ratios = params.isofox_gc_ratios ? file(params.isofox_gc_ratios) : hmf_data.isofox_gc_ratios
 
         ISOFOX_QUANTIFICATION(
-            ch_inputs,
+            ch_dna_processed_out,
             ref_data.genome_fasta,
             ref_data.genome_version,
             ref_data.genome_fai,
@@ -232,7 +228,7 @@ workflow WGTS {
 
     } else {
 
-        ch_isofox_out = ch_inputs.map { meta -> [meta, []] }
+        ch_isofox_out = ch_dna_processed_out.map { meta -> [meta, []] }
 
     }
 
@@ -244,7 +240,7 @@ workflow WGTS {
     if (run_config.stages.amber) {
 
         AMBER_PROFILING(
-            ch_inputs,
+            ch_dna_processed_out,
             ref_data.genome_version,
             hmf_data.heterozygous_sites,
             [],  // target_region_bed
@@ -256,7 +252,7 @@ workflow WGTS {
 
     } else {
 
-        ch_amber_out = ch_inputs.map { meta -> [meta, []] }
+        ch_amber_out = ch_dna_processed_out.map { meta -> [meta, []] }
 
     }
 
@@ -268,7 +264,7 @@ workflow WGTS {
     if (run_config.stages.cobalt) {
 
         COBALT_PROFILING(
-            ch_inputs,
+            ch_dna_processed_out,
             hmf_data.gc_profile,
             hmf_data.diploid_bed,
             [],  // panel_target_region_normalisation
@@ -280,7 +276,7 @@ workflow WGTS {
 
     } else {
 
-        ch_cobalt_out = ch_inputs.map { meta -> [meta, []] }
+        ch_cobalt_out = ch_dna_processed_out.map { meta -> [meta, []] }
 
     }
 
@@ -292,7 +288,7 @@ workflow WGTS {
     if (run_config.stages.gridss) {
 
         GRIDSS_SVPREP_CALLING(
-            ch_inputs,
+            ch_dna_processed_out,
             ref_data.genome_fasta,
             ref_data.genome_version,
             ref_data.genome_fai,
@@ -312,7 +308,7 @@ workflow WGTS {
 
     } else {
 
-        ch_gridss_out = ch_inputs.map { meta -> [meta, []] }
+        ch_gridss_out = ch_dna_processed_out.map { meta -> [meta, []] }
 
     }
 
@@ -326,7 +322,7 @@ workflow WGTS {
     if (run_config.stages.gripss) {
 
         GRIPSS_FILTERING(
-            ch_inputs,
+            ch_dna_processed_out,
             ch_gridss_out,
             ref_data.genome_fasta,
             ref_data.genome_version,
@@ -346,9 +342,9 @@ workflow WGTS {
 
     } else {
 
-        ch_gripss_somatic_out = ch_inputs.map { meta -> [meta, [], []] }
-        ch_gripss_germline_out = ch_inputs.map { meta -> [meta, [], []] }
-        ch_gripss_somatic_unfiltered_out = ch_inputs.map { meta -> [meta, [], []] }
+        ch_gripss_somatic_out = ch_dna_processed_out.map { meta -> [meta, [], []] }
+        ch_gripss_germline_out = ch_dna_processed_out.map { meta -> [meta, [], []] }
+        ch_gripss_somatic_unfiltered_out = ch_dna_processed_out.map { meta -> [meta, [], []] }
 
     }
 
@@ -364,7 +360,7 @@ workflow WGTS {
     if (run_config.stages.sage) {
 
         SAGE_CALLING(
-            ch_inputs,
+            ch_dna_processed_out,
             ref_data.genome_fasta,
             ref_data.genome_version,
             ref_data.genome_fai,
@@ -388,10 +384,10 @@ workflow WGTS {
 
     } else {
 
-        ch_sage_germline_vcf_out = ch_inputs.map { meta -> [meta, [], []] }
-        ch_sage_somatic_vcf_out = ch_inputs.map { meta -> [meta, [], []] }
-        ch_sage_germline_dir_out = ch_inputs.map { meta -> [meta, []] }
-        ch_sage_somatic_dir_out = ch_inputs.map { meta -> [meta, []] }
+        ch_sage_germline_vcf_out = ch_dna_processed_out.map { meta -> [meta, [], []] }
+        ch_sage_somatic_vcf_out = ch_dna_processed_out.map { meta -> [meta, [], []] }
+        ch_sage_germline_dir_out = ch_dna_processed_out.map { meta -> [meta, []] }
+        ch_sage_somatic_dir_out = ch_dna_processed_out.map { meta -> [meta, []] }
 
     }
 
@@ -404,7 +400,7 @@ workflow WGTS {
     if (run_config.stages.pave) {
 
         PAVE_ANNOTATION(
-            ch_inputs,
+            ch_dna_processed_out,
             ch_sage_germline_vcf_out,
             ch_sage_somatic_vcf_out,
             ref_data.genome_fasta,
@@ -428,8 +424,8 @@ workflow WGTS {
 
     } else {
 
-        ch_pave_germline_out = ch_inputs.map { meta -> [meta, []] }
-        ch_pave_somatic_out = ch_inputs.map { meta -> [meta, []] }
+        ch_pave_germline_out = ch_dna_processed_out.map { meta -> [meta, []] }
+        ch_pave_somatic_out = ch_dna_processed_out.map { meta -> [meta, []] }
 
     }
 
@@ -441,7 +437,7 @@ workflow WGTS {
     if (run_config.stages.purple) {
 
         PURPLE_CALLING(
-            ch_inputs,
+            ch_dna_processed_out,
             ch_amber_out,
             ch_cobalt_out,
             ch_pave_somatic_out,
@@ -470,7 +466,7 @@ workflow WGTS {
 
     } else {
 
-        ch_purple_out = ch_inputs.map { meta -> [meta, []] }
+        ch_purple_out = ch_dna_processed_out.map { meta -> [meta, []] }
 
     }
 
@@ -485,7 +481,7 @@ workflow WGTS {
         // NOTE(SW): currently used only for ORANGE but will also be used for Neo once implemented
 
         SAGE_APPEND(
-            ch_inputs,
+            ch_dna_processed_out,
             ch_purple_out,
             ref_data.genome_fasta,
             ref_data.genome_version,
@@ -499,8 +495,8 @@ workflow WGTS {
 
     } else {
 
-        ch_sage_somatic_append_out = ch_inputs.map { meta -> [meta, []] }
-        ch_sage_germline_append_out = ch_inputs.map { meta -> [meta, []] }
+        ch_sage_somatic_append_out = ch_dna_processed_out.map { meta -> [meta, []] }
+        ch_sage_germline_append_out = ch_dna_processed_out.map { meta -> [meta, []] }
 
     }
 
@@ -513,7 +509,7 @@ workflow WGTS {
     if (run_config.stages.linx) {
 
         LINX_ANNOTATION(
-            ch_inputs,
+            ch_dna_processed_out,
             ch_purple_out,
             ref_data.genome_version,
             hmf_data.ensembl_data_resources,
@@ -529,8 +525,8 @@ workflow WGTS {
 
     } else {
 
-        ch_linx_somatic_out = ch_inputs.map { meta -> [meta, []] }
-        ch_linx_germline_out = ch_inputs.map { meta -> [meta, []] }
+        ch_linx_somatic_out = ch_dna_processed_out.map { meta -> [meta, []] }
+        ch_linx_germline_out = ch_dna_processed_out.map { meta -> [meta, []] }
 
     }
 
@@ -542,7 +538,7 @@ workflow WGTS {
     if (run_config.stages.linx) {
 
         LINX_PLOTTING(
-            ch_inputs,
+            ch_dna_processed_out,
             ch_linx_somatic_out,
             ref_data.genome_version,
             hmf_data.ensembl_data_resources,
@@ -554,7 +550,7 @@ workflow WGTS {
 
     } else {
 
-        ch_linx_somatic_visualiser_dir_out = ch_inputs.map { meta -> [meta, []] }
+        ch_linx_somatic_visualiser_dir_out = ch_dna_processed_out.map { meta -> [meta, []] }
 
     }
 
@@ -567,7 +563,7 @@ workflow WGTS {
     if (run_config.stages.orange && run_config.stages.flagstat) {
 
         FLAGSTAT_METRICS(
-            ch_inputs,
+            ch_dna_processed_out,
         )
 
         ch_versions = ch_versions.mix(FLAGSTAT_METRICS.out.versions)
@@ -577,8 +573,8 @@ workflow WGTS {
 
     } else {
 
-        ch_flagstat_somatic_out = ch_inputs.map { meta -> [meta, []] }
-        ch_flagstat_germline_out = ch_inputs.map { meta -> [meta, []] }
+        ch_flagstat_somatic_out = ch_dna_processed_out.map { meta -> [meta, []] }
+        ch_flagstat_germline_out = ch_dna_processed_out.map { meta -> [meta, []] }
 
     }
 
@@ -591,7 +587,7 @@ workflow WGTS {
     if (run_config.stages.bamtools) {
 
         BAMTOOLS_METRICS(
-            ch_inputs,
+            ch_dna_processed_out,
             ref_data.genome_fasta,
             ref_data.genome_version,
         )
@@ -603,8 +599,8 @@ workflow WGTS {
 
     } else {
 
-        ch_bamtools_somatic_out = ch_inputs.map { meta -> [meta, []] }
-        ch_bamtools_germline_out = ch_inputs.map { meta -> [meta, []] }
+        ch_bamtools_somatic_out = ch_dna_processed_out.map { meta -> [meta, []] }
+        ch_bamtools_germline_out = ch_dna_processed_out.map { meta -> [meta, []] }
 
     }
 
@@ -616,7 +612,7 @@ workflow WGTS {
     if (run_config.stages.sigs) {
 
         SIGS_FITTING(
-            ch_inputs,
+            ch_dna_processed_out,
             ch_purple_out,
             hmf_data.sigs_signatures,
         )
@@ -627,7 +623,7 @@ workflow WGTS {
 
     } else {
 
-        ch_sigs_out = ch_inputs.map { meta -> [meta, []] }
+        ch_sigs_out = ch_dna_processed_out.map { meta -> [meta, []] }
 
     }
 
@@ -639,7 +635,7 @@ workflow WGTS {
     if (run_config.stages.chord) {
 
         CHORD_PREDICTION(
-            ch_inputs,
+            ch_dna_processed_out,
             ch_purple_out,
             ref_data.genome_version,
         )
@@ -650,7 +646,7 @@ workflow WGTS {
 
     } else {
 
-        ch_chord_out = ch_inputs.map { meta -> [meta, []] }
+        ch_chord_out = ch_dna_processed_out.map { meta -> [meta, []] }
 
     }
 
@@ -665,7 +661,7 @@ workflow WGTS {
         ref_data_hla_slice_bed = params.containsKey('ref_data_hla_slice_bed') ? params.ref_data_hla_slice_bed : []
 
         LILAC_CALLING(
-            ch_inputs,
+            ch_dna_processed_out,
             ch_purple_out,
             ref_data.genome_fasta,
             ref_data.genome_version,
@@ -680,7 +676,7 @@ workflow WGTS {
 
     } else {
 
-        ch_lilac_out = ch_inputs.map { meta -> [meta, []] }
+        ch_lilac_out = ch_dna_processed_out.map { meta -> [meta, []] }
 
     }
 
@@ -692,7 +688,7 @@ workflow WGTS {
     if (run_config.stages.virusinterpreter) {
 
         VIRUSBREAKEND_CALLING(
-            ch_inputs,
+            ch_dna_processed_out,
             ch_purple_out,
             ch_bamtools_somatic_out,
             ref_data.genome_fasta,
@@ -713,7 +709,7 @@ workflow WGTS {
 
     } else {
 
-        ch_virusinterpreter_out = ch_inputs.map { meta -> [meta, []] }
+        ch_virusinterpreter_out = ch_dna_processed_out.map { meta -> [meta, []] }
 
     }
 
@@ -725,7 +721,7 @@ workflow WGTS {
     if (run_config.stages.cuppa) {
 
         CUPPA_PREDICTION(
-            ch_inputs,
+            ch_dna_processed_out,
             ch_isofox_out,
             ch_purple_out,
             ch_linx_somatic_out,
@@ -740,7 +736,7 @@ workflow WGTS {
 
     } else {
 
-        ch_cuppa_out = ch_inputs.map { meta -> [meta, []] }
+        ch_cuppa_out = ch_dna_processed_out.map { meta -> [meta, []] }
 
     }
 
@@ -750,7 +746,7 @@ workflow WGTS {
     if (run_config.stages.orange) {
 
         ORANGE_REPORTING(
-            ch_inputs,
+            ch_dna_processed_out,
             ch_bamtools_somatic_out,
             ch_bamtools_germline_out,
             ch_flagstat_somatic_out,
@@ -783,13 +779,13 @@ workflow WGTS {
         ch_versions = ch_versions.mix(ORANGE_REPORTING.out.versions)
     }
 
-    //
-    // MODULE: Pipeline reporting
-    //
-    CUSTOM_DUMPSOFTWAREVERSIONS(
-        ch_versions.unique().collectFile(name: 'collated_versions.yml')
-    )
-    */
+    // TODO(MC): This is failing.
+    // //
+    // // MODULE: Pipeline reporting
+    // //
+    // CUSTOM_DUMPSOFTWAREVERSIONS(
+    //     ch_versions.unique().collectFile(name: 'collated_versions.yml')
+    // )
 }
 
 /*
