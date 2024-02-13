@@ -26,7 +26,6 @@ workflow SAGE_CALLING {
         segment_mappability          // channel: [mandatory] /path/to/segment_mappability
         driver_gene_panel            // channel: [mandatory] /path/to/driver_gene_panel
         ensembl_data_resources       // channel: [mandatory] /path/to/ensembl_data_resources/
-        ensembl_data_resources       // channel: [mandatory] /path/to/ensembl_data_resources/
 
     main:
         // Channel for version.yml files

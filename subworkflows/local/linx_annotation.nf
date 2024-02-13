@@ -19,7 +19,7 @@ workflow LINX_ANNOTATION {
         ensembl_data_resources // channel: [mandatory] /path/to/ensembl_data_resources/
         known_fusion_data      // channel: [mandatory] /path/to/known_fusion_data
         driver_gene_panel      // channel: [mandatory] /path/to/driver_gene_panel
-        gene_id_file           // channel: [mandatory] /path/to/linx_gene_id_file
+        gene_id_file           // channel: [optional]  /path/to/linx_gene_id_file
 
     main:
         // Channel for versions.yml files
