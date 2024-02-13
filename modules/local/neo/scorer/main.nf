@@ -21,7 +21,7 @@ process NEO_SCORER {
     def args = task.ext.args ?: ''
 
     def rna_sample_arg = meta.containsKey('sample_rna_id') ? "-rna_sample ${meta.sample_rna_id}" : ''
-    def rna_somatic_vcf_arg = meta.containsKey('sample_rna_id') ? "-rna_somatic_vcf ${purple_dir}/${meta.sample_id}.sage_append.vcf.gz" : ''
+    def rna_somatic_vcf_arg = meta.containsKey('sample_rna_id') ? "-rna_somatic_vcf ${sage_vcf}" : ''
 
     def cancer_type_arg = meta.containsKey('cancer_type') ? "-cancer_type ${meta.cancer_type}" : ''
 
