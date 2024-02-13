@@ -22,14 +22,14 @@ process BWA_MEM2 {
     task.ext.when == null || task.ext.when
 
     script:
-    // # TODO(MC): read group
-    // # -R ${meta.read_group}
+    def read_group_tag = "@RG\t${meta.read_group}"
 
     """
     ln -s \$(find -L ${genome_bwa_index} -type f) ./
 
     bwa-mem2 mem \\
     -Y \\
+    -R '${read_group_tag}' \\
     -t ${task.cpus} \\
     ${genome_fasta} \\
     ${reads_fwd} \\
