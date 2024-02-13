@@ -1,5 +1,5 @@
 process BWA_MEM2 {
-    tag "${meta.id}"
+    tag "${meta.subject_id}__${meta.sample_id}"
     label 'process_high'
 
     // TODO(SW): Upload container.

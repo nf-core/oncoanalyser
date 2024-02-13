@@ -1,5 +1,5 @@
 process MARKDUPS {
-    tag "${meta_bam.id}"
+    tag "${meta_bam.subject_id}__${meta_bam.sample_id}"
 
     container 'docker.io/scwatts/markdups:1.1.rc1'
 

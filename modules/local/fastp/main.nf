@@ -1,5 +1,5 @@
 process FASTP {
-    tag "${meta.id}"
+    tag "${meta.subject_id}__${meta.sample_id}"
 
     container 'docker.io/scwatts/fastp:0.23.4'
 

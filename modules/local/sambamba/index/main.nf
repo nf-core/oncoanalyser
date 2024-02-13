@@ -1,5 +1,5 @@
 process SAMBAMBA_INDEX {
-    tag "${meta.id}"
+    tag "${meta.subject_id}__${meta.sample_id}"
 
     container 'docker.io/scwatts/sambamba:1.0'
 

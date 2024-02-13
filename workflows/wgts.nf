@@ -111,7 +111,6 @@ include { CUSTOM_DUMPSOFTWAREVERSIONS } from '../modules/nf-core/custom/dumpsoft
 samplesheet = Utils.getFileObject(params.input)
 
 // TODO(MC): New params, and resource files, documentation and proper placement.
-// TODO(MC): Processed appearing as NULL.
 // TODO(MC): WARN: Found unexpected parameters:
 //     * --max_fastq_records: 10000000
 //     * --refdata_unmap_regions: /Users/matthewcooper/projects/oncoanalyser/hmf_reference_data/markdups/unmap_regions_37.tsv
