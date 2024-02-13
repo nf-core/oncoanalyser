@@ -10,7 +10,7 @@ RUN \
 
 RUN \
   mkdir -p /opt/neo/ && \
-  wget -O /opt/neo/neo.jar 'https://github.com/hartwigmedical/hmftools/releases/download/neo-v1.1_beta/neo_v1.1.jar'
+  wget -O /opt/neo/neo.jar 'https://github.com/hartwigmedical/hmftools/releases/download/neo-v1.2_beta/neo_v1.2_beta.jar'
 
 USER mambauser
 
