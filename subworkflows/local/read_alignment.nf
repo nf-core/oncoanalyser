@@ -289,7 +289,7 @@ workflow READ_ALIGNMENT {
     emit:
     dna       = ch_bwa_outputs  // channel: [ meta ]
 
-    // TODO(MC): RNA alignment.
+    // TODO(SW): RNA alignment.
     rna       = ch_star_outputs // channel: [ meta, bam_rna ]
 
     // TODO(MC): Versions.
