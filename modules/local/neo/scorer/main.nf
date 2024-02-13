@@ -23,6 +23,8 @@ process NEO_SCORER {
     def rna_sample_arg = meta.containsKey('sample_rna_id') ? "-rna_sample ${meta.sample_rna_id}" : ''
     def rna_somatic_vcf_arg = meta.containsKey('sample_rna_id') ? "-rna_somatic_vcf ${sage_vcf}" : ''
 
+    def cancer_type_arg = meta.containsKey('cancer_type') ? "-cancer_type ${meta.cancer_type}" : ''
+
     """
     isofox_dir_arg=''
     if [[ -n "${isofox_dir}" ]]; then
@@ -42,6 +44,7 @@ process NEO_SCORER {
         com.hartwig.hmftools.neo.score.NeoScorer \\
             ${args} \\
             -sample ${meta.sample_id} \\
+            ${cancer_type_arg} \\
             ${rna_sample_arg} \\
             \${isofox_dir_arg} \\
             -purple_dir ${purple_dir} \\

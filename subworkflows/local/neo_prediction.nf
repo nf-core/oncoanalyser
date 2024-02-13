@@ -168,6 +168,7 @@ workflow NEO_PREDICTION{
                     key: meta.group_id,
                     id: meta.group_id,
                     sample_id: Utils.getTumorDnaSampleName(meta),
+                    cancer_type: meta[Constants.InfoField.CANCER_TYPE],
                 ]
 
                 if (Utils.hasTumorRnaBam(meta)) {
