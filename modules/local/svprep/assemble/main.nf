@@ -37,6 +37,12 @@ process GRIDSS_ASSEMBLE {
     def bams_filtered_list = bams_filtered instanceof List ? bams_filtered : [bams_filtered]
     def bams_filtered_arg = "--filtered_bams ${bams_filtered_list.join(',')}"
 
+    // JVM heap for other tasks must be no greater than 1/4 of task memory, defaults to 1 GB if not provided
+    def otherJvmHeap = Math.min(
+        Math.round(task.memory.bytes * 0.25),
+        task.ext.otherJvmHeap ? task.ext.otherJvmHeap.bytes : 1.GB.bytes
+    )
+
     """
     # Create shadow directory with file symlinks of GRIDSS 'working' dir to prevent cache invalidation
     # NOTE: for reasons that elude me, NF doesn't always stage in the workingdir; remove if it is present
@@ -69,8 +75,8 @@ process GRIDSS_ASSEMBLE {
     # Run
     gridss_svprep \\
         ${args} \\
-        --jvmheap ${Math.round((task.memory.bytes - task.ext.otherJvmHeap.bytes) * 0.95)} \\
-        --otherjvmheap ${task.ext.otherJvmHeap.bytes} \\
+        --jvmheap ${Math.round((task.memory.bytes - otherJvmHeap) * 0.95)} \\
+        --otherjvmheap ${otherJvmHeap} \\
         --steps assemble \\
         --labels ${labels_arg} \\
         --reference ${genome_fasta} \\
