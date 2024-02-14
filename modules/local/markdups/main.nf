@@ -52,7 +52,7 @@ process MARKDUPS {
     "${task.process}":
         sambamba: 1.0
         samtools: 1.17
-        openjdk: >=8
+        openjdk: 8
         mark-dups: 1.1
     END_VERSIONS
     """

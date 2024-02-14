@@ -779,13 +779,12 @@ workflow WGTS {
         ch_versions = ch_versions.mix(ORANGE_REPORTING.out.versions)
     }
 
-    // TODO(MC): This is failing.
-    // //
-    // // MODULE: Pipeline reporting
-    // //
-    // CUSTOM_DUMPSOFTWAREVERSIONS(
-    //     ch_versions.unique().collectFile(name: 'collated_versions.yml')
-    // )
+    //
+    // MODULE: Pipeline reporting
+    //
+    CUSTOM_DUMPSOFTWAREVERSIONS(
+        ch_versions.unique().collectFile(name: 'collated_versions.yml')
+    )
 }
 
 /*

@@ -53,7 +53,7 @@ workflow READ_ALIGNMENT {
                 sample_key['sample_id'] = value.sample_id
                 sample_key.remove(key)
 
-                fastq_pair_count = value[Constants.FileType.FASTQ].tokenize(';').size() / 2
+                fastq_pair_count = value[Constants.FileType.FASTQ].toString().tokenize(';').size() / 2
             }
         }
 
@@ -71,11 +71,10 @@ workflow READ_ALIGNMENT {
             }
 
             def sample_id = meta[sample_key]['sample_id']
-            def fastq_files = meta[sample_key][Constants.FileType.FASTQ].tokenize(';')
+            def fastq_files = meta[sample_key][Constants.FileType.FASTQ].toString().tokenize(';')
 
             def meta_fastq_common = [:]
             meta.each { key, value ->
-
 
                 if (key === sample_key) {
                     return
@@ -251,6 +250,7 @@ workflow READ_ALIGNMENT {
             meta_bam[sample_key][Constants.FileType.BAI_MARKDUPS] = bai_files
 
             bams.each { bam ->
+
                 bam_files.add(bam[1])
                 bai_files.add(bam[2])
             }

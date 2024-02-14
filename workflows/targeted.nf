@@ -102,6 +102,7 @@ include { CUSTOM_DUMPSOFTWAREVERSIONS } from '../modules/nf-core/custom/dumpsoft
 // Get absolute file paths
 samplesheet = Utils.getFileObject(params.input)
 
+// TODO(MC): -panel targeted
 workflow TARGETED {
 
     // Create channel for versions
@@ -123,7 +124,7 @@ workflow TARGETED {
     // Set GRIDSS config
     gridss_config = params.containsKey('gridss_config') ? file(params.gridss_config) : hmf_data.gridss_config
 
-        //
+    //
     // SUBWORKFLOW: Align reads
     //
     // channel: [ meta ]
