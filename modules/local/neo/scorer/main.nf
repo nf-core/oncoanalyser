@@ -31,7 +31,7 @@ process NEO_SCORER {
         isofox_dir_local=isofox__prepared/;
 
         cp -rL ${isofox_dir} \${isofox_dir_local}/;
-        cp -rL ${annotate_fusions} \${isofox_dir_local}/;
+        cp -r ${annotate_fusions} \${isofox_dir_local}/;
 
         isofox_dir_arg="-isofox_dir \${isofox_dir_local}";
     fi;
