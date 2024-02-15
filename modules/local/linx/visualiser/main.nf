@@ -2,7 +2,7 @@ process LINX_VISUALISER {
     tag "${meta.id}"
     label 'process_medium'
 
-    conda "${moduleDir}/../environment.yml"
+    conda "${moduleDir}/environment.yml"
     container "${ workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container ?
         'https://depot.galaxyproject.org/singularity/hmftools-linx:1.25--hdfd78af_0':
         'quay.io/biocontainers/hmftools-linx:1.25--hdfd78af_0' }"

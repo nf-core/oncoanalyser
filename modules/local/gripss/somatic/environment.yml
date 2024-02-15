@@ -1,0 +1,7 @@
+name: gripss
+channels:
+  - conda-forge
+  - bioconda
+  - defaults
+dependencies:
+  - bioconda::gripss=2.4

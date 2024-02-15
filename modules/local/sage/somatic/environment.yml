@@ -1,0 +1,7 @@
+name: sage
+channels:
+  - conda-forge
+  - bioconda
+  - defaults
+dependencies:
+  - bioconda::hmftools-sage=3.4=hdfd78af_1

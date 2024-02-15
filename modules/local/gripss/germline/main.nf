@@ -2,7 +2,7 @@ process GRIPSS_GERMLINE {
     tag "${meta.id}"
     label 'process_low'
 
-    conda "${moduleDir}/../environment.yml"
+    conda "${moduleDir}/environment.yml"
     container "${ workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container ?
         'https://depot.galaxyproject.org/singularity/hmftools-gripss:2.4--hdfd78af_0' :
         'quay.io/biocontainers/hmftools-gripss:2.4--hdfd78af_0' }"
