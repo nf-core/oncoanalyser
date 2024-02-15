@@ -4,4 +4,4 @@ channels:
   - bioconda
   - defaults
 dependencies:
-  - bioconda::lilac=1.6
+  - bioconda::hmftools-lilac=1.6
