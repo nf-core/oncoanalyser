@@ -1,4 +1,4 @@
-name: pave
+name: pave_somatic
 channels:
   - conda-forge
   - bioconda

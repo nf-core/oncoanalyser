@@ -1,4 +1,4 @@
-name: linx
+name: linx_visualiser
 channels:
   - conda-forge
   - bioconda

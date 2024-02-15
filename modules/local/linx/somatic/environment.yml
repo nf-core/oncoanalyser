@@ -1,4 +1,4 @@
-name: linx
+name: linx_somatic
 channels:
   - conda-forge
   - bioconda

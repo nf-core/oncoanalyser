@@ -1,4 +1,4 @@
-name: gridss
+name: gridss_index
 channels:
   - conda-forge
   - bioconda

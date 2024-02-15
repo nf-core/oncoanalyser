@@ -1,4 +1,4 @@
-name: svprep
+name: svprep_call
 channels:
   - conda-forge
   - bioconda

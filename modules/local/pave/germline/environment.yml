@@ -1,4 +1,4 @@
-name: pave
+name: pave_germline
 channels:
   - conda-forge
   - bioconda

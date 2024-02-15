@@ -1,4 +1,4 @@
-name: svprep
+name: svprep_depth_annotator
 channels:
   - conda-forge
   - bioconda

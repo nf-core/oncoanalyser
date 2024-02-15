@@ -1,4 +1,4 @@
-name: sage
+name: sage_append
 channels:
   - conda-forge
   - bioconda

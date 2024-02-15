@@ -1,4 +1,4 @@
-name: gripss
+name: gripss_germline
 channels:
   - conda-forge
   - bioconda
