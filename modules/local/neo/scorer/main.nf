@@ -2,7 +2,7 @@ process NEO_SCORER {
     tag "${meta.id}"
     label 'process_medium'
 
-    container 'docker.io/scwatts/neo:1.2_beta--0'
+    container 'docker.io/scwatts/neo:1.2_beta--1'
 
     input:
     tuple val(meta), path(isofox_dir), path(purple_dir), path(sage_vcf), path(lilac_dir), path(neo_finder_dir), path(annotate_fusions)
