@@ -2,7 +2,7 @@ process NEO_FINDER {
     tag "${meta.id}"
     label 'process_low'
 
-    container 'docker.io/scwatts/neo:1.2_beta--0'
+    container 'docker.io/scwatts/neo:1.2_beta--1'
 
     input:
     tuple val(meta), path(purple_dir), path(linx_dir)
@@ -31,7 +31,6 @@ process NEO_FINDER {
             -sample ${meta.sample_id} \\
             -linx_dir ${linx_dir} \\
             -somatic_vcf ${purple_dir}/${meta.sample_id}.purple.somatic.vcf.gz \\
-            -req_amino_acids 15 \\
             -ref_genome ${genome_fasta} \\
             -ref_genome_version ${genome_ver} \\
             -ensembl_data_dir ${ensembl_data_resources} \\
