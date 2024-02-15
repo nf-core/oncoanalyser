@@ -3,8 +3,8 @@ process CUSTOM_EXTRACTTARBALL {
 
     conda "conda-forge::tar"
     container "${ workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container ?
-        'https://depot.galaxyproject.org/singularity/debian:bullseye-slim' :
-        'docker pull debian:bullseye-slim' }"
+        'https://depot.galaxyproject.org/singularity/ubuntu:20.04' :
+        'quay.io/nf-core/ubuntu:20.04' }"
 
     input:
     tuple val(meta), path(tarball)
