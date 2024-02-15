@@ -26,6 +26,8 @@ process MARKDUPS {
     //     # -umi_duplex_delim _ \\
     //     # -umi_base_diff_stats \\
 
+    // TODO(MC): Ref genome version.
+
     """
     java \\
       -Xmx${Math.round(task.memory.bytes * 0.95)} \\
