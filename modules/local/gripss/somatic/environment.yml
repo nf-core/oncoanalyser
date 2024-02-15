@@ -1,4 +1,4 @@
-name: gripss_germline
+name: gripss_somatic
 channels:
   - conda-forge
   - bioconda
