@@ -2,7 +2,7 @@ process LINXREPORT {
     tag "${meta.id}"
     label 'process_single'
 
-    conda "${moduleDir}/../environment.yml"
+    conda "${moduleDir}/environment.yml"
     container "${ workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container ?
         'https://depot.galaxyproject.org/singularity/r-linxreport:1.0.0--r43hdfd78af_0' :
         'quay.io/biocontainers/r-linxreport:1.0.0--r43hdfd78af_0' }"
