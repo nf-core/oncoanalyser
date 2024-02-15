@@ -2,7 +2,10 @@ process CUSTOM_REALIGNREADS {
     tag "${meta.id}"
     label 'process_low'
 
-    container 'docker.io/scwatts/custom-realign_reads_lilac:0.0.1--3'
+    conda "bwa=0.7.17 samtools=1.19.2 sambamba=1.0"
+    container "${ workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container ?
+        'https://depot.galaxyproject.org/singularity/mulled-v2-4908f45b5b676e6a2fed6b1977d445b16b7b8dee:2411d64e0a784487e81828123aaf68a549531e5c-0' :
+        'quay.io/biocontainers/mulled-v2-4908f45b5b676e6a2fed6b1977d445b16b7b8dee:2411d64e0a784487e81828123aaf68a549531e5c-0' }"
 
     input:
     tuple val(meta), path(bam), path(bai)
