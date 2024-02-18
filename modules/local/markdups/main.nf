@@ -46,7 +46,7 @@ process MARKDUPS {
         -write_stats \\
         -threads 16 \\
         \\
-        -output_bam ${meta_bam.sample_id}.mark_dups.bam
+        -output_bam ${meta_bam.sample_id}.markdups.bam
 
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":
@@ -63,8 +63,8 @@ process MARKDUPS {
         ' touch ${meta_bam.sample_id}.umi_nucleotide_freq.tsv' : ''
 
     """
-    touch ${meta_bam.sample_id}.mark_dups.bam
-    touch ${meta_bam.sample_id}.mark_dups.bam.bai
+    touch ${meta_bam.sample_id}.markdups.bam
+    touch ${meta_bam.sample_id}.markdups.bam.bai
     touch ${meta_bam.sample_id}.duplicate_freq.tsv
     ${umi_output_files}
 
