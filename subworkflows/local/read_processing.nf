@@ -67,6 +67,7 @@ workflow READ_PROCESSING {
         genome_fai,
         genome_dict,
         unmap_regions,
+        false,
     )
 
     ch_versions = ch_versions.mix(MARKDUPS.out.versions)

@@ -9,6 +9,7 @@ process MARKDUPS {
     path genome_fai
     path genome_dict
     path unmap_regions
+    val has_umis
 
     output:
     tuple val(meta_bam), path('*bam'), path('*bai'), emit: bam
@@ -19,12 +20,7 @@ process MARKDUPS {
     task.ext.when == null || task.ext.when
 
     script:
-    // # TODO(MC): Umi flags
-    //     # -multi_bam \\
-    //     # -umi_enabled \\
-    //     # -umi_duplex \\
-    //     # -umi_duplex_delim _ \\
-    //     # -umi_base_diff_stats \\
+    def umi_flags = has_umis ? '-umi_enabled -umi_duplex -umi_duplex_delim _ -umi_base_diff_stats' : ''
 
     // TODO(MC): Ref genome version.
 
@@ -40,6 +36,8 @@ process MARKDUPS {
         -input_bam ${bams.join(',')} \\
         \\
         -form_consensus \\
+        -multi_bam \\
+        ${umi_flags} \\
         \\
         -unmap_regions ${unmap_regions} \\
         -ref_genome ${genome_fasta} \\
@@ -60,16 +58,16 @@ process MARKDUPS {
     """
 
     stub:
+    def umi_output_files = has_umis ? 'touch ${meta_bam.sample_id}.umi_coord_freq.tsv;' +
+        ' touch ${meta_bam.sample_id}.umi_edit_distance.tsv;' +
+        ' touch ${meta_bam.sample_id}.umi_nucleotide_freq.tsv' : ''
+
     """
     touch ${meta_bam.sample_id}.mark_dups.bam
     touch ${meta_bam.sample_id}.mark_dups.bam.bai
     touch ${meta_bam.sample_id}.duplicate_freq.tsv
+    ${umi_output_files}
 
     echo -e '${task.process}:\\n  stub: noversions\\n' > versions.yml
     """
-
-    // # TODO(MC): UMIs.
-    // # touch ${meta_bam.sample_id}.umi_coord_freq.tsv
-    // # touch ${meta_bam.sample_id}.umi_edit_distance.tsv
-    // # touch ${meta_bam.sample_id}.umi_nucleotide_freq.tsv
 }
