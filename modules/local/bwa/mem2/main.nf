@@ -25,7 +25,7 @@ process BWA_MEM2 {
     def read_group_tag = "@RG\t${meta.read_group}"
 
     """
-    ln -s \$(find -L ${genome_bwa_index} -type f) ./
+    ln -fs \$(find -L ${genome_bwa_index} -type f) ./
 
     bwa-mem2 mem \\
     -Y \\
