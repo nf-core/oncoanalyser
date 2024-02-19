@@ -488,10 +488,13 @@ class Utils {
 
     static public readGroupFromFastqPath(fastq_path) {
         def base_name = fastq_path.split('/')[-1]
-        def pattern = /^(.+)_\d+\.fastq$/
-        def matcher = base_name =~ pattern
-        assert matcher.find()
-        return matcher[0][1]
+        def components = base_name.split('_')
+        def read_group_components = []
+        for (def i = 0; i < components.size() - 2; ++i) {
+            read_group_components.add(components[i])
+        }
+
+        return read_group_components.join('_')
     }
 
 }

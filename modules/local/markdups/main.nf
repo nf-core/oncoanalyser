@@ -58,9 +58,9 @@ process MARKDUPS {
     """
 
     stub:
-    def umi_output_files = has_umis ? 'touch ${meta_bam.sample_id}.umi_coord_freq.tsv;' +
-        ' touch ${meta_bam.sample_id}.umi_edit_distance.tsv;' +
-        ' touch ${meta_bam.sample_id}.umi_nucleotide_freq.tsv' : ''
+    def umi_output_files = has_umis ? "touch ${meta_bam.sample_id}.umi_coord_freq.tsv;" +
+        " touch ${meta_bam.sample_id}.umi_edit_distance.tsv;" +
+        " touch ${meta_bam.sample_id}.umi_nucleotide_freq.tsv" : ''
 
     """
     touch ${meta_bam.sample_id}.markdups.bam
