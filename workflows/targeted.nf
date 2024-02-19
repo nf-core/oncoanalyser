@@ -104,7 +104,6 @@ include { CUSTOM_DUMPSOFTWAREVERSIONS } from '../modules/nf-core/custom/dumpsoft
 // Get absolute file paths
 samplesheet = Utils.getFileObject(params.input)
 
-// TODO(MC): -panel targeted
 workflow TARGETED {
 
     // Create channel for versions
@@ -166,6 +165,8 @@ workflow TARGETED {
     // TODO(SW): set up correctly
     if (true || run_config.stages.markdups) {
 
+        has_umis = params.panel.equalsIgnoreCase('tso500')
+
         READ_PROCESSING(
             ch_inputs,
             ch_dna_alignment_out,
@@ -174,7 +175,7 @@ workflow TARGETED {
             ref_data.genome_fai,
             ref_data.genome_dict,
             file(params.refdata_unmap_regions),
-            true,
+            has_umis,
         )
 
         ch_versions = ch_versions.mix(READ_PROCESSING.out.versions)
