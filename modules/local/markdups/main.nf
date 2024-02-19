@@ -20,7 +20,7 @@ process MARKDUPS {
     task.ext.when == null || task.ext.when
 
     script:
-    def umi_flags = has_umis ? '-umi_enabled -umi_duplex -umi_duplex_delim _ -umi_base_diff_stats' : ''
+    def umi_flags = has_umis ? '-umi_enabled -umi_duplex -umi_duplex_delim +' : ''
 
     // TODO(MC): Ref genome version.
 
