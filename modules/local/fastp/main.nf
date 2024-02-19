@@ -15,14 +15,9 @@ process FASTP {
     task.ext.when == null || task.ext.when
 
     script:
-    // TODO(MC): UMI flags
-    //   --umi \\
-    // --umi_loc per_read \\
-    // --umi_len 7 \\
-    // --umi_skip 1 \\
-
     """
     # * do not apply trimming/clipping, already done in BCL convert
+    # * do not process umis, already done for us
 
     fastp \\
       --in1 ${reads_fwd} \\

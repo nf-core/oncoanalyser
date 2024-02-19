@@ -22,7 +22,8 @@ process BWA_MEM2 {
     task.ext.when == null || task.ext.when
 
     script:
-    def read_group_tag = "@RG\t${meta.read_group}"
+    // TODO(MC): Double check this with Charles.
+    def read_group_tag = "@RG\\tID:${meta.read_group}\\tSM:${meta.sample_id}"
 
     """
     ln -fs \$(find -L ${genome_bwa_index} -type f) ./
