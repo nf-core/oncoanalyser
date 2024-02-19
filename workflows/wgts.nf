@@ -117,6 +117,8 @@ samplesheet = Utils.getFileObject(params.input)
 //     - Ignore this warning: params.schema_ignore_params = "max_fastq_records,refdata_unmap_regions"
 // TODO(MC): get error logs for amber, cobalt, and gripss
 // TODO(MC): Drop commit 'WIP: Reverting bioconda containers'.
+// TODO(MC): Drop commit 'WIP: Turn FASTP back on by default'.
+// TODO(MC): Check on bwa vs bwa-mem2 differences.
 workflow WGTS {
     // Create channel for versions
     // channel: [ versions.yml ]
