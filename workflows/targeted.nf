@@ -140,6 +140,7 @@ workflow TARGETED {
             ref_data.genome_fasta,
             ref_data.genome_bwa_index,
             params.max_fastq_records,
+            params.use_mem2,
         )
 
         ch_versions = ch_versions.mix(READ_ALIGNMENT.out.versions)
