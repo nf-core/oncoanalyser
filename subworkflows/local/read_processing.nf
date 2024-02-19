@@ -10,6 +10,7 @@ workflow READ_PROCESSING {
     genome_fai
     genome_dict
     unmap_regions
+    has_umis
 
     main:
     // Channel for version.yml files
@@ -67,7 +68,7 @@ workflow READ_PROCESSING {
         genome_fai,
         genome_dict,
         unmap_regions,
-        false,
+        has_umis,
     )
 
     ch_versions = ch_versions.mix(MARKDUPS.out.versions)

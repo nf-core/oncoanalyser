@@ -188,6 +188,7 @@ workflow WGTS {
             ref_data.genome_fai,
             ref_data.genome_dict,
             file(params.refdata_unmap_regions),
+            false,
         )
 
         ch_versions = ch_versions.mix(READ_PROCESSING.out.versions)
