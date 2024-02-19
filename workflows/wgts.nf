@@ -120,6 +120,7 @@ samplesheet = Utils.getFileObject(params.input)
 // TODO(MC): Drop commit 'WIP: Turn FASTP back on by default'.
 // TODO(MC): Check on bwa vs bwa-mem2 differences.
 // TODO(MC): Run all TSO500 test.
+// TODO(MC): Go from .fastq.gz.
 workflow WGTS {
     // Create channel for versions
     // channel: [ versions.yml ]
