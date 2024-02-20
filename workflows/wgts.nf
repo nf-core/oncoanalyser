@@ -117,6 +117,7 @@ samplesheet = Utils.getFileObject(params.input)
 // TODO(MC): Check on bwa vs bwa-mem2 differences.
 // TODO(MC): Run all TSO500 test.
 // TODO(MC): Go from .fastq.gz.
+// TODO(MC): Unmap region file location.
 workflow WGTS {
     // Create channel for versions
     // channel: [ versions.yml ]
