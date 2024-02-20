@@ -111,10 +111,6 @@ include { CUSTOM_DUMPSOFTWAREVERSIONS } from '../modules/nf-core/custom/dumpsoft
 samplesheet = Utils.getFileObject(params.input)
 
 // TODO(MC): New params, and resource files, documentation and proper placement.
-// TODO(MC): WARN: Found unexpected parameters:
-//     * --max_fastq_records: 10000000
-//     * --refdata_unmap_regions: /Users/matthewcooper/projects/oncoanalyser/hmf_reference_data/markdups/unmap_regions_37.tsv
-//     - Ignore this warning: params.schema_ignore_params = "max_fastq_records,refdata_unmap_regions"
 // TODO(MC): get error logs for amber, cobalt, and gripss
 // TODO(MC): Drop commit 'WIP: Reverting bioconda containers'.
 // TODO(MC): Drop commit 'WIP: Turn FASTP back on by default'.

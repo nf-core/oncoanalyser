@@ -166,7 +166,7 @@ workflow TARGETED {
     // TODO(SW): set up correctly
     if (true || run_config.stages.markdups) {
 
-        has_umis = params.panel.equalsIgnoreCase('tso500')
+        has_umis = run_config.panel.equalsIgnoreCase('tso500')
 
         READ_PROCESSING(
             ch_inputs,
