@@ -110,12 +110,7 @@ include { CUSTOM_DUMPSOFTWAREVERSIONS } from '../modules/nf-core/custom/dumpsoft
 // Get absolute file paths
 samplesheet = Utils.getFileObject(params.input)
 
-// TODO(MC): New params, and resource files, documentation and proper placement.
-// TODO(MC): get error logs for amber, cobalt, and gripss
 // TODO(MC): Drop commit 'WIP: Reverting bioconda containers'.
-// TODO(MC): Drop commit 'WIP: Turn FASTP back on by default'.
-// TODO(MC): Check on bwa vs bwa-mem2 differences.
-// TODO(MC): Run all TSO500 test.
 // TODO(MC): Go from .fastq.gz.
 // TODO(MC): Unmap region file location.
 workflow WGTS {
