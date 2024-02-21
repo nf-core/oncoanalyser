@@ -17,12 +17,16 @@ process FASTP {
     script:
     """
     # * do not apply trimming/clipping, already done in BCL convert
+    # * turn off all filtering
     # * do not process umis, already done for us
 
     fastp \\
       --in1 ${reads_fwd} \\
       --in2 ${reads_rev} \\
+      --disable_quality_filtering \\
+      --disable_length_filtering \\
       --disable_adapter_trimming \\
+      --disable_trim_poly_g \\
       --split_by_lines ${4 * max_fastq_records} \\
       --out1 ${meta.sample_id}_${meta.read_group}_R1.fastp.fastq \\
       --out2 ${meta.sample_id}_${meta.read_group}_R2.fastp.fastq
