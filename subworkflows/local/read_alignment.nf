@@ -1,4 +1,3 @@
-include { BWA_MEM } from '../../modules/local/bwa/mem/main'
 include { BWA_MEM2 } from '../../modules/local/bwa/mem2/main'
 include { FASTP          } from '../../modules/local/fastp/main'
 include { SAMBAMBA_INDEX } from '../../modules/local/sambamba/index/main'
@@ -11,7 +10,6 @@ workflow READ_ALIGNMENT {
     genome_fasta
     genome_bwa_index
     max_fastq_records
-    use_mem2
 
     main:
     // Channel for version.yml files
@@ -42,7 +40,7 @@ workflow READ_ALIGNMENT {
     // TODO(SW): implement outputs
     ch_star_outputs = Channel.empty()
 
-    // BWA MEM/MEM2
+    // BWA MEM2
     // channel: [ sample_key, fastq_pair_count ]
     ch_sample_fastq_pair_count = ch_meta_samples_sorted.runnable_fastq.map { meta_sample ->
 
@@ -192,31 +190,17 @@ workflow READ_ALIGNMENT {
     }
 
     // channel: [ meta_fastq, bam ]
-    ch_alignment_output = Channel.empty()
-    if (use_mem2) {
-        BWA_MEM2(
-            ch_bwa_mem_inputs,
-            genome_fasta,
-            genome_bwa_index,
-        )
+    BWA_MEM2(
+        ch_bwa_mem_inputs,
+        genome_fasta,
+        genome_bwa_index,
+    )
 
-        ch_alignment_output = BWA_MEM2.out.bam
-        ch_versions = ch_versions.mix(BWA_MEM2.out.versions)
-    }
-    else {
-        BWA_MEM(
-            ch_bwa_mem_inputs,
-            genome_fasta,
-            genome_bwa_index,
-        )
-
-        ch_alignment_output = BWA_MEM.out.bam
-        ch_versions = ch_versions.mix(BWA_MEM.out.versions)
-    }
+    ch_versions = ch_versions.mix(BWA_MEM2.out.versions)
 
     // channel: [ meta_fastq, bam, bai ]
     SAMBAMBA_INDEX(
-        ch_alignment_output,
+        BWA_MEM2.out.bam,
     )
 
     ch_versions = ch_versions.mix(SAMBAMBA_INDEX.out.versions)
