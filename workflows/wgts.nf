@@ -113,6 +113,7 @@ samplesheet = Utils.getFileObject(params.input)
 // TODO(MC): Drop commit 'WIP: Reverting bioconda containers'.
 // TODO(MC): Go from .fastq.gz.
 // TODO(MC): Unmap region file location.
+// TODO(MC): Fix warnings.
 workflow WGTS {
     // Create channel for versions
     // channel: [ versions.yml ]
