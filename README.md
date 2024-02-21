@@ -63,7 +63,8 @@ P1__wgts,P1,SC,normal,dna,bam,/path/to/SC.normal.dna.wgs.bam
 Launch oncoanalyser:
 
 ```bash
-nextflow run umccr/oncoanalyser \
+nextflow run nf-core/oncoanalyser \
+   -revision v0.3.0 \
    -profile docker \
    --mode wgts \
    --genome GRCh38_hmf \
@@ -89,8 +90,9 @@ Each release that is given extended support is allocated a separate long-lived g
 
 ## Credits
 
-The oncoanalyser pipeline was written by Stephen Watts at the [University of Melbourne Centre for Cancer
-Research](https://mdhs.unimelb.edu.au/centre-for-cancer-research).
+The oncoanalyser pipeline was written by Stephen Watts while in the [Genomics Platform
+Group](https://mdhs.unimelb.edu.au/centre-for-cancer-research/our-research/genomics-platform-group) at the [University
+of Melbourne Centre for Cancer Research](https://mdhs.unimelb.edu.au/centre-for-cancer-research).
 
 We thank the following people for their extensive assistance in the development of this pipeline, listed in alphabetical
 order:
