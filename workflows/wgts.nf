@@ -176,6 +176,7 @@ workflow WGTS {
             ch_inputs,
             ch_dna_alignment_out,
             ch_rna_alignment_out,
+            ref_data.genome_version,
             ref_data.genome_fasta,
             ref_data.genome_fai,
             ref_data.genome_dict,

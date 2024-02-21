@@ -6,6 +6,7 @@ process MARKDUPS {
 
     input:
     tuple val(meta_bam), path(bams), path(bais)
+    val genome_ver
     path genome_fasta
     path genome_fai
     path genome_dict
@@ -22,8 +23,6 @@ process MARKDUPS {
 
     script:
     def umi_flags = has_umis ? '-umi_enabled -umi_duplex -umi_duplex_delim +' : ''
-
-    // TODO(MC): Ref genome version.
 
     """
     java \\
@@ -42,7 +41,7 @@ process MARKDUPS {
         \\
         -unmap_regions ${unmap_regions} \\
         -ref_genome ${genome_fasta} \\
-        -ref_genome_version 37 \\
+        -ref_genome_version ${genome_ver} \\
         \\
         -write_stats \\
         -threads 16 \\

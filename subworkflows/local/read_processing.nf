@@ -6,6 +6,7 @@ workflow READ_PROCESSING {
     ch_inputs   // channel: [mandatory] [ meta ]
     ch_dna_bams // channel: [mandatory] [ meta, bam_dna ]
     ch_rna_bams // channel: [mandatory] [ meta, bam_rna ]
+    genome_ver
     genome_fasta
     genome_fai
     genome_dict
@@ -64,6 +65,7 @@ workflow READ_PROCESSING {
     // channel: [ meta_bam, bam, bai ]
     MARKDUPS(
         ch_markdups_inputs,
+        genome_ver,
         genome_fasta,
         genome_fai,
         genome_dict,
