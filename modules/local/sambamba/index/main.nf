@@ -1,7 +1,9 @@
 process SAMBAMBA_INDEX {
     tag "${meta.subject_id}__${meta.sample_id}"
 
-    container 'docker.io/scwatts/sambamba:1.0'
+    container "${ workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container ?
+        'https://depot.galaxyproject.org/singularity/sambamba:1.0--h98b6b92_0' :
+        'quay.io/biocontainers/sambamba:1.0--h98b6b92_0' }"
 
     input:
     tuple val(meta), path(bam)

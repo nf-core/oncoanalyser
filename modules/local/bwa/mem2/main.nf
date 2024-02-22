@@ -2,8 +2,9 @@ process BWA_MEM2 {
     tag "${meta.subject_id}__${meta.sample_id}"
     label 'process_high'
 
-    // TODO(SW): Upload container.
-    container 'bwa-mem2:2.2.1-sambamba'
+    container "${ workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container ?
+        'https://depot.galaxyproject.org/singularity/bwa-mem2:2.2.1--hd03093a_5' :
+        'quay.io/biocontainers/bwa-mem2:2.2.1--hd03093a_5' }"
 
     input:
     tuple val(meta), path(reads_fwd), path(reads_rev)

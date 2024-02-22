@@ -2,7 +2,9 @@ process MARKDUPS {
     tag "${meta_bam.subject_id}__${meta_bam.sample_id}"
     label 'process_medium'
 
-    container 'docker.io/scwatts/markdups:1.1.rc1'
+    container "${ workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container ?
+        'https://depot.galaxyproject.org/singularity/hmftools-mark-dups:1.1--hdfd78af_0' :
+        'quay.io/biocontainers/hmftools-mark-dups:1.1--hdfd78af_0' }"
 
     input:
     tuple val(meta_bam), path(bams), path(bais)
@@ -24,34 +26,32 @@ process MARKDUPS {
     script:
     def umi_flags = has_umis ? '-umi_enabled -umi_duplex -umi_duplex_delim +' : ''
 
-    // TODO(MC): Update mark-dups version command, and update to bioconda container.
     """
-    java \\
+    markdups \\
       -Xmx${Math.round(task.memory.bytes * 0.95)} \\
-      -jar /opt/markdups/markdups.jar \\
-        \\
-        -samtools \$(which samtools) \\
-        -sambamba \$(which sambamba) \\
-        \\
-        -sample ${meta_bam.sample_id} \\
-        -input_bam ${bams.join(',')} \\
-        \\
-        -form_consensus \\
-        -multi_bam \\
-        ${umi_flags} \\
-        \\
-        -unmap_regions ${unmap_regions} \\
-        -ref_genome ${genome_fasta} \\
-        -ref_genome_version ${genome_ver} \\
-        \\
-        -write_stats \\
-        -threads 16 \\
-        \\
-        -output_bam ${meta_bam.sample_id}.markdups.bam
+      \\
+      -samtools \$(which samtools) \\
+      -sambamba \$(which sambamba) \\
+      \\
+      -sample ${meta_bam.sample_id} \\
+      -input_bam ${bams.join(',')} \\
+      \\
+      -form_consensus \\
+      -multi_bam \\
+      ${umi_flags} \\
+      \\
+      -unmap_regions ${unmap_regions} \\
+      -ref_genome ${genome_fasta} \\
+      -ref_genome_version ${genome_ver} \\
+      \\
+      -write_stats \\
+      -threads 16 \\
+      \\
+      -output_bam ${meta_bam.sample_id}.markdups.bam
 
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":
-        mark-dups: \$(java -jar /opt/markdups/markdups.jar -version | awk '{ print \$NF }')
+        markdups: \$(markdups -version | awk '{ print \$NF }')
         openjdk: \$(java --version | egrep '^OpenJDK Runtime Environment ' | sed 's/^.*build //' | sed 's/.\$//')
         sambamba: \$(sambamba --version 2>&1 | egrep '^sambamba' | head -n 1 | awk '{ print \$NF }')
         samtools: \$(samtools --version 2>&1 | egrep '^samtools\\s' | head -n 1 | sed 's/^.* //')

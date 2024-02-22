@@ -1,7 +1,9 @@
 process FASTP {
     tag "${meta.subject_id}__${meta.sample_id}"
 
-    container 'docker.io/scwatts/fastp:0.23.4'
+    container "${ workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container ?
+        'https://depot.galaxyproject.org/singularity/fastp:0.23.4--hadf994f_2' :
+        'quay.io/biocontainers/fastp:0.23.4--hadf994f_2' }"
 
     input:
     tuple val(meta), path(reads_fwd), path(reads_rev)
