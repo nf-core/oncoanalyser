@@ -111,7 +111,7 @@ include { CUSTOM_DUMPSOFTWAREVERSIONS } from '../modules/nf-core/custom/dumpsoft
 samplesheet = Utils.getFileObject(params.input)
 
 // TODO(MC): Drop commit 'WIP: Reverting bioconda containers'.
-// TODO(MC): Go from .fastq.gz.
+// TODO(MC): Run full tests for going from .fastq.gz.
 // TODO(SW): Unmap region resouce files.
 // TODO(MC): Fix warnings.
 workflow WGTS {
