@@ -1,5 +1,5 @@
 process SAMBAMBA_INDEX {
-    tag "${meta.subject_id}__${meta.sample_id}"
+    tag "${meta.id}"
 
     container "${ workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container ?
         'https://depot.galaxyproject.org/singularity/sambamba:1.0--h98b6b92_0' :

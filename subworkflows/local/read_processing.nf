@@ -51,6 +51,8 @@ workflow READ_PROCESSING {
                 }
             }
 
+            meta_bam['id'] = "${meta_bam.group_id}__${meta_bam.sample_id}"
+
             if (!(bams instanceof Collection)) {
                 bams = [bams]
             }
@@ -82,6 +84,7 @@ workflow READ_PROCESSING {
         def meta_bam = bam[0]
 
         def meta = Utils.shallow_copy(meta_bam)
+        meta.remove('id')
         meta.remove('sample_id')
         meta.remove('sample_key')
 

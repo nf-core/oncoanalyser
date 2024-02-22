@@ -73,7 +73,7 @@ workflow READ_ALIGNMENT {
             def sample_id = meta[sample_key]['sample_id']
             def fastq_files = meta[sample_key][Constants.FileType.FASTQ].toString().tokenize(';')
 
-            def meta_fastq_common = [:]
+            def meta_fastq_common = [id: "${meta.group_id}__${sample_id}"]
             meta.each { key, value ->
 
                 if (key === sample_key) {
@@ -122,6 +122,7 @@ workflow READ_ALIGNMENT {
 
                 def meta_sample = split_fastq_pairs[0]
                 def sample_key = Utils.shallow_copy(meta_sample)
+                sample_key.remove('id')
                 sample_key.remove('read_group')
                 sample_key.remove(meta_sample.sample_key)
 
@@ -214,6 +215,7 @@ workflow READ_ALIGNMENT {
 
                     def meta_bam = bam[0]
                     def sample_key = Utils.shallow_copy(meta_bam)
+                    sample_key.remove('id')
                     sample_key.remove(meta_bam.sample_key)
                     sample_key.remove('read_group')
                     sample_key.remove('split')

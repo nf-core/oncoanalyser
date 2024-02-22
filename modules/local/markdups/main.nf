@@ -1,5 +1,5 @@
 process MARKDUPS {
-    tag "${meta_bam.subject_id}__${meta_bam.sample_id}"
+    tag "${meta_bam.id}"
     label 'process_medium'
 
     container "${ workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container ?

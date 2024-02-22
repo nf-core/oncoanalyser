@@ -1,5 +1,5 @@
 process FASTP {
-    tag "${meta.subject_id}__${meta.sample_id}"
+    tag "${meta.id}"
 
     container "${ workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container ?
         'https://depot.galaxyproject.org/singularity/fastp:0.23.4--hadf994f_2' :

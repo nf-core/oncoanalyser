@@ -1,5 +1,5 @@
 process BWA_MEM2 {
-    tag "${meta.subject_id}__${meta.sample_id}"
+    tag "${meta.id}"
     label 'process_high'
 
     container "${ workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container ?
