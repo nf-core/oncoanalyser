@@ -24,6 +24,7 @@ process MARKDUPS {
     script:
     def umi_flags = has_umis ? '-umi_enabled -umi_duplex -umi_duplex_delim +' : ''
 
+    // TODO(MC): Update mark-dups version command, and update to bioconda container.
     """
     java \\
       -Xmx${Math.round(task.memory.bytes * 0.95)} \\
@@ -50,10 +51,10 @@ process MARKDUPS {
 
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":
-        sambamba: 1.0
-        samtools: 1.17
-        openjdk: 8
-        mark-dups: 1.1
+        mark-dups: \$(java -jar /opt/markdups/markdups.jar -version | awk '{ print \$NF }')
+        openjdk: \$(java --version | egrep '^OpenJDK Runtime Environment ' | sed 's/^.*build //' | sed 's/.\$//')
+        sambamba: \$(sambamba --version 2>&1 | egrep '^sambamba' | head -n 1 | awk '{ print \$NF }')
+        samtools: \$(samtools --version 2>&1 | egrep '^samtools\\s' | head -n 1 | sed 's/^.* //')
     END_VERSIONS
     """
 

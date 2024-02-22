@@ -33,7 +33,7 @@ process FASTP {
 
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":
-        fastp: 0.23.4
+        fastp: \$(fastp --version 2>&1 | sed 's/^.* //')
     END_VERSIONS
     """
 

@@ -21,7 +21,7 @@ process SAMBAMBA_INDEX {
 
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":
-        sambamba: 1.0
+        sambamba: \$(sambamba --version 2>&1 | egrep '^sambamba' | head -n 1 | awk '{ print \$NF }')
     END_VERSIONS
     """
 

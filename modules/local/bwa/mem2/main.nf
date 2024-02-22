@@ -25,6 +25,7 @@ process BWA_MEM2 {
     // TODO(MC): Double check this with Charles.
     def read_group_tag = "@RG\\tID:${meta.read_group}\\tSM:${meta.sample_id}"
 
+    // NOTE(MC): Hardcoding bwa-mem2 version since the CLI does not have a --version flag.
     """
     ln -fs \$(find -L ${genome_bwa_index} -type f) ./
 
@@ -50,8 +51,8 @@ process BWA_MEM2 {
 
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":
-        bwamem2: 2.2.1
-        sambamba: 1.0
+        bwa-mem2: 2.2.1
+        sambamba: \$(sambamba --version 2>&1 | egrep '^sambamba' | head -n 1 | awk '{ print \$NF }')
     END_VERSIONS
     """
 
