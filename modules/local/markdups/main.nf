@@ -3,8 +3,8 @@ process MARKDUPS {
     label 'process_medium'
 
     container "${ workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container ?
-        'https://depot.galaxyproject.org/singularity/hmftools-mark-dups:1.1--hdfd78af_0' :
-        'quay.io/biocontainers/hmftools-mark-dups:1.1--hdfd78af_0' }"
+        'https://depot.galaxyproject.org/singularity/hmftools-mark-dups:1.1.1--hdfd78af_0' :
+        'quay.io/biocontainers/hmftools-mark-dups:1.1.1--hdfd78af_0' }"
 
     input:
     tuple val(meta_bam), path(bams), path(bais)
