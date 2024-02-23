@@ -486,15 +486,46 @@ class Utils {
         return splitGroupIntoSamples(meta_group).size()
     }
 
-    static public readGroupFromFastqPath(fastq_path) {
+    static public fastqBasenameWithoutExtension(fastq_path) {
         def base_name = fastq_path.split('/')[-1]
-        def components = base_name.split('_')
-        def read_group_components = []
-        for (def i = 0; i < components.size() - 2; ++i) {
-            read_group_components.add(components[i])
+        def matcher = base_name =~ /^(.*)\.fastq(\.gz|)$/
+        assert matcher.find()
+        return matcher[0][1]
+    }
+
+    static public readGroupFromFastqPath(fwd_fastq_path, rev_fastq_path) {
+        def fwd_fastq_no_extension = fastqBasenameWithoutExtension(fwd_fastq_path)
+        def rev_fastq_no_extension = fastqBasenameWithoutExtension(rev_fastq_path)
+
+        def lane_fastq_pattern = /^(.*)_(.*_L[0-9]{3})_(R[12])_([0-9]{3})$/
+        def fwd_matcher = fwd_fastq_no_extension =~ lane_fastq_pattern
+        def rev_matcher = rev_fastq_no_extension =~ lane_fastq_pattern
+
+        if (fwd_matcher.find()) {
+            assert rev_matcher.find()
+            assert fwd_matcher[0][3].equals("R1")
+            assert rev_matcher[0][3].equals("R2")
+
+            def fwd_read_group = "${fwd_matcher[0][2]}_${fwd_matcher[0][4]}"
+            def rev_read_group = "${rev_matcher[0][2]}_${rev_matcher[0][4]}"
+            assert fwd_read_group.equals(rev_read_group)
+            return fwd_read_group
         }
 
-        return read_group_components.join('_')
+        // Case for when lane fastq files are from picard SamToFastq.
+        lane_fastq_pattern = /^(.*)_(.*_L[0-9]{3})_([0-9]{3})_([12])$/
+        fwd_matcher = fwd_fastq_no_extension =~ lane_fastq_pattern
+        rev_matcher = rev_fastq_no_extension =~ lane_fastq_pattern
+
+        assert fwd_matcher.find()
+        assert rev_matcher.find()
+        assert fwd_matcher[0][4].equals("1")
+        assert rev_matcher[0][4].equals("2")
+
+        def fwd_read_group = "${fwd_matcher[0][1]}_${fwd_matcher[0][2]}"
+        def rev_read_group = "${rev_matcher[0][1]}_${rev_matcher[0][2]}"
+        assert fwd_read_group.equals(rev_read_group)
+        return fwd_read_group
     }
 
 }

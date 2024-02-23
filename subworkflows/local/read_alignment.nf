@@ -91,7 +91,7 @@ workflow READ_ALIGNMENT {
                 def reads_rev = fastq_files[i + 1]
 
                 def meta_fastq = Utils.shallow_copy(meta_fastq_common)
-                meta_fastq['read_group'] = Utils.readGroupFromFastqPath(reads_fwd)
+                meta_fastq['read_group'] = Utils.readGroupFromFastqPath(reads_fwd, reads_rev)
 
                 fastq_pairs.add([meta_fastq, reads_fwd, reads_rev])
             }

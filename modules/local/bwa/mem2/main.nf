@@ -23,7 +23,6 @@ process BWA_MEM2 {
     task.ext.when == null || task.ext.when
 
     script:
-    // TODO(MC): Double check this with Charles.
     def read_group_tag = "@RG\\tID:${meta.read_group}\\tSM:${meta.sample_id}"
 
     // NOTE(MC): Hardcoding bwa-mem2 version since the CLI does not have a --version flag.
