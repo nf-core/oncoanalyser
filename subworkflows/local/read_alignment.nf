@@ -163,15 +163,12 @@ workflow READ_ALIGNMENT {
         ch_versions = ch_versions.mix(SAMBAMBA_INDEX.out.versions)
 
         // Combine BAMs and BAIs
-        ch_bams_flat = Channel.empty()
-            .mix(
-                BWA_MEM2.out.bam,
-                SAMBAMBA_INDEX.out.bai
-            )
-            .groupTuple(size: 2)
-            .map { it.flatten() }
-
-
+        // channel: [ meta, sample_type, bam, bai ]
+        ch_bams_flat = WorkflowOncoanalyser.groupByMeta(
+            BWA_MEM2.out.bam.map { meta_bwa, bam -> [meta_bwa, meta_bwa.sample_type] },
+            BWA_MEM2.out.bam,
+            SAMBAMBA_INDEX.out.bai,
+        )
 
         // Reunite BAMs
         // First, count expected BAMs per sample for non-blocking groupTuple op
@@ -188,11 +185,12 @@ workflow READ_ALIGNMENT {
             .groupTuple()
             .map { meta_count, meta_bwas -> return [meta_count, meta_bwas.size()] }
 
+
         // Now, group with expected size then sort into tumor and normal channels
         ch_bams_united = ch_sample_fastq_counts
             .cross(
                 // First element to match meta_count above for `cross`
-                ch_bams_flat.map { meta_bwa, bam, bai -> [[key: meta_bwa.key, sample_type: meta_bwa.sample_type], bam, bai] }
+                ch_bams_flat.map { meta, sample_type, bam, bai -> [[key: meta.key, sample_type: sample_type], bam, bai] }
             )
             .map { count_tuple, bam_tuple ->
 
