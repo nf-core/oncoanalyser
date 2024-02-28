@@ -2,18 +2,15 @@ process BWA_MEM2 {
     tag "${meta.id}"
     label 'process_high'
 
-    container "${ workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container ?
-        'https://depot.galaxyproject.org/singularity/bwa-mem2:2.2.1--hd03093a_5' :
-        'quay.io/biocontainers/bwa-mem2:2.2.1--hd03093a_5' }"
+    // TODO(SW): create BioContainers multi-package image when appropriate
+    container 'docker.io/scwatts/bwa-mem2:2.2.1'
 
     input:
     tuple val(meta), path(reads_fwd), path(reads_rev)
     path genome_fasta
-    // TODO(SW): The following resourse files are needed from gs://hmf-public/HMFtools-Resources/ref_genome/37:
-    //    + Homo_sapiens.GRCh37.GATK.illumina.fasta.bwt.2bit.64
-    //    + Homo_sapiens.GRCh37.GATK.illumina.fasta.0123
-    //    Similarly for ref genome 38.
     path genome_bwa_index
+    path genome_bwa_index_bseq
+    path genome_bwa_index_biidx
 
     output:
     tuple val(meta), path('*.bam'), emit: bam
@@ -25,7 +22,6 @@ process BWA_MEM2 {
     script:
     def read_group_tag = "@RG\\tID:${meta.read_group}\\tSM:${meta.sample_id}"
 
-    // NOTE(MC): Hardcoding bwa-mem2 version since the CLI does not have a --version flag.
     """
     ln -fs \$(find -L ${genome_bwa_index} -type f) ./
 
@@ -51,7 +47,7 @@ process BWA_MEM2 {
 
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":
-        bwa-mem2: 2.2.1
+        bwa-mem2: \$(bwa-mem2 version 2>/dev/null)
         sambamba: \$(sambamba --version 2>&1 | egrep '^sambamba' | head -n 1 | awk '{ print \$NF }')
     END_VERSIONS
     """

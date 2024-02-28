@@ -25,6 +25,8 @@ params.ref_data_genome_fasta           = WorkflowMain.getGenomeAttribute(params,
 params.ref_data_genome_fai             = WorkflowMain.getGenomeAttribute(params, 'fai')
 params.ref_data_genome_dict            = WorkflowMain.getGenomeAttribute(params, 'dict')
 params.ref_data_genome_bwa_index       = WorkflowMain.getGenomeAttribute(params, 'bwa_index')
+params.ref_data_genome_bwa_index_bseq  = WorkflowMain.getGenomeAttribute(params, 'bwa_index_bseq')
+params.ref_data_genome_bwa_index_biidx = WorkflowMain.getGenomeAttribute(params, 'bwa_index_biidx')
 params.ref_data_genome_bwa_index_image = WorkflowMain.getGenomeAttribute(params, 'bwa_index_image')
 params.ref_data_genome_gridss_index    = WorkflowMain.getGenomeAttribute(params, 'gridss_index')
 

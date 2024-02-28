@@ -128,66 +128,64 @@ workflow TARGETED {
     //
     // SUBWORKFLOW: Align reads
     //
-    // channel: [ meta ]
-    ch_dna_alignment_out = Channel.empty()
-    // channel: [ meta, bam_rna ]
-    ch_rna_alignment_out = Channel.empty()
-    // TODO(SW): set up correctly
-    if (true || run_config.stages.alignment) {
+    // channel: [ meta, [bam, ...], [bai, ...] ]
+    ch_align_dna_tumor_out = Channel.empty()
+    ch_align_dna_normal_out = Channel.empty()
+    if (run_config.stages.alignment) {
 
         READ_ALIGNMENT(
             ch_inputs,
             ref_data.genome_fasta,
             ref_data.genome_bwa_index,
+            ref_data.genome_bwa_index_bseq,
+            ref_data.genome_bwa_index_biidx,
             params.max_fastq_records,
         )
 
         ch_versions = ch_versions.mix(READ_ALIGNMENT.out.versions)
 
-        ch_dna_alignment_out = ch_dna_alignment_out.mix(READ_ALIGNMENT.out.dna)
-        ch_rna_alignment_out = ch_rna_alignment_out.mix(READ_ALIGNMENT.out.rna)
-
+        ch_align_dna_tumor_out = ch_align_dna_tumor_out.mix(READ_ALIGNMENT.out.dna_tumor)
+        ch_align_dna_normal_out = ch_align_dna_normal_out.mix(READ_ALIGNMENT.out.dna_normal)
 
     } else {
 
-        ch_dna_alignment_out = ch_inputs
-        ch_rna_alignment_out = ch_inputs.map { meta -> [meta, []] }
+        ch_align_dna_tumor_out = ch_inputs.map { meta -> [meta, [], []] }
+        ch_align_dna_normal_out = ch_inputs.map { meta -> [meta, [], []] }
 
     }
 
     //
     // SUBWORKFLOW: Process read alignments
     //
-    // channel: [ meta ]
-    ch_dna_processed_out = Channel.empty()
-    // channel: [ meta, bam_rna ]
-    ch_rna_processed_out = Channel.empty()
-    // TODO(SW): set up correctly
-    if (true || run_config.stages.markdups) {
+    // channel: [ meta, bam, bai ]
+    ch_process_dna_tumor_out = Channel.empty()
+    ch_process_dna_normal_out = Channel.empty()
+    if (run_config.stages.markdups) {
 
+        // NOTE(SW/MC): hardcoded for initial testing purposes
         has_umis = run_config.panel.equalsIgnoreCase('tso500')
 
         READ_PROCESSING(
             ch_inputs,
-            ch_dna_alignment_out,
-            ch_rna_alignment_out,
-            ref_data.genome_version,
+            ch_align_dna_tumor_out,
+            ch_align_dna_normal_out,
             ref_data.genome_fasta,
+            ref_data.genome_version,
             ref_data.genome_fai,
             ref_data.genome_dict,
-            file(params.refdata_unmap_regions),
+            hmf_data.unmap_regions,
             has_umis,
         )
 
         ch_versions = ch_versions.mix(READ_PROCESSING.out.versions)
 
-        ch_dna_processed_out = ch_dna_processed_out.mix(READ_PROCESSING.out.dna)
-        ch_rna_processed_out = ch_rna_processed_out.mix(READ_PROCESSING.out.rna)
+        ch_process_dna_tumor_out = ch_process_dna_tumor_out.mix(READ_PROCESSING.out.dna_tumor)
+        ch_process_dna_normal_out = ch_process_dna_normal_out.mix(READ_PROCESSING.out.dna_normal)
 
     } else {
 
-        ch_dna_processed_out = ch_inputs.map
-        ch_rna_processed_out = ch_inputs.map { meta -> [meta, []] }
+        ch_process_dna_normal_out = ch_inputs.map
+        ch_process_dna_normal_out = ch_inputs.map { meta -> [meta, []] }
 
     }
 
@@ -205,7 +203,7 @@ workflow TARGETED {
         isofox_tpm_norm = params.isofox_tpm_norm ? file(params.isofox_tpm_norm) : panel_data.isofox_tpm_norm
 
         ISOFOX_QUANTIFICATION(
-            ch_dna_processed_out,
+            ch_inputs,
             ref_data.genome_fasta,
             ref_data.genome_version,
             ref_data.genome_fai,
@@ -224,7 +222,7 @@ workflow TARGETED {
 
     } else {
 
-        ch_isofox_out = ch_dna_processed_out.map { meta -> [meta, []] }
+        ch_isofox_out = ch_inputs.map { meta -> [meta, []] }
 
     }
 
@@ -236,7 +234,9 @@ workflow TARGETED {
     if (run_config.stages.amber) {
 
         AMBER_PROFILING(
-            ch_dna_processed_out,
+            ch_inputs,
+            ch_process_dna_tumor_out,
+            ch_process_dna_normal_out,
             ref_data.genome_version,
             hmf_data.heterozygous_sites,
             panel_data.target_region_bed,
@@ -247,7 +247,7 @@ workflow TARGETED {
 
     } else {
 
-        ch_amber_out = ch_dna_processed_out.map { meta -> [meta, []] }
+        ch_amber_out = ch_inputs.map { meta -> [meta, []] }
 
     }
 
@@ -259,7 +259,9 @@ workflow TARGETED {
     if (run_config.stages.cobalt) {
 
         COBALT_PROFILING(
-            ch_dna_processed_out,
+            ch_inputs,
+            ch_process_dna_tumor_out,
+            ch_process_dna_normal_out,
             hmf_data.gc_profile,
             hmf_data.diploid_bed,
             panel_data.target_region_normalisation,
@@ -271,7 +273,7 @@ workflow TARGETED {
 
     } else {
 
-        ch_cobalt_out = ch_dna_processed_out.map { meta -> [meta, []] }
+        ch_cobalt_out = ch_inputs.map { meta -> [meta, []] }
 
     }
 
@@ -283,7 +285,9 @@ workflow TARGETED {
     if (run_config.stages.gridss) {
 
         GRIDSS_SVPREP_CALLING(
-            ch_dna_processed_out,
+            ch_inputs,
+            ch_process_dna_tumor_out,
+            ch_process_dna_normal_out,
             ref_data.genome_fasta,
             ref_data.genome_version,
             ref_data.genome_fai,
@@ -303,7 +307,7 @@ workflow TARGETED {
 
     } else {
 
-        ch_gridss_out = ch_dna_processed_out.map { meta -> [meta, []] }
+        ch_gridss_out = ch_inputs.map { meta -> [meta, []] }
 
     }
 
@@ -317,7 +321,7 @@ workflow TARGETED {
     if (run_config.stages.gripss) {
 
         GRIPSS_FILTERING(
-            ch_dna_processed_out,
+            ch_inputs,
             ch_gridss_out,
             ref_data.genome_fasta,
             ref_data.genome_version,
@@ -337,9 +341,9 @@ workflow TARGETED {
 
     } else {
 
-        ch_gripss_somatic_out = ch_dna_processed_out.map { meta -> [meta, [], []] }
-        ch_gripss_germline_out = ch_dna_processed_out.map { meta -> [meta, [], []] }
-        ch_gripss_somatic_unfiltered_out = ch_dna_processed_out.map { meta -> [meta, [], []] }
+        ch_gripss_somatic_out = ch_inputs.map { meta -> [meta, [], []] }
+        ch_gripss_germline_out = ch_inputs.map { meta -> [meta, [], []] }
+        ch_gripss_somatic_unfiltered_out = ch_inputs.map { meta -> [meta, [], []] }
 
     }
 
@@ -355,7 +359,9 @@ workflow TARGETED {
     if (run_config.stages.sage) {
 
         SAGE_CALLING(
-            ch_dna_processed_out,
+            ch_inputs,
+            ch_process_dna_tumor_out,
+            ch_process_dna_normal_out,
             ref_data.genome_fasta,
             ref_data.genome_version,
             ref_data.genome_fai,
@@ -379,10 +385,10 @@ workflow TARGETED {
 
     } else {
 
-        ch_sage_germline_vcf_out = ch_dna_processed_out.map { meta -> [meta, [], []] }
-        ch_sage_somatic_vcf_out = ch_dna_processed_out.map { meta -> [meta, [], []] }
-        ch_sage_germline_dir_out = ch_dna_processed_out.map { meta -> [meta, []] }
-        ch_sage_somatic_dir_out = ch_dna_processed_out.map { meta -> [meta, []] }
+        ch_sage_germline_vcf_out = ch_inputs.map { meta -> [meta, [], []] }
+        ch_sage_somatic_vcf_out = ch_inputs.map { meta -> [meta, [], []] }
+        ch_sage_germline_dir_out = ch_inputs.map { meta -> [meta, []] }
+        ch_sage_somatic_dir_out = ch_inputs.map { meta -> [meta, []] }
 
     }
 
@@ -395,7 +401,7 @@ workflow TARGETED {
     if (run_config.stages.pave) {
 
         PAVE_ANNOTATION(
-            ch_dna_processed_out,
+            ch_inputs,
             ch_sage_germline_vcf_out,
             ch_sage_somatic_vcf_out,
             ref_data.genome_fasta,
@@ -419,8 +425,8 @@ workflow TARGETED {
 
     } else {
 
-        ch_pave_germline_out = ch_dna_processed_out.map { meta -> [meta, []] }
-        ch_pave_somatic_out = ch_dna_processed_out.map { meta -> [meta, []] }
+        ch_pave_germline_out = ch_inputs.map { meta -> [meta, []] }
+        ch_pave_somatic_out = ch_inputs.map { meta -> [meta, []] }
 
     }
 
@@ -432,7 +438,7 @@ workflow TARGETED {
     if (run_config.stages.purple) {
 
         PURPLE_CALLING(
-            ch_dna_processed_out,
+            ch_inputs,
             ch_amber_out,
             ch_cobalt_out,
             ch_pave_somatic_out,
@@ -461,7 +467,7 @@ workflow TARGETED {
 
     } else {
 
-        ch_purple_out = ch_dna_processed_out.map { meta -> [meta, []] }
+        ch_purple_out = ch_inputs.map { meta -> [meta, []] }
 
     }
 
@@ -476,7 +482,7 @@ workflow TARGETED {
         // NOTE(SW): currently used only for ORANGE but will also be used for Neo once implemented
 
         SAGE_APPEND(
-            ch_dna_processed_out,
+            ch_inputs,
             ch_purple_out,
             ref_data.genome_fasta,
             ref_data.genome_version,
@@ -491,8 +497,8 @@ workflow TARGETED {
 
     } else {
 
-        ch_sage_somatic_append_out = ch_dna_processed_out.map { meta -> [meta, []] }
-        ch_sage_germline_append_out = ch_dna_processed_out.map { meta -> [meta, []] }
+        ch_sage_somatic_append_out = ch_inputs.map { meta -> [meta, []] }
+        ch_sage_germline_append_out = ch_inputs.map { meta -> [meta, []] }
 
     }
 
@@ -505,7 +511,7 @@ workflow TARGETED {
     if (run_config.stages.linx) {
 
         LINX_ANNOTATION(
-            ch_dna_processed_out,
+            ch_inputs,
             ch_purple_out,
             ref_data.genome_version,
             hmf_data.ensembl_data_resources,
@@ -521,8 +527,8 @@ workflow TARGETED {
 
     } else {
 
-        ch_linx_somatic_out = ch_dna_processed_out.map { meta -> [meta, []] }
-        ch_linx_germline_out = ch_dna_processed_out.map { meta -> [meta, []] }
+        ch_linx_somatic_out = ch_inputs.map { meta -> [meta, []] }
+        ch_linx_germline_out = ch_inputs.map { meta -> [meta, []] }
 
     }
 
@@ -534,7 +540,7 @@ workflow TARGETED {
     if (run_config.stages.linx) {
 
         LINX_PLOTTING(
-            ch_dna_processed_out,
+            ch_inputs,
             ch_linx_somatic_out,
             ref_data.genome_version,
             hmf_data.ensembl_data_resources,
@@ -546,7 +552,7 @@ workflow TARGETED {
 
     } else {
 
-        ch_linx_somatic_visualiser_dir_out = ch_dna_processed_out.map { meta -> [meta, []] }
+        ch_linx_somatic_visualiser_dir_out = ch_inputs.map { meta -> [meta, []] }
 
     }
 
@@ -559,7 +565,9 @@ workflow TARGETED {
     if (run_config.stages.orange && run_config.stages.flagstat) {
 
         FLAGSTAT_METRICS(
-            ch_dna_processed_out,
+            ch_inputs,
+            ch_process_dna_tumor_out,
+            ch_process_dna_normal_out,
         )
 
         ch_versions = ch_versions.mix(FLAGSTAT_METRICS.out.versions)
@@ -569,8 +577,8 @@ workflow TARGETED {
 
     } else {
 
-        ch_flagstat_somatic_out = ch_dna_processed_out.map { meta -> [meta, []] }
-        ch_flagstat_germline_out = ch_dna_processed_out.map { meta -> [meta, []] }
+        ch_flagstat_somatic_out = ch_inputs.map { meta -> [meta, []] }
+        ch_flagstat_germline_out = ch_inputs.map { meta -> [meta, []] }
 
     }
 
@@ -583,7 +591,9 @@ workflow TARGETED {
     if (run_config.stages.bamtools) {
 
         BAMTOOLS_METRICS(
-            ch_dna_processed_out,
+            ch_inputs,
+            ch_process_dna_tumor_out,
+            ch_process_dna_normal_out,
             ref_data.genome_fasta,
             ref_data.genome_version,
         )
@@ -595,8 +605,8 @@ workflow TARGETED {
 
     } else {
 
-        ch_bamtools_somatic_out = ch_dna_processed_out.map { meta -> [meta, []] }
-        ch_bamtools_germline_out = ch_dna_processed_out.map { meta -> [meta, []] }
+        ch_bamtools_somatic_out = ch_inputs.map { meta -> [meta, []] }
+        ch_bamtools_germline_out = ch_inputs.map { meta -> [meta, []] }
 
     }
 
@@ -611,7 +621,9 @@ workflow TARGETED {
         ref_data_hla_slice_bed = params.containsKey('ref_data_hla_slice_bed') ? params.ref_data_hla_slice_bed : []
 
         LILAC_CALLING(
-            ch_dna_processed_out,
+            ch_inputs,
+            ch_process_dna_tumor_out,
+            ch_process_dna_normal_out,
             ch_purple_out,
             ref_data.genome_fasta,
             ref_data.genome_version,
@@ -626,7 +638,7 @@ workflow TARGETED {
 
     } else {
 
-        ch_lilac_out = ch_dna_processed_out.map { meta -> [meta, []] }
+        ch_lilac_out = ch_inputs.map { meta -> [meta, []] }
 
     }
 
@@ -636,13 +648,13 @@ workflow TARGETED {
     if (run_config.stages.orange) {
 
         // Create placeholder channels for empty remaining channels
-        ch_chord_out = ch_dna_processed_out.map { meta -> [meta, []] }
-        ch_cuppa_out = ch_dna_processed_out.map { meta -> [meta, []] }
-        ch_sigs_out = ch_dna_processed_out.map { meta -> [meta, []] }
-        ch_virusinterpreter_out = ch_dna_processed_out.map { meta -> [meta, []] }
+        ch_chord_out = ch_inputs.map { meta -> [meta, []] }
+        ch_cuppa_out = ch_inputs.map { meta -> [meta, []] }
+        ch_sigs_out = ch_inputs.map { meta -> [meta, []] }
+        ch_virusinterpreter_out = ch_inputs.map { meta -> [meta, []] }
 
         ORANGE_REPORTING(
-            ch_dna_processed_out,
+            ch_inputs,
             ch_bamtools_somatic_out,
             ch_bamtools_germline_out,
             ch_flagstat_somatic_out,

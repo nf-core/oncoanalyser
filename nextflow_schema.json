@@ -218,6 +218,20 @@
                     "fa_icon": "far fa-file-code",
                     "hidden": true
                 },
+                "ref_data_genome_bwa_index_bseq": {
+                    "type": "string",
+                    "format": "directory-path",
+                    "description": "Path to directory containing reference genome BWA MEM 2 binary sequence index file.",
+                    "fa_icon": "far fa-file-code",
+                    "hidden": true
+                },
+                "ref_data_genome_bwa_index_biidx": {
+                    "type": "string",
+                    "format": "directory-path",
+                    "description": "Path to directory containing reference genome BWA MEM 2 bi-index file.",
+                    "fa_icon": "far fa-file-code",
+                    "hidden": true
+                },
                 "ref_data_genome_bwa_index_image": {
                     "type": "string",
                     "format": "file-path",

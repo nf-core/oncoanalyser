@@ -62,7 +62,7 @@ workflow CUPPA_PREDICTION {
                 // (run exclusions currently done basis for presence of normal DNA)
 
                 def has_existing = Utils.hasExistingInput(meta, Constants.INPUT.CUPPA_DIR)
-                def has_normal_dna = Utils.hasNormalDnaBam(meta)
+                def has_normal_dna = Utils.hasNormalDna(meta)
 
                 def has_runnable_inputs = isofox_dir || (purple_dir && linx_annotation_dir && has_normal_dna)
 
@@ -82,8 +82,8 @@ workflow CUPPA_PREDICTION {
                     id: meta.group_id,
                 ]
 
-                def has_tumor_dna = Utils.hasTumorDnaBam(meta)
-                def has_normal_dna = Utils.hasNormalDnaBam(meta)
+                def has_tumor_dna = Utils.hasTumorDna(meta)
+                def has_normal_dna = Utils.hasNormalDna(meta)
                 def has_tumor_rna = Utils.hasTumorRnaBam(meta)
 
                 def has_dna_inputs = (purple_dir && linx_annotation_dir)

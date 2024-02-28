@@ -102,7 +102,7 @@ workflow PURPLE_CALLING {
                     tumor_id: Utils.getTumorDnaSampleName(meta),
                 ]
 
-                if (Utils.hasNormalDnaBam(meta)) {
+                if (Utils.hasNormalDna(meta)) {
                     meta_purple.normal_id = Utils.getNormalDnaSampleName(meta)
                 }
 

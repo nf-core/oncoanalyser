@@ -53,7 +53,7 @@ workflow GRIPSS_FILTERING {
         // channel: skip: [ meta ]
         ch_inputs_germline_sorted = ch_inputs_sorted.runnable
             .branch { meta, gridss_vcf ->
-                def has_tumor_normal = Utils.hasTumorDnaBam(meta) && Utils.hasNormalDnaBam(meta)
+                def has_tumor_normal = Utils.hasTumorDna(meta) && Utils.hasNormalDna(meta)
                 def has_existing = Utils.hasExistingInput(meta, Constants.INPUT.GRIPSS_VCF_NORMAL)
 
                 runnable: has_tumor_normal && !has_existing
@@ -98,7 +98,7 @@ workflow GRIPSS_FILTERING {
         // channel: skip: [ meta ]
         ch_inputs_somatic_sorted = ch_inputs_sorted.runnable
             .branch { meta, gridss_vcf ->
-                def has_tumor = Utils.hasTumorDnaBam(meta)
+                def has_tumor = Utils.hasTumorDna(meta)
                 def has_existing = Utils.hasExistingInput(meta, Constants.INPUT.GRIPSS_VCF_TUMOR)
 
                 runnable: has_tumor && !has_existing
@@ -117,7 +117,7 @@ workflow GRIPSS_FILTERING {
                       tumor_id: Utils.getTumorDnaSampleName(meta),
                   ]
 
-                if (Utils.hasNormalDnaBam(meta)) {
+                if (Utils.hasNormalDna(meta)) {
                     meta_gripss.normal_id = Utils.getNormalDnaSampleName(meta)
                 }
 

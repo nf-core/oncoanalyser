@@ -1,140 +1,115 @@
-include { MARKDUPS       } from '../../modules/local/markdups/main'
+include { MARKDUPS } from '../../modules/local/markdups/main'
 
 workflow READ_PROCESSING {
     take:
-    // Sample data
-    ch_inputs   // channel: [mandatory] [ meta ]
-    ch_dna_bams // channel: [mandatory] [ meta, bam_dna ]
-    ch_rna_bams // channel: [mandatory] [ meta, bam_rna ]
-    genome_ver
-    genome_fasta
-    genome_fai
-    genome_dict
-    unmap_regions
-    has_umis
+        // Sample data
+        ch_inputs     // channel: [mandatory] [ meta ]
+        ch_dna_tumor  // channel: [mandatory] [ meta, [bam, ...], [bai, ...] ]
+        ch_dna_normal // channel: [mandatory] [ meta, [bam, ...], [bai, ...] ]
+
+        // Reference data
+        genome_fasta  // channel: [mandatory] /path/to/genome_fasta
+        genome_ver    // channel: [mandatory] genome version
+        genome_fai    // channel: [mandatory] /path/to/genome_fai
+        genome_dict   // channel: [mandatory] /path/to/genome_dict
+        unmap_regions // channel: [mandatory] /path/to/unmap_regions
+
+        // Params
+        has_umis      // boolean: [mandatory] UMI processing flag
 
     main:
-    // Channel for version.yml files
-    // channel: [ versions.yml ]
-    ch_versions = Channel.empty()
+        // Channel for version.yml files
+        // channel: [ versions.yml ]
+        ch_versions = Channel.empty()
 
-    // channel: [ group_id, sample_count ]
-    ch_sample_counts = ch_inputs.map { meta -> [meta.group_id, Utils.groupSampleCounts(meta)] }
-
-    // channel: [ meta ] (One sample per record).
-    ch_meta_samples = ch_dna_bams.flatMap { meta -> Utils.splitGroupIntoSamples(meta) }
-
-    // Sort inputs
-    // channel: [ meta ] (One sample per record).
-    ch_meta_samples_sorted = ch_meta_samples
-        .branch { meta ->
-            runnable: Utils.hasDnaMarkdupsBam(meta)
-            skip: true
-        }
-
-    // MarkDups
-    // Prepare input to markdups process.
-    // channel: [ meta_bam, bams, bais ]
-    ch_markdups_inputs = ch_meta_samples_sorted.runnable
-        .map { meta_sample ->
-
-            def meta_bam = Utils.shallow_copy(meta_sample)
-            def bams = []
-            def bais = []
-            meta_sample.each { key, value ->
-
-                if ((value instanceof java.util.Map) && value.containsKey('sample_id')) {
-                    meta_bam['sample_id'] = value.sample_id
-                    meta_bam['sample_key'] = key
-                    bams = value[Constants.FileType.BAM_MARKDUPS]
-                    bais = value[Constants.FileType.BAI_MARKDUPS]
-                }
+        // Select and sort input sources, separating bytumor and normal
+        // channel: runnable: [ meta, bams, bais ]
+        // channel: skip: [ meta ]
+        ch_inputs_tumor_sorted = ch_dna_tumor
+            .map { meta, bams, bais ->
+                return [
+                    meta,
+                    Utils.hasExistingInput(meta, Constants.INPUT.BAM_DNA_TUMOR) ? [Utils.getInput(meta, Constants.INPUT.BAM_DNA_TUMOR)] : bams,
+                    Utils.hasExistingInput(meta, Constants.INPUT.BAI_DNA_TUMOR) ? [Utils.getInput(meta, Constants.INPUT.BAI_DNA_TUMOR)] : bais,
+                ]
+            }
+            .branch { meta, bams, bais ->
+                def has_existing = Utils.hasExistingInput(meta, Constants.INPUT.BAM_MARKDUPS_DNA_TUMOR)
+                runnable: bams && !has_existing
+                skip: true
+                    return meta
             }
 
-            meta_bam['id'] = "${meta_bam.group_id}__${meta_bam.sample_id}"
-
-            if (!(bams instanceof Collection)) {
-                bams = [bams]
+        ch_inputs_normal_sorted = ch_dna_normal
+            .map { meta, bams, bais ->
+                return [
+                    meta,
+                    Utils.hasExistingInput(meta, Constants.INPUT.BAM_DNA_NORMAL) ? [Utils.getInput(meta, Constants.INPUT.BAM_DNA_NORMAL)] : bams,
+                    Utils.hasExistingInput(meta, Constants.INPUT.BAI_DNA_NORMAL) ? [Utils.getInput(meta, Constants.INPUT.BAI_DNA_NORMAL)] : bais,
+                ]
+            }
+            .branch { meta, bams, bais ->
+                def has_existing = Utils.hasExistingInput(meta, Constants.INPUT.BAM_MARKDUPS_DNA_NORMAL)
+                runnable: bams && !has_existing
+                skip: true
+                    return meta
             }
 
-            if (!(bais instanceof Collection)) {
-                bais = [bais]
+        // Create process input channel
+        // channel: [ meta_markdups, bam, bai ]
+        ch_markdups_inputs = Channel.empty()
+            .mix(
+                ch_inputs_tumor_sorted.runnable.map { meta, bam, bai -> [meta, Utils.getTumorDnaSample(meta), 'tumor', bam, bai] },
+                ch_inputs_normal_sorted.runnable.map { meta, bam, bai -> [meta, Utils.getNormalDnaSample(meta), 'normal', bam, bai] },
+            )
+            .map { meta, meta_sample, sample_type, bam, bai ->
+
+                def meta_markdups = [
+                    key: meta.group_id,
+                    id: "${meta.group_id}_${meta_sample.sample_id}",
+                    sample_id: meta_sample.sample_id,
+                    sample_type: sample_type,
+                ]
+
+                return [meta_markdups, bam, bai]
             }
 
-            [meta_bam, bams, bais]
-        }
-
-    // channel: [ meta_bam, bam, bai ]
-    MARKDUPS(
-        ch_markdups_inputs,
-        genome_ver,
-        genome_fasta,
-        genome_fai,
-        genome_dict,
-        unmap_regions,
-        has_umis,
-    )
-
-    ch_versions = ch_versions.mix(MARKDUPS.out.versions)
-
-    // Update sample information.
-    // channel: [ meta ] (One sample per meta record).
-    ch_bam_samples = MARKDUPS.out.bam.map { bam ->
-
-        def meta_bam = bam[0]
-
-        def meta = Utils.shallow_copy(meta_bam)
-        meta.remove('id')
-        meta.remove('sample_id')
-        meta.remove('sample_key')
-
-        def sample = [sample_id: meta_bam.sample_id]
-        sample[Constants.FileType.BAM] = bam[1]
-        sample[Constants.FileType.BAI] = bam[2]
-        meta[meta_bam.sample_key] = sample
-
-        meta
-    }
-
-    // Merge back in skipped meta entries.
-    // channel: [ meta ] (One sample per meta record).
-    ch_all_samples = Channel.empty()
-        .mix(
-            ch_bam_samples,
-            ch_meta_samples_sorted.skip,
+        // Run process
+        MARKDUPS(
+            ch_markdups_inputs,
+            genome_fasta,
+            genome_ver,
+            genome_fai,
+            genome_dict,
+            unmap_regions,
+            has_umis,
         )
 
-    // Merge individual sample records back into group records without blocking for the whole channel to be processed.
-    // channel: [ meta_bam ]
-    ch_markduplicates_dna_out = ch_sample_counts
-        .cross(
-            ch_all_samples.map { meta -> [meta.group_id, meta] }
-        )
-        .map { count_tuple, meta_tuple ->
-
-            def group_id = count_tuple[0]
-            def count = count_tuple[1]
-            def meta = meta_tuple[1]
-
-            tuple(groupKey(group_id, count), meta)
-        }
-        .groupTuple()
-        .map { group_key, meta_samples ->
-
-            def meta_group = [:]
-            meta_samples.each { meta_sample ->
-
-                meta_sample.each { key, value -> meta_group[key] = value }
+        // Sort into a tumor and normal channel
+        ch_markdups_out = MARKDUPS.out.bam
+            .branch { meta_markdups, bam, bai ->
+                assert ['tumor', 'normal'].contains(meta_markdups.sample_type)
+                tumor: meta_markdups.sample_type == 'tumor'
+                normal: meta_markdups.sample_type == 'normal'
+                placeholder: true
             }
 
-            meta_group
-        }
+        // Set outputs, restoring original meta
+        // channel: [ meta, bam, bai ]
+        ch_bam_tumor_out = Channel.empty()
+            .mix(
+                WorkflowOncoanalyser.restoreMeta(ch_markdups_out.tumor, ch_inputs),
+                ch_inputs_tumor_sorted.skip.map { meta -> [meta, [], []] },
+            )
 
-    // TODO(SW): implement outputs
-    ch_markduplicates_rna_out = Channel.empty()
+        ch_bam_normal_out = Channel.empty()
+            .mix(
+                WorkflowOncoanalyser.restoreMeta(ch_markdups_out.normal, ch_inputs),
+                ch_inputs_normal_sorted.skip.map { meta -> [meta, [], []] },
+            )
 
     emit:
-    dna       = ch_markduplicates_dna_out // channel: [ meta ]
-    rna       = ch_markduplicates_rna_out // channel: [ meta, bam_rna ]
-    versions  = ch_versions               // channel: [ versions.yml ]
+        dna_tumor  = ch_bam_tumor_out  // channel: [ meta, bam, bai ]
+        dna_normal = ch_bam_normal_out // channel: [ meta, bam, bai ]
+        versions   = ch_versions       // channel: [ versions.yml ]
 }

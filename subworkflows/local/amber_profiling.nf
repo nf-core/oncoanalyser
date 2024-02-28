@@ -11,6 +11,8 @@ workflow AMBER_PROFILING {
     take:
         // Sample data
         ch_inputs          // channel: [mandatory] [ meta ]
+        ch_tumor_bam       // channel: [mandatory] [ meta, bam, bai ]
+        ch_normal_bam      // channel: [mandatory] [ meta, bam, bai ]
 
         // Reference data
         genome_version     // channel: [mandatory] genome version
@@ -22,39 +24,39 @@ workflow AMBER_PROFILING {
         // channel: [ versions.yml ]
         ch_versions = Channel.empty()
 
-        // Sort inputs
-        // channel: [ meta ]
-        ch_inputs_sorted = ch_inputs
-            .branch { meta ->
+        // Select input sources and sort
+        // channel: runnable: [ meta, tumor_bam, tumor_bai, normal_bam, normal_bai]
+        // channel: skip: [ meta ]
+        ch_inputs_sorted = WorkflowOncoanalyser.groupByMeta(
+            ch_tumor_bam,
+            ch_normal_bam,
+        )
+            .map { meta, tumor_bam, tumor_bai, normal_bam, normal_bai ->
+                return [
+                    meta,
+                    Utils.selectCurrentOrExisting(tumor_bam, meta, Constants.INPUT.BAM_MARKDUPS_DNA_TUMOR),
+                    Utils.selectCurrentOrExisting(tumor_bai, meta, Constants.INPUT.BAI_MARKDUPS_DNA_TUMOR),
+                    Utils.selectCurrentOrExisting(normal_bam, meta, Constants.INPUT.BAM_MARKDUPS_DNA_NORMAL),
+                    Utils.selectCurrentOrExisting(normal_bai, meta, Constants.INPUT.BAI_MARKDUPS_DNA_NORMAL),
+                ]
+            }
+            .branch { meta, tumor_bam, tumor_bai, normal_bam, normal_bai ->
                 def has_existing = Utils.hasExistingInput(meta, Constants.INPUT.AMBER_DIR)
-                runnable: Utils.hasTumorDnaBam(meta) && !has_existing
+                runnable: tumor_bam && !has_existing
                 skip: true
+                    meta
             }
 
         // Create process input channel
         // channel: [ meta_amber, tumor_bam, normal_bam, tumor_bai, normal_bai ]
         ch_amber_inputs = ch_inputs_sorted.runnable
-            .map { meta ->
+            .map { meta, tumor_bam, tumor_bai, normal_bam, normal_bai ->
 
                 def meta_amber = [
                     key: meta.group_id,
                     id: meta.group_id,
                     tumor_id: Utils.getTumorDnaSampleName(meta),
                 ]
-
-                def tumor_bam = Utils.getTumorDnaBam(meta)
-                def tumor_bai = Utils.getTumorDnaBai(meta)
-
-                def normal_bam = []
-                def normal_bai = []
-
-                if (Utils.hasNormalDnaBam(meta)) {
-
-                    meta_amber.normal_id = Utils.getNormalDnaSampleName(meta)
-                    normal_bam = Utils.getNormalDnaBam(meta)
-                    normal_bai = Utils.getNormalDnaBai(meta)
-
-                }
 
                 [meta_amber, tumor_bam, normal_bam, tumor_bai, normal_bai]
             }

@@ -11,6 +11,8 @@ workflow BAMTOOLS_METRICS {
     take:
         // Sample data
         ch_inputs      // channel: [mandatory] [ meta ]
+        ch_tumor_bam   // channel: [mandatory] [ meta, bam, bai ]
+        ch_normal_bam  // channel: [mandatory] [ meta, bam, bai ]
 
         // Reference data
         genome_fasta   // channel: [mandatory] /path/to/genome_fasta
@@ -21,78 +23,55 @@ workflow BAMTOOLS_METRICS {
         // channel: [ versions.yml ]
         ch_versions = Channel.empty()
 
-        // Sort inputs
-        // channel: [ meta ]
-        ch_inputs_sorted = ch_inputs
-            .branch { meta ->
-
-                def has_tumor_dna = Utils.hasTumorDnaBam(meta)
-                def has_normal_dna = Utils.hasNormalDnaBam(meta)
-
-                runnable: has_tumor_dna || has_normal_dna
-                skip: true
-            }
-
-        // Flatten into BAM/BAI pairs, select inputs that are eligible to run
-        // channel: runnable: [ meta_extra, bam, bai ]
-        // channel: skip: [ meta_extra ]
-        ch_bams_bais_sorted = ch_inputs_sorted.runnable
-            .flatMap { meta ->
-
-                def tumor_sample_id = []
-                def tumor_bam = []
-                def tumor_bai = []
-
-                def normal_sample_id = []
-                def normal_bam = []
-                def normal_bai = []
-
-
-                if (Utils.hasTumorDnaBam(meta)) {
-                    tumor_sample_id = Utils.getTumorDnaSampleName(meta)
-                    tumor_bam = Utils.getTumorDnaBam(meta)
-                    tumor_bai = Utils.getTumorDnaBai(meta)
-                }
-
-                if (Utils.hasNormalDnaBam(meta)) {
-                    normal_sample_id = Utils.getNormalDnaSampleName(meta)
-                    normal_bam = Utils.getNormalDnaBam(meta)
-                    normal_bai = Utils.getNormalDnaBai(meta)
-                }
-
+        // Sort inputs, separate by tumor and normal
+        // channel: runnable: [ meta, bam, bai ]
+        // channel: skip: [ meta ]
+        ch_inputs_tumor_sorted = ch_tumor_bam
+            .map { meta, bam, bai ->
                 return [
-                    [[key: meta.group_id, *:meta, sample_id: tumor_sample_id, sample_type: 'tumor'], tumor_bam, tumor_bai],
-                    [[key: meta.group_id, *:meta, sample_id: normal_sample_id, sample_type: 'normal'], normal_bam, normal_bai],
+                    meta,
+                    Utils.selectCurrentOrExisting(bam, meta, Constants.INPUT.BAM_MARKDUPS_DNA_TUMOR),
+                    Utils.selectCurrentOrExisting(bai, meta, Constants.INPUT.BAI_MARKDUPS_DNA_TUMOR),
                 ]
             }
-            .branch { meta_extra, bam, bai ->
-
-                def input_key
-                if (meta_extra.sample_type == 'tumor') {
-                    input_key = Constants.INPUT.BAMTOOLS_TUMOR
-                } else if (meta_extra.sample_type == 'normal') {
-                    input_key = Constants.INPUT.BAMTOOLS_NORMAL
-                } else {
-                    assert false
-                }
-
-                def has_existing = Utils.hasExistingInput(meta_extra, input_key)
-
-                runnable: bam && bai && !has_existing
+            .branch { meta, bam, bai ->
+                def has_existing = Utils.hasExistingInput(meta, Constants.INPUT.BAMTOOLS_TUMOR)
+                runnable: bam && !has_existing
                 skip: true
-                    return meta_extra
+                    meta
+            }
+
+        // channel: runnable: [ meta, bam, bai ]
+        // channel: skip: [ meta ]
+        ch_inputs_normal_sorted = ch_normal_bam
+            .map { meta, bam, bai ->
+                return [
+                    meta,
+                    Utils.selectCurrentOrExisting(bam, meta, Constants.INPUT.BAM_MARKDUPS_DNA_NORMAL),
+                    Utils.selectCurrentOrExisting(bai, meta, Constants.INPUT.BAI_MARKDUPS_DNA_NORMAL),
+                ]
+            }
+            .branch { meta, bam, bai ->
+                def has_existing = Utils.hasExistingInput(meta, Constants.INPUT.BAMTOOLS_NORMAL)
+                runnable: bam && !has_existing
+                skip: true
+                    meta
             }
 
         // Create process input channel
         // channel: [ meta_bamtools, bam, bai ]
-        ch_bamtools_inputs = ch_bams_bais_sorted.runnable
-            .map { meta_extra, bam, bai ->
+        ch_bamtools_inputs = Channel.empty()
+            .mix(
+                ch_inputs_tumor_sorted.runnable.map { meta, bam, bai -> [meta, Utils.getTumorDnaSample(meta), 'tumor', bam, bai] },
+                ch_inputs_normal_sorted.runnable.map { meta, bam, bai -> [meta, Utils.getNormalDnaSample(meta), 'normal', bam, bai] },
+            )
+            .map { meta, meta_sample, sample_type, bam, bai ->
 
                 def meta_bamtools = [
-                    key: meta_extra.group_id,
-                    id: "${meta_extra.group_id}__${meta_extra.sample_id}",
-                    sample_id: meta_extra.sample_id,
-                    sample_type: meta_extra.sample_type,
+                    key: meta.group_id,
+                    id: "${meta.group_id}_${meta_sample.sample_id}",
+                    sample_id: meta_sample.sample_id,
+                    sample_type: sample_type,
                 ]
 
                 return [meta_bamtools, bam, bai]
@@ -107,29 +86,27 @@ workflow BAMTOOLS_METRICS {
 
         ch_versions = ch_versions.mix(BAMTOOLS.out.versions)
 
-        // Sort outputs into tumor and normal channels, adding partial skip entries
-        // channel: [ meta_bamtools, metrics ]
-        ch_outputs_sorted = Channel.empty()
-            .mix(
-                BAMTOOLS.out.metrics,
-                ch_bams_bais_sorted.skip.map { meta -> [meta, []] },
-            )
+        // Sort into a tumor and normal channel
+        ch_bamtools_out = BAMTOOLS.out.metrics
             .branch { meta_bamtools, metrics ->
+                assert ['tumor', 'normal'].contains(meta_bamtools.sample_type)
                 tumor: meta_bamtools.sample_type == 'tumor'
                 normal: meta_bamtools.sample_type == 'normal'
+                placeholder: true
             }
 
-        // Set outputs, restoring original meta, including full skip entries
+        // Set outputs, restoring original meta
+        // channel: [ meta, metrics ]
         ch_somatic_metrics = Channel.empty()
             .mix(
-                WorkflowOncoanalyser.restoreMeta(ch_outputs_sorted.tumor, ch_inputs),
-                ch_inputs_sorted.skip.map { meta -> [meta, []] },
+                WorkflowOncoanalyser.restoreMeta(ch_bamtools_out.tumor, ch_inputs),
+                ch_inputs_tumor_sorted.skip.map { meta -> [meta, []] },
             )
 
         ch_germline_metrics = Channel.empty()
             .mix(
-                WorkflowOncoanalyser.restoreMeta(ch_outputs_sorted.normal, ch_inputs),
-                ch_inputs_sorted.skip.map { meta -> [meta, []] },
+                WorkflowOncoanalyser.restoreMeta(ch_bamtools_out.normal, ch_inputs),
+                ch_inputs_normal_sorted.skip.map { meta -> [meta, []] },
             )
 
     emit:

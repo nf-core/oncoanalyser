@@ -104,7 +104,7 @@ workflow SAGE_APPEND {
             .branch { meta, purple_dir ->
                 def tumor_dna_id = Utils.getTumorDnaSampleName(meta)
 
-                def has_tumor_dna = Utils.hasTumorDnaBam(meta)
+                def has_tumor_dna = Utils.hasTumorDna(meta)
                 def has_tumor_rna = Utils.hasTumorRnaBam(meta)
                 def has_smlv_somatic = file(purple_dir).resolve("${tumor_dna_id}.purple.somatic.vcf.gz")
                 def has_existing = Utils.hasExistingInput(meta, Constants.INPUT.SAGE_APPEND_VCF_TUMOR)

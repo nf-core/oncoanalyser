@@ -2,6 +2,11 @@
 // Prepare reference data as required
 //
 
+
+// NOTE(SW): BWA MEM2 indexes are required and are not created
+// TODO(SW): consider removing index creation since it's unlikely to be used, replace with documentation
+
+
 include { SAMTOOLS_FAIDX } from '../../modules/nf-core/samtools/faidx/main'
 include { SAMTOOLS_DICT  } from '../../modules/nf-core/samtools/dict/main'
 include { BWA_INDEX      } from '../../modules/nf-core/bwa/index/main'
@@ -94,6 +99,10 @@ workflow PREPARE_REFERENCE {
             }
         }
 
+        // Explicitly create value channels for BWA MEM2 index files
+        ch_genome_bwa_index_bseq = Channel.value(params.ref_data_genome_bwa_index_bseq)
+        ch_genome_bwa_index_biidx = Channel.value(params.ref_data_genome_bwa_index_biidx)
+
         //
         // Set VIRUSBreakend database path / stage, unpack if required
         //
@@ -168,6 +177,8 @@ workflow PREPARE_REFERENCE {
         genome_fai             = ch_genome_fai                  // path: genome_fai
         genome_dict            = ch_genome_dict                 // path: genome_dict
         genome_bwa_index       = ch_genome_bwa_index            // path: genome_bwa_index
+        genome_bwa_index_bseq  = ch_genome_bwa_index_bseq       // path: genome_bwa_index_bseq
+        genome_bwa_index_biidx = ch_genome_bwa_index_biidx      // path: genome_bwa_index_biidx
         genome_bwa_index_image = ch_genome_bwa_index_image      // path: genome_bwa_index_image
         genome_gridss_index    = ch_genome_gridss_index         // path: genome_gridss_index
         genome_version         = params.ref_data_genome_version // val:  genome_version

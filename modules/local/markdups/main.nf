@@ -1,22 +1,22 @@
 process MARKDUPS {
-    tag "${meta_bam.id}"
+    tag "${meta.id}"
     label 'process_medium'
 
     container "${ workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container ?
-        'https://depot.galaxyproject.org/singularity/hmftools-mark-dups:1.1.1--hdfd78af_0' :
-        'quay.io/biocontainers/hmftools-mark-dups:1.1.1--hdfd78af_0' }"
+        'https://depot.galaxyproject.org/singularity/hmftools-mark-dups:1.1.2--hdfd78af_0' :
+        'quay.io/biocontainers/hmftools-mark-dups:1.1.2--hdfd78af_0' }"
 
     input:
-    tuple val(meta_bam), path(bams), path(bais)
-    val genome_ver
+    tuple val(meta), path(bams), path(bais)
     path genome_fasta
+    val genome_ver
     path genome_fai
     path genome_dict
     path unmap_regions
     val has_umis
 
     output:
-    tuple val(meta_bam), path('*bam'), path('*bai'), emit: bam
+    tuple val(meta), path('*bam'), path('*bai'), emit: bam
     path 'versions.yml'                            , emit: versions
     path '*.tsv'
 
@@ -33,7 +33,7 @@ process MARKDUPS {
       -samtools \$(which samtools) \\
       -sambamba \$(which sambamba) \\
       \\
-      -sample ${meta_bam.sample_id} \\
+      -sample ${meta.sample_id} \\
       -input_bam ${bams.join(',')} \\
       \\
       -form_consensus \\
@@ -45,29 +45,29 @@ process MARKDUPS {
       -ref_genome_version ${genome_ver} \\
       \\
       -write_stats \\
-      -threads 16 \\
+      -threads ${task.cpus} \\
       \\
-      -output_bam ${meta_bam.sample_id}.markdups.bam
+      -output_bam ${meta.sample_id}.markdups.bam
 
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":
         markdups: \$(markdups -version | awk '{ print \$NF }')
-        openjdk: \$(java --version | egrep '^OpenJDK Runtime Environment ' | sed 's/^.*build //' | sed 's/.\$//')
         sambamba: \$(sambamba --version 2>&1 | egrep '^sambamba' | head -n 1 | awk '{ print \$NF }')
         samtools: \$(samtools --version 2>&1 | egrep '^samtools\\s' | head -n 1 | sed 's/^.* //')
     END_VERSIONS
     """
 
     stub:
-    def umi_output_files = has_umis ? "touch ${meta_bam.sample_id}.umi_coord_freq.tsv;" +
-        " touch ${meta_bam.sample_id}.umi_edit_distance.tsv;" +
-        " touch ${meta_bam.sample_id}.umi_nucleotide_freq.tsv" : ''
-
     """
-    touch ${meta_bam.sample_id}.markdups.bam
-    touch ${meta_bam.sample_id}.markdups.bam.bai
-    touch ${meta_bam.sample_id}.duplicate_freq.tsv
-    ${umi_output_files}
+    touch ${meta.sample_id}.markdups.bam
+    touch ${meta.sample_id}.markdups.bam.bai
+    touch ${meta.sample_id}.duplicate_freq.tsv
+
+    if [[ -n "${has_umis}" ]]; then
+      touch ${meta.sample_id}.umi_coord_freq.tsv
+      touch ${meta.sample_id}.umi_edit_distance.tsv
+      touch ${meta.sample_id}.umi_nucleotide_freq.tsv
+    fi;
 
     echo -e '${task.process}:\\n  stub: noversions\\n' > versions.yml
     """

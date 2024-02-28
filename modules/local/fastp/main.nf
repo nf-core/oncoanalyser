@@ -10,8 +10,8 @@ process FASTP {
     val(max_fastq_records)
 
     output:
-    tuple val(meta), path('*_R1.fastp.fastq'), path('*_R2.fastp.fastq'), emit: fastq
-    path 'versions.yml'                                                , emit: versions
+    tuple val(meta), path('*_R1.fastp.fastq.gz'), path('*_R2.fastp.fastq.gz'), emit: fastq
+    path 'versions.yml'                                                      , emit: versions
 
     when:
     task.ext.when == null || task.ext.when
@@ -30,8 +30,8 @@ process FASTP {
       --disable_adapter_trimming \\
       --disable_trim_poly_g \\
       --split_by_lines ${4 * max_fastq_records} \\
-      --out1 ${meta.sample_id}_${meta.read_group}_R1.fastp.fastq \\
-      --out2 ${meta.sample_id}_${meta.read_group}_R2.fastp.fastq
+      --out1 ${meta.sample_id}_${meta.library_id}_${meta.lane}_R1.fastp.fastq.gz \\
+      --out2 ${meta.sample_id}_${meta.library_id}_${meta.lane}_R2.fastp.fastq.gz
 
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":
@@ -41,8 +41,8 @@ process FASTP {
 
     stub:
     """
-    touch 00{1..4}.${meta.sample_id}_${meta.read_group}_R1.fastp.fastq
-    touch 00{1..4}.${meta.sample_id}_${meta.read_group}_R2.fastp.fastq
+    touch 00{1..4}.${meta.sample_id}_${meta.library_id}_${meta.lane}_R1.fastp.fastq.gz
+    touch 00{1..4}.${meta.sample_id}_${meta.library_id}_${meta.lane}_R2.fastp.fastq.gz
 
     echo -e '${task.process}:\\n  stub: noversions\\n' > versions.yml
     """
