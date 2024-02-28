@@ -23,7 +23,7 @@ workflow READ_PROCESSING {
         ch_versions = Channel.empty()
 
         // Select and sort input sources, separating bytumor and normal
-        // channel: runnable: [ meta, bams, bais ]
+        // channel: runnable: [ meta, [bam, ...], [bai, ...] ]
         // channel: skip: [ meta ]
         ch_inputs_tumor_sorted = ch_dna_tumor
             .map { meta, bams, bais ->
@@ -56,13 +56,13 @@ workflow READ_PROCESSING {
             }
 
         // Create process input channel
-        // channel: [ meta_markdups, bam, bai ]
+        // channel: [ meta_markdups, [bam, ...], [bai, ...] ]
         ch_markdups_inputs = Channel.empty()
             .mix(
-                ch_inputs_tumor_sorted.runnable.map { meta, bam, bai -> [meta, Utils.getTumorDnaSample(meta), 'tumor', bam, bai] },
-                ch_inputs_normal_sorted.runnable.map { meta, bam, bai -> [meta, Utils.getNormalDnaSample(meta), 'normal', bam, bai] },
+                ch_inputs_tumor_sorted.runnable.map { meta, bams, bais -> [meta, Utils.getTumorDnaSample(meta), 'tumor', bams, bais] },
+                ch_inputs_normal_sorted.runnable.map { meta, bams, bais -> [meta, Utils.getNormalDnaSample(meta), 'normal', bams, bais] },
             )
-            .map { meta, meta_sample, sample_type, bam, bai ->
+            .map { meta, meta_sample, sample_type, bams, bais ->
 
                 def meta_markdups = [
                     key: meta.group_id,
@@ -71,7 +71,7 @@ workflow READ_PROCESSING {
                     sample_type: sample_type,
                 ]
 
-                return [meta_markdups, bam, bai]
+                return [meta_markdups, bams, bais]
             }
 
         // Run process

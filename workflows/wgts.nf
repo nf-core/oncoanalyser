@@ -193,7 +193,6 @@ workflow WGTS {
 
     }
 
-
     //
     // MODULE: Run Isofox to analyse RNA data
     //

@@ -139,7 +139,6 @@ workflow READ_ALIGNMENT {
                 ]
 
                 return [meta_bwa, fastq_fwd, fastq_rev]
-
             }
 
         // Run process
