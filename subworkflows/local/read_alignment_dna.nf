@@ -1,4 +1,4 @@
-include { BWA_MEM2       } from '../../modules/local/bwa/mem2/main'
+include { BWAMEM2_ALIGN  } from '../../modules/local/bwa-mem2/mem/main'
 include { FASTP          } from '../../modules/local/fastp/main'
 include { SAMBAMBA_INDEX } from '../../modules/local/sambamba/index/main'
 
@@ -142,7 +142,7 @@ workflow READ_ALIGNMENT_DNA {
             }
 
         // Run process
-        BWA_MEM2(
+        BWAMEM2_ALIGN(
             ch_bwa_inputs,
             genome_fasta,
             genome_bwa_index,
@@ -150,13 +150,13 @@ workflow READ_ALIGNMENT_DNA {
             genome_bwa_index_biidx,
         )
 
-        ch_versions = ch_versions.mix(BWA_MEM2.out.versions)
+        ch_versions = ch_versions.mix(BWAMEM2_ALIGN.out.versions)
 
         //
         // MODULE: Sambamba index
         //
         SAMBAMBA_INDEX(
-            BWA_MEM2.out.bam,
+            BWAMEM2_ALIGN.out.bam,
         )
 
         ch_versions = ch_versions.mix(SAMBAMBA_INDEX.out.versions)
@@ -164,8 +164,8 @@ workflow READ_ALIGNMENT_DNA {
         // Combine BAMs and BAIs
         // channel: [ meta_bwa, sample_type, bam, bai ]
         ch_bams_flat = WorkflowOncoanalyser.groupByMeta(
-            BWA_MEM2.out.bam.map { meta_bwa, bam -> [meta_bwa, meta_bwa.sample_type] },
-            BWA_MEM2.out.bam,
+            BWAMEM2_ALIGN.out.bam.map { meta_bwa, bam -> [meta_bwa, meta_bwa.sample_type] },
+            BWAMEM2_ALIGN.out.bam,
             SAMBAMBA_INDEX.out.bai,
         )
 
