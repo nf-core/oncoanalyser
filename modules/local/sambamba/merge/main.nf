@@ -1,4 +1,4 @@
-process SAMBAMBA_INDEX {
+process SAMBAMBA_MERGE {
     tag "${meta.id}"
 
     container "${ workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container ?
@@ -6,30 +6,28 @@ process SAMBAMBA_INDEX {
         'quay.io/biocontainers/sambamba:1.0--h98b6b92_0' }"
 
     input:
-    tuple val(meta), path(bam)
+    tuple val(meta), path(bams), path(bais)
 
     output:
-    tuple val(meta), path('*bai'), emit: bai
+    tuple val(meta), path('*bam'), emit: bam
     path 'versions.yml'          , emit: versions
-
-    when:
-    task.ext.when == null || task.ext.when
 
     script:
     """
-    sambamba index \\
+    sambamba merge \\
       --nthreads ${task.cpus} \\
-      ${bam}
+      ${meta.sample_id}.bam \\
+      ${bams}
 
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":
-        sambamba: \$(sambamba --version 2>&1 | egrep '^sambamba' | head -n 1 | awk '{ print \$NF }')
+        sambamba: \$(sambamba --version 2>&1 | grep -m1 sambamba | sed 's/^sambamba //')
     END_VERSIONS
     """
 
     stub:
     """
-    touch ${bam}.bai
+    touch ${meta.sample_id}.bam
     echo -e '${task.process}:\\n  stub: noversions\\n' > versions.yml
     """
 }

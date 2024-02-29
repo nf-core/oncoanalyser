@@ -52,9 +52,9 @@ workflow GRIDSS_SVPREP_CALLING {
                 return [
                     meta,
                     Utils.selectCurrentOrExisting(tumor_bam, meta, Constants.INPUT.BAM_MARKDUPS_DNA_TUMOR),
-                    Utils.selectCurrentOrExisting(tumor_bai, meta, Constants.INPUT.BAI_MARKDUPS_DNA_TUMOR),
+                    Utils.selectCurrentOrExisting(tumor_bai, meta, Constants.INPUT.BAI_DNA_TUMOR),
                     Utils.selectCurrentOrExisting(normal_bam, meta, Constants.INPUT.BAM_MARKDUPS_DNA_NORMAL),
-                    Utils.selectCurrentOrExisting(normal_bai, meta, Constants.INPUT.BAI_MARKDUPS_DNA_NORMAL),
+                    Utils.selectCurrentOrExisting(normal_bai, meta, Constants.INPUT.BAI_DNA_NORMAL),
                 ]
             }
             .branch { meta, tumor_bam, tumor_bai, normal_bam, normal_bai ->

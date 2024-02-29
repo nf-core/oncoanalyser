@@ -151,7 +151,7 @@ class Utils {
                             index_enum = Constants.FileType.BAI
                             index_str = 'bai'
                         } else if (key === Constants.FileType.BAM_MARKDUPS) {
-                            index_enum = Constants.FileType.BAI_MARKDUPS
+                            index_enum = Constants.FileType.BAI
                             index_str = 'bai'
                         } else if (key === Constants.FileType.GRIDSS_VCF) {
                             index_enum = Constants.FileType.GRIDSS_VCF_TBI
@@ -413,20 +413,25 @@ class Utils {
 
 
     // Files
-    static public getTumorDnaBam(meta) {
-        return getTumorDnaSample(meta).getOrDefault(Constants.FileType.BAM, null)
+    static public getTumorDnaFastq(meta) {
+        return getTumorDnaSample(meta).getOrDefault(Constants.FileType.FASTQ, null)
     }
 
-    static public getTumorDnaBai(meta) {
-        return getTumorDnaSample(meta).getOrDefault(Constants.FileType.BAI, null)
+    static public getTumorDnaBam(meta) {
+        return getTumorDnaSample(meta).getOrDefault(Constants.FileType.BAM, null)
     }
 
     static public getTumorDnaMarkdupsBam(meta) {
         return getTumorDnaSample(meta).getOrDefault(Constants.FileType.BAM_MARKDUPS, null)
     }
 
-    static public getTumorDnaFastq(meta) {
-        return getTumorDnaSample(meta).getOrDefault(Constants.FileType.FASTQ, null)
+    static public getTumorDnaBai(meta) {
+        return getTumorDnaSample(meta).getOrDefault(Constants.FileType.BAI, null)
+    }
+
+
+    static public hasTumorDnaFastq(meta) {
+        return getTumorDnaFastq(meta) !== null
     }
 
     static public hasTumorDnaBam(meta) {
@@ -437,36 +442,25 @@ class Utils {
         return getTumorDnaMarkdupsBam(meta) !== null
     }
 
-    static public hasTumorDnaFastq(meta) {
-        return getTumorDnaFastq(meta) !== null
-    }
 
-    static public getTumorRnaBam(meta) {
-        return getTumorRnaSample(meta).getOrDefault(Constants.FileType.BAM, null)
-    }
-
-    static public getTumorRnaBai(meta) {
-        return getTumorRnaSample(meta).getOrDefault(Constants.FileType.BAI, null)
-    }
-
-    static public hasTumorRnaBam(meta) {
-        return getTumorRnaBam(meta) !== null
+    static public getNormalDnaFastq(meta) {
+        return getNormalDnaSample(meta).getOrDefault(Constants.FileType.FASTQ, null)
     }
 
     static public getNormalDnaBam(meta) {
         return getNormalDnaSample(meta).getOrDefault(Constants.FileType.BAM, null)
     }
 
+    static public getNormalDnaMarkdupsBam(meta) {
+        return getNormalDnaSample(meta).getOrDefault(Constants.FileType.BAM_MARKDUPS, null)
+    }
     static public getNormalDnaBai(meta) {
         return getNormalDnaSample(meta).getOrDefault(Constants.FileType.BAI, null)
     }
 
-    static public getNormalDnaMarkdupsBam(meta) {
-        return getNormalDnaSample(meta).getOrDefault(Constants.FileType.BAM_MARKDUPS, null)
-    }
 
-    static public getNormalDnaFastq(meta) {
-        return getNormalDnaSample(meta).getOrDefault(Constants.FileType.FASTQ, null)
+    static public hasNormalDnaFastq(meta) {
+        return getNormalDnaFastq(meta) !== null
     }
 
     static public hasNormalDnaBam(meta) {
@@ -477,16 +471,35 @@ class Utils {
         return getNormalDnaMarkdupsBam(meta) !== null
     }
 
-    static public hasNormalDnaFastq(meta) {
-        return getNormalDnaFastq(meta) !== null
+
+    static public hasDnaFastq(meta) {
+        return hasNormalDnaFastq(meta) || hasTumorDnaFastq(meta)
     }
 
     static public hasDnaMarkdupsBam(meta) {
         return hasNormalDnaMarkdupsBam(meta) || hasTumorDnaMarkdupsBam(meta)
     }
 
-    static public hasDnaFastq(meta) {
-        return hasNormalDnaFastq(meta) || hasTumorDnaFastq(meta)
+
+    static public getTumorRnaFastq(meta) {
+        return getTumorRnaSample(meta).getOrDefault(Constants.FileType.FASTQ, null)
+    }
+
+    static public getTumorRnaBam(meta) {
+        return getTumorRnaSample(meta).getOrDefault(Constants.FileType.BAM, null)
+    }
+
+    static public getTumorRnaBai(meta) {
+        return getTumorRnaSample(meta).getOrDefault(Constants.FileType.BAI, null)
+    }
+
+
+    static public hasTumorRnaFastq(meta) {
+        return getTumorRnaFastq(meta) !== null
+    }
+
+    static public hasTumorRnaBam(meta) {
+        return getTumorRnaBam(meta) !== null
     }
 
 
@@ -497,6 +510,10 @@ class Utils {
 
     static public hasNormalDna(meta) {
         return hasNormalDnaBam(meta) || hasNormalDnaMarkdupsBam(meta) || hasNormalDnaFastq(meta)
+    }
+
+    static public hasTumorRna(meta) {
+        return hasTumorRnaBam(meta) || hasTumorRnaFastq(meta)
     }
 
 

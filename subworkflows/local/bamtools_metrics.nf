@@ -31,7 +31,7 @@ workflow BAMTOOLS_METRICS {
                 return [
                     meta,
                     Utils.selectCurrentOrExisting(bam, meta, Constants.INPUT.BAM_MARKDUPS_DNA_TUMOR),
-                    Utils.selectCurrentOrExisting(bai, meta, Constants.INPUT.BAI_MARKDUPS_DNA_TUMOR),
+                    Utils.selectCurrentOrExisting(bai, meta, Constants.INPUT.BAI_DNA_TUMOR),
                 ]
             }
             .branch { meta, bam, bai ->
@@ -48,7 +48,7 @@ workflow BAMTOOLS_METRICS {
                 return [
                     meta,
                     Utils.selectCurrentOrExisting(bam, meta, Constants.INPUT.BAM_MARKDUPS_DNA_NORMAL),
-                    Utils.selectCurrentOrExisting(bai, meta, Constants.INPUT.BAI_MARKDUPS_DNA_NORMAL),
+                    Utils.selectCurrentOrExisting(bai, meta, Constants.INPUT.BAI_DNA_NORMAL),
                 ]
             }
             .branch { meta, bam, bai ->

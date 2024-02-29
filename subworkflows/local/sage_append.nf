@@ -11,14 +11,15 @@ include { SAGE_APPEND as GERMLINE } from '../../modules/local/sage/append/main'
 workflow SAGE_APPEND {
     take:
         // Sample data
-        ch_inputs      // channel: [mandatory] [ meta ]
-        ch_purple_dir  // channel: [mandatory] [ meta, purple_dir ]
+        ch_inputs        // channel: [mandatory] [ meta ]
+        ch_tumor_rna_bam // channel: [mandatory] [ meta, bam, bai ]
+        ch_purple_dir    // channel: [mandatory] [ meta, purple_dir ]
 
         // Reference data
-        genome_fasta   // channel: [mandatory] /path/to/genome_fasta
-        genome_version // channel: [mandatory] genome version
-        genome_fai     // channel: [mandatory] /path/to/genome_fai
-        genome_dict    // channel: [mandatory] /path/to/genome_dict
+        genome_fasta     // channel: [mandatory] /path/to/genome_fasta
+        genome_version   // channel: [mandatory] genome version
+        genome_fai       // channel: [mandatory] /path/to/genome_fai
+        genome_dict      // channel: [mandatory] /path/to/genome_dict
 
     main:
         // Channel for version.yml files
@@ -26,17 +27,22 @@ workflow SAGE_APPEND {
         ch_versions = Channel.empty()
 
         // Select input sources and sort
-        // channel: runnable: [ meta, purple_dir ]
+        // channel: runnable: [ meta, tumor_bam, tumor_bai, purple_dir ]
         // channel: skip: [ meta ]
-        ch_inputs_sorted = ch_purple_dir
-            .map { meta, purple_dir ->
+        ch_inputs_sorted = WorkflowOncoanalyser.groupByMeta(
+            ch_tumor_rna_bam,
+            ch_purple_dir,
+        )
+            .map { meta, tumor_bam, tumor_bai, purple_dir ->
                 return [
                     meta,
+                    Utils.selectCurrentOrExisting(tumor_bam, meta, Constants.INPUT.BAM_RNA_TUMOR),
+                    Utils.selectCurrentOrExisting(tumor_bai, meta, Constants.INPUT.BAI_RNA_TUMOR),
                     Utils.selectCurrentOrExisting(purple_dir, meta, Constants.INPUT.PURPLE_DIR),
                 ]
             }
-            .branch { meta, purple_dir ->
-                runnable: purple_dir
+            .branch { meta, tumor_bam, tumor_bai, purple_dir ->
+                runnable: tumor_bam && purple_dir
                 skip: true
                     return meta
             }
@@ -45,15 +51,15 @@ workflow SAGE_APPEND {
         // MODULE: SAGE append germline
         //
         // Select inputs that are eligible to run
-        // channel: runnable: [ meta, purple_dir ]
+        // channel: runnable: [ meta, tumor_bam, tumor_bai, purple_dir ]
         // channel: skip: [ meta ]
         ch_inputs_germline_sorted = ch_inputs_sorted.runnable
-            .branch { meta, purple_dir ->
+            .branch { meta, tumor_bam, tumor_bai, purple_dir ->
 
                 def tumor_dna_id = Utils.getTumorDnaSampleName(meta)
 
-                def has_normal_dna = Utils.hasNormalDnaBam(meta)
-                def has_tumor_rna = Utils.hasTumorRnaBam(meta)
+                def has_normal_dna = Utils.hasNormalDna(meta)
+                def has_tumor_rna = Utils.hasTumorRna(meta)
                 def has_smlv_germline = file(purple_dir).resolve("${tumor_dna_id}.purple.germline.vcf.gz")
                 def has_existing = Utils.hasExistingInput(meta, Constants.INPUT.SAGE_APPEND_VCF_NORMAL)
 
@@ -63,9 +69,9 @@ workflow SAGE_APPEND {
             }
 
         // Create process input channel
-        // channel: [ meta_append, purple_smlv_vcf, tumor_rna_bam, tumor_rna_bai ]
+        // channel: [ meta_append, purple_smlv_vcf, tumor_bam, tumor_bai ]
         ch_sage_append_germline_inputs = ch_inputs_germline_sorted.runnable
-            .map { meta, purple_dir ->
+            .map { meta, tumor_bam, tumor_bai, purple_dir ->
 
                 def tumor_dna_id = Utils.getTumorDnaSampleName(meta)
 
@@ -76,11 +82,9 @@ workflow SAGE_APPEND {
                     dna_id: Utils.getNormalDnaSampleName(meta),
                 ]
 
-                def tumor_rna_bam = Utils.getTumorRnaBam(meta)
-                def tumor_rna_bai = Utils.getTumorRnaBai(meta)
                 def purple_smlv_vcf = file(purple_dir).resolve("${tumor_dna_id}.purple.germline.vcf.gz")
 
-                return [meta_append, purple_smlv_vcf, tumor_rna_bam, tumor_rna_bai]
+                return [meta_append, purple_smlv_vcf, tumor_bam, tumor_bai]
             }
 
         // Run process
@@ -98,14 +102,14 @@ workflow SAGE_APPEND {
         // MODULE: SAGE append somatic
         //
         // Select inputs that are eligible to run
-        // channel: runnable: [ meta, purple_dir ]
+        // channel: runnable: [ meta, tumor_bam, tumor_bai, purple_dir ]
         // channel: skip: [ meta ]
         ch_inputs_somatic_sorted = ch_inputs_sorted.runnable
-            .branch { meta, purple_dir ->
+            .branch { meta, tumor_bam, tumor_bai, purple_dir ->
                 def tumor_dna_id = Utils.getTumorDnaSampleName(meta)
 
                 def has_tumor_dna = Utils.hasTumorDna(meta)
-                def has_tumor_rna = Utils.hasTumorRnaBam(meta)
+                def has_tumor_rna = Utils.hasTumorRna(meta)
                 def has_smlv_somatic = file(purple_dir).resolve("${tumor_dna_id}.purple.somatic.vcf.gz")
                 def has_existing = Utils.hasExistingInput(meta, Constants.INPUT.SAGE_APPEND_VCF_TUMOR)
 
@@ -115,9 +119,9 @@ workflow SAGE_APPEND {
             }
 
         // Create process input channel
-        // channel: [ meta_append, purple_smlv_vcf, tumor_rna_bam, tumor_rna_bai ]
+        // channel: [ meta_append, purple_smlv_vcf, tumor_bam, tumor_bai ]
         ch_sage_append_somatic_inputs = ch_inputs_somatic_sorted.runnable
-            .map { meta, purple_dir ->
+            .map { meta, tumor_bam, tumor_bai, purple_dir ->
 
                 def tumor_dna_id = Utils.getTumorDnaSampleName(meta)
 
@@ -128,11 +132,9 @@ workflow SAGE_APPEND {
                     dna_id: Utils.getTumorDnaSampleName(meta),
                 ]
 
-                def tumor_rna_bam = Utils.getTumorRnaBam(meta)
-                def tumor_rna_bai = Utils.getTumorRnaBai(meta)
                 def purple_smlv_vcf = file(purple_dir).resolve("${tumor_dna_id}.purple.somatic.vcf.gz")
 
-                return [meta_append, purple_smlv_vcf, tumor_rna_bam, tumor_rna_bai]
+                return [meta_append, purple_smlv_vcf, tumor_bam, tumor_bai]
             }
 
         // Run process

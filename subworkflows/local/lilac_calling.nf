@@ -16,6 +16,7 @@ workflow LILAC_CALLING {
         ch_inputs          // channel: [mandatory] [ meta ]
         ch_tumor_bam       // channel: [mandatory] [ meta, bam, bai ]
         ch_normal_bam      // channel: [mandatory] [ meta, bam, bai ]
+        ch_tumor_rna_bam   // channel: [mandatory] [ meta, bam, bai ]
         ch_purple          // channel: [mandatory] [ meta, purple_dir ]
 
         // Reference data
@@ -41,9 +42,9 @@ workflow LILAC_CALLING {
                 return [
                     meta,
                     Utils.selectCurrentOrExisting(tumor_bam, meta, Constants.INPUT.BAM_MARKDUPS_DNA_TUMOR),
-                    Utils.selectCurrentOrExisting(tumor_bai, meta, Constants.INPUT.BAI_MARKDUPS_DNA_TUMOR),
+                    Utils.selectCurrentOrExisting(tumor_bai, meta, Constants.INPUT.BAI_DNA_TUMOR),
                     Utils.selectCurrentOrExisting(normal_bam, meta, Constants.INPUT.BAM_MARKDUPS_DNA_NORMAL),
-                    Utils.selectCurrentOrExisting(normal_bai, meta, Constants.INPUT.BAI_MARKDUPS_DNA_NORMAL),
+                    Utils.selectCurrentOrExisting(normal_bai, meta, Constants.INPUT.BAI_DNA_NORMAL),
                 ]
             }
             .branch { meta, tumor_bam, tumor_bai, normal_bam, normal_bai ->
@@ -161,22 +162,6 @@ workflow LILAC_CALLING {
 
         }
 
-        // Create channel for RNA BAMs
-        // channel: [ meta, tumor_rna_bam, tumor_rna_bai ]
-        ch_rna_inputs_ready = ch_inputs
-            .map { meta ->
-
-                def bam = []
-                def bai = []
-
-                if (Utils.hasTumorRnaBam(meta)) {
-                    bam = Utils.getTumorRnaBam(meta)
-                    bai = Utils.getTumorRnaBai(meta)
-                }
-
-                return [meta, bam, bai]
-            }
-
         //
         // MODULE: LILAC
         //
@@ -184,7 +169,7 @@ workflow LILAC_CALLING {
         // channel: [ meta_lilac, normal_dna_bam, normal_dna_bai, tumor_dna_bam, tumor_dna_bai, tumor_rna_bam, tumor_rna_bai, purple_dir ]
         ch_lilac_inputs = WorkflowOncoanalyser.groupByMeta(
             ch_dna_inputs_ready,
-            ch_rna_inputs_ready,
+            ch_tumor_rna_bam,
             ch_purple,
         )
             .map { meta, tbam_dna, tbai_dna, nbam_dna, nbai_dna, tbam_rna, tbai_rna, purple_dir ->

@@ -2,7 +2,7 @@ include { BWA_MEM2       } from '../../modules/local/bwa/mem2/main'
 include { FASTP          } from '../../modules/local/fastp/main'
 include { SAMBAMBA_INDEX } from '../../modules/local/sambamba/index/main'
 
-workflow READ_ALIGNMENT {
+workflow READ_ALIGNMENT_DNA {
     take:
         // Sample data
         ch_inputs              // channel: [mandatory] [ meta ]
@@ -162,7 +162,7 @@ workflow READ_ALIGNMENT {
         ch_versions = ch_versions.mix(SAMBAMBA_INDEX.out.versions)
 
         // Combine BAMs and BAIs
-        // channel: [ meta, sample_type, bam, bai ]
+        // channel: [ meta_bwa, sample_type, bam, bai ]
         ch_bams_flat = WorkflowOncoanalyser.groupByMeta(
             BWA_MEM2.out.bam.map { meta_bwa, bam -> [meta_bwa, meta_bwa.sample_type] },
             BWA_MEM2.out.bam,
@@ -171,6 +171,7 @@ workflow READ_ALIGNMENT {
 
         // Reunite BAMs
         // First, count expected BAMs per sample for non-blocking groupTuple op
+        // channel: [ meta_count, group_size ]
         ch_sample_fastq_counts = ch_bwa_inputs
             .map { meta_bwa, reads_fwd, reads_rev ->
 
@@ -184,12 +185,12 @@ workflow READ_ALIGNMENT {
             .groupTuple()
             .map { meta_count, meta_bwas -> return [meta_count, meta_bwas.size()] }
 
-
         // Now, group with expected size then sort into tumor and normal channels
+        // channel: [ meta_group, [bam, ...], [bai, ...] ]
         ch_bams_united = ch_sample_fastq_counts
             .cross(
                 // First element to match meta_count above for `cross`
-                ch_bams_flat.map { meta, sample_type, bam, bai -> [[key: meta.key, sample_type: sample_type], bam, bai] }
+                ch_bams_flat.map { meta_bwa, sample_type, bam, bai -> [[key: meta_bwa.key, sample_type: sample_type], bam, bai] }
             )
             .map { count_tuple, bam_tuple ->
 

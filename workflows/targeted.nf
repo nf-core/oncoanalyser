@@ -79,7 +79,8 @@ include { ORANGE_REPORTING      } from '../subworkflows/local/orange_reporting'
 include { PAVE_ANNOTATION       } from '../subworkflows/local/pave_annotation'
 include { PREPARE_REFERENCE     } from '../subworkflows/local/prepare_reference'
 include { PURPLE_CALLING        } from '../subworkflows/local/purple_calling'
-include { READ_ALIGNMENT        } from '../subworkflows/local/read_alignment'
+include { READ_ALIGNMENT_DNA    } from '../subworkflows/local/read_alignment_dna'
+include { READ_ALIGNMENT_RNA    } from '../subworkflows/local/read_alignment_rna'
 include { READ_PROCESSING       } from '../subworkflows/local/read_processing'
 include { SAGE_APPEND           } from '../subworkflows/local/sage_append'
 include { SAGE_CALLING          } from '../subworkflows/local/sage_calling'
@@ -105,7 +106,6 @@ include { CUSTOM_DUMPSOFTWAREVERSIONS } from '../modules/nf-core/custom/dumpsoft
 samplesheet = Utils.getFileObject(params.input)
 
 workflow TARGETED {
-
     // Create channel for versions
     // channel: [ versions.yml ]
     ch_versions = Channel.empty()
@@ -126,14 +126,15 @@ workflow TARGETED {
     gridss_config = params.containsKey('gridss_config') ? file(params.gridss_config) : hmf_data.gridss_config
 
     //
-    // SUBWORKFLOW: Align reads
+    // SUBWORKFLOW: Run read alignment to generate BAMs
     //
     // channel: [ meta, [bam, ...], [bai, ...] ]
     ch_align_dna_tumor_out = Channel.empty()
     ch_align_dna_normal_out = Channel.empty()
+    ch_align_rna_tumor_out = Channel.empty()
     if (run_config.stages.alignment) {
 
-        READ_ALIGNMENT(
+        READ_ALIGNMENT_DNA(
             ch_inputs,
             ref_data.genome_fasta,
             ref_data.genome_bwa_index,
@@ -142,20 +143,30 @@ workflow TARGETED {
             params.max_fastq_records,
         )
 
-        ch_versions = ch_versions.mix(READ_ALIGNMENT.out.versions)
+        READ_ALIGNMENT_RNA(
+            ch_inputs,
+            ref_data.genome_star_index,
+        )
 
-        ch_align_dna_tumor_out = ch_align_dna_tumor_out.mix(READ_ALIGNMENT.out.dna_tumor)
-        ch_align_dna_normal_out = ch_align_dna_normal_out.mix(READ_ALIGNMENT.out.dna_normal)
+        ch_versions = ch_versions.mix(
+            READ_ALIGNMENT_DNA.out.versions,
+            READ_ALIGNMENT_RNA.out.versions,
+        )
+
+        ch_align_dna_tumor_out = ch_align_dna_tumor_out.mix(READ_ALIGNMENT_DNA.out.dna_tumor)
+        ch_align_dna_normal_out = ch_align_dna_normal_out.mix(READ_ALIGNMENT_DNA.out.dna_normal)
+        ch_align_rna_tumor_out = ch_align_rna_tumor_out.mix(READ_ALIGNMENT_RNA.out.rna_tumor)
 
     } else {
 
         ch_align_dna_tumor_out = ch_inputs.map { meta -> [meta, [], []] }
         ch_align_dna_normal_out = ch_inputs.map { meta -> [meta, [], []] }
+        ch_align_rna_tumor_out = ch_inputs.map { meta -> [meta, [], []] }
 
     }
 
     //
-    // SUBWORKFLOW: Process read alignments
+    // SUBWORKFLOW: Run MarkDups for DNA BAMs
     //
     // channel: [ meta, bam, bai ]
     ch_process_dna_tumor_out = Channel.empty()
@@ -204,6 +215,7 @@ workflow TARGETED {
 
         ISOFOX_QUANTIFICATION(
             ch_inputs,
+            ch_align_rna_tumor_out,
             ref_data.genome_fasta,
             ref_data.genome_version,
             ref_data.genome_fai,
@@ -483,6 +495,7 @@ workflow TARGETED {
 
         SAGE_APPEND(
             ch_inputs,
+            ch_align_rna_tumor_out,
             ch_purple_out,
             ref_data.genome_fasta,
             ref_data.genome_version,
@@ -624,6 +637,7 @@ workflow TARGETED {
             ch_inputs,
             ch_process_dna_tumor_out,
             ch_process_dna_normal_out,
+            ch_align_rna_tumor_out,
             ch_purple_out,
             ref_data.genome_fasta,
             ref_data.genome_version,

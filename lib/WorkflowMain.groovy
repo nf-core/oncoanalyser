@@ -1,6 +1,8 @@
 //
 // This file holds several functions specific to the main.nf workflow in the nf-core/oncoanalyser pipeline
 //
+import Utils
+
 
 class WorkflowMain {
 
@@ -314,8 +316,9 @@ class WorkflowMain {
             mode: run_mode,
             panel: run_mode === Constants.RunMode.TARGETED ? params.panel : null,
             stages: stages,
-            has_dna: inputs.any { it.containsKey([Constants.SampleType.TUMOR, Constants.SequenceType.DNA]) },
-            has_rna: inputs.any { it.containsKey([Constants.SampleType.TUMOR, Constants.SequenceType.RNA]) },
+            has_dna: inputs.any { Utils.hasTumorDna(it) },
+            has_rna: inputs.any { Utils.hasTumorRna(it) },
+            has_rna_fastq: inputs.any { Utils.hasTumorRnaFastq(it) },
         ]
     }
 }

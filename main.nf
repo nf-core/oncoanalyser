@@ -29,6 +29,7 @@ params.ref_data_genome_bwa_index_bseq  = WorkflowMain.getGenomeAttribute(params,
 params.ref_data_genome_bwa_index_biidx = WorkflowMain.getGenomeAttribute(params, 'bwa_index_biidx')
 params.ref_data_genome_bwa_index_image = WorkflowMain.getGenomeAttribute(params, 'bwa_index_image')
 params.ref_data_genome_gridss_index    = WorkflowMain.getGenomeAttribute(params, 'gridss_index')
+params.ref_data_genome_star_index      = WorkflowMain.getGenomeAttribute(params, 'star_index')
 
 /*
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~

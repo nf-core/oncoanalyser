@@ -14,6 +14,7 @@ include { BWA_INDEX      } from '../../modules/nf-core/bwa/index/main'
 include { CUSTOM_EXTRACTTARBALL as DECOMP_BWA_INDEX        } from '../../modules/local/custom/extract_tarball/main'
 include { CUSTOM_EXTRACTTARBALL as DECOMP_HMF_DATA         } from '../../modules/local/custom/extract_tarball/main'
 include { CUSTOM_EXTRACTTARBALL as DECOMP_PANEL_DATA       } from '../../modules/local/custom/extract_tarball/main'
+include { CUSTOM_EXTRACTTARBALL as DECOMP_STAR_INDEX       } from '../../modules/local/custom/extract_tarball/main'
 include { CUSTOM_EXTRACTTARBALL as DECOMP_VIRUSBREAKEND_DB } from '../../modules/local/custom/extract_tarball/main'
 include { GRIDSS_INDEX as GRIDSS_BWA_INDEX_IMAGE           } from '../../modules/local/gridss/index/main'
 include { GRIDSS_INDEX as GRIDSS_INDEX                     } from '../../modules/local/gridss/index/main'
@@ -104,6 +105,19 @@ workflow PREPARE_REFERENCE {
         ch_genome_bwa_index_biidx = Channel.value(params.ref_data_genome_bwa_index_biidx)
 
         //
+        // Decompress STAR index
+        //
+        ch_genome_star_index = params.ref_data_genome_star_index ? file(params.ref_data_genome_star_index) : []
+        if (run_config.has_rna_fastq && run_config.stages.alignment && params.ref_data_genome_star_index.endsWith('.tar.gz')) {
+                ch_genome_star_index_inputs = [
+                    [id: 'star_index'],
+                    file(params.ref_data_genome_star_index),
+                ]
+                DECOMP_STAR_INDEX(ch_genome_star_index_inputs)
+                ch_genome_star_index = DECOMP_STAR_INDEX.out.dir
+        }
+
+        //
         // Set VIRUSBreakend database path / stage, unpack if required
         //
         ch_virusbreakenddb = Channel.empty()
@@ -181,6 +195,7 @@ workflow PREPARE_REFERENCE {
         genome_bwa_index_biidx = ch_genome_bwa_index_biidx      // path: genome_bwa_index_biidx
         genome_bwa_index_image = ch_genome_bwa_index_image      // path: genome_bwa_index_image
         genome_gridss_index    = ch_genome_gridss_index         // path: genome_gridss_index
+        genome_star_index      = ch_genome_star_index           // path: genome_star_index
         genome_version         = params.ref_data_genome_version // val:  genome_version
 
         virusbreakenddb        = ch_virusbreakenddb             // path: VIRUSBreakend database

@@ -84,7 +84,7 @@ workflow CUPPA_PREDICTION {
 
                 def has_tumor_dna = Utils.hasTumorDna(meta)
                 def has_normal_dna = Utils.hasNormalDna(meta)
-                def has_tumor_rna = Utils.hasTumorRnaBam(meta)
+                def has_tumor_rna = Utils.hasTumorRna(meta)
 
                 def has_dna_inputs = (purple_dir && linx_annotation_dir)
                 def has_rna_inputs = isofox_dir

@@ -213,7 +213,6 @@
                 },
                 "ref_data_genome_bwa_index": {
                     "type": "string",
-                    "format": "directory-path",
                     "description": "Path to directory containing reference genome BWA indices.",
                     "fa_icon": "far fa-file-code",
                     "hidden": true
@@ -245,6 +244,12 @@
                     "format": "file-path",
                     "pattern": "^\\S+\\.gridsscache$",
                     "description": "Path to reference genome GRIDSS index file.",
+                    "fa_icon": "far fa-file-code",
+                    "hidden": true
+                },
+                "ref_data_genome_star_index": {
+                    "type": "string",
+                    "description": "Path to reference genome STAR index file.",
                     "fa_icon": "far fa-file-code",
                     "hidden": true
                 }

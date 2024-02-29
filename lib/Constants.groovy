@@ -58,9 +58,8 @@ class Constants {
     static enum FileType {
         // Generic
         BAM,
-        BAI,
         BAM_MARKDUPS,
-        BAI_MARKDUPS,
+        BAI,
         FASTQ,
         // Process
         AMBER_DIR,
@@ -125,12 +124,6 @@ class Constants {
             SequenceType.DNA,
         ],
 
-        BAM_RNA_TUMOR : [
-            FileType.BAM,
-            SampleType.TUMOR,
-            SequenceType.RNA,
-        ],
-
         BAM_DNA_NORMAL: [
             FileType.BAM,
             SampleType.NORMAL,
@@ -143,32 +136,16 @@ class Constants {
             SequenceType.DNA,
         ],
 
-        BAM_RNA_NORMAL : [
+        BAM_RNA_TUMOR: [
             FileType.BAM,
-            SampleType.NORMAL,
+            SampleType.TUMOR,
             SequenceType.RNA,
         ],
-
-
-
-
 
         BAI_DNA_TUMOR: [
             FileType.BAI,
             SampleType.TUMOR,
             SequenceType.DNA,
-        ],
-
-        BAI_MARKDUPS_DNA_TUMOR: [
-            FileType.BAI_MARKDUPS,
-            SampleType.TUMOR,
-            SequenceType.DNA,
-        ],
-
-        BAI_RNA_TUMOR : [
-            FileType.BAI,
-            SampleType.TUMOR,
-            SequenceType.RNA,
         ],
 
         BAI_DNA_NORMAL: [
@@ -177,20 +154,11 @@ class Constants {
             SequenceType.DNA,
         ],
 
-        BAI_MARKDUPS_DNA_NORMAL: [
-            FileType.BAI_MARKDUPS,
-            SampleType.NORMAL,
-            SequenceType.DNA,
-        ],
-
-        BAI_RNA_NORMAL : [
+        BAI_RNA_TUMOR: [
             FileType.BAI,
-            SampleType.NORMAL,
+            SampleType.TUMOR,
             SequenceType.RNA,
         ],
-
-
-
 
         ISOFOX_DIR: [
             FileType.ISOFOX_DIR,
