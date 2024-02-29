@@ -100,9 +100,9 @@ workflow PREPARE_REFERENCE {
             }
         }
 
-        // Explicitly create value channels for BWA MEM2 index files
-        ch_genome_bwa_index_bseq = Channel.value(params.ref_data_genome_bwa_index_bseq)
-        ch_genome_bwa_index_biidx = Channel.value(params.ref_data_genome_bwa_index_biidx)
+        // Explicitly set BWA MEM2 index file inputs
+        ch_genome_bwa_index_bseq = file(params.ref_data_genome_bwa_index_bseq)
+        ch_genome_bwa_index_biidx = file(params.ref_data_genome_bwa_index_biidx)
 
         //
         // Decompress STAR index
