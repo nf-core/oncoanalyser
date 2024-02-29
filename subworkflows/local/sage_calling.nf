@@ -131,6 +131,10 @@ workflow SAGE_CALLING {
                     tumor_id: Utils.getTumorDnaSampleName(meta),
                 ]
 
+                if (normal_bam) {
+                    meta_sage.normal_id = Utils.getNormalDnaSampleName(meta)
+                }
+
                 return [meta_sage, tumor_bam, normal_bam, tumor_bai, normal_bai]
             }
 
