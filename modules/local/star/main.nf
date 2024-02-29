@@ -41,7 +41,7 @@ process STAR {
         --outFilterMultimapNmax 10 \\
         --outFilterScoreMinOverLread 0.33 \\
         --outSAMattributes All \\
-        --outSAMattrRGline 'ID:${meta.read_group} SM:${meta.sample_id}' \\
+        --outSAMattrRGline ID:${meta.read_group} SM:${meta.sample_id} \\
         --outSAMtype BAM Unsorted \\
         --outSAMunmapped Within \\
         --runRNGseed 0
