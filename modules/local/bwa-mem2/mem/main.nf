@@ -26,24 +26,24 @@ process BWAMEM2_ALIGN {
     ln -fs \$(find -L ${genome_bwa_index} -type f) ./
 
     bwa-mem2 mem \\
-    -Y \\
-    -R '${read_group_tag}' \\
-    -t ${task.cpus} \\
-    ${genome_fasta} \\
-    ${reads_fwd} \\
-    ${reads_rev} | \\
-    \\
-    sambamba view \\
-      --sam-input \\
-      --format bam \\
-      --compression-level 0 \\
-      --nthreads ${task.cpus} \\
-      /dev/stdin | \\
-    \\
-    sambamba sort \\
-      --nthreads ${task.cpus} \\
-      --out ${meta.split}.${meta.sample_id}.${meta.read_group}.bam \\
-      /dev/stdin
+        -Y \\
+        -R '${read_group_tag}' \\
+        -t ${task.cpus} \\
+        ${genome_fasta} \\
+        ${reads_fwd} \\
+        ${reads_rev} | \\
+        \\
+        sambamba view \\
+            --sam-input \\
+            --format bam \\
+            --compression-level 0 \\
+            --nthreads ${task.cpus} \\
+            /dev/stdin | \\
+        \\
+        sambamba sort \\
+            --nthreads ${task.cpus} \\
+            --out ${meta.split}.${meta.sample_id}.${meta.read_group}.bam \\
+            /dev/stdin
 
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":

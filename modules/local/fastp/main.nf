@@ -23,15 +23,15 @@ process FASTP {
     # * do not process umis, already done for us
 
     fastp \\
-      --in1 ${reads_fwd} \\
-      --in2 ${reads_rev} \\
-      --disable_quality_filtering \\
-      --disable_length_filtering \\
-      --disable_adapter_trimming \\
-      --disable_trim_poly_g \\
-      --split_by_lines ${4 * max_fastq_records} \\
-      --out1 ${meta.sample_id}_${meta.library_id}_${meta.lane}_R1.fastp.fastq.gz \\
-      --out2 ${meta.sample_id}_${meta.library_id}_${meta.lane}_R2.fastp.fastq.gz
+        --in1 ${reads_fwd} \\
+        --in2 ${reads_rev} \\
+        --disable_quality_filtering \\
+        --disable_length_filtering \\
+        --disable_adapter_trimming \\
+        --disable_trim_poly_g \\
+        --split_by_lines ${4 * max_fastq_records} \\
+        --out1 ${meta.sample_id}_${meta.library_id}_${meta.lane}_R1.fastp.fastq.gz \\
+        --out2 ${meta.sample_id}_${meta.library_id}_${meta.lane}_R2.fastp.fastq.gz
 
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":

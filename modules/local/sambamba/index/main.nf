@@ -18,8 +18,8 @@ process SAMBAMBA_INDEX {
     script:
     """
     sambamba index \\
-      --nthreads ${task.cpus} \\
-      ${bam}
+        --nthreads ${task.cpus} \\
+        ${bam}
 
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":

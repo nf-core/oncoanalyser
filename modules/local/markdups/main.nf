@@ -28,25 +28,25 @@ process MARKDUPS {
 
     """
     markdups \\
-      -Xmx${Math.round(task.memory.bytes * 0.95)} \\
-      \\
-      -samtools \$(which samtools) \\
-      -sambamba \$(which sambamba) \\
-      \\
-      -sample ${meta.sample_id} \\
-      -input_bam ${bams.join(',')} \\
-      \\
-      -form_consensus \\
-      ${umi_flags} \\
-      \\
-      -unmap_regions ${unmap_regions} \\
-      -ref_genome ${genome_fasta} \\
-      -ref_genome_version ${genome_ver} \\
-      \\
-      -write_stats \\
-      -threads ${task.cpus} \\
-      \\
-      -output_bam ${meta.sample_id}.markdups.bam
+        -Xmx${Math.round(task.memory.bytes * 0.95)} \\
+        \\
+        -samtools \$(which samtools) \\
+        -sambamba \$(which sambamba) \\
+        \\
+        -sample ${meta.sample_id} \\
+        -input_bam ${bams.join(',')} \\
+        \\
+        -form_consensus \\
+        ${umi_flags} \\
+        \\
+        -unmap_regions ${unmap_regions} \\
+        -ref_genome ${genome_fasta} \\
+        -ref_genome_version ${genome_ver} \\
+        \\
+        -write_stats \\
+        -threads ${task.cpus} \\
+        \\
+        -output_bam ${meta.sample_id}.markdups.bam
 
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":
@@ -63,9 +63,9 @@ process MARKDUPS {
     touch ${meta.sample_id}.duplicate_freq.tsv
 
     if [[ -n "${has_umis}" ]]; then
-      touch ${meta.sample_id}.umi_coord_freq.tsv
-      touch ${meta.sample_id}.umi_edit_distance.tsv
-      touch ${meta.sample_id}.umi_nucleotide_freq.tsv
+        touch ${meta.sample_id}.umi_coord_freq.tsv
+        touch ${meta.sample_id}.umi_edit_distance.tsv
+        touch ${meta.sample_id}.umi_nucleotide_freq.tsv
     fi;
 
     echo -e '${task.process}:\\n  stub: noversions\\n' > versions.yml
