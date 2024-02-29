@@ -70,6 +70,10 @@ workflow COBALT_PROFILING {
                     tumor_id: Utils.getTumorDnaSampleName(meta),
                 ]
 
+                if (normal_bam) {
+                    meta_cobalt.normal_id = Utils.getNormalDnaSampleName(meta)
+                }
+
                 sample_data: [meta_cobalt, tumor_bam, normal_bam, tumor_bai, normal_bai]
                 diploid_bed: diploid_bed
             }
