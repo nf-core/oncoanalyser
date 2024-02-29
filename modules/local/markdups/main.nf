@@ -37,7 +37,6 @@ process MARKDUPS {
       -input_bam ${bams.join(',')} \\
       \\
       -form_consensus \\
-      -multi_bam \\
       ${umi_flags} \\
       \\
       -unmap_regions ${unmap_regions} \\
