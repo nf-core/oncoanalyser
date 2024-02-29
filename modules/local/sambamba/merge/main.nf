@@ -6,7 +6,7 @@ process SAMBAMBA_MERGE {
         'quay.io/biocontainers/sambamba:1.0--h98b6b92_0' }"
 
     input:
-    tuple val(meta), path(bams), path(bais)
+    tuple val(meta), path(bams)
 
     output:
     tuple val(meta), path('*bam'), emit: bam

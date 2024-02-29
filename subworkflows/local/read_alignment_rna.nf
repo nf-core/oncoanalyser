@@ -1,5 +1,4 @@
 include { GATK4_MARKDUPLICATES } from '../../modules/nf-core/gatk4/markduplicates/main'
-include { SAMBAMBA_INDEX       } from '../../modules/local/sambamba/index/main'
 include { SAMBAMBA_MERGE       } from '../../modules/local/sambamba/merge/main'
 include { SAMTOOLS_SORT        } from '../../modules/nf-core/samtools/sort/main'
 include { STAR                 } from '../../modules/local/star/main'
@@ -99,24 +98,8 @@ workflow READ_ALIGNMENT_RNA {
         ch_versions = ch_versions.mix(SAMTOOLS_SORT.out.versions)
 
         //
-        // MODULE: Sambamba index
-        //
-        SAMBAMBA_INDEX(
-            SAMTOOLS_SORT.out.bam,
-        )
-
-        ch_versions = ch_versions.mix(SAMBAMBA_INDEX.out.versions)
-
-        //
         // MODULE: Sambamba merge
         //
-        // Combine BAMs and BAIs
-        // channel: [ meta_star, bam, bai ]
-        ch_bams_flat = WorkflowOncoanalyser.groupByMeta(
-            SAMTOOLS_SORT.out.bam,
-            SAMBAMBA_INDEX.out.bai,
-        )
-
         // Reunite BAMs
         // First, count expected BAMs per sample for non-blocking groupTuple op
         // channel: [ meta_count, group_size ]
@@ -129,45 +112,45 @@ workflow READ_ALIGNMENT_RNA {
             .map { meta_count, meta_stars -> return [meta_count, meta_stars.size()] }
 
         // Now, group with expected size then sort into tumor and normal channels
-        // channel: [ meta_group, [bam, ...], [bai, ...] ]
+        // channel: [ meta_group, [bam, ...] ]
         ch_bams_united = ch_sample_fastq_counts
             .cross(
                 // First element to match meta_count above for `cross`
-                ch_bams_flat.map { meta_star, bam, bai -> [[key: meta_star.key], bam, bai] }
+                SAMTOOLS_SORT.out.bam.map { meta_star, bam -> [[key: meta_star.key], bam] }
             )
             .map { count_tuple, bam_tuple ->
 
                 def group_size = count_tuple[1]
-                def (meta_bam, bam, bai) = bam_tuple
+                def (meta_bam, bam) = bam_tuple
 
                 def meta_group = [
                     *:meta_bam,
                 ]
 
-                return tuple(groupKey(meta_group, group_size), bam, bai)
+                return tuple(groupKey(meta_group, group_size), bam)
             }
             .groupTuple()
 
         // Sort into merge-eligible BAMs (at least two BAMs required)
-        // channel: runnable: [ meta_group, [bam, ...], [bai, ...] ]
+        // channel: runnable: [ meta_group, [bam, ...] ]
         // channel: skip: [ meta_group, bam ]
         ch_bams_united_sorted = ch_bams_united
-            .branch { meta_group, bams, bais ->
+            .branch { meta_group, bams ->
                 runnable: bams.size() > 1
                 skip: true
                     return [meta_group, bams[0]]
             }
 
         // Create process input channel
-        // channel: [ meta_merge, [bams, ...], [bais, ...] ]
+        // channel: [ meta_merge, [bams, ...] ]
         ch_merge_inputs = WorkflowOncoanalyser.restoreMeta(ch_bams_united_sorted.runnable, ch_inputs)
-            .map { meta, bams, bais ->
+            .map { meta, bams ->
                 def meta_merge = [
                     key: meta.group_id,
                     id: meta.group_id,
                     sample_id: Utils.getTumorRnaSampleName(meta),
                 ]
-                return [meta_merge, bams, bais]
+                return [meta_merge, bams]
             }
 
         // Run process
