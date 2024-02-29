@@ -58,6 +58,10 @@ workflow AMBER_PROFILING {
                     tumor_id: Utils.getTumorDnaSampleName(meta),
                 ]
 
+                if (normal_bam) {
+                    meta_amber.normal_id = Utils.getNormalDnaSampleName(meta)
+                }
+
                 [meta_amber, tumor_bam, normal_bam, tumor_bai, normal_bai]
             }
 
