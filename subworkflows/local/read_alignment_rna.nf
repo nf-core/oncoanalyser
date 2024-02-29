@@ -149,11 +149,13 @@ workflow READ_ALIGNMENT_RNA {
             .groupTuple()
 
         // Sort into merge-eligible BAMs (at least two BAMs required)
+        // channel: runnable: [ meta_group, [bam, ...], [bai, ...] ]
+        // channel: skip: [ meta_group, bam ]
         ch_bams_united_sorted = ch_bams_united
             .branch { meta_group, bams, bais ->
                 runnable: bams.size() > 1
-                skip:
-                    return [meta_group, bams[0], bais[0]]
+                skip: true
+                    return [meta_group, bams[0]]
             }
 
         // Create process input channel
@@ -179,19 +181,19 @@ workflow READ_ALIGNMENT_RNA {
         // MODULE: GATK4 markduplicates
         //
         // Create process input channel
-        // channel: [ meta_markdups, bam, bai ]
+        // channel: [ meta_markdups, bam ]
         ch_markdups_inputs = Channel.empty()
             .mix(
                 WorkflowOncoanalyser.restoreMeta(SAMBAMBA_MERGE.out.bam, ch_inputs),
                 WorkflowOncoanalyser.restoreMeta(ch_bams_united_sorted.skip, ch_inputs),
             )
-            .map { meta, bam, bai ->
+            .map { meta, bam ->
                 def meta_markdups = [
                     key: meta.group_id,
                     id: meta.group_id,
                     sample_id: Utils.getTumorRnaSampleName(meta),
                 ]
-                return [meta_markdups, bams, bais]
+                return [meta_markdups, bam]
             }
 
         // Run process
