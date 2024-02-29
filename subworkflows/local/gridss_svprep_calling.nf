@@ -63,9 +63,9 @@ workflow GRIDSS_SVPREP_CALLING {
 
                 runnable_tn: tumor_bam && normal_bam && !has_existing
                 runnable_to: tumor_bam && !has_existing
-                    [meta, tumor_bam, tumor_bai]
+                    return [meta, tumor_bam, tumor_bai]
                 skip: true
-                    meta
+                    return meta
             }
 
         //

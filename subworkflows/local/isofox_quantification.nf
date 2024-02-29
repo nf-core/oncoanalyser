@@ -47,7 +47,7 @@ workflow ISOFOX_QUANTIFICATION {
                 def has_existing = Utils.hasExistingInput(meta, Constants.INPUT.ISOFOX_DIR)
                 runnable: tumor_bam && !has_existing
                 skip: true
-                    meta
+                    return meta
             }
 
         // Create process input channel

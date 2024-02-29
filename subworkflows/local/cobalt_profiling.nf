@@ -46,7 +46,7 @@ workflow COBALT_PROFILING {
                 runnable_tn: tumor_bam && normal_bam && !has_existing
                 runnable_to: tumor_bam && !has_existing
                 skip: true
-                    meta
+                    return meta
             }
 
         // First set diploid BED input for tumor/normal and tumor only samples

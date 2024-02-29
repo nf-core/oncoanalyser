@@ -53,7 +53,7 @@ workflow LILAC_CALLING {
 
                 runnable: (tumor_bam || normal_bam) && !has_existing
                 skip: true
-                    meta
+                    return meta
             }
 
         // Realign reads mapping to HLA regions and homologus regions if using reference genome with ALT contigs

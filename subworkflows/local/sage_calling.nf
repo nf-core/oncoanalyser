@@ -53,7 +53,7 @@ workflow SAGE_CALLING {
             .branch { meta, tumor_bam, tumor_bai, normal_bam, normal_bai ->
                 runnable: tumor_bam
                 skip: true
-                    meta
+                    return meta
             }
 
         //
@@ -69,7 +69,7 @@ workflow SAGE_CALLING {
 
                 runnable: has_tumor_normal && !has_existing
                 skip: true
-                    meta
+                    return meta
             }
 
         // Create process input channel
@@ -116,7 +116,7 @@ workflow SAGE_CALLING {
 
                 runnable: has_tumor && !has_existing
                 skip: true
-                    meta
+                    return meta
             }
 
         // Create process input channel

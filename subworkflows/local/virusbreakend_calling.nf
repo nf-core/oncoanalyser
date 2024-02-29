@@ -50,7 +50,7 @@ workflow VIRUSBREAKEND_CALLING {
                 def has_existing = Utils.hasExistingInput(meta, Constants.INPUT.VIRUSINTERPRETER_DIR)
                 runnable: tumor_bam && !has_existing
                 skip: true
-                    meta
+                    return meta
             }
 
         //

@@ -38,7 +38,7 @@ workflow BAMTOOLS_METRICS {
                 def has_existing = Utils.hasExistingInput(meta, Constants.INPUT.BAMTOOLS_TUMOR)
                 runnable: bam && !has_existing
                 skip: true
-                    meta
+                    return meta
             }
 
         // channel: runnable: [ meta, bam, bai ]
@@ -55,7 +55,7 @@ workflow BAMTOOLS_METRICS {
                 def has_existing = Utils.hasExistingInput(meta, Constants.INPUT.BAMTOOLS_NORMAL)
                 runnable: bam && !has_existing
                 skip: true
-                    meta
+                    return meta
             }
 
         // Create process input channel
