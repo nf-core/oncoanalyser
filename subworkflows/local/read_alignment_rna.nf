@@ -146,9 +146,17 @@ workflow READ_ALIGNMENT_RNA {
             }
             .groupTuple()
 
+        // Sort into merge-eligible BAMs (at least two BAMs required)
+        ch_bams_united_sorted = ch_bams_united
+            .branch { meta_group, bams, bais ->
+                runnable: bams.size() > 1
+                skip:
+                    return [meta_group, bams[0], bais[0]]
+            }
+
         // Create process input channel
         // channel: [ meta_merge, [bams, ...], [bais, ...] ]
-        ch_merge_inputs = WorkflowOncoanalyser.restoreMeta(ch_bams_united, ch_inputs)
+        ch_merge_inputs = WorkflowOncoanalyser.restoreMeta(ch_bams_united_sorted.runnable, ch_inputs)
             .map { meta, bams, bais ->
                 def meta_merge = [
                     key: meta.group_id,
@@ -168,8 +176,25 @@ workflow READ_ALIGNMENT_RNA {
         //
         // MODULE: GATK4 markduplicates
         //
+        // Create process input channel
+        // channel: [ meta_markdups, bam, bai ]
+        ch_markdups_inputs = Channel.empty()
+            .mix(
+                WorkflowOncoanalyser.restoreMeta(SAMBAMBA_MERGE.out.bam, ch_inputs),
+                WorkflowOncoanalyser.restoreMeta(ch_bams_united_sorted.skip, ch_inputs),
+            )
+            .map { meta, bam, bai ->
+                def meta_markdups = [
+                    key: meta.group_id,
+                    id: meta.group_id,
+                    sample_id: Utils.getTumorRnaSampleName(meta),
+                ]
+                return [meta_markdups, bams, bais]
+            }
+
+        // Run process
         GATK4_MARKDUPLICATES(
-            SAMBAMBA_MERGE.out.bam,
+            ch_markdups_inputs,
             [],
             [],
         )
