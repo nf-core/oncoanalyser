@@ -1,6 +1,6 @@
 process STAR {
     tag "${meta.id}"
-    label 'process_medium'
+    label 'process_high'
 
     container 'quay.io/biocontainers/star:2.7.3a--0'
 
