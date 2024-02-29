@@ -14,10 +14,19 @@ process SAMBAMBA_MERGE {
 
     script:
     """
-    sambamba merge \\
-      --nthreads ${task.cpus} \\
-      ${meta.sample_id}.bam \\
-      ${bams}
+    # NOTE(SW): single BAM when read count is less than max split count; merge expects at least two BAMs
+    if [[ \$(tr -cd ' ' <<< ${bams} | wc -c) -eq 0 ]]; then
+
+      ln -s ${bams} ${meta.sample_id}.bam;
+
+    else
+
+      sambamba merge \\
+        --nthreads ${task.cpus} \\
+        ${meta.sample_id}.bam \\
+        ${bams}
+
+    fi;
 
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":
