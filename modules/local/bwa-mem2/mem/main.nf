@@ -1,4 +1,4 @@
-process BWA_MEM2 {
+process BWAMEM2_ALIGN {
     tag "${meta.id}"
     label 'process_high'
 
