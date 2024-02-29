@@ -119,6 +119,7 @@ workflow READ_ALIGNMENT_RNA {
 
         // Reunite BAMs
         // First, count expected BAMs per sample for non-blocking groupTuple op
+        // channel: [ meta_count, group_size ]
         ch_sample_fastq_counts = ch_star_inputs
             .map { meta_star, reads_fwd, reads_rev ->
                 def meta_count = [key: meta_star.key]
@@ -128,6 +129,7 @@ workflow READ_ALIGNMENT_RNA {
             .map { meta_count, meta_stars -> return [meta_count, meta_stars.size()] }
 
         // Now, group with expected size then sort into tumor and normal channels
+        // channel: [ meta_group, [bam, ...], [bai, ...] ]
         ch_bams_united = ch_sample_fastq_counts
             .cross(
                 // First element to match meta_count above for `cross`
