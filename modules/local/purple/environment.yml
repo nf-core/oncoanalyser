@@ -4,4 +4,4 @@ channels:
   - bioconda
   - defaults
 dependencies:
-  - bioconda::hmftools-purple=4.0
+  - bioconda::hmftools-purple=4.0.2
