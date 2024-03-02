@@ -94,12 +94,12 @@ The oncoanalyser pipeline was written by Stephen Watts while in the [Genomics Pl
 Group](https://mdhs.unimelb.edu.au/centre-for-cancer-research/our-research/genomics-platform-group) at the [University
 of Melbourne Centre for Cancer Research](https://mdhs.unimelb.edu.au/centre-for-cancer-research).
 
-We thank the following people for their extensive assistance in the development of this pipeline, listed in alphabetical
-order:
+We thank the following organisations and people for their extensive assistance in the development of this pipeline,
+listed in alphabetical order:
 
-* Charles Shale
+* [Hartwig Medical Foundation
+  Australia](https://www.hartwigmedicalfoundation.nl/en/partnerships/hartwig-medical-foundation-australia/)
 * Oliver Hofmann
-* Peter Priestley
 
 ## Contributions and Support
 
