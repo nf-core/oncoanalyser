@@ -278,7 +278,7 @@ workflow WGTS {
     }
 
     //
-    // SUBWORKFLOW: call SNV, MNV, and small INDELS with SAGE
+    // SUBWORKFLOW: Call SNV, MNV, and small INDELS with SAGE
     //
     // channel: [ meta, sage_vcf, sage_tbi ]
     ch_sage_germline_vcf_out = Channel.empty()
