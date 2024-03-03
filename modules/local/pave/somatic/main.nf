@@ -46,7 +46,7 @@ process PAVE_SOMATIC {
         System.exit(1)
     }
 
-    // Targetted mode
+    // Targeted mode
     def pon_artefact_arg = pon_artefacts ? "-pon_artefact_file ${pon_artefacts}" : ''
     def pathogenic_pass_force_arg = pon_artefacts ? '-force_pathogenic_pass': ''
     def sage_blocklist_regions_arg = sage_blocklist_regions ? "-blacklist_bed ${sage_blocklist_regions}" : ''
