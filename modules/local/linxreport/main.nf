@@ -20,19 +20,19 @@ process LINXREPORT {
     script:
     def args = task.ext.args ?: ''
 
-    def plot_dir = linx_visualiser_dir.resolve('all/').toUriString().replaceAll('/$', '')
+    def plot_dir = linx_visualiser_dir.resolve('all/').toUriString()
 
     """
     # Set input plot directory and create it doesn't exist. See the LINX visualiser module for further info.
-    if [[ ! -e ${plot_dir}/ ]]; then
-        mkdir -p ${plot_dir}/;
+    if [[ ! -e ${plot_dir} ]]; then
+        mkdir -p ${plot_dir};
     fi;
 
     linxreport.R \\
         ${args} \\
         --sample ${meta.sample_id} \\
-        --plot ${plot_dir}/ \\
-        --table ${linx_annotation_dir}/ \\
+        --plot ${plot_dir} \\
+        --table ${linx_annotation_dir} \\
         --out ${meta.sample_id}_linx.html
 
     cat <<-END_VERSIONS > versions.yml
@@ -43,8 +43,6 @@ process LINXREPORT {
     """
 
     stub:
-    def plot_dir = linx_visualiser_dir.resolve('all/').toUriString().replaceAll('/$', '')
-
     """
     touch ${meta.sample_id}_linx.html
     echo -e '${task.process}:\n  stub: noversions\n' > versions.yml
