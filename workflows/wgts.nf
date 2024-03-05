@@ -111,9 +111,6 @@ include { CUSTOM_DUMPSOFTWAREVERSIONS } from '../modules/nf-core/custom/dumpsoft
 // Get absolute file paths
 samplesheet = Utils.getFileObject(params.input)
 
-// TODO(MC): Drop commit 'WIP: Reverting bioconda containers'.
-// TODO(MC): Run full tests for going from .fastq.gz.
-// TODO(MC): Fix warnings.
 workflow WGTS {
     // Create channel for versions
     // channel: [ versions.yml ]
