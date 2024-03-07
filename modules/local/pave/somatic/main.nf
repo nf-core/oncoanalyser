@@ -48,7 +48,6 @@ process PAVE_SOMATIC {
 
     // Targeted mode
     def pon_artefact_arg = pon_artefacts ? "-pon_artefact_file ${pon_artefacts}" : ''
-    def pathogenic_pass_force_arg = pon_artefacts ? '-force_pathogenic_pass': ''
     def sage_blocklist_regions_arg = sage_blocklist_regions ? "-blacklist_bed ${sage_blocklist_regions}" : ''
     def sage_blocklist_sites_arg = sage_blocklist_sites ? "-blacklist_vcf ${sage_blocklist_sites}" : ''
     def clinvar_annotations = clinvar_annotations ? "-clinvar_vcf ${clinvar_annotations}" : ''
@@ -69,7 +68,6 @@ process PAVE_SOMATIC {
         -ensembl_data_dir ${ensembl_data_resources} \\
         ${sage_blocklist_regions_arg} \\
         ${sage_blocklist_sites_arg} \\
-        ${pathogenic_pass_force_arg} \\
         ${gnomad_args} \\
         -read_pass_only \\
         -threads ${task.cpus} \\
