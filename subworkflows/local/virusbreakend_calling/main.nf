@@ -84,9 +84,9 @@ workflow VIRUSBREAKEND_CALLING {
         // Select input sources
         // channel: [ meta, virus_tsv, purple_dir, metrics ]
         ch_virusinterpreter_inputs_selected = WorkflowOncoanalyser.groupByMeta(
-              WorkflowOncoanalyser.restoreMeta(VIRUSBREAKEND.out.tsv, ch_inputs),
-              ch_purple,
-              ch_bamtools_somatic,
+            WorkflowOncoanalyser.restoreMeta(VIRUSBREAKEND.out.tsv, ch_inputs),
+            ch_purple,
+            ch_bamtools_somatic,
         )
             .map { meta, virus_tsv, purple_dir, metrics ->
 

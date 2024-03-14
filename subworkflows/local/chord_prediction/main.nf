@@ -41,16 +41,16 @@ workflow CHORD_PREDICTION {
                 def has_sv_vcf
 
                 if (has_dna) {
-                  tumor_id = Utils.getTumorDnaSampleName(meta)
-                  has_smlv_vcf = purple_dir ? file(purple_dir).resolve("${tumor_id}.purple.somatic.vcf.gz") : []
-                  has_sv_vcf = purple_dir ? file(purple_dir).resolve("${tumor_id}.purple.sv.vcf.gz") : []
+                    tumor_id = Utils.getTumorDnaSampleName(meta)
+                    has_smlv_vcf = purple_dir ? file(purple_dir).resolve("${tumor_id}.purple.somatic.vcf.gz") : []
+                    has_sv_vcf = purple_dir ? file(purple_dir).resolve("${tumor_id}.purple.sv.vcf.gz") : []
                 }
 
                 def has_existing = Utils.hasExistingInput(meta, Constants.INPUT.CHORD_DIR)
 
                 runnable: has_dna && purple_dir && has_smlv_vcf && has_sv_vcf && !has_existing
                 skip: true
-                  return meta
+                    return meta
             }
 
         // Create process input channel
@@ -74,8 +74,8 @@ workflow CHORD_PREDICTION {
 
         // Run process
         CHORD(
-          ch_chord_inputs,
-          genome_version,
+            ch_chord_inputs,
+            genome_version,
         )
 
         ch_versions = ch_versions.mix(CHORD.out.versions)

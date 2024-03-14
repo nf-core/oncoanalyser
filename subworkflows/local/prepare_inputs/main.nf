@@ -13,7 +13,7 @@ import Utils
 
 workflow PREPARE_INPUTS {
     take:
-      input_fp_str
+        input_fp_str
 
     main:
 

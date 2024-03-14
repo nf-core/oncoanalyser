@@ -111,11 +111,11 @@ workflow GRIPSS_FILTERING {
         ch_gripss_somatic_inputs = ch_inputs_somatic_sorted.runnable
             .map { meta, gridss_vcf ->
 
-                  def meta_gripss = [
-                      key: meta.group_id,
-                      id: meta.group_id,
-                      tumor_id: Utils.getTumorDnaSampleName(meta),
-                  ]
+                def meta_gripss = [
+                    key: meta.group_id,
+                    id: meta.group_id,
+                    tumor_id: Utils.getTumorDnaSampleName(meta),
+                ]
 
                 if (Utils.hasNormalDnaBam(meta)) {
                     meta_gripss.normal_id = Utils.getNormalDnaSampleName(meta)

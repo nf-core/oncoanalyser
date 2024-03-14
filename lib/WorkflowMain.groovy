@@ -161,9 +161,9 @@ class WorkflowMain {
 
         // NOTE(SW): this could be moved to the wgts.nf where we check that input files exist
         def null_check = [
-             'genome_fasta',
-             'genome_type',
-             'genome_version',
+            'genome_fasta',
+            'genome_type',
+            'genome_version',
         ]
         null_check.each { k ->
             if (!params[k]) {

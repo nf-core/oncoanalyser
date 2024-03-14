@@ -39,8 +39,8 @@ workflow SIGS_FITTING {
                 def tumor_id
                 def has_smlv_vcf
                 if (has_dna) {
-                  tumor_id = Utils.getTumorDnaSampleName(meta)
-                  has_smlv_vcf = purple_dir ? file(purple_dir).resolve("${tumor_id}.purple.somatic.vcf.gz") : []
+                    tumor_id = Utils.getTumorDnaSampleName(meta)
+                    has_smlv_vcf = purple_dir ? file(purple_dir).resolve("${tumor_id}.purple.somatic.vcf.gz") : []
                 }
 
                 def has_existing = Utils.hasExistingInput(meta, Constants.INPUT.SIGS_DIR)
@@ -70,8 +70,8 @@ workflow SIGS_FITTING {
 
         // Run process
         SIGS(
-          ch_sigs_inputs,
-          sigs_signatures,
+            ch_sigs_inputs,
+            sigs_signatures,
         )
 
         ch_versions = ch_versions.mix(SIGS.out.versions)
