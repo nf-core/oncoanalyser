@@ -1,7 +1,7 @@
 nextflow_workflow {
 
     name "Test GRIPSS subworkflow"
-    script "subworkflows/local/gripss_filtering.nf"
+    script "subworkflows/local/gripss_filtering/main.nf"
     workflow "GRIPSS_FILTERING"
     profile "docker"
 
@@ -9,7 +9,7 @@ nextflow_workflow {
 
         setup {
             run("PREPARE_INPUTS") {
-                script "subworkflows/local/prepare_inputs.nf"
+                script "subworkflows/local/prepare_inputs/main.nf"
                 process {
                     """
                     input[0] = '${baseDir}/tests/samplesheets/wgts.dna_rna.single.csv'

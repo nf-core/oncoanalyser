@@ -1,13 +1,12 @@
 #!/usr/bin/env nextflow
-import Utils
 import Constants
+import Utils
 
 /*
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     nf-core/oncoanalyser
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     Github : https://github.com/nf-core/oncoanalyser
-
     Website: https://nf-co.re/oncoanalyser
     Slack  : https://nfcore.slack.com/channels/oncoanalyser
 ----------------------------------------------------------------------------------------
@@ -17,27 +16,29 @@ nextflow.enable.dsl = 2
 
 /*
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-    GENOME PARAMETER VALUES
+    IMPORT NF-CORE UTILITY FUNCTIONS / SUBWORKFLOWS
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 */
 
-params.ref_data_genome_fasta           = WorkflowMain.getGenomeAttribute(params, 'fasta')
-params.ref_data_genome_fai             = WorkflowMain.getGenomeAttribute(params, 'fai')
-params.ref_data_genome_dict            = WorkflowMain.getGenomeAttribute(params, 'dict')
-params.ref_data_genome_bwa_index       = WorkflowMain.getGenomeAttribute(params, 'bwa_index')
-params.ref_data_genome_bwa_index_image = WorkflowMain.getGenomeAttribute(params, 'bwa_index_image')
-params.ref_data_genome_gridss_index    = WorkflowMain.getGenomeAttribute(params, 'gridss_index')
+include { PIPELINE_INITIALISATION } from './subworkflows/local/utils_nfcore_oncoanalyser_pipeline'
+include { PIPELINE_COMPLETION     } from './subworkflows/local/utils_nfcore_oncoanalyser_pipeline'
+
+include { getGenomeAttribute } from './subworkflows/local/utils_nfcore_oncoanalyser_pipeline'
 
 /*
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-    VALIDATE & PRINT PARAMETER SUMMARY
+    SET DEFAULT VALUES
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 */
 
-WorkflowMain.initialise(workflow, params, log)
+params.ref_data_genome_fasta           = getGenomeAttribute('fasta')
+params.ref_data_genome_fai             = getGenomeAttribute('fai')
+params.ref_data_genome_dict            = getGenomeAttribute('dict')
+params.ref_data_genome_bwa_index       = getGenomeAttribute('bwa_index')
+params.ref_data_genome_bwa_index_image = getGenomeAttribute('bwa_index_image')
+params.ref_data_genome_gridss_index    = getGenomeAttribute('gridss_index')
+
 WorkflowMain.setParamsDefaults(params, log)
-WorkflowMain.validateParams(params, log)
-WorkflowMain.paramsSummaryLog(workflow, params, log)
 
 /*
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -53,15 +54,21 @@ if (workflow.stubRun && params.create_stub_placeholders) {
 
 /*
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-    NAMED WORKFLOW FOR PIPELINE
+    IMPORT WORKFLOWS
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 */
 
-include { TARGETED  } from './workflows/targeted'
-include { WGTS      } from './workflows/wgts'
+include { TARGETED } from './workflows/targeted'
+include { WGTS     } from './workflows/wgts'
+
+/*
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    NAMED WORKFLOWS FOR PIPELINE
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+*/
 
 //
-// WORKFLOW: Run main nf-core/oncoanalyser analysis pipeline
+// WORKFLOW: Run main analysis pipeline depending on type of input
 //
 run_mode = Utils.getRunMode(params.mode, log)
 
@@ -79,36 +86,40 @@ workflow NFCORE_ONCOANALYSER {
 
 /*
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-    RUN ALL WORKFLOWS
+    RUN MAIN WORKFLOW
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 */
 
-//
-// WORKFLOW: Execute a single named workflow for the pipeline
-// See: https://github.com/nf-core/rnaseq/issues/619
-//
 workflow {
+
+    //
+    // SUBWORKFLOW: Run initialisation tasks
+    //
+    PIPELINE_INITIALISATION(
+        params.version,
+        params.help,
+        params.validate_params,
+        params.monochrome_logs,
+        args,
+        params.outdir,
+    )
+
+    //
+    // WORKFLOW: Run main workflow
+    //
     NFCORE_ONCOANALYSER()
-}
 
-/*
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-    COMPLETION EMAIL AND SUMMARY
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-*/
-
-workflow.onComplete {
-
-    def summary_params = NfcoreSchema.paramsSummaryMap(workflow, params)
-
-    if (params.email || params.email_on_fail) {
-        NfcoreTemplate.email(workflow, params, summary_params, projectDir, log)
-    }
-
-    NfcoreTemplate.summary(workflow, params, log)
-    if (params.hook_url) {
-        NfcoreTemplate.adaptivecard(workflow, params, summary_params, projectDir, log)
-    }
+    //
+    // SUBWORKFLOW: Run completion tasks
+    //
+    PIPELINE_COMPLETION(
+        params.email,
+        params.email_on_fail,
+        params.plaintext_email,
+        params.outdir,
+        params.monochrome_logs,
+        params.hook_url,
+    )
 }
 
 /*

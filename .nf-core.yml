@@ -1,1 +1,8 @@
 repository_type: pipeline
+lint:
+  actions_ci: False
+  files_exist:
+    - lib/NfcoreTemplate.groovy
+    - lib/Utils.groovy
+    - lib/WorkflowMain.groovy
+    - lib/WorkflowOncoanalyser.groovy
