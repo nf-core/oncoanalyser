@@ -41,16 +41,16 @@ website](https://nf-co.re/oncoanalyser/results).
 
 The following processes and tools can be run with oncoanalyser:
 
-* SNV and MNV calling (`SAGE`, `PAVE`)
-* SV calling (`SV Prep`, `GRIDSS`, `GRIPSS`, `PURPLE`, `LINX`)
-* CNV calling (`AMBER`, `COBALT`, `PURPLE`)
-* Transcript analysis (`Isofox`)
-* Oncoviral detection (`VIRUSBreakend`, `Virus Interpreter`)
-* HLA calling (`LILAC`)
-* HRD status prediction (`CHORD`)
-* Mutational signature fitting (`Sigs`)
-* Tissue of origin prediction (`CUPPA`)
-* Report generation (`ORANGE`, `linxreport`)
+- SNV and MNV calling (`SAGE`, `PAVE`)
+- SV calling (`SV Prep`, `GRIDSS`, `GRIPSS`, `PURPLE`, `LINX`)
+- CNV calling (`AMBER`, `COBALT`, `PURPLE`)
+- Transcript analysis (`Isofox`)
+- Oncoviral detection (`VIRUSBreakend`, `Virus Interpreter`)
+- HLA calling (`LILAC`)
+- HRD status prediction (`CHORD`)
+- Mutational signature fitting (`Sigs`)
+- Tissue of origin prediction (`CUPPA`)
+- Report generation (`ORANGE`, `linxreport`)
 
 ## Usage
 
@@ -109,9 +109,9 @@ of Melbourne Centre for Cancer Research](https://mdhs.unimelb.edu.au/centre-for-
 We thank the following organisations and people for their extensive assistance in the development of this pipeline,
 listed in alphabetical order:
 
-* [Hartwig Medical Foundation
+- [Hartwig Medical Foundation
   Australia](https://www.hartwigmedicalfoundation.nl/en/partnerships/hartwig-medical-foundation-australia/)
-* Oliver Hofmann
+- Oliver Hofmann
 
 ## Contributions and Support
 
