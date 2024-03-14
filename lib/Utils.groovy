@@ -359,9 +359,9 @@ class Utils {
 
     public static selectCurrentOrExisting(val, meta, key) {
         if (hasExistingInput(meta, key)) {
-          return getInput(meta, key)
+            return getInput(meta, key)
         } else {
-          return val
+            return val
         }
     }
 
