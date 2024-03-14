@@ -70,7 +70,7 @@ workflow LILAC_CALLING {
         // NOTE(SW): the aim of this process is to take reads mapping to ALT contigs and align them to the three
         // relevant HLA genes on chr6. All reads including those previously mapped to chr6 are realigned for
         // consistency.
-        if (params.ref_data_genome_type == 'alt') {
+        if (params.genome_type == 'alt') {
 
             // Flatten into BAM/BAI pairs, select inputs that are eligible to run
             // channel: runnable: [ meta_extra, bam, bai ]

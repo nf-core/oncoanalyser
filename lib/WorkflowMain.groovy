@@ -14,30 +14,30 @@ class WorkflowMain {
         def default_invalid = false
 
         if (params.containsKey('genome_version')) {
-            params.ref_data_genome_version = params.genome_version.toString()
+            params.genome_version = params.genome_version.toString()
         } else if (Constants.GENOMES_VERSION_37.contains(params.genome)) {
-            params.ref_data_genome_version = '37'
+            params.genome_version = '37'
         } else if (Constants.GENOMES_VERSION_38.contains(params.genome)) {
-            params.ref_data_genome_version = '38'
+            params.genome_version = '38'
         } else {
             default_invalid = true
         }
 
         if (params.containsKey('genome_type')) {
-            params.ref_data_genome_type = params.genome_type
+            params.genome_type = params.genome_type
         } else if (Constants.GENOMES_ALT.contains(params.genome)) {
-            params.ref_data_genome_type = 'alt'
+            params.genome_type = 'alt'
         } else if (Constants.GENOMES_DEFINED.contains(params.genome)) {
-            params.ref_data_genome_type = 'no_alt'
+            params.genome_type = 'no_alt'
         } else {
             default_invalid = true
         }
 
-        if (!params.containsKey('ref_data_hmf_data_path')) {
-            if (params.ref_data_genome_version == '37') {
-                params.ref_data_hmf_data_path = Constants.HMF_DATA_37_PATH
-            } else if (params.ref_data_genome_version == '38') {
-                params.ref_data_hmf_data_path = Constants.HMF_DATA_38_PATH
+        if (!params.containsKey('hmf_data_path')) {
+            if (params.genome_version == '37') {
+                params.hmf_data_path = Constants.HMF_DATA_37_PATH
+            } else if (params.genome_version == '38') {
+                params.hmf_data_path = Constants.HMF_DATA_38_PATH
             }
         }
 
@@ -59,11 +59,11 @@ class WorkflowMain {
         if (run_mode === Constants.RunMode.TARGETED) {
 
             // Attempt to set default panel data path; make no assumption on valid 'panel' value
-            if (!params.containsKey('ref_data_panel_data_path') && params.containsKey('panel')) {
-                if (params.panel == 'tso500' && params.ref_data_genome_version == '37') {
-                    params.ref_data_panel_data_path = Constants.TSO500_PANEL_37_PATH
-                } else if (params.panel == 'tso500' && params.ref_data_genome_version == '38') {
-                    params.ref_data_panel_data_path = Constants.TSO500_PANEL_38_PATH
+            if (!params.containsKey('panel_data_path') && params.containsKey('panel')) {
+                if (params.panel == 'tso500' && params.genome_version == '37') {
+                    params.panel_data_path = Constants.TSO500_PANEL_37_PATH
+                } else if (params.panel == 'tso500' && params.genome_version == '38') {
+                    params.panel_data_path = Constants.TSO500_PANEL_38_PATH
                 }
             }
 
@@ -77,14 +77,14 @@ class WorkflowMain {
         )
 
         if (stages.virusinterpreter && run_mode === Constants.RunMode.WGTS) {
-            if (!params.containsKey('ref_data_virusbreakenddb_path')) {
-                params.ref_data_virusbreakenddb_path = Constants.VIRUSBREAKENDDB_PATH
+            if (!params.containsKey('virusbreakenddb_path')) {
+                params.virusbreakenddb_path = Constants.VIRUSBREAKENDDB_PATH
             }
         }
 
         if (stages.lilac) {
-            if (params.ref_data_genome_version == '38' && params.ref_data_genome_type == 'alt' && !params.containsKey('ref_data_hla_slice_bed')) {
-                params.ref_data_hla_slice_bed = Constants.HLA_SLICE_BED_GRCH38_ALT_PATH
+            if (params.genome_version == '38' && params.genome_type == 'alt' && !params.containsKey('hla_slice_bed')) {
+                params.hla_slice_bed = Constants.HLA_SLICE_BED_GRCH38_ALT_PATH
             }
         }
 
@@ -134,7 +134,7 @@ class WorkflowMain {
             }
         }
 
-        if (!params.ref_data_genome_version) {
+        if (!params.genome_version) {
             log.error "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n" +
                 "  Genome version wasn't provided and genome '${params.genome}' is not defined in   \n" +
                 "  genome version list.\n" +
@@ -144,7 +144,7 @@ class WorkflowMain {
             System.exit(1)
         }
 
-        if (!params.ref_data_genome_type) {
+        if (!params.genome_type) {
             log.error "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n" +
                 "  Genome type wasn't provided and genome '${params.genome}' is not defined in      \n" +
                 "  genome type list.\n" +
@@ -154,16 +154,16 @@ class WorkflowMain {
             System.exit(1)
         }
 
-        if (!params.ref_data_hmf_data_path) {
+        if (!params.hmf_data_path) {
             log.error "ERROR: HMF data path wasn't provided"
             System.exit(1)
         }
 
         // NOTE(SW): this could be moved to the wgts.nf where we check that input files exist
         def null_check = [
-             'ref_data_genome_fasta',
-             'ref_data_genome_type',
-             'ref_data_genome_version',
+             'genome_fasta',
+             'genome_type',
+             'genome_version',
         ]
         null_check.each { k ->
             if (!params[k]) {

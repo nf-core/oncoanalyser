@@ -131,24 +131,24 @@ class Utils {
     public static void createStubPlaceholders(params) {
 
         def fps = [
-            params.ref_data_genome_fasta,
-            params.ref_data_genome_fai,
-            params.ref_data_genome_dict,
-            params.ref_data_genome_bwa_index,
-            params.ref_data_genome_bwa_index_image,
-            params.ref_data_genome_gridss_index,
-            params.ref_data_virusbreakenddb_path,
+            params.genome_fasta,
+            params.genome_fai,
+            params.genome_dict,
+            params.genome_bwa_index,
+            params.genome_bwa_index_image,
+            params.genome_gridss_index,
+            params.virusbreakenddb_path,
         ]
 
-        params.hmf_data_paths[params.ref_data_genome_version]
+        params.hmf_data_paths[params.genome_version]
             .each { k, v ->
-                fps << "${params.ref_data_hmf_data_path.replaceAll('/$', '')}/${v}"
+                fps << "${params.hmf_data_path.replaceAll('/$', '')}/${v}"
             }
 
         if(params.containsKey('panel')) {
-            params.panel_data_paths[params.panel][params.ref_data_genome_version]
+            params.panel_data_paths[params.panel][params.genome_version]
                 .each { k, v ->
-                    fps << "${params.ref_data_panel_data_path.replaceAll('/$', '')}/${v}"
+                    fps << "${params.panel_data_path.replaceAll('/$', '')}/${v}"
                 }
         }
 

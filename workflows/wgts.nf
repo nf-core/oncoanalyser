@@ -33,12 +33,12 @@ if (run_config.stages.gridss) {
 
 // Mode check required as evaluated regardless of workflow selection
 if (run_config.stages.virusinterpreter && run_config.mode !== Constants.RunMode.TARGETED) {
-    checkPathParamList.add(params.ref_data_virusbreakenddb_path)
+    checkPathParamList.add(params.virusbreakenddb_path)
 }
 
 if (run_config.stages.lilac) {
-    if (params.ref_data_genome_version == '38' && params.ref_data_genome_type == 'alt' && params.containsKey('ref_data_hla_slice_bed')) {
-        checkPathParamList.add(params.ref_data_hla_slice_bed)
+    if (params.genome_version == '38' && params.genome_type == 'alt' && params.containsKey('hla_slice_bed')) {
+        checkPathParamList.add(params.hla_slice_bed)
     }
 }
 
@@ -50,13 +50,6 @@ if (params.input) { ch_input = file(params.input) } else { exit 1, 'Input sample
 
 // Create Path objects for some input files
 linx_gene_id_file = params.linx_gene_id_file ? file(params.linx_gene_id_file) : []
-
-/*
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-    CONFIG FILES
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-*/
-
 
 /*
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -575,7 +568,7 @@ workflow WGTS {
     if (run_config.stages.lilac) {
 
         // Use HLA slice BED if provided in params or set as default requirement
-        ref_data_hla_slice_bed = params.containsKey('ref_data_hla_slice_bed') ? params.ref_data_hla_slice_bed : []
+        ref_data_hla_slice_bed = params.containsKey('hla_slice_bed') ? params.hla_slice_bed : []
 
         LILAC_CALLING(
             ch_inputs,

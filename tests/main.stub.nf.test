@@ -15,8 +15,8 @@ nextflow_pipeline {
                 input "${baseDir}/tests/samplesheets/wgts.dna_rna.single.stub.csv"
                 outdir "${outputDir}"
 
-                ref_data_virusbreakenddb_path "${workDir}/reference_data/virusbreakenddb_20210401/"
-                ref_data_hmf_data_path "${workDir}/reference_data/hmf_data/"
+                virusbreakenddb_path "${workDir}/reference_data/virusbreakenddb_20210401/"
+                hmf_data_path "${workDir}/reference_data/hmf_data/"
 
                 max_cpus = 1
                 max_memory = "10.GB"
@@ -44,9 +44,9 @@ nextflow_pipeline {
                 input "${baseDir}/tests/samplesheets/targeted.tso500.dna_rna.single.stub.csv"
                 outdir "${outputDir}"
 
-                ref_data_virusbreakenddb_path "${workDir}/reference_data/virusbreakenddb_20210401/"
-                ref_data_hmf_data_path "${workDir}/reference_data/hmf_data/"
-                ref_data_panel_data_path "${workDir}/reference_data/panel_data/"
+                virusbreakenddb_path "${workDir}/reference_data/virusbreakenddb_20210401/"
+                hmf_data_path "${workDir}/reference_data/hmf_data/"
+                panel_data_path "${workDir}/reference_data/panel_data/"
 
                 max_cpus 1
                 max_memory "10.GB"
