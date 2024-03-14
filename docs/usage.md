@@ -6,61 +6,141 @@
 
 ## Introduction
 
-<!-- TODO nf-core: Add documentation about anything specific to running your pipeline. For general topics, please point to (and add to) the main nf-core website. -->
+The oncoanalyser pipeline typically runs from FASTQs or BAMs and supports two modes: (1) whole genome and/or
+transcriptome, and (2) targeted panel. Launching an analysis requires only the creation of a samplesheet that describes
+details of each input such as the sample type (tumor or normal), sequence type (DNA or RNA), and filepath.
 
-## Samplesheet input
+Various aspects of an oncoanalyser analysis can be configured to fit a range of needs, and many of these are considered
+[advanced usage](#advanced-usage) of the pipeline. The most useful include:
 
-You will need to create a samplesheet with information about the samples you would like to analyse before running the pipeline. Use this parameter to specify its location. It has to be a comma-separated file with 3 columns, and a header row as shown in the examples below.
+- precise process selection
+- starting from existing data
+- granular control over resource data
 
-```bash
---input '[path to samplesheet file]'
-```
+These features enable oncoanalyser to be run in a highly flexible way. For example, an analysis can be run with existing
+PURPLE data as the starting point and skip variant calling processes. Additionally, resource/reference data can staged
+locally to optimise execution or modified to create user-defined driver gene panels.
 
-### Multiple runs of the same sample
+> [!WARNING]
+> There are important requirements when using BAMs as input instead of FASTQs:
+>   - STAR must have been run with [specific
+>     parameters](https://github.com/hartwigmedical/hmftools/tree/master/isofox#a-note-on-alignment-and-multi-mapping),
+>     this is critical for WTS data, and
+>   - reads are expected to have been aligned to one of the Hartwig-distributed reference genomes (user-defined genomes may be used though are not recommended)
 
-The `sample` identifiers have to be the same when you have re-sequenced the same sample more than once e.g. to increase sequencing depth. The pipeline will concatenate the raw reads before performing any downstream analysis. Below is an example for the same sample sequenced across 3 lanes:
+## Supported analyses
+
+A variety of analyses are accessible in oncoanalyser and are implicitly run according to the data available in the
+samplesheet. The supported analysis types for each workflow are listed below.
+
+| Input sequence data                       | WGS/WTS workflow   | Targeted sequencing workflow<sup>\*</sup> |
+| ---                                       | :-:                | :-:                                       |
+| • Tumor/normal DNA<br />• Tumor RNA       | :white_check_mark: | -                                         |
+| • Tumor only DNA<br />• Tumor RNA         | :white_check_mark: | :white_check_mark:                        |
+| • Tumor/normal DNA                        | :white_check_mark: | -                                         |
+| • Tumor only DNA                          | :white_check_mark: | :white_check_mark:                        |
+| • Tumor only RNA                          | :white_check_mark: | -                                         |
+
+<sub><sup>\*</sup> Supported analyses relate to the TSO500 panel only</sub>
+
+## Samplesheet
+
+A samplesheet that contains information of each input in CSV format is needed to run oncoanalyser. The required input
+details and columns are [described below](#column-descriptions).
+
+The oncoanalyser pipeline also recognises several input filetypes, including intermediate output files generated during
+execution such as the PURPLE output directory. The full list recognised input filetypes is available
+[here](https://github.com/nf-core/oncoanalyser/blob/v0.3.1/lib/Constants.groovy#L56-L86).
+
+### Simple example
+
+#### FASTQ
+
+> [!NOTE]
+> Currently only non-interleaved paired-end reads are accepted as FASTQ input
 
 ```csv title="samplesheet.csv"
-sample,fastq_1,fastq_2
-CONTROL_REP1,AEG588A1_S1_L002_R1_001.fastq.gz,AEG588A1_S1_L002_R2_001.fastq.gz
-CONTROL_REP1,AEG588A1_S1_L003_R1_001.fastq.gz,AEG588A1_S1_L003_R2_001.fastq.gz
-CONTROL_REP1,AEG588A1_S1_L004_R1_001.fastq.gz,AEG588A1_S1_L004_R2_001.fastq.gz
+group_id,subject_id,sample_id,sample_type,sequence_type,filetype,info,filepath
+P1__wgts,P1,SA,normal,dna,fastq,library_id:SA_library;lane:001,/path/to/P1.SA.normal.dna.wgs.001.R1.fastq.gz;/path/to/P1.SA.normal.dna.wgs.001.R2.fastq.gz
+P1__wgts,P1,SB,tumor,dna,fastq,library_id:SB_library;lane:001,/path/to/P1.SB.tumor.dna.wgs.001.R1.fastq.gz;/path/to/P1.SB.tumor.dna.wgs.001.R2.fastq.gz
+P1__wgts,P1,SC,tumor,rna,fastq,library_id:SC_library;lane:001,/path/to/P1.SC.tumor.rna.wts.001.R1.fastq.gz;/path/to/P1.SC.tumor.rna.wts.001.R2.fastq.gz
 ```
 
-### Full samplesheet
+#### BAM
 
-The pipeline will auto-detect whether a sample is single- or paired-end using the information provided in the samplesheet. The samplesheet can have as many columns as you desire, however, there is a strict requirement for the first 3 columns to match those defined in the table below.
-
-A final samplesheet file consisting of both single- and paired-end data may look something like the one below. This is for 6 samples, where `TREATMENT_REP3` has been sequenced twice.
+> [!NOTE]
+> Inputs with the `bam` filetype will be processed by MarkDups as required by hmftools. Where an input BAM has already
+> been processed by MarkDups, you can avoid needless reprocessing by setting `bam_markdups` as the filetype instead.
+>
+> Please note there are important requirements around the use of BAMs, see the warning above in the
+> [Introduction](#introduction).
 
 ```csv title="samplesheet.csv"
-sample,fastq_1,fastq_2
-CONTROL_REP1,AEG588A1_S1_L002_R1_001.fastq.gz,AEG588A1_S1_L002_R2_001.fastq.gz
-CONTROL_REP2,AEG588A2_S2_L002_R1_001.fastq.gz,AEG588A2_S2_L002_R2_001.fastq.gz
-CONTROL_REP3,AEG588A3_S3_L002_R1_001.fastq.gz,AEG588A3_S3_L002_R2_001.fastq.gz
-TREATMENT_REP1,AEG588A4_S4_L003_R1_001.fastq.gz,
-TREATMENT_REP2,AEG588A5_S5_L003_R1_001.fastq.gz,
-TREATMENT_REP3,AEG588A6_S6_L003_R1_001.fastq.gz,
-TREATMENT_REP3,AEG588A6_S6_L004_R1_001.fastq.gz,
+group_id,subject_id,sample_id,sample_type,sequence_type,filetype,filepath
+P1__wgts,P1,SA,normal,dna,bam,/path/to/P1.SA.normal.dna.wgs.bam
+P1__wgts,P1,SB,tumor,dna,bam,/path/to/P1.SB.tumor.dna.wgs.bam
+P1__wgts,P1,SC,tumor,rna,bam,/path/to/P1.SC.tumor.rna.wts.bam
 ```
 
-| Column    | Description                                                                                                                                                                            |
-| --------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `sample`  | Custom sample name. This entry will be identical for multiple sequencing libraries/runs from the same sample. Spaces in sample names are automatically converted to underscores (`_`). |
-| `fastq_1` | Full path to FastQ file for Illumina short reads 1. File has to be gzipped and have the extension ".fastq.gz" or ".fq.gz".                                                             |
-| `fastq_2` | Full path to FastQ file for Illumina short reads 2. File has to be gzipped and have the extension ".fastq.gz" or ".fq.gz".                                                             |
+### Multiple lanes
 
-An [example samplesheet](../assets/samplesheet.csv) has been provided with the pipeline.
+```csv title="samplesheet.csv"
+group_id,subject_id,sample_id,sample_type,sequence_type,filetype,info,filepath
+P1__wgts,P1,SA,normal,dna,fastq,library_id:SA_library;lane:001,/path/to/P1.SA.normal.dna.wgs.001.R1.fastq.gz;/path/to/P1.SA.normal.dna.wgs.001.R2.fastq.gz
+P1__wgts,P1,SA,normal,dna,fastq,library_id:SA_library;lane:002,/path/to/P1.SA.normal.dna.wgs.002.R1.fastq.gz;/path/to/P1.SA.normal.dna.wgs.002.R2.fastq.gz
+P1__wgts,P1,SB,tumor,dna,fastq,library_id:SB_library;lane:001,/path/to/P1.SB.tumor.dna.wgs.001.R1.fastq.gz;/path/to/P1.SB.tumor.dna.wgs.001.R2.fastq.gz
+P1__wgts,P1,SB,tumor,dna,fastq,library_id:SB_library;lane:002,/path/to/P1.SB.tumor.dna.wgs.002.R1.fastq.gz;/path/to/P1.SB.tumor.dna.wgs.002.R2.fastq.gz
+P1__wgts,P1,SC,tumor,rna,fastq,library_id:SC_library;lane:001,/path/to/P1.SC.tumor.rna.wts.001.R1.fastq.gz;/path/to/P1.SC.tumor.rna.wts.001.R2.fastq.gz
+```
+
+### Multiple patients
+
+```csv title="samplesheet.csv"
+group_id,subject_id,sample_id,sample_type,sequence_type,filetype,info,filepath
+P1__wgts,P1,SA,normal,dna,fastq,library_id:SA_library;lane:001,/path/to/P1.SA.normal.dna.wgs.001.R1.fastq.gz;/path/to/P1.SA.normal.dna.wgs.001.R2.fastq.gz
+P1__wgts,P1,SB,tumor,dna,fastq,library_id:SB_library;lane:001,/path/to/P1.SB.tumor.dna.wgs.001.R1.fastq.gz;/path/to/P1.SB.tumor.dna.wgs.001.R2.fastq.gz
+P2__wgts,P2,SA,normal,dna,fastq,library_id:SA_library;lane:001,/path/to/P2.SA.normal.dna.wgs.001.R1.fastq.gz;/path/to/P2.SA.normal.dna.wgs.001.R2.fastq.gz
+P2__wgts,P2,SB,tumor,dna,fastq,library_id:SB_library;lane:001,/path/to/P2.SB.tumor.dna.wgs.001.R1.fastq.gz;/path/to/P2.SB.tumor.dna.wgs.001.R2.fastq.gz
+```
+
+### Column descriptions
+
+| Column        | Description                                                          |
+| ---           | ---                                                                  |
+| group_id      | Group ID for a set of samples and inputs                             |
+| subject_id    | Subject/patient ID                                                   |
+| sample_id     | Sample ID                                                            |
+| sample_type   | Sample type: `tumor`, `normal`                                       |
+| sequence_type | Sequence type: `dna`, `rna`                                          |
+| filetype      | File type: e.g. `fastq`, `bam`, `bai`                                |
+| filepath      | Absolute filepath to input file (can be local filepath, URL, S3 URI) |
+
+The identifiers provided in the samplesheet are used to set output file paths:
+
+* `group_id`: top-level output directory for analysis files e.g. `output/COLO829_example/`
+* tumor `sample_id`: output prefix for most filenames e.g. `COLO829T.purple.sv.vcf.gz`
+* normal `sample_id`: output prefix for some filenames e.g. `COLO829R.cobalt.ratio.pcf`
 
 ## Running the pipeline
 
 The typical command for running the pipeline is as follows:
 
 ```bash
-nextflow run nf-core/oncoanalyser --input ./samplesheet.csv --outdir ./results --genome GRCh37 -profile docker
+nextflow run nf-core/oncoanalyser \
+  -profile docker \
+  -revision v0.3.1 \
+  --mode <wgts|targeted> \
+  --genome <GRCh37_hmf|GRCh38_hmf> \
+  --input samplesheet.csv \
+  --outdir <output_directory>
 ```
 
 This will launch the pipeline with the `docker` configuration profile. See below for more information about profiles.
+
+> [!NOTE]
+> When oncoanalyser is run, it will retrieve all reference data it requires to perform the requested analysis. When
+> running oncoanalyser more than once, it is strongly recommended to pre-stage reference data locally to avoid it being
+> retrieved multiple times by oncoanalyser. See [Staging reference data](#staging-reference-data).
 
 Note that the pipeline will create the following files in your working directory:
 
@@ -117,6 +197,127 @@ To further assist in reproducbility, you can use share and re-use [parameter fil
 :::tip
 If you wish to share such profile (such as upload as supplementary material for academic publications), make sure to NOT include cluster specific paths to files, nor institutional specific profiles.
 :::
+
+## Advanced usage
+
+### Selecting processes
+
+Most of the major components in oncoanalyser can be skipped using `--processes_exclude` (the full list of available
+processes can be view [here](https://github.com/nf-core/oncoanalyser/blob/v0.3.1/lib/Constants.groovy#L36-L54)).
+Multiple processes can be given as comma-separated list. While there are some use-cases for this feature (e.g. skipping
+resource intensive processes such as VIRUSBreakend), it becomes more powerful when combined with existing inputs as
+described in the follow section.
+
+> [!WARNING]
+> When skipping components, no checks are done to identify orphan processes in the execution DAG or for redundant
+> processes.
+
+### Existing inputs
+
+The oncoanalyser pipeline has been designed to allow entry at arbiturary points and is particularly useful in
+situtations where previous outputs exist and re-running oncoanalyser is desired (e.g. to subsequently execute an
+optional sensor or use an upgrade component such as PURPLE). The primary advantage of this approach is that only the
+required processes are executed, which can greatly reduce runtimes by skipping unneccessary processes.
+
+In order to effectively utilise this feature, existing inputs must be set in the [samplesheet](#samplesheet) and the
+appropriate [processes selected](#selecting-processes). Take the below example where existing PURPLE inputs are used so
+that all upstream variant calling can be skipped:
+
+```csv title='samplesheet.existing_purple.csv'
+P1__wgts,P1,SA,normal,dna,bam,/path/to/P1.SA.normal.dna.wgs.bam
+P1__wgts,P1,SB,tumor,dna,bam,/path/to/P1.SB.tumor.dna.wgs.bam
+P1__wgts,P1,SB,tumor,dna,purple_dir,/path/to/P1.purple_dir/
+```
+
+> [!NOTE]
+> The original source input file (i.e. BAM or FASTQ) must always be provided for oncoanalyser to infer the correct
+> analysis type.
+
+And now run and skip variant calling:
+
+```bash
+nextflow run nf-core/oncoanalyser \
+  -profile docker \
+  -revision v0.3.1 \
+  --mode wgts \
+  --processes_exclude amber,cobalt,gridss,gripss,sage,pave \
+  --genome GRCh38_hmf \
+  --input samplesheet.csv \
+  --outdir output/
+```
+
+> [!WARNING]
+> Providing existing inputs will cause oncoanalyser to skip the corresponding process but *not any* of the upstream
+> processes.
+
+### Configuring reference data
+
+All reference data can be configured as needed. These are defined in various locations:
+
+| Reference data          | Filepath                  | Note                                    |
+| ---                     | ---                       | ---                                     |
+| hmftools resource files | `conf/hmf_data.config`    | Paths relative to data bundle directory |
+| panel resource files    | `conf/panel_data.config`  | Paths relative to data bundle directory |
+| Genomes and indexes     | `conf/hmf_genomes.config` | Absolute paths                          |
+
+To override hmftools resource files (e.g. driver gene panel), [stage the bundle](#staging-reference-data) locally then
+copy in the desired file(s) and update `conf/hmf_data.config` accordingly. The local custom bundle must be provided to
+oncoanalyser with the `--ref_data_hmf_data_path` CLI option. The same approach is followed for customising panel
+resource files, configuring `conf/panel_data.config` and supplying with `--ref_data_panel_data_path` instead.
+
+The path or URI to the VIRUSBreakend database can also be explicitly set with `--ref_data_virusbreakenddb_path`.
+Configuring custom genomes uses a different approach to align with the existing concepts in nf-core.
+
+#### Custom genomes
+
+It is strongly recommended to use the Hartwig-distributed reference genomes for alignments
+([GRCh37](https://console.cloud.google.com/storage/browser/hmf-public/HMFtools-Resources/ref_genome/37) or
+[GRCh38](https://console.cloud.google.com/storage/browser/hmf-public/HMFtools-Resources/ref_genome/38)). If there is no
+other option than to use a custom genome, one can be configured with the following process:
+
+```text title='genome.custom.config'
+params {
+    genomes {
+        CustomGenome {
+            fasta           = "/path/to/CustomGenome/custom_genome.fa"
+            fai             = "/path/to/CustomGenome/samtools_index/1.16/custom_genome.fa.fai"
+            dict            = "/path/to/CustomGenome/samtools_index/1.16/custom_genome.fa.dict"
+            bwa_index       = "/path/to/CustomGenome/bwa_index/0.7.17-r1188/"
+            bwa_index_bseq  = "/path/to/CustomGenome/bwa_index/2.2.1/GCA_000001405.15_GRCh38_no_alt_analysis_set.fna.0123"
+            bwa_index_biidx = "/path/to/CustomGenome/bwa_index/2.2.1/GCA_000001405.15_GRCh38_no_alt_analysis_set.fna.bwt.2bit.64"
+            bwa_index_image = "/path/to/CustomGenome/bwa_index_image/0.7.17-r1188/custom_genome.fa.img"
+            gridss_index    = "/path/to/CustomGenome/gridss_index/2.13.2/custom_genome.fa.gridsscache"
+            star_index      = "/path/to/CustomGenome/star_index/gencode_38/2.7.3a/"
+        }
+    }
+}
+```
+
+Run a custom genome with the above configuration and below command
+
+```bash
+nextflow run nf-core/oncoanalyser \
+  -profile docker \
+  -revision v0.3.1 \
+  -config genome.custom.config \
+  --mode wgts \
+  \
+  --genome CustomGenome \
+  --genome_version <37|38> \
+  --genome_type <alt|no_alt> \
+  --force_genome \
+  \
+  --input samplesheet.csv \
+  --outdir output/
+```
+
+> [!WARNING]
+> RNA alignment with STAR must use an index generated from a matching Ensembl release version (GRCh37: v74; GRCh38:
+> v104).
+
+#### Staging reference data
+
+Please refer to [REFERENCE_DATA.md](https://github.com/nf-core/oncoanalyser/REFERENCE_DATA.md).
 
 ## Core Nextflow arguments
 
