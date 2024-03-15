@@ -145,7 +145,7 @@ class Utils {
                 fps << "${params.hmf_data_path.replaceAll('/$', '')}/${v}"
             }
 
-        if(params.containsKey('panel')) {
+        if(params.panel !== null) {
             params.panel_data_paths[params.panel][params.ref_data.genome_version]
                 .each { k, v ->
                     fps << "${params.panel_data_path.replaceAll('/$', '')}/${v}"
