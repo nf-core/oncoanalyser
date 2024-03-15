@@ -5,7 +5,7 @@ Download and unpack
 > All reference data is retrieved here, exclude unused files as desired; using GRCh38_hmf below
 
 ```bash
-base_url=https://pub-29f2e5b2b7384811bdbbcba44f8b5083.r2.dev/genomes
+base_url=https://pub-29f2e5b2b7384811bdbbcba44f8b5083.r2.dev
 
 fps='
 genomes/GRCh37_hmf/Homo_sapiens.GRCh37.GATK.illumina.fasta
