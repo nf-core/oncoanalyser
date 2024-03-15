@@ -67,7 +67,7 @@ output/
   - [LILAC](#lilac) - HLA calling
 - [HRD status prediction](#hrd-status-prediction)
   - [CHORD](#chord) - HRD status prediction
-- [Mutational signature fitting](#mutation-signature-fitting)
+- [Mutational signature fitting](#mutational-signature-fitting)
   - [Sigs](#sigs) - Mutational signature fitting
 - [Tissue of origin prediction](#tissue-of-origin-prediction)
   - [CUPPA](#cuppa) - Tissue of origin prediction
