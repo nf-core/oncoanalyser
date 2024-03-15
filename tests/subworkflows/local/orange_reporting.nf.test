@@ -1,7 +1,7 @@
 nextflow_workflow {
 
     name "Test ORANGE subworkflow"
-    script "subworkflows/local/orange_reporting.nf"
+    script "subworkflows/local/orange_reporting/main.nf"
     workflow "ORANGE_REPORTING"
     profile "docker"
 
@@ -9,7 +9,7 @@ nextflow_workflow {
 
         setup {
             run("PREPARE_INPUTS") {
-                script "subworkflows/local/prepare_inputs.nf"
+                script "subworkflows/local/prepare_inputs/main.nf"
                 process {
                     """
                     input[0] = '${baseDir}/tests/samplesheets/wgts.dna_rna.single.csv'

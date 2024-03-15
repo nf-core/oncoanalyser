@@ -1,7 +1,7 @@
 nextflow_workflow {
 
     name "Test SAGE append subworkflow"
-    script "subworkflows/local/sage_append.nf"
+    script "subworkflows/local/sage_append/main.nf"
     workflow "SAGE_APPEND"
     profile "docker"
 
@@ -9,7 +9,7 @@ nextflow_workflow {
 
         setup {
             run("PREPARE_INPUTS") {
-                script "subworkflows/local/prepare_inputs.nf"
+                script "subworkflows/local/prepare_inputs/main.nf"
                 process {
                     """
                     input[0] = '${baseDir}/tests/samplesheets/wgts.dna_rna.single.csv'

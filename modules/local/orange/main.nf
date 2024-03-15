@@ -67,7 +67,7 @@ process ORANGE {
         purple_dir_local=purple__prepared;
 
         if [[ -d \${purple_dir_local}/ ]]; then
-          rm -r \${purple_dir_local}/;
+            rm -r \${purple_dir_local}/;
         fi
 
         cp -rL ${purple_dir} \${purple_dir_local}/
@@ -105,45 +105,45 @@ process ORANGE {
         --add-opens java.base/java.time=ALL-UNNAMED \\
         -Xmx${Math.round(task.memory.bytes * 0.95)} \\
         -jar \${orange_jar} \\
-          \\
-          -experiment_date \$(date +%y%m%d) \\
-          -add_disclaimer \\
-          -pipeline_version_file pipeline_version.txt \\
-          \\
-          -tumor_sample_id ${meta.tumor_id} \\
-          -primary_tumor_doids 162 \\
-          -tumor_sample_wgs_metrics_file ${bam_metrics_somatic} \\
-          -tumor_sample_flagstat_file ${flagstat_somatic} \\
-          -sage_dir ${sage_somatic_dir} \\
-          -purple_dir \${purple_dir_local} \\
-          -purple_plot_dir \${purple_dir_local}/plot/ \\
-          -linx_dir ${linx_somatic_anno_dir} \\
-          -linx_plot_dir ${plot_dir}/ \\
-          -lilac_dir ${lilac_dir} \\
-          ${virus_dir_arg} \\
-          ${chord_dir_arg} \\
-          ${sigs_dir_arg} \\
-          ${cuppa_dir_arg} \\
-          \\
-          ${normal_id_arg} \\
-          ${normal_metrics_arg} \\
-          ${normal_flagstat_arg} \\
-          ${normal_sage_dir} \\
-          ${normal_linx_arg} \\
-          \\
-          ${rna_id_arg} \\
-          ${isofox_dir_arg} \\
-          \\
-          -ref_genome_version ${genome_ver} \\
-          -doid_json ${disease_ontology} \\
-          -cohort_mapping_tsv ${cohort_mapping} \\
-          -cohort_percentiles_tsv ${cohort_percentiles} \\
-          -known_fusion_file ${known_fusion_data} \\
-          -driver_gene_panel ${driver_gene_panel} \\
-          -ensembl_data_dir ${ensembl_data_resources} \\
-          ${isofox_gene_distribution_arg} \\
-          ${isofox_alt_sj_arg} \\
-          -output_dir output/
+            \\
+            -experiment_date \$(date +%y%m%d) \\
+            -add_disclaimer \\
+            -pipeline_version_file pipeline_version.txt \\
+            \\
+            -tumor_sample_id ${meta.tumor_id} \\
+            -primary_tumor_doids 162 \\
+            -tumor_sample_wgs_metrics_file ${bam_metrics_somatic} \\
+            -tumor_sample_flagstat_file ${flagstat_somatic} \\
+            -sage_dir ${sage_somatic_dir} \\
+            -purple_dir \${purple_dir_local} \\
+            -purple_plot_dir \${purple_dir_local}/plot/ \\
+            -linx_dir ${linx_somatic_anno_dir} \\
+            -linx_plot_dir ${plot_dir}/ \\
+            -lilac_dir ${lilac_dir} \\
+            ${virus_dir_arg} \\
+            ${chord_dir_arg} \\
+            ${sigs_dir_arg} \\
+            ${cuppa_dir_arg} \\
+            \\
+            ${normal_id_arg} \\
+            ${normal_metrics_arg} \\
+            ${normal_flagstat_arg} \\
+            ${normal_sage_dir} \\
+            ${normal_linx_arg} \\
+            \\
+            ${rna_id_arg} \\
+            ${isofox_dir_arg} \\
+            \\
+            -ref_genome_version ${genome_ver} \\
+            -doid_json ${disease_ontology} \\
+            -cohort_mapping_tsv ${cohort_mapping} \\
+            -cohort_percentiles_tsv ${cohort_percentiles} \\
+            -known_fusion_file ${known_fusion_data} \\
+            -driver_gene_panel ${driver_gene_panel} \\
+            -ensembl_data_dir ${ensembl_data_resources} \\
+            ${isofox_gene_distribution_arg} \\
+            ${isofox_alt_sj_arg} \\
+            -output_dir output/
 
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":
