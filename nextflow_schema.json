@@ -152,8 +152,7 @@
                 },
                 "virusbreakenddb_path": {
                     "type": "string",
-                    "format": "directory-path",
-                    "description": "Path to VIRUSBreakend database.",
+                    "description": "Path to VIRUSBreakend database (directory or tarball).",
                     "fa_icon": "far fa-file-code"
                 },
                 "hla_slice_bed": {
@@ -202,8 +201,7 @@
                 },
                 "genome_bwa_index": {
                     "type": "string",
-                    "format": "directory-path",
-                    "description": "Path to directory containing reference genome BWA indices.",
+                    "description": "Path to reference genome BWA indices (directory or tarball).",
                     "fa_icon": "far fa-file-code",
                     "hidden": true
                 },
