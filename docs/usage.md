@@ -49,8 +49,8 @@ samplesheet. The supported analysis types for each workflow are listed below.
 A samplesheet that contains information of each input in CSV format is needed to run oncoanalyser. The required input
 details and columns are [described below](#column-descriptions).
 
-The oncoanalyser pipeline also recognises several input filetypes, including intermediate output files generated during
-execution such as the PURPLE output directory. The full list recognised input filetypes is available
+Several different input filetypes beyond FASTQ and BAM are recognised, including intermediate output files generated
+during execution such as the PURPLE output directory. The full list of recognised input filetypes is available
 [here](https://github.com/nf-core/oncoanalyser/blob/v0.3.1/lib/Constants.groovy#L56-L86).
 
 ### Simple example
@@ -114,6 +114,7 @@ P2__wgts,P2,SB,tumor,dna,fastq,library_id:SB_library;lane:001,/path/to/P2.SB.tum
 | sample_type   | Sample type: `tumor`, `normal`                                       |
 | sequence_type | Sequence type: `dna`, `rna`                                          |
 | filetype      | File type: e.g. `fastq`, `bam`, `bai`                                |
+| info          | Additional input information: `library_id`, `lane`, `cancer_type`    |
 | filepath      | Absolute filepath to input file (can be local filepath, URL, S3 URI) |
 
 The identifiers provided in the samplesheet are used to set output file paths:
@@ -139,9 +140,9 @@ nextflow run nf-core/oncoanalyser \
 This will launch the pipeline with the `docker` configuration profile. See below for more information about profiles.
 
 > [!NOTE]
-> When oncoanalyser is run, it will retrieve all reference data it requires to perform the requested analysis. When
-> running oncoanalyser more than once, it is strongly recommended to pre-stage reference data locally to avoid it being
-> retrieved multiple times by oncoanalyser. See [Staging reference data](#staging-reference-data).
+> Reference data will be retrieved by oncoanalyser for every analysis run. It is therefore strongly recommended when
+> running multiple analyses to pre-stage reference data locally to avoid it being retrieved multiple times. See [Staging
+> reference data](#staging-reference-data).
 
 Note that the pipeline will create the following files in your working directory:
 
@@ -215,16 +216,17 @@ described in the follow section.
 
 ### Existing inputs
 
-The oncoanalyser pipeline has been designed to allow entry at arbiturary points and is particularly useful in
+The oncoanalyser pipeline has been designed to allow entry at arbitrary points, which is particularly useful in
 situtations where previous outputs exist and re-running oncoanalyser is desired (e.g. to subsequently execute an
 optional sensor or use an upgrade component such as PURPLE). The primary advantage of this approach is that only the
-required processes are executed, which can greatly reduce runtimes by skipping unneccessary processes.
+required processes are executed, reducing costs and runtimes by skipping unneccessary processes.
 
 In order to effectively utilise this feature, existing inputs must be set in the [samplesheet](#samplesheet) and the
 appropriate [processes selected](#selecting-processes). Take the below example where existing PURPLE inputs are used so
 that all upstream variant calling can be skipped:
 
 ```csv title='samplesheet.existing_purple.csv'
+group_id,subject_id,sample_id,sample_type,sequence_type,filetype,filepath
 P1__wgts,P1,SA,normal,dna,bam,/path/to/P1.SA.normal.dna.wgs.bam
 P1__wgts,P1,SB,tumor,dna,bam,/path/to/P1.SB.tumor.dna.wgs.bam
 P1__wgts,P1,SB,tumor,dna,purple_dir,/path/to/P1.purple_dir/
@@ -249,7 +251,7 @@ nextflow run nf-core/oncoanalyser \
 
 > [!WARNING]
 > Providing existing inputs will cause oncoanalyser to skip the corresponding process but _not any_ of the upstream
-> processes.
+> processes. It is the responsibility of the user to skip all relevant processes.
 
 ### Configuring reference data
 
@@ -257,14 +259,14 @@ All reference data can be configured as needed. These are defined in various loc
 
 | Reference data          | Filepath                  | Note                                    |
 | ----------------------- | ------------------------- | --------------------------------------- |
-| hmftools resource files | `conf/hmf_data.config`    | Paths relative to data bundle directory |
-| panel resource files    | `conf/panel_data.config`  | Paths relative to data bundle directory |
 | Genomes and indexes     | `conf/hmf_genomes.config` | Absolute paths                          |
+| hmftools resource files | `conf/hmf_data.config`    | Paths relative to data bundle directory |
+| Panel resource files    | `conf/panel_data.config`  | Paths relative to data bundle directory |
 
 To override hmftools resource files (e.g. driver gene panel), [stage the bundle](#staging-reference-data) locally then
-copy in the desired file(s) and update `conf/hmf_data.config` accordingly. The local custom bundle must be provided to
-oncoanalyser with the `--ref_data_hmf_data_path` CLI option. The same approach is followed for customising panel
-resource files, configuring `conf/panel_data.config` and supplying with `--ref_data_panel_data_path` instead.
+copy in the user-created file(s) and update `conf/hmf_data.config` accordingly. The local custom bundle must be provided
+to oncoanalyser with the `--ref_data_hmf_data_path` CLI option. The same approach is followed for customising panel
+resource files but configuring `conf/panel_data.config` and supplying with `--ref_data_panel_data_path` instead.
 
 The path or URI to the VIRUSBreakend database can also be explicitly set with `--ref_data_virusbreakenddb_path`.
 Configuring custom genomes uses a different approach to align with the existing concepts in nf-core.
