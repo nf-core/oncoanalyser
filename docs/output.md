@@ -86,14 +86,14 @@ hmftools.
 [bwa-mem2](https://github.com/bwa-mem2/bwa-mem2) is a short-read mapping tool used to align reads to a large reference
 sequences. In oncoanalyser, bwa-mem2 is used to align DNA reads to the human genome.
 
-*No outputs are published directly from bwa-mem2, see [MarkDups](#markdups) for the fully processed alignment outputs*
+_No outputs are published directly from bwa-mem2, see [MarkDups](#markdups) for the fully processed alignment outputs_
 
 #### STAR
 
 [STAR](https://github.com/alexdobin/STAR) is a specialised mapping to used to align RNA reads to a reference
 transcriptome.
 
-*No outputs are published directly from STAR, see [Picard MarkDuplicates](#picard-markduplicates) for the fully processed alignment outputs*
+_No outputs are published directly from STAR, see [Picard MarkDuplicates](#picard-markduplicates) for the fully processed alignment outputs_
 
 ### Alignment post-processing
 
@@ -116,7 +116,7 @@ transcriptome.
 routines such as duplicate marking and unmapping of problematic regions. It can also handle UMIs when configured to do
 so.
 
-*MarkDups is only run on DNA alignments*
+_MarkDups is only run on DNA alignments_
 
 ### Picard MarkDuplicates
 
@@ -133,7 +133,7 @@ so.
 [Picard MarkDuplicates](https://gatk.broadinstitute.org/hc/en-us/articles/360037052812-MarkDuplicates-Picard) used to
 mark duplicate reads following alignment.
 
-*Picard MarkDuplicates is only run on RNA alignments*
+_Picard MarkDuplicates is only run on RNA alignments_
 
 ### SNV, MNV, INDEL calling
 
@@ -143,10 +143,12 @@ mark duplicate reads following alignment.
 <summary>Output files</summary>
 
 - `<group_id>/sage/append/`
+
   - `<tumor_dna_id>.sage.append.vcf.gz`: Tumor DNA sample small variant VCF with RNA data appended.
   - `<normal_dna_id>.sage.append.vcf.gz`: Normal DNA sample small variant VCF with RNA data appended..
 
 - `<group_id>/sage/somatic/`
+
   - `<normal_dna_id>.sage.bqr.png`: Normal DNA sample base quality recalibration metrics plot.
   - `<normal_dna_id>.sage.bqr.tsv`: Normal DNA sample base quality recalibration metrics.
   - `<tumor_dna_id>.sage.bqr.png`: Tumor DNA sample base quality recalibration metrics plot.
@@ -198,7 +200,7 @@ information with regards to transcript and coding effects.
 [SvPrep](https://github.com/hartwigmedical/hmftools/tree/master/sv-prep) runs prior to SV calling to reducing runtime by
 rapidly identifying reads that are likely to be involved in a SV event.
 
-*No outputs are published directly from SvPrep, see [GRIPSS](#gripss) for the fully processed SV calling outputs*
+_No outputs are published directly from SvPrep, see [GRIPSS](#gripss) for the fully processed SV calling outputs_
 
 #### GRIDSS
 
@@ -220,6 +222,7 @@ breakend/breakpoint assemblies to call variants.
 <summary>Output files</summary>
 
 - `<group_id>/gripss/germline/`
+
   - `<tumor_dna_id>.gripss.filtered.germline.vcf.gz`: Filtered GRIDSS germline structural variants.
   - `<tumor_dna_id>.gripss.filtered.germline.vcf.gz.tbi`: Filtered GRIDSS germline structural variants index.
   - `<tumor_dna_id>.gripss.germline.vcf.gz`: GRIDSS structural variants (GRIPSS filters set but not applied).
@@ -319,6 +322,7 @@ purity/ploidy and annotates both small and structural variant calls with copy-nu
 <summary>Output files</summary>
 
 - `<group_id>/linx/germline_annotations/`
+
   - `linx.version`: LINX version file.
   - `<tumor_dna_id>.linx.germline.breakend.tsv`: Normal DNA sample breakend data.
   - `<tumor_dna_id>.linx.germline.clusters.tsv`: Normal DNA sample clustered events.
@@ -328,6 +332,7 @@ purity/ploidy and annotates both small and structural variant calls with copy-nu
   - `<tumor_dna_id>.linx.germline.svs.tsv`: Normal DNA sample structural variants.
 
 - `<group_id>/linx/somatic_annotations/`
+
   - `linx.version`: LINX version file.
   - `<tumor_dna_id>.linx.breakend.tsv`: Tumor DNA sample breakend data.
   - `<tumor_dna_id>.linx.clusters.tsv`: Tumor DNA sample clustered events.
