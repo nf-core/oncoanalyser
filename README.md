@@ -73,12 +73,12 @@ Launch oncoanalyser:
 
 ```bash
 nextflow run nf-core/oncoanalyser \
-  -profile docker \
-  -revision 1.0.0 \
-  --mode wgts \
-  --genome GRCh38_hmf \
-  --input samplesheet.csv \
-  --outdir output/
+   -revision v0.4.0 \
+   -profile docker \
+   --mode wgts \
+   --genome GRCh38_hmf \
+   --input samplesheet.csv \
+   --outdir output/
 ```
 
 > [!WARNING]
