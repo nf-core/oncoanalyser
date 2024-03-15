@@ -57,6 +57,7 @@
                 "force_genome": {
                     "type": "boolean",
                     "description": "Skip check for restricted genome.",
+                    "default": false,
                     "fa_icon": "fas fa-palette"
                 },
                 "processes_manual": {
@@ -133,6 +134,20 @@
                     "description": "Name of genome reference.",
                     "fa_icon": "fas fa-book"
                 },
+                "genome_version": {
+                    "type": "string",
+                    "description": "Version of reference genome.",
+                    "fa_icon": "far fa-file-code",
+                    "enum": ["37", "38"],
+                    "hidden": true
+                },
+                "genome_type": {
+                    "type": "string",
+                    "description": "Type of reference genome.",
+                    "fa_icon": "far fa-file-code",
+                    "enum": ["alt", "no_alt"],
+                    "hidden": true
+                },
                 "igenomes_ignore": {
                     "type": "boolean",
                     "description": "Do not load the iGenomes reference config.",
@@ -160,66 +175,6 @@
                     "pattern": "^\\S+\\.bed$",
                     "description": "Path to HLA slice BED file.",
                     "fa_icon": "far fa-file-code"
-                },
-                "genome_fasta": {
-                    "type": "string",
-                    "format": "file-path",
-                    "pattern": "^\\S+\\.fn?a(sta)?(\\.gz)?$",
-                    "description": "Path to reference genome FASTA file.",
-                    "fa_icon": "far fa-file-code",
-                    "hidden": true
-                },
-                "genome_version": {
-                    "type": "string",
-                    "description": "Version of reference genome.",
-                    "fa_icon": "far fa-file-code",
-                    "enum": ["37", "38"],
-                    "hidden": true
-                },
-                "genome_type": {
-                    "type": "string",
-                    "description": "Type of reference genome.",
-                    "fa_icon": "far fa-file-code",
-                    "enum": ["alt", "no_alt"],
-                    "hidden": true
-                },
-                "genome_fai": {
-                    "type": "string",
-                    "format": "file-path",
-                    "pattern": "^\\S+\\.fai$",
-                    "description": "Path to reference genome FAI file.",
-                    "fa_icon": "far fa-file-code",
-                    "hidden": true
-                },
-                "genome_dict": {
-                    "type": "string",
-                    "format": "file-path",
-                    "pattern": "^\\S+\\.dict$",
-                    "description": "Path to reference genome sequence dictionary file.",
-                    "fa_icon": "far fa-file-code",
-                    "hidden": true
-                },
-                "genome_bwa_index": {
-                    "type": "string",
-                    "description": "Path to reference genome BWA indices (directory or tarball).",
-                    "fa_icon": "far fa-file-code",
-                    "hidden": true
-                },
-                "genome_bwa_index_image": {
-                    "type": "string",
-                    "format": "file-path",
-                    "pattern": "^\\S+\\.img$",
-                    "description": "Path to reference genome BWA indices image file.",
-                    "fa_icon": "far fa-file-code",
-                    "hidden": true
-                },
-                "genome_gridss_index": {
-                    "type": "string",
-                    "format": "file-path",
-                    "pattern": "^\\S+\\.gridsscache$",
-                    "description": "Path to reference genome GRIDSS index file.",
-                    "fa_icon": "far fa-file-code",
-                    "hidden": true
                 }
             }
         },

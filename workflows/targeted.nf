@@ -29,14 +29,14 @@ def checkPathParamList = [
 
 // Conditional requirements
 if (run_config.stages.gridss) {
-    if (params.containsKey('gridss_config')) {
+    if (params.gridss_config !== null) {
         checkPathParamList.add(params.gridss_config)
     }
 }
 
 if (run_config.stages.lilac) {
-    if (params.genome_version == '38' && params.genome_type == 'alt' && params.containsKey('hla_slice_bed')) {
-        checkPathParamList.add(params.hla_slice_bed)
+    if (params.ref_data.genome_version == '38' && params.ref_data.genome_type == 'alt' && params.ref_data.containsKey('hla_slice_bed')) {
+        checkPathParamList.add(params.ref_data.hla_slice_bed)
     }
 }
 
@@ -102,7 +102,7 @@ workflow TARGETED {
     panel_data = PREPARE_REFERENCE.out.panel_data
 
     // Set GRIDSS config
-    gridss_config = params.containsKey('gridss_config') ? file(params.gridss_config) : hmf_data.gridss_config
+    gridss_config = params.gridss_config !== null ? file(params.gridss_config) : hmf_data.gridss_config
 
     //
     // MODULE: Run Isofox to analyse RNA data
@@ -113,6 +113,7 @@ workflow TARGETED {
 
         isofox_counts = params.isofox_counts ? file(params.isofox_counts) : panel_data.isofox_counts
         isofox_gc_ratios = params.isofox_gc_ratios ? file(params.isofox_gc_ratios) : panel_data.isofox_gc_ratios
+        isofox_read_length = params.isofox_read_length !== null ? params.isofox_read_length : Constants.DEFAULT_ISOFOX_READ_LENGTH_TARGETED
 
         isofox_gene_ids = params.isofox_gene_ids ? file(params.isofox_gene_ids) : panel_data.isofox_gene_ids
         isofox_tpm_norm = params.isofox_tpm_norm ? file(params.isofox_tpm_norm) : panel_data.isofox_tpm_norm
@@ -128,7 +129,7 @@ workflow TARGETED {
             isofox_gene_ids,
             isofox_tpm_norm,
             params.isofox_functions,
-            params.isofox_read_length,
+            isofox_read_length,
         )
 
         ch_versions = ch_versions.mix(ISOFOX_QUANTIFICATION.out.versions)
@@ -521,7 +522,7 @@ workflow TARGETED {
     if (run_config.stages.lilac) {
 
         // Set HLA slice BED if provided in params
-        ref_data_hla_slice_bed = params.containsKey('hla_slice_bed') ? params.hla_slice_bed : []
+        ref_data_hla_slice_bed = params.ref_data.containsKey('hla_slice_bed') ? params.ref_data.hla_slice_bed : []
 
         LILAC_CALLING(
             ch_inputs,

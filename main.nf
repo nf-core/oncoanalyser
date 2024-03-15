@@ -31,14 +31,21 @@ include { getGenomeAttribute } from './subworkflows/local/utils_nfcore_oncoanaly
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 */
 
-params.genome_fasta           = getGenomeAttribute('fasta')
-params.genome_fai             = getGenomeAttribute('fai')
-params.genome_dict            = getGenomeAttribute('dict')
-params.genome_bwa_index       = getGenomeAttribute('bwa_index')
-params.genome_bwa_index_image = getGenomeAttribute('bwa_index_image')
-params.genome_gridss_index    = getGenomeAttribute('gridss_index')
+// Reference config lifted up into params.ref_data to conform to standards/linting
+params.ref_data = [
+    genome: params.genome,
+    force_genome: params.force_genome,
+]
+
+params.ref_data.genome_fasta           = getGenomeAttribute('fasta')
+params.ref_data.genome_fai             = getGenomeAttribute('fai')
+params.ref_data.genome_dict            = getGenomeAttribute('dict')
+params.ref_data.genome_bwa_index       = getGenomeAttribute('bwa_index')
+params.ref_data.genome_bwa_index_image = getGenomeAttribute('bwa_index_image')
+params.ref_data.genome_gridss_index    = getGenomeAttribute('gridss_index')
 
 WorkflowMain.setParamsDefaults(params, log)
+WorkflowMain.validateParams(params, log)
 
 /*
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
