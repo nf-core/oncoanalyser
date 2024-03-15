@@ -23,23 +23,24 @@ locally to optimise execution or modified to create user-defined driver gene pan
 
 > [!WARNING]
 > There are important requirements when using BAMs as input instead of FASTQs:
->   - STAR must have been run with [specific
->     parameters](https://github.com/hartwigmedical/hmftools/tree/master/isofox#a-note-on-alignment-and-multi-mapping),
->     this is critical for WTS data, and
->   - reads are expected to have been aligned to one of the Hartwig-distributed reference genomes (user-defined genomes may be used though are not recommended)
+>
+> - STAR must have been run with [specific
+>   parameters](https://github.com/hartwigmedical/hmftools/tree/master/isofox#a-note-on-alignment-and-multi-mapping),
+>   this is critical for WTS data, and
+> - reads are expected to have been aligned to one of the Hartwig-distributed reference genomes (user-defined genomes may be used though are not recommended)
 
 ## Supported analyses
 
 A variety of analyses are accessible in oncoanalyser and are implicitly run according to the data available in the
 samplesheet. The supported analysis types for each workflow are listed below.
 
-| Input sequence data                       | WGS/WTS workflow   | Targeted sequencing workflow<sup>\*</sup> |
-| ---                                       | :-:                | :-:                                       |
-| • Tumor/normal DNA<br />• Tumor RNA       | :white_check_mark: | -                                         |
-| • Tumor only DNA<br />• Tumor RNA         | :white_check_mark: | :white_check_mark:                        |
-| • Tumor/normal DNA                        | :white_check_mark: | -                                         |
-| • Tumor only DNA                          | :white_check_mark: | :white_check_mark:                        |
-| • Tumor only RNA                          | :white_check_mark: | -                                         |
+| Input sequence data                 |  WGS/WTS workflow  | Targeted sequencing workflow<sup>\*</sup> |
+| ----------------------------------- | :----------------: | :---------------------------------------: |
+| • Tumor/normal DNA<br />• Tumor RNA | :white_check_mark: |                     -                     |
+| • Tumor only DNA<br />• Tumor RNA   | :white_check_mark: |            :white_check_mark:             |
+| • Tumor/normal DNA                  | :white_check_mark: |                     -                     |
+| • Tumor only DNA                    | :white_check_mark: |            :white_check_mark:             |
+| • Tumor only RNA                    | :white_check_mark: |                     -                     |
 
 <sub><sup>\*</sup> Supported analyses relate to the TSO500 panel only</sub>
 
@@ -106,7 +107,7 @@ P2__wgts,P2,SB,tumor,dna,fastq,library_id:SB_library;lane:001,/path/to/P2.SB.tum
 ### Column descriptions
 
 | Column        | Description                                                          |
-| ---           | ---                                                                  |
+| ------------- | -------------------------------------------------------------------- |
 | group_id      | Group ID for a set of samples and inputs                             |
 | subject_id    | Subject/patient ID                                                   |
 | sample_id     | Sample ID                                                            |
@@ -117,9 +118,9 @@ P2__wgts,P2,SB,tumor,dna,fastq,library_id:SB_library;lane:001,/path/to/P2.SB.tum
 
 The identifiers provided in the samplesheet are used to set output file paths:
 
-* `group_id`: top-level output directory for analysis files e.g. `output/COLO829_example/`
-* tumor `sample_id`: output prefix for most filenames e.g. `COLO829T.purple.sv.vcf.gz`
-* normal `sample_id`: output prefix for some filenames e.g. `COLO829R.cobalt.ratio.pcf`
+- `group_id`: top-level output directory for analysis files e.g. `output/COLO829_example/`
+- tumor `sample_id`: output prefix for most filenames e.g. `COLO829T.purple.sv.vcf.gz`
+- normal `sample_id`: output prefix for some filenames e.g. `COLO829R.cobalt.ratio.pcf`
 
 ## Running the pipeline
 
@@ -247,7 +248,7 @@ nextflow run nf-core/oncoanalyser \
 ```
 
 > [!WARNING]
-> Providing existing inputs will cause oncoanalyser to skip the corresponding process but *not any* of the upstream
+> Providing existing inputs will cause oncoanalyser to skip the corresponding process but _not any_ of the upstream
 > processes.
 
 ### Configuring reference data
@@ -255,7 +256,7 @@ nextflow run nf-core/oncoanalyser \
 All reference data can be configured as needed. These are defined in various locations:
 
 | Reference data          | Filepath                  | Note                                    |
-| ---                     | ---                       | ---                                     |
+| ----------------------- | ------------------------- | --------------------------------------- |
 | hmftools resource files | `conf/hmf_data.config`    | Paths relative to data bundle directory |
 | panel resource files    | `conf/panel_data.config`  | Paths relative to data bundle directory |
 | Genomes and indexes     | `conf/hmf_genomes.config` | Absolute paths                          |

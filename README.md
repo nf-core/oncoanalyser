@@ -30,7 +30,7 @@ available in oncoanalyser. The targeted sequencing workflow has built-in support
 custom panels with externally-generated normalisation data.
 
 The key analysis results for each sample are summarised and presented in an ORANGE report (summary page excerpt shown
-below from *[COLO829_wgts.orange_report.pdf](https://pub-29f2e5b2b7384811bdbbcba44f8b5083.r2.dev/oncoanalyser/other/example_report/COLO829_wgts.orange_report.pdf)*):
+below from _[COLO829_wgts.orange_report.pdf](https://pub-29f2e5b2b7384811bdbbcba44f8b5083.r2.dev/oncoanalyser/other/example_report/COLO829_wgts.orange_report.pdf)_):
 
 <p align='center'><img width='750' src='docs/images/COLO829_wgts.orange_report.summary_section.png'></p>
 
@@ -107,7 +107,7 @@ Each release that is given extended support is allocated a separate long-lived g
 
 Versions nominated to have current long-term support:
 
-* TBD
+- TBD
 
 ### Release parity
 
@@ -116,7 +116,7 @@ equivalence of these two pieces of software. The functional/feature parity with 
 in the below table.
 
 | oncoanalyser        | hmftools |
-| ---                 | ---      |
+| ------------------- | -------- |
 | 0.1.0 through 0.2.7 | 5.33     |
 | 0.3.0 through 0.3.1 | 5.34     |
 
