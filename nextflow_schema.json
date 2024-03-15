@@ -2,7 +2,7 @@
     "$schema": "http://json-schema.org/draft-07/schema",
     "$id": "https://raw.githubusercontent.com/nf-core/oncoanalyser/master/nextflow_schema.json",
     "title": "nf-core/oncoanalyser pipeline parameters",
-    "description": "A comprehensive cancer NGS analysis and reporting pipeline",
+    "description": "A comprehensive cancer DNA/RNA analysis and reporting pipeline",
     "type": "object",
     "definitions": {
         "input_output_options": {
