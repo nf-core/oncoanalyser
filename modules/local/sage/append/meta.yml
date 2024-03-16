@@ -9,7 +9,7 @@ tools:
       description: A precise and highly sensitive somatic SNV, MNV and small INDEL caller.
       homepage: https://github.com/hartwigmedical/hmftools/tree/master/sage
       documentation: https://github.com/hartwigmedical/hmftools/tree/master/sage
-      licence: ['GPL v3']
+      licence: ["GPL v3"]
 input:
   - meta:
       type: map

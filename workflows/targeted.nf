@@ -29,14 +29,14 @@ def checkPathParamList = [
 
 // Conditional requirements
 if (run_config.stages.gridss) {
-    if (params.containsKey('gridss_config')) {
+    if (params.gridss_config !== null) {
         checkPathParamList.add(params.gridss_config)
     }
 }
 
 if (run_config.stages.lilac) {
-    if (params.ref_data_genome_version == '38' && params.ref_data_genome_type == 'alt' && params.containsKey('ref_data_hla_slice_bed')) {
-        checkPathParamList.add(params.ref_data_hla_slice_bed)
+    if (params.ref_data.genome_version == '38' && params.ref_data.genome_type == 'alt' && params.ref_data.containsKey('hla_slice_bed')) {
+        checkPathParamList.add(params.ref_data.hla_slice_bed)
     }
 }
 
@@ -51,20 +51,12 @@ linx_gene_id_file = params.linx_gene_id_file ? file(params.linx_gene_id_file) : 
 
 /*
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-    CONFIG FILES
+    IMPORT MODULES / SUBWORKFLOWS / FUNCTIONS
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 */
 
+include { softwareVersionsToYAML } from '../subworkflows/nf-core/utils_nfcore_pipeline'
 
-/*
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-    IMPORT LOCAL MODULES/SUBWORKFLOWS
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-*/
-
-//
-// SUBWORKFLOWS
-//
 include { AMBER_PROFILING       } from '../subworkflows/local/amber_profiling'
 include { BAMTOOLS_METRICS      } from '../subworkflows/local/bamtools_metrics'
 include { COBALT_PROFILING      } from '../subworkflows/local/cobalt_profiling'
@@ -84,17 +76,6 @@ include { READ_ALIGNMENT_RNA    } from '../subworkflows/local/read_alignment_rna
 include { READ_PROCESSING       } from '../subworkflows/local/read_processing'
 include { SAGE_APPEND           } from '../subworkflows/local/sage_append'
 include { SAGE_CALLING          } from '../subworkflows/local/sage_calling'
-
-/*
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-    IMPORT NF-CORE MODULES/SUBWORKFLOWS
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-*/
-
-//
-// MODULES
-//
-include { CUSTOM_DUMPSOFTWAREVERSIONS } from '../modules/nf-core/custom/dumpsoftwareversions/main'
 
 /*
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -123,7 +104,7 @@ workflow TARGETED {
     panel_data = PREPARE_REFERENCE.out.panel_data
 
     // Set GRIDSS config
-    gridss_config = params.containsKey('gridss_config') ? file(params.gridss_config) : hmf_data.gridss_config
+    gridss_config = params.gridss_config !== null ? file(params.gridss_config) : hmf_data.gridss_config
 
     //
     // SUBWORKFLOW: Run read alignment to generate BAMs
@@ -209,6 +190,7 @@ workflow TARGETED {
 
         isofox_counts = params.isofox_counts ? file(params.isofox_counts) : panel_data.isofox_counts
         isofox_gc_ratios = params.isofox_gc_ratios ? file(params.isofox_gc_ratios) : panel_data.isofox_gc_ratios
+        isofox_read_length = params.isofox_read_length !== null ? params.isofox_read_length : Constants.DEFAULT_ISOFOX_READ_LENGTH_TARGETED
 
         isofox_gene_ids = params.isofox_gene_ids ? file(params.isofox_gene_ids) : panel_data.isofox_gene_ids
         isofox_tpm_norm = params.isofox_tpm_norm ? file(params.isofox_tpm_norm) : panel_data.isofox_tpm_norm
@@ -225,7 +207,7 @@ workflow TARGETED {
             isofox_gene_ids,
             isofox_tpm_norm,
             params.isofox_functions,
-            params.isofox_read_length,
+            isofox_read_length,
         )
 
         ch_versions = ch_versions.mix(ISOFOX_QUANTIFICATION.out.versions)
@@ -631,7 +613,7 @@ workflow TARGETED {
     if (run_config.stages.lilac) {
 
         // Set HLA slice BED if provided in params
-        ref_data_hla_slice_bed = params.containsKey('ref_data_hla_slice_bed') ? params.ref_data_hla_slice_bed : []
+        ref_data_hla_slice_bed = params.ref_data.containsKey('hla_slice_bed') ? params.ref_data.hla_slice_bed : []
 
         LILAC_CALLING(
             ch_inputs,
@@ -702,11 +684,15 @@ workflow TARGETED {
     }
 
     //
-    // MODULE: Pipeline reporting
+    // TASK: Aggregate software versions
     //
-    CUSTOM_DUMPSOFTWAREVERSIONS(
-        ch_versions.unique().collectFile(name: 'collated_versions.yml')
-    )
+    softwareVersionsToYAML(ch_versions)
+        .collectFile(
+            storeDir: "${params.outdir}/pipeline_info",
+            name: 'software_versions.yml',
+            sort: true,
+            newLine: true,
+        )
 }
 
 /*

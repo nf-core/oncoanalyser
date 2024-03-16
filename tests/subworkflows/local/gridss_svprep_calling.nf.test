@@ -1,7 +1,7 @@
 nextflow_workflow {
 
     name "Test SvPrep subworkflow"
-    script "subworkflows/local/gridss_svprep_calling.nf"
+    script "subworkflows/local/gridss_svprep_calling/main.nf"
     workflow "GRIDSS_SVPREP_CALLING"
     profile "docker"
 
@@ -9,7 +9,7 @@ nextflow_workflow {
 
         setup {
             run("PREPARE_INPUTS") {
-                script "subworkflows/local/prepare_inputs.nf"
+                script "subworkflows/local/prepare_inputs/main.nf"
                 process {
                     """
                     input[0] = '${baseDir}/tests/samplesheets/wgts.dna_rna.single.csv'

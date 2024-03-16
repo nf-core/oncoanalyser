@@ -196,24 +196,26 @@ class Utils {
     public static void createStubPlaceholders(params) {
 
         def fps = [
-            params.ref_data_genome_fasta,
-            params.ref_data_genome_fai,
-            params.ref_data_genome_dict,
-            params.ref_data_genome_bwa_index,
-            params.ref_data_genome_bwa_index_image,
-            params.ref_data_genome_gridss_index,
-            params.ref_data_virusbreakenddb_path,
+            params.ref_data.genome_fasta,
+            params.ref_data.genome_fai,
+            params.ref_data.genome_dict,
+            params.ref_data.genome_bwa_index,
+            params.ref_data.genome_bwa_index_image,
+            params.ref_data.genome_bwa_index_bseq,
+            params.ref_data.genome_bwa_index_biidx,
+            params.ref_data.genome_gridss_index,
+            params.ref_data.virusbreakenddb_path,
         ]
 
-        params.hmf_data_paths[params.ref_data_genome_version]
+        params.hmf_data_paths[params.ref_data.genome_version]
             .each { k, v ->
-                fps << "${params.ref_data_hmf_data_path.replaceAll('/$', '')}/${v}"
+                fps << "${params.hmf_data_path.replaceAll('/$', '')}/${v}"
             }
 
-        if(params.containsKey('panel')) {
-            params.panel_data_paths[params.panel][params.ref_data_genome_version]
+        if(params.panel !== null) {
+            params.panel_data_paths[params.panel][params.ref_data.genome_version]
                 .each { k, v ->
-                    fps << "${params.ref_data_panel_data_path.replaceAll('/$', '')}/${v}"
+                    fps << "${params.panel_data_path.replaceAll('/$', '')}/${v}"
                 }
         }
 
@@ -311,45 +313,6 @@ class Utils {
                 System.exit(1)
             }
 
-        }
-    }
-
-    //
-    // When running with -profile conda, warn if channels have not been set-up appropriately
-    //
-    public static void checkCondaChannels(log) {
-        Yaml parser = new Yaml()
-        def channels = []
-        try {
-            def config = parser.load("conda config --show channels".execute().text)
-            channels = config.channels
-        } catch(NullPointerException | IOException e) {
-            log.warn "Could not verify conda channel configuration."
-            return
-        }
-
-        // Check that all channels are present
-        // This channel list is ordered by required channel priority.
-        def required_channels_in_order = ['conda-forge', 'bioconda', 'defaults']
-        def channels_missing = ((required_channels_in_order as Set) - (channels as Set)) as Boolean
-
-        // Check that they are in the right order
-        def channel_priority_violation = false
-        def n = required_channels_in_order.size()
-        for (int i = 0; i < n - 1; i++) {
-            channel_priority_violation |= !(channels.indexOf(required_channels_in_order[i]) < channels.indexOf(required_channels_in_order[i+1]))
-        }
-
-        if (channels_missing | channel_priority_violation) {
-            log.warn "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n" +
-                "  There is a problem with your Conda configuration!\n\n" +
-                "  You will need to set-up the conda-forge and bioconda channels correctly.\n" +
-                "  Please refer to https://bioconda.github.io/\n" +
-                "  The observed channel order is \n" +
-                "  ${channels}\n" +
-                "  but the following channel order is required:\n" +
-                "  ${required_channels_in_order}\n" +
-                "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
         }
     }
 
@@ -536,9 +499,9 @@ class Utils {
 
     public static selectCurrentOrExisting(val, meta, key) {
         if (hasExistingInput(meta, key)) {
-          return getInput(meta, key)
+            return getInput(meta, key)
         } else {
-          return val
+            return val
         }
     }
 

@@ -12,7 +12,7 @@ tools:
       description: Annotates small variant VCF with gene, transcript coding and protein effects.
       homepage: https://github.com/hartwigmedical/hmftools/tree/master/pave
       documentation: https://github.com/hartwigmedical/hmftools/tree/master/pave
-      licence: ['GPL v3']
+      licence: ["GPL v3"]
 input:
   - meta:
       type: map

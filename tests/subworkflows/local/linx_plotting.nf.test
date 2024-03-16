@@ -1,7 +1,7 @@
 nextflow_workflow {
 
     name "Test LINX plotting subworkflow"
-    script "subworkflows/local/linx_plotting.nf"
+    script "subworkflows/local/linx_plotting/main.nf"
     workflow "LINX_PLOTTING"
     profile "docker"
 
@@ -9,7 +9,7 @@ nextflow_workflow {
 
         setup {
             run("PREPARE_INPUTS") {
-                script "subworkflows/local/prepare_inputs.nf"
+                script "subworkflows/local/prepare_inputs/main.nf"
                 process {
                     """
                     input[0] = '${baseDir}/tests/samplesheets/wgts.dna_rna.single.csv'

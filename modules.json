@@ -7,13 +7,7 @@
                 "nf-core": {
                     "bwa/index": {
                         "branch": "master",
-                        "git_sha": "9518fa4f65f3fb8cde24fde7d40333b39ec8fd65",
-                        "installed_by": ["modules"],
-                        "patch": "modules/nf-core/bwa/index/bwa-index.diff"
-                    },
-                    "custom/dumpsoftwareversions": {
-                        "branch": "master",
-                        "git_sha": "8022c68e7403eecbd8ba9c49496f69f8c49d50f0",
+                        "git_sha": "90aef30f432332bdf0ce9f4b9004aa5d5c4960bb",
                         "installed_by": ["modules"]
                     },
                     "samtools/dict": {
@@ -28,9 +22,27 @@
                     },
                     "samtools/flagstat": {
                         "branch": "master",
-                        "git_sha": "c8e35eb2055c099720a75538d1b8adb3fb5a464c",
-                        "installed_by": ["modules"],
-                        "patch": "modules/nf-core/samtools/flagstat/samtools-flagstat.diff"
+                        "git_sha": "bbb99cb8d679555cc01c98766de7869f83283545",
+                        "installed_by": ["modules"]
+                    }
+                }
+            },
+            "subworkflows": {
+                "nf-core": {
+                    "utils_nextflow_pipeline": {
+                        "branch": "master",
+                        "git_sha": "5caf7640a9ef1d18d765d55339be751bb0969dfa",
+                        "installed_by": ["subworkflows"]
+                    },
+                    "utils_nfcore_pipeline": {
+                        "branch": "master",
+                        "git_sha": "5caf7640a9ef1d18d765d55339be751bb0969dfa",
+                        "installed_by": ["subworkflows"]
+                    },
+                    "utils_nfvalidation_plugin": {
+                        "branch": "master",
+                        "git_sha": "5caf7640a9ef1d18d765d55339be751bb0969dfa",
+                        "installed_by": ["subworkflows"]
                     }
                 }
             }

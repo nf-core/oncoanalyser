@@ -58,8 +58,8 @@ process CHORD {
 
     cat('[INFO] Performing chord HRD prediction\\n')
     prediction <- chordPredict(
-      signatures,
-      hrd.cutoff=0.5
+        signatures,
+        hrd.cutoff=0.5
     )
 
     cat('[INFO] Writing output file:', sigOutTxt,'\\n')

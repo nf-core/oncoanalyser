@@ -26,19 +26,19 @@ def checkPathParamList = [
 
 // Conditional requirements
 if (run_config.stages.gridss) {
-    if (params.containsKey('gridss_config')) {
+    if (params.gridss_config !== null) {
         checkPathParamList.add(params.gridss_config)
     }
 }
 
 // Mode check required as evaluated regardless of workflow selection
 if (run_config.stages.virusinterpreter && run_config.mode !== Constants.RunMode.TARGETED) {
-    checkPathParamList.add(params.ref_data_virusbreakenddb_path)
+    checkPathParamList.add(params.virusbreakenddb_path)
 }
 
 if (run_config.stages.lilac) {
-    if (params.ref_data_genome_version == '38' && params.ref_data_genome_type == 'alt' && params.containsKey('ref_data_hla_slice_bed')) {
-        checkPathParamList.add(params.ref_data_hla_slice_bed)
+    if (params.ref_data.genome_version == '38' && params.ref_data.genome_type == 'alt' && params.ref_data.containsKey('hla_slice_bed')) {
+        checkPathParamList.add(params.ref_data.hla_slice_bed)
     }
 }
 
@@ -53,20 +53,12 @@ linx_gene_id_file = params.linx_gene_id_file ? file(params.linx_gene_id_file) : 
 
 /*
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-    CONFIG FILES
+    IMPORT MODULES / SUBWORKFLOWS / FUNCTIONS
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 */
 
+include { softwareVersionsToYAML } from '../subworkflows/nf-core/utils_nfcore_pipeline'
 
-/*
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-    IMPORT LOCAL MODULES/SUBWORKFLOWS
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-*/
-
-//
-// SUBWORKFLOWS
-//
 include { AMBER_PROFILING       } from '../subworkflows/local/amber_profiling'
 include { BAMTOOLS_METRICS      } from '../subworkflows/local/bamtools_metrics'
 include { CHORD_PREDICTION      } from '../subworkflows/local/chord_prediction'
@@ -90,17 +82,6 @@ include { SAGE_APPEND           } from '../subworkflows/local/sage_append'
 include { SAGE_CALLING          } from '../subworkflows/local/sage_calling'
 include { SIGS_FITTING          } from '../subworkflows/local/sigs_fitting'
 include { VIRUSBREAKEND_CALLING } from '../subworkflows/local/virusbreakend_calling'
-
-/*
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-    IMPORT NF-CORE MODULES/SUBWORKFLOWS
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-*/
-
-//
-// MODULES
-//
-include { CUSTOM_DUMPSOFTWAREVERSIONS } from '../modules/nf-core/custom/dumpsoftwareversions/main'
 
 /*
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -128,7 +109,7 @@ workflow WGTS {
     hmf_data = PREPARE_REFERENCE.out.hmf_data
 
     // Set GRIDSS config
-    gridss_config = params.containsKey('gridss_config') ? file(params.gridss_config) : hmf_data.gridss_config
+    gridss_config = params.gridss_config !== null ? file(params.gridss_config) : hmf_data.gridss_config
 
     //
     // SUBWORKFLOW: Run read alignment to generate BAMs
@@ -211,6 +192,7 @@ workflow WGTS {
 
         isofox_counts = params.isofox_counts ? file(params.isofox_counts) : hmf_data.isofox_counts
         isofox_gc_ratios = params.isofox_gc_ratios ? file(params.isofox_gc_ratios) : hmf_data.isofox_gc_ratios
+        isofox_read_length = params.isofox_read_length !== null ? params.isofox_read_length : Constants.DEFAULT_ISOFOX_READ_LENGTH_WTS
 
         ISOFOX_QUANTIFICATION(
             ch_inputs,
@@ -224,7 +206,7 @@ workflow WGTS {
             [],  // isofox_gene_ids
             [],  // isofox_tpm_norm
             params.isofox_functions,
-            params.isofox_read_length,
+            isofox_read_length,
         )
 
         ch_versions = ch_versions.mix(ISOFOX_QUANTIFICATION.out.versions)
@@ -676,7 +658,7 @@ workflow WGTS {
     if (run_config.stages.lilac) {
 
         // Use HLA slice BED if provided in params or set as default requirement
-        ref_data_hla_slice_bed = params.containsKey('ref_data_hla_slice_bed') ? params.ref_data_hla_slice_bed : []
+        ref_data_hla_slice_bed = params.ref_data.containsKey('hla_slice_bed') ? params.ref_data.hla_slice_bed : []
 
         LILAC_CALLING(
             ch_inputs,
@@ -802,11 +784,15 @@ workflow WGTS {
     }
 
     //
-    // MODULE: Pipeline reporting
+    // TASK: Aggregate software versions
     //
-    CUSTOM_DUMPSOFTWAREVERSIONS(
-        ch_versions.unique().collectFile(name: 'collated_versions.yml')
-    )
+    softwareVersionsToYAML(ch_versions)
+        .collectFile(
+            storeDir: "${params.outdir}/pipeline_info",
+            name: 'software_versions.yml',
+            sort: true,
+            newLine: true,
+        )
 }
 
 /*
