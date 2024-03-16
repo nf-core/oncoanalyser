@@ -5,9 +5,9 @@
 import Constants
 import Utils
 
-include { ANNOTATE_FUSIONS     } from '../../modules/local/neo/annotate_fusions/main'
-include { NEO_FINDER           } from '../../modules/local/neo/finder/main'
-include { NEO_SCORER           } from '../../modules/local/neo/scorer/main'
+include { ANNOTATE_FUSIONS } from '../../../modules/local/neo/annotate_fusions/main'
+include { NEO_FINDER       } from '../../../modules/local/neo/finder/main'
+include { NEO_SCORER       } from '../../../modules/local/neo/scorer/main'
 
 workflow NEO_PREDICTION{
     take:
