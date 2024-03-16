@@ -81,29 +81,29 @@ workflow READ_ALIGNMENT_DNA {
 
             // Prepare outputs within conditional block
             ch_fastqs_ready = FASTP.out.fastq
-              .flatMap { meta_fastq, reads_fwd, reads_rev ->
+                .flatMap { meta_fastq, reads_fwd, reads_rev ->
 
-                def data = [reads_fwd, reads_rev]
-                  .transpose()
-                  .collect { fwd, rev ->
+                    def data = [reads_fwd, reads_rev]
+                        .transpose()
+                        .collect { fwd, rev ->
 
-                    def split_fwd = fwd.name.replaceAll('\\..+$', '')
-                    def split_rev = rev.name.replaceAll('\\..+$', '')
+                            def split_fwd = fwd.name.replaceAll('\\..+$', '')
+                            def split_rev = rev.name.replaceAll('\\..+$', '')
 
-                    assert split_fwd == split_rev
+                            assert split_fwd == split_rev
 
-                    // NOTE(SW): split allows meta_fastq_ready to be unique, which is required during reunite below
-                    def meta_fastq_ready = [
-                      *:meta_fastq,
-                      id: "${meta_fastq.id}_${split_fwd}",
-                      split: split_fwd,
-                    ]
+                            // NOTE(SW): split allows meta_fastq_ready to be unique, which is required during reunite below
+                            def meta_fastq_ready = [
+                                *:meta_fastq,
+                                id: "${meta_fastq.id}_${split_fwd}",
+                                split: split_fwd,
+                            ]
 
-                    return [meta_fastq_ready, fwd, rev]
-                  }
+                            return [meta_fastq_ready, fwd, rev]
+                        }
 
-                return data
-              }
+                    return data
+                }
 
         } else {
 
@@ -111,8 +111,8 @@ workflow READ_ALIGNMENT_DNA {
                 .map { meta_fastq, fastq_fwd, fastq_rev ->
 
                     def meta_fastq_ready = [
-                      *:meta_fastq,
-                      split: null,
+                        *:meta_fastq,
+                        split: null,
                     ]
 
                     return [meta_fastq_ready, fastq_fwd, fastq_rev]
