@@ -47,6 +47,9 @@ for (param in checkPathParamList) { if (param) { file(param, checkIfExists: true
 // Check mandatory parameters
 if (params.input) { ch_input = file(params.input) } else { exit 1, 'Input samplesheet not specified!' }
 
+// Used in Isofox and Neo subworkflows
+isofox_read_length = params.isofox_read_length !== null ? params.isofox_read_length : Constants.DEFAULT_ISOFOX_READ_LENGTH_WTS
+
 /*
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     IMPORT MODULES / SUBWORKFLOWS / FUNCTIONS
@@ -201,7 +204,6 @@ workflow WGTS {
 
         isofox_counts = params.isofox_counts ? file(params.isofox_counts) : hmf_data.isofox_counts
         isofox_gc_ratios = params.isofox_gc_ratios ? file(params.isofox_gc_ratios) : hmf_data.isofox_gc_ratios
-        isofox_read_length = params.isofox_read_length !== null ? params.isofox_read_length : Constants.DEFAULT_ISOFOX_READ_LENGTH_WTS
 
         ISOFOX_QUANTIFICATION(
             ch_inputs,
@@ -730,6 +732,7 @@ workflow WGTS {
 
         NEO_PREDICTION(
             ch_inputs,
+            ch_align_rna_tumor_out,
             ch_isofox_out,
             ch_purple_out,
             ch_sage_somatic_append_out,
@@ -741,7 +744,7 @@ workflow WGTS {
             hmf_data.ensembl_data_resources,
             hmf_data.neo_resources,
             hmf_data.cohort_tpm_medians,
-            params.isofox_read_length,
+            isofox_read_length,
         )
 
         ch_versions = ch_versions.mix(NEO_PREDICTION.out.versions)

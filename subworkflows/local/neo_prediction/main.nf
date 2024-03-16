@@ -13,6 +13,7 @@ workflow NEO_PREDICTION{
     take:
         // Sample data
         ch_inputs              // channel: [mandatory] [ meta ]
+        ch_tumor_rna_bam       // channel: [mandatory] [ meta, bam, bai ]
         ch_isofox              // channel: [mandatory] [ meta, isofox_dir ]
         ch_purple              // channel: [mandatory] [ meta, purple_dir ]
         ch_sage_somatic_append // channel: [mandatory] [ meta, sage_append_vcf ]
@@ -60,7 +61,7 @@ workflow NEO_PREDICTION{
         ch_finder_inputs_sorted = ch_finder_inputs_selected
             .branch { meta, purple_dir, linx_annotation_dir ->
 
-                def has_normal_dna = Utils.hasNormalDnaBam(meta)
+                def has_normal_dna = Utils.hasNormalDna(meta)
 
                 def has_runnable_inputs = purple_dir && linx_annotation_dir && has_normal_dna
 
@@ -103,13 +104,24 @@ workflow NEO_PREDICTION{
         //
         // Annotate the fusion-derived neoepitope using Isofox where RNA data is available
 
-        // Sort inputs
+        // Select input sources and sort
         // channel: runnable: [ meta, neo_finder_dir, tumor_bam_rna, tumor_bai_rna ]
         // channel: skip: [ meta ]
-        ch_isofox_inputs_sorted = ch_finder_out
-            .branch { meta, neo_finder_dir ->
-                runnable: Utils.hasTumorRnaBam(meta)
-                    return [meta, neo_finder_dir, Utils.getTumorRnaBam(meta), Utils.getTumorRnaBai(meta)]
+        ch_isofox_inputs_sorted = WorkflowOncoanalyser.groupByMeta(
+            ch_finder_out,
+            ch_tumor_rna_bam,
+        )
+            .map { meta, neo_finder_dir, tumor_bam, tumor_bai ->
+                return [
+                    meta,
+                    neo_finder_dir,
+                    Utils.selectCurrentOrExisting(tumor_bam, meta, Constants.INPUT.BAM_RNA_TUMOR),
+                    Utils.selectCurrentOrExisting(tumor_bai, meta, Constants.INPUT.BAI_RNA_TUMOR),
+                ]
+            }
+            .branch { meta, neo_finder_dir, tumor_bam, tumor_bai ->
+                runnable: Utils.hasTumorRna(meta)
+                    return [meta, neo_finder_dir, tumor_bam, tumor_bai]
                 skip: true
                     return meta
             }
@@ -125,7 +137,7 @@ workflow NEO_PREDICTION{
                     sample_id: Utils.getTumorDnaSampleName(meta),
                 ]
 
-                return [meta_isofox, neo_finder_dir, Utils.getTumorRnaBam(meta), Utils.getTumorRnaBai(meta)]
+                return [meta_isofox, neo_finder_dir, tumor_bam_rna, tumor_bai_rna]
             }
 
         // Run process
@@ -171,7 +183,7 @@ workflow NEO_PREDICTION{
                     cancer_type: meta[Constants.InfoField.CANCER_TYPE],
                 ]
 
-                if (Utils.hasTumorRnaBam(meta)) {
+                if (Utils.hasTumorRna(meta)) {
                     meta_scorer.sample_rna_id = Utils.getTumorRnaSampleName(meta)
                 }
 
