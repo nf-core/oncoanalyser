@@ -141,7 +141,7 @@ workflow PREPARE_REFERENCE {
 
             // NOTE(SW): consider approach to implement custom panel support
 
-            panel_data_paths_versions = params.ref_data.panel_data_paths[params.panel]
+            panel_data_paths_versions = params.panel_data_paths[params.panel]
             panel_data_paths = panel_data_paths_versions[params.ref_data.genome_version]
 
             if (params.ref_data.panel_data_path.endsWith('tar.gz')) {
