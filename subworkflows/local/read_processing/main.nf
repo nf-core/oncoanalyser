@@ -1,3 +1,10 @@
+//
+// Apply post-alignment processing
+//
+
+import Constants
+import Utils
+
 include { MARKDUPS } from '../../../modules/local/markdups/main'
 
 workflow READ_PROCESSING {

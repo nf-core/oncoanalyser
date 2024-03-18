@@ -5,6 +5,8 @@
 // NOTE(SW): BWA MEM2 indexes are required and are not created
 // TODO(SW): consider removing index creation since it's unlikely to be used, replace with documentation
 
+import Constants
+
 include { SAMTOOLS_FAIDX } from '../../../modules/nf-core/samtools/faidx/main'
 include { SAMTOOLS_DICT  } from '../../../modules/nf-core/samtools/dict/main'
 include { BWA_INDEX      } from '../../../modules/nf-core/bwa/index/main'
