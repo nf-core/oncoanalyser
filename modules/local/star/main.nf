@@ -2,7 +2,9 @@ process STAR {
     tag "${meta.id}"
     label 'process_high'
 
-    container 'quay.io/biocontainers/star:2.7.3a--0'
+    container "${ workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container ?
+        'https://depot.galaxyproject.org/singularity/star:2.7.3a--0' :
+        'quay.io/biocontainers/star:2.7.3a--0' }"
 
     input:
     tuple val(meta), path(fastq_fwd), path(fastq_rev)
