@@ -2,8 +2,10 @@ process BWAMEM2_ALIGN {
     tag "${meta.id}"
     label 'process_high'
 
-    // TODO(SW): create BioContainers multi-package image when appropriate
-    container 'docker.io/scwatts/bwa-mem2:2.2.1'
+    conda "${moduleDir}/environment.yml"
+    container "${ workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container ?
+        'https://depot.galaxyproject.org/singularity/mulled-v2-4dde50190ae599f2bb2027cb2c8763ea00fb5084:544519c4a0ff7e9616a3b44afde1f143c52f10c3-0' :
+        'quay.io/biocontainers/mulled-v2-4dde50190ae599f2bb2027cb2c8763ea00fb5084:544519c4a0ff7e9616a3b44afde1f143c52f10c3-0' }"
 
     input:
     tuple val(meta), path(reads_fwd), path(reads_rev)
