@@ -103,7 +103,8 @@ accomplished through long-term support of several nominated feature releases, wh
 fixes during the period of extended support.
 
 Each release that is given extended support is allocated a separate long-lived git branch with the 'stable' prefix, e.g.
-`stable/1.2.x`, `stable/1.5.x`. Feature development otherwise occurs on the `main` branch.
+`stable/1.2.x`, `stable/1.5.x`. Feature development otherwise occurs on the `dev` branch with stable releases pushed to
+`master`.
 
 Versions nominated to have current long-term support:
 
