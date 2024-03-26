@@ -20,7 +20,7 @@ RUN \
 RUN \
     conda install -y curl && \
     curl -s https://www.dfam.org/releases/Dfam_3.7/families/Dfam_curatedonly.h5.gz | \
-        gzip -cd > /env/share/RepeatMasker/Libraries/Dfam.h5
+      gzip -cd > /env/share/RepeatMasker/Libraries/Dfam.h5
 
 RUN \
     conda clean -yaf

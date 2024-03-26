@@ -5,7 +5,9 @@ process VIRUSBREAKEND {
     label 'process_high'
 
     conda "${moduleDir}/environment.yml"
-    container "nf-core/gridss:2.13.2--1"
+    container "${ workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container ?
+        'https://pub-29f2e5b2b7384811bdbbcba44f8b5083.r2.dev/singularity/gridss:2.13.2--1' :
+        'quay.io/nf-core/gridss:2.13.2--1' }"
 
     input:
     tuple val(meta), path(bam)
