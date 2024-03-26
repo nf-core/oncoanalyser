@@ -14,30 +14,21 @@ channels:\n\
 RUN \
     conda create -y -p /env/ \
         'gridss=2.13.2=h50ea8bc_3' \
-        'bash' \
-        'coreutils' \
-        'findutils' \
-        'gawk' \
-        'grep' \
-        'procps-ng' \
-        'time' \
-        'util-linux' \
-        'which'
+        'grep'
+
+# Install Dfam database required for RepeatMasker
+RUN \
+    conda install -y curl && \
+    curl -s https://www.dfam.org/releases/Dfam_3.7/families/Dfam_curatedonly.h5.gz | \
+      gzip -cd > /env/share/RepeatMasker/Libraries/Dfam.h5
 
 RUN \
     conda clean -yaf
 
-# Move Conda environment into distroless image
-FROM gcr.io/distroless/base-debian11:latest
+# Move Conda environment into standard BioContainers base image
+FROM quay.io/bioconda/base-glibc-busybox-bash:2.1.0
 
 COPY --from=build /env/ /env/
 
 ENV PATH="/env/bin:${PATH}"
 ENV LD_LIBRARY_PATH="/env/lib/:${LD_LIBRARY_PATH}"
-
-# Symlink system executables as required by VIRUSBreaked
-SHELL ["/env/bin/bash", "-c"]
-RUN \
-    ln -s /env/bin/bash /bin/bash && \
-    ln -s /env/bin/env /usr/bin/env && \
-    ln -s /env/bin/time /usr/bin/time
