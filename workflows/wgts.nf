@@ -75,6 +75,9 @@ include { ORANGE_REPORTING      } from '../subworkflows/local/orange_reporting'
 include { PAVE_ANNOTATION       } from '../subworkflows/local/pave_annotation'
 include { PREPARE_REFERENCE     } from '../subworkflows/local/prepare_reference'
 include { PURPLE_CALLING        } from '../subworkflows/local/purple_calling'
+include { READ_ALIGNMENT_DNA    } from '../subworkflows/local/read_alignment_dna'
+include { READ_ALIGNMENT_RNA    } from '../subworkflows/local/read_alignment_rna'
+include { READ_PROCESSING       } from '../subworkflows/local/read_processing'
 include { SAGE_APPEND           } from '../subworkflows/local/sage_append'
 include { SAGE_CALLING          } from '../subworkflows/local/sage_calling'
 include { SIGS_FITTING          } from '../subworkflows/local/sigs_fitting'
@@ -109,6 +112,78 @@ workflow WGTS {
     gridss_config = params.gridss_config !== null ? file(params.gridss_config) : hmf_data.gridss_config
 
     //
+    // SUBWORKFLOW: Run read alignment to generate BAMs
+    //
+    // channel: [ meta, [bam, ...], [bai, ...] ]
+    ch_align_dna_tumor_out = Channel.empty()
+    ch_align_dna_normal_out = Channel.empty()
+    ch_align_rna_tumor_out = Channel.empty()
+    if (run_config.stages.alignment) {
+
+        READ_ALIGNMENT_DNA(
+            ch_inputs,
+            ref_data.genome_fasta,
+            ref_data.genome_bwa_index,
+            ref_data.genome_bwa_index_bseq,
+            ref_data.genome_bwa_index_biidx,
+            params.max_fastq_records,
+        )
+
+        READ_ALIGNMENT_RNA(
+            ch_inputs,
+            ref_data.genome_star_index,
+        )
+
+        ch_versions = ch_versions.mix(
+            READ_ALIGNMENT_DNA.out.versions,
+            READ_ALIGNMENT_RNA.out.versions,
+        )
+
+        ch_align_dna_tumor_out = ch_align_dna_tumor_out.mix(READ_ALIGNMENT_DNA.out.dna_tumor)
+        ch_align_dna_normal_out = ch_align_dna_normal_out.mix(READ_ALIGNMENT_DNA.out.dna_normal)
+        ch_align_rna_tumor_out = ch_align_rna_tumor_out.mix(READ_ALIGNMENT_RNA.out.rna_tumor)
+
+    } else {
+
+        ch_align_dna_tumor_out = ch_inputs.map { meta -> [meta, [], []] }
+        ch_align_dna_normal_out = ch_inputs.map { meta -> [meta, [], []] }
+        ch_align_rna_tumor_out = ch_inputs.map { meta -> [meta, [], []] }
+
+    }
+
+    //
+    // SUBWORKFLOW: Run MarkDups for DNA BAMs
+    //
+    // channel: [ meta, bam, bai ]
+    ch_process_dna_tumor_out = Channel.empty()
+    ch_process_dna_normal_out = Channel.empty()
+    if (run_config.stages.markdups) {
+
+        READ_PROCESSING(
+            ch_inputs,
+            ch_align_dna_tumor_out,
+            ch_align_dna_normal_out,
+            ref_data.genome_fasta,
+            ref_data.genome_version,
+            ref_data.genome_fai,
+            ref_data.genome_dict,
+            hmf_data.unmap_regions,
+            false,  // has_umis
+        )
+
+        ch_versions = ch_versions.mix(READ_PROCESSING.out.versions)
+
+        ch_process_dna_tumor_out = ch_process_dna_tumor_out.mix(READ_PROCESSING.out.dna_tumor)
+        ch_process_dna_normal_out = ch_process_dna_normal_out.mix(READ_PROCESSING.out.dna_normal)
+
+    } else {
+
+        ch_process_dna_tumor_out = ch_inputs.map { meta -> [meta, []] }
+        ch_process_dna_normal_out = ch_inputs.map { meta -> [meta, []] }
+
+    }
+
+    //
     // MODULE: Run Isofox to analyse RNA data
     //
     // channel: [ meta, isofox_dir ]
@@ -121,6 +196,7 @@ workflow WGTS {
 
         ISOFOX_QUANTIFICATION(
             ch_inputs,
+            ch_align_rna_tumor_out,
             ref_data.genome_fasta,
             ref_data.genome_version,
             ref_data.genome_fai,
@@ -152,6 +228,8 @@ workflow WGTS {
 
         AMBER_PROFILING(
             ch_inputs,
+            ch_process_dna_tumor_out,
+            ch_process_dna_normal_out,
             ref_data.genome_version,
             hmf_data.heterozygous_sites,
             [],  // target_region_bed
@@ -176,6 +254,8 @@ workflow WGTS {
 
         COBALT_PROFILING(
             ch_inputs,
+            ch_process_dna_tumor_out,
+            ch_process_dna_normal_out,
             hmf_data.gc_profile,
             hmf_data.diploid_bed,
             [],  // panel_target_region_normalisation
@@ -200,6 +280,8 @@ workflow WGTS {
 
         GRIDSS_SVPREP_CALLING(
             ch_inputs,
+            ch_process_dna_tumor_out,
+            ch_process_dna_normal_out,
             ref_data.genome_fasta,
             ref_data.genome_version,
             ref_data.genome_fai,
@@ -272,6 +354,8 @@ workflow WGTS {
 
         SAGE_CALLING(
             ch_inputs,
+            ch_process_dna_tumor_out,
+            ch_process_dna_normal_out,
             ref_data.genome_fasta,
             ref_data.genome_version,
             ref_data.genome_fai,
@@ -393,6 +477,7 @@ workflow WGTS {
 
         SAGE_APPEND(
             ch_inputs,
+            ch_align_rna_tumor_out,
             ch_purple_out,
             ref_data.genome_fasta,
             ref_data.genome_version,
@@ -475,6 +560,8 @@ workflow WGTS {
 
         FLAGSTAT_METRICS(
             ch_inputs,
+            ch_process_dna_tumor_out,
+            ch_process_dna_normal_out,
         )
 
         ch_versions = ch_versions.mix(FLAGSTAT_METRICS.out.versions)
@@ -499,6 +586,8 @@ workflow WGTS {
 
         BAMTOOLS_METRICS(
             ch_inputs,
+            ch_process_dna_tumor_out,
+            ch_process_dna_normal_out,
             ref_data.genome_fasta,
             ref_data.genome_version,
         )
@@ -573,6 +662,9 @@ workflow WGTS {
 
         LILAC_CALLING(
             ch_inputs,
+            ch_process_dna_tumor_out,
+            ch_process_dna_normal_out,
+            ch_align_rna_tumor_out,
             ch_purple_out,
             ref_data.genome_fasta,
             ref_data.genome_version,
@@ -600,6 +692,7 @@ workflow WGTS {
 
         VIRUSBREAKEND_CALLING(
             ch_inputs,
+            ch_process_dna_tumor_out,
             ch_purple_out,
             ch_bamtools_somatic_out,
             ref_data.genome_fasta,

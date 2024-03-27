@@ -12,6 +12,7 @@ workflow VIRUSBREAKEND_CALLING {
     take:
         // Sample data
         ch_inputs              // channel: [mandatory] [ meta ]
+        ch_tumor_bam           // channel: [mandatory] [ meta, bam, bai ]
         ch_purple              // channel: [mandatory] [ meta, purple_dir ]
         ch_bamtools_somatic    // channel: [mandatory] [ meta, metrics ]
 
@@ -36,14 +37,20 @@ workflow VIRUSBREAKEND_CALLING {
 
         // Sort inputs
         // NOTE(SW): VIRUSBreakend inputs are not allowed in the samplesheet, so aren't considered
-        // channel: [ meta ]
-        ch_inputs_sorted = ch_inputs
-            .branch { meta ->
-
+        // channel: [ meta, tumor_bam, tumor_bai ]
+        ch_inputs_sorted = ch_tumor_bam
+            .map { meta, tumor_bam, tumor_bai ->
+                return [
+                    meta,
+                    Utils.selectCurrentOrExisting(tumor_bam, meta, Constants.INPUT.BAM_MARKDUPS_DNA_TUMOR),
+                    Utils.selectCurrentOrExisting(tumor_bai, meta, Constants.INPUT.BAI_DNA_TUMOR),
+                ]
+            }
+            .branch { meta, tumor_bam, tumor_bai ->
                 def has_existing = Utils.hasExistingInput(meta, Constants.INPUT.VIRUSINTERPRETER_DIR)
-
-                runnable: Utils.hasTumorDnaBam(meta) && !has_existing
+                runnable: tumor_bam && !has_existing
                 skip: true
+                    return meta
             }
 
         //
@@ -52,7 +59,7 @@ workflow VIRUSBREAKEND_CALLING {
         // Create process input channel
         // channel: [ meta_virus, tumor_bam ]
         ch_virusbreakend_inputs = ch_inputs_sorted.runnable
-            .map { meta ->
+            .map { meta, tumor_bam, tumor_bai ->
 
                 def meta_virus = [
                     key: meta.group_id,
@@ -60,7 +67,7 @@ workflow VIRUSBREAKEND_CALLING {
                     sample_id: Utils.getTumorDnaSampleName(meta),
                 ]
 
-                return [meta_virus, Utils.getTumorDnaBam(meta)]
+                return [meta_virus, tumor_bam]
             }
 
         // Run process

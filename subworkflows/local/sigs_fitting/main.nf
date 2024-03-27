@@ -34,7 +34,7 @@ workflow SIGS_FITTING {
         ch_inputs_sorted = ch_inputs_selected
             .branch { meta, purple_dir ->
 
-                def has_dna = Utils.hasTumorDnaBam(meta)
+                def has_dna = Utils.hasTumorDna(meta)
 
                 def tumor_id
                 def has_smlv_vcf

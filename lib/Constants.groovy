@@ -11,12 +11,12 @@ class Constants {
     static List PANELS_DEFINED     = ['tso500']
 
 
-    static String HMF_DATA_37_PATH = 'https://pub-29f2e5b2b7384811bdbbcba44f8b5083.r2.dev/hmf_reference_data/hmftools/5.34_37--0.tar.gz'
-    static String HMF_DATA_38_PATH = 'https://pub-29f2e5b2b7384811bdbbcba44f8b5083.r2.dev/hmf_reference_data/hmftools/5.34_38--0.tar.gz'
+    static String HMF_DATA_37_PATH = 'https://pub-29f2e5b2b7384811bdbbcba44f8b5083.r2.dev/hmf_reference_data/hmftools/5.34_37--2.tar.gz'
+    static String HMF_DATA_38_PATH = 'https://pub-29f2e5b2b7384811bdbbcba44f8b5083.r2.dev/hmf_reference_data/hmftools/5.34_38--2.tar.gz'
 
 
-    static String TSO500_PANEL_37_PATH = 'https://pub-29f2e5b2b7384811bdbbcba44f8b5083.r2.dev/hmf_reference_data/panels/tso500_5.34_37--0.tar.gz'
-    static String TSO500_PANEL_38_PATH = 'https://pub-29f2e5b2b7384811bdbbcba44f8b5083.r2.dev/hmf_reference_data/panels/tso500_5.34_38--0.tar.gz'
+    static String TSO500_PANEL_37_PATH = 'https://pub-29f2e5b2b7384811bdbbcba44f8b5083.r2.dev/hmf_reference_data/panels/tso500_5.34_37--1.tar.gz'
+    static String TSO500_PANEL_38_PATH = 'https://pub-29f2e5b2b7384811bdbbcba44f8b5083.r2.dev/hmf_reference_data/panels/tso500_5.34_38--1.tar.gz'
 
 
     static String VIRUSBREAKENDDB_PATH = 'https://pub-29f2e5b2b7384811bdbbcba44f8b5083.r2.dev/virusbreakend/virusbreakenddb_20210401.tar.gz'
@@ -34,6 +34,7 @@ class Constants {
     }
 
     static enum Process {
+        ALIGNMENT,
         AMBER,
         BAMTOOLS,
         CHORD,
@@ -45,6 +46,7 @@ class Constants {
         ISOFOX,
         LILAC,
         LINX,
+        MARKDUPS,
         ORANGE,
         PAVE,
         PURPLE,
@@ -56,7 +58,9 @@ class Constants {
     static enum FileType {
         // Generic
         BAM,
+        BAM_MARKDUPS,
         BAI,
+        FASTQ,
         // Process
         AMBER_DIR,
         BAMTOOLS,
@@ -97,10 +101,64 @@ class Constants {
         DNA_RNA,
     }
 
+    static enum InfoField {
+        CANCER_TYPE,
+        LANE,
+        LIBRARY_ID,
+    }
+
     static Map PLACEHOLDER_META = [meta_placeholder: null]
     static List PLACEHOLDER_OPTIONAL_CHANNEL = []
 
     static Map INPUT = [
+
+        BAM_DNA_TUMOR: [
+            FileType.BAM,
+            SampleType.TUMOR,
+            SequenceType.DNA,
+        ],
+
+        BAM_MARKDUPS_DNA_TUMOR: [
+            FileType.BAM_MARKDUPS,
+            SampleType.TUMOR,
+            SequenceType.DNA,
+        ],
+
+        BAM_DNA_NORMAL: [
+            FileType.BAM,
+            SampleType.NORMAL,
+            SequenceType.DNA,
+        ],
+
+        BAM_MARKDUPS_DNA_NORMAL: [
+            FileType.BAM_MARKDUPS,
+            SampleType.NORMAL,
+            SequenceType.DNA,
+        ],
+
+        BAM_RNA_TUMOR: [
+            FileType.BAM,
+            SampleType.TUMOR,
+            SequenceType.RNA,
+        ],
+
+        BAI_DNA_TUMOR: [
+            FileType.BAI,
+            SampleType.TUMOR,
+            SequenceType.DNA,
+        ],
+
+        BAI_DNA_NORMAL: [
+            FileType.BAI,
+            SampleType.NORMAL,
+            SequenceType.DNA,
+        ],
+
+        BAI_RNA_TUMOR: [
+            FileType.BAI,
+            SampleType.TUMOR,
+            SequenceType.RNA,
+        ],
 
         ISOFOX_DIR: [
             FileType.ISOFOX_DIR,

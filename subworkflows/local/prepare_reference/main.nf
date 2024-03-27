@@ -2,6 +2,11 @@
 // Prepare reference data as required
 //
 
+// NOTE(SW): BWA MEM2 indexes are required and are not created
+// TODO(SW): consider removing index creation since it's unlikely to be used, replace with documentation
+
+import Constants
+
 include { SAMTOOLS_FAIDX } from '../../../modules/nf-core/samtools/faidx/main'
 include { SAMTOOLS_DICT  } from '../../../modules/nf-core/samtools/dict/main'
 include { BWA_INDEX      } from '../../../modules/nf-core/bwa/index/main'
@@ -9,6 +14,7 @@ include { BWA_INDEX      } from '../../../modules/nf-core/bwa/index/main'
 include { CUSTOM_EXTRACTTARBALL as DECOMP_BWA_INDEX        } from '../../../modules/local/custom/extract_tarball/main'
 include { CUSTOM_EXTRACTTARBALL as DECOMP_HMF_DATA         } from '../../../modules/local/custom/extract_tarball/main'
 include { CUSTOM_EXTRACTTARBALL as DECOMP_PANEL_DATA       } from '../../../modules/local/custom/extract_tarball/main'
+include { CUSTOM_EXTRACTTARBALL as DECOMP_STAR_INDEX       } from '../../../modules/local/custom/extract_tarball/main'
 include { CUSTOM_EXTRACTTARBALL as DECOMP_VIRUSBREAKEND_DB } from '../../../modules/local/custom/extract_tarball/main'
 include { GRIDSS_INDEX as GRIDSS_BWA_INDEX_IMAGE           } from '../../../modules/local/gridss/index/main'
 include { GRIDSS_INDEX as GRIDSS_INDEX                     } from '../../../modules/local/gridss/index/main'
@@ -94,6 +100,23 @@ workflow PREPARE_REFERENCE {
             }
         }
 
+        // Explicitly set BWA MEM2 index file inputs
+        ch_genome_bwa_index_bseq = file(params.ref_data.genome_bwa_index_bseq)
+        ch_genome_bwa_index_biidx = file(params.ref_data.genome_bwa_index_biidx)
+
+        //
+        // Decompress STAR index
+        //
+        ch_genome_star_index = params.ref_data.genome_star_index ? file(params.ref_data.genome_star_index) : []
+        if (run_config.has_rna_fastq && run_config.stages.alignment && params.ref_data.genome_star_index.endsWith('.tar.gz')) {
+                ch_genome_star_index_inputs = [
+                    [id: 'star_index'],
+                    file(params.ref_data.genome_star_index),
+                ]
+                DECOMP_STAR_INDEX(ch_genome_star_index_inputs)
+                ch_genome_star_index = DECOMP_STAR_INDEX.out.dir
+        }
+
         //
         // Set VIRUSBreakend database path / stage, unpack if required
         //
@@ -141,7 +164,7 @@ workflow PREPARE_REFERENCE {
 
             // NOTE(SW): consider approach to implement custom panel support
 
-            panel_data_paths_versions = params.ref_data.panel_data_paths[params.panel]
+            panel_data_paths_versions = params.panel_data_paths[params.panel]
             panel_data_paths = panel_data_paths_versions[params.ref_data.genome_version]
 
             if (params.ref_data.panel_data_path.endsWith('tar.gz')) {
@@ -168,8 +191,11 @@ workflow PREPARE_REFERENCE {
         genome_fai             = ch_genome_fai                  // path: genome_fai
         genome_dict            = ch_genome_dict                 // path: genome_dict
         genome_bwa_index       = ch_genome_bwa_index            // path: genome_bwa_index
+        genome_bwa_index_bseq  = ch_genome_bwa_index_bseq       // path: genome_bwa_index_bseq
+        genome_bwa_index_biidx = ch_genome_bwa_index_biidx      // path: genome_bwa_index_biidx
         genome_bwa_index_image = ch_genome_bwa_index_image      // path: genome_bwa_index_image
         genome_gridss_index    = ch_genome_gridss_index         // path: genome_gridss_index
+        genome_star_index      = ch_genome_star_index           // path: genome_star_index
         genome_version         = params.ref_data.genome_version // val:  genome_version
 
         virusbreakenddb        = ch_virusbreakenddb             // path: VIRUSBreakend database
