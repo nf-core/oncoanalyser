@@ -23,6 +23,7 @@ process BWAMEM2_ALIGN {
 
     script:
     def read_group_tag = "@RG\\tID:${meta.read_group}\\tSM:${meta.sample_id}"
+    def output_fn = meta.split ? "${meta.split}.${meta.sample_id}.${meta.read_group}.bam" : "${meta.sample_id}.${meta.read_group}.bam"
 
     """
     ln -fs \$(find -L ${genome_bwa_index} -type f) ./
@@ -44,7 +45,7 @@ process BWAMEM2_ALIGN {
         \\
         sambamba sort \\
             --nthreads ${task.cpus} \\
-            --out ${meta.split}.${meta.sample_id}.${meta.read_group}.bam \\
+            --out ${output_fn} \\
             /dev/stdin
 
     cat <<-END_VERSIONS > versions.yml
@@ -55,8 +56,10 @@ process BWAMEM2_ALIGN {
     """
 
     stub:
+    def output_fn = meta.split ? "${meta.split}.${meta.sample_id}.${meta.read_group}.bam" : "${meta.sample_id}.${meta.read_group}.bam"
+
     """
-    touch ${meta.split}.${meta.sample_id}.${meta.read_group}.bam
+    touch ${output_fn}
 
     echo -e '${task.process}:\\n  stub: noversions\\n' > versions.yml
     """
