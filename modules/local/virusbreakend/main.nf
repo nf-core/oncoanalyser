@@ -5,7 +5,7 @@ process VIRUSBREAKEND {
     label 'process_high'
 
     conda "${moduleDir}/environment.yml"
-    container "nf-core/gridss:2.13.2--1"
+    container "quay.io/nf-core/gridss:2.13.2--1"
 
     input:
     tuple val(meta), path(bam)
