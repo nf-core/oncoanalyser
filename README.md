@@ -64,7 +64,7 @@ Launch oncoanalyser:
 
 ```bash
 nextflow run nf-core/oncoanalyser \
-   -revision v0.4.2 \
+   -revision v0.4.3 \
    -profile docker \
    --mode wgts \
    --genome GRCh38_hmf \
