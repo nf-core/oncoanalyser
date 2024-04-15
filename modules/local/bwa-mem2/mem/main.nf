@@ -15,8 +15,8 @@ process BWAMEM2_ALIGN {
     path genome_bwa_index_biidx
 
     output:
-    tuple val(meta), path('*.bam'), emit: bam
-    path 'versions.yml'           , emit: versions
+    tuple val(meta), path('*.bam'), path('*.bai'), emit: bam
+    path 'versions.yml'                          , emit: versions
 
     when:
     task.ext.when == null || task.ext.when

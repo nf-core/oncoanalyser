@@ -1,6 +1,12 @@
+//
+// Align DNA reads
+//
+
+import Constants
+import Utils
+
 include { BWAMEM2_ALIGN  } from '../../modules/local/bwa-mem2/mem/main'
 include { FASTP          } from '../../modules/local/fastp/main'
-include { SAMBAMBA_INDEX } from '../../modules/local/sambamba/index/main'
 
 workflow READ_ALIGNMENT_DNA {
     take:
@@ -152,23 +158,6 @@ workflow READ_ALIGNMENT_DNA {
 
         ch_versions = ch_versions.mix(BWAMEM2_ALIGN.out.versions)
 
-        //
-        // MODULE: Sambamba index
-        //
-        SAMBAMBA_INDEX(
-            BWAMEM2_ALIGN.out.bam,
-        )
-
-        ch_versions = ch_versions.mix(SAMBAMBA_INDEX.out.versions)
-
-        // Combine BAMs and BAIs
-        // channel: [ meta_bwa, sample_type, bam, bai ]
-        ch_bams_flat = WorkflowOncoanalyser.groupByMeta(
-            BWAMEM2_ALIGN.out.bam.map { meta_bwa, bam -> [meta_bwa, meta_bwa.sample_type] },
-            BWAMEM2_ALIGN.out.bam,
-            SAMBAMBA_INDEX.out.bai,
-        )
-
         // Reunite BAMs
         // First, count expected BAMs per sample for non-blocking groupTuple op
         // channel: [ meta_count, group_size ]
@@ -190,7 +179,7 @@ workflow READ_ALIGNMENT_DNA {
         ch_bams_united = ch_sample_fastq_counts
             .cross(
                 // First element to match meta_count above for `cross`
-                ch_bams_flat.map { meta_bwa, sample_type, bam, bai -> [[key: meta_bwa.key, sample_type: sample_type], bam, bai] }
+                BWAMEM2_ALIGN.out.bam.map { meta_bwa, bam, bai -> [[key: meta_bwa.key, sample_type: meta_bwa.sample_type], bam, bai] }
             )
             .map { count_tuple, bam_tuple ->
 
