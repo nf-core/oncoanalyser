@@ -483,18 +483,20 @@ class Utils {
     // Misc
     public static getInput(meta, key) {
 
-        def result
+        def result = []
         def (key_filetype, key_filetypes, key_sequencetypes) = key
 
         for (key_sample in [key_filetypes, key_sequencetypes].combinations()) {
             if (meta.containsKey(key_sample) && meta[key_sample].containsKey(key_filetype)) {
-                return meta[key_sample].getAt(key_filetype)
+                result = meta[key_sample].get(key_filetype)
+                break
             }
         }
+        return result
     }
 
     public static hasExistingInput(meta, key) {
-        return getInput(meta, key) !== null
+        return getInput(meta, key) != []
     }
 
     public static selectCurrentOrExisting(val, meta, key) {
