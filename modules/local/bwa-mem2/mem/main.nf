@@ -60,6 +60,7 @@ process BWAMEM2_ALIGN {
 
     """
     touch ${output_fn}
+    touch ${output_fn}.bai
 
     echo -e '${task.process}:\\n  stub: noversions\\n' > versions.yml
     """
