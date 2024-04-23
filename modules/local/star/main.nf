@@ -7,7 +7,7 @@ process STAR {
         'quay.io/biocontainers/star:2.7.3a--0' }"
 
     input:
-    tuple val(meta), path(fastq_fwd), path(fastq_rev)
+    tuple val(meta), path(reads_fwd), path(reads_rev)
     path genome_star_index
 
     output:
@@ -20,7 +20,7 @@ process STAR {
     script:
     """
     STAR \\
-        --readFilesIn ${fastq_fwd} ${fastq_rev} \\
+        --readFilesIn ${reads_fwd} ${reads_rev} \\
         --genomeDir ${genome_star_index} \\
         --runThreadN ${task.cpus} \\
         --readFilesCommand zcat \\
