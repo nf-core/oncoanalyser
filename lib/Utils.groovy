@@ -201,6 +201,8 @@ class Utils {
             params.ref_data_genome_dict,
             params.ref_data_genome_bwa_index,
             params.ref_data_genome_bwa_index_image,
+            params.ref_data_genome_bwa_index_bseq,
+            params.ref_data_genome_bwa_index_biidx,
             params.ref_data_genome_gridss_index,
             params.ref_data_virusbreakenddb_path,
         ]
