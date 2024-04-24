@@ -11,6 +11,8 @@ workflow COBALT_PROFILING {
     take:
         // Sample data
         ch_inputs                   // channel: [mandatory] [ meta ]
+        ch_tumor_bam                // channel: [mandatory] [ meta, bam, bai ]
+        ch_normal_bam               // channel: [mandatory] [ meta, bam, bai ]
 
         // Reference data
         gc_profile                  // channel: [mandatory] /path/to/gc_profile
@@ -22,23 +24,37 @@ workflow COBALT_PROFILING {
         // channel: [ versions.yml ]
         ch_versions = Channel.empty()
 
-        // Sort inputs
+        // Select input sources and sort
         // NOTE(SW): germline mode is not currently supported
-        // channel: [ meta ]
-        ch_inputs_sorted = ch_inputs
-            .branch { meta ->
+        // channel: runnable: [ meta, tumor_bam, tumor_bai, normal_bam, normal_bai]
+        // channel: skip: [ meta ]
+        ch_inputs_sorted = WorkflowOncoanalyser.groupByMeta(
+            ch_tumor_bam,
+            ch_normal_bam,
+        )
+            .map { meta, tumor_bam, tumor_bai, normal_bam, normal_bai ->
+                return [
+                    meta,
+                    Utils.selectCurrentOrExisting(tumor_bam, meta, Constants.INPUT.BAM_MARKDUPS_DNA_TUMOR),
+                    tumor_bai ?: Utils.getInput(meta, Constants.INPUT.BAI_DNA_TUMOR),
+                    Utils.selectCurrentOrExisting(normal_bam, meta, Constants.INPUT.BAM_MARKDUPS_DNA_NORMAL),
+                    normal_bai ?: Utils.getInput(meta, Constants.INPUT.BAI_DNA_NORMAL),
+                ]
+            }
+            .branch { meta, tumor_bam, tumor_bai, normal_bam, normal_bai ->
                 def has_existing = Utils.hasExistingInput(meta, Constants.INPUT.COBALT_DIR)
-                runnable_tn: Utils.hasTumorDnaBam(meta) && Utils.hasNormalDnaBam(meta) && !has_existing
-                runnable_to: Utils.hasTumorDnaBam(meta) && !has_existing
+                runnable_tn: tumor_bam && normal_bam && !has_existing
+                runnable_to: tumor_bam && !has_existing
                 skip: true
+                    return meta
             }
 
         // First set diploid BED input for tumor/normal and tumor only samples
         // NOTE(SW): since the diploid BED is provided as a channel, I seem to be only able to include via channel ops
-        // channel: [ meta, diploid_bed ]
+        // channel: [ meta, tumor_bam, tumor_bai, normal_bam, normal_bai, diploid_bed ]
         ch_inputs_runnable = Channel.empty()
             .mix(
-                ch_inputs_sorted.runnable_tn.map { meta -> [meta, []] },
+                ch_inputs_sorted.runnable_tn.map { [*it, []] },
                 ch_inputs_sorted.runnable_to.combine(diploid_bed),
             )
 
@@ -46,7 +62,7 @@ workflow COBALT_PROFILING {
         // channel: sample_data: [ meta_cobalt, tumor_bam, normal_bam, tumor_bai, normal_bai ]
         // channel: diploid_bed: [ diploid_bed ]
         ch_cobalt_inputs = ch_inputs_runnable
-            .multiMap { meta, diploid_bed ->
+            .multiMap { meta, tumor_bam, tumor_bai, normal_bam, normal_bai, diploid_bed ->
 
                 def meta_cobalt = [
                     key: meta.group_id,
@@ -54,18 +70,8 @@ workflow COBALT_PROFILING {
                     tumor_id: Utils.getTumorDnaSampleName(meta),
                 ]
 
-                def tumor_bam = Utils.getTumorDnaBam(meta)
-                def tumor_bai = Utils.getTumorDnaBai(meta)
-
-                def normal_bam = []
-                def normal_bai = []
-
-                if (Utils.hasNormalDnaBam(meta)) {
-
+                if (normal_bam) {
                     meta_cobalt.normal_id = Utils.getNormalDnaSampleName(meta)
-                    normal_bam = Utils.getNormalDnaBam(meta)
-                    normal_bai = Utils.getNormalDnaBai(meta)
-
                 }
 
                 sample_data: [meta_cobalt, tumor_bam, normal_bam, tumor_bai, normal_bai]

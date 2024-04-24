@@ -11,6 +11,7 @@ workflow ISOFOX_QUANTIFICATION {
     take:
         // Sample data
         ch_inputs              // channel: [mandatory] [ meta ]
+        ch_tumor_rna_bam       // channel: [mandatory] [ meta, bam, bai ]
 
         // Reference data
         genome_fasta           // channel: [mandatory] /path/to/genome_fasta
@@ -31,19 +32,28 @@ workflow ISOFOX_QUANTIFICATION {
         // channel: [ versions.yml ]
         ch_versions = Channel.empty()
 
-        // Sort inputs
-        // channel: [ meta ]
-        ch_inputs_sorted = ch_inputs
-            .branch { meta ->
+        // Select input sources and sort
+        // channel: runnable: [ meta, tumor_bam, tumor_bai ]
+        // channel: skip: [ meta ]
+        ch_inputs_sorted = ch_tumor_rna_bam
+            .map { meta, tumor_bam, tumor_bai ->
+                return [
+                    meta,
+                    Utils.selectCurrentOrExisting(tumor_bam, meta, Constants.INPUT.BAM_RNA_TUMOR),
+                    Utils.selectCurrentOrExisting(tumor_bai, meta, Constants.INPUT.BAI_RNA_TUMOR),
+                ]
+            }
+            .branch { meta, tumor_bam, tumor_bai ->
                 def has_existing = Utils.hasExistingInput(meta, Constants.INPUT.ISOFOX_DIR)
-                runnable: Utils.hasTumorRnaBam(meta) && !has_existing
+                runnable: tumor_bam && !has_existing
                 skip: true
+                    return meta
             }
 
         // Create process input channel
-        // channel: [ meta_isofox, tumor_bam_rna ]
+        // channel: [ meta_isofox, tumor_bam, tumor_bai ]
         ch_isofox_inputs = ch_inputs_sorted.runnable
-            .map { meta ->
+            .map { meta, tumor_bam, tumor_bai ->
 
                 def meta_isofox = [
                     key: meta.group_id,
@@ -51,7 +61,7 @@ workflow ISOFOX_QUANTIFICATION {
                     sample_id: Utils.getTumorRnaSampleName(meta),
                 ]
 
-                return [meta_isofox, Utils.getTumorRnaBam(meta), Utils.getTumorRnaBai(meta)]
+                return [meta_isofox, tumor_bam, tumor_bai]
             }
 
         // Run process

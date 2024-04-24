@@ -81,6 +81,11 @@
                     "default": false,
                     "fa_icon": "fas fa-diagram-project"
                 },
+                "max_fastq_records": {
+                    "type": "integer",
+                    "description": "When positive, will use fastp to split fastq files so that each resultant fastq file has no more than max_fastq_records records. When nonpositive, fastp is not used and the provided fastq files are passed as-is to the aligner.",
+                    "fa_icon": "fas fa-cog"
+                },
                 "gridss_config": {
                     "type": "string",
                     "description": "Path to GRIDSS configuration file.",

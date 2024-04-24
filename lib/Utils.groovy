@@ -11,7 +11,7 @@ class Utils {
 
     public static parseInput(input_fp_str, stub_run, log) {
 
-        // NOTE(SW): using Nextflow .splitCsv channel operator, hence sould be easily interchangable
+        // NOTE(SW): using NF .splitCsv channel operator, hence should be easily interchangable with NF syntax
 
         def input_fp = Utils.getFileObject(input_fp_str)
         def inputs = nextflow.splitter.SplitterEx.splitCsv(input_fp, [header: true])
@@ -30,7 +30,6 @@ class Utils {
                     } else {
                         meta.subject_id = it.subject_id
                     }
-
 
                     // Sample type
                     def sample_type_enum = Utils.getEnumFromString(it.sample_type, Constants.SampleType)
@@ -64,12 +63,75 @@ class Utils {
                         System.exit(1)
                     }
 
-                    if (meta_sample.containsKey(filetype_enum)) {
+                    if (meta_sample.containsKey(filetype_enum) & filetype_enum != Constants.FileType.FASTQ) {
                         log.error "got duplicate file for ${group_id} ${sample_type_enum}/${sequence_type_enum}: ${filetype_enum}"
                         System.exit(1)
                     }
 
-                    meta_sample[filetype_enum] = Utils.getFileObject(it.filepath)
+                    // Info data
+                    def info_data = [:]
+                    if (it.containsKey('info')) {
+                        // Parse
+                        it.info
+                            .tokenize(';')
+                            .each { e ->
+                                def (k, v) = e.tokenize(':')
+                                def info_field_enum = Utils.getEnumFromString(k, Constants.InfoField)
+
+                                if (!info_field_enum) {
+                                    def info_field_str = Utils.getEnumNames(Constants.InfoField).join('\n  - ')
+                                    log.error "received invalid info field: '${k}'. Valid options are:\n  - ${info_field_str}"
+                                    System.exit(1)
+                                }
+
+                                if (info_data.containsKey(info_field_enum)) {
+                                    log.error "got duplicate info field for ${group_id} ${sample_type_enum}/${sequence_type_enum}: ${info_field_enum}"
+                                    System.exit(1)
+                                }
+
+                                info_data[info_field_enum] = v
+                            }
+
+                        // Process
+                        if (info_data.containsKey(Constants.InfoField.CANCER_TYPE)) {
+                            meta[Constants.InfoField.CANCER_TYPE] = info_data[Constants.InfoField.CANCER_TYPE]
+                        }
+
+                    }
+
+
+                    // Handle inputs appropriately
+                    if (filetype_enum === Constants.FileType.FASTQ) {
+
+                        if (!info_data.containsKey(Constants.InfoField.LIBRARY_ID)) {
+                            log.error "missing 'library_id' info field for ${group_id} ${sample_type_enum}/${sequence_type_enum}"
+                            System.exit(1)
+                        }
+
+                        if (!info_data.containsKey(Constants.InfoField.LANE)) {
+                            log.error "missing 'lane' info field for ${group_id} ${sample_type_enum}/${sequence_type_enum}"
+                            System.exit(1)
+                        }
+
+                        def (fwd, rev) = it.filepath.tokenize(';')
+                        def fastq_key = [info_data[Constants.InfoField.LIBRARY_ID], info_data[Constants.InfoField.LANE]]
+
+                        if (meta_sample.containsKey(fastq_key)) {
+                            log.error "got duplicate lane + library_id data for ${group_id} ${sample_type_enum}/${sequence_type_enum}: ${fastq_key}"
+                            System.exit(1)
+                        }
+
+                        if (!meta_sample.containsKey(filetype_enum)) {
+                            meta_sample[filetype_enum] = [:]
+                        }
+
+                        meta_sample[filetype_enum][fastq_key] = ['fwd': fwd, 'rev': rev]
+
+                    } else {
+
+                        meta_sample[filetype_enum] = Utils.getFileObject(it.filepath)
+
+                    }
 
                     // Record sample key to simplify iteration later on
                     sample_keys << sample_key
@@ -86,6 +148,9 @@ class Utils {
                         def index_str
 
                         if (key === Constants.FileType.BAM) {
+                            index_enum = Constants.FileType.BAI
+                            index_str = 'bai'
+                        } else if (key === Constants.FileType.BAM_MARKDUPS) {
                             index_enum = Constants.FileType.BAI
                             index_str = 'bai'
                         } else if (key === Constants.FileType.GRIDSS_VCF) {
@@ -136,6 +201,8 @@ class Utils {
             params.ref_data.genome_dict,
             params.ref_data.genome_bwa_index,
             params.ref_data.genome_bwa_index_image,
+            params.ref_data.genome_bwa_index_bseq,
+            params.ref_data.genome_bwa_index_biidx,
             params.ref_data.genome_gridss_index,
             params.ref_data.virusbreakenddb_path,
         ]
@@ -177,7 +244,7 @@ class Utils {
 
         inputs.each { meta ->
 
-            // Require BAMs for each defined sample type
+            // Require BAMs or BAM_MARKDUPs or FASTQs for each defined sample type
             // NOTE(SW): repeating key pairs above to avoid having to duplicate error messages
             sample_keys.each { key ->
 
@@ -187,9 +254,12 @@ class Utils {
 
                 def (sample_type, sequence_type) = key
 
-                if (!meta[key].containsKey(Constants.FileType.BAM)) {
-                    log.error "no BAM provided for ${meta.group_id} ${sample_type}/${sequence_type}\n\n" +
-                        "NB: BAMs are always required as they are the basis to determine input sample type."
+                if (!meta[key].containsKey(Constants.FileType.BAM) &&
+                    !meta[key].containsKey(Constants.FileType.BAM_MARKDUPS) &&
+                    !meta[key].containsKey(Constants.FileType.FASTQ)) {
+
+                    log.error "no BAMs nor BAM_MARKDUPs nor FASTQs provided for ${meta.group_id} ${sample_type}/${sequence_type}\n\n" +
+                        "NB: BAMs or BAM_MARKDUPs or FASTQs are always required as they are the basis to determine input sample type."
                     System.exit(1)
                 }
 
@@ -199,14 +269,14 @@ class Utils {
             if (run_config.mode === Constants.RunMode.TARGETED) {
 
                 // Do not allow normal DNA
-                if (Utils.hasNormalDnaBam(meta)) {
+                if (Utils.hasNormalDna(meta)) {
                     log.error "targeted mode is not compatible with the normal DNA BAM provided for ${meta.group_id}\n\n" +
                         "The targeted workflow supports only tumor DNA BAMs (and tumor RNA BAMs for TSO500)"
                     System.exit(1)
                 }
 
                 // Do not allow only tumor RNA
-                if (Utils.hasTumorRnaBam(meta) && !Utils.hasTumorDnaBam(meta)) {
+                if (Utils.hasTumorRnaBam(meta) && !Utils.hasTumorDna(meta)) {
                     log.error "targeted mode is not compatible with only tumor RNA provided for ${meta.group_id}\n\n" +
                         "The targeted workflow requires tumor DNA and can optionally take tumor RNA, depending on " +
                         "the configured panel."
@@ -223,7 +293,7 @@ class Utils {
             }
 
             // Do not allow normal DNA only
-            if (Utils.hasNormalDnaBam(meta) && !Utils.hasTumorDnaBam(meta)) {
+            if (Utils.hasNormalDna(meta) && !Utils.hasTumorDna(meta)) {
                 log.error "germline only mode not supported, found only a normal DNA BAM for ${meta.group_id}\n"
                 System.exit(1)
             }
@@ -266,69 +336,6 @@ class Utils {
         return path ? nextflow.Nextflow.file(path) : []
     }
 
-
-    // Sample names
-    static public getTumorDnaSampleName(meta) {
-        def meta_sample = meta[Constants.SampleType.TUMOR, Constants.SequenceType.DNA]
-        return meta_sample['sample_id']
-    }
-
-    static public getTumorRnaSampleName(meta) {
-        def meta_sample = meta[Constants.SampleType.TUMOR, Constants.SequenceType.RNA]
-        return meta_sample['sample_id']
-    }
-
-    static public getNormalDnaSampleName(meta) {
-        def meta_sample = meta[Constants.SampleType.NORMAL, Constants.SequenceType.DNA]
-        return meta_sample['sample_id']
-    }
-
-
-    // Files
-    static public getTumorDnaBam(meta) {
-        def meta_sample = meta.getOrDefault([Constants.SampleType.TUMOR, Constants.SequenceType.DNA], [:])
-        return meta_sample.getOrDefault(Constants.FileType.BAM, null)
-    }
-
-    static public getTumorDnaBai(meta) {
-        def meta_sample = meta.getOrDefault([Constants.SampleType.TUMOR, Constants.SequenceType.DNA], [:])
-        return meta_sample.getOrDefault(Constants.FileType.BAI, null)
-    }
-
-    static public hasTumorDnaBam(meta) {
-        return getTumorDnaBam(meta) !== null
-    }
-
-    static public getTumorRnaBam(meta) {
-        def meta_sample = meta.getOrDefault([Constants.SampleType.TUMOR, Constants.SequenceType.RNA], [:])
-        return meta_sample.getOrDefault(Constants.FileType.BAM, null)
-    }
-
-    static public getTumorRnaBai(meta) {
-        def meta_sample = meta.getOrDefault([Constants.SampleType.TUMOR, Constants.SequenceType.RNA], [:])
-        return meta_sample.getOrDefault(Constants.FileType.BAI, null)
-    }
-
-    static public hasTumorRnaBam(meta) {
-        return getTumorRnaBam(meta) !== null
-    }
-
-
-    static public getNormalDnaBam(meta) {
-        def meta_sample = meta.getOrDefault([Constants.SampleType.NORMAL, Constants.SequenceType.DNA], [:])
-        return meta_sample.getOrDefault(Constants.FileType.BAM, null)
-    }
-
-    static public getNormalDnaBai(meta) {
-        def meta_sample = meta.getOrDefault([Constants.SampleType.NORMAL, Constants.SequenceType.DNA], [:])
-        return meta_sample.getOrDefault(Constants.FileType.BAI, null)
-    }
-
-    static public hasNormalDnaBam(meta) {
-        return getNormalDnaBam(meta) !== null
-    }
-
-
     static public getRunMode(run_mode, log) {
         def run_mode_enum = Utils.getEnumFromString(run_mode, Constants.RunMode)
         if (!run_mode_enum) {
@@ -340,21 +347,156 @@ class Utils {
     }
 
 
+    // Sample records
+    static public getTumorDnaSample(meta) {
+        return meta.getOrDefault([Constants.SampleType.TUMOR, Constants.SequenceType.DNA], [:])
+    }
 
+    static public getTumorRnaSample(meta) {
+        return meta.getOrDefault([Constants.SampleType.TUMOR, Constants.SequenceType.RNA], [:])
+    }
+
+    static public getNormalDnaSample(meta) {
+        return meta.getOrDefault([Constants.SampleType.NORMAL, Constants.SequenceType.DNA], [:])
+    }
+
+
+    // Sample names
+    static public getTumorDnaSampleName(meta) {
+        return getTumorDnaSample(meta)['sample_id']
+    }
+
+    static public getTumorRnaSampleName(meta) {
+        return getTumorRnaSample(meta)['sample_id']
+    }
+
+    static public getNormalDnaSampleName(meta) {
+        return getNormalDnaSample(meta)['sample_id']
+    }
+
+
+    // Files
+    static public getTumorDnaFastq(meta) {
+        return getTumorDnaSample(meta).getOrDefault(Constants.FileType.FASTQ, null)
+    }
+
+    static public getTumorDnaBam(meta) {
+        return getTumorDnaSample(meta).getOrDefault(Constants.FileType.BAM, null)
+    }
+
+    static public getTumorDnaMarkdupsBam(meta) {
+        return getTumorDnaSample(meta).getOrDefault(Constants.FileType.BAM_MARKDUPS, null)
+    }
+
+    static public getTumorDnaBai(meta) {
+        return getTumorDnaSample(meta).getOrDefault(Constants.FileType.BAI, null)
+    }
+
+
+    static public hasTumorDnaFastq(meta) {
+        return getTumorDnaFastq(meta) !== null
+    }
+
+    static public hasTumorDnaBam(meta) {
+        return getTumorDnaBam(meta) !== null
+    }
+
+    static public hasTumorDnaMarkdupsBam(meta) {
+        return getTumorDnaMarkdupsBam(meta) !== null
+    }
+
+
+    static public getNormalDnaFastq(meta) {
+        return getNormalDnaSample(meta).getOrDefault(Constants.FileType.FASTQ, null)
+    }
+
+    static public getNormalDnaBam(meta) {
+        return getNormalDnaSample(meta).getOrDefault(Constants.FileType.BAM, null)
+    }
+
+    static public getNormalDnaMarkdupsBam(meta) {
+        return getNormalDnaSample(meta).getOrDefault(Constants.FileType.BAM_MARKDUPS, null)
+    }
+    static public getNormalDnaBai(meta) {
+        return getNormalDnaSample(meta).getOrDefault(Constants.FileType.BAI, null)
+    }
+
+
+    static public hasNormalDnaFastq(meta) {
+        return getNormalDnaFastq(meta) !== null
+    }
+
+    static public hasNormalDnaBam(meta) {
+        return getNormalDnaBam(meta) !== null
+    }
+
+    static public hasNormalDnaMarkdupsBam(meta) {
+        return getNormalDnaMarkdupsBam(meta) !== null
+    }
+
+
+    static public hasDnaFastq(meta) {
+        return hasNormalDnaFastq(meta) || hasTumorDnaFastq(meta)
+    }
+
+    static public hasDnaMarkdupsBam(meta) {
+        return hasNormalDnaMarkdupsBam(meta) || hasTumorDnaMarkdupsBam(meta)
+    }
+
+
+    static public getTumorRnaFastq(meta) {
+        return getTumorRnaSample(meta).getOrDefault(Constants.FileType.FASTQ, null)
+    }
+
+    static public getTumorRnaBam(meta) {
+        return getTumorRnaSample(meta).getOrDefault(Constants.FileType.BAM, null)
+    }
+
+    static public getTumorRnaBai(meta) {
+        return getTumorRnaSample(meta).getOrDefault(Constants.FileType.BAI, null)
+    }
+
+
+    static public hasTumorRnaFastq(meta) {
+        return getTumorRnaFastq(meta) !== null
+    }
+
+    static public hasTumorRnaBam(meta) {
+        return getTumorRnaBam(meta) !== null
+    }
+
+
+    // Status
+    static public hasTumorDna(meta) {
+        return hasTumorDnaBam(meta) || hasTumorDnaMarkdupsBam(meta) || hasTumorDnaFastq(meta)
+    }
+
+    static public hasNormalDna(meta) {
+        return hasNormalDnaBam(meta) || hasNormalDnaMarkdupsBam(meta) || hasNormalDnaFastq(meta)
+    }
+
+    static public hasTumorRna(meta) {
+        return hasTumorRnaBam(meta) || hasTumorRnaFastq(meta)
+    }
+
+
+    // Misc
     public static getInput(meta, key) {
 
-        def result
+        def result = []
         def (key_filetype, key_filetypes, key_sequencetypes) = key
 
         for (key_sample in [key_filetypes, key_sequencetypes].combinations()) {
             if (meta.containsKey(key_sample) && meta[key_sample].containsKey(key_filetype)) {
-                return meta[key_sample].getAt(key_filetype)
+                result = meta[key_sample].get(key_filetype)
+                break
             }
         }
+        return result
     }
 
     public static hasExistingInput(meta, key) {
-        return getInput(meta, key) !== null
+        return getInput(meta, key) != []
     }
 
     public static selectCurrentOrExisting(val, meta, key) {

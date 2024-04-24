@@ -14,6 +14,9 @@ workflow LILAC_CALLING {
     take:
         // Sample data
         ch_inputs          // channel: [mandatory] [ meta ]
+        ch_tumor_bam       // channel: [mandatory] [ meta, bam, bai ]
+        ch_normal_bam      // channel: [mandatory] [ meta, bam, bai ]
+        ch_tumor_rna_bam   // channel: [mandatory] [ meta, bam, bai ]
         ch_purple          // channel: [mandatory] [ meta, purple_dir ]
 
         // Reference data
@@ -28,42 +31,29 @@ workflow LILAC_CALLING {
         // channel: [ versions.yml ]
         ch_versions = Channel.empty()
 
-        // Sort inputs
-        // channel: [ meta ]
-        ch_inputs_sorted = ch_inputs
-            .branch { meta ->
-
-                def has_tumor_dna = Utils.hasTumorDnaBam(meta)
-                def has_normal_dna = Utils.hasNormalDnaBam(meta)
+        // Select input sources and sort for DNA BAMs
+        // channel: runnable: [ meta, tumor_dna_bam, tumor_dna_bai, normal_dna_bam, normal_dna_bai ]
+        // channel: skip: [ meta ]
+        ch_dna_inputs_sorted = WorkflowOncoanalyser.groupByMeta(
+            ch_tumor_bam,
+            ch_normal_bam,
+        )
+            .map { meta, tumor_bam, tumor_bai, normal_bam, normal_bai ->
+                return [
+                    meta,
+                    Utils.selectCurrentOrExisting(tumor_bam, meta, Constants.INPUT.BAM_MARKDUPS_DNA_TUMOR),
+                    tumor_bai ?: Utils.getInput(meta, Constants.INPUT.BAI_DNA_TUMOR),
+                    Utils.selectCurrentOrExisting(normal_bam, meta, Constants.INPUT.BAM_MARKDUPS_DNA_NORMAL),
+                    normal_bai ?: Utils.getInput(meta, Constants.INPUT.BAI_DNA_NORMAL),
+                ]
+            }
+            .branch { meta, tumor_bam, tumor_bai, normal_bam, normal_bai ->
 
                 def has_existing = Utils.hasExistingInput(meta, Constants.INPUT.LILAC_DIR)
 
-                runnable: (has_tumor_dna || has_normal_dna) && !has_existing
+                runnable: (tumor_bam || normal_bam) && !has_existing
                 skip: true
-            }
-
-        // Create channel for DNA BAMs
-        // channel: [ meta, tumor_dna_bam, tumor_dna_bai, normal_dna_bam, normal_dna_bai ]
-        ch_dna_inputs = ch_inputs_sorted.runnable
-            .map { meta ->
-
-                def tumor_bam = []
-                def tumor_bai = []
-
-                def normal_bam = []
-                def normal_bai = []
-
-                if (Utils.hasTumorDnaBam(meta)) {
-                    tumor_bam = Utils.getTumorDnaBam(meta)
-                    tumor_bai = Utils.getTumorDnaBai(meta)
-                }
-
-                if (Utils.hasNormalDnaBam(meta)) {
-                    normal_bam = Utils.getNormalDnaBam(meta)
-                    normal_bai = Utils.getNormalDnaBai(meta)
-                }
-
-                return [meta, tumor_bam, tumor_bai, normal_bam, normal_bai]
+                    return meta
             }
 
         // Realign reads mapping to HLA regions and homologus regions if using reference genome with ALT contigs
@@ -75,11 +65,11 @@ workflow LILAC_CALLING {
             // Flatten into BAM/BAI pairs, select inputs that are eligible to run
             // channel: runnable: [ meta_extra, bam, bai ]
             // channel: skip: [ meta_extra ]
-            ch_realign_inputs_sorted = ch_dna_inputs
+            ch_realign_inputs_sorted = ch_dna_inputs_sorted.runnable
                 .flatMap { meta, tumor_bam, tumor_bai, normal_bam, normal_bai ->
 
-                    def tumor_sample_id = Utils.hasTumorDnaBam(meta) ? Utils.getTumorDnaSampleName(meta) : []
-                    def normal_sample_id = Utils.hasNormalDnaBam(meta) ? Utils.getNormalDnaSampleName(meta) : []
+                    def tumor_sample_id = Utils.hasTumorDna(meta) ? Utils.getTumorDnaSampleName(meta) : []
+                    def normal_sample_id = Utils.hasNormalDna(meta) ? Utils.getNormalDnaSampleName(meta) : []
 
                     return [
                         [[key: meta.group_id, *:meta, sample_id: tumor_sample_id, sample_type: 'tumor'], tumor_bam, tumor_bai],
@@ -168,25 +158,9 @@ workflow LILAC_CALLING {
         } else {
 
             // channel: [ meta, tumor_dna_bam, tumor_dna_bai, normal_dna_bam, normal_dna_bai ]
-            ch_dna_inputs_ready = ch_dna_inputs
+            ch_dna_inputs_ready = ch_dna_inputs_sorted.runnable
 
         }
-
-        // Create channel for RNA BAMs
-        // channel: [ meta, tumor_rna_bam, tumor_rna_bai ]
-        ch_rna_inputs_ready = ch_inputs
-            .map { meta ->
-
-                def bam = []
-                def bai = []
-
-                if (Utils.hasTumorRnaBam(meta)) {
-                    bam = Utils.getTumorRnaBam(meta)
-                    bai = Utils.getTumorRnaBai(meta)
-                }
-
-                return [meta, bam, bai]
-            }
 
         //
         // MODULE: LILAC
@@ -195,7 +169,7 @@ workflow LILAC_CALLING {
         // channel: [ meta_lilac, normal_dna_bam, normal_dna_bai, tumor_dna_bam, tumor_dna_bai, tumor_rna_bam, tumor_rna_bai, purple_dir ]
         ch_lilac_inputs = WorkflowOncoanalyser.groupByMeta(
             ch_dna_inputs_ready,
-            ch_rna_inputs_ready,
+            ch_tumor_rna_bam,
             ch_purple,
         )
             .map { meta, tbam_dna, tbai_dna, nbam_dna, nbai_dna, tbam_rna, tbai_rna, purple_dir ->
@@ -205,11 +179,11 @@ workflow LILAC_CALLING {
                     id: meta.group_id,
                 ]
 
-                if (Utils.hasTumorDnaBam(meta)) {
+                if (Utils.hasTumorDna(meta)) {
                     meta_lilac.tumor_id = Utils.getTumorDnaSampleName(meta)
                 }
 
-                if (Utils.hasNormalDnaBam(meta)) {
+                if (Utils.hasNormalDna(meta)) {
                     meta_lilac.normal_id = Utils.getNormalDnaSampleName(meta)
                 }
 
@@ -240,7 +214,7 @@ workflow LILAC_CALLING {
         ch_outputs = Channel.empty()
             .mix(
                 WorkflowOncoanalyser.restoreMeta(LILAC.out.lilac_dir, ch_inputs),
-                ch_inputs_sorted.skip.map { meta -> [meta, []] },
+                ch_dna_inputs_sorted.skip.map { meta -> [meta, []] },
             )
 
     emit:
