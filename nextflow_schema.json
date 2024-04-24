@@ -91,11 +91,6 @@
                     "description": "Path to GRIDSS configuration file.",
                     "fa_icon": "fas fa-cog"
                 },
-                "linx_gene_id_file": {
-                    "type": "string",
-                    "description": "Path to LINX gene ID file.",
-                    "fa_icon": "fas fa-cog"
-                },
                 "isofox_read_length": {
                     "description": "User defined RNA read length used for Isofox.",
                     "fa_icon": "fas fa-cog"
@@ -160,22 +155,22 @@
                     "hidden": true,
                     "help_text": "Do not load `igenomes.config` when running the pipeline. You may choose this option if you observe c lashes between custom parameters and those supplied in `igenomes.config`."
                 },
-                "hmf_data_path": {
+                "ref_data_hmf_data_path": {
                     "type": "string",
                     "description": "Path to HMF data.",
                     "fa_icon": "far fa-folder-open"
                 },
-                "panel_data_path": {
+                "ref_data_panel_data_path": {
                     "type": "string",
                     "description": "Path to panel data.",
                     "fa_icon": "far fa-folder-open"
                 },
-                "virusbreakenddb_path": {
+                "ref_data_virusbreakenddb_path": {
                     "type": "string",
                     "description": "Path to VIRUSBreakend database (directory or tarball).",
                     "fa_icon": "far fa-file-code"
                 },
-                "hla_slice_bed": {
+                "ref_data_hla_slice_bed": {
                     "format": "file-path",
                     "pattern": "^\\S+\\.bed$",
                     "description": "Path to HLA slice BED file.",

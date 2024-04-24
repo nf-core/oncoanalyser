@@ -21,7 +21,6 @@ Utils.validateInput(inputs, run_config, log)
 def checkPathParamList = [
     params.isofox_counts,
     params.isofox_gc_ratios,
-    params.linx_gene_id_file,
 ]
 
 // Conditional requirements
@@ -33,12 +32,12 @@ if (run_config.stages.gridss) {
 
 // Mode check required as evaluated regardless of workflow selection
 if (run_config.stages.virusinterpreter && run_config.mode !== Constants.RunMode.TARGETED) {
-    checkPathParamList.add(params.virusbreakenddb_path)
+    checkPathParamList.add(params.ref_data_virusbreakenddb_path)
 }
 
 if (run_config.stages.lilac) {
-    if (params.ref_data.genome_version == '38' && params.ref_data.genome_type == 'alt' && params.ref_data.containsKey('hla_slice_bed')) {
-        checkPathParamList.add(params.ref_data.hla_slice_bed)
+    if (params.ref_data_genome_version == '38' && params.ref_data_genome_type == 'alt' && params.ref_data_containsKey('hla_slice_bed')) {
+        checkPathParamList.add(params.ref_data_hla_slice_bed)
     }
 }
 
@@ -47,9 +46,6 @@ for (param in checkPathParamList) { if (param) { file(param, checkIfExists: true
 
 // Check mandatory parameters
 if (params.input) { ch_input = file(params.input) } else { exit 1, 'Input samplesheet not specified!' }
-
-// Create Path objects for some input files
-linx_gene_id_file = params.linx_gene_id_file ? file(params.linx_gene_id_file) : []
 
 /*
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -511,7 +507,6 @@ workflow WGTS {
             hmf_data.ensembl_data_resources,
             hmf_data.known_fusion_data,
             hmf_data.driver_gene_panel,
-            linx_gene_id_file,
         )
 
         ch_versions = ch_versions.mix(LINX_ANNOTATION.out.versions)
@@ -658,7 +653,7 @@ workflow WGTS {
     if (run_config.stages.lilac) {
 
         // Use HLA slice BED if provided in params or set as default requirement
-        ref_data_hla_slice_bed = params.ref_data.containsKey('hla_slice_bed') ? params.ref_data.hla_slice_bed : []
+        ref_data_hla_slice_bed = params.containsKey('ref_data_hla_slice_bed') ? params.ref_data_hla_slice_bed : []
 
         LILAC_CALLING(
             ch_inputs,

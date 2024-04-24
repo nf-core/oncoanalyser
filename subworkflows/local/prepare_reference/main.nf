@@ -31,7 +31,7 @@ workflow PREPARE_REFERENCE {
         //
         // Set some variables for brevity
         //
-        ch_genome_fasta = file(params.ref_data.genome_fasta)
+        ch_genome_fasta = file(params.ref_data_genome_fasta)
         run_virusinterpreter = run_config.mode !== Constants.RunMode.TARGETED && run_config.stages.virusinterpreter
 
         //
@@ -40,14 +40,14 @@ workflow PREPARE_REFERENCE {
         // The fai and dict files should always be present if using a genome preset. These are
         // always created where they are not present without checking processes to run given they
         // are used in numerous processes and have a neglibile cost to generate.
-        ch_genome_fai = params.ref_data.genome_fai ? file(params.ref_data.genome_fai) : []
-        ch_genome_dict = params.ref_data.genome_dict ? file(params.ref_data.genome_dict) : []
-        if (!params.ref_data.genome_fai) {
+        ch_genome_fai = params.ref_data_genome_fai ? file(params.ref_data_genome_fai) : []
+        ch_genome_dict = params.ref_data_genome_dict ? file(params.ref_data_genome_dict) : []
+        if (!params.ref_data_genome_fai) {
             SAMTOOLS_FAIDX([[:], ch_genome_fasta])
             ch_genome_fai = SAMTOOLS_FAIDX.out.fai.map { meta, fai -> fai }
             ch_versions = ch_versions.mix(SAMTOOLS_FAIDX.out.versions)
         }
-        if (!params.ref_data.genome_dict) {
+        if (!params.ref_data_genome_dict) {
             SAMTOOLS_DICT([[:], ch_genome_fasta])
             ch_genome_dict = SAMTOOLS_DICT.out.dict.map { meta, dict -> dict }
             ch_versions = ch_versions.mix(SAMTOOLS_DICT.out.versions)
@@ -56,25 +56,25 @@ workflow PREPARE_REFERENCE {
         //
         // Create BWA index, BWA index image, and GRIDSS index for reference genome if required
         //
-        ch_genome_bwa_index = params.ref_data.genome_bwa_index ? file(params.ref_data.genome_bwa_index) : []
-        ch_genome_bwa_index_image = params.ref_data.genome_gridss_index ? file(params.ref_data.genome_bwa_index_image) : []
-        ch_genome_gridss_index = params.ref_data.genome_gridss_index ? file(params.ref_data.genome_gridss_index) : []
+        ch_genome_bwa_index = params.ref_data_genome_bwa_index ? file(params.ref_data_genome_bwa_index) : []
+        ch_genome_bwa_index_image = params.ref_data_genome_gridss_index ? file(params.ref_data_genome_bwa_index_image) : []
+        ch_genome_gridss_index = params.ref_data_genome_gridss_index ? file(params.ref_data_genome_gridss_index) : []
         if (run_config.has_dna && (run_config.stages.gridss || run_virusinterpreter)) {
             // NOTE(SW): the BWA index directory can be provided as a compressed tarball
-            if (!params.ref_data.genome_bwa_index) {
+            if (!params.ref_data_genome_bwa_index) {
                 BWA_INDEX([[:], ch_genome_fasta])
                 ch_genome_bwa_index = BWA_INDEX.out.index.map { meta, index -> index }
                 ch_versions = ch_versions.mix(BWA_INDEX.out.versions)
-            } else if (params.ref_data.genome_bwa_index.endsWith('.tar.gz')) {
+            } else if (params.ref_data_genome_bwa_index.endsWith('.tar.gz')) {
                 ch_genome_bwa_index_inputs = [
                     [id: 'bwa_index'],
-                    file(params.ref_data.genome_bwa_index),
+                    file(params.ref_data_genome_bwa_index),
                 ]
                 DECOMP_BWA_INDEX(ch_genome_bwa_index_inputs)
                 ch_genome_bwa_index = DECOMP_BWA_INDEX.out.dir
             }
 
-            if (!params.ref_data.genome_bwa_index_image) {
+            if (!params.ref_data_genome_bwa_index_image) {
                 GRIDSS_BWA_INDEX_IMAGE(
                     ch_genome_fasta,
                     ch_genome_fai,
@@ -86,7 +86,7 @@ workflow PREPARE_REFERENCE {
                 ch_genome_bwa_index_image = GRIDSS_BWA_INDEX_IMAGE.out.img
                 ch_versions = ch_versions.mix(GRIDSS_BWA_INDEX_IMAGE.out.versions)
             }
-            if (!params.ref_data.genome_gridss_index) {
+            if (!params.ref_data_genome_gridss_index) {
                 GRIDSS_INDEX(
                     ch_genome_fasta,
                     ch_genome_fai,
@@ -101,17 +101,17 @@ workflow PREPARE_REFERENCE {
         }
 
         // Explicitly set BWA MEM2 index file inputs
-        ch_genome_bwa_index_bseq = file(params.ref_data.genome_bwa_index_bseq)
-        ch_genome_bwa_index_biidx = file(params.ref_data.genome_bwa_index_biidx)
+        ch_genome_bwa_index_bseq = file(params.ref_data_genome_bwa_index_bseq)
+        ch_genome_bwa_index_biidx = file(params.ref_data_genome_bwa_index_biidx)
 
         //
         // Decompress STAR index
         //
-        ch_genome_star_index = params.ref_data.genome_star_index ? file(params.ref_data.genome_star_index) : []
-        if (run_config.has_rna_fastq && run_config.stages.alignment && params.ref_data.genome_star_index.endsWith('.tar.gz')) {
+        ch_genome_star_index = params.ref_data_genome_star_index ? file(params.ref_data_genome_star_index) : []
+        if (run_config.has_rna_fastq && run_config.stages.alignment && params.ref_data_genome_star_index.endsWith('.tar.gz')) {
                 ch_genome_star_index_inputs = [
                     [id: 'star_index'],
-                    file(params.ref_data.genome_star_index),
+                    file(params.ref_data_genome_star_index),
                 ]
                 DECOMP_STAR_INDEX(ch_genome_star_index_inputs)
                 ch_genome_star_index = DECOMP_STAR_INDEX.out.dir
@@ -122,26 +122,26 @@ workflow PREPARE_REFERENCE {
         //
         ch_virusbreakenddb = Channel.empty()
         if (run_config.has_dna && run_virusinterpreter) {
-            if (params.ref_data.virusbreakenddb_path.endsWith('.tar.gz')) {
+            if (params.ref_data_virusbreakenddb_path.endsWith('.tar.gz')) {
                 ch_virusbreakenddb_inputs = [
                     [id: 'virusbreakenddb'],
-                    file(params.ref_data.virusbreakenddb_path),
+                    file(params.ref_data_virusbreakenddb_path),
                 ]
                 DECOMP_VIRUSBREAKEND_DB(ch_virusbreakenddb_inputs)
                 ch_virusbreakenddb = DECOMP_VIRUSBREAKEND_DB.out.dir
             } else {
-                ch_virusbreakenddb = file(params.ref_data.virusbreakenddb_path)
+                ch_virusbreakenddb = file(params.ref_data_virusbreakenddb_path)
             }
         }
 
         //
         // Set HMF reference paths / stage, unpack if required
         //
-        hmf_data_paths = params.hmf_data_paths[params.ref_data.genome_version]
-        if (params.ref_data.hmf_data_path.endsWith('tar.gz')) {
+        hmf_data_paths = params.hmf_data_paths[params.ref_data_genome_version]
+        if (params.ref_data_hmf_data_path.endsWith('tar.gz')) {
             ch_hmf_data_inputs = [
                 [id: 'hmf_data'],
-                file(params.ref_data.hmf_data_path),
+                file(params.ref_data_hmf_data_path),
             ]
             DECOMP_HMF_DATA(ch_hmf_data_inputs)
 
@@ -153,7 +153,7 @@ workflow PREPARE_REFERENCE {
                     return createDataMap(hmf_data_paths, dirpath)
                 }
         } else {
-            ch_hmf_data = createDataMap(hmf_data_paths, params.ref_data.hmf_data_path)
+            ch_hmf_data = createDataMap(hmf_data_paths, params.ref_data_hmf_data_path)
         }
 
         //
@@ -165,12 +165,12 @@ workflow PREPARE_REFERENCE {
             // NOTE(SW): consider approach to implement custom panel support
 
             panel_data_paths_versions = params.panel_data_paths[params.panel]
-            panel_data_paths = panel_data_paths_versions[params.ref_data.genome_version]
+            panel_data_paths = panel_data_paths_versions[params.ref_data_genome_version]
 
-            if (params.ref_data.panel_data_path.endsWith('tar.gz')) {
+            if (params.ref_data_panel_data_path.endsWith('tar.gz')) {
                 ch_panel_data_inputs = [
                     [id: 'panel_data'],
-                    file(params.ref_data.panel_data_path),
+                    file(params.ref_data_panel_data_path),
                 ]
                 DECOMP_PANEL_DATA(ch_panel_data_inputs)
 
@@ -182,7 +182,7 @@ workflow PREPARE_REFERENCE {
                         return createDataMap(panel_data_paths, dirpath)
                     }
             } else {
-                ch_panel_data = createDataMap(panel_data_paths, params.ref_data.panel_data_path)
+                ch_panel_data = createDataMap(panel_data_paths, params.ref_data_panel_data_path)
             }
         }
 
@@ -196,7 +196,7 @@ workflow PREPARE_REFERENCE {
         genome_bwa_index_image = ch_genome_bwa_index_image      // path: genome_bwa_index_image
         genome_gridss_index    = ch_genome_gridss_index         // path: genome_gridss_index
         genome_star_index      = ch_genome_star_index           // path: genome_star_index
-        genome_version         = params.ref_data.genome_version // val:  genome_version
+        genome_version         = params.ref_data_genome_version // val:  genome_version
 
         virusbreakenddb        = ch_virusbreakenddb             // path: VIRUSBreakend database
         hmf_data               = ch_hmf_data                    // map:  HMF data paths

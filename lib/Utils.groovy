@@ -196,26 +196,26 @@ class Utils {
     public static void createStubPlaceholders(params) {
 
         def fps = [
-            params.ref_data.genome_fasta,
-            params.ref_data.genome_fai,
-            params.ref_data.genome_dict,
-            params.ref_data.genome_bwa_index,
-            params.ref_data.genome_bwa_index_image,
-            params.ref_data.genome_bwa_index_bseq,
-            params.ref_data.genome_bwa_index_biidx,
-            params.ref_data.genome_gridss_index,
-            params.ref_data.virusbreakenddb_path,
+            params.ref_data_genome_fasta,
+            params.ref_data_genome_fai,
+            params.ref_data_genome_dict,
+            params.ref_data_genome_bwa_index,
+            params.ref_data_genome_bwa_index_image,
+            params.ref_data_genome_bwa_index_bseq,
+            params.ref_data_genome_bwa_index_biidx,
+            params.ref_data_genome_gridss_index,
+            params.ref_data_virusbreakenddb_path,
         ]
 
-        params.hmf_data_paths[params.ref_data.genome_version]
+        params.hmf_data_paths[params.ref_data_genome_version]
             .each { k, v ->
-                fps << "${params.hmf_data_path.replaceAll('/$', '')}/${v}"
+                fps << "${params.ref_data_hmf_data_path.replaceAll('/$', '')}/${v}"
             }
 
         if(params.panel !== null) {
-            params.panel_data_paths[params.panel][params.ref_data.genome_version]
+            params.panel_data_paths[params.panel][params.ref_data_genome_version]
                 .each { k, v ->
-                    fps << "${params.panel_data_path.replaceAll('/$', '')}/${v}"
+                    fps << "${params.ref_data_panel_data_path.replaceAll('/$', '')}/${v}"
                 }
         }
 

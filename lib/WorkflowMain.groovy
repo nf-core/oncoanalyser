@@ -15,34 +15,34 @@ class WorkflowMain {
 
         // Set defaults common to all run configuration
 
-        if (params.genome_version !== null) {
-            params.ref_data.genome_version = params.genome_version.toString()
-        } else if (Constants.GENOMES_VERSION_37.contains(params.genome)) {
-            params.ref_data.genome_version = '37'
-        } else if (Constants.GENOMES_VERSION_38.contains(params.genome)) {
-            params.ref_data.genome_version = '38'
-        } else {
-            default_invalid = true
+        if (!params.containsKey('ref_data_genome_version')) {
+            if (Constants.GENOMES_VERSION_37.contains(params.genome)) {
+                params.ref_data_genome_version = '37'
+            } else if (Constants.GENOMES_VERSION_38.contains(params.genome)) {
+                params.ref_data_genome_version = '38'
+            } else {
+                default_invalid = true
+            }
         }
 
-        if (params.genome_type !== null) {
-            params.ref_data.genome_type = params.genome_type
-        } else if (Constants.GENOMES_ALT.contains(params.genome)) {
-            params.ref_data.genome_type = 'alt'
-        } else if (Constants.GENOMES_DEFINED.contains(params.genome)) {
-            params.ref_data.genome_type = 'no_alt'
-        } else {
-            default_invalid = true
+        if (!params.containsKey('ref_data_genome_type')) {
+            if (Constants.GENOMES_ALT.contains(params.genome)) {
+                params.ref_data_genome_type = 'alt'
+            } else if (Constants.GENOMES_DEFINED.contains(params.genome)) {
+                params.ref_data_genome_type = 'no_alt'
+            } else {
+                default_invalid = true
+            }
         }
 
-        if (params.hmf_data_path !== null) {
-            params.ref_data.hmf_data_path = params.hmf_data_path
-        } else if (params.ref_data.genome_version == '37') {
-            params.ref_data.hmf_data_path = Constants.HMF_DATA_37_PATH
-        } else if (params.ref_data.genome_version == '38') {
-            params.ref_data.hmf_data_path = Constants.HMF_DATA_38_PATH
-        } else {
-            default_invalid = true
+        if (!params.containsKey('ref_hmf_data_path')) {
+            if (params.ref_data_genome_version == '37') {
+                params.ref_data_hmf_data_path = Constants.HMF_DATA_37_PATH
+            } else if (params.ref_data_genome_version == '38') {
+                params.ref_data_hmf_data_path = Constants.HMF_DATA_38_PATH
+            } else {
+                default_invalid = true
+            }
         }
 
         // Bad configuration, catch in validateParams
@@ -64,13 +64,11 @@ class WorkflowMain {
 
             // Attempt to set default panel data path; make no assumption on valid 'panel' value
 
-            if (params.panel_data_path !== null) {
-                params.ref_data.panel_data_path = params.panel_data_path
-            } else if (params.panel !== null ) {
-                if (params.panel == 'tso500' && params.genome_version == '37') {
-                    params.ref_data.panel_data_path = Constants.TSO500_PANEL_37_PATH
-                } else if (params.panel == 'tso500' && params.genome_version == '38') {
-                    params.ref_data.panel_data_path = Constants.TSO500_PANEL_38_PATH
+            if (!params.containsKey('panel')) {
+                if (params.panel == 'tso500' && params.ref_data_genome_version == '37') {
+                    params.ref_data_panel_data_path = Constants.TSO500_PANEL_37_PATH
+                } else if (params.panel == 'tso500' && params.ref_data_genome_version == '38') {
+                    params.ref_data_panel_data_path = Constants.TSO500_PANEL_38_PATH
                 }
             }
         }
@@ -82,19 +80,13 @@ class WorkflowMain {
             log,
         )
 
-        if (stages.virusinterpreter && run_mode === Constants.RunMode.WGTS) {
-            if (params.virusbreakenddb_path !== null) {
-                params.ref_data.virusbreakenddb_path = params.virusbreakenddb_path
-            } else {
-                params.ref_data.virusbreakenddb_path = Constants.VIRUSBREAKENDDB_PATH
-            }
+        if (!params.containsKey('ref_data_virusbreakenddb_path') && stages.virusinterpreter && run_mode === Constants.RunMode.WGTS){
+            params.ref_data_virusbreakenddb_path = Constants.VIRUSBREAKENDDB_PATH
         }
 
-        if (stages.lilac) {
-            if (params.hla_slice_bed !== null) {
-                params.ref_data.hla_slice_bed = params.hla_slice_bed
-            } else if (params.genome_version == '38' && params.genome_type == 'alt') {
-                params.ref_data.hla_slice_bed = Constants.HLA_SLICE_BED_GRCH38_ALT_PATH
+        if (!params.containsKey('ref_data_hla_slice_bed') && stages.lilac) {
+            if (params.ref_data_genome_version == '38' && params.ref_data_genome_type == 'alt') {
+                params.ref_data_hla_slice_bed = Constants.HLA_SLICE_BED_GRCH38_ALT_PATH
             }
         }
 
@@ -107,36 +99,36 @@ class WorkflowMain {
 
         // Common parameters
 
-        if (!params.ref_data.genome) {
+        if (!params.genome) {
             log.error "\n~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n" +
                 "  Genome must be set using the --genome CLI argument or in a configuration file.\n" +
                 "  Currently, the available genome are:\n" +
                 "  ${params.genomes.keySet().join(", ")}\n" +
                 "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
             System.exit(1)
-        } else if (!params.genomes.containsKey(params.ref_data.genome)) {
+        } else if (!params.genomes.containsKey(params.genome)) {
             log.error "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n" +
-                "  Genome '${params.ref_data.genome}' not found in any config files provided to the pipeline.\n" +
+                "  Genome '${params.genome}' not found in any config files provided to the pipeline.\n" +
                 "  Currently, the available genome are:\n" +
                 "  ${params.genomes.keySet().join(", ")}\n" +
                 "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
             System.exit(1)
         }
 
-        if (!Constants.GENOMES_SUPPORTED.contains(params.ref_data.genome)) {
-            if (!params.ref_data.force_genome) {
-                log.error "ERROR: currently only the GRCh37_hmf and GRCh38_hmf genomes are supported but got ${params.ref_data.genome}" +
+        if (!Constants.GENOMES_SUPPORTED.contains(params.genome)) {
+            if (!params.ref_data_force_genome) {
+                log.error "ERROR: currently only the GRCh37_hmf and GRCh38_hmf genomes are supported but got ${params.genome}" +
                     ", please adjust the --genome argument accordingly or override with --force_genome."
                 System.exit(1)
             } else {
                 log.warn "currently only the GRCh37_hmf and GRCh38_hmf genomes are supported but forcing to " +
-                    "proceed with \"${params.ref_data.genome}\""
+                    "proceed with \"${params.genome}\""
             }
         }
 
-        if (!params.ref_data.genome_version) {
+        if (!params.ref_data_genome_version) {
             log.error "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n" +
-                "  Genome version wasn't provided and genome '${params.ref_data.genome}' is not defined in   \n" +
+                "  Genome version wasn't provided and genome '${params.genome}' is not defined in   \n" +
                 "  genome version list.\n" +
                 "  Currently, the list of genomes in the version list include:\n" +
                 "  ${Constants.GENOMES_DEFINED.join(", ")}\n" +
@@ -144,9 +136,9 @@ class WorkflowMain {
             System.exit(1)
         }
 
-        if (!params.ref_data.genome_type) {
+        if (!params.ref_data_genome_type) {
             log.error "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n" +
-                "  Genome type wasn't provided and genome '${params.ref_data.genome}' is not defined in      \n" +
+                "  Genome type wasn't provided and genome '${params.genome}' is not defined in      \n" +
                 "  genome type list.\n" +
                 "  Currently, the list of genomes in the type list include:\n" +
                 "  ${Constants.GENOMES_DEFINED.join(", ")}\n" +
@@ -154,7 +146,7 @@ class WorkflowMain {
             System.exit(1)
         }
 
-        if (!params.ref_data.hmf_data_path) {
+        if (!params.ref_data_hmf_data_path) {
             log.error "ERROR: HMF data path wasn't provided"
             System.exit(1)
         }
