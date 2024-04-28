@@ -15,7 +15,7 @@ inputs = Utils.parseInput(params.input, workflow.stubRun, log)
 run_config = WorkflowMain.getRunConfig(params, inputs, log)
 
 // Validate inputs
-Utils.validateInput(inputs, run_config, log)
+Utils.validateInput(inputs, run_config, params, log)
 
 // Check input path parameters to see if they exist
 def checkPathParamList = [
@@ -36,7 +36,7 @@ if (run_config.stages.virusinterpreter && run_config.mode !== Constants.RunMode.
 }
 
 if (run_config.stages.lilac) {
-    if (params.genome_version == '38' && params.genome_type == 'alt' && params.containsKey('ref_data_hla_slice_bed')) {
+    if (params.genome_version.toString() == '38' && params.genome_type == 'alt' && params.containsKey('ref_data_hla_slice_bed')) {
         checkPathParamList.add(params.ref_data_hla_slice_bed)
     }
 }
@@ -104,6 +104,10 @@ workflow WGTS {
     ref_data = PREPARE_REFERENCE.out
     hmf_data = PREPARE_REFERENCE.out.hmf_data
 
+    ch_versions = ch_versions.mix(
+        PREPARE_REFERENCE.out.versions,
+    )
+
     // Set GRIDSS config
     gridss_config = params.gridss_config !== null ? file(params.gridss_config) : hmf_data.gridss_config
 
@@ -120,8 +124,6 @@ workflow WGTS {
             ch_inputs,
             ref_data.genome_fasta,
             ref_data.genome_bwa_index,
-            ref_data.genome_bwa_index_bseq,
-            ref_data.genome_bwa_index_biidx,
             params.max_fastq_records,
         )
 
@@ -282,8 +284,6 @@ workflow WGTS {
             ref_data.genome_version,
             ref_data.genome_fai,
             ref_data.genome_dict,
-            ref_data.genome_bwa_index,
-            ref_data.genome_bwa_index_image,
             ref_data.genome_gridss_index,
             hmf_data.gridss_region_blocklist,
             hmf_data.sv_prep_blocklist,
@@ -693,8 +693,6 @@ workflow WGTS {
             ref_data.genome_fasta,
             ref_data.genome_fai,
             ref_data.genome_dict,
-            ref_data.genome_bwa_index,
-            ref_data.genome_bwa_index_image,
             ref_data.genome_gridss_index,
             ref_data.virusbreakenddb,
             hmf_data.virus_taxonomy_db,

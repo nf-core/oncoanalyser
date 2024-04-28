@@ -25,8 +25,6 @@ workflow GRIDSS_SVPREP_CALLING {
         genome_version         // channel: [mandatory] genome version
         genome_fai             // channel: [mandatory] /path/to/genome_fai
         genome_dict            // channel: [mandatory] /path/to/genome_dict
-        genome_bwa_index       // channel: [mandatory] /path/to/genome_bwa_index_dir/
-        genome_bwa_index_image // channel: [mandatory] /path/to/genome_bwa_index_image
         genome_gridss_index    // channel: [mandatory] /path/to/genome_gridss_index
         gridss_blocklist       // channel: [mandatory] /path/to/gridss_blocklist
         sv_prep_blocklist      // channel: [mandatory] /path/to/sv_prep_blocklist
@@ -190,8 +188,6 @@ workflow GRIDSS_SVPREP_CALLING {
             genome_fasta,
             genome_fai,
             genome_dict,
-            genome_bwa_index,
-            genome_bwa_index_image,
             genome_gridss_index,
         )
 
@@ -270,8 +266,6 @@ workflow GRIDSS_SVPREP_CALLING {
             genome_fasta,
             genome_fai,
             genome_dict,
-            genome_bwa_index,
-            genome_bwa_index_image,
             genome_gridss_index,
             gridss_blocklist,
         )
@@ -302,8 +296,6 @@ workflow GRIDSS_SVPREP_CALLING {
             genome_fasta,
             genome_fai,
             genome_dict,
-            genome_bwa_index,
-            genome_bwa_index_image,
             genome_gridss_index,
             gridss_blocklist,
         )

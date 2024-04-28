@@ -32,14 +32,6 @@ input:
   - genome_bwa_index:
       type: directory
       description: bwa-mem1 index directory
-  - genome_bwa_index_bseq:
-      type: directory
-      description: bwa-mem2 bseq index file
-      pattern: "*.{0123}"
-  - genome_bwa_index_biidx:
-      type: directory
-      description: bwa-mem2 biidx index file
-      pattern: "*.{bwt.2bit.64}"
 output:
   - meta:
       type: map

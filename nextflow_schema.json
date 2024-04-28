@@ -75,6 +75,12 @@
                     "description": "Pipeline processes to include.",
                     "fa_icon": "fas fa-diagram-project"
                 },
+                "prepare_reference_only": {
+                    "type": "boolean",
+                    "description": "Prepare and write reference output only.",
+                    "default": false,
+                    "fa_icon": "fas fa-diagram-project"
+                },
                 "create_stub_placeholders": {
                     "type": "boolean",
                     "description": "Create placeholders for reference data during stub run.",
@@ -138,7 +144,7 @@
                     "type": "string",
                     "description": "Version of reference genome.",
                     "fa_icon": "far fa-file-code",
-                    "enum": ["37", "38"],
+                    "enum": ["37", "38", 37, 38],
                     "hidden": true
                 },
                 "genome_type": {

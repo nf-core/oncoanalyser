@@ -11,30 +11,20 @@ process GRIDSS_INDEX {
     path genome_fasta
     path genome_fai
     path genome_dict
-    path genome_bwa_index_dir, stageAs: 'bwa_index'
-    path genome_bwa_index_image
-    val indices
+    path genome_alt
 
     output:
-    path '*.dict'       , emit: dict, optional: true
-    path '*.img'        , emit: img, optional: true
-    path '*.gridsscache', emit: index, optional: true
-    path 'versions.yml' , emit: versions
+    path 'gridss_index', emit: index
+    path 'versions.yml', emit: versions
 
     when:
     task.ext.when == null || task.ext.when
 
     script:
     def args = task.ext.args ?: ''
-    def sequence_dict_arg = indices.contains('samtools_dict') ? 'true' : 'false'
-    def bwa_index_image_arg = indices.contains('bwa_index_image') ? 'true' : 'false'
-    def gridss_index_arg = indices.contains('gridss_index') ? 'true' : 'false'
 
     """
-    # Symlink BWA indices next to assembly FASTA
-    ln -s \$(find -L ${genome_bwa_index_dir} -type f) ./
-
-    # Run
+    # Create indexes
     PrepareReference \\
         -Xmx${Math.round(task.memory.bytes * 0.95)} \\
         -XX:ParallelGCThreads=${task.cpus} \\
@@ -44,10 +34,22 @@ process GRIDSS_INDEX {
         -Dsamjdk.use_async_io_write_tribble=true \\
         -Dsamjdk.buffer_size=4194304 \\
         -Dsamjdk.async_io_read_threads=${task.cpus} \\
+        ${args} \\
         REFERENCE_SEQUENCE=${genome_fasta} \\
-        CREATE_SEQUENCE_DICTIONARY=${sequence_dict_arg} \\
-        CREATE_BWA_INDEX_IMAGE=${bwa_index_image_arg} \\
-        CREATE_GRIDSS_REFERENCE_CACHE=${gridss_index_arg}
+        CREATE_SEQUENCE_DICTIONARY='false' \\
+        CREATE_BWA_INDEX_IMAGE='true' \\
+        CREATE_GRIDSS_REFERENCE_CACHE='true'
+
+    # Move under single directory for output
+    mkdir -p gridss_index/
+    mv ${genome_fasta.name}.{sa,pac,bwt,ann,amb} gridss_index/
+    mv ${genome_fasta.name}.img gridss_index/
+    mv ${genome_fasta.name}.gridsscache gridss_index/
+
+    # Include ALT file where necessary
+    if [[ -n "${genome_alt}" ]]; then
+        ln -s ../${genome_alt} gridss_index/;
+    fi;
 
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":
@@ -57,9 +59,16 @@ process GRIDSS_INDEX {
 
     stub:
     """
-    touch ${genome_fasta.name}.dict
-    touch ${genome_fasta.name}.img
-    touch ${genome_fasta.name}.gridsscache
+    mkdir -p gridss_index/
+    touch gridss_index/${genome_fasta.name}.{sa,pac,bwt,ann,amb}
+    touch gridss_index/${genome_fasta.name}.img
+    touch gridss_index/${genome_fasta.name}.gridsscache
+
+    # Include ALT file where necessary
+    if [[ -n "${genome_alt}" ]]; then
+        ln -s ../${genome_alt} gridss_index/;
+    fi;
+
     echo -e '${task.process}:\\n  stub: noversions\\n' > versions.yml
     """
 }

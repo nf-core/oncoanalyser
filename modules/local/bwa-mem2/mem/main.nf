@@ -11,8 +11,6 @@ process BWAMEM2_ALIGN {
     tuple val(meta), path(reads_fwd), path(reads_rev)
     path genome_fasta
     path genome_bwa_index
-    path genome_bwa_index_bseq
-    path genome_bwa_index_biidx
 
     output:
     tuple val(meta), path('*.bam'), path('*.bai'), emit: bam

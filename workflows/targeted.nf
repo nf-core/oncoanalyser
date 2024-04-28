@@ -16,7 +16,7 @@ inputs = Utils.parseInput(params.input, workflow.stubRun, log)
 run_config = WorkflowMain.getRunConfig(params, inputs, log)
 
 // Validate inputs
-Utils.validateInput(inputs, run_config, log)
+Utils.validateInput(inputs, run_config, params, log)
 
 // Check input path parameters to see if they exist
 def checkPathParamList = [
@@ -34,7 +34,7 @@ if (run_config.stages.gridss) {
 }
 
 if (run_config.stages.lilac) {
-    if (params.genome_version == '38' && params.genome_type == 'alt' && params.containsKey('ref_data_hla_slice_bed')) {
+    if (params.genome_version.toString() == '38' && params.genome_type == 'alt' && params.containsKey('ref_data_hla_slice_bed')) {
         checkPathParamList.add(params.ref_data_hla_slice_bed)
     }
 }
@@ -115,8 +115,6 @@ workflow TARGETED {
             ch_inputs,
             ref_data.genome_fasta,
             ref_data.genome_bwa_index,
-            ref_data.genome_bwa_index_bseq,
-            ref_data.genome_bwa_index_biidx,
             params.max_fastq_records,
         )
 
@@ -172,7 +170,7 @@ workflow TARGETED {
 
     } else {
 
-        ch_process_dna_normal_out = ch_inputs.map
+        ch_process_dna_tumor_out = ch_inputs.map { meta -> [meta, []] }
         ch_process_dna_normal_out = ch_inputs.map { meta -> [meta, []] }
 
     }
@@ -282,8 +280,6 @@ workflow TARGETED {
             ref_data.genome_version,
             ref_data.genome_fai,
             ref_data.genome_dict,
-            ref_data.genome_bwa_index,
-            ref_data.genome_bwa_index_image,
             ref_data.genome_gridss_index,
             hmf_data.gridss_region_blocklist,
             hmf_data.sv_prep_blocklist,

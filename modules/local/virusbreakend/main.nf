@@ -13,8 +13,6 @@ process VIRUSBREAKEND {
     path genome_fasta
     path genome_fai
     path genome_dict
-    path genome_bwa_index_dir, stageAs: 'bwa_index'
-    path genome_bwa_index_image
     path genome_gridss_index
     path virusbreakenddb
 
@@ -30,8 +28,8 @@ process VIRUSBREAKEND {
     def args = task.ext.args ?: ''
 
     """
-    # Symlink BWA indices next to assembly FASTA
-    ln -s \$(find -L ${genome_bwa_index_dir} -type f) ./
+    # Symlink indices next to assembly FASTA
+    ln -s \$(find -L ${genome_gridss_index} -type f) ./
 
     virusbreakend \\
         --gridssargs "--jvmheap ${Math.round(task.memory.bytes * 0.95)}" \\

@@ -13,8 +13,6 @@ process GRIDSS_ASSEMBLE {
     path genome_fasta
     path genome_fai
     path genome_dict
-    path genome_bwa_index_dir, stageAs: 'bwa_index'
-    path genome_bwa_index_image
     path genome_gridss_index
     path blocklist
 
@@ -69,8 +67,8 @@ process GRIDSS_ASSEMBLE {
         shadow_input_directory \${preprocess_dir};
     done
 
-    # Symlink BWA indices next to assembly FASTA
-    ln -s \$(find -L ${genome_bwa_index_dir} -type f) ./
+    # Symlink indices next to assembly FASTA
+    ln -s \$(find -L ${genome_gridss_index} -type f) ./
 
     # Run
     gridss_svprep \\

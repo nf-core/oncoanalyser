@@ -1,0 +1,60 @@
+Changes in module 'nf-core/bwamem2/index'
+--- modules/nf-core/bwamem2/index/main.nf
++++ modules/nf-core/bwamem2/index/main.nf
+@@ -8,11 +8,12 @@
+         'biocontainers/bwa-mem2:2.2.1--he513fc3_0' }"
+ 
+     input:
+-    tuple val(meta), path(fasta)
++    path fasta
++    path alt
+ 
+     output:
+-    tuple val(meta), path("bwamem2"), emit: index
+-    path "versions.yml"             , emit: versions
++    path bwamem2       , emit: index
++    path "versions.yml", emit: versions
+ 
+     when:
+     task.ext.when == null || task.ext.when
+@@ -20,12 +21,18 @@
+     script:
+     def prefix = task.ext.prefix ?: "${fasta}"
+     def args = task.ext.args ?: ''
++
+     """
+-    mkdir bwamem2
++    mkdir -p bwamem2/
+     bwa-mem2 \\
+         index \\
+         $args \\
+         $fasta -p bwamem2/${prefix}
++
++    # Include ALT file where necessary
++    if [[ -n "${alt}" ]]; then
++        ln -s ../${alt} bwamem2/;
++    fi;
+ 
+     cat <<-END_VERSIONS > versions.yml
+     "${task.process}":
+@@ -37,12 +44,17 @@
+     def prefix = task.ext.prefix ?: "${fasta}"
+ 
+     """
+-    mkdir bwamem2
++    mkdir -p bwamem2/
+     touch bwamem2/${prefix}.0123
+     touch bwamem2/${prefix}.ann
+     touch bwamem2/${prefix}.pac
+     touch bwamem2/${prefix}.amb
+     touch bwamem2/${prefix}.bwt.2bit.64
++
++    # Include ALT file where necessary
++    if [[ -n "${alt}" ]]; then
++        ln -s ../${alt} bwamem2/;
++    fi;
+ 
+     cat <<-END_VERSIONS > versions.yml
+     "${task.process}":
+
+************************************************************
