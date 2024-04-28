@@ -319,6 +319,7 @@ class WorkflowMain {
             has_dna: inputs.any { Utils.hasTumorDna(it) },
             has_rna: inputs.any { Utils.hasTumorRna(it) },
             has_rna_fastq: inputs.any { Utils.hasTumorRnaFastq(it) },
+            has_dna_fastq: inputs.any { Utils.hasTumorDnaFastq(it) },
         ]
     }
 }
