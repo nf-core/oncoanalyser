@@ -1,12 +1,12 @@
 group_id,subject_id,sample_id,sample_type,sequence_type,filetype,filepath
-subject_one__to__dna,subject_one,sample_a,tumor,bam,dna,/Users/stephen/repos/oncoanalyser/subject_one/sample_a.bam
+subject_one__to__dna,subject_one,sample_a,tumor,dna,bam,/Users/stephen/repos/oncoanalyser/subject_one/sample_a.tumor.bam
 
-subject_one__tn__dna,subject_one,sample_a,tumor,bam,dna,/Users/stephen/repos/oncoanalyser/subject_one/sample_a.bam
-subject_one__tn__dna,subject_one,sample_b,normal,bam,dna,/Users/stephen/repos/oncoanalyser/subject_one/sample_b.bam
+subject_one__tn__dna,subject_one,sample_a,tumor,dna,bam,/Users/stephen/repos/oncoanalyser/subject_one/sample_a.tumor.bam
+subject_one__tn__dna,subject_one,sample_b,normal,dna,bam,/Users/stephen/repos/oncoanalyser/subject_one/sample_b.normal.bam
 
-subject_one__tn__dna_rna,subject_one,sample_a,tumor,bam,dna,/Users/stephen/repos/oncoanalyser/subject_one/sample_a.bam
-subject_one__tn__dna_rna,subject_one,sample_b,normal,bam,dna,/Users/stephen/repos/oncoanalyser/subject_one/sample_b.bam
-subject_one__tn__dna_rna,subject_one,sample_c,tumor,bam,rna,/Users/stephen/repos/oncoanalyser/subject_one/sample_c.bam
+subject_one__tn__dna_rna,subject_one,sample_a,tumor,dna,bam,/Users/stephen/repos/oncoanalyser/subject_one/sample_a.tumor.bam
+subject_one__tn__dna_rna,subject_one,sample_b,normal,dna,bam,/Users/stephen/repos/oncoanalyser/subject_one/sample_b.normal.bam
+subject_one__tn__dna_rna,subject_one,sample_c,tumor,rna,bam,/Users/stephen/repos/oncoanalyser/subject_one/sample_c.tumor_rna.bam
 
-subject_one__to__dna_rna,subject_one,sample_a,tumor,bam,dna,/Users/stephen/repos/oncoanalyser/subject_one/sample_a.bam
-subject_one__to__dna_rna,subject_one,sample_c,tumor,bam,rna,/Users/stephen/repos/oncoanalyser/subject_one/sample_c.bam
+subject_one__to__dna_rna,subject_one,sample_a,tumor,dna,bam,/Users/stephen/repos/oncoanalyser/subject_one/sample_a.tumor.bam
+subject_one__to__dna_rna,subject_one,sample_c,tumor,rna,bam,/Users/stephen/repos/oncoanalyser/subject_one/sample_c.tumor_rna.bam
