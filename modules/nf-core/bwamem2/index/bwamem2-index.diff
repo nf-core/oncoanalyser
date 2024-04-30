@@ -1,7 +1,15 @@
 Changes in module 'nf-core/bwamem2/index'
 --- modules/nf-core/bwamem2/index/main.nf
 +++ modules/nf-core/bwamem2/index/main.nf
-@@ -8,11 +8,12 @@
+@@ -1,6 +1,7 @@
+ process BWAMEM2_INDEX {
+     tag "$fasta"
+     label 'process_single'
++    label 'process_high_memory'
+ 
+     conda "${moduleDir}/environment.yml"
+     container "${ workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container ?
+@@ -8,11 +9,12 @@
          'biocontainers/bwa-mem2:2.2.1--he513fc3_0' }"
  
      input:
@@ -17,7 +25,7 @@ Changes in module 'nf-core/bwamem2/index'
  
      when:
      task.ext.when == null || task.ext.when
-@@ -20,12 +21,18 @@
+@@ -20,12 +22,18 @@
      script:
      def prefix = task.ext.prefix ?: "${fasta}"
      def args = task.ext.args ?: ''
@@ -37,7 +45,7 @@ Changes in module 'nf-core/bwamem2/index'
  
      cat <<-END_VERSIONS > versions.yml
      "${task.process}":
-@@ -37,12 +44,17 @@
+@@ -37,12 +45,17 @@
      def prefix = task.ext.prefix ?: "${fasta}"
  
      """
