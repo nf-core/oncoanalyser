@@ -119,7 +119,7 @@ in the below table.
 | oncoanalyser        | hmftools |
 | ------------------- | -------- |
 | 0.1.0 through 0.2.7 | 5.33     |
-| 0.3.0 through 0.3.1 | 5.34     |
+| 0.3.0 through 0.4.5 | 5.34     |
 
 ## Credits
 
