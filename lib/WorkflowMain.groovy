@@ -66,7 +66,7 @@ class WorkflowMain {
 
             // Attempt to set default panel data path; make no assumption on valid 'panel' value
 
-            if (!params.containsKey('panel')) {
+            if (params.containsKey('panel')) {
                 if (params.panel == 'tso500' && params.genome_version.toString() == '37') {
                     params.ref_data_panel_data_path = Constants.TSO500_PANEL_37_PATH
                 } else if (params.panel == 'tso500' && params.genome_version.toString() == '38') {
