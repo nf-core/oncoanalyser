@@ -52,11 +52,10 @@ workflow PREPARE_REFERENCE {
         }
 
         //
-        // Set bwa-mem2 and GRIDSS indexes, unpack or create if required
+        // Set bwa-mem2 index, unpack or create if required
         //
         ch_genome_bwa_index = getRefFileChannel('ref_data_genome_bwa_index')
-        ch_genome_gridss_index = getRefFileChannel('ref_data_genome_gridss_index')
-        if (run_config.has_dna && (run_config.stages.gridss || run_virusinterpreter)) {
+        if (run_config.has_dna && run_config.stages.alignment) {
             if (!params.ref_data_genome_bwa_index) {
 
                 BWAMEM2_INDEX(
@@ -69,14 +68,21 @@ workflow PREPARE_REFERENCE {
             } else if (params.ref_data_genome_bwa_index.endsWith('.tar.gz')) {
 
                 ch_genome_bwa_index_inputs = Channel.fromPath(params.ref_data_genome_bwa_index)
-                    .map { [[id: it.name.replaceAll('\\.tar\\.gz$', '')], it] }
+                    .map { [[id: "bwa-mem2_index_${it.name.replaceAll('\\.tar\\.gz$', '')}"], it] }
 
                 DECOMP_BWAMEM2_INDEX(ch_genome_bwa_index_inputs)
                 ch_genome_bwa_index = DECOMP_BWAMEM2_INDEX.out.dir
 
             }
+        }
 
+        //
+        // Set and GRIDSS index, unpack or create if required
+        //
+        ch_genome_gridss_index = getRefFileChannel('ref_data_genome_gridss_index')
+        if (run_config.has_dna && (run_config.stages.gridss || run_virusinterpreter)) {
             if (!params.ref_data_genome_gridss_index) {
+
                 GRIDSS_INDEX(
                     ch_genome_fasta,
                     ch_genome_fai,
@@ -85,6 +91,15 @@ workflow PREPARE_REFERENCE {
                 )
                 ch_genome_gridss_index = GRIDSS_INDEX.out.index
                 ch_versions = ch_versions.mix(GRIDSS_INDEX.out.versions)
+
+            } else if (params.ref_data_genome_gridss_index.endsWith('.tar.gz')) {
+
+                ch_genome_gridss_index_inputs = Channel.fromPath(params.ref_data_genome_gridss_index)
+                    .map { [[id: "gridss_index_${it.name.replaceAll('\\.tar\\.gz$', '')}"], it] }
+
+                DECOMP_GRIDSS_INDEX(ch_genome_gridss_index_inputs)
+                ch_genome_gridss_index = DECOMP_GRIDSS_INDEX.out.dir
+
             }
         }
 
@@ -105,7 +120,7 @@ workflow PREPARE_REFERENCE {
             } else if (params.ref_data_genome_star_index.endsWith('.tar.gz')) {
 
                 ch_genome_star_index_inputs = Channel.fromPath(params.ref_data_genome_star_index)
-                    .map { [[id: it.name.replaceAll('\\.tar\\.gz$', '')], it] }
+                    .map { [[id: "star_index_${it.name.replaceAll('\\.tar\\.gz$', '')}"], it] }
 
                 DECOMP_STAR_INDEX(ch_genome_star_index_inputs)
                 ch_genome_star_index = DECOMP_STAR_INDEX.out.dir
@@ -141,7 +156,7 @@ workflow PREPARE_REFERENCE {
         if (params.ref_data_hmf_data_path.endsWith('tar.gz')) {
 
             ch_hmf_data_inputs = Channel.fromPath(params.ref_data_hmf_data_path)
-                .map { [[id: it.name.replaceAll('\\.tar\\.gz$', '')], it] }
+                .map { [[id: "hmf_data_${it.name.replaceAll('\\.tar\\.gz$', '')}"], it] }
 
             DECOMP_HMF_DATA(ch_hmf_data_inputs)
 
@@ -168,7 +183,7 @@ workflow PREPARE_REFERENCE {
             if (params.ref_data_panel_data_path.endsWith('tar.gz')) {
 
                 ch_panel_data_inputs = Channel.fromPath(params.ref_data_panel_data_path)
-                    .map { [[id: it.name.replaceAll('\\.tar\\.gz$', '')], it] }
+                    .map { [[id: "panel_data_${it.name.replaceAll('\\.tar\\.gz$', '')}"], it] }
 
                 DECOMP_PANEL_DATA(ch_panel_data_inputs)
 
