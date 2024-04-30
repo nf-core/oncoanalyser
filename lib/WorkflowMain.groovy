@@ -97,6 +97,7 @@ class WorkflowMain {
         if (!params.containsKey('ref_data_genome_alt')) { params.ref_data_genome_alt = null }
         if (!params.containsKey('ref_data_genome_gtf')) { params.ref_data_genome_gtf = null }
         if (!params.containsKey('ref_data_hla_slice_bed')) { params.ref_data_hla_slice_bed = null }
+        if (!params.containsKey('ref_data_panel_data_path')) { params.ref_data_panel_data_path = null }
 
     }
 
