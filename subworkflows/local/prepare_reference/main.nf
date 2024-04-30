@@ -179,8 +179,11 @@ workflow PREPARE_REFERENCE {
                     def dirpath = dir_list[0].toUriString()
                     return createDataMap(hmf_data_paths, dirpath)
                 }
+
         } else {
+
             ch_hmf_data = Channel.value(createDataMap(hmf_data_paths, params.ref_data_hmf_data_path))
+
         }
 
         //
@@ -206,8 +209,11 @@ workflow PREPARE_REFERENCE {
                         def dirpath = dir_list[0].toUriString()
                         return createDataMap(panel_data_paths, dirpath)
                     }
+
             } else {
+
                 ch_panel_data = Channel.value(createDataMap(panel_data_paths, params.ref_data_panel_data_path))
+
             }
         }
 
