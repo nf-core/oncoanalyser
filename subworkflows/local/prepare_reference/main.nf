@@ -69,7 +69,7 @@ workflow PREPARE_REFERENCE {
             } else if (params.ref_data_genome_bwa_index.endsWith('.tar.gz')) {
 
                 ch_genome_bwa_index_inputs = Channel.fromPath(params.ref_data_genome_bwa_index)
-                    .map { [[id: it.simpleName], it] }
+                    .map { [[id: it.name.replaceAll('\\.tar\\.gz$', '')], it] }
 
                 DECOMP_BWAMEM2_INDEX(ch_genome_bwa_index_inputs)
                 ch_genome_bwa_index = DECOMP_BWAMEM2_INDEX.out.dir
@@ -105,7 +105,7 @@ workflow PREPARE_REFERENCE {
             } else if (params.ref_data_genome_star_index.endsWith('.tar.gz')) {
 
                 ch_genome_star_index_inputs = Channel.fromPath(params.ref_data_genome_star_index)
-                    .map { [[id: it.simpleName], it] }
+                    .map { [[id: it.name.replaceAll('\\.tar\\.gz$', '')], it] }
 
                 DECOMP_STAR_INDEX(ch_genome_star_index_inputs)
                 ch_genome_star_index = DECOMP_STAR_INDEX.out.dir
@@ -121,7 +121,7 @@ workflow PREPARE_REFERENCE {
             if (params.ref_data_virusbreakenddb_path.endsWith('.tar.gz')) {
 
                 ch_virusbreakenddb_inputs = Channel.fromPath(params.ref_data_virusbreakenddb_path)
-                    .map { [[id: it.simpleName], it] }
+                    .map { [[id: it.name.replaceAll('\\.tar\\.gz$', '')], it] }
 
                 DECOMP_VIRUSBREAKEND_DB(ch_virusbreakenddb_inputs)
                 ch_virusbreakenddb = DECOMP_VIRUSBREAKEND_DB.out.dir
@@ -141,7 +141,7 @@ workflow PREPARE_REFERENCE {
         if (params.ref_data_hmf_data_path.endsWith('tar.gz')) {
 
             ch_hmf_data_inputs = Channel.fromPath(params.ref_data_hmf_data_path)
-                .map { [[id: it.simpleName], it] }
+                .map { [[id: it.name.replaceAll('\\.tar\\.gz$', '')], it] }
 
             DECOMP_HMF_DATA(ch_hmf_data_inputs)
 
@@ -168,7 +168,7 @@ workflow PREPARE_REFERENCE {
             if (params.ref_data_panel_data_path.endsWith('tar.gz')) {
 
                 ch_panel_data_inputs = Channel.fromPath(params.ref_data_panel_data_path)
-                    .map { [[id: it.simpleName], it] }
+                    .map { [[id: it.name.replaceAll('\\.tar\\.gz$', '')], it] }
 
                 DECOMP_PANEL_DATA(ch_panel_data_inputs)
 
