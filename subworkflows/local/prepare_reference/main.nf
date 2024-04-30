@@ -54,7 +54,7 @@ workflow PREPARE_REFERENCE {
         //
         // Set bwa-mem2 index, unpack or create if required
         //
-        ch_genome_bwa_index = getRefFileChannel('ref_data_genome_bwa_index')
+        ch_genome_bwa_index = Channel.empty()
         if (run_config.has_dna && run_config.stages.alignment) {
             if (!params.ref_data_genome_bwa_index) {
 
@@ -73,13 +73,17 @@ workflow PREPARE_REFERENCE {
                 DECOMP_BWAMEM2_INDEX(ch_genome_bwa_index_inputs)
                 ch_genome_bwa_index = DECOMP_BWAMEM2_INDEX.out.dir
 
+            } else {
+
+                ch_genome_bwa_index = getRefFileChannel('ref_data_genome_bwa_index')
+
             }
         }
 
         //
         // Set and GRIDSS index, unpack or create if required
         //
-        ch_genome_gridss_index = getRefFileChannel('ref_data_genome_gridss_index')
+        ch_genome_gridss_index = Channel.empty()
         if (run_config.has_dna && (run_config.stages.gridss || run_virusinterpreter)) {
             if (!params.ref_data_genome_gridss_index) {
 
@@ -100,13 +104,17 @@ workflow PREPARE_REFERENCE {
                 DECOMP_GRIDSS_INDEX(ch_genome_gridss_index_inputs)
                 ch_genome_gridss_index = DECOMP_GRIDSS_INDEX.out.dir
 
+            } else {
+
+                ch_genome_gridss_index = getRefFileChannel('ref_data_genome_gridss_index')
+
             }
         }
 
         //
         // Set STAR index path, unpack or create if required
         //
-        ch_genome_star_index = getRefFileChannel('ref_data_genome_star_index')
+        ch_genome_star_index = Channel.empty()
         if (run_config.has_rna_fastq && run_config.stages.alignment) {
             if (!params.ref_data_genome_star_index) {
 
@@ -124,6 +132,10 @@ workflow PREPARE_REFERENCE {
 
                 DECOMP_STAR_INDEX(ch_genome_star_index_inputs)
                 ch_genome_star_index = DECOMP_STAR_INDEX.out.dir
+
+            } else {
+
+                ch_genome_star_index = getRefFileChannel('ref_data_genome_star_index')
 
             }
         }
