@@ -33,10 +33,6 @@ input:
       type: file
       description: Driver Gene Panel file
       pattern: "*.{csv}"
-  - gene_id_file:
-      type: file
-      description: Ensembl gene ID file (optional)
-      pattern: "*.{csv}"
 output:
   - meta:
       type: map
