@@ -207,13 +207,13 @@ class Utils {
             params.ref_data_virusbreakenddb_path,
         ]
 
-        params.hmf_data_paths[params.ref_data_genome_version]
+        params.hmf_data_paths[params.genome_version]
             .each { k, v ->
                 fps << "${params.ref_data_hmf_data_path.replaceAll('/$', '')}/${v}"
             }
 
         if(params.panel !== null) {
-            params.panel_data_paths[params.panel][params.ref_data_genome_version]
+            params.panel_data_paths[params.panel][params.genome_version]
                 .each { k, v ->
                     fps << "${params.ref_data_panel_data_path.replaceAll('/$', '')}/${v}"
                 }

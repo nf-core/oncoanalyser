@@ -36,7 +36,7 @@ if (run_config.stages.virusinterpreter && run_config.mode !== Constants.RunMode.
 }
 
 if (run_config.stages.lilac) {
-    if (params.ref_data_genome_version == '38' && params.ref_data_genome_type == 'alt' && params.ref_data_containsKey('hla_slice_bed')) {
+    if (params.genome_version == '38' && params.genome_type == 'alt' && params.ref_data_containsKey('hla_slice_bed')) {
         checkPathParamList.add(params.ref_data_hla_slice_bed)
     }
 }

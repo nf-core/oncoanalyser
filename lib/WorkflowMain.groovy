@@ -15,30 +15,30 @@ class WorkflowMain {
 
         // Set defaults common to all run configuration
 
-        if (!params.containsKey('ref_data_genome_version')) {
+        if (!params.containsKey('genome_version')) {
             if (Constants.GENOMES_VERSION_37.contains(params.genome)) {
-                params.ref_data_genome_version = '37'
+                params.genome_version = '37'
             } else if (Constants.GENOMES_VERSION_38.contains(params.genome)) {
-                params.ref_data_genome_version = '38'
+                params.genome_version = '38'
             } else {
                 default_invalid = true
             }
         }
 
-        if (!params.containsKey('ref_data_genome_type')) {
+        if (!params.containsKey('genome_type')) {
             if (Constants.GENOMES_ALT.contains(params.genome)) {
-                params.ref_data_genome_type = 'alt'
+                params.genome_type = 'alt'
             } else if (Constants.GENOMES_DEFINED.contains(params.genome)) {
-                params.ref_data_genome_type = 'no_alt'
+                params.genome_type = 'no_alt'
             } else {
                 default_invalid = true
             }
         }
 
         if (!params.containsKey('ref_hmf_data_path')) {
-            if (params.ref_data_genome_version == '37') {
+            if (params.genome_version == '37') {
                 params.ref_data_hmf_data_path = Constants.HMF_DATA_37_PATH
-            } else if (params.ref_data_genome_version == '38') {
+            } else if (params.genome_version == '38') {
                 params.ref_data_hmf_data_path = Constants.HMF_DATA_38_PATH
             } else {
                 default_invalid = true
@@ -65,9 +65,9 @@ class WorkflowMain {
             // Attempt to set default panel data path; make no assumption on valid 'panel' value
 
             if (!params.containsKey('panel')) {
-                if (params.panel == 'tso500' && params.ref_data_genome_version == '37') {
+                if (params.panel == 'tso500' && params.genome_version == '37') {
                     params.ref_data_panel_data_path = Constants.TSO500_PANEL_37_PATH
-                } else if (params.panel == 'tso500' && params.ref_data_genome_version == '38') {
+                } else if (params.panel == 'tso500' && params.genome_version == '38') {
                     params.ref_data_panel_data_path = Constants.TSO500_PANEL_38_PATH
                 }
             }
@@ -85,7 +85,7 @@ class WorkflowMain {
         }
 
         if (!params.containsKey('ref_data_hla_slice_bed') && stages.lilac) {
-            if (params.ref_data_genome_version == '38' && params.ref_data_genome_type == 'alt') {
+            if (params.genome_version == '38' && params.genome_type == 'alt') {
                 params.ref_data_hla_slice_bed = Constants.HLA_SLICE_BED_GRCH38_ALT_PATH
             }
         }
@@ -116,7 +116,7 @@ class WorkflowMain {
         }
 
         if (!Constants.GENOMES_SUPPORTED.contains(params.genome)) {
-            if (!params.ref_data_force_genome) {
+            if (!params.force_genome) {
                 log.error "ERROR: currently only the GRCh37_hmf and GRCh38_hmf genomes are supported but got ${params.genome}" +
                     ", please adjust the --genome argument accordingly or override with --force_genome."
                 System.exit(1)
@@ -126,7 +126,7 @@ class WorkflowMain {
             }
         }
 
-        if (!params.ref_data_genome_version) {
+        if (!params.genome_version) {
             log.error "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n" +
                 "  Genome version wasn't provided and genome '${params.genome}' is not defined in   \n" +
                 "  genome version list.\n" +
@@ -136,7 +136,7 @@ class WorkflowMain {
             System.exit(1)
         }
 
-        if (!params.ref_data_genome_type) {
+        if (!params.genome_type) {
             log.error "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n" +
                 "  Genome type wasn't provided and genome '${params.genome}' is not defined in      \n" +
                 "  genome type list.\n" +

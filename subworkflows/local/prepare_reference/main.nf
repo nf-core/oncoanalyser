@@ -137,7 +137,7 @@ workflow PREPARE_REFERENCE {
         //
         // Set HMF reference paths / stage, unpack if required
         //
-        hmf_data_paths = params.hmf_data_paths[params.ref_data_genome_version]
+        hmf_data_paths = params.hmf_data_paths[params.genome_version]
         if (params.ref_data_hmf_data_path.endsWith('tar.gz')) {
             ch_hmf_data_inputs = [
                 [id: 'hmf_data'],
@@ -165,7 +165,7 @@ workflow PREPARE_REFERENCE {
             // NOTE(SW): consider approach to implement custom panel support
 
             panel_data_paths_versions = params.panel_data_paths[params.panel]
-            panel_data_paths = panel_data_paths_versions[params.ref_data_genome_version]
+            panel_data_paths = panel_data_paths_versions[params.genome_version]
 
             if (params.ref_data_panel_data_path.endsWith('tar.gz')) {
                 ch_panel_data_inputs = [
@@ -196,7 +196,7 @@ workflow PREPARE_REFERENCE {
         genome_bwa_index_image = ch_genome_bwa_index_image      // path: genome_bwa_index_image
         genome_gridss_index    = ch_genome_gridss_index         // path: genome_gridss_index
         genome_star_index      = ch_genome_star_index           // path: genome_star_index
-        genome_version         = params.ref_data_genome_version // val:  genome_version
+        genome_version         = params.genome_version          // val:  genome_version
 
         virusbreakenddb        = ch_virusbreakenddb             // path: VIRUSBreakend database
         hmf_data               = ch_hmf_data                    // map:  HMF data paths
