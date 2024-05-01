@@ -11,6 +11,7 @@ process GRIDSS_INDEX {
     path genome_fasta
     path genome_fai
     path genome_dict
+    path genome_bwa_index
     path genome_alt
 
     output:
@@ -24,16 +25,11 @@ process GRIDSS_INDEX {
     def args = task.ext.args ?: ''
 
     """
+    # Symlink BWA indices next to assembly FASTA
+    ln -s \$(find -L ${genome_bwa_index} -type f) ./
+
     # Create indexes
     PrepareReference \\
-        -Xmx${Math.round(task.memory.bytes * 0.95)} \\
-        -XX:ParallelGCThreads=${task.cpus} \\
-        -Dsamjdk.reference_fasta=${genome_fasta} \\
-        -Dsamjdk.use_async_io_read_samtools=true \\
-        -Dsamjdk.use_async_io_write_samtools=true \\
-        -Dsamjdk.use_async_io_write_tribble=true \\
-        -Dsamjdk.buffer_size=4194304 \\
-        -Dsamjdk.async_io_read_threads=${task.cpus} \\
         ${args} \\
         REFERENCE_SEQUENCE=${genome_fasta} \\
         CREATE_SEQUENCE_DICTIONARY='false' \\
