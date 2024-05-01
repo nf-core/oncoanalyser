@@ -12,7 +12,6 @@ process GRIDSS_INDEX {
     path genome_fai
     path genome_dict
     path genome_bwa_index
-    path genome_alt
 
     output:
     path 'gridss_index', emit: index
@@ -44,11 +43,6 @@ process GRIDSS_INDEX {
     # Copy across BWA index
     ln -s ../${genome_fasta.name}.{amb,ann,bwt,pac,sa} gridss_index/
 
-    # Include ALT file where necessary
-    if [[ -n "${genome_alt}" ]]; then
-        ln -s ../${genome_alt} gridss_index/;
-    fi;
-
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":
         gridss: \$(CallVariants --version 2>&1 | sed 's/-gridss\$//')
@@ -61,11 +55,6 @@ process GRIDSS_INDEX {
     touch gridss_index/${genome_fasta.name}.{sa,pac,bwt,ann,amb}
     touch gridss_index/${genome_fasta.name}.img
     touch gridss_index/${genome_fasta.name}.gridsscache
-
-    # Include ALT file where necessary
-    if [[ -n "${genome_alt}" ]]; then
-        ln -s ../${genome_alt} gridss_index/;
-    fi;
 
     echo -e '${task.process}:\\n  stub: noversions\\n' > versions.yml
     """

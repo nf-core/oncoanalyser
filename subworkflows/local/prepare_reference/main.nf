@@ -99,7 +99,6 @@ workflow PREPARE_REFERENCE {
                     ch_genome_fai,
                     ch_genome_dict,
                     BWA_INDEX.out.index,
-                    params.ref_data_genome_alt ? file(params.ref_data_genome_alt) : [],
                 )
                 ch_genome_gridss_index = GRIDSS_INDEX.out.index
                 ch_versions = ch_versions.mix(GRIDSS_INDEX.out.versions)
