@@ -5,6 +5,7 @@
 import Constants
 
 include { BWAMEM2_INDEX       } from '../../../modules/nf-core/bwamem2/index/main'
+include { BWA_INDEX           } from '../../../modules/nf-core/bwa/index/main'
 include { SAMTOOLS_DICT       } from '../../../modules/nf-core/samtools/dict/main'
 include { SAMTOOLS_FAIDX      } from '../../../modules/nf-core/samtools/faidx/main'
 include { STAR_GENOMEGENERATE } from '../../../modules/nf-core/star/genomegenerate/main'
@@ -87,10 +88,16 @@ workflow PREPARE_REFERENCE {
         if (run_config.has_dna && (run_config.stages.gridss || run_virusinterpreter)) {
             if (!params.ref_data_genome_gridss_index) {
 
+                BWA_INDEX(
+                    ch_genome_fasta,
+                )
+                ch_versions = ch_versions.mix(BWA_INDEX.out.versions)
+
                 GRIDSS_INDEX(
                     ch_genome_fasta,
                     ch_genome_fai,
                     ch_genome_dict,
+                    BWA_INDEX.out.index,
                     params.ref_data_genome_alt ? file(params.ref_data_genome_alt) : [],
                 )
                 ch_genome_gridss_index = GRIDSS_INDEX.out.index
