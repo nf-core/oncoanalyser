@@ -9,6 +9,7 @@ process BWA_INDEX {
 
     input:
     path fasta
+    path alt
 
     output:
     path bwa_index     , emit: index
@@ -28,6 +29,11 @@ process BWA_INDEX {
         $args \\
         -p bwa_index/${prefix} \\
         $fasta
+
+    # Include ALT file where necessary
+    if [[ -n "${alt}" ]]; then
+        ln -s ../${alt} bwa_index/;
+    fi;
 
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":

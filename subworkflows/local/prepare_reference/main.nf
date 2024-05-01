@@ -90,6 +90,7 @@ workflow PREPARE_REFERENCE {
 
                 BWA_INDEX(
                     ch_genome_fasta,
+                    params.ref_data_genome_alt ? file(params.ref_data_genome_alt) : [],
                 )
                 ch_versions = ch_versions.mix(BWA_INDEX.out.versions)
 
