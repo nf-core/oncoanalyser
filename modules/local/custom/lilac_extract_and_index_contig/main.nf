@@ -2,10 +2,10 @@ process CUSTOM_EXTRACTCONTIG {
     tag "${contig_name}"
     label 'process_single'
 
-    conda "bwa=0.7.17 samtools=1.19.2"
+    conda "bwa-mem2=2.2.1 samtools=1.19.2"
     container "${ workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container ?
-        'https://depot.galaxyproject.org/singularity/mulled-v2-4908f45b5b676e6a2fed6b1977d445b16b7b8dee:2411d64e0a784487e81828123aaf68a549531e5c-0' :
-        'quay.io/biocontainers/mulled-v2-4908f45b5b676e6a2fed6b1977d445b16b7b8dee:2411d64e0a784487e81828123aaf68a549531e5c-0' }"
+        'https://depot.galaxyproject.org/singularity/mulled-v2-4dde50190ae599f2bb2027cb2c8763ea00fb5084:544519c4a0ff7e9616a3b44afde1f143c52f10c3-0' :
+        'quay.io/biocontainers/mulled-v2-4dde50190ae599f2bb2027cb2c8763ea00fb5084:544519c4a0ff7e9616a3b44afde1f143c52f10c3-0' }"
 
     input:
     val contig_name
@@ -15,7 +15,7 @@ process CUSTOM_EXTRACTCONTIG {
 
     output:
     path "*extracted.fa"  , emit: contig
-    path "*extracted.fa.*", emit: bwa_indices
+    path "*extracted.fa.*", emit: bwa_index
     path 'versions.yml'   , emit: versions
 
     when:
@@ -29,11 +29,11 @@ process CUSTOM_EXTRACTCONTIG {
         -o ${contig_name}_extracted.fa \\
         ${genome_fasta} \\
         ${contig_name}
-    bwa index ${contig_name}_extracted.fa
+    bwa-mem2 index ${contig_name}_extracted.fa
 
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":
-        bwa: \$(echo \$(bwa 2>&1) | sed 's/^.*Version: //; s/Contact:.*\$//')
+        bwa-mem2: \$(bwa-mem2 version 2>/dev/null)
         samtools: \$(echo \$(samtools --version 2>&1) | sed 's/^.*samtools //; s/Using.*\$//')
     END_VERSIONS
     """
