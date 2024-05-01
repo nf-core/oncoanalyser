@@ -38,9 +38,11 @@ process GRIDSS_INDEX {
 
     # Move under single directory for output
     mkdir -p gridss_index/
-    mv ${genome_fasta.name}.{sa,pac,bwt,ann,amb} gridss_index/
     mv ${genome_fasta.name}.img gridss_index/
     mv ${genome_fasta.name}.gridsscache gridss_index/
+
+    # Copy across BWA index
+    ln -s ../${genome_fasta.name}.{amb,ann,bwt,pac,sa} gridss_index/
 
     # Include ALT file where necessary
     if [[ -n "${genome_alt}" ]]; then
