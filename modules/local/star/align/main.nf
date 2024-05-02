@@ -1,4 +1,4 @@
-process STAR {
+process STAR_ALIGN {
     tag "${meta.id}"
     label 'process_high'
 

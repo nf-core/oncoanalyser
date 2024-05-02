@@ -1,4 +1,4 @@
-name: star
+name: star_align
 channels:
   - conda-forge
   - bioconda

@@ -8,7 +8,7 @@ import Utils
 include { GATK4_MARKDUPLICATES } from '../../../modules/nf-core/gatk4/markduplicates/main'
 include { SAMBAMBA_MERGE       } from '../../../modules/local/sambamba/merge/main'
 include { SAMTOOLS_SORT        } from '../../../modules/nf-core/samtools/sort/main'
-include { STAR                 } from '../../../modules/local/star/main'
+include { STAR_ALIGN           } from '../../../modules/local/star/align/main'
 
 workflow READ_ALIGNMENT_RNA {
     take:
@@ -55,7 +55,7 @@ workflow READ_ALIGNMENT_RNA {
         }
 
     //
-    // MODULE: STAR
+    // MODULE: STAR alignment
     //
     // Create process input channel
     // channel: [ meta_star, fastq_fwd, fastq_rev ]
@@ -75,19 +75,19 @@ workflow READ_ALIGNMENT_RNA {
         }
 
     // Run process
-    STAR(
+    STAR_ALIGN(
         ch_star_inputs,
         genome_star_index,
     )
 
-    ch_versions = ch_versions.mix(STAR.out.versions)
+    ch_versions = ch_versions.mix(STAR_ALIGN.out.versions)
 
     //
     // MODULE: SAMtools sort
     //
     // Create process input channel
     // channel: [ meta_sort, bam ]
-    ch_sort_inputs = STAR.out.bam
+    ch_sort_inputs = STAR_ALIGN.out.bam
         .map { meta_star, bam ->
             def meta_sort = [
                 *:meta_star,
