@@ -13,8 +13,8 @@ process BWAMEM2_INDEX {
     path alt
 
     output:
-    path bwamem2       , emit: index
-    path "versions.yml", emit: versions
+    path "bwa-mem2_index", emit: index
+    path "versions.yml"  , emit: versions
 
     when:
     task.ext.when == null || task.ext.when
@@ -24,15 +24,15 @@ process BWAMEM2_INDEX {
     def args = task.ext.args ?: ''
 
     """
-    mkdir -p bwamem2/
+    mkdir -p bwa-mem2_index/
     bwa-mem2 \\
         index \\
         $args \\
-        $fasta -p bwamem2/${prefix}
+        $fasta -p bwa-mem2_index/${prefix}
 
     # Include ALT file where necessary
     if [[ -n "${alt}" ]]; then
-        ln -s ../${alt} bwamem2/;
+        ln -s ../${alt} bwa-mem2_index/;
     fi;
 
     cat <<-END_VERSIONS > versions.yml
@@ -45,16 +45,16 @@ process BWAMEM2_INDEX {
     def prefix = task.ext.prefix ?: "${fasta}"
 
     """
-    mkdir -p bwamem2/
-    touch bwamem2/${prefix}.0123
-    touch bwamem2/${prefix}.ann
-    touch bwamem2/${prefix}.pac
-    touch bwamem2/${prefix}.amb
-    touch bwamem2/${prefix}.bwt.2bit.64
+    mkdir -p bwa-mem2_index/
+    touch bwa-mem2_index/${prefix}.0123
+    touch bwa-mem2_index/${prefix}.ann
+    touch bwa-mem2_index/${prefix}.pac
+    touch bwa-mem2_index/${prefix}.amb
+    touch bwa-mem2_index/${prefix}.bwt.2bit.64
 
     # Include ALT file where necessary
     if [[ -n "${alt}" ]]; then
-        ln -s ../${alt} bwamem2/;
+        ln -s ../${alt} bwa-mem2_index/;
     fi;
 
     cat <<-END_VERSIONS > versions.yml
