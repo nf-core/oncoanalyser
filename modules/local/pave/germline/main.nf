@@ -73,6 +73,7 @@ process PAVE_GERMLINE {
     stub:
     """
     touch ${meta.sample_id}.sage.pave_germline.vcf.gz{,.tbi}
+
     echo -e '${task.process}:\\n  stub: noversions\\n' > versions.yml
     """
 }

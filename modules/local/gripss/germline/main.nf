@@ -57,6 +57,7 @@ process GRIPSS_GERMLINE {
     touch ${meta.normal_id}.gripss.filtered.germline.vcf.gz.tbi
     touch ${meta.normal_id}.gripss.germline.vcf.gz
     touch ${meta.normal_id}.gripss.germline.vcf.gz.tbi
+
     echo -e '${task.process}:\\n  stub: noversions\\n' > versions.yml
     """
 }

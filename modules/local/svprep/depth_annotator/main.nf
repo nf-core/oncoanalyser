@@ -51,6 +51,7 @@ process SVPREP_DEPTH_ANNOTATOR {
     """
     touch ${meta.tumor_id}.gridss.vcf.gz
     touch ${meta.tumor_id}.gridss.vcf.gz.tbi
+
     echo -e '${task.process}:\\n  stub: noversions\\n' > versions.yml
     """
 }

@@ -26,6 +26,7 @@ process SIGS {
 
     sigs \\
         -Xmx${Math.round(task.memory.bytes * 0.95)} \\
+        ${args} \\
         -sample ${meta.sample_id} \\
         -somatic_vcf_file ${smlv_vcf} \\
         -signatures_file ${signatures} \\
@@ -41,6 +42,7 @@ process SIGS {
     """
     mkdir -p sigs/
     touch sigs/placeholder
+
     echo -e '${task.process}:\\n  stub: noversions\\n' > versions.yml
     """
 }

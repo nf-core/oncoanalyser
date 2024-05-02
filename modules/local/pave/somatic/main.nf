@@ -32,7 +32,6 @@ process PAVE_SOMATIC {
 
     script:
     def args = task.ext.args ?: ''
-
     def pon_filters
     def gnomad_args
     if (genome_ver.toString() == '37') {
@@ -54,6 +53,7 @@ process PAVE_SOMATIC {
 
     """
     pave \\
+        ${args} \\
         -Xmx${Math.round(task.memory.bytes * 0.95)} \\
         -sample ${meta.sample_id} \\
         -vcf_file ${sage_vcf} \\
@@ -82,6 +82,7 @@ process PAVE_SOMATIC {
     stub:
     """
     touch ${meta.sample_id}.sage.pave_somatic.vcf.gz{,.tbi}
+
     echo -e '${task.process}:\\n  stub: noversions\\n' > versions.yml
     """
 }

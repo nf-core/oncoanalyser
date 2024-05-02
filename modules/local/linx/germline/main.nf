@@ -45,6 +45,7 @@ process LINX_GERMLINE {
     """
     mkdir linx_germline/
     touch linx_germline/placeholder
+
     echo -e '${task.process}:\\n  stub: noversions\\n' > versions.yml
     """
 }

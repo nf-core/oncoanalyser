@@ -19,8 +19,6 @@ process CHORD {
     task.ext.when == null || task.ext.when
 
     script:
-    def args = task.ext.args ?: ''
-
     """
     #!/usr/bin/env Rscript
     library('CHORD')
@@ -82,6 +80,7 @@ process CHORD {
     mkdir -p chord/
     touch chord/${meta.sample_id}_chord_signatures.txt
     touch chord/${meta.sample_id}_chord_prediction.txt
+
     echo -e '${task.process}:\\n  stub: noversions\\n' > versions.yml
     """
 }

@@ -59,6 +59,7 @@ process SVPREP {
     """
     touch "${meta.sample_id}.sv_prep.sorted.bam"
     touch "${meta.sample_id}.sv_prep.junctions.tsv"
+
     echo -e '${task.process}:\\n  stub: noversions\\n' > versions.yml
     """
 }

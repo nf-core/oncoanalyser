@@ -62,6 +62,7 @@ process GRIPSS_SOMATIC {
     touch ${meta.tumor_id}.gripss.filtered.somatic.vcf.gz.tbi
     touch ${meta.tumor_id}.gripss.somatic.vcf.gz
     touch ${meta.tumor_id}.gripss.somatic.vcf.gz.tbi
+
     echo -e '${task.process}:\\n  stub: noversions\\n' > versions.yml
     """
 }

@@ -31,7 +31,6 @@ process SAGE_SOMATIC {
 
     script:
     def args = task.ext.args ?: ''
-
     def reference_arg = meta.containsKey('normal_id') ? "-reference ${meta.normal_id}" : ''
     def reference_bam_arg = normal_bam ? "-reference_bam ${normal_bam}" : ''
 
@@ -73,6 +72,7 @@ process SAGE_SOMATIC {
     touch somatic/${meta.tumor_id}.sage.bqr.tsv
     touch somatic/${meta.normal_id}.sage.bqr.png
     touch somatic/${meta.normal_id}.sage.bqr.tsv
+
     echo -e '${task.process}:\\n  stub: noversions\\n' > versions.yml
     """
 }

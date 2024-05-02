@@ -46,6 +46,7 @@ process SAGE_APPEND {
     stub:
     """
     touch "${meta.dna_id}.sage.append.vcf.gz"
+
     echo -e '${task.process}:\\n  stub: noversions\\n' > versions.yml
     """
 }

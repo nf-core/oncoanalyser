@@ -1,13 +1,15 @@
 process FASTP {
     tag "${meta.id}"
+    label 'process_medium'
 
+    conda "${moduleDir}/environment.yml"
     container "${ workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container ?
         'https://depot.galaxyproject.org/singularity/fastp:0.23.4--hadf994f_2' :
         'biocontainers/fastp:0.23.4--hadf994f_2' }"
 
     input:
     tuple val(meta), path(reads_fwd), path(reads_rev)
-    val(max_fastq_records)
+    val max_fastq_records
 
     output:
     tuple val(meta), path('*_R1.fastp.fastq.gz'), path('*_R2.fastp.fastq.gz'), emit: fastq
@@ -17,12 +19,11 @@ process FASTP {
     task.ext.when == null || task.ext.when
 
     script:
-    """
-    # * do not apply trimming/clipping, already done in BCL convert
-    # * turn off all filtering
-    # * do not process umis, already done for us
+    def args = task.ext.args ?: ''
 
+    """
     fastp \\
+        ${args} \\
         --in1 ${reads_fwd} \\
         --in2 ${reads_rev} \\
         --disable_quality_filtering \\

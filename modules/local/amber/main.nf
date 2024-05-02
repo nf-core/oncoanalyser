@@ -52,6 +52,7 @@ process AMBER {
     """
     mkdir -p amber/
     touch amber/placeholder
+
     echo -e '${task.process}:\\n  stub: noversions\\n' > versions.yml
     """
 }

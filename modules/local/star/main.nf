@@ -18,8 +18,11 @@ process STAR {
     task.ext.when == null || task.ext.when
 
     script:
+    def args = task.ext.args ?: ''
+
     """
     STAR \\
+        ${args} \\
         --readFilesIn ${reads_fwd} ${reads_rev} \\
         --genomeDir ${genome_star_index} \\
         --runThreadN ${task.cpus} \\
@@ -57,6 +60,7 @@ process STAR {
     stub:
     """
     touch Aligned.out.bam
+
     echo -e '${task.process}:\\n  stub: noversions\\n' > versions.yml
     """
 }

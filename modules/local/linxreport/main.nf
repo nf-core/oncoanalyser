@@ -45,6 +45,7 @@ process LINXREPORT {
     stub:
     """
     touch ${meta.sample_id}_linx.html
+
     echo -e '${task.process}:\n  stub: noversions\n' > versions.yml
     """
 }

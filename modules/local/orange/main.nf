@@ -105,6 +105,7 @@ process ORANGE {
         --add-opens java.base/java.time=ALL-UNNAMED \\
         -Xmx${Math.round(task.memory.bytes * 0.95)} \\
         -jar \${orange_jar} \\
+            ${args} \\
             \\
             -experiment_date \$(date +%y%m%d) \\
             -add_disclaimer \\
@@ -156,6 +157,7 @@ process ORANGE {
     mkdir -p output/
     touch output/${meta.tumor_id}.orange.json
     touch output/${meta.tumor_id}.orange.pdf
+
     echo -e '${task.process}:\\n  stub: noversions\\n' > versions.yml
     """
 }

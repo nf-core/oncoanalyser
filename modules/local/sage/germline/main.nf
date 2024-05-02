@@ -76,6 +76,7 @@ process SAGE_GERMLINE {
     touch germline/${meta.normal_id}.sage.bqr.png
     touch germline/${meta.normal_id}.sage.bqr.tsv
     touch germline/${meta.normal_id}.gene.coverage.tsv
+
     echo -e '${task.process}:\\n  stub: noversions\\n' > versions.yml
     """
 }

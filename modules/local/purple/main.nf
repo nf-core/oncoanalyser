@@ -98,6 +98,7 @@ process PURPLE {
     touch purple/${meta.tumor_id}.purple.somatic.vcf.gz
     touch purple/${meta.tumor_id}.purple.sv.germline.vcf.gz
     touch purple/${meta.tumor_id}.purple.sv.vcf.gz
+
     echo -e '${task.process}:\\n  stub: noversions\\n' > versions.yml
     """
 }

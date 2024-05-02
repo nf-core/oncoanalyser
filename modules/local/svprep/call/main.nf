@@ -101,6 +101,7 @@ process GRIDSS_CALL {
     #CHROM	POS	ID	REF	ALT	QUAL	FILTER	INFO
     .	.	.	.	.	.	.
     EOF
+
     echo -e '${task.process}:\\n  stub: noversions\\n' > versions.yml
     """
 }

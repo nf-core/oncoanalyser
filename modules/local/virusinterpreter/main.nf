@@ -27,6 +27,7 @@ process VIRUSINTERPRETER {
 
     virusinterpreter \\
         -Xmx${Math.round(task.memory.bytes * 0.95)} \\
+        ${args} \\
         -sample ${meta.sample_id} \\
         -purple_dir ${purple_dir} \\
         -tumor_sample_wgs_metrics_file ${wgs_metrics} \\
@@ -45,6 +46,7 @@ process VIRUSINTERPRETER {
     """
     mkdir -p virusinterpreter/
     touch virusinterpreter/${meta.sample_id}.virus.annotated.tsv
+
     echo -e '${task.process}:\\n  stub: noversions\\n' > versions.yml
     """
 }
