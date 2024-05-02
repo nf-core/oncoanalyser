@@ -35,10 +35,10 @@ process PAVE_SOMATIC {
 
     def pon_filters
     def gnomad_args
-    if (genome_ver == '37') {
+    if (genome_ver.toString() == '37') {
         pon_filters = 'HOTSPOT:10:5;PANEL:6:5;UNKNOWN:6:0'
         gnomad_args = "-gnomad_freq_file ${gnomad_resource}"
-    } else if (genome_ver == '38') {
+    } else if (genome_ver.toString() == '38') {
         pon_filters = 'HOTSPOT:5:5;PANEL:2:5;UNKNOWN:2:0'
         gnomad_args = "-gnomad_freq_dir ${gnomad_resource}"
     } else {
