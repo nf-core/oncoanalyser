@@ -13,10 +13,104 @@ Changes in module 'nf-core/star/genomegenerate'
      output:
 -    tuple val(meta), path("star")  , emit: index
 -    path "versions.yml"            , emit: versions
-+    path "star"        , emit: index
++    path "star_index"  , emit: index
 +    path "versions.yml", emit: versions
  
      when:
      task.ext.when == null || task.ext.when
+@@ -25,10 +25,10 @@
+     def include_gtf = gtf ? "--sjdbGTFfile $gtf" : ''
+     if (args_list.contains('--genomeSAindexNbases')) {
+         """
+-        mkdir star
++        mkdir -p star_index/
+         STAR \\
+             --runMode genomeGenerate \\
+-            --genomeDir star/ \\
++            --genomeDir star_index/ \\
+             --genomeFastaFiles $fasta \\
+             $include_gtf \\
+             --runThreadN $task.cpus \\
+@@ -47,10 +47,10 @@
+         samtools faidx $fasta
+         NUM_BASES=`gawk '{sum = sum + \$2}END{if ((log(sum)/log(2))/2 - 1 > 14) {printf "%.0f", 14} else {printf "%.0f", (log(sum)/log(2))/2 - 1}}' ${fasta}.fai`
+ 
+-        mkdir star
++        mkdir -p star_index/
+         STAR \\
+             --runMode genomeGenerate \\
+-            --genomeDir star/ \\
++            --genomeDir star_index/ \\
+             --genomeFastaFiles $fasta \\
+             $include_gtf \\
+             --runThreadN $task.cpus \\
+@@ -70,23 +70,23 @@
+     stub:
+     if (gtf) {
+         """
+-        mkdir star
+-        touch star/Genome
+-        touch star/Log.out
+-        touch star/SA
+-        touch star/SAindex
+-        touch star/chrLength.txt
+-        touch star/chrName.txt
+-        touch star/chrNameLength.txt
+-        touch star/chrStart.txt
+-        touch star/exonGeTrInfo.tab
+-        touch star/exonInfo.tab
+-        touch star/geneInfo.tab
+-        touch star/genomeParameters.txt
+-        touch star/sjdbInfo.txt
+-        touch star/sjdbList.fromGTF.out.tab
+-        touch star/sjdbList.out.tab
+-        touch star/transcriptInfo.tab
++        mkdir -p star_index/
++        touch star_index/Genome
++        touch star_index/Log.out
++        touch star_index/SA
++        touch star_index/SAindex
++        touch star_index/chrLength.txt
++        touch star_index/chrName.txt
++        touch star_index/chrNameLength.txt
++        touch star_index/chrStart.txt
++        touch star_index/exonGeTrInfo.tab
++        touch star_index/exonInfo.tab
++        touch star_index/geneInfo.tab
++        touch star_index/genomeParameters.txt
++        touch star_index/sjdbInfo.txt
++        touch star_index/sjdbList.fromGTF.out.tab
++        touch star_index/sjdbList.out.tab
++        touch star_index/transcriptInfo.tab
+ 
+         cat <<-END_VERSIONS > versions.yml
+         "${task.process}":
+@@ -97,16 +97,16 @@
+         """
+     } else {
+         """
+-        mkdir star
+-        touch star/Genome
+-        touch star/Log.out
+-        touch star/SA
+-        touch star/SAindex
+-        touch star/chrLength.txt
+-        touch star/chrName.txt
+-        touch star/chrNameLength.txt
+-        touch star/chrStart.txt
+-        touch star/genomeParameters.txt
++        mkdir -p star_index/
++        touch star_index/Genome
++        touch star_index/Log.out
++        touch star_index/SA
++        touch star_index/SAindex
++        touch star_index/chrLength.txt
++        touch star_index/chrName.txt
++        touch star_index/chrNameLength.txt
++        touch star_index/chrStart.txt
++        touch star_index/genomeParameters.txt
+ 
+         cat <<-END_VERSIONS > versions.yml
+         "${task.process}":
 
 ************************************************************
