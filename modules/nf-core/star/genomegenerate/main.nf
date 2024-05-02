@@ -4,8 +4,8 @@ process STAR_GENOMEGENERATE {
 
     conda "${moduleDir}/environment.yml"
     container "${ workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container ?
-        'https://depot.galaxyproject.org/singularity/mulled-v2-1fa26d1ce03c295fe2fdcf85831a92fbcbd7e8c2:ded3841da0194af2701c780e9b3d653a85d27489-0' :
-        'biocontainers/mulled-v2-1fa26d1ce03c295fe2fdcf85831a92fbcbd7e8c2:ded3841da0194af2701c780e9b3d653a85d27489-0' }"
+        'https://depot.galaxyproject.org/singularity/star:2.7.3a--0' :
+        'quay.io/biocontainers/star:2.7.3a--0' }"
 
     input:
     path fasta
@@ -23,49 +23,24 @@ process STAR_GENOMEGENERATE {
     def args_list   = args.tokenize()
     def memory      = task.memory ? "--limitGenomeGenerateRAM ${task.memory.toBytes() - 100000000}" : ''
     def include_gtf = gtf ? "--sjdbGTFfile $gtf" : ''
-    if (args_list.contains('--genomeSAindexNbases')) {
-        """
-        mkdir -p star_index/
-        STAR \\
-            --runMode genomeGenerate \\
-            --genomeDir star_index/ \\
-            --genomeFastaFiles $fasta \\
-            $include_gtf \\
-            --runThreadN $task.cpus \\
-            $memory \\
-            $args
 
-        cat <<-END_VERSIONS > versions.yml
-        "${task.process}":
-            star: \$(STAR --version | sed -e "s/STAR_//g")
-            samtools: \$(echo \$(samtools --version 2>&1) | sed 's/^.*samtools //; s/Using.*\$//')
-            gawk: \$(echo \$(gawk --version 2>&1) | sed 's/^.*GNU Awk //; s/, .*\$//')
-        END_VERSIONS
-        """
-    } else {
-        """
-        samtools faidx $fasta
-        NUM_BASES=`gawk '{sum = sum + \$2}END{if ((log(sum)/log(2))/2 - 1 > 14) {printf "%.0f", 14} else {printf "%.0f", (log(sum)/log(2))/2 - 1}}' ${fasta}.fai`
+    """
+    mkdir -p star_index/
 
-        mkdir -p star_index/
-        STAR \\
-            --runMode genomeGenerate \\
-            --genomeDir star_index/ \\
-            --genomeFastaFiles $fasta \\
-            $include_gtf \\
-            --runThreadN $task.cpus \\
-            --genomeSAindexNbases \$NUM_BASES \\
-            $memory \\
-            $args
+    STAR \\
+        --runMode genomeGenerate \\
+        --genomeDir star_index/ \\
+        --genomeFastaFiles $fasta \\
+        $include_gtf \\
+        --runThreadN $task.cpus \\
+        $memory \\
+        $args
 
-        cat <<-END_VERSIONS > versions.yml
-        "${task.process}":
-            star: \$(STAR --version | sed -e "s/STAR_//g")
-            samtools: \$(echo \$(samtools --version 2>&1) | sed 's/^.*samtools //; s/Using.*\$//')
-            gawk: \$(echo \$(gawk --version 2>&1) | sed 's/^.*GNU Awk //; s/, .*\$//')
-        END_VERSIONS
+    cat <<-END_VERSIONS > versions.yml
+    "${task.process}":
+        star: \$(STAR --version | sed -e "s/STAR_//g")
+    END_VERSIONS
         """
-    }
 
     stub:
     if (gtf) {
@@ -92,7 +67,6 @@ process STAR_GENOMEGENERATE {
         "${task.process}":
             star: \$(STAR --version | sed -e "s/STAR_//g")
             samtools: \$(echo \$(samtools --version 2>&1) | sed 's/^.*samtools //; s/Using.*\$//')
-            gawk: \$(echo \$(gawk --version 2>&1) | sed 's/^.*GNU Awk //; s/, .*\$//')
         END_VERSIONS
         """
     } else {
@@ -112,7 +86,6 @@ process STAR_GENOMEGENERATE {
         "${task.process}":
             star: \$(STAR --version | sed -e "s/STAR_//g")
             samtools: \$(echo \$(samtools --version 2>&1) | sed 's/^.*samtools //; s/Using.*\$//')
-            gawk: \$(echo \$(gawk --version 2>&1) | sed 's/^.*GNU Awk //; s/, .*\$//')
         END_VERSIONS
         """
     }
