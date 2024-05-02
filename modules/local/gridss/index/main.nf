@@ -41,8 +41,13 @@ process GRIDSS_INDEX {
     mv ${genome_fasta.name}.img gridss_index/
     mv ${genome_fasta.name}.gridsscache gridss_index/
 
-    # Copy across BWA index
+    # Symlink BWA index files into output directory
     ln -s ../${genome_fasta.name}.{amb,ann,bwt,pac,sa} gridss_index/
+
+    # Also include the ALT file if present
+    if [[ -e ${genome_fasta.name}.alt || -L ${genome_fasta.name}.alt ]]; then
+        ln -s ../${genome_fasta.name}.alt gridss_index/;
+    fi;
 
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":
