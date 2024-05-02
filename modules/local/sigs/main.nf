@@ -5,7 +5,7 @@ process SIGS {
     conda "${moduleDir}/environment.yml"
     container "${ workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container ?
         'https://depot.galaxyproject.org/singularity/hmftools-sigs:1.2.1--hdfd78af_0' :
-        'quay.io/biocontainers/hmftools-sigs:1.2.1--hdfd78af_0' }"
+        'biocontainers/hmftools-sigs:1.2.1--hdfd78af_0' }"
 
     input:
     tuple val(meta), path(smlv_vcf)

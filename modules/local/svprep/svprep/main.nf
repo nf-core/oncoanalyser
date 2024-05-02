@@ -5,7 +5,7 @@ process SVPREP {
     conda "${moduleDir}/environment.yml"
     container "${ workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container ?
         'https://depot.galaxyproject.org/singularity/hmftools-sv-prep:1.2.3--hdfd78af_1' :
-        'quay.io/biocontainers/hmftools-sv-prep:1.2.3--hdfd78af_1' }"
+        'biocontainers/hmftools-sv-prep:1.2.3--hdfd78af_1' }"
 
     input:
     tuple val(meta), path(bam), path(bai), path(junctions)

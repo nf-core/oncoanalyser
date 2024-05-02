@@ -5,7 +5,7 @@ process ORANGE {
     conda "${moduleDir}/environment.yml"
     container "${ workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container ?
         'https://depot.galaxyproject.org/singularity/hmftools-orange:2.7.1--hdfd78af_0' :
-        'quay.io/biocontainers/hmftools-orange:2.7.1--hdfd78af_0' }"
+        'biocontainers/hmftools-orange:2.7.1--hdfd78af_0' }"
 
     input:
     tuple val(meta), path(bam_metrics_somatic), path(bam_metrics_germline), path(flagstat_somatic), path(flagstat_germline), path(sage_somatic_dir), path(sage_germline_dir), path(smlv_somatic_vcf), path(smlv_germline_vcf), path(purple_dir), path(linx_somatic_anno_dir), path(linx_somatic_plot_dir), path(linx_germline_anno_dir), path(virusinterpreter_dir), path(chord_dir), path(sigs_dir), path(lilac_dir), path(cuppa_dir), path(isofox_dir)

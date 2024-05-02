@@ -4,7 +4,7 @@ process STAR {
 
     container "${ workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container ?
         'https://depot.galaxyproject.org/singularity/star:2.7.3a--0' :
-        'quay.io/biocontainers/star:2.7.3a--0' }"
+        'biocontainers/star:2.7.3a--0' }"
 
     input:
     tuple val(meta), path(reads_fwd), path(reads_rev)
