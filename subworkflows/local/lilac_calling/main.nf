@@ -131,7 +131,7 @@ workflow LILAC_CALLING {
             REALIGNREADS(
                 SLICEBAM.out.bam,
                 EXTRACTCONTIG.out.contig,
-                EXTRACTCONTIG.out.bwa_indices,
+                EXTRACTCONTIG.out.bwa_index,
             )
 
             ch_versions = ch_versions.mix(REALIGNREADS.out.versions)

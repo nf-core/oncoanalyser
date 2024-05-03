@@ -196,30 +196,31 @@ class Utils {
     public static void createStubPlaceholders(params) {
 
         def fps = [
-            params.ref_data_genome_fasta,
-            params.ref_data_genome_fai,
-            params.ref_data_genome_dict,
+            params.ref_data_genome_alt,
             params.ref_data_genome_bwa_index,
-            params.ref_data_genome_bwa_index_image,
-            params.ref_data_genome_bwa_index_bseq,
-            params.ref_data_genome_bwa_index_biidx,
+            params.ref_data_genome_dict,
+            params.ref_data_genome_fai,
+            params.ref_data_genome_fasta,
             params.ref_data_genome_gridss_index,
+            params.ref_data_genome_gtf,
             params.ref_data_virusbreakenddb_path,
         ]
 
-        params.hmf_data_paths[params.genome_version]
+        params.hmf_data_paths[params.genome_version.toString()]
             .each { k, v ->
                 fps << "${params.ref_data_hmf_data_path.replaceAll('/$', '')}/${v}"
             }
 
         if(params.panel !== null) {
-            params.panel_data_paths[params.panel][params.genome_version]
+            params.panel_data_paths[params.panel][params.genome_version.toString()]
                 .each { k, v ->
                     fps << "${params.ref_data_panel_data_path.replaceAll('/$', '')}/${v}"
                 }
         }
 
         fps.each { fp_str ->
+            if (fp_str === null) return
+
             def fp = Utils.getFileObject(fp_str)
 
             if (!fp_str || fp.exists()) return
@@ -234,7 +235,7 @@ class Utils {
 
     }
 
-    public static void validateInput(inputs, run_config, log) {
+    public static void validateInput(inputs, run_config, params, log) {
 
         def sample_keys = [
             [Constants.SampleType.TUMOR, Constants.SequenceType.DNA],
@@ -314,6 +315,46 @@ class Utils {
             }
 
         }
+
+
+        // NOTE(SW): the follwing final config checks are performed here since they require additional information
+        // regarding processes that are run and also inputs
+
+        def has_alt_contigs = params.genome_type == 'alt'
+
+        // Ensure that custom genomes with ALT contigs that need indexes built have the required .alt file
+        def has_bwa_indexes = (params.ref_data_genome_bwa_index && params.ref_data_genome_gridss_index)
+        def has_alt_file = params.containsKey('ref_data_genome_alt') && params.ref_data_genome_alt
+        def run_bwa_or_gridss_index = run_config.stages.alignment && run_config.has_dna_fastq && !has_bwa_indexes
+
+        if (run_bwa_or_gridss_index && has_alt_contigs && !has_alt_file) {
+            log.error "\n~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n" +
+                "  The genome .alt file is required when building bwa-mem2 or GRIDSS indexes\n" +
+                "  for reference genomes containing ALT contigs\n" +
+                "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
+            System.exit(1)
+        }
+
+        // Refuse to create STAR index for reference genome containing ALTs, refer to Slack channel
+        def run_star_index = run_config.stages.alignment && run_config.has_rna_fastq && !params.ref_data_genome_star_index
+
+        if (run_star_index && has_alt_contigs) {
+            log.error "\n~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n" +
+                "  Refusing to create the STAR index for a reference genome with ALT contigs.\n" +
+                "  Please review https://github.com/alexdobin/STAR docs or contact us on Slack.\n" +
+                "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
+            System.exit(1)
+        }
+
+        // Require that an input GTF file is provided when creating STAR index
+        if (run_star_index && !params.ref_data_genome_gtf) {
+            log.error "\n~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n" +
+                "  Creating a STAR index requires the appropriate genome transcript annotations\n" +
+                "  as a GTF file. Please contact us on Slack for further information."
+                "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
+            System.exit(1)
+        }
+
     }
 
     static public getEnumFromString(s, e) {

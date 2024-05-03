@@ -2,10 +2,10 @@ process CUSTOM_REALIGNREADS {
     tag "${meta.id}"
     label 'process_low'
 
-    conda "bwa=0.7.17 samtools=1.19.2 sambamba=1.0"
+    conda "bioconda::bwa-mem2=2.2.1 bioconda::samtools=1.19.2 bioconda::sambamba=1.0"
     container "${ workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container ?
-        'https://depot.galaxyproject.org/singularity/mulled-v2-4908f45b5b676e6a2fed6b1977d445b16b7b8dee:2411d64e0a784487e81828123aaf68a549531e5c-0' :
-        'quay.io/biocontainers/mulled-v2-4908f45b5b676e6a2fed6b1977d445b16b7b8dee:2411d64e0a784487e81828123aaf68a549531e5c-0' }"
+        'https://depot.galaxyproject.org/singularity/mulled-v2-4dde50190ae599f2bb2027cb2c8763ea00fb5084:544519c4a0ff7e9616a3b44afde1f143c52f10c3-0' :
+        'quay.io/biocontainers/mulled-v2-4dde50190ae599f2bb2027cb2c8763ea00fb5084:544519c4a0ff7e9616a3b44afde1f143c52f10c3-0' }"
 
     input:
     tuple val(meta), path(bam), path(bai)
@@ -30,20 +30,30 @@ process CUSTOM_REALIGNREADS {
             -0 ${meta.sample_id}_other.fastq.gz \\
             -s ${meta.sample_id}_singleton.fastq.gz;
 
-    bwa mem \\
-        -t${task.cpus} \\
+    bwa-mem2 mem \\
         -Y \\
+        -t ${task.cpus} \\
         ${reference} \\
         ${meta.sample_id}_R1.fastq.gz \\
         ${meta.sample_id}_R2.fastq.gz | \\
-        samtools sort -T tmp -o ${bam.baseName}.realigned.bam
-    samtools index ${bam.baseName}.realigned.bam
+        \\
+        sambamba view \\
+            --sam-input \\
+            --format bam \\
+            --compression-level 0 \\
+            --nthreads ${task.cpus} \\
+            /dev/stdin | \\
+        \\
+        sambamba sort \\
+            --nthreads ${task.cpus} \\
+            --out ${bam.baseName}.realigned.bam \\
+            /dev/stdin
 
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":
-        bwa: \$(echo \$(bwa 2>&1) | sed 's/^.*Version: //; s/Contact:.*\$//')
+        bwa-mem2: \$(bwa-mem2 version 2>/dev/null)
         samtools: \$(echo \$(samtools --version 2>&1) | sed 's/^.*samtools //; s/Using.*\$//')
-        sambamba: \$(sambamba --version 2>&1 | sed -n '/sambamba/ s/^sambamba \\(.\\+\\)/\\1/p' | head -n1)
+        sambamba: \$(sambamba --version 2>&1 | egrep '^sambamba' | head -n 1 | awk '{ print \$NF }')
     END_VERSIONS
     """
 

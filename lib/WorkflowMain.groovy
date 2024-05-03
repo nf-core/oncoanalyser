@@ -1,8 +1,10 @@
 //
 // This file holds several functions specific to the main.nf workflow in the nf-core/oncoanalyser pipeline
 //
-import Utils
 
+import nextflow.Nextflow
+
+import Utils
 
 class WorkflowMain {
 
@@ -36,9 +38,9 @@ class WorkflowMain {
         }
 
         if (!params.containsKey('ref_hmf_data_path')) {
-            if (params.genome_version == '37') {
+            if (params.genome_version.toString() == '37') {
                 params.ref_data_hmf_data_path = Constants.HMF_DATA_37_PATH
-            } else if (params.genome_version == '38') {
+            } else if (params.genome_version.toString() == '38') {
                 params.ref_data_hmf_data_path = Constants.HMF_DATA_38_PATH
             } else {
                 default_invalid = true
@@ -64,10 +66,10 @@ class WorkflowMain {
 
             // Attempt to set default panel data path; make no assumption on valid 'panel' value
 
-            if (!params.containsKey('panel')) {
-                if (params.panel == 'tso500' && params.genome_version == '37') {
+            if (params.containsKey('panel')) {
+                if (params.panel == 'tso500' && params.genome_version.toString() == '37') {
                     params.ref_data_panel_data_path = Constants.TSO500_PANEL_37_PATH
-                } else if (params.panel == 'tso500' && params.genome_version == '38') {
+                } else if (params.panel == 'tso500' && params.genome_version.toString() == '38') {
                     params.ref_data_panel_data_path = Constants.TSO500_PANEL_38_PATH
                 }
             }
@@ -85,10 +87,18 @@ class WorkflowMain {
         }
 
         if (!params.containsKey('ref_data_hla_slice_bed') && stages.lilac) {
-            if (params.genome_version == '38' && params.genome_type == 'alt') {
+            if (params.genome_version.toString() == '38' && params.genome_type == 'alt') {
                 params.ref_data_hla_slice_bed = Constants.HLA_SLICE_BED_GRCH38_ALT_PATH
             }
         }
+
+        // Final point to set any default to avoid access to undefined parameters during nf-validation
+        if (!params.containsKey('panel')) { params.panel = null }
+        if (!params.containsKey('ref_data_genome_alt')) { params.ref_data_genome_alt = null }
+        if (!params.containsKey('ref_data_genome_gtf')) { params.ref_data_genome_gtf = null }
+        if (!params.containsKey('ref_data_hla_slice_bed')) { params.ref_data_hla_slice_bed = null }
+        if (!params.containsKey('ref_data_panel_data_path')) { params.ref_data_panel_data_path = null }
+        if (!params.containsKey('ref_data_virusbreakenddb_path')) { params.ref_data_virusbreakenddb_path = null }
 
     }
 
@@ -192,6 +202,26 @@ class WorkflowMain {
 
         }
 
+        if (params.ref_data_genome_alt !== null) {
+            if (params.genome_type != 'alt') {
+                log.error "\n~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n" +
+                    "  Using a reference genome without ALT contigs but found an .alt file\n" +
+                    "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
+                System.exit(1)
+            }
+
+            def ref_data_genome_alt_fn = nextflow.Nextflow.file(params.ref_data_genome_alt).name
+            def ref_data_genome_fasta_fn = nextflow.Nextflow.file(params.ref_data_genome_fasta).name
+            if (ref_data_genome_alt_fn != "${ref_data_genome_fasta_fn}.alt") {
+                log.error "\n~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n" +
+                    "  Found .alt file with filename of ${ref_data_genome_alt_fn} but it is required to match\n" +
+                    "  reference genome FASTA filename stem: ${ref_data_genome_fasta_fn}.alt\n" +
+                    "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
+                System.exit(1)
+            }
+        }
+
+
     }
 
     public static getRunConfig(params, inputs, log) {
@@ -212,6 +242,7 @@ class WorkflowMain {
             has_dna: inputs.any { Utils.hasTumorDna(it) },
             has_rna: inputs.any { Utils.hasTumorRna(it) },
             has_rna_fastq: inputs.any { Utils.hasTumorRnaFastq(it) },
+            has_dna_fastq: inputs.any { Utils.hasTumorDnaFastq(it) || Utils.hasNormalDnaFastq(it) },
         ]
     }
 }

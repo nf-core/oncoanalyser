@@ -2,30 +2,38 @@ process BWA_INDEX {
     tag "$fasta"
     label 'process_single'
 
-    conda (params.enable_conda ? "bioconda::bwa=0.7.17" : null)
+    conda "${moduleDir}/environment.yml"
     container "${ workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container ?
         'https://depot.galaxyproject.org/singularity/bwa:0.7.17--hed695b0_7' :
-        'quay.io/biocontainers/bwa:0.7.17--hed695b0_7' }"
+        'biocontainers/bwa:0.7.17--hed695b0_7' }"
 
     input:
-    tuple val(meta), path(fasta)
+    path fasta
+    path alt
 
     output:
-    tuple val(meta), path(bwa) , emit: index
-    path "versions.yml"        , emit: versions
+    path bwa_index     , emit: index
+    path "versions.yml", emit: versions
 
     when:
     task.ext.when == null || task.ext.when
 
     script:
-    def args = task.ext.args ?: ''
+    def prefix = task.ext.prefix ?: "${fasta.name}"
+    def args   = task.ext.args ?: ''
+
     """
-    mkdir bwa
+    mkdir -p bwa_index/
     bwa \\
         index \\
         $args \\
-        -p bwa/${fasta.name} \\
+        -p bwa_index/${prefix} \\
         $fasta
+
+    # Include ALT file where necessary
+    if [[ -n "${alt}" ]]; then
+        ln -s ../${alt} bwa_index/;
+    fi;
 
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":
@@ -34,14 +42,15 @@ process BWA_INDEX {
     """
 
     stub:
+    def prefix = task.ext.prefix ?: "${fasta.name}"
     """
-    mkdir bwa
+    mkdir -p bwa_index/
 
-    touch bwa/genome.fasta.amb
-    touch bwa/genome.fasta.ann
-    touch bwa/genome.fasta.bwt
-    touch bwa/genome.fasta.pac
-    touch bwa/genome.fasta.sa
+    touch bwa_index/${prefix}.amb
+    touch bwa_index/${prefix}.ann
+    touch bwa_index/${prefix}.bwt
+    touch bwa_index/${prefix}.pac
+    touch bwa_index/${prefix}.sa
 
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":

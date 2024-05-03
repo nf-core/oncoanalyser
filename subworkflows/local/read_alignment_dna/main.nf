@@ -16,8 +16,6 @@ workflow READ_ALIGNMENT_DNA {
         // Reference data
         genome_fasta           // channel: [mandatory] /path/to/genome_fasta
         genome_bwa_index       // channel: [mandatory] /path/to/genome_bwa_index_dir/
-        genome_bwa_index_bseq  // channel: [mandatory] /path/to/genome_bwa_index_binary_seq
-        genome_bwa_index_biidx // channel: [mandatory] /path/to/genome_bwa_index_bi-index
 
         // Params
         max_fastq_records      // numeric: [mandatory] max number of FASTQ records per split
@@ -152,8 +150,6 @@ workflow READ_ALIGNMENT_DNA {
             ch_bwa_inputs,
             genome_fasta,
             genome_bwa_index,
-            genome_bwa_index_bseq,
-            genome_bwa_index_biidx,
         )
 
         ch_versions = ch_versions.mix(BWAMEM2_ALIGN.out.versions)

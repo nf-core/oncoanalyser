@@ -8,11 +8,11 @@ process SAMTOOLS_DICT {
         'quay.io/biocontainers/samtools:1.16.1--h6899075_1' }"
 
     input:
-    tuple val(meta), path(fasta)
+    path fasta
 
     output:
-    tuple val(meta), path ("*.dict"), emit: dict
-    path "versions.yml"             , emit: versions
+    path "*.dict"      , emit: dict
+    path "versions.yml", emit: versions
 
     when:
     task.ext.when == null || task.ext.when

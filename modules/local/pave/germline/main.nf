@@ -35,9 +35,9 @@ process PAVE_GERMLINE {
     script:
     def args = task.ext.args ?: ''
     def gnomad_args
-    if (genome_ver == '37') {
+    if (genome_ver.toString() == '37') {
         gnomad_args = "-gnomad_freq_file ${gnomad_resource}"
-    } else if (genome_ver == '38') {
+    } else if (genome_ver.toString() == '38') {
         gnomad_args = "-gnomad_freq_dir ${gnomad_resource}"
     } else {
         log.error "got bad genome version: ${genome_ver}"
