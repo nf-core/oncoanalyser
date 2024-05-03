@@ -5,7 +5,7 @@ process LINX_VISUALISER {
     conda "${moduleDir}/environment.yml"
     container "${ workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container ?
         'https://depot.galaxyproject.org/singularity/hmftools-linx:1.25--hdfd78af_0':
-        'quay.io/biocontainers/hmftools-linx:1.25--hdfd78af_0' }"
+        'biocontainers/hmftools-linx:1.25--hdfd78af_0' }"
 
     input:
     tuple val(meta), path(linx_annotation_dir)
@@ -93,6 +93,7 @@ process LINX_VISUALISER {
     """
     mkdir -p plots/{all,reportable}/
     touch plots/{all,reportable}/placeholder
+
     echo -e '${task.process}:\n  stub: noversions\n' > versions.yml
     """
 }

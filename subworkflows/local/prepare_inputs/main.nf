@@ -12,14 +12,13 @@ import Utils
 
 workflow PREPARE_INPUTS {
     take:
-        input_fp_str
+    input_fp_str
 
     main:
-
-        ch_inputs = Channel.fromList(
-            Utils.parseInput(input_fp_str, workflow.stubRun, log)
-        )
+    ch_inputs = Channel.fromList(
+        Utils.parseInput(input_fp_str, workflow.stubRun, log)
+    )
 
     emit:
-        inputs  = ch_inputs // channel: [ meta ]
+    inputs = ch_inputs // channel: [ meta ]
 }

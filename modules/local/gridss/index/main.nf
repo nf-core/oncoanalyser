@@ -6,7 +6,7 @@ process GRIDSS_INDEX {
     conda "${moduleDir}/environment.yml"
     container "${ workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container ?
         'https://depot.galaxyproject.org/singularity/gridss:2.13.2--h50ea8bc_3' :
-        'quay.io/biocontainers/gridss:2.13.2--h50ea8bc_3' }"
+        'biocontainers/gridss:2.13.2--h50ea8bc_3' }"
 
     input:
     path genome_fasta

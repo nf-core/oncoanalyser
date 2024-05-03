@@ -5,7 +5,7 @@ process LILAC {
     conda "${moduleDir}/environment.yml"
     container "${ workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container ?
         'https://depot.galaxyproject.org/singularity/hmftools-lilac:1.6--hdfd78af_0' :
-        'quay.io/biocontainers/hmftools-lilac:1.6--hdfd78af_0' }"
+        'biocontainers/hmftools-lilac:1.6--hdfd78af_0' }"
 
     input:
     tuple val(meta), path(normal_dna_bam), path(normal_dna_bai), path(tumor_dna_bam), path(tumor_dna_bai), path(tumor_rna_bam), path(tumor_rna_bai), path(purple_dir)
@@ -55,6 +55,7 @@ process LILAC {
     """
     mkdir -p lilac/
     touch lilac/placeholder
+
     echo -e '${task.process}:\\n  stub: noversions\\n' > versions.yml
     """
 }

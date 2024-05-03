@@ -5,7 +5,7 @@ process GRIPSS_SOMATIC {
     conda "${moduleDir}/environment.yml"
     container "${ workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container ?
         'https://depot.galaxyproject.org/singularity/hmftools-gripss:2.4--hdfd78af_0' :
-        'quay.io/biocontainers/hmftools-gripss:2.4--hdfd78af_0' }"
+        'biocontainers/hmftools-gripss:2.4--hdfd78af_0' }"
 
     input:
     tuple val(meta), path(gridss_vcf)
@@ -62,6 +62,7 @@ process GRIPSS_SOMATIC {
     touch ${meta.tumor_id}.gripss.filtered.somatic.vcf.gz.tbi
     touch ${meta.tumor_id}.gripss.somatic.vcf.gz
     touch ${meta.tumor_id}.gripss.somatic.vcf.gz.tbi
+
     echo -e '${task.process}:\\n  stub: noversions\\n' > versions.yml
     """
 }

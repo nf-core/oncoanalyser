@@ -1,10 +1,10 @@
-process STAR {
+process STAR_ALIGN {
     tag "${meta.id}"
     label 'process_high'
 
     container "${ workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container ?
         'https://depot.galaxyproject.org/singularity/star:2.7.3a--0' :
-        'quay.io/biocontainers/star:2.7.3a--0' }"
+        'biocontainers/star:2.7.3a--0' }"
 
     input:
     tuple val(meta), path(reads_fwd), path(reads_rev)
@@ -18,8 +18,11 @@ process STAR {
     task.ext.when == null || task.ext.when
 
     script:
+    def args = task.ext.args ?: ''
+
     """
     STAR \\
+        ${args} \\
         --readFilesIn ${reads_fwd} ${reads_rev} \\
         --genomeDir ${genome_star_index} \\
         --runThreadN ${task.cpus} \\
@@ -57,6 +60,7 @@ process STAR {
     stub:
     """
     touch Aligned.out.bam
+
     echo -e '${task.process}:\\n  stub: noversions\\n' > versions.yml
     """
 }

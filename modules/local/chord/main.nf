@@ -5,7 +5,7 @@ process CHORD {
     conda "${moduleDir}/environment.yml"
     container "${ workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container ?
         'https://depot.galaxyproject.org/singularity/r-chord:2.03--r43hdfd78af_0' :
-        'quay.io/biocontainers/r-chord:2.03--r43hdfd78af_0' }"
+        'biocontainers/r-chord:2.03--r43hdfd78af_0' }"
 
     input:
     tuple val(meta), path(smlv_vcf), path(sv_vcf)
@@ -19,8 +19,6 @@ process CHORD {
     task.ext.when == null || task.ext.when
 
     script:
-    def args = task.ext.args ?: ''
-
     """
     #!/usr/bin/env Rscript
     library('CHORD')
@@ -82,6 +80,7 @@ process CHORD {
     mkdir -p chord/
     touch chord/${meta.sample_id}_chord_signatures.txt
     touch chord/${meta.sample_id}_chord_prediction.txt
+
     echo -e '${task.process}:\\n  stub: noversions\\n' > versions.yml
     """
 }

@@ -1,9 +1,10 @@
 process SAMBAMBA_MERGE {
     tag "${meta.id}"
+    label 'process_medium'
 
     container "${ workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container ?
         'https://depot.galaxyproject.org/singularity/sambamba:1.0--h98b6b92_0' :
-        'quay.io/biocontainers/sambamba:1.0--h98b6b92_0' }"
+        'biocontainers/sambamba:1.0--h98b6b92_0' }"
 
     input:
     tuple val(meta), path(bams)
@@ -12,9 +13,15 @@ process SAMBAMBA_MERGE {
     tuple val(meta), path('*bam'), emit: bam
     path 'versions.yml'          , emit: versions
 
+    when:
+    task.ext.when == null || task.ext.when
+
     script:
+    def args = task.ext.args ?: ''
+
     """
     sambamba merge \\
+        ${args} \\
         --nthreads ${task.cpus} \\
         ${meta.sample_id}.bam \\
         ${bams}
@@ -28,6 +35,7 @@ process SAMBAMBA_MERGE {
     stub:
     """
     touch ${meta.sample_id}.bam
+
     echo -e '${task.process}:\\n  stub: noversions\\n' > versions.yml
     """
 }

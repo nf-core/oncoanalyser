@@ -5,7 +5,7 @@ process VIRUSINTERPRETER {
     conda "${moduleDir}/environment.yml"
     container "${ workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container ?
         'https://depot.galaxyproject.org/singularity/hmftools-virus-interpreter:1.3--hdfd78af_0' :
-        'quay.io/biocontainers/hmftools-virus-interpreter:1.3--hdfd78af_0' }"
+        'biocontainers/hmftools-virus-interpreter:1.3--hdfd78af_0' }"
 
     input:
     tuple val(meta), path(virus_tsv), path(purple_dir), path(wgs_metrics)
@@ -27,6 +27,7 @@ process VIRUSINTERPRETER {
 
     virusinterpreter \\
         -Xmx${Math.round(task.memory.bytes * 0.95)} \\
+        ${args} \\
         -sample ${meta.sample_id} \\
         -purple_dir ${purple_dir} \\
         -tumor_sample_wgs_metrics_file ${wgs_metrics} \\
@@ -45,6 +46,7 @@ process VIRUSINTERPRETER {
     """
     mkdir -p virusinterpreter/
     touch virusinterpreter/${meta.sample_id}.virus.annotated.tsv
+
     echo -e '${task.process}:\\n  stub: noversions\\n' > versions.yml
     """
 }

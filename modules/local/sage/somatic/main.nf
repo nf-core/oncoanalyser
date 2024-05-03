@@ -7,7 +7,7 @@ process SAGE_SOMATIC {
     conda "${moduleDir}/environment.yml"
     container "${ workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container ?
         'https://depot.galaxyproject.org/singularity/hmftools-sage:3.4--hdfd78af_1' :
-        'quay.io/biocontainers/hmftools-sage:3.4--hdfd78af_1' }"
+        'biocontainers/hmftools-sage:3.4--hdfd78af_1' }"
 
     input:
     tuple val(meta), path(tumor_bam), path(normal_bam), path(tumor_bai), path(normal_bai)
@@ -31,7 +31,6 @@ process SAGE_SOMATIC {
 
     script:
     def args = task.ext.args ?: ''
-
     def reference_arg = meta.containsKey('normal_id') ? "-reference ${meta.normal_id}" : ''
     def reference_bam_arg = normal_bam ? "-reference_bam ${normal_bam}" : ''
 
@@ -73,6 +72,7 @@ process SAGE_SOMATIC {
     touch somatic/${meta.tumor_id}.sage.bqr.tsv
     touch somatic/${meta.normal_id}.sage.bqr.png
     touch somatic/${meta.normal_id}.sage.bqr.tsv
+
     echo -e '${task.process}:\\n  stub: noversions\\n' > versions.yml
     """
 }

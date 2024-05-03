@@ -5,7 +5,7 @@ process SIGS {
     conda "${moduleDir}/environment.yml"
     container "${ workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container ?
         'https://depot.galaxyproject.org/singularity/hmftools-sigs:1.2.1--hdfd78af_0' :
-        'quay.io/biocontainers/hmftools-sigs:1.2.1--hdfd78af_0' }"
+        'biocontainers/hmftools-sigs:1.2.1--hdfd78af_0' }"
 
     input:
     tuple val(meta), path(smlv_vcf)
@@ -26,6 +26,7 @@ process SIGS {
 
     sigs \\
         -Xmx${Math.round(task.memory.bytes * 0.95)} \\
+        ${args} \\
         -sample ${meta.sample_id} \\
         -somatic_vcf_file ${smlv_vcf} \\
         -signatures_file ${signatures} \\
@@ -41,6 +42,7 @@ process SIGS {
     """
     mkdir -p sigs/
     touch sigs/placeholder
+
     echo -e '${task.process}:\\n  stub: noversions\\n' > versions.yml
     """
 }

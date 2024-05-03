@@ -5,7 +5,7 @@ process SVPREP_DEPTH_ANNOTATOR {
     conda "${moduleDir}/environment.yml"
     container "${ workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container ?
         'https://depot.galaxyproject.org/singularity/hmftools-sv-prep:1.2.3--hdfd78af_1' :
-        'quay.io/biocontainers/hmftools-sv-prep:1.2.3--hdfd78af_1' }"
+        'biocontainers/hmftools-sv-prep:1.2.3--hdfd78af_1' }"
 
     input:
     tuple val(meta), path(bams), path(bais), path(vcf), val(labels)
@@ -51,6 +51,7 @@ process SVPREP_DEPTH_ANNOTATOR {
     """
     touch ${meta.tumor_id}.gridss.vcf.gz
     touch ${meta.tumor_id}.gridss.vcf.gz.tbi
+
     echo -e '${task.process}:\\n  stub: noversions\\n' > versions.yml
     """
 }

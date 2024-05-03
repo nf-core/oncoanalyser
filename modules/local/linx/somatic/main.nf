@@ -5,7 +5,7 @@ process LINX_SOMATIC {
     conda "${moduleDir}/environment.yml"
     container "${ workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container ?
         'https://depot.galaxyproject.org/singularity/hmftools-linx:1.25--hdfd78af_0':
-        'quay.io/biocontainers/hmftools-linx:1.25--hdfd78af_0' }"
+        'biocontainers/hmftools-linx:1.25--hdfd78af_0' }"
 
     input:
     tuple val(meta), path(purple_dir)
@@ -48,6 +48,7 @@ process LINX_SOMATIC {
     """
     mkdir linx_somatic/
     touch linx_somatic/placeholder
+
     echo -e '${task.process}:\\n  stub: noversions\\n' > versions.yml
     """
 }

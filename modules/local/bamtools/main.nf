@@ -5,7 +5,7 @@ process BAMTOOLS {
     conda "${moduleDir}/environment.yml"
     container "${ workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container ?
         'https://depot.galaxyproject.org/singularity/hmftools-bam-tools:1.2.1--hdfd78af_0' :
-        'quay.io/biocontainers/hmftools-bam-tools:1.2.1--hdfd78af_0' }"
+        'biocontainers/hmftools-bam-tools:1.2.1--hdfd78af_0' }"
 
     input:
     tuple val(meta), path(bam), path(bai)
@@ -26,6 +26,7 @@ process BAMTOOLS {
     bamtools \\
         -Xmx${Math.round(task.memory.bytes * 0.95)} \\
         com.hartwig.hmftools.bamtools.metrics.BamMetrics \\
+        ${args} \\
         -sample ${meta.sample_id} \\
         -bam_file ${bam} \\
         -ref_genome ${genome_fasta} \\
@@ -44,6 +45,7 @@ process BAMTOOLS {
     stub:
     """
     touch ${meta.sample_id}.wgsmetrics
+
     echo -e '${task.process}:\\n  stub: noversions\\n' > versions.yml
     """
 }

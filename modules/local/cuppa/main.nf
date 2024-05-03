@@ -5,7 +5,7 @@ process CUPPA {
     conda "${moduleDir}/environment.yml"
     container "${ workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container ?
         'https://depot.galaxyproject.org/singularity/hmftools-cuppa:1.8.1--hdfd78af_0' :
-        'quay.io/biocontainers/hmftools-cuppa:1.8.1--hdfd78af_0' }"
+        'biocontainers/hmftools-cuppa:1.8.1--hdfd78af_0' }"
 
     input:
     tuple val(meta), path(isofox_dir), path(purple_dir), path(linx_dir), path(virusinterpreter_dir)
@@ -46,6 +46,7 @@ process CUPPA {
 
     cuppa \\
         -Xmx${Math.round(task.memory.bytes * 0.95)} \\
+        ${args} \\
         -sample ${meta.sample_id} \\
         -sample_data_dir sample_data/ \\
         -categories ${classifier} \\
@@ -76,6 +77,7 @@ process CUPPA {
     touch cuppa/${meta.sample_id}.cup.report.summary.png
     touch cuppa/${meta.sample_id}.cup.report.features.png
     touch cuppa/${meta.sample_id}.cuppa.chart.png
+
     echo -e '${task.process}:\\n  stub: noversions\\n' > versions.yml
     """
 }

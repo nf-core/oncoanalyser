@@ -5,7 +5,7 @@ process ISOFOX {
     conda "${moduleDir}/environment.yml"
     container "${ workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container ?
         'https://depot.galaxyproject.org/singularity/hmftools-isofox:1.7.1--hdfd78af_0':
-        'quay.io/biocontainers/hmftools-isofox:1.7.1--hdfd78af_0' }"
+        'biocontainers/hmftools-isofox:1.7.1--hdfd78af_0' }"
 
     input:
     tuple val(meta), path(bam), path(bai)
@@ -68,6 +68,7 @@ process ISOFOX {
     """
     mkdir -p isofox/
     touch isofox/placeholder
+
     echo -e '${task.process}:\\n  stub: noversions\\n' > versions.yml
     """
 }

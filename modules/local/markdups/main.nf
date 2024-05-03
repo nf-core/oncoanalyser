@@ -4,7 +4,7 @@ process MARKDUPS {
 
     container "${ workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container ?
         'https://depot.galaxyproject.org/singularity/hmftools-mark-dups:1.1.5--hdfd78af_0' :
-        'quay.io/biocontainers/hmftools-mark-dups:1.1.5--hdfd78af_0' }"
+        'biocontainers/hmftools-mark-dups:1.1.5--hdfd78af_0' }"
 
     input:
     tuple val(meta), path(bams), path(bais)
@@ -24,10 +24,12 @@ process MARKDUPS {
     task.ext.when == null || task.ext.when
 
     script:
+    def args = task.ext.args ?: ''
     def umi_flags = has_umis ? '-umi_enabled -umi_duplex -umi_duplex_delim +' : ''
 
     """
     markdups \\
+        ${args} \\
         -Xmx${Math.round(task.memory.bytes * 0.95)} \\
         \\
         -samtools \$(which samtools) \\

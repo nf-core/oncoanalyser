@@ -32,6 +32,7 @@ process VIRUSBREAKEND {
     ln -s \$(find -L ${genome_gridss_index} -type f) ./
 
     virusbreakend \\
+        ${args} \\
         --gridssargs "--jvmheap ${Math.round(task.memory.bytes * 0.95)}" \\
         --threads ${task.cpus} \\
         --db ${virusbreakenddb.toString().replaceAll("/\$", "")}/ \\
@@ -48,6 +49,7 @@ process VIRUSBREAKEND {
     stub:
     """
     touch ${meta.sample_id}.virusbreakend.vcf ${meta.sample_id}.summary.tsv
+
     echo -e '${task.process}:\\n  stub: noversions\\n' > versions.yml
     """
 }
