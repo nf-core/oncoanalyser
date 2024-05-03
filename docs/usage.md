@@ -51,7 +51,7 @@ details and columns are [described below](#column-descriptions).
 
 Several different input filetypes beyond FASTQ and BAM are recognised, including intermediate output files generated
 during execution such as the PURPLE output directory. The full list of recognised input filetypes is available
-[here](https://github.com/nf-core/oncoanalyser/blob/v0.3.1/lib/Constants.groovy#L56-L86).
+[here](https://github.com/nf-core/oncoanalyser/blob/0.4.5/lib/Constants.groovy#L58-L90).
 
 ### Simple example
 
@@ -130,7 +130,7 @@ The typical command for running the pipeline is as follows:
 ```bash
 nextflow run nf-core/oncoanalyser \
   -profile docker \
-  -revision v0.3.1 \
+  -revision 0.4.5 \
   --mode <wgts|targeted> \
   --genome <GRCh37_hmf|GRCh38_hmf> \
   --input samplesheet.csv \
@@ -205,7 +205,7 @@ If you wish to share such profile (such as upload as supplementary material for 
 ### Selecting processes
 
 Most of the major components in oncoanalyser can be skipped using `--processes_exclude` (the full list of available
-processes can be view [here](https://github.com/nf-core/oncoanalyser/blob/v0.3.1/lib/Constants.groovy#L36-L54)).
+processes can be view [here](https://github.com/nf-core/oncoanalyser/blob/0.4.5/lib/Constants.groovy#L36-L56)).
 Multiple processes can be given as comma-separated list. While there are some use-cases for this feature (e.g. skipping
 resource intensive processes such as VIRUSBreakend), it becomes more powerful when combined with existing inputs as
 described in the follow section.
@@ -241,9 +241,9 @@ And now run and skip variant calling:
 ```bash
 nextflow run nf-core/oncoanalyser \
   -profile docker \
-  -revision v0.3.1 \
+  -revision 0.4.5 \
   --mode wgts \
-  --processes_exclude amber,cobalt,gridss,gripss,sage,pave \
+  --processes_exclude markdups,amber,cobalt,gridss,gripss,sage,pave \
   --genome GRCh38_hmf \
   --input samplesheet.csv \
   --outdir output/
@@ -255,7 +255,7 @@ nextflow run nf-core/oncoanalyser \
 
 ### Configuring reference data
 
-All reference data can be configured as needed. These are defined in various locations:
+All reference data can be configured as needed, and are defined in the following locations:
 
 | Reference data          | Filepath                  | Note                                    |
 | ----------------------- | ------------------------- | --------------------------------------- |
@@ -263,34 +263,132 @@ All reference data can be configured as needed. These are defined in various loc
 | hmftools resource files | `conf/hmf_data.config`    | Paths relative to data bundle directory |
 | Panel resource files    | `conf/panel_data.config`  | Paths relative to data bundle directory |
 
-To override hmftools resource files (e.g. driver gene panel), [stage the bundle](#staging-reference-data) locally then
-copy in the user-created file(s) and update `conf/hmf_data.config` accordingly. The local custom bundle must be provided
-to oncoanalyser with the `--ref_data_hmf_data_path` CLI option. The same approach is followed for customising panel
-resource files but configuring `conf/panel_data.config` and supplying with `--ref_data_panel_data_path` instead.
+See the below sections for further details on customising reference data.
 
-The path or URI to the VIRUSBreakend database can also be explicitly set with `--ref_data_virusbreakenddb_path`.
-Configuring custom genomes uses a different approach to align with the existing concepts in nf-core.
+#### Customising hmf data
+
+To override hmftools resource files, first [stage the bundle](#staging-reference-data) locally then copy in your
+custom file under the bundle directory and create a new config with relevant file paths:
+
+```text title="hmf_data.custom.config"
+params {
+    hmf_data_paths {
+        '38' {
+            driver_gene_panel     = 'custom_files/DriverGenePanel.tsv'
+            sage_actionable_panel = 'custom_files/ActionableCodingPanel.bed.gz'
+            sage_coverage_panel   = 'custom_files/CoverageCodingPanel.bed.gz'
+        }
+    }
+}
+```
+
+To use these hmftools resource file overrides in oncoanalyser the local bundle directory must be provided with
+`--ref_data_hmf_data_path`.
+
+#### Customise other data
+
+The path or URI to the VIRUSBreakend database can also be explicitly set with `--ref_data_virusbreakenddb_path`. There
+are additional arguments to manually set various other reference data files, please review parameters documentation for
+the complete list.
+
+#### Staging reference data
+
+Default reference data can be staged locally with oncoanalyser by providing a samplesheet for the desired analysis and
+setting the `--prepare_reference_only` argument. The samplesheet and oncoanalyser configuration is used to determine the
+revelant reference data to download. For example the following will download the GRCh38_hmf genome plus indices,
+reference data, and databases required to run a WGTS analysis for tumor/normal DNA with tumor RNA:
+
+```csv title="samplesheet.csv"
+group_id,subject_id,sample_id,sample_type,sequence_type,filetype,filepath
+P1__wgts,P1,SA,normal,dna,bam,/path/to/P1.SA.normal.dna.wgs.bam
+P1__wgts,P1,SB,tumor,dna,bam,/path/to/P1.SB.tumor.dna.wgs.bam
+P1__wgts,P1,SC,tumor,rna,bam,/path/to/P1.SC.tumor.rna.wts.bam
+```
+
+```bash
+nextflow run nf-core/oncoanalyser \
+  -profile docker \
+  -revision 0.4.5 \
+  --mode wgts \
+  --genome GRCh38_hmf \
+  --prepare_reference_only \
+  --input samplesheet.csv \
+  --outdir prepare_reference/
+```
+
+This process will download and unpack default reference data without running any analysis, and once complete the
+prepared reference files can found in `./prepare_reference/reference_data/0.4.5/<datetimestamp>/`. It is recommended to
+remove the Nextflow work directory after staging data to free disk space.
+
+For oncoanalyser to use locally staged reference data a custom config can be used:
+
+```text title="refdata.local.config"
+params {
+
+    genomes {
+        GRCh38_hmf {
+            fasta           = "/path/to/GCA_000001405.15_GRCh38_no_alt_analysis_set.fna"
+            fai             = "/path/to/GCA_000001405.15_GRCh38_no_alt_analysis_set.fna.fai"
+            dict            = "/path/to/GCA_000001405.15_GRCh38_no_alt_analysis_set.fna.dict"
+            bwa_index       = "/path/to/bwa-mem2_index/"
+            gridss_index    = "/path/to/gridss_index/"
+            star_index      = "/path/to/star_index/"
+        }
+    }
+
+    ref_data_hmf_data_path        = "/path/to/hmftools_data/"
+    ref_data_panel_data_path      = "/path/to/tso500_panel_data/"
+    ref_data_virusbreakenddb_path = "/path/to/virusbreakenddb/"
+}
+```
+
+Specific reference files can also be downloaded directly from the hosting service with the corresponding URL.
+
+##### Reference data URLs
+
+_GRCh37 genome (Hartwig) [`GRCh37_hmf`]_
+
+| Type                 | Name                                                                                                                                                                                         |
+| -------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| FASTA                | [Homo_sapiens.GRCh37.GATK.illumina.fasta](https://pub-cf6ba01919994c3cbd354659947f74d8.r2.dev/genomes/GRCh37_hmf/24.0/Homo_sapiens.GRCh37.GATK.illumina.fasta)                               |
+| FASTA index          | [Homo_sapiens.GRCh37.GATK.illumina.fasta.fai](https://pub-cf6ba01919994c3cbd354659947f74d8.r2.dev/genomes/GRCh37_hmf/24.0/samtools_index/1.16/Homo_sapiens.GRCh37.GATK.illumina.fasta.fai)   |
+| FASTA seq dictionary | [Homo_sapiens.GRCh37.GATK.illumina.fasta.dict](https://pub-cf6ba01919994c3cbd354659947f74d8.r2.dev/genomes/GRCh37_hmf/24.0/samtools_index/1.16/Homo_sapiens.GRCh37.GATK.illumina.fasta.dict) |
+| bwa-mem2 index       | [bwa_index/2.2.1.tar.gz](https://pub-cf6ba01919994c3cbd354659947f74d8.r2.dev/genomes/GRCh37_hmf/24.1/bwa_index/2.2.1.tar.gz)                                                                 |
+| GRIDSS index         | [gridss_index/2.13.2.tar.gz](https://pub-cf6ba01919994c3cbd354659947f74d8.r2.dev/genomes/GRCh37_hmf/24.1/gridss_index/2.13.2.tar.gz)                                                         |
+| STAR index           | [star_index/gencode_19/2.7.3a.tar.gz](https://pub-cf6ba01919994c3cbd354659947f74d8.r2.dev/genomes/GRCh37_hmf/24.0/star_index/gencode_19/2.7.3a.tar.gz)                                       |
+
+_GRCh37 genome (Hartwig) [`GRCh38_hmf`]_
+
+| Type                 | Name                                                                                                                                                                                                         |
+| -------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| FASTA                | [GCA_000001405.15_GRCh38_no_alt_analysis_set.fna](https://pub-cf6ba01919994c3cbd354659947f74d8.r2.dev/genomes/GRCh38_hmf/24.0/GCA_000001405.15_GRCh38_no_alt_analysis_set.fna)                               |
+| FASTA index          | [GCA_000001405.15_GRCh38_no_alt_analysis_set.fna.fai](https://pub-cf6ba01919994c3cbd354659947f74d8.r2.dev/genomes/GRCh38_hmf/24.0/samtools_index/1.16/GCA_000001405.15_GRCh38_no_alt_analysis_set.fna.fai)   |
+| FASTA seq dictionary | [GCA_000001405.15_GRCh38_no_alt_analysis_set.fna.dict](https://pub-cf6ba01919994c3cbd354659947f74d8.r2.dev/genomes/GRCh38_hmf/24.0/samtools_index/1.16/GCA_000001405.15_GRCh38_no_alt_analysis_set.fna.dict) |
+| bwa-mem2 index       | [bwa_index/2.2.1.tar.gz](https://pub-cf6ba01919994c3cbd354659947f74d8.r2.dev/genomes/GRCh38_hmf/24.1/bwa_index/2.2.1.tar.gz)                                                                                 |
+| GRIDSS index         | [gridss_index/2.13.2.tar.gz](https://pub-cf6ba01919994c3cbd354659947f74d8.r2.dev/genomes/GRCh38_hmf/24.1/gridss_index/2.13.2.tar.gz)                                                                         |
+| STAR index           | [star_index/gencode_38/2.7.3a.tar.gz](https://pub-cf6ba01919994c3cbd354659947f74d8.r2.dev/genomes/GRCh38_hmf/24.0/star_index/gencode_38/2.7.3a.tar.gz)                                                       |
+
+_Other reference data_
+
+| Type                   | Name                                                                                                                                           |
+| ---------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------- |
+| hmftools data (GRCh37) | [hmftools/5.34_37--2.tar.gz](https://pub-cf6ba01919994c3cbd354659947f74d8.r2.dev/hmf_reference_data/hmftools/5.34_37--2.tar.gz)                |
+| hmftools data (GRCh38) | [hmftools/5.34_38--2.tar.gz](https://pub-cf6ba01919994c3cbd354659947f74d8.r2.dev/hmf_reference_data/hmftools/5.34_38--2.tar.gz)                |
+| TSO500 data (GRCh37)   | [panels/tso500_5.34_37--1.tar.gz](https://pub-cf6ba01919994c3cbd354659947f74d8.r2.dev/hmf_reference_data/panels/tso500_5.34_37--1.tar.gz)      |
+| TSO500 data (GRCh38)   | [panels/tso500_5.34_38--1.tar.gz](https://pub-cf6ba01919994c3cbd354659947f74d8.r2.dev/hmf_reference_data/panels/tso500_5.34_38--1.tar.gz)      |
+| HLA slice BED          | [hla_slice/grch38_alt.plus_homologous.bed](https://pub-cf6ba01919994c3cbd354659947f74d8.r2.dev/other/hla_slice/grch38_alt.plus_homologous.bed) |
+| VIRUSBreakend database | [virusbreakenddb_20210401.tar.gz](https://pub-cf6ba01919994c3cbd354659947f74d8.r2.dev/virusbreakend/virusbreakenddb_20210401.tar.gz)           |
 
 #### Custom genomes
 
-It is strongly recommended to use the Hartwig-distributed reference genomes for alignments
-([GRCh37](https://console.cloud.google.com/storage/browser/hmf-public/HMFtools-Resources/ref_genome/37) or
-[GRCh38](https://console.cloud.google.com/storage/browser/hmf-public/HMFtools-Resources/ref_genome/38)). If there is no
-other option than to use a custom genome, one can be configured with the following process:
+It is strongly recommended to use the Hartwig-distributed reference genomes for alignments (GRCh37_hmf or GRCh38_hmf).
+If there is no other option than to use a custom genome, one can be configured with the following process:
 
 ```text title='genome.custom.config'
 params {
     genomes {
         CustomGenome {
-            fasta           = "/path/to/CustomGenome/custom_genome.fa"
-            fai             = "/path/to/CustomGenome/samtools_index/1.16/custom_genome.fa.fai"
-            dict            = "/path/to/CustomGenome/samtools_index/1.16/custom_genome.fa.dict"
-            bwa_index       = "/path/to/CustomGenome/bwa_index/0.7.17-r1188/"
-            bwa_index_bseq  = "/path/to/CustomGenome/bwa_index/2.2.1/GCA_000001405.15_GRCh38_no_alt_analysis_set.fna.0123"
-            bwa_index_biidx = "/path/to/CustomGenome/bwa_index/2.2.1/GCA_000001405.15_GRCh38_no_alt_analysis_set.fna.bwt.2bit.64"
-            bwa_index_image = "/path/to/CustomGenome/bwa_index_image/0.7.17-r1188/custom_genome.fa.img"
-            gridss_index    = "/path/to/CustomGenome/gridss_index/2.13.2/custom_genome.fa.gridsscache"
-            star_index      = "/path/to/CustomGenome/star_index/gencode_38/2.7.3a/"
+            fasta = "/path/to/custom_genome.fa"
         }
     }
 }
@@ -301,7 +399,7 @@ Run a custom genome with the above configuration and below command
 ```bash
 nextflow run nf-core/oncoanalyser \
   -profile docker \
-  -revision v0.3.1 \
+  -revision 0.4.5 \
   -config genome.custom.config \
   --mode wgts \
   \
@@ -314,13 +412,21 @@ nextflow run nf-core/oncoanalyser \
   --outdir output/
 ```
 
+Creation of a STAR index also requires transcript annotations, please use either of the following via the
+`--ref_data_genome_gtf` option:
+
+- GRCh37: [GENCODE v38 (Ensembl v104)
+  annotations](https://ftp.ebi.ac.uk/pub/databases/gencode/Gencode_human/release_38/gencode.v38.annotation.gtf.gz)
+- GRCh38: [GENCODE v37 (Ensembl v74)
+  annotations](https://ftp.ebi.ac.uk/pub/databases/gencode/Gencode_human/release_19/gencode.v19.annotation.gtf.gz)
+
 > [!WARNING]
-> RNA alignment with STAR must use an index generated from a matching Ensembl release version (GRCh37: v74; GRCh38:
-> v104).
+> STAR index must use transcript annotations from Ensembl versions that match hmftoos resource data (GRCh37: v74;
+> GRCh38: v104).
 
-#### Staging reference data
-
-Please refer to [REFERENCE_DATA.md](https://github.com/nf-core/oncoanalyser/REFERENCE_DATA.md).
+When creating indexes for reference genomes with alternative haplotypes, an ALT file must be provided with
+`--ref_data_genome_alt`. Importantly, a STAR index will not be generated for reference genomes with alternative
+haplotypes since this requires careful processing and is hence left to the user.
 
 ## Core Nextflow arguments
 
