@@ -60,8 +60,8 @@ workflow PREPARE_REFERENCE {
             if (!params.ref_data_genome_bwa_index) {
 
                 BWAMEM2_INDEX(
-                  ch_genome_fasta,
-                  params.ref_data_genome_alt ? file(params.ref_data_genome_alt) : [],
+                    ch_genome_fasta,
+                    params.ref_data_genome_alt ? file(params.ref_data_genome_alt) : [],
                 )
                 ch_genome_bwa_index = BWAMEM2_INDEX.out.index
                 ch_versions = ch_versions.mix(BWAMEM2_INDEX.out.versions)
