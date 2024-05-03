@@ -28,6 +28,7 @@ process BWAMEM2_ALIGN {
 
     bwa-mem2 mem \\
         -Y \\
+        -K 100000000 \\
         -R '${read_group_tag}' \\
         -t ${task.cpus} \\
         ${genome_fasta} \\
