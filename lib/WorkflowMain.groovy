@@ -202,10 +202,6 @@ class WorkflowMain {
 
         }
 
-
-        // TODO(SW): implement additional requirements for ALT file
-        // disallow alt file when params.genome_type == no_alt
-        // require alt filename to be genome_fasta + '.alt'
         if (params.ref_data_genome_alt !== null) {
             if (params.genome_type != 'alt') {
                 log.error "\n~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n" +

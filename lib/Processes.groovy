@@ -4,7 +4,7 @@ import Utils
 
 class Processes {
 
-    public static getRunStages(include, exclude, manual_select,  log) {
+    public static getRunStages(include, exclude, manual_select, log) {
         def processes = manual_select ? [] : Constants.Process.values().toList()
         def include_list = this.getProcessList(include, log)
         def exclude_list = this.getProcessList(exclude, log)
