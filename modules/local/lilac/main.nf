@@ -22,6 +22,7 @@ process LILAC {
 
     script:
     def args = task.ext.args ?: ''
+
     def sample_name = getSampleName(meta, tumor_dna_bam, normal_dna_bam)
 
     def normal_bam_arg = normal_dna_bam ? "-reference_bam ${normal_dna_bam}" : ''

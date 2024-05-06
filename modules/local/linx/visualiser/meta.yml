@@ -32,9 +32,9 @@ output:
       description: |
         Groovy Map containing sample information
         e.g. [id: 'sample_id']
-  - visualiser_dir:
+  - plots:
       type: directory
-      description: LINX visualiser output directory
+      description: Directory containing output plots
   - versions:
       type: file
       description: File containing software versions

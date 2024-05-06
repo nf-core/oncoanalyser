@@ -53,6 +53,7 @@ process COBALT {
     """
     mkdir -p cobalt/
     touch cobalt/placeholder
+
     echo -e '${task.process}:\\n  stub: noversions\\n' > versions.yml
     """
 }

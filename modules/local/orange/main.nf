@@ -30,6 +30,7 @@ process ORANGE {
 
     script:
     def args = task.ext.args ?: ''
+
     def pipeline_version_str = pipeline_version ?: 'not specified'
 
     def virus_dir_arg = virusinterpreter_dir ? "-virus_dir ${virusinterpreter_dir}" : ''

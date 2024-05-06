@@ -14,7 +14,7 @@ process SVPREP_DEPTH_ANNOTATOR {
 
     output:
     tuple val(meta), path("${meta.tumor_id}.gridss.vcf.gz"), emit: vcf
-    path("${meta.tumor_id}.gridss.vcf.gz.tbi")             , emit: tbi
+    path "${meta.tumor_id}.gridss.vcf.gz.tbi"              , emit: tbi
     path 'versions.yml'                                    , emit: versions
 
     when:
@@ -22,6 +22,7 @@ process SVPREP_DEPTH_ANNOTATOR {
 
     script:
     def args = task.ext.args ?: ''
+
     def labels_list = labels instanceof List ? labels : [labels]
     def labels_arg = labels_list.join(',')
     // NOTE(SW): Nextflow implicitly casts List<TaskPath> to an atomic TaskPath, hence the required check below

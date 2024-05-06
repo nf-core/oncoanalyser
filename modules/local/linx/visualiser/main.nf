@@ -4,7 +4,7 @@ process LINX_VISUALISER {
 
     conda "${moduleDir}/environment.yml"
     container "${ workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container ?
-        'https://depot.galaxyproject.org/singularity/hmftools-linx:1.25--hdfd78af_0':
+        'https://depot.galaxyproject.org/singularity/hmftools-linx:1.25--hdfd78af_0' :
         'biocontainers/hmftools-linx:1.25--hdfd78af_0' }"
 
     input:
@@ -21,6 +21,7 @@ process LINX_VISUALISER {
 
     script:
     def args = task.ext.args ?: ''
+    def args2 = task.ext.args2 ?: ''
 
     """
     # NOTE(SW): the output plot directories are always required for ORANGE, which is straightfoward to handle with POSIX
@@ -67,7 +68,7 @@ process LINX_VISUALISER {
     linx \\
         -Xmx${Math.round(task.memory.bytes * 0.95)} \\
         com.hartwig.hmftools.linx.visualiser.SvVisualiser \\
-        ${args} \\
+        ${args2} \\
         -sample ${meta.sample_id} \\
         -vis_file_dir ${linx_annotation_dir} \\
         -ref_genome_version ${genome_ver} \\

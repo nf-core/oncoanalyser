@@ -28,6 +28,9 @@ input:
   - virusinterpreter_dir:
       type: directory
       description: Virus Interpreter output directory (optional)
+  - genome_ver:
+      type: string
+      description: Reference genome version
   - cuppa_resources:
       type: directory
       description: CUPPA resource directory

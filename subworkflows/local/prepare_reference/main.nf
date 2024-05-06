@@ -82,7 +82,7 @@ workflow PREPARE_REFERENCE {
     }
 
     //
-    // Set and GRIDSS index, unpack or create if required
+    // Set GRIDSS index, unpack or create if required
     //
     ch_genome_gridss_index = Channel.empty()
     if (run_config.has_dna && (run_config.stages.gridss || run_virusinterpreter)) {
@@ -119,7 +119,7 @@ workflow PREPARE_REFERENCE {
     }
 
     //
-    // Set STAR index path, unpack or create if required
+    // Set STAR index , unpack or create if required
     //
     ch_genome_star_index = Channel.empty()
     if (run_config.has_rna_fastq && run_config.stages.alignment) {
@@ -148,7 +148,7 @@ workflow PREPARE_REFERENCE {
     }
 
     //
-    // Set VIRUSBreakend database path, unpack if required
+    // Set VIRUSBreakend database, unpack if required
     //
     ch_virusbreakenddb = Channel.empty()
     if (run_config.has_dna && run_virusinterpreter) {
@@ -168,7 +168,7 @@ workflow PREPARE_REFERENCE {
     }
 
     //
-    // Set HMF reference paths, unpack if required
+    // Set HMF reference data, unpack if required
     //
     ch_hmf_data = Channel.empty()
     hmf_data_paths = params.hmf_data_paths[params.genome_version.toString()]
@@ -194,7 +194,7 @@ workflow PREPARE_REFERENCE {
     }
 
     //
-    // Set panel reference paths, unpack if required
+    // Set panel reference data, unpack if required
     //
     ch_panel_data = Channel.empty()
     if (run_config.mode === Constants.RunMode.TARGETED) {
@@ -224,6 +224,9 @@ workflow PREPARE_REFERENCE {
         }
     }
 
+    //
+    // Write prepared reference data if requested
+    //
     if (params.prepare_reference_only) {
 
         // Create channel of data files to stage (if not already local) and write

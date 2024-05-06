@@ -20,6 +20,10 @@ process BWAMEM2_ALIGN {
     task.ext.when == null || task.ext.when
 
     script:
+    def args = task.ext.args ?: ''
+    def args2 = task.ext.args2 ?: ''
+    def args3 = task.ext.args3 ?: ''
+
     def read_group_tag = "@RG\\tID:${meta.read_group}\\tSM:${meta.sample_id}"
     def output_fn = meta.split ? "${meta.split}.${meta.sample_id}.${meta.read_group}.bam" : "${meta.sample_id}.${meta.read_group}.bam"
 
@@ -27,6 +31,7 @@ process BWAMEM2_ALIGN {
     ln -fs \$(find -L ${genome_bwa_index} -type f) ./
 
     bwa-mem2 mem \\
+        ${args} \\
         -Y \\
         -R '${read_group_tag}' \\
         -t ${task.cpus} \\
@@ -35,6 +40,7 @@ process BWAMEM2_ALIGN {
         ${reads_rev} | \\
         \\
         sambamba view \\
+            ${args2} \\
             --sam-input \\
             --format bam \\
             --compression-level 0 \\
@@ -42,6 +48,7 @@ process BWAMEM2_ALIGN {
             /dev/stdin | \\
         \\
         sambamba sort \\
+            ${args3} \\
             --nthreads ${task.cpus} \\
             --out ${output_fn} \\
             /dev/stdin

@@ -21,16 +21,22 @@ process CUSTOM_REALIGNREADS {
 
     script:
     def args = task.ext.args ?: ''
+    def args2 = task.ext.args2 ?: ''
+    def args3 = task.ext.args3 ?: ''
+    def args4 = task.ext.args4 ?: ''
+    def args5 = task.ext.args5 ?: ''
 
     """
-    sambamba sort -n ${bam} -o ${meta.sample_id}_sorted.bam
-    samtools fastq -@${task.threads} ${meta.sample_id}_sorted.bam \\
+    sambamba sort ${args} -n ${bam} -o ${meta.sample_id}_sorted.bam
+
+    samtools fastq ${args2} -@${task.threads} ${meta.sample_id}_sorted.bam \\
             -1 ${meta.sample_id}_R1.fastq.gz \\
             -2 ${meta.sample_id}_R2.fastq.gz \\
             -0 ${meta.sample_id}_other.fastq.gz \\
             -s ${meta.sample_id}_singleton.fastq.gz;
 
     bwa-mem2 mem \\
+        ${args3} \\
         -Y \\
         -t ${task.cpus} \\
         ${reference} \\
@@ -38,6 +44,7 @@ process CUSTOM_REALIGNREADS {
         ${meta.sample_id}_R2.fastq.gz | \\
         \\
         sambamba view \\
+            ${args4} \\
             --sam-input \\
             --format bam \\
             --compression-level 0 \\
@@ -45,6 +52,7 @@ process CUSTOM_REALIGNREADS {
             /dev/stdin | \\
         \\
         sambamba sort \\
+            ${args5} \\
             --nthreads ${task.cpus} \\
             --out ${bam.baseName}.realigned.bam \\
             /dev/stdin
@@ -60,6 +68,7 @@ process CUSTOM_REALIGNREADS {
     stub:
     """
     touch ${bam.baseName}.realigned.bam ${bam.baseName}.realigned.bam.bai
+
     echo -e '${task.process}:\\n  stub: noversions\\n' > versions.yml
     """
 }

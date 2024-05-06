@@ -25,6 +25,8 @@ process SVPREP {
 
     script:
     def args = task.ext.args ?: ''
+    def args2 = task.ext.args2 ?: ''
+
     def write_types_arg = write_types ? "-write_types \'${write_types}\'" : ''
     def existing_juction_file_arg = junctions ? "-existing_junction_file ${junctions}" : ''
 
@@ -44,6 +46,7 @@ process SVPREP {
         -output_dir ./
 
     samtools sort \\
+        ${args2} \\
         -@ ${task.cpus} \\
         -T ${meta.sample_id}.sv_prep.tmp \\
         -o ${meta.sample_id}.sv_prep.sorted.bam \\

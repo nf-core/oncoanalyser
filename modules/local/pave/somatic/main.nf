@@ -32,6 +32,7 @@ process PAVE_SOMATIC {
 
     script:
     def args = task.ext.args ?: ''
+
     def pon_filters
     def gnomad_args
     if (genome_ver.toString() == '37') {
@@ -53,8 +54,8 @@ process PAVE_SOMATIC {
 
     """
     pave \\
-        ${args} \\
         -Xmx${Math.round(task.memory.bytes * 0.95)} \\
+        ${args} \\
         -sample ${meta.sample_id} \\
         -vcf_file ${sage_vcf} \\
         -ref_genome ${genome_fasta} \\

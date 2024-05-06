@@ -13,6 +13,9 @@ process WRITE_REFERENCE_DATA {
     output:
     path fp, includeInputs: true
 
+    when:
+    task.ext.when == null || task.ext.when
+
     script:
     """
     """

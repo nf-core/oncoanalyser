@@ -77,10 +77,6 @@ output:
       type: file
       description: SAGE VCF file
       pattern: "*.{vcf.gz}"
-  - vcf_filtered:
-      type: file
-      description: Filtered VCF file
-      pattern: "*.{vcf.gz}"
   - sage_dir:
       type: directory
       description: SAGE output directory

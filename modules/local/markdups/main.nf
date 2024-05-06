@@ -25,12 +25,13 @@ process MARKDUPS {
 
     script:
     def args = task.ext.args ?: ''
+
     def umi_flags = has_umis ? '-umi_enabled -umi_duplex -umi_duplex_delim +' : ''
 
     """
     markdups \\
-        ${args} \\
         -Xmx${Math.round(task.memory.bytes * 0.95)} \\
+        ${args} \\
         \\
         -samtools \$(which samtools) \\
         -sambamba \$(which sambamba) \\

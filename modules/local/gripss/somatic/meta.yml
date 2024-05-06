@@ -31,7 +31,7 @@ input:
       type: file
       description: Reference genome assembly fai file
       pattern: "*.{fai}"
-  - pon_breakend:
+  - pon_breakends:
       type: file
       description: GRIDSS breakend PON file
       pattern: "*.{bed.gz}"
