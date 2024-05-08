@@ -60,6 +60,11 @@
                     "default": false,
                     "fa_icon": "fas fa-palette"
                 },
+                "force_panel": {
+                    "type": "boolean",
+                    "description": "Skip check for known panels.",
+                    "fa_icon": "fas fa-palette"
+                },
                 "processes_manual": {
                     "type": "boolean",
                     "description": "Run only processes manually provided in processes_include.",
@@ -90,6 +95,16 @@
                 "max_fastq_records": {
                     "type": "integer",
                     "description": "When positive, will use fastp to split fastq files so that each resultant fastq file has no more than max_fastq_records records. When nonpositive, fastp is not used and the provided fastq files are passed as-is to the aligner.",
+                    "fa_icon": "fas fa-cog"
+                },
+                "umi_length": {
+                    "type": "integer",
+                    "description": "When positive, will use fastp to extract UMIs of this length from  fastq files.",
+                    "fa_icon": "fas fa-cog"
+                },
+                "umi_duplex_delim": {
+                    "type": "string",
+                    "description": "UMI duplex delimiter as used by MarkDups.",
                     "fa_icon": "fas fa-cog"
                 },
                 "gridss_config": {
