@@ -1,3 +1,12 @@
-sample,fastq_1,fastq_2
-SAMPLE_PAIRED_END,/path/to/fastq/files/AEG588A1_S1_L002_R1_001.fastq.gz,/path/to/fastq/files/AEG588A1_S1_L002_R2_001.fastq.gz
-SAMPLE_SINGLE_END,/path/to/fastq/files/AEG588A4_S4_L003_R1_001.fastq.gz,
+group_id,subject_id,sample_id,sample_type,sequence_type,filetype,filepath
+subject_one__to__dna,subject_one,sample_a,tumor,dna,bam,/Users/stephen/repos/oncoanalyser/subject_one/sample_a.tumor.bam
+
+subject_one__tn__dna,subject_one,sample_a,tumor,dna,bam,/Users/stephen/repos/oncoanalyser/subject_one/sample_a.tumor.bam
+subject_one__tn__dna,subject_one,sample_b,normal,dna,bam,/Users/stephen/repos/oncoanalyser/subject_one/sample_b.normal.bam
+
+subject_one__tn__dna_rna,subject_one,sample_a,tumor,dna,bam,/Users/stephen/repos/oncoanalyser/subject_one/sample_a.tumor.bam
+subject_one__tn__dna_rna,subject_one,sample_b,normal,dna,bam,/Users/stephen/repos/oncoanalyser/subject_one/sample_b.normal.bam
+subject_one__tn__dna_rna,subject_one,sample_c,tumor,rna,bam,/Users/stephen/repos/oncoanalyser/subject_one/sample_c.tumor_rna.bam
+
+subject_one__to__dna_rna,subject_one,sample_a,tumor,dna,bam,/Users/stephen/repos/oncoanalyser/subject_one/sample_a.tumor.bam
+subject_one__to__dna_rna,subject_one,sample_c,tumor,rna,bam,/Users/stephen/repos/oncoanalyser/subject_one/sample_c.tumor_rna.bam

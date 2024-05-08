@@ -1,0 +1,52 @@
+nextflow_workflow {
+
+    name "Test VIRUSBreakend subworkflow"
+    script "subworkflows/local/virusbreakend_calling/main.nf"
+    workflow "VIRUSBREAKEND_CALLING"
+    profile "docker"
+
+    test("WGTS COLO829 mini") {
+
+        setup {
+            run("PREPARE_INPUTS") {
+                script "subworkflows/local/prepare_inputs/main.nf"
+                process {
+                    """
+                    input[0] = '${baseDir}/tests/samplesheets/wgts.dna_rna.single.csv'
+                    """
+                }
+            }
+        }
+
+        when {
+            params {
+                outdir = "${outputDir}"
+
+                max_cpus = 1
+                max_memory = "10.GB"
+            }
+            workflow {
+                """
+                input[0]  = PREPARE_INPUTS.out.inputs
+                input[1]  = PREPARE_INPUTS.out.inputs.combine(Channel.of('${baseDir}/test_data/module_data/purple/'))
+                input[2]  = PREPARE_INPUTS.out.inputs.combine(Channel.of('${baseDir}/test_data/module_data/bamtools/COLO829v003T.wgsmetrics'))
+                input[3]  = '${baseDir}/test_data/reference_data/genomes/GRCh38_hmf/GCA_000001405.15_GRCh38_no_alt_analysis_set.fna'
+                input[4]  = '${baseDir}/test_data/reference_data/genomes/GRCh38_hmf/samtools_index/1.16/GCA_000001405.15_GRCh38_no_alt_analysis_set.fna.fai'
+                input[5]  = '${baseDir}/test_data/reference_data/genomes/GRCh38_hmf/samtools_index/1.16/GCA_000001405.15_GRCh38_no_alt_analysis_set.fna.dict'
+                input[6]  = '${baseDir}/test_data/reference_data/genomes/GRCh38_hmf/bwa_index/0.7.17-r1188/'
+                input[7]  = '${baseDir}/test_data/reference_data/genomes/GRCh38_hmf/bwa_index_image/0.7.17-r1188/GCA_000001405.15_GRCh38_no_alt_analysis_set.fna.img'
+                input[8]  = '${baseDir}/test_data/reference_data/genomes/GRCh38_hmf/gridss_index/2.13.2/GCA_000001405.15_GRCh38_no_alt_analysis_set.fna.gridsscache'
+                input[9]   = '${baseDir}/test_data/reference_data/other/virusbreakenddb_test/'
+                input[10]  = '${baseDir}/test_data/reference_data/hmf_reference_data/hmftools/5.34_38--0/virusinterpreter/taxonomy_db.tsv'
+                input[11]  = '${baseDir}/test_data/reference_data/hmf_reference_data/hmftools/5.34_38--0/virusinterpreter/virus_reporting_db.tsv'
+                input[12]  = '${baseDir}/test_data/reference_data/hmf_reference_data/hmftools/5.34_38--0/dna_pipeline/sv/gridss.properties'
+                """
+            }
+        }
+
+        then {
+            assert workflow.success
+        }
+
+    }
+}

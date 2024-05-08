@@ -9,7 +9,7 @@
 [![GitHub Actions Linting Status](https://github.com/nf-core/oncoanalyser/actions/workflows/linting.yml/badge.svg)](https://github.com/nf-core/oncoanalyser/actions/workflows/linting.yml)[![AWS CI](https://img.shields.io/badge/CI%20tests-full%20size-FF9900?labelColor=000000&logo=Amazon%20AWS)](https://nf-co.re/oncoanalyser/results)[![Cite with Zenodo](http://img.shields.io/badge/DOI-10.5281/zenodo.XXXXXXX-1073c8?labelColor=000000)](https://doi.org/10.5281/zenodo.XXXXXXX)
 [![nf-test](https://img.shields.io/badge/unit_tests-nf--test-337ab7.svg)](https://www.nf-test.com)
 
-[![Nextflow](https://img.shields.io/badge/nextflow%20DSL2-%E2%89%A523.04.0-23aa62.svg)](https://www.nextflow.io/)
+[![Nextflow](https://img.shields.io/badge/nextflow%20DSL2-%E2%89%A522.10.5-23aa62.svg)](https://www.nextflow.io/)
 [![run with conda](http://img.shields.io/badge/run%20with-conda-3EB049?labelColor=000000&logo=anaconda)](https://docs.conda.io/en/latest/)
 [![run with docker](https://img.shields.io/badge/run%20with-docker-0db7ed?labelColor=000000&logo=docker)](https://www.docker.com/)
 [![run with singularity](https://img.shields.io/badge/run%20with-singularity-1d355c.svg?labelColor=000000)](https://sylabs.io/docs/)
@@ -19,51 +19,63 @@
 
 ## Introduction
 
-**nf-core/oncoanalyser** is a bioinformatics pipeline that ...
+**nf-core/oncoanalyser** is a Nextflow implementation of the comprehensive cancer DNA and RNA analysis and reporting
+workflow from the Hartwig Medical Foundation. For detailed information on each component of the Hartwig Medical
+Foundation workflow, please refer to [hartwigmedical/hmftools](https://github.com/hartwigmedical/hmftools/).
 
-<!-- TODO nf-core:
-   Complete this sentence with a 2-3 sentence summary of what types of data the pipeline ingests, a brief overview of the
-   major pipeline sections and the types of output it produces. You're giving an overview to someone new
-   to nf-core here, in 15-20 seconds. For an example, see https://github.com/nf-core/rnaseq/blob/master/README.md#introduction
--->
+The oncoanalyser pipeline is built using [Nextflow](https://www.nextflow.io), a workflow tool to run tasks across
+multiple compute infrastructures in a very portable manner. It uses Docker/Singularity containers making installation
+trivial and results highly reproducible. The [Nextflow DSL2](https://www.nextflow.io/docs/latest/dsl2.html)
+implementation of this pipeline uses one container per process which makes it much easier to maintain and update
+software dependencies. Where possible, these processes have been submitted to and installed from
+[nf-core/modules](https://github.com/nf-core/modules) in order to make them available to all nf-core pipelines, and to
+everyone within the Nextflow community!
 
-<!-- TODO nf-core: Include a figure that guides the user through the major workflow steps. Many nf-core
-     workflows use the "tube map" design for that. See https://nf-co.re/docs/contributing/design_guidelines#examples for examples.   -->
-<!-- TODO nf-core: Fill in short bullet-pointed list of the default steps in the pipeline -->
+On release, automated continuous integration tests run the pipeline on a full-sized dataset on the AWS cloud
+infrastructure. This ensures that the pipeline runs on AWS, has sensible resource allocation defaults set to run on
+real-world datasets, and permits the persistent storage of results to benchmark between pipeline releases and other
+analysis sources. The results obtained from the full-sized test can be viewed on the [nf-core
+website](https://nf-co.re/oncoanalyser/results).
 
-1. Read QC ([`FastQC`](https://www.bioinformatics.babraham.ac.uk/projects/fastqc/))
-2. Present QC for raw reads ([`MultiQC`](http://multiqc.info/))
+## Pipeline summary
+
+The following processes and tools can be run with oncoanalyser:
+
+- SNV and MNV calling (`SAGE`, `PAVE`)
+- SV calling (`SV Prep`, `GRIDSS`, `GRIPSS`, `PURPLE`, `LINX`)
+- CNV calling (`AMBER`, `COBALT`, `PURPLE`)
+- Transcript analysis (`Isofox`)
+- Oncoviral detection (`VIRUSBreakend`, `Virus Interpreter`)
+- HLA calling (`LILAC`)
+- HRD status prediction (`CHORD`)
+- Mutational signature fitting (`Sigs`)
+- Tissue of origin prediction (`CUPPA`)
+- Report generation (`ORANGE`, `linxreport`)
 
 ## Usage
 
 > [!NOTE]
 > If you are new to Nextflow and nf-core, please refer to [this page](https://nf-co.re/docs/usage/installation) on how to set-up Nextflow. Make sure to [test your setup](https://nf-co.re/docs/usage/introduction#how-to-run-a-pipeline) with `-profile test` before running the workflow on actual data.
 
-<!-- TODO nf-core: Describe the minimum required steps to execute the pipeline, e.g. how to prepare samplesheets.
-     Explain what rows and columns represent. For instance (please edit as appropriate):
+Create a samplesheet containing your inputs:
 
-First, prepare a samplesheet with your input data that looks as follows:
-
-`samplesheet.csv`:
-
-```csv
-sample,fastq_1,fastq_2
-CONTROL_REP1,AEG588A1_S1_L002_R1_001.fastq.gz,AEG588A1_S1_L002_R2_001.fastq.gz
+```text
+group_id,subject_id,sample_id,sample_type,sequence_type,filetype,filepath
+P1__wgts,P1,SA,tumor,dna,bam,/path/to/SA.tumor.dna.wgs.bam
+P1__wgts,P1,SB,tumor,rna,bam,/path/to/SB.tumor.rna.wts.bam
+P1__wgts,P1,SC,normal,dna,bam,/path/to/SC.normal.dna.wgs.bam
 ```
 
-Each row represents a fastq file (single-end) or a pair of fastq files (paired end).
-
--->
-
-Now, you can run the pipeline using:
-
-<!-- TODO nf-core: update the following command to include all required parameters for a minimal example -->
+Launch oncoanalyser:
 
 ```bash
 nextflow run nf-core/oncoanalyser \
-   -profile <docker/singularity/.../institute> \
+   -revision v0.3.1 \
+   -profile docker \
+   --mode wgts \
+   --genome GRCh38_hmf \
    --input samplesheet.csv \
-   --outdir <OUTDIR>
+   --outdir output/
 ```
 
 > [!WARNING]
@@ -78,33 +90,49 @@ To see the results of an example test run with a full size dataset refer to the 
 For more details about the output files and reports, please refer to the
 [output documentation](https://nf-co.re/oncoanalyser/output).
 
+## Version support
+
+As oncoanalyser is used in clinical settings and is subject to accreditation standards in some instances, there is a
+need for long-term stability and reliability for feature releases in order to meet operational requirements. This is
+accomplished through long-term support of several nominated feature releases, which all receive bug fixes and security
+fixes during the period of extended support.
+
+Each release that is given extended support is allocated a separate long-lived git branch with the 'stable' prefix, e.g.
+`stable/1.2.x`, `stable/1.5.x`. Feature development otherwise occurs on the `main` branch.
+
 ## Credits
 
-nf-core/oncoanalyser was originally written by Stephen Watts.
+The oncoanalyser pipeline was written by Stephen Watts while in the [Genomics Platform
+Group](https://mdhs.unimelb.edu.au/centre-for-cancer-research/our-research/genomics-platform-group) at the [University
+of Melbourne Centre for Cancer Research](https://mdhs.unimelb.edu.au/centre-for-cancer-research).
 
-We thank the following people for their extensive assistance in the development of this pipeline:
+We thank the following organisations and people for their extensive assistance in the development of this pipeline,
+listed in alphabetical order:
 
-<!-- TODO nf-core: If applicable, make list of people who have also contributed -->
+- [Hartwig Medical Foundation
+  Australia](https://www.hartwigmedicalfoundation.nl/en/partnerships/hartwig-medical-foundation-australia/)
+- Oliver Hofmann
 
 ## Contributions and Support
 
 If you would like to contribute to this pipeline, please see the [contributing guidelines](.github/CONTRIBUTING.md).
 
-For further information or help, don't hesitate to get in touch on the [Slack `#oncoanalyser` channel](https://nfcore.slack.com/channels/oncoanalyser) (you can join with [this invite](https://nf-co.re/join/slack)).
+For further information or help, don't hesitate to get in touch on the [Slack `#oncoanalyser`
+channel](https://nfcore.slack.com/channels/oncoanalyser) (you can join with [this invite](https://nf-co.re/join/slack)).
 
 ## Citations
 
-<!-- TODO nf-core: Add citation for pipeline after first release. Uncomment lines below and update Zenodo doi and badge at the top of this file. -->
-<!-- If you use nf-core/oncoanalyser for your analysis, please cite it using the following doi: [10.5281/zenodo.XXXXXX](https://doi.org/10.5281/zenodo.XXXXXX) -->
+You can cite the oncoanalyser zenodo record for a specific version using the following doi:
+[10.5281/zenodo.XXXXXXX](https://doi.org/10.5281/zenodo.XXXXXXX)
 
-<!-- TODO nf-core: Add bibliography of tools and data used in your pipeline -->
-
-An extensive list of references for the tools used by the pipeline can be found in the [`CITATIONS.md`](CITATIONS.md) file.
+An extensive list of references for the tools used by the pipeline can be found in the [`CITATIONS.md`](CITATIONS.md)
+file.
 
 You can cite the `nf-core` publication as follows:
 
 > **The nf-core framework for community-curated bioinformatics pipelines.**
 >
-> Philip Ewels, Alexander Peltzer, Sven Fillinger, Harshil Patel, Johannes Alneberg, Andreas Wilm, Maxime Ulysse Garcia, Paolo Di Tommaso & Sven Nahnsen.
+> Philip Ewels, Alexander Peltzer, Sven Fillinger, Harshil Patel, Johannes Alneberg, Andreas Wilm, Maxime Ulysse Garcia,
+> Paolo Di Tommaso & Sven Nahnsen.
 >
 > _Nat Biotechnol._ 2020 Feb 13. doi: [10.1038/s41587-020-0439-x](https://dx.doi.org/10.1038/s41587-020-0439-x).

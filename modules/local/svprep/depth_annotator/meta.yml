@@ -1,0 +1,58 @@
+name: depth_annotator
+description: Annotate GRIDSS BAM with depth information
+keywords:
+  - depth
+  - annotation
+  - sv
+tools:
+  - svprep:
+      description: Selects reads associated with SV events for input to GRIDSS
+      homepage: https://github.com/hartwigmedical/hmftools/tree/master/sv-prep
+      documentation: https://github.com/hartwigmedical/hmftools/tree/master/sv-prep
+      licence: ["GPL >=3"]
+input:
+  - meta:
+      type: map
+      description: |
+        Groovy Map containing sample information
+        e.g. [id: 'sample_id']
+  - bams:
+      type: list
+      description: BAM files
+  - bai:
+      type: list
+      description: BAI files
+  - vcf:
+      type: file
+      description: VCF file
+      pattern: "*.{vcf.gz}"
+  - labels:
+      type: list
+      description: List of labels corresponding to BAMs and GRIDSS preprocess output directories
+  - genome_fasta:
+      type: file
+      description: Reference genome assembly FASTA file
+      pattern: "*.{fa,fasta}"
+  - genome_ver:
+      type: string
+      description: Reference genome version
+output:
+  - meta:
+      type: map
+      description: |
+        Groovy Map containing sample information
+        e.g. [id: 'sample_id']
+  - vcf:
+      type: file
+      description: VCF file
+      pattern: "*.{vcf.gz}"
+  - tbi:
+      type: file
+      description: VCF index file
+      pattern: "*.{vcf.gz.tbi}"
+  - versions:
+      type: file
+      description: File containing software versions
+      pattern: "versions.yml"
+authors:
+  - "@scwatts"

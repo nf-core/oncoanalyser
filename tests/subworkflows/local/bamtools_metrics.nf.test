@@ -1,0 +1,43 @@
+nextflow_workflow {
+
+    name "Test BamTools subworkflow"
+    script "subworkflows/local/bamtools_metrics/main.nf"
+    workflow "BAMTOOLS_METRICS"
+    profile "docker"
+
+    test("WGTS COLO829 mini") {
+
+        setup {
+            run("PREPARE_INPUTS") {
+                script "subworkflows/local/prepare_inputs/main.nf"
+                process {
+                    """
+                    input[0] = '${baseDir}/tests/samplesheets/wgts.dna_rna.single.csv'
+                    """
+                }
+            }
+        }
+
+        when {
+            params {
+                outdir = "${outputDir}"
+
+                // NOTE(SW): BamTools fails when using a single thread
+                max_cpus = 2
+                max_memory = "10.GB"
+            }
+            workflow {
+                """
+                input[0] = PREPARE_INPUTS.out.inputs
+                input[1] = '${baseDir}/test_data/reference_data/genomes/GRCh38_hmf/GCA_000001405.15_GRCh38_no_alt_analysis_set.fna'
+                input[2] = '38'
+                """
+            }
+        }
+
+        then {
+            assert workflow.success
+        }
+
+    }
+}

@@ -1,0 +1,7 @@
+name: svprep_depth_annotator
+channels:
+  - conda-forge
+  - bioconda
+  - defaults
+dependencies:
+  - bioconda::hmftools-sv-prep=1.2.3=hdfd78af_1

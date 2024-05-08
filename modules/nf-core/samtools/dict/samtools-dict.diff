@@ -1,0 +1,20 @@
+Changes in module 'nf-core/samtools/dict'
+--- modules/nf-core/samtools/dict/main.nf
++++ modules/nf-core/samtools/dict/main.nf
+@@ -8,11 +8,11 @@
+         'quay.io/biocontainers/samtools:1.16.1--h6899075_1' }"
+ 
+     input:
+-    tuple val(meta), path(fasta)
++    path fasta
+ 
+     output:
+-    tuple val(meta), path ("*.dict"), emit: dict
+-    path "versions.yml"             , emit: versions
++    path "*.dict"      , emit: dict
++    path "versions.yml", emit: versions
+ 
+     when:
+     task.ext.when == null || task.ext.when
+
+************************************************************
