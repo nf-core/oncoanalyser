@@ -43,6 +43,9 @@ input:
   - has_umis:
       type: boolean
       description: Flag indicating presence of UMIs in reads
+  - umi_duplex_delim:
+      type: string
+      description: UMI duplex delimiter
 output:
   - meta:
       type: map
