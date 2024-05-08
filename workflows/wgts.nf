@@ -123,7 +123,7 @@ workflow WGTS {
             ref_data.genome_fasta,
             ref_data.genome_bwamem2_index,
             params.max_fastq_records,
-            , // disabled for now
+            0, // disabled for now
         )
 
         READ_ALIGNMENT_RNA(
