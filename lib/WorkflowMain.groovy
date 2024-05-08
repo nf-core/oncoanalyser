@@ -191,7 +191,7 @@ class WorkflowMain {
 
             } else if (!Constants.PANELS_DEFINED.contains(params.panel)) {
 
-                if (!params.containsKey('force_panel') || !params.force_panel) {
+                if (!params.containsKey('force_panel') && !params.force_panel) {
                     def panels = Constants.PANELS_DEFINED.join('\n    - ')
                     log.error "\n~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n" +
                         "  The ${params.panel} is not defined. Currently, the available panels are:\n" +
