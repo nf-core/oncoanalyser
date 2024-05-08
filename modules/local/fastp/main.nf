@@ -9,7 +9,8 @@ process FASTP {
 
     input:
     tuple val(meta), path(reads_fwd), path(reads_rev)
-    val max_fastq_records
+    val(max_fastq_records)
+    val umi_length
 
     output:
     tuple val(meta), path('*_R1.fastp.fastq.gz'), path('*_R2.fastp.fastq.gz'), emit: fastq
@@ -19,7 +20,12 @@ process FASTP {
     task.ext.when == null || task.ext.when
 
     script:
-    def args = task.ext.args ?: ''
+    def umi_extraction = umi_length > 0 ? '--umi --umi_loc per_read --umi_len ' + umiLength : ''
+
+    """
+    # * do not apply trimming/clipping, already done in BCL convert
+    # * turn off all filtering
+    # * extract UMIs if a UMI length has been specified
 
     """
     fastp \\
@@ -31,7 +37,7 @@ process FASTP {
         --disable_adapter_trimming \\
         --disable_trim_poly_g \\
         --split_by_lines ${4 * max_fastq_records} \\
-        --thread ${task.cpus} \\
+        ${umi_extraction} \\
         --out1 ${meta.sample_id}_${meta.library_id}_${meta.lane}_R1.fastp.fastq.gz \\
         --out2 ${meta.sample_id}_${meta.library_id}_${meta.lane}_R2.fastp.fastq.gz
 

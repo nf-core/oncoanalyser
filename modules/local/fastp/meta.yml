@@ -28,6 +28,9 @@ input:
   - max_fastq_records:
       type: integer
       description: Maximum number of reads per file
+  - umi_length:
+      type: integer
+      description: UMI length for UMI extraction
 output:
   - meta:
       type: map
