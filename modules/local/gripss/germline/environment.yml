@@ -1,0 +1,7 @@
+name: gripss_germline
+channels:
+  - conda-forge
+  - bioconda
+  - defaults
+dependencies:
+  - bioconda::hmftools-gripss=2.4

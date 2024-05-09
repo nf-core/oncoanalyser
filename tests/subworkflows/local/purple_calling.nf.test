@@ -1,0 +1,69 @@
+nextflow_workflow {
+
+    name "Test PURPLE subworkflow"
+    script "subworkflows/local/purple_calling/main.nf"
+    workflow "PURPLE_CALLING"
+    profile "docker"
+
+    test("WGTS COLO829 mini") {
+
+        setup {
+            run("PREPARE_INPUTS") {
+                script "subworkflows/local/prepare_inputs/main.nf"
+                process {
+                    """
+                    input[0] = '${baseDir}/tests/samplesheets/wgts.dna_rna.single.csv'
+                    """
+                }
+            }
+        }
+
+        when {
+            params {
+                outdir = "${outputDir}"
+
+                max_cpus = 1
+                max_memory = "10.GB"
+            }
+            workflow {
+                """
+                input[0]  = PREPARE_INPUTS.out.inputs
+                input[1]  = PREPARE_INPUTS.out.inputs.combine(Channel.of('${baseDir}/test_data/module_data/amber/'))
+                input[2]  = PREPARE_INPUTS.out.inputs.combine(Channel.of('${baseDir}/test_data/module_data/cobalt/'))
+                input[3]  = PREPARE_INPUTS.out.inputs.combine(Channel.of('${baseDir}/test_data/module_data/pave/COLO829v003T.sage.somatic.pave.vcf.gz'))
+                input[4]  = PREPARE_INPUTS.out.inputs.combine(Channel.of('${baseDir}/test_data/module_data/pave/COLO829v003T.sage.germline.pave.vcf.gz'))
+                input[5]  = PREPARE_INPUTS.out.inputs.combine(Channel.of([
+                    '${baseDir}/test_data/module_data/gripss/somatic/COLO829v003T.gripss.filtered.somatic.vcf.gz',
+                    '${baseDir}/test_data/module_data/gripss/somatic/COLO829v003T.gripss.filtered.somatic.vcf.gz.tbi',
+                ]))
+                input[6]  = PREPARE_INPUTS.out.inputs.combine(Channel.of([
+                    '${baseDir}/test_data/module_data/gripss/germline/COLO829v003T.gripss.filtered.germline.vcf.gz',
+                    '${baseDir}/test_data/module_data/gripss/germline/COLO829v003T.gripss.filtered.germline.vcf.gz.tbi',
+                ]))
+                input[7]  = PREPARE_INPUTS.out.inputs.combine(Channel.of([
+                    '${baseDir}/test_data/module_data/gripss/somatic/COLO829v003T.gripss.somatic.vcf.gz',
+                    '${baseDir}/test_data/module_data/gripss/somatic/COLO829v003T.gripss.somatic.vcf.gz.tbi',
+                ]))
+                input[8]  = '${baseDir}/test_data/reference_data/genomes/GRCh38_hmf/GCA_000001405.15_GRCh38_no_alt_analysis_set.fna'
+                input[9]  = '38'
+                input[10] = '${baseDir}/test_data/reference_data/genomes/GRCh38_hmf/samtools_index/1.16/GCA_000001405.15_GRCh38_no_alt_analysis_set.fna.fai'
+                input[11] = '${baseDir}/test_data/reference_data/genomes/GRCh38_hmf/samtools_index/1.16/GCA_000001405.15_GRCh38_no_alt_analysis_set.fna.dict'
+                input[12] = '${baseDir}/test_data/reference_data/hmf_reference_data/hmftools/5.34_38--0/dna_pipeline/copy_number/GC_profile.1000bp.38.cnp'
+                input[13] = '${baseDir}/test_data/reference_data/hmf_reference_data/hmftools/5.34_38--0/dna_pipeline/variants/KnownHotspots.somatic.38.vcf.gz'
+                input[14] = '${baseDir}/test_data/reference_data/hmf_reference_data/hmftools/5.34_38--0/dna_pipeline/variants/KnownHotspots.germline.38.vcf.gz'
+                input[15] = '${baseDir}/test_data/reference_data/hmf_reference_data/hmftools/5.34_38--0/dna_pipeline/common/DriverGenePanel.38.tsv'
+                input[16] = '${baseDir}/test_data/reference_data/hmf_reference_data/hmftools/5.34_38--0/dna_pipeline/common/ensembl_data/'
+                input[17] = '${baseDir}/test_data/reference_data/hmf_reference_data/hmftools/5.34_38--0/dna_pipeline/copy_number/cohort_germline_del_freq.38.csv'
+                input[18] = []
+                input[19] = []
+                input[20] = []
+                """
+            }
+        }
+
+        then {
+            assert workflow.success
+        }
+
+    }
+}

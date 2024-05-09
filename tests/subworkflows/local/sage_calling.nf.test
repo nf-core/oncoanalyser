@@ -1,0 +1,52 @@
+nextflow_workflow {
+
+    name "Test SAGE calling subworkflow"
+    script "subworkflows/local/sage_calling/main.nf"
+    workflow "SAGE_CALLING"
+    profile "docker"
+
+    test("WGTS COLO829 mini") {
+
+        setup {
+            run("PREPARE_INPUTS") {
+                script "subworkflows/local/prepare_inputs/main.nf"
+                process {
+                    """
+                    input[0] = '${baseDir}/tests/samplesheets/wgts.dna_rna.single.csv'
+                    """
+                }
+            }
+        }
+
+        when {
+            params {
+                outdir = "${outputDir}"
+
+                max_cpus = 1
+                max_memory = "10.GB"
+            }
+            workflow {
+                """
+                input[0] = PREPARE_INPUTS.out.inputs
+                input[1]  = '${baseDir}/test_data/reference_data/genomes/GRCh38_hmf/GCA_000001405.15_GRCh38_no_alt_analysis_set.fna'
+                input[2]  = '38'
+                input[3]  = '${baseDir}/test_data/reference_data/genomes/GRCh38_hmf/samtools_index/1.16/GCA_000001405.15_GRCh38_no_alt_analysis_set.fna.fai'
+                input[4]  = '${baseDir}/test_data/reference_data/genomes/GRCh38_hmf/samtools_index/1.16/GCA_000001405.15_GRCh38_no_alt_analysis_set.fna.dict'
+                input[5]  = '${baseDir}/test_data/reference_data/hmf_reference_data/hmftools/5.34_38--0/dna_pipeline/variants/KnownHotspots.somatic.38.vcf.gz'
+                input[6]  = '${baseDir}/test_data/reference_data/hmf_reference_data/hmftools/5.34_38--0/dna_pipeline/variants/KnownHotspots.germline.38.vcf.gz'
+                input[7]  = '${baseDir}/test_data/reference_data/hmf_reference_data/hmftools/5.34_38--0/dna_pipeline/variants/ActionableCodingPanel.38.bed.gz'
+                input[8]  = '${baseDir}/test_data/reference_data/hmf_reference_data/hmftools/5.34_38--0/dna_pipeline/variants/CoverageCodingPanel.38.bed.gz'
+                input[9]  = '${baseDir}/test_data/reference_data/hmf_reference_data/hmftools/5.34_38--0/dna_pipeline/variants/HG001_GRCh38_GIAB_highconf_CG-IllFB-IllGATKHC-Ion-10X-SOLID_CHROM1-X_v.3.3.2_highconf_nosomaticdel_noCENorHET7.bed.gz'
+                input[10] = '${baseDir}/test_data/reference_data/hmf_reference_data/hmftools/5.34_38--0/dna_pipeline/variants/mappability_150.38.bed.gz'
+                input[11] = '${baseDir}/test_data/reference_data/hmf_reference_data/hmftools/5.34_38--0/dna_pipeline/common/DriverGenePanel.38.tsv'
+                input[12] = '${baseDir}/test_data/reference_data/hmf_reference_data/hmftools/5.34_38--0/dna_pipeline/common/ensembl_data/'
+                """
+            }
+        }
+
+        then {
+            assert workflow.success
+        }
+
+    }
+}

@@ -1,0 +1,46 @@
+nextflow_workflow {
+
+    name "Test LILAC subworkflow"
+    script "subworkflows/local/lilac_calling/main.nf"
+    workflow "LILAC_CALLING"
+    profile "docker"
+
+    test("WGTS COLO829 mini") {
+
+        setup {
+            run("PREPARE_INPUTS") {
+                script "subworkflows/local/prepare_inputs/main.nf"
+                process {
+                    """
+                    input[0] = '${baseDir}/tests/samplesheets/wgts.dna_rna.single.csv'
+                    """
+                }
+            }
+        }
+
+        when {
+            params {
+                outdir = "${outputDir}"
+
+                max_cpus = 1
+                max_memory = "10.GB"
+            }
+            workflow {
+                """
+                input[0] = PREPARE_INPUTS.out.inputs
+                input[1] = PREPARE_INPUTS.out.inputs.combine(Channel.of('${baseDir}/test_data/module_data/purple/'))
+                input[2] = '${baseDir}/test_data/reference_data/genomes/GRCh38_hmf/GCA_000001405.15_GRCh38_no_alt_analysis_set.fna'
+                input[3] = '38'
+                input[4] = '${baseDir}/test_data/reference_data/genomes/GRCh38_hmf/samtools_index/1.16/GCA_000001405.15_GRCh38_no_alt_analysis_set.fna.fai'
+                input[5] = '${baseDir}/test_data/reference_data/hmf_reference_data/hmftools/5.34_38--0/dna_pipeline/immune/'
+                input[6] = '${baseDir}/test_data/reference_data/hmf_reference_data/hmftools/5.34_38--0/other/lilac/hla.38.bed'
+                """
+            }
+        }
+
+        then {
+            assert workflow.success
+        }
+
+    }
+}
