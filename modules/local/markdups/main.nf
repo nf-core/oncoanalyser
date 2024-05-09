@@ -51,7 +51,6 @@ process MARKDUPS {
         -sample ${meta.sample_id} \\
         -input_bam ${bams.join(',')} \\
         \\
-        -form_consensus \\
         ${umi_flags} \\
         \\
         -unmap_regions ${unmap_regions} \\
