@@ -20,7 +20,7 @@ process FASTP {
     task.ext.when == null || task.ext.when
 
     script:
-    def umi_extraction = umi_length > 0 ? '--umi --umi_loc per_read --umi_len ' + umiLength : ''
+    def umi_extraction = umi_length > 0 ? '--umi --umi_loc per_read --umi_len ' + umi_length : ''
 
     """
     # * do not apply trimming/clipping, already done in BCL convert
