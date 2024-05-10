@@ -25,6 +25,7 @@ process GRIDSS_CALL {
 
     script:
     def args = task.ext.args ?: ''
+
     def config_arg = gridss_config ? "--configuration ${gridss_config}" : ''
     def output_dirname = 'gridss_call'
     def labels_list = labels instanceof List ? labels : [labels]

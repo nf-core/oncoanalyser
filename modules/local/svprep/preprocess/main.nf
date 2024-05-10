@@ -24,6 +24,7 @@ process GRIDSS_PREPROCESS {
 
     script:
     def args = task.ext.args ?: ''
+
     def config_arg = gridss_config ? "--configuration ${gridss_config}" : ''
 
     """

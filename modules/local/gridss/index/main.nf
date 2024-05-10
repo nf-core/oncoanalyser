@@ -15,8 +15,8 @@ process GRIDSS_INDEX {
     path genome_bwa_index
 
     output:
-    path 'gridss_index', emit: index
-    path 'versions.yml', emit: versions
+    path 'gridss_index/', emit: index
+    path 'versions.yml' , emit: versions
 
     when:
     task.ext.when == null || task.ext.when

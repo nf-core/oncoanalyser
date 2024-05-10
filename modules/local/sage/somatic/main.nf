@@ -31,6 +31,7 @@ process SAGE_SOMATIC {
 
     script:
     def args = task.ext.args ?: ''
+
     def reference_arg = meta.containsKey('normal_id') ? "-reference ${meta.normal_id}" : ''
     def reference_bam_arg = normal_bam ? "-reference_bam ${normal_bam}" : ''
 

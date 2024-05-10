@@ -9,7 +9,7 @@ process CUSTOM_SLICE {
 
     input:
     tuple val(meta), path(bam), path(bai)
-    path(bed)
+    path bed
 
     output:
     tuple val(meta), path("*sliced.bam"), path("*sliced.bam.bai"), emit: bam
@@ -41,6 +41,7 @@ process CUSTOM_SLICE {
     stub:
     """
     touch ${bam.baseName}.sliced.bam ${bam.baseName}.sliced.bam.bai
+
     echo -e '${task.process}:\\n  stub: noversions\\n' > versions.yml
     """
 }

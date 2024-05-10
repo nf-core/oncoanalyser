@@ -23,13 +23,16 @@ process CUSTOM_EXTRACTCONTIG {
 
     script:
     def args = task.ext.args ?: ''
+    def args2 = task.ext.args2 ?: ''
 
     """
     samtools faidx \\
+        ${args} \\
         -o ${contig_name}_extracted.fa \\
         ${genome_fasta} \\
         ${contig_name}
-    bwa-mem2 index ${contig_name}_extracted.fa
+
+    bwa-mem2 index ${args2} ${contig_name}_extracted.fa
 
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":
@@ -41,6 +44,7 @@ process CUSTOM_EXTRACTCONTIG {
     stub:
     """
     touch ${contig_name}_extracted.fa ${contig_name}_extracted.fa.amb
+
     echo -e '${task.process}:\\n  stub: noversions\\n' > versions.yml
     """
 }

@@ -34,13 +34,6 @@ input:
       type: file
       description: Reference genome assembly dict file
       pattern: "*.{dict}"
-  - genome_bwa_index_dir:
-      type: directory
-      description: Directory containing reference genome assembly BWA index
-  - genome_bwa_index_image:
-      type: file
-      description: Reference genome assembly BWA index img file
-      pattern: "*.{img}"
   - genome_gridss_index:
       type: file
       description: Reference genome assembly GRIDSS index file
