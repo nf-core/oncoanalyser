@@ -22,6 +22,8 @@ process FASTP {
     script:
     def umi_extraction = umi_length > 0 ? '--umi --umi_loc per_read --umi_len ' + umi_length : ''
 
+    def split_by_lines_arg = max_fastq_records ? "--split_by_lines ${4 * max_fastq_records}" : ''
+
     """
     # * do not apply trimming/clipping, already done in BCL convert
     # * turn off all filtering
@@ -36,8 +38,8 @@ process FASTP {
         --disable_length_filtering \\
         --disable_adapter_trimming \\
         --disable_trim_poly_g \\
-        --split_by_lines ${4 * max_fastq_records} \\
         ${umi_extraction} \\
+        ${split_by_lines_arg} \\
         --out1 ${meta.sample_id}_${meta.library_id}_${meta.lane}_R1.fastp.fastq.gz \\
         --out2 ${meta.sample_id}_${meta.library_id}_${meta.lane}_R2.fastp.fastq.gz
 
