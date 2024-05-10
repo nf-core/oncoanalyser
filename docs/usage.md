@@ -15,11 +15,11 @@ Various aspects of an oncoanalyser analysis can be configured to fit a range of 
 
 - precise process selection
 - starting from existing data
-- granular control over resource data
+- granular control over reference/resource files
 
 These features enable oncoanalyser to be run in a highly flexible way. For example, an analysis can be run with existing
-PURPLE data as the starting point and skip variant calling processes. Additionally, resource/reference data can staged
-locally to optimise execution or modified to create user-defined driver gene panels.
+PURPLE data as the starting point and skip variant calling processes. Additionally, reference/resource files can be
+staged locally to optimise execution or modified to create user-defined driver gene panels.
 
 > [!WARNING]
 > There are important requirements when using BAMs as input instead of FASTQs:
@@ -31,7 +31,7 @@ locally to optimise execution or modified to create user-defined driver gene pan
 
 ## Supported analyses
 
-A variety of analyses are accessible in oncoanalyser and are implicitly run according to the data available in the
+A variety of analyses are accessible in oncoanalyser and are implicitly run according to the data described in the
 samplesheet. The supported analysis types for each workflow are listed below.
 
 | Input sequence data                 |  WGS/WTS workflow  | Targeted sequencing workflow<sup>\*</sup> |
@@ -106,16 +106,16 @@ P2__wgts,P2,SB,tumor,dna,fastq,library_id:SB_library;lane:001,/path/to/P2.SB.tum
 
 ### Column descriptions
 
-| Column        | Description                                                          |
-| ------------- | -------------------------------------------------------------------- |
-| group_id      | Group ID for a set of samples and inputs                             |
-| subject_id    | Subject/patient ID                                                   |
-| sample_id     | Sample ID                                                            |
-| sample_type   | Sample type: `tumor`, `normal`                                       |
-| sequence_type | Sequence type: `dna`, `rna`                                          |
-| filetype      | File type: e.g. `fastq`, `bam`, `bai`                                |
-| info          | Additional input information: `library_id`, `lane`, `cancer_type`    |
-| filepath      | Absolute filepath to input file (can be local filepath, URL, S3 URI) |
+| Column        | Description                                                                    |
+| ------------- | ------------------------------------------------------------------------------ |
+| group_id      | Group ID for a set of samples and inputs                                       |
+| subject_id    | Subject/patient ID                                                             |
+| sample_id     | Sample ID                                                                      |
+| sample_type   | Sample type: `tumor`, `normal`                                                 |
+| sequence_type | Sequence type: `dna`, `rna`                                                    |
+| filetype      | File type: e.g. `fastq`, `bam`, `bai`                                          |
+| info          | Additional input information: `library_id`, `lane`, `cancer_type` _[optional]_ |
+| filepath      | Absolute filepath to input file (can be local filepath, URL, S3 URI)           |
 
 The identifiers provided in the samplesheet are used to set output file paths:
 
@@ -137,7 +137,7 @@ nextflow run nf-core/oncoanalyser \
   --outdir <output_directory>
 ```
 
-This will launch the pipeline with the `docker` configuration profile. See below for more information about profiles.
+This will launch the pipeline with the `docker` configuration profile. See below for more information on profiles.
 
 > [!NOTE]
 > Reference data will be retrieved by oncoanalyser for every analysis run. It is therefore strongly recommended when
@@ -194,7 +194,7 @@ First, go to the [nf-core/oncoanalyser releases page](https://github.com/nf-core
 
 This version number will be logged in reports when you run the pipeline, so that you'll know what you used when you look back in the future. For example, at the bottom of the MultiQC reports.
 
-To further assist in reproducbility, you can use share and re-use [parameter files](#running-the-pipeline) to repeat pipeline runs with the same settings without having to write out a command with every single parameter.
+To further assist in reproducbility, you can share and re-use [parameter files](#running-the-pipeline) to repeat pipeline runs with the same settings without having to write out a command with every single parameter.
 
 :::tip
 If you wish to share such profile (such as upload as supplementary material for academic publications), make sure to NOT include cluster specific paths to files, nor institutional specific profiles.
@@ -206,20 +206,20 @@ If you wish to share such profile (such as upload as supplementary material for 
 
 Most of the major components in oncoanalyser can be skipped using `--processes_exclude` (the full list of available
 processes can be view [here](https://github.com/nf-core/oncoanalyser/blob/0.4.5/lib/Constants.groovy#L36-L56)).
-Multiple processes can be given as comma-separated list. While there are some use-cases for this feature (e.g. skipping
-resource intensive processes such as VIRUSBreakend), it becomes more powerful when combined with existing inputs as
-described in the follow section.
+Multiple processes can be given as a comma-separated list. While there are some use-cases for this feature (e.g.
+skipping resource intensive processes such as VIRUSBreakend), it becomes more powerful when combined with existing
+inputs as described in the following section.
 
 > [!WARNING]
-> When skipping components, no checks are done to identify orphan processes in the execution DAG or for redundant
+> When skipping components no checks are done to identify orphan processes in the execution DAG or for redundant
 > processes.
 
 ### Existing inputs
 
 The oncoanalyser pipeline has been designed to allow entry at arbitrary points, which is particularly useful in
-situtations where previous outputs exist and re-running oncoanalyser is desired (e.g. to subsequently execute an
+situations where previous outputs exist and re-running oncoanalyser is desired (e.g. to subsequently execute an
 optional sensor or use an upgrade component such as PURPLE). The primary advantage of this approach is that only the
-required processes are executed, reducing costs and runtimes by skipping unneccessary processes.
+required processes are executed, reducing costs and runtimes by skipping unnecessary processes.
 
 In order to effectively utilise this feature, existing inputs must be set in the [samplesheet](#samplesheet) and the
 appropriate [processes selected](#selecting-processes). Take the below example where existing PURPLE inputs are used so
@@ -288,15 +288,15 @@ To use these hmftools resource file overrides in oncoanalyser the local bundle d
 #### Customise other data
 
 The path or URI to the VIRUSBreakend database can also be explicitly set with `--ref_data_virusbreakenddb_path`. There
-are additional arguments to manually set various other reference data files, please review parameters documentation for
-the complete list.
+are additional arguments to manually set various other reference data files, please review the parameters documentation
+for the complete list.
 
 #### Staging reference data
 
 Default reference data can be staged locally with oncoanalyser by providing a samplesheet for the desired analysis and
-setting the `--prepare_reference_only` argument. The samplesheet and oncoanalyser configuration is used to determine the
-revelant reference data to download. For example the following will download the GRCh38_hmf genome plus indices,
-reference data, and databases required to run a WGTS analysis for tumor/normal DNA with tumor RNA:
+setting the `--prepare_reference_only` argument. The samplesheet and oncoanalyser configuration will determine the
+relevant reference data to download. For example the following command will download the `GRCh38_hmf` genome plus
+indices, reference data, and databases required to run a WGTS analysis for tumor/normal DNA with tumor RNA:
 
 ```csv title="samplesheet.csv"
 group_id,subject_id,sample_id,sample_type,sequence_type,filetype,filepath
@@ -316,9 +316,9 @@ nextflow run nf-core/oncoanalyser \
   --outdir prepare_reference/
 ```
 
-This process will download and unpack default reference data without running any analysis, and once complete the
-prepared reference files can found in `./prepare_reference/reference_data/0.4.5/<datetimestamp>/`. It is recommended to
-remove the Nextflow work directory after staging data to free disk space.
+Executing the above command will download and unpack default reference data without running any analysis, and once
+complete the prepared reference files can found in `./prepare_reference/reference_data/0.4.5/<datetimestamp>/`. It is
+recommended to remove the Nextflow work directory after staging data to free disk space.
 
 For oncoanalyser to use locally staged reference data a custom config can be used:
 
@@ -357,7 +357,7 @@ _GRCh37 genome (Hartwig) [`GRCh37_hmf`]_
 | GRIDSS index         | [gridss_index/2.13.2.tar.gz](https://pub-cf6ba01919994c3cbd354659947f74d8.r2.dev/genomes/GRCh37_hmf/24.1/gridss_index/2.13.2.tar.gz)                                                         |
 | STAR index           | [star_index/gencode_19/2.7.3a.tar.gz](https://pub-cf6ba01919994c3cbd354659947f74d8.r2.dev/genomes/GRCh37_hmf/24.0/star_index/gencode_19/2.7.3a.tar.gz)                                       |
 
-_GRCh37 genome (Hartwig) [`GRCh38_hmf`]_
+_GRCh38 genome (Hartwig) [`GRCh38_hmf`]_
 
 | Type                 | Name                                                                                                                                                                                                         |
 | -------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
@@ -381,8 +381,9 @@ _Other reference data_
 
 #### Custom genomes
 
-It is strongly recommended to use the Hartwig-distributed reference genomes for alignments (GRCh37_hmf or GRCh38_hmf).
-If there is no other option than to use a custom genome, one can be configured with the following process:
+It is strongly recommended to use a Hartwig-distributed reference genome for alignments and subsequent analysis
+(`GRCh37_hmf` or `GRCh38_hmf`). Where it is not feasible to do so, a custom genome can instead be used by providing the
+relevant FASTA file in a configuration file:
 
 ```text title='genome.custom.config'
 params {
@@ -394,7 +395,13 @@ params {
 }
 ```
 
-Run a custom genome with the above configuration and below command
+Each index required for the analysis will first be created before running the rest of oncoanalyser with the following
+command:
+
+> [!NOTE]
+> In a process similar to [staging reference data](#staging-reference-data), you can first generate the required indexes
+> by setting `--prepare_reference_only` and then provide the prepared reference files to oncoanalyser through a custom
+> config file. This avoids having to regenerate indexes for each new analysis.
 
 ```bash
 nextflow run nf-core/oncoanalyser \
@@ -412,8 +419,8 @@ nextflow run nf-core/oncoanalyser \
   --outdir output/
 ```
 
-Creation of a STAR index also requires transcript annotations, please use either of the following via the
-`--ref_data_genome_gtf` option:
+Creation of a STAR index also requires transcript annotations, please provide either of the following GTF files via the
+`--ref_data_genome_gtf` option after decompressing:
 
 - GRCh37: [GENCODE v38 (Ensembl v104)
   annotations](https://ftp.ebi.ac.uk/pub/databases/gencode/Gencode_human/release_38/gencode.v38.annotation.gtf.gz)
@@ -421,10 +428,10 @@ Creation of a STAR index also requires transcript annotations, please use either
   annotations](https://ftp.ebi.ac.uk/pub/databases/gencode/Gencode_human/release_19/gencode.v19.annotation.gtf.gz)
 
 > [!WARNING]
-> STAR index must use transcript annotations from Ensembl versions that match hmftoos resource data (GRCh37: v74;
+> STAR index must use transcript annotations from Ensembl versions that match hmftools resource data (GRCh37: v74;
 > GRCh38: v104).
 
-When creating indexes for reference genomes with alternative haplotypes, an ALT file must be provided with
+When creating indexes for reference genomes with alternative haplotypes, an ALT file must be given with
 `--ref_data_genome_alt`. Importantly, a STAR index will not be generated for reference genomes with alternative
 haplotypes since this requires careful processing and is hence left to the user.
 
@@ -449,7 +456,7 @@ The pipeline also dynamically loads configurations from [https://github.com/nf-c
 Note that multiple profiles can be loaded, for example: `-profile test,docker` - the order of arguments is important!
 They are loaded in sequence, so later profiles can overwrite earlier profiles.
 
-If `-profile` is not specified, the pipeline will run locally and expect all software to be installed and available on the `PATH`. This is _not_ recommended, since it can lead to different results on different machines dependent on the computer enviroment.
+If `-profile` is not specified, the pipeline will run locally and expect all software to be installed and available on the `PATH`. This is _not_ recommended, since it can lead to different results on different machines dependent on the computer environment.
 
 - `test`
   - A profile with a complete configuration for automated testing
@@ -489,13 +496,13 @@ Whilst the default requirements set within the pipeline will hopefully work for 
 
 To change the resource requests, please see the [max resources](https://nf-co.re/docs/usage/configuration#max-resources) and [tuning workflow resources](https://nf-co.re/docs/usage/configuration#tuning-workflow-resources) section of the nf-core website.
 
-### Custom Containers
+### Custom containers
 
 In some cases you may wish to change which container or conda environment a step of the pipeline uses for a particular tool. By default nf-core pipelines use containers and software from the [biocontainers](https://biocontainers.pro/) or [bioconda](https://bioconda.github.io/) projects. However in some cases the pipeline specified version maybe out of date.
 
 To use a different container from the default container or conda environment specified in a pipeline, please see the [updating tool versions](https://nf-co.re/docs/usage/configuration#updating-tool-versions) section of the nf-core website.
 
-### Custom Tool Arguments
+### Custom tool arguments
 
 A pipeline might not always support every possible argument or option of a particular tool used in pipeline. Fortunately, nf-core pipelines provide some freedom to users to insert additional parameters that the pipeline does not include by default.
 
@@ -509,13 +516,13 @@ See the main [Nextflow documentation](https://www.nextflow.io/docs/latest/config
 
 If you have any questions or issues please send us a message on [Slack](https://nf-co.re/join/slack) on the [`#configs` channel](https://nfcore.slack.com/channels/configs).
 
-## Azure Resource Requests
+## Azure resource requests
 
 To be used with the `azurebatch` profile by specifying the `-profile azurebatch`.
 We recommend providing a compute `params.vm_type` of `Standard_D16_v3` VMs by default but these options can be changed if required.
 
 Note that the choice of VM size depends on your quota and the overall workload during the analysis.
-For a thorough list, please refer the [Azure Sizes for virtual machines in Azure](https://docs.microsoft.com/en-us/azure/virtual-machines/sizes).
+For a thorough list, please refer to the [Azure Sizes for virtual machines in Azure](https://docs.microsoft.com/en-us/azure/virtual-machines/sizes).
 
 ## Running in the background
 
