@@ -5,7 +5,7 @@ process SAGE_APPEND {
     conda "${moduleDir}/environment.yml"
     container "${ workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container ?
         'https://depot.galaxyproject.org/singularity/hmftools-sage:3.4.3--hdfd78af_0' :
-        'biocontainers/hmftools-sage:3.4.3--hdfd78af_0' }"
+        'quay.io/biocontainers/hmftools-sage:3.4.3--hdfd78af_0' }"
 
     input:
     tuple val(meta), path(vcf), path(bam), path(bai)
