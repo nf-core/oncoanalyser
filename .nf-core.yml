@@ -7,4 +7,4 @@ lint:
     - lib/Utils.groovy
     - lib/WorkflowMain.groovy
     - lib/WorkflowOncoanalyser.groovy
-nf_core_version: "2.14.0"
+nf_core_version: "2.14.1"
