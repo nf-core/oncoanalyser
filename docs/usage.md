@@ -27,7 +27,7 @@ staged locally to optimise execution or modified to create user-defined driver g
 > - STAR must have been run with [specific
 >   parameters](https://github.com/hartwigmedical/hmftools/tree/master/isofox#a-note-on-alignment-and-multi-mapping),
 >   this is critical for WTS data, and
-> - reads are expected to have been aligned to one of the Hartwig-distributed reference genomes (user-defined genomes may be used though are not recommended)
+> - reads are expected to have been aligned to one of the Hartwig-distributed reference genomes ([user-defined genomes may be used](#custom-genomes) though are not recommended)
 
 ## Supported analyses
 
