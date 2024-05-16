@@ -71,7 +71,7 @@ P1__wgts,P1,SC,tumor,rna,fastq,library_id:SC_library;lane:001,/path/to/P1.SC.tum
 
 > [!NOTE]
 > Inputs with the `bam` filetype will be processed by MarkDups as required by hmftools. Where an input BAM has already
-> been processed by MarkDups, you can avoid needless reprocessing by setting `bam_markdups` as the filetype instead.
+> been processed by [HMF mark duplicates](https://github.com/hartwigmedical/hmftools/blob/master/mark-dups/README.md), you can avoid needless reprocessing by setting `bam_markdups` as the filetype instead.
 >
 > Please note there are important requirements around the use of BAMs, see the warning above in the
 > [Introduction](#introduction).
