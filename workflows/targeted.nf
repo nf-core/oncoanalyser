@@ -114,7 +114,7 @@ workflow TARGETED {
         READ_ALIGNMENT_DNA(
             ch_inputs,
             ref_data.genome_fasta,
-            ref_data.genome_bwa_index,
+            ref_data.genome_bwamem2_index,
             params.max_fastq_records,
         )
 

@@ -55,28 +55,28 @@ workflow PREPARE_REFERENCE {
     //
     // Set bwa-mem2 index, unpack or create if required
     //
-    ch_genome_bwa_index = Channel.empty()
+    ch_genome_bwamem2_index = Channel.empty()
     if (run_config.has_dna && run_config.stages.alignment) {
-        if (!params.ref_data_genome_bwa_index) {
+        if (!params.ref_data_genome_bwamem2_index) {
 
             BWAMEM2_INDEX(
                 ch_genome_fasta,
                 params.ref_data_genome_alt ? file(params.ref_data_genome_alt) : [],
             )
-            ch_genome_bwa_index = BWAMEM2_INDEX.out.index
+            ch_genome_bwamem2_index = BWAMEM2_INDEX.out.index
             ch_versions = ch_versions.mix(BWAMEM2_INDEX.out.versions)
 
-        } else if (params.ref_data_genome_bwa_index.endsWith('.tar.gz')) {
+        } else if (params.ref_data_genome_bwamem2_index.endsWith('.tar.gz')) {
 
-            ch_genome_bwa_index_inputs = Channel.fromPath(params.ref_data_genome_bwa_index)
+            ch_genome_bwamem2_index_inputs = Channel.fromPath(params.ref_data_genome_bwamem2_index)
                 .map { [[id: "bwa-mem2_index_${it.name.replaceAll('\\.tar\\.gz$', '')}"], it] }
 
-            DECOMP_BWAMEM2_INDEX(ch_genome_bwa_index_inputs)
-            ch_genome_bwa_index = DECOMP_BWAMEM2_INDEX.out.dir
+            DECOMP_BWAMEM2_INDEX(ch_genome_bwamem2_index_inputs)
+            ch_genome_bwamem2_index = DECOMP_BWAMEM2_INDEX.out.dir
 
         } else {
 
-            ch_genome_bwa_index = getRefFileChannel('ref_data_genome_bwa_index')
+            ch_genome_bwamem2_index = getRefFileChannel('ref_data_genome_bwamem2_index')
 
         }
     }
@@ -235,7 +235,7 @@ workflow PREPARE_REFERENCE {
                 ch_genome_fasta,
                 ch_genome_fai,
                 ch_genome_dict,
-                ch_genome_bwa_index,
+                ch_genome_bwamem2_index,
                 ch_genome_gridss_index,
                 ch_genome_star_index,
                 ch_virusbreakenddb,
@@ -258,19 +258,19 @@ workflow PREPARE_REFERENCE {
     }
 
     emit:
-    genome_fasta        = ch_genome_fasta.first()        // path: genome_fasta
-    genome_fai          = ch_genome_fai.first()          // path: genome_fai
-    genome_dict         = ch_genome_dict.first()         // path: genome_dict
-    genome_bwa_index    = ch_genome_bwa_index.first()    // path: genome_bwa_index
-    genome_gridss_index = ch_genome_gridss_index.first() // path: genome_gridss_index
-    genome_star_index   = ch_genome_star_index.first()   // path: genome_star_index
-    genome_version      = ch_genome_version              // val:  genome_version
+    genome_fasta         = ch_genome_fasta.first()         // path: genome_fasta
+    genome_fai           = ch_genome_fai.first()           // path: genome_fai
+    genome_dict          = ch_genome_dict.first()          // path: genome_dict
+    genome_bwamem2_index = ch_genome_bwamem2_index.first() // path: genome_bwa-mem2_index
+    genome_gridss_index  = ch_genome_gridss_index.first()  // path: genome_gridss_index
+    genome_star_index    = ch_genome_star_index.first()    // path: genome_star_index
+    genome_version       = ch_genome_version               // val:  genome_version
 
-    virusbreakenddb     = ch_virusbreakenddb.first()     // path: VIRUSBreakend database
-    hmf_data            = ch_hmf_data                    // map:  HMF data paths
-    panel_data          = ch_panel_data                  // map:  Panel data paths
+    virusbreakenddb      = ch_virusbreakenddb.first()      // path: VIRUSBreakend database
+    hmf_data             = ch_hmf_data                     // map:  HMF data paths
+    panel_data           = ch_panel_data                   // map:  Panel data paths
 
-    versions            = ch_versions                    // channel: [ versions.yml ]
+    versions             = ch_versions                     // channel: [ versions.yml ]
 }
 
 def getRefFileChannel(key) {

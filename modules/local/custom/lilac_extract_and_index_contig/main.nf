@@ -15,7 +15,7 @@ process CUSTOM_EXTRACTCONTIG {
 
     output:
     path "*extracted.fa"  , emit: contig
-    path "*extracted.fa.*", emit: bwa_index
+    path "*extracted.fa.*", emit: bwamem2_index
     path 'versions.yml'   , emit: versions
 
     when:

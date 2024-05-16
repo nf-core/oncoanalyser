@@ -15,7 +15,7 @@ workflow READ_ALIGNMENT_DNA {
 
     // Reference data
     genome_fasta           // channel: [mandatory] /path/to/genome_fasta
-    genome_bwa_index       // channel: [mandatory] /path/to/genome_bwa_index_dir/
+    genome_bwamem2_index   // channel: [mandatory] /path/to/genome_bwa-mem2_index_dir/
 
     // Params
     max_fastq_records      // numeric: [mandatory] max number of FASTQ records per split
@@ -128,11 +128,11 @@ workflow READ_ALIGNMENT_DNA {
     // MODULE: BWA-MEM2
     //
     // Create process input channel
-    // channel: [ meta_bwa, fastq_fwd, fastq_rev ]
-    ch_bwa_inputs = ch_fastqs_ready
+    // channel: [ meta_bwamem2, fastq_fwd, fastq_rev ]
+    ch_bwamem2_inputs = ch_fastqs_ready
         .map { meta_fastq_ready, fastq_fwd, fastq_rev ->
 
-            def meta_bwa = [
+            def meta_bwamem2 = [
                 *:meta_fastq_ready,
 
 
@@ -142,14 +142,14 @@ workflow READ_ALIGNMENT_DNA {
 
             ]
 
-            return [meta_bwa, fastq_fwd, fastq_rev]
+            return [meta_bwamem2, fastq_fwd, fastq_rev]
         }
 
     // Run process
     BWAMEM2_ALIGN(
-        ch_bwa_inputs,
+        ch_bwamem2_inputs,
         genome_fasta,
-        genome_bwa_index,
+        genome_bwamem2_index,
     )
 
     ch_versions = ch_versions.mix(BWAMEM2_ALIGN.out.versions)
@@ -157,25 +157,25 @@ workflow READ_ALIGNMENT_DNA {
     // Reunite BAMs
     // First, count expected BAMs per sample for non-blocking groupTuple op
     // channel: [ meta_count, group_size ]
-    ch_sample_fastq_counts = ch_bwa_inputs
-        .map { meta_bwa, reads_fwd, reads_rev ->
+    ch_sample_fastq_counts = ch_bwamem2_inputs
+        .map { meta_bwamem2, reads_fwd, reads_rev ->
 
             def meta_count = [
-                key: meta_bwa.key,
-                sample_type: meta_bwa.sample_type,
+                key: meta_bwamem2.key,
+                sample_type: meta_bwamem2.sample_type,
             ]
 
-            return [meta_count, meta_bwa]
+            return [meta_count, meta_bwamem2]
         }
         .groupTuple()
-        .map { meta_count, meta_bwas -> return [meta_count, meta_bwas.size()] }
+        .map { meta_count, metas_bwamem2 -> return [meta_count, metas_bwamem2.size()] }
 
     // Now, group with expected size then sort into tumor and normal channels
     // channel: [ meta_group, [bam, ...], [bai, ...] ]
     ch_bams_united = ch_sample_fastq_counts
         .cross(
             // First element to match meta_count above for `cross`
-            BWAMEM2_ALIGN.out.bam.map { meta_bwa, bam, bai -> [[key: meta_bwa.key, sample_type: meta_bwa.sample_type], bam, bai] }
+            BWAMEM2_ALIGN.out.bam.map { meta_bwamem2, bam, bai -> [[key: meta_bwamem2.key, sample_type: meta_bwamem2.sample_type], bam, bai] }
         )
         .map { count_tuple, bam_tuple ->
 
