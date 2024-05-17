@@ -197,12 +197,13 @@ class Utils {
 
         def fps = [
             params.ref_data_genome_alt,
-            params.ref_data_genome_bwa_index,
+            params.ref_data_genome_bwamem2_index,
             params.ref_data_genome_dict,
             params.ref_data_genome_fai,
             params.ref_data_genome_fasta,
             params.ref_data_genome_gridss_index,
             params.ref_data_genome_gtf,
+            params.ref_data_genome_star_index,
             params.ref_data_virusbreakenddb_path,
         ]
 
@@ -323,7 +324,7 @@ class Utils {
         def has_alt_contigs = params.genome_type == 'alt'
 
         // Ensure that custom genomes with ALT contigs that need indexes built have the required .alt file
-        def has_bwa_indexes = (params.ref_data_genome_bwa_index && params.ref_data_genome_gridss_index)
+        def has_bwa_indexes = (params.ref_data_genome_bwamem2_index && params.ref_data_genome_gridss_index)
         def has_alt_file = params.containsKey('ref_data_genome_alt') && params.ref_data_genome_alt
         def run_bwa_or_gridss_index = run_config.stages.alignment && run_config.has_dna_fastq && !has_bwa_indexes
 

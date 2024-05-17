@@ -29,9 +29,9 @@ input:
       type: file
       description: Reference genome assembly FASTA file
       pattern: "*.{fa,fasta}"
-  - genome_bwa_index:
+  - genome_bwamem2_index:
       type: directory
-      description: bwa-mem1 index directory
+      description: bwa-mem2 index directory
 output:
   - meta:
       type: map

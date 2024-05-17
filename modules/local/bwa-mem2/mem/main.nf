@@ -10,7 +10,7 @@ process BWAMEM2_ALIGN {
     input:
     tuple val(meta), path(reads_fwd), path(reads_rev)
     path genome_fasta
-    path genome_bwa_index
+    path genome_bwamem2_index
 
     output:
     tuple val(meta), path('*.bam'), path('*.bai'), emit: bam
@@ -28,7 +28,7 @@ process BWAMEM2_ALIGN {
     def output_fn = meta.split ? "${meta.split}.${meta.sample_id}.${meta.read_group}.bam" : "${meta.sample_id}.${meta.read_group}.bam"
 
     """
-    ln -fs \$(find -L ${genome_bwa_index} -type f) ./
+    ln -fs \$(find -L ${genome_bwamem2_index} -type f) ./
 
     bwa-mem2 mem \\
         ${args} \\
