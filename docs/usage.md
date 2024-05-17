@@ -334,7 +334,7 @@ params {
             fasta           = "/path/to/GCA_000001405.15_GRCh38_no_alt_analysis_set.fna"
             fai             = "/path/to/GCA_000001405.15_GRCh38_no_alt_analysis_set.fna.fai"
             dict            = "/path/to/GCA_000001405.15_GRCh38_no_alt_analysis_set.fna.dict"
-            bwa-mem2_index  = "/path/to/bwa-mem2_index/"
+            bwamem2_index   = "/path/to/bwa-mem2_index/"
             gridss_index    = "/path/to/gridss_index/"
             star_index      = "/path/to/star_index/"
         }
