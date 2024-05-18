@@ -123,7 +123,7 @@ in the below table.
 
 ## Known issues
 
-- MarkDups error processing hard-clipped supplementary alignments ([#37](https://github.com/nf-core/oncoanalyser/issues/37))
+- MarkDups may encounter a fatal error processing hard-clipped supplementary alignments ([#37](https://github.com/nf-core/oncoanalyser/issues/37))
 
 ## Credits
 
