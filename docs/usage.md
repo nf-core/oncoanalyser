@@ -27,7 +27,7 @@ When starting from BAMs rather than FASTQ it is expected that:
 
 - RNA read alignments are generated with STAR using [specific
   parameters](https://github.com/hartwigmedical/hmftools/tree/master/isofox#a-note-on-alignment-and-multi-mapping), this
-  is __critical__ for WTS data, and
+  is **critical** for WTS data, and
 - reads are aligned to a Hartwig-distributed reference genome ([custom genomes](#custom-genomes) can be used but are not
   recommended)
 
