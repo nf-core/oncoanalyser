@@ -21,13 +21,17 @@ These features enable oncoanalyser to be run in a highly flexible way. For examp
 PURPLE data as the starting point and skip variant calling processes. Additionally, reference/resource files can be
 staged locally to optimise execution or modified to create user-defined driver gene panels.
 
-> [!WARNING]
-> There are important requirements when using BAMs as input instead of FASTQs:
->
-> - STAR must have been run with [specific
->   parameters](https://github.com/hartwigmedical/hmftools/tree/master/isofox#a-note-on-alignment-and-multi-mapping),
->   this is critical for WTS data, and
-> - reads are expected to have been aligned to one of the Hartwig-distributed reference genomes ([user-defined genomes may be used](#custom-genomes) though are not recommended)
+:::danger
+
+When starting from BAMs rather than FASTQ it is expected that:
+
+- RNA read alignments are generated with STAR using [specific
+  parameters](https://github.com/hartwigmedical/hmftools/tree/master/isofox#a-note-on-alignment-and-multi-mapping), this
+  is **critical** for WTS data, and
+- reads are aligned to a Hartwig-distributed reference genome ([custom genomes](#custom-genomes) can be used but are not
+  recommended)
+
+:::
 
 ## Supported analyses
 
@@ -57,8 +61,11 @@ during execution such as the PURPLE output directory. The full list of recognise
 
 #### FASTQ
 
-> [!NOTE]
-> Currently only non-interleaved paired-end reads are accepted as FASTQ input
+:::note
+
+Currently only non-interleaved paired-end reads are accepted as FASTQ input.
+
+:::
 
 ```csv title="samplesheet.csv"
 group_id,subject_id,sample_id,sample_type,sequence_type,filetype,info,filepath
@@ -69,16 +76,21 @@ P1__wgts,P1,SC,tumor,rna,fastq,library_id:SC_library;lane:001,/path/to/P1.SC.tum
 
 #### BAM
 
-> [!NOTE]
-> Inputs with the `bam` filetype will be processed by MarkDups as required by hmftools. Where an input BAM has already
-> been processed specifically by [HMF
-> MarkDups](https://github.com/hartwigmedical/hmftools/blob/master/mark-dups/README.md), you can avoid needless
-> reprocessing by setting `bam_markdups` as the filetype instead. It is important to understand that duplicate marking
-> by other tools (e.g. GATK) cannot be used as a substitute since HMF MarkDups performs key operations beyond just
-> duplicate marking.
->
-> Please note there are other essential requirements around the use of BAMs as inputs, see the warning above in the
-> [Introduction](#introduction).
+:::note
+
+Inputs with the `bam` filetype will be processed by MarkDups as required by hmftools. Where an input BAM has already
+been processed specifically by [HMF
+MarkDups](https://github.com/hartwigmedical/hmftools/blob/master/mark-dups/README.md), you can avoid needless
+reprocessing by setting `bam_markdups` as the filetype instead. It is important to understand that duplicate marking by
+other tools (e.g. GATK) cannot be used as a substitute since HMF MarkDups performs key operations beyond just duplicate
+marking.
+
+<br />
+
+Please note there are other essential requirements around the use of BAMs as inputs, see the warning above in the
+[Introduction](#introduction).
+
+:::
 
 ```csv title="samplesheet.csv"
 group_id,subject_id,sample_id,sample_type,sequence_type,filetype,filepath
@@ -143,10 +155,13 @@ nextflow run nf-core/oncoanalyser \
 
 This will launch the pipeline with the `docker` configuration profile. See below for more information on profiles.
 
-> [!NOTE]
-> Reference data will be retrieved by oncoanalyser for every analysis run. It is therefore strongly recommended when
-> running multiple analyses to pre-stage reference data locally to avoid it being retrieved multiple times. See [Staging
-> reference data](#staging-reference-data).
+:::note
+
+Reference data will be retrieved by oncoanalyser for every analysis run. It is therefore strongly recommended when
+running multiple analyses to pre-stage reference data locally to avoid it being retrieved multiple times. See [Staging
+reference data](#staging-reference-data).
+
+:::
 
 Note that the pipeline will create the following files in your working directory:
 
@@ -162,7 +177,12 @@ If you wish to repeatedly use the same parameters for multiple runs, rather than
 Pipeline settings can be provided in a `yaml` or `json` file via `-params-file <file>`.
 
 :::warning
-Do not use `-c <file>` to specify parameters as this will result in errors. Custom config files specified with `-c` must only be used for [tuning process resource specifications](https://nf-co.re/docs/usage/configuration#tuning-workflow-resources), other infrastructural tweaks (such as output directories), or module arguments (args).
+
+Do not use `-c <file>` to specify parameters as this will result in errors. Custom config files specified with `-c` must
+only be used for [tuning process resource
+specifications](https://nf-co.re/docs/usage/configuration#tuning-workflow-resources), other infrastructural tweaks (such
+as output directories), or module arguments (args).
+
 :::
 
 The above pipeline run specified with a params file in yaml format:
@@ -214,9 +234,12 @@ Multiple processes can be given as a comma-separated list. While there are some 
 skipping resource intensive processes such as VIRUSBreakend), it becomes more powerful when combined with existing
 inputs as described in the following section.
 
-> [!WARNING]
-> When skipping components no checks are done to identify orphan processes in the execution DAG or for redundant
-> processes.
+:::warning
+
+When skipping components no checks are done to identify orphan processes in the execution DAG or for redundant
+processes.
+
+:::
 
 ### Existing inputs
 
@@ -236,9 +259,12 @@ P1__wgts,P1,SB,tumor,dna,bam,/path/to/P1.SB.tumor.dna.wgs.bam
 P1__wgts,P1,SB,tumor,dna,purple_dir,/path/to/P1.purple_dir/
 ```
 
-> [!NOTE]
-> The original source input file (i.e. BAM or FASTQ) must always be provided for oncoanalyser to infer the correct
-> analysis type.
+:::note
+
+The original source input file (i.e. BAM or FASTQ) must always be provided for oncoanalyser to infer the correct
+analysis type.
+
+:::
 
 And now run and skip variant calling:
 
@@ -253,9 +279,12 @@ nextflow run nf-core/oncoanalyser \
   --outdir output/
 ```
 
-> [!WARNING]
-> Providing existing inputs will cause oncoanalyser to skip the corresponding process but _not any_ of the upstream
-> processes. It is the responsibility of the user to skip all relevant processes.
+:::warning
+
+Providing existing inputs will cause oncoanalyser to skip the corresponding process but _not any_ of the upstream
+processes. It is the responsibility of the user to skip all relevant processes.
+
+:::
 
 ### Configuring reference data
 
@@ -402,10 +431,13 @@ params {
 Each index required for the analysis will first be created before running the rest of oncoanalyser with the following
 command:
 
-> [!NOTE]
-> In a process similar to [staging reference data](#staging-reference-data), you can first generate the required indexes
-> by setting `--prepare_reference_only` and then provide the prepared reference files to oncoanalyser through a custom
-> config file. This avoids having to regenerate indexes for each new analysis.
+:::note
+
+In a process similar to [staging reference data](#staging-reference-data), you can first generate the required indexes
+by setting `--prepare_reference_only` and then provide the prepared reference files to oncoanalyser through a custom
+config file. This avoids having to regenerate indexes for each new analysis.
+
+:::
 
 ```bash
 nextflow run nf-core/oncoanalyser \
@@ -431,9 +463,12 @@ Creation of a STAR index also requires transcript annotations, please provide ei
 - GRCh38: [GENCODE v37 (Ensembl v74)
   annotations](https://ftp.ebi.ac.uk/pub/databases/gencode/Gencode_human/release_19/gencode.v19.annotation.gtf.gz)
 
-> [!WARNING]
-> STAR index must use transcript annotations from Ensembl versions that match hmftools resource data (GRCh37: v74;
-> GRCh38: v104).
+:::warning
+
+STAR index must use transcript annotations from Ensembl versions that match hmftools resource data (GRCh37: v74; GRCh38:
+v104).
+
+:::
 
 When creating indexes for reference genomes with alternative haplotypes, an ALT file must be given with
 `--ref_data_genome_alt`. Importantly, a STAR index will not be generated for reference genomes with alternative
