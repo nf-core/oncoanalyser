@@ -32,7 +32,7 @@ custom panels with externally-generated normalisation data.
 The key analysis results for each sample are summarised and presented in an ORANGE report (summary page excerpt shown
 below from _[COLO829_wgts.orange_report.pdf](https://pub-29f2e5b2b7384811bdbbcba44f8b5083.r2.dev/oncoanalyser/other/example_report/COLO829_wgts.orange_report.pdf)_):
 
-<p align='center'><img width='750' src='docs/images/COLO829_wgts.orange_report.summary_section.png'></p>
+<p align="center"><img width="750" src="docs/images/COLO829_wgts.orange_report.summary_section.png"></p>
 
 For detailed information on each component of the Hartwig workflow, please refer to
 [hartwigmedical/hmftools](https://github.com/hartwigmedical/hmftools/).
