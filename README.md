@@ -121,6 +121,10 @@ in the below table.
 | 0.1.0 through 0.2.7 | 5.33     |
 | 0.3.0 through 0.4.5 | 5.34     |
 
+## Known issues
+
+- MarkDups may encounter a fatal error processing hard-clipped supplementary alignments ([#37](https://github.com/nf-core/oncoanalyser/issues/37))
+
 ## Credits
 
 The oncoanalyser pipeline was written by Stephen Watts while in the [Genomics Platform
