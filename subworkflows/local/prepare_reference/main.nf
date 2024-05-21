@@ -56,7 +56,7 @@ workflow PREPARE_REFERENCE {
     // Set bwa-mem2 index, unpack or create if required
     //
     ch_genome_bwamem2_index = Channel.empty()
-    if (run_config.has_dna && run_config.stages.alignment) {
+    if (run_config.has_dna_fastq && run_config.stages.alignment) {
         if (!params.ref_data_genome_bwamem2_index) {
 
             BWAMEM2_INDEX(
