@@ -31,6 +31,7 @@ process FASTP {
         --disable_adapter_trimming \\
         --disable_trim_poly_g \\
         --split_by_lines ${4 * max_fastq_records} \\
+        --thread ${task.cpus} \\
         --out1 ${meta.sample_id}_${meta.library_id}_${meta.lane}_R1.fastp.fastq.gz \\
         --out2 ${meta.sample_id}_${meta.library_id}_${meta.lane}_R2.fastp.fastq.gz
 
