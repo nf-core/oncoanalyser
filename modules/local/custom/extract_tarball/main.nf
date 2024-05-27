@@ -10,7 +10,7 @@ process CUSTOM_EXTRACTTARBALL {
     tuple val(meta), path(tarball)
 
     output:
-    path "${meta.id}/", emit: dir
+    path "${meta.id}/", emit: extracted_dir
 
     when:
     task.ext.when == null || task.ext.when
