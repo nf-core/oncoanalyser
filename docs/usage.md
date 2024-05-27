@@ -55,7 +55,7 @@ details and columns are [described below](#column-descriptions).
 
 Several different input filetypes beyond FASTQ and BAM are recognised, including intermediate output files generated
 during execution such as the PURPLE output directory. The full list of recognised input filetypes is available
-[here](https://github.com/nf-core/oncoanalyser/blob/0.4.5/lib/Constants.groovy#L58-L90).
+[here](https://github.com/nf-core/oncoanalyser/blob/1.0.0/lib/Constants.groovy#L58-L90).
 
 ### Simple example
 
@@ -146,7 +146,7 @@ The typical command for running the pipeline is as follows:
 ```bash
 nextflow run nf-core/oncoanalyser \
   -profile docker \
-  -revision 0.4.5 \
+  -revision 1.0.0 \
   --mode <wgts|targeted> \
   --genome <GRCh37_hmf|GRCh38_hmf> \
   --input samplesheet.csv \
@@ -229,7 +229,7 @@ If you wish to share such profile (such as upload as supplementary material for 
 ### Selecting processes
 
 Most of the major components in oncoanalyser can be skipped using `--processes_exclude` (the full list of available
-processes can be view [here](https://github.com/nf-core/oncoanalyser/blob/0.4.5/lib/Constants.groovy#L36-L56)).
+processes can be view [here](https://github.com/nf-core/oncoanalyser/blob/1.0.0/lib/Constants.groovy#L36-L56)).
 Multiple processes can be given as a comma-separated list. While there are some use-cases for this feature (e.g.
 skipping resource intensive processes such as VIRUSBreakend), it becomes more powerful when combined with existing
 inputs as described in the following section.
@@ -271,7 +271,7 @@ And now run and skip variant calling:
 ```bash
 nextflow run nf-core/oncoanalyser \
   -profile docker \
-  -revision 0.4.5 \
+  -revision 1.0.0 \
   --mode wgts \
   --processes_exclude markdups,amber,cobalt,gridss,gripss,sage,pave \
   --genome GRCh38_hmf \
@@ -341,7 +341,7 @@ P1__wgts,P1,SC,tumor,rna,bam,/path/to/P1.SC.tumor.rna.wts.bam
 ```bash
 nextflow run nf-core/oncoanalyser \
   -profile docker \
-  -revision 0.4.5 \
+  -revision 1.0.0 \
   --mode wgts \
   --genome GRCh38_hmf \
   --prepare_reference_only \
@@ -350,7 +350,7 @@ nextflow run nf-core/oncoanalyser \
 ```
 
 Executing the above command will download and unpack default reference data without running any analysis, and once
-complete the prepared reference files can found in `./prepare_reference/reference_data/0.4.5/<datetimestamp>/`. It is
+complete the prepared reference files can found in `./prepare_reference/reference_data/1.0.0/<datetimestamp>/`. It is
 recommended to remove the Nextflow work directory after staging data to free disk space.
 
 For oncoanalyser to use locally staged reference data a custom config can be used:
@@ -442,7 +442,7 @@ config file. This avoids having to regenerate indexes for each new analysis.
 ```bash
 nextflow run nf-core/oncoanalyser \
   -profile docker \
-  -revision 0.4.5 \
+  -revision 1.0.0 \
   -config genome.custom.config \
   --mode wgts \
   \
