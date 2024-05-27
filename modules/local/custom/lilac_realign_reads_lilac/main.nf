@@ -2,10 +2,10 @@ process CUSTOM_REALIGNREADS {
     tag "${meta.id}"
     label 'process_low'
 
-    conda "bioconda::bwa-mem2=2.2.1 bioconda::samtools=1.19.2 bioconda::sambamba=1.0"
+    conda "bioconda::bwa-mem2=2.2.1 bioconda::samtools=1.19.2 bioconda::sambamba=1.0.1"
     container "${ workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container ?
-        'https://depot.galaxyproject.org/singularity/mulled-v2-4dde50190ae599f2bb2027cb2c8763ea00fb5084:544519c4a0ff7e9616a3b44afde1f143c52f10c3-0' :
-        'biocontainers/mulled-v2-4dde50190ae599f2bb2027cb2c8763ea00fb5084:544519c4a0ff7e9616a3b44afde1f143c52f10c3-0' }"
+        'https://depot.galaxyproject.org/singularity/mulled-v2-4dde50190ae599f2bb2027cb2c8763ea00fb5084:4163e62e1daead7b7ea0228baece715bec295c22-0' :
+        'biocontainers/mulled-v2-4dde50190ae599f2bb2027cb2c8763ea00fb5084:4163e62e1daead7b7ea0228baece715bec295c22-0' }"
 
     input:
     tuple val(meta), path(bam), path(bai)
