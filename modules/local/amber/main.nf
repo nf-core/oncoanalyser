@@ -9,7 +9,7 @@ process AMBER {
 
     input:
     tuple val(meta), path(tumor_bam), path(normal_bam), path(tumor_bai), path(normal_bai)
-    val ref_genome_ver
+    val genome_ver
     path heterozygous_sites
     path target_region_bed
 
@@ -37,7 +37,7 @@ process AMBER {
         ${reference_arg} \\
         ${reference_bam_arg} \\
         ${target_regions_bed_arg} \\
-        -ref_genome_version ${ref_genome_ver} \\
+        -ref_genome_version ${genome_ver} \\
         -loci ${heterozygous_sites} \\
         -threads ${task.cpus} \\
         -output_dir amber/
