@@ -115,21 +115,21 @@ class WorkflowMain {
                 "  Currently, the available genome are:\n" +
                 "  ${params.genomes.keySet().join(", ")}\n" +
                 "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
-            System.exit(1)
+            Nextflow.exit(1)
         } else if (!params.genomes.containsKey(params.genome)) {
             log.error "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n" +
                 "  Genome '${params.genome}' not found in any config files provided to the pipeline.\n" +
                 "  Currently, the available genome are:\n" +
                 "  ${params.genomes.keySet().join(", ")}\n" +
                 "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
-            System.exit(1)
+            Nextflow.exit(1)
         }
 
         if (!Constants.GENOMES_SUPPORTED.contains(params.genome)) {
             if (!params.force_genome) {
-                log.error "ERROR: currently only the GRCh37_hmf and GRCh38_hmf genomes are supported but got ${params.genome}" +
+                log.error "currently only the GRCh37_hmf and GRCh38_hmf genomes are supported but got ${params.genome}" +
                     ", please adjust the --genome argument accordingly or override with --force_genome."
-                System.exit(1)
+                Nextflow.exit(1)
             } else {
                 log.warn "currently only the GRCh37_hmf and GRCh38_hmf genomes are supported but forcing to " +
                     "proceed with \"${params.genome}\""
@@ -143,7 +143,7 @@ class WorkflowMain {
                 "  Currently, the list of genomes in the version list include:\n" +
                 "  ${Constants.GENOMES_DEFINED.join(", ")}\n" +
                 "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
-            System.exit(1)
+            Nextflow.exit(1)
         }
 
         if (!params.genome_type) {
@@ -153,12 +153,12 @@ class WorkflowMain {
                 "  Currently, the list of genomes in the type list include:\n" +
                 "  ${Constants.GENOMES_DEFINED.join(", ")}\n" +
                 "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
-            System.exit(1)
+            Nextflow.exit(1)
         }
 
         if (!params.ref_data_hmf_data_path) {
-            log.error "ERROR: HMF data path wasn't provided"
-            System.exit(1)
+            log.error "HMF data path wasn't provided"
+            Nextflow.exit(1)
         }
 
         // Run configuration specific parameters
@@ -171,7 +171,7 @@ class WorkflowMain {
                 "  Currently, the available run modes are:\n" +
                 "    - ${run_modes}\n" +
                 "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
-            System.exit(1)
+            Nextflow.exit(1)
         }
 
         def run_mode = Utils.getRunMode(params.mode, log)
@@ -187,7 +187,7 @@ class WorkflowMain {
                     "  Currently, the available panels are:\n" +
                     "    - ${panels}\n" +
                     "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
-                System.exit(1)
+                Nextflow.exit(1)
 
             } else if (!Constants.PANELS_DEFINED.contains(params.panel)) {
 
@@ -196,7 +196,7 @@ class WorkflowMain {
                     "  The ${params.panel} is not defined. Currently, the available panels are:\n" +
                     "    - ${panels}\n" +
                     "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
-                System.exit(1)
+                Nextflow.exit(1)
 
             }
 
@@ -207,7 +207,7 @@ class WorkflowMain {
                 log.error "\n~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n" +
                     "  Using a reference genome without ALT contigs but found an .alt file\n" +
                     "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
-                System.exit(1)
+                Nextflow.exit(1)
             }
 
             def ref_data_genome_alt_fn = nextflow.Nextflow.file(params.ref_data_genome_alt).name
@@ -217,7 +217,7 @@ class WorkflowMain {
                     "  Found .alt file with filename of ${ref_data_genome_alt_fn} but it is required to match\n" +
                     "  reference genome FASTA filename stem: ${ref_data_genome_fasta_fn}.alt\n" +
                     "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
-                System.exit(1)
+                Nextflow.exit(1)
             }
         }
 

@@ -1,3 +1,5 @@
+import nextflow.Nextflow
+
 import Constants
 import Utils
 
@@ -29,8 +31,8 @@ class Processes {
                     return Constants.Process.valueOf(name.toUpperCase())
                 } catch(java.lang.IllegalArgumentException e) {
                     def processes_str = Processes.getProcessNames().join('\n  - ')
-                    log.error "\nERROR: recieved invalid process: '${name}'. Valid options are:\n  - ${processes_str}"
-                    System.exit(1)
+                    log.error "recieved invalid process: '${name}'. Valid options are:\n  - ${processes_str}"
+                    Nextflow.exit(1)
                 }
             }
             .unique()
@@ -45,8 +47,8 @@ class Processes {
         if (processes_shared) {
             def processes_shared_str = processes_shared.join('\n  - ')
             def message_base = 'the following processes was found in the include and the exclude list'
-            log.error "\nERROR: ${message_base}:\n  - ${processes_shared_str}"
-            System.exit(1)
+            log.error "${message_base}:\n  - ${processes_shared_str}"
+            Nextflow.exit(1)
         }
     }
 
