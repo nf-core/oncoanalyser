@@ -197,10 +197,31 @@ class WorkflowMain {
                         "  The ${params.panel} is not defined. Currently, the available panels are:\n" +
                         "    - ${panels}\n" +
                         "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
-                    System.exit(1)
+                    Nextflow.exit(1)
                 }
             }
         }
+
+        if (params.ref_data_genome_alt !== null) {
+            if (params.genome_type != 'alt') {
+                log.error "\n~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n" +
+                    "  Using a reference genome without ALT contigs but found an .alt file\n" +
+                    "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
+                Nextflow.exit(1)
+            }
+
+            def ref_data_genome_alt_fn = nextflow.Nextflow.file(params.ref_data_genome_alt).name
+            def ref_data_genome_fasta_fn = nextflow.Nextflow.file(params.ref_data_genome_fasta).name
+            if (ref_data_genome_alt_fn != "${ref_data_genome_fasta_fn}.alt") {
+                log.error "\n~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n" +
+                    "  Found .alt file with filename of ${ref_data_genome_alt_fn} but it is required to match\n" +
+                    "  reference genome FASTA filename stem: ${ref_data_genome_fasta_fn}.alt\n" +
+                    "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
+                Nextflow.exit(1)
+            }
+
+        }
+
     }
 
     public static getRunConfig(params, inputs, log) {
