@@ -59,7 +59,7 @@ class WorkflowOncoanalyser {
                 }
             } else {
                 System.err.println "ERROR: got bad flatten_mode: ${flatten_mode}"
-                System.exit(1)
+                Nextflow.exit(1)
             }
         }
 

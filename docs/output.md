@@ -145,7 +145,7 @@ _Picard MarkDuplicates is only run on RNA alignments_
 - `<group_id>/sage/append/`
 
   - `<tumor_dna_id>.sage.append.vcf.gz`: Tumor DNA sample small variant VCF with RNA data appended.
-  - `<normal_dna_id>.sage.append.vcf.gz`: Normal DNA sample small variant VCF with RNA data appended..
+  - `<normal_dna_id>.sage.append.vcf.gz`: Normal DNA sample small variant VCF with RNA data appended.
 
 - `<group_id>/sage/somatic/`
 

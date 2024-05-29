@@ -74,7 +74,7 @@ Launch oncoanalyser:
 ```bash
 nextflow run nf-core/oncoanalyser \
   -profile docker \
-  -revision 0.4.5 \
+  -revision 1.0.0 \
   --mode wgts \
   --genome GRCh38_hmf \
   --input samplesheet.csv \

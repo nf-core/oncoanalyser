@@ -26,7 +26,7 @@ class Utils {
                     // Add subject id if absent or check if current matches existing
                     if (meta.containsKey('subject_id') && meta.subject_id != it.subject_id) {
                         log.error "got unexpected subject name for ${group_id} ${meta.subject_id}: ${it.subject_id}"
-                        System.exit(1)
+                        Nextflow.exit(1)
                     } else {
                         meta.subject_id = it.subject_id
                     }
@@ -36,7 +36,7 @@ class Utils {
                     if (!sample_type_enum) {
                         def sample_type_str = Utils.getEnumNames(Constants.SampleType).join('\n  - ')
                         log.error "received invalid sample type: '${it.sample_type}'. Valid options are:\n  - ${sample_type_str}"
-                        System.exit(1)
+                        Nextflow.exit(1)
                     }
 
                     // Sequence type
@@ -44,7 +44,7 @@ class Utils {
                     if (!sequence_type_enum) {
                         def sequence_type_str = Utils.getEnumNames(Constants.SequenceType).join('\n  - ')
                         log.error "received invalid sequence type: '${it.sequence_type}'. Valid options are:\n  - ${sequence_type_str}"
-                        System.exit(1)
+                        Nextflow.exit(1)
                     }
 
                     // Filetype
@@ -52,7 +52,7 @@ class Utils {
                     if (!filetype_enum) {
                         def filetype_str = Utils.getEnumNames(Constants.FileType).join('\n  - ')
                         log.error "received invalid file type: '${it.filetype}'. Valid options are:\n  - ${filetype_str}"
-                        System.exit(1)
+                        Nextflow.exit(1)
                     }
 
                     def sample_key = [sample_type_enum, sequence_type_enum]
@@ -60,12 +60,12 @@ class Utils {
 
                     if (meta_sample.sample_id != it.sample_id) {
                         log.error "got unexpected sample name for ${group_id} ${sample_type_enum}/${sequence_type_enum}: ${it.sample_id}"
-                        System.exit(1)
+                        Nextflow.exit(1)
                     }
 
                     if (meta_sample.containsKey(filetype_enum) & filetype_enum != Constants.FileType.FASTQ) {
                         log.error "got duplicate file for ${group_id} ${sample_type_enum}/${sequence_type_enum}: ${filetype_enum}"
-                        System.exit(1)
+                        Nextflow.exit(1)
                     }
 
                     // Info data
@@ -81,12 +81,12 @@ class Utils {
                                 if (!info_field_enum) {
                                     def info_field_str = Utils.getEnumNames(Constants.InfoField).join('\n  - ')
                                     log.error "received invalid info field: '${k}'. Valid options are:\n  - ${info_field_str}"
-                                    System.exit(1)
+                                    Nextflow.exit(1)
                                 }
 
                                 if (info_data.containsKey(info_field_enum)) {
                                     log.error "got duplicate info field for ${group_id} ${sample_type_enum}/${sequence_type_enum}: ${info_field_enum}"
-                                    System.exit(1)
+                                    Nextflow.exit(1)
                                 }
 
                                 info_data[info_field_enum] = v
@@ -105,12 +105,12 @@ class Utils {
 
                         if (!info_data.containsKey(Constants.InfoField.LIBRARY_ID)) {
                             log.error "missing 'library_id' info field for ${group_id} ${sample_type_enum}/${sequence_type_enum}"
-                            System.exit(1)
+                            Nextflow.exit(1)
                         }
 
                         if (!info_data.containsKey(Constants.InfoField.LANE)) {
                             log.error "missing 'lane' info field for ${group_id} ${sample_type_enum}/${sequence_type_enum}"
-                            System.exit(1)
+                            Nextflow.exit(1)
                         }
 
                         def (fwd, rev) = it.filepath.tokenize(';')
@@ -118,7 +118,7 @@ class Utils {
 
                         if (meta_sample.containsKey(fastq_key)) {
                             log.error "got duplicate lane + library_id data for ${group_id} ${sample_type_enum}/${sequence_type_enum}: ${fastq_key}"
-                            System.exit(1)
+                            Nextflow.exit(1)
                         }
 
                         if (!meta_sample.containsKey(filetype_enum)) {
@@ -179,7 +179,7 @@ class Utils {
                         if (!index_fp.exists() && !stub_run) {
                             def (sample_type, sequence_type) = sample_key
                             log.error "no index provided or found for ${meta.group_id} ${sample_type}/${sequence_type}: ${key}: ${fp}"
-                            System.exit(1)
+                            Nextflow.exit(1)
                         }
 
                         meta[sample_key][index_enum] = index_fp
@@ -262,7 +262,7 @@ class Utils {
 
                     log.error "no BAMs nor BAM_MARKDUPs nor FASTQs provided for ${meta.group_id} ${sample_type}/${sequence_type}\n\n" +
                         "NB: BAMs or BAM_MARKDUPs or FASTQs are always required as they are the basis to determine input sample type."
-                    System.exit(1)
+                    Nextflow.exit(1)
                 }
 
             }
@@ -274,7 +274,7 @@ class Utils {
                 if (Utils.hasNormalDna(meta)) {
                     log.error "targeted mode is not compatible with the normal DNA BAM provided for ${meta.group_id}\n\n" +
                         "The targeted workflow supports only tumor DNA BAMs (and tumor RNA BAMs for TSO500)"
-                    System.exit(1)
+                    Nextflow.exit(1)
                 }
 
                 // Do not allow only tumor RNA
@@ -282,22 +282,22 @@ class Utils {
                     log.error "targeted mode is not compatible with only tumor RNA provided for ${meta.group_id}\n\n" +
                         "The targeted workflow requires tumor DNA and can optionally take tumor RNA, depending on " +
                         "the configured panel."
-                    System.exit(1)
+                    Nextflow.exit(1)
                 }
 
                 // Restrict tumor RNA inputs to the TSO500 panel
                 if (Utils.hasTumorRnaBam(meta) && run_config.panel != 'tso500') {
                     def panel = run_config.panel.toUpperCase()
-                        "Only the TSO500 panel supports tumor RNA analysis"
-                    System.exit(1)
+                    log.error "only the TSO500 panel supports tumor RNA analysis but got: ${panel}"
+                    Nextflow.exit(1)
                 }
 
             }
 
             // Do not allow normal DNA only
             if (Utils.hasNormalDna(meta) && !Utils.hasTumorDna(meta)) {
-                log.error "germline only mode not supported, found only a normal DNA BAM for ${meta.group_id}\n"
-                System.exit(1)
+                log.error "germline only mode not supported, found only a normal DNA BAM for ${meta.group_id}"
+                Nextflow.exit(1)
             }
 
             // Enforce unique samples names within groups
@@ -310,9 +310,8 @@ class Utils {
                     def key_strs = keys.collect { sample_type, sequence_type -> "${sample_type}/${sequence_type}" }
                     return "  * ${sample_id}: ${key_strs.join(", ")}"
                 }
-                log.error "duplicate sample names found for ${meta.group_id}:\n\n" +
-                    "${duplicate_message_strs.join("\n")}"
-                System.exit(1)
+                log.error "duplicate sample names found for ${meta.group_id}:\n\n${duplicate_message_strs.join("\n")}"
+                Nextflow.exit(1)
             }
 
         }
@@ -333,7 +332,7 @@ class Utils {
                 "  The genome .alt file is required when building bwa-mem2 or GRIDSS indexes\n" +
                 "  for reference genomes containing ALT contigs\n" +
                 "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
-            System.exit(1)
+            Nextflow.exit(1)
         }
 
         // Refuse to create STAR index for reference genome containing ALTs, refer to Slack channel
@@ -344,7 +343,7 @@ class Utils {
                 "  Refusing to create the STAR index for a reference genome with ALT contigs.\n" +
                 "  Please review https://github.com/alexdobin/STAR docs or contact us on Slack.\n" +
                 "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
-            System.exit(1)
+            Nextflow.exit(1)
         }
 
         // Require that an input GTF file is provided when creating STAR index
@@ -353,7 +352,7 @@ class Utils {
                 "  Creating a STAR index requires the appropriate genome transcript annotations\n" +
                 "  as a GTF file. Please contact us on Slack for further information."
                 "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
-            System.exit(1)
+            Nextflow.exit(1)
         }
 
     }
@@ -383,7 +382,7 @@ class Utils {
         if (!run_mode_enum) {
             def run_modes_str = Utils.getEnumNames(Constants.RunMode).join('\n  - ')
             log.error "recieved an invalid run mode: '${run_mode}'. Valid options are:\n  - ${run_modes_str}"
-            System.exit(1)
+            Nextflow.exit(1)
         }
         return run_mode_enum
     }

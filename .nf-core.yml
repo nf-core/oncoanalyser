@@ -3,7 +3,6 @@ lint:
   actions_ci: False
   multiqc_config: False
   files_exist:
-    - lib/NfcoreTemplate.groovy
     - lib/Utils.groovy
     - lib/WorkflowMain.groovy
     - lib/WorkflowOncoanalyser.groovy
