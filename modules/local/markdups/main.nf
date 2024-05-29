@@ -26,19 +26,19 @@ process MARKDUPS {
     task.ext.when == null || task.ext.when
 
     script:
-    // previously: def umi_flags = has_umis ? '-umi_enabled -umi_duplex -umi_duplex_delim +' : ''
+    def args = task.ext.args ?: ''
 
     def xmx_mod = task.ext.xmx_mod ?: 0.95
 
     def umi_flags
-      if(has_umis) {
+    if (has_umis) {
         umi_flags = '-umi_enabled'
-        if(umi_duplex_delim) {
-          umi_flags = "${umi_flags} -umi_duplex -umi_duplex_delim ${umi_duplex_delim}"
+        if (umi_duplex_delim) {
+            umi_flags = "${umi_flags} -umi_duplex -umi_duplex_delim ${umi_duplex_delim}"
         }
-      } else {
+    } else {
         umi_flags = '-form_consensus'
-      }
+    }
 
     """
     markdups \\

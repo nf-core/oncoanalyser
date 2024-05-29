@@ -15,14 +15,15 @@ workflow READ_PROCESSING {
     ch_dna_normal // channel: [mandatory] [ meta, [bam, ...], [bai, ...] ]
 
     // Reference data
-    genome_fasta  // channel: [mandatory] /path/to/genome_fasta
-    genome_ver    // channel: [mandatory] genome version
-    genome_fai    // channel: [mandatory] /path/to/genome_fai
-    genome_dict   // channel: [mandatory] /path/to/genome_dict
-    unmap_regions // channel: [mandatory] /path/to/unmap_regions
+    genome_fasta     // channel: [mandatory] /path/to/genome_fasta
+    genome_ver       // channel: [mandatory] genome version
+    genome_fai       // channel: [mandatory] /path/to/genome_fai
+    genome_dict      // channel: [mandatory] /path/to/genome_dict
+    unmap_regions    // channel: [mandatory] /path/to/unmap_regions
 
     // Params
-    has_umis      // boolean: [mandatory] UMI processing flag
+    has_umis         // boolean: [mandatory] UMI processing flag
+    umi_duplex_delim // string:  [optional] UMI duplex delimiter
 
     main:
     // Channel for version.yml files
@@ -90,6 +91,7 @@ workflow READ_PROCESSING {
         genome_dict,
         unmap_regions,
         has_umis,
+        umi_duplex_delim,
     )
 
     ch_versions = ch_versions.mix(MARKDUPS.out.versions)
