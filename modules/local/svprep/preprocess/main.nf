@@ -4,8 +4,8 @@ process GRIDSS_PREPROCESS {
 
     conda "${moduleDir}/environment.yml"
     container "${ workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container ?
-        'https://depot.galaxyproject.org/singularity/hmftools-sv-prep:1.2.3--hdfd78af_1' :
-        'biocontainers/hmftools-sv-prep:1.2.3--hdfd78af_1' }"
+        'https://depot.galaxyproject.org/singularity/hmftools-sv-prep:1.2.4--hdfd78af_0' :
+        'biocontainers/hmftools-sv-prep:1.2.4--hdfd78af_0' }"
 
     input:
     tuple val(meta), path(bam), path(bam_filtered)
