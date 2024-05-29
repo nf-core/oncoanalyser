@@ -26,7 +26,7 @@ process MARKDUPS {
     task.ext.when == null || task.ext.when
 
     script:
-    // previously: def umi_flags = has_umis ? '-umi_enabled -umi_duplex -umi_duplex_delim +' : ''
+    def args = task.ext.args ?: ''
 
     def umi_flags
       if(has_umis) {
