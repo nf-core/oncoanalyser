@@ -18,7 +18,7 @@ workflow NEO_PREDICTION {
     ch_purple              // channel: [mandatory] [ meta, purple_dir ]
     ch_sage_somatic_append // channel: [mandatory] [ meta, sage_append_vcf ]
     ch_lilac               // channel: [mandatory] [ meta, lilac_dir ]
-    ch_linx                // channel: [mandatory] [ meta, linx_dir ]
+    ch_linx                // channel: [mandatory] [ meta, linx_annotation_dir ]
 
     // Reference data
     genome_fasta           // channel: [mandatory] /path/to/genome_fasta
@@ -165,7 +165,7 @@ workflow NEO_PREDICTION {
     // MODULE: Neo scorer
     //
     // Select input sources and prepare input channel
-    // channel: [ meta_scorer, isofox_dir, purple_dir, sage_somatic_append, lilac_dir, neo_finder_dir, annotate_fusions ]
+    // channel: [ meta_scorer, isofox_dir, purple_dir, sage_somatic_append, lilac_dir, neo_finder_dir, annotated_fusions ]
     ch_scorer_inputs = WorkflowOncoanalyser.groupByMeta(
         ch_isofox,
         ch_purple,
@@ -174,7 +174,7 @@ workflow NEO_PREDICTION {
         ch_finder_out,
         ch_annotate_fusions_out,
     )
-        .map { meta, isofox_dir, purple_dir, sage_somatic_append, lilac_dir, neo_finder_dir, annotate_fusions ->
+        .map { meta, isofox_dir, purple_dir, sage_somatic_append, lilac_dir, neo_finder_dir, annotated_fusions ->
 
             def meta_scorer = [
                 key: meta.group_id,
@@ -193,7 +193,7 @@ workflow NEO_PREDICTION {
                 Utils.selectCurrentOrExisting(sage_somatic_append, meta, Constants.INPUT.SAGE_APPEND_VCF_TUMOR),
                 Utils.selectCurrentOrExisting(lilac_dir, meta, Constants.INPUT.LILAC_DIR),
                 neo_finder_dir,
-                annotate_fusions,
+                annotated_fusions,
             ]
 
             return [meta_scorer, *inputs]

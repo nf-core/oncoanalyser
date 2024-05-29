@@ -5,7 +5,7 @@ process NEO_SCORER {
     container 'docker.io/scwatts/neo:1.2_beta--1'
 
     input:
-    tuple val(meta), path(isofox_dir), path(purple_dir), path(sage_vcf), path(lilac_dir), path(neo_finder_dir), path(annotate_fusions)
+    tuple val(meta), path(isofox_dir), path(purple_dir), path(sage_vcf), path(lilac_dir), path(neo_finder_dir), path(annotated_fusions)
     path ensembl_data_resources
     path neo_resources, stageAs: 'neo_reference_data'
     path cohort_tpm_medians
@@ -31,7 +31,7 @@ process NEO_SCORER {
         isofox_dir_local=isofox__prepared/;
 
         cp -rL ${isofox_dir} \${isofox_dir_local}/;
-        cp -r ${annotate_fusions} \${isofox_dir_local}/;
+        cp -r ${annotated_fusions} \${isofox_dir_local}/;
 
         isofox_dir_arg="-isofox_dir \${isofox_dir_local}";
     fi;
@@ -69,4 +69,3 @@ process NEO_SCORER {
     echo -e '${task.process}:\\n  stub: noversions\\n' > versions.yml
     """
 }
-
