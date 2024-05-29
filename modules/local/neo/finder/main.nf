@@ -5,7 +5,7 @@ process NEO_FINDER {
     container 'docker.io/scwatts/neo:1.2_beta--1'
 
     input:
-    tuple val(meta), path(purple_dir), path(linx_dir)
+    tuple val(meta), path(purple_dir), path(linx_annotation_dir)
     path genome_fasta
     val genome_ver
     path genome_fai
@@ -29,7 +29,7 @@ process NEO_FINDER {
         -jar ${task.ext.jarPath} \\
             ${args} \\
             -sample ${meta.sample_id} \\
-            -linx_dir ${linx_dir} \\
+            -linx_dir ${linx_annotation_dir} \\
             -somatic_vcf ${purple_dir}/${meta.sample_id}.purple.somatic.vcf.gz \\
             -ref_genome ${genome_fasta} \\
             -ref_genome_version ${genome_ver} \\
