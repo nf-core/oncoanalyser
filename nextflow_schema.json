@@ -64,6 +64,7 @@
                 "force_panel": {
                     "type": "boolean",
                     "description": "Skip check for known panels.",
+                    "default": false,
                     "fa_icon": "fas fa-palette"
                 },
                 "processes_manual": {
