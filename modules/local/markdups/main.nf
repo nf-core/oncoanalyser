@@ -2,7 +2,9 @@ process MARKDUPS {
     tag "${meta.id}"
     label 'process_medium'
 
-    container 'docker.io/scwatts/hmftools-mark-dups:1.1.6_beta--1'
+    container "${ workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container ?
+        'https://depot.galaxyproject.org/singularity/hmftools-mark-dups:1.1.7--hdfd78af_0' :
+        'biocontainers/hmftools-mark-dups:1.1.7--hdfd78af_0' }"
 
     input:
     tuple val(meta), path(bams), path(bais)
@@ -36,7 +38,8 @@ process MARKDUPS {
     }
 
     """
-    java -Xmx${Math.round(task.memory.bytes * 0.95)} -jar /opt/markdups/markdups.jar \\
+    markdups \\
+        -Xmx${Math.round(task.memory.bytes * 0.95)} \\
         ${args} \\
         \\
         -samtools \$(which samtools) \\
@@ -58,7 +61,7 @@ process MARKDUPS {
 
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":
-        markdups: \$(java -jar /opt/markdups/markdups.jar -version | awk '{ print \$NF }')
+        markdups: \$(markdups -version | awk '{ print \$NF }')
         sambamba: \$(sambamba --version 2>&1 | egrep '^sambamba' | head -n 1 | awk '{ print \$NF }')
         samtools: \$(samtools --version 2>&1 | egrep '^samtools\\s' | head -n 1 | sed 's/^.* //')
     END_VERSIONS
