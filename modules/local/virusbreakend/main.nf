@@ -29,7 +29,7 @@ process VIRUSBREAKEND {
 
     """
     # Symlink indices next to assembly FASTA
-    ln -s \$(find -L ${genome_gridss_index} -type f) ./
+    ln -s \$(find -L ${genome_gridss_index} -type f -name *.gridsscache -o -name *.img) ./
 
     virusbreakend \\
         ${args} \\
