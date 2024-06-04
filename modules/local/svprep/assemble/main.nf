@@ -58,7 +58,7 @@ process GRIDSS_ASSEMBLE {
             # NOTE(SW): ideally we would get the relative path using the --relative-to but this is only
             # supported for GNU realpath and fails for others such as BusyBox, which is used in Biocontainers
             symlinkpath=\$(realpath \${filepath_src})
-            ln -s \${symlinkpath} \${filepath_dst};
+            ln -s "\${symlinkpath}" \${filepath_dst};
         done
         if [[ -L "\${src##*/}" ]]; then
             rm "\${src}"
