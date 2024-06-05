@@ -144,7 +144,7 @@ class Constants {
         ],
 
         BAM_MARKDUPS_DNA_DONOR: [
-            FileType.BAM,
+            FileType.BAM_MARKDUPS,
             SampleType.DONOR,
             SequenceType.DNA,
         ],
