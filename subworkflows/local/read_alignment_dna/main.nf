@@ -42,12 +42,20 @@ workflow READ_ALIGNMENT_DNA {
             skip: true
         }
 
+    ch_inputs_donor_sorted = ch_inputs
+        .branch { meta ->
+            def has_existing = Utils.hasExistingInput(meta, Constants.INPUT.BAM_DNA_DONOR)
+            runnable: Utils.hasDonorDnaFastq(meta) && !has_existing
+            skip: true
+        }
+
     // Create FASTQ input channel
     // channel: [ meta_fastq, fastq_fwd, fastq_rev ]
     ch_fastq_inputs = Channel.empty()
         .mix(
             ch_inputs_tumor_sorted.runnable.map { meta -> [meta, Utils.getTumorDnaSample(meta), 'tumor'] },
             ch_inputs_normal_sorted.runnable.map { meta -> [meta, Utils.getNormalDnaSample(meta), 'normal'] },
+            ch_inputs_donor_sorted.runnable.map { meta -> [meta, Utils.getDonorDnaSample(meta), 'donor'] },
         )
         .flatMap { meta, meta_sample, sample_type ->
             meta_sample
@@ -199,9 +207,10 @@ workflow READ_ALIGNMENT_DNA {
         }
         .groupTuple()
         .branch { meta_group, bams, bais ->
-            assert ['tumor', 'normal'].contains(meta_group.sample_type)
+            assert ['tumor', 'normal', 'donor'].contains(meta_group.sample_type)
             tumor: meta_group.sample_type == 'tumor'
             normal: meta_group.sample_type == 'normal'
+            donor: meta_group.sample_type == 'donor'
             placeholder: true
         }
 
@@ -219,9 +228,16 @@ workflow READ_ALIGNMENT_DNA {
             ch_inputs_normal_sorted.skip.map { meta -> [meta, [], []] },
         )
 
+    ch_bam_donor_out = Channel.empty()
+        .mix(
+            WorkflowOncoanalyser.restoreMeta(ch_bams_united.donor, ch_inputs),
+            ch_inputs_normal_sorted.skip.map { meta -> [meta, [], []] },
+        )
+
     emit:
     dna_tumor  = ch_bam_tumor_out  // channel: [ meta, [bam, ...], [bai, ...] ]
     dna_normal = ch_bam_normal_out // channel: [ meta, [bam, ...], [bai, ...] ]
+    dna_donor = ch_bam_donor_out // channel: [ meta, [bam, ...], [bai, ...] ]
 
     versions   = ch_versions       // channel: [ versions.yml ]
 }
