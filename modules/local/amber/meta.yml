@@ -23,6 +23,10 @@ input:
       type: file
       description: Normal BAM file
       pattern: "*.{bam}"
+  - donor_bam:
+      type: file
+      description: Donor BAM file
+      pattern: "*.{bam}"
   - tumor_bai:
       type: file
       description: Tumor BAI file
@@ -30,6 +34,10 @@ input:
   - normal_bai:
       type: file
       description: Normal BAI file
+      pattern: "*.{bai}"
+  - donor_bai:
+      type: file
+      description: Donor BAI file
       pattern: "*.{bai}"
   - genome_ver:
       type: string

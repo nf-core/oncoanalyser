@@ -401,6 +401,9 @@ class Utils {
         return meta.getOrDefault([Constants.SampleType.NORMAL, Constants.SequenceType.DNA], [:])
     }
 
+    static public getDonorDnaSample(meta) {
+        return meta.getOrDefault([Constants.SampleType.DONOR, Constants.SequenceType.DNA], [:])
+    }
 
     // Sample names
     static public getTumorDnaSampleName(meta) {
@@ -415,8 +418,12 @@ class Utils {
         return getNormalDnaSample(meta)['sample_id']
     }
 
+    static public getDonorDnaSampleName(meta) {
+        return getDonorDnaSample(meta)['sample_id']
+    }
 
-    // Files
+
+    // Files - tumor
     static public getTumorDnaFastq(meta) {
         return getTumorDnaSample(meta).getOrDefault(Constants.FileType.FASTQ, null)
     }
@@ -447,6 +454,7 @@ class Utils {
     }
 
 
+    // Files - normal
     static public getNormalDnaFastq(meta) {
         return getNormalDnaSample(meta).getOrDefault(Constants.FileType.FASTQ, null)
     }
@@ -475,7 +483,6 @@ class Utils {
         return getNormalDnaMarkdupsBam(meta) !== null
     }
 
-
     static public hasDnaFastq(meta) {
         return hasNormalDnaFastq(meta) || hasTumorDnaFastq(meta)
     }
@@ -485,6 +492,38 @@ class Utils {
     }
 
 
+    // Files - donor
+    static public getDonorDnaFastq(meta) {
+        return getDonorDnaSample(meta).getOrDefault(Constants.FileType.FASTQ, null)
+    }
+
+    static public getDonorDnaBam(meta) {
+        return getDonorDnaSample(meta).getOrDefault(Constants.FileType.BAM, null)
+    }
+
+    static public getDonorDnaMarkdupsBam(meta) {
+        return getDonorDnaSample(meta).getOrDefault(Constants.FileType.BAM_MARKDUPS, null)
+    }
+
+    static public getDonorDnaBai(meta) {
+        return getDonorDnaSample(meta).getOrDefault(Constants.FileType.BAI, null)
+    }
+
+
+    static public hasDonorDnaFastq(meta) {
+        return getDonorDnaFastq(meta) !== null
+    }
+
+    static public hasDonorDnaBam(meta) {
+        return getDonorDnaBam(meta) !== null
+    }
+
+    static public hasDonorDnaMarkdupsBam(meta) {
+        return getDonorDnaMarkdupsBam(meta) !== null
+    }
+
+
+    // Files - RNA
     static public getTumorRnaFastq(meta) {
         return getTumorRnaSample(meta).getOrDefault(Constants.FileType.FASTQ, null)
     }
@@ -514,6 +553,10 @@ class Utils {
 
     static public hasNormalDna(meta) {
         return hasNormalDnaBam(meta) || hasNormalDnaMarkdupsBam(meta) || hasNormalDnaFastq(meta)
+    }
+
+    static public hasDonorDna(meta) {
+        return hasDonorDnaBam(meta) || hasDonorDnaMarkdupsBam(meta) || hasDonorDnaFastq(meta)
     }
 
     static public hasTumorRna(meta) {
