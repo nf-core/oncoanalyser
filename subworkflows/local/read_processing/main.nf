@@ -13,6 +13,7 @@ workflow READ_PROCESSING {
     ch_inputs     // channel: [mandatory] [ meta ]
     ch_dna_tumor  // channel: [mandatory] [ meta, [bam, ...], [bai, ...] ]
     ch_dna_normal // channel: [mandatory] [ meta, [bam, ...], [bai, ...] ]
+    ch_dna_donor // channel: [optional] [ meta, [bam, ...], [bai, ...] ]
 
     // Reference data
     genome_fasta  // channel: [mandatory] /path/to/genome_fasta
@@ -62,12 +63,28 @@ workflow READ_PROCESSING {
                 return meta
         }
 
+    ch_inputs_donor_sorted = ch_dna_donor
+        .map { meta, bams, bais ->
+            return [
+                meta,
+                Utils.hasExistingInput(meta, Constants.INPUT.BAM_DNA_DONOR) ? [Utils.getInput(meta, Constants.INPUT.BAM_DNA_DONOR)] : bams,
+                Utils.hasExistingInput(meta, Constants.INPUT.BAI_DNA_DONOR) ? [Utils.getInput(meta, Constants.INPUT.BAI_DNA_DONOR)] : bais,
+            ]
+        }
+        .branch { meta, bams, bais ->
+            def has_existing = Utils.hasExistingInput(meta, Constants.INPUT.BAM_MARKDUPS_DNA_DONOR)
+            runnable: bams && !has_existing
+            skip: true
+            return meta
+        }
+
     // Create process input channel
     // channel: [ meta_markdups, [bam, ...], [bai, ...] ]
     ch_markdups_inputs = Channel.empty()
         .mix(
             ch_inputs_tumor_sorted.runnable.map { meta, bams, bais -> [meta, Utils.getTumorDnaSample(meta), 'tumor', bams, bais] },
             ch_inputs_normal_sorted.runnable.map { meta, bams, bais -> [meta, Utils.getNormalDnaSample(meta), 'normal', bams, bais] },
+            ch_inputs_donor_sorted.runnable.map { meta, bams, bais -> [meta, Utils.getDonorDnaSample(meta), 'donor', bams, bais] },
         )
         .map { meta, meta_sample, sample_type, bams, bais ->
 
@@ -97,9 +114,10 @@ workflow READ_PROCESSING {
     // Sort into a tumor and normal channel
     ch_markdups_out = MARKDUPS.out.bam
         .branch { meta_markdups, bam, bai ->
-            assert ['tumor', 'normal'].contains(meta_markdups.sample_type)
+            assert ['tumor', 'normal', 'donor'].contains(meta_markdups.sample_type)
             tumor: meta_markdups.sample_type == 'tumor'
             normal: meta_markdups.sample_type == 'normal'
+            donor: meta_markdups.sample_type == 'donor'
             placeholder: true
         }
 
@@ -117,9 +135,16 @@ workflow READ_PROCESSING {
             ch_inputs_normal_sorted.skip.map { meta -> [meta, [], []] },
         )
 
+    ch_bam_donor_out = Channel.empty()
+        .mix(
+            WorkflowOncoanalyser.restoreMeta(ch_markdups_out.donor, ch_inputs),
+            ch_inputs_donor_sorted.skip.map { meta -> [meta, [], []] },
+        )
+
     emit:
     dna_tumor  = ch_bam_tumor_out  // channel: [ meta, bam, bai ]
     dna_normal = ch_bam_normal_out // channel: [ meta, bam, bai ]
+    dna_donor = ch_bam_donor_out // channel: [ meta, bam, bai ]
 
     versions   = ch_versions       // channel: [ versions.yml ]
 }
