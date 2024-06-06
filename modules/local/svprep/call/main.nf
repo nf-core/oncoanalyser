@@ -67,7 +67,7 @@ process GRIDSS_CALL {
     shadow_input_directory ${assemble_dir}
 
     # Symlink indices next to assembly FASTA
-    ln -s \$(find -L ${genome_gridss_index} -type f) ./
+    ln -s \$(find -L ${genome_gridss_index} -regex '.*\\.\\(amb\\|ann\\|pac\\|gridsscache\\|sa\\|bwt\\|img\\|alt\\)') ./
 
     # Run
     gridss_svprep \\
