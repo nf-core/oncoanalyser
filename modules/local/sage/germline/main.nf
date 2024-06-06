@@ -8,7 +8,7 @@ process SAGE_GERMLINE {
         'biocontainers/hmftools-sage:3.4.3--hdfd78af_0' }"
 
     input:
-    tuple val(meta), path(tumor_bam), path(normal_bam), path(tumor_bai), path(normal_bai)
+    tuple val(meta), path(tumor_bam), path(normal_bam), path(donor_bam), path(tumor_bai), path(normal_bai), path(donor_bai)
     path genome_fasta
     val genome_ver
     path genome_fai
