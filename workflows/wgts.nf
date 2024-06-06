@@ -240,6 +240,7 @@ workflow WGTS {
             ch_inputs,
             ch_process_dna_tumor_out,
             ch_process_dna_normal_out,
+            ch_process_dna_donor_out,
             ref_data.genome_version,
             hmf_data.heterozygous_sites,
             [],  // target_region_bed
