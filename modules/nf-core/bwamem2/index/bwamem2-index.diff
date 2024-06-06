@@ -41,7 +41,7 @@ Changes in module 'nf-core/bwamem2/index'
 +
 +    # Include ALT file where necessary
 +    if [[ -n "${alt}" ]]; then
-+        ln -s ../${alt} bwa-mem2_index/;
++        ln -sf ../${alt} bwa-mem2_index/;
 +    fi;
  
      cat <<-END_VERSIONS > versions.yml
@@ -65,7 +65,7 @@ Changes in module 'nf-core/bwamem2/index'
 +
 +    # Include ALT file where necessary
 +    if [[ -n "${alt}" ]]; then
-+        ln -s ../${alt} bwa-mem2_index/;
++        ln -sf ../${alt} bwa-mem2_index/;
 +    fi;
  
      cat <<-END_VERSIONS > versions.yml
