@@ -42,6 +42,8 @@ process SAGE_SOMATIC {
     if(donor_bam) reference_bams.add(donor_bam)
     def reference_bam_arg = reference_bams.size()>0 ? "-reference_bam ${String.join(",", reference_bams)}" : ""
 
+    def ref_sample_count_arg = "-ref_sample_count ${reference_ids.size()}"
+
     """
     mkdir -p somatic/
 
@@ -50,6 +52,7 @@ process SAGE_SOMATIC {
         ${args} \\
         ${reference_arg} \\
         ${reference_bam_arg} \\
+        ${ref_sample_count_arg} \\
         -tumor ${meta.tumor_id} \\
         -tumor_bam ${tumor_bam} \\
         -ref_genome ${genome_fasta} \\
