@@ -29,7 +29,7 @@ process GRIDSS_PREPROCESS {
 
     """
     # Symlink indices next to assembly FASTA
-    ln -s \$(find -L ${genome_gridss_index} -type f) ./
+    ln -sf \$(find -L ${genome_gridss_index} -type f) ./
 
     gridss_svprep \\
         ${args} \\
