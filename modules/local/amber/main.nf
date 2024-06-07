@@ -25,12 +25,12 @@ process AMBER {
 
     def reference_ids = []
     if(meta.containsKey('normal_id')) reference_ids.add(meta.normal_id)
-    if(meta.containsKey('donor_id')) reference_ids.add(meta.donor_id)
+    //if(meta.containsKey('donor_id')) reference_ids.add(meta.donor_id) // FIXME: re-enable when AMBER with multi refererence_bam fix is in docker
     def reference_arg = reference_ids.size()>0 ? "-reference ${String.join(",", reference_ids)}" : ""
 
     def reference_bams = []
     if(normal_bam) reference_bams.add(normal_bam.toString())
-    if(donor_bam) reference_bams.add(donor_bam.toString())
+    //if(donor_bam) reference_bams.add(donor_bam.toString()) // FIXME: re-enable when AMBER with multi refererence_bam fix is in docker
     def reference_bam_arg = reference_bams.size()>0 ? "-reference_bam ${String.join(",", reference_bams)}" : ""
 
     def target_regions_bed_arg = target_region_bed ? "-target_regions_bed ${target_region_bed}" : ""
