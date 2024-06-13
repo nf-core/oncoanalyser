@@ -29,7 +29,7 @@ process GRIDSS_PREPROCESS {
 
     """
     # Symlink indices next to assembly FASTA
-    ln -s \$(find -L ${genome_gridss_index} -regex '.*\\.\\(amb\\|ann\\|pac\\|gridsscache\\|sa\\|bwt\\|img\\|alt\\)') ./
+    ln -sf \$(find -L ${genome_gridss_index} -regex '.*\\.\\(amb\\|ann\\|pac\\|gridsscache\\|sa\\|bwt\\|img\\|alt\\)') ./
 
     gridss_svprep \\
         ${args} \\
