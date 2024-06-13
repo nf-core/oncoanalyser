@@ -80,7 +80,7 @@ P1__wgts,P1,SC,tumor,rna,fastq,library_id:SC_library;lane:001,/path/to/P1.SC.tum
 
 Inputs with the `bam` filetype will be processed by MarkDups as required by hmftools. Where an input BAM has already
 been processed specifically by [HMF
-MarkDups](https://github.com/hartwigmedical/hmftools/blob/mark-dups-v1.1.5/mark-dups/README.md), you can avoid needless
+MarkDups](https://github.com/hartwigmedical/hmftools/blob/mark-dups-v1.1.7/mark-dups/README.md), you can avoid needless
 reprocessing by setting `bam_markdups` as the filetype instead. It is important to understand that duplicate marking by
 other tools (e.g. GATK) cannot be used as a substitute since HMF MarkDups performs key operations beyond just duplicate
 marking.
