@@ -10,7 +10,7 @@ process SAGE_SOMATIC {
         'biocontainers/hmftools-sage:3.4.4--hdfd78af_0' }"
 
     input:
-    tuple val(meta), path(tumor_bam), path(normal_bam), path(tumor_bai), path(normal_bai)
+    tuple val(meta), path(tumor_bam), path(normal_bam), path(donor_bam), path(tumor_bai), path(normal_bai), path(donor_bai)
     path genome_fasta
     val genome_ver
     path genome_fai
@@ -32,8 +32,17 @@ process SAGE_SOMATIC {
     script:
     def args = task.ext.args ?: ''
 
-    def reference_arg = meta.containsKey('normal_id') ? "-reference ${meta.normal_id}" : ''
-    def reference_bam_arg = normal_bam ? "-reference_bam ${normal_bam}" : ''
+    def reference_ids = []
+    if(meta.containsKey('normal_id')) reference_ids.add(meta.normal_id)
+    if(meta.containsKey('donor_id')) reference_ids.add(meta.donor_id)
+    def reference_arg = reference_ids.size()>0 ? "-reference ${String.join(",", reference_ids)}" : ""
+
+    def reference_bams = []
+    if(normal_bam) reference_bams.add(normal_bam.toString())
+    if(donor_bam) reference_bams.add(donor_bam.toString())
+    def reference_bam_arg = reference_bams.size()>0 ? "-reference_bam ${String.join(",", reference_bams)}" : ""
+
+    def ref_sample_count_arg = "-ref_sample_count ${reference_ids.size()}"
 
     """
     mkdir -p somatic/
@@ -43,6 +52,7 @@ process SAGE_SOMATIC {
         ${args} \\
         ${reference_arg} \\
         ${reference_bam_arg} \\
+        ${ref_sample_count_arg} \\
         -tumor ${meta.tumor_id} \\
         -tumor_bam ${tumor_bam} \\
         -ref_genome ${genome_fasta} \\
