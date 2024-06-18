@@ -33,8 +33,8 @@ process SAGE_SOMATIC {
     def args = task.ext.args ?: ''
 
     def reference_ids = []
-    if(meta.containsKey('normal_id')) reference_ids.add(meta.normal_id)
-    if(meta.containsKey('donor_id')) reference_ids.add(meta.donor_id)
+    if(meta.normal_id != null) reference_ids.add(meta.normal_id)
+    if(meta.donor_id != null) reference_ids.add(meta.donor_id)
     def reference_arg = reference_ids.size()>0 ? "-reference ${String.join(",", reference_ids)}" : ""
 
     def reference_bams = []
