@@ -98,6 +98,7 @@
                     "fa_icon": "fas fa-cog"
                 },
                 "isofox_read_length": {
+                    "type": "integer",
                     "description": "User defined RNA read length used for Isofox.",
                     "fa_icon": "fas fa-cog"
                 },
