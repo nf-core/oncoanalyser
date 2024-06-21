@@ -468,9 +468,7 @@ workflow WGTS {
     // channel: [ meta, sage_append_vcf ]
     ch_sage_somatic_append_out = Channel.empty()
     ch_sage_germline_append_out = Channel.empty()
-    if (run_config.stages.orange) {
-
-        // NOTE(SW): currently used only for ORANGE but will also be used for Neo once implemented
+    if (run_config.stages.orange || run_config.stages.neo) {
 
         SAGE_APPEND(
             ch_inputs,
