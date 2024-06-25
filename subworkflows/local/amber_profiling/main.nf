@@ -56,7 +56,7 @@ workflow AMBER_PROFILING {
     // Create process input channel
     // channel: [ meta_amber, tumor_bam, normal_bam, donor_bam, tumor_bai, normal_bai, donor_bai ]
     ch_amber_inputs = ch_inputs_sorted.runnable
-        .map { meta, tumor_bam, tumor_bai, normal_bam, normal_bai, donor_bam, donor_bai  ->
+        .map { meta, tumor_bam, tumor_bai, normal_bam, normal_bai, donor_bam, donor_bai ->
 
             def meta_amber = [
                 key: meta.group_id,
