@@ -130,7 +130,7 @@ workflow SAGE_CALLING {
     // channel: tumor/normal: [ meta_sage, tumor_bam, normal_bam, donor_bam, tumor_bai, normal_bai, donor_bai ]
     // channel: tumor only: [ meta_sage, tumor_bam, [], tumor_bai, [] ]
     ch_sage_somatic_inputs = ch_inputs_somatic_sorted.runnable
-        .map { meta, tumor_bam, tumor_bai, normal_bam, normal_bai, donor_bam, donor_bai  ->
+        .map { meta, tumor_bam, tumor_bai, normal_bam, normal_bai, donor_bam, donor_bai ->
 
             def meta_sage = [
                 key: meta.group_id,
