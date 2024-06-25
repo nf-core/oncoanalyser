@@ -57,6 +57,7 @@ The following processes and tools can be run with `oncoanalyser`:
 - HRD status prediction (`CHORD`)
 - Mutational signature fitting (`Sigs`)
 - Tissue of origin prediction (`CUPPA`)
+- Neoepitope prediction (`Neo`)
 - Report generation (`ORANGE`, `linxreport`)
 
 ## Usage
