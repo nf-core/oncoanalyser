@@ -4,4 +4,4 @@ channels:
   - bioconda
   - defaults
 dependencies:
-  - bioconda::hmftools-sage=3.4.3
+  - bioconda::hmftools-sage=3.4.4
