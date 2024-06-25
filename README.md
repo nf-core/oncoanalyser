@@ -53,6 +53,7 @@ The following processes and tools can be run with oncoanalyser:
 - HRD status prediction (`CHORD`)
 - Mutational signature fitting (`Sigs`)
 - Tissue of origin prediction (`CUPPA`)
+- Neoepitope prediction (`Neo`)
 - Report generation (`ORANGE`, `linxreport`)
 
 ## Usage
@@ -122,7 +123,7 @@ in the below table.
 
 ## Known issues
 
-- MarkDups may encounter a fatal error processing hard-clipped supplementary alignments ([#37](https://github.com/nf-core/oncoanalyser/issues/37))
+There are currently no known issues.
 
 ## Credits
 
