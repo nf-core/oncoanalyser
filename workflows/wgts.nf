@@ -1,5 +1,4 @@
 import Constants
-import Processes
 import Utils
 
 /*
@@ -494,6 +493,7 @@ workflow WGTS {
         )
 
         ch_versions = ch_versions.mix(SAGE_APPEND.out.versions)
+
         ch_sage_somatic_append_out = ch_sage_somatic_append_out.mix(SAGE_APPEND.out.somatic_vcf)
         ch_sage_germline_append_out = ch_sage_germline_append_out.mix(SAGE_APPEND.out.germline_vcf)
 
