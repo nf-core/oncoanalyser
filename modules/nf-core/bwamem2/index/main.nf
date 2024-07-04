@@ -32,7 +32,7 @@ process BWAMEM2_INDEX {
 
     # Include ALT file where necessary
     if [[ -n "${alt}" ]]; then
-        ln -s ../${alt} bwa-mem2_index/;
+        ln -sf ../${alt} bwa-mem2_index/;
     fi;
 
     cat <<-END_VERSIONS > versions.yml
@@ -54,7 +54,7 @@ process BWAMEM2_INDEX {
 
     # Include ALT file where necessary
     if [[ -n "${alt}" ]]; then
-        ln -s ../${alt} bwa-mem2_index/;
+        ln -sf ../${alt} bwa-mem2_index/;
     fi;
 
     cat <<-END_VERSIONS > versions.yml

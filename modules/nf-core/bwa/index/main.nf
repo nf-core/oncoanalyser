@@ -32,7 +32,7 @@ process BWA_INDEX {
 
     # Include ALT file where necessary
     if [[ -n "${alt}" ]]; then
-        ln -s ../${alt} bwa_index/;
+        ln -sf ../${alt} bwa_index/;
     fi;
 
     cat <<-END_VERSIONS > versions.yml
