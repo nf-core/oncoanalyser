@@ -277,10 +277,10 @@ class Utils {
             // Apply some required restrictions to targeted mode
             if (run_config.mode === Constants.RunMode.TARGETED) {
 
-                // Do not allow normal DNA
-                if (Utils.hasNormalDna(meta)) {
-                    log.error "targeted mode is not compatible with the normal DNA BAM provided for ${meta.group_id}\n\n" +
-                        "The targeted workflow supports only tumor DNA BAMs (and tumor RNA BAMs for TSO500)"
+                // Do not allow donor DNA
+                if (Utils.hasDonorDna(meta)) {
+                    log.error "targeted mode is not compatible with the donor DNA BAM provided for ${meta.group_id}\n\n" +
+                        "The targeted workflow supports only tumor and normal DNA BAMs (and tumor RNA BAMs for TSO500)"
                     Nextflow.exit(1)
                 }
 
