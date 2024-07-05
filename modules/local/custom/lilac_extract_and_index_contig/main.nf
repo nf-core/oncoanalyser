@@ -36,8 +36,8 @@ process CUSTOM_EXTRACTCONTIG {
 
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":
-        bwa-mem2: \$(bwa-mem2 version 2>/dev/null)
-        samtools: \$(echo \$(samtools --version 2>&1) | sed 's/^.*samtools //; s/Using.*\$//')
+        bwa-mem2: \$(bwa-mem2 version)
+        samtools: \$(samtools --version | sed -n '/^samtools / { s/^.* //p }')
     END_VERSIONS
     """
 

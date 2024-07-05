@@ -79,7 +79,7 @@ process PURPLE {
 
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":
-        purple: \$(purple -version | sed 's/^.* //')
+        purple: \$(purple -version | sed -n '/^Purple version / { s/^.* //p }')
     END_VERSIONS
     """
 
