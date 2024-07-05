@@ -375,6 +375,7 @@ workflow TARGETED {
             hmf_data.segment_mappability,
             panel_data.driver_gene_panel,
             hmf_data.ensembl_data_resources,
+            false,
         )
 
         ch_versions = ch_versions.mix(SAGE_CALLING.out.versions)
