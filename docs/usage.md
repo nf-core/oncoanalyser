@@ -229,7 +229,7 @@ If you wish to share such profile (such as upload as supplementary material for 
 ### Selecting processes
 
 Most of the major components in oncoanalyser can be skipped using `--processes_exclude` (the full list of available
-processes can be view [here](https://github.com/nf-core/oncoanalyser/blob/1.0.0/lib/Constants.groovy#L36-L56)).
+processes can be viewed [here](https://github.com/nf-core/oncoanalyser/blob/1.0.0/lib/Constants.groovy#L36-L56)).
 Multiple processes can be given as a comma-separated list. While there are some use-cases for this feature (e.g.
 skipping resource intensive processes such as VIRUSBreakend), it becomes more powerful when combined with existing
 inputs as described in the following section.
@@ -243,10 +243,11 @@ processes.
 
 ### Existing inputs
 
-The oncoanalyser pipeline has been designed to allow entry at arbitrary points, which is particularly useful in
-situations where previous outputs exist and re-running oncoanalyser is desired (e.g. to subsequently execute an
-optional sensor or use an upgrade component such as PURPLE). The primary advantage of this approach is that only the
-required processes are executed, reducing costs and runtimes by skipping unnecessary processes.
+The `oncoanalyser` pipeline has been designed to allow entry at arbitrary points, which is particularly useful in
+situations where previous outputs exist and re-running `oncoanalyser` is desired (e.g. to subsequently execute an
+optional sensor/workflow or re-run an analysis with an upgraded tool such as PURPLE). The primary advantage of this
+approach is that only the required processes are executed, reducing costs and runtimes by skipping unnecessary
+processes.
 
 In order to effectively utilise this feature, existing inputs must be set in the [samplesheet](#samplesheet) and the
 appropriate [processes selected](#selecting-processes). Take the below example where existing PURPLE inputs are used so
