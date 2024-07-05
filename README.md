@@ -111,14 +111,14 @@ Versions nominated to have current long-term support:
 
 ### Release parity
 
-Versioning between oncoanalyser and hmftools naturally differ, however it is often necessary to relate the functional
+Versioning between `oncoanalyser` and hmftools naturally differ, however it is often necessary to relate the functional
 equivalence of these two pieces of software. The functional/feature parity with regards to version releases are detailed
 in the below table.
 
 | oncoanalyser        | hmftools |
 | ------------------- | -------- |
 | 0.1.0 through 0.2.7 | 5.33     |
-| 0.3.0 through 0.4.5 | 5.34     |
+| 0.3.0 through 1.0.0 | 5.34     |
 
 ## Known issues
 
