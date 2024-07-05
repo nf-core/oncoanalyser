@@ -39,7 +39,7 @@ For detailed information on each component of the Hartwig workflow, please refer
 
 ## Pipeline summary
 
-The following processes and tools can be run with oncoanalyser:
+The following processes and tools can be run with `oncoanalyser`:
 
 - Simple DNA/RNA alignment (`bwa-mem2`, `STAR`)
 - Post-alignment processing (`MarkDups`, `Picard MarkDuplicates`)
@@ -69,7 +69,7 @@ P1__wgts,P1,SB,tumor,dna,fastq,library_id:SB_library;lane:001,/path/to/SB.tumor.
 P1__wgts,P1,SC,tumor,rna,fastq,library_id:SC_library;lane:001,/path/to/SC.tumor.rna.wts.001.R1.fastq.gz;/path/to/SC.tumor.rna.wts.001.R2.fastq.gz
 ```
 
-Launch oncoanalyser:
+Launch `oncoanalyser`:
 
 ```bash
 nextflow run nf-core/oncoanalyser \
@@ -96,7 +96,7 @@ For more details about the output files and reports, please refer to the
 
 ### Extended support
 
-As oncoanalyser is used in clinical settings and subject to accreditation standards in some instances, there is a need
+As `oncoanalyser` is used in clinical settings and subject to accreditation standards in some instances, there is a need
 for long-term stability and reliability for feature releases in order to meet operational requirements. This is
 accomplished through long-term support of several nominated feature releases, which all receive bug fixes and security
 fixes during the period of extended support.
@@ -111,14 +111,14 @@ Versions nominated to have current long-term support:
 
 ### Release parity
 
-Versioning between oncoanalyser and hmftools naturally differ, however it is often necessary to relate the functional
+Versioning between `oncoanalyser` and hmftools naturally differ, however it is often necessary to relate the functional
 equivalence of these two pieces of software. The functional/feature parity with regards to version releases are detailed
 in the below table.
 
 | oncoanalyser        | hmftools |
 | ------------------- | -------- |
 | 0.1.0 through 0.2.7 | 5.33     |
-| 0.3.0 through 0.4.5 | 5.34     |
+| 0.3.0 through 1.0.0 | 5.34     |
 
 ## Known issues
 
@@ -126,7 +126,7 @@ There are currently no known issues.
 
 ## Credits
 
-The oncoanalyser pipeline was written by Stephen Watts while in the [Genomics Platform
+The `oncoanalyser` pipeline was written by Stephen Watts while in the [Genomics Platform
 Group](https://mdhs.unimelb.edu.au/centre-for-cancer-research/our-research/genomics-platform-group) at the [University
 of Melbourne Centre for Cancer Research](https://mdhs.unimelb.edu.au/centre-for-cancer-research).
 
@@ -146,7 +146,7 @@ channel](https://nfcore.slack.com/channels/oncoanalyser) (you can join with [thi
 
 ## Citations
 
-You can cite the oncoanalyser zenodo record for a specific version using the following doi:
+You can cite the `oncoanalyser` zenodo record for a specific version using the following doi:
 [10.5281/zenodo.XXXXXXX](https://doi.org/10.5281/zenodo.XXXXXXX)
 
 An extensive list of references for the tools used by the pipeline can be found in the [`CITATIONS.md`](CITATIONS.md)

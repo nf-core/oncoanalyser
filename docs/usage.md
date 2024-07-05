@@ -6,20 +6,20 @@
 
 ## Introduction
 
-The oncoanalyser pipeline typically runs from FASTQs or BAMs and supports two modes: (1) whole genome and/or
+The `oncoanalyser` pipeline typically runs from FASTQs or BAMs and supports two modes: (1) whole genome and/or
 transcriptome, and (2) targeted panel. Launching an analysis requires only the creation of a samplesheet that describes
 details of each input such as the sample type (tumor or normal), sequence type (DNA or RNA), and filepath.
 
-Various aspects of an oncoanalyser analysis can be configured to fit a range of needs, and many of these are considered
-[advanced usage](#advanced-usage) of the pipeline. The most useful include:
+Various aspects of an `oncoanalyser` analysis can be configured to fit a range of needs, and many of these are
+considered [advanced usage](#advanced-usage) of the pipeline. The most useful include:
 
 - precise process selection
 - starting from existing data
 - granular control over reference/resource files
 
-These features enable oncoanalyser to be run in a highly flexible way. For example, an analysis can be run with existing
-PURPLE data as the starting point and skip variant calling processes. Additionally, reference/resource files can be
-staged locally to optimise execution or modified to create user-defined driver gene panels.
+These features enable `oncoanalyser` to be run in a highly flexible way. For example, an analysis can be run with
+existing PURPLE data as the starting point and skip variant calling processes. Additionally, reference/resource files
+can be staged locally to optimise execution or modified to create user-defined driver gene panels.
 
 :::danger
 
@@ -35,7 +35,7 @@ When starting from BAMs rather than FASTQ it is expected that:
 
 ## Supported analyses
 
-A variety of analyses are accessible in oncoanalyser and are implicitly run according to the data described in the
+A variety of analyses are accessible in `oncoanalyser` and are implicitly run according to the data described in the
 samplesheet. The supported analysis types for each workflow are listed below.
 
 | Input sequence data                 |  WGS/WTS workflow  | Targeted sequencing workflow<sup>\*</sup> |
@@ -50,7 +50,7 @@ samplesheet. The supported analysis types for each workflow are listed below.
 
 ## Samplesheet
 
-A samplesheet that contains information of each input in CSV format is needed to run oncoanalyser. The required input
+A samplesheet that contains information of each input in CSV format is needed to run `oncoanalyser`. The required input
 details and columns are [described below](#column-descriptions).
 
 Several different input filetypes beyond FASTQ and BAM are recognised, including intermediate output files generated
@@ -157,7 +157,7 @@ This will launch the pipeline with the `docker` configuration profile. See below
 
 :::note
 
-Reference data will be retrieved by oncoanalyser for every analysis run. It is therefore strongly recommended when
+Reference data will be retrieved by `oncoanalyser` for every analysis run. It is therefore strongly recommended when
 running multiple analyses to pre-stage reference data locally to avoid it being retrieved multiple times. See [Staging
 reference data](#staging-reference-data).
 
@@ -214,7 +214,7 @@ nextflow pull nf-core/oncoanalyser
 
 It is a good idea to specify a pipeline version when running the pipeline on your data. This ensures that a specific version of the pipeline code and software are used when you run your pipeline. If you keep using the same tag, you'll be running the same version of the pipeline, even if there have been changes to the code since.
 
-First, go to the [nf-core/oncoanalyser releases page](https://github.com/nf-core/oncoanalyser/releases) and find the latest pipeline version - numeric only (eg. `1.3.1`). Then specify this when running the pipeline with `-r` (one hyphen) - eg. `-r 1.3.1`. Of course, you can switch to another version by changing the number after the `-r` flag.
+First, go to the [nf-core/oncoanalyser releases page](https://github.com/nf-core/oncoanalyser/releases) and find the latest pipeline version - numeric only (eg. `1.0.0`). Then specify this when running the pipeline with `-r` (one hyphen) - eg. `-r 1.0.0`. Of course, you can switch to another version by changing the number after the `-r` flag.
 
 This version number will be logged in reports when you run the pipeline, so that you'll know what you used when you look back in the future. For example, at the bottom of the MultiQC reports.
 
@@ -228,8 +228,8 @@ If you wish to share such profile (such as upload as supplementary material for 
 
 ### Selecting processes
 
-Most of the major components in oncoanalyser can be skipped using `--processes_exclude` (the full list of available
-processes can be view [here](https://github.com/nf-core/oncoanalyser/blob/1.0.0/lib/Constants.groovy#L36-L56)).
+Most of the major components in `oncoanalyser` can be skipped using `--processes_exclude` (the full list of available
+processes can be viewed [here](https://github.com/nf-core/oncoanalyser/blob/1.0.0/lib/Constants.groovy#L36-L56)).
 Multiple processes can be given as a comma-separated list. While there are some use-cases for this feature (e.g.
 skipping resource intensive processes such as VIRUSBreakend), it becomes more powerful when combined with existing
 inputs as described in the following section.
@@ -243,10 +243,11 @@ processes.
 
 ### Existing inputs
 
-The oncoanalyser pipeline has been designed to allow entry at arbitrary points, which is particularly useful in
-situations where previous outputs exist and re-running oncoanalyser is desired (e.g. to subsequently execute an
-optional sensor or use an upgrade component such as PURPLE). The primary advantage of this approach is that only the
-required processes are executed, reducing costs and runtimes by skipping unnecessary processes.
+The `oncoanalyser` pipeline has been designed to allow entry at arbitrary points, which is particularly useful in
+situations where previous outputs exist and re-running `oncoanalyser` is desired (e.g. to subsequently execute an
+optional sensor/workflow or re-run an analysis with an upgraded tool such as PURPLE). The primary advantage of this
+approach is that only the required processes are executed, reducing costs and runtimes by skipping unnecessary
+processes.
 
 In order to effectively utilise this feature, existing inputs must be set in the [samplesheet](#samplesheet) and the
 appropriate [processes selected](#selecting-processes). Take the below example where existing PURPLE inputs are used so
@@ -261,7 +262,7 @@ P1__wgts,P1,SB,tumor,dna,purple_dir,/path/to/P1.purple_dir/
 
 :::note
 
-The original source input file (i.e. BAM or FASTQ) must always be provided for oncoanalyser to infer the correct
+The original source input file (i.e. BAM or FASTQ) must always be provided for `oncoanalyser` to infer the correct
 analysis type.
 
 :::
@@ -281,7 +282,7 @@ nextflow run nf-core/oncoanalyser \
 
 :::warning
 
-Providing existing inputs will cause oncoanalyser to skip the corresponding process but _not any_ of the upstream
+Providing existing inputs will cause `oncoanalyser` to skip the corresponding process but _not any_ of the upstream
 processes. It is the responsibility of the user to skip all relevant processes.
 
 :::
@@ -315,7 +316,7 @@ params {
 }
 ```
 
-To use these hmftools resource file overrides in oncoanalyser the local bundle directory must be provided with
+To use these hmftools resource file overrides in `oncoanalyser` the local bundle directory must be provided with
 `--ref_data_hmf_data_path`.
 
 #### Customise other data
@@ -326,8 +327,8 @@ for the complete list.
 
 #### Staging reference data
 
-Default reference data can be staged locally with oncoanalyser by providing a samplesheet for the desired analysis and
-setting the `--prepare_reference_only` argument. The samplesheet and oncoanalyser configuration will determine the
+Default reference data can be staged locally with `oncoanalyser` by providing a samplesheet for the desired analysis and
+setting the `--prepare_reference_only` argument. The samplesheet and `oncoanalyser` configuration will determine the
 relevant reference data to download. For example the following command will download the `GRCh38_hmf` genome plus
 indices, reference data, and databases required to run a WGTS analysis for tumor/normal DNA with tumor RNA:
 
@@ -353,7 +354,7 @@ Executing the above command will download and unpack default reference data with
 complete the prepared reference files can found in `./prepare_reference/reference_data/1.0.0/<datetimestamp>/`. It is
 recommended to remove the Nextflow work directory after staging data to free disk space.
 
-For oncoanalyser to use locally staged reference data a custom config can be used:
+For `oncoanalyser` to use locally staged reference data a custom config can be used:
 
 ```text title="refdata.local.config"
 params {
@@ -428,13 +429,13 @@ params {
 }
 ```
 
-Each index required for the analysis will first be created before running the rest of oncoanalyser with the following
+Each index required for the analysis will first be created before running the rest of `oncoanalyser` with the following
 command:
 
 :::note
 
 In a process similar to [staging reference data](#staging-reference-data), you can first generate the required indexes
-by setting `--prepare_reference_only` and then provide the prepared reference files to oncoanalyser through a custom
+by setting `--prepare_reference_only` and then provide the prepared reference files to `oncoanalyser` through a custom
 config file. This avoids having to regenerate indexes for each new analysis.
 
 :::

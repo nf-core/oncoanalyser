@@ -78,13 +78,13 @@ output/
 
 ### Simple DNA/RNA alignment
 
-Alignment functionality in oncoanalyser is simple and rigid, and exists only to meet the exact requirements of the
+Alignment functionality in `oncoanalyser` is simple and rigid, and exists only to meet the exact requirements of the
 hmftools.
 
 #### bwa-mem2
 
 [bwa-mem2](https://github.com/bwa-mem2/bwa-mem2) is a short-read mapping tool used to align reads to a large reference
-sequences. In oncoanalyser, bwa-mem2 is used to align DNA reads to the human genome.
+sequences. In `oncoanalyser`, bwa-mem2 is used to align DNA reads to the human genome.
 
 _No outputs are published directly from bwa-mem2, see [MarkDups](#markdups) for the fully processed alignment outputs_
 
