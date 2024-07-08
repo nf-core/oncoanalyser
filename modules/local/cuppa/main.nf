@@ -28,10 +28,7 @@ process CUPPA {
     mkdir -p sample_data/
     if [[ ${classifier} == 'DNA' || ${classifier} == 'ALL' ]]; then
         find -L ${purple_dir} ${linx_dir} ${virusinterpreter_dir} -maxdepth 1 -type f -exec ln -fs ../{} sample_data/ \\;
-    fi
 
-    if [[ ${classifier} == 'RNA' ]]; then
-        find -L ${isofox_dir} -maxdepth 1 -type f -exec ln -fs ../{} sample_data/ \\;
     elif [[ ${classifier} == 'ALL' ]]; then
         # NOTE(SW): CUPPA requires that the RNA sample name matches the DNA sample name
         for fp in \$(find -L ${isofox_dir} -maxdepth 1 -type f); do
@@ -42,25 +39,31 @@ process CUPPA {
         sed -i 's/^${meta.sample_rna_id}/${meta.sample_id}/g' sample_data/${meta.sample_id}.isf.summary.csv;
     fi;
 
+    # Use symlink to remove genome version suffix (e.g. cuppa_classifier.37.pickle.gz -> cuppa_classifier.pickle.gz)
+    ln -sf \$(find -L ${cuppa_resources} -type f -name 'cuppa_classifier*.pickle.gz') ${cuppa_resources}/cuppa_classifier.pickle.gz
+    ln -sf \$(find -L ${cuppa_resources} -type f -name 'alt_sj.selected_loci*.tsv.gz') ${cuppa_resources}/alt_sj.selected_loci.tsv.gz
+
     mkdir -p cuppa/
 
+    # Extract input features
     cuppa \\
         -Xmx${Math.round(task.memory.bytes * 0.95)} \\
         ${args} \\
         -sample ${meta.sample_id} \\
-        -sample_data_dir sample_data/ \\
         -categories ${classifier} \\
-        -ref_data_dir ${cuppa_resources} \\
         -ref_genome_version ${genome_ver} \\
-        -create_pdf \\
-        -output_dir cuppa/
+        -sample_data_dir sample_data/ \\
+        -output_dir cuppa/ \\
+        -ref_alt_sj_sites "${cuppa_resources}/alt_sj.selected_loci.tsv.gz"
 
-    if [[ ${classifier} == 'DNA' || ${classifier} == 'ALL' ]]; then
-        cuppa-chart \\
-            -sample ${meta.sample_id} \\
-            -sample_data cuppa/${meta.sample_id}.cup.data.csv \\
-            -output_dir cuppa/;
-    fi
+    # Make predictions
+    pyenv activate pycuppa_env
+    python3 -m cuppa.predict \\
+        --sample_id ${meta.sample_id} \\
+        --classifier_path ${cuppa_resources}/cuppa_classifier.pickle.gz \\
+        --features_path cuppa/${meta.sample_id}.cuppa_data.tsv.gz \\
+        --output_dir cuppa/ \\
+        --clf_group ${classifier}
 
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":
@@ -71,12 +74,11 @@ process CUPPA {
     stub:
     """
     mkdir -p cuppa/
-    touch cuppa/${meta.sample_id}.cup.data.csv
-    touch cuppa/${meta.sample_id}.cuppa.conclusion.txt
-    touch cuppa/${meta.sample_id}_cup_report.pdf
-    touch cuppa/${meta.sample_id}.cup.report.summary.png
-    touch cuppa/${meta.sample_id}.cup.report.features.png
-    touch cuppa/${meta.sample_id}.cuppa.chart.png
+
+    touch cuppa/${meta.sample_id}.cuppa_data.tsv.gz
+    touch cuppa/${meta.sample_id}.cuppa.pred_summ.tsv
+    touch cuppa/${meta.sample_id}.cuppa.vis_data.tsv
+    touch cuppa/${meta.sample_id}.cuppa.vis.png
 
     echo -e '${task.process}:\\n  stub: noversions\\n' > versions.yml
     """
