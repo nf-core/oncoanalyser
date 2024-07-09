@@ -217,7 +217,7 @@ workflow READ_ALIGNMENT_DNA {
     ch_bam_donor_out = Channel.empty()
         .mix(
             WorkflowOncoanalyser.restoreMeta(ch_bams_united.donor, ch_inputs),
-            ch_inputs_normal_sorted.skip.map { meta -> [meta, [], []] },
+            ch_inputs_donor_sorted.skip.map { meta -> [meta, [], []] },
         )
 
     emit:
