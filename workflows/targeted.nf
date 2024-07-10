@@ -351,8 +351,8 @@ workflow TARGETED {
             ref_data.genome_version,
             ref_data.genome_fai,
             ref_data.genome_dict,
-            [],  // sage_known_hotspots_germline
             hmf_data.sage_known_hotspots_somatic,
+            [],  // sage_known_hotspots_germline
             panel_data.sage_actionable_panel,
             panel_data.sage_coverage_panel,
             hmf_data.sage_highconf_regions,
