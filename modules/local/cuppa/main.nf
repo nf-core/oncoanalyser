@@ -5,7 +5,7 @@ process CUPPA {
     conda "${moduleDir}/environment.yml"
     container "${ workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container ?
         'https://depot.galaxyproject.org/singularity/hmftools-cuppa:1.8.1--hdfd78af_0' :
-        'biocontainers/hmftools-cuppa:1.8.1--hdfd78af_0' }"
+        'docker.io/scwatts/hmftools-cuppa:2.2.1--py311r42hdfd78af_0' }"
 
     input:
     tuple val(meta), path(isofox_dir), path(purple_dir), path(linx_dir), path(virusinterpreter_dir)
@@ -46,8 +46,7 @@ process CUPPA {
     mkdir -p cuppa/
 
     # Extract input features
-    CUPPA_JAR=/home/lnguyen/downloads/cuppa_v2.2.1.jar
-    java -cp \$CUPPA_JAR \\
+    cuppa \\
         -Xmx${Math.round(task.memory.bytes * 0.95)} \\
         com.hartwig.hmftools.cup.prep.CuppaDataPrep \\
         ${args} \\
@@ -59,8 +58,7 @@ process CUPPA {
         -ref_alt_sj_sites "./alt_sj.selected_loci.tsv.gz"
 
     # Make predictions
-    PYTHON_PATH=/home/lnguyen/.pyenv/versions/pycuppa_venv/bin/python
-    \$PYTHON_PATH -m cuppa.predict \\
+    python -m cuppa.predict \\
         --sample_id ${meta.sample_id} \\
         --classifier_path ./cuppa_classifier.pickle.gz \\
         --features_path cuppa/${meta.sample_id}.cuppa_data.tsv.gz \\
