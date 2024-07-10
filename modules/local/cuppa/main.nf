@@ -26,41 +26,43 @@ process CUPPA {
     """
     # Symlink input files into a single directory
     mkdir -p sample_data/
-    if [[ ${classifier} == 'DNA' || ${classifier} == 'ALL' ]]; then
-        find -L ${purple_dir} ${linx_dir} ${virusinterpreter_dir} -maxdepth 1 -type f -exec ln -fs ../{} sample_data/ \\;
 
-    elif [[ ${classifier} == 'ALL' ]]; then
+    for file_path in \$(find -L ${purple_dir} ${linx_dir} ${virusinterpreter_dir} -maxdepth 1 -type f -exec realpath {} \\;); do
+        ln -sf \${file_path} sample_data/\$(basename \${file_path})
+    done;
+
+    if [ ${classifier} == 'ALL' ]; then
         # NOTE(SW): CUPPA requires that the RNA sample name matches the DNA sample name
-        for fp in \$(find -L ${isofox_dir} -maxdepth 1 -type f); do
-            fn_out=\$(sed 's/^${meta.sample_rna_id}/${meta.sample_id}/' <<< \${fp##*/});
-            cp \${fp} sample_data/\${fn_out}
+        for file_path in \$(find -L ${isofox_dir} -maxdepth 1 -type f -exec realpath {} \\;); do
+            new_file_name=\$(basename \${file_path} | sed 's/^${meta.sample_rna_id}/${meta.sample_id}/')
+            ln -sf \${file_path} sample_data/\${new_file_name}
         done;
-        # Rename identifier in the summary file
-        sed -i 's/^${meta.sample_rna_id}/${meta.sample_id}/g' sample_data/${meta.sample_id}.isf.summary.csv;
     fi;
 
     # Use symlink to remove genome version suffix (e.g. cuppa_classifier.37.pickle.gz -> cuppa_classifier.pickle.gz)
-    ln -sf \$(find -L ${cuppa_resources} -type f -name 'cuppa_classifier*.pickle.gz') ${cuppa_resources}/cuppa_classifier.pickle.gz
-    ln -sf \$(find -L ${cuppa_resources} -type f -name 'alt_sj.selected_loci*.tsv.gz') ${cuppa_resources}/alt_sj.selected_loci.tsv.gz
+    ln -sf \$(find -L ${cuppa_resources} -type f -name 'cuppa_classifier*.pickle.gz' -print -quit) ./cuppa_classifier.pickle.gz
+    ln -sf \$(find -L ${cuppa_resources} -type f -name 'alt_sj.selected_loci*.tsv.gz' -print -quit) ./alt_sj.selected_loci.tsv.gz
 
     mkdir -p cuppa/
 
     # Extract input features
-    cuppa \\
+    CUPPA_JAR=/home/lnguyen/downloads/cuppa_v2.2.1.jar
+    java -cp \$CUPPA_JAR \\
         -Xmx${Math.round(task.memory.bytes * 0.95)} \\
+        com.hartwig.hmftools.cup.prep.CuppaDataPrep \\
         ${args} \\
         -sample ${meta.sample_id} \\
         -categories ${classifier} \\
         -ref_genome_version ${genome_ver} \\
         -sample_data_dir sample_data/ \\
         -output_dir cuppa/ \\
-        -ref_alt_sj_sites "${cuppa_resources}/alt_sj.selected_loci.tsv.gz"
+        -ref_alt_sj_sites "./alt_sj.selected_loci.tsv.gz"
 
     # Make predictions
-    pyenv activate pycuppa_env
-    python3 -m cuppa.predict \\
+    PYTHON_PATH=/home/lnguyen/.pyenv/versions/pycuppa_venv/bin/python
+    \$PYTHON_PATH -m cuppa.predict \\
         --sample_id ${meta.sample_id} \\
-        --classifier_path ${cuppa_resources}/cuppa_classifier.pickle.gz \\
+        --classifier_path ./cuppa_classifier.pickle.gz \\
         --features_path cuppa/${meta.sample_id}.cuppa_data.tsv.gz \\
         --output_dir cuppa/ \\
         --clf_group ${classifier}
