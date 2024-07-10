@@ -148,7 +148,6 @@ workflow TARGETED {
     ch_process_dna_normal_out = Channel.empty()
     if (run_config.stages.markdups) {
 
-        // NOTE(SW/MC): hardcoded for initial testing purposes
         has_umis = run_config.panel.equalsIgnoreCase('tso500')
 
         READ_PROCESSING(
