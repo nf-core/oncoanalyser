@@ -20,8 +20,8 @@ workflow SAGE_CALLING {
     genome_version               // channel: [mandatory] genome version
     genome_fai                   // channel: [mandatory] /path/to/genome_fai
     genome_dict                  // channel: [mandatory] /path/to/genome_dict
-    sage_known_hotspots_germline // channel: [optional]  /path/to/sage_known_hotspots_germline
     sage_known_hotspots_somatic  // channel: [mandatory] /path/to/sage_known_hotspots_somatic
+    sage_known_hotspots_germline // channel: [optional]  /path/to/sage_known_hotspots_germline
     sage_actionable_panel        // channel: [mandatory] /path/to/sage_actionable_panel
     sage_coverage_panel          // channel: [mandatory] /path/to/sage_coverage_panel
     sage_highconf_regions        // channel: [mandatory] /path/to/sage_highconf_regions

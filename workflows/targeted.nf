@@ -148,7 +148,6 @@ workflow TARGETED {
     ch_process_dna_normal_out = Channel.empty()
     if (run_config.stages.markdups) {
 
-        // NOTE(SW/MC): hardcoded for initial testing purposes
         has_umis = run_config.panel.equalsIgnoreCase('tso500')
 
         READ_PROCESSING(
@@ -352,8 +351,8 @@ workflow TARGETED {
             ref_data.genome_version,
             ref_data.genome_fai,
             ref_data.genome_dict,
-            [],  // sage_known_hotspots_germline
             hmf_data.sage_known_hotspots_somatic,
+            [],  // sage_known_hotspots_germline
             panel_data.sage_actionable_panel,
             panel_data.sage_coverage_panel,
             hmf_data.sage_highconf_regions,
