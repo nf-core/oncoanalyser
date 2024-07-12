@@ -42,7 +42,7 @@ class Constants {
         CUPPA,
         FLAGSTAT,
         GRIDSS,
-        GRIPSS,
+        ESVEE,
         ISOFOX,
         LILAC,
         LINX,
@@ -66,12 +66,12 @@ class Constants {
         AMBER_DIR,
         BAMTOOLS,
         COBALT_DIR,
-        GRIDSS_VCF,
-        GRIDSS_VCF_TBI,
-        GRIPSS_VCF,
-        GRIPSS_VCF_TBI,
-        GRIPSS_UNFILTERED_VCF,
-        GRIPSS_UNFILTERED_VCF_TBI,
+        GRIDSS_VCF, // TODO: Deprecate this
+        GRIDSS_VCF_TBI, // TODO: Deprecate this
+        ESVEE_VCF,
+        ESVEE_VCF_TBI,
+        ESVEE_UNFILTERED_VCF,
+        ESVEE_UNFILTERED_VCF_TBI,
         ISOFOX_DIR,
         LILAC_DIR,
         LINX_ANNO_DIR,
@@ -277,38 +277,38 @@ class Constants {
             SequenceType.DNA,
         ],
 
-        GRIPSS_VCF_TUMOR: [
-            FileType.GRIPSS_VCF,
+        ESVEE_VCF_TUMOR: [
+            FileType.ESVEE_VCF,
             [SampleType.TUMOR, SampleType.TUMOR_NORMAL],
             SequenceType.DNA,
         ],
-        GRIPSS_VCF_TUMOR_TBI: [
-            FileType.GRIPSS_VCF_TBI,
+        ESVEE_VCF_TUMOR_TBI: [
+            FileType.ESVEE_VCF_TBI,
             [SampleType.TUMOR, SampleType.TUMOR_NORMAL],
             SequenceType.DNA,
         ],
-        GRIPSS_VCF_NORMAL: [
-            FileType.GRIPSS_VCF,
+        ESVEE_VCF_NORMAL: [
+            FileType.ESVEE_VCF,
             SampleType.NORMAL,
             SequenceType.DNA,
         ],
-        GRIPSS_VCF_NORMAL_TBI: [
-            FileType.GRIPSS_VCF_TBI,
+        ESVEE_VCF_NORMAL_TBI: [
+            FileType.ESVEE_VCF_TBI,
             SampleType.NORMAL,
             SequenceType.DNA,
         ],
-        GRIPSS_UNFILTERED_VCF_TUMOR: [
-            FileType.GRIPSS_UNFILTERED_VCF,
+        ESVEE_UNFILTERED_VCF_TUMOR: [
+            FileType.ESVEE_UNFILTERED_VCF,
             [SampleType.TUMOR, SampleType.TUMOR_NORMAL],
             SequenceType.DNA,
         ],
-        GRIPSS_UNFILTERED_VCF_TUMOR_TBI: [
-            FileType.GRIPSS_UNFILTERED_VCF_TBI,
+        ESVEE_UNFILTERED_VCF_TUMOR_TBI: [
+            FileType.ESVEE_UNFILTERED_VCF_TBI,
             [SampleType.TUMOR, SampleType.TUMOR_NORMAL],
             SequenceType.DNA,
         ],
-        GRIPSS_UNFILTERED_VCF_NORMAL: [
-            FileType.GRIPSS_UNFILTERED_VCF,
+        ESVEE_UNFILTERED_VCF_NORMAL: [
+            FileType.ESVEE_UNFILTERED_VCF,
             SampleType.NORMAL,
             SequenceType.DNA,
         ],
