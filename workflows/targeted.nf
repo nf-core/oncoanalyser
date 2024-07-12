@@ -59,7 +59,7 @@ include { AMBER_PROFILING       } from '../subworkflows/local/amber_profiling'
 include { BAMTOOLS_METRICS      } from '../subworkflows/local/bamtools_metrics'
 include { COBALT_PROFILING      } from '../subworkflows/local/cobalt_profiling'
 include { FLAGSTAT_METRICS      } from '../subworkflows/local/flagstat_metrics'
-include { GRIDSS_SVPREP_CALLING } from '../subworkflows/local/gridss_svprep_calling'
+include { ESVEE_CALLING         } from '../subworkflows/local/esvee_calling'
 include { GRIPSS_FILTERING      } from '../subworkflows/local/gripss_filtering'
 include { ISOFOX_QUANTIFICATION } from '../subworkflows/local/isofox_quantification'
 include { LILAC_CALLING         } from '../subworkflows/local/lilac_calling'
@@ -283,7 +283,7 @@ workflow TARGETED {
     ch_gridss_out = Channel.empty()
     if (run_config.stages.gridss) {
 
-        GRIDSS_SVPREP_CALLING(
+        ESVEE_CALLING(
             ch_inputs,
             ch_process_dna_tumor_out,
             ch_process_dna_normal_out,
@@ -298,9 +298,9 @@ workflow TARGETED {
             gridss_config,
         )
 
-        ch_versions = ch_versions.mix(GRIDSS_SVPREP_CALLING.out.versions)
+        ch_versions = ch_versions.mix(ESVEE_CALLING.out.versions)
 
-        ch_gridss_out = ch_gridss_out.mix(GRIDSS_SVPREP_CALLING.out.vcf)
+        ch_gridss_out = ch_gridss_out.mix(ESVEE_CALLING.out.vcf)
 
     } else {
 

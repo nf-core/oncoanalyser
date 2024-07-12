@@ -13,7 +13,7 @@ include { GRIDSS_PREPROCESS as PREPROCESS           } from '../../../modules/loc
 include { SVPREP as SVPREP_NORMAL                   } from '../../../modules/local/esvee/svprep/main'
 include { SVPREP as SVPREP_TUMOR                    } from '../../../modules/local/esvee/svprep/main'
 
-workflow GRIDSS_SVPREP_CALLING {
+workflow ESVEE_CALLING {
     take:
     // Sample data
     ch_inputs              // channel: [mandatory] [ meta ]
