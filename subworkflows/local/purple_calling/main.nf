@@ -15,9 +15,9 @@ workflow PURPLE_CALLING {
     ch_cobalt                    // channel: [mandatory] [ meta, cobalt_dir ]
     ch_smlv_somatic              // channel: [mandatory] [ meta, pave_vcf ]
     ch_smlv_germline             // channel: [mandatory] [ meta, pave_vcf ]
-    ch_sv_somatic                // channel: [mandatory] [ meta, gripss_vcf, gripss_tbi ]
-    ch_sv_germline               // channel: [mandatory] [ meta, gripss_vcf, gripss_tbi ]
-    ch_sv_somatic_unfiltered     // channel: [mandatory] [ meta, gripss_vcf, gripss_tbi ]
+    ch_sv_somatic                // channel: [mandatory] [ meta, esvee_vcf, esvee_tbi ]
+    ch_sv_germline               // channel: [mandatory] [ meta, esvee_vcf, esvee_tbi ]
+    ch_sv_somatic_unfiltered     // channel: [mandatory] [ meta, esvee_vcf, esvee_tbi ]
 
     // Reference data
     genome_fasta                 // channel: [mandatory] /path/to/genome_fasta
@@ -59,12 +59,12 @@ workflow PURPLE_CALLING {
             def inputs = [
                 Utils.selectCurrentOrExisting(d[1], meta, Constants.INPUT.AMBER_DIR),
                 Utils.selectCurrentOrExisting(d[2], meta, Constants.INPUT.COBALT_DIR),
-                Utils.selectCurrentOrExisting(d[3], meta, Constants.INPUT.GRIPSS_VCF_TUMOR),
-                Utils.selectCurrentOrExisting(d[4], meta, Constants.INPUT.GRIPSS_VCF_TUMOR_TBI),
-                Utils.selectCurrentOrExisting(d[5], meta, Constants.INPUT.GRIPSS_UNFILTERED_VCF_TUMOR),
-                Utils.selectCurrentOrExisting(d[6], meta, Constants.INPUT.GRIPSS_UNFILTERED_VCF_TUMOR_TBI),
-                Utils.selectCurrentOrExisting(d[7], meta, Constants.INPUT.GRIPSS_VCF_NORMAL),
-                Utils.selectCurrentOrExisting(d[8], meta, Constants.INPUT.GRIPSS_VCF_NORMAL_TBI),
+                Utils.selectCurrentOrExisting(d[3], meta, Constants.INPUT.ESVEE_VCF_TUMOR),
+                Utils.selectCurrentOrExisting(d[4], meta, Constants.INPUT.ESVEE_VCF_TUMOR_TBI),
+                Utils.selectCurrentOrExisting(d[5], meta, Constants.INPUT.ESVEE_UNFILTERED_VCF_TUMOR),
+                Utils.selectCurrentOrExisting(d[6], meta, Constants.INPUT.ESVEE_UNFILTERED_VCF_TUMOR_TBI),
+                Utils.selectCurrentOrExisting(d[7], meta, Constants.INPUT.ESVEE_VCF_NORMAL),
+                Utils.selectCurrentOrExisting(d[8], meta, Constants.INPUT.ESVEE_VCF_NORMAL_TBI),
                 Utils.selectCurrentOrExisting(d[9], meta, Constants.INPUT.PAVE_VCF_TUMOR),
                 Utils.selectCurrentOrExisting(d[10], meta, Constants.INPUT.PAVE_VCF_NORMAL),
             ]
