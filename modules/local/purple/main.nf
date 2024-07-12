@@ -4,11 +4,11 @@ process PURPLE {
 
     conda "${moduleDir}/environment.yml"
     container "${ workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container ?
-        'https://depot.galaxyproject.org/singularity/hmftools-purple:4.0.2--hdfd78af_0' :
-        'biocontainers/hmftools-purple:4.0.2--hdfd78af_0' }"
+        'https://depot.galaxyproject.org/singularity/hmftools-purple:4.1--hdfd78af_0' :
+        'biocontainers/hmftools-purple:4.1--hdfd78af_0' }"
 
     input:
-    tuple val(meta), path(amber), path(cobalt), path(sv_tumor_vcf), path(sv_tumor_tbi), path(sv_tumor_unfiltered_vcf), path(sv_tumor_unfiltered_tbi), path(sv_normal_vcf), path(sv_normal_tbi), path(smlv_tumor_vcf), path(smlv_normal_vcf)
+    tuple val(meta), path(amber), path(cobalt), path(sv_tumor_vcf), path(sv_tumor_tbi), path(sv_normal_vcf), path(sv_normal_tbi), path(smlv_tumor_vcf), path(smlv_normal_vcf)
     path genome_fasta
     val genome_ver
     path genome_fai
@@ -40,8 +40,6 @@ process PURPLE {
     def sv_tumor_vcf_arg = sv_tumor_vcf ? "-somatic_sv_vcf ${sv_tumor_vcf}" : ''
     def sv_normal_vcf_arg = sv_normal_vcf ? "-germline_sv_vcf ${sv_normal_vcf}" : ''
 
-    def sv_tumor_recovery_vcf_arg = sv_tumor_unfiltered_vcf ? "-sv_recovery_vcf ${sv_tumor_unfiltered_vcf}" : ''
-
     def smlv_tumor_vcf_arg = smlv_tumor_vcf ? "-somatic_vcf ${smlv_tumor_vcf}" : ''
     def smlv_normal_vcf_arg = smlv_normal_vcf ? "-germline_vcf ${smlv_normal_vcf}" : ''
 
@@ -62,7 +60,6 @@ process PURPLE {
         -cobalt ${cobalt} \\
         ${sv_tumor_vcf_arg} \\
         ${sv_normal_vcf_arg} \\
-        ${sv_tumor_recovery_vcf_arg} \\
         ${smlv_tumor_vcf_arg} \\
         ${smlv_normal_vcf_arg} \\
         -ref_genome ${genome_fasta} \\
