@@ -6,12 +6,12 @@
 import Constants
 import Utils
 
-include { GRIDSS_ASSEMBLE as ASSEMBLE               } from '../../../modules/local/svprep/assemble/main'
-include { GRIDSS_CALL as CALL                       } from '../../../modules/local/svprep/call/main'
-include { SVPREP_DEPTH_ANNOTATOR as DEPTH_ANNOTATOR } from '../../../modules/local/svprep/depth_annotator/main'
-include { GRIDSS_PREPROCESS as PREPROCESS           } from '../../../modules/local/svprep/preprocess/main'
-include { SVPREP as SVPREP_NORMAL                   } from '../../../modules/local/svprep/svprep/main'
-include { SVPREP as SVPREP_TUMOR                    } from '../../../modules/local/svprep/svprep/main'
+include { GRIDSS_ASSEMBLE as ASSEMBLE               } from '../../../modules/local/esvee/assemble/main'
+include { GRIDSS_CALL as CALL                       } from '../../../modules/local/esvee/call/main'
+include { SVPREP_DEPTH_ANNOTATOR as DEPTH_ANNOTATOR } from '../../../modules/local/esvee/depth_annotator/main'
+include { GRIDSS_PREPROCESS as PREPROCESS           } from '../../../modules/local/esvee/preprocess/main'
+include { SVPREP as SVPREP_NORMAL                   } from '../../../modules/local/esvee/svprep/main'
+include { SVPREP as SVPREP_TUMOR                    } from '../../../modules/local/esvee/svprep/main'
 
 workflow GRIDSS_SVPREP_CALLING {
     take:
