@@ -41,7 +41,6 @@ class Constants {
         COBALT,
         CUPPA,
         FLAGSTAT,
-        GRIDSS,
         ESVEE,
         ISOFOX,
         LILAC,
@@ -66,8 +65,6 @@ class Constants {
         AMBER_DIR,
         BAMTOOLS,
         COBALT_DIR,
-        GRIDSS_VCF, // TODO: Deprecate this
-        GRIDSS_VCF_TBI, // TODO: Deprecate this
         ESVEE_VCF,
         ESVEE_VCF_TBI,
         ESVEE_UNFILTERED_VCF,
@@ -268,12 +265,6 @@ class Constants {
         PAVE_VCF_NORMAL: [
             FileType.PAVE_VCF,
             SampleType.NORMAL,
-            SequenceType.DNA,
-        ],
-
-        GRIDSS_VCF: [
-            FileType.GRIDSS_VCF,
-            [SampleType.TUMOR, SampleType.TUMOR_NORMAL],
             SequenceType.DNA,
         ],
 
