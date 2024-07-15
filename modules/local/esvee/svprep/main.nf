@@ -43,9 +43,9 @@ process ESVEE_PREP {
         -known_fusion_bed ${known_fusions} \\
         -bamtool \$SAMBAMBA_PATH \\
         -write_types "JUNCTIONS;BAM;FRAGMENT_LENGTH_DIST" \\
-        -output_dir ./sv_prep \\
-        -log_level DEBUG \\
+        -output_dir sv_prep/ \\
         -threads ${task.cpus}
+        -log_level DEBUG \\
 
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":
