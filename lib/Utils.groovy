@@ -150,9 +150,6 @@ class Utils {
                         } else if (key === Constants.FileType.BAM_MARKDUPS) {
                             index_enum = Constants.FileType.BAI
                             index_str = 'bai'
-                        } else if (key === Constants.FileType.GRIDSS_VCF) { // TODO: Deprecate this clause
-                            index_enum = Constants.FileType.GRIDSS_VCF_TBI
-                            index_str = 'tbi'
                         } else if (key === Constants.FileType.ESVEE_VCF) {
                             index_enum = Constants.FileType.ESVEE_VCF_TBI
                             index_str = 'tbi'
