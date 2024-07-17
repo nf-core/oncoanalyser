@@ -80,7 +80,7 @@ workflow NFCORE_ONCOANALYSER {
     } else if (run_mode === Constants.RunMode.TARGETED) {
         TARGETED()
     } else {
-        log.error("recieved bad run mode: ${run_mode}")
+        log.error("received bad run mode: ${run_mode}")
         Nextflow.exit(1)
     }
 
