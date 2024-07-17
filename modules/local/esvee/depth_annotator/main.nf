@@ -13,8 +13,8 @@ process ESVEE_DEPTH_ANNOTATOR {
     val genome_ver
 
     output:
+    tuple val(meta), path("depth_annotation/")                                           , emit: depth_annotation_dir
     tuple val(meta), path("depth_annotation/${meta.tumor_id}.esvee.ref_depth.vcf.gz")    , emit: ref_depth_vcf
-    tuple val(meta), path("depth_annotation/${meta.tumor_id}.esvee.ref_depth.vcf.gz.tbi"), emit: ref_depth_tbi
     path 'versions.yml'                                                                  , emit: versions
 
     when:
