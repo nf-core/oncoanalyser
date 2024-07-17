@@ -134,12 +134,7 @@ workflow READ_ALIGNMENT_DNA {
 
             def meta_bwamem2 = [
                 *:meta_fastq_ready,
-
-
-                // TODO(SW): understand target format
                 read_group: "${meta_fastq_ready.sample_id}.${meta_fastq_ready.library_id}.${meta_fastq_ready.lane}",
-
-
             ]
 
             return [meta_bwamem2, fastq_fwd, fastq_rev]

@@ -63,12 +63,7 @@ workflow READ_ALIGNMENT_RNA {
         .map { meta_fastq, fastq_fwd, fastq_rev ->
             def meta_star = [
                 *:meta_fastq,
-
-
-                // TODO(SW): understand target format
                 read_group: "${meta_fastq.sample_id}.${meta_fastq.library_id}.${meta_fastq.lane}",
-
-
             ]
 
             return [meta_star, fastq_fwd, fastq_rev]
