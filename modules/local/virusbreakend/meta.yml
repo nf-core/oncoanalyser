@@ -19,9 +19,6 @@ input:
       type: file
       description: BAM file
       pattern: "*.{bam}"
-  - gridss_config:
-      type: file
-      description: GRIDSS configuration file (optional)
   - genome_fasta:
       type: file
       description: Reference genome assembly FASTA file
@@ -41,6 +38,9 @@ input:
   - virusbreakenddb:
       type: directory
       description: VIRUSBreakend database directory
+  - gridss_config:
+      type: file
+      description: GRIDSS configuration file (optional)
 output:
   - meta:
       type: map

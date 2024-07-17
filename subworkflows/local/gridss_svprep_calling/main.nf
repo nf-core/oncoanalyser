@@ -184,11 +184,11 @@ workflow GRIDSS_SVPREP_CALLING {
     // Run process
     PREPROCESS(
         ch_preprocess_inputs,
-        gridss_config,
         genome_fasta,
         genome_fai,
         genome_dict,
         genome_gridss_index,
+        gridss_config,
     )
 
     ch_versions = ch_versions.mix(PREPROCESS.out.versions)
@@ -262,12 +262,12 @@ workflow GRIDSS_SVPREP_CALLING {
     // Run process
     ASSEMBLE(
         ch_assemble_inputs,
-        gridss_config,
         genome_fasta,
         genome_fai,
         genome_dict,
         genome_gridss_index,
         gridss_blocklist,
+        gridss_config,
     )
 
     ch_versions = ch_versions.mix(ASSEMBLE.out.versions)
@@ -292,12 +292,12 @@ workflow GRIDSS_SVPREP_CALLING {
     // Run process
     CALL(
         ch_call_inputs,
-        gridss_config,
         genome_fasta,
         genome_fai,
         genome_dict,
         genome_gridss_index,
         gridss_blocklist,
+        gridss_config,
     )
 
     ch_versions = ch_versions.mix(CALL.out.versions)

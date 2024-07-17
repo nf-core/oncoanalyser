@@ -27,9 +27,6 @@ input:
   - labels:
       type: list
       description: List of labels corresponding to BAMs and GRIDSS preprocess output directories
-  - gridss_config:
-      type: file
-      description: GRIDSS configuration file (optional)
   - genome_fasta:
       type: file
       description: Reference genome assembly FASTA file
@@ -50,6 +47,9 @@ input:
       type: file
       description: GRIDSS blocklist file
       pattern: "*.{bed.gz}"
+  - gridss_config:
+      type: file
+      description: GRIDSS configuration file (optional)
 output:
   - meta:
       type: map

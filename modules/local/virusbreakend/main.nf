@@ -9,12 +9,12 @@ process VIRUSBREAKEND {
 
     input:
     tuple val(meta), path(bam)
-    path gridss_config
     path genome_fasta
     path genome_fai
     path genome_dict
     path genome_gridss_index
     path virusbreakenddb
+    path gridss_config
 
     output:
     tuple val(meta), path("*.summary.tsv"), emit: tsv
