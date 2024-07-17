@@ -44,7 +44,7 @@ process GRIDSS_ASSEMBLE {
 
     """
     # Create shadow directory with file symlinks of GRIDSS 'working' dir to prevent cache invalidation
-    # NOTE: for reasons that elude me, NF doesn't always stage in the workingdir; remove if it is present
+    # NOTE(SW): for reasons that elude me, NF doesn't always stage in the workingdir; remove if it is present
     shadow_input_directory() {
         src=\${1}
         dst="${output_dirname}/work/\${src##*/}"
