@@ -193,7 +193,9 @@ workflow ESVEE_CALLING {
         )
 
     emit:
-    vcf      = ch_outputs  // channel: [ meta, vcf ]
+    germline_vcf   = ESVEE_CALL.out.germline_vcf   // channel: [ meta, vcf ]
+    somatic_vcf    = ESVEE_CALL.out.somatic_vcf    // channel: [ meta, vcf ]
+    unfiltered_vcf = ESVEE_CALL.out.unfiltered_vcf // channel: [ meta, vcf ]
 
     versions = ch_versions // channel: [ versions.yml ]
 }
