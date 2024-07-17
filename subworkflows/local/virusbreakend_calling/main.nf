@@ -71,12 +71,12 @@ workflow VIRUSBREAKEND_CALLING {
     // Run process
     VIRUSBREAKEND(
         ch_virusbreakend_inputs,
-        gridss_config,
         genome_fasta,
         genome_fai,
         genome_dict,
         genome_gridss_index,
         virusbreakenddb,
+        gridss_config,
     )
 
     ch_versions = ch_versions.mix(VIRUSBREAKEND.out.versions)

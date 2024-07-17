@@ -9,11 +9,11 @@ process GRIDSS_PREPROCESS {
 
     input:
     tuple val(meta), path(bam), path(bam_filtered)
-    path gridss_config
     path genome_fasta
     path genome_fai
     path genome_dict
     path genome_gridss_index
+    path gridss_config
 
     output:
     tuple val(meta), path("gridss_preprocess/${meta.sample_id}.sv_prep.sorted.bam.gridss.working/"), emit: preprocess_dir

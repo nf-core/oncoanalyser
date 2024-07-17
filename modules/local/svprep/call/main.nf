@@ -9,12 +9,12 @@ process GRIDSS_CALL {
 
     input:
     tuple val(meta), path(bams), path(bams_filtered), path(assemble_dir), val(labels)
-    path gridss_config
     path genome_fasta
     path genome_fai
     path genome_dict
     path genome_gridss_index
     path blocklist
+    path gridss_config
 
     output:
     tuple val(meta), path('gridss_call/sv.svprep.gridss.vcf.gz'), emit: vcf

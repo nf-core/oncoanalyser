@@ -9,12 +9,12 @@ process GRIDSS_ASSEMBLE {
 
     input:
     tuple val(meta), path(bams), path(bams_filtered), path(preprocess_dirs), val(labels)
-    path gridss_config
     path genome_fasta
     path genome_fai
     path genome_dict
     path genome_gridss_index
     path blocklist
+    path gridss_config
 
     output:
     tuple val(meta), path('gridss_assemble/'), emit: assemble_dir
