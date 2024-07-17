@@ -16,8 +16,9 @@ process ESVEE_ASSEMBLE {
     path decoy_sequences_image
 
     output:
-    tuple val(meta), path('assemble/'), emit: assemble_dir
-    path 'versions.yml'               , emit: versions
+    tuple val(meta), path("assemble/${meta.tumor_id}.esvee.raw.vcf.gz"), emit: raw_vcf
+    tuple val(meta), path('assemble/')                                 , emit: assemble_dir
+    path 'versions.yml'                                                , emit: versions
 
     when:
     task.ext.when == null || task.ext.when
