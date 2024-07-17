@@ -29,7 +29,7 @@ process LINX_VISUALISER {
     # used in the plot directory to force FusionFS to create the directory as ORANGE will treat the placeholder as a PNG
     # and fail. Optional outputs are possible but requires further channel logic and output to detect when complete.
     # Instead I place the two plot output directories under a parent directory, only operating on that to allow use of a
-    # placeholder and support empty outputs when using FusionFS. Handing missing/non-existent directories are deferred
+    # placeholder and support empty outputs when using FusionFS. Handling missing/non-existent directories are deferred
     # to downstream processes, bypassing the need to implement further channel operations.
 
     mkdir -p plots/
