@@ -8,7 +8,7 @@ process ESVEE_ASSEMBLE {
         'docker.io/scwatts/hmftools-esvee:1.0_beta--hdfd78af_0--1' }"
 
     input:
-    tuple val(meta), path(sv_prep_dir)
+    tuple val(meta), path(tumor_prep_bam), path(normal_prep_bam), path(junctions_tsv), path(fragment_lengths_tsv)
     path genome_fasta
     path genome_fai
     path genome_dict
@@ -30,16 +30,16 @@ process ESVEE_ASSEMBLE {
     mkdir -p assemble/
 
     # Esvee expects the fragment_lengths.tsv input file to be in `output_dir`
-    ln -sf \$(realpath ${sv_prep_dir}/${meta.tumor_id}.esvee.prep.fragment_lengths.tsv) assemble/
+    ln -sf \$(realpath ${fragment_lengths_tsv}) assemble/
 
     esvee com.hartwig.hmftools.esvee.EsveeApplication \\
         -Xmx${Math.round(task.memory.bytes * 0.95)} \\
         ${args} \\
         -tumor ${meta.tumor_id} \\
         -reference ${meta.normal_id} \\
-        -tumor_bam ${sv_prep_dir}/${meta.tumor_id}.esvee.prep.bam \\
-        -reference_bam ${sv_prep_dir}/${meta.normal_id}.esvee.prep.bam \\
-        -junction_files ${sv_prep_dir}/${meta.tumor_id}.esvee.prep.junctions.tsv \\
+        -tumor_bam ${tumor_prep_bam} \\
+        -reference_bam ${normal_prep_bam} \\
+        -junction_files ${junctions_tsv} \\
         -ref_genome ${genome_fasta} \\
         -ref_genome_version ${genome_ver} \\
         -decoy_genome ${decoy_sequences_image} \\
