@@ -310,9 +310,9 @@ workflow WGTS {
 
     } else {
 
-        ch_esvee_germline_out = ch_inputs.map { meta -> [meta, []] }
-        ch_esvee_somatic_out = ch_inputs.map { meta -> [meta, []] }
-        ch_esvee_unfiltered_out = ch_inputs.map { meta -> [meta, []] }
+        ch_esvee_germline_out = ch_inputs.map { meta -> [meta, [], []] }
+        ch_esvee_somatic_out = ch_inputs.map { meta -> [meta, [], []] }
+        ch_esvee_unfiltered_out = ch_inputs.map { meta -> [meta, [], []] }
 
     }
 
