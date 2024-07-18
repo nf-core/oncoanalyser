@@ -17,11 +17,11 @@ process ESVEE_CALL {
     path repeatmasker_annotations
 
     output:
-    tuple val(meta), path("caller/")                                        , emit: caller_dir
-    tuple val(meta), path("caller/${meta.tumor_id}.esvee.germline.vcf.gz")  , emit: germline_vcf
-    tuple val(meta), path("caller/${meta.tumor_id}.esvee.somatic.vcf.gz")   , emit: somatic_vcf
-    tuple val(meta), path("caller/${meta.tumor_id}.esvee.unfiltered.vcf.gz"), emit: unfiltered_vcf
-    path 'versions.yml'                                                     , emit: versions
+    tuple val(meta), path("caller/"), emit: caller_dir
+    tuple val(meta), path("caller/${meta.tumor_id}.esvee.germline.vcf.gz"),   path("caller/${meta.tumor_id}.esvee.germline.vcf.gz.tbi"), emit: germline_vcf
+    tuple val(meta), path("caller/${meta.tumor_id}.esvee.somatic.vcf.gz"),    path("caller/${meta.tumor_id}.esvee.somatic.vcf.gz.tbi"),  emit: somatic_vcf
+    tuple val(meta), path("caller/${meta.tumor_id}.esvee.unfiltered.vcf.gz"), path("caller/${meta.tumor_id}.esvee.unfiltered.vcf.gz"),   emit: unfiltered_vcf
+    path 'versions.yml', emit: versions
 
     when:
     task.ext.when == null || task.ext.when
@@ -68,6 +68,10 @@ process ESVEE_CALL {
     echo \${vcf_template} | gzip -c > caller/${meta.tumor_id}.esvee.somatic.vcf.gz
     echo \${vcf_template} | gzip -c > caller/${meta.tumor_id}.esvee.germline.vcf.gz
     echo \${vcf_template} | gzip -c > caller/${meta.tumor_id}.esvee.unfiltered.vcf.gz
+
+    touch caller/${meta.tumor_id}.esvee.somatic.vcf.gz.tbi
+    touch caller/${meta.tumor_id}.esvee.germline.vcf.gz.tbi
+    touch caller/${meta.tumor_id}.esvee.unfiltered.vcf.gz.tbi
 
     echo -e '${task.process}:\\n  stub: noversions\\n' > versions.yml
     """
