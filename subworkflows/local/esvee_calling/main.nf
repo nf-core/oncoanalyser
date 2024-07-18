@@ -183,16 +183,31 @@ workflow ESVEE_CALLING {
 
     // Set outputs, restoring original meta
     // channel: [ meta, esvee_vcf ]
-    ch_outputs = Channel.empty()
+    ch_somatic_out = Channel.empty()
         .mix(
             WorkflowOncoanalyser.restoreMeta(ESVEE_CALL.out.somatic_vcf, ch_inputs),
-            ch_inputs_sorted.skip.map { meta -> [meta, []] },
+            //ch_inputs_somatic_sorted.skip.map { meta -> [meta, [], []] },
+            ch_inputs_sorted.skip.map { meta -> [meta, [], []] },
+        )
+
+    ch_germline_out = Channel.empty()
+        .mix(
+            WorkflowOncoanalyser.restoreMeta(ESVEE_CALL.out.germline_vcf, ch_inputs),
+//            ch_inputs_germline_sorted.skip.map { meta -> [meta, [], []] },
+            ch_inputs_sorted.skip.map { meta -> [meta, [], []] },
+        )
+
+    ch_unfiltered_out = Channel.empty()
+        .mix(
+            WorkflowOncoanalyser.restoreMeta(ESVEE_CALL.out.unfiltered_vcf, ch_inputs),
+            //ch_inputs_somatic_sorted.skip.map { meta -> [meta, [], []] },
+            ch_inputs_sorted.skip.map { meta -> [meta, [], []] },
         )
 
     emit:
-    germline_vcf   = ESVEE_CALL.out.germline_vcf   // channel: [ meta, vcf ]
-    somatic_vcf    = ESVEE_CALL.out.somatic_vcf    // channel: [ meta, vcf ]
-    unfiltered_vcf = ESVEE_CALL.out.unfiltered_vcf // channel: [ meta, vcf ]
+    somatic_vcf    = ch_somatic_out    // channel: [ meta, vcf, tbi ]
+    germline_vcf   = ch_germline_out   // channel: [ meta, vcf, tbi ]
+    unfiltered_vcf = ch_unfiltered_out // channel: [ meta, vcf, tbi ]
 
     versions = ch_versions // channel: [ versions.yml ]
 }
