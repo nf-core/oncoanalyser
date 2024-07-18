@@ -47,11 +47,12 @@
                 "mode": {
                     "type": "string",
                     "description": "Workflow run mode.",
-                    "fa_icon": "fas fa-diagram-project"
+                    "fa_icon": "fas fa-diagram-project",
+                    "pattern": "^(wgts|targeted)"
                 },
                 "panel": {
                     "type": "string",
-                    "description": "Name of pane to use.",
+                    "description": "Name of panel to use.",
                     "fa_icon": "fas fa-book"
                 },
                 "force_genome": {

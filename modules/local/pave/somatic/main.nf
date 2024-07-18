@@ -1,5 +1,3 @@
-import nextflow.Nextflow
-
 process PAVE_SOMATIC {
     tag "${meta.id}"
     label 'process_medium'
@@ -44,8 +42,7 @@ process PAVE_SOMATIC {
         pon_filters = 'HOTSPOT:5:5;PANEL:2:5;UNKNOWN:2:0'
         gnomad_args = "-gnomad_freq_dir ${gnomad_resource}"
     } else {
-        log.error "got bad genome version: ${genome_ver}"
-        Nextflow.exit(1)
+        error "got bad genome version: ${genome_ver}"
     }
 
     // Targeted mode
