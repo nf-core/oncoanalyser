@@ -290,10 +290,10 @@ workflow TARGETED {
             hmf_data.gridss_region_blocklist,
             hmf_data.sv_prep_blocklist,
             hmf_data.known_fusions,
-            hmf_data.decoy_sequences_image,
             hmf_data.gridss_pon_breakends,
             hmf_data.gridss_pon_breakpoints,
             hmf_data.repeatmasker_annotations,
+            hmf_data.decoy_sequences_image,
         )
 
         ch_versions = ch_versions.mix(ESVEE_CALLING.out.versions)
