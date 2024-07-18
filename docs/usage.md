@@ -320,7 +320,7 @@ params {
 To use these hmftools resource file overrides in `oncoanalyser` the local bundle directory must be provided with
 `--ref_data_hmf_data_path`.
 
-#### Customise other data
+#### Customising other data
 
 The path or URI to the VIRUSBreakend database can also be explicitly set with `--ref_data_virusbreakenddb_path`. There
 are additional arguments to manually set various other reference data files, please review the parameters documentation
