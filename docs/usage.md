@@ -217,7 +217,7 @@ It is a good idea to specify a pipeline version when running the pipeline on you
 
 First, go to the [nf-core/oncoanalyser releases page](https://github.com/nf-core/oncoanalyser/releases) and find the latest pipeline version - numeric only (eg. `1.0.0`). Then specify this when running the pipeline with `-r` (one hyphen) - eg. `-r 1.0.0`. Of course, you can switch to another version by changing the number after the `-r` flag.
 
-This version number will be logged in reports when you run the pipeline, so that you'll know what you used when you look back in the future. For example, at the bottom of the MultiQC reports.
+This version number will be logged in reports when you run the pipeline, so that you'll know what you used when you look back in the future. For example, in the `<outdir>/pipeline_info/software_versions.yml` file.
 
 To further assist in reproducbility, you can share and re-use [parameter files](#running-the-pipeline) to repeat pipeline runs with the same settings without having to write out a command with every single parameter.
 
