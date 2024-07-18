@@ -69,9 +69,9 @@ Currently only non-interleaved paired-end reads are accepted as FASTQ input.
 
 ```csv title="samplesheet.csv"
 group_id,subject_id,sample_id,sample_type,sequence_type,filetype,info,filepath
-P1__wgts,P1,SA,normal,dna,fastq,library_id:SA_library;lane:001,/path/to/P1.SA.normal.dna.wgs.001.R1.fastq.gz;/path/to/P1.SA.normal.dna.wgs.001.R2.fastq.gz
-P1__wgts,P1,SB,tumor,dna,fastq,library_id:SB_library;lane:001,/path/to/P1.SB.tumor.dna.wgs.001.R1.fastq.gz;/path/to/P1.SB.tumor.dna.wgs.001.R2.fastq.gz
-P1__wgts,P1,SC,tumor,rna,fastq,library_id:SC_library;lane:001,/path/to/P1.SC.tumor.rna.wts.001.R1.fastq.gz;/path/to/P1.SC.tumor.rna.wts.001.R2.fastq.gz
+P1_wgts,P1,SA,normal,dna,fastq,library_id:SA_library;lane:001,/path/to/P1.SA.normal.dna.wgs.001.R1.fastq.gz;/path/to/P1.SA.normal.dna.wgs.001.R2.fastq.gz
+P1_wgts,P1,SB,tumor,dna,fastq,library_id:SB_library;lane:001,/path/to/P1.SB.tumor.dna.wgs.001.R1.fastq.gz;/path/to/P1.SB.tumor.dna.wgs.001.R2.fastq.gz
+P1_wgts,P1,SC,tumor,rna,fastq,library_id:SC_library;lane:001,/path/to/P1.SC.tumor.rna.wts.001.R1.fastq.gz;/path/to/P1.SC.tumor.rna.wts.001.R2.fastq.gz
 ```
 
 #### BAM
@@ -94,30 +94,30 @@ Please note there are other essential requirements around the use of BAMs as inp
 
 ```csv title="samplesheet.csv"
 group_id,subject_id,sample_id,sample_type,sequence_type,filetype,filepath
-P1__wgts,P1,SA,normal,dna,bam,/path/to/P1.SA.normal.dna.wgs.bam
-P1__wgts,P1,SB,tumor,dna,bam,/path/to/P1.SB.tumor.dna.wgs.bam
-P1__wgts,P1,SC,tumor,rna,bam,/path/to/P1.SC.tumor.rna.wts.bam
+P1_wgts,P1,SA,normal,dna,bam,/path/to/P1.SA.normal.dna.wgs.bam
+P1_wgts,P1,SB,tumor,dna,bam,/path/to/P1.SB.tumor.dna.wgs.bam
+P1_wgts,P1,SC,tumor,rna,bam,/path/to/P1.SC.tumor.rna.wts.bam
 ```
 
 ### Multiple lanes
 
 ```csv title="samplesheet.csv"
 group_id,subject_id,sample_id,sample_type,sequence_type,filetype,info,filepath
-P1__wgts,P1,SA,normal,dna,fastq,library_id:SA_library;lane:001,/path/to/P1.SA.normal.dna.wgs.001.R1.fastq.gz;/path/to/P1.SA.normal.dna.wgs.001.R2.fastq.gz
-P1__wgts,P1,SA,normal,dna,fastq,library_id:SA_library;lane:002,/path/to/P1.SA.normal.dna.wgs.002.R1.fastq.gz;/path/to/P1.SA.normal.dna.wgs.002.R2.fastq.gz
-P1__wgts,P1,SB,tumor,dna,fastq,library_id:SB_library;lane:001,/path/to/P1.SB.tumor.dna.wgs.001.R1.fastq.gz;/path/to/P1.SB.tumor.dna.wgs.001.R2.fastq.gz
-P1__wgts,P1,SB,tumor,dna,fastq,library_id:SB_library;lane:002,/path/to/P1.SB.tumor.dna.wgs.002.R1.fastq.gz;/path/to/P1.SB.tumor.dna.wgs.002.R2.fastq.gz
-P1__wgts,P1,SC,tumor,rna,fastq,library_id:SC_library;lane:001,/path/to/P1.SC.tumor.rna.wts.001.R1.fastq.gz;/path/to/P1.SC.tumor.rna.wts.001.R2.fastq.gz
+P1_wgts,P1,SA,normal,dna,fastq,library_id:SA_library;lane:001,/path/to/P1.SA.normal.dna.wgs.001.R1.fastq.gz;/path/to/P1.SA.normal.dna.wgs.001.R2.fastq.gz
+P1_wgts,P1,SA,normal,dna,fastq,library_id:SA_library;lane:002,/path/to/P1.SA.normal.dna.wgs.002.R1.fastq.gz;/path/to/P1.SA.normal.dna.wgs.002.R2.fastq.gz
+P1_wgts,P1,SB,tumor,dna,fastq,library_id:SB_library;lane:001,/path/to/P1.SB.tumor.dna.wgs.001.R1.fastq.gz;/path/to/P1.SB.tumor.dna.wgs.001.R2.fastq.gz
+P1_wgts,P1,SB,tumor,dna,fastq,library_id:SB_library;lane:002,/path/to/P1.SB.tumor.dna.wgs.002.R1.fastq.gz;/path/to/P1.SB.tumor.dna.wgs.002.R2.fastq.gz
+P1_wgts,P1,SC,tumor,rna,fastq,library_id:SC_library;lane:001,/path/to/P1.SC.tumor.rna.wts.001.R1.fastq.gz;/path/to/P1.SC.tumor.rna.wts.001.R2.fastq.gz
 ```
 
 ### Multiple patients
 
 ```csv title="samplesheet.csv"
 group_id,subject_id,sample_id,sample_type,sequence_type,filetype,info,filepath
-P1__wgts,P1,SA,normal,dna,fastq,library_id:SA_library;lane:001,/path/to/P1.SA.normal.dna.wgs.001.R1.fastq.gz;/path/to/P1.SA.normal.dna.wgs.001.R2.fastq.gz
-P1__wgts,P1,SB,tumor,dna,fastq,library_id:SB_library;lane:001,/path/to/P1.SB.tumor.dna.wgs.001.R1.fastq.gz;/path/to/P1.SB.tumor.dna.wgs.001.R2.fastq.gz
-P2__wgts,P2,SA,normal,dna,fastq,library_id:SA_library;lane:001,/path/to/P2.SA.normal.dna.wgs.001.R1.fastq.gz;/path/to/P2.SA.normal.dna.wgs.001.R2.fastq.gz
-P2__wgts,P2,SB,tumor,dna,fastq,library_id:SB_library;lane:001,/path/to/P2.SB.tumor.dna.wgs.001.R1.fastq.gz;/path/to/P2.SB.tumor.dna.wgs.001.R2.fastq.gz
+P1_wgts,P1,SA,normal,dna,fastq,library_id:SA_library;lane:001,/path/to/P1.SA.normal.dna.wgs.001.R1.fastq.gz;/path/to/P1.SA.normal.dna.wgs.001.R2.fastq.gz
+P1_wgts,P1,SB,tumor,dna,fastq,library_id:SB_library;lane:001,/path/to/P1.SB.tumor.dna.wgs.001.R1.fastq.gz;/path/to/P1.SB.tumor.dna.wgs.001.R2.fastq.gz
+P2_wgts,P2,SA,normal,dna,fastq,library_id:SA_library;lane:001,/path/to/P2.SA.normal.dna.wgs.001.R1.fastq.gz;/path/to/P2.SA.normal.dna.wgs.001.R2.fastq.gz
+P2_wgts,P2,SB,tumor,dna,fastq,library_id:SB_library;lane:001,/path/to/P2.SB.tumor.dna.wgs.001.R1.fastq.gz;/path/to/P2.SB.tumor.dna.wgs.001.R2.fastq.gz
 ```
 
 ### Column descriptions
@@ -255,9 +255,9 @@ that all upstream variant calling can be skipped:
 
 ```csv title='samplesheet.existing_purple.csv'
 group_id,subject_id,sample_id,sample_type,sequence_type,filetype,filepath
-P1__wgts,P1,SA,normal,dna,bam,/path/to/P1.SA.normal.dna.wgs.bam
-P1__wgts,P1,SB,tumor,dna,bam,/path/to/P1.SB.tumor.dna.wgs.bam
-P1__wgts,P1,SB,tumor,dna,purple_dir,/path/to/P1.purple_dir/
+P1_wgts,P1,SA,normal,dna,bam,/path/to/P1.SA.normal.dna.wgs.bam
+P1_wgts,P1,SB,tumor,dna,bam,/path/to/P1.SB.tumor.dna.wgs.bam
+P1_wgts,P1,SB,tumor,dna,purple_dir,/path/to/P1.purple_dir/
 ```
 
 :::note
@@ -334,9 +334,9 @@ indices, reference data, and databases required to run a WGTS analysis for tumor
 
 ```csv title="samplesheet.csv"
 group_id,subject_id,sample_id,sample_type,sequence_type,filetype,filepath
-P1__wgts,P1,SA,normal,dna,bam,/path/to/P1.SA.normal.dna.wgs.bam
-P1__wgts,P1,SB,tumor,dna,bam,/path/to/P1.SB.tumor.dna.wgs.bam
-P1__wgts,P1,SC,tumor,rna,bam,/path/to/P1.SC.tumor.rna.wts.bam
+P1_wgts,P1,SA,normal,dna,bam,/path/to/P1.SA.normal.dna.wgs.bam
+P1_wgts,P1,SB,tumor,dna,bam,/path/to/P1.SB.tumor.dna.wgs.bam
+P1_wgts,P1,SC,tumor,rna,bam,/path/to/P1.SC.tumor.rna.wts.bam
 ```
 
 ```bash
