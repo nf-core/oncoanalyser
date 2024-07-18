@@ -28,10 +28,10 @@ workflow ESVEE_CALLING {
     gridss_blocklist         // channel: [mandatory] /path/to/gridss_blocklist
     sv_prep_blocklist        // channel: [mandatory] /path/to/sv_prep_blocklist
     known_fusions            // channel: [mandatory] /path/to/known_fusions
-    decoy_sequences          // channel: [mandatory] /path/to/deocy_sequences // TODO: make optional
     pon_breakends            // channel: [mandatory] /path/to/pon_sgl
     pon_breakpoints          // channel: [mandatory] /path/to/pon_sv
     repeatmasker_annotations // channel: [mandatory] /path/to/repeatmasker_annotations
+    decoy_sequences          // channel: [mandatory] /path/to/deocy_sequences // TODO: make optional
 
 
     main:
