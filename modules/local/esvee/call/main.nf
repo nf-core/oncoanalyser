@@ -59,11 +59,15 @@ process ESVEE_CALL {
     """
     mkdir -p caller/
 
-    echo '##fileformat=VCFv4.1
+    vcf_template='##fileformat=VCFv4.1
     ##contig=<ID=.>
     #CHROM	POS	ID	REF	ALT	QUAL	FILTER	INFO
     .	.	.	.	.	.	.
-    ' | gzip -c > caller/${meta.tumor_id}.esvee.somatic.vcf.gz
+    '
+
+    echo \${vcf_template} | gzip -c > caller/${meta.tumor_id}.esvee.somatic.vcf.gz
+    echo \${vcf_template} | gzip -c > caller/${meta.tumor_id}.esvee.germline.vcf.gz
+    echo \${vcf_template} | gzip -c > caller/${meta.tumor_id}.esvee.unfiltered.vcf.gz
 
     echo -e '${task.process}:\\n  stub: noversions\\n' > versions.yml
     """

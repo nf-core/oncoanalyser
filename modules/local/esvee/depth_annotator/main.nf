@@ -52,7 +52,7 @@ process ESVEE_DEPTH_ANNOTATOR {
     mkdir -p depth_annotation/
 
     touch depth_annotation/${meta.tumor_id}.esvee.ref_depth.vcf.gz
-    tough depth_annotation/${meta.tumor_id}.esvee.ref_depth.vcf.gz.tbi
+    touch depth_annotation/${meta.tumor_id}.esvee.ref_depth.vcf.gz.tbi
 
     echo -e '${task.process}:\\n  stub: noversions\\n' > versions.yml
     """
