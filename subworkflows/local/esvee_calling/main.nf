@@ -48,8 +48,16 @@ workflow ESVEE_CALLING {
         ch_normal_bam,
     )
         .map { meta, tumor_bam, tumor_bai, normal_bam, normal_bai ->
+
+            def meta_simplified = [
+                key: meta.group_id,
+                id: meta.group_id,
+                tumor_id: Utils.getTumorDnaSampleName(meta),
+                normal_id: Utils.getNormalDnaSampleName(meta),
+            ]
+
             return [
-                meta,
+                meta_simplified,
                 Utils.selectCurrentOrExisting(tumor_bam, meta, Constants.INPUT.BAM_MARKDUPS_DNA_TUMOR),
                 tumor_bai ?: Utils.getInput(meta, Constants.INPUT.BAI_DNA_TUMOR),
                 Utils.selectCurrentOrExisting(normal_bam, meta, Constants.INPUT.BAM_MARKDUPS_DNA_NORMAL),
@@ -71,22 +79,14 @@ workflow ESVEE_CALLING {
     // MODULE: Esvee prep
     //
     // Create process input channel
-    // channel: [ meta_svprep, bam_tumor, bai_tumor, [] ]
+    // channel: [ meta, tumor_bam, normal_bam, tumor_bai, normal_bai ]
     ch_sv_prep_inputs = Channel.empty()
         .mix(
             ch_inputs_sorted.runnable_to.map { [*it, [], []] },
             ch_inputs_sorted.runnable_tn,
         )
         .map { meta, tumor_bam, tumor_bai, normal_bam, normal_bai ->
-
-            def meta_esvee_prep = [
-                key: meta.group_id,
-                id: meta.group_id,
-                tumor_id: Utils.getTumorDnaSampleName(meta),
-                normal_id: Utils.getNormalDnaSampleName(meta),
-            ]
-
-            return [meta_esvee_prep, tumor_bam, normal_bam, tumor_bai, normal_bai]
+            return [meta, tumor_bam, normal_bam, tumor_bai, normal_bai]
         }
 
     // Run process
