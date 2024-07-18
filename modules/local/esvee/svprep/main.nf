@@ -8,7 +8,7 @@ process ESVEE_PREP {
         'docker.io/scwatts/hmftools-esvee:1.0_beta--hdfd78af_0--1' }"
 
     input:
-    tuple val(meta), path(tumor_bam), path(normal_bam), path(tumor_bai), path(normal_bai)
+    tuple val(meta), path(tumor_bam), path(tumor_bai), path(normal_bam), path(normal_bai)
     path genome_fasta
     val genome_ver
     path sv_blocklist
