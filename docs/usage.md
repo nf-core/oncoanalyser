@@ -48,6 +48,17 @@ samplesheet. The supported analysis types for each workflow are listed below.
 
 <sub><sup>\*</sup> Supported analyses relate to the TSO500 panel only</sub>
 
+:::note
+
+The default settings of `oncoanalyser` will accommodate typical sequencing depths for sample inputs and each individual
+tool is generally sequencing depth agnostic. However, variant calling is optimised for 100x tumor and 40x normal when
+invoked in `wgts` mode and expects sparse high-depth read data characteristic of panel sequencing when run in `targeted`
+mode. For atypical input sequence data you may consult the [hmftools
+documentation](https://github.com/hartwigmedical/hmftools) and [configure](#custom-tool-arguments) `oncoanalyser`
+accordingly.
+
+:::
+
 ## Samplesheet
 
 A samplesheet that contains information of each input in CSV format is needed to run `oncoanalyser`. The required input
