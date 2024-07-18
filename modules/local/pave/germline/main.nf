@@ -2,8 +2,6 @@
 //  - https://github.com/hartwigmedical/pipeline5/blob/v5.33/cluster/src/main/java/com/hartwig/pipeline/tertiary/pave/PaveGermline.java#L36-L41
 //  - https://github.com/hartwigmedical/pipeline5/blob/v5.33/cluster/src/main/java/com/hartwig/pipeline/tertiary/pave/PaveArguments.java#L31-L43
 
-import nextflow.Nextflow
-
 process PAVE_GERMLINE {
     tag "${meta.id}"
     label 'process_medium'
@@ -43,8 +41,7 @@ process PAVE_GERMLINE {
     } else if (genome_ver.toString() == '38') {
         gnomad_args = "-gnomad_freq_dir ${gnomad_resource}"
     } else {
-        log.error "got bad genome version: ${genome_ver}"
-        Nextflow.exit(1)
+        error "got bad genome version: ${genome_ver}"
     }
 
     """
