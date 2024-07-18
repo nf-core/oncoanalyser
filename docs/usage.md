@@ -191,12 +191,13 @@ The above pipeline run specified with a params file in yaml format:
 nextflow run nf-core/oncoanalyser -profile docker -params-file params.yaml
 ```
 
-with `params.yaml` containing:
+with `params.yaml` containing the following as an example:
 
 ```yaml
+mode: 'wgts'
+genome: 'GRCh38_hmf'
 input: './samplesheet.csv'
 outdir: './results/'
-genome: 'GRCh37'
 <...>
 ```
 
