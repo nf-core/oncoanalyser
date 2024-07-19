@@ -316,7 +316,7 @@ See the below sections for further details on customising reference data.
 To override hmftools resource files, first [stage the bundle](#staging-reference-data) locally then copy in your
 custom file under the bundle directory and create a new config with relevant file paths:
 
-```text title="hmf_data.custom.config"
+```groovy title="hmf_data.custom.config"
 params {
     hmf_data_paths {
         '38' {
@@ -368,7 +368,7 @@ recommended to remove the Nextflow work directory after staging data to free dis
 
 For `oncoanalyser` to use locally staged reference data a custom config can be used:
 
-```text title="refdata.local.config"
+```groovy title="refdata.local.config"
 params {
 
     genomes {
@@ -431,7 +431,7 @@ It is strongly recommended to use a Hartwig-distributed reference genome for ali
 (`GRCh37_hmf` or `GRCh38_hmf`). Where it is not feasible to do so, a custom genome can instead be used by providing the
 relevant FASTA file in a configuration file:
 
-```text title='genome.custom.config'
+```groovy title='genome.custom.config'
 params {
     genomes {
         CustomGenome {
