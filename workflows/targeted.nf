@@ -272,7 +272,7 @@ workflow TARGETED {
     ch_esvee_out = Channel.empty()
     ch_esvee_somatic_out = Channel.empty()
     ch_esvee_germline_out = Channel.empty()
-    ch_esvee_somatic_unfiltered_out = Channel.empty()
+    ch_esvee_unfiltered_out = Channel.empty()
     if (run_config.stages.esvee) {
 
         ESVEE_CALLING(
@@ -406,7 +406,7 @@ workflow TARGETED {
             ch_pave_germline_out,
             ch_esvee_somatic_out,
             ch_esvee_germline_out,
-            ch_esvee_somatic_unfiltered_out,
+            ch_esvee_unfiltered_out,
             ref_data.genome_fasta,
             ref_data.genome_version,
             ref_data.genome_fai,
