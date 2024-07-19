@@ -1,7 +1,7 @@
 process CUSTOM_EXTRACTTARBALL {
     label 'process_single'
 
-    conda "conda-forge::tar"
+    conda "conda-forge::tar=1.34"
     container "${ workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container ?
         'https://depot.galaxyproject.org/singularity/ubuntu:20.04' :
         'quay.io/nf-core/ubuntu:20.04' }"
