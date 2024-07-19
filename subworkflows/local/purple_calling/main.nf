@@ -10,14 +10,14 @@ include { PURPLE } from '../../../modules/local/purple/main'
 workflow PURPLE_CALLING {
     take:
     // Sample data
-    ch_inputs                    // channel: [mandatory] [ meta ]
-    ch_amber                     // channel: [mandatory] [ meta, amber_dir ]
-    ch_cobalt                    // channel: [mandatory] [ meta, cobalt_dir ]
-    ch_smlv_somatic              // channel: [mandatory] [ meta, pave_vcf ]
-    ch_smlv_germline             // channel: [mandatory] [ meta, pave_vcf ]
-    ch_sv_somatic                // channel: [mandatory] [ meta, esvee_vcf, esvee_tbi ]
-    ch_sv_germline               // channel: [mandatory] [ meta, esvee_vcf, esvee_tbi ]
-    ch_sv_somatic_unfiltered     // channel: [mandatory] [ meta, esvee_vcf, esvee_tbi ]
+    ch_inputs         // channel: [mandatory] [ meta ]
+    ch_amber          // channel: [mandatory] [ meta, amber_dir ]
+    ch_cobalt         // channel: [mandatory] [ meta, cobalt_dir ]
+    ch_smlv_somatic   // channel: [mandatory] [ meta, pave_vcf ]
+    ch_smlv_germline  // channel: [mandatory] [ meta, pave_vcf ]
+    ch_sv_somatic     // channel: [mandatory] [ meta, esvee_vcf, esvee_tbi ]
+    ch_sv_germline    // channel: [mandatory] [ meta, esvee_vcf, esvee_tbi ]
+    ch_sv_unfiltered  // channel: [mandatory] [ meta, esvee_vcf, esvee_tbi ]
 
     // Reference data
     genome_fasta                 // channel: [mandatory] /path/to/genome_fasta
@@ -45,7 +45,7 @@ workflow PURPLE_CALLING {
         ch_amber,
         ch_cobalt,
         ch_sv_somatic,
-        ch_sv_somatic_unfiltered,
+        ch_sv_unfiltered,
         ch_sv_germline,
         ch_smlv_somatic,
         ch_smlv_germline,
