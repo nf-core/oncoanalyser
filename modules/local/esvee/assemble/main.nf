@@ -4,8 +4,8 @@ process ESVEE_ASSEMBLE {
 
     conda "${moduleDir}/environment.yml"
     container "${ workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container ?
-        'https://depot.galaxyproject.org/singularity/hmftools-sv-prep:1.2.4--hdfd78af_0' :
-        'docker.io/scwatts/hmftools-esvee:1.0_beta--hdfd78af_0--1' }"
+        'https://depot.galaxyproject.org/singularity/hmftools-esvee:1.0_beta--hdfd78af_0' :
+        'quay.io/biocontainers/hmftools-esvee:1.0_beta--hdfd78af_0' }"
 
     input:
     tuple val(meta), path(tumor_prep_bam), path(normal_prep_bam), path(junctions_tsv), path(fragment_lengths_tsv)
