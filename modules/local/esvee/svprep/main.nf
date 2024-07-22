@@ -28,8 +28,16 @@ process ESVEE_PREP {
     script:
     def args = task.ext.args ?: ''
 
-    def sample_ids_string = String.join(",", meta.tumor_id, meta.normal_id)
-    def bam_files_string = String.join(",", tumor_bam.toString(), normal_bam.toString())
+    def sample_ids = [meta.tumor_id]
+    def bam_files = [tumor_bam.toString()]
+
+    if(meta.normal_id != null){
+        sample_ids.add(meta.normal_id)
+        bam_files.add(normal_bam.toString())
+    }
+
+    def sample_ids_string = String.join(",", sample_ids)
+    def bam_files_string = String.join(",", bam_files)
 
     """
     mkdir -p sv_prep/
@@ -50,6 +58,10 @@ process ESVEE_PREP {
         -output_dir sv_prep/ \\
         -threads ${task.cpus} \\
         -log_level DEBUG \\
+
+    # NOTE(LN): For tumor only mode, make empty output null.esvee.prep.bam for the reference sample so that nextflow doesn't complain about
+    # this missing file when emitting output
+    ${ (meta.normal_id == null) ? "touch sv_prep/${meta.normal_id}.esvee.prep.bam" : "" }
 
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":
