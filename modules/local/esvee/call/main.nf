@@ -18,9 +18,9 @@ process ESVEE_CALL {
 
     output:
     tuple val(meta), path("caller/"), emit: caller_dir
-    tuple val(meta), path("caller/${meta.tumor_id}.esvee.germline.vcf.gz"),   path("caller/${meta.tumor_id}.esvee.germline.vcf.gz.tbi"),   emit: germline_vcf
-    tuple val(meta), path("caller/${meta.tumor_id}.esvee.somatic.vcf.gz"),    path("caller/${meta.tumor_id}.esvee.somatic.vcf.gz.tbi"),    emit: somatic_vcf
     tuple val(meta), path("caller/${meta.tumor_id}.esvee.unfiltered.vcf.gz"), path("caller/${meta.tumor_id}.esvee.unfiltered.vcf.gz.tbi"), emit: unfiltered_vcf
+    tuple val(meta), path("caller/${meta.tumor_id}.esvee.somatic.vcf.gz"),    path("caller/${meta.tumor_id}.esvee.somatic.vcf.gz.tbi"),    emit: somatic_vcf
+    tuple val(meta), path("caller/${meta.tumor_id}.esvee.germline.vcf.gz"),   path("caller/${meta.tumor_id}.esvee.germline.vcf.gz.tbi"),   emit: germline_vcf
     path 'versions.yml', emit: versions
 
     when:
@@ -28,6 +28,8 @@ process ESVEE_CALL {
 
     script:
     def args = task.ext.args ?: ''
+
+    def reference_arg = meta.normal_id != null ? "-reference ${meta.normal_id}" : ""
 
     """
     mkdir -p caller/
@@ -39,7 +41,7 @@ process ESVEE_CALL {
         -Xmx${Math.round(task.memory.bytes * 0.95)} \\
         ${args} \\
         -sample ${meta.tumor_id} \\
-        -reference ${meta.normal_id} \\
+        ${reference_arg} \\
         -input_vcf ${ref_depth_vcf} \\
         -ref_genome_version ${genome_ver} \\
         -known_hotspot_file ${known_fusions} \\
@@ -48,6 +50,13 @@ process ESVEE_CALL {
         -repeat_mask_file ${repeatmasker_annotations} \\
         -output_dir caller/ \\
         -log_debug
+
+    # NOTE(LN): For tumor only mode, make empty output null.esvee.germline.vcf.gz for the reference sample so that nextflow doesn't complain
+    # about this missing file when emitting output
+    ${ if(meta.normal_id == null){
+        "touch caller/${meta.normal_id}.esvee.germline.vcf.gz"
+        "touch caller/${meta.normal_id}.esvee.germline.vcf.gz.tbi"
+    } }
 
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":
@@ -65,13 +74,13 @@ process ESVEE_CALL {
     .	.	.	.	.	.	.
     '
 
+    echo \${vcf_template} | gzip -c > caller/${meta.tumor_id}.esvee.unfiltered.vcf.gz
     echo \${vcf_template} | gzip -c > caller/${meta.tumor_id}.esvee.somatic.vcf.gz
     echo \${vcf_template} | gzip -c > caller/${meta.tumor_id}.esvee.germline.vcf.gz
-    echo \${vcf_template} | gzip -c > caller/${meta.tumor_id}.esvee.unfiltered.vcf.gz
 
+    touch caller/${meta.tumor_id}.esvee.unfiltered.vcf.gz.tbi
     touch caller/${meta.tumor_id}.esvee.somatic.vcf.gz.tbi
     touch caller/${meta.tumor_id}.esvee.germline.vcf.gz.tbi
-    touch caller/${meta.tumor_id}.esvee.unfiltered.vcf.gz.tbi
 
     echo -e '${task.process}:\\n  stub: noversions\\n' > versions.yml
     """
