@@ -8,7 +8,7 @@ process ESVEE_DEPTH_ANNOTATOR {
         'quay.io/biocontainers/hmftools-esvee:1.0_beta--hdfd78af_0' }"
 
     input:
-    tuple val(meta), path(tumor_bam), path(normal_bam), path(tumor_bai), path(normal_bai), path(raw_vcf)
+    tuple val(meta), path(tumor_bam), path(normal_bam), path(raw_vcf)
     path genome_fasta
     val genome_ver
 
@@ -23,8 +23,16 @@ process ESVEE_DEPTH_ANNOTATOR {
     script:
     def args = task.ext.args ?: ''
 
-    def sample_ids_string = String.join(",", meta.tumor_id, meta.normal_id)
-    def bam_files_string = String.join(",", tumor_bam.toString(), normal_bam.toString())
+    def sample_ids = [meta.tumor_id]
+    def bam_files = [tumor_bam.toString()]
+
+    if(meta.normal_id != null){
+        sample_ids.add(meta.normal_id)
+        bam_files.add(normal_bam.toString())
+    }
+
+    def sample_ids_string = String.join(",", sample_ids)
+    def bam_files_string = String.join(",", bam_files)
 
     """
     mkdir -p depth_annotation/

@@ -140,7 +140,7 @@ workflow ESVEE_CALLING {
             ESVEE_ASSEMBLE.out.raw_vcf,
         )
         .map { meta, tumor_bam, tumor_bai, normal_bam, normal_bai, raw_vcf ->
-            return [ meta, tumor_bam, tumor_bai, normal_bam, normal_bai, raw_vcf ]
+            return [ meta, tumor_bam, normal_bam, raw_vcf ]
         }
 
     // Run process
@@ -186,21 +186,18 @@ workflow ESVEE_CALLING {
     ch_somatic_out = Channel.empty()
         .mix(
             WorkflowOncoanalyser.restoreMeta(ESVEE_CALL.out.somatic_vcf, ch_inputs),
-            //ch_inputs_somatic_sorted.skip.map { meta -> [meta, [], []] },
             ch_inputs_sorted.skip.map { meta -> [meta, [], []] },
         )
 
     ch_germline_out = Channel.empty()
         .mix(
             WorkflowOncoanalyser.restoreMeta(ESVEE_CALL.out.germline_vcf, ch_inputs),
-//            ch_inputs_germline_sorted.skip.map { meta -> [meta, [], []] },
             ch_inputs_sorted.skip.map { meta -> [meta, [], []] },
         )
 
     ch_unfiltered_out = Channel.empty()
         .mix(
             WorkflowOncoanalyser.restoreMeta(ESVEE_CALL.out.unfiltered_vcf, ch_inputs),
-            //ch_inputs_somatic_sorted.skip.map { meta -> [meta, [], []] },
             ch_inputs_sorted.skip.map { meta -> [meta, [], []] },
         )
 
