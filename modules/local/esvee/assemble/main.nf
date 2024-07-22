@@ -26,6 +26,7 @@ process ESVEE_ASSEMBLE {
     script:
     def args = task.ext.args ?: ''
 
+    def reference_arg = meta.normal_id != null ? "-reference ${meta.normal_id}" : ""
     def reference_bam_arg = meta.normal_id != null ? "-reference_bam ${normal_prep_bam}" : ""
 
     """
@@ -38,8 +39,8 @@ process ESVEE_ASSEMBLE {
         -Xmx${Math.round(task.memory.bytes * 0.95)} \\
         ${args} \\
         -tumor ${meta.tumor_id} \\
-        -reference ${meta.normal_id} \\
         -tumor_bam ${tumor_prep_bam} \\
+        ${reference_arg} \\
         ${reference_bam_arg} \\
         -junction_files ${junctions_tsv} \\
         -ref_genome ${genome_fasta} \\
