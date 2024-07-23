@@ -152,14 +152,8 @@ class Utils {
                         } else if (key === Constants.FileType.BAM_REDUX) {
                             index_enum = Constants.FileType.BAI
                             index_str = 'bai'
-                        } else if (key === Constants.FileType.GRIDSS_VCF) {
-                            index_enum = Constants.FileType.GRIDSS_VCF_TBI
-                            index_str = 'tbi'
-                        } else if (key === Constants.FileType.GRIPSS_VCF) {
-                            index_enum = Constants.FileType.GRIPSS_VCF_TBI
-                            index_str = 'tbi'
-                        } else if (key === Constants.FileType.GRIPSS_UNFILTERED_VCF) {
-                            index_enum = Constants.FileType.GRIPSS_UNFILTERED_VCF_TBI
+                        } else if (key === Constants.FileType.ESVEE_VCF) {
+                            index_enum = Constants.FileType.ESVEE_VCF_TBI
                             index_str = 'tbi'
                         } else if (key === Constants.FileType.SAGE_VCF) {
                             index_enum = Constants.FileType.SAGE_VCF_TBI

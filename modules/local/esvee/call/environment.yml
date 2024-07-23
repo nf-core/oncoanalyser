@@ -1,7 +1,7 @@
-name: svprep_call
+name: esvee_call
 channels:
   - conda-forge
   - bioconda
   - defaults
 dependencies:
-  - bioconda::hmftools-sv-prep=1.2.4
+  - bioconda::hmftools-esvee=1.0_beta

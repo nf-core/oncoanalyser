@@ -1,14 +1,14 @@
-name: depth_annotator
-description: Annotate GRIDSS BAM with depth information
+name: esvee_depth_annotator
+description: Annotate ESVEE VCFs with depth information
 keywords:
   - depth
   - annotation
   - sv
 tools:
-  - svprep:
-      description: Selects reads associated with SV events for input to GRIDSS
-      homepage: https://github.com/hartwigmedical/hmftools/tree/master/sv-prep
-      documentation: https://github.com/hartwigmedical/hmftools/tree/master/sv-prep
+  - esvee:
+      description: Structural variant (SV) calling
+      homepage: https://github.com/hartwigmedical/hmftools/tree/master/esvee
+      documentation: https://github.com/hartwigmedical/hmftools/tree/master/esvee
       licence: ["GPL >=3"]
 input:
   - meta:

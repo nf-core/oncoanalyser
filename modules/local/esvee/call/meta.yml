@@ -1,13 +1,13 @@
-name: gridss_assemble
-description: Assemble SVs with GRIDSS
+name: esvee_call
+description: Call somatic SVs with ESVEE
 keywords:
-  - assemble
+  - calling
   - sv
 tools:
-  - gridss:
-      description: GRIDSS is a module software suite containing tools useful for the detection of genomic rearrangements.
-      homepage: https://github.com/PapenfussLab/gridss
-      documentation: https://github.com/PapenfussLab/gridss
+  - esvee:
+      description: Structural variant (SV) calling
+      homepage: https://github.com/hartwigmedical/hmftools/tree/master/esvee
+      documentation: https://github.com/hartwigmedical/hmftools/tree/master/esvee
       licence: ["GPL >=3"]
 input:
   - meta:
@@ -21,9 +21,9 @@ input:
   - bams_filtered:
       type: list
       description: List of filtered BAM files
-  - preprocess_dirs:
-      type: list
-      description: List of GRIDSS preprocess output directories
+  - assemble_dir:
+      type: directory
+      description: GRIDSS assemble output directory
   - labels:
       type: list
       description: List of labels corresponding to BAMs and GRIDSS preprocess output directories
@@ -56,9 +56,10 @@ output:
       description: |
         Groovy Map containing sample information
         e.g. [id: 'sample_id']
-  - assembly_dir:
-      type: directory
-      description: GRIDSS assemble output directory
+  - vcf:
+      type: file
+      description: VCF file
+      pattern: "*.{vcf.gz}"
   - versions:
       type: file
       description: File containing software versions

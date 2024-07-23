@@ -23,13 +23,6 @@ def checkPathParamList = [
     params.isofox_gc_ratios,
 ]
 
-// Conditional requirements
-if (run_config.stages.gridss) {
-    if (params.gridss_config !== null) {
-        checkPathParamList.add(params.gridss_config)
-    }
-}
-
 if (run_config.stages.lilac) {
     if (params.genome_version.toString() == '38' && params.genome_type == 'alt' && params.containsKey('ref_data_hla_slice_bed')) {
         checkPathParamList.add(params.ref_data_hla_slice_bed)
@@ -58,8 +51,7 @@ include { BAMTOOLS_METRICS      } from '../subworkflows/local/bamtools_metrics'
 include { CHORD_PREDICTION      } from '../subworkflows/local/chord_prediction'
 include { COBALT_PROFILING      } from '../subworkflows/local/cobalt_profiling'
 include { CUPPA_PREDICTION      } from '../subworkflows/local/cuppa_prediction'
-include { GRIDSS_SVPREP_CALLING } from '../subworkflows/local/gridss_svprep_calling'
-include { GRIPSS_FILTERING      } from '../subworkflows/local/gripss_filtering'
+include { ESVEE_CALLING         } from '../subworkflows/local/esvee_calling'
 include { ISOFOX_QUANTIFICATION } from '../subworkflows/local/isofox_quantification'
 include { LILAC_CALLING         } from '../subworkflows/local/lilac_calling'
 include { LINX_ANNOTATION       } from '../subworkflows/local/linx_annotation'
@@ -294,70 +286,40 @@ workflow WGTS {
     }
 
     //
-    // SUBWORKFLOW: Call structural variants with GRIDSS
+    // SUBWORKFLOW: Call structural variants with ESVEE
     //
-    // channel: [ meta, gridss_vcf ]
-    ch_gridss_out = Channel.empty()
-    if (run_config.stages.gridss) {
+    // channel: [ meta, esvee_vcf ]
+    ch_esvee_germline_out = Channel.empty()
+    ch_esvee_somatic_out = Channel.empty()
+    if (run_config.stages.esvee) {
 
-        GRIDSS_SVPREP_CALLING(
+        ESVEE_CALLING(
             ch_inputs,
-            ch_process_dna_tumor_out,
-            ch_process_dna_normal_out,
+            ch_redux_dna_tumor_out,
+            ch_redux_dna_normal_out,
             ref_data.genome_fasta,
             ref_data.genome_version,
             ref_data.genome_fai,
             ref_data.genome_dict,
-            ref_data.genome_gridss_index,
-            hmf_data.gridss_region_blocklist,
+            ref_data.genome_img,
             hmf_data.sv_prep_blocklist,
             hmf_data.known_fusions,
-            gridss_config,
-        )
-
-        ch_versions = ch_versions.mix(GRIDSS_SVPREP_CALLING.out.versions)
-
-        ch_gridss_out = ch_gridss_out.mix(GRIDSS_SVPREP_CALLING.out.vcf)
-
-    } else {
-
-        ch_gridss_out = ch_inputs.map { meta -> [meta, []] }
-
-    }
-
-    //
-    // SUBWORKFLOW: Run GRIPSS to filter GRIDSS SV calls
-    //
-    // channel: [ meta, gripss_vcf, gripss_tbi ]
-    ch_gripss_somatic_out = Channel.empty()
-    ch_gripss_germline_out = Channel.empty()
-    ch_gripss_somatic_unfiltered_out = Channel.empty()
-    if (run_config.stages.gripss) {
-
-        GRIPSS_FILTERING(
-            ch_inputs,
-            ch_gridss_out,
-            ref_data.genome_fasta,
-            ref_data.genome_version,
-            ref_data.genome_fai,
             hmf_data.gridss_pon_breakends,
             hmf_data.gridss_pon_breakpoints,
-            hmf_data.known_fusions,
             hmf_data.repeatmasker_annotations,
-            [],  // target_region_bed
+            hmf_data.decoy_sequences_image,
+            hmf_data.unmap_regions,
         )
 
-        ch_versions = ch_versions.mix(GRIPSS_FILTERING.out.versions)
+        ch_versions = ch_versions.mix(ESVEE_CALLING.out.versions)
 
-        ch_gripss_somatic_out = ch_gripss_somatic_out.mix(GRIPSS_FILTERING.out.somatic)
-        ch_gripss_germline_out = ch_gripss_germline_out.mix(GRIPSS_FILTERING.out.germline)
-        ch_gripss_somatic_unfiltered_out = ch_gripss_somatic_unfiltered_out.mix(GRIPSS_FILTERING.out.somatic_unfiltered)
+        ch_esvee_germline_out = ch_esvee_germline_out.mix(ESVEE_CALLING.out.germline_vcf)
+        ch_esvee_somatic_out = ch_esvee_somatic_out.mix(ESVEE_CALLING.out.somatic_vcf)
 
     } else {
 
-        ch_gripss_somatic_out = ch_inputs.map { meta -> [meta, [], []] }
-        ch_gripss_germline_out = ch_inputs.map { meta -> [meta, [], []] }
-        ch_gripss_somatic_unfiltered_out = ch_inputs.map { meta -> [meta, [], []] }
+        ch_esvee_germline_out = ch_inputs.map { meta -> [meta, [], []] }
+        ch_esvee_somatic_out = ch_inputs.map { meta -> [meta, [], []] }
 
     }
 
@@ -461,9 +423,8 @@ workflow WGTS {
             ch_cobalt_out,
             ch_pave_somatic_out,
             ch_pave_germline_out,
-            ch_gripss_somatic_out,
-            ch_gripss_germline_out,
-            ch_gripss_somatic_unfiltered_out,
+            ch_esvee_somatic_out,
+            ch_esvee_germline_out,
             ref_data.genome_fasta,
             ref_data.genome_version,
             ref_data.genome_fai,
