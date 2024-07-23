@@ -47,8 +47,6 @@ process ESVEE_ASSEMBLE {
         -ref_genome_version ${genome_ver} \\
         -decoy_genome ${decoy_sequences_image} \\
         -write_types "JUNC_ASSEMBLY;ALIGNMENT;ALIGNMENT_DATA;BREAKEND;VCF" \\
-        -asm_ref_base_write_max 0 \\
-        -phase_process_limit 500 \\
         -output_dir assemble/ \\
         -threads ${task.cpus} \\
         -perf_log_time 10 \\
