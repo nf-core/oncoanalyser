@@ -112,9 +112,9 @@ _No outputs are published directly from STAR, see [Picard MarkDuplicates](#picar
 
 </details>
 
-[MarkDups](https://github.com/hartwigmedical/hmftools/tree/master/mark-dups) applies various alignment post-processing
-routines such as duplicate marking and unmapping of problematic regions. It can also handle UMIs when configured to do
-so.
+[MarkDups](https://github.com/hartwigmedical/hmftools/tree/mark-dups-v1.1.7/mark-dups) applies various alignment
+post-processing routines such as duplicate marking and unmapping of problematic regions. It can also handle UMIs when
+configured to do so.
 
 _MarkDups is only run on DNA alignments_
 
