@@ -25,9 +25,13 @@
 ## Introduction
 
 **nf-core/oncoanalyser** is a Nextflow implementation of the comprehensive cancer DNA/RNA analysis and reporting
-workflow from the Hartwig Medical Foundation. Both the Hartwig WGS/WTS workflow and targeted sequencing workflow are
-available in oncoanalyser. The targeted sequencing workflow has built-in support for the TSO500 panel and can also run
-custom panels with externally-generated normalisation data.
+workflow from the Hartwig Medical Foundation (HMF). The workflow starts from FASTQ or BAM and calls genomic variants,
+analyses transcript data, infers important biomarkers and features (e.g. TMB, HRD, mutational signatures, HLA alleles,
+oncoviral content, tissue of origin, etc), annotates and interprets results in the clinical context, and more.
+
+Both the Hartwig WGS/WTS workflow and targeted sequencing workflow are available in oncoanalyser. The targeted
+sequencing workflow has built-in support for the TSO500 panel and can also run custom panels with externally-generated
+normalisation data.
 
 The key analysis results for each sample are summarised and presented in an ORANGE report (summary page excerpt shown
 below from _[COLO829_wgts.orange_report.pdf](https://pub-29f2e5b2b7384811bdbbcba44f8b5083.r2.dev/oncoanalyser/other/example_report/COLO829_wgts.orange_report.pdf)_):
