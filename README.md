@@ -29,8 +29,8 @@ workflow from the Hartwig Medical Foundation (HMF). The workflow starts from FAS
 analyses transcript data, infers important biomarkers and features (e.g. TMB, HRD, mutational signatures, HLA alleles,
 oncoviral content, tissue of origin, etc), annotates and interprets results in the clinical context, and more.
 
-Both the Hartwig WGS/WTS workflow and targeted sequencing workflow are available in oncoanalyser. The targeted
-sequencing workflow has built-in support for the TSO500 panel and can also run custom panels with externally-generated
+Both the HMF WGS/WTS workflow and targeted sequencing workflow are available in oncoanalyser. The targeted sequencing
+workflow has built-in support for the TSO500 panel and can also run custom panels with externally-generated
 normalisation data.
 
 The key analysis results for each sample are summarised and presented in an ORANGE report (summary page excerpt shown
@@ -38,7 +38,7 @@ below from _[COLO829_wgts.orange_report.pdf](https://pub-29f2e5b2b7384811bdbbcba
 
 <p align="center"><img width="750" src="docs/images/COLO829_wgts.orange_report.summary_section.png"></p>
 
-For detailed information on each component of the Hartwig workflow, please refer to
+For detailed information on each component of the HMF workflow, please refer to
 [hartwigmedical/hmftools](https://github.com/hartwigmedical/hmftools/).
 
 ## Pipeline summary
