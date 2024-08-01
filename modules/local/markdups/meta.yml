@@ -6,8 +6,8 @@ keywords:
 tools:
   - MarkDups:
       description: Identify and mark duplicate reads ifrom alignment data
-      homepage: https://github.com/hartwigmedical/hmftools/tree/master/mark-dups
-      documentation: https://github.com/hartwigmedical/hmftools/tree/master/mark-dups
+      homepage: https://github.com/hartwigmedical/hmftools/tree/mark-dups-v1.1.7/mark-dups
+      documentation: https://github.com/hartwigmedical/hmftools/tree/mark-dups-v1.1.7/mark-dups
       licence: ["GPL v3"]
 input:
   - meta:
