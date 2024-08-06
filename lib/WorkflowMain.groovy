@@ -178,7 +178,7 @@ class WorkflowMain {
 
         if (run_mode === Constants.RunMode.TARGETED) {
 
-            if (!params.containsKey('panel')) {
+            if (!params.containsKey('panel') || params.panel === null) {
 
                 def panels = Constants.PANELS_DEFINED.join('\n    - ')
                 log.error "\n~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n" +
