@@ -193,8 +193,8 @@ workflow LILAC_CALLING {
                 nbai_dna,
                 tbam_dna,
                 tbai_dna,
-                tbam_rna,
-                tbai_rna,
+                Utils.selectCurrentOrExisting(tbam_rna, meta, Constants.INPUT.BAM_RNA_TUMOR),
+                Utils.selectCurrentOrExisting(tbai_rna, meta, Constants.INPUT.BAI_RNA_TUMOR),
                 Utils.selectCurrentOrExisting(purple_dir, meta, Constants.INPUT.PURPLE_DIR),
             ]
         }
