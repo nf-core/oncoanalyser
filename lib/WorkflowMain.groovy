@@ -182,9 +182,9 @@ class WorkflowMain {
 
                 def panels = Constants.PANELS_DEFINED.join('\n    - ')
                 log.error "\n~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n" +
-                    "  A panel is required to be set using the --panel CLI argument or in a \n" +
-                    "  configuration file.\n" +
-                    "  Currently, the available panels are:\n" +
+                    "  A panel is required to be set using the --panel CLI argument or in a\n" +
+                    "  configuration file when running in targeted mode.\n" +
+                    "  Currently, the available built-in panels are:\n" +
                     "    - ${panels}\n" +
                     "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
                 Nextflow.exit(1)
