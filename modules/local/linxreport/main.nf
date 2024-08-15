@@ -37,7 +37,7 @@ process LINXREPORT {
 
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":
-        R: \$(R --version | head -n1 | sed 's/^R version \\([0-9.]\\+\\).\\+/\\1/')
+        r: \$(R --version | head -n1 | sed 's/^R version \\([0-9.]\\+\\).\\+/\\1/')
         linxreport: \$(linxreport.R --version)
     END_VERSIONS
     """
