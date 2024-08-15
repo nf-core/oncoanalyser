@@ -45,14 +45,6 @@ input:
   - pon_artefacts:
       type: file
       description: Taregeted sequencing PON artefacts file (optional)
-  - sage_blocklist_regions:
-      type: file
-      description: SAGE regions blocklist file
-      pattern: "*.{bed}"
-  - sage_blocklist_sites:
-      type: file
-      description: SAGE sites blocklist file
-      pattern: "*.{vcf.gz}"
   - clinvar_annotations:
       type: file
       description: ClinVar annotations VCF file
