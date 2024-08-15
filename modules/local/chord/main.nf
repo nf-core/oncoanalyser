@@ -70,8 +70,8 @@ process CHORD {
 
     sink('versions.yml')
     writeLines('"${task.process}":')
-    writeLines(paste('    CHORD:', packageVersion('CHORD')))
-    writeLines(paste('    mutSigExtractor:', packageVersion('mutSigExtractor')))
+    writeLines(paste('    chord:', packageVersion('CHORD')))
+    writeLines(paste('    mutsigextractor:', packageVersion('mutSigExtractor')))
     sink()
     """
 
