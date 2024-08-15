@@ -99,6 +99,8 @@ workflow TARGETED {
     hmf_data = PREPARE_REFERENCE.out.hmf_data
     panel_data = PREPARE_REFERENCE.out.panel_data
 
+    ch_versions = ch_versions.mix(PREPARE_REFERENCE.out.versions)
+
     // Set GRIDSS config
     gridss_config = params.gridss_config !== null ? file(params.gridss_config) : hmf_data.gridss_config
 

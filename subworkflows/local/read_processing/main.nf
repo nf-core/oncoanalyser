@@ -92,6 +92,8 @@ workflow READ_PROCESSING {
         has_umis,
     )
 
+    ch_versions = ch_versions.mix(MARKDUPS.out.versions)
+
     // Sort into a tumor and normal channel
     ch_markdups_out = MARKDUPS.out.bam
         .branch { meta_markdups, bam, bai ->
