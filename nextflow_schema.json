@@ -2,7 +2,7 @@
     "$schema": "http://json-schema.org/draft-07/schema",
     "$id": "https://raw.githubusercontent.com/nf-core/oncoanalyser/master/nextflow_schema.json",
     "title": "nf-core/oncoanalyser pipeline parameters",
-    "description": "A comprehensive cancer WGS/WTS analysis and reporting pipeline",
+    "description": "A comprehensive cancer DNA/RNA analysis and reporting pipeline",
     "type": "object",
     "definitions": {
         "input_output_options": {
@@ -15,9 +15,10 @@
                 "input": {
                     "type": "string",
                     "format": "file-path",
+                    "exists": true,
+                    "schema": "assets/schema_input.json",
                     "mimetype": "text/csv",
                     "pattern": "^\\S+\\.csv$",
-                    "schema": "assets/schema_input.json",
                     "description": "Path to comma-separated file containing information about the samples in the experiment.",
                     "help_text": "You will need to create a design file with information about the samples in your experiment before running the pipeline. Use this parameter to specify its location. It has to be a comma-separated file with 3 columns, and a header row. See [usage docs](https://nf-co.re/oncoanalyser/usage#samplesheet-input).",
                     "fa_icon": "fas fa-file-csv"
@@ -27,7 +28,15 @@
                     "format": "directory-path",
                     "description": "The output directory where the results will be saved. You have to use absolute paths to storage on Cloud infrastructure.",
                     "fa_icon": "fas fa-folder-open"
-                },
+                }
+            }
+        },
+        "other_options": {
+            "title": "Other options",
+            "type": "object",
+            "fa_icon": "fas fa-book",
+            "description": "Other options specific to this pipeline.",
+            "properties": {
                 "email": {
                     "type": "string",
                     "description": "Email address for completion summary.",
@@ -35,40 +44,116 @@
                     "help_text": "Set this parameter to your e-mail address to get a summary e-mail with details of the run sent to you when the workflow exits. If set in your user config file (`~/.nextflow/config`) then you don't need to specify this on the command line for every run.",
                     "pattern": "^([a-zA-Z0-9_\\-\\.]+)@([a-zA-Z0-9_\\-\\.]+)\\.([a-zA-Z]{2,5})$"
                 },
-                "multiqc_title": {
+                "mode": {
                     "type": "string",
-                    "description": "MultiQC report title. Printed as page header, used for filename if not otherwise specified.",
-                    "fa_icon": "fas fa-file-signature"
+                    "description": "Workflow run mode.",
+                    "fa_icon": "fas fa-diagram-project",
+                    "pattern": "^(wgts|targeted)"
+                },
+                "panel": {
+                    "type": "string",
+                    "description": "Name of panel to use.",
+                    "fa_icon": "fas fa-book"
+                },
+                "force_genome": {
+                    "type": "boolean",
+                    "description": "Skip check for restricted genome.",
+                    "default": false,
+                    "fa_icon": "fas fa-palette"
+                },
+                "processes_manual": {
+                    "type": "boolean",
+                    "description": "Run only processes manually provided in processes_include.",
+                    "fa_icon": "fas fa-diagram-project"
+                },
+                "processes_exclude": {
+                    "type": "string",
+                    "description": "Pipeline processes to exclude.",
+                    "fa_icon": "fas fa-diagram-project"
+                },
+                "processes_include": {
+                    "type": "string",
+                    "description": "Pipeline processes to include.",
+                    "fa_icon": "fas fa-diagram-project"
+                },
+                "prepare_reference_only": {
+                    "type": "boolean",
+                    "description": "Prepare and write reference output only.",
+                    "default": false,
+                    "fa_icon": "fas fa-diagram-project"
+                },
+                "create_stub_placeholders": {
+                    "type": "boolean",
+                    "description": "Create placeholders for reference data during stub run.",
+                    "default": false,
+                    "fa_icon": "fas fa-diagram-project"
+                },
+                "max_fastq_records": {
+                    "type": "integer",
+                    "description": "When positive, will use fastp to split fastq files so that each resultant fastq file has no more than max_fastq_records records. When nonpositive, fastp is not used and the provided fastq files are passed as-is to the aligner.",
+                    "fa_icon": "fas fa-cog"
+                },
+                "gridss_config": {
+                    "type": "string",
+                    "description": "Path to GRIDSS configuration file.",
+                    "fa_icon": "fas fa-cog"
+                },
+                "isofox_read_length": {
+                    "type": "integer",
+                    "description": "User defined RNA read length used for Isofox.",
+                    "fa_icon": "fas fa-cog"
+                },
+                "isofox_gc_ratios": {
+                    "type": "string",
+                    "description": "User defined Isofox expected GC ratios file.",
+                    "fa_icon": "fas fa-cog"
+                },
+                "isofox_counts": {
+                    "type": "string",
+                    "description": "User defined Isofox expected counts files (read length dependent).",
+                    "fa_icon": "fas fa-cog"
+                },
+                "isofox_tpm_norm": {
+                    "type": "string",
+                    "description": "User defined Isofox TPM normalisation file for panel data.",
+                    "fa_icon": "fas fa-cog"
+                },
+                "isofox_gene_ids": {
+                    "type": "string",
+                    "description": "User defined Isofox gene list file for panel data.",
+                    "fa_icon": "fas fa-cog"
+                },
+                "isofox_functions": {
+                    "type": "string",
+                    "description": "Semicolon-separated list of Isofox functions to run",
+                    "default": "TRANSCRIPT_COUNTS;ALT_SPLICE_JUNCTIONS;FUSIONS;RETAINED_INTRONS",
+                    "fa_icon": "fas fa-cog"
                 }
             }
         },
-        "reference_genome_options": {
-            "title": "Reference genome options",
+        "reference_data_options": {
+            "title": "Reference data options",
             "type": "object",
             "fa_icon": "fas fa-dna",
-            "description": "Reference genome related files and options required for the workflow.",
+            "description": "Reference data files and options required for the workflow.",
             "properties": {
                 "genome": {
                     "type": "string",
-                    "description": "Name of iGenomes reference.",
-                    "fa_icon": "fas fa-book",
-                    "help_text": "If using a reference genome configured in the pipeline using iGenomes, use this parameter to give the ID for the reference. This is then used to build the full paths for all required reference genome files e.g. `--genome GRCh38`. \n\nSee the [nf-core website docs](https://nf-co.re/usage/reference_genomes) for more details."
+                    "description": "Name of genome reference.",
+                    "fa_icon": "fas fa-book"
                 },
-                "fasta": {
+                "genome_version": {
                     "type": "string",
-                    "format": "file-path",
-                    "mimetype": "text/plain",
-                    "pattern": "^\\S+\\.fn?a(sta)?(\\.gz)?$",
-                    "description": "Path to FASTA genome file.",
-                    "help_text": "This parameter is *mandatory* if `--genome` is not specified. If you don't have a BWA index available this will be generated for you automatically. Combine with `--save_reference` to save BWA index for future runs.",
-                    "fa_icon": "far fa-file-code"
+                    "description": "Version of reference genome.",
+                    "fa_icon": "far fa-file-code",
+                    "enum": ["37", "38", 37, 38],
+                    "hidden": true
                 },
-                "igenomes_base": {
+                "genome_type": {
                     "type": "string",
-                    "format": "directory-path",
-                    "description": "Directory / URL base for iGenomes references.",
-                    "default": "s3://ngi-igenomes/igenomes",
-                    "fa_icon": "fas fa-cloud-download-alt",
+                    "description": "Type of reference genome.",
+                    "fa_icon": "far fa-file-code",
+                    "enum": ["alt", "no_alt"],
                     "hidden": true
                 },
                 "igenomes_ignore": {
@@ -76,7 +161,28 @@
                     "description": "Do not load the iGenomes reference config.",
                     "fa_icon": "fas fa-ban",
                     "hidden": true,
-                    "help_text": "Do not load `igenomes.config` when running the pipeline. You may choose this option if you observe clashes between custom parameters and those supplied in `igenomes.config`."
+                    "help_text": "Do not load `igenomes.config` when running the pipeline. You may choose this option if you observe c lashes between custom parameters and those supplied in `igenomes.config`."
+                },
+                "ref_data_hmf_data_path": {
+                    "type": "string",
+                    "description": "Path to HMF data.",
+                    "fa_icon": "far fa-folder-open"
+                },
+                "ref_data_panel_data_path": {
+                    "type": "string",
+                    "description": "Path to panel data.",
+                    "fa_icon": "far fa-folder-open"
+                },
+                "ref_data_virusbreakenddb_path": {
+                    "type": "string",
+                    "description": "Path to VIRUSBreakend database (directory or tarball).",
+                    "fa_icon": "far fa-file-code"
+                },
+                "ref_data_hla_slice_bed": {
+                    "format": "file-path",
+                    "pattern": "^\\S+\\.bed$",
+                    "description": "Path to HLA slice BED file.",
+                    "fa_icon": "far fa-file-code"
                 }
             }
         },
@@ -157,7 +263,7 @@
                     "description": "Maximum amount of time that can be requested for any single job.",
                     "default": "240.h",
                     "fa_icon": "far fa-clock",
-                    "pattern": "^(\\d+\\.?\\s*(s|m|h|day)\\s*)+$",
+                    "pattern": "^(\\d+\\.?\\s*(s|m|h|d|day)\\s*)+$",
                     "hidden": true,
                     "help_text": "Use to set an upper-limit for the time requirement for each process. Should be a string in the format integer-unit e.g. `--max_time '2.h'`"
                 }
@@ -173,6 +279,12 @@
                 "help": {
                     "type": "boolean",
                     "description": "Display help text.",
+                    "fa_icon": "fas fa-question-circle",
+                    "hidden": true
+                },
+                "version": {
+                    "type": "boolean",
+                    "description": "Display version and exit.",
                     "fa_icon": "fas fa-question-circle",
                     "hidden": true
                 },
@@ -199,14 +311,6 @@
                     "fa_icon": "fas fa-remove-format",
                     "hidden": true
                 },
-                "max_multiqc_email_size": {
-                    "type": "string",
-                    "description": "File size limit when attaching MultiQC reports to summary emails.",
-                    "pattern": "^\\d+(\\.\\d+)?\\.?\\s*(K|M|G|T)?B$",
-                    "default": "25.MB",
-                    "fa_icon": "fas fa-file-upload",
-                    "hidden": true
-                },
                 "monochrome_logs": {
                     "type": "boolean",
                     "description": "Do not use coloured log outputs.",
@@ -217,31 +321,7 @@
                     "type": "string",
                     "description": "Incoming hook URL for messaging service",
                     "fa_icon": "fas fa-people-group",
-                    "help_text": "Incoming hook URL for messaging service. Currently, only MS Teams is supported.",
-                    "hidden": true
-                },
-                "multiqc_config": {
-                    "type": "string",
-                    "description": "Custom config file to supply to MultiQC.",
-                    "fa_icon": "fas fa-cog",
-                    "hidden": true
-                },
-                "multiqc_logo": {
-                    "type": "string",
-                    "description": "Custom logo file to supply to MultiQC. File name must also be set in the MultiQC config file",
-                    "fa_icon": "fas fa-image",
-                    "hidden": true
-                },
-                "multiqc_methods_description": {
-                    "type": "string",
-                    "description": "Custom MultiQC yaml file containing HTML including a methods description.",
-                    "fa_icon": "fas fa-cog"
-                },
-                "tracedir": {
-                    "type": "string",
-                    "description": "Directory to keep pipeline Nextflow logs and reports.",
-                    "default": "${params.outdir}/pipeline_info",
-                    "fa_icon": "fas fa-cogs",
+                    "help_text": "Incoming hook URL for messaging service. Currently, MS Teams and Slack are supported.",
                     "hidden": true
                 },
                 "validate_params": {
@@ -251,18 +331,26 @@
                     "fa_icon": "fas fa-check-square",
                     "hidden": true
                 },
-                "show_hidden_params": {
+                "validationShowHiddenParams": {
                     "type": "boolean",
                     "fa_icon": "far fa-eye-slash",
                     "description": "Show all params when using `--help`",
                     "hidden": true,
                     "help_text": "By default, parameters set as _hidden_ in the schema are not shown on the command line when a user runs with `--help`. Specifying this option will tell the pipeline to show all parameters."
                 },
-                "enable_conda": {
+                "validationFailUnrecognisedParams": {
                     "type": "boolean",
-                    "description": "Run this workflow with Conda. You can also use '-profile conda' instead of providing this parameter.",
+                    "fa_icon": "far fa-check-circle",
+                    "description": "Validation of parameters fails when an unrecognised parameter is found.",
                     "hidden": true,
-                    "fa_icon": "fas fa-bacon"
+                    "help_text": "By default, when an unrecognised parameter is found, it returns a warinig."
+                },
+                "validationLenientMode": {
+                    "type": "boolean",
+                    "fa_icon": "far fa-check-circle",
+                    "description": "Validation of parameters in lenient more.",
+                    "hidden": true,
+                    "help_text": "Allows string values that are parseable as numbers or booleans. For further information see [JSONSchema docs](https://github.com/everit-org/json-schema#lenient-mode)."
                 }
             }
         }
@@ -272,7 +360,10 @@
             "$ref": "#/definitions/input_output_options"
         },
         {
-            "$ref": "#/definitions/reference_genome_options"
+            "$ref": "#/definitions/other_options"
+        },
+        {
+            "$ref": "#/definitions/reference_data_options"
         },
         {
             "$ref": "#/definitions/institutional_config_options"

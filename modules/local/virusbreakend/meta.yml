@@ -1,0 +1,63 @@
+name: virusbreakend
+description: Detect viral integration from WGS data
+keywords:
+  - viral
+  - integration
+tools:
+  - virusbreakend:
+      description: Performs detection of viral intergation from WGS data
+      homepage: https://github.com/PapenfussLab/gridss/blob/master/VIRUSBreakend_Readme.md
+      documentation: https://github.com/PapenfussLab/gridss/blob/master/VIRUSBreakend_Readme.md
+      licence: ["GPL v3"]
+input:
+  - meta:
+      type: map
+      description: |
+        Groovy Map containing sample information
+        e.g. [id: 'sample_id']
+  - bam:
+      type: file
+      description: BAM file
+      pattern: "*.{bam}"
+  - genome_fasta:
+      type: file
+      description: Reference genome assembly FASTA file
+      pattern: "*.{fa,fasta}"
+  - genome_fai:
+      type: file
+      description: Reference genome assembly fai file
+      pattern: "*.{fai}"
+  - genome_dict:
+      type: file
+      description: Reference genome assembly dict file
+      pattern: "*.{dict}"
+  - genome_gridss_index:
+      type: file
+      description: Reference genome assembly GRIDSS index file
+      pattern: "*.{gridsscache}"
+  - virusbreakenddb:
+      type: directory
+      description: VIRUSBreakend database directory
+  - gridss_config:
+      type: file
+      description: GRIDSS configuration file (optional)
+output:
+  - meta:
+      type: map
+      description: |
+        Groovy Map containing sample information
+        e.g. [id: 'sample_id']
+  - tsv:
+      type: file
+      description: Summary file
+      pattern: "*.{tsv}"
+  - vcf:
+      type: file
+      description: VCF file
+      pattern: "*.{vcf.gz}"
+  - versions:
+      type: file
+      description: File containing software versions
+      pattern: "versions.yml"
+authors:
+  - "@scwatts"
