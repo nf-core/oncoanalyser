@@ -267,6 +267,13 @@ class Utils {
 
             }
 
+            // Do not allow donor sample without normal sample
+            if (Utils.hasDonorDna(meta) && ! Utils.hasNormalDna(meta)) {
+                log.error "a donor sample but not normal sample was found for ${meta.group_id}\n\n" +
+                    "Analysis with a donor sample requires a normal sample."
+                Nextflow.exit(1)
+            }
+
             // Apply some required restrictions to targeted mode
             if (run_config.mode === Constants.RunMode.TARGETED) {
 
