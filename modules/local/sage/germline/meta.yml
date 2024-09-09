@@ -33,14 +33,6 @@ input:
       type: file
       description: Normal BAI file
       pattern: "*.{bai}"
-  - donor_bam:
-      type: file
-      description: Donor BAM file
-      pattern: "*.{bam}"
-  - donor_bai:
-      type: file
-      description: Donor BAI file
-      pattern: "*.{bai}"
   - genome_fasta:
       type: file
       description: Reference genome assembly FASTA file

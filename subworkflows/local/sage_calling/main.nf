@@ -80,7 +80,7 @@ workflow SAGE_CALLING {
         }
 
     // Create process input channel
-    // channel: [ meta_sage, tumor_bam, normal_bam, donor_bam, tumor_bai, normal_bai, donor_bai ]
+    // channel: [ meta_sage, tumor_bam, normal_bam, tumor_bai, normal_bai ]
     ch_sage_germline_inputs = ch_inputs_germline_sorted.runnable
         .map { meta, tumor_bam, tumor_bai, normal_bam, normal_bai, donor_bam, donor_bai ->
 
@@ -91,7 +91,7 @@ workflow SAGE_CALLING {
                 normal_id: Utils.getNormalDnaSampleName(meta),
             ]
 
-            return [meta_sage, tumor_bam, normal_bam, donor_bam, tumor_bai, normal_bai, donor_bai]
+            return [meta_sage, tumor_bam, normal_bam, tumor_bai, normal_bai]
         }
 
     // Run process
