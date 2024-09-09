@@ -492,6 +492,7 @@ workflow WGTS {
             ref_data.genome_version,
             ref_data.genome_fai,
             ref_data.genome_dict,
+            run_config.stages.orange,  // run_germline [run for ORANGE but not Neo]
         )
 
         ch_versions = ch_versions.mix(SAGE_APPEND.out.versions)
