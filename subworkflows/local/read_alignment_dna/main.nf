@@ -223,7 +223,7 @@ workflow READ_ALIGNMENT_DNA {
     emit:
     dna_tumor  = ch_bam_tumor_out  // channel: [ meta, [bam, ...], [bai, ...] ]
     dna_normal = ch_bam_normal_out // channel: [ meta, [bam, ...], [bai, ...] ]
-    dna_donor = ch_bam_donor_out // channel: [ meta, [bam, ...], [bai, ...] ]
+    dna_donor  = ch_bam_donor_out  // channel: [ meta, [bam, ...], [bai, ...] ]
 
     versions   = ch_versions       // channel: [ versions.yml ]
 }

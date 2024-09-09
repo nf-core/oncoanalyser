@@ -14,7 +14,7 @@ workflow SAGE_CALLING {
     ch_inputs                    // channel: [mandatory] [ meta ]
     ch_tumor_bam                 // channel: [mandatory] [ meta, bam, bai ]
     ch_normal_bam                // channel: [mandatory] [ meta, bam, bai ]
-    ch_donor_bam                // channel: [optional] [ meta, bam, bai ]
+    ch_donor_bam                 // channel: [mandatory] [ meta, bam, bai ]
 
     // Reference data
     genome_fasta                 // channel: [mandatory] /path/to/genome_fasta
