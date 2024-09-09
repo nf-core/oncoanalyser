@@ -180,9 +180,9 @@ workflow WGTS {
 
     } else {
 
-        ch_process_dna_tumor_out = ch_inputs.map { meta -> [meta, []] }
-        ch_process_dna_normal_out = ch_inputs.map { meta -> [meta, []] }
-        ch_process_dna_donor_out = ch_inputs.map { meta -> [meta, []] }
+        ch_process_dna_tumor_out = ch_inputs.map { meta -> [meta, [], []] }
+        ch_process_dna_normal_out = ch_inputs.map { meta -> [meta, [], []] }
+        ch_process_dna_donor_out = ch_inputs.map { meta -> [meta, [], []] }
 
     }
 
