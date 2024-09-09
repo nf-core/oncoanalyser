@@ -13,7 +13,7 @@ workflow READ_PROCESSING {
     ch_inputs     // channel: [mandatory] [ meta ]
     ch_dna_tumor  // channel: [mandatory] [ meta, [bam, ...], [bai, ...] ]
     ch_dna_normal // channel: [mandatory] [ meta, [bam, ...], [bai, ...] ]
-    ch_dna_donor // channel: [optional] [ meta, [bam, ...], [bai, ...] ]
+    ch_dna_donor  // channel: [mandatory] [ meta, [bam, ...], [bai, ...] ]
 
     // Reference data
     genome_fasta  // channel: [mandatory] /path/to/genome_fasta
@@ -144,7 +144,7 @@ workflow READ_PROCESSING {
     emit:
     dna_tumor  = ch_bam_tumor_out  // channel: [ meta, bam, bai ]
     dna_normal = ch_bam_normal_out // channel: [ meta, bam, bai ]
-    dna_donor = ch_bam_donor_out // channel: [ meta, bam, bai ]
+    dna_donor  = ch_bam_donor_out  // channel: [ meta, bam, bai ]
 
     versions   = ch_versions       // channel: [ versions.yml ]
 }

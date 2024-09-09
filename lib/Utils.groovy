@@ -423,7 +423,7 @@ class Utils {
     }
 
 
-    // Files - tumor
+    // Files - Tumor DNA
     static public getTumorDnaFastq(meta) {
         return getTumorDnaSample(meta).getOrDefault(Constants.FileType.FASTQ, null)
     }
@@ -454,7 +454,7 @@ class Utils {
     }
 
 
-    // Files - normal
+    // Files - Normal DNA
     static public getNormalDnaFastq(meta) {
         return getNormalDnaSample(meta).getOrDefault(Constants.FileType.FASTQ, null)
     }
@@ -492,7 +492,7 @@ class Utils {
     }
 
 
-    // Files - donor
+    // Files - Donor DNA
     static public getDonorDnaFastq(meta) {
         return getDonorDnaSample(meta).getOrDefault(Constants.FileType.FASTQ, null)
     }
@@ -523,7 +523,7 @@ class Utils {
     }
 
 
-    // Files - RNA
+    // Files - Tumor RNA
     static public getTumorRnaFastq(meta) {
         return getTumorRnaSample(meta).getOrDefault(Constants.FileType.FASTQ, null)
     }
