@@ -191,14 +191,19 @@ class WorkflowMain {
 
             } else if (!Constants.PANELS_DEFINED.contains(params.panel)) {
 
-                if (!params.containsKey('force_panel') && !params.force_panel) {
+                if (params.containsKey('force_panel') && params.force_panel) {
+                    log.warn "provided panel ${params.panel} does not have built-in support but forcing to proceed"
+                } else {
                     def panels = Constants.PANELS_DEFINED.join('\n    - ')
                     log.error "\n~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n" +
-                        "  The ${params.panel} is not defined. Currently, the available panels are:\n" +
-                        "    - ${panels}\n" +
+                        "  The ${params.panel} panel does not have built-in support. Currently, the\n" +
+                        "  available supported panels are:\n" +
+                        "    - ${panels}\n\n" +
+                        "  Please adjust the --panel argument or override with --force_panel.\n" +
                         "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
                     Nextflow.exit(1)
                 }
+
             }
         }
 
