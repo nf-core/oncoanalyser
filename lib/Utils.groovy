@@ -292,13 +292,6 @@ class Utils {
                     Nextflow.exit(1)
                 }
 
-                // Restrict tumor RNA inputs to the TSO500 panel
-                if (Utils.hasTumorRnaBam(meta) && run_config.panel != 'tso500') {
-                    def panel = run_config.panel.toUpperCase()
-                    log.error "only the TSO500 panel supports tumor RNA analysis but got: ${panel}"
-                    Nextflow.exit(1)
-                }
-
             }
 
             // Do not allow normal DNA only
