@@ -365,7 +365,7 @@ workflow TARGETED {
             ref_data.genome_fai,
             ref_data.genome_dict,
             hmf_data.sage_known_hotspots_somatic,
-            [],  // sage_known_hotspots_germline
+            hmf_data.sage_known_hotspots_germline,
             panel_data.sage_actionable_panel,
             panel_data.sage_coverage_panel,
             hmf_data.sage_highconf_regions,
@@ -450,10 +450,10 @@ workflow TARGETED {
             ref_data.genome_dict,
             hmf_data.gc_profile,
             hmf_data.sage_known_hotspots_somatic,
-            [],  // sage_known_hotspots_germline
+            hmf_data.sage_known_hotspots_germline,
             panel_data.driver_gene_panel,
             hmf_data.ensembl_data_resources,
-            [],  // purple_germline_del
+            hmf_data.purple_germline_del,
             panel_data.target_region_bed,
             panel_data.target_region_ratios,
             panel_data.target_region_msi_indels,
