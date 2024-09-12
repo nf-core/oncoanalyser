@@ -3,9 +3,11 @@ process ESVEE_DEPTH_ANNOTATOR {
     label 'process_medium'
 
     conda "${moduleDir}/environment.yml"
-    container "${ workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container ?
-        'https://depot.galaxyproject.org/singularity/hmftools-esvee:1.0_beta--hdfd78af_0' :
-        'quay.io/biocontainers/hmftools-esvee:1.0_beta--hdfd78af_0' }"
+//    container "${ workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container ?
+//        'https://depot.galaxyproject.org/singularity/hmftools-esvee:1.0_beta--hdfd78af_0' :
+//        'quay.io/biocontainers/hmftools-esvee:1.0_beta--hdfd78af_0' }"
+
+    container 'quay.io/local/hmftools-esvee'
 
     input:
     tuple val(meta), path(tumor_bam), path(normal_bam), path(raw_vcf)
