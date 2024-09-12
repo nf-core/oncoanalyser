@@ -3,9 +3,11 @@ process ESVEE_CALL {
     label 'process_medium'
 
     conda "${moduleDir}/environment.yml"
-    container "${ workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container ?
-        'https://depot.galaxyproject.org/singularity/hmftools-esvee:1.0_beta--hdfd78af_0' :
-        'quay.io/biocontainers/hmftools-esvee:1.0_beta--hdfd78af_0' }"
+//    container "${ workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container ?
+//        'https://depot.galaxyproject.org/singularity/hmftools-esvee:1.0_beta--hdfd78af_0' :
+//        'quay.io/biocontainers/hmftools-esvee:1.0_beta--hdfd78af_0' }"
+
+    container 'quay.io/local/hmftools-esvee'
 
     input:
     tuple val(meta), path(ref_depth_vcf), path(fragment_lengths_tsv)
@@ -56,6 +58,8 @@ process ESVEE_CALL {
     ${ if(meta.normal_id == null){
         "touch caller/${meta.normal_id}.esvee.germline.vcf.gz"
         "touch caller/${meta.normal_id}.esvee.germline.vcf.gz.tbi"
+    } else {
+        ""
     } }
 
     cat <<-END_VERSIONS > versions.yml
