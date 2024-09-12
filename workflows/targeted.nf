@@ -286,6 +286,7 @@ workflow TARGETED {
             ref_data.genome_version,
             ref_data.genome_fai,
             ref_data.genome_dict,
+            ref_data.genome_img,
             ref_data.genome_gridss_index,
             hmf_data.gridss_region_blocklist,
             hmf_data.sv_prep_blocklist,
