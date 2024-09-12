@@ -3,15 +3,18 @@ process ESVEE_ASSEMBLE {
     label 'process_medium'
 
     conda "${moduleDir}/environment.yml"
-    container "${ workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container ?
-        'https://depot.galaxyproject.org/singularity/hmftools-esvee:1.0_beta--hdfd78af_0' :
-        'quay.io/biocontainers/hmftools-esvee:1.0_beta--hdfd78af_0' }"
+//    container "${ workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container ?
+//        'https://depot.galaxyproject.org/singularity/hmftools-esvee:1.0_beta--hdfd78af_0' :
+//        'quay.io/biocontainers/hmftools-esvee:1.0_beta--hdfd78af_0' }"
+
+    container 'quay.io/local/hmftools-esvee'
 
     input:
     tuple val(meta), path(tumor_prep_bam), path(normal_prep_bam), path(junctions_tsv), path(fragment_lengths_tsv)
     path genome_fasta
     path genome_fai
     path genome_dict
+    path genome_img
     val genome_ver
     path decoy_sequences_image
 
