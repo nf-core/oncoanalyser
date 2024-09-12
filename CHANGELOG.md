@@ -5,8 +5,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/) 
 
 ## [dev]
 
+- [98](https://github.com/nf-core/oncoanalyser/pull/98) - Fix typos in error messages for process and run mode check
 - [96](https://github.com/nf-core/oncoanalyser/pull/96) - Added missing type field to an entry in the nextflow_schema.json
-
 - [95](https://github.com/nf-core/oncoanalyser/pull/95) - Post-release bump
 
 ## [[1.0.0](https://github.com/nf-core/oncoanalyser/releases/tag/1.0.0)] Pied Currawong - 2024-08-26

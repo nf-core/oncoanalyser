@@ -381,7 +381,7 @@ class Utils {
         def run_mode_enum = Utils.getEnumFromString(run_mode, Constants.RunMode)
         if (!run_mode_enum) {
             def run_modes_str = Utils.getEnumNames(Constants.RunMode).join('\n  - ')
-            log.error "recieved an invalid run mode: '${run_mode}'. Valid options are:\n  - ${run_modes_str}"
+            log.error "received an invalid run mode: '${run_mode}'. Valid options are:\n  - ${run_modes_str}"
             Nextflow.exit(1)
         }
         return run_mode_enum
