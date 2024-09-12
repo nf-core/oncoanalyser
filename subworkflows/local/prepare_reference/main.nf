@@ -4,11 +4,12 @@
 
 import Constants
 
-include { BWAMEM2_INDEX       } from '../../../modules/nf-core/bwamem2/index/main'
-include { BWA_INDEX           } from '../../../modules/nf-core/bwa/index/main'
-include { SAMTOOLS_DICT       } from '../../../modules/nf-core/samtools/dict/main'
-include { SAMTOOLS_FAIDX      } from '../../../modules/nf-core/samtools/faidx/main'
-include { STAR_GENOMEGENERATE } from '../../../modules/nf-core/star/genomegenerate/main'
+include { BWAMEM2_INDEX         } from '../../../modules/nf-core/bwamem2/index/main'
+include { BWA_INDEX             } from '../../../modules/nf-core/bwa/index/main'
+include { SAMTOOLS_DICT         } from '../../../modules/nf-core/samtools/dict/main'
+include { SAMTOOLS_FAIDX        } from '../../../modules/nf-core/samtools/faidx/main'
+include { GATK4_BWA_INDEX_IMAGE } from '../../../modules/nf-core/gatk4/bwaindeximage/main'
+include { STAR_GENOMEGENERATE   } from '../../../modules/nf-core/star/genomegenerate/main'
 
 include { CUSTOM_EXTRACTTARBALL as DECOMP_BWAMEM2_INDEX    } from '../../../modules/local/custom/extract_tarball/main'
 include { CUSTOM_EXTRACTTARBALL as DECOMP_GRIDSS_INDEX     } from '../../../modules/local/custom/extract_tarball/main'
@@ -50,6 +51,13 @@ workflow PREPARE_REFERENCE {
         SAMTOOLS_DICT(ch_genome_fasta)
         ch_genome_dict = SAMTOOLS_DICT.out.dict
         ch_versions = ch_versions.mix(SAMTOOLS_DICT.out.versions)
+    }
+
+    ch_genome_img = getRefFileChannel('ref_data_genome_img')
+    if (!params.ref_data_genome_img) {
+        GATK4_BWA_INDEX_IMAGE(ch_genome_fasta)
+        ch_genome_img = GATK4_BWA_INDEX_IMAGE.out.img
+        ch_versions = ch_versions.mix(GATK4_BWA_INDEX_IMAGE.out.versions)
     }
 
     //
@@ -261,6 +269,7 @@ workflow PREPARE_REFERENCE {
     genome_fasta         = ch_genome_fasta.first()         // path: genome_fasta
     genome_fai           = ch_genome_fai.first()           // path: genome_fai
     genome_dict          = ch_genome_dict.first()          // path: genome_dict
+    genome_img           = ch_genome_img.first()           // path: genome_img
     genome_bwamem2_index = ch_genome_bwamem2_index.first() // path: genome_bwa-mem2_index
     genome_gridss_index  = ch_genome_gridss_index.first()  // path: genome_gridss_index
     genome_star_index    = ch_genome_star_index.first()    // path: genome_star_index
