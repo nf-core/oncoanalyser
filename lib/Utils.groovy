@@ -296,7 +296,7 @@ class Utils {
 
             // Do not allow normal DNA only
             if (Utils.hasNormalDna(meta) && !Utils.hasTumorDna(meta)) {
-                log.error "germline only mode not supported, found only a normal DNA BAM for ${meta.group_id}"
+                log.error "found only normal DNA input for ${meta.group_id} but germline only analysis is not supported"
                 Nextflow.exit(1)
             }
 
