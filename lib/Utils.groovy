@@ -285,7 +285,7 @@ class Utils {
                 }
 
                 // Do not allow only tumor RNA
-                if (Utils.hasTumorRnaBam(meta) && !Utils.hasTumorDna(meta)) {
+                if (Utils.hasTumorRna(meta) && !Utils.hasTumorDna(meta)) {
                     log.error "targeted mode is not compatible with only tumor RNA provided for ${meta.group_id}\n\n" +
                         "The targeted workflow requires tumor DNA and can optionally take tumor RNA, depending on " +
                         "the configured panel."
