@@ -40,9 +40,9 @@ input:
       type: file
       description: Unmapped regions file
       pattern: "*.{tsv}"
-  - has_umis:
+  - umi_enable:
       type: boolean
-      description: Flag indicating presence of UMIs in reads
+      description: Flag to enable UMI processing
   - umi_duplex_delim:
       type: string
       description: UMI duplex delimiter

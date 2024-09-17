@@ -119,7 +119,10 @@ workflow TARGETED {
             ref_data.genome_fasta,
             ref_data.genome_bwamem2_index,
             params.max_fastq_records,
-            params.umi_length
+            params.fastp_umi,
+            params.fastp_umi_location,
+            params.fastp_umi_length,
+            params.fastp_umi_skip,
         )
 
         READ_ALIGNMENT_RNA(
@@ -155,8 +158,6 @@ workflow TARGETED {
     ch_process_dna_donor_out = Channel.empty()
     if (run_config.stages.markdups) {
 
-        has_umis = run_config.panel.equalsIgnoreCase('tso500') || params.umi_duplex_delim != '' || params.umi_length > 0
-
         READ_PROCESSING(
             ch_inputs,
             ch_align_dna_tumor_out,
@@ -167,8 +168,8 @@ workflow TARGETED {
             ref_data.genome_fai,
             ref_data.genome_dict,
             hmf_data.unmap_regions,
-            has_umis,
-            params.umi_duplex_delim,
+            params.markdups_umi,
+            params.markdups_umi_duplex_delim,
         )
 
         ch_versions = ch_versions.mix(READ_PROCESSING.out.versions)

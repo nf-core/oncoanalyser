@@ -124,7 +124,10 @@ workflow WGTS {
             ref_data.genome_fasta,
             ref_data.genome_bwamem2_index,
             params.max_fastq_records,
-            0,  // disabled for now
+            false,  // umi_enable
+            null,  // umi_location
+            null,  // umi_length
+            null,  // umi_skip
         )
 
         READ_ALIGNMENT_RNA(
@@ -170,8 +173,8 @@ workflow WGTS {
             ref_data.genome_fai,
             ref_data.genome_dict,
             hmf_data.unmap_regions,
-            false,  // has_umis
-            '',  // no duplex UMI delimiter
+            false,  // umi_enable
+            '',  // umi_duplex_delim
         )
 
         ch_versions = ch_versions.mix(READ_PROCESSING.out.versions)
