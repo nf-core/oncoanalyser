@@ -4,8 +4,8 @@ process BAMTOOLS {
 
     conda "${moduleDir}/environment.yml"
     container "${ workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container ?
-        'https://depot.galaxyproject.org/singularity/hmftools-bam-tools:1.2.1--hdfd78af_0' :
-        'biocontainers/hmftools-bam-tools:1.2.1--hdfd78af_0' }"
+        'https://depot.galaxyproject.org/singularity/hmftools-bam-tools:1.3--hdfd78af_0' :
+        'biocontainers/hmftools-bam-tools:1.3--hdfd78af_0' }"
 
     input:
     tuple val(meta), path(bam), path(bai)
@@ -13,8 +13,8 @@ process BAMTOOLS {
     val genome_ver
 
     output:
-    tuple val(meta), path('*wgsmetrics'), emit: metrics
-    path 'versions.yml'                 , emit: versions
+    tuple val(meta), path("${meta.id}_bamtools/"), emit: metrics_dir
+    path 'versions.yml'                          , emit: versions
 
     when:
     task.ext.when == null || task.ext.when
@@ -25,6 +25,8 @@ process BAMTOOLS {
     def xmx_mod = task.ext.xmx_mod ?: 0.75
 
     """
+    mkdir -p ${meta.id}_bamtools/
+
     bamtools \\
         -Xmx${Math.round(task.memory.bytes * xmx_mod)} \\
         com.hartwig.hmftools.bamtools.metrics.BamMetrics \\
@@ -34,9 +36,8 @@ process BAMTOOLS {
         -ref_genome ${genome_fasta} \\
         -ref_genome_version ${genome_ver} \\
         -threads ${task.cpus} \\
-        -write_old_style \\
         -log_level INFO \\
-        -output_dir ./
+        -output_dir ${meta.id}_bamtools/
 
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":
@@ -46,7 +47,11 @@ process BAMTOOLS {
 
     stub:
     """
-    touch ${meta.sample_id}.wgsmetrics
+    touch ${meta.sample_id}.bam_metric.summary.tsv;
+    touch ${meta.sample_id}.bam_metric.coverage.tsv;
+    touch ${meta.sample_id}.bam_metric.frag_length.tsv;
+    touch ${meta.sample_id}.bam_metric.flag_counts.tsv;
+    touch ${meta.sample_id}.bam_metric.partition_stats.tsv;
 
     echo -e '${task.process}:\\n  stub: noversions\\n' > versions.yml
     """

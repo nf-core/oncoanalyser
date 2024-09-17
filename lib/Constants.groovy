@@ -64,6 +64,7 @@ class Constants {
         // Process
         AMBER_DIR,
         BAMTOOLS,
+        BAMTOOLS_DIR,
         COBALT_DIR,
         ESVEE_VCF,
         ESVEE_VCF_TBI,
@@ -250,6 +251,11 @@ class Constants {
             SequenceType.DNA,
         ],
 
+        BAMTOOLS_DIR: [
+            FileType.BAMTOOLS_DIR,
+            [SampleType.TUMOR, SampleType.TUMOR_NORMAL],
+            SequenceType.DNA,
+        ],
         BAMTOOLS_TUMOR: [
             FileType.BAMTOOLS,
             SampleType.TUMOR,
