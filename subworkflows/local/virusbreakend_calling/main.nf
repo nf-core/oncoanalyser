@@ -24,6 +24,7 @@ workflow VIRUSBREAKEND_CALLING {
     virusbreakenddb        // channel: [mandatory] /path/to/virusbreakenddb/
     virus_taxonomy_db      // channel: [mandatory] /path/to/virus_taxonomy_db
     virus_reporting_db     // channel: [mandatory] /path/to/virus_reporting_db
+    virus_blacklist_db     // channel: [mandatory] /path/to/virus_blacklist_db
 
     // Params
     gridss_config          // channel: [optional] /path/to/gridss_config
@@ -96,7 +97,7 @@ workflow VIRUSBREAKEND_CALLING {
             def inputs = [
                 virus_tsv,
                 Utils.selectCurrentOrExisting(purple_dir, meta, Constants.INPUT.PURPLE_DIR),
-                Utils.selectCurrentOrExisting(metrics, meta, Constants.INPUT.BAMTOOLS_TUMOR),
+                Utils.selectCurrentOrExisting(metrics, meta, Constants.INPUT.BAMTOOLS_DIR),
             ]
 
             return [meta, *inputs]
@@ -134,6 +135,7 @@ workflow VIRUSBREAKEND_CALLING {
         ch_virusinterpreter_inputs,
         virus_taxonomy_db,
         virus_reporting_db,
+        virus_blacklist_db,
     )
 
     ch_versions = ch_versions.mix(VIRUSINTERPRETER.out.versions)
