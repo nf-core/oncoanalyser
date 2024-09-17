@@ -87,7 +87,7 @@ workflow BAMTOOLS_METRICS {
     ch_versions = ch_versions.mix(BAMTOOLS.out.versions)
 
     // Sort into a tumor and normal channel
-    ch_bamtools_out = BAMTOOLS.out.metrics
+    ch_bamtools_out = BAMTOOLS.out.metrics_dir
         .branch { meta_bamtools, metrics ->
             assert ['tumor', 'normal'].contains(meta_bamtools.sample_type)
             tumor: meta_bamtools.sample_type == 'tumor'
