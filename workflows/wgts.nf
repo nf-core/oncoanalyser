@@ -168,6 +168,7 @@ workflow WGTS {
             ref_data.genome_fai,
             ref_data.genome_dict,
             hmf_data.unmap_regions,
+            hmf_data.msi_jitter_sites,
             false,  // has_umis
             '',  // no duplex UMI delimiter
         )

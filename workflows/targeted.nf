@@ -158,6 +158,7 @@ workflow TARGETED {
             ref_data.genome_fai,
             ref_data.genome_dict,
             hmf_data.unmap_regions,
+            hmf_data.msi_jitter_sites,
             has_umis,
             params.umi_duplex_delim,
         )

@@ -1,11 +1,11 @@
-name: markdups
-description: Identify and mark duplicate reads ifrom alignment data
+name: redux
+description: Identify and mark duplicate reads from alignment data
 keywords:
   - duplicating marking
-  - markdups
+  - redux
 tools:
-  - MarkDups:
-      description: Identify and mark duplicate reads ifrom alignment data
+  - REDUX:
+      description: Identify and mark duplicate reads from alignment data
       homepage: https://github.com/hartwigmedical/hmftools/tree/master/mark-dups
       documentation: https://github.com/hartwigmedical/hmftools/tree/master/mark-dups
       licence: ["GPL v3"]

@@ -41,7 +41,7 @@ workflow VIRUSBREAKEND_CALLING {
         .map { meta, tumor_bam, tumor_bai ->
             return [
                 meta,
-                Utils.selectCurrentOrExisting(tumor_bam, meta, Constants.INPUT.BAM_MARKDUPS_DNA_TUMOR),
+                Utils.selectCurrentOrExisting(tumor_bam, meta, Constants.INPUT.BAM_REDUX_DNA_TUMOR),
                 Utils.selectCurrentOrExisting(tumor_bai, meta, Constants.INPUT.BAI_DNA_TUMOR),
             ]
         }

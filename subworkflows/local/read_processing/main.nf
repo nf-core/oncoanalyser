@@ -5,7 +5,7 @@
 import Constants
 import Utils
 
-include { MARKDUPS } from '../../../modules/local/markdups/main'
+include { REDUX } from '../../../modules/local/redux/main'
 
 workflow READ_PROCESSING {
     take:
@@ -21,6 +21,7 @@ workflow READ_PROCESSING {
     genome_fai       // channel: [mandatory] /path/to/genome_fai
     genome_dict      // channel: [mandatory] /path/to/genome_dict
     unmap_regions    // channel: [mandatory] /path/to/unmap_regions
+    msi_jitter_sites // channel: [mandatory] /path/to/msi_jitter_sites
 
     // Params
     has_umis         // boolean: [mandatory] UMI processing flag
@@ -43,7 +44,7 @@ workflow READ_PROCESSING {
             ]
         }
         .branch { meta, bams, bais ->
-            def has_existing = Utils.hasExistingInput(meta, Constants.INPUT.BAM_MARKDUPS_DNA_TUMOR)
+            def has_existing = Utils.hasExistingInput(meta, Constants.INPUT.BAM_REDUX_DNA_TUMOR)
             runnable: bams && !has_existing
             skip: true
                 return meta
@@ -58,7 +59,7 @@ workflow READ_PROCESSING {
             ]
         }
         .branch { meta, bams, bais ->
-            def has_existing = Utils.hasExistingInput(meta, Constants.INPUT.BAM_MARKDUPS_DNA_NORMAL)
+            def has_existing = Utils.hasExistingInput(meta, Constants.INPUT.BAM_REDUX_DNA_NORMAL)
             runnable: bams && !has_existing
             skip: true
                 return meta
@@ -73,15 +74,15 @@ workflow READ_PROCESSING {
             ]
         }
         .branch { meta, bams, bais ->
-            def has_existing = Utils.hasExistingInput(meta, Constants.INPUT.BAM_MARKDUPS_DNA_DONOR)
+            def has_existing = Utils.hasExistingInput(meta, Constants.INPUT.BAM_REDUX_DNA_DONOR)
             runnable: bams && !has_existing
             skip: true
             return meta
         }
 
     // Create process input channel
-    // channel: [ meta_markdups, [bam, ...], [bai, ...] ]
-    ch_markdups_inputs = Channel.empty()
+    // channel: [ meta_redux, [bam, ...], [bai, ...] ]
+    ch_redux_inputs = Channel.empty()
         .mix(
             ch_inputs_tumor_sorted.runnable.map { meta, bams, bais -> [meta, Utils.getTumorDnaSample(meta), 'tumor', bams, bais] },
             ch_inputs_normal_sorted.runnable.map { meta, bams, bais -> [meta, Utils.getNormalDnaSample(meta), 'normal', bams, bais] },
@@ -89,35 +90,36 @@ workflow READ_PROCESSING {
         )
         .map { meta, meta_sample, sample_type, bams, bais ->
 
-            def meta_markdups = [
+            def meta_redux = [
                 key: meta.group_id,
                 id: "${meta.group_id}_${meta_sample.sample_id}",
                 sample_id: meta_sample.sample_id,
                 sample_type: sample_type,
             ]
 
-            return [meta_markdups, bams, bais]
+            return [meta_redux, bams, bais]
         }
 
     // Run process
-    MARKDUPS(
-        ch_markdups_inputs,
+    REDUX(
+        ch_redux_inputs,
         genome_fasta,
         genome_ver,
         genome_fai,
         genome_dict,
         unmap_regions,
+        msi_jitter_sites,
         has_umis,
         umi_duplex_delim,
     )
 
     // Sort into a tumor and normal channel
-    ch_markdups_out = MARKDUPS.out.bam
-        .branch { meta_markdups, bam, bai ->
-            assert ['tumor', 'normal', 'donor'].contains(meta_markdups.sample_type)
-            tumor: meta_markdups.sample_type == 'tumor'
-            normal: meta_markdups.sample_type == 'normal'
-            donor: meta_markdups.sample_type == 'donor'
+    ch_redux_out = REDUX.out.bam
+        .branch { meta_redux, bam, bai ->
+            assert ['tumor', 'normal', 'donor'].contains(meta_redux.sample_type)
+            tumor: meta_redux.sample_type == 'tumor'
+            normal: meta_redux.sample_type == 'normal'
+            donor: meta_redux.sample_type == 'donor'
             placeholder: true
         }
 
@@ -125,19 +127,19 @@ workflow READ_PROCESSING {
     // channel: [ meta, bam, bai ]
     ch_bam_tumor_out = Channel.empty()
         .mix(
-            WorkflowOncoanalyser.restoreMeta(ch_markdups_out.tumor, ch_inputs),
+            WorkflowOncoanalyser.restoreMeta(ch_redux_out.tumor, ch_inputs),
             ch_inputs_tumor_sorted.skip.map { meta -> [meta, [], []] },
         )
 
     ch_bam_normal_out = Channel.empty()
         .mix(
-            WorkflowOncoanalyser.restoreMeta(ch_markdups_out.normal, ch_inputs),
+            WorkflowOncoanalyser.restoreMeta(ch_redux_out.normal, ch_inputs),
             ch_inputs_normal_sorted.skip.map { meta -> [meta, [], []] },
         )
 
     ch_bam_donor_out = Channel.empty()
         .mix(
-            WorkflowOncoanalyser.restoreMeta(ch_markdups_out.donor, ch_inputs),
+            WorkflowOncoanalyser.restoreMeta(ch_redux_out.donor, ch_inputs),
             ch_inputs_donor_sorted.skip.map { meta -> [meta, [], []] },
         )
 
