@@ -58,7 +58,7 @@ class Constants {
     static enum FileType {
         // Generic
         BAM,
-        BAM_MARKDUPS,
+        BAM_REDUX,
         BAI,
         FASTQ,
         // Process
@@ -118,8 +118,8 @@ class Constants {
             SequenceType.DNA,
         ],
 
-        BAM_MARKDUPS_DNA_TUMOR: [
-            FileType.BAM_MARKDUPS,
+        BAM_REDUX_DNA_TUMOR: [
+            FileType.BAM_REDUX,
             SampleType.TUMOR,
             SequenceType.DNA,
         ],
@@ -130,8 +130,8 @@ class Constants {
             SequenceType.DNA,
         ],
 
-        BAM_MARKDUPS_DNA_NORMAL: [
-            FileType.BAM_MARKDUPS,
+        BAM_REDUX_DNA_NORMAL: [
+            FileType.BAM_REDUX,
             SampleType.NORMAL,
             SequenceType.DNA,
         ],
@@ -142,8 +142,8 @@ class Constants {
             SequenceType.DNA,
         ],
 
-        BAM_MARKDUPS_DNA_DONOR: [
-            FileType.BAM_MARKDUPS,
+        BAM_REDUX_DNA_DONOR: [
+            FileType.BAM_REDUX,
             SampleType.DONOR,
             SequenceType.DNA,
         ],
