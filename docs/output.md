@@ -43,7 +43,7 @@ output/
   - [bwa-mem2](#bwa-mem2) - DNA alignment
   - [STAR](#star) - RNA alignment
 - [Alignment post-processing](#alignment-post-processing)
-  - [MarkDups](#markdups) - General alignment processing
+  - [REDUX](#redux) - General alignment processing
   - [Picard Markduplicates](#picard-markduplicates) - Duplicate read marking
 - [SNV, MNV, INDEL calling](#snv-mnv-indel-calling)
   - [SAGE](#sage) - SNV, MNV, INDEL calling

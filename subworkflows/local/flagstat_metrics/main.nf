@@ -26,7 +26,7 @@ workflow FLAGSTAT_METRICS {
         .map { meta, bam, bai ->
             return [
                 meta,
-                Utils.selectCurrentOrExisting(bam, meta, Constants.INPUT.BAM_MARKDUPS_DNA_TUMOR),
+                Utils.selectCurrentOrExisting(bam, meta, Constants.INPUT.BAM_REDUX_DNA_TUMOR),
                 bai ?: Utils.getInput(meta, Constants.INPUT.BAI_DNA_TUMOR),
             ]
         }
@@ -43,7 +43,7 @@ workflow FLAGSTAT_METRICS {
         .map { meta, bam, bai ->
             return [
                 meta,
-                Utils.selectCurrentOrExisting(bam, meta, Constants.INPUT.BAM_MARKDUPS_DNA_NORMAL),
+                Utils.selectCurrentOrExisting(bam, meta, Constants.INPUT.BAM_REDUX_DNA_NORMAL),
                 bai ?: Utils.getInput(meta, Constants.INPUT.BAI_DNA_NORMAL),
             ]
         }

@@ -147,7 +147,7 @@ class Utils {
                         if (key === Constants.FileType.BAM) {
                             index_enum = Constants.FileType.BAI
                             index_str = 'bai'
-                        } else if (key === Constants.FileType.BAM_MARKDUPS) {
+                        } else if (key === Constants.FileType.BAM_REDUX) {
                             index_enum = Constants.FileType.BAI
                             index_str = 'bai'
                         } else if (key === Constants.FileType.ESVEE_VCF) {
@@ -251,7 +251,7 @@ class Utils {
                 def (sample_type, sequence_type) = key
 
                 if (!meta[key].containsKey(Constants.FileType.BAM) &&
-                    !meta[key].containsKey(Constants.FileType.BAM_MARKDUPS) &&
+                    !meta[key].containsKey(Constants.FileType.BAM_REDUX) &&
                     !meta[key].containsKey(Constants.FileType.FASTQ)) {
 
                     log.error "no BAMs nor BAM_MARKDUPs nor FASTQs provided for ${meta.group_id} ${sample_type}/${sequence_type}\n\n" +
@@ -427,7 +427,7 @@ class Utils {
     }
 
     static public getTumorDnaMarkdupsBam(meta) {
-        return getTumorDnaSample(meta).getOrDefault(Constants.FileType.BAM_MARKDUPS, null)
+        return getTumorDnaSample(meta).getOrDefault(Constants.FileType.BAM_REDUX, null)
     }
 
     static public getTumorDnaBai(meta) {
@@ -458,7 +458,7 @@ class Utils {
     }
 
     static public getNormalDnaMarkdupsBam(meta) {
-        return getNormalDnaSample(meta).getOrDefault(Constants.FileType.BAM_MARKDUPS, null)
+        return getNormalDnaSample(meta).getOrDefault(Constants.FileType.BAM_REDUX, null)
     }
     static public getNormalDnaBai(meta) {
         return getNormalDnaSample(meta).getOrDefault(Constants.FileType.BAI, null)
@@ -496,7 +496,7 @@ class Utils {
     }
 
     static public getDonorDnaMarkdupsBam(meta) {
-        return getDonorDnaSample(meta).getOrDefault(Constants.FileType.BAM_MARKDUPS, null)
+        return getDonorDnaSample(meta).getOrDefault(Constants.FileType.BAM_REDUX, null)
     }
 
     static public getDonorDnaBai(meta) {

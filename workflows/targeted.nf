@@ -160,8 +160,9 @@ workflow TARGETED {
             ref_data.genome_fai,
             ref_data.genome_dict,
             hmf_data.unmap_regions,
-            params.markdups_umi,
-            params.markdups_umi_duplex_delim,
+            hmf_data.msi_jitter_sites,
+            has_umis,
+            params.umi_duplex_delim,
         )
 
         ch_versions = ch_versions.mix(READ_PROCESSING.out.versions)
