@@ -15,8 +15,8 @@ process BAMTOOLS {
     val genome_ver
 
     output:
-    tuple val(meta), path('metrics/'), emit: metrics_dir
-    path 'versions.yml'              , emit: versions
+    tuple val(meta), path('*.bam_metric.*.tsv'), emit: metrics
+    path 'versions.yml'           , emit: versions
 
     when:
     task.ext.when == null || task.ext.when
@@ -25,8 +25,6 @@ process BAMTOOLS {
     def args = task.ext.args ?: ''
 
     """
-    mkdir -p metrics/
-
     bamtools \\
         -Xmx${Math.round(task.memory.bytes * 0.95)} \\
         com.hartwig.hmftools.bamtools.metrics.BamMetrics \\
@@ -37,7 +35,7 @@ process BAMTOOLS {
         -ref_genome_version ${genome_ver} \\
         -threads ${task.cpus} \\
         -log_level INFO \\
-        -output_dir metrics/
+        -output_dir ./
 
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":
@@ -47,13 +45,11 @@ process BAMTOOLS {
 
     stub:
     """
-    mkdir -p metrics/
-
-    touch metrics/${meta.sample_id}.bam_metric.summary.tsv;
-    touch metrics/${meta.sample_id}.bam_metric.coverage.tsv;
-    touch metrics/${meta.sample_id}.bam_metric.frag_length.tsv;
-    touch metrics/${meta.sample_id}.bam_metric.flag_counts.tsv;
-    touch metrics/${meta.sample_id}.bam_metric.partition_stats.tsv;
+    touch ${meta.sample_id}.bam_metric.summary.tsv;
+    touch ${meta.sample_id}.bam_metric.coverage.tsv;
+    touch ${meta.sample_id}.bam_metric.frag_length.tsv;
+    touch ${meta.sample_id}.bam_metric.flag_counts.tsv;
+    touch ${meta.sample_id}.bam_metric.partition_stats.tsv;
 
     echo -e '${task.process}:\\n  stub: noversions\\n' > versions.yml
     """

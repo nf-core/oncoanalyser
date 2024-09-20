@@ -20,9 +20,9 @@ process REDUX {
     val umi_duplex_delim
 
     output:
-    tuple val(meta), path('redux/')                                          , emit: redux_dir
-    tuple val(meta), path('redux/*.redux.bam'), path('redux/*.redux.bam.bai'), emit: bam
-    path 'versions.yml'                                                      , emit: versions
+    tuple val(meta), path('*.redux.bam'), path('*.redux.bam.bai'), emit: bam
+    tuple val(meta), path('*.tsv*')                              , emit: tsv
+    path 'versions.yml'                                          , emit: versions
 
     when:
     task.ext.when == null || task.ext.when
@@ -41,15 +41,13 @@ process REDUX {
     }
 
     """
-    mkdir -p redux/
-
     redux \\
         -Xmx${Math.round(task.memory.bytes * 0.95)} \\
         ${args} \\
         -sample ${meta.sample_id} \\
         -input_bam ${bams.join(',')} \\
-        -output_dir redux/ \\
-        -output_bam redux/${meta.sample_id}.redux.bam \\
+        -output_dir ./ \\
+        -output_bam ./${meta.sample_id}.redux.bam \\
         -ref_genome ${genome_fasta} \\
         -ref_genome_version ${genome_ver} \\
         -unmap_regions ${unmap_regions} \\
@@ -69,19 +67,17 @@ process REDUX {
 
     stub:
     """
-    mkdir -p redux/
-
-    touch redux/${meta.sample_id}.markdups.bam
-    touch redux/${meta.sample_id}.markdups.bam.bai
-    touch redux/${meta.sample_id}.duplicate_freq.tsv
-    touch redux/${meta.sample_id}.jitter_params.tsv
-    touch redux/${meta.sample_id}.ms_table.tsv.gz
-    touch redux/${meta.sample_id}.repeat.tsv.gz
+    touch ${meta.sample_id}.redux.bam
+    touch ${meta.sample_id}.redux.bam.bai
+    touch ${meta.sample_id}.duplicate_freq.tsv
+    touch ${meta.sample_id}.jitter_params.tsv
+    touch ${meta.sample_id}.ms_table.tsv.gz
+    touch ${meta.sample_id}.repeat.tsv.gz
 
     if [[ -n "${has_umis}" ]]; then
-        touch redux/${meta.sample_id}.umi_coord_freq.tsv
-        touch redux/${meta.sample_id}.umi_edit_distance.tsv
-        touch redux/${meta.sample_id}.umi_nucleotide_freq.tsv
+        touch ${meta.sample_id}.umi_coord_freq.tsv
+        touch ${meta.sample_id}.umi_edit_distance.tsv
+        touch ${meta.sample_id}.umi_nucleotide_freq.tsv
     fi;
 
     echo -e '${task.process}:\\n  stub: noversions\\n' > versions.yml
