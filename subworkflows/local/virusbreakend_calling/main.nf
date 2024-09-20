@@ -24,6 +24,7 @@ workflow VIRUSBREAKEND_CALLING {
     virusbreakenddb        // channel: [mandatory] /path/to/virusbreakenddb/
     virus_taxonomy_db      // channel: [mandatory] /path/to/virus_taxonomy_db
     virus_reporting_db     // channel: [mandatory] /path/to/virus_reporting_db
+    virus_blacklist_db     // channel: [mandatory] /path/to/virus_blacklist_db
 
     // Params
     gridss_config          // channel: [optional] /path/to/gridss_config
@@ -40,7 +41,7 @@ workflow VIRUSBREAKEND_CALLING {
         .map { meta, tumor_bam, tumor_bai ->
             return [
                 meta,
-                Utils.selectCurrentOrExisting(tumor_bam, meta, Constants.INPUT.BAM_MARKDUPS_DNA_TUMOR),
+                Utils.selectCurrentOrExisting(tumor_bam, meta, Constants.INPUT.BAM_REDUX_DNA_TUMOR),
                 Utils.selectCurrentOrExisting(tumor_bai, meta, Constants.INPUT.BAI_DNA_TUMOR),
             ]
         }
@@ -91,12 +92,12 @@ workflow VIRUSBREAKEND_CALLING {
         ch_purple,
         ch_bamtools_somatic,
     )
-        .map { meta, virus_tsv, purple_dir, metrics ->
+        .map { meta, virus_tsv, purple_dir, somatic_metrics ->
 
             def inputs = [
                 virus_tsv,
                 Utils.selectCurrentOrExisting(purple_dir, meta, Constants.INPUT.PURPLE_DIR),
-                Utils.selectCurrentOrExisting(metrics, meta, Constants.INPUT.BAMTOOLS_TUMOR),
+                Utils.selectCurrentOrExisting(somatic_metrics, meta, Constants.INPUT.BAMTOOLS_DIR),
             ]
 
             return [meta, *inputs]
@@ -106,8 +107,8 @@ workflow VIRUSBREAKEND_CALLING {
     // channel: [ meta, virus_tsv, purple_dir, metrics ]
     // channel: skip: [ meta ]
     ch_virusinterpreter_inputs_sorted = ch_virusinterpreter_inputs_selected
-        .branch { meta, virus_tsv, purple_dir, metrics ->
-            runnable: virus_tsv && purple_dir && metrics
+        .branch { meta, virus_tsv, purple_dir, somatic_metrics ->
+            runnable: virus_tsv && purple_dir && somatic_metrics
             skip: true
                 return meta
         }
@@ -134,6 +135,7 @@ workflow VIRUSBREAKEND_CALLING {
         ch_virusinterpreter_inputs,
         virus_taxonomy_db,
         virus_reporting_db,
+        virus_blacklist_db,
     )
 
     ch_versions = ch_versions.mix(VIRUSINTERPRETER.out.versions)

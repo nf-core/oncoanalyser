@@ -4,13 +4,14 @@ process VIRUSINTERPRETER {
 
     conda "${moduleDir}/environment.yml"
     container "${ workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container ?
-        'https://depot.galaxyproject.org/singularity/hmftools-virus-interpreter:1.3--hdfd78af_0' :
-        'biocontainers/hmftools-virus-interpreter:1.3--hdfd78af_0' }"
+        'https://depot.galaxyproject.org/singularity/hmftools-virus-interpreter:1.7--hdfd78af_0' :
+        'biocontainers/hmftools-virus-interpreter:1.7--hdfd78af_0' }"
 
     input:
-    tuple val(meta), path(virus_tsv), path(purple_dir), path(wgs_metrics)
+    tuple val(meta), path(virus_tsv), path(purple_dir), path(bamtools_somatic_dir)
     path taxonomy_db
     path reporting_db
+    path blacklist_db
 
     output:
     tuple val(meta), path('virusinterpreter/'), emit: virusinterpreter_dir
@@ -32,15 +33,16 @@ process VIRUSINTERPRETER {
         ${args} \\
         -sample ${meta.sample_id} \\
         -purple_dir ${purple_dir} \\
-        -tumor_sample_wgs_metrics_file ${wgs_metrics} \\
+        -tumor_metrics_dir ${bamtools_somatic_dir} \\
         -virus_breakend_tsv ${virus_tsv} \\
         -taxonomy_db_tsv ${taxonomy_db} \\
         -virus_reporting_db_tsv ${reporting_db} \\
+        -virus_blacklisting_db_tsv ${blacklist_db} \\
         -output_dir virusinterpreter/
 
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":
-        virusinterpreter: \$(virusinterpreter | sed -n '1s/^.*Interpreter v//p')
+        virusinterpreter: \$(virusinterpreter -version | sed 's/^.* //')
     END_VERSIONS
     """
 
