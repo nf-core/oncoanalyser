@@ -3,9 +3,11 @@ process AMBER {
     label 'process_medium'
 
     conda "${moduleDir}/environment.yml"
-    container "${ workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container ?
-        'https://depot.galaxyproject.org/singularity/hmftools-amber:4.0.1--hdfd78af_0' :
-        'biocontainers/hmftools-amber:4.0.1--hdfd78af_0' }"
+//    container "${ workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container ?
+//        'https://depot.galaxyproject.org/singularity/hmftools-amber:4.0.1--hdfd78af_0' :
+//        'biocontainers/hmftools-amber:4.0.1--hdfd78af_0' }"
+
+    container "quay.io/local/hmftools-amber"
 
     input:
     tuple val(meta), path(tumor_bam), path(normal_bam), path(donor_bam), path(tumor_bai), path(normal_bai), path(donor_bai)
