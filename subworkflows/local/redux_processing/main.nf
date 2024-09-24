@@ -7,7 +7,7 @@ import Utils
 
 include { REDUX } from '../../../modules/local/redux/main'
 
-workflow READ_PROCESSING {
+workflow REDUX_PROCESSING {
     take:
     // Sample data
     ch_inputs     // channel: [mandatory] [ meta ]
@@ -125,28 +125,28 @@ workflow READ_PROCESSING {
 
     // Set outputs, restoring original meta
     // channel: [ meta, bam, bai ]
-    ch_bam_tumor_out = Channel.empty()
+    ch_redux_tumor_out = Channel.empty()
         .mix(
             WorkflowOncoanalyser.restoreMeta(ch_redux_out.tumor, ch_inputs),
             ch_inputs_tumor_sorted.skip.map { meta -> [meta, [], []] },
         )
 
-    ch_bam_normal_out = Channel.empty()
+    ch_redux_normal_out = Channel.empty()
         .mix(
             WorkflowOncoanalyser.restoreMeta(ch_redux_out.normal, ch_inputs),
             ch_inputs_normal_sorted.skip.map { meta -> [meta, [], []] },
         )
 
-    ch_bam_donor_out = Channel.empty()
+    ch_redux_donor_out = Channel.empty()
         .mix(
             WorkflowOncoanalyser.restoreMeta(ch_redux_out.donor, ch_inputs),
             ch_inputs_donor_sorted.skip.map { meta -> [meta, [], []] },
         )
 
     emit:
-    dna_tumor  = ch_bam_tumor_out  // channel: [ meta, bam, bai ]
-    dna_normal = ch_bam_normal_out // channel: [ meta, bam, bai ]
-    dna_donor = ch_bam_donor_out // channel: [ meta, bam, bai ]
+    dna_tumor  = ch_redux_tumor_out  // channel: [ meta, bam, bai, tsv ]
+    dna_normal = ch_redux_normal_out // channel: [ meta, bam, bai, tsv ]
+    dna_donor = ch_redux_donor_out // channel: [ meta, bam, bai, tsv ]
 
     versions   = ch_versions       // channel: [ versions.yml ]
 }
