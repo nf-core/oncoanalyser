@@ -64,7 +64,7 @@ include { PREPARE_REFERENCE     } from '../subworkflows/local/prepare_reference'
 include { PURPLE_CALLING        } from '../subworkflows/local/purple_calling'
 include { READ_ALIGNMENT_DNA    } from '../subworkflows/local/read_alignment_dna'
 include { READ_ALIGNMENT_RNA    } from '../subworkflows/local/read_alignment_rna'
-include { READ_PROCESSING       } from '../subworkflows/local/read_processing'
+include { REDUX_PROCESSING      } from '../subworkflows/local/redux_processing'
 include { SAGE_APPEND           } from '../subworkflows/local/sage_append'
 include { SAGE_CALLING          } from '../subworkflows/local/sage_calling'
 
@@ -145,12 +145,16 @@ workflow TARGETED {
     // SUBWORKFLOW: Run MarkDups for DNA BAMs
     //
     // channel: [ meta, bam, bai ]
-    ch_process_dna_tumor_out = Channel.empty()
-    ch_process_dna_normal_out = Channel.empty()
+    ch_redux_dna_tumor_out = Channel.empty()
+    ch_redux_dna_normal_out = Channel.empty()
+    // TODO: This is ignored in panel?
+    // TODO: Don't need double definition.
     ch_process_dna_donor_out = Channel.empty()
     if (run_config.stages.markdups) {
 
-        READ_PROCESSING(
+        has_umis = run_config.panel.equalsIgnoreCase('tso500') || params.umi_duplex_delim != '' || params.umi_length > 0
+
+        REDUX_PROCESSING(
             ch_inputs,
             ch_align_dna_tumor_out,
             ch_align_dna_normal_out,
@@ -165,17 +169,15 @@ workflow TARGETED {
             params.umi_duplex_delim,
         )
 
-        ch_versions = ch_versions.mix(READ_PROCESSING.out.versions)
+        ch_versions = ch_versions.mix(REDUX_PROCESSING.out.versions)
 
-        ch_process_dna_tumor_out = ch_process_dna_tumor_out.mix(READ_PROCESSING.out.dna_tumor)
-        ch_process_dna_normal_out = ch_process_dna_normal_out.mix(READ_PROCESSING.out.dna_normal)
-        ch_process_dna_donor_out = ch_process_dna_donor_out.mix(READ_PROCESSING.out.dna_donor)
+        ch_redux_dna_tumor_out = ch_redux_dna_tumor_out.mix(REDUX_PROCESSING.out.dna_tumor)
+        ch_redux_dna_normal_out = ch_redux_dna_normal_out.mix(REDUX_PROCESSING.out.dna_normal)
 
     } else {
 
-        ch_process_dna_tumor_out = ch_inputs.map { meta -> [meta, [], []] }
-        ch_process_dna_normal_out = ch_inputs.map { meta -> [meta, [], []] }
-        ch_process_dna_donor_out = ch_inputs.map { meta -> [meta, [], []] }
+        ch_redux_dna_tumor_out = ch_inputs.map { meta -> [meta, [], []] }
+        ch_redux_dna_normal_out = ch_inputs.map { meta -> [meta, [], []] }
 
     }
 
@@ -226,8 +228,8 @@ workflow TARGETED {
 
         AMBER_PROFILING(
             ch_inputs,
-            ch_process_dna_tumor_out,
-            ch_process_dna_normal_out,
+            ch_redux_dna_tumor_out,
+            ch_redux_dna_normal_out,
             ch_process_dna_donor_out,
             ref_data.genome_version,
             hmf_data.heterozygous_sites,
@@ -252,8 +254,8 @@ workflow TARGETED {
 
         COBALT_PROFILING(
             ch_inputs,
-            ch_process_dna_tumor_out,
-            ch_process_dna_normal_out,
+            ch_redux_dna_tumor_out,
+            ch_redux_dna_normal_out,
             hmf_data.gc_profile,
             hmf_data.diploid_bed,
             panel_data.target_region_normalisation,
@@ -281,8 +283,8 @@ workflow TARGETED {
 
         ESVEE_CALLING(
             ch_inputs,
-            ch_process_dna_tumor_out,
-            ch_process_dna_normal_out,
+            ch_redux_dna_tumor_out,
+            ch_redux_dna_normal_out,
             ref_data.genome_fasta,
             ref_data.genome_version,
             ref_data.genome_fai,
@@ -325,8 +327,8 @@ workflow TARGETED {
 
         SAGE_CALLING(
             ch_inputs,
-            ch_process_dna_tumor_out,
-            ch_process_dna_normal_out,
+            ch_redux_dna_tumor_out,
+            ch_redux_dna_normal_out,
             ch_process_dna_donor_out,
             ref_data.genome_fasta,
             ref_data.genome_version,
@@ -533,8 +535,8 @@ workflow TARGETED {
 
         FLAGSTAT_METRICS(
             ch_inputs,
-            ch_process_dna_tumor_out,
-            ch_process_dna_normal_out,
+            ch_redux_dna_tumor_out,
+            ch_redux_dna_normal_out,
         )
 
         ch_versions = ch_versions.mix(FLAGSTAT_METRICS.out.versions)
@@ -559,8 +561,8 @@ workflow TARGETED {
 
         BAMTOOLS_METRICS(
             ch_inputs,
-            ch_process_dna_tumor_out,
-            ch_process_dna_normal_out,
+            ch_redux_dna_tumor_out,
+            ch_redux_dna_normal_out,
             ref_data.genome_fasta,
             ref_data.genome_version,
         )
@@ -589,8 +591,8 @@ workflow TARGETED {
 
         LILAC_CALLING(
             ch_inputs,
-            ch_process_dna_tumor_out,
-            ch_process_dna_normal_out,
+            ch_redux_dna_tumor_out,
+            ch_redux_dna_normal_out,
             ch_align_rna_tumor_out,
             ch_purple_out,
             ref_data.genome_fasta,
