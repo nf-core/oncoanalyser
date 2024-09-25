@@ -9,9 +9,11 @@ process PAVE_GERMLINE {
     label 'process_medium'
 
     conda "${moduleDir}/environment.yml"
-    container "${ workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container ?
-        'https://depot.galaxyproject.org/singularity/hmftools-pave:1.6--hdfd78af_0' :
-        'biocontainers/hmftools-pave:1.6--hdfd78af_0' }"
+//    container "${ workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container ?
+//        'https://depot.galaxyproject.org/singularity/hmftools-pave:1.6--hdfd78af_0' :
+//        'biocontainers/hmftools-pave:1.6--hdfd78af_0' }"
+
+    container "quay.io/local/hmftools-pave"
 
     input:
     tuple val(meta), path(sage_vcf), path(sage_tbi)
@@ -61,7 +63,6 @@ process PAVE_GERMLINE {
         -ensembl_data_dir ${ensembl_data_resources} \\
         -blacklist_bed ${sage_blocklist_regions} \\
         -blacklist_vcf ${sage_blocklist_sites} \\
-        -gnomad_pon_filter -1 \\
         ${gnomad_args} \\
         -read_pass_only \\
         -threads ${task.cpus} \\

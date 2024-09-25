@@ -5,9 +5,11 @@ process PAVE_SOMATIC {
     label 'process_medium'
 
     conda "${moduleDir}/environment.yml"
-    container "${ workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container ?
-        'https://depot.galaxyproject.org/singularity/hmftools-pave:1.6--hdfd78af_0' :
-        'biocontainers/hmftools-pave:1.6--hdfd78af_0' }"
+//    container "${ workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container ?
+//        'https://depot.galaxyproject.org/singularity/hmftools-pave:1.6--hdfd78af_0' :
+//        'biocontainers/hmftools-pave:1.6--hdfd78af_0' }"
+
+    container "quay.io/local/hmftools-pave"
 
     input:
     tuple val(meta), path(sage_vcf), path(sage_tbi)
