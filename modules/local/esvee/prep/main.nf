@@ -17,12 +17,12 @@ process ESVEE_PREP {
     path known_fusions
 
     output:
-    tuple val(meta), path("sv_prep/")                                                , emit: sv_prep_dir
-    tuple val(meta), path("sv_prep/${meta.normal_id}.esvee.prep.bam")                , emit: normal_prep_bam
-    tuple val(meta), path("sv_prep/${meta.tumor_id}.esvee.prep.bam")                 , emit: tumor_prep_bam
-    tuple val(meta), path("sv_prep/${meta.tumor_id}.esvee.prep.junctions.tsv")       , emit: junctions_tsv
-    tuple val(meta), path("sv_prep/${meta.tumor_id}.esvee.prep.fragment_lengths.tsv"), emit: fragment_lengths_tsv
-    path 'versions.yml'                                                              , emit: versions
+    tuple val(meta), path("prep/")                                                , emit: sv_prep_dir
+    tuple val(meta), path("prep/${meta.normal_id}.esvee.prep.bam")                , emit: normal_prep_bam
+    tuple val(meta), path("prep/${meta.tumor_id}.esvee.prep.bam")                 , emit: tumor_prep_bam
+    tuple val(meta), path("prep/${meta.tumor_id}.esvee.prep.junctions.tsv")       , emit: junctions_tsv
+    tuple val(meta), path("prep/${meta.tumor_id}.esvee.prep.fragment_lengths.tsv"), emit: fragment_lengths_tsv
+    path 'versions.yml'                                                           , emit: versions
 
     when:
     task.ext.when == null || task.ext.when
@@ -42,7 +42,7 @@ process ESVEE_PREP {
     def bam_files_string = String.join(",", bam_files)
 
     """
-    mkdir -p sv_prep/
+    mkdir -p prep/
 
     SAMBAMBA_PATH=\$(which sambamba)
 
@@ -57,13 +57,13 @@ process ESVEE_PREP {
         -known_fusion_bed ${known_fusions} \\
         -bamtool \$SAMBAMBA_PATH \\
         -write_types "JUNCTIONS;BAM;FRAGMENT_LENGTH_DIST" \\
-        -output_dir sv_prep/ \\
+        -output_dir prep/ \\
         -threads ${task.cpus} \\
         -log_level DEBUG \\
 
     # NOTE(LN): For tumor only mode, make empty output null.esvee.prep.bam for the reference sample so that nextflow doesn't complain about
     # this missing file when emitting output
-    ${ (meta.normal_id == null) ? "touch sv_prep/${meta.normal_id}.esvee.prep.bam" : "" }
+    ${ (meta.normal_id == null) ? "touch prep/${meta.normal_id}.esvee.prep.bam" : "" }
 
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":
@@ -73,14 +73,14 @@ process ESVEE_PREP {
 
     stub:
     """
-    mkdir -p sv_prep/
+    mkdir -p prep/
 
-    touch "sv_prep/${meta.normal_id}.esvee.prep.bam"
-    touch "sv_prep/${meta.normal_id}.esvee.prep.bam.bai"
-    touch "sv_prep/${meta.tumor_id}.esvee.prep.bam"
-    touch "sv_prep/${meta.tumor_id}.esvee.prep.bam.bai"
-    touch "sv_prep/${meta.tumor_id}.esvee.prep.fragment_lengths.tsv"
-    touch "sv_prep/${meta.tumor_id}.esvee.prep.junctions.tsv"
+    touch "prep/${meta.normal_id}.esvee.prep.bam"
+    touch "prep/${meta.normal_id}.esvee.prep.bam.bai"
+    touch "prep/${meta.tumor_id}.esvee.prep.bam"
+    touch "prep/${meta.tumor_id}.esvee.prep.bam.bai"
+    touch "prep/${meta.tumor_id}.esvee.prep.fragment_lengths.tsv"
+    touch "prep/${meta.tumor_id}.esvee.prep.junctions.tsv"
 
     echo -e '${task.process}:\\n  stub: noversions\\n' > versions.yml
     """
