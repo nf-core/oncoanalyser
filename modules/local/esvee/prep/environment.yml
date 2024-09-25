@@ -1,4 +1,4 @@
-name: svprep_svprep
+name: esvee_prep
 channels:
   - conda-forge
   - bioconda
