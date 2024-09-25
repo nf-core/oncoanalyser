@@ -7,7 +7,7 @@ import Utils
 
 import java.nio.channels.Channel
 
-include { ESVEE_PREP            } from '../../../modules/local/esvee/svprep/main'
+include { ESVEE_PREP            } from '../../../modules/local/esvee/prep/main'
 include { ESVEE_ASSEMBLE        } from '../../../modules/local/esvee/assemble/main'
 include { ESVEE_DEPTH_ANNOTATOR } from '../../../modules/local/esvee/depth_annotator/main'
 include { ESVEE_CALL            } from '../../../modules/local/esvee/call/main'
