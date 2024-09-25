@@ -5,9 +5,11 @@ process SAGE_SOMATIC {
     label 'process_medium'
 
     conda "${moduleDir}/environment.yml"
-    container "${ workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container ?
-        'https://depot.galaxyproject.org/singularity/hmftools-sage:3.4.4--hdfd78af_0' :
-        'biocontainers/hmftools-sage:3.4.4--hdfd78af_0' }"
+//    container "${ workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container ?
+//        'https://depot.galaxyproject.org/singularity/hmftools-sage:3.4.4--hdfd78af_0' :
+//        'biocontainers/hmftools-sage:3.4.4--hdfd78af_0' }"
+
+    container "quay.io/local/hmftools-sage"
 
     input:
     tuple val(meta), path(tumor_bam), path(normal_bam), path(donor_bam), path(tumor_bai), path(normal_bai), path(donor_bai)
@@ -45,6 +47,21 @@ process SAGE_SOMATIC {
     def ref_sample_count_arg = "-ref_sample_count ${reference_ids.size()}"
 
     """
+    # Get MSI jitter files
+    mkdir -p redux/
+
+    symlink_redux_tsvs_from () {
+        # TSV files are stored in the same dir as the BAM files
+        bam_file=\$(realpath \$1)
+        bam_dir=\$(dirname \$bam_file)
+        ln -sf \$bam_dir/*.tsv* redux/
+    }
+
+    symlink_redux_tsvs_from ${tumor_bam}
+    ${ (meta.normal_id != null) ? "symlink_redux_tsvs_from ${normal_bam}" : "" }
+    ${ (meta.donor_id != null) ? "symlink_redux_tsvs_from ${donor_bam}" : "" }
+
+    # Run SAGE
     mkdir -p somatic/
 
     sage \\
@@ -55,6 +72,7 @@ process SAGE_SOMATIC {
         ${ref_sample_count_arg} \\
         -tumor ${meta.tumor_id} \\
         -tumor_bam ${tumor_bam} \\
+        -jitter_param_dir redux/ \\
         -ref_genome ${genome_fasta} \\
         -ref_genome_version ${genome_ver} \\
         -hotspots ${sage_known_hotspots_somatic} \\
@@ -62,8 +80,7 @@ process SAGE_SOMATIC {
         -coverage_bed ${sage_coverage_panel} \\
         -high_confidence_bed ${sage_highconf_regions} \\
         -ensembl_data_dir ${ensembl_data_resources} \\
-        -write_bqr_data \\
-        -write_bqr_plot \\
+        -bqr_write_plot \\
         -threads ${task.cpus} \\
         -output_vcf somatic/${meta.tumor_id}.sage.somatic.vcf.gz
 
