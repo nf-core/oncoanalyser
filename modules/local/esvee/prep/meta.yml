@@ -1,14 +1,14 @@
-name: svprep
+name: esvee_prep
 description: Select reads associated with SV events
 keywords:
   - filtering
   - reads
   - sv
 tools:
-  - svprep:
-      description: Selects reads associated with SV events for input to GRIDSS
-      homepage: https://github.com/hartwigmedical/hmftools/tree/master/sv-prep
-      documentation: https://github.com/hartwigmedical/hmftools/tree/master/sv-prep
+  - esvee:
+      description: Structural variant (SV) calling
+      homepage: https://github.com/hartwigmedical/hmftools/tree/master/esvee
+      documentation: https://github.com/hartwigmedical/hmftools/tree/master/esvee
       licence: ["GPL >=3"]
 input:
   - meta:

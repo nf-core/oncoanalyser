@@ -1,13 +1,13 @@
-name: gridss_call
-description: Call SVs with GRIDSS
+name: esvee_call
+description: Call somatic SVs with ESVEE
 keywords:
   - calling
   - sv
 tools:
-  - gridss:
-      description: GRIDSS is a module software suite containing tools useful for the detection of genomic rearrangements.
-      homepage: https://github.com/PapenfussLab/gridss
-      documentation: https://github.com/PapenfussLab/gridss
+  - esvee:
+      description: Structural variant (SV) calling
+      homepage: https://github.com/hartwigmedical/hmftools/tree/master/esvee
+      documentation: https://github.com/hartwigmedical/hmftools/tree/master/esvee
       licence: ["GPL >=3"]
 input:
   - meta:
@@ -58,7 +58,7 @@ output:
         e.g. [id: 'sample_id']
   - vcf:
       type: file
-      description: GRIDSS SV VCF file
+      description: VCF file
       pattern: "*.{vcf.gz}"
   - versions:
       type: file

@@ -1,13 +1,13 @@
-name: gridss_assemble
-description: Assemble SVs with GRIDSS
+name: esvee_assemble
+description: Assemble SVs with ESVEE
 keywords:
   - assemble
   - sv
 tools:
-  - gridss:
-      description: GRIDSS is a module software suite containing tools useful for the detection of genomic rearrangements.
-      homepage: https://github.com/PapenfussLab/gridss
-      documentation: https://github.com/PapenfussLab/gridss
+  - esvee:
+      description: Structural variant (SV) calling
+      homepage: https://github.com/hartwigmedical/hmftools/tree/master/esvee
+      documentation: https://github.com/hartwigmedical/hmftools/tree/master/esvee
       licence: ["GPL >=3"]
 input:
   - meta:
