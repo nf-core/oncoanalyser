@@ -13,7 +13,7 @@ workflow REDUX_PROCESSING {
     ch_inputs     // channel: [mandatory] [ meta ]
     ch_dna_tumor  // channel: [mandatory] [ meta, [bam, ...], [bai, ...] ]
     ch_dna_normal // channel: [mandatory] [ meta, [bam, ...], [bai, ...] ]
-    ch_dna_donor  // channel: [mandatory] [ meta, [bam, ...], [bai, ...] ]
+    ch_dna_donor  // channel: [optional]  [ meta, [bam, ...], [bai, ...] ]
 
     // Reference data
     genome_fasta     // channel: [mandatory] /path/to/genome_fasta
@@ -117,11 +117,11 @@ workflow REDUX_PROCESSING {
 
     // Sort into a tumor and normal channel
     ch_redux_out = REDUX.out.bam
-        .branch { meta_redux, bam, bai ->
-            assert ['tumor', 'normal', 'donor'].contains(meta_redux.sample_type)
-            tumor: meta_redux.sample_type == 'tumor'
-            normal: meta_redux.sample_type == 'normal'
-            donor: meta_redux.sample_type == 'donor'
+        .branch { meta, bam, bai ->
+            assert ['tumor', 'normal', 'donor'].contains(meta.sample_type)
+            tumor: meta.sample_type == 'tumor'
+            normal: meta.sample_type == 'normal'
+            donor: meta.sample_type == 'donor'
             placeholder: true
         }
 
@@ -146,9 +146,9 @@ workflow REDUX_PROCESSING {
         )
 
     emit:
-    dna_tumor  = ch_redux_tumor_out  // channel: [ meta, bam, bai, tsv ]
-    dna_normal = ch_redux_normal_out // channel: [ meta, bam, bai, tsv ]
-    dna_donor = ch_redux_donor_out // channel: [ meta, bam, bai, tsv ]
+    dna_tumor  = ch_redux_tumor_out  // channel: [ meta, bam, bai ]
+    dna_normal = ch_redux_normal_out // channel: [ meta, bam, bai ]
+    dna_donor = ch_redux_donor_out   // channel: [ meta, bam, bai ]
 
     versions   = ch_versions       // channel: [ versions.yml ]
 }
