@@ -64,14 +64,9 @@ process SAGE_GERMLINE {
         -coverage_bed ${sage_coverage_panel} \\
         -high_confidence_bed ${sage_highconf_regions} \\
         -ensembl_data_dir ${ensembl_data_resources} \\
-        -hotspot_min_tumor_qual 50 \\
-        -hotspot_max_germline_vaf 100 \\
-        -hotspot_max_germline_rel_qual 100 \\
-        -panel_min_tumor_qual 75 \\
-        -panel_max_germline_vaf 100 \\
-        -panel_max_germline_rel_qual 100 \\
-        -ref_sample_count 0 \\
+        -germline \\
         -panel_only \\
+        -ref_sample_count 0 \\
         -bqr_write_plot \\
         -threads ${task.cpus} \\
         -output_vcf germline/${meta.tumor_id}.sage.germline.vcf.gz
