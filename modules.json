@@ -34,11 +34,6 @@
                         "installed_by": ["modules"],
                         "patch": "modules/nf-core/samtools/faidx/samtools-faidx.diff"
                     },
-                    "samtools/flagstat": {
-                        "branch": "master",
-                        "git_sha": "bbb99cb8d679555cc01c98766de7869f83283545",
-                        "installed_by": ["modules"]
-                    },
                     "samtools/sort": {
                         "branch": "master",
                         "git_sha": "d5d785b3d8b422cda9c6d84a23f629a8e9ff8cd8",
