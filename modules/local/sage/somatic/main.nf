@@ -46,6 +46,9 @@ process SAGE_SOMATIC {
 
     def ref_sample_count_arg = "-ref_sample_count ${reference_ids.size()}"
 
+    def run_mode = Utils.getEnumFromString(params.mode, Constants.RunMode)
+    def high_depth_mode_arg = (run_mode === Constants.RunMode.TARGETED) ? "-high_depth_mode" : ""
+
     """
     # Get MSI jitter files
     mkdir -p redux/
@@ -80,6 +83,7 @@ process SAGE_SOMATIC {
         -coverage_bed ${sage_coverage_panel} \\
         -high_confidence_bed ${sage_highconf_regions} \\
         -ensembl_data_dir ${ensembl_data_resources} \\
+        ${high_depth_mode_arg} \\
         -bqr_write_plot \\
         -threads ${task.cpus} \\
         -output_vcf somatic/${meta.tumor_id}.sage.somatic.vcf.gz
