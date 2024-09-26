@@ -3,12 +3,21 @@ process ORANGE {
     label 'process_single'
 
     conda "${moduleDir}/environment.yml"
-    container "${ workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container ?
-        'https://depot.galaxyproject.org/singularity/hmftools-orange:2.7.1--hdfd78af_0' :
-        'biocontainers/hmftools-orange:2.7.1--hdfd78af_0' }"
+//    container "${ workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container ?
+//        'https://depot.galaxyproject.org/singularity/hmftools-orange:2.7.1--hdfd78af_0' :
+//        'biocontainers/hmftools-orange:2.7.1--hdfd78af_0' }"
+
+    container "quay.io/local/hmftools-orange"
 
     input:
-    tuple val(meta), path(bam_metrics_somatic), path(bam_metrics_germline), path(flagstat_somatic), path(flagstat_germline), path(sage_somatic_dir), path(sage_germline_dir), path(smlv_somatic_vcf), path(smlv_germline_vcf), path(purple_dir), path(linx_somatic_anno_dir), path(linx_somatic_plot_dir), path(linx_germline_anno_dir), path(virusinterpreter_dir), path(chord_dir), path(sigs_dir), path(lilac_dir), path(cuppa_dir), path(isofox_dir)
+    tuple val(meta),
+        path(bam_metrics_somatic), path(bam_metrics_germline),
+        path(sage_somatic_dir), path(sage_germline_dir),
+        path(smlv_somatic_vcf), path(smlv_germline_vcf),
+        path(purple_dir),
+        path(linx_somatic_anno_dir), path(linx_somatic_plot_dir),
+        path(linx_germline_anno_dir),
+        path(virusinterpreter_dir), path(chord_dir), path(sigs_dir), path(lilac_dir), path(cuppa_dir), path(isofox_dir)
     val genome_ver
     path disease_ontology
     path cohort_mapping
@@ -16,6 +25,7 @@ process ORANGE {
     path known_fusion_data
     path driver_gene_panel
     path ensembl_data_resources
+    path sigs_etiology
     path isofox_alt_sj
     path isofox_gene_distribution
     val pipeline_version
@@ -33,15 +43,20 @@ process ORANGE {
 
     def pipeline_version_str = pipeline_version ?: 'not specified'
 
+    def run_mode = Utils.getEnumFromString(params.mode, Constants.RunMode);
+    def experiment_type = (run_mode === Constants.RunMode.WGTS) ? "WGS" : "TARGETED"
+
     def virus_dir_arg = virusinterpreter_dir ? "-virus_dir ${virusinterpreter_dir}" : ''
     def chord_dir_arg = chord_dir ? "-chord_dir ${chord_dir}" : ''
     def sigs_dir_arg = sigs_dir ? "-sigs_dir ${sigs_dir}" : ''
     def cuppa_dir_arg = cuppa_dir ? "-cuppa_dir ${cuppa_dir}" : ''
     def plot_dir = linx_somatic_plot_dir.resolve('reportable/').toUriString().replaceAll('/$', '')
 
+    def metrics_dir = "./metrics/"
+    def tumor_metrics_arg = "-tumor_metrics_dir ${metrics_dir}"
+    def normal_metrics_arg = bam_metrics_germline ? "-ref_metrics_dir ${metrics_dir}" : ''
+
     def normal_id_arg = meta.containsKey('normal_dna_id') ? "-reference_sample_id ${meta.normal_dna_id}" : ''
-    def normal_metrics_arg = bam_metrics_germline ? "-ref_sample_wgs_metrics_file ${bam_metrics_germline}" : ''
-    def normal_flagstat_arg = flagstat_germline ? "-ref_sample_flagstat_file ${flagstat_germline}" : ''
     def normal_sage_dir = sage_germline_dir ? "-sage_germline_dir ${sage_germline_dir}" : ''
     def normal_linx_arg = linx_germline_anno_dir ? "-linx_germline_dir ${linx_germline_anno_dir}" : ''
 
@@ -85,6 +100,10 @@ process ORANGE {
 
     fi
 
+    # Combine tumor and reference bam metrics into one folder
+    mkdir -p ${metrics_dir}
+    ln -sf \$(realpath ${bam_metrics_somatic} ${bam_metrics_germline}) ${metrics_dir}
+
     # Set input plot directory and create it doesn't exist. See the LINX visualiser module for further info.
     if [[ ! -e ${plot_dir}/ ]]; then
         mkdir -p ${plot_dir}/;
@@ -108,14 +127,12 @@ process ORANGE {
         -jar \${orange_jar} \\
             ${args} \\
             \\
-            -experiment_date \$(date +%y%m%d) \\
             -add_disclaimer \\
             -pipeline_version_file pipeline_version.txt \\
+            -experiment_type ${experiment_type} \\
             \\
             -tumor_sample_id ${meta.tumor_id} \\
             -primary_tumor_doids 162 \\
-            -tumor_sample_wgs_metrics_file ${bam_metrics_somatic} \\
-            -tumor_sample_flagstat_file ${flagstat_somatic} \\
             -sage_dir ${sage_somatic_dir} \\
             -purple_dir \${purple_dir_local} \\
             -purple_plot_dir \${purple_dir_local}/plot/ \\
@@ -129,7 +146,7 @@ process ORANGE {
             \\
             ${normal_id_arg} \\
             ${normal_metrics_arg} \\
-            ${normal_flagstat_arg} \\
+            ${tumor_metrics_arg} \\
             ${normal_sage_dir} \\
             ${normal_linx_arg} \\
             \\
@@ -142,6 +159,7 @@ process ORANGE {
             -cohort_percentiles_tsv ${cohort_percentiles} \\
             -known_fusion_file ${known_fusion_data} \\
             -driver_gene_panel ${driver_gene_panel} \\
+            -signatures_etiology_tsv ${sigs_etiology} \\
             -ensembl_data_dir ${ensembl_data_resources} \\
             ${isofox_gene_distribution_arg} \\
             ${isofox_alt_sj_arg} \\
