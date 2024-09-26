@@ -1,0 +1,43 @@
+name: PEACH
+description: Rapidly process BAMs for various tasks
+keywords:
+  - bam
+tools:
+  - bamtools:
+      description: Pharmacogenomic Evaluator And Caller of Haplotypes
+      homepage: https://github.com/hartwigmedical/hmftools/tree/master/peach
+      documentation: https://github.com/hartwigmedical/hmftools/blob/master/peach/README.md
+      licence: ["GPL v3"]
+input:
+  - meta:
+      type: map
+      description: |
+        Groovy Map containing sample information
+        e.g. [id: 'sample_id']
+  - sage_germline_vcf:
+      type: file
+      description: SAGE germline vcf
+      pattern: "*.{vcf.gz}"
+  - haplotypes:
+      type: file
+      description: Configuration of the haplotypes that can be called
+      pattern: "*.{tsv}"
+  - haplotype_functions:
+      type: file
+      description: TSV describing function of configured haplotype
+      pattern: "*.{tsv}"
+  - drugs:
+      type: file
+      description: TSV with relevant drugs for configured genes and URLs to suggested prescription adjustments for these drugs depending on haplotype function
+      pattern: "*.{tsv}"
+output:
+  - meta:
+      type: map
+      description: |
+        Groovy Map containing sample information
+        e.g. [id: 'sample_id']
+  - peach_dir:
+      type: directory
+      description: PEACH output directory
+authors:
+  - "@DFKoetsier"
