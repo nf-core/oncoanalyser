@@ -40,7 +40,6 @@ class Constants {
         CHORD,
         COBALT,
         CUPPA,
-        FLAGSTAT,
         ESVEE,
         ISOFOX,
         LILAC,
@@ -83,7 +82,6 @@ class Constants {
         CHORD_DIR,
         SIGS_DIR,
         CUPPA_DIR,
-        FLAGSTAT,
         LINX_PLOT_DIR,
         SAGE_DIR,
     }
@@ -207,17 +205,6 @@ class Constants {
         ],
         BAMTOOLS_NORMAL: [
             FileType.BAMTOOLS,
-            SampleType.NORMAL,
-            SequenceType.DNA,
-        ],
-
-        FLAGSTAT_TUMOR: [
-            FileType.FLAGSTAT,
-            SampleType.TUMOR,
-            SequenceType.DNA,
-        ],
-        FLAGSTAT_NORMAL: [
-            FileType.FLAGSTAT,
             SampleType.NORMAL,
             SequenceType.DNA,
         ],

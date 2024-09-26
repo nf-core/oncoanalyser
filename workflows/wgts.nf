@@ -57,7 +57,6 @@ include { CHORD_PREDICTION      } from '../subworkflows/local/chord_prediction'
 include { COBALT_PROFILING      } from '../subworkflows/local/cobalt_profiling'
 include { CUPPA_PREDICTION      } from '../subworkflows/local/cuppa_prediction'
 include { ESVEE_CALLING         } from '../subworkflows/local/esvee_calling'
-include { FLAGSTAT_METRICS      } from '../subworkflows/local/flagstat_metrics'
 include { ISOFOX_QUANTIFICATION } from '../subworkflows/local/isofox_quantification'
 include { LILAC_CALLING         } from '../subworkflows/local/lilac_calling'
 include { LINX_ANNOTATION       } from '../subworkflows/local/linx_annotation'
@@ -529,32 +528,6 @@ workflow WGTS {
     }
 
     //
-    // SUBWORKFLOW: Run SAMtools flagstat to generate stats required for ORANGE
-    //
-    // channel: [ meta, metrics ]
-    ch_flagstat_somatic_out = Channel.empty()
-    ch_flagstat_germline_out = Channel.empty()
-    if (run_config.stages.orange && run_config.stages.flagstat) {
-
-        FLAGSTAT_METRICS(
-            ch_inputs,
-            ch_redux_dna_tumor_out,
-            ch_redux_dna_normal_out,
-        )
-
-        ch_versions = ch_versions.mix(FLAGSTAT_METRICS.out.versions)
-
-        ch_flagstat_somatic_out = ch_flagstat_somatic_out.mix(FLAGSTAT_METRICS.out.somatic)
-        ch_flagstat_germline_out = ch_flagstat_germline_out.mix(FLAGSTAT_METRICS.out.germline)
-
-    } else {
-
-        ch_flagstat_somatic_out = ch_inputs.map { meta -> [meta, []] }
-        ch_flagstat_germline_out = ch_inputs.map { meta -> [meta, []] }
-
-    }
-
-    //
     // SUBWORKFLOW: Run Bam Tools to generate stats required for downstream processes
     //
     // channel: [ meta, metrics ]
@@ -757,8 +730,6 @@ workflow WGTS {
             ch_inputs,
             ch_bamtools_somatic_out,
             ch_bamtools_germline_out,
-            ch_flagstat_somatic_out,
-            ch_flagstat_germline_out,
             ch_sage_somatic_dir_out,
             ch_sage_germline_dir_out,
             ch_sage_somatic_append_out,

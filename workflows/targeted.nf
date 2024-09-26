@@ -52,7 +52,6 @@ include { softwareVersionsToYAML } from '../subworkflows/nf-core/utils_nfcore_pi
 include { AMBER_PROFILING       } from '../subworkflows/local/amber_profiling'
 include { BAMTOOLS_METRICS      } from '../subworkflows/local/bamtools_metrics'
 include { COBALT_PROFILING      } from '../subworkflows/local/cobalt_profiling'
-include { FLAGSTAT_METRICS      } from '../subworkflows/local/flagstat_metrics'
 include { ESVEE_CALLING         } from '../subworkflows/local/esvee_calling'
 include { ISOFOX_QUANTIFICATION } from '../subworkflows/local/isofox_quantification'
 include { LILAC_CALLING         } from '../subworkflows/local/lilac_calling'
@@ -526,32 +525,6 @@ workflow TARGETED {
     }
 
     //
-    // SUBWORKFLOW: Run SAMtools flagstat to generate stats required for ORANGE
-    //
-    // channel: [ meta, metrics ]
-    ch_flagstat_somatic_out = Channel.empty()
-    ch_flagstat_germline_out = Channel.empty()
-    if (run_config.stages.orange && run_config.stages.flagstat) {
-
-        FLAGSTAT_METRICS(
-            ch_inputs,
-            ch_redux_dna_tumor_out,
-            ch_redux_dna_normal_out,
-        )
-
-        ch_versions = ch_versions.mix(FLAGSTAT_METRICS.out.versions)
-
-        ch_flagstat_somatic_out = ch_flagstat_somatic_out.mix(FLAGSTAT_METRICS.out.somatic)
-        ch_flagstat_germline_out = ch_flagstat_germline_out.mix(FLAGSTAT_METRICS.out.germline)
-
-    } else {
-
-        ch_flagstat_somatic_out = ch_inputs.map { meta -> [meta, []] }
-        ch_flagstat_germline_out = ch_inputs.map { meta -> [meta, []] }
-
-    }
-
-    //
     // SUBWORKFLOW: Run Bam Tools to generate stats required for downstream processes
     //
     // channel: [ meta, metrics ]
@@ -627,8 +600,6 @@ workflow TARGETED {
             ch_inputs,
             ch_bamtools_somatic_out,
             ch_bamtools_germline_out,
-            ch_flagstat_somatic_out,
-            ch_flagstat_germline_out,
             ch_sage_somatic_dir_out,
             ch_sage_germline_dir_out,
             ch_sage_somatic_append_out,
