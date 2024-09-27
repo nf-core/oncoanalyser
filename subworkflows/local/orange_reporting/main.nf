@@ -22,10 +22,10 @@ workflow ORANGE_REPORTING {
     ch_linx_somatic_plot        // channel: [mandatory] [ meta, linx_visualiser_dir ]
     ch_linx_germline_annotation // channel: [mandatory] [ meta, linx_annotation_dir ]
     ch_virusinterpreter         // channel: [mandatory] [ meta, virusinterpreter_dir ]
-    ch_peach                    // channel: [mandatory] [ meta, peach_dir ]
+    ch_peach                    // channel: [optional]  [ meta, peach_dir ]
     ch_chord                    // channel: [mandatory] [ meta, chord_dir ]
     ch_sigs                     // channel: [mandatory] [ meta, sigs_dir ]
-    ch_lilac                    // channel: [mandatory] [ meta, lilac_dir ]
+    ch_lilac                    // channel: [optional]  [ meta, lilac_dir ]
     ch_cuppa                    // channel: [mandatory] [ meta, cuppa_dir ]
     ch_isofox                   // channel: [mandatory] [ meta, isofox_dir ]
 
@@ -55,14 +55,12 @@ workflow ORANGE_REPORTING {
         6,   // purple_dir
         7,   // linx_somatic_annotation
         8,   // linx_somatic_plot_dir
-        14,  // lilac_dir
     ]
 
     dna_normal_input_indexes = [
         1,   // bamtools_germline
         3,   // sage_germline
         9,   // linx_germline_annotation
-        11,  // peach_dir
     ]
 
     rna_tumor_input_indexes = [
@@ -126,7 +124,7 @@ workflow ORANGE_REPORTING {
         }
 
     // Sort inputs
-    // channel: runnable: [ meta, tbt_metrics, nbt_metrics, tfs_metrics, nfs_metrics, tsage_dir, nsage_dir, tsage_append, nsage_append, purple_dir, tlinx_anno_dir, tlinx_plot_dir, nlinx_anno_dir, virusinterpreter_dir, chord_dir, sigs_dir, lilac_dir, cuppa_dir, isofox_dir ]
+    // channel: runnable: [ meta, tbt_metrics, nbt_metrics, tfs_metrics, nfs_metrics, tsage_dir, nsage_dir, tsage_append, nsage_append, purple_dir, tlinx_anno_dir, tlinx_plot_dir, nlinx_anno_dir, virusinterpreter_dir, peach_dir, chord_dir, sigs_dir, lilac_dir, cuppa_dir, isofox_dir ]
     // channel: skip: [ meta ]
     ch_inputs_sorted = ch_inputs_selected
         .branch { d ->
@@ -150,7 +148,7 @@ workflow ORANGE_REPORTING {
 
     // First set RNA reference files
     // NOTE(SW): since the RNA reference files are provided as channels, I seem to be only able to include via channel ops
-    // channel: [ meta, tbt_metrics, nbt_metrics, tsage_dir, nsage_dir, tsage_append, nsage_append, purple_dir, tlinx_anno_dir, tlinx_plot_dir, nlinx_anno_dir, virusinterpreter_dir, chord_dir, sigs_dir, lilac_dir, cuppa_dir, isofox_dir, isofox_alt_sj, isofox_gene_distribution ]
+    // channel: [ meta, tbt_metrics, nbt_metrics, tsage_dir, nsage_dir, tsage_append, nsage_append, purple_dir, tlinx_anno_dir, tlinx_plot_dir, nlinx_anno_dir, virusinterpreter_dir, peach_dir, chord_dir, sigs_dir, lilac_dir, cuppa_dir, isofox_dir, isofox_alt_sj, isofox_gene_distribution ]
     ch_inputs_runnable = Channel.empty()
         .mix(
             ch_inputs_sorted.runnable_dna.map { d -> [*d, [], []] },
@@ -160,7 +158,7 @@ workflow ORANGE_REPORTING {
         )
 
     // Create process input channel
-    // channel: sample_data: [ meta, tbt_metrics, nbt_metrics, tsage_dir, nsage_dir, tsmlv_vcf, nsmlv_vcf, purple_dir, tlinx_anno_dir, tlinx_plot_dir, nlinx_anno_dir, virusinterpreter_dir, chord_dir, sigs_dir, lilac_dir, cuppa_dir, isofox_dir ]
+    // channel: sample_data: [ meta, tbt_metrics, nbt_metrics, tsage_dir, nsage_dir, tsmlv_vcf, nsmlv_vcf, purple_dir, tlinx_anno_dir, tlinx_plot_dir, nlinx_anno_dir, virusinterpreter_dir, peach_dir, chord_dir, sigs_dir, lilac_dir, cuppa_dir, isofox_dir ]
     // channel: isofox_alt_sj: [ isofox_alt_sj ]
     // channel: isofox_gene_distribution: [ isofox_gene_distribution ]
     ch_orange_inputs = ch_inputs_runnable

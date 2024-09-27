@@ -54,6 +54,7 @@ process ORANGE {
 
     def virus_dir_arg = virusinterpreter_dir ? "-virus_dir ${virusinterpreter_dir}" : ''
     def peach_dir_arg = peach_dir ? "-peach_dir ${peach_dir}" : ''
+    def lilac_dir_arg = lilac_dir ? "-lilac_dir ${lilac_dir}" : ''
     def chord_dir_arg = chord_dir ? "-chord_dir ${chord_dir}" : ''
     def sigs_dir_arg = sigs_dir ? "-sigs_dir ${sigs_dir}" : ''
     def cuppa_dir_arg = cuppa_dir ? "-cuppa_dir ${cuppa_dir}" : ''
@@ -145,9 +146,9 @@ process ORANGE {
             -purple_plot_dir \${purple_dir_local}/plot/ \\
             -linx_dir ${linx_somatic_anno_dir} \\
             -linx_plot_dir ${plot_dir}/ \\
-            -lilac_dir ${lilac_dir} \\
             ${virus_dir_arg} \\
             ${peach_dir_arg} \\
+            ${lilac_dir_arg} \\
             ${chord_dir_arg} \\
             ${sigs_dir_arg} \\
             ${cuppa_dir_arg} \\
