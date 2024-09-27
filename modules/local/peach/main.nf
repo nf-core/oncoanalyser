@@ -10,7 +10,10 @@ process PEACH {
     container 'quay.io/local/hmftools-peach'
 
     input:
-    tuple val(meta), path(sage_germline_vcf), path(haplotypes), path(haplotype_functions), path(drugs)
+    tuple val(meta), path(sage_germline_vcf), path(sage_germline_tbi)
+    path(haplotypes)
+    path(haplotype_functions)
+    path(drugs)
 
     output:
     tuple val(meta), path('peach/'), emit: peach_dir
