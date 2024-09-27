@@ -420,7 +420,7 @@ workflow WGTS {
 
         ch_versions = ch_versions.mix(PEACH_REPORTING.out.versions)
 
-        ch_peach_germline_out = ch_pave_germline_out.mix(PEACH_REPORTING.out.peach_dir)
+        ch_peach_germline_out = ch_peach_germline_out.mix(PEACH_REPORTING.out.peach_dir)
 
     } else {
 
@@ -765,6 +765,7 @@ workflow WGTS {
             ch_linx_somatic_visualiser_dir_out,
             ch_linx_germline_out,
             ch_virusinterpreter_out,
+            ch_peach_germline_out,
             ch_chord_out,
             ch_sigs_out,
             ch_lilac_out,
@@ -776,8 +777,8 @@ workflow WGTS {
             hmf_data.cohort_percentiles,
             hmf_data.known_fusion_data,
             hmf_data.driver_gene_panel,
-            hmf_data.sigs_etiology,
             hmf_data.ensembl_data_resources,
+            hmf_data.sigs_etiology,
             hmf_data.alt_sj_distribution,
             hmf_data.gene_exp_distribution,
         )
