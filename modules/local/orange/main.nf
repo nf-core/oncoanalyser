@@ -17,7 +17,13 @@ process ORANGE {
         path(purple_dir),
         path(linx_somatic_anno_dir), path(linx_somatic_plot_dir),
         path(linx_germline_anno_dir),
-        path(virusinterpreter_dir), path(chord_dir), path(sigs_dir), path(lilac_dir), path(cuppa_dir), path(isofox_dir)
+        path(virusinterpreter_dir),
+        path(peach_dir),
+        path(chord_dir),
+        path(sigs_dir),
+        path(lilac_dir),
+        path(cuppa_dir),
+        path(isofox_dir)
     val genome_ver
     path disease_ontology
     path cohort_mapping
@@ -47,6 +53,7 @@ process ORANGE {
     def experiment_type = (run_mode === Constants.RunMode.WGTS) ? "WGS" : "TARGETED"
 
     def virus_dir_arg = virusinterpreter_dir ? "-virus_dir ${virusinterpreter_dir}" : ''
+    def peach_dir_arg = peach_dir ? "-peach_dir ${peach_dir}" : ''
     def chord_dir_arg = chord_dir ? "-chord_dir ${chord_dir}" : ''
     def sigs_dir_arg = sigs_dir ? "-sigs_dir ${sigs_dir}" : ''
     def cuppa_dir_arg = cuppa_dir ? "-cuppa_dir ${cuppa_dir}" : ''
@@ -140,6 +147,7 @@ process ORANGE {
             -linx_plot_dir ${plot_dir}/ \\
             -lilac_dir ${lilac_dir} \\
             ${virus_dir_arg} \\
+            ${peach_dir_arg} \\
             ${chord_dir_arg} \\
             ${sigs_dir_arg} \\
             ${cuppa_dir_arg} \\

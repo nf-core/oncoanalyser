@@ -22,6 +22,7 @@ workflow ORANGE_REPORTING {
     ch_linx_somatic_plot        // channel: [mandatory] [ meta, linx_visualiser_dir ]
     ch_linx_germline_annotation // channel: [mandatory] [ meta, linx_annotation_dir ]
     ch_virusinterpreter         // channel: [mandatory] [ meta, virusinterpreter_dir ]
+    ch_peach                    // channel: [mandatory] [ meta, peach_dir ]
     ch_chord                    // channel: [mandatory] [ meta, chord_dir ]
     ch_sigs                     // channel: [mandatory] [ meta, sigs_dir ]
     ch_lilac                    // channel: [mandatory] [ meta, lilac_dir ]
@@ -46,7 +47,7 @@ workflow ORANGE_REPORTING {
     ch_versions = Channel.empty()
 
     // Set expected input ordering and size
-    input_expected_size = 16
+    input_expected_size = 17
 
     dna_tumor_input_indexes = [
         0,   // bamtools_somatic
@@ -54,18 +55,19 @@ workflow ORANGE_REPORTING {
         6,   // purple_dir
         7,   // linx_somatic_annotation
         8,   // linx_somatic_plot_dir
-        13,  // lilac_dir
+        14,  // lilac_dir
     ]
 
     dna_normal_input_indexes = [
         1,   // bamtools_germline
         3,   // sage_germline
         9,   // linx_germline_annotation
+        11,  // peach_dir
     ]
 
     rna_tumor_input_indexes = [
         4,   // sage_somatic_append
-        15,  // isofox_dir
+        16,  // isofox_dir
     ]
 
     rna_sage_germline_append_index = 7  // sage_germline_append
@@ -84,6 +86,7 @@ workflow ORANGE_REPORTING {
         ch_linx_somatic_plot,
         ch_linx_germline_annotation,
         ch_virusinterpreter,
+        ch_peach,
         ch_chord,
         ch_sigs,
         ch_lilac,
@@ -111,11 +114,12 @@ workflow ORANGE_REPORTING {
                 Utils.selectCurrentOrExisting(inputs[8], meta, Constants.INPUT.LINX_PLOT_DIR_TUMOR),
                 Utils.selectCurrentOrExisting(inputs[9], meta, Constants.INPUT.LINX_ANNO_DIR_NORMAL),
                 Utils.selectCurrentOrExisting(inputs[10], meta, Constants.INPUT.VIRUSINTERPRETER_DIR),
-                Utils.selectCurrentOrExisting(inputs[11], meta, Constants.INPUT.CHORD_DIR),
-                Utils.selectCurrentOrExisting(inputs[12], meta, Constants.INPUT.SIGS_DIR),
-                Utils.selectCurrentOrExisting(inputs[13], meta, Constants.INPUT.LILAC_DIR),
-                Utils.selectCurrentOrExisting(inputs[14], meta, Constants.INPUT.CUPPA_DIR),
-                Utils.selectCurrentOrExisting(inputs[15], meta, Constants.INPUT.ISOFOX_DIR),
+                Utils.selectCurrentOrExisting(inputs[11], meta, Constants.INPUT.PEACH_DIR_NORMAL),
+                Utils.selectCurrentOrExisting(inputs[12], meta, Constants.INPUT.CHORD_DIR),
+                Utils.selectCurrentOrExisting(inputs[13], meta, Constants.INPUT.SIGS_DIR),
+                Utils.selectCurrentOrExisting(inputs[14], meta, Constants.INPUT.LILAC_DIR),
+                Utils.selectCurrentOrExisting(inputs[15], meta, Constants.INPUT.CUPPA_DIR),
+                Utils.selectCurrentOrExisting(inputs[16], meta, Constants.INPUT.ISOFOX_DIR),
             ]
 
             return [meta, *inputs_selected]
