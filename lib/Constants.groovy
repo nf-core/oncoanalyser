@@ -48,6 +48,7 @@ class Constants {
         NEO,
         ORANGE,
         PAVE,
+        PEACH,
         PURPLE,
         SAGE,
         SIGS,
@@ -73,6 +74,7 @@ class Constants {
         LILAC_DIR,
         LINX_ANNO_DIR,
         PAVE_VCF,
+        PEACH_DIR,
         PURPLE_DIR,
         SAGE_VCF,
         SAGE_VCF_TBI,
@@ -293,6 +295,12 @@ class Constants {
         ],
         ESVEE_UNFILTERED_VCF_NORMAL: [
             FileType.ESVEE_UNFILTERED_VCF,
+            SampleType.NORMAL,
+            SequenceType.DNA,
+        ],
+
+        PEACH_DIR_NORMAL : [
+            FileType.PEACH_DIR,
             SampleType.NORMAL,
             SequenceType.DNA,
         ],
