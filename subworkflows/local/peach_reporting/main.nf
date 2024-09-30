@@ -50,7 +50,7 @@ workflow PEACH_REPORTING {
             def meta_peach = [
                 key: meta.group_id,
                 id: meta.group_id,
-                sample_id: Utils.getTumorDnaSampleName(meta),
+                sample_id: Utils.getNormalDnaSampleName(meta),
             ]
 
             return [meta_peach, sage_vcf, sage_tbi]
