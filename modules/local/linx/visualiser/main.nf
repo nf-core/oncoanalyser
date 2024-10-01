@@ -3,9 +3,11 @@ process LINX_VISUALISER {
     label 'process_medium'
 
     conda "${moduleDir}/environment.yml"
-    container "${ workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container ?
-        'https://depot.galaxyproject.org/singularity/hmftools-linx:1.25--hdfd78af_0' :
-        'biocontainers/hmftools-linx:1.25--hdfd78af_0' }"
+//    container "${ workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container ?
+//        'https://depot.galaxyproject.org/singularity/hmftools-linx:1.25--hdfd78af_0' :
+//        'biocontainers/hmftools-linx:1.25--hdfd78af_0' }"
+
+    container "quay.io/local/hmftools-linx"
 
     input:
     tuple val(meta), path(linx_annotation_dir)
