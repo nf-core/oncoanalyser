@@ -49,7 +49,7 @@ process ESVEE_ASSEMBLE {
         -ref_genome ${genome_fasta} \\
         -ref_genome_version ${genome_ver} \\
         -decoy_genome ${decoy_sequences_image} \\
-        -write_types "JUNC_ASSEMBLY;ALIGNMENT;ALIGNMENT_DATA;BREAKEND;VCF" \\
+        -write_types "JUNC_ASSEMBLY;PHASED_ASSEMBLY;ALIGNMENT;BREAKEND;VCF" \\
         -output_dir assemble/ \\
         -threads ${task.cpus} \\
         -perf_log_time 10 \\
@@ -67,9 +67,9 @@ process ESVEE_ASSEMBLE {
 
     touch assemble/${meta.tumor_id}.esvee.raw.vcf.gz
     touch assemble/${meta.tumor_id}.esvee.raw.vcf.gz.tbi
-    touch assemble/${meta.tumor_id}.esvee.align_detailed.tsv
     touch assemble/${meta.tumor_id}.esvee.alignment.tsv
-    touch assemble/${meta.tumor_id}.esvee.assemblies.tsv
+    touch assemble/${meta.tumor_id}.esvee.assembly.tsv
+    touch assemble/${meta.tumor_id}.esvee.phased_assembly.tsv
     touch assemble/${meta.tumor_id}.esvee.breakend.tsv
 
     echo -e '${task.process}:\\n  stub: noversions\\n' > versions.yml
