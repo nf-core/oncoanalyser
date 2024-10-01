@@ -3,9 +3,11 @@ process LINX_GERMLINE {
     label 'process_low'
 
     conda "${moduleDir}/environment.yml"
-    container "${ workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container ?
-        'https://depot.galaxyproject.org/singularity/hmftools-linx:1.25--hdfd78af_0' :
-        'biocontainers/hmftools-linx:1.25--hdfd78af_0' }"
+//    container "${ workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container ?
+//        'https://depot.galaxyproject.org/singularity/hmftools-linx:1.25--hdfd78af_0' :
+//        'biocontainers/hmftools-linx:1.25--hdfd78af_0' }"
+
+    container "quay.io/local/hmftools-linx"
 
     input:
     tuple val(meta), path(sv_vcf)
