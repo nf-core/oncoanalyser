@@ -1,6 +1,6 @@
 process REDUX {
     tag "${meta.id}"
-    label 'process_medium'
+    label 'process_high'
 
 //    container "${ workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container ?
 //        'https://depot.galaxyproject.org/singularity/hmftools-mark-dups:1.1.7--hdfd78af_0' :
