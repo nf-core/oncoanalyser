@@ -13,6 +13,7 @@ process ESVEE_DEPTH_ANNOTATOR {
     tuple val(meta), path(tumor_bam), path(normal_bam), path(raw_vcf)
     path genome_fasta
     val genome_ver
+    path unmap_regions
 
     output:
     tuple val(meta), path("depth_annotation/")                                           , emit: depth_annotation_dir
@@ -47,6 +48,7 @@ process ESVEE_DEPTH_ANNOTATOR {
         -input_vcf ${raw_vcf} \\
         -ref_genome ${genome_fasta} \\
         -ref_genome_version ${genome_ver} \\
+        -unmap_regions ${unmap_regions} \\
         -output_dir depth_annotation/ \\
         -threads ${task.cpus} \\
         -log_debug
