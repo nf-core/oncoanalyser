@@ -32,7 +32,8 @@ workflow ESVEE_CALLING {
     pon_breakends            // channel: [mandatory] /path/to/pon_sgl
     pon_breakpoints          // channel: [mandatory] /path/to/pon_sv
     repeatmasker_annotations // channel: [mandatory] /path/to/repeatmasker_annotations
-    decoy_sequences          // channel: [mandatory] /path/to/deocy_sequences // TODO: make optional
+    decoy_sequences          // channel: [mandatory] /path/to/deocy_sequences
+    unmap_regions            // channel: [mandatory] /path/to/deocy_sequences
 
 
     main:
@@ -150,6 +151,7 @@ workflow ESVEE_CALLING {
         ch_depth_annotator_inputs,
         genome_fasta,
         genome_version,
+        unmap_regions,
     )
 
     ch_versions = ch_versions.mix(ESVEE_DEPTH_ANNOTATOR.out.versions)
