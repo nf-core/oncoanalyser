@@ -293,6 +293,7 @@ workflow TARGETED {
             hmf_data.gridss_pon_breakpoints,
             hmf_data.repeatmasker_annotations,
             hmf_data.decoy_sequences_image,
+            hmf_data.unmap_regions,
         )
 
         ch_versions = ch_versions.mix(ESVEE_CALLING.out.versions)
