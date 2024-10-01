@@ -20,8 +20,8 @@ process ESVEE_PREP {
     tuple val(meta), path("prep/")                                                , emit: sv_prep_dir
     tuple val(meta), path("prep/${meta.normal_id}.esvee.prep.bam")                , emit: normal_prep_bam
     tuple val(meta), path("prep/${meta.tumor_id}.esvee.prep.bam")                 , emit: tumor_prep_bam
-    tuple val(meta), path("prep/${meta.tumor_id}.esvee.prep.junctions.tsv")       , emit: junctions_tsv
-    tuple val(meta), path("prep/${meta.tumor_id}.esvee.prep.fragment_lengths.tsv"), emit: fragment_lengths_tsv
+    tuple val(meta), path("prep/${meta.tumor_id}.esvee.prep.junction.tsv")        , emit: junctions_tsv
+    tuple val(meta), path("prep/${meta.tumor_id}.esvee.prep.fragment_length.tsv") , emit: fragment_lengths_tsv
     path 'versions.yml'                                                           , emit: versions
 
     when:
@@ -79,8 +79,8 @@ process ESVEE_PREP {
     touch "prep/${meta.normal_id}.esvee.prep.bam.bai"
     touch "prep/${meta.tumor_id}.esvee.prep.bam"
     touch "prep/${meta.tumor_id}.esvee.prep.bam.bai"
-    touch "prep/${meta.tumor_id}.esvee.prep.fragment_lengths.tsv"
-    touch "prep/${meta.tumor_id}.esvee.prep.junctions.tsv"
+    touch "prep/${meta.tumor_id}.esvee.prep.fragment_length.tsv"
+    touch "prep/${meta.tumor_id}.esvee.prep.junction.tsv"
 
     echo -e '${task.process}:\\n  stub: noversions\\n' > versions.yml
     """
