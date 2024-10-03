@@ -15,7 +15,6 @@ workflow VIRUSBREAKEND_CALLING {
     ch_tumor_bam           // channel: [mandatory] [ meta, bam, bai ]
     ch_purple              // channel: [mandatory] [ meta, purple_dir ]
     ch_bamtools_somatic    // channel: [mandatory] [ meta, metrics ]
-    ch_bamtools_germline   // channel: [mandatory] [ meta, metrics ]
 
     // Reference data
     genome_fasta           // channel: [mandatory] /path/to/genome_fasta
@@ -92,15 +91,13 @@ workflow VIRUSBREAKEND_CALLING {
         WorkflowOncoanalyser.restoreMeta(VIRUSBREAKEND.out.tsv, ch_inputs),
         ch_purple,
         ch_bamtools_somatic,
-        ch_bamtools_germline,
     )
-        .map { meta, virus_tsv, purple_dir, somatic_metrics, germline_metrics ->
+        .map { meta, virus_tsv, purple_dir, somatic_metrics ->
 
             def inputs = [
                 virus_tsv,
                 Utils.selectCurrentOrExisting(purple_dir, meta, Constants.INPUT.PURPLE_DIR),
                 Utils.selectCurrentOrExisting(somatic_metrics, meta, Constants.INPUT.BAMTOOLS_DIR),
-                Utils.selectCurrentOrExisting(germline_metrics, meta, Constants.INPUT.BAMTOOLS_DIR),
             ]
 
             return [meta, *inputs]
@@ -110,8 +107,8 @@ workflow VIRUSBREAKEND_CALLING {
     // channel: [ meta, virus_tsv, purple_dir, metrics ]
     // channel: skip: [ meta ]
     ch_virusinterpreter_inputs_sorted = ch_virusinterpreter_inputs_selected
-        .branch { meta, virus_tsv, purple_dir, somatic_metrics, germline_metrics ->
-            runnable: virus_tsv && purple_dir && somatic_metrics && germline_metrics
+        .branch { meta, virus_tsv, purple_dir, somatic_metrics ->
+            runnable: virus_tsv && purple_dir && somatic_metrics
             skip: true
                 return meta
         }

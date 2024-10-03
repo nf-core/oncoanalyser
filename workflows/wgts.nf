@@ -673,7 +673,6 @@ workflow WGTS {
             ch_redux_dna_tumor_out,
             ch_purple_out,
             ch_bamtools_somatic_out,
-            ch_bamtools_germline_out,
             ref_data.genome_fasta,
             ref_data.genome_fai,
             ref_data.genome_dict,
