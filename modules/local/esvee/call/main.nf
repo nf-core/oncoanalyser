@@ -22,7 +22,7 @@ process ESVEE_CALL {
     tuple val(meta), path("caller/"), emit: caller_dir
     tuple val(meta), path("caller/${meta.tumor_id}.esvee.unfiltered.vcf.gz"), path("caller/${meta.tumor_id}.esvee.unfiltered.vcf.gz.tbi"), emit: unfiltered_vcf
     tuple val(meta), path("caller/${meta.tumor_id}.esvee.somatic.vcf.gz"),    path("caller/${meta.tumor_id}.esvee.somatic.vcf.gz.tbi"),    emit: somatic_vcf
-    tuple val(meta), path("caller/${meta.normal_id}.esvee.germline.vcf.gz"),  path("caller/${meta.normal_id}.esvee.germline.vcf.gz.tbi"),  emit: germline_vcf
+    tuple val(meta), path("caller/${meta.tumor_id}.esvee.germline.vcf.gz"),   path("caller/${meta.tumor_id}.esvee.germline.vcf.gz.tbi"),   emit: germline_vcf
     path 'versions.yml', emit: versions
 
     when:
@@ -53,10 +53,10 @@ process ESVEE_CALL {
         -output_dir caller/ \\
         -log_debug
 
-    # NOTE(LN): For tumor only mode, make empty output null.esvee.germline.vcf.gz for the reference sample so that nextflow doesn't complain
+    # NOTE(LN): For tumor only mode, make empty output tumor.esvee.germline.vcf.gz for the reference sample so that nextflow doesn't complain
     # about this missing file when emitting output
-    ${ (meta.normal_id == null) ? "touch caller/${meta.normal_id}.esvee.germline.vcf.gz" : "" }
-    ${ (meta.normal_id == null) ? "touch caller/${meta.normal_id}.esvee.germline.vcf.gz.tbi" : "" }
+    ${ (meta.normal_id == null) ? "touch caller/${meta.tumor_id}.esvee.germline.vcf.gz" : "" }
+    ${ (meta.normal_id == null) ? "touch caller/${meta.tumor_id}.esvee.germline.vcf.gz.tbi" : "" }
 
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":
@@ -76,11 +76,11 @@ process ESVEE_CALL {
 
     echo \${vcf_template} | gzip -c > caller/${meta.tumor_id}.esvee.unfiltered.vcf.gz
     echo \${vcf_template} | gzip -c > caller/${meta.tumor_id}.esvee.somatic.vcf.gz
-    echo \${vcf_template} | gzip -c > caller/${meta.normal_id}.esvee.germline.vcf.gz
+    echo \${vcf_template} | gzip -c > caller/${meta.tumor_id}.esvee.germline.vcf.gz
 
     touch caller/${meta.tumor_id}.esvee.unfiltered.vcf.gz.tbi
     touch caller/${meta.tumor_id}.esvee.somatic.vcf.gz.tbi
-    touch caller/${meta.normal_id}.esvee.germline.vcf.gz.tbi
+    touch caller/${meta.tumor_id}.esvee.germline.vcf.gz.tbi
 
     echo -e '${task.process}:\\n  stub: noversions\\n' > versions.yml
     """
