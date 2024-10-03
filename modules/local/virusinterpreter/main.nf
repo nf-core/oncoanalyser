@@ -10,7 +10,7 @@ process VIRUSINTERPRETER {
     container "quay.io/local/hmftools-virusinterpreter"
 
     input:
-    tuple val(meta), path(virus_tsv), path(purple_dir), path(somatic_metrics), path(germline_metrics)
+    tuple val(meta), path(virus_tsv), path(purple_dir), path(somatic_metrics)
     path taxonomy_db
     path reporting_db
     path blacklist_db
@@ -27,7 +27,7 @@ process VIRUSINTERPRETER {
 
     """
     mkdir -p metrics/
-    ln -sf \$(realpath ${somatic_metrics} ${germline_metrics}) metrics/
+    ln -sf \$(realpath ${somatic_metrics}) metrics/
 
     mkdir -p virusinterpreter/
     virusinterpreter \\
