@@ -21,60 +21,38 @@ process CHORD {
     task.ext.when == null || task.ext.when
 
     script:
+    def args = task.ext.args ?: ''
+
     """
-    #!/usr/bin/env Rscript
-    library('CHORD')
+    mkdir -p purple/
+    ln -sf \$(realpath ${smlv_vcf}) purple/
+    ln -sf \$(realpath ${sv_vcf}) purple/
 
-    sampleName <- '${meta.sample_id}'
-    snvIndVcf <- '${smlv_vcf}'
-    svVcf <- '${sv_vcf}'
-    refGenomeVsn <- '${genome_ver}'
+    mkdir -p chord/
 
-    sigOutTxt <- 'chord/${meta.sample_id}_chord_signatures.txt'
-    prdOutTxt <- 'chord/${meta.sample_id}_chord_prediction.txt'
+    ## NOTE(LN): Use pwd so that absolute path can be specified to -purple_dir and -output_dir
+    ## Relative paths don't work because the RExecutor class from hmf-common executes from a tmp dir, and not the working dir of this
+    ## nextflow process
+    working_dir=\$PWD
 
-    dir.create('chord/')
+    chord \\
+        -Xmx${Math.round(task.memory.bytes * 0.95)} \\
+        com.hartwig.hmftools.chord.ChordRunner \\
+        ${args} \\
+        -sample ${meta.sample_id} \\
+        -ref_genome_version ${genome_ver} \\
+        -purple_dir "\${working_dir}/purple/" \\
+        -output_dir "\${working_dir}/chord/" \\
+        -log_level DEBUG
 
-    if (refGenomeVsn == '37') {
-        library(BSgenome.Hsapiens.UCSC.hg19)
-        refGenome <- BSgenome.Hsapiens.UCSC.hg19
-    } else if (refGenomeVsn == '38') {
-        library(BSgenome.Hsapiens.UCSC.hg38)
-        refGenome <- BSgenome.Hsapiens.UCSC.hg38
-    } else {
-        stop('Unsupported ref genome version: ', refGenomeVsn, ' (should be 37 or 38)\\n')
-    }
+    ## NOTE(LN): Chord expects the R packages `CHORD` and `mutSigExtractor` to be installed as R packages
+    ## Otherwise, arg '-chord_tool_dir' would need to be provided, whereby this dir contains the subdirs CHORD/ and mutSigExtractor/
 
-    cat('[INFO] Performing chord signature extraction\\n')
-    signatures <- CHORD::extractSigsChord(
-        vcf.snv=snvIndVcf,
-        vcf.indel=snvIndVcf,
-        vcf.sv=svVcf,
-        sample.name=sampleName,
-        sv.caller='gridss',
-        vcf.filters=list(snv='PASS', indel='PASS', sv='PASS'),
-        ref.genome=refGenome
-    )
+    cat <<-END_VERSIONS > versions.yml
+    "${task.process}":
+        chord: \$(chord -version | awk '{ print \$NF }')
+    END_VERSIONS
 
-    cat('[INFO] Performing chord HRD prediction\\n')
-    prediction <- chordPredict(
-        signatures,
-        hrd.cutoff=0.5
-    )
-
-    cat('[INFO] Writing output file:', sigOutTxt,'\\n')
-    write.table(signatures, file=sigOutTxt, sep='\\t')
-
-    cat('[INFO] Writing output file:', prdOutTxt,'\\n')
-    write.table(prediction, file=prdOutTxt, sep='\\t', quote=FALSE, row.names=FALSE)
-
-    cat('[INFO] FINISHED CHORD signature extraction and HRD prediction\\n')
-
-    sink('versions.yml')
-    writeLines('"${task.process}":')
-    writeLines(paste('    chord:', packageVersion('CHORD')))
-    writeLines(paste('    mutsigextractor:', packageVersion('mutSigExtractor')))
-    sink()
     """
 
     stub:
