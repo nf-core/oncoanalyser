@@ -7,7 +7,7 @@ process BAMTOOLS {
 //        'https://depot.galaxyproject.org/singularity/hmftools-bam-tools:1.2.1--hdfd78af_0' :
 //        'biocontainers/hmftools-bam-tools:1.2.1--hdfd78af_0' }"
 
-    container 'quay.io/local/hmftools-bam-tools'
+    container 'quay.io/biocontainers/hmftools-bam-tools:1.3_beta--hdfd78af_0'
 
     input:
     tuple val(meta), path(bam), path(bai)

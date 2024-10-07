@@ -7,7 +7,7 @@ process AMBER {
 //        'https://depot.galaxyproject.org/singularity/hmftools-amber:4.0.1--hdfd78af_0' :
 //        'biocontainers/hmftools-amber:4.0.1--hdfd78af_0' }"
 
-    container "quay.io/local/hmftools-amber"
+    container "quay.io/biocontainers/hmftools-amber:4.1_beta--hdfd78af_0"
 
     input:
     tuple val(meta), path(tumor_bam), path(normal_bam), path(donor_bam), path(tumor_bai), path(normal_bai), path(donor_bai)

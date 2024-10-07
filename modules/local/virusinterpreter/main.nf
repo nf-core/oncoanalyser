@@ -7,7 +7,7 @@ process VIRUSINTERPRETER {
 //        'https://depot.galaxyproject.org/singularity/hmftools-virus-interpreter:1.3--hdfd78af_0' :
 //        'biocontainers/hmftools-virus-interpreter:1.3--hdfd78af_0' }"
 
-    container "quay.io/local/hmftools-virusinterpreter"
+    container "quay.io/biocontainers/hmftools-virus-interpreter:3.7_beta--hdfd78af_0"
 
     input:
     tuple val(meta), path(virus_tsv), path(purple_dir), path(somatic_metrics)
