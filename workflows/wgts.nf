@@ -125,9 +125,9 @@ workflow WGTS {
             ref_data.genome_bwamem2_index,
             params.max_fastq_records,
             false,  // umi_enable
-            null,  // umi_location
-            null,  // umi_length
-            null,  // umi_skip
+            '',  // umi_location
+            0,  // umi_length
+            0,  // umi_skip
         )
 
         READ_ALIGNMENT_RNA(

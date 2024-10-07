@@ -28,12 +28,12 @@ process MARKDUPS {
     script:
     def args = task.ext.args ?: ''
 
-    def form_consensus_arg = umi_enable ?: '-form_consensus'
+    def form_consensus_arg = umi_enable ? '' : '-form_consensus'
 
     def umi_args_list = []
     if (umi_enabled) umi_args_list.add('-umi_enabled')
     if (umi_duplex_delim) umi_args_list.add("-umi_duplex -umi_duplex_delim ${umi_duplex_delim}")
-    def umi_args = umi_args_list ? umi_args_list.join(',')
+    def umi_args = umi_args_list ? umi_args_list.join(',') : ''
 
     """
     markdups \\

@@ -106,7 +106,7 @@
                     "fa_icon": "fas fa-cog"
                 },
                 "fastp_umi_location": {
-                    "type": "integer",
+                    "type": "string",
                     "description": "fastp UMI location parameter (--umi_loc).",
                     "fa_icon": "fas fa-cog"
                 },
