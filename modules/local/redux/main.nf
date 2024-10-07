@@ -6,7 +6,7 @@ process REDUX {
 //        'https://depot.galaxyproject.org/singularity/hmftools-mark-dups:1.1.7--hdfd78af_0' :
 //        'biocontainers/hmftools-mark-dups:1.1.7--hdfd78af_0' }"
 
-    container "quay.io/local/hmftools-redux"
+    container "quay.io/biocontainers/hmftools-redux:1.0_beta--hdfd78af_0"
 
     input:
     tuple val(meta), path(bams), path(bais)
