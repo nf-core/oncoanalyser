@@ -30,7 +30,7 @@ process FASTP {
     if (umi_location) umi_args_list.add("--umi_loc ${umi_location}")
     if (umi_length) umi_args_list.add("--umi_len ${umi_length}")
     if (umi_skip) umi_args_list.add("--umi_skip ${umi_skip}")
-    def umi_args = umi_args_list ? '--umi ' + umi_args_list.join(',')
+    def umi_args = umi_args_list ? '--umi ' + umi_args_list.join(',') : ''
 
     """
     fastp \\
