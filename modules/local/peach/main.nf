@@ -7,7 +7,7 @@ process PEACH {
 //        'https://depot.galaxyproject.org/singularity/hmftools-bam-tools:1.2.1--hdfd78af_0' :
 //        'biocontainers/hmftools-bam-tools:1.2.1--hdfd78af_0' }"
 
-    container 'quay.io/local/hmftools-peach'
+    container 'quay.io/biocontainers/hmftools-peach:2.0.0--hdfd78af_0'
 
     input:
     tuple val(meta), path(sage_germline_vcf), path(sage_germline_tbi)

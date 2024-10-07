@@ -7,7 +7,7 @@ process COBALT {
 //        'https://depot.galaxyproject.org/singularity/hmftools-cobalt:1.16--hdfd78af_0' :
 //        'biocontainers/hmftools-cobalt:1.16--hdfd78af_0' }"
 
-    container "quay.io/local/hmftools-cobalt"
+    container "quay.io/biocontainers/hmftools-cobalt:2.0_beta--hdfd78af_0"
 
     input:
     tuple val(meta), path(tumor_bam), path(normal_bam), path(tumor_bai), path(normal_bai)
