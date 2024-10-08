@@ -163,8 +163,8 @@ workflow TARGETED {
             ref_data.genome_dict,
             hmf_data.unmap_regions,
             hmf_data.msi_jitter_sites,
-            has_umis,
-            params.umi_duplex_delim,
+            params.redux_umi,
+            params.redux_umi_duplex_delim,
         )
 
         ch_versions = ch_versions.mix(REDUX_PROCESSING.out.versions)
