@@ -3,11 +3,9 @@ process SAGE_GERMLINE {
     label 'process_medium'
 
     conda "${moduleDir}/environment.yml"
-//    container "${ workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container ?
-//        'https://depot.galaxyproject.org/singularity/hmftools-sage:3.4.4--hdfd78af_0' :
-//        'biocontainers/hmftools-sage:3.4.4--hdfd78af_0' }"
-
-    container "quay.io/biocontainers/hmftools-sage:4.0_beta--hdfd78af_0"
+    container "${ workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container ?
+        'https://depot.galaxyproject.org/singularity/hmftools-sage:4.0_beta--hdfd78af_0' :
+        'biocontainers/hmftools-sage:4.0_beta--hdfd78af_0' }"
 
     input:
     tuple val(meta), path(tumor_bam), path(normal_bam), path(tumor_bai), path(normal_bai)
