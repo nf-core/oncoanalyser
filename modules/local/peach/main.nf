@@ -47,6 +47,8 @@ process PEACH {
 
     stub:
     """
+    mkdir -p peach/
+
     touch peach/${meta.sample_id}.peach.events.tsv
     touch peach/${meta.sample_id}.peach.gene.events.tsv
     touch peach/${meta.sample_id}.peach.haplotypes.all.tsv
