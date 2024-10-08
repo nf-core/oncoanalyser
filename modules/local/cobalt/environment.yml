@@ -4,4 +4,4 @@ channels:
   - bioconda
   - defaults
 dependencies:
-  - bioconda::hmftools-cobalt=1.16
+  - bioconda::hmftools-cobalt=2.0_beta
