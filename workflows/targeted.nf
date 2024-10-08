@@ -141,8 +141,6 @@ workflow TARGETED {
     // channel: [ meta, bam, bai ]
     ch_redux_dna_tumor_out = Channel.empty()
     ch_redux_dna_normal_out = Channel.empty()
-    // TODO: This is ignored in panel?
-    // TODO: Don't need double definition.
     ch_redux_dna_donor_out = Channel.empty()
     if (run_config.stages.markdups) {
 
@@ -167,11 +165,13 @@ workflow TARGETED {
 
         ch_redux_dna_tumor_out = ch_redux_dna_tumor_out.mix(REDUX_PROCESSING.out.dna_tumor)
         ch_redux_dna_normal_out = ch_redux_dna_normal_out.mix(REDUX_PROCESSING.out.dna_normal)
+        ch_redux_dna_donor_out = ch_redux_dna_donor_out.mix(REDUX_PROCESSING.out.dna_donor)
 
     } else {
 
         ch_redux_dna_tumor_out = ch_inputs.map { meta -> [meta, [], []] }
         ch_redux_dna_normal_out = ch_inputs.map { meta -> [meta, [], []] }
+        ch_redux_dna_donor_out = ch_inputs.map { meta -> [meta, [], []] }
 
     }
 
