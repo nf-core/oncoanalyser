@@ -14,7 +14,7 @@ process REDUX {
     path genome_dict
     path unmap_regions
     path msi_jitter_sites
-    val has_umis
+    val umi_enable
     val umi_duplex_delim
 
     output:
@@ -31,7 +31,7 @@ process REDUX {
     def form_consensus_arg = umi_enable ? '' : '-form_consensus'
 
     def umi_args_list = []
-    if (umi_enabled) umi_args_list.add('-umi_enabled')
+    if (umi_enable) umi_args_list.add('-umi_enabled')
     if (umi_duplex_delim) umi_args_list.add("-umi_duplex -umi_duplex_delim ${umi_duplex_delim}")
     def umi_args = umi_args_list ? umi_args_list.join(',') : ''
 
@@ -70,7 +70,7 @@ process REDUX {
     touch ${meta.sample_id}.ms_table.tsv.gz
     touch ${meta.sample_id}.repeat.tsv.gz
 
-    if [[ -n "${has_umis}" ]]; then
+    if [[ -n "${umi_enable}" ]]; then
         touch ${meta.sample_id}.umi_coord_freq.tsv
         touch ${meta.sample_id}.umi_edit_distance.tsv
         touch ${meta.sample_id}.umi_nucleotide_freq.tsv
