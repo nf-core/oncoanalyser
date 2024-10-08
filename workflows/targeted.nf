@@ -150,8 +150,6 @@ workflow TARGETED {
     ch_redux_dna_donor_out = Channel.empty()
     if (run_config.stages.redux) {
 
-        has_umis = run_config.panel.equalsIgnoreCase('tso500') || params.umi_duplex_delim != '' || params.umi_length > 0
-
         REDUX_PROCESSING(
             ch_inputs,
             ch_align_dna_tumor_out,
