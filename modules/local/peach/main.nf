@@ -3,11 +3,9 @@ process PEACH {
     label 'process_low'
 
     conda "${moduleDir}/environment.yml"
-//    container "${ workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container ?
-//        'https://depot.galaxyproject.org/singularity/hmftools-bam-tools:1.2.1--hdfd78af_0' :
-//        'biocontainers/hmftools-bam-tools:1.2.1--hdfd78af_0' }"
-
-    container 'quay.io/biocontainers/hmftools-peach:2.0.0--hdfd78af_0'
+    container "${ workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container ?
+        'https://depot.galaxyproject.org/singularity/hmftools-peach:2.0.0--hdfd78af_0' :
+        'biocontainers/hmftools-peach:2.0.0--hdfd78af_0' }"
 
     input:
     tuple val(meta), path(sage_germline_vcf), path(sage_germline_tbi)
