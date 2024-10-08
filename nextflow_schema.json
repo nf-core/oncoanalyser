@@ -120,15 +120,15 @@
                     "description": "fastp UMI skip parameter (--umi_skip)",
                     "fa_icon": "fas fa-cog"
                 },
-                "markdups_umi": {
+                "redux_umi": {
                     "type": "boolean",
-                    "description": "Enable MarkDups UMI processing.",
+                    "description": "Enable REDUX UMI processing.",
                     "default": false,
                     "fa_icon": "fas fa-cog"
                 },
-                "markdups_umi_duplex_delim": {
+                "redux_umi_duplex_delim": {
                     "type": "string",
-                    "description": "UMI duplex delimiter as used by MarkDups.",
+                    "description": "UMI duplex delimiter as used by REDUX.",
                     "fa_icon": "fas fa-cog"
                 },
                 "gridss_config": {

@@ -109,7 +109,7 @@ workflow REDUX_PROCESSING {
         genome_dict,
         unmap_regions,
         msi_jitter_sites,
-        has_umis,
+        umi_enable,
         umi_duplex_delim,
     )
 
