@@ -7,7 +7,7 @@ process ORANGE {
 //        'https://depot.galaxyproject.org/singularity/hmftools-orange:2.7.1--hdfd78af_0' :
 //        'biocontainers/hmftools-orange:2.7.1--hdfd78af_0' }"
 
-    container "quay.io/local/hmftools-orange"
+    container "docker.io/scwatts/hmftools-orange:3.7.1_beta--hdfd78af_0"
 
     input:
     tuple val(meta),
@@ -50,7 +50,7 @@ process ORANGE {
     def pipeline_version_str = pipeline_version ?: 'not specified'
 
     def run_mode = Utils.getEnumFromString(params.mode, Constants.RunMode);
-    def experiment_type = (run_mode === Constants.RunMode.WGTS) ? "WGS" : "TARGETED"
+    def experiment_type = (run_mode === Constants.RunMode.WGTS) ? "WGS" : "PANEL"
 
     def virus_dir_arg = virusinterpreter_dir ? "-virus_dir ${virusinterpreter_dir}" : ''
     def peach_dir_arg = peach_dir ? "-peach_dir ${peach_dir}" : ''
