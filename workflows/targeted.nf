@@ -142,13 +142,13 @@ workflow TARGETED {
     }
 
     //
-    // SUBWORKFLOW: Run MarkDups for DNA BAMs
+    // SUBWORKFLOW: Run REDUX for DNA BAMs
     //
     // channel: [ meta, bam, bai ]
     ch_redux_dna_tumor_out = Channel.empty()
     ch_redux_dna_normal_out = Channel.empty()
     ch_redux_dna_donor_out = Channel.empty()
-    if (run_config.stages.markdups) {
+    if (run_config.stages.redux) {
 
         has_umis = run_config.panel.equalsIgnoreCase('tso500') || params.umi_duplex_delim != '' || params.umi_length > 0
 
@@ -156,7 +156,7 @@ workflow TARGETED {
             ch_inputs,
             ch_align_dna_tumor_out,
             ch_align_dna_normal_out,
-            ch_redux_dna_donor_out,
+            ch_align_dna_donor_out,
             ref_data.genome_fasta,
             ref_data.genome_version,
             ref_data.genome_fai,
