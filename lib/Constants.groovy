@@ -46,11 +46,11 @@ class Constants {
         ISOFOX,
         LILAC,
         LINX,
-        MARKDUPS,
         NEO,
         ORANGE,
         PAVE,
         PURPLE,
+        REDUX,
         SAGE,
         SIGS,
         VIRUSINTERPRETER,
@@ -59,9 +59,13 @@ class Constants {
     static enum FileType {
         // Generic
         BAM,
-        BAM_MARKDUPS,
         BAI,
         FASTQ,
+        // Redux
+        BAM_REDUX,
+        REDUX_DUP_FREQ_TSV,
+        REDUX_JITTER_TSV,
+        REDUX_MS_TSV,
         // Process
         AMBER_DIR,
         BAMTOOLS,
@@ -114,14 +118,9 @@ class Constants {
 
     static Map INPUT = [
 
+        // Bams
         BAM_DNA_TUMOR: [
             FileType.BAM,
-            SampleType.TUMOR,
-            SequenceType.DNA,
-        ],
-
-        BAM_MARKDUPS_DNA_TUMOR: [
-            FileType.BAM_MARKDUPS,
             SampleType.TUMOR,
             SequenceType.DNA,
         ],
@@ -132,20 +131,8 @@ class Constants {
             SequenceType.DNA,
         ],
 
-        BAM_MARKDUPS_DNA_NORMAL: [
-            FileType.BAM_MARKDUPS,
-            SampleType.NORMAL,
-            SequenceType.DNA,
-        ],
-
         BAM_DNA_DONOR: [
             FileType.BAM,
-            SampleType.DONOR,
-            SequenceType.DNA,
-        ],
-
-        BAM_MARKDUPS_DNA_DONOR: [
-            FileType.BAM_MARKDUPS,
             SampleType.DONOR,
             SequenceType.DNA,
         ],
@@ -180,6 +167,82 @@ class Constants {
             SequenceType.RNA,
         ],
 
+
+        // REDUX
+        BAM_REDUX_DNA_TUMOR: [
+            FileType.BAM_REDUX,
+            SampleType.TUMOR,
+            SequenceType.DNA,
+        ],
+
+        REDUX_DUP_FREQ_TSV_TUMOR: [
+            FileType.REDUX_DUP_FREQ_TSV,
+            SampleType.TUMOR,
+            SequenceType.DNA,
+        ],
+
+        REDUX_JITTER_TSV_TUMOR: [
+            FileType.REDUX_JITTER_TSV,
+            SampleType.TUMOR,
+            SequenceType.DNA,
+        ],
+
+        REDUX_MS_TSV_TUMOR: [
+            FileType.REDUX_MS_TSV,
+            SampleType.TUMOR,
+            SequenceType.DNA,
+        ],
+
+        BAM_REDUX_DNA_NORMAL: [
+            FileType.BAM_REDUX,
+            SampleType.NORMAL,
+            SequenceType.DNA,
+        ],
+
+        REDUX_DUP_FREQ_TSV_NORMAL: [
+            FileType.REDUX_DUP_FREQ_TSV,
+            SampleType.NORMAL,
+            SequenceType.DNA,
+        ],
+
+        REDUX_JITTER_TSV_NORMAL: [
+            FileType.REDUX_JITTER_TSV,
+            SampleType.NORMAL,
+            SequenceType.DNA,
+        ],
+
+        REDUX_MS_TSV_NORMAL: [
+            FileType.REDUX_MS_TSV,
+            SampleType.NORMAL,
+            SequenceType.DNA,
+        ],
+
+        BAM_REDUX_DNA_DONOR: [
+            FileType.BAM_REDUX,
+            SampleType.DONOR,
+            SequenceType.DNA,
+        ],
+
+        REDUX_DUP_FREQ_TSV_DONOR: [
+            FileType.REDUX_DUP_FREQ_TSV,
+            SampleType.DONOR,
+            SequenceType.DNA,
+        ],
+
+        REDUX_JITTER_TSV_DONOR: [
+            FileType.REDUX_JITTER_TSV,
+            SampleType.DONOR,
+            SequenceType.DNA,
+        ],
+
+        REDUX_MS_TSV_DONOR: [
+            FileType.REDUX_MS_TSV,
+            SampleType.DONOR,
+            SequenceType.DNA,
+        ],
+
+
+        // Other tools
         ISOFOX_DIR: [
             FileType.ISOFOX_DIR,
             SampleType.TUMOR,

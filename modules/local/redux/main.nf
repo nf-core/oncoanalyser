@@ -1,11 +1,10 @@
-process MARKDUPS {
+process REDUX {
     tag "${meta.id}"
     label 'process_medium'
 
-    conda "${moduleDir}/environment.yml"
     container "${ workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container ?
-        'https://depot.galaxyproject.org/singularity/hmftools-mark-dups:1.1.7--hdfd78af_0' :
-        'biocontainers/hmftools-mark-dups:1.1.7--hdfd78af_0' }"
+        'https://depot.galaxyproject.org/singularity/hmftools-redux:1.1--hdfd78af_1' :
+        'biocontainers/hmftools-redux:1.1--hdfd78af_1' }"
 
     input:
     tuple val(meta), path(bams), path(bais)
@@ -14,21 +13,22 @@ process MARKDUPS {
     path genome_fai
     path genome_dict
     path unmap_regions
+    path msi_jitter_sites
     val umi_enable
     val umi_duplex_delim
 
     output:
-    tuple val(meta), path('*.markdups.bam'), path('*.markdups.bam.bai'), emit: bam
-    path 'versions.yml'                                                , emit: versions
-    path '*.tsv'
+    tuple val(meta), path('*.redux.bam'), path('*.redux.bam.bai'), emit: bam
+    tuple val(meta), path('*.duplicate_freq.tsv')                , emit: dup_freq_tsv
+    tuple val(meta), path('*.jitter_params.tsv')                 , emit: jitter_tsv
+    tuple val(meta), path('*.ms_table.tsv.gz')                   , emit: ms_tsv
+    path 'versions.yml'                                          , emit: versions
 
     when:
     task.ext.when == null || task.ext.when
 
     script:
     def args = task.ext.args ?: ''
-
-    def xmx_mod = task.ext.xmx_mod ?: 0.95
 
     def form_consensus_arg = umi_enable ? '' : '-form_consensus'
 
@@ -38,41 +38,39 @@ process MARKDUPS {
     def umi_args = umi_args_list ? umi_args_list.join(' ') : ''
 
     """
-    markdups \\
-        -Xmx${Math.round(task.memory.bytes * xmx_mod)} \\
+    redux \\
+        -Xmx${Math.round(task.memory.bytes * 0.95)} \\
         ${args} \\
-        \\
-        -samtools \$(which samtools) \\
-        -sambamba \$(which sambamba) \\
-        \\
         -sample ${meta.sample_id} \\
         -input_bam ${bams.join(',')} \\
-        \\
-        ${form_consensus_arg} \\
-        ${umi_args} \\
-        \\
-        -unmap_regions ${unmap_regions} \\
+        -output_dir ./ \\
+        -output_bam ./${meta.sample_id}.redux.bam \\
         -ref_genome ${genome_fasta} \\
         -ref_genome_version ${genome_ver} \\
-        \\
+        -unmap_regions ${unmap_regions} \\
+        -ref_genome_msi_file ${msi_jitter_sites} \\
+        -bamtool \$(which samtools) \\
+        ${form_consensus_arg} \\
+        ${umi_args} \\
         -write_stats \\
         -threads ${task.cpus} \\
-        \\
-        -output_bam ${meta.sample_id}.markdups.bam
+        -log_level DEBUG
 
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":
-        markdups: \$(markdups -version | awk '{ print \$NF }')
+        redux: \$(redux -version | awk '{ print \$NF }')
         sambamba: \$(sambamba --version 2>&1 | egrep '^sambamba' | head -n 1 | awk '{ print \$NF }')
-        samtools: \$(samtools --version 2>&1 | egrep '^samtools\\s' | head -n 1 | sed 's/^.* //')
     END_VERSIONS
     """
 
     stub:
     """
-    touch ${meta.sample_id}.markdups.bam
-    touch ${meta.sample_id}.markdups.bam.bai
+    touch ${meta.sample_id}.redux.bam
+    touch ${meta.sample_id}.redux.bam.bai
     touch ${meta.sample_id}.duplicate_freq.tsv
+    touch ${meta.sample_id}.jitter_params.tsv
+    touch ${meta.sample_id}.ms_table.tsv.gz
+    touch ${meta.sample_id}.repeat.tsv.gz
 
     if [[ -n "${umi_enable}" ]]; then
         touch ${meta.sample_id}.umi_coord_freq.tsv
