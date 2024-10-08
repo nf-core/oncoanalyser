@@ -150,13 +150,13 @@ workflow WGTS {
     }
 
     //
-    // SUBWORKFLOW: Run MarkDups for DNA BAMs
+    // SUBWORKFLOW: Run REDUX for DNA BAMs
     //
     // channel: [ meta, bam, bai ]
     ch_redux_dna_tumor_out = Channel.empty()
     ch_redux_dna_normal_out = Channel.empty()
     ch_redux_dna_donor_out = Channel.empty()
-    if (run_config.stages.markdups) {
+    if (run_config.stages.redux) {
 
         REDUX_PROCESSING(
             ch_inputs,
