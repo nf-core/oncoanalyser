@@ -20,7 +20,7 @@ workflow PEACH_REPORTING {
     ch_versions = Channel.empty()
 
     //
-    // MODULE: PAVE germline
+    // MODULE: PEACH germline
     //
     // Select input sources and sort
     // channel: runnable: [ meta, sage_vcf, sage_tbi ]
@@ -43,7 +43,7 @@ workflow PEACH_REPORTING {
         }
 
     // Create process input channel
-    // channel: [ meta_pave, sage_vcf, sage_tbi ]
+    // channel: [ meta_peach, sage_vcf, sage_tbi ]
     ch_peach_inputs = ch_inputs_sorted.runnable
         .map { meta, sage_vcf, sage_tbi ->
 
