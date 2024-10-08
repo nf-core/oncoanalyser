@@ -113,7 +113,7 @@ workflow REDUX_PROCESSING {
         umi_duplex_delim,
     )
 
-    ch_versions = ch_versions.mix(MARKDUPS.out.versions)
+    ch_versions = ch_versions.mix(REDUX.out.versions)
 
     // Sort into a tumor and normal channel
     ch_redux_out = REDUX.out.bam
