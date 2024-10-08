@@ -648,8 +648,8 @@ workflow TARGETED {
             hmf_data.cohort_percentiles,
             hmf_data.known_fusion_data,
             panel_data.driver_gene_panel,
-            hmf_data.sigs_etiology,
             hmf_data.ensembl_data_resources,
+            hmf_data.sigs_etiology,
             hmf_data.alt_sj_distribution,
             hmf_data.gene_exp_distribution,
         )
