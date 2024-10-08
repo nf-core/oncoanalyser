@@ -30,15 +30,12 @@ process REDUX {
     script:
     def args = task.ext.args ?: ''
 
-    def umi_flags
-    if(has_umis) {
-        umi_flags = '-umi_enabled'
-        if(umi_duplex_delim) {
-            umi_flags = "${umi_flags} -umi_duplex -umi_duplex_delim ${umi_duplex_delim}"
-        }
-    } else {
-        umi_flags = '-form_consensus'
-    }
+    def form_consensus_arg = umi_enable ? '' : '-form_consensus'
+
+    def umi_args_list = []
+    if (umi_enabled) umi_args_list.add('-umi_enabled')
+    if (umi_duplex_delim) umi_args_list.add("-umi_duplex -umi_duplex_delim ${umi_duplex_delim}")
+    def umi_args = umi_args_list ? umi_args_list.join(',') : ''
 
     """
     redux \\
@@ -53,7 +50,8 @@ process REDUX {
         -unmap_regions ${unmap_regions} \\
         -ref_genome_msi_file ${msi_jitter_sites} \\
         -bamtool \$(which sambamba) \\
-        ${umi_flags} \\
+        ${form_consensus_arg} \\
+        ${umi_args} \\
         -write_stats \\
         -threads ${task.cpus} \\
         -log_level DEBUG
