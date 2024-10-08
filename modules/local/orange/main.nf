@@ -3,11 +3,9 @@ process ORANGE {
     label 'process_single'
 
     conda "${moduleDir}/environment.yml"
-//    container "${ workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container ?
-//        'https://depot.galaxyproject.org/singularity/hmftools-orange:2.7.1--hdfd78af_0' :
-//        'biocontainers/hmftools-orange:2.7.1--hdfd78af_0' }"
-
-    container "docker.io/scwatts/hmftools-orange:3.7.1_beta--hdfd78af_0"
+    container "${ workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container ?
+        'https://depot.galaxyproject.org/singularity/hmftools-orange:3.7.1_beta--hdfd78af_0' :
+        'biocontainers/hmftools-orange:3.7.1_beta--hdfd78af_0' }"
 
     input:
     tuple val(meta),
