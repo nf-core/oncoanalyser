@@ -2,11 +2,9 @@ process REDUX {
     tag "${meta.id}"
     label 'process_high'
 
-//    container "${ workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container ?
-//        'https://depot.galaxyproject.org/singularity/hmftools-mark-dups:1.1.7--hdfd78af_0' :
-//        'biocontainers/hmftools-mark-dups:1.1.7--hdfd78af_0' }"
-
-    container "quay.io/biocontainers/hmftools-redux:1.0_beta--hdfd78af_0"
+    container "${ workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container ?
+        'https://depot.galaxyproject.org/singularity/hmftools-redux:1.0_beta--hdfd78af_0' :
+        'biocontainers/hmftools-redux:1.0_beta--hdfd78af_0' }"
 
     input:
     tuple val(meta), path(bams), path(bais)
