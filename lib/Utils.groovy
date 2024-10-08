@@ -426,7 +426,7 @@ class Utils {
         return getTumorDnaSample(meta).getOrDefault(Constants.FileType.BAM, null)
     }
 
-    static public getTumorDnaMarkdupsBam(meta) {
+    static public getTumorDnaReduxBam(meta) {
         return getTumorDnaSample(meta).getOrDefault(Constants.FileType.BAM_REDUX, null)
     }
 
@@ -443,8 +443,8 @@ class Utils {
         return getTumorDnaBam(meta) !== null
     }
 
-    static public hasTumorDnaMarkdupsBam(meta) {
-        return getTumorDnaMarkdupsBam(meta) !== null
+    static public hasTumorDnaReduxBam(meta) {
+        return getTumorDnaReduxBam(meta) !== null
     }
 
 
@@ -457,7 +457,7 @@ class Utils {
         return getNormalDnaSample(meta).getOrDefault(Constants.FileType.BAM, null)
     }
 
-    static public getNormalDnaMarkdupsBam(meta) {
+    static public getNormalDnaReduxBam(meta) {
         return getNormalDnaSample(meta).getOrDefault(Constants.FileType.BAM_REDUX, null)
     }
     static public getNormalDnaBai(meta) {
@@ -473,16 +473,16 @@ class Utils {
         return getNormalDnaBam(meta) !== null
     }
 
-    static public hasNormalDnaMarkdupsBam(meta) {
-        return getNormalDnaMarkdupsBam(meta) !== null
+    static public hasNormalDnaReduxBam(meta) {
+        return getNormalDnaReduxBam(meta) !== null
     }
 
     static public hasDnaFastq(meta) {
         return hasNormalDnaFastq(meta) || hasTumorDnaFastq(meta)
     }
 
-    static public hasDnaMarkdupsBam(meta) {
-        return hasNormalDnaMarkdupsBam(meta) || hasTumorDnaMarkdupsBam(meta)
+    static public hasDnaReduxBam(meta) {
+        return hasNormalDnaReduxBam(meta) || hasTumorDnaReduxBam(meta)
     }
 
 
@@ -495,7 +495,7 @@ class Utils {
         return getDonorDnaSample(meta).getOrDefault(Constants.FileType.BAM, null)
     }
 
-    static public getDonorDnaMarkdupsBam(meta) {
+    static public getDonorDnaReduxBam(meta) {
         return getDonorDnaSample(meta).getOrDefault(Constants.FileType.BAM_REDUX, null)
     }
 
@@ -512,8 +512,8 @@ class Utils {
         return getDonorDnaBam(meta) !== null
     }
 
-    static public hasDonorDnaMarkdupsBam(meta) {
-        return getDonorDnaMarkdupsBam(meta) !== null
+    static public hasDonorDnaReduxBam(meta) {
+        return getDonorDnaReduxBam(meta) !== null
     }
 
 
@@ -542,15 +542,15 @@ class Utils {
 
     // Status
     static public hasTumorDna(meta) {
-        return hasTumorDnaBam(meta) || hasTumorDnaMarkdupsBam(meta) || hasTumorDnaFastq(meta)
+        return hasTumorDnaBam(meta) || hasTumorDnaReduxBam(meta) || hasTumorDnaFastq(meta)
     }
 
     static public hasNormalDna(meta) {
-        return hasNormalDnaBam(meta) || hasNormalDnaMarkdupsBam(meta) || hasNormalDnaFastq(meta)
+        return hasNormalDnaBam(meta) || hasNormalDnaReduxBam(meta) || hasNormalDnaFastq(meta)
     }
 
     static public hasDonorDna(meta) {
-        return hasDonorDnaBam(meta) || hasDonorDnaMarkdupsBam(meta) || hasDonorDnaFastq(meta)
+        return hasDonorDnaBam(meta) || hasDonorDnaReduxBam(meta) || hasDonorDnaFastq(meta)
     }
 
     static public hasTumorRna(meta) {
