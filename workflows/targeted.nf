@@ -125,12 +125,14 @@ workflow TARGETED {
 
         ch_align_dna_tumor_out = ch_align_dna_tumor_out.mix(READ_ALIGNMENT_DNA.out.dna_tumor)
         ch_align_dna_normal_out = ch_align_dna_normal_out.mix(READ_ALIGNMENT_DNA.out.dna_normal)
+        ch_align_dna_donor_out = ch_align_dna_donor_out.mix(READ_ALIGNMENT_DNA.out.dna_donor)
         ch_align_rna_tumor_out = ch_align_rna_tumor_out.mix(READ_ALIGNMENT_RNA.out.rna_tumor)
 
     } else {
 
         ch_align_dna_tumor_out = ch_inputs.map { meta -> [meta, [], []] }
         ch_align_dna_normal_out = ch_inputs.map { meta -> [meta, [], []] }
+        ch_align_dna_donor_out = ch_inputs.map { meta -> [meta, [], []] }
         ch_align_rna_tumor_out = ch_inputs.map { meta -> [meta, [], []] }
 
     }
