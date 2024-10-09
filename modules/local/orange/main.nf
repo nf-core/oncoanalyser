@@ -16,7 +16,6 @@ process ORANGE {
         path(linx_somatic_anno_dir), path(linx_somatic_plot_dir),
         path(linx_germline_anno_dir),
         path(virusinterpreter_dir),
-        path(peach_dir),
         path(chord_dir),
         path(sigs_dir),
         path(lilac_dir),
@@ -51,7 +50,6 @@ process ORANGE {
     def experiment_type = (run_mode === Constants.RunMode.WGTS) ? "WGS" : "PANEL"
 
     def virus_dir_arg = virusinterpreter_dir ? "-virus_dir ${virusinterpreter_dir}" : ''
-    def peach_dir_arg = peach_dir ? "-peach_dir ${peach_dir}" : ''
     def lilac_dir_arg = lilac_dir ? "-lilac_dir ${lilac_dir}" : ''
     def chord_dir_arg = chord_dir ? "-chord_dir ${chord_dir}" : ''
     def sigs_dir_arg = sigs_dir ? "-sigs_dir ${sigs_dir}" : ''
@@ -145,7 +143,6 @@ process ORANGE {
             -linx_dir ${linx_somatic_anno_dir} \\
             -linx_plot_dir ${plot_dir}/ \\
             ${virus_dir_arg} \\
-            ${peach_dir_arg} \\
             ${lilac_dir_arg} \\
             ${chord_dir_arg} \\
             ${sigs_dir_arg} \\
