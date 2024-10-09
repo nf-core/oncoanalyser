@@ -59,7 +59,6 @@ include { LINX_ANNOTATION       } from '../subworkflows/local/linx_annotation'
 include { LINX_PLOTTING         } from '../subworkflows/local/linx_plotting'
 include { ORANGE_REPORTING      } from '../subworkflows/local/orange_reporting'
 include { PAVE_ANNOTATION       } from '../subworkflows/local/pave_annotation'
-include { PEACH_REPORTING       } from '../subworkflows/local/peach_reporting'
 include { PREPARE_REFERENCE     } from '../subworkflows/local/prepare_reference'
 include { PURPLE_CALLING        } from '../subworkflows/local/purple_calling'
 include { READ_ALIGNMENT_DNA    } from '../subworkflows/local/read_alignment_dna'
@@ -398,31 +397,6 @@ workflow TARGETED {
     }
 
     //
-    // SUBWORKFLOW: Determine haplotype combinations for each gene with PEACH
-    //
-    // channel: [ meta, peach_dir ]
-    ch_peach_germline_out = Channel.empty()
-    if (run_config.stages.peach) {
-
-        PEACH_REPORTING(
-            ch_inputs,
-            ch_sage_germline_vcf_out,
-            hmf_data.peach_haplotypes,
-            hmf_data.peach_haplotype_functions,
-            hmf_data.peach_drugs,
-        )
-
-        ch_versions = ch_versions.mix(PEACH_REPORTING.out.versions)
-
-        ch_peach_germline_out = ch_peach_germline_out.mix(PEACH_REPORTING.out.peach_dir)
-
-    } else {
-
-        ch_peach_germline_out = ch_inputs.map { meta -> [meta, []] }
-
-    }
-
-    //
     // SUBWORKFLOW: Call CNVs, infer purity and ploidy, and recover low quality SVs with PURPLE
     //
     // channel: [ meta, purple_dir ]
@@ -634,7 +608,6 @@ workflow TARGETED {
             ch_linx_somatic_visualiser_dir_out,
             ch_linx_germline_out,
             ch_virusinterpreter_out,
-            ch_peach_germline_out,
             ch_chord_out,
             ch_sigs_out,
             ch_lilac_out,
