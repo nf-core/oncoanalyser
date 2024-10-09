@@ -9,7 +9,7 @@ process SAGE_SOMATIC {
 //        'https://depot.galaxyproject.org/singularity/hmftools-sage:3.4.4--hdfd78af_0' :
 //        'biocontainers/hmftools-sage:3.4.4--hdfd78af_0' }"
 
-    container "quay.io/biocontainers/hmftools-sage:4.0_beta--hdfd78af_0"
+    container "quay.io/biocontainers/hmftools-sage:4.0_beta--hdfd78af_1"
 
     input:
     tuple val(meta), path(tumor_bam), path(normal_bam), path(donor_bam), path(tumor_bai), path(normal_bai), path(donor_bai)
