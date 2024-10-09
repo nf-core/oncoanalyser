@@ -6,8 +6,8 @@ process SAGE_SOMATIC {
 
     conda "${moduleDir}/environment.yml"
     container "${ workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container ?
-        'https://depot.galaxyproject.org/singularity/hmftools-sage:4.0_beta--hdfd78af_0' :
-        'biocontainers/hmftools-sage:4.0_beta--hdfd78af_0' }"
+        'https://depot.galaxyproject.org/singularity/hmftools-sage:4.0_beta--hdfd78af_1' :
+        'biocontainers/hmftools-sage:4.0_beta--hdfd78af_1' }"
 
     input:
     tuple val(meta), path(tumor_bam), path(normal_bam), path(donor_bam), path(tumor_bai), path(normal_bai), path(donor_bai)
