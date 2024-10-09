@@ -294,8 +294,6 @@ workflow WGTS {
             ref_data.genome_fai,
             ref_data.genome_dict,
             ref_data.genome_img,
-            ref_data.genome_gridss_index,
-            hmf_data.gridss_region_blocklist,
             hmf_data.sv_prep_blocklist,
             hmf_data.known_fusions,
             hmf_data.gridss_pon_breakends,
@@ -708,7 +706,8 @@ workflow WGTS {
             ch_linx_somatic_out,
             ch_virusinterpreter_out,
             ref_data.genome_version,
-            hmf_data.cuppa_resources,
+            hmf_data.cuppa_alt_sj,
+            hmf_data.cuppa_classifier,
         )
 
         ch_versions = ch_versions.mix(CUPPA_PREDICTION.out.versions)

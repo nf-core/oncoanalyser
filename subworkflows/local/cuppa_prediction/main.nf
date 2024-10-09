@@ -18,7 +18,8 @@ workflow CUPPA_PREDICTION {
 
     // Reference data
     genome_version      // channel: [mandatory] genome version
-    cuppa_resources     // channel: [mandatory] /path/to/cuppa_resources/
+    cuppa_alt_sj        // channel: [mandatory] /path/to/cuppa_alt_sj/
+    cuppa_classifier    // channel: [mandatory] /path/to/cuppa_classifier/
 
     main:
     // Channel for version.yml files
@@ -128,7 +129,8 @@ workflow CUPPA_PREDICTION {
     CUPPA(
         ch_cuppa_inputs.sample_data,
         genome_version,
-        cuppa_resources,
+        cuppa_alt_sj,
+        cuppa_classifier,
         ch_cuppa_inputs.classifier,
     )
 

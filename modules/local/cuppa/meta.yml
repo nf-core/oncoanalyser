@@ -31,9 +31,12 @@ input:
   - genome_ver:
       type: string
       description: Reference genome version
-  - cuppa_resources:
-      type: directory
-      description: CUPPA resource directory
+  - cuppa_alt_sj:
+      type: file
+      description: CUPPA ALT slice-junction resource file
+  - cuppa_classifier:
+      type: file
+      description: CUPPA classifier resource file
   - classifier:
       type: string
       description: CUPPA classifier to use
