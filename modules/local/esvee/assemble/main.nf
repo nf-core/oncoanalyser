@@ -30,7 +30,7 @@ process ESVEE_ASSEMBLE {
     def reference_arg = meta.normal_id != null ? "-reference ${meta.normal_id}" : ""
     def reference_bam_arg = meta.normal_id != null ? "-reference_bam ${normal_prep_bam}" : ""
 
-    def decoy_genome_arg = decoy_sequences_image ? "-decoy_genome ${decoy_genome_arg}" : ""
+    def decoy_genome_arg = decoy_sequences_image ? "-decoy_genome ${decoy_sequences_image}" : ""
 
     """
     mkdir -p assemble/
