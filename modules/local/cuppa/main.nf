@@ -10,7 +10,8 @@ process CUPPA {
     input:
     tuple val(meta), path(isofox_dir), path(purple_dir), path(linx_dir), path(virusinterpreter_dir)
     val genome_ver
-    path cuppa_resources, stageAs: 'cuppa_reference_data'
+    path cuppa_alt_sj
+    path cuppa_classifier
     val classifier
 
     output:
