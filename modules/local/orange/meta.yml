@@ -14,18 +14,12 @@ input:
       description: |
         Groovy Map containing sample information
         e.g. [id: 'sample_id', tumor_id: 'tumor_name', normal_id: 'normal_name']
-  - bam_metrics_somatic:
-      type: file
-      description: Somatic collectwgsmetrics file
-  - bam_metrics_germline:
-      type: file
-      description: Germline collectwgsmetrics file (optional)
-  - flagstat_somatic:
-      type: file
-      description: Somatic SAMtools flagstat output file
-  - flagstat_germline:
-      type: file
-      description: Somatic SAMtools flagstat output file (optional)
+  - bamtools_somatic_dir:
+      type: directory
+      description: BamTools somatic output directory
+  - bamtools_germline_dir:
+      type: directory
+      description: BamTools germline output directory
   - sage_somatic_dir:
       type: directory
       description: SAGE somatic output directory

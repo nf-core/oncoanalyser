@@ -9,7 +9,7 @@ process ORANGE {
 
     input:
     tuple val(meta),
-        path(bam_metrics_somatic), path(bam_metrics_germline),
+        path(bamtools_somatic_dir), path(bamtools_metrics_dir),
         path(sage_somatic_dir), path(sage_germline_dir),
         path(smlv_somatic_vcf), path(smlv_germline_vcf),
         path(purple_dir),

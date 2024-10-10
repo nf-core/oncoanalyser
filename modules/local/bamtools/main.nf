@@ -13,8 +13,8 @@ process BAMTOOLS {
     val genome_ver
 
     output:
-    tuple val(meta), path('*.bam_metric.*.tsv'), emit: metrics
-    path 'versions.yml'                        , emit: versions
+    tuple val(meta), path("${meta.id}_bamtools/"), emit: metrics_dir
+    path 'versions.yml'                          , emit: versions
 
     when:
     task.ext.when == null || task.ext.when
@@ -23,6 +23,8 @@ process BAMTOOLS {
     def args = task.ext.args ?: ''
 
     """
+    mkdir -p ${meta.id}_bamtools/
+
     bamtools \\
         -Xmx${Math.round(task.memory.bytes * 0.95)} \\
         com.hartwig.hmftools.bamtools.metrics.BamMetrics \\
@@ -33,7 +35,7 @@ process BAMTOOLS {
         -ref_genome_version ${genome_ver} \\
         -threads ${task.cpus} \\
         -log_level INFO \\
-        -output_dir ./
+        -output_dir ${meta.id}_bamtools/
 
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":
