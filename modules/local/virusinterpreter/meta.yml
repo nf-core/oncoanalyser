@@ -24,9 +24,9 @@ input:
   - purple_dir:
       type: directory
       description: PURPLE output directory
-  - wgs_metrics:
-      type: file
-      description: Somatic collectwgsmetrics file
+  - bamtools_somatic_dir:
+      type: directory
+      description: BamTools somatic output directory
   - taxonomy_db:
       type: file
       description: Virus Interpreter taxonomy database file
