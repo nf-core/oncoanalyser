@@ -9,7 +9,7 @@ process ORANGE {
 
     input:
     tuple val(meta),
-        path(bam_metrics_somatic), path(bam_metrics_germline),
+        path(bamtools_somatic_dir), path(bamtools_germline_dir),
         path(sage_somatic_dir), path(sage_germline_dir),
         path(smlv_somatic_vcf), path(smlv_germline_vcf),
         path(purple_dir),
@@ -56,9 +56,8 @@ process ORANGE {
     def cuppa_dir_arg = cuppa_dir ? "-cuppa_dir ${cuppa_dir}" : ''
     def plot_dir = linx_somatic_plot_dir.resolve('reportable/').toUriString().replaceAll('/$', '')
 
-    def metrics_dir = "./metrics/"
-    def tumor_metrics_arg = "-tumor_metrics_dir ${metrics_dir}"
-    def normal_metrics_arg = bam_metrics_germline ? "-ref_metrics_dir ${metrics_dir}" : ''
+    def tumor_metrics_arg = "-tumor_metrics_dir ${bamtools_somatic_dir}"
+    def normal_metrics_arg = bamtools_germline_dir ? "-ref_metrics_dir ${bamtools_germline_dir}" : ''
 
     def normal_id_arg = meta.containsKey('normal_dna_id') ? "-reference_sample_id ${meta.normal_dna_id}" : ''
     def normal_sage_dir = sage_germline_dir ? "-sage_germline_dir ${sage_germline_dir}" : ''
@@ -103,10 +102,6 @@ process ORANGE {
         done;
 
     fi
-
-    # Combine tumor and reference bam metrics into one folder
-    mkdir -p ${metrics_dir}
-    ln -sf \$(realpath ${bam_metrics_somatic} ${bam_metrics_germline}) ${metrics_dir}
 
     # Set input plot directory and create it doesn't exist. See the LINX visualiser module for further info.
     if [[ ! -e ${plot_dir}/ ]]; then

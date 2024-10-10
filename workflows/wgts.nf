@@ -528,7 +528,7 @@ workflow WGTS {
     //
     // SUBWORKFLOW: Run Bam Tools to generate stats required for downstream processes
     //
-    // channel: [ meta, metrics ]
+    // channel: [ meta, metrics_dir ]
     ch_bamtools_somatic_out = Channel.empty()
     ch_bamtools_germline_out = Channel.empty()
     if (run_config.stages.bamtools) {
