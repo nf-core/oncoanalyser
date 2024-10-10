@@ -290,7 +290,7 @@ def getRefFileChannel(key) {
 def createDataMap(entries, ref_data_path) {
     return entries
         .collectEntries { name, path ->
-            def ref_data_file = getRefdataFile(path, ref_data_path)
+            def ref_data_file = path == [] ? [] : getRefdataFile(path, ref_data_path)
             return [name, ref_data_file]
         }
 }
