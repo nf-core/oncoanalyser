@@ -78,7 +78,7 @@ class WorkflowMain {
                 params.redux_umi = true
             }
 
-            // Set the REDUX UMI duplex delimiter to '+' when the following conditions are met:
+            // Set the REDUX UMI duplex delimiter to '_' when the following conditions are met:
             //   - both fastp and REDUX UMI processing enabled
             //   - fastp is using a duplex UMI location type (per_index or per_read)
             //   - no REDUX duplex delimiter has been set
@@ -86,7 +86,7 @@ class WorkflowMain {
             def fastp_duplex_location = params.containsKey('fastp_umi_location') && (params.fastp_umi_location == 'per_index' || params.fastp_umi_location == 'per_read')
             def no_umi_duplex_delim = !params.containsKey('redux_umi_duplex_delim') || !params.redux_umi_duplex_delim
             if (fastp_and_redux_umi && fastp_duplex_location && no_umi_duplex_delim) {
-                params.redux_umi_duplex_delim = '+'
+                params.redux_umi_duplex_delim = '_'
             }
 
         }
