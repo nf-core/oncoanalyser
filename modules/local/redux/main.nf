@@ -33,7 +33,7 @@ process REDUX {
     def umi_args_list = []
     if (umi_enable) umi_args_list.add('-umi_enabled')
     if (umi_duplex_delim) umi_args_list.add("-umi_duplex -umi_duplex_delim ${umi_duplex_delim}")
-    def umi_args = umi_args_list ? umi_args_list.join(',') : ''
+    def umi_args = umi_args_list ? umi_args_list.join(' ') : ''
 
     """
     redux \\
