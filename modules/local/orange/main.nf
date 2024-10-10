@@ -103,10 +103,6 @@ process ORANGE {
 
     fi
 
-    # Combine tumor and reference bam metrics into one folder
-    mkdir -p ${metrics_dir}
-    ln -sf \$(realpath ${bam_metrics_somatic} ${bam_metrics_germline}) ${metrics_dir}
-
     # Set input plot directory and create it doesn't exist. See the LINX visualiser module for further info.
     if [[ ! -e ${plot_dir}/ ]]; then
         mkdir -p ${plot_dir}/;
