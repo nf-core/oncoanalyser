@@ -40,10 +40,6 @@ process CUPPA {
         done;
     fi;
 
-    # Use symlink to remove genome version suffix (e.g. cuppa_classifier.37.pickle.gz -> cuppa_classifier.pickle.gz)
-    ln -sf \$(find -L ${cuppa_resources} -type f -name 'cuppa_classifier*.pickle.gz' -print -quit) ./cuppa_classifier.pickle.gz
-    ln -sf \$(find -L ${cuppa_resources} -type f -name 'alt_sj.selected_loci*.tsv.gz' -print -quit) ./alt_sj.selected_loci.tsv.gz
-
     mkdir -p cuppa/
 
     # Extract input features
@@ -56,12 +52,12 @@ process CUPPA {
         -ref_genome_version ${genome_ver} \\
         -sample_data_dir sample_data/ \\
         -output_dir cuppa/ \\
-        -ref_alt_sj_sites "./alt_sj.selected_loci.tsv.gz"
+        -ref_alt_sj_sites ${cuppa_alt_sj}
 
     # Make predictions
     python -m cuppa.predict \\
         --sample_id ${meta.sample_id} \\
-        --classifier_path ./cuppa_classifier.pickle.gz \\
+        --classifier_path ${cuppa_classifier} \\
         --features_path cuppa/${meta.sample_id}.cuppa_data.tsv.gz \\
         --output_dir cuppa/ \\
         --clf_group ${classifier}
