@@ -57,7 +57,7 @@ process ORANGE {
     def plot_dir = linx_somatic_plot_dir.resolve('reportable/').toUriString().replaceAll('/$', '')
 
     def tumor_metrics_arg = "-tumor_metrics_dir ${bamtools_somatic_dir}"
-    def normal_metrics_arg = bam_metrics_germline ? "-ref_metrics_dir ${bamtools_germline_dir}" : ''
+    def normal_metrics_arg = bamtools_germline_dir ? "-ref_metrics_dir ${bamtools_germline_dir}" : ''
 
     def normal_id_arg = meta.containsKey('normal_dna_id') ? "-reference_sample_id ${meta.normal_dna_id}" : ''
     def normal_sage_dir = sage_germline_dir ? "-sage_germline_dir ${sage_germline_dir}" : ''
