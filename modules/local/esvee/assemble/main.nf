@@ -7,7 +7,7 @@ process ESVEE_ASSEMBLE {
 //        'https://depot.galaxyproject.org/singularity/hmftools-esvee:1.0_beta--hdfd78af_0' :
 //        'quay.io/biocontainers/hmftools-esvee:1.0_beta--hdfd78af_0' }"
 
-    container 'quay.io/local/hmftools-esvee'
+    container 'docker.io/luannnguyen/hmftools-esvee:1.0_beta--hdfd78af_2'
 
     input:
     tuple val(meta), path(tumor_prep_bam), path(normal_prep_bam), path(junctions_tsv), path(fragment_lengths_tsv)

@@ -7,7 +7,7 @@ process LINX_VISUALISER {
 //        'https://depot.galaxyproject.org/singularity/hmftools-linx:1.25--hdfd78af_0' :
 //        'biocontainers/hmftools-linx:1.25--hdfd78af_0' }"
 
-    container "quay.io/local/hmftools-linx"
+    container 'docker.io/luannnguyen/hmftools-linx:2.0_beta--hdfd78af_0'
 
     input:
     tuple val(meta), path(linx_annotation_dir)
