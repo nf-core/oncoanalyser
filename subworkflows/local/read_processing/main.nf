@@ -22,7 +22,7 @@ workflow READ_PROCESSING {
     unmap_regions    // channel: [mandatory] /path/to/unmap_regions
 
     // Params
-    has_umis         // boolean: [mandatory] UMI processing flag
+    umi_enable       // boolean: [mandatory] enable UMI processing
     umi_duplex_delim // string:  [optional] UMI duplex delimiter
 
     main:
@@ -90,7 +90,7 @@ workflow READ_PROCESSING {
         genome_fai,
         genome_dict,
         unmap_regions,
-        has_umis,
+        umi_enable,
         umi_duplex_delim,
     )
 

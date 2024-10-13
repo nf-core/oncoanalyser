@@ -97,14 +97,39 @@
                 "max_fastq_records": {
                     "type": "integer",
                     "description": "When positive, will use fastp to split fastq files so that each resultant fastq file has no more than max_fastq_records records. When nonpositive, fastp is not used and the provided fastq files are passed as-is to the aligner.",
+                    "default": 10000000,
                     "fa_icon": "fas fa-cog"
                 },
-                "umi_length": {
+                "fastp_umi": {
+                    "type": "boolean",
+                    "description": "Enable fastp UMI processing.",
+                    "default": false,
+                    "fa_icon": "fas fa-cog"
+                },
+                "fastp_umi_location": {
+                    "type": "string",
+                    "description": "fastp UMI location parameter (--umi_loc).",
+                    "fa_icon": "fas fa-cog"
+                },
+                "fastp_umi_length": {
                     "type": "integer",
-                    "description": "When positive, will use fastp to extract UMIs of this length from  fastq files.",
+                    "description": "fastp UMI length parameter (--umi_len)",
+                    "default": 0,
                     "fa_icon": "fas fa-cog"
                 },
-                "umi_duplex_delim": {
+                "fastp_umi_skip": {
+                    "type": "integer",
+                    "description": "fastp UMI skip parameter (--umi_skip)",
+                    "default": -1,
+                    "fa_icon": "fas fa-cog"
+                },
+                "markdups_umi": {
+                    "type": "boolean",
+                    "description": "Enable MarkDups UMI processing.",
+                    "default": false,
+                    "fa_icon": "fas fa-cog"
+                },
+                "markdups_umi_duplex_delim": {
                     "type": "string",
                     "description": "UMI duplex delimiter as used by MarkDups.",
                     "fa_icon": "fas fa-cog"

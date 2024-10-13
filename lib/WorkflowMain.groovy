@@ -37,7 +37,7 @@ class WorkflowMain {
             }
         }
 
-        if (!params.containsKey('ref_hmf_data_path')) {
+        if (!params.containsKey('ref_data_hmf_data_path')) {
             if (params.genome_version.toString() == '37') {
                 params.ref_data_hmf_data_path = Constants.HMF_DATA_37_PATH
             } else if (params.genome_version.toString() == '38') {
@@ -65,7 +65,6 @@ class WorkflowMain {
         if (run_mode === Constants.RunMode.TARGETED) {
 
             // Attempt to set default panel data path; make no assumption on valid 'panel' value
-
             if (params.containsKey('panel')) {
                 if (params.panel == 'tso500' && params.genome_version.toString() == '37') {
                     params.ref_data_panel_data_path = Constants.TSO500_PANEL_37_PATH
@@ -73,6 +72,23 @@ class WorkflowMain {
                     params.ref_data_panel_data_path = Constants.TSO500_PANEL_38_PATH
                 }
             }
+
+            // When fastp UMI is enabled, MarkDups UMI should be as well
+            if (params.fastp_umi && (!params.containsKey('markdups_umi') || !params.markdups_umi)) {
+                params.markdups_umi = true
+            }
+
+            // Set the MarkDups UMI duplex delimiter to '_' when the following conditions are met:
+            //   - both fastp and MarkDups UMI processing enabled
+            //   - fastp is using a duplex UMI location type (per_index or per_read)
+            //   - no MarkDups duplex delimiter has been set
+            def fastp_and_markdups_umi = params.fastp_umi && params.markdups_umi
+            def fastp_duplex_location = params.containsKey('fastp_umi_location') && (params.fastp_umi_location == 'per_index' || params.fastp_umi_location == 'per_read')
+            def no_umi_duplex_delim = !params.containsKey('markdups_umi_duplex_delim') || !params.markdups_umi_duplex_delim
+            if (fastp_and_markdups_umi && fastp_duplex_location && no_umi_duplex_delim) {
+                params.markdups_umi_duplex_delim = '_'
+            }
+
         }
 
         def stages = Processes.getRunStages(
@@ -93,12 +109,18 @@ class WorkflowMain {
         }
 
         // Final point to set any default to avoid access to undefined parameters during nf-validation
-        if (!params.containsKey('panel')) { params.panel = null }
-        if (!params.containsKey('ref_data_genome_alt')) { params.ref_data_genome_alt = null }
-        if (!params.containsKey('ref_data_genome_gtf')) { params.ref_data_genome_gtf = null }
-        if (!params.containsKey('ref_data_hla_slice_bed')) { params.ref_data_hla_slice_bed = null }
-        if (!params.containsKey('ref_data_panel_data_path')) { params.ref_data_panel_data_path = null }
-        if (!params.containsKey('ref_data_virusbreakenddb_path')) { params.ref_data_virusbreakenddb_path = null }
+        if (!params.containsKey('panel')) params.panel = null
+        if (!params.containsKey('ref_data_genome_alt')) params.ref_data_genome_alt = null
+        if (!params.containsKey('ref_data_genome_gtf')) params.ref_data_genome_gtf = null
+        if (!params.containsKey('ref_data_hla_slice_bed')) params.ref_data_hla_slice_bed = null
+        if (!params.containsKey('ref_data_panel_data_path')) params.ref_data_panel_data_path = null
+        if (!params.containsKey('ref_data_virusbreakenddb_path')) params.ref_data_virusbreakenddb_path = null
+
+        // Additionally set selected parameters with false-ish truthy values to avoid passing null values as inputs
+        if (!params.containsKey('fastp_umi_location')) params.fastp_umi_location = ''
+        if (!params.containsKey('fastp_umi_length')) params.fastp_umi_length = 0
+        if (!params.containsKey('fastp_umi_skip')) params.fastp_umi_skip = -1
+        if (!params.containsKey('markdups_umi_duplex_delim')) params.markdups_umi_duplex_delim = ''
 
     }
 
@@ -225,6 +247,36 @@ class WorkflowMain {
                 Nextflow.exit(1)
             }
 
+        }
+
+        // UMI parameters
+
+        def fastp_umi_args_set_any = params.fastp_umi_location || params.fastp_umi_length || params.fastp_umi_skip >= 0
+        if (fastp_umi_args_set_any && !params.fastp_umi) {
+            log.error "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n" +
+                "  Detected use of fastp UMI parameters but fastp UMI processing has not been enabled.\n" +
+                "  Please review your configuration and set the fastp_umi flag or otherwise adjust\n" +
+                "  accordingly.\n" +
+                "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
+            Nextflow.exit(1)
+        }
+
+        def fastp_umi_args_set_all = params.fastp_umi_location && params.fastp_umi_length && params.fastp_umi_skip >= 0
+        if (params.fastp_umi && !fastp_umi_args_set_all) {
+            log.error "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n" +
+                "  Refusing to run fastp UMI processing without having any UMI params configured.\n" +
+                "  Please review your configuration and appropriately set all fastp_umi_* parameters.\n" +
+                "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
+            Nextflow.exit(1)
+        }
+
+        if (params.markdups_umi_duplex_delim && params.markdups_umi === false) {
+            log.error "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n" +
+                "  Detected use of MarkDups UMI parameters but MarkDups UMI processing has not been\n" +
+                "  enabled. Please review your configuration and set the markdups_umi flag or\n" +
+                "  otherwise adjust accordingly.\n" +
+                "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
+            Nextflow.exit(1)
         }
 
     }
