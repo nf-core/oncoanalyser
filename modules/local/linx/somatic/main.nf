@@ -5,7 +5,7 @@ process LINX_SOMATIC {
     conda "${moduleDir}/environment.yml"
     container "${ workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container ?
         'https://depot.galaxyproject.org/singularity/hmftools-linx:2.0_beta--hdfd78af_0' :
-        'biocontainershmftools-linx:2.0_beta--hdfd78af_0' }"
+        'biocontainers/hmftools-linx:2.0_beta--hdfd78af_0' }"
 
     input:
     tuple val(meta), path(purple_dir)
