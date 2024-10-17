@@ -17,8 +17,8 @@ process MARKDUPS {
     val has_umis
 
     output:
-    tuple val(meta), path('*bam'), path('*bai'), emit: bam
-    path 'versions.yml'                        , emit: versions
+    tuple val(meta), path('*.markdups.bam'), path('*.markdups.bai'), emit: bam
+    path 'versions.yml'                                            , emit: versions
     path '*.tsv'
 
     when:
