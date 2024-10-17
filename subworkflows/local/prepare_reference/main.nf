@@ -16,7 +16,6 @@ include { CUSTOM_EXTRACTTARBALL as DECOMP_GRIDSS_INDEX     } from '../../../modu
 include { CUSTOM_EXTRACTTARBALL as DECOMP_HMF_DATA         } from '../../../modules/local/custom/extract_tarball/main'
 include { CUSTOM_EXTRACTTARBALL as DECOMP_PANEL_DATA       } from '../../../modules/local/custom/extract_tarball/main'
 include { CUSTOM_EXTRACTTARBALL as DECOMP_STAR_INDEX       } from '../../../modules/local/custom/extract_tarball/main'
-include { CUSTOM_EXTRACTTARBALL as DECOMP_VIRUSBREAKEND_DB } from '../../../modules/local/custom/extract_tarball/main'
 include { GRIDSS_INDEX                                     } from '../../../modules/local/gridss/index/main'
 include { WRITE_REFERENCE_DATA                             } from '../../../modules/local/custom/write_reference_data/main'
 
@@ -156,26 +155,6 @@ workflow PREPARE_REFERENCE {
     }
 
     //
-    // Set VIRUSBreakend database, unpack if required
-    //
-    ch_virusbreakenddb = Channel.empty()
-    if (run_config.has_dna && run_virusinterpreter) {
-        if (params.ref_data_virusbreakenddb_path.endsWith('.tar.gz')) {
-
-            ch_virusbreakenddb_inputs = Channel.fromPath(params.ref_data_virusbreakenddb_path)
-                .map { [[id: it.name.replaceAll('\\.tar\\.gz$', '')], it] }
-
-            DECOMP_VIRUSBREAKEND_DB(ch_virusbreakenddb_inputs)
-            ch_virusbreakenddb = DECOMP_VIRUSBREAKEND_DB.out.extracted_dir
-
-        } else {
-
-            ch_virusbreakenddb = Channel.fromPath(params.ref_data_virusbreakenddb_path)
-
-        }
-    }
-
-    //
     // Set HMF reference data, unpack if required
     //
     ch_hmf_data = Channel.empty()
@@ -246,7 +225,6 @@ workflow PREPARE_REFERENCE {
                 ch_genome_bwamem2_index,
                 ch_genome_gridss_index,
                 ch_genome_star_index,
-                ch_virusbreakenddb,
                 // Also include base paths for hmf_data and panel_data
                 Channel.empty()
                     .mix(
@@ -275,7 +253,6 @@ workflow PREPARE_REFERENCE {
     genome_star_index    = ch_genome_star_index.first()    // path: genome_star_index
     genome_version       = ch_genome_version               // val:  genome_version
 
-    virusbreakenddb      = ch_virusbreakenddb.first()      // path: VIRUSBreakend database
     hmf_data             = ch_hmf_data                     // map:  HMF data paths
     panel_data           = ch_panel_data                   // map:  Panel data paths
 

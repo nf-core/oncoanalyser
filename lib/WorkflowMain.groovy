@@ -98,10 +98,6 @@ class WorkflowMain {
             log,
         )
 
-        if (!params.containsKey('ref_data_virusbreakenddb_path') && stages.virusinterpreter && run_mode === Constants.RunMode.WGTS){
-            params.ref_data_virusbreakenddb_path = Constants.VIRUSBREAKENDDB_PATH
-        }
-
         if (!params.containsKey('ref_data_hla_slice_bed') && stages.lilac) {
             if (params.genome_version.toString() == '38' && params.genome_type == 'alt') {
                 params.ref_data_hla_slice_bed = Constants.HLA_SLICE_BED_GRCH38_ALT_PATH

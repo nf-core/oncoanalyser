@@ -198,7 +198,6 @@ class Utils {
             params.ref_data_genome_gridss_index,
             params.ref_data_genome_gtf,
             params.ref_data_genome_star_index,
-            params.ref_data_virusbreakenddb_path,
         ]
 
         params.hmf_data_paths[params.genome_version.toString()]
