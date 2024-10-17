@@ -648,7 +648,7 @@ workflow WGTS {
             ref_data.genome_fai,
             ref_data.genome_dict,
             ref_data.genome_gridss_index,
-            ref_data.virusbreakenddb,
+            hmf_data.virusbreakend_db,
             hmf_data.virus_taxonomy_db,
             hmf_data.virus_reporting_db,
             hmf_data.virus_blacklist_db,
