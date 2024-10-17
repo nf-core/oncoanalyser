@@ -20,7 +20,7 @@ workflow VIRUSBREAKEND_CALLING {
     genome_fasta           // channel: [mandatory] /path/to/genome_fasta
     genome_fai             // channel: [mandatory] /path/to/genome_fai
     genome_dict            // channel: [mandatory] /path/to/genome_dict
-    genome_gridss_index    // channel: [mandatory] /path/to/genome_gridss_index
+    bwamem2_index          // channel: [mandatory] /path/to/bwamem2_index
     virusbreakenddb        // channel: [mandatory] /path/to/virusbreakenddb/
     virus_taxonomy_db      // channel: [mandatory] /path/to/virus_taxonomy_db
     virus_reporting_db     // channel: [mandatory] /path/to/virus_reporting_db
@@ -75,7 +75,7 @@ workflow VIRUSBREAKEND_CALLING {
         genome_fasta,
         genome_fai,
         genome_dict,
-        genome_gridss_index,
+        bwamem2_index,
         virusbreakenddb,
         gridss_config,
     )

@@ -36,7 +36,6 @@ params.ref_data_genome_fai           = getGenomeAttribute('fai')
 params.ref_data_genome_dict          = getGenomeAttribute('dict')
 params.ref_data_genome_img           = getGenomeAttribute('img')
 params.ref_data_genome_bwamem2_index = getGenomeAttribute('bwamem2_index')
-params.ref_data_genome_gridss_index  = getGenomeAttribute('gridss_index')
 params.ref_data_genome_star_index    = getGenomeAttribute('star_index')
 
 WorkflowMain.setParamsDefaults(params, log)
