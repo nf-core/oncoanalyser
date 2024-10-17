@@ -98,10 +98,6 @@ class WorkflowMain {
             log,
         )
 
-        if (!params.containsKey('ref_data_virusbreakenddb_path') && stages.virusinterpreter && run_mode === Constants.RunMode.WGTS){
-            params.ref_data_virusbreakenddb_path = Constants.VIRUSBREAKENDDB_PATH
-        }
-
         if (!params.containsKey('ref_data_hla_slice_bed') && stages.lilac) {
             if (params.genome_version.toString() == '38' && params.genome_type == 'alt') {
                 params.ref_data_hla_slice_bed = Constants.HLA_SLICE_BED_GRCH38_ALT_PATH
@@ -114,7 +110,6 @@ class WorkflowMain {
         if (!params.containsKey('ref_data_genome_gtf')) params.ref_data_genome_gtf = null
         if (!params.containsKey('ref_data_hla_slice_bed')) params.ref_data_hla_slice_bed = null
         if (!params.containsKey('ref_data_panel_data_path')) params.ref_data_panel_data_path = null
-        if (!params.containsKey('ref_data_virusbreakenddb_path')) params.ref_data_virusbreakenddb_path = null
 
         // Additionally set selected parameters with false-ish truthy values to avoid passing null values as inputs
         if (!params.containsKey('fastp_umi_location')) params.fastp_umi_location = ''

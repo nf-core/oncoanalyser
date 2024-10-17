@@ -256,6 +256,11 @@
                     "description": "Path to reference genome bwa-mem2 index.",
                     "fa_icon": "far fa-file-code"
                 },
+                "ref_data_genome_img": {
+                    "type": "string",
+                    "description": "Path to reference genome img.",
+                    "fa_icon": "far fa-file-code"
+                },
                 "ref_data_genome_gridss_index": {
                     "type": "string",
                     "description": "Path to reference genome GRIDSS index.",
