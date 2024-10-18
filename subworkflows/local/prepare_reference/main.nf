@@ -12,7 +12,6 @@ include { GATK4_BWA_INDEX_IMAGE } from '../../../modules/nf-core/gatk4/bwaindexi
 include { STAR_GENOMEGENERATE   } from '../../../modules/nf-core/star/genomegenerate/main'
 
 include { CUSTOM_EXTRACTTARBALL as DECOMP_BWAMEM2_INDEX    } from '../../../modules/local/custom/extract_tarball/main'
-include { CUSTOM_EXTRACTTARBALL as DECOMP_GRIDSS_INDEX     } from '../../../modules/local/custom/extract_tarball/main'
 include { CUSTOM_EXTRACTTARBALL as DECOMP_HMF_DATA         } from '../../../modules/local/custom/extract_tarball/main'
 include { CUSTOM_EXTRACTTARBALL as DECOMP_PANEL_DATA       } from '../../../modules/local/custom/extract_tarball/main'
 include { CUSTOM_EXTRACTTARBALL as DECOMP_STAR_INDEX       } from '../../../modules/local/custom/extract_tarball/main'
