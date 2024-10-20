@@ -122,7 +122,7 @@ workflow WGTS {
             false,  // umi_enable
             '',  // umi_location
             0,  // umi_length
-            0,  // umi_skip
+            -1,  // umi_skip
         )
 
         READ_ALIGNMENT_RNA(
