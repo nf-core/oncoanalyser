@@ -12,7 +12,7 @@ process VIRUSBREAKEND {
     path genome_fasta
     path genome_fai
     path genome_dict
-    path bwamem2_index
+    path genome_gridss_index
     path virusbreakenddb
     path gridss_config
 
@@ -29,7 +29,7 @@ process VIRUSBREAKEND {
 
     """
     # Symlink indices next to assembly FASTA
-    ln -s \$(find -L ${bwamem2_index} -regex '.*\\.\\(amb\\|ann\\|pac\\|sa\\|bwt\\|img\\|alt\\)') ./
+    ln -s \$(find -L ${genome_gridss_index} -regex '.*\\.\\(amb\\|ann\\|pac\\|gridsscache\\|sa\\|bwt\\|img\\|alt\\)') ./
 
     virusbreakend \\
         ${args} \\

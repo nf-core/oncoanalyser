@@ -39,6 +39,10 @@ input:
       type: file
       description: Reference genome assembly dict file
       pattern: "*.{dict}"
+  - genome_gridss_index:
+      type: file
+      description: Reference genome assembly GRIDSS index file
+      pattern: "*.{gridsscache}"
   - blocklist:
       type: file
       description: GRIDSS blocklist file

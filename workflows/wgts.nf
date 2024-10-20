@@ -637,7 +637,6 @@ workflow WGTS {
     //
     // channel: [ meta, virusinterpreter_dir ]
     ch_virusinterpreter_out = Channel.empty()
-
     if (run_config.stages.virusinterpreter) {
 
         VIRUSBREAKEND_CALLING(
@@ -648,7 +647,7 @@ workflow WGTS {
             ref_data.genome_fasta,
             ref_data.genome_fai,
             ref_data.genome_dict,
-            ref_data.genome_bwamem2_index,
+            ref_data.genome_gridss_index,
             hmf_data.virusbreakend_db,
             hmf_data.virus_taxonomy_db,
             hmf_data.virus_reporting_db,

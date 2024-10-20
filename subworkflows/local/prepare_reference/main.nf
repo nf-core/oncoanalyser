@@ -12,9 +12,11 @@ include { GATK4_BWA_INDEX_IMAGE } from '../../../modules/nf-core/gatk4/bwaindexi
 include { STAR_GENOMEGENERATE   } from '../../../modules/nf-core/star/genomegenerate/main'
 
 include { CUSTOM_EXTRACTTARBALL as DECOMP_BWAMEM2_INDEX    } from '../../../modules/local/custom/extract_tarball/main'
+include { CUSTOM_EXTRACTTARBALL as DECOMP_GRIDSS_INDEX     } from '../../../modules/local/custom/extract_tarball/main'
 include { CUSTOM_EXTRACTTARBALL as DECOMP_HMF_DATA         } from '../../../modules/local/custom/extract_tarball/main'
 include { CUSTOM_EXTRACTTARBALL as DECOMP_PANEL_DATA       } from '../../../modules/local/custom/extract_tarball/main'
 include { CUSTOM_EXTRACTTARBALL as DECOMP_STAR_INDEX       } from '../../../modules/local/custom/extract_tarball/main'
+include { GRIDSS_INDEX                                     } from '../../../modules/local/gridss/index/main'
 include { WRITE_REFERENCE_DATA                             } from '../../../modules/local/custom/write_reference_data/main'
 
 workflow PREPARE_REFERENCE {
@@ -61,7 +63,7 @@ workflow PREPARE_REFERENCE {
     // Set bwa-mem2 index, unpack or create if required
     //
     ch_genome_bwamem2_index = Channel.empty()
-    if ((run_config.has_dna_fastq && run_config.stages.alignment) || run_virusinterpreter) {
+    if (run_config.has_dna_fastq && run_config.stages.alignment) {
         if (!params.ref_data_genome_bwamem2_index) {
 
             BWAMEM2_INDEX(
@@ -82,6 +84,43 @@ workflow PREPARE_REFERENCE {
         } else {
 
             ch_genome_bwamem2_index = getRefFileChannel('ref_data_genome_bwamem2_index')
+
+        }
+    }
+
+    //
+    // Set GRIDSS index, unpack or create if required
+    //
+    ch_genome_gridss_index = Channel.empty()
+    if (run_config.has_dna && (run_config.stages.gridss || run_virusinterpreter)) {
+        if (!params.ref_data_genome_gridss_index) {
+
+            BWA_INDEX(
+                ch_genome_fasta,
+                params.ref_data_genome_alt ? file(params.ref_data_genome_alt) : [],
+            )
+            ch_versions = ch_versions.mix(BWA_INDEX.out.versions)
+
+            GRIDSS_INDEX(
+                ch_genome_fasta,
+                ch_genome_fai,
+                ch_genome_dict,
+                BWA_INDEX.out.index,
+            )
+            ch_genome_gridss_index = GRIDSS_INDEX.out.index
+            ch_versions = ch_versions.mix(GRIDSS_INDEX.out.versions)
+
+        } else if (params.ref_data_genome_gridss_index.endsWith('.tar.gz')) {
+
+            ch_genome_gridss_index_inputs = Channel.fromPath(params.ref_data_genome_gridss_index)
+                .map { [[id: "gridss_index_${it.name.replaceAll('\\.tar\\.gz$', '')}"], it] }
+
+            DECOMP_GRIDSS_INDEX(ch_genome_gridss_index_inputs)
+            ch_genome_gridss_index = DECOMP_GRIDSS_INDEX.out.extracted_dir
+
+        } else {
+
+            ch_genome_gridss_index = getRefFileChannel('ref_data_genome_gridss_index')
 
         }
     }
@@ -184,6 +223,7 @@ workflow PREPARE_REFERENCE {
                 ch_genome_fai,
                 ch_genome_dict,
                 ch_genome_bwamem2_index,
+                ch_genome_gridss_index,
                 ch_genome_star_index,
                 // Also include base paths for hmf_data and panel_data
                 Channel.empty()
@@ -209,6 +249,7 @@ workflow PREPARE_REFERENCE {
     genome_dict          = ch_genome_dict.first()          // path: genome_dict
     genome_img           = ch_genome_img.first()           // path: genome_img
     genome_bwamem2_index = ch_genome_bwamem2_index.first() // path: genome_bwa-mem2_index
+    genome_gridss_index  = ch_genome_gridss_index.first()  // path: genome_gridss_index
     genome_star_index    = ch_genome_star_index.first()    // path: genome_star_index
     genome_version       = ch_genome_version               // val:  genome_version
 
