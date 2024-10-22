@@ -26,7 +26,7 @@ process VIRUSINTERPRETER {
     mkdir -p virusinterpreter/
 
     virusinterpreter \\
-        -Xmx${Math.round(task.memory.bytes * 0.95)} \\
+        -Xmx${Math.round(task.memory.bytes * 0.75)} \\
         ${args} \\
         -sample ${meta.sample_id} \\
         -purple_dir ${purple_dir} \\

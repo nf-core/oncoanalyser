@@ -39,7 +39,7 @@ process SAGE_SOMATIC {
     mkdir -p somatic/
 
     sage \\
-        -Xmx${Math.round(task.memory.bytes * 0.95)} \\
+        -Xmx${Math.round(task.memory.bytes * 0.75)} \\
         ${args} \\
         ${reference_arg} \\
         ${reference_bam_arg} \\

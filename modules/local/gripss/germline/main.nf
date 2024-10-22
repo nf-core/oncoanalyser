@@ -30,7 +30,7 @@ process GRIPSS_GERMLINE {
 
     """
     gripss \\
-        -Xmx${Math.round(task.memory.bytes * 0.95)} \\
+        -Xmx${Math.round(task.memory.bytes * 0.75)} \\
         ${args} \\
         -sample ${meta.normal_id} \\
         -reference ${meta.tumor_id} \\

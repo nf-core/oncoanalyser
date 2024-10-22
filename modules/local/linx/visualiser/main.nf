@@ -43,7 +43,7 @@ process LINX_VISUALISER {
     # Generate all chromosome and cluster plots by default
 
     linx \\
-        -Xmx${Math.round(task.memory.bytes * 0.95)} \\
+        -Xmx${Math.round(task.memory.bytes * 0.75)} \\
         com.hartwig.hmftools.linx.visualiser.SvVisualiser \\
         ${args} \\
         -sample ${meta.sample_id} \\
@@ -66,7 +66,7 @@ process LINX_VISUALISER {
     # https://github.com/hartwigmedical/hmftools/blob/linx-v1.24.1/linx/src/main/java/com/hartwig/hmftools/linx/visualiser/SampleData.java#L220-L236
 
     linx \\
-        -Xmx${Math.round(task.memory.bytes * 0.95)} \\
+        -Xmx${Math.round(task.memory.bytes * 0.75)} \\
         com.hartwig.hmftools.linx.visualiser.SvVisualiser \\
         ${args2} \\
         -sample ${meta.sample_id} \\

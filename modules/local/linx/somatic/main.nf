@@ -26,7 +26,7 @@ process LINX_SOMATIC {
 
     """
     linx \\
-        -Xmx${Math.round(task.memory.bytes * 0.95)} \\
+        -Xmx${Math.round(task.memory.bytes * 0.75)} \\
         ${args} \\
         -sample ${meta.sample_id} \\
         -sv_vcf ${purple_dir}/${meta.sample_id}.purple.sv.vcf.gz \\

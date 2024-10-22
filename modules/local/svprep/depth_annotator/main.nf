@@ -31,7 +31,7 @@ process SVPREP_DEPTH_ANNOTATOR {
 
     """
     svprep \\
-        -Xmx${Math.round(task.memory.bytes * 0.95)} \\
+        -Xmx${Math.round(task.memory.bytes * 0.75)} \\
         com.hartwig.hmftools.svprep.depth.DepthAnnotator \\
         ${args} \\
         -input_vcf ${vcf} \\

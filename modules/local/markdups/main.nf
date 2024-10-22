@@ -31,7 +31,7 @@ process MARKDUPS {
 
     """
     markdups \\
-        -Xmx${Math.round(task.memory.bytes * 0.95)} \\
+        -Xmx${Math.round(task.memory.bytes * 0.75)} \\
         ${args} \\
         \\
         -samtools \$(which samtools) \\

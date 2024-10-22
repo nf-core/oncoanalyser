@@ -35,7 +35,7 @@ process GRIPSS_SOMATIC {
 
     """
     gripss \\
-        -Xmx${Math.round(task.memory.bytes * 0.95)} \\
+        -Xmx${Math.round(task.memory.bytes * 0.75)} \\
         ${args} \\
         -sample ${meta.tumor_id} \\
         ${reference_arg} \\

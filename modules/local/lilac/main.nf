@@ -33,7 +33,7 @@ process LILAC {
 
     """
     lilac \\
-        -Xmx${Math.round(task.memory.bytes * 0.95)} \\
+        -Xmx${Math.round(task.memory.bytes * 0.75)} \\
         ${args} \\
         -sample ${sample_name} \\
         ${normal_bam_arg} \\

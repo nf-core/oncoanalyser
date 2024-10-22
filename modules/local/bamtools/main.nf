@@ -24,7 +24,7 @@ process BAMTOOLS {
 
     """
     bamtools \\
-        -Xmx${Math.round(task.memory.bytes * 0.95)} \\
+        -Xmx${Math.round(task.memory.bytes * 0.75)} \\
         com.hartwig.hmftools.bamtools.metrics.BamMetrics \\
         ${args} \\
         -sample ${meta.sample_id} \\

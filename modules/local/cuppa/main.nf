@@ -45,7 +45,7 @@ process CUPPA {
     mkdir -p cuppa/
 
     cuppa \\
-        -Xmx${Math.round(task.memory.bytes * 0.95)} \\
+        -Xmx${Math.round(task.memory.bytes * 0.75)} \\
         ${args} \\
         -sample ${meta.sample_id} \\
         -sample_data_dir sample_data/ \\
