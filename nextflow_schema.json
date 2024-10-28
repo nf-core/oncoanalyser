@@ -172,6 +172,14 @@
                     "hidden": true,
                     "default": "s3://ngi-igenomes/igenomes/"
                 },
+                "hmf_genomes_base": {
+                    "type": "string",
+                    "format": "directory-path",
+                    "description": "The base path to the HMF genome reference files",
+                    "fa_icon": "fas fa-ban",
+                    "hidden": true,
+                    "default": "https://pub-cf6ba01919994c3cbd354659947f74d8.r2.dev/genomes"
+                },
                 "ref_data_hmf_data_path": {
                     "type": "string",
                     "description": "Path to HMF data.",
