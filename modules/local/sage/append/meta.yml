@@ -1,0 +1,61 @@
+name: sage_append
+description: A tool to append data to existing SAGE calls
+keywords:
+  - append
+  - snv
+  - mnv
+tools:
+  - sage:
+      description: A precise and highly sensitive somatic SNV, MNV and small INDEL caller.
+      homepage: https://github.com/hartwigmedical/hmftools/tree/master/sage
+      documentation: https://github.com/hartwigmedical/hmftools/tree/master/sage
+      licence: ["GPL v3"]
+input:
+  - meta:
+      type: map
+      description: |
+        Groovy Map containing sample informatio
+        e.g. [id: 'sample_id', append_id: 'sample_id_append']
+  - vcf:
+      type: file
+      description: VCF file
+      pattern: "*.{vcf.gz}"
+  - bam:
+      type: file
+      description: BAM file
+      pattern: "*.{bam}"
+  - bai:
+      type: file
+      description: BAI file
+      pattern: "*.{bai}"
+  - genome_fasta:
+      type: file
+      description: Reference genome assembly FASTA file
+      pattern: "*.{fa,fasta}"
+  - genome_ver:
+      type: string
+      description: Reference genome version
+  - genome_fai:
+      type: file
+      description: Reference genome assembly fai file
+      pattern: "*.{fai}"
+  - genome_dict:
+      type: file
+      description: Reference genome assembly dict file
+      pattern: "*.{dict}"
+output:
+  - meta:
+      type: map
+      description: |
+        Groovy Map containing sample information
+        e.g. [id: 'sample_id', append_id: 'sample_id_append']
+  - vcf:
+      type: file
+      description: VCF file
+      pattern: "*.{vcf.gz}"
+  - versions:
+      type: file
+      description: File containing software versions
+      pattern: "versions.yml"
+authors:
+  - "@scwatts"

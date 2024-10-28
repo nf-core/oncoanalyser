@@ -1,14 +1,5 @@
-bump_version: null
-lint:
-  actions_ci: false
-  files_exist:
-    - lib/Utils.groovy
-    - lib/WorkflowMain.groovy
-    - lib/WorkflowOncoanalyser.groovy
-  multiqc_config: false
-nf_core_version: 3.0.2
-org_path: null
 repository_type: pipeline
+nf_core_version: 3.0.2
 template:
   author: Stephen Watts
   description: A comprehensive cancer DNA/RNA analysis and reporting pipeline
@@ -19,4 +10,13 @@ template:
   outdir: .
   skip_features: null
   version: 1.1.0dev
+lint:
+  actions_ci: False
+  multiqc_config: False
+  files_exist:
+    - lib/Utils.groovy
+    - lib/WorkflowMain.groovy
+    - lib/WorkflowOncoanalyser.groovy
+bump_version: null
+org_path: null
 update: null
