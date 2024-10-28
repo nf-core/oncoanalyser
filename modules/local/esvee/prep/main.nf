@@ -16,7 +16,7 @@ process ESVEE_PREP {
 
     output:
     tuple val(meta), path("prep/")                                                , emit: sv_prep_dir
-    tuple val(meta), path("prep/${meta.normal_id}.esvee.prep.bam")                , emit: normal_prep_bam
+    tuple val(meta), path("prep/${meta.normal_id}.esvee.prep.bam")                , emit: normal_prep_bam, optional: true
     tuple val(meta), path("prep/${meta.tumor_id}.esvee.prep.bam")                 , emit: tumor_prep_bam
     tuple val(meta), path("prep/${meta.tumor_id}.esvee.prep.junction.tsv")        , emit: junctions_tsv
     tuple val(meta), path("prep/${meta.tumor_id}.esvee.prep.fragment_length.tsv") , emit: fragment_lengths_tsv
@@ -58,10 +58,6 @@ process ESVEE_PREP {
         -output_dir prep/ \\
         -threads ${task.cpus} \\
         -log_level DEBUG \\
-
-    # NOTE(LN): For tumor only mode, make empty output null.esvee.prep.bam for the reference sample so that nextflow doesn't complain about
-    # this missing file when emitting output
-    ${ (meta.normal_id == null) ? "touch prep/${meta.normal_id}.esvee.prep.bam" : "" }
 
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":
