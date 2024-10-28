@@ -195,6 +195,41 @@
                     "description": "Path to VIRUSBreakend database (directory or tarball).",
                     "fa_icon": "far fa-file-code"
                 },
+                "ref_data_genome_fasta": {
+                    "type": "string",
+                    "description": "Path to reference genome FASTA.",
+                    "fa_icon": "far fa-file-code"
+                },
+                "ref_data_genome_fai": {
+                    "type": "string",
+                    "description": "Path to reference genome FAI.",
+                    "fa_icon": "far fa-file-code"
+                },
+                "ref_data_genome_dict": {
+                    "type": "string",
+                    "description": "Path to reference genome dict.",
+                    "fa_icon": "far fa-file-code"
+                },
+                "ref_data_genome_bwamem2_index": {
+                    "type": "string",
+                    "description": "Path to reference genome bwa-mem2 index.",
+                    "fa_icon": "far fa-file-code"
+                },
+                "ref_data_genome_gridss_index": {
+                    "type": "string",
+                    "description": "Path to reference genome GRIDSS index.",
+                    "fa_icon": "far fa-file-code"
+                },
+                "ref_data_genome_star_index": {
+                    "type": "string",
+                    "description": "Path to reference genome STAR index.",
+                    "fa_icon": "far fa-file-code"
+                },
+                "ref_data_genome_gtf": {
+                    "type": "string",
+                    "description": "Path to reference genome GTF.",
+                    "fa_icon": "far fa-file-code"
+                },
                 "ref_data_hla_slice_bed": {
                     "type": "string",
                     "format": "file-path",
