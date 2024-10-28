@@ -44,7 +44,7 @@ process CUPPA {
 
     # Extract input features
     cuppa \\
-        -Xmx${Math.round(task.memory.bytes * 0.95)} \\
+        -Xmx${Math.round(task.memory.bytes * 0.75)} \\
         com.hartwig.hmftools.cup.prep.CuppaDataPrep \\
         ${args} \\
         -sample ${meta.sample_id} \\

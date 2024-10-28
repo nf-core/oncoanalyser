@@ -40,7 +40,7 @@ process REDUX {
 
     """
     redux \\
-        -Xmx${Math.round(task.memory.bytes * 0.95)} \\
+        -Xmx${Math.round(task.memory.bytes * 0.75)} \\
         ${args} \\
         -sample ${meta.sample_id} \\
         -input_bam ${bams.join(',')} \\

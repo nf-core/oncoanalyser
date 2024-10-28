@@ -34,7 +34,7 @@ process CHORD {
     working_dir=\$PWD
 
     chord \\
-        -Xmx${Math.round(task.memory.bytes * 0.95)} \\
+        -Xmx${Math.round(task.memory.bytes * 0.75)} \\
         com.hartwig.hmftools.chord.ChordRunner \\
         ${args} \\
         -sample ${meta.sample_id} \\

@@ -42,7 +42,7 @@ process ISOFOX {
     mkdir -p isofox/
 
     isofox \\
-        -Xmx${Math.round(task.memory.bytes * 0.95)} \\
+        -Xmx${Math.round(task.memory.bytes * 0.75)} \\
         ${args} \\
         -sample ${meta.sample_id} \\
         -bam_file ${bam} \\

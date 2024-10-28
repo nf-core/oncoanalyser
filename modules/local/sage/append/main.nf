@@ -1,6 +1,6 @@
 process SAGE_APPEND {
     tag "${meta.id}"
-    label 'process_medium'
+    label 'process_high'
 
     conda "${moduleDir}/environment.yml"
     container "${ workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container ?
@@ -26,7 +26,7 @@ process SAGE_APPEND {
 
     """
     sage \\
-        -Xmx${Math.round(task.memory.bytes * 0.95)} \\
+        -Xmx${Math.round(task.memory.bytes * 0.75)} \\
         com.hartwig.hmftools.sage.append.SageAppendApplication \\
         ${args} \\
         -input_vcf ${vcf} \\

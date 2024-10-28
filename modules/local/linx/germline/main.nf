@@ -25,7 +25,7 @@ process LINX_GERMLINE {
 
     """
     linx \\
-        -Xmx${Math.round(task.memory.bytes * 0.95)} \\
+        -Xmx${Math.round(task.memory.bytes * 0.75)} \\
         ${args} \\
         -sample ${meta.sample_id} \\
         -sv_vcf ${sv_vcf} \\

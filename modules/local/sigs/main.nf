@@ -25,7 +25,7 @@ process SIGS {
     mkdir -p sigs/
 
     sigs \\
-        -Xmx${Math.round(task.memory.bytes * 0.95)} \\
+        -Xmx${Math.round(task.memory.bytes * 0.75)} \\
         ${args} \\
         -sample ${meta.sample_id} \\
         -somatic_vcf_file ${smlv_vcf} \\

@@ -42,7 +42,7 @@ process NEO_SCORER {
     mkdir -p neo_scorer/
 
     java \\
-        -Xmx${Math.round(task.memory.bytes * 0.95)} \\
+        -Xmx${Math.round(task.memory.bytes * 0.75)} \\
         -cp ${task.ext.jarPath} \\
         com.hartwig.hmftools.neo.score.NeoScorer \\
             ${args} \\

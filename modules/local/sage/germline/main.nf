@@ -1,6 +1,6 @@
 process SAGE_GERMLINE {
     tag "${meta.id}"
-    label 'process_medium'
+    label 'process_high'
 
     conda "${moduleDir}/environment.yml"
     container "${ workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container ?
@@ -34,7 +34,7 @@ process SAGE_GERMLINE {
     mkdir germline/
 
     sage \\
-        -Xmx${Math.round(task.memory.bytes * 0.95)} \\
+        -Xmx${Math.round(task.memory.bytes * 0.75)} \\
         ${args} \\
         -tumor ${meta.normal_id} \\
         -tumor_bam ${normal_bam} \\

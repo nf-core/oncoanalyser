@@ -31,7 +31,7 @@ process COBALT {
 
     """
     cobalt \\
-        -Xmx${Math.round(task.memory.bytes * 0.95)} \\
+        -Xmx${Math.round(task.memory.bytes * 0.75)} \\
         ${args} \\
         -tumor ${meta.tumor_id} \\
         -tumor_bam ${tumor_bam} \\

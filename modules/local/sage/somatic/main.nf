@@ -2,7 +2,7 @@
 
 process SAGE_SOMATIC {
     tag "${meta.id}"
-    label 'process_medium'
+    label 'process_high'
 
     conda "${moduleDir}/environment.yml"
     container "${ workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container ?
@@ -52,7 +52,7 @@ process SAGE_SOMATIC {
     mkdir -p somatic/
 
     sage \\
-        -Xmx${Math.round(task.memory.bytes * 0.95)} \\
+        -Xmx${Math.round(task.memory.bytes * 0.75)} \\
         ${args} \\
         ${reference_arg} \\
         ${reference_bam_arg} \\

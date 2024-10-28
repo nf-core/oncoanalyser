@@ -48,7 +48,7 @@ process PAVE_SOMATIC {
 
     """
     pave \\
-        -Xmx${Math.round(task.memory.bytes * 0.95)} \\
+        -Xmx${Math.round(task.memory.bytes * 0.75)} \\
         ${args} \\
         -sample ${meta.sample_id} \\
         -vcf_file ${sage_vcf} \\

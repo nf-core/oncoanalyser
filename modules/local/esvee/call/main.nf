@@ -38,7 +38,7 @@ process ESVEE_CALL {
     ln -sf ../${fragment_lengths_tsv} caller/
 
     esvee com.hartwig.hmftools.esvee.caller.CallerApplication \\
-        -Xmx${Math.round(task.memory.bytes * 0.95)} \\
+        -Xmx${Math.round(task.memory.bytes * 0.75)} \\
         ${args} \\
         -sample ${meta.tumor_id} \\
         ${reference_arg} \\

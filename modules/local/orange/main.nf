@@ -1,6 +1,6 @@
 process ORANGE {
     tag "${meta.id}"
-    label 'process_single'
+    label 'process_low'
 
     conda "${moduleDir}/environment.yml"
     container "${ workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container ?
@@ -122,7 +122,7 @@ process ORANGE {
 
     java \\
         --add-opens java.base/java.time=ALL-UNNAMED \\
-        -Xmx${Math.round(task.memory.bytes * 0.95)} \\
+        -Xmx${Math.round(task.memory.bytes * 0.75)} \\
         -jar \${orange_jar} \\
             ${args} \\
             \\

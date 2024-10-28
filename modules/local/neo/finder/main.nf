@@ -28,7 +28,7 @@ process NEO_FINDER {
     mkdir -p neo_finder/
 
     java \\
-        -Xmx${Math.round(task.memory.bytes * 0.95)} \\
+        -Xmx${Math.round(task.memory.bytes * 0.75)} \\
         -jar ${task.ext.jarPath} \\
             ${args} \\
             -sample ${meta.sample_id} \\
