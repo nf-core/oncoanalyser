@@ -61,7 +61,7 @@ process ESVEE_PREP {
 
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":
-        esvee: \$(esvee -version | sed 's/^.* //')
+        esvee: \$(esvee -version | grep 'Esvee version' | sed 's/^.* //')
     END_VERSIONS
     """
 
