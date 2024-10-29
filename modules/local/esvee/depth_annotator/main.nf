@@ -41,8 +41,8 @@ process ESVEE_DEPTH_ANNOTATOR {
     esvee com.hartwig.hmftools.esvee.depth.DepthAnnotator \\
         -Xmx${Math.round(task.memory.bytes * 0.75)} \\
         ${args} \\
-        -samples ${sample_ids_string} \\
-        -bam_files ${bam_files_string} \\
+        -sample ${sample_ids_string} \\
+        -bam_file ${bam_files_string} \\
         -input_vcf ${raw_vcf} \\
         -ref_genome ${genome_fasta} \\
         -ref_genome_version ${genome_ver} \\

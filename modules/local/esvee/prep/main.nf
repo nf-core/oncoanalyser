@@ -44,11 +44,11 @@ process ESVEE_PREP {
 
     SAMBAMBA_PATH=\$(which sambamba)
 
-    esvee com.hartwig.hmftools.esvee.prep.SvPrepApplication \\
+    esvee com.hartwig.hmftools.esvee.prep.PrepApplication \\
         -Xmx${Math.round(task.memory.bytes * 0.75)} \\
         ${args} \\
         -sample "${sample_ids_string}" \\
-        -bam_files "${bam_files_string}" \\
+        -bam_file "${bam_files_string}" \\
         -ref_genome ${genome_fasta} \\
         -ref_genome_version ${genome_ver} \\
         -blacklist_bed ${sv_blocklist} \\

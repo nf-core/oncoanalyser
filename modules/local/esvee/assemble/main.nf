@@ -38,14 +38,14 @@ process ESVEE_ASSEMBLE {
     # Esvee expects the fragment_lengths.tsv input file to be in `output_dir`
     ln -sf \$(realpath ${fragment_lengths_tsv}) assemble/
 
-    esvee com.hartwig.hmftools.esvee.EsveeApplication \\
+    esvee com.hartwig.hmftools.esvee.assembly.AssemblyApplication \\
         -Xmx${Math.round(task.memory.bytes * 0.95)} \\
         ${args} \\
         -tumor ${meta.tumor_id} \\
         -tumor_bam ${tumor_prep_bam} \\
         ${reference_arg} \\
         ${reference_bam_arg} \\
-        -junction_files ${junctions_tsv} \\
+        -junction_file ${junctions_tsv} \\
         -ref_genome ${genome_fasta} \\
         -ref_genome_version ${genome_ver} \\
         ${decoy_genome_arg} \\
