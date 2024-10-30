@@ -8,7 +8,7 @@ process SAGE_GERMLINE {
         'biocontainers/hmftools-sage:4.0_beta--hdfd78af_2' }"
 
     input:
-    tuple val(meta), path(tumor_bam), path(normal_bam), path(tumor_bai), path(normal_bai)
+    tuple val(meta), path(tumor_bam), path(normal_bam), path(tumor_bai), path(normal_bai), path(redux_tsvs)
     path genome_fasta
     val genome_ver
     path genome_fai
@@ -31,20 +31,6 @@ process SAGE_GERMLINE {
     def args = task.ext.args ?: ''
 
     """
-    # Get MSI jitter files
-    mkdir -p redux/
-
-    symlink_redux_tsvs_from () {
-        # TSV files are stored in the same dir as the BAM files
-        bam_file=\$(realpath \$1)
-        bam_dir=\$(dirname \$bam_file)
-        ln -sf \$bam_dir/*.tsv* redux/
-    }
-
-    symlink_redux_tsvs_from ${tumor_bam}
-    symlink_redux_tsvs_from ${normal_bam}
-
-    # Run SAGE
     mkdir germline/
 
     sage \\
@@ -54,7 +40,7 @@ process SAGE_GERMLINE {
         -tumor_bam ${normal_bam} \\
         -reference ${meta.tumor_id} \\
         -reference_bam ${tumor_bam} \\
-        -jitter_param_dir redux/ \\
+        -jitter_param_dir ./ \\
         -ref_genome ${genome_fasta} \\
         -ref_genome_version ${genome_ver} \\
         -hotspots ${sage_known_hotspots_germline} \\

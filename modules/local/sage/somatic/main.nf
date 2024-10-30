@@ -10,7 +10,8 @@ process SAGE_SOMATIC {
         'biocontainers/hmftools-sage:4.0_beta--hdfd78af_2' }"
 
     input:
-    tuple val(meta), path(tumor_bam), path(normal_bam), path(donor_bam), path(tumor_bai), path(normal_bai), path(donor_bai)
+    tuple val(meta), path(tumor_bam), path(normal_bam), path(donor_bam), path(tumor_bai), path(normal_bai), path(donor_bai), path(redux_tsvs)
+
     path genome_fasta
     val genome_ver
     path genome_fai
@@ -48,21 +49,6 @@ process SAGE_SOMATIC {
     def high_depth_mode_arg = (run_mode === Constants.RunMode.TARGETED) ? "-high_depth_mode" : ""
 
     """
-    # Get MSI jitter files
-    mkdir -p redux/
-
-    symlink_redux_tsvs_from () {
-        # TSV files are stored in the same dir as the BAM files
-        bam_file=\$(realpath \$1)
-        bam_dir=\$(dirname \$bam_file)
-        ln -sf \$bam_dir/*.tsv* redux/
-    }
-
-    symlink_redux_tsvs_from ${tumor_bam}
-    ${ (meta.normal_id != null) ? "symlink_redux_tsvs_from ${normal_bam}" : "" }
-    ${ (meta.donor_id != null) ? "symlink_redux_tsvs_from ${donor_bam}" : "" }
-
-    # Run SAGE
     mkdir -p somatic/
 
     sage \\
@@ -73,7 +59,7 @@ process SAGE_SOMATIC {
         ${ref_sample_count_arg} \\
         -tumor ${meta.tumor_id} \\
         -tumor_bam ${tumor_bam} \\
-        -jitter_param_dir redux/ \\
+        -jitter_param_dir ./ \\
         -ref_genome ${genome_fasta} \\
         -ref_genome_version ${genome_ver} \\
         -hotspots ${sage_known_hotspots_somatic} \\
