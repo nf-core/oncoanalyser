@@ -104,18 +104,18 @@ workflow ESVEE_CALLING {
     ch_versions = ch_versions.mix(ESVEE_PREP.out.versions)
 
     // Set output normal prep BAM channel inclusive of placeholders
-    // channel: [ meta_esvee, normal_prep_bam ]
+    // channel: [ meta_esvee, normal_prep_bam, normal_prep_bai ]
     ch_esvee_prep_normal_bam = Channel.empty()
         .mix(
             ESVEE_PREP.out.normal_prep_bam,
-            ch_bam_inputs.filter { ! it[0].containsKey('normal_id') }.map { [it[0], []] },
+            ch_bam_inputs.filter { ! it[0].containsKey('normal_id') }.map { [it[0], [], []] },
         )
 
     //
     // MODULE: ESVEE assemble reads
     //
     // Create process input channel
-    // channel: [ meta_esvee, tumor_prep_bam, normal_prep_bam, junctions_tsv, fragment_lengths_tsv ]
+    // channel: [ meta_esvee, tumor_prep_bam, tumor_prep_bai, normal_prep_bam, normal_prep_bai, junctions_tsv, fragment_lengths_tsv ]
     ch_assemble_inputs = WorkflowOncoanalyser.groupByMeta(
         ESVEE_PREP.out.tumor_prep_bam,
         ch_esvee_prep_normal_bam,
@@ -141,14 +141,10 @@ workflow ESVEE_CALLING {
     //
     // Create process input channel
     // channel: [ meta_esvee, tumor_bam, tumor_bai, normal_bam, normal_bai, assemble_dir ]
-    ch_depth_annotator_inputs =
-        WorkflowOncoanalyser.groupByMeta(
-            ch_bam_inputs,
-            ESVEE_ASSEMBLE.out.raw_vcf,
-        )
-        .map { meta_esvee, tumor_bam, tumor_bai, normal_bam, normal_bai, raw_vcf ->
-            return [ meta_esvee, tumor_bam, normal_bam, raw_vcf ]
-        }
+    ch_depth_annotator_inputs = WorkflowOncoanalyser.groupByMeta(
+        ch_bam_inputs,
+        ESVEE_ASSEMBLE.out.raw_vcf,
+    )
 
     // Run process
     ESVEE_DEPTH_ANNOTATOR(

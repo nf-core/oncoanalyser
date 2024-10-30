@@ -8,7 +8,7 @@ process ESVEE_ASSEMBLE {
         'biocontainers/hmftools-esvee:1.0_beta--hdfd78af_3' }"
 
     input:
-    tuple val(meta), path(tumor_prep_bam), path(normal_prep_bam), path(junctions_tsv), path(fragment_lengths_tsv)
+    tuple val(meta), path(tumor_prep_bam), path(tumor_prep_bai), path(normal_prep_bam), path(normal_prep_bai), path(junctions_tsv), path(fragment_lengths_tsv)
     path genome_fasta
     path genome_fai
     path genome_dict

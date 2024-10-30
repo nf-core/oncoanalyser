@@ -15,12 +15,12 @@ process ESVEE_PREP {
     path known_fusions
 
     output:
-    tuple val(meta), path("prep/")                                                , emit: sv_prep_dir
-    tuple val(meta), path("prep/${meta.normal_id}.esvee.prep.bam")                , emit: normal_prep_bam, optional: true
-    tuple val(meta), path("prep/${meta.tumor_id}.esvee.prep.bam")                 , emit: tumor_prep_bam
-    tuple val(meta), path("prep/${meta.tumor_id}.esvee.prep.junction.tsv")        , emit: junctions_tsv
-    tuple val(meta), path("prep/${meta.tumor_id}.esvee.prep.fragment_length.tsv") , emit: fragment_lengths_tsv
-    path 'versions.yml'                                                           , emit: versions
+    tuple val(meta), path("prep/")                                                                 , emit: sv_prep_dir
+    tuple val(meta), path("prep/${meta.tumor_id}.*.bam"), path("prep/${meta.tumor_id}.*.bam.bai")  , emit: tumor_prep_bam
+    tuple val(meta), path("prep/${meta.normal_id}.*.bam"), path("prep/${meta.normal_id}.*.bam.bai"), emit: normal_prep_bam, optional: true
+    tuple val(meta), path("prep/${meta.tumor_id}.*.junction.tsv")                                  , emit: junctions_tsv
+    tuple val(meta), path("prep/${meta.tumor_id}.*.fragment_length.tsv")                           , emit: fragment_lengths_tsv
+    path 'versions.yml'                                                                            , emit: versions
 
     when:
     task.ext.when == null || task.ext.when

@@ -8,7 +8,7 @@ process ESVEE_DEPTH_ANNOTATOR {
         'biocontainers/hmftools-esvee:1.0_beta--hdfd78af_3' }"
 
     input:
-    tuple val(meta), path(tumor_bam), path(normal_bam), path(raw_vcf)
+    tuple val(meta), path(tumor_bam), path(tumor_bai), path(normal_bam), path(normal_bai), path(raw_vcf)
     path genome_fasta
     val genome_ver
     path unmap_regions
