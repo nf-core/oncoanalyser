@@ -295,7 +295,6 @@ workflow WGTS {
     // channel: [ meta, esvee_vcf ]
     ch_esvee_germline_out = Channel.empty()
     ch_esvee_somatic_out = Channel.empty()
-    ch_esvee_unfiltered_out = Channel.empty()
     if (run_config.stages.esvee) {
 
         ESVEE_CALLING(
@@ -320,13 +319,11 @@ workflow WGTS {
 
         ch_esvee_germline_out = ch_esvee_germline_out.mix(ESVEE_CALLING.out.germline_vcf)
         ch_esvee_somatic_out = ch_esvee_somatic_out.mix(ESVEE_CALLING.out.somatic_vcf)
-        ch_esvee_unfiltered_out = ch_esvee_unfiltered_out.mix(ESVEE_CALLING.out.unfiltered_vcf)
 
     } else {
 
         ch_esvee_germline_out = ch_inputs.map { meta -> [meta, [], []] }
         ch_esvee_somatic_out = ch_inputs.map { meta -> [meta, [], []] }
-        ch_esvee_unfiltered_out = ch_inputs.map { meta -> [meta, [], []] }
 
     }
 
@@ -432,7 +429,6 @@ workflow WGTS {
             ch_pave_germline_out,
             ch_esvee_somatic_out,
             ch_esvee_germline_out,
-            ch_esvee_unfiltered_out,
             ref_data.genome_fasta,
             ref_data.genome_version,
             ref_data.genome_fai,

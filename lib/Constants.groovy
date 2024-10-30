@@ -65,8 +65,6 @@ class Constants {
         COBALT_DIR,
         ESVEE_VCF,
         ESVEE_VCF_TBI,
-        ESVEE_UNFILTERED_VCF,
-        ESVEE_UNFILTERED_VCF_TBI,
         ISOFOX_DIR,
         LILAC_DIR,
         LINX_ANNO_DIR,
@@ -276,21 +274,6 @@ class Constants {
         ],
         ESVEE_VCF_NORMAL_TBI: [
             FileType.ESVEE_VCF_TBI,
-            SampleType.NORMAL,
-            SequenceType.DNA,
-        ],
-        ESVEE_UNFILTERED_VCF_TUMOR: [
-            FileType.ESVEE_UNFILTERED_VCF,
-            [SampleType.TUMOR, SampleType.TUMOR_NORMAL],
-            SequenceType.DNA,
-        ],
-        ESVEE_UNFILTERED_VCF_TUMOR_TBI: [
-            FileType.ESVEE_UNFILTERED_VCF_TBI,
-            [SampleType.TUMOR, SampleType.TUMOR_NORMAL],
-            SequenceType.DNA,
-        ],
-        ESVEE_UNFILTERED_VCF_NORMAL: [
-            FileType.ESVEE_UNFILTERED_VCF,
             SampleType.NORMAL,
             SequenceType.DNA,
         ],

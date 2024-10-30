@@ -153,9 +153,6 @@ class Utils {
                         } else if (key === Constants.FileType.ESVEE_VCF) {
                             index_enum = Constants.FileType.ESVEE_VCF_TBI
                             index_str = 'tbi'
-                        } else if (key === Constants.FileType.ESVEE_UNFILTERED_VCF) {
-                            index_enum = Constants.FileType.ESVEE_UNFILTERED_VCF_TBI
-                            index_str = 'tbi'
                         } else if (key === Constants.FileType.SAGE_VCF) {
                             index_enum = Constants.FileType.SAGE_VCF_TBI
                             index_str = 'tbi'
