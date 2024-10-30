@@ -115,40 +115,67 @@ workflow REDUX_PROCESSING {
 
     ch_versions = ch_versions.mix(REDUX.out.versions)
 
+    // Combine TSV outputs into single channel for processing
+    // channel: [ meta_redux, bam, bai, dup_freq_tsv, jitter_tsv, ms_tsv, repeat_tsv ]
+    ch_redux_out = WorkflowOncoanalyser.groupByMeta(
+        REDUX.out.bam,
+        REDUX.out.dup_freq_tsv,
+        REDUX.out.jitter_tsv,
+        REDUX.out.ms_tsv,
+        REDUX.out.repeat_tsv,
+    )
+
     // Sort into a tumor and normal channel
-    ch_redux_out = REDUX.out.bam
-        .branch { meta, bam, bai ->
-            assert ['tumor', 'normal', 'donor'].contains(meta.sample_type)
-            tumor: meta.sample_type == 'tumor'
-            normal: meta.sample_type == 'normal'
-            donor: meta.sample_type == 'donor'
+    // channel: [ meta_redux, bam, bai, dup_freq_tsv, jitter_tsv, ms_tsv, repeat_tsv ]
+    ch_redux_out_sorted = ch_redux_out
+        .branch { meta_redux, bam, bai, dup_freq_tsv, jitter_tsv, ms_tsv, repeat_tsv ->
+            assert ['tumor', 'normal', 'donor'].contains(meta_redux.sample_type)
+            tumor: meta_redux.sample_type == 'tumor'
+            normal: meta_redux.sample_type == 'normal'
+            donor: meta_redux.sample_type == 'donor'
             placeholder: true
         }
 
-    // Set outputs, restoring original meta
-    // channel: [ meta, bam, bai ]
+    // Set outputs, restoring original meta, split into BAMs and TSVs
+    // channel: [ meta, bam, bai, dup_freq_tsv, jitter_tsv, ms_tsv, repeat_tsv ]
     ch_redux_tumor_out = Channel.empty()
         .mix(
-            WorkflowOncoanalyser.restoreMeta(ch_redux_out.tumor, ch_inputs),
-            ch_inputs_tumor_sorted.skip.map { meta -> [meta, [], []] },
+            WorkflowOncoanalyser.restoreMeta(ch_redux_out_sorted.tumor, ch_inputs),
+            ch_inputs_tumor_sorted.skip.map { meta -> [meta, [], [], [], [], [], []] },
         )
+        .multiMap { meta, bam, bai, dup_freq_tsv, jitter_tsv, ms_tsv, repeat_tsv ->
+            bam: [meta, bam, bai]
+            tsv: [meta, dup_freq_tsv, jitter_tsv, ms_tsv, repeat_tsv]
+        }
 
     ch_redux_normal_out = Channel.empty()
         .mix(
-            WorkflowOncoanalyser.restoreMeta(ch_redux_out.normal, ch_inputs),
-            ch_inputs_normal_sorted.skip.map { meta -> [meta, [], []] },
+            WorkflowOncoanalyser.restoreMeta(ch_redux_out_sorted.normal, ch_inputs),
+            ch_inputs_normal_sorted.skip.map { meta -> [meta, [], [], [], [], [], []] },
         )
+        .multiMap { meta, bam, bai, dup_freq_tsv, jitter_tsv, ms_tsv, repeat_tsv ->
+            bam: [meta, bam, bai]
+            tsv: [meta, dup_freq_tsv, jitter_tsv, ms_tsv, repeat_tsv]
+        }
 
     ch_redux_donor_out = Channel.empty()
         .mix(
-            WorkflowOncoanalyser.restoreMeta(ch_redux_out.donor, ch_inputs),
-            ch_inputs_donor_sorted.skip.map { meta -> [meta, [], []] },
+            WorkflowOncoanalyser.restoreMeta(ch_redux_out_sorted.donor, ch_inputs),
+            ch_inputs_donor_sorted.skip.map { meta -> [meta, [], [], [], [], [], []] },
         )
+        .multiMap { meta, bam, bai, dup_freq_tsv, jitter_tsv, ms_tsv, repeat_tsv ->
+            bam: [meta, bam, bai]
+            tsv: [meta, dup_freq_tsv, jitter_tsv, ms_tsv, repeat_tsv]
+        }
 
     emit:
-    dna_tumor  = ch_redux_tumor_out  // channel: [ meta, bam, bai ]
-    dna_normal = ch_redux_normal_out // channel: [ meta, bam, bai ]
-    dna_donor = ch_redux_donor_out   // channel: [ meta, bam, bai ]
+    dna_tumor      = ch_redux_tumor_out.bam  // channel: [ meta, bam, bai ]
+    dna_normal     = ch_redux_normal_out.bam // channel: [ meta, bam, bai ]
+    dna_donor      = ch_redux_donor_out.bam  // channel: [ meta, bam, bai ]
 
-    versions   = ch_versions       // channel: [ versions.yml ]
+    dna_tumor_tsv  = ch_redux_tumor_out.tsv  // channel: [ meta, dup_freq_tsv, jitter_tsv, ms_tsv, repeat_tsv ]
+    dna_normal_tsv = ch_redux_normal_out.tsv // channel: [ meta, dup_freq_tsv, jitter_tsv, ms_tsv, repeat_tsv ]
+    dna_donor_tsv  = ch_redux_donor_out.tsv  // channel: [ meta, dup_freq_tsv, jitter_tsv, ms_tsv, repeat_tsv ]
+
+    versions       = ch_versions             // channel: [ versions.yml ]
 }
