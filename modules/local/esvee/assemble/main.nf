@@ -35,8 +35,8 @@ process ESVEE_ASSEMBLE {
     """
     mkdir -p assemble/
 
-    # Esvee expects the fragment_lengths.tsv input file to be in `output_dir`
-    ln -sf \$(realpath ${fragment_lengths_tsv}) assemble/
+    # ESVEE expects the fragment_lengths.tsv file to be present in the output directory
+    ln -sf ../${fragment_lengths_tsv} assemble/
 
     esvee com.hartwig.hmftools.esvee.assembly.AssemblyApplication \\
         -Xmx${Math.round(task.memory.bytes * 0.95)} \\
