@@ -23,6 +23,8 @@ process CUPPA {
     script:
     def args = task.ext.args ?: ''
 
+    def xmx_mod = task.ext.xmx_mod ?: 0.75
+
     """
     # Symlink input files into a single directory
     mkdir -p sample_data/
@@ -45,7 +47,7 @@ process CUPPA {
     mkdir -p cuppa/
 
     cuppa \\
-        -Xmx${Math.round(task.memory.bytes * 0.75)} \\
+        -Xmx${Math.round(task.memory.bytes * xmx_mod)} \\
         ${args} \\
         -sample ${meta.sample_id} \\
         -sample_data_dir sample_data/ \\

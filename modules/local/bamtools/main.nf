@@ -22,9 +22,11 @@ process BAMTOOLS {
     script:
     def args = task.ext.args ?: ''
 
+    def xmx_mod = task.ext.xmx_mod ?: 0.75
+
     """
     bamtools \\
-        -Xmx${Math.round(task.memory.bytes * 0.75)} \\
+        -Xmx${Math.round(task.memory.bytes * xmx_mod)} \\
         com.hartwig.hmftools.bamtools.metrics.BamMetrics \\
         ${args} \\
         -sample ${meta.sample_id} \\

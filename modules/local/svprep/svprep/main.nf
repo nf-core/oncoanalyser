@@ -27,12 +27,14 @@ process SVPREP {
     def args = task.ext.args ?: ''
     def args2 = task.ext.args2 ?: ''
 
+    def xmx_mod = task.ext.xmx_mod ?: 0.95
+
     def write_types_arg = write_types ? "-write_types \'${write_types}\'" : ''
     def existing_juction_file_arg = junctions ? "-existing_junction_file ${junctions}" : ''
 
     """
     svprep \\
-        -Xmx${Math.round(task.memory.bytes * 0.75)} \\
+        -Xmx${Math.round(task.memory.bytes * xmx_mod)} \\
         ${args} \\
         -sample ${meta.sample_id} \\
         -bam_file ${bam} \\

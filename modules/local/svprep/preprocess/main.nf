@@ -25,6 +25,8 @@ process GRIDSS_PREPROCESS {
     script:
     def args = task.ext.args ?: ''
 
+    def xmx_mod = task.ext.xmx_mod ?: 0.95
+
     def config_arg = gridss_config ? "--configuration ${gridss_config}" : ''
 
     """
@@ -33,7 +35,7 @@ process GRIDSS_PREPROCESS {
 
     gridss_svprep \\
         ${args} \\
-        --jvmheap ${Math.round(task.memory.bytes * 0.95)} \\
+        --jvmheap ${Math.round(task.memory.bytes * xmx_mod)} \\
         --steps preprocess \\
         --reference ${genome_fasta} \\
         --workingdir gridss_preprocess/ \\

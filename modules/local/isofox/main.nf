@@ -30,6 +30,8 @@ process ISOFOX {
     script:
     def args = task.ext.args ?: ''
 
+    def xmx_mod = task.ext.xmx_mod ?: 0.75
+
     def functions_arg = functions ? "-functions \'${functions}\'" : ''
 
     def exp_counts_arg = exp_counts ? "-exp_counts_file ${exp_counts}" : ''
@@ -42,7 +44,7 @@ process ISOFOX {
     mkdir -p isofox/
 
     isofox \\
-        -Xmx${Math.round(task.memory.bytes * 0.75)} \\
+        -Xmx${Math.round(task.memory.bytes * xmx_mod)} \\
         ${args} \\
         -sample ${meta.sample_id} \\
         -bam_file ${bam} \\

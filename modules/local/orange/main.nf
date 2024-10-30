@@ -31,6 +31,8 @@ process ORANGE {
     script:
     def args = task.ext.args ?: ''
 
+    def xmx_mod = task.ext.xmx_mod ?: 0.95
+
     def pipeline_version_str = pipeline_version ?: 'not specified'
 
     def virus_dir_arg = virusinterpreter_dir ? "-virus_dir ${virusinterpreter_dir}" : ''
@@ -104,7 +106,7 @@ process ORANGE {
 
     java \\
         --add-opens java.base/java.time=ALL-UNNAMED \\
-        -Xmx${Math.round(task.memory.bytes * 0.75)} \\
+        -Xmx${Math.round(task.memory.bytes * xmx_mod)} \\
         -jar \${orange_jar} \\
             ${args} \\
             \\

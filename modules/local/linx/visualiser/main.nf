@@ -23,6 +23,8 @@ process LINX_VISUALISER {
     def args = task.ext.args ?: ''
     def args2 = task.ext.args2 ?: ''
 
+    def xmx_mod = task.ext.xmx_mod ?: 0.75
+
     """
     # NOTE(SW): the output plot directories are always required for ORANGE, which is straightfoward to handle with POSIX
     # fs but more involved with FusionFS since it will not write empty directories to S3. A placeholder file can't be
@@ -43,7 +45,7 @@ process LINX_VISUALISER {
     # Generate all chromosome and cluster plots by default
 
     linx \\
-        -Xmx${Math.round(task.memory.bytes * 0.75)} \\
+        -Xmx${Math.round(task.memory.bytes * xmx_mod)} \\
         com.hartwig.hmftools.linx.visualiser.SvVisualiser \\
         ${args} \\
         -sample ${meta.sample_id} \\
@@ -66,7 +68,7 @@ process LINX_VISUALISER {
     # https://github.com/hartwigmedical/hmftools/blob/linx-v1.24.1/linx/src/main/java/com/hartwig/hmftools/linx/visualiser/SampleData.java#L220-L236
 
     linx \\
-        -Xmx${Math.round(task.memory.bytes * 0.75)} \\
+        -Xmx${Math.round(task.memory.bytes * xmx_mod)} \\
         com.hartwig.hmftools.linx.visualiser.SvVisualiser \\
         ${args2} \\
         -sample ${meta.sample_id} \\
