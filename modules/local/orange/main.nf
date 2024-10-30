@@ -34,8 +34,8 @@ process ORANGE {
     val pipeline_version
 
     output:
-    tuple val(meta), path('output/*.orange.pdf') , emit: pdf
-    tuple val(meta), path('output/*.orange.json'), emit: json
+    tuple val(meta), path('output/*.orange.pdf') , emit: pdf, optional: true
+    tuple val(meta), path('output/*.orange.json'), emit: json, optional: true
     path 'versions.yml'                          , emit: versions
 
     when:
