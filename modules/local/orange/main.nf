@@ -116,9 +116,8 @@ process ORANGE {
     mkdir -p output/
 
     # NOTE(SW): manually locating ORANGE install directory so that we can applu `--add-opens`, won't fix old bioconda recipe
-    orange_bin_fp=\$(which orange)
-    orange_install_dir=\$(readlink \${orange_bin_fp} | xargs dirname)
-    orange_jar=\$(dirname \${orange_bin_fp})/\${orange_install_dir}/orange.jar
+    orange_install_dir=\$(which orange | xargs realpath | xargs dirname)
+    orange_jar=\${orange_install_dir}/orange.jar
 
     java \\
         --add-opens java.base/java.time=ALL-UNNAMED \\
