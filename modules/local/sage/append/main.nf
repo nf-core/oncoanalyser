@@ -34,6 +34,7 @@ process SAGE_APPEND {
         -reference_bam ${bam} \\
         -ref_genome ${genome_fasta} \\
         -ref_genome_version ${genome_ver} \\
+        -skip_msi_jitter \\
         -threads ${task.cpus} \\
         -output_vcf ${meta.dna_id}.sage.append.vcf.gz
 
