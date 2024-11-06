@@ -2,45 +2,56 @@ process PEACH {
     tag "${meta.id}"
     label 'process_single'
 
-    container 'docker.io/scwatts/peach:1.6--0'
+    conda "${moduleDir}/environment.yml"
+    container "${ workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container ?
+        'https://depot.galaxyproject.org/singularity/hmftools-peach:2.0.0--hdfd78af_1' :
+        'biocontainers/hmftools-peach:2.0.0--hdfd78af_1' }"
 
     input:
     tuple val(meta), path(germline_vcf)
-    val genome_ver
-    path panel
+    path haplotypes
+    path haplotype_functions
+    path drug_info
 
     output:
-    tuple val(meta), path('*.genotype.tsv'), emit: genotype
-    path '*.calls.tsv'                     , emit: calls
-    path 'versions.yml'                    , emit: versions
+    tuple val(meta), path('peach/'), emit: peach_dir
+    path 'versions.yml'            , emit: versions
 
     when:
     task.ext.when == null || task.ext.when
 
     script:
     def args = task.ext.args ?: ''
-    def tool_version = '1.6'
+
+    def xmx_mod = task.ext.xmx_mod ?: 0.75
 
     """
-    python ${task.ext.scriptPath} \\
-        --sample_t_id ${meta.tumor_id} \\
-        --sample_r_id ${meta.normal_id} \\
-        --vcf ${germline_vcf} \\
-        --vcf_reference_assembly_version V${genome_ver} \\
-        --panel ${panel} \\
-        --tool_version ${tool_version} \\
-        --outputdir ./
+    peach \\
+        -Xmx${Math.round(task.memory.bytes * xmx_mod)} \\
+        ${args} \\
+        -sample_name ${meta.sample_id} \\
+        -vcf_file ${germline_vcf} \\
+        -haplotypes_file ${haplotypes} \\
+        -function_file ${haplotype_functions} \\
+        -drugs_file ${drug_info} \\
+        -output_dir peach/
 
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":
-        peach: ${tool_version}
+        peach: \$(peach -version | sed -n '/Peach version/ { s/^.* //p }')
     END_VERSIONS
     """
 
     stub:
     """
-    touch "${meta.tumor_id}.peach.calls.tsv"
-    touch "${meta.tumor_id}.peach.genotype.tsv"
+    mkdir -p peach/
+
+    touch peach/${meta.sample_id}.peach.events.tsv
+    touch peach/${meta.sample_id}.peach.gene.events.tsv
+    touch peach/${meta.sample_id}.peach.haplotypes.all.tsv
+    touch peach/${meta.sample_id}.peach.haplotypes.best.tsv
+    touch peach/${meta.sample_id}.peach.qc.tsv
+
     echo -e '${task.process}:\\n  stub: noversions\\n' > versions.yml
     """
 }
