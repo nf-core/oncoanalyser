@@ -59,6 +59,9 @@ input:
   - cuppa_dir:
       type: directory
       description: CUPPA output directory (optional)
+  - peach_dir:
+      type: directory
+      description: PEACH output directory (optional)
   - isofox_dir:
       type: directory
       description: Isofox output directory (optional)
