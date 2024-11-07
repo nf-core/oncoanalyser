@@ -144,9 +144,11 @@ class Utils {
                         def index_enum
                         def index_str
 
+                        def fp = meta[sample_key][key].toString()
+
                         if (key === Constants.FileType.BAM) {
                             index_enum = Constants.FileType.BAI
-                            index_str = 'bai'
+                            index_str = (fp.endsWith('cram')) ? 'crai' : 'bai'
                         } else if (key === Constants.FileType.BAM_REDUX) {
                             index_enum = Constants.FileType.BAI
                             index_str = 'bai'
@@ -164,7 +166,6 @@ class Utils {
                             return
                         }
 
-                        def fp = meta[sample_key][key].toUriString()
                         def index_fp = nextflow.Nextflow.file("${fp}.${index_str}")
 
                         if (!index_fp.exists() && !stub_run) {
