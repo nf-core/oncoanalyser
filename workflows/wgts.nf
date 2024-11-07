@@ -49,6 +49,7 @@ include { softwareVersionsToYAML } from '../subworkflows/nf-core/utils_nfcore_pi
 include { AMBER_PROFILING       } from '../subworkflows/local/amber_profiling'
 include { BAMTOOLS_METRICS      } from '../subworkflows/local/bamtools_metrics'
 include { CHORD_PREDICTION      } from '../subworkflows/local/chord_prediction'
+include { CIDER_CALLING         } from '../subworkflows/local/cider_calling'
 include { COBALT_PROFILING      } from '../subworkflows/local/cobalt_profiling'
 include { CUPPA_PREDICTION      } from '../subworkflows/local/cuppa_prediction'
 include { ESVEE_CALLING         } from '../subworkflows/local/esvee_calling'
@@ -559,6 +560,23 @@ workflow WGTS {
 
         ch_bamtools_somatic_out = ch_inputs.map { meta -> [meta, []] }
         ch_bamtools_germline_out = ch_inputs.map { meta -> [meta, []] }
+
+    }
+
+    //
+    // SUBWORKFLOW: Run CIDER to identify and annotate CDR3 sequences of IG and TCR loci
+    //
+    if (run_config.stages.cider) {
+
+        CIDER_CALLING(
+            ch_inputs,
+            ch_redux_dna_tumor_out,
+            ch_align_rna_tumor_out,
+            ref_data.genome_version,
+            hmf_data.cider_blastdb,
+        )
+
+        ch_versions = ch_versions.mix(CIDER_CALLING.out.versions)
 
     }
 
