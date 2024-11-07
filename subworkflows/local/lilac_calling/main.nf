@@ -203,6 +203,7 @@ workflow LILAC_CALLING {
     LILAC(
         ch_lilac_inputs,
         genome_fasta,
+        genome_fai,
         genome_version,
         lilac_resource_dir,
     )
