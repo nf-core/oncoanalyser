@@ -53,6 +53,7 @@ process REDUX {
         -bamtool \$(which sambamba) \\
         ${form_consensus_arg} \\
         ${umi_args} \\
+        -use_supp_bam \\
         -write_stats \\
         -threads ${task.cpus} \\
         -log_level DEBUG
