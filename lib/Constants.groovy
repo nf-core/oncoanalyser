@@ -25,6 +25,7 @@ class Constants {
 
 
     static enum RunMode {
+        PURITY_ESTIMATE,
         TARGETED,
         WGTS,
     }
@@ -51,6 +52,7 @@ class Constants {
         SIGS,
         TEAL,
         VIRUSINTERPRETER,
+        WISP,
     }
 
     static enum FileType {
@@ -76,7 +78,7 @@ class Constants {
         PURPLE_DIR,
         SAGE_VCF,
         SAGE_VCF_TBI,
-        SAGE_APPEND_VCF,
+        SAGE_APPEND_DIR,
         VIRUSINTERPRETER_DIR,
         // ORANGE specific
         CHORD_DIR,
@@ -104,6 +106,7 @@ class Constants {
         CANCER_TYPE,
         LANE,
         LIBRARY_ID,
+        LONGITUDINAL_SAMPLE,
     }
 
     static Map PLACEHOLDER_META = [meta_placeholder: null]
@@ -294,13 +297,13 @@ class Constants {
             SampleType.NORMAL,
             SequenceType.DNA,
         ],
-        SAGE_APPEND_VCF_TUMOR: [
-            FileType.SAGE_APPEND_VCF,
+        SAGE_APPEND_DIR_TUMOR: [
+            FileType.SAGE_APPEND_DIR,
             SampleType.TUMOR,
             SequenceType.DNA_RNA,
         ],
-        SAGE_APPEND_VCF_NORMAL: [
-            FileType.SAGE_APPEND_VCF,
+        SAGE_APPEND_DIR_NORMAL: [
+            FileType.SAGE_APPEND_DIR,
             SampleType.NORMAL,
             SequenceType.DNA_RNA,
         ],

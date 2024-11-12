@@ -48,7 +48,7 @@
                     "type": "string",
                     "description": "Workflow run mode.",
                     "fa_icon": "fas fa-diagram-project",
-                    "pattern": "^(wgts|targeted)"
+                    "pattern": "^(wgts|targeted|purity_estimate)"
                 },
                 "panel": {
                     "type": "string",
