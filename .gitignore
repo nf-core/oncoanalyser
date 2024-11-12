@@ -9,3 +9,7 @@ testing/
 testing*
 *.pyc
 null/
+# nf-test specific
+.nf-test/
+nf-test_*
+.nf-test.log*

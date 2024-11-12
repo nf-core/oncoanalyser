@@ -1,0 +1,61 @@
+{
+    "AMBER testing": {
+        "content": [
+            {
+                "0": [
+                    [
+                        {
+                            "id": "test",
+                            "tumor_id": "tumor_test",
+                            "normal_id": "normal_test"
+                        },
+                        [
+                            "amber.version:md5,94a3ca487cc956f9eadb8de364c27b1d",
+                            "normal_test.amber.homozygousregion.tsv:md5,d21abd62a26119eaf01ea8d1f66b9f05",
+                            "normal_test.amber.snp.vcf.gz:md5,44f59e7c11b3b348f647e0251732acc6",
+                            "normal_test.amber.snp.vcf.gz.tbi:md5,e4caffcadff308826156914dd6b43484",
+                            "tumor_test.amber.baf.pcf:md5,d4015414e9ccf00ab02c818a2a99a939",
+                            "tumor_test.amber.baf.tsv.gz:md5,7c6921d6c7742598b3e8b3f7fe8fea8d",
+                            "tumor_test.amber.contamination.tsv:md5,6fb3d29cc2c879b1db07cc8581a8fb70",
+                            "tumor_test.amber.contamination.vcf.gz:md5,5562d1e335c40ff733bbf751e37e541c",
+                            "tumor_test.amber.contamination.vcf.gz.tbi:md5,a359216fecd8b0a3eada28dc683300a1",
+                            "tumor_test.amber.qc:md5,9c502425aa5e1bf23569e1f60a32dcf1"
+                        ]
+                    ]
+                ],
+                "1": [
+                    "versions.yml:md5,f5846f28a6cd7391cccfc28a96892710"
+                ],
+                "amber_dir": [
+                    [
+                        {
+                            "id": "test",
+                            "tumor_id": "tumor_test",
+                            "normal_id": "normal_test"
+                        },
+                        [
+                            "amber.version:md5,94a3ca487cc956f9eadb8de364c27b1d",
+                            "normal_test.amber.homozygousregion.tsv:md5,d21abd62a26119eaf01ea8d1f66b9f05",
+                            "normal_test.amber.snp.vcf.gz:md5,44f59e7c11b3b348f647e0251732acc6",
+                            "normal_test.amber.snp.vcf.gz.tbi:md5,e4caffcadff308826156914dd6b43484",
+                            "tumor_test.amber.baf.pcf:md5,d4015414e9ccf00ab02c818a2a99a939",
+                            "tumor_test.amber.baf.tsv.gz:md5,7c6921d6c7742598b3e8b3f7fe8fea8d",
+                            "tumor_test.amber.contamination.tsv:md5,6fb3d29cc2c879b1db07cc8581a8fb70",
+                            "tumor_test.amber.contamination.vcf.gz:md5,5562d1e335c40ff733bbf751e37e541c",
+                            "tumor_test.amber.contamination.vcf.gz.tbi:md5,a359216fecd8b0a3eada28dc683300a1",
+                            "tumor_test.amber.qc:md5,9c502425aa5e1bf23569e1f60a32dcf1"
+                        ]
+                    ]
+                ],
+                "versions": [
+                    "versions.yml:md5,f5846f28a6cd7391cccfc28a96892710"
+                ]
+            }
+        ],
+        "meta": {
+            "nf-test": "0.9.1",
+            "nextflow": "24.10.0"
+        },
+        "timestamp": "2024-11-12T12:39:04.36170114"
+    }
+}
