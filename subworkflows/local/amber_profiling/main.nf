@@ -48,7 +48,14 @@ workflow AMBER_PROFILING {
         }
         .branch { meta, tumor_bam, tumor_bai, normal_bam, normal_bai, donor_bam, donor_bai ->
             def has_existing = Utils.hasExistingInput(meta, Constants.INPUT.AMBER_DIR)
-            runnable: tumor_bam && !has_existing
+
+
+            // TODO(SW): must improve handling through separation of sample information in meta; currently unable to provide ccfDNA AMBER directory in samplesheet
+            def is_longitudinal_sample = Utils.getTumorDnaSample(meta).containsKey('longitudinal_sample_id')
+
+            runnable: tumor_bam && (!has_existing || is_longitudinal_sample)
+
+
             skip: true
                 return meta
         }
