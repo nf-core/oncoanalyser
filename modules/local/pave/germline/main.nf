@@ -59,6 +59,7 @@ process PAVE_GERMLINE {
         -blacklist_bed ${sage_blocklist_regions} \\
         -blacklist_vcf ${sage_blocklist_sites} \\
         ${gnomad_args} \\
+        -gnomad_no_filter \\
         -read_pass_only \\
         -threads ${task.cpus} \\
         -output_dir ./
