@@ -4,12 +4,14 @@ process CHORD {
 
     conda "${moduleDir}/environment.yml"
     container "${ workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container ?
-        'https://depot.galaxyproject.org/singularity/hmftools-chord:2.1.0_beta--r43hdfd78af_0' :
-        'biocontainers/hmftools-chord:2.1.0_beta--r43hdfd78af_0' }"
+        'https://depot.galaxyproject.org/singularity/hmftools-chord:2.1.0_beta--hdfd78af_2' :
+        'biocontainers/hmftools-chord:2.1.0_beta--hdfd78af_2' }"
 
     input:
     tuple val(meta), path(smlv_vcf), path(sv_vcf)
-    val genome_ver
+    path genome_fasta
+    path genome_fai
+    path genome_dict
 
     output:
     tuple val(meta), path('chord/'), emit: chord_dir
@@ -22,29 +24,20 @@ process CHORD {
     def args = task.ext.args ?: ''
 
     """
-    mkdir -p purple/
-    ln -sf \$(realpath ${smlv_vcf}) purple/
-    ln -sf \$(realpath ${sv_vcf}) purple/
+    ## NOTE(LN): The CHORD jar runs an embedded R script using 'com.hartwig.hmftools.common.utils.r.RExecutor' which requires absolute
+    ## paths. Relative paths don't work because RExecutor executes from a tmp dir, and not the working dir of this nextflow process
 
     mkdir -p chord/
 
-    ## NOTE(LN): Use pwd so that absolute path can be specified to -purple_dir and -output_dir
-    ## Relative paths don't work because the RExecutor class from hmf-common executes from a tmp dir, and not the working dir of this
-    ## nextflow process
-    working_dir=\$PWD
-
     chord \\
         -Xmx${Math.round(task.memory.bytes * 0.95)} \\
-        com.hartwig.hmftools.chord.ChordRunner \\
         ${args} \\
         -sample ${meta.sample_id} \\
-        -ref_genome_version ${genome_ver} \\
-        -purple_dir "\${working_dir}/purple/" \\
-        -output_dir "\${working_dir}/chord/" \\
+        -snv_indel_vcf_file \$(realpath ${smlv_vcf}) \\
+        -sv_vcf_file \$(realpath ${smlv_vcf}) \\
+        -output_dir \$(realpath chord/) \\
+        -ref_genome ${genome_fasta} \\
         -log_level DEBUG
-
-    ## NOTE(LN): Chord expects the R packages `CHORD` and `mutSigExtractor` to be installed as R packages
-    ## Otherwise, arg '-chord_tool_dir' would need to be provided, whereby this dir contains the subdirs CHORD/ and mutSigExtractor/
 
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":
@@ -56,8 +49,8 @@ process CHORD {
     stub:
     """
     mkdir -p chord/
-    touch chord/${meta.sample_id}_chord_signatures.txt
-    touch chord/${meta.sample_id}_chord_prediction.txt
+    touch chord/${meta.sample_id}.chord.mutation_contexts.tsv
+    touch chord/${meta.sample_id}.chord.prediction.tsv
 
     echo -e '${task.process}:\\n  stub: noversions\\n' > versions.yml
     """

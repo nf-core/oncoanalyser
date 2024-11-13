@@ -599,7 +599,9 @@ workflow WGTS {
         CHORD_PREDICTION(
             ch_inputs,
             ch_purple_out,
-            ref_data.genome_version,
+            ref_data.genome_fasta,
+            ref_data.genome_fai,
+            ref_data.genome_dict,
         )
 
         ch_versions = ch_versions.mix(CHORD_PREDICTION.out.versions)
