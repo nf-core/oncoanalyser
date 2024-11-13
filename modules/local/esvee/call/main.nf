@@ -4,8 +4,8 @@ process ESVEE_CALL {
 
     conda "${moduleDir}/environment.yml"
     container "${ workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container ?
-        'https://depot.galaxyproject.org/singularity/hmftools-esvee:1.0_beta--hdfd78af_3' :
-        'biocontainers/hmftools-esvee:1.0_beta--hdfd78af_3' }"
+        'https://depot.galaxyproject.org/singularity/hmftools-esvee:1.0_beta--hdfd78af_5' :
+        'biocontainers/hmftools-esvee:1.0_beta--hdfd78af_5' }"
 
     input:
     tuple val(meta), path(ref_depth_vcf), path(fragment_lengths_tsv)

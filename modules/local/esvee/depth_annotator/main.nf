@@ -4,8 +4,8 @@ process ESVEE_DEPTH_ANNOTATOR {
 
     conda "${moduleDir}/environment.yml"
     container "${ workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container ?
-        'https://depot.galaxyproject.org/singularity/hmftools-esvee:1.0_beta--hdfd78af_3' :
-        'biocontainers/hmftools-esvee:1.0_beta--hdfd78af_3' }"
+        'https://depot.galaxyproject.org/singularity/hmftools-esvee:1.0_beta--hdfd78af_5' :
+        'biocontainers/hmftools-esvee:1.0_beta--hdfd78af_5' }"
 
     input:
     tuple val(meta), path(tumor_bam), path(tumor_bai), path(normal_bam), path(normal_bai), path(raw_vcf)
