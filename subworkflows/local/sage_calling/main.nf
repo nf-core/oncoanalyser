@@ -5,6 +5,8 @@
 import Constants
 import Utils
 
+import java.nio.channels.Channel
+
 include { SAGE_GERMLINE as GERMLINE } from '../../../modules/local/sage/germline/main'
 include { SAGE_SOMATIC as SOMATIC   } from '../../../modules/local/sage/somatic/main'
 
@@ -49,18 +51,33 @@ workflow SAGE_CALLING {
         ch_normal_tsv,
         ch_donor_tsv,
     )
-        .map { d ->
+        .map { meta,
+               tumor_bam,  tumor_bai,
+               normal_bam, normal_bai,
+               donor_bam,  donor_bai,
 
-            def meta = d[0]
+               tumor_dup_freq_tsv,  tumor_jitter_tsv,  tumor_ms_tsv,  tumor_repeat_tsv,
+               normal_dup_freq_tsv, normal_jitter_tsv, normal_ms_tsv, normal_repeat_tsv,
+               donor_dup_freq_tsv,  donor_jitter_tsv,  donor_ms_tsv,  donor_repeat_tsv ->
 
-            def tumor_bam = d[1]
-            def tumor_bai = d[2]
-            def normal_bam = d[3]
-            def normal_bai = d[4]
-            def donor_bam = d[5]
-            def donor_bai = d[6]
+            def redux_tsv_list = [
+                tumor_dup_freq_tsv  ?: Utils.getInput(meta, Constants.INPUT.REDUX_DUP_FREQ_TSV_TUMOR),
+                tumor_jitter_tsv    ?: Utils.getInput(meta, Constants.INPUT.REDUX_JITTER_TSV_TUMOR),
+                tumor_ms_tsv        ?: Utils.getInput(meta, Constants.INPUT.REDUX_MS_TSV_TUMOR),
+                tumor_repeat_tsv    ?: Utils.getInput(meta, Constants.INPUT.REDUX_REPEAT_TSV_TUMOR),
 
-            def redux_tsvs = d[7..-1]
+                normal_dup_freq_tsv ?: Utils.getInput(meta, Constants.INPUT.REDUX_DUP_FREQ_TSV_NORMAL),
+                normal_jitter_tsv   ?: Utils.getInput(meta, Constants.INPUT.REDUX_JITTER_TSV_NORMAL),
+                normal_ms_tsv       ?: Utils.getInput(meta, Constants.INPUT.REDUX_MS_TSV_NORMAL),
+                normal_repeat_tsv   ?: Utils.getInput(meta, Constants.INPUT.REDUX_REPEAT_TSV_NORMAL),
+
+                donor_dup_freq_tsv  ?: Utils.getInput(meta, Constants.INPUT.REDUX_DUP_FREQ_TSV_DONOR),
+                donor_jitter_tsv    ?: Utils.getInput(meta, Constants.INPUT.REDUX_JITTER_TSV_DONOR),
+                donor_ms_tsv        ?: Utils.getInput(meta, Constants.INPUT.REDUX_MS_TSV_DONOR),
+                donor_repeat_tsv    ?: Utils.getInput(meta, Constants.INPUT.REDUX_REPEAT_TSV_DONOR),
+            ]
+
+            redux_tsv_list = redux_tsv_list.findAll{ it != [] }
 
             return [
                 meta,
@@ -74,7 +91,7 @@ workflow SAGE_CALLING {
                 Utils.selectCurrentOrExisting(donor_bam, meta, Constants.INPUT.BAM_REDUX_DNA_DONOR),
                 donor_bai ?: Utils.getInput(meta, Constants.INPUT.BAI_DNA_DONOR),
 
-                redux_tsvs.findAll { ! (it instanceof List) },
+                redux_tsv_list,
             ]
         }
         .branch { meta, tumor_bam, tumor_bai, normal_bam, normal_bai, donor_bam, donor_bai, redux_tsvs ->

@@ -179,6 +179,57 @@ class Utils {
                     }
                 }
 
+                // Check that REDUX TSVs are present
+                sample_keys.each { sample_key ->
+                    meta[sample_key]*.key.each { key ->
+
+                        if (stub_run || key !== Constants.FileType.BAM_REDUX)
+                            return
+
+                        def bam_path = meta[sample_key][key].toString()
+
+                        def sample_id = meta[sample_key].sample_id
+                        def bam_dir = new File(bam_path).getParent()
+
+                        def dup_freq_tsv = nextflow.Nextflow.file("${bam_dir}/${sample_id}.redux.duplicate_freq.tsv")
+                        def jitter_tsv   = nextflow.Nextflow.file("${bam_dir}/${sample_id}.jitter_params.tsv")
+                        def ms_tsv       = nextflow.Nextflow.file("${bam_dir}/${sample_id}.ms_table.tsv.gz")
+                        def repeat_tsv   = nextflow.Nextflow.file("${bam_dir}/${sample_id}.repeat.tsv.gz")
+
+                        def missing_tsvs = []
+                        if(!dup_freq_tsv.exists()) missing_tsvs.add(dup_freq_tsv)
+                        if(!jitter_tsv.exists())   missing_tsvs.add(jitter_tsv)
+                        if(!ms_tsv.exists())       missing_tsvs.add(ms_tsv)
+                        if(!repeat_tsv.exists())   missing_tsvs.add(repeat_tsv)
+
+                        if(missing_tsvs.size() > 0){
+
+                            def error_message = []
+
+                            error_message.add("Missing expected TSVs associated with REDUX BAM:")
+                            error_message.add("REDUX BAM:   ${bam_path}")
+                            missing_tsvs.each { error_message.add("Missing TSV: ${it}") }
+                            error_message.add("")
+                            error_message.add("REDUX BAM and TSVs should be in the same dir when only specifying filetype ${Constants.FileType.BAM_REDUX} in the sample sheet.")
+                            error_message.add("")
+                            error_message.add("Alternatively, specify the TSV paths in the sample sheet using filetype values: " +
+                                "${Constants.FileType.REDUX_DUP_FREQ_TSV}, " +
+                                "${Constants.FileType.REDUX_JITTER_TSV}, " +
+                                "${Constants.FileType.REDUX_MS_TSV}, " +
+                                "${Constants.FileType.REDUX_REPEAT_TSV}"
+                            )
+
+                            log.error error_message.join("\n")
+                            Nextflow.exit(1)
+                        }
+
+                        meta[sample_key][Constants.FileType.REDUX_DUP_FREQ_TSV] = dup_freq_tsv
+                        meta[sample_key][Constants.FileType.REDUX_JITTER_TSV] = jitter_tsv
+                        meta[sample_key][Constants.FileType.REDUX_MS_TSV] = ms_tsv
+                        meta[sample_key][Constants.FileType.REDUX_REPEAT_TSV] = repeat_tsv
+                    }
+                }
+
                 return meta
             }
 
