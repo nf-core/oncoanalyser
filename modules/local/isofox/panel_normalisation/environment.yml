@@ -1,4 +1,4 @@
-name: isofox
+name: isofox_panel_normalisation
 channels:
   - conda-forge
   - bioconda

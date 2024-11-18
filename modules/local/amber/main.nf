@@ -11,7 +11,7 @@ process AMBER {
     tuple val(meta), path(tumor_bam), path(normal_bam), path(donor_bam), path(tumor_bai), path(normal_bai), path(donor_bai)
     val genome_ver
     path heterozygous_sites
-    path target_region_bed
+    path target_regions_bed
 
     output:
     tuple val(meta), path('amber/'), emit: amber_dir
@@ -35,7 +35,7 @@ process AMBER {
     if (donor_bam) reference_bams.add(donor_bam.toString())
     def reference_bam_arg = reference_bams.size() > 0 ? "-reference_bam ${String.join(",", reference_bams)}" : ''
 
-    def target_regions_bed_arg = target_region_bed ? "-target_regions_bed ${target_region_bed}" : ''
+    def target_regions_bed_arg = target_regions_bed ? "-target_regions_bed ${target_regions_bed}" : ''
 
     """
     amber \\
