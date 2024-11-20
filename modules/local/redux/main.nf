@@ -3,8 +3,8 @@ process REDUX {
     label 'process_high'
 
     container "${ workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container ?
-        'https://depot.galaxyproject.org/singularity/hmftools-redux:1.0_beta--hdfd78af_5' :
-        'biocontainers/hmftools-redux:1.0_beta--hdfd78af_5' }"
+        'https://depot.galaxyproject.org/singularity/hmftools-redux:1.0_beta--hdfd78af_6' :
+        'biocontainers/hmftools-redux:1.0_beta--hdfd78af_6' }"
 
     input:
     tuple val(meta), path(bams), path(bais)
