@@ -200,42 +200,31 @@ class Utils {
                     def bam_dir = new File(bam_path).getParent()
 
                     // Get user specified TSV paths
-                    def dup_freq_tsv = meta_sample[Constants.FileType.REDUX_DUP_FREQ_TSV]
                     def jitter_tsv   = meta_sample[Constants.FileType.REDUX_JITTER_TSV]
                     def ms_tsv       = meta_sample[Constants.FileType.REDUX_MS_TSV]
-                    def repeat_tsv   = meta_sample[Constants.FileType.REDUX_REPEAT_TSV]
 
                     // If TSV paths not provided, default to TSV paths in the same dir as the BAM
-                    dup_freq_tsv = dup_freq_tsv ?: "${bam_dir}/${sample_id}.redux.duplicate_freq.tsv"
                     jitter_tsv   = jitter_tsv   ?: "${bam_dir}/${sample_id}.jitter_params.tsv"
                     ms_tsv       = ms_tsv       ?: "${bam_dir}/${sample_id}.ms_table.tsv.gz"
-                    repeat_tsv   = repeat_tsv   ?: "${bam_dir}/${sample_id}.repeat.tsv.gz"
 
-                    dup_freq_tsv = nextflow.Nextflow.file(dup_freq_tsv)
                     jitter_tsv   = nextflow.Nextflow.file(jitter_tsv)
                     ms_tsv       = nextflow.Nextflow.file(ms_tsv)
-                    repeat_tsv   = nextflow.Nextflow.file(repeat_tsv)
 
-                    def missing_tsvs = []
-                    if(!dup_freq_tsv.exists()) missing_tsvs.add(dup_freq_tsv)
-                    if(!jitter_tsv.exists())   missing_tsvs.add(jitter_tsv)
-                    if(!ms_tsv.exists())       missing_tsvs.add(ms_tsv)
-                    if(!repeat_tsv.exists())   missing_tsvs.add(repeat_tsv)
+                    def missing_tsvs = [:]
+                    if(!jitter_tsv.exists()) missing_tsvs[Constants.FileType.REDUX_JITTER_TSV] = jitter_tsv
+                    if(!ms_tsv.exists())     missing_tsvs[Constants.FileType.REDUX_MS_TSV] = ms_tsv
 
                     if(missing_tsvs.size() > 0){
 
                         def error_message = []
 
-                        error_message.add("Missing or invalid REDUX TSV paths associated with REDUX BAM:")
-                        error_message.add("REDUX BAM: ${bam_path}")
-                        missing_tsvs.each { error_message.add("REDUX TSV: ${it}") }
+                        error_message.add("When only specifying filetype ${Constants.FileType.BAM_REDUX} in the sample sheet, make sure the REDUX BAM and TSVs are in the same dir:")
+                        error_message.add("${bam_path} (${Constants.FileType.BAM_REDUX})")
+                        missing_tsvs.each { error_message.add("${it.value} (missing expected ${it.key})") }
                         error_message.add("")
-                        error_message.add("When only specifying filetype ${Constants.FileType.BAM_REDUX} in the sample sheet, make sure the REDUX BAMs and TSVs are in the same dir")
-                        error_message.add("Otherwise, specify the TSV paths in the sample sheet using filetype values: " +
-                            "${Constants.FileType.REDUX_DUP_FREQ_TSV}, " +
+                        error_message.add("Alternatively, provide the TSV paths in the sample sheet using filetype values: " +
                             "${Constants.FileType.REDUX_JITTER_TSV}, " +
-                            "${Constants.FileType.REDUX_MS_TSV}, " +
-                            "${Constants.FileType.REDUX_REPEAT_TSV}"
+                            "${Constants.FileType.REDUX_MS_TSV}"
                         )
 
                         log.error error_message.join("\n")
@@ -243,10 +232,8 @@ class Utils {
                     }
 
                     // Set parsed REDUX TSV paths in metadata object
-                    meta_sample[Constants.FileType.REDUX_DUP_FREQ_TSV] = dup_freq_tsv
                     meta_sample[Constants.FileType.REDUX_JITTER_TSV] = jitter_tsv
                     meta_sample[Constants.FileType.REDUX_MS_TSV] = ms_tsv
-                    meta_sample[Constants.FileType.REDUX_REPEAT_TSV] = repeat_tsv
                 }
 
                 return meta
