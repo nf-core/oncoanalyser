@@ -4,8 +4,8 @@ process VIRUSINTERPRETER {
 
     conda "${moduleDir}/environment.yml"
     container "${ workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container ?
-        'https://depot.galaxyproject.org/singularity/hmftools-virus-interpreter:3.7_beta--hdfd78af_0' :
-        'biocontainers/hmftools-virus-interpreter:3.7_beta--hdfd78af_0' }"
+        'https://depot.galaxyproject.org/singularity/hmftools-virus-interpreter:3.7_beta--hdfd78af_1' :
+        'biocontainers/hmftools-virus-interpreter:3.7_beta--hdfd78af_1' }"
 
     input:
     tuple val(meta), path(virus_tsv), path(purple_dir), path(bamtools_somatic_dir)

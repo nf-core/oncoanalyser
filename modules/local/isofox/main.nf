@@ -4,8 +4,8 @@ process ISOFOX {
 
     conda "${moduleDir}/environment.yml"
     container "${ workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container ?
-        'https://depot.galaxyproject.org/singularity/hmftools-isofox:1.7.1--hdfd78af_0' :
-        'biocontainers/hmftools-isofox:1.7.1--hdfd78af_0' }"
+        'https://depot.galaxyproject.org/singularity/hmftools-isofox:1.7.1--hdfd78af_1' :
+        'biocontainers/hmftools-isofox:1.7.1--hdfd78af_1' }"
 
     input:
     tuple val(meta), path(bam), path(bai)

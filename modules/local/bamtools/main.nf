@@ -4,8 +4,8 @@ process BAMTOOLS {
 
     conda "${moduleDir}/environment.yml"
     container "${ workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container ?
-        'https://depot.galaxyproject.org/singularity/hmftools-bam-tools:1.3_beta--hdfd78af_0' :
-        'biocontainers/hmftools-bam-tools:1.3_beta--hdfd78af_0' }"
+        'https://depot.galaxyproject.org/singularity/hmftools-bam-tools:1.3_beta--hdfd78af_1' :
+        'biocontainers/hmftools-bam-tools:1.3_beta--hdfd78af_1' }"
 
     input:
     tuple val(meta), path(bam), path(bai)
