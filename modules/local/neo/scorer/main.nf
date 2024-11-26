@@ -2,7 +2,10 @@ process NEO_SCORER {
     tag "${meta.id}"
     label 'process_medium'
 
-    container 'docker.io/scwatts/neo:1.2_beta--1'
+    conda "${moduleDir}/environment.yml"
+    container "${ workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container ?
+        'https://depot.galaxyproject.org/singularity/hmftools-neo:1.2--hdfd78af_1' :
+        'biocontainers/hmftools-neo:1.2--hdfd78af_1' }"
 
     input:
     tuple val(meta), path(isofox_dir), path(purple_dir), path(sage_vcf), path(lilac_dir), path(neo_finder_dir), path(annotated_fusions)
