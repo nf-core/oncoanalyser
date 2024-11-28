@@ -34,15 +34,13 @@ process ESVEE_CALL {
     """
     mkdir -p caller/
 
-    # ESVEE expects the fragment_lengths.tsv file to be present in the output directory
-    ln -sf ../${fragment_lengths_tsv} caller/
-
     esvee com.hartwig.hmftools.esvee.caller.CallerApplication \\
         -Xmx${Math.round(task.memory.bytes * 0.95)} \\
         ${args} \\
         -sample ${meta.tumor_id} \\
         ${reference_arg} \\
         -input_vcf ${ref_depth_vcf} \\
+        -frag_length_file ${fragment_lengths_tsv} \\
         -ref_genome_version ${genome_ver} \\
         -known_hotspot_file ${known_fusions} \\
         -pon_sgl_file ${pon_breakends} \\

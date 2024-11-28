@@ -35,9 +35,6 @@ process ESVEE_ASSEMBLE {
     """
     mkdir -p assemble/
 
-    # ESVEE expects the fragment_lengths.tsv file to be present in the output directory
-    ln -sf ../${fragment_lengths_tsv} assemble/
-
     esvee com.hartwig.hmftools.esvee.assembly.AssemblyApplication \\
         -Xmx${Math.round(task.memory.bytes * 0.95)} \\
         ${args} \\
@@ -46,6 +43,7 @@ process ESVEE_ASSEMBLE {
         ${reference_arg} \\
         ${reference_bam_arg} \\
         -junction_file ${junctions_tsv} \\
+        -frag_length_file ${fragment_lengths_tsv} \\
         -ref_genome ${genome_fasta} \\
         -ref_genome_version ${genome_ver} \\
         ${decoy_genome_arg} \\
