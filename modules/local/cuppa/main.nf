@@ -24,19 +24,15 @@ process CUPPA {
     script:
     def args = task.ext.args ?: ''
 
+    def isofox_dir_arg = isofox_dir ? "-isofox_dir ${isofox_dir}" : ""
+    def ref_alt_sj_sites_arg = isofox_dir ? "-ref_alt_sj_sites ${cuppa_alt_sj}" : ""
+
     """
-    # Symlink input files into a single directory
-    mkdir -p sample_data/
-
-    for file_path in \$(find -L ${purple_dir} ${linx_dir} ${virusinterpreter_dir} -maxdepth 1 -type f -exec realpath {} \\;); do
-        ln -sf \${file_path} sample_data/\$(basename \${file_path})
-    done;
-
-    if [ ${classifier} == 'ALL' ]; then
+    if [[ -d "${isofox_dir}" ]]; then
         # NOTE(SW): CUPPA requires that the RNA sample name matches the DNA sample name
         for file_path in \$(find -L ${isofox_dir} -maxdepth 1 -type f -exec realpath {} \\;); do
             new_file_name=\$(basename \${file_path} | sed 's/^${meta.sample_rna_id}/${meta.sample_id}/')
-            ln -sf \${file_path} sample_data/\${new_file_name}
+            ln -sf \${file_path} ${isofox_dir}/\${new_file_name}
         done;
     fi;
 
@@ -50,9 +46,12 @@ process CUPPA {
         -sample ${meta.sample_id} \\
         -categories ${classifier} \\
         -ref_genome_version ${genome_ver} \\
-        -sample_data_dir sample_data/ \\
         -output_dir cuppa/ \\
-        -ref_alt_sj_sites ${cuppa_alt_sj}
+        -purple_dir ${purple_dir} \\
+        -linx_dir ${linx_dir} \\
+        -virus_dir ${virusinterpreter_dir} \\
+        ${isofox_dir_arg} \\
+        ${ref_alt_sj_sites_arg}
 
     # Make predictions
     python -m cuppa.predict \\
