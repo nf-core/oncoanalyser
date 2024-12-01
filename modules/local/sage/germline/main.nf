@@ -31,7 +31,7 @@ process SAGE_GERMLINE {
     def args = task.ext.args ?: ''
 
     """
-    mkdir germline/
+    mkdir -p germline/
 
     sage \\
         -Xmx${Math.round(task.memory.bytes * 0.95)} \\
