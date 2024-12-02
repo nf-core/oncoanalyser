@@ -12,7 +12,7 @@ process CUPPA {
     val genome_ver
     path cuppa_alt_sj
     path cuppa_classifier
-    val classifier
+    val categories
 
     output:
     tuple val(meta), path('cuppa/'), emit: cuppa_dir
@@ -44,7 +44,7 @@ process CUPPA {
         com.hartwig.hmftools.cup.prep.CuppaDataPrep \\
         ${args} \\
         -sample ${meta.sample_id} \\
-        -categories ${classifier} \\
+        -categories ${categories} \\
         -ref_genome_version ${genome_ver} \\
         -output_dir cuppa/ \\
         -purple_dir ${purple_dir} \\
@@ -59,7 +59,7 @@ process CUPPA {
         --classifier_path ${cuppa_classifier} \\
         --features_path cuppa/${meta.sample_id}.cuppa_data.tsv.gz \\
         --output_dir cuppa/ \\
-        --clf_group ${classifier}
+        --clf_group ${categories}
 
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":

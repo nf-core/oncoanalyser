@@ -75,7 +75,7 @@ workflow CUPPA_PREDICTION {
 
     // Create process input channel
     // channel: sample_data: [ meta, isofox_dir, purple_dir, linx_annotation_dir, virusinterpreter_dir ]
-    // channel: classifer: [ classifier ]
+    // channel: categories: [ categories ]
     ch_cuppa_inputs = ch_inputs_sorted.runnable
         .multiMap{ meta, isofox_dir, purple_dir, linx_annotation_dir, virusinterpreter_dir ->
 
@@ -94,24 +94,24 @@ workflow CUPPA_PREDICTION {
             def run_dna = has_dna_inputs && has_tumor_dna && has_normal_dna
             def run_rna = has_rna_inputs && has_tumor_rna
 
-            def classifier
+            def categories
 
             if (run_dna && run_rna) {
 
-                classifier = 'ALL'
+                categories = 'ALL'
 
                 meta_cuppa.sample_id = Utils.getTumorDnaSampleName(meta)
                 meta_cuppa.sample_rna_id = Utils.getTumorRnaSampleName(meta)
 
             } else if (run_dna) {
 
-                classifier = 'DNA'
+                categories = 'DNA'
 
                 meta_cuppa.sample_id = Utils.getTumorDnaSampleName(meta)
 
             } else if (run_rna) {
 
-                classifier = 'RNA'
+                categories = 'RNA'
 
                 meta_cuppa.sample_id = Utils.getTumorRnaSampleName(meta)
 
@@ -122,7 +122,7 @@ workflow CUPPA_PREDICTION {
             }
 
             sample_data: [meta_cuppa, isofox_dir, purple_dir, linx_annotation_dir, virusinterpreter_dir]
-            classifier: classifier
+            categories: categories
         }
 
     // Run process
@@ -131,7 +131,7 @@ workflow CUPPA_PREDICTION {
         genome_version,
         cuppa_alt_sj,
         cuppa_classifier,
-        ch_cuppa_inputs.classifier,
+        ch_cuppa_inputs.categories,
     )
 
     ch_versions = ch_versions.mix(CUPPA.out.versions)
