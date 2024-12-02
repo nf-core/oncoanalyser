@@ -764,7 +764,8 @@ workflow WGTS {
             ch_linx_somatic_out,
             ch_virusinterpreter_out,
             ref_data.genome_version,
-            hmf_data.cuppa_resources,
+            hmf_data.cuppa_alt_sj,
+            hmf_data.cuppa_classifier,
         )
 
         ch_versions = ch_versions.mix(CUPPA_PREDICTION.out.versions)
