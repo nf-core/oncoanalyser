@@ -29,13 +29,15 @@ process GRIPSS_SOMATIC {
     script:
     def args = task.ext.args ?: ''
 
+    def xmx_mod = task.ext.xmx_mod ?: 0.75
+
     def reference_arg = meta.containsKey('normal_id') ? "-reference ${meta.normal_id}" : ''
     def target_regions_bed_arg = target_region_bed ? "-target_regions_bed ${target_region_bed}" : ''
     def output_id_arg = meta.containsKey('normal_id') ? '-output_id somatic' : ''
 
     """
     gripss \\
-        -Xmx${Math.round(task.memory.bytes * 0.95)} \\
+        -Xmx${Math.round(task.memory.bytes * xmx_mod)} \\
         ${args} \\
         -sample ${meta.tumor_id} \\
         ${reference_arg} \\

@@ -35,6 +35,8 @@ process PAVE_GERMLINE {
     script:
     def args = task.ext.args ?: ''
 
+    def xmx_mod = task.ext.xmx_mod ?: 0.75
+
     def gnomad_args
     if (genome_ver.toString() == '37') {
         gnomad_args = "-gnomad_freq_file ${gnomad_resource}"
@@ -46,7 +48,7 @@ process PAVE_GERMLINE {
 
     """
     pave \\
-        -Xmx${Math.round(task.memory.bytes * 0.95)} \\
+        -Xmx${Math.round(task.memory.bytes * xmx_mod)} \\
         ${args} \\
         -sample ${meta.sample_id} \\
         -vcf_file ${sage_vcf} \\

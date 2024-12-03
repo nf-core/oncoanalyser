@@ -23,6 +23,8 @@ process LILAC {
     script:
     def args = task.ext.args ?: ''
 
+    def xmx_mod = task.ext.xmx_mod ?: 0.75
+
     def sample_name = getSampleName(meta, tumor_dna_bam, normal_dna_bam)
 
     def normal_bam_arg = normal_dna_bam ? "-reference_bam ${normal_dna_bam}" : ''
@@ -33,7 +35,7 @@ process LILAC {
 
     """
     lilac \\
-        -Xmx${Math.round(task.memory.bytes * 0.95)} \\
+        -Xmx${Math.round(task.memory.bytes * xmx_mod)} \\
         ${args} \\
         -sample ${sample_name} \\
         ${normal_bam_arg} \\

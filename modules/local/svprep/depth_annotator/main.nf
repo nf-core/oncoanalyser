@@ -23,6 +23,8 @@ process SVPREP_DEPTH_ANNOTATOR {
     script:
     def args = task.ext.args ?: ''
 
+    def xmx_mod = task.ext.xmx_mod ?: 0.95
+
     def labels_list = labels instanceof List ? labels : [labels]
     def labels_arg = labels_list.join(',')
     // NOTE(SW): Nextflow implicitly casts List<TaskPath> to an atomic TaskPath, hence the required check below
@@ -31,7 +33,7 @@ process SVPREP_DEPTH_ANNOTATOR {
 
     """
     svprep \\
-        -Xmx${Math.round(task.memory.bytes * 0.95)} \\
+        -Xmx${Math.round(task.memory.bytes * xmx_mod)} \\
         com.hartwig.hmftools.svprep.depth.DepthAnnotator \\
         ${args} \\
         -input_vcf ${vcf} \\

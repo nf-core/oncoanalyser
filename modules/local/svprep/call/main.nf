@@ -26,6 +26,8 @@ process GRIDSS_CALL {
     script:
     def args = task.ext.args ?: ''
 
+    def xmx_mod = task.ext.xmx_mod ?: 0.75
+
     def config_arg = gridss_config ? "--configuration ${gridss_config}" : ''
     def output_dirname = 'gridss_call'
     def labels_list = labels instanceof List ? labels : [labels]
@@ -72,7 +74,7 @@ process GRIDSS_CALL {
     # Run
     gridss_svprep \\
         ${args} \\
-        --jvmheap ${Math.round((task.memory.bytes - otherJvmHeap) * 0.95)} \\
+        --jvmheap ${Math.round((task.memory.bytes - otherJvmHeap) * xmx_mod)} \\
         --otherjvmheap ${otherJvmHeap} \\
         --steps call \\
         --labels ${labels_arg} \\
