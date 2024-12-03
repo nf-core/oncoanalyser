@@ -40,7 +40,7 @@ process VIRUSINTERPRETER {
 
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":
-        virusinterpreter: \$(virusinterpreter | sed -n '1s/^.*Interpreter v//p')
+        virusinterpreter: \$(virusinterpreter -version | sed 's/^.* //')
     END_VERSIONS
     """
 
