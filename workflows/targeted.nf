@@ -212,6 +212,7 @@ workflow TARGETED {
             ref_data.genome_version,
             ref_data.genome_fai,
             hmf_data.ensembl_data_resources,
+            hmf_data.known_fusion_data,
             isofox_counts,
             isofox_gc_ratios,
             isofox_gene_ids,
