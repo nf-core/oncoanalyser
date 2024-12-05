@@ -14,7 +14,8 @@ process MARKDUPS {
     path genome_fai
     path genome_dict
     path unmap_regions
-    val has_umis
+    val umi_enable
+    val umi_duplex_delim
 
     output:
     tuple val(meta), path('*.markdups.bam'), path('*.markdups.bam.bai'), emit: bam
@@ -29,7 +30,12 @@ process MARKDUPS {
 
     def xmx_mod = task.ext.xmx_mod ?: 0.95
 
-    def umi_flags = has_umis ? '-umi_enabled -umi_duplex -umi_duplex_delim +' : ''
+    def form_consensus_arg = umi_enable ? '' : '-form_consensus'
+
+    def umi_args_list = []
+    if (umi_enable) umi_args_list.add('-umi_enabled')
+    if (umi_duplex_delim) umi_args_list.add("-umi_duplex -umi_duplex_delim ${umi_duplex_delim}")
+    def umi_args = umi_args_list ? umi_args_list.join(' ') : ''
 
     """
     markdups \\
@@ -42,8 +48,8 @@ process MARKDUPS {
         -sample ${meta.sample_id} \\
         -input_bam ${bams.join(',')} \\
         \\
-        -form_consensus \\
-        ${umi_flags} \\
+        ${form_consensus_arg} \\
+        ${umi_args} \\
         \\
         -unmap_regions ${unmap_regions} \\
         -ref_genome ${genome_fasta} \\
@@ -68,7 +74,7 @@ process MARKDUPS {
     touch ${meta.sample_id}.markdups.bam.bai
     touch ${meta.sample_id}.duplicate_freq.tsv
 
-    if [[ -n "${has_umis}" ]]; then
+    if [[ -n "${umi_enable}" ]]; then
         touch ${meta.sample_id}.umi_coord_freq.tsv
         touch ${meta.sample_id}.umi_edit_distance.tsv
         touch ${meta.sample_id}.umi_nucleotide_freq.tsv

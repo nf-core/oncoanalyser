@@ -10,6 +10,9 @@ process FASTP {
     input:
     tuple val(meta), path(reads_fwd), path(reads_rev)
     val max_fastq_records
+    val umi_location
+    val umi_length
+    val umi_skip
 
     output:
     tuple val(meta), path('*_R1.fastp.fastq.gz'), path('*_R2.fastp.fastq.gz'), emit: fastq
@@ -21,6 +24,14 @@ process FASTP {
     script:
     def args = task.ext.args ?: ''
 
+    def split_by_lines_arg = max_fastq_records > 0 ? "--split_by_lines ${4 * max_fastq_records}" : ''
+
+    def umi_args_list = []
+    if (umi_location) umi_args_list.add("--umi_loc ${umi_location}")
+    if (umi_length) umi_args_list.add("--umi_len ${umi_length}")
+    if (umi_skip >= 0) umi_args_list.add("--umi_skip ${umi_skip}")
+    def umi_args = umi_args_list ? '--umi ' + umi_args_list.join(' ') : ''
+
     """
     fastp \\
         ${args} \\
@@ -30,8 +41,8 @@ process FASTP {
         --disable_length_filtering \\
         --disable_adapter_trimming \\
         --disable_trim_poly_g \\
-        --split_by_lines ${4 * max_fastq_records} \\
-        --thread ${task.cpus} \\
+        ${umi_args} \\
+        ${split_by_lines_arg} \\
         --out1 ${meta.sample_id}_${meta.library_id}_${meta.lane}_R1.fastp.fastq.gz \\
         --out2 ${meta.sample_id}_${meta.library_id}_${meta.lane}_R2.fastp.fastq.gz
 

@@ -277,25 +277,18 @@ class Utils {
             // Apply some required restrictions to targeted mode
             if (run_config.mode === Constants.RunMode.TARGETED) {
 
-                // Do not allow normal DNA
-                if (Utils.hasNormalDna(meta)) {
-                    log.error "targeted mode is not compatible with the normal DNA BAM provided for ${meta.group_id}\n\n" +
-                        "The targeted workflow supports only tumor DNA BAMs (and tumor RNA BAMs for TSO500)"
+                // Do not allow donor DNA
+                if (Utils.hasDonorDna(meta)) {
+                    log.error "targeted mode is not compatible with the donor DNA BAM provided for ${meta.group_id}\n\n" +
+                        "The targeted workflow supports only tumor and normal DNA BAMs (and tumor RNA BAMs for TSO500)"
                     Nextflow.exit(1)
                 }
 
                 // Do not allow only tumor RNA
-                if (Utils.hasTumorRnaBam(meta) && !Utils.hasTumorDna(meta)) {
+                if (Utils.hasTumorRna(meta) && !Utils.hasTumorDna(meta)) {
                     log.error "targeted mode is not compatible with only tumor RNA provided for ${meta.group_id}\n\n" +
                         "The targeted workflow requires tumor DNA and can optionally take tumor RNA, depending on " +
                         "the configured panel."
-                    Nextflow.exit(1)
-                }
-
-                // Restrict tumor RNA inputs to the TSO500 panel
-                if (Utils.hasTumorRnaBam(meta) && run_config.panel != 'tso500') {
-                    def panel = run_config.panel.toUpperCase()
-                    log.error "only the TSO500 panel supports tumor RNA analysis but got: ${panel}"
                     Nextflow.exit(1)
                 }
 
@@ -303,7 +296,7 @@ class Utils {
 
             // Do not allow normal DNA only
             if (Utils.hasNormalDna(meta) && !Utils.hasTumorDna(meta)) {
-                log.error "germline only mode not supported, found only a normal DNA BAM for ${meta.group_id}"
+                log.error "found only normal DNA input for ${meta.group_id} but germline only analysis is not supported"
                 Nextflow.exit(1)
             }
 

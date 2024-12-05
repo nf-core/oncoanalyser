@@ -17,6 +17,10 @@ lint:
     - lib/Utils.groovy
     - lib/WorkflowMain.groovy
     - lib/WorkflowOncoanalyser.groovy
+  nextflow_config:
+    - config_defaults:
+        - params.fastp_umi_length
+        - params.fastp_umi_skip
 bump_version: null
 org_path: null
 update: null

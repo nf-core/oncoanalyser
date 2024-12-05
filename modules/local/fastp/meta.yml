@@ -27,7 +27,16 @@ input:
       pattern: "*.{fastq.gz}"
   - max_fastq_records:
       type: integer
-      description: Maximum number of reads per file
+      description: Maximum number of reads per file (optional)
+  - umi_location:
+      type: string
+      description: UMI location type (optional)
+  - umi_length:
+      type: integer
+      description: UMI length (optional)
+  - umi_skip:
+      type: integer
+      description: UMI base skip (optional)
 output:
   - meta:
       type: map
