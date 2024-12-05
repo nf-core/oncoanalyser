@@ -21,6 +21,9 @@ workflow SAGE_APPEND {
     genome_fai       // channel: [mandatory] /path/to/genome_fai
     genome_dict      // channel: [mandatory] /path/to/genome_dict
 
+    // Params
+    run_germline     // boolean: [mandatory] Run germline flag
+
     main:
     // Channel for version.yml files
     // channel: [ versions.yml ]
@@ -63,7 +66,7 @@ workflow SAGE_APPEND {
             def has_smlv_germline = file(purple_dir).resolve("${tumor_dna_id}.purple.germline.vcf.gz")
             def has_existing = Utils.hasExistingInput(meta, Constants.INPUT.SAGE_APPEND_VCF_NORMAL)
 
-            runnable: has_normal_dna && has_tumor_rna && has_smlv_germline && !has_existing
+            runnable: has_normal_dna && has_tumor_rna && has_smlv_germline && !has_existing && run_germline
             skip: true
                 return meta
         }

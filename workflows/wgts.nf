@@ -47,6 +47,9 @@ for (param in checkPathParamList) { if (param) { file(param, checkIfExists: true
 // Check mandatory parameters
 if (params.input) { ch_input = file(params.input) } else { exit 1, 'Input samplesheet not specified!' }
 
+// Used in Isofox and Neo subworkflows
+isofox_read_length = params.isofox_read_length !== null ? params.isofox_read_length : Constants.DEFAULT_ISOFOX_READ_LENGTH_WTS
+
 /*
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     IMPORT MODULES / SUBWORKFLOWS / FUNCTIONS
@@ -67,6 +70,7 @@ include { ISOFOX_QUANTIFICATION } from '../subworkflows/local/isofox_quantificat
 include { LILAC_CALLING         } from '../subworkflows/local/lilac_calling'
 include { LINX_ANNOTATION       } from '../subworkflows/local/linx_annotation'
 include { LINX_PLOTTING         } from '../subworkflows/local/linx_plotting'
+include { NEO_PREDICTION        } from '../subworkflows/local/neo_prediction'
 include { ORANGE_REPORTING      } from '../subworkflows/local/orange_reporting'
 include { PAVE_ANNOTATION       } from '../subworkflows/local/pave_annotation'
 include { PREPARE_REFERENCE     } from '../subworkflows/local/prepare_reference'
@@ -195,7 +199,6 @@ workflow WGTS {
 
         isofox_counts = params.isofox_counts ? file(params.isofox_counts) : hmf_data.isofox_counts
         isofox_gc_ratios = params.isofox_gc_ratios ? file(params.isofox_gc_ratios) : hmf_data.isofox_gc_ratios
-        isofox_read_length = params.isofox_read_length !== null ? params.isofox_read_length : Constants.DEFAULT_ISOFOX_READ_LENGTH_WTS
 
         ISOFOX_QUANTIFICATION(
             ch_inputs,
@@ -474,9 +477,7 @@ workflow WGTS {
     // channel: [ meta, sage_append_vcf ]
     ch_sage_somatic_append_out = Channel.empty()
     ch_sage_germline_append_out = Channel.empty()
-    if (run_config.stages.orange) {
-
-        // NOTE(SW): currently used only for ORANGE but will also be used for Neo once implemented
+    if (run_config.stages.orange || run_config.stages.neo) {
 
         SAGE_APPEND(
             ch_inputs,
@@ -486,6 +487,7 @@ workflow WGTS {
             ref_data.genome_version,
             ref_data.genome_fai,
             ref_data.genome_dict,
+            run_config.stages.orange,  // run_germline [run for ORANGE but not Neo]
         )
 
         ch_versions = ch_versions.mix(SAGE_APPEND.out.versions)
@@ -714,6 +716,32 @@ workflow WGTS {
     } else {
 
         ch_virusinterpreter_out = ch_inputs.map { meta -> [meta, []] }
+
+    }
+
+    //
+    // SUBWORKFLOW: Run Neo to identify and score neoepitopes
+    //
+    if (run_config.stages.neo) {
+
+        NEO_PREDICTION(
+            ch_inputs,
+            ch_align_rna_tumor_out,
+            ch_isofox_out,
+            ch_purple_out,
+            ch_sage_somatic_append_out,
+            ch_lilac_out,
+            ch_linx_somatic_out,
+            ref_data.genome_fasta,
+            ref_data.genome_version,
+            ref_data.genome_fai,
+            hmf_data.ensembl_data_resources,
+            hmf_data.neo_resources,
+            hmf_data.cohort_tpm_medians,
+            isofox_read_length,
+        )
+
+        ch_versions = ch_versions.mix(NEO_PREDICTION.out.versions)
 
     }
 

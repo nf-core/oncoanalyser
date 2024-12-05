@@ -1,0 +1,62 @@
+name: neo_scorer
+description: Score and rank candidate neoeptitops
+keywords:
+  - neoepitopes
+tools:
+  - neo:
+      description: Predict and score neoepitopes
+      homepage: https://github.com/hartwigmedical/hmftools/tree/master/neo
+      documentation: https://github.com/hartwigmedical/hmftools/tree/master/neo
+      licence: ["GPL v3"]
+input:
+  - meta:
+      type: map
+      description: |
+        Groovy Map containing sample information
+        e.g. [id: 'sample_id']
+  - isofox_dir:
+      type: directory
+      description: Isofox output directory (optional)
+  - purple_dir:
+      type: directory
+      description: PURPLE output directory
+  - sage_vcf:
+      type: file
+      description: SAGE VCF file
+      pattern: "*.{vcf.gz}"
+  - lilac_dir:
+      type: directory
+      description: LILAC output directory
+  - neo_finder_dir:
+      type: directory
+      description: Neo Finder output directory
+  - annotated_fusions:
+      type: file
+      description: Annotated neoepitopes file
+      pattern: "*.{tsv}"
+  - ensembl_data_resources:
+      type: directory
+      description: HMF ensembl data resources directory
+  - neo_resources:
+      type: directory
+      description: HMF Neo resources directory
+  - cohort_tpm_medians:
+      type: file
+      description: HMF cohort TPM medians file
+      pattern: "*.{csv}"
+output:
+  - meta:
+      type: map
+      description: |
+        Groovy Map containing sample information
+        e.g. [id: 'sample_id']
+  - neo_score_dir:
+      type: directory
+      description: Neo Scorer output directory
+  - versions:
+      type: file
+      description: File containing software versions
+      pattern: "versions.yml"
+authors:
+  - "@scwatts"
+  - "@charlesshale"
