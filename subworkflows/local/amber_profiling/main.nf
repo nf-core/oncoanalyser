@@ -13,6 +13,7 @@ workflow AMBER_PROFILING {
     ch_inputs          // channel: [mandatory] [ meta ]
     ch_tumor_bam       // channel: [mandatory] [ meta, bam, bai ]
     ch_normal_bam      // channel: [mandatory] [ meta, bam, bai ]
+    ch_donor_bam       // channel: [mandatory] [ meta, bam, bai ]
 
     // Reference data
     genome_version     // channel: [mandatory] genome version
@@ -30,17 +31,22 @@ workflow AMBER_PROFILING {
     ch_inputs_sorted = WorkflowOncoanalyser.groupByMeta(
         ch_tumor_bam,
         ch_normal_bam,
+        ch_donor_bam,
     )
-        .map { meta, tumor_bam, tumor_bai, normal_bam, normal_bai ->
+        .map { meta, tumor_bam, tumor_bai, normal_bam, normal_bai, donor_bam, donor_bai ->
             return [
                 meta,
                 Utils.selectCurrentOrExisting(tumor_bam, meta, Constants.INPUT.BAM_MARKDUPS_DNA_TUMOR),
                 tumor_bai ?: Utils.getInput(meta, Constants.INPUT.BAI_DNA_TUMOR),
+
                 Utils.selectCurrentOrExisting(normal_bam, meta, Constants.INPUT.BAM_MARKDUPS_DNA_NORMAL),
                 normal_bai ?: Utils.getInput(meta, Constants.INPUT.BAI_DNA_NORMAL),
+
+                Utils.selectCurrentOrExisting(donor_bam, meta, Constants.INPUT.BAM_MARKDUPS_DNA_DONOR),
+                donor_bai ?: Utils.getInput(meta, Constants.INPUT.BAI_DNA_DONOR),
             ]
         }
-        .branch { meta, tumor_bam, tumor_bai, normal_bam, normal_bai ->
+        .branch { meta, tumor_bam, tumor_bai, normal_bam, normal_bai, donor_bam, donor_bai ->
             def has_existing = Utils.hasExistingInput(meta, Constants.INPUT.AMBER_DIR)
             runnable: tumor_bam && !has_existing
             skip: true
@@ -48,9 +54,9 @@ workflow AMBER_PROFILING {
         }
 
     // Create process input channel
-    // channel: [ meta_amber, tumor_bam, normal_bam, tumor_bai, normal_bai ]
+    // channel: [ meta_amber, tumor_bam, normal_bam, donor_bam, tumor_bai, normal_bai, donor_bai ]
     ch_amber_inputs = ch_inputs_sorted.runnable
-        .map { meta, tumor_bam, tumor_bai, normal_bam, normal_bai ->
+        .map { meta, tumor_bam, tumor_bai, normal_bam, normal_bai, donor_bam, donor_bai ->
 
             def meta_amber = [
                 key: meta.group_id,
@@ -62,7 +68,11 @@ workflow AMBER_PROFILING {
                 meta_amber.normal_id = Utils.getNormalDnaSampleName(meta)
             }
 
-            [meta_amber, tumor_bam, normal_bam, tumor_bai, normal_bai]
+            if (donor_bam) {
+                meta_amber.donor_id = Utils.getDonorDnaSampleName(meta)
+            }
+
+            [meta_amber, tumor_bam, normal_bam, donor_bam, tumor_bai, normal_bai, donor_bai]
         }
 
     // Run process

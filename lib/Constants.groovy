@@ -93,6 +93,7 @@ class Constants {
         TUMOR,
         NORMAL,
         TUMOR_NORMAL,
+        DONOR,
     }
 
     static enum SequenceType {
@@ -136,6 +137,18 @@ class Constants {
             SequenceType.DNA,
         ],
 
+        BAM_DNA_DONOR: [
+            FileType.BAM,
+            SampleType.DONOR,
+            SequenceType.DNA,
+        ],
+
+        BAM_MARKDUPS_DNA_DONOR: [
+            FileType.BAM_MARKDUPS,
+            SampleType.DONOR,
+            SequenceType.DNA,
+        ],
+
         BAM_RNA_TUMOR: [
             FileType.BAM,
             SampleType.TUMOR,
@@ -151,6 +164,12 @@ class Constants {
         BAI_DNA_NORMAL: [
             FileType.BAI,
             SampleType.NORMAL,
+            SequenceType.DNA,
+        ],
+
+        BAI_DNA_DONOR: [
+            FileType.BAI,
+            SampleType.DONOR,
             SequenceType.DNA,
         ],
 
