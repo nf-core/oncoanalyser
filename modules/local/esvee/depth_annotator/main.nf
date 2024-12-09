@@ -49,7 +49,7 @@ process ESVEE_DEPTH_ANNOTATOR {
         -unmap_regions ${unmap_regions} \\
         -output_dir depth_annotation/ \\
         -threads ${task.cpus} \\
-        -log_debug
+        -log_level DEBUG
 
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":

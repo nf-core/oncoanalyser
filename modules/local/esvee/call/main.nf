@@ -8,7 +8,7 @@ process ESVEE_CALL {
         'biocontainers/hmftools-esvee:1.0_beta--hdfd78af_6' }"
 
     input:
-    tuple val(meta), path(ref_depth_vcf), path(fragment_lengths_tsv)
+    tuple val(meta), path(ref_depth_vcf), path(prep_dir)
     path genome_fasta
     val genome_ver
     path pon_breakends
@@ -40,14 +40,14 @@ process ESVEE_CALL {
         -sample ${meta.tumor_id} \\
         ${reference_arg} \\
         -input_vcf ${ref_depth_vcf} \\
-        -frag_length_file ${fragment_lengths_tsv} \\
+        -esvee_prep_dir ${prep_dir}/ \\
         -ref_genome_version ${genome_ver} \\
         -known_hotspot_file ${known_fusions} \\
         -pon_sgl_file ${pon_breakends} \\
         -pon_sv_file ${pon_breakpoints} \\
         -repeat_mask_file ${repeatmasker_annotations} \\
         -output_dir caller/ \\
-        -log_debug
+        -log_level DEBUG
 
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":

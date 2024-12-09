@@ -115,12 +115,11 @@ workflow ESVEE_CALLING {
     // MODULE: ESVEE assemble reads
     //
     // Create process input channel
-    // channel: [ meta_esvee, tumor_prep_bam, tumor_prep_bai, normal_prep_bam, normal_prep_bai, junctions_tsv, fragment_lengths_tsv ]
+    // channel: [ meta_esvee, tumor_prep_bam, tumor_prep_bai, normal_prep_bam, normal_prep_bai, prep_dir ]
     ch_assemble_inputs = WorkflowOncoanalyser.groupByMeta(
         ESVEE_PREP.out.tumor_prep_bam,
         ch_esvee_prep_normal_bam,
-        ESVEE_PREP.out.junctions_tsv,
-        ESVEE_PREP.out.fragment_lengths_tsv,
+        ESVEE_PREP.out.prep_dir,
     )
 
     // Run process
@@ -161,10 +160,10 @@ workflow ESVEE_CALLING {
     // MODULE: ESVEE call somatic structural variants
     //
     // Create process input channel
-    // channel: [meta_esvee, ref_depth_vcf, fragment_lengths_tsv]
+    // channel: [meta_esvee, ref_depth_vcf, prep_dir]
     ch_call_inputs = WorkflowOncoanalyser.groupByMeta(
         ESVEE_DEPTH_ANNOTATOR.out.ref_depth_vcf,
-        ESVEE_PREP.out.fragment_lengths_tsv,
+        ESVEE_PREP.out.prep_dir,
     )
 
     ESVEE_CALL(
