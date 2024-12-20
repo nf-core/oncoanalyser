@@ -9,7 +9,7 @@ lint:
     - config_defaults:
         - params.fastp_umi_length
         - params.fastp_umi_skip
-nf_core_version: 3.1.0
+nf_core_version: 3.1.1
 repository_type: pipeline
 template:
   author: Stephen Watts
