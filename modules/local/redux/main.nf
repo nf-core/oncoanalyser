@@ -1,6 +1,6 @@
 process REDUX {
     tag "${meta.id}"
-    label 'process_high'
+    label 'process_medium'
 
     container "${ workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container ?
         'https://depot.galaxyproject.org/singularity/hmftools-redux:1.0_beta--hdfd78af_6' :
@@ -50,7 +50,7 @@ process REDUX {
         -ref_genome_version ${genome_ver} \\
         -unmap_regions ${unmap_regions} \\
         -ref_genome_msi_file ${msi_jitter_sites} \\
-        -bamtool \$(which sambamba) \\
+        -bamtool \$(which samtools) \\
         ${form_consensus_arg} \\
         ${umi_args} \\
         -write_stats \\
