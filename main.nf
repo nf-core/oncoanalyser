@@ -1,4 +1,7 @@
 #!/usr/bin/env nextflow
+import Constants
+import Utils
+
 /*
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     nf-core/oncoanalyser
@@ -9,27 +12,55 @@
 ----------------------------------------------------------------------------------------
 */
 
+nextflow.enable.dsl = 2
+
 /*
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-    IMPORT FUNCTIONS / MODULES / SUBWORKFLOWS / WORKFLOWS
+    IMPORT NF-CORE UTILITY FUNCTIONS / SUBWORKFLOWS
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 */
 
-include { ONCOANALYSER  } from './workflows/oncoanalyser'
 include { PIPELINE_INITIALISATION } from './subworkflows/local/utils_nfcore_oncoanalyser_pipeline'
 include { PIPELINE_COMPLETION     } from './subworkflows/local/utils_nfcore_oncoanalyser_pipeline'
-include { getGenomeAttribute      } from './subworkflows/local/utils_nfcore_oncoanalyser_pipeline'
+
+include { getGenomeAttribute } from './subworkflows/local/utils_nfcore_oncoanalyser_pipeline'
 
 /*
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-    GENOME PARAMETER VALUES
+    SET DEFAULT VALUES
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 */
 
-// TODO nf-core: Remove this line if you don't need a FASTA file
-//   This is an example of how to use getGenomeAttribute() to fetch parameters
-//   from igenomes.config using `--genome`
-params.fasta = getGenomeAttribute('fasta')
+params.ref_data_genome_fasta         = getGenomeAttribute('fasta')
+params.ref_data_genome_fai           = getGenomeAttribute('fai')
+params.ref_data_genome_dict          = getGenomeAttribute('dict')
+params.ref_data_genome_bwamem2_index = getGenomeAttribute('bwamem2_index')
+params.ref_data_genome_gridss_index  = getGenomeAttribute('gridss_index')
+params.ref_data_genome_star_index    = getGenomeAttribute('star_index')
+
+WorkflowMain.setParamsDefaults(params, log)
+WorkflowMain.validateParams(params, log)
+
+/*
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    CREATE PLACEHOLDER FILES FOR STUB RUNS
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+*/
+
+// NOTE(SW): required prior to workflow import
+
+if (workflow.stubRun && params.create_stub_placeholders) {
+    Utils.createStubPlaceholders(params)
+}
+
+/*
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    IMPORT WORKFLOWS
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+*/
+
+include { TARGETED } from './workflows/targeted'
+include { WGTS     } from './workflows/wgts'
 
 /*
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -40,22 +71,21 @@ params.fasta = getGenomeAttribute('fasta')
 //
 // WORKFLOW: Run main analysis pipeline depending on type of input
 //
+run_mode = Utils.getRunMode(params.mode, log)
+
 workflow NFCORE_ONCOANALYSER {
 
-    take:
-    samplesheet // channel: samplesheet read in from --input
+    if (run_mode === Constants.RunMode.WGTS) {
+        WGTS()
+    } else if (run_mode === Constants.RunMode.TARGETED) {
+        TARGETED()
+    } else {
+        log.error("received bad run mode: ${run_mode}")
+        Nextflow.exit(1)
+    }
 
-    main:
-
-    //
-    // WORKFLOW: Run pipeline
-    //
-    ONCOANALYSER (
-        samplesheet
-    )
-    emit:
-    multiqc_report = ONCOANALYSER.out.multiqc_report // channel: /path/to/multiqc_report.html
 }
+
 /*
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     RUN MAIN WORKFLOW
@@ -64,36 +94,32 @@ workflow NFCORE_ONCOANALYSER {
 
 workflow {
 
-    main:
     //
     // SUBWORKFLOW: Run initialisation tasks
     //
-    PIPELINE_INITIALISATION (
+    PIPELINE_INITIALISATION(
         params.version,
         params.validate_params,
         params.monochrome_logs,
         args,
         params.outdir,
-        params.input
     )
 
     //
     // WORKFLOW: Run main workflow
     //
-    NFCORE_ONCOANALYSER (
-        PIPELINE_INITIALISATION.out.samplesheet
-    )
+    NFCORE_ONCOANALYSER()
+
     //
     // SUBWORKFLOW: Run completion tasks
     //
-    PIPELINE_COMPLETION (
+    PIPELINE_COMPLETION(
         params.email,
         params.email_on_fail,
         params.plaintext_email,
         params.outdir,
         params.monochrome_logs,
         params.hook_url,
-        NFCORE_ONCOANALYSER.out.multiqc_report
     )
 }
 
