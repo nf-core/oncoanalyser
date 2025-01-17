@@ -22,7 +22,6 @@ process REDUX {
     tuple val(meta), path('*.duplicate_freq.tsv')                , emit: dup_freq_tsv
     tuple val(meta), path('*.jitter_params.tsv')                 , emit: jitter_tsv
     tuple val(meta), path('*.ms_table.tsv.gz')                   , emit: ms_tsv
-    tuple val(meta), path('*.repeat.tsv.gz')                     , emit: repeat_tsv
     path 'versions.yml'                                          , emit: versions
 
     when:

@@ -17,9 +17,9 @@ workflow SAGE_CALLING {
     ch_tumor_bam                 // channel: [mandatory] [ meta, bam, bai ]
     ch_normal_bam                // channel: [mandatory] [ meta, bam, bai ]
     ch_donor_bam                 // channel: [mandatory] [ meta, bam, bai ]
-    ch_tumor_tsv                 // channel: [mandatory] [ meta, dup_freq_tsv, jitter_tsv, ms_tsv, repeat_tsv ]
-    ch_normal_tsv                // channel: [mandatory] [ meta, dup_freq_tsv, jitter_tsv, ms_tsv, repeat_tsv ]
-    ch_donor_tsv                 // channel: [mandatory] [ meta, dup_freq_tsv, jitter_tsv, ms_tsv, repeat_tsv ]
+    ch_tumor_tsv                 // channel: [mandatory] [ meta, dup_freq_tsv, jitter_tsv, ms_tsv ]
+    ch_normal_tsv                // channel: [mandatory] [ meta, dup_freq_tsv, jitter_tsv, ms_tsv ]
+    ch_donor_tsv                 // channel: [mandatory] [ meta, dup_freq_tsv, jitter_tsv, ms_tsv ]
 
     // Reference data
     genome_fasta                 // channel: [mandatory] /path/to/genome_fasta
@@ -56,25 +56,22 @@ workflow SAGE_CALLING {
                normal_bam, normal_bai,
                donor_bam,  donor_bai,
 
-               tumor_dup_freq_tsv,  tumor_jitter_tsv,  tumor_ms_tsv,  tumor_repeat_tsv,
-               normal_dup_freq_tsv, normal_jitter_tsv, normal_ms_tsv, normal_repeat_tsv,
-               donor_dup_freq_tsv,  donor_jitter_tsv,  donor_ms_tsv,  donor_repeat_tsv ->
+               tumor_dup_freq_tsv,  tumor_jitter_tsv,  tumor_ms_tsv,
+               normal_dup_freq_tsv, normal_jitter_tsv, normal_ms_tsv,
+               donor_dup_freq_tsv,  donor_jitter_tsv,  donor_ms_tsv ->
 
             def redux_tsv_list = [
                 tumor_dup_freq_tsv  ?: Utils.getInput(meta, Constants.INPUT.REDUX_DUP_FREQ_TSV_TUMOR),
                 tumor_jitter_tsv    ?: Utils.getInput(meta, Constants.INPUT.REDUX_JITTER_TSV_TUMOR),
                 tumor_ms_tsv        ?: Utils.getInput(meta, Constants.INPUT.REDUX_MS_TSV_TUMOR),
-                tumor_repeat_tsv    ?: Utils.getInput(meta, Constants.INPUT.REDUX_REPEAT_TSV_TUMOR),
 
                 normal_dup_freq_tsv ?: Utils.getInput(meta, Constants.INPUT.REDUX_DUP_FREQ_TSV_NORMAL),
                 normal_jitter_tsv   ?: Utils.getInput(meta, Constants.INPUT.REDUX_JITTER_TSV_NORMAL),
                 normal_ms_tsv       ?: Utils.getInput(meta, Constants.INPUT.REDUX_MS_TSV_NORMAL),
-                normal_repeat_tsv   ?: Utils.getInput(meta, Constants.INPUT.REDUX_REPEAT_TSV_NORMAL),
 
                 donor_dup_freq_tsv  ?: Utils.getInput(meta, Constants.INPUT.REDUX_DUP_FREQ_TSV_DONOR),
                 donor_jitter_tsv    ?: Utils.getInput(meta, Constants.INPUT.REDUX_JITTER_TSV_DONOR),
                 donor_ms_tsv        ?: Utils.getInput(meta, Constants.INPUT.REDUX_MS_TSV_DONOR),
-                donor_repeat_tsv    ?: Utils.getInput(meta, Constants.INPUT.REDUX_REPEAT_TSV_DONOR),
             ]
 
             redux_tsv_list = redux_tsv_list.findAll{ it != [] }
