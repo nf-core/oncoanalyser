@@ -1,0 +1,26 @@
+Changes in module 'nf-core/samtools/flagstat'
+--- modules/nf-core/samtools/flagstat/main.nf
++++ modules/nf-core/samtools/flagstat/main.nf
+@@ -19,7 +19,7 @@
+ 
+     script:
+     def args = task.ext.args ?: ''
+-    def prefix = task.ext.prefix ?: "${meta.id}"
++    def prefix = task.ext.prefix ?: "${meta.sample_id}"
+     """
+     samtools \\
+         flagstat \\
+@@ -32,4 +32,11 @@
+         samtools: \$(echo \$(samtools --version 2>&1) | sed 's/^.*samtools //; s/Using.*\$//')
+     END_VERSIONS
+     """
++
++    stub:
++    def prefix = task.ext.prefix ?: "${meta.sample_id}"
++    """
++    touch ${prefix}.flagstat
++    echo -e '${task.process}:\\n  stub: noversions\\n' > versions.yml
++    """
+ }
+
+************************************************************

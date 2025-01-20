@@ -1,0 +1,40 @@
+name: sigs
+description: Fit somatic small variants to signature definitions
+keywords:
+  - signatures
+  - variants
+tools:
+  - sigs:
+      description: Fits somatic small variants to signature definitions.
+      homepage: https://github.com/hartwigmedical/hmftools/tree/master/sigs
+      documentation: https://github.com/hartwigmedical/hmftools/tree/master/sigs
+      licence: ["GPL v3"]
+input:
+  - meta:
+      type: map
+      description: |
+        Groovy Map containing sample information
+        e.g. [id: 'sample_id', tumor_id: 'tumor_name']
+  - smlv_vcf:
+      type: file
+      description: Small somatic variant VCF file
+      pattern: "*.{vcf.gz}"
+  - signatures:
+      type: file
+      description: Signatures file
+      pattern: "*.{csv}"
+output:
+  - meta:
+      type: map
+      description: |
+        Groovy Map containing sample information
+        e.g. [id: 'sample_id', tumor_id: 'tumor_name', normal_id: 'normal_name']
+  - sigs_dir:
+      type: directory
+      description: Sigs output directory
+  - versions:
+      type: file
+      description: File containing software versions
+      pattern: "versions.yml"
+authors:
+  - "@scwatts"

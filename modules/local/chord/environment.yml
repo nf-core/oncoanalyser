@@ -1,0 +1,6 @@
+name: chord
+channels:
+  - conda-forge
+  - bioconda
+dependencies:
+  - bioconda::r-chord=2.03
