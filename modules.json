@@ -5,15 +5,50 @@
         "https://github.com/nf-core/modules.git": {
             "modules": {
                 "nf-core": {
-                    "fastqc": {
+                    "bwa/index": {
                         "branch": "master",
-                        "git_sha": "08108058ea36a63f141c25c4e75f9f872a5b2296",
+                        "git_sha": "6278bf9afd4a4b2d00fa6052250e73da3d91546f",
+                        "installed_by": ["modules"],
+                        "patch": "modules/nf-core/bwa/index/bwa-index.diff"
+                    },
+                    "bwamem2/index": {
+                        "branch": "master",
+                        "git_sha": "7081e04c18de9480948d34513a1c1e2d0fa9126d",
+                        "installed_by": ["modules"],
+                        "patch": "modules/nf-core/bwamem2/index/bwamem2-index.diff"
+                    },
+                    "gatk4/markduplicates": {
+                        "branch": "master",
+                        "git_sha": "e726b1730dff525bde4a6839e544dabfea4cd7fd",
                         "installed_by": ["modules"]
                     },
-                    "multiqc": {
+                    "samtools/dict": {
                         "branch": "master",
-                        "git_sha": "f0719ae309075ae4a291533883847c3f7c441dad",
+                        "git_sha": "cf5b9c30a2adacc581793afb79fae5f5b50bed01",
+                        "installed_by": ["modules"],
+                        "patch": "modules/nf-core/samtools/dict/samtools-dict.diff"
+                    },
+                    "samtools/faidx": {
+                        "branch": "master",
+                        "git_sha": "cf5b9c30a2adacc581793afb79fae5f5b50bed01",
+                        "installed_by": ["modules"],
+                        "patch": "modules/nf-core/samtools/faidx/samtools-faidx.diff"
+                    },
+                    "samtools/flagstat": {
+                        "branch": "master",
+                        "git_sha": "bbb99cb8d679555cc01c98766de7869f83283545",
                         "installed_by": ["modules"]
+                    },
+                    "samtools/sort": {
+                        "branch": "master",
+                        "git_sha": "d5d785b3d8b422cda9c6d84a23f629a8e9ff8cd8",
+                        "installed_by": ["modules"]
+                    },
+                    "star/genomegenerate": {
+                        "branch": "master",
+                        "git_sha": "a21faa6a3481af92a343a10926f59c189a2c16c9",
+                        "installed_by": ["modules"],
+                        "patch": "modules/nf-core/star/genomegenerate/star-genomegenerate.diff"
                     }
                 }
             },
