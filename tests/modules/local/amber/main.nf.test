@@ -69,9 +69,6 @@ nextflow_process {
 
         then {
             assert process.success
-            // assert path("${process.out.amber_dir[0][1]}/amber.baf").exists()
-            // assert path("${process.out.amber_dir[0][1]}/amber.qc").exists()
-            
             assert snapshot(process.out).match()
         }
     }
