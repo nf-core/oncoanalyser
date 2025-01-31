@@ -53,6 +53,8 @@ process ORANGE {
     def isofox_gene_distribution_arg = isofox_gene_distribution ? "-isofox_gene_distribution ${isofox_gene_distribution}" : ''
     def isofox_alt_sj_arg = isofox_alt_sj ? "-isofox_alt_sj_cohort ${isofox_alt_sj}" : ''
 
+    def doid_arg = meta.cancer_type ?: "162"
+
     """
     echo "${pipeline_version_str}" > pipeline_version.txt
 
@@ -115,7 +117,7 @@ process ORANGE {
             -pipeline_version_file pipeline_version.txt \\
             \\
             -tumor_sample_id ${meta.tumor_id} \\
-            -primary_tumor_doids 162 \\
+            -primary_tumor_doids ${doid_arg} \\
             -tumor_sample_wgs_metrics_file ${bam_metrics_somatic} \\
             -tumor_sample_flagstat_file ${flagstat_somatic} \\
             -sage_dir ${sage_somatic_dir} \\
