@@ -27,7 +27,7 @@ nextflow_process {
                     file(params.test_sample_data +  'subject_a.normal.dna.bwa-mem2_2.2.1.markdups.bam.bai', checkIfExists: true),
                 
                 ]
-                input[1] = file("https://raw.githubusercontent.com/nf-core/test-datasets/oncoanalyser/reference_data/hmftools/5.34_38--2/dna_pipeline/copy_number/GC_profile.1000bp.38.cnp")
+                input[1] = file("/home/rhassaine/resource_files_oa/38/results/reference_data/1.0.0/20250203_101759/hmf_data_5.34_38--2/dna_pipeline/copy_number/GC_profile.1000bp.38.cnp")
                 input[2] = []
                 input[3] = []
                 """
@@ -35,15 +35,19 @@ nextflow_process {
         }
 
         then {
+            def cobalt_output_dir = process.out.cobalt_dir[0][1]
+            
             assertAll(
                 { assert process.success },
                 { assert snapshot(process.out).match() },
-                { assert path(process.out.cobalt_ratio).exists() },
-                { assert path(process.out.cobalt_ratio).getText().contains("Chromosome\tPosition\tRatio") },
-                { assert path(process.out.cobalt_pcf).exists() },
-                { assert path(process.out.cobalt_pcf).getText().contains("Chromosome\tPosition\tRatio") },
-                { assert path(process.out.cobalt_gc).exists() },
-                { assert path(process.out.cobalt_gc).getText().contains("Chromosome\tPosition\tGCContent") }
+                { assert path(cobalt_output_dir).resolve("cobalt.version").exists() },
+                { assert path(cobalt_output_dir).resolve("tumor_test.cobalt.gc.median.tsv").exists() },
+                { assert path(cobalt_output_dir).resolve("tumor_test.cobalt.ratio.pcf").exists() },
+                { assert path(cobalt_output_dir).resolve("tumor_test.cobalt.ratio.tsv.gz").exists() },
+                { assert path(cobalt_output_dir).resolve("normal_test.cobalt.gc.median.tsv").exists() },
+                { assert path(cobalt_output_dir).resolve("normal_test.cobalt.ratio.median.tsv").exists() },
+                { assert path(cobalt_output_dir).resolve("normal_test.cobalt.ratio.pcf").exists() },
+                { assert path(process.out.versions[0]).exists() }
             )
         }
 
@@ -64,27 +68,25 @@ nextflow_process {
                     file(params.test_sample_data + 'subject_a.tumor.dna.bwa-mem2_2.2.1.markdups.bam.bai', checkIfExists: true),
                     []
                 ]
-                input[1] = file("https://raw.githubusercontent.com/nf-core/test-datasets/oncoanalyser/reference_data/hmftools/5.34_38--2/dna_pipeline/copy_number/GC_profile.1000bp.38.cnp")
-                input[2] = file("https://raw.githubusercontent.com/nf-core/test-datasets/oncoanalyser/reference_data/hmftools/5.34_38--2/dna_pipeline/copy_number/DiploidRegions.38.bed.gz")
+                input[1] = file("/home/rhassaine/resource_files_oa/38/results/reference_data/1.0.0/20250203_101759/hmf_data_5.34_38--2/dna_pipeline/copy_number/GC_profile.1000bp.38.cnp")
+                input[2] = file("/home/rhassaine/resource_files_oa/38/results/reference_data/1.0.0/20250203_101759/hmf_data_5.34_38--2/dna_pipeline/copy_number/DiploidRegions.38.bed.gz")
                 input[3] = []
                 """
             }
         }
 
-        then {
-            assertAll(
-                { assert process.success },
-                { assert snapshot(process.out).match() },
-                { assert path(process.out.cobalt_ratio).exists() },
-                { assert path(process.out.cobalt_ratio).getText().contains("Chromosome\tPosition\tRatio") },
-                { assert path(process.out.cobalt_pcf).exists() },
-                { assert path(process.out.cobalt_pcf).getText().contains("Chromosome\tPosition\tRatio") },
-                { assert path(process.out.cobalt_gc).exists() },
-                { assert path(process.out.cobalt_gc).getText().contains("Chromosome\tPosition\tGCContent") },
-                { assert path(process.out.cobalt_diploid_bed).exists() },
-                { assert path(process.out.cobalt_diploid_bed).getText().contains("chr\tstart\tend") }
-            )
+       then {
+        def cobalt_output_dir = process.out.cobalt_dir[0][1]
+        
+        assertAll(
+            { assert process.success },
+            { assert snapshot(process.out).match() },
+            { assert path(cobalt_output_dir).resolve("cobalt.version").exists() },
+            { assert path(cobalt_output_dir).resolve("tumor_test.cobalt.gc.median.tsv").exists() },
+            { assert path(cobalt_output_dir).resolve("tumor_test.cobalt.ratio.pcf").exists() },
+            { assert path(cobalt_output_dir).resolve("tumor_test.cobalt.ratio.tsv.gz").exists() },
+            { assert path(process.out.versions[0]).exists() }
+    )
+}
         }
     }
-
-}
