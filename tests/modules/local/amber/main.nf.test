@@ -8,7 +8,7 @@ nextflow_process {
 
         when {
             params {
-                test_sample_data = 'https://raw.githubusercontent.com/nf-core/test-datasets/oncoanalyser/sample_data/simulated_reads/wgts/markdups_bam/'// define parameters here. Example:
+                test_sample_data = 'https://raw.githubusercontent.com/nf-core/test-datasets/oncoanalyser/sample_data/simulated_reads/wgts/markdups_bam/'
             }
             process {
                 """
