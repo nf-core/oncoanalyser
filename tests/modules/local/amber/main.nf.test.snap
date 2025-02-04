@@ -56,6 +56,51 @@
             "nf-test": "0.9.2",
             "nextflow": "24.10.4"
         },
-        "timestamp": "2025-02-03T16:00:40.195219282"
+        "timestamp": "2025-02-04T08:41:54.940934927"
+    },
+    "AMBER with tumor only": {
+        "content": [
+            {
+                "0": [
+                    [
+                        {
+                            "id": "test",
+                            "tumor_id": "tumor_test"
+                        },
+                        [
+                            "amber.version:md5,94a3ca487cc956f9eadb8de364c27b1d",
+                            "tumor_test.amber.baf.pcf:md5,5b42f5fac4df8e88a1605943beda9eda",
+                            "tumor_test.amber.baf.tsv.gz:md5,938d30b5bd65598a4efc2b5c01f89ce1",
+                            "tumor_test.amber.qc:md5,9547e68ba672e08d6bd49e1e6f654ee8"
+                        ]
+                    ]
+                ],
+                "1": [
+                    "versions.yml:md5,f5846f28a6cd7391cccfc28a96892710"
+                ],
+                "amber_dir": [
+                    [
+                        {
+                            "id": "test",
+                            "tumor_id": "tumor_test"
+                        },
+                        [
+                            "amber.version:md5,94a3ca487cc956f9eadb8de364c27b1d",
+                            "tumor_test.amber.baf.pcf:md5,5b42f5fac4df8e88a1605943beda9eda",
+                            "tumor_test.amber.baf.tsv.gz:md5,938d30b5bd65598a4efc2b5c01f89ce1",
+                            "tumor_test.amber.qc:md5,9547e68ba672e08d6bd49e1e6f654ee8"
+                        ]
+                    ]
+                ],
+                "versions": [
+                    "versions.yml:md5,f5846f28a6cd7391cccfc28a96892710"
+                ]
+            }
+        ],
+        "meta": {
+            "nf-test": "0.9.2",
+            "nextflow": "24.10.4"
+        },
+        "timestamp": "2025-02-04T08:42:14.429643438"
     }
 }
