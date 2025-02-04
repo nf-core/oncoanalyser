@@ -1,0 +1,79 @@
+{
+    "SAGE (Somatic) testing tumor + normal": {
+        "content": [
+            {
+                "0": [
+                    [
+                        {
+                            "id": "test",
+                            "tumor_id": "tumor_test",
+                            "normal_id": "normal_test"
+                        },
+                        "tumor_test.sage.somatic.vcf.gz:md5,cd6169af5b27d284cca6ea127ee654da",
+                        "tumor_test.sage.somatic.vcf.gz.tbi:md5,437be8db89758eaf79b8478eabc3b002"
+                    ]
+                ],
+                "1": [
+                    [
+                        {
+                            "id": "test",
+                            "tumor_id": "tumor_test",
+                            "normal_id": "normal_test"
+                        },
+                        [
+                            "normal_test.sage.bqr.png:md5,2f2b28d06d9ee1eaf0cbe3ee43ed0461",
+                            "normal_test.sage.bqr.tsv:md5,ac6ced06ac3cf3ceb98d8a6bc16327fe",
+                            "tumor_test.sage.bqr.png:md5,d85e132c1a112d234f89c90ab5416c73",
+                            "tumor_test.sage.bqr.tsv:md5,dcda061b2a4fdf7de6e7d4337edee7c6",
+                            "tumor_test.sage.exon.medians.tsv:md5,acc1b3f998dadfca2856ff94d562295e",
+                            "tumor_test.sage.gene.coverage.tsv:md5,0e57d0540ec0526654440e303d4c6ca0",
+                            "tumor_test.sage.somatic.vcf.gz:md5,cd6169af5b27d284cca6ea127ee654da",
+                            "tumor_test.sage.somatic.vcf.gz.tbi:md5,437be8db89758eaf79b8478eabc3b002"
+                        ]
+                    ]
+                ],
+                "2": [
+                    "versions.yml:md5,56582c57adca1a9e66e3fe56bf77ab2b"
+                ],
+                "sage_dir": [
+                    [
+                        {
+                            "id": "test",
+                            "tumor_id": "tumor_test",
+                            "normal_id": "normal_test"
+                        },
+                        [
+                            "normal_test.sage.bqr.png:md5,2f2b28d06d9ee1eaf0cbe3ee43ed0461",
+                            "normal_test.sage.bqr.tsv:md5,ac6ced06ac3cf3ceb98d8a6bc16327fe",
+                            "tumor_test.sage.bqr.png:md5,d85e132c1a112d234f89c90ab5416c73",
+                            "tumor_test.sage.bqr.tsv:md5,dcda061b2a4fdf7de6e7d4337edee7c6",
+                            "tumor_test.sage.exon.medians.tsv:md5,acc1b3f998dadfca2856ff94d562295e",
+                            "tumor_test.sage.gene.coverage.tsv:md5,0e57d0540ec0526654440e303d4c6ca0",
+                            "tumor_test.sage.somatic.vcf.gz:md5,cd6169af5b27d284cca6ea127ee654da",
+                            "tumor_test.sage.somatic.vcf.gz.tbi:md5,437be8db89758eaf79b8478eabc3b002"
+                        ]
+                    ]
+                ],
+                "vcf": [
+                    [
+                        {
+                            "id": "test",
+                            "tumor_id": "tumor_test",
+                            "normal_id": "normal_test"
+                        },
+                        "tumor_test.sage.somatic.vcf.gz:md5,cd6169af5b27d284cca6ea127ee654da",
+                        "tumor_test.sage.somatic.vcf.gz.tbi:md5,437be8db89758eaf79b8478eabc3b002"
+                    ]
+                ],
+                "versions": [
+                    "versions.yml:md5,56582c57adca1a9e66e3fe56bf77ab2b"
+                ]
+            }
+        ],
+        "meta": {
+            "nf-test": "0.9.2",
+            "nextflow": "24.10.4"
+        },
+        "timestamp": "2025-02-04T15:59:05.573321877"
+    }
+}
