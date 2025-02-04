@@ -43,19 +43,19 @@ nextflow_process {
             def amber_output_dir = process.out.amber_dir[0][1]
 
             assertAll(
-            { assert process.success },
-            { assert snapshot(process.out).match() },
-            { assert path(amber_output_dir).resolve("amber.version").exists() },
-            { assert path(amber_output_dir).resolve("normal_test.amber.homozygousregion.tsv").exists() },
-            { assert path(amber_output_dir).resolve("normal_test.amber.snp.vcf.gz").exists() },
-            { assert path(amber_output_dir).resolve("normal_test.amber.snp.vcf.gz.tbi").exists() },
-            { assert path(amber_output_dir).resolve("tumor_test.amber.baf.pcf").exists() },
-            { assert path(amber_output_dir).resolve("tumor_test.amber.baf.tsv.gz").exists() },
-            { assert path(amber_output_dir).resolve("tumor_test.amber.contamination.tsv").exists() },
-            { assert path(amber_output_dir).resolve("tumor_test.amber.contamination.vcf.gz").exists() },
-            { assert path(amber_output_dir).resolve("tumor_test.amber.contamination.vcf.gz.tbi").exists() },
-            { assert path(amber_output_dir).resolve("tumor_test.amber.qc").exists() },
-            { assert path(process.out.versions[0]).exists() }
+                { assert process.success },
+                { assert snapshot(process.out).match() },
+                { assert path(amber_output_dir).resolve("amber.version").exists() },
+                { assert path(amber_output_dir).resolve("normal_test.amber.homozygousregion.tsv").exists() },
+                { assert path(amber_output_dir).resolve("normal_test.amber.snp.vcf.gz").exists() },
+                { assert path(amber_output_dir).resolve("normal_test.amber.snp.vcf.gz.tbi").exists() },
+                { assert path(amber_output_dir).resolve("tumor_test.amber.baf.pcf").exists() },
+                { assert path(amber_output_dir).resolve("tumor_test.amber.baf.tsv.gz").exists() },
+                { assert path(amber_output_dir).resolve("tumor_test.amber.contamination.tsv").exists() },
+                { assert path(amber_output_dir).resolve("tumor_test.amber.contamination.vcf.gz").exists() },
+                { assert path(amber_output_dir).resolve("tumor_test.amber.contamination.vcf.gz.tbi").exists() },
+                { assert path(amber_output_dir).resolve("tumor_test.amber.qc").exists() },
+                { assert path(process.out.versions[0]).exists() }
             )
         }
 
@@ -87,13 +87,13 @@ nextflow_process {
             def amber_output_dir = process.out.amber_dir[0][1]
 
             assertAll(
-            { assert process.success },
-            { assert snapshot(process.out).match() },
-            { assert path(amber_output_dir).resolve("amber.version").exists() },
-            { assert path(amber_output_dir).resolve("tumor_test.amber.baf.pcf").exists() },
-            { assert path(amber_output_dir).resolve("tumor_test.amber.baf.tsv.gz").exists() },
-            { assert path(amber_output_dir).resolve("tumor_test.amber.qc").exists() },
-            { assert path(process.out.versions[0]).exists() }
+                { assert process.success },
+                { assert snapshot(process.out).match() },
+                { assert path(amber_output_dir).resolve("amber.version").exists() },
+                { assert path(amber_output_dir).resolve("tumor_test.amber.baf.pcf").exists() },
+                { assert path(amber_output_dir).resolve("tumor_test.amber.baf.tsv.gz").exists() },
+                { assert path(amber_output_dir).resolve("tumor_test.amber.qc").exists() },
+                { assert path(process.out.versions[0]).exists() }
             )
         }
     }
