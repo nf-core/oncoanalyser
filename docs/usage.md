@@ -21,7 +21,9 @@ These features enable `oncoanalyser` to be run in a highly flexible way. For exa
 existing PURPLE data as the starting point and skip variant calling processes. Additionally, reference/resource files
 can be staged locally to optimise execution or modified to create user-defined driver gene panels.
 
-:::danger
+<!--- NOTE(SW): nf-core/tools does not convert multiline GH admonition, so instead Docusaurus syntax is used --->
+
+:::danger{title=Caution}
 
 When starting from BAMs rather than FASTQ it is expected that:
 
@@ -48,16 +50,8 @@ samplesheet. The supported analysis types for each workflow are listed below.
 
 <sub><sup>\*</sup> Supported analyses relate to the TSO500 panel only</sub>
 
-:::note
-
-The default settings of `oncoanalyser` will accommodate typical sequencing depths for sample inputs and each individual
-tool is generally sequencing depth agnostic. However, variant calling is optimised for 100x tumor and 40x normal when
-invoked in `wgts` mode and expects sparse high-depth read data characteristic of panel sequencing when run in `targeted`
-mode. For atypical input sequence data you may consult the [hmftools
-documentation](https://github.com/hartwigmedical/hmftools) and [configure](#custom-tool-arguments) `oncoanalyser`
-accordingly.
-
-:::
+> [!NOTE]
+> The default settings of `oncoanalyser` will accommodate typical sequencing depths for sample inputs and each individual tool is generally sequencing depth agnostic. However, variant calling is optimised for 100x tumor and 40x normal when invoked in `wgts` mode and expects sparse high-depth read data characteristic of panel sequencing when run in `targeted` mode. For atypical input sequence data you may consult the [hmftools documentation](https://github.com/hartwigmedical/hmftools) and [configure](#custom-tool-arguments) `oncoanalyser` accordingly.
 
 ## Samplesheet
 
@@ -72,11 +66,8 @@ during execution such as the PURPLE output directory. The full list of recognise
 
 #### FASTQ
 
-:::note
-
-Currently only non-interleaved paired-end reads are accepted as FASTQ input.
-
-:::
+> [!NOTE]
+> Currently only non-interleaved paired-end reads are accepted as FASTQ input.
 
 ```csv title="samplesheet.csv"
 group_id,subject_id,sample_id,sample_type,sequence_type,filetype,info,filepath
@@ -86,6 +77,8 @@ P1_wgts,P1,SC,tumor,rna,fastq,library_id:SC_library;lane:001,/path/to/P1.SC.tumo
 ```
 
 #### BAM
+
+<!--- NOTE(SW): nf-core/tools does not convert multiline GH admonition, so instead Docusaurus syntax is used --->
 
 :::note
 
@@ -166,13 +159,8 @@ nextflow run nf-core/oncoanalyser \
 
 This will launch the pipeline with the `docker` configuration profile. See below for more information about profiles.
 
-:::note
-
-Reference data will be retrieved by `oncoanalyser` for every analysis run. It is therefore strongly recommended when
-running multiple analyses to pre-stage reference data locally to avoid it being retrieved multiple times. See [Staging
-reference data](#staging-reference-data).
-
-:::
+> [!NOTE]
+> Reference data will be retrieved by `oncoanalyser` for every analysis run. It is therefore strongly recommended when running multiple analyses to pre-stage reference data locally to avoid it being retrieved multiple times. See [Staging reference data](#staging-reference-data).
 
 Note that the pipeline will create the following files in your working directory:
 
@@ -187,11 +175,8 @@ If you wish to repeatedly use the same parameters for multiple runs, rather than
 
 Pipeline settings can be provided in a `yaml` or `json` file via `-params-file <file>`.
 
-:::warning
-
-Do not use `-c <file>` to specify parameters as this will result in errors. Custom config files specified with `-c` must only be used for [tuning process resource specifications](https://nf-co.re/docs/usage/configuration#tuning-workflow-resources), other infrastructural tweaks (such as output directories), or module arguments (args).
-
-:::
+> [!WARNING]
+> Do not use `-c <file>` to specify parameters as this will result in errors. Custom config files specified with `-c` must only be used for [tuning process resource specifications](https://nf-co.re/docs/usage/configuration#tuning-workflow-resources), other infrastructural tweaks (such as output directories), or module arguments (args).
 
 The above pipeline run specified with a params file in yaml format:
 
@@ -221,7 +206,7 @@ nextflow pull nf-core/oncoanalyser
 
 ### Reproducibility
 
-It is a good idea to specify a pipeline version when running the pipeline on your data. This ensures that a specific version of the pipeline code and software are used when you run your pipeline. If you keep using the same tag, you'll be running the same version of the pipeline, even if there have been changes to the code since.
+It is a good idea to specify the pipeline version when running the pipeline on your data. This ensures that a specific version of the pipeline code and software are used when you run your pipeline. If you keep using the same tag, you'll be running the same version of the pipeline, even if there have been changes to the code since.
 
 First, go to the [nf-core/oncoanalyser releases page](https://github.com/nf-core/oncoanalyser/releases) and find the latest pipeline version - numeric only (eg. `1.0.0`). Then specify this when running the pipeline with `-r` (one hyphen) - eg. `-r 1.0.0`. Of course, you can switch to another version by changing the number after the `-r` flag.
 
@@ -229,9 +214,8 @@ This version number will be logged in reports when you run the pipeline, so that
 
 To further assist in reproducbility, you can share and re-use [parameter files](#running-the-pipeline) to repeat pipeline runs with the same settings without having to write out a command with every single parameter.
 
-:::tip
-If you wish to share such profile (such as upload as supplementary material for academic publications), make sure to NOT include cluster specific paths to files, nor institutional specific profiles.
-:::
+> [!TIP]
+> If you wish to share such profile (such as upload as supplementary material for academic publications), make sure to NOT include cluster specific paths to files, nor institutional specific profiles.
 
 ## Advanced usage
 
@@ -243,12 +227,8 @@ Multiple processes can be given as a comma-separated list. While there are some 
 skipping resource intensive processes such as VIRUSBreakend), it becomes more powerful when combined with existing
 inputs as described in the following section.
 
-:::warning
-
-When skipping components no checks are done to identify orphan processes in the execution DAG or for redundant
-processes.
-
-:::
+> [!WARNING]
+> When skipping components no checks are done to identify orphan processes in the execution DAG or for redundant processes.
 
 ### Existing inputs
 
@@ -269,12 +249,8 @@ P1_wgts,P1,SB,tumor,dna,bam,/path/to/P1.SB.tumor.dna.wgs.bam
 P1_wgts,P1,SB,tumor,dna,purple_dir,/path/to/P1.purple_dir/
 ```
 
-:::note
-
-The original source input file (i.e. BAM or FASTQ) must always be provided for `oncoanalyser` to infer the correct
-analysis type.
-
-:::
+> [!NOTE]
+> The original source input file (i.e. BAM or FASTQ) must always be provided for `oncoanalyser` to infer the correct analysis type.
 
 And now run and skip variant calling:
 
@@ -289,12 +265,8 @@ nextflow run nf-core/oncoanalyser \
   --outdir output/
 ```
 
-:::warning
-
-Providing existing inputs will cause `oncoanalyser` to skip the corresponding process but _not any_ of the upstream
-processes. It is the responsibility of the user to skip all relevant processes.
-
-:::
+> [!WARNING]
+> Providing existing inputs will cause `oncoanalyser` to skip the corresponding process but _not any_ of the upstream processes. It is the responsibility of the user to skip all relevant processes.
 
 ### Configuring reference data
 
@@ -441,13 +413,8 @@ params {
 Each index required for the analysis will first be created before running the rest of `oncoanalyser` with the following
 command:
 
-:::note
-
-In a process similar to [staging reference data](#staging-reference-data), you can first generate the required indexes
-by setting `--prepare_reference_only` and then provide the prepared reference files to `oncoanalyser` through a custom
-config file. This avoids having to regenerate indexes for each new analysis.
-
-:::
+> [!NOTE]
+> In a process similar to [staging reference data](#staging-reference-data), you can first generate the required indexes by setting `--prepare_reference_only` and then provide the prepared reference files to `oncoanalyser` through a custom config file. This avoids having to regenerate indexes for each new analysis.
 
 ```bash
 nextflow run nf-core/oncoanalyser \
@@ -473,12 +440,8 @@ Creation of a STAR index also requires transcript annotations, please provide ei
 - GRCh38: [GENCODE v37 (Ensembl v74)
   annotations](https://ftp.ebi.ac.uk/pub/databases/gencode/Gencode_human/release_19/gencode.v19.annotation.gtf.gz)
 
-:::warning
-
-STAR index must use transcript annotations from Ensembl versions that match hmftools resource data (GRCh37: v74; GRCh38:
-v104).
-
-:::
+> [!WARNING]
+> STAR index must use transcript annotations from Ensembl versions that match hmftools resource data (GRCh37: v74; GRCh38: v104).
 
 When creating indexes for reference genomes with alternative haplotypes, an ALT file must be given with
 `--ref_data_genome_alt`. Importantly, a STAR index will not be generated for reference genomes with alternative
@@ -486,9 +449,8 @@ haplotypes since this requires careful processing and is hence left to the user.
 
 ## Core Nextflow arguments
 
-:::note
-These options are part of Nextflow and use a _single_ hyphen (pipeline parameters use a double-hyphen).
-:::
+> [!NOTE]
+> These options are part of Nextflow and use a _single_ hyphen (pipeline parameters use a double-hyphen)
 
 ### `-profile`
 
@@ -496,11 +458,10 @@ Use this parameter to choose a configuration profile. Profiles can give configur
 
 Several generic profiles are bundled with the pipeline which instruct the pipeline to use software packaged using different methods (Docker, Singularity, Podman, Shifter, Charliecloud, Apptainer, Conda) - see below.
 
-:::info
-We highly recommend the use of Docker or Singularity containers for full pipeline reproducibility, however when this is not possible, Conda is also supported.
-:::
+> [!IMPORTANT]
+> We highly recommend the use of Docker or Singularity containers for full pipeline reproducibility, however when this is not possible, Conda is also supported.
 
-The pipeline also dynamically loads configurations from [https://github.com/nf-core/configs](https://github.com/nf-core/configs) when it runs, making multiple config profiles for various institutional clusters available at run time. For more information and to see if your system is available in these configs please see the [nf-core/configs documentation](https://github.com/nf-core/configs#documentation).
+The pipeline also dynamically loads configurations from [https://github.com/nf-core/configs](https://github.com/nf-core/configs) when it runs, making multiple config profiles for various institutional clusters available at run time. For more information and to check if your system is supported, please see the [nf-core/configs documentation](https://github.com/nf-core/configs#documentation).
 
 Note that multiple profiles can be loaded, for example: `-profile test,docker` - the order of arguments is important!
 They are loaded in sequence, so later profiles can overwrite earlier profiles.
@@ -541,13 +502,13 @@ Specify the path to a specific config file (this is a core Nextflow command). Se
 
 ### Resource requests
 
-Whilst the default requirements set within the pipeline will hopefully work for most people and with most input data, you may find that you want to customise the compute resources that the pipeline requests. Each step in the pipeline has a default set of requirements for number of CPUs, memory and time. For most of the steps in the pipeline, if the job exits with any of the error codes specified [here](https://github.com/nf-core/rnaseq/blob/4c27ef5610c87db00c3c5a3eed10b1d161abf575/conf/base.config#L18) it will automatically be resubmitted with higher requests (2 x original, then 3 x original). If it still fails after the third attempt then the pipeline execution is stopped.
+Whilst the default requirements set within the pipeline will hopefully work for most people and with most input data, you may find that you want to customise the compute resources that the pipeline requests. Each step in the pipeline has a default set of requirements for number of CPUs, memory and time. For most of the pipeline steps, if the job exits with any of the error codes specified [here](https://github.com/nf-core/rnaseq/blob/4c27ef5610c87db00c3c5a3eed10b1d161abf575/conf/base.config#L18) it will automatically be resubmitted with higher resources request (2 x original, then 3 x original). If it still fails after the third attempt then the pipeline execution is stopped.
 
 To change the resource requests, please see the [max resources](https://nf-co.re/docs/usage/configuration#max-resources) and [tuning workflow resources](https://nf-co.re/docs/usage/configuration#tuning-workflow-resources) section of the nf-core website.
 
 ### Custom containers
 
-In some cases you may wish to change which container or conda environment a step of the pipeline uses for a particular tool. By default nf-core pipelines use containers and software from the [biocontainers](https://biocontainers.pro/) or [bioconda](https://bioconda.github.io/) projects. However in some cases the pipeline specified version maybe out of date.
+In some cases, you may wish to change the container or conda environment used by a pipeline steps for a particular tool. By default, nf-core pipelines use containers and software from the [biocontainers](https://biocontainers.pro/) or [bioconda](https://bioconda.github.io/) projects. However, in some cases the pipeline specified version maybe out of date.
 
 To use a different container from the default container or conda environment specified in a pipeline, please see the [updating tool versions](https://nf-co.re/docs/usage/configuration#updating-tool-versions) section of the nf-core website.
 
