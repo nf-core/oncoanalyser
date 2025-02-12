@@ -5,7 +5,7 @@
 import Constants
 import Utils
 
-include { ESVEE_CALL } from '../../../modules/local/esvee/call/main'
+include { ESVEE_CALL } from '../../../modules/local/esvee/main'
 
 workflow ESVEE_CALLING {
     take:
