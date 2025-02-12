@@ -304,12 +304,10 @@ workflow TARGETED {
             ref_data.genome_fai,
             ref_data.genome_dict,
             ref_data.genome_img,
-            hmf_data.sv_prep_blocklist,
             hmf_data.known_fusions,
             hmf_data.gridss_pon_breakends,
             hmf_data.gridss_pon_breakpoints,
             hmf_data.repeatmasker_annotations,
-            hmf_data.decoy_sequences_image,
             hmf_data.unmap_regions,
         )
 

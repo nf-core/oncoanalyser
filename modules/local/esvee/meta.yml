@@ -1,4 +1,4 @@
-name: esvee_call
+name: esvee
 description: Call somatic SVs with ESVEE
 keywords:
   - calling

@@ -1,4 +1,4 @@
-name: esvee_call
+name: esvee
 channels:
   - conda-forge
   - bioconda
