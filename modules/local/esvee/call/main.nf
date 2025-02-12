@@ -8,19 +8,23 @@ process ESVEE_CALL {
         'biocontainers/hmftools-esvee:1.0--hdfd78af_0' }"
 
     input:
-    tuple val(meta), path(ref_depth_vcf), path(prep_dir)
+    tuple val(meta), path(tumor_prep_bam), path(tumor_prep_bai), path(normal_prep_bam), path(normal_prep_bai)
     path genome_fasta
+    path genome_fai
+    path genome_dict
+    path genome_img
     val genome_ver
     path pon_breakends
     path pon_breakpoints
     path known_fusions
     path repeatmasker_annotations
+    path unmap_regions
 
     output:
-    tuple val(meta), path("caller/"), emit: caller_dir
-    tuple val(meta), path("caller/${meta.tumor_id}.esvee.unfiltered.vcf.gz"), path("caller/${meta.tumor_id}.esvee.unfiltered.vcf.gz.tbi"), emit: unfiltered_vcf
-    tuple val(meta), path("caller/${meta.tumor_id}.esvee.somatic.vcf.gz"),    path("caller/${meta.tumor_id}.esvee.somatic.vcf.gz.tbi"),    emit: somatic_vcf
-    tuple val(meta), path("caller/${meta.tumor_id}.esvee.germline.vcf.gz"),   path("caller/${meta.tumor_id}.esvee.germline.vcf.gz.tbi"),   emit: germline_vcf, optional: true
+    tuple val(meta), path("esvee/"), emit: esvee_dir
+    tuple val(meta), path("esvee/${meta.tumor_id}.esvee.unfiltered.vcf.gz"), path("esvee/${meta.tumor_id}.esvee.unfiltered.vcf.gz.tbi"), emit: unfiltered_vcf
+    tuple val(meta), path("esvee/${meta.tumor_id}.esvee.somatic.vcf.gz"),    path("esvee/${meta.tumor_id}.esvee.somatic.vcf.gz.tbi"),    emit: somatic_vcf
+    tuple val(meta), path("esvee/${meta.tumor_id}.esvee.germline.vcf.gz"),   path("esvee/${meta.tumor_id}.esvee.germline.vcf.gz.tbi"),   emit: germline_vcf, optional: true
     path 'versions.yml', emit: versions
 
     when:
@@ -29,50 +33,62 @@ process ESVEE_CALL {
     script:
     def args = task.ext.args ?: ''
 
-    def reference_arg = meta.normal_id != null ? "-reference ${meta.normal_id}" : ""
+    def reference_arg = meta.normal_id ? "-reference ${meta.normal_id}" : ""
+    def tumor_bam_arg = "-tumor_bam ${tumor_prep_bam}"
+
+    def reference_bam_arg = meta.normal_id ? "-reference_bam ${normal_prep_bam}" : ""
+    
+    def sample_ids = [meta.tumor_id]
+    
+    if (meta.normal_id) {
+        sample_ids.add(meta.normal_id)
+    }
+
 
     """
-    mkdir -p caller/
+    mkdir -p esvee/
 
-    esvee com.hartwig.hmftools.esvee.caller.CallerApplication \\
+    esvee \\
         -Xmx${Math.round(task.memory.bytes * 0.95)} \\
         ${args} \\
-        -sample ${meta.tumor_id} \\
+        -tumor ${meta.tumor_id} \\
         ${reference_arg} \\
-        -input_vcf ${ref_depth_vcf} \\
-        -esvee_prep_dir ${prep_dir}/ \\
+        ${tumor_bam_arg} \\
+        ${reference_bam_arg} \\
+        -ref_genome ${genome_fasta} \\
         -ref_genome_version ${genome_ver} \\
         -known_hotspot_file ${known_fusions} \\
         -pon_sgl_file ${pon_breakends} \\
         -pon_sv_file ${pon_breakpoints} \\
         -repeat_mask_file ${repeatmasker_annotations} \\
-        -output_dir caller/ \\
+        -unmap_regions ${unmap_regions} \\
+        -bamtool \$(which sambamba) \\
+        -write_types "PREP_JUNCTION;PREP_BAM;FRAGMENT_LENGTH_DIST;JUNC_ASSEMBLY;PHASED_ASSEMBLY;ALIGNMENT;BREAKEND;VCF" \\
+        -output_dir esvee/ \\
+        -esvee_prep_dir esvee/ \\
+        -threads ${task.cpus} \\
         -log_level DEBUG
 
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":
-        esvee: \$(esvee -version | grep -m1 'Esvee version' | sed 's/^.* //')
+        esvee: \$(java -jar \${ESVEE_JAR} -version | sed 's/^.*Esvee version: //')
     END_VERSIONS
     """
 
     stub:
     """
-    mkdir -p caller/
+    mkdir -p esvee/
 
-    vcf_template='##fileformat=VCFv4.1
-    ##contig=<ID=.>
-    #CHROM	POS	ID	REF	ALT	QUAL	FILTER	INFO
-    .	.	.	.	.	.	.
-    '
+    touch esvee/${meta.tumor_id}.esvee.unfiltered.vcf.gz
+    touch esvee/${meta.tumor_id}.esvee.unfiltered.vcf.gz.tbi
+    touch esvee/${meta.tumor_id}.esvee.somatic.vcf.gz
+    touch esvee/${meta.tumor_id}.esvee.somatic.vcf.gz.tbi
+    touch esvee/${meta.tumor_id}.esvee.germline.vcf.gz
+    touch esvee/${meta.tumor_id}.esvee.germline.vcf.gz.tbi
 
-    echo \${vcf_template} | gzip -c > caller/${meta.tumor_id}.esvee.unfiltered.vcf.gz
-    echo \${vcf_template} | gzip -c > caller/${meta.tumor_id}.esvee.somatic.vcf.gz
-    echo \${vcf_template} | gzip -c > caller/${meta.tumor_id}.esvee.germline.vcf.gz
-
-    touch caller/${meta.tumor_id}.esvee.unfiltered.vcf.gz.tbi
-    touch caller/${meta.tumor_id}.esvee.somatic.vcf.gz.tbi
-    touch caller/${meta.tumor_id}.esvee.germline.vcf.gz.tbi
-
-    echo -e '${task.process}:\\n  stub: noversions\\n' > versions.yml
+    cat <<-END_VERSIONS > versions.yml
+    "${task.process}":
+        esvee: \$(echo "1.0-beta")
+    END_VERSIONS
     """
 }
