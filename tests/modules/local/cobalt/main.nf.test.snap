@@ -1,0 +1,100 @@
+{
+    "COBALT with tumor only": {
+        "content": [
+            {
+                "0": [
+                    [
+                        {
+                            "id": "test",
+                            "tumor_id": "tumor_test"
+                        },
+                        [
+                            "cobalt.version:md5,1433054603f898036e236365bb7f183a",
+                            "tumor_test.cobalt.gc.median.tsv:md5,c80a997fd0dc3226aefae4e4e11926d5",
+                            "tumor_test.cobalt.ratio.pcf:md5,dd979e7f86c68ff02715ffdc12e8557d",
+                            "tumor_test.cobalt.ratio.tsv.gz:md5,dc8cb6e711b60ae7e0dfee76cd49c7ca"
+                        ]
+                    ]
+                ],
+                "1": [
+                    "versions.yml:md5,769f137ece2db83e3d85e66486292a34"
+                ],
+                "cobalt_dir": [
+                    [
+                        {
+                            "id": "test",
+                            "tumor_id": "tumor_test"
+                        },
+                        [
+                            "cobalt.version:md5,1433054603f898036e236365bb7f183a",
+                            "tumor_test.cobalt.gc.median.tsv:md5,c80a997fd0dc3226aefae4e4e11926d5",
+                            "tumor_test.cobalt.ratio.pcf:md5,dd979e7f86c68ff02715ffdc12e8557d",
+                            "tumor_test.cobalt.ratio.tsv.gz:md5,dc8cb6e711b60ae7e0dfee76cd49c7ca"
+                        ]
+                    ]
+                ],
+                "versions": [
+                    "versions.yml:md5,769f137ece2db83e3d85e66486292a34"
+                ]
+            }
+        ],
+        "meta": {
+            "nf-test": "0.9.2",
+            "nextflow": "24.10.4"
+        },
+        "timestamp": "2025-02-12T06:09:30.395926428"
+    },
+    "COBALT testing tumor + normal": {
+        "content": [
+            {
+                "0": [
+                    [
+                        {
+                            "id": "test",
+                            "tumor_id": "tumor_test",
+                            "normal_id": "normal_test"
+                        },
+                        [
+                            "cobalt.version:md5,1433054603f898036e236365bb7f183a",
+                            "normal_test.cobalt.gc.median.tsv:md5,9deaecdc8199d76bb3114ca3167e2571",
+                            "normal_test.cobalt.ratio.median.tsv:md5,b361c09c0bea5e42156a638316afdfe2",
+                            "normal_test.cobalt.ratio.pcf:md5,142be492e8031846f8e2235661b8525f",
+                            "tumor_test.cobalt.gc.median.tsv:md5,c80a997fd0dc3226aefae4e4e11926d5",
+                            "tumor_test.cobalt.ratio.pcf:md5,b713be54407649e73654c8a9501c3951",
+                            "tumor_test.cobalt.ratio.tsv.gz:md5,5834b95681366765f023c0aa9b142b71"
+                        ]
+                    ]
+                ],
+                "1": [
+                    "versions.yml:md5,769f137ece2db83e3d85e66486292a34"
+                ],
+                "cobalt_dir": [
+                    [
+                        {
+                            "id": "test",
+                            "tumor_id": "tumor_test",
+                            "normal_id": "normal_test"
+                        },
+                        [
+                            "cobalt.version:md5,1433054603f898036e236365bb7f183a",
+                            "normal_test.cobalt.gc.median.tsv:md5,9deaecdc8199d76bb3114ca3167e2571",
+                            "normal_test.cobalt.ratio.median.tsv:md5,b361c09c0bea5e42156a638316afdfe2",
+                            "normal_test.cobalt.ratio.pcf:md5,142be492e8031846f8e2235661b8525f",
+                            "tumor_test.cobalt.gc.median.tsv:md5,c80a997fd0dc3226aefae4e4e11926d5",
+                            "tumor_test.cobalt.ratio.pcf:md5,b713be54407649e73654c8a9501c3951",
+                            "tumor_test.cobalt.ratio.tsv.gz:md5,5834b95681366765f023c0aa9b142b71"
+                        ]
+                    ]
+                ],
+                "versions": [
+                    "versions.yml:md5,769f137ece2db83e3d85e66486292a34"
+                ]
+            }
+        ],
+        "meta": {
+            "nf-test": "0.9.2",
+            "nextflow": "24.10.4"
+        },
+        "timestamp": "2025-02-12T06:07:23.859524752"
+    }
+}
