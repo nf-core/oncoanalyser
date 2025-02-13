@@ -10,7 +10,7 @@
             "type": "object",
             "fa_icon": "fas fa-terminal",
             "description": "Define where the pipeline should find input data and save output data.",
-            "required": ["input", "outdir"],
+            "required": ["outdir"],
             "properties": {
                 "input": {
                     "type": "string",
@@ -48,7 +48,7 @@
                     "type": "string",
                     "description": "Workflow run mode.",
                     "fa_icon": "fas fa-diagram-project",
-                    "pattern": "^(wgts|targeted)"
+                    "pattern": "^(wgts|targeted|prepare_reference)"
                 },
                 "panel": {
                     "type": "string",
@@ -82,10 +82,9 @@
                     "description": "Pipeline processes to include.",
                     "fa_icon": "fas fa-diagram-project"
                 },
-                "prepare_reference_only": {
-                    "type": "boolean",
-                    "description": "Prepare and write reference output only.",
-                    "default": false,
+                "ref_data_types": {
+                    "type": "string",
+                    "description": "Which reference data types to download and extract.",
                     "fa_icon": "fas fa-diagram-project"
                 },
                 "create_stub_placeholders": {
