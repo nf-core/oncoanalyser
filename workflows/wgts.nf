@@ -7,41 +7,49 @@ import Utils
     VALIDATE INPUTS
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 */
-// Parse input samplesheet
-// NOTE(SW): this is done early and outside of gpars so that we can access synchronously and prior to pipeline execution
-inputs = Utils.parseInput(params.input, workflow.stubRun, log)
 
-// Get run config
-run_config = WorkflowMain.getRunConfig(params, inputs, log)
+run_mode = Utils.getRunMode(params.mode, log)
 
-// Validate inputs
-Utils.validateInput(inputs, run_config, params, log)
+if(run_mode === Constants.RunMode.WGTS) {
+    // Parse input samplesheet
+    // NOTE(SW): this is done early and outside of gpars so that we can access synchronously and prior to pipeline execution
+    inputs = Utils.parseInput(params.input, workflow.stubRun, log)
 
-// Check input path parameters to see if they exist
-def checkPathParamList = [
-    params.isofox_counts,
-    params.isofox_gc_ratios,
-]
+    // Get run config
+    run_config = WorkflowMain.getRunConfig(params, inputs, log)
 
-// Mode check required as evaluated regardless of workflow selection
-if (run_config.stages.virusinterpreter && run_config.mode !== Constants.RunMode.TARGETED) {
-    checkPathParamList.add(params.ref_data_virusbreakenddb_path)
-}
+    // Validate inputs
+    Utils.validateInput(inputs, run_config, params, log)
 
-if (run_config.stages.lilac) {
-    if (params.genome_version.toString() == '38' && params.genome_type == 'alt' && params.containsKey('ref_data_hla_slice_bed')) {
-        checkPathParamList.add(params.ref_data_hla_slice_bed)
+    // Check input path parameters to see if they exist
+    def checkPathParamList = [
+        params.isofox_counts,
+        params.isofox_gc_ratios,
+    ]
+
+    // Mode check required as evaluated regardless of workflow selection
+    if (run_config.stages.virusinterpreter && run_config.mode !== Constants.RunMode.TARGETED) {
+        checkPathParamList.add(params.ref_data_virusbreakenddb_path)
     }
+
+    if (run_config.stages.lilac) {
+        if (params.genome_version.toString() == '38' && params.genome_type == 'alt' && params.containsKey('ref_data_hla_slice_bed')) {
+            checkPathParamList.add(params.ref_data_hla_slice_bed)
+        }
+    }
+
+    // TODO(SW): consider whether we should check for null entries here for errors to be more informative
+    for (param in checkPathParamList) { if (param) { file(param, checkIfExists: true) } }
+
+    // Check mandatory parameters
+    if (params.input) { ch_input = file(params.input) } else { exit 1, 'Input samplesheet not specified!' }
+
+    // Used in Isofox and Neo subworkflows
+    isofox_read_length = params.isofox_read_length !== null ? params.isofox_read_length : Constants.DEFAULT_ISOFOX_READ_LENGTH_WTS
+
+    // Get absolute file paths
+    samplesheet = Utils.getFileObject(params.input)
 }
-
-// TODO(SW): consider whether we should check for null entries here for errors to be more informative
-for (param in checkPathParamList) { if (param) { file(param, checkIfExists: true) } }
-
-// Check mandatory parameters
-if (params.input) { ch_input = file(params.input) } else { exit 1, 'Input samplesheet not specified!' }
-
-// Used in Isofox and Neo subworkflows
-isofox_read_length = params.isofox_read_length !== null ? params.isofox_read_length : Constants.DEFAULT_ISOFOX_READ_LENGTH_WTS
 
 /*
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -80,9 +88,6 @@ include { VIRUSBREAKEND_CALLING } from '../subworkflows/local/virusbreakend_call
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 */
 
-// Get absolute file paths
-samplesheet = Utils.getFileObject(params.input)
-
 workflow WGTS {
     // Create channel for versions
     // channel: [ versions.yml ]
@@ -93,8 +98,9 @@ workflow WGTS {
     ch_inputs = Channel.fromList(inputs)
 
     // Set up reference data, assign more human readable variables
+    prep_config = WorkflowMain.getPrepConfigFromRunConfig(run_config)
     PREPARE_REFERENCE(
-        run_config,
+        prep_config,
     )
     ref_data = PREPARE_REFERENCE.out
     hmf_data = PREPARE_REFERENCE.out.hmf_data

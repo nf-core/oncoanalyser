@@ -8,38 +8,53 @@ import Utils
     VALIDATE INPUTS
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 */
-// Parse input samplesheet
-// NOTE(SW): this is done early and outside of gpars so that we can access synchronously and prior to pipeline execution
-inputs = Utils.parseInput(params.input, workflow.stubRun, log)
 
-// Get run config
-run_config = WorkflowMain.getRunConfig(params, inputs, log)
+run_mode = Utils.getRunMode(params.mode, log)
 
-// Validate inputs
-Utils.validateInput(inputs, run_config, params, log)
+if(run_mode === Constants.RunMode.TARGETED) {
 
-// Check input path parameters to see if they exist
-def checkPathParamList = [
-    params.isofox_counts,
-    params.isofox_gc_ratios,
-    params.isofox_gene_ids,
-    params.isofox_tpm_norm,
-]
+    // Parse input samplesheet
+    // NOTE(SW): this is done early and outside of gpars so that we can access synchronously and prior to pipeline execution
+    inputs = Utils.parseInput(params.input, workflow.stubRun, log)
 
-if (run_config.stages.lilac) {
-    if (params.genome_version.toString() == '38' && params.genome_type == 'alt' && params.containsKey('ref_data_hla_slice_bed')) {
-        checkPathParamList.add(params.ref_data_hla_slice_bed)
+    // Get run config
+    run_config = WorkflowMain.getRunConfig(params, inputs, log)
+
+    // Validate inputs
+    Utils.validateInput(inputs, run_config, params, log)
+
+    // Check input path parameters to see if they exist
+    def checkPathParamList = [
+        params.isofox_counts,
+        params.isofox_gc_ratios,
+        params.isofox_gene_ids,
+        params.isofox_tpm_norm,
+    ]
+
+    if (run_config.stages.lilac) {
+        if (params.genome_version.toString() == '38' && params.genome_type == 'alt' && params.containsKey('ref_data_hla_slice_bed')) {
+            checkPathParamList.add(params.ref_data_hla_slice_bed)
+        }
     }
+
+    // TODO(SW): consider whether we should check for null entries here for errors to be more informative
+    for (param in checkPathParamList) {
+        if (param) {
+            file(param, checkIfExists: true)
+        }
+    }
+
+    // Check mandatory parameters
+    if (params.input) {
+        ch_input = file(params.input)
+    } else {
+        exit 1, 'Input samplesheet not specified!'
+    }
+
+    // Used in Isofox subworkflow only
+    isofox_read_length = params.isofox_read_length !== null ? params.isofox_read_length : Constants.DEFAULT_ISOFOX_READ_LENGTH_TARGETED
+
 }
-
-// TODO(SW): consider whether we should check for null entries here for errors to be more informative
-for (param in checkPathParamList) { if (param) { file(param, checkIfExists: true) } }
-
-// Check mandatory parameters
-if (params.input) { ch_input = file(params.input) } else { exit 1, 'Input samplesheet not specified!' }
-
-// Used in Isofox subworkflow only
-isofox_read_length = params.isofox_read_length !== null ? params.isofox_read_length : Constants.DEFAULT_ISOFOX_READ_LENGTH_TARGETED
 
 /*
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -86,8 +101,9 @@ workflow TARGETED {
     ch_inputs = Channel.fromList(inputs)
 
     // Set up reference data, assign more human readable variables
+    prep_config = WorkflowMain.getPrepConfigFromRunConfig(run_config)
     PREPARE_REFERENCE(
-        run_config,
+        prep_config,
     )
     ref_data = PREPARE_REFERENCE.out
     hmf_data = PREPARE_REFERENCE.out.hmf_data
