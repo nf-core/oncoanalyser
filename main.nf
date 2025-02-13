@@ -58,8 +58,10 @@ if (workflow.stubRun && params.create_stub_placeholders) {
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 */
 
-include { TARGETED } from './workflows/targeted'
-include { WGTS     } from './workflows/wgts'
+include { TARGETED          } from './workflows/targeted'
+include { WGTS              } from './workflows/wgts'
+include { PREPARE_REFERENCE } from './subworkflows/local/prepare_reference'
+
 
 /*
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -73,8 +75,10 @@ include { WGTS     } from './workflows/wgts'
 run_mode = Utils.getRunMode(params.mode, log)
 
 workflow NFCORE_ONCOANALYSER {
-
-    if (run_mode === Constants.RunMode.WGTS) {
+    if (run_mode === Constants.RunMode.PREPARE_REFERENCE)  {
+        prep_config = WorkflowMain.getPrepConfigForStagingOnly(params, log)
+        PREPARE_REFERENCE(prep_config)
+    } else if (run_mode === Constants.RunMode.WGTS) {
         WGTS()
     } else if (run_mode === Constants.RunMode.TARGETED) {
         TARGETED()
