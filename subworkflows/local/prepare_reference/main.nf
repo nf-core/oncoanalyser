@@ -21,7 +21,7 @@ include { WRITE_REFERENCE_DATA                             } from '../../../modu
 
 workflow PREPARE_REFERENCE {
     take:
-    run_config // channel: [mandatory] run configuration
+    prep_config // channel: [mandatory] configuration indicating which reference data is required
 
     main:
     // Channel for version.yml files
@@ -33,7 +33,6 @@ workflow PREPARE_REFERENCE {
     //
     ch_genome_fasta = Channel.fromPath(params.ref_data_genome_fasta)
     ch_genome_version = Channel.value(params.genome_version)
-    run_virusinterpreter = run_config.mode !== Constants.RunMode.TARGETED && run_config.stages.virusinterpreter
 
     //
     // Set .fai and .dict indexes, create if required
@@ -63,7 +62,8 @@ workflow PREPARE_REFERENCE {
     // Set bwa-mem2 index, unpack or create if required
     //
     ch_genome_bwamem2_index = Channel.empty()
-    if (run_config.has_dna_fastq && run_config.stages.alignment) {
+    if (prep_config.require_bwa_index) {
+
         if (!params.ref_data_genome_bwamem2_index) {
 
             BWAMEM2_INDEX(
@@ -92,7 +92,8 @@ workflow PREPARE_REFERENCE {
     // Set GRIDSS index, unpack or create if required
     //
     ch_genome_gridss_index = Channel.empty()
-    if (run_config.has_dna && (run_config.stages.gridss || run_virusinterpreter)) {
+    if (prep_config.require_gridss_index) {
+
         if (!params.ref_data_genome_gridss_index) {
 
             BWA_INDEX(
@@ -129,7 +130,8 @@ workflow PREPARE_REFERENCE {
     // Set STAR index , unpack or create if required
     //
     ch_genome_star_index = Channel.empty()
-    if (run_config.has_rna_fastq && run_config.stages.alignment) {
+    if (prep_config.require_star_index) {
+
         if (!params.ref_data_genome_star_index) {
 
             STAR_GENOMEGENERATE(
@@ -158,33 +160,37 @@ workflow PREPARE_REFERENCE {
     // Set HMF reference data, unpack if required
     //
     ch_hmf_data = Channel.empty()
-    hmf_data_paths = params.hmf_data_paths[params.genome_version.toString()]
-    if (params.ref_data_hmf_data_path.endsWith('tar.gz')) {
+    if(prep_config.require_hmftools_data) {
 
-        ch_hmf_data_inputs = Channel.fromPath(params.ref_data_hmf_data_path)
-            .map { [[id: "hmf_data_${it.name.replaceAll('\\.tar\\.gz$', '')}"], it] }
+        hmf_data_paths = params.hmf_data_paths[params.genome_version.toString()]
 
-        DECOMP_HMF_DATA(ch_hmf_data_inputs)
+        if (params.ref_data_hmf_data_path.endsWith('tar.gz')) {
 
-        ch_hmf_data = DECOMP_HMF_DATA.out.extracted_dir
-            .collect()
-            .map { dir_list ->
-                assert dir_list.size() == 1
-                def dirpath = dir_list[0].toUriString()
-                return createDataMap(hmf_data_paths, dirpath)
-            }
+            ch_hmf_data_inputs = Channel.fromPath(params.ref_data_hmf_data_path)
+                .map { [[id: "hmf_data_${it.name.replaceAll('\\.tar\\.gz$', '')}"], it] }
 
-    } else {
+            DECOMP_HMF_DATA(ch_hmf_data_inputs)
 
-        ch_hmf_data = Channel.value(createDataMap(hmf_data_paths, params.ref_data_hmf_data_path))
+            ch_hmf_data = DECOMP_HMF_DATA.out.extracted_dir
+                .collect()
+                .map { dir_list ->
+                    assert dir_list.size() == 1
+                    def dirpath = dir_list[0].toUriString()
+                    return createDataMap(hmf_data_paths, dirpath)
+                }
 
+        } else {
+
+            ch_hmf_data = Channel.value(createDataMap(hmf_data_paths, params.ref_data_hmf_data_path))
+
+        }
     }
 
     //
     // Set panel reference data, unpack if required
     //
     ch_panel_data = Channel.empty()
-    if (run_config.mode === Constants.RunMode.TARGETED) {
+    if (prep_config.require_panel_data) {
 
         panel_data_paths_versions = params.panel_data_paths[params.panel]
         panel_data_paths = panel_data_paths_versions[params.genome_version.toString()]
@@ -214,7 +220,7 @@ workflow PREPARE_REFERENCE {
     //
     // Write prepared reference data if requested
     //
-    if (params.prepare_reference_only) {
+    if (prep_config.prepare_ref_data_only) {
 
         // Create channel of data files to stage (if not already local) and write
         ch_refdata = Channel.empty()
@@ -239,8 +245,6 @@ workflow PREPARE_REFERENCE {
             workflow.manifest.version,
         )
 
-        // Clear all stages to prevent running any analysis
-        run_config.stages = [:]
     }
 
     emit:

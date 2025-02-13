@@ -4,8 +4,6 @@
 
 import nextflow.Nextflow
 
-import Utils
-
 class WorkflowMain {
 
     //
@@ -296,6 +294,65 @@ class WorkflowMain {
             has_rna: inputs.any { Utils.hasTumorRna(it) },
             has_rna_fastq: inputs.any { Utils.hasTumorRnaFastq(it) },
             has_dna_fastq: inputs.any { Utils.hasTumorDnaFastq(it) || Utils.hasNormalDnaFastq(it) },
+        ]
+    }
+
+    public static getPrepConfigFromRunConfig(run_config)
+    {
+        return [
+            prepare_ref_data_only: false,
+
+            require_genome: true,
+            require_bwa_index: run_config.has_dna_fastq && run_config.stages.alignment,
+            require_gridss_index: run_config.has_dna && run_config.mode !== Constants.RunMode.TARGETED && run_config.stages.virusinterpreter,
+            require_star_index: run_config.has_rna_fastq && run_config.stages.alignment,
+            require_hmftools_data: true,
+            require_panel_data: run_config.mode === Constants.RunMode.TARGETED,
+        ]
+    }
+
+    public static getPrepConfigFromParams(params)
+    {
+        def ref_data_types = params.ref_data_types
+            .tokenize(',')
+            .collect { Utils.getEnumFromString(it, Constants.RefDataType) }
+
+        def prepare_ref_data_only = true
+
+        def require_genome = ref_data_types.contains(Constants.RefDataType.REF_GENOME)
+        def require_bwa_index = ref_data_types.contains(Constants.RefDataType.BWA_INDEX)
+        def require_gridss_index = ref_data_types.contains(Constants.RefDataType.GRIDSS_INDEX)
+        def require_star_index = ref_data_types.contains(Constants.RefDataType.STAR_INDEX)
+        def require_hmftools_data = ref_data_types.contains(Constants.RefDataType.HMFTOOLS)
+        def require_panel_data = ref_data_types.contains(Constants.RefDataType.PANEL)
+
+        if (ref_data_types.contains(Constants.RefDataType.WGS)) {
+            require_genome = true
+            require_bwa_index = true
+            require_gridss_index = true
+            require_hmftools_data = true
+        }
+
+        if (ref_data_types.contains(Constants.RefDataType.WTS)) {
+            require_genome = true
+            require_star_index = true
+            require_hmftools_data = true
+        }
+
+        if (ref_data_types.contains(Constants.RefDataType.PANEL)) {
+            require_genome = true
+            require_hmftools_data = true
+        }
+
+        return [
+            prepare_ref_data_only: prepare_ref_data_only,
+
+            require_genome: require_genome,
+            require_bwa_index: require_bwa_index,
+            require_gridss_index: require_gridss_index,
+            require_star_index: require_star_index,
+            require_hmftools_data: require_hmftools_data,
+            require_panel_data: require_panel_data,
         ]
     }
 }
