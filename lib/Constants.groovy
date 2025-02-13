@@ -25,8 +25,27 @@ class Constants {
 
 
     static enum RunMode {
+        PREPARE_REFERENCE,
         TARGETED,
         WGTS,
+    }
+
+    static enum RefDataType {
+        // Compound types
+        WGS,
+        WTS,
+        TARGETED,
+
+        // Individual types
+        FASTA,
+        FAI,
+        DICT,
+        IMG,
+        BWA_INDEX, DNA_ALIGNMENT,
+        GRIDSS_INDEX,
+        STAR_INDEX, RNA_ALIGNMENT,
+        HMFTOOLS,
+        PANEL,
     }
 
     static enum Process {
