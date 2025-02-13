@@ -12,12 +12,13 @@ class Constants {
 
 
     // NOTE(SW): these public URLs are for the oncoanalyser dev bucket
-    static String HMF_DATA_37_PATH = 'https://pub-29f2e5b2b7384811bdbbcba44f8b5083.r2.dev/hmf_reference_data/hmftools/6.0_37--0.tar.gz'
-    static String HMF_DATA_38_PATH = 'https://pub-29f2e5b2b7384811bdbbcba44f8b5083.r2.dev/hmf_reference_data/hmftools/6.0_38--1.tar.gz'
+    // TODO(LN): Change these to cloudflare URLs once these files have been uploaded there
+    static String HMF_DATA_37_PATH = 'https://storage.googleapis.com/hmf-public/HMFtools-Resources/oncoanalyser/v6_0/37/hmf_pipeline_resources.37_v6.0--2.tar.gz'
+    static String HMF_DATA_38_PATH = 'https://storage.googleapis.com/hmf-public/HMFtools-Resources/oncoanalyser/v6_0/38/hmf_pipeline_resources.38_v6.0--2.tar.gz'
 
 
-    static String TSO500_PANEL_37_PATH = 'https://pub-cf6ba01919994c3cbd354659947f74d8.r2.dev/hmf_reference_data/panels/tso500_5.34_37--1.tar.gz'
-    static String TSO500_PANEL_38_PATH = 'https://pub-cf6ba01919994c3cbd354659947f74d8.r2.dev/hmf_reference_data/panels/tso500_5.34_38--1.tar.gz'
+    static String TSO500_PANEL_37_PATH = 'https://storage.googleapis.com/hmf-public/HMFtools-Resources/oncoanalyser/v6_0/37/hmf_panel_resources.tso500.37_v6.0--2.tar.gz'
+    static String TSO500_PANEL_38_PATH = 'https://storage.googleapis.com/hmf-public/HMFtools-Resources/oncoanalyser/v6_0/38/hmf_panel_resources.tso500.38_v6.0--2.tar.gz'
 
     static String HLA_SLICE_BED_GRCH38_ALT_PATH = 'https://pub-cf6ba01919994c3cbd354659947f74d8.r2.dev/other/hla_slice/grch38_alt.plus_homologous.bed'
 
@@ -27,8 +28,23 @@ class Constants {
 
 
     static enum RunMode {
+        PREPARE_REFERENCE,
         TARGETED,
         WGTS,
+    }
+
+    static enum RefDataType {
+        REF_GENOME,
+        BWA_INDEX,
+        GRIDSS_INDEX,
+        STAR_INDEX,
+        HMFTOOLS,
+        PANEL,
+
+        // Compound types
+        WGS,
+        WTS,
+        TARGETED,
     }
 
     static enum Process {
