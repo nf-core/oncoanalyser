@@ -34,7 +34,7 @@ process CHORD {
         ${args} \\
         -sample ${meta.sample_id} \\
         -snv_indel_vcf_file \$(realpath ${smlv_vcf}) \\
-        -sv_vcf_file \$(realpath ${smlv_vcf}) \\
+        -sv_vcf_file \$(realpath ${sv_vcf}) \\
         -output_dir \$(realpath chord/) \\
         -ref_genome ${genome_fasta} \\
         -log_level DEBUG
