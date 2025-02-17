@@ -1,0 +1,44 @@
+nextflow_workflow {
+
+    name "Test Workflow WGTS"
+    script "workflows/wgts.nf"
+    workflow "WGTS"
+    options "-dump-channels"
+
+    test("Should run wgts mode without failures") {
+
+        when {
+            params {
+                input = file ('/home/rhassaine/samplesheet.csv')
+                mode = 'wgts'
+                genome_version = 'GRCh38_hmf'
+                test_sample_data = 'https://raw.githubusercontent.com/nf-core/test-datasets/oncoanalyser/sample_data/simulated_reads/wgts/markdups_bam/'
+                output {
+                     dir = "./debug_nf_test_workflow"
+                }
+                // prepare_reference_only = 'false'
+                // Add other necessary params here
+            }
+            // workflow {
+            //     """
+            //     // input[0] = [
+            //     //     [id: 'test', tumor_id: 'subject_a.tumor', normal_id: 'subject_a.normal'],
+            //     //     file(params.test_sample_data + 'subject_a.tumor.dna.bwa-mem2_2.2.1.markdups.bam', checkIfExists: true),
+            //     //     file(params.test_sample_data + 'subject_a.normal.dna.bwa-mem2_2.2.1.markdups.bam', checkIfExists: true),
+            //     //     [],
+            //     //     file(params.test_sample_data + 'subject_a.tumor.dna.bwa-mem2_2.2.1.markdups.bam.bai', checkIfExists: true),
+            //     //     file(params.test_sample_data + 'subject_a.normal.dna.bwa-mem2_2.2.1.markdups.bam.bai', checkIfExists: true),
+            //     //     []
+            //     // ]
+            //     """
+            // }
+        }
+
+        then {
+            assert workflow.success
+            // assert workflow.out.wgts_dir != null
+            // Snapshot test for workflow output
+            // assert snapshot(workflow.out).match()
+        }
+    }
+}
