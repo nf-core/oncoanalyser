@@ -179,6 +179,7 @@ workflow ORANGE_REPORTING {
                 key: meta.group_id,
                 id: meta.group_id,
                 tumor_id: Utils.getTumorDnaSampleName(meta),
+                cancer_type: meta[Constants.InfoField.CANCER_TYPE],
             ]
 
             def inputs_selected = inputs.clone()
