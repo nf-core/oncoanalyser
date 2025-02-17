@@ -23,7 +23,7 @@ nextflow_process {
                     file(params.test_sample_data +  'subject_a.tumor.dna.bwa-mem2_2.2.1.markdups.bam.bai', checkIfExists: true),
                     file(params.test_sample_data +  'subject_a.normal.dna.bwa-mem2_2.2.1.markdups.bam.bai', checkIfExists: true),
                 ]
-                input[1] = file("/home/rhassaine/resource_files_oa/hmf_pipeline_resources.38_v6.0--2/dna/copy_number/GC_profile.1000bp.38.cnp")
+                input[1] = file("/home/rhassaine/resources_files_oa/hmf_pipeline_resources.38_v6.0--2/dna/copy_number/GC_profile.1000bp.38.cnp")
                 input[2] = []
                 input[3] = []
                 """
@@ -67,8 +67,8 @@ nextflow_process {
                     file(params.test_sample_data + 'subject_a.tumor.dna.bwa-mem2_2.2.1.markdups.bam.bai', checkIfExists: true),
                     []
                 ]
-                input[1] = file("/home/rhassaine/resource_files_oa/hmf_pipeline_resources.38_v6.0--2/dna/copy_number/GC_profile.1000bp.38.cnp")
-                input[2] = file("/home/rhassaine/resource_files_oa/hmf_pipeline_resources.38_v6.0--2/dna/copy_number/DiploidRegions.38.bed.gz")
+                input[1] = file("/home/rhassaine/resources_files_oa/hmf_pipeline_resources.38_v6.0--2/dna/copy_number/GC_profile.1000bp.38.cnp")
+                input[2] = file("/home/rhassaine/resources_files_oa/hmf_pipeline_resources.38_v6.0--2/dna/copy_number/DiploidRegions.38.bed.gz")
                 input[3] = []
                 """
             }
@@ -112,7 +112,7 @@ nextflow_process {
                     [],
                     [],
                 ]
-                input[1] = file("/home/rhassaine/resource_files_oa/hmf_pipeline_resources.38_v6.0--2/dna/copy_number/GC_profile.1000bp.38.cnp")
+                input[1] = file("/home/rhassaine/resources_files_oa/hmf_pipeline_resources.38_v6.0--2/dna/copy_number/GC_profile.1000bp.38.cnp")
                 input[2] = []
                 input[3] = []
                 """
