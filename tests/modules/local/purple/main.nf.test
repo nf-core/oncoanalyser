@@ -1,0 +1,104 @@
+nextflow_process {
+    name "Test Process PURPLE"
+    script "modules/local/purple/main.nf"
+    process "PURPLE"
+    config "tests/nextflow.config"
+
+    test("PURPLE") {
+        when {
+            params {
+                test_sample_data = 'https://raw.githubusercontent.com/nf-core/test-datasets/oncoanalyser/sample_data/simulated_reads/wgts/sage_vcf/'
+                resource_path = '/home/rhassaine/resources_files_oa/38/'
+                output = '/home/rhassaine/container_test_output/subject_a/'
+                mode = 'WGS'
+            }
+
+            process {
+                """
+                input[0] = [
+                    [id: 'test', tumor_id: 'subject_a.tumor', normal_id: 'subject_a.normal'],
+                    file(params.output + '/amber', checkIfExists: true),
+                    file(params.output + '/cobalt/', checkIfExists: true),
+                    file(params.output + '/esvee/subject_a.tumor.esvee.somatic.vcf.gz', checkIfExists: true),
+                    file(params.output + '/esvee/subject_a.tumor.esvee.somatic.vcf.gz.tbi', checkIfExists: true),
+                    file(params.output + '/esvee/subject_a.tumor.esvee.germline.vcf.gz', checkIfExists: true),
+                    file(params.output + '/esvee/subject_a.tumor.esvee.germline.vcf.gz.tbi', checkIfExists: true),
+                    file(params.output + '/pave/subject_a.tumor.sage.somatic.pave.vcf.gz', checkIfExists: true),
+                    file(params.output + '/pave/subject_a.tumor.sage.germline.pave.vcf.gz', checkIfExists: true)
+                ]
+                input[1] = file(params.resource_path + "GCA_000001405.15_GRCh38_no_alt_analysis_set.fna", checkIfExists: true)
+                input[2] = 38
+                input[3] = file(params.resource_path + "GCA_000001405.15_GRCh38_no_alt_analysis_set.fna.fai", checkIfExists: true)
+                input[4] = []
+                input[5] = file(params.resource_path + "hmf_pipeline_resources.38_v6.0--2/dna/copy_number/GC_profile.1000bp.38.cnp", checkIfExists: true)
+                input[6] = file(params.resource_path + "hmf_pipeline_resources.38_v6.0--2/dna/variants/KnownHotspots.somatic.38.vcf.gz", checkIfExists: true)
+                input[7] = file(params.resource_path + "hmf_pipeline_resources.38_v6.0--2/dna/variants/KnownHotspots.germline.38.vcf.gz", checkIfExists: true)
+                input[8] = file(params.resource_path + "hmf_pipeline_resources.38_v6.0--2/common/DriverGenePanel.38.tsv", checkIfExists: true)
+                input[9] = file(params.resource_path + "hmf_pipeline_resources.38_v6.0--2/common/ensembl_data/", checkIfExists: true)
+                input[10] = file(params.resource_path + "hmf_pipeline_resources.38_v6.0--2/dna/copy_number/cohort_germline_del_freq.38.csv", checkIfExists: true)
+                input[11] = []
+                input[12] = []
+                input[13] = []
+                """
+            }
+        }
+
+        then {
+            assertAll(
+                { assert process.success },
+                { assert process.out.purple_dir != null },
+                { assert process.out.purple_dir.size() > 0 },
+                { 
+                    def purpleDir = path(process.out.purple_dir[0][1])
+                    assert purpleDir.exists()
+                    assert purpleDir.list().size() > 0
+                    def somaticTsv = purpleDir.resolve("subject_a.tumor.purple.cnv.somatic.tsv")
+                    assert somaticTsv.exists()
+                    assert snapshot(somaticTsv.text).match()
+                }
+            )
+
+            if (process.success) {
+                assertAll(
+                    { assert path(process.out.purple_dir[0][1]).exists() },
+                    { assert path(process.out.purple_dir[0][1]).list().size() > 0 },
+                    { assert process.out.versions != null },
+                    { assert process.out.versions.size() > 0 },
+                    { assert path(process.out.versions[0]).exists() }
+                )
+            }
+        }
+    }
+
+    test("PURPLE should fail when input is missing") {
+        when {
+            params {
+                test_sample_data = 'https://raw.githubusercontent.com/nf-core/test-datasets/oncoanalyser/sample_data/simulated_reads/wgts/sage_vcf/'
+                resource_path = '/home/rhassaine/resources_files_oa/38/'
+                mode = 'WGS'
+            }
+            process {
+                """
+                input[0] = [
+                    [id: 'test', tumor_id: 'subject_a.tumor', normal_id: 'subject_a.normal'],
+                    [],  // Missing AMBER file
+                    [],  // Missing COBALT file
+                    [],  // Missing SV tumor VCF
+                    [],  // Missing SV tumor TBI
+                    [],  // Missing SV normal VCF
+                    [],  // Missing SV normal TBI
+                    [],  // Missing SMLV tumor VCF
+                    []   // Missing SMLV normal VCF
+                ]
+                """
+            }
+        }
+
+        then {
+            assertAll(
+                { assert !process.success },
+                { assert process.exitStatus != 0 }
+            )
+        }
+    }
+}
