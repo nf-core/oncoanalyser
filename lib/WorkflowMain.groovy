@@ -324,42 +324,61 @@ class WorkflowMain {
         ]
     }
 
-    public static getPrepConfigFromParams(params)
+    public static getPrepConfigFromParams(params, log)
     {
         def ref_data_types = params.ref_data_types
             .tokenize(',')
             .collect { Utils.getEnumFromString(it, Constants.RefDataType) }
 
-        def prepare_ref_data_only = true
+        if (ref_data_types.contains(Constants.RefDataType.WGS)) {
+
+            ref_data_types += [
+                Constants.RefDataType.REF_GENOME,
+                Constants.RefDataType.BWA_INDEX,
+                Constants.RefDataType.GRIDSS_INDEX,
+                Constants.RefDataType.HMFTOOLS
+            ]
+        }
+
+        if (ref_data_types.contains(Constants.RefDataType.WTS)) {
+
+            ref_data_types += [
+                Constants.RefDataType.REF_GENOME,
+                Constants.RefDataType.STAR_INDEX,
+                Constants.RefDataType.HMFTOOLS
+            ]
+        }
+
+        if (ref_data_types.contains(Constants.RefDataType.TARGETED)) {
+
+            ref_data_types += [
+                Constants.RefDataType.REF_GENOME,
+                Constants.RefDataType.BWA_INDEX,
+                Constants.RefDataType.HMFTOOLS,
+                Constants.RefDataType.PANEL
+            ]
+        }
 
         def require_genome = ref_data_types.contains(Constants.RefDataType.REF_GENOME)
         def require_bwa_index = ref_data_types.contains(Constants.RefDataType.BWA_INDEX)
         def require_gridss_index = ref_data_types.contains(Constants.RefDataType.GRIDSS_INDEX)
         def require_star_index = ref_data_types.contains(Constants.RefDataType.STAR_INDEX)
         def require_hmftools_data = ref_data_types.contains(Constants.RefDataType.HMFTOOLS)
+
         def require_panel_data = ref_data_types.contains(Constants.RefDataType.PANEL)
 
-        if (ref_data_types.contains(Constants.RefDataType.WGS)) {
-            require_genome = true
-            require_bwa_index = true
-            require_gridss_index = true
-            require_hmftools_data = true
-        }
-
-        if (ref_data_types.contains(Constants.RefDataType.WTS)) {
-            require_genome = true
-            require_star_index = true
-            require_hmftools_data = true
-        }
-
-        if (ref_data_types.contains(Constants.RefDataType.PANEL)) {
-            require_genome = true
-            require_bwa_index = true
-            require_hmftools_data = true
+        if(require_panel_data){
+            if(params.panel == null) {
+                require_panel_data = false
+                log.warn "Skipping preparing panel specific reference data as --panel CLI argument was not provided"
+            } else if(!Constants.PANELS_DEFINED.contains(params.panel)) {
+                require_panel_data = false
+                log.warn "Skipping preparing panel specific reference data for custom panel: ${params.panel}"
+            }
         }
 
         return [
-            prepare_ref_data_only: prepare_ref_data_only,
+            prepare_ref_data_only: true,
 
             require_genome: require_genome,
             require_bwa_index: require_bwa_index,

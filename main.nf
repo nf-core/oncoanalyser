@@ -78,7 +78,7 @@ run_mode = Utils.getRunMode(params.mode, log)
 
 workflow NFCORE_ONCOANALYSER {
     if (run_mode === Constants.RunMode.PREPARE_REFERENCE)  {
-        prep_config = WorkflowMain.getPrepConfigFromParams(params)
+        prep_config = WorkflowMain.getPrepConfigFromParams(params, log)
         PREPARE_REFERENCE(prep_config)
     } else if (run_mode === Constants.RunMode.WGTS) {
         WGTS()
