@@ -85,7 +85,8 @@
                 "ref_data_types": {
                     "type": "string",
                     "description": "Prepare and write reference output only.",
-                    "fa_icon": "fas fa-diagram-project"
+                    "fa_icon": "fas fa-diagram-project",
+                    "enum": ["wgs", "wts", "targeted", "ref_genome", "bwa_index", "gridss_index", "star_index", "hmftools", "panel"]
                 },
                 "create_stub_placeholders": {
                     "type": "boolean",
