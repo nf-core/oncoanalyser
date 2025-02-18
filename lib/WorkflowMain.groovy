@@ -60,16 +60,29 @@ class WorkflowMain {
             return
         }
 
-        if (run_mode === Constants.RunMode.TARGETED) {
+        // Attempt to set default panel data path; make no assumption on valid 'panel' value
+        if(run_mode === Constants.RunMode.TARGETED || run_mode === Constants.RunMode.PREPARE_REFERENCE) {
 
-            // Attempt to set default panel data path; make no assumption on valid 'panel' value
             if (params.containsKey('panel')) {
-                if (params.panel == 'tso500' && params.genome_version.toString() == '37') {
-                    params.ref_data_panel_data_path = Constants.TSO500_PANEL_37_PATH
-                } else if (params.panel == 'tso500' && params.genome_version.toString() == '38') {
-                    params.ref_data_panel_data_path = Constants.TSO500_PANEL_38_PATH
+
+                if(params.panel == 'tso500') {
+                    if(params.genome_version.toString() == '37') {
+                        params.ref_data_panel_data_path = Constants.TSO500_PANEL_37_PATH
+                    } else if (params.genome_version.toString() == '38') {
+                        params.ref_data_panel_data_path = Constants.TSO500_PANEL_38_PATH
+                    }
                 }
+
+                // TODO(LN): Add support for other 'standard' panels
+                // if(params.panel == 'pm_haem') {
+                //
+                // }
             }
+
+        }
+
+
+        if (run_mode === Constants.RunMode.TARGETED) {
 
             // When fastp UMI is enabled, REDUX UMI should be as well
             if (params.fastp_umi && (!params.containsKey('redux_umi') || !params.redux_umi)) {
