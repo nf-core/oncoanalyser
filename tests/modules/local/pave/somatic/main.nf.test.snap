@@ -1,0 +1,55 @@
+{
+    "PAVE_SOMATIC": {
+        "content": [
+            {
+                "0": [
+                    [
+                        {
+                            "id": "test",
+                            "sample_id": "subject_a.tumor"
+                        },
+                        "subject_a.tumor.sage.somatic.pave.vcf.gz:md5,d4ae69ca1aa1e1085b88653c979b3c2c"
+                    ]
+                ],
+                "1": [
+                    [
+                        {
+                            "id": "test",
+                            "sample_id": "subject_a.tumor"
+                        },
+                        "subject_a.tumor.sage.somatic.pave.vcf.gz.tbi:md5,5df8174164b0bd2c6964a4ff055ce421"
+                    ]
+                ],
+                "2": [
+                    "versions.yml:md5,535477aa7bfc44fbd16990963e86067f"
+                ],
+                "index": [
+                    [
+                        {
+                            "id": "test",
+                            "sample_id": "subject_a.tumor"
+                        },
+                        "subject_a.tumor.sage.somatic.pave.vcf.gz.tbi:md5,5df8174164b0bd2c6964a4ff055ce421"
+                    ]
+                ],
+                "vcf": [
+                    [
+                        {
+                            "id": "test",
+                            "sample_id": "subject_a.tumor"
+                        },
+                        "subject_a.tumor.sage.somatic.pave.vcf.gz:md5,d4ae69ca1aa1e1085b88653c979b3c2c"
+                    ]
+                ],
+                "versions": [
+                    "versions.yml:md5,535477aa7bfc44fbd16990963e86067f"
+                ]
+            }
+        ],
+        "meta": {
+            "nf-test": "0.9.2",
+            "nextflow": "24.10.4"
+        },
+        "timestamp": "2025-02-18T05:46:57.268792224"
+    }
+}
