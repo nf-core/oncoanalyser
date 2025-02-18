@@ -84,7 +84,7 @@
                 },
                 "ref_data_types": {
                     "type": "string",
-                    "description": "Prepare and write reference output only.",
+                    "description": "Which reference data types to download and extract.",
                     "fa_icon": "fas fa-diagram-project",
                     "enum": ["wgs", "wts", "targeted", "ref_genome", "bwa_index", "gridss_index", "star_index", "hmftools", "panel"]
                 },
