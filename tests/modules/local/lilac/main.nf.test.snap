@@ -1,0 +1,13 @@
+{
+    "LILAC with tumor and normal samples": {
+        "content": [
+            "/home/rhassaine/oncoanalyser/.nf-test/tests/a9a073c0b708c2979d94696edd8e2eeb/work/d6/55930f3389b541be080877c356c44c/lilac/subject_a.tumor.lilac.candidates.coverage.tsv\n/home/rhassaine/oncoanalyser/.nf-test/tests/a9a073c0b708c2979d94696edd8e2eeb/work/d6/55930f3389b541be080877c356c44c/lilac/subject_a.tumor.lilac.qc.tsv\n/home/rhassaine/oncoanalyser/.nf-test/tests/a9a073c0b708c2979d94696edd8e2eeb/work/d6/55930f3389b541be080877c356c44c/lilac/subject_a.tumor.lilac.tsv",
+            "lilac_directory_contents"
+        ],
+        "meta": {
+            "nf-test": "0.9.2",
+            "nextflow": "24.10.4"
+        },
+        "timestamp": "2025-02-19T07:38:39.861631309"
+    }
+}
