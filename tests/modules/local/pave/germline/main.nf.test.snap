@@ -1,0 +1,55 @@
+{
+    "PAVE_GERMLINE": {
+        "content": [
+            {
+                "0": [
+                    [
+                        {
+                            "id": "test",
+                            "sample_id": "subject_a.tumor"
+                        },
+                        "subject_a.tumor.sage.germline.pave.vcf.gz:md5,ffe4d4d323631f74dd59358e59728a7d"
+                    ]
+                ],
+                "1": [
+                    [
+                        {
+                            "id": "test",
+                            "sample_id": "subject_a.tumor"
+                        },
+                        "subject_a.tumor.sage.germline.pave.vcf.gz.tbi:md5,1a61cdb164c1d874d07eb3ef9ee5436f"
+                    ]
+                ],
+                "2": [
+                    "versions.yml:md5,4ea6837c1373366d0ecb2a247358308a"
+                ],
+                "index": [
+                    [
+                        {
+                            "id": "test",
+                            "sample_id": "subject_a.tumor"
+                        },
+                        "subject_a.tumor.sage.germline.pave.vcf.gz.tbi:md5,1a61cdb164c1d874d07eb3ef9ee5436f"
+                    ]
+                ],
+                "vcf": [
+                    [
+                        {
+                            "id": "test",
+                            "sample_id": "subject_a.tumor"
+                        },
+                        "subject_a.tumor.sage.germline.pave.vcf.gz:md5,ffe4d4d323631f74dd59358e59728a7d"
+                    ]
+                ],
+                "versions": [
+                    "versions.yml:md5,4ea6837c1373366d0ecb2a247358308a"
+                ]
+            }
+        ],
+        "meta": {
+            "nf-test": "0.9.2",
+            "nextflow": "24.10.4"
+        },
+        "timestamp": "2025-02-19T06:34:51.435296115"
+    }
+}
