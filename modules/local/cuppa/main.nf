@@ -4,8 +4,8 @@ process CUPPA {
 
     conda "${moduleDir}/environment.yml"
     container "${ workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container ?
-        'https://depot.galaxyproject.org/singularity/hmftools-cuppa:2.3.0_beta--py311r42hdfd78af_2' :
-        'biocontainers/hmftools-cuppa:2.3.0_beta--py311r42hdfd78af_2' }"
+        'https://depot.galaxyproject.org/singularity/hmftools-cuppa:2.3.1--py311r42hdfd78af_0' :
+        'biocontainers/hmftools-cuppa:2.3.1--py311r42hdfd78af_0' }"
 
     input:
     tuple val(meta), path(isofox_dir), path(purple_dir), path(linx_dir), path(virusinterpreter_dir)
