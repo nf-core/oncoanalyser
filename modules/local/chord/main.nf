@@ -4,8 +4,8 @@ process CHORD {
 
     conda "${moduleDir}/environment.yml"
     container "${ workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container ?
-        'https://depot.galaxyproject.org/singularity/hmftools-chord:2.1.0_beta--hdfd78af_4' :
-        'biocontainers/hmftools-chord:2.1.0_beta--hdfd78af_4' }"
+        'https://depot.galaxyproject.org/singularity/hmftools-chord:2.1.0--hdfd78af_0' :
+        'biocontainers/hmftools-chord:2.1.0--hdfd78af_0' }"
 
     input:
     tuple val(meta), path(smlv_vcf), path(sv_vcf)
