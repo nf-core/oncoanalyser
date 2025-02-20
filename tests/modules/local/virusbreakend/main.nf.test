@@ -1,0 +1,68 @@
+nextflow_process {
+    name "Test Process VIRUSBREAKEND"
+    script "modules/local/virusbreakend/main.nf"
+    process "VIRUSBREAKEND"
+    config "tests/nextflow.config"
+
+    test("VIRUSBREAKEND with all inputs") {
+        when {
+            params {
+                test_sample_data = 'https://raw.githubusercontent.com/nf-core/test-datasets/oncoanalyser/sample_data/simulated_reads/wgts/markdups_bam/'
+                resource_path = '/home/rhassaine/resources_files_oa/38/'
+                mode = 'WGS'
+            }
+            process {
+                """
+                input[0] = [
+                    [id: 'test', sample_id: 'subject_a.tumor'],
+                    file(params.test_sample_data + 'subject_a.tumor.dna.bwa-mem2_2.2.1.markdups.bam', checkIfExists: true)
+                ]
+                input[1] = file(params.resource_path + "GCA_000001405.15_GRCh38_no_alt_analysis_set.fna", checkIfExists: true)
+                input[2] = file(params.resource_path + "GCA_000001405.15_GRCh38_no_alt_analysis_set.fna.fai", checkIfExists: true)
+                input[3] = file(params.resource_path + "GCA_000001405.15_GRCh38_no_alt_analysis_set.fna.dict", checkIfExists: true)
+                input[4] = file(params.resource_path + "2.13.2.tar.gz", checkIfExists: true)
+                input[5] = file(params.resource_path + "hmf_pipeline_resources.38_v6.0--2/misc/virusbreakend/", checkIfExists: true)
+                input[6] = file(params.resource_path + "hmf_pipeline_resources.38_v6.0--2/dna/sv/gridss.properties", checkIfExists: true)
+                """
+            }
+        }
+
+        then {
+            assertAll(
+                { assert process.success },
+                { assert process.out.tsv != null },
+                { assert process.out.tsv.size() > 0 },
+                { assert process.out.vcf != null },
+                { assert process.out.vcf.size() > 0 },
+                { assert process.out.versions != null },
+                { assert process.out.versions.size() > 0 }
+            )
+
+            with(process.out) {
+                def sample_id = tsv[0][0].sample_id
+                assertAll(
+                    { assert path(tsv[0][1]).resolve().name == "${sample_id}.summary.tsv" },
+                    { assert path(vcf[0]).resolve().name == "${sample_id}.virusbreakend.vcf" },
+                    { assert path(versions[0]).resolve().exists() }
+                )
+            }
+        }
+    }
+
+    test("VIRUSBREAKEND should fail when input is missing") {
+        when {
+            process {
+                """
+                input[0] = [ [id: 'test', sample_id: 'subject_a.tumor'], [] ]
+                """
+            }
+        }
+
+        then {
+            assertAll(
+                { assert !process.success },
+                { assert process.exitStatus != 0 }
+            )
+        }
+    }
+}
