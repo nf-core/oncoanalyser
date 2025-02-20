@@ -1,0 +1,59 @@
+{
+    "LINX_VISUALISER with default parameters": {
+        "content": [
+            {
+                "0": [
+                    [
+                        {
+                            "id": "test",
+                            "sample_id": "subject_a.tumor"
+                        },
+                        [
+                            [
+                                "subject_a.tumor.chr11.007.png:md5,6de04c56c1088ce2234bb5c9205a5956",
+                                "subject_a.tumor.chr19.000.png:md5,16150521da7abc854d281dd8a78e0f3e",
+                                "subject_a.tumor.chr9.007.png:md5,dfbf4080d61c632112df960cf24e4d08",
+                                "subject_a.tumor.cluster-0.sv2.003.png:md5,87ff4eeea0f6d97f69cb4bfa74adf55a",
+                                "subject_a.tumor.cluster-1.sv2.007.png:md5,c9ad060f12bf078e9ab1745ce3beb505"
+                            ],
+                            [
+                                "subject_a.tumor.cluster-1.sv2.007.png:md5,c9ad060f12bf078e9ab1745ce3beb505"
+                            ]
+                        ]
+                    ]
+                ],
+                "1": [
+                    "versions.yml:md5,7cc2e10dbc189797869850ae60178730"
+                ],
+                "plots": [
+                    [
+                        {
+                            "id": "test",
+                            "sample_id": "subject_a.tumor"
+                        },
+                        [
+                            [
+                                "subject_a.tumor.chr11.007.png:md5,6de04c56c1088ce2234bb5c9205a5956",
+                                "subject_a.tumor.chr19.000.png:md5,16150521da7abc854d281dd8a78e0f3e",
+                                "subject_a.tumor.chr9.007.png:md5,dfbf4080d61c632112df960cf24e4d08",
+                                "subject_a.tumor.cluster-0.sv2.003.png:md5,87ff4eeea0f6d97f69cb4bfa74adf55a",
+                                "subject_a.tumor.cluster-1.sv2.007.png:md5,c9ad060f12bf078e9ab1745ce3beb505"
+                            ],
+                            [
+                                "subject_a.tumor.cluster-1.sv2.007.png:md5,c9ad060f12bf078e9ab1745ce3beb505"
+                            ]
+                        ]
+                    ]
+                ],
+                "versions": [
+                    "versions.yml:md5,7cc2e10dbc189797869850ae60178730"
+                ]
+            }
+        ],
+        "meta": {
+            "nf-test": "0.9.2",
+            "nextflow": "24.10.4"
+        },
+        "timestamp": "2025-02-20T05:48:54.926643986"
+    }
+}
