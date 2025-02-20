@@ -35,20 +35,6 @@ nextflow_process {
                 input[9] = []
                 input[10] = []
                 input[11] = []
-
-                // Print out all input values for debugging
-                println "Input 0: " + input[0]
-                println "Input 1: " + input[1]
-                println "Input 2: " + input[2]
-                println "Input 3: " + input[3]
-                println "Input 4: " + input[4]
-                println "Input 5: " + input[5]
-                println "Input 6: " + input[6]
-                println "Input 7: " + input[7]
-                println "Input 8: " + input[8]
-                println "Input 9: " + input[9]
-                println "Input 10: " + input[10]
-                println "Input 11: " + input[11]
                 """
             }
         }
