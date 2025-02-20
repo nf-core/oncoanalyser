@@ -1,0 +1,43 @@
+{
+    "CHORD with default parameters": {
+        "content": [
+            {
+                "0": [
+                    [
+                        {
+                            "id": "test",
+                            "sample_id": "subject_a.tumor"
+                        },
+                        [
+                            "subject_a.tumor.chord.mutation_contexts.tsv:md5,3012b46fa2dd1f76225bfc825e5a40a6",
+                            "subject_a.tumor.chord.prediction.tsv:md5,9c0971533aca96471dc7c9dac637ce0e"
+                        ]
+                    ]
+                ],
+                "1": [
+                    "versions.yml:md5,515be517b16e231349d32b81d67174ae"
+                ],
+                "chord_dir": [
+                    [
+                        {
+                            "id": "test",
+                            "sample_id": "subject_a.tumor"
+                        },
+                        [
+                            "subject_a.tumor.chord.mutation_contexts.tsv:md5,3012b46fa2dd1f76225bfc825e5a40a6",
+                            "subject_a.tumor.chord.prediction.tsv:md5,9c0971533aca96471dc7c9dac637ce0e"
+                        ]
+                    ]
+                ],
+                "versions": [
+                    "versions.yml:md5,515be517b16e231349d32b81d67174ae"
+                ]
+            }
+        ],
+        "meta": {
+            "nf-test": "0.9.2",
+            "nextflow": "24.10.4"
+        },
+        "timestamp": "2025-02-20T03:37:08.865934053"
+    }
+}
