@@ -1,0 +1,55 @@
+{
+    "ISOFOX with all inputs": {
+        "content": [
+            {
+                "0": [
+                    [
+                        {
+                            "id": "test",
+                            "sample_id": "subject_a.tumor"
+                        },
+                        [
+                            "subject_a.tumor.isf.alt_splice_junc.csv:md5,9e74a4b566d7a667d457fd4732bcf8a0",
+                            "subject_a.tumor.isf.fusions.csv:md5,3f0c92d3ba56185aa303924460143553",
+                            "subject_a.tumor.isf.gene_collection.csv:md5,1b5e6e6246fda7cf31e8eb8d0e6706a6",
+                            "subject_a.tumor.isf.gene_data.csv:md5,681532561647389b43193db553d4c897",
+                            "subject_a.tumor.isf.pass_fusions.csv:md5,52f25e6fd1e1ae27071c5be94fb0e9d1",
+                            "subject_a.tumor.isf.retained_intron.csv:md5,f16b9ec5ec166f545c8e067021e6c08f",
+                            "subject_a.tumor.isf.summary.csv:md5,1362397b39f713ecf63061884f85fa75",
+                            "subject_a.tumor.isf.transcript_data.csv:md5,41d5269c2ec5e7da04df440c2648d311"
+                        ]
+                    ]
+                ],
+                "1": [
+                    "versions.yml:md5,2b3732e625517e83842f526c81c51d0f"
+                ],
+                "isofox_dir": [
+                    [
+                        {
+                            "id": "test",
+                            "sample_id": "subject_a.tumor"
+                        },
+                        [
+                            "subject_a.tumor.isf.alt_splice_junc.csv:md5,9e74a4b566d7a667d457fd4732bcf8a0",
+                            "subject_a.tumor.isf.fusions.csv:md5,3f0c92d3ba56185aa303924460143553",
+                            "subject_a.tumor.isf.gene_collection.csv:md5,1b5e6e6246fda7cf31e8eb8d0e6706a6",
+                            "subject_a.tumor.isf.gene_data.csv:md5,681532561647389b43193db553d4c897",
+                            "subject_a.tumor.isf.pass_fusions.csv:md5,52f25e6fd1e1ae27071c5be94fb0e9d1",
+                            "subject_a.tumor.isf.retained_intron.csv:md5,f16b9ec5ec166f545c8e067021e6c08f",
+                            "subject_a.tumor.isf.summary.csv:md5,1362397b39f713ecf63061884f85fa75",
+                            "subject_a.tumor.isf.transcript_data.csv:md5,41d5269c2ec5e7da04df440c2648d311"
+                        ]
+                    ]
+                ],
+                "versions": [
+                    "versions.yml:md5,2b3732e625517e83842f526c81c51d0f"
+                ]
+            }
+        ],
+        "meta": {
+            "nf-test": "0.9.2",
+            "nextflow": "24.10.4"
+        },
+        "timestamp": "2025-02-20T00:58:22.589201661"
+    }
+}
