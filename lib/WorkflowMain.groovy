@@ -205,6 +205,18 @@ class WorkflowMain {
 
         def run_mode = Utils.getRunMode(params.mode, log)
 
+        if (run_mode === Constants.RunMode.PREPARE_REFERENCE && params.ref_data_types == null) {
+
+            def ref_data_types = Utils.getEnumNames(Constants.RefDataType).join('\n    - ')
+
+            log.error "\n~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n" +
+                "  CLI argument --ref_data_types is required for mode prepare_reference.\n" +
+                "  Please specify one or more of the below valid values (separated by commas)\n" +
+                "    - ${ref_data_types}\n" +
+                "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
+            Nextflow.exit(1)
+        }
+
         if (run_mode === Constants.RunMode.TARGETED) {
 
             if (!params.containsKey('panel') || params.panel === null) {

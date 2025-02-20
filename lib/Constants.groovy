@@ -32,17 +32,17 @@ class Constants {
     }
 
     static enum RefDataType {
+        // Compound types
+        WGS,
+        WTS,
+        TARGETED,
+
         REF_GENOME,
         BWA_INDEX,
         GRIDSS_INDEX,
         STAR_INDEX,
         HMFTOOLS,
         PANEL,
-
-        // Compound types
-        WGS,
-        WTS,
-        TARGETED,
     }
 
     static enum Process {
