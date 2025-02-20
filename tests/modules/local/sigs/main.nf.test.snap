@@ -1,0 +1,43 @@
+{
+    "SIGS with default parameters": {
+        "content": [
+            {
+                "0": [
+                    [
+                        {
+                            "id": "test",
+                            "sample_id": "subject_a.tumor"
+                        },
+                        [
+                            "subject_a.tumor.sig.allocation.tsv:md5,24390aa4c547a4a29d81f1ec44e7fbbc",
+                            "subject_a.tumor.sig.snv_counts.csv:md5,2f78f35bcde31761000904f1e927d4d7"
+                        ]
+                    ]
+                ],
+                "1": [
+                    "versions.yml:md5,d750f630e272727cba01af06a61c1a94"
+                ],
+                "sigs_dir": [
+                    [
+                        {
+                            "id": "test",
+                            "sample_id": "subject_a.tumor"
+                        },
+                        [
+                            "subject_a.tumor.sig.allocation.tsv:md5,24390aa4c547a4a29d81f1ec44e7fbbc",
+                            "subject_a.tumor.sig.snv_counts.csv:md5,2f78f35bcde31761000904f1e927d4d7"
+                        ]
+                    ]
+                ],
+                "versions": [
+                    "versions.yml:md5,d750f630e272727cba01af06a61c1a94"
+                ]
+            }
+        ],
+        "meta": {
+            "nf-test": "0.9.2",
+            "nextflow": "24.10.4"
+        },
+        "timestamp": "2025-02-20T03:15:48.076275678"
+    }
+}
