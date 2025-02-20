@@ -1,0 +1,96 @@
+{
+    "CUPPA with default parameters (ALL categories)": {
+        "content": [
+            {
+                "0": [
+                    [
+                        {
+                            "id": "test",
+                            "sample_id": "subject_a.tumor",
+                            "sample_rna_id": "subject_a.tumor_rna"
+                        },
+                        [
+                            "subject_a.tumor.cuppa.pred_summ.tsv:md5,fc33c20e3766cdd7ee64a8062e864686",
+                            "subject_a.tumor.cuppa.vis.png:md5,cf4703e244012ca96f37632a54bdcc7a",
+                            "subject_a.tumor.cuppa.vis_data.tsv:md5,2237901c760e5a7ca3d3bbd1f0781132",
+                            "subject_a.tumor.cuppa_data.tsv.gz:md5,f0291c0e9969db16a6ba9d1cab5e8860"
+                        ]
+                    ]
+                ],
+                "1": [
+                    "versions.yml:md5,4b4bb425530b387ae7d8821332a5f609"
+                ],
+                "cuppa_dir": [
+                    [
+                        {
+                            "id": "test",
+                            "sample_id": "subject_a.tumor",
+                            "sample_rna_id": "subject_a.tumor_rna"
+                        },
+                        [
+                            "subject_a.tumor.cuppa.pred_summ.tsv:md5,fc33c20e3766cdd7ee64a8062e864686",
+                            "subject_a.tumor.cuppa.vis.png:md5,cf4703e244012ca96f37632a54bdcc7a",
+                            "subject_a.tumor.cuppa.vis_data.tsv:md5,2237901c760e5a7ca3d3bbd1f0781132",
+                            "subject_a.tumor.cuppa_data.tsv.gz:md5,f0291c0e9969db16a6ba9d1cab5e8860"
+                        ]
+                    ]
+                ],
+                "versions": [
+                    "versions.yml:md5,4b4bb425530b387ae7d8821332a5f609"
+                ]
+            }
+        ],
+        "meta": {
+            "nf-test": "0.9.2",
+            "nextflow": "24.10.4"
+        },
+        "timestamp": "2025-02-20T04:10:17.027766304"
+    },
+    "CUPPA with DNA-only categories": {
+        "content": [
+            {
+                "0": [
+                    [
+                        {
+                            "id": "test",
+                            "sample_id": "subject_a.tumor",
+                            "sample_rna_id": "subject_a.tumor_rna"
+                        },
+                        [
+                            "subject_a.tumor.cuppa.pred_summ.tsv:md5,ddca4a0507895bee001f855ea8e0d061",
+                            "subject_a.tumor.cuppa.vis.png:md5,99d4dcf7263b63cbd048c8cdba1b085a",
+                            "subject_a.tumor.cuppa.vis_data.tsv:md5,9c00514c21ad934b5ad328d01515b547",
+                            "subject_a.tumor.cuppa_data.tsv.gz:md5,b2894129214198df6bde85d532f0f9b8"
+                        ]
+                    ]
+                ],
+                "1": [
+                    "versions.yml:md5,4b4bb425530b387ae7d8821332a5f609"
+                ],
+                "cuppa_dir": [
+                    [
+                        {
+                            "id": "test",
+                            "sample_id": "subject_a.tumor",
+                            "sample_rna_id": "subject_a.tumor_rna"
+                        },
+                        [
+                            "subject_a.tumor.cuppa.pred_summ.tsv:md5,ddca4a0507895bee001f855ea8e0d061",
+                            "subject_a.tumor.cuppa.vis.png:md5,99d4dcf7263b63cbd048c8cdba1b085a",
+                            "subject_a.tumor.cuppa.vis_data.tsv:md5,9c00514c21ad934b5ad328d01515b547",
+                            "subject_a.tumor.cuppa_data.tsv.gz:md5,b2894129214198df6bde85d532f0f9b8"
+                        ]
+                    ]
+                ],
+                "versions": [
+                    "versions.yml:md5,4b4bb425530b387ae7d8821332a5f609"
+                ]
+            }
+        ],
+        "meta": {
+            "nf-test": "0.9.2",
+            "nextflow": "24.10.4"
+        },
+        "timestamp": "2025-02-20T04:10:34.877952937"
+    }
+}
