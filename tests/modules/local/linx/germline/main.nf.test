@@ -1,0 +1,75 @@
+nextflow_process {
+    name "Test Process LINX_GERMLINE"
+    script "modules/local/linx/germline/main.nf"
+    process "LINX_GERMLINE"
+    config "tests/nextflow.config"
+
+    test("LINX_GERMLINE with default parameters") {
+        when {
+            params {
+                test_sample_data = 'https://raw.githubusercontent.com/nf-core/test-datasets/oncoanalyser/sample_data/simulated_reads/wgts/'
+                resource_path = '/home/rhassaine/resources_files_oa/38/'
+                mode = 'WGS'
+            }
+            process {
+                """
+                input[0] = [
+                    [id: 'test', sample_id: 'subject_a.tumor'],
+                    file('/home/rhassaine/container_test_output/subject_a/purple/subject_a.tumor.purple.sv.germline.vcf.gz')
+                ]
+                input[1] = 38
+                input[2] = file(params.resource_path + "hmf_pipeline_resources.38_v6.0--2/common/ensembl_data/", checkIfExists: true)
+                input[3] = file(params.resource_path + "hmf_pipeline_resources.38_v6.0--2/common/DriverGenePanel.38.tsv", checkIfExists: true)
+                """
+            }
+        }
+
+        then {
+            assertAll(
+                { assert process.success },
+                { assert process.out.annotation_dir != null },
+                { assert process.out.annotation_dir.size() > 0 },
+                { assert snapshot(process.out).match() }
+            )
+
+            if (process.success) {
+                def linx_output_dir = process.out.annotation_dir[0][1]
+                def sample_id = process.out.annotation_dir[0][0].sample_id
+                assertAll(
+                    { assert path(linx_output_dir).resolve("linx.version").exists() },
+                    { assert path(linx_output_dir).resolve("${sample_id}.linx.germline.breakend.tsv").exists() },
+                    { assert path(linx_output_dir).resolve("${sample_id}.linx.germline.clusters.tsv").exists() },
+                    { assert path(linx_output_dir).resolve("${sample_id}.linx.germline.disruption.tsv").exists() },
+                    { assert path(linx_output_dir).resolve("${sample_id}.linx.germline.driver.catalog.tsv").exists() },
+                    { assert path(linx_output_dir).resolve("${sample_id}.linx.germline.links.tsv").exists() },
+                    { assert path(linx_output_dir).resolve("${sample_id}.linx.germline.svs.tsv").exists() },
+                    { assert process.out.versions != null },
+                    { assert process.out.versions.size() > 0 },
+                    { assert path(process.out.versions[0]).exists() }
+                )
+            }
+        }
+    }
+
+    test("LINX_GERMLINE should fail when input is missing") {
+        when {
+            params {
+                test_sample_data = 'https://raw.githubusercontent.com/nf-core/test-datasets/oncoanalyser/sample_data/simulated_reads/wgts/'
+                resource_path = '/home/rhassaine/resources_files_oa/38/'
+                mode = 'WGS'
+            }
+            process {
+                """
+                input[0] = []  // Missing input
+                """
+            }
+        }
+
+        then {
+            assertAll(
+                { assert !process.success },
+                { assert process.exitStatus != 0 }
+            )
+        }
+    }
+}

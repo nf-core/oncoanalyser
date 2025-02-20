@@ -1,0 +1,53 @@
+{
+    "LINX_GERMLINE with default parameters": {
+        "content": [
+            {
+                "0": [
+                    [
+                        {
+                            "id": "test",
+                            "sample_id": "subject_a.tumor"
+                        },
+                        [
+                            "linx.version:md5,a5fc97b5c4e6092096f0a1fdffd20159",
+                            "subject_a.tumor.linx.germline.breakend.tsv:md5,62e0235c504dc8b2eb168d308ad1ca43",
+                            "subject_a.tumor.linx.germline.clusters.tsv:md5,e73bc24fed69e59e14c7a0820b507d7b",
+                            "subject_a.tumor.linx.germline.disruption.tsv:md5,02e772341ff55bd6c4ac3b33c71bc06c",
+                            "subject_a.tumor.linx.germline.driver.catalog.tsv:md5,1ab1213e1408409affd036f247928194",
+                            "subject_a.tumor.linx.germline.links.tsv:md5,b1d1360fa6598420a8d9751ba2a4d4dc",
+                            "subject_a.tumor.linx.germline.svs.tsv:md5,ebba2c61f884b97eaf13be69817a0bed"
+                        ]
+                    ]
+                ],
+                "1": [
+                    "versions.yml:md5,c25d0eb259f72685d0f53a5127e91140"
+                ],
+                "annotation_dir": [
+                    [
+                        {
+                            "id": "test",
+                            "sample_id": "subject_a.tumor"
+                        },
+                        [
+                            "linx.version:md5,a5fc97b5c4e6092096f0a1fdffd20159",
+                            "subject_a.tumor.linx.germline.breakend.tsv:md5,62e0235c504dc8b2eb168d308ad1ca43",
+                            "subject_a.tumor.linx.germline.clusters.tsv:md5,e73bc24fed69e59e14c7a0820b507d7b",
+                            "subject_a.tumor.linx.germline.disruption.tsv:md5,02e772341ff55bd6c4ac3b33c71bc06c",
+                            "subject_a.tumor.linx.germline.driver.catalog.tsv:md5,1ab1213e1408409affd036f247928194",
+                            "subject_a.tumor.linx.germline.links.tsv:md5,b1d1360fa6598420a8d9751ba2a4d4dc",
+                            "subject_a.tumor.linx.germline.svs.tsv:md5,ebba2c61f884b97eaf13be69817a0bed"
+                        ]
+                    ]
+                ],
+                "versions": [
+                    "versions.yml:md5,c25d0eb259f72685d0f53a5127e91140"
+                ]
+            }
+        ],
+        "meta": {
+            "nf-test": "0.9.2",
+            "nextflow": "24.10.4"
+        },
+        "timestamp": "2025-02-20T04:39:55.098404267"
+    }
+}
