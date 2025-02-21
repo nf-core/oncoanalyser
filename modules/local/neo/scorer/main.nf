@@ -41,9 +41,8 @@ process NEO_SCORER {
 
     mkdir -p neo_scorer/
 
-    java \\
+    neo \\
         -Xmx${Math.round(task.memory.bytes * 0.95)} \\
-        -cp ${task.ext.jarPath} \\
         com.hartwig.hmftools.neo.score.NeoScorer \\
             ${args} \\
             -sample ${meta.sample_id} \\
@@ -62,7 +61,7 @@ process NEO_SCORER {
 
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":
-        neo: \$(java -jar ${task.ext.jarPath} -version | sed 's/^.* //')
+        neo: \$(neo -version | sed 's/^.* //')
     END_VERSIONS
     """
 

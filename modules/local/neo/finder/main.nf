@@ -27,9 +27,8 @@ process NEO_FINDER {
     """
     mkdir -p neo_finder/
 
-    java \\
+    neo \\
         -Xmx${Math.round(task.memory.bytes * 0.95)} \\
-        -jar ${task.ext.jarPath} \\
             ${args} \\
             -sample ${meta.sample_id} \\
             -linx_dir ${linx_annotation_dir} \\
@@ -42,7 +41,7 @@ process NEO_FINDER {
 
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":
-        neo: \$(java -jar ${task.ext.jarPath} -version | sed 's/^.* //')
+        neo: \$(neo -version | sed 's/^.* //')
     END_VERSIONS
     """
 
