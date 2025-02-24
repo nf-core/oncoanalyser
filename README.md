@@ -25,42 +25,42 @@
 ## Introduction
 
 **nf-core/oncoanalyser** is a Nextflow pipeline for the analysis of Next Generation Sequencing (NGS) data using the
-**[WiGiTS](https://github.com/hartwigmedical/hmftools)** toolkit of the Hartwig Medical Foundation (HMF).
+**[WiGiTS](https://github.com/hartwigmedical/hmftools)** toolkit of the Hartwig Medical Foundation (HMF). The pipeline performs variant
+calling as well as various downstream analyses (see [Pipeline overview](#pipeline-overview)). `oncoanalyser` supports the below
+experimental setups:
 
-### Supported sequencing methods
+### Sequencing methods
 
-The pipeline is natively designed for analysing data from **whole genome sequencing (WGS)** and **whole transcriptome sequencing (WTS)**
-data.
-
-Oncoanalyser currently has built-in support for the
-**[TSO500 panel](https://sapac.illumina.com/products/by-type/clinical-research-products/trusight-oncology-500.html)**.
-For other **targeted panels** or **whole exome sequencing (WES)**, a training procedure (detailed [here](https://github.com/hartwigmedical/hmftools/blob/master/pipeline/README_TARGETED.md))
-can be used to generate panel specific resources files allowing for normalisation of copy number, TMB, and TPM data as well as filtering of
-panel specific artefacts.
-
-### Input files
-
-Onconalyser supports **BAM**, **CRAM** or **FASTQ** as starting inputs.
-
-### Reference genomes
-
-Oncoanalyser will work with most **GRCh37** and **GRCh38** genome builds.
-
-We strongly recommend removing or masking all HLA class I alt contigs. These cause a myriad of issues in HLA class I genes including poor
-small variant and copy number calling, as well as incorrect HLA typing. _We will soon release a standalone utility to remap HLA alt contigs
-back to the original BAM for users who want to run from BAMs._
+- DNA sequencing
+  - **WGS** (whole genome sequencing)
+  - **Targeted sequencing**
+    - Built-in support for [TSO500 panel](https://sapac.illumina.com/products/by-type/clinical-research-products/trusight-oncology-500.html)
+    - Other panels (including whole exome) require [reference data generation](https://github.com/hartwigmedical/hmftools/blob/master/pipeline/README_TARGETED.md) to filter out panel specific artefacts, as well as normalise copy number, tumor mutational burden, and RNA transcript counts
+  - Support for **UMIs** (unique molecular identifiers) allowing for read deduplication and error correction
+- RNA sequencing
+  - **WTS** (whole transcriptome sequencing)
 
 ### Sample modes
+- **Tumor/normal**
+  - Allows germline (normal) variants to be subtracted from tumor variants
+  - **Donor sample** can be included for further normal subtraction. Relevant for patients with bone marrow transplants or other contaminants in the tumor
+  - Only DNA sequencing data supported
+- **Tumor-only**
+  - DNA and RNA sequencing data supported
 
-Oncoanalyser supports **paired tumor/normal** (DNA sequencing only) or **tumor-only** (DNA and RNA sequencing) sample modes.
+### Input files
+- **BAM**
+- **CRAM**
+- **FASTQ**
+  - Only interleaved paired end FASTQ files are supported
 
-Paired tumor/normal is recommended if possible which allows for germline (normal) variants to be subtracted from tumor variants.
+### Reference genomes
+- **GRCh37**
+- **GRCh38**
+  - It is strongly recommended to remove or mask HLA class I alt contigs. These lead to poor variant calling in HLA class I genes and poor HLA typing.
+  We will soon release a standalone utility to remap HLA contigs back to the original BAM for users who want to start from BAM.
 
-A paired tumor/normal mode with **donor sample** is also available for to allow multiple normal subtraction, which is relevant for patients
-with bone marrow transplants or other known sample contamination in the tumor. This allows for germline subtraction from BAF points
-(impacting purity fit) and from small variant calling.
-
-## Pipeline summary
+## Pipeline overview
 
 <p align="center"><img width="750" src="docs/images/wigits_pipeline.png"></p>
 
@@ -94,7 +94,7 @@ Create a sample sheet with your inputs (WGS/WTS BAMs in this example):
 group_id,subject_id,sample_id,sample_type,sequence_type,filetype,filepath
 PATIENT1_WGTS,PATIENT1,PATIENT1-T,tumor,dna,bam,/path/to/PATIENT1-T.dna.bam
 PATIENT1_WGTS,PATIENT1,PATIENT1-R,normal,dna,bam,/path/to/PATIENT1-R.dna.bam
-PATIENT1_WGTS,PATIENT1,PATIENT1-T-RNA,tumor,dna,bam,/path/to/PATIENT1-T.rna.bam
+PATIENT1_WGTS,PATIENT1,PATIENT1-T-RNA,tumor,rna,bam,/path/to/PATIENT1-T.rna.bam
 ```
 
 Launch `oncoanalyser`:

@@ -6,37 +6,20 @@
 
 ## Introduction
 
-**nf-core/oncoanalyser** is a Nextflow pipeline for the analysis of Next Generation Sequencing (NGS) data using the
-**[WiGiTS](https://github.com/hartwigmedical/hmftools)** toolkit from the Hartwig Medical Foundation (HMF).
+The `oncoanalyser` pipeline runs from **FASTQ**, **BAM** or **CRAM** files and supports two modes: whole genome and/or transcriptome
+(**WGTS**), and **targeted** panel. The pipeline supports **tumor/normal** (with optional donor sample) and **tumor-only** sample modes,
+and most **GRCh37** and **GRCh38** human reference genome builds. **UMI** (unique molecular identifier) processing is supported for
+DNA sequencing data.
 
-`oncoanalyser` supports the below:
-- **Sequencing methods**:
-  - Whole genome sequencing (WGS)
-  - Whole transcriptome sequencing (WTS)
-  - Targeted sequencing ([TSO500 panel](https://sapac.illumina.com/products/by-type/clinical-research-products/trusight-oncology-500.html) supported by default; whole exome sequencing (WES) and other panels require reference data generation)
-- **Sample modes**:
-  - Tumor+normal (not available for WTS)
-  - Tumor+normal with donor sample (germline variant subtraction using e.g. bone marrow transplant donor sample)
-  - Tumor-only
-- **Input files**:
-  - BAM
-  - CRAM
-  - FASTQ
-- **Reference genomes**:
-  - GRCh37
-  - GRCh38 (exclusion of HLA alt contigs recommended)
-- **Pre-built containers**:
-  - Docker
-  - Singularity (recommended for HPC environments)
 
 ## Getting started
 
 Assuming that [**Nextflow**](https://www.nextflow.io/docs/latest/install.html) and
-[**Docker**](https://docs.docker.com/engine/install/)/[**Singularity**](https://docs.sylabs.io/guides/3.0/user-guide/quick_start.html#)
+[**Docker**](https://docs.docker.com/engine/install/) or [**Singularity**](https://docs.sylabs.io/guides/3.0/user-guide/quick_start.html#)
 is installed, setting up and running `oncoanalyser` involves the following steps:
 
 1. Download and configure [**reference data**](#reference-data) (e.g. reference genome)
-2. (Optional) [**Other configuration**](#custom-configuration) (e.g. max RAM)
+2. (Optional) [**Other configuration**](#custom-configuration) (e.g. compute resources)
 3. Create [**samplesheet**](#samplesheet) specifying input files
 4. [**Run**](#running-the-pipeline) `oncoanalyser`
 
@@ -239,7 +222,7 @@ PATIENT1,PATIENT1,PATIENT1-T-RNA,tumor,rna,bam,/path/to/PATIENT1-T.rna.bam
 group_id,subject_id,sample_id,sample_type,sequence_type,filetype,filepath
 PATIENT1,PATIENT1,PATIENT1-T,tumor,dna,bam,/path/to/PATIENT1-T.dna.bam
 PATIENT1,PATIENT1,PATIENT1-R,normal,dna,bam,/path/to/PATIENT1-R.dna.bam
-PATIENT1,PATIENT1,PATIENT1-T-RNA,tumor,dna,bam,/path/to/PATIENT1-T.rna.bam
+PATIENT1,PATIENT1,PATIENT1-T-RNA,tumor,rna,bam,/path/to/PATIENT1-T.rna.bam
 ```
 
 #### Tumor/normal DNA with donor sample
@@ -735,10 +718,11 @@ To learn how to provide additional arguments to a particular tool of the pipelin
 [customising tool arguments](https://nf-co.re/docs/usage/configuration#customising-tool-arguments) section of the nf-core website.
 
 ### UMI processing
-In `--mode targeted`, unique molecular identifier (UMI) processing is performed by
+
+Unique molecular identifiers (UMI) allow for read deduplication and error correction. UMI processing is performed by
 [fastp](https://github.com/OpenGene/fastp?tab=readme-ov-file#unique-molecular-identifier-umi-processing) for FASTQ files, and
-[REDUX](https://github.com/hartwigmedical/hmftools/tree/master/redux) for BAM files. Depending on the format of your UMI strings, you may
-need to configure one or more of these arguments:
+[REDUX](https://github.com/hartwigmedical/hmftools/tree/master/redux#deduplication) for BAM files. Depending on the presence/format of your
+UMI strings, you may need to configure one or more of these arguments:
 
 ```groovy
 params {
