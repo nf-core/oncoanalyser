@@ -24,122 +24,115 @@
 
 ## Introduction
 
-**nf-core/oncoanalyser** is a Nextflow implementation of the comprehensive cancer DNA/RNA analysis and reporting
-workflow from the Hartwig Medical Foundation (HMF). The workflow starts from FASTQ or BAM and calls genomic variants,
-analyses transcript data, infers important biomarkers and features (e.g. TMB, HRD, mutational signatures, HLA alleles,
-oncoviral content, tissue of origin, etc), annotates and interprets results in the clinical context, and more.
+**nf-core/oncoanalyser** is a Nextflow pipeline for the analysis of Next Generation Sequencing (NGS) data using the
+**[WiGiTS](https://github.com/hartwigmedical/hmftools)** toolkit of the Hartwig Medical Foundation (HMF).
 
-Both the HMF WGS/WTS workflow and targeted sequencing workflow are available in oncoanalyser. The targeted sequencing
-workflow has built-in support for the TSO500 panel and can also run custom panels with externally-generated
-normalisation data.
+### Supported sequencing methods
 
-The key analysis results for each sample are summarised and presented in an ORANGE report (summary page excerpt shown
-below from _[COLO829_wgts.orange_report.pdf](https://pub-29f2e5b2b7384811bdbbcba44f8b5083.r2.dev/oncoanalyser/other/example_report/COLO829_wgts.orange_report.pdf)_):
+The pipeline is natively designed for analysing data from **whole genome sequencing (WGS)** and **whole transcriptome sequencing (WTS)**
+data.
 
-<p align="center"><img width="750" src="docs/images/COLO829_wgts.orange_report.summary_section.png"></p>
+Oncoanalyser currently has built-in support for the
+**[TSO500 panel](https://sapac.illumina.com/products/by-type/clinical-research-products/trusight-oncology-500.html)**.
+For other **targeted panels** or **whole exome sequencing (WES)**, a training procedure (detailed [here](https://github.com/hartwigmedical/hmftools/blob/master/pipeline/README_TARGETED.md))
+can be used to generate panel specific resources files allowing for normalisation of copy number, TMB, and TPM data as well as filtering of
+panel specific artefacts.
 
-For detailed information on each component of the HMF workflow, please refer to
-[hartwigmedical/hmftools](https://github.com/hartwigmedical/hmftools/).
+### Input files
+
+Onconalyser supports **BAM**, **CRAM** or **FASTQ** as starting inputs.
+
+### Reference genomes
+
+Oncoanalyser will work with most **GRCh37** and **GRCh38** genome builds.
+
+We strongly recommend removing or masking all HLA class I alt contigs. These cause a myriad of issues in HLA class I genes including poor
+small variant and copy number calling, as well as incorrect HLA typing. _We will soon release a standalone utility to remap HLA alt contigs
+back to the original BAM for users who want to run from BAMs._
+
+### Sample modes
+
+Oncoanalyser supports **paired tumor/normal** (DNA sequencing only) or **tumor-only** (DNA and RNA sequencing) sample modes.
+
+Paired tumor/normal is recommended if possible which allows for germline (normal) variants to be subtracted from tumor variants.
+
+A paired tumor/normal mode with **donor sample** is also available for to allow multiple normal subtraction, which is relevant for patients
+with bone marrow transplants or other known sample contamination in the tumor. This allows for germline subtraction from BAF points
+(impacting purity fit) and from small variant calling.
 
 ## Pipeline summary
 
-The following processes and tools can be run with `oncoanalyser`:
+<p align="center"><img width="750" src="docs/images/wigits_pipeline.png"></p>
 
-- Simple DNA/RNA alignment (`bwa-mem2`, `STAR`)
-- Post-alignment processing (`MarkDups`, `Picard MarkDuplicates`)
-- SNV, MNV, and INDEL calling (`SAGE`, `PAVE`)
-- CNV calling (`AMBER`, `COBALT`, `PURPLE`)
-- SV calling (`SvPrep`, `GRIDSS`, `GRIPSS`)
-- SV event interpretation (`LINX`)
-- Transcript analysis (`Isofox`)
-- Oncoviral detection (`VIRUSBreakend`, `Virus Interpreter`)
-- HLA calling (`LILAC`)
-- HRD status prediction (`CHORD`)
-- Mutational signature fitting (`Sigs`)
-- Tissue of origin prediction (`CUPPA`)
-- Neoepitope prediction (`Neo`)
-- Report generation (`ORANGE`, `linxreport`)
+The pipeline mainly uses tools from **[WiGiTS](https://github.com/hartwigmedical/hmftools)**, as well as some external tools. Due to the
+limitations of panel data, certain tools (mark with a caret `^` below) do not run in targeted mode.
+
+- Read alignment: [BWA-MEM2](https://github.com/bwa-mem2/bwa-mem2) (for DNA), [STAR](https://github.com/alexdobin/STAR) (for RNA)
+- Read post-processing: [REDUX](https://github.com/hartwigmedical/hmftools/tree/master/redux) (for DNA), [Picard MarkDuplicates](https://gatk.broadinstitute.org/hc/en-us/articles/360037052812-MarkDuplicates-Picard) (for RNA)
+- SNV, MNV, INDEL calling: [SAGE](https://github.com/hartwigmedical/hmftools/tree/master/sage), [PAVE](https://github.com/hartwigmedical/hmftools/tree/master/pave)
+- SV calling: [ESVEE](https://github.com/hartwigmedical/hmftools/tree/master/esvee)
+- CNV calling: [AMBER](https://github.com/hartwigmedical/hmftools/tree/master/amber), [COBALT](https://github.com/hartwigmedical/hmftools/tree/master/cobalt), [PURPLE](https://github.com/hartwigmedical/hmftools/tree/master/purple)
+- SV and driver event interpretation: [LINX](https://github.com/hartwigmedical/hmftools/tree/master/linx)
+- RNA transcript analysis: [ISOFOX](https://github.com/hartwigmedical/hmftools/tree/master/isofox)
+- Oncoviral detection: [VIRUSbreakend](https://github.com/PapenfussLab/gridss)^, [VirusInterpreter](https://github.com/hartwigmedical/hmftools/tree/master/virus-interpreter)^
+- Immune analysis: [LILAC](https://github.com/hartwigmedical/hmftools/tree/master/lilac), [NEO](https://github.com/hartwigmedical/hmftools/tree/master/neo)^
+- Mutational signature fitting: [SIGS](https://github.com/hartwigmedical/hmftools/tree/master/sigs)^
+- HRD prediction: [CHORD](https://github.com/hartwigmedical/hmftools/tree/master/chord)^
+- Tissue of origin prediction: [CUPPA](https://github.com/hartwigmedical/hmftools/tree/master/cuppa)^
+- Summary report: [ORANGE](https://github.com/hartwigmedical/hmftools/tree/master/orange)
 
 ## Usage
 
 > [!NOTE]
-> If you are new to Nextflow and nf-core, please refer to [this page](https://nf-co.re/docs/usage/installation) on how to set-up Nextflow. Make sure to [test your setup](https://nf-co.re/docs/usage/introduction#how-to-run-a-pipeline) with `-profile test` before running the workflow on actual data.
+> If you are new to Nextflow and nf-core, please refer to [this page](https://nf-co.re/docs/usage/installation) on how to set up Nextflow.
+> Make sure to [test your setup](https://nf-co.re/docs/usage/introduction#how-to-run-a-pipeline) with `-profile test` before running the
+> workflow on actual data.
 
-Create a samplesheet with your inputs (WGS/WTS FASTQs in this example):
+Create a sample sheet with your inputs (WGS/WTS BAMs in this example):
 
-```csv
-group_id,subject_id,sample_id,sample_type,sequence_type,filetype,info,filepath
-P1__wgts,P1,SA,normal,dna,fastq,library_id:SA_library;lane:001,/path/to/SA.normal.dna.wgs.001.R1.fastq.gz;/path/to/SA.normal.dna.wgs.001.R2.fastq.gz
-P1__wgts,P1,SB,tumor,dna,fastq,library_id:SB_library;lane:001,/path/to/SB.tumor.dna.wgs.001.R1.fastq.gz;/path/to/SB.tumor.dna.wgs.001.R2.fastq.gz
-P1__wgts,P1,SC,tumor,rna,fastq,library_id:SC_library;lane:001,/path/to/SC.tumor.rna.wts.001.R1.fastq.gz;/path/to/SC.tumor.rna.wts.001.R2.fastq.gz
+```shell
+group_id,subject_id,sample_id,sample_type,sequence_type,filetype,filepath
+PATIENT1_WGTS,PATIENT1,PATIENT1-T,tumor,dna,bam,/path/to/PATIENT1-T.dna.bam
+PATIENT1_WGTS,PATIENT1,PATIENT1-R,normal,dna,bam,/path/to/PATIENT1-R.dna.bam
+PATIENT1_WGTS,PATIENT1,PATIENT1-T-RNA,tumor,dna,bam,/path/to/PATIENT1-T.rna.bam
 ```
 
 Launch `oncoanalyser`:
 
 ```bash
 nextflow run nf-core/oncoanalyser \
-  -profile docker \
-  -revision dev \
-  --mode wgts \
-  --genome GRCh38_hmf \
-  --input samplesheet.csv \
+  -profile <docker|singularity> \
+  -revision 2.0.0 \
+  --mode <wgts|targeted> \
+  --genome <GRCh37_hmf|GRCh38_hmf> \
+  --input sample_sheet.csv \
   --outdir output/
 ```
 
 > [!WARNING]
-> Please provide pipeline parameters via the CLI or Nextflow `-params-file` option. Custom config files including those provided by the `-c` Nextflow option can be used to provide any configuration _**except for parameters**_; see [docs](https://nf-co.re/usage/configuration#custom-configuration-files).
+> Please provide pipeline parameters via the CLI or Nextflow `-params-file` option. Custom config files including those provided by the `-c`
+> Nextflow option can be used to provide any configuration _**except for parameters**_;
+> see [docs](https://nf-co.re/usage/configuration#custom-configuration-files).
 
-For more details and further functionality, please refer to the [usage documentation](https://nf-co.re/oncoanalyser/usage) and the [parameter documentation](https://nf-co.re/oncoanalyser/parameters).
+For more details and further functionality, please refer to the [usage documentation](https://nf-co.re/oncoanalyser/usage) and the
+[parameter documentation](https://nf-co.re/oncoanalyser/parameters).
 
 ## Pipeline output
 
-To see the results of an example test run with a full size dataset refer to the [results](https://nf-co.re/oncoanalyser/results) tab on the nf-core website pipeline page.
-For more details about the output files and reports, please refer to the
+To see the results of an example test run with a full size dataset refer to the [results](https://nf-co.re/oncoanalyser/results) tab on the
+nf-core website pipeline page. For more details about the output files and reports, please refer to the
 [output documentation](https://nf-co.re/oncoanalyser/output).
-
-## Version information
-
-### Extended support
-
-As `oncoanalyser` is used in clinical settings and subject to accreditation standards in some instances, there is a need
-for long-term stability and reliability for feature releases in order to meet operational requirements. This is
-accomplished through long-term support of several nominated feature releases, which all receive bug fixes and security
-fixes during the period of extended support.
-
-Each release that is given extended support is allocated a separate long-lived git branch with the 'stable' prefix, e.g.
-`stable/1.2.x`, `stable/1.5.x`. Feature development otherwise occurs on the `dev` branch with stable releases pushed to
-`master`.
-
-Versions nominated to have current long-term support:
-
-- TBD
-
-### Release parity
-
-Versioning between `oncoanalyser` and hmftools naturally differ, however it is often necessary to relate the functional
-equivalence of these two pieces of software. The functional/feature parity with regards to version releases are detailed
-in the below table.
-
-| oncoanalyser        | hmftools |
-| ------------------- | -------- |
-| 0.1.0 through 0.2.7 | 5.33     |
-| 0.3.0 through 1.0.0 | 5.34     |
-
-## Known issues
-
-There are currently no known issues.
 
 ## Credits
 
-The `oncoanalyser` pipeline was written by Stephen Watts while in the [Genomics Platform
+The Oncoanalyser pipeline was written by Stephen Watts while in the [Genomics Platform
 Group](https://mdhs.unimelb.edu.au/centre-for-cancer-research/our-research/genomics-platform-group) at the [University
 of Melbourne Centre for Cancer Research](https://mdhs.unimelb.edu.au/centre-for-cancer-research).
 
 We thank the following organisations and people for their extensive assistance in the development of this pipeline,
 listed in alphabetical order:
 
-- [Hartwig Medical Foundation
-  Australia](https://www.hartwigmedicalfoundation.nl/en/partnerships/hartwig-medical-foundation-australia/)
+- [Hartwig Medical Foundation Australia](https://www.hartwigmedicalfoundation.nl/en/partnerships/hartwig-medical-foundation-australia/)
 - Oliver Hofmann
 
 ## Contributions and Support
@@ -151,7 +144,7 @@ channel](https://nfcore.slack.com/channels/oncoanalyser) (you can join with [thi
 
 ## Citations
 
-You can cite the `oncoanalyser` zenodo record for a specific version using the following doi:
+You can cite the Oncoanalyser zenodo record for a specific version using the following doi:
 [10.5281/zenodo.XXXXXXX](https://doi.org/10.5281/zenodo.XXXXXXX)
 
 An extensive list of references for the tools used by the pipeline can be found in the [`CITATIONS.md`](CITATIONS.md)
