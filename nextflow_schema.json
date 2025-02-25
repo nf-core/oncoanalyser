@@ -48,7 +48,7 @@
                     "type": "string",
                     "description": "Workflow run mode.",
                     "fa_icon": "fas fa-diagram-project",
-                    "pattern": "^(wgts|targeted)"
+                    "enum": ["wgts", "targeted"]
                 },
                 "panel": {
                     "type": "string",
