@@ -23,11 +23,6 @@ def checkPathParamList = [
     params.isofox_gc_ratios,
 ]
 
-// Mode check required as evaluated regardless of workflow selection
-if (run_config.stages.virusinterpreter && run_config.mode !== Constants.RunMode.TARGETED) {
-    checkPathParamList.add(params.ref_data_virusbreakenddb_path)
-}
-
 if (run_config.stages.lilac) {
     if (params.genome_version.toString() == '38' && params.genome_type == 'alt' && params.containsKey('ref_data_hla_slice_bed')) {
         checkPathParamList.add(params.ref_data_hla_slice_bed)
