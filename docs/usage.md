@@ -40,15 +40,19 @@ nextflow run nf-core/oncoanalyser \
 ```
 
 :::tip
+
 **Nextflow** arguments have **one hyphen** (`-`) and are detailed in the [**Nextflow CLI documentation**](https://www.nextflow.io/docs/latest/reference/cli.html).
 
 **Oncoanalyser** arguments have **two hyphens** (`--`) and are detailed in the [**Parameters tab**](https://nf-co.re/oncoanalyser/parameters).
+
 :::
 
 :::note
+
 It is strongly recommended to locally stage and configure reference data paths (e.g. reference genome) with `-config <file>`
 (see: [**Manually setting up reference data**](#manually-staging-reference-data)). If not configured, `oncoanalyser` will automatically
 re-download reference data for every run executed from a different working directory, which can lead to unnecessary disk/network usage.
+
 :::
 
 ### Outputs
@@ -117,9 +121,11 @@ The samplesheet is a comma separated table with the following columns:
 | `info`          | Sequencing library and lane info for [FASTQ](#fastq) files. Column does not need to be provided if not running from FASTQ                                                                                                                    |
 
 :::note
+
 `subject_id` is reserved for implementing more complex sample setups in the future, but currently has no functional purpose.
 For now, `subject_id` must correlate exactly with `group_id`. E.g. if `group_id` is `PATIENT1_WGS` and `subject_id` is `PATIENT1`,
 this must be the case for every row in the samplesheet.
+
 :::
 
 ### Input starting points
@@ -139,7 +145,9 @@ PATIENT1,PATIENT1,PATIENT1-T,tumor,dna,fastq,/path/to/PATIENT1-T_S1_L002_R1_001.
 ```
 
 :::note
+
 Currently only gzip compressed, non-interleaved pair-end FASTQ files are currently supported
+
 :::
 
 #### BAM / CRAM
@@ -252,8 +260,10 @@ PATIENT2,PATIENT2,PATIENT2-R,normal,dna,bam,/path/to/PATIENT2-R.dna.bam
 ```
 
 :::warning
+
 Running a large batch of samples can lead to stalling due to sample runs competing for compute resources. It is therefore recommended to
 run each sample in the batch in e.g. a separate cloud VM.
+
 :::
 
 ## Reference data
@@ -380,7 +390,9 @@ To use custom panels, reference data must first be generated using a training pr
 copy number, TMB, and TPM data as well as filtering of panel specific artefacts.
 
 :::note
+
 The panel reference data training will soon be integrated into `oncoanalyser` which will greatly simplify the process.
+
 :::
 
 The panel reference data paths must then be provided in a config file:
@@ -468,8 +480,10 @@ nextflow run nf-core/oncoanalyser \
 ```
 
 :::tip
+
 You can first generate the required indexes by setting `--prepare_reference_only` and then provide the prepared reference files to
 `oncoanalyser` through a custom config file. This avoids having to regenerate indexes for each new analysis.
+
 :::
 
 Creation of a STAR index also requires transcript annotations, please provide either of the following GTF files via the
@@ -479,7 +493,9 @@ Creation of a STAR index also requires transcript annotations, please provide ei
 - GRCh38: [GENCODE v37 (Ensembl v74) annotations](https://ftp.ebi.ac.uk/pub/databases/gencode/Gencode_human/release_19/gencode.v19.annotation.gtf.gz)
 
 :::warning
+
 STAR index must use transcript annotations from Ensembl versions that match WiGiTS resource data (GRCh37: v74; GRCh38: v104).
+
 :::
 
 When creating indexes for reference genomes with alternative haplotypes, an ALT file must be given with
@@ -511,7 +527,9 @@ nextflow run nf-core/oncoanalyser \
 ```
 
 :::warning
+
 When skipping components no checks are done to identify orphan processes in the execution DAG or for redundant processes.
+
 :::
 
 ### Manual process selection
@@ -544,8 +562,10 @@ nextflow run nf-core/oncoanalyser \
 ```
 
 :::warning
+
 It is the user's responsibility to select the required upstream processes for a downstream process to run. If not all required processes
 are not selected, `oncoanalyser` will not crash but will simply finish without the downstream process running.
+
 :::
 
 ### Starting from existing inputs
@@ -566,7 +586,9 @@ PATIENT1,PATIENT1,PATIENT1-T,tumor,dna,lilac_dir,/path/to/PATIENT1.lilac_dir/
 ```
 
 :::note
+
 The original source input file (i.e. BAM or FASTQ) must be provided for `oncoanalyser` to infer the correct analysis type.
+
 :::
 
 Then, run `oncoanalyser`, skipping variant calling by using `--processes_exclude` (see [Excluding process](#excluding-processes)):
@@ -583,14 +605,18 @@ nextflow run nf-core/oncoanalyser \
 ```
 
 :::warning
+
 Providing existing inputs will cause `oncoanalyser` to skip the corresponding process but _not any_ of the upstream
 processes. It is the responsibility of the user to skip all relevant processes.
+
 :::
 
 ## Core Nextflow arguments
 
 :::note
+
 These options are part of Nextflow and use a _single_ hyphen (pipeline parameters use a double-hyphen).
+
 :::
 
 ### `-profile`
@@ -601,8 +627,10 @@ Several generic profiles are bundled with the pipeline which instruct the pipeli
 Singularity, Podman, Shifter, Charliecloud, Apptainer, Conda) - see below.
 
 :::info
+
 We highly recommend the use of Docker or Singularity containers for full pipeline reproducibility, however when this is not possible,
 Conda is also supported.
+
 :::
 
 The pipeline also dynamically loads configurations from [https://github.com/nf-core/configs](https://github.com/nf-core/configs) when it
@@ -679,8 +707,10 @@ the [Downloading Apptainer containers](https://nf-co.re/docs/nf-core-tools/pipel
 of the nf-core-tools documentation for details.
 
 :::tip
+
 Docker images can be [pulled with Singularity](https://docs.sylabs.io/guides/2.6/user-guide/singularity_and_docker.html) using
 `singularity pull --name <output_path> <docker_image_url>`
+
 :::
 
 #### Container image sources
