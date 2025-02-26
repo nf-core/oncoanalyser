@@ -1,6 +1,6 @@
 process SAGE_GERMLINE {
     tag "${meta.id}"
-    label 'process_high'
+    label 'process_medium'
 
     conda "${moduleDir}/environment.yml"
     container "${ workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container ?
@@ -18,6 +18,7 @@ process SAGE_GERMLINE {
     path sage_coverage_panel
     path sage_highconf_regions
     path ensembl_data_resources
+    path gnomad_resource
 
     output:
     tuple val(meta), path('germline/*.sage.germline.vcf.gz'), path('germline/*.sage.germline.vcf.gz.tbi'), emit: vcf
@@ -30,13 +31,20 @@ process SAGE_GERMLINE {
     script:
     def args = task.ext.args ?: ''
 
-    def xmx_mod = task.ext.xmx_mod ?: 0.95
+    def gnomad_args
+    if (genome_ver.toString() == '37') {
+        gnomad_args = "-gnomad_freq_file ${gnomad_resource}"
+    } else if (genome_ver.toString() == '38') {
+        gnomad_args = "-gnomad_freq_dir ${gnomad_resource}"
+    } else {
+        error "got bad genome version: ${genome_ver}"
+    }
 
     """
     mkdir -p germline/
 
     sage \\
-        -Xmx${Math.round(task.memory.bytes * xmx_mod)} \\
+        -Xmx${Math.round(task.memory.bytes * 0.95)} \\
         ${args} \\
         -tumor ${meta.normal_id} \\
         -tumor_bam ${normal_bam} \\
@@ -53,13 +61,14 @@ process SAGE_GERMLINE {
         -germline \\
         -panel_only \\
         -ref_sample_count 0 \\
+         ${gnomad_args} \\
         -bqr_write_plot \\
         -threads ${task.cpus} \\
         -output_vcf germline/${meta.tumor_id}.sage.germline.vcf.gz
 
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":
-        sage: \$(sage -version | sed -n '/^Sage version / { s/^.* //p }')
+        sage: \$(sage -version | sed 's/^.* //')
     END_VERSIONS
     """
 

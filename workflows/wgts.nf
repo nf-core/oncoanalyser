@@ -344,6 +344,7 @@ workflow WGTS {
             ref_data.genome_version,
             ref_data.genome_fai,
             ref_data.genome_dict,
+            hmf_data.sage_pon,
             hmf_data.sage_known_hotspots_somatic,
             hmf_data.sage_known_hotspots_germline,
             hmf_data.sage_actionable_panel,
@@ -352,6 +353,7 @@ workflow WGTS {
             hmf_data.segment_mappability,
             hmf_data.driver_gene_panel,
             hmf_data.ensembl_data_resources,
+            hmf_data.gnomad_resource,
         )
 
         ch_versions = ch_versions.mix(SAGE_CALLING.out.versions)
@@ -385,7 +387,6 @@ workflow WGTS {
             ref_data.genome_fasta,
             ref_data.genome_version,
             ref_data.genome_fai,
-            hmf_data.sage_pon,
             [],  // sage_pon_artefacts
             hmf_data.sage_blocklist_regions,
             hmf_data.sage_blocklist_sites,
@@ -393,7 +394,6 @@ workflow WGTS {
             hmf_data.segment_mappability,
             hmf_data.driver_gene_panel,
             hmf_data.ensembl_data_resources,
-            hmf_data.gnomad_resource,
         )
 
         ch_versions = ch_versions.mix(PAVE_ANNOTATION.out.versions)

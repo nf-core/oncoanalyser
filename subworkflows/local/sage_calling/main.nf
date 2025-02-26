@@ -26,6 +26,7 @@ workflow SAGE_CALLING {
     genome_version               // channel: [mandatory] genome version
     genome_fai                   // channel: [mandatory] /path/to/genome_fai
     genome_dict                  // channel: [mandatory] /path/to/genome_dict
+    sage_pon                     // channel: [mandatory] /path/to/sage_pon
     sage_known_hotspots_somatic  // channel: [mandatory] /path/to/sage_known_hotspots_somatic
     sage_known_hotspots_germline // channel: [optional]  /path/to/sage_known_hotspots_germline
     sage_actionable_panel        // channel: [mandatory] /path/to/sage_actionable_panel
@@ -34,6 +35,7 @@ workflow SAGE_CALLING {
     segment_mappability          // channel: [mandatory] /path/to/segment_mappability
     driver_gene_panel            // channel: [mandatory] /path/to/driver_gene_panel
     ensembl_data_resources       // channel: [mandatory] /path/to/ensembl_data_resources/
+    gnomad_resource              // channel: [mandatory] /path/to/gnomad_resource
 
     main:
     // Channel for version.yml files
@@ -140,6 +142,7 @@ workflow SAGE_CALLING {
         sage_coverage_panel,
         sage_highconf_regions,
         ensembl_data_resources,
+        gnomad_resource,
     )
 
     ch_versions = ch_versions.mix(SAGE_GERMLINE.out.versions)
@@ -191,11 +194,13 @@ workflow SAGE_CALLING {
         genome_version,
         genome_fai,
         genome_dict,
+        sage_pon,
         sage_known_hotspots_somatic,
         sage_actionable_panel,
         sage_coverage_panel,
         sage_highconf_regions,
         ensembl_data_resources,
+        gnomad_resource,
     )
 
     ch_versions = ch_versions.mix(SAGE_SOMATIC.out.versions)

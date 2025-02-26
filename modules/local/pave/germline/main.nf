@@ -22,7 +22,6 @@ process PAVE_GERMLINE {
     path segment_mappability
     path driver_gene_panel
     path ensembl_data_resources
-    path gnomad_resource
 
     output:
     tuple val(meta), path("*.vcf.gz")    , emit: vcf
@@ -35,20 +34,9 @@ process PAVE_GERMLINE {
     script:
     def args = task.ext.args ?: ''
 
-    def xmx_mod = task.ext.xmx_mod ?: 0.75
-
-    def gnomad_args
-    if (genome_ver.toString() == '37') {
-        gnomad_args = "-gnomad_freq_file ${gnomad_resource}"
-    } else if (genome_ver.toString() == '38') {
-        gnomad_args = "-gnomad_freq_dir ${gnomad_resource}"
-    } else {
-        error "got bad genome version: ${genome_ver}"
-    }
-
     """
     pave \\
-        -Xmx${Math.round(task.memory.bytes * xmx_mod)} \\
+        -Xmx${Math.round(task.memory.bytes * 0.95)} \\
         ${args} \\
         -sample ${meta.sample_id} \\
         -vcf_file ${sage_vcf} \\
@@ -60,7 +48,6 @@ process PAVE_GERMLINE {
         -ensembl_data_dir ${ensembl_data_resources} \\
         -blacklist_bed ${sage_blocklist_regions} \\
         -blacklist_vcf ${sage_blocklist_sites} \\
-        ${gnomad_args} \\
         -gnomad_no_filter \\
         -read_pass_only \\
         -threads ${task.cpus} \\
@@ -68,7 +55,7 @@ process PAVE_GERMLINE {
 
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":
-        pave: \$(pave -version | sed -n '/^Pave version / { s/^.* //p }')
+        pave: \$(pave -version | sed 's/^.* //')
     END_VERSIONS
     """
 
