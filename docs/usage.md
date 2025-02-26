@@ -6,22 +6,35 @@
 
 ## Introduction
 
-The `oncoanalyser` pipeline runs from **FASTQ**, **BAM** or **CRAM** files and supports two modes: whole genome and/or transcriptome
-(**WGTS**), and **targeted** panel. The pipeline supports **tumor/normal** (with optional donor sample) and **tumor-only** sample modes,
-and most **GRCh37** and **GRCh38** human reference genome builds. **UMI** (unique molecular identifier) processing is supported for
-DNA sequencing data.
+The `oncoanalyser` pipeline typically runs from  **FASTQ**, **BAM** or **CRAM** [input files](#input-starting-points), supports most
+**GRCh37** and **GRCh38** human reference genome builds, and supports **UMI** ([unique molecular identifier](#umi-processing)) processing
+for DNA sequencing data.
 
+The pipeline supports **WGTS** (whole genome and/or transcriptome) and **targeted** panel workflow modes; and supports **tumor/normal**
+(with optional donor sample) and **tumor-only** [sample setups](#sample-setups). The below table summarises the supported analyses:
+
+| Sample setup           | WGTS workflow  | Targeted workflow |
+|------------------------|----------------|-------------------|
+| Tumor / Normal         | DNA and/or RNA | DNA only          |
+| Tumor / Normal / Donor | DNA and/or RNA | DNA only          |
+| Tumor-only             | DNA and/or RNA | DNA and/or RNA    |
 
 ## Getting started
 
 Assuming that [**Nextflow**](https://www.nextflow.io/docs/latest/install.html) and
 [**Docker**](https://docs.docker.com/engine/install/) or [**Singularity**](https://docs.sylabs.io/guides/3.0/user-guide/quick_start.html#)
-is installed, setting up and running `oncoanalyser` involves the following steps:
+are installed, setting up and running `oncoanalyser` involves the following steps:
 
 1. Download and configure [**reference data**](#reference-data) (e.g. reference genome)
 2. (Optional) [**Other configuration**](#custom-configuration) (e.g. compute resources)
 3. Create [**samplesheet**](#samplesheet) specifying input files
 4. [**Run**](#running-the-pipeline) `oncoanalyser`
+
+:::tip
+
+Jump to [**FAQ and troubleshooting**](#faq-and-troubleshooting).
+
+:::
 
 ## Running the pipeline
 
@@ -38,6 +51,10 @@ nextflow run nf-core/oncoanalyser \
   --outdir output/ \
   -config oncoanalyser.config ## Optional; see below note
 ```
+
+`oncoanalyser` supports two analysis `--mode`s:
+- `wgts`: whole genome and/or transcriptome sequencing data
+- `targeted`: targeted sequencing data (panels or exomes)
 
 :::tip
 
@@ -199,10 +216,10 @@ PATIENT1,PATIENT1,PATIENT1-T,tumor,dna,redux_jitter_tsv,/other/dir/PATIENT1-T.dn
 PATIENT1,PATIENT1,PATIENT1-T,tumor,dna,redux_ms_tsv,/path/dir/PATIENT1-T.dna.ms_table.tsv.gz
 ```
 
-### Sample modes
+### Sample setups
 
-Providing `sample_type` and `sequence_type` in different combinations allows `oncoanalyser` to run in different sample modes. The below
-samplesheets use BAM files, but different sample modes can also be specified for FASTQ or CRAM files.
+Providing `sample_type` and `sequence_type` in different combinations allows `oncoanalyser` to run in different sample setups. The below
+samplesheets use BAM files, but different sample setups can also be specified for FASTQ or CRAM files.
 
 #### Tumor/normal DNA
 ```csv title="samplesheet.tn_dna.csv"
@@ -269,7 +286,8 @@ run each sample in the batch in e.g. a separate cloud VM.
 ## Reference data
 
 Reference data refers to reference genomes + indexes, [WiGiTS](https://github.com/hartwigmedical/hmftools) resources files, and panel
-specific resource files.
+specific resource files. Descriptions for each file can be found on the
+[WiGiTS resource file documentation](https://github.com/hartwigmedical/hmftools/blob/master/pipeline/README_RESOURCES.md).
 
 If reference data is not configured using `-config <file>`, `oncoanalyser` will automatically download/extract reference data for every
 run from a different working directory. Therefore, it is strongly recommended to [manually stage reference data](#manually-staging-reference-data),
@@ -387,7 +405,7 @@ _GRCh38 genome (Hartwig): `GRCh38_hmf`_
 
 To use custom panels, reference data must first be generated using a training procedure detailed
 [here](https://github.com/hartwigmedical/hmftools/blob/master/pipeline/README_TARGETED.md). This procedure allows for normalisation of
-copy number, TMB, and TPM data as well as filtering of panel specific artefacts.
+copy number, tumor mutational burden, and RNA transcript counts, as well as to filter out panel specific artefacts.
 
 :::note
 
@@ -419,7 +437,8 @@ params {
                 target_region_ratios        = 'copy_number/target_regions_ratios.custom_panel.38.tsv'
                 target_region_msi_indels    = 'copy_number/target_regions_msi_indels.custom_panel.38.tsv'
 
-                // Optional. If no RNA samples, these can be omitted by providing in empty list, e.g. isofox_tpm_norm = []
+                // Optional. If no RNA in panel, these can be omitted by providing in empty list, e.g.:
+                // isofox_tpm_norm = []
                 isofox_tpm_norm             = 'rna_resources/isofox.gene_normalisation.custom_panel.38.csv'
                 isofox_gene_ids             = 'rna_resources/custom_panel.rna_gene_ids.csv'
                 isofox_counts               = 'rna_resources/read_93_exp_counts.38.csv'
@@ -463,6 +482,14 @@ params {
 
 Each index required for the analysis will first be created before running the rest of `oncoanalyser` with the following command:
 
+:::warning
+
+For GRCh38 genome builds, It is strongly recommended to remove or mask HLA class I alt contigs. These lead to poor variant calling in HLA
+class I genes and poor HLA typing. We will soon release a standalone utility to remap HLA contigs back to the original BAM for users who
+want to start from BAM.
+
+:::
+
 ```bash
 nextflow run nf-core/oncoanalyser \
   -profile docker \
@@ -489,8 +516,8 @@ You can first generate the required indexes by setting `--prepare_reference_only
 Creation of a STAR index also requires transcript annotations, please provide either of the following GTF files via the
 `--ref_data_genome_gtf` option after decompressing:
 
-- GRCh37: [GENCODE v38 (Ensembl v104) annotations](https://ftp.ebi.ac.uk/pub/databases/gencode/Gencode_human/release_38/gencode.v38.annotation.gtf.gz)
-- GRCh38: [GENCODE v37 (Ensembl v74) annotations](https://ftp.ebi.ac.uk/pub/databases/gencode/Gencode_human/release_19/gencode.v19.annotation.gtf.gz)
+- GRCh37: [GENCODE v37 (Ensembl v74) annotations](https://ftp.ebi.ac.uk/pub/databases/gencode/Gencode_human/release_19/gencode.v19.annotation.gtf.gz)
+- GRCh38: [GENCODE v38 (Ensembl v104) annotations](https://ftp.ebi.ac.uk/pub/databases/gencode/Gencode_human/release_38/gencode.v38.annotation.gtf.gz)
 
 :::warning
 
