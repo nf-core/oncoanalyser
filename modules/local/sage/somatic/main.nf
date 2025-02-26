@@ -16,11 +16,13 @@ process SAGE_SOMATIC {
     val genome_ver
     path genome_fai
     path genome_dict
+    path sage_pon
     path sage_known_hotspots_somatic
     path sage_actionable_panel
     path sage_coverage_panel
     path sage_highconf_regions
     path ensembl_data_resources
+    path gnomad_resource
 
     output:
     tuple val(meta), path('somatic/*.sage.somatic.vcf.gz'), path('somatic/*.sage.somatic.vcf.gz.tbi'), emit: vcf
@@ -33,11 +35,13 @@ process SAGE_SOMATIC {
     script:
     def args = task.ext.args ?: ''
 
+    // Sample IDs
     def reference_ids = []
     if (meta.normal_id != null) reference_ids.add(meta.normal_id)
     if (meta.donor_id != null) reference_ids.add(meta.donor_id)
     def reference_arg = reference_ids.size() > 0 ? "-reference ${String.join(",", reference_ids)}" : ""
 
+    // BAMs
     def reference_bams = []
     if (normal_bam) reference_bams.add(normal_bam.toString())
     if (donor_bam) reference_bams.add(donor_bam.toString())
@@ -45,8 +49,19 @@ process SAGE_SOMATIC {
 
     def ref_sample_count_arg = "-ref_sample_count ${reference_ids.size()}"
 
+    // High depth mode
     def run_mode = Utils.getEnumFromString(params.mode, Constants.RunMode)
     def high_depth_mode_arg = (run_mode === Constants.RunMode.TARGETED) ? "-high_depth_mode" : ""
+
+    // gnomAD
+    def gnomad_args
+    if (genome_ver.toString() == '37') {
+        gnomad_args = "-gnomad_freq_file ${gnomad_resource}"
+    } else if (genome_ver.toString() == '38') {
+        gnomad_args = "-gnomad_freq_dir ${gnomad_resource}"
+    } else {
+        error "got bad genome version: ${genome_ver}"
+    }
 
     """
     mkdir -p somatic/
@@ -62,12 +77,15 @@ process SAGE_SOMATIC {
         -jitter_param_dir ./ \\
         -ref_genome ${genome_fasta} \\
         -ref_genome_version ${genome_ver} \\
+        -pon_file ${sage_pon} \\
         -hotspots ${sage_known_hotspots_somatic} \\
         -panel_bed ${sage_actionable_panel} \\
         -coverage_bed ${sage_coverage_panel} \\
         -high_confidence_bed ${sage_highconf_regions} \\
         -ensembl_data_dir ${ensembl_data_resources} \\
         ${high_depth_mode_arg} \\
+        ${gnomad_args} \\
+        -run_tinc \\
         -bqr_write_plot \\
         -threads ${task.cpus} \\
         -output_vcf somatic/${meta.tumor_id}.sage.somatic.vcf.gz

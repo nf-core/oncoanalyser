@@ -22,7 +22,6 @@ process PAVE_GERMLINE {
     path segment_mappability
     path driver_gene_panel
     path ensembl_data_resources
-    path gnomad_resource
 
     output:
     tuple val(meta), path("*.vcf.gz")    , emit: vcf
@@ -34,15 +33,6 @@ process PAVE_GERMLINE {
 
     script:
     def args = task.ext.args ?: ''
-
-    def gnomad_args
-    if (genome_ver.toString() == '37') {
-        gnomad_args = "-gnomad_freq_file ${gnomad_resource}"
-    } else if (genome_ver.toString() == '38') {
-        gnomad_args = "-gnomad_freq_dir ${gnomad_resource}"
-    } else {
-        error "got bad genome version: ${genome_ver}"
-    }
 
     """
     pave \\
@@ -58,7 +48,6 @@ process PAVE_GERMLINE {
         -ensembl_data_dir ${ensembl_data_resources} \\
         -blacklist_bed ${sage_blocklist_regions} \\
         -blacklist_vcf ${sage_blocklist_sites} \\
-        ${gnomad_args} \\
         -gnomad_no_filter \\
         -read_pass_only \\
         -threads ${task.cpus} \\

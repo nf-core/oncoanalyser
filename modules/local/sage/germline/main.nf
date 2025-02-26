@@ -18,6 +18,7 @@ process SAGE_GERMLINE {
     path sage_coverage_panel
     path sage_highconf_regions
     path ensembl_data_resources
+    path gnomad_resource
 
     output:
     tuple val(meta), path('germline/*.sage.germline.vcf.gz'), path('germline/*.sage.germline.vcf.gz.tbi'), emit: vcf
@@ -29,6 +30,15 @@ process SAGE_GERMLINE {
 
     script:
     def args = task.ext.args ?: ''
+
+    def gnomad_args
+    if (genome_ver.toString() == '37') {
+        gnomad_args = "-gnomad_freq_file ${gnomad_resource}"
+    } else if (genome_ver.toString() == '38') {
+        gnomad_args = "-gnomad_freq_dir ${gnomad_resource}"
+    } else {
+        error "got bad genome version: ${genome_ver}"
+    }
 
     """
     mkdir -p germline/
@@ -51,6 +61,7 @@ process SAGE_GERMLINE {
         -germline \\
         -panel_only \\
         -ref_sample_count 0 \\
+         ${gnomad_args} \\
         -bqr_write_plot \\
         -threads ${task.cpus} \\
         -output_vcf germline/${meta.tumor_id}.sage.germline.vcf.gz
