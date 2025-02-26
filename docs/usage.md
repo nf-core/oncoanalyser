@@ -811,6 +811,65 @@ configuration files.
 If you have any questions or issues please send us a message on [Slack](https://nf-co.re/join/slack) on the
 [`#configs` channel](https://nfcore.slack.com/channels/configs).
 
+
+## FAQ and troubleshooting
+
+### Are CRAMs supported?
+Yes. Simply specify a CRAM path instead of a BAM path in the sample sheet. See section [Input starting points: BAM / CRAM](#bam--cram).
+
+### Are UMIs supported?
+Yes. UMI processing can be enabled and configured via a config file. See section [UMI processing](#umi-processing).
+
+### How to use oncoanalyser with a custom panel or whole exome?
+`oncoanalyser` currently has built-in support for the TSO500 panel. For custom panels however, reference data must first be generated using
+a training procedure detailed [here](https://github.com/hartwigmedical/hmftools/blob/master/pipeline/README_TARGETED.md). This procedure
+allows for normalisation of copy number, TMB, and TPM data as well as filtering of panel specific artefacts.
+
+We realise that this training procedure is not very straight forward. The panel training procedure will therefore be integrated into
+`oncoanalyser` in the next minor release!
+
+### Why does the output contain the BAM(s) from REDUX but not from BWA-MEM2?
+
+### What are the extra files next to the REDUX BAM?
+
+### How to only output variant calls?
+
+### Why does oncoanalyser call too many / too few variants than another pipeline?
+
+### Manually downloading reference data
+
+### How to exclude steps in the pipeline?
+
+### CPUs/RAM/disk space not fully utilised
+
+### Docker not allowed on HPC
+
+### Oncoanalyser cannot pull container images
+
+### Timeout when downloading files
+
+https://www.nextflow.io/docs/latest/reference/config.html
+
+```groovy
+singularity {
+  pullTimeout = '2h'
+}
+
+docker {
+  pullTimeout = '2h'
+}
+
+env {
+  NXF_HTTP_TIMEOUT = '2h' // Increase HTTP download timeout
+}
+```
+
+### Can oncoanalyser CLI arguments be put in a config file?
+
+### How to navigate the `work/` directory?
+
+### How to find error messages when the pipeline crashes?
+
 ## Azure resource requests
 
 To be used with the `azurebatch` profile by specifying the `-profile azurebatch`.
