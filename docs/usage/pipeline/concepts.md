@@ -25,7 +25,7 @@ A detailed description of deduplication logic is available in the
 
 ## Error recalibration
 Two types of sample specific error recalibration are currently performed in `oncoanalyser`. REDUX measures the rate of microsatellite errors
-per consensus type, repeat context, repeat length, and fits these variables to a model
+per consensus type (for UMIs: single vs dual stranded), repeat context, repeat length, and fits these variables to a model
 (see [REDUX microsatellite jitter modeling](https://github.com/hartwigmedical/hmftools/tree/master/redux#microsatellite-jitter-modelling) for details).
 SAGE measures the rate of base errors per consensus type, trinucleotide context, and mutation type
 (see [SAGE concepts](https://github.com/hartwigmedical/hmftools/tree/master/sage#key-concepts-in-sage) for details).
@@ -54,18 +54,6 @@ more customisable.
 More details on the driver gene panel can be found in the
 [PURPLE driver catalog documentation](https://github.com/hartwigmedical/hmftools/blob/master/purple/DriverCatalog.md).
 
-## Tumor/normal vs tumor-only
-`oncoanalyser` currently supports a single tumor DNA and single tumor RNA sample only. A normal DNA sample may be provided for germline
-subtraction and is recommended if available.
-
-## Donor sample support
-For patients with bone marrow transplant or other known sample contamination in the tumor, a 2nd normal sample may be configured to allow
-multiple normal subtraction. This currently allows germline subtraction of the BAF points (impacting purity fit) and from small
-variant calling.
-
-## Tumor Mutational Burden (TMB)
-For TMB estimates, `oncoanalyser` uses variants with > 2% VAF. Other pipelines may have different assumptions which may cause differences
-in samples with low tumor purity or a high number of subclonal variants.
 
 
 

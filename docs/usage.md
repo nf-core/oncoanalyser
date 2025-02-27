@@ -4,6 +4,72 @@
 
 > _Documentation of pipeline parameters is generated automatically from the pipeline schema and can no longer be found in markdown files._
 
+## Table of contents (TEMPORARY)
+
+<!-- TOC -->
+* [nf-core/oncoanalyser: Usage](#nf-coreoncoanalyser--usage)
+  * [:warning: Please read this documentation on the nf-core website: https://nf-co.re/oncoanalyser/usage](#-warning--please-read-this-documentation-on-the-nf-core-website--httpsnf-coreoncoanalyserusage)
+  * [Table of contents (TEMPORARY)](#table-of-contents--temporary-)
+  * [Introduction](#introduction)
+  * [Getting started](#getting-started)
+  * [Running the pipeline](#running-the-pipeline)
+    * [Command line interface (CLI)](#command-line-interface--cli-)
+    * [Outputs](#outputs)
+    * [Reusing CLI arguments](#reusing-cli-arguments)
+    * [Versions and reproducibility](#versions-and-reproducibility)
+  * [Samplesheet](#samplesheet)
+    * [Input starting points](#input-starting-points)
+      * [FASTQ](#fastq)
+      * [BAM / CRAM](#bam--cram)
+      * [REDUX BAM](#redux-bam)
+    * [Sample setups](#sample-setups)
+      * [Tumor/normal DNA](#tumornormal-dna)
+      * [Tumor-only DNA](#tumor-only-dna)
+      * [Tumor-only RNA](#tumor-only-rna)
+      * [Tumor/normal DNA and tumor-only RNA](#tumornormal-dna-and-tumor-only-rna)
+      * [Tumor/normal DNA with donor sample](#tumornormal-dna-with-donor-sample)
+    * [Multiple samples](#multiple-samples)
+  * [Reference data](#reference-data)
+    * [Automatic staging of reference data](#automatic-staging-of-reference-data)
+    * [Manually staging reference data](#manually-staging-reference-data)
+    * [Reference data URLs](#reference-data-urls)
+    * [Custom panel reference data](#custom-panel-reference-data)
+    * [Custom genomes](#custom-genomes)
+  * [Process selection](#process-selection)
+    * [Excluding processes](#excluding-processes)
+    * [Manual process selection](#manual-process-selection)
+    * [Starting from existing inputs](#starting-from-existing-inputs)
+  * [Core Nextflow arguments](#core-nextflow-arguments)
+    * [`-profile`](#-profile)
+    * [`-resume`](#-resume)
+    * [`-c`](#-c)
+  * [Custom configuration](#custom-configuration)
+    * [Compute resources](#compute-resources)
+    * [Container images](#container-images)
+      * [Setting up Singularity](#setting-up-singularity)
+      * [Container image sources](#container-image-sources)
+    * [Custom tool arguments](#custom-tool-arguments)
+    * [UMI processing](#umi-processing)
+    * [nf-core/configs](#nf-coreconfigs)
+  * [FAQ and troubleshooting](#faq-and-troubleshooting)
+    * [How to start from CRAM?](#how-to-start-from-cram)
+    * [How to handle UMIs?](#how-to-handle-umis)
+    * [How to use oncoanalyser with a custom panel or whole exome?](#how-to-use-oncoanalyser-with-a-custom-panel-or-whole-exome)
+    * [Incompatible BAM files](#incompatible-bam-files)
+    * [I want to store the output BAMs. Why are there only REDUX BAM(s) with additional files?](#i-want-to-store-the-output-bams-why-are-there-only-redux-bam--s--with-additional-files)
+    * [I only want variant calls](#i-only-want-variant-calls)
+    * [Why does `oncoanalyser` call too many / too few variants than another pipeline?](#why-does-oncoanalyser-call-too-many--too-few-variants-than-another-pipeline)
+    * [My HPC does not allow Docker](#my-hpc-does-not-allow-docker)
+    * [Firewall prevents `oncoanalyser` from pulling Singularity images](#firewall-prevents-oncoanalyser-from-pulling-singularity-images)
+    * [Network timeout](#network-timeout)
+    * [Run fails due to insufficient CPUs/RAM/disk](#run-fails-due-to-insufficient-cpusramdisk)
+    * [Can `oncoanalyser` CLI arguments be put in a config file?](#can-oncoanalyser-cli-arguments-be-put-in-a-config-file)
+    * [Errors and navigating the `work/` directory](#errors-and-navigating-the-work-directory)
+  * [Azure resource requests](#azure-resource-requests)
+  * [Running in the background](#running-in-the-background)
+  * [Nextflow memory requirements](#nextflow-memory-requirements)
+<!-- TOC -->
+
 ## Introduction
 
 The `oncoanalyser` pipeline typically runs from  **FASTQ**, **BAM** or **CRAM** [input files](#input-starting-points), supports most
@@ -728,10 +794,18 @@ instructions.
 
 #### Setting up Singularity
 
-Some restricted compute environments (e.g. HPC)  do not allow Docker to be used and/or dynamic download of images upon running
+Some restricted compute environments (e.g. HPC)  do not allow Docker to be used. and/or dynamic download of images upon running
 `oncoanalyser`. In these cases, it is recommended to use Singularity (now known as Apptainer) images that are cached for offline use. See
 the [Downloading Apptainer containers](https://nf-co.re/docs/nf-core-tools/pipelines/download#downloading-apptainer-containers) section
 of the nf-core-tools documentation for details.
+
+:::warning
+
+When manually downloading singularity images, do not execute multiple `singularity pull` commands in parallel. E.g. do not pull different
+singularity images in separate terminal sessions on the same compute environment. This will result in a
+"[no descriptor found for reference](https://github.com/apptainer/singularity/issues/4555)" error.
+
+:::
 
 :::tip
 
@@ -781,7 +855,7 @@ Unique molecular identifiers (UMI) allow for read deduplication and error correc
 [REDUX](https://github.com/hartwigmedical/hmftools/tree/master/redux#deduplication) for BAM files. Depending on the presence/format of your
 UMI strings, you may need to configure one or more of these arguments:
 
-```groovy
+```groovy title='umi.config'
 params {
     // For FASTQ files
     fastp_umi = true                // Enable UMI processing by fastp
@@ -814,61 +888,200 @@ If you have any questions or issues please send us a message on [Slack](https://
 
 ## FAQ and troubleshooting
 
-### Are CRAMs supported?
-Yes. Simply specify a CRAM path instead of a BAM path in the sample sheet. See section [Input starting points: BAM / CRAM](#bam--cram).
+### How to start from CRAM?
+Simply specify a CRAM path instead of a BAM path in the sample sheet. See section [Input starting points: BAM / CRAM](#bam--cram).
 
-### Are UMIs supported?
-Yes. UMI processing can be enabled and configured via a config file. See section [UMI processing](#umi-processing).
+### How to handle UMIs?
+UMI processing can be enabled and configured via a config file. See section [UMI processing](#umi-processing).
 
 ### How to use oncoanalyser with a custom panel or whole exome?
 `oncoanalyser` currently has built-in support for the TSO500 panel. For custom panels however, reference data must first be generated using
 a training procedure detailed [here](https://github.com/hartwigmedical/hmftools/blob/master/pipeline/README_TARGETED.md). This procedure
 allows for normalisation of copy number, TMB, and TPM data as well as filtering of panel specific artefacts.
 
-We realise that this training procedure is not very straight forward. The panel training procedure will therefore be integrated into
-`oncoanalyser` in the next minor release!
+:::note
 
-### Why does the output contain the BAM(s) from REDUX but not from BWA-MEM2?
+We realise that the panel training procedure is not very straight forward and will therefore be integrated into `oncoanalyser` in the next minor release!
 
-### What are the extra files next to the REDUX BAM?
+:::
 
-### How to only output variant calls?
+### Incompatible BAM files
+`oncoanalyser` has been validated on with BAMs aligned with BWA-MEM, BWA-MEM2 and DRAGEN. BAM files from other aligners / sources may be
+incompatible with `oncoanalyser` can cause the pipeline to crash.
 
-### Why does oncoanalyser call too many / too few variants than another pipeline?
+One requirement for example that the mate cigar attribute must be present for any BAM records with paired reads. Non-compatible BAMs may be
+rectified using tools such as [Picard FixMateInformation](https://gatk.broadinstitute.org/hc/en-us/articles/360036713471-FixMateInformation-Picard)
+routine.
 
-### Manually downloading reference data
+In other cases, converting from BAM back to FASTQ may be required to run `oncoanalyser`.
 
-### How to exclude steps in the pipeline?
+### I want to store the output BAMs. Why are there only REDUX BAM(s) with additional files?
 
-### CPUs/RAM/disk space not fully utilised
+[REDUX](https://github.com/hartwigmedical/hmftools/tree/master/redux) performs some important read post-processing steps:
+- Unmapping of reads in pre-defined problematic regions (extremely high depth, reads often discordant or have long soft clipping). This is
+done to remove obvious poor alignments from the BAM prior to running downstream tools
+reads are retained in the BAM
+- [Read deduplication](https://github.com/hartwigmedical/hmftools/tree/master/redux#deduplication) to form of consensus read with consensus
+sequence / base qualities
+- Measure the rate of microsatellite errors (see: [jitter modeling](https://github.com/hartwigmedical/hmftools/tree/master/redux#microsatellite-jitter-modelling))
+which are store in lookup files (`*.jitter_params.tsv` and `*.ms_table.tsv.gz`)to be used downstream by
+[SAGE](https://github.com/hartwigmedical/hmftools/tree/master/sage#key-concepts-in-sage) for error-calibrated small variant calling.
 
-### Docker not allowed on HPC
+It was therefore a choice to provide the user the REDUX BAM (plus TSV files) as output, rather than BAMs from BWA-MEM2 which have
+potentially more poor alignments and read duplicates.
 
-### Oncoanalyser cannot pull container images
+:::note
 
-### Timeout when downloading files
+When storing REDUX BAMs, the `*.jitter_params.tsv` and `*.ms_table.tsv.gz` must also be stored!
 
-https://www.nextflow.io/docs/latest/reference/config.html
+:::
 
-```groovy
-singularity {
+### I only want variant calls
+
+Variant calls can be found in the following files:
+- PURPLE VCF/TSV files: purity/ploidy adjusted SNV, INDEL, SV, and CNV calls
+- SAGE VCF files: raw SNV and INDEL calls
+- ESVEE VCF files: raw SV calls
+
+For descriptions of each file, please see the [Output](https://nf-co.re/oncoanalyser/docs/output/) tab.
+
+If you only want to run the variant calling steps, you can either manually select the variant calling processes or exclude downstream
+processes (see: [Process selection](#process-selection)). Using manual process selection for example, you would run
+`oncoanalyser` with the below command (assuming starting from FASTQ for DNA sequencing data):
+
+```bash
+nextflow run nf-core/oncoanalyser \
+  -profile docker \
+  -revision 2.0.0 \
+  --mode wgts \
+  --genome GRCh38_hmf \
+  --input samplesheet.neo_inputs.csv \
+  --outdir output/ \
+  --processes_manual \
+  --processes_include alignment,redux,amber,cobalt,sage,pave,esvee,purple
+```
+
+### Why does `oncoanalyser` call too many / too few variants than another pipeline?
+
+`oncoanalyser` uses variants with > 2% VAF. Other pipelines may have different assumptions which may cause differences in samples with low
+tumor purity or a high number of subclonal variants.
+
+### My HPC does not allow Docker
+
+Some compute environments (especisally HPCs) do not allow Docker as it runs a daemon as root which is deemed a security issue. In these
+cases, using Singularity is recommended by providing `-profile singularity` when running `oncoanalyser`.
+
+### Firewall prevents `oncoanalyser` from pulling Singularity images
+
+Oncoanalyser can fail to pull Singularity images when there is a firewall set up. We recommend in these cases to manually download and cache
+singularity containers. See [Downloading Apptainer containers](https://nf-co.re/docs/nf-core-tools/pipelines/download#downloading-apptainer-containers)
+for more details.
+
+### Network timeout
+
+`oncoanalyser` may time out if pulling containers takes too long. To fix this, increase the network timeout in the config file
+(see the [Nextflow config docs](https://www.nextflow.io/docs/latest/reference/config.html) to configure other container platforms):
+
+```groovy title='timeout.config'
+singularity { // If using singularity
   pullTimeout = '2h'
 }
 
-docker {
+docker { // If using Docker
   pullTimeout = '2h'
 }
 
-env {
-  NXF_HTTP_TIMEOUT = '2h' // Increase HTTP download timeout
+env { // Shell environment variables
+  NXF_HTTP_TIMEOUT = '2h'
 }
 ```
 
-### Can oncoanalyser CLI arguments be put in a config file?
+Network timeout may also occur when downloading reference data. While the above solution might also work, we recommend downloading and
+setting up reference data [manually](#manually-staging-reference-data) instead.
 
-### How to navigate the `work/` directory?
+### Run fails due to insufficient CPUs/RAM/disk
 
-### How to find error messages when the pipeline crashes?
+Please see section: [Compute resources](#compute-resources)
+
+### Can `oncoanalyser` CLI arguments be put in a config file?
+Almost all `oncoanalyser` arguments in the [**Parameters tab**](https://nf-co.re/oncoanalyser/parameters) can be placed in a config file.
+
+For example, the `oncoanalyser` arguments which start with `--` in this command:
+
+```shell
+nextflow run nf-core/oncoanalyser \
+  -profile docker \
+  -revision 2.0.0 \
+  -config refdata.config \
+  --mode wgts \
+  --genome GRCh38_hmf \
+  --input /path/to/samplesheet.csv \
+  --outdir /path/to/outdir/
+```
+
+can be specified in a config file like so:
+```groovy title='params.config'
+params {
+    mode = "wgts"
+    genome = "GRCh38_hmf"
+    input = "/path/to/samplesheet.csv"
+    outdir = "/path/to/outdir/"
+}
+```
+
+and provided as a config file when running `oncoanalyser`:
+```shell
+nextflow run nf-core/oncoanalyser \
+  -profile docker \
+  -revision 2.0.0 \
+  -config refdata.config \
+  -config params.config
+```
+
+:::tip
+
+The `-config` Nextflow argument can be used multiple times to provide multiple config file
+
+:::
+
+### Errors and navigating the `work/` directory
+
+When `oncoanalyser` crashes, you may need to further investigate error messages in the `.nextflow.log` files or the `work` directory.
+
+The `work` directory contains the run scripts, logs, and input/output files for each process. Once the process is done running, only the
+output files are 'published' (copied) to the final output directory (as specified by `--outdir`).
+
+Below is an example `work` directory for one process. Error messages will typically be found in `.command.log`, `.command.err` or
+`.command.out` log files. You can send these logs / error messages for example to the
+`oncoanalyser` [Slack channel](https://nfcore.slack.com/channels/oncoanalyser), as an issue on the
+[oncoanalyser](https://github.com/nf-core/oncoanalyser) or [WiGiTS](https://github.com/hartwigmedical/hmftools) GitHub.
+
+```shell
+work/
+├── e5
+│   └── f6e2e8f18ef70add9349164d5fb37e
+│       ├── .command.sh     # Bash script used to run the process *within the container*
+│       ├── .command.run    # Bash script used to run the process in the host machine
+│       ├── .command.begin
+│       ├── .command.log    # All log messages
+│       ├── .command.err    # stderr log messages
+│       ├── .command.out    # stdout log messages
+│       ├── .command.trace  # Compute resource usage stats
+│       ├── .exitcode       # Exit code
+│       ├── <...>           # Input/output files or directories
+│       └── versions.yml    # WiGiTS tool version
+<...>
+```
+
+The `work/` directory can be hard to navigate due to the `<short_hash>/<long_hash>` structure. These hashes are shown (truncated) in the
+console while running `oncoanalyser` (but can also be found in the `.nextflow.log` files):
+
+```shell
+[e5/f6e2e8] process > NFCORE_ONCOANALYSER:WGTS:REDUX_PROCESSING:REDUX (<group_id>_<sample_id>)     [100%] 2 of 2 ✔
+```
+
+Otherwise, you can use a utility like [tree](https://en.wikipedia.org/wiki/Tree_(command)) to show the directory structure, which allows
+you to manually find the target process directory.
 
 ## Azure resource requests
 
