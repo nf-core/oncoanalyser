@@ -450,8 +450,8 @@ _GRCh37 genome (Hartwig): `GRCh37_hmf`_
 | BWA-MEM2 indexes     | [bwa-mem2_index/2.2.1.tar.gz](https://pub-cf6ba01919994c3cbd354659947f74d8.r2.dev/genomes/GRCh37_hmf/24.1/bwa-mem2_index/2.2.1.tar.gz)                                                              |
 | GRIDSS indexes       | [gridss_index/2.13.2.tar.gz](https://pub-cf6ba01919994c3cbd354659947f74d8.r2.dev/genomes/GRCh37_hmf/24.1/gridss_index/2.13.2.tar.gz)                                                                |
 | STAR indexes         | [star_index/gencode_19/2.7.3a.tar.gz](https://pub-cf6ba01919994c3cbd354659947f74d8.r2.dev/genomes/GRCh37_hmf/24.0/star_index/gencode_19/2.7.3a.tar.gz)                                              |
-| WiGiTS data          | [hmf_pipeline_resources.37_v6.0--2.tar.gz](https://pub-cf6ba01919994c3cbd354659947f74d8.r2.dev/hmf_reference_data/hmftools/hmf_pipeline_resources.37_v6.0--2.tar.gz)                                |
-| TSO500 panel data    | [hmf_panel_resources.tso500.37_v6.0--2.tar.gz](https://pub-cf6ba01919994c3cbd354659947f74d8.r2.dev/hmf_reference_data/panels/hmf_panel_resources.tso500.37_v6.0--2.tar.gz)                          |
+| WiGiTS data          | [hmf_pipeline_resources.37_v2.0.0--2.tar.gz](https://pub-cf6ba01919994c3cbd354659947f74d8.r2.dev/hmf_reference_data/hmftools/hmf_pipeline_resources.37_v2.0.0--2.tar.gz)                            |
+| TSO500 panel data    | [hmf_panel_resources.tso500.37_v2.0.0--2.tar.gz](https://pub-cf6ba01919994c3cbd354659947f74d8.r2.dev/hmf_reference_data/panels/hmf_panel_resources.tso500.37_v2.0.0--2.tar.gz)                      |
 
 _GRCh38 genome (Hartwig): `GRCh38_hmf`_
 
@@ -464,8 +464,8 @@ _GRCh38 genome (Hartwig): `GRCh38_hmf`_
 | BWA-MEM2 indexes     | [bwa-mem2_index/2.2.1.tar.gz](https://pub-cf6ba01919994c3cbd354659947f74d8.r2.dev/genomes/GRCh38_hmf/24.1/bwa-mem2_index/2.2.1.tar.gz)                                                                       |
 | GRIDSS indexes       | [gridss_index/2.13.2.tar.gz](https://pub-cf6ba01919994c3cbd354659947f74d8.r2.dev/genomes/GRCh38_hmf/24.1/gridss_index/2.13.2.tar.gz)                                                                         |
 | STAR indexes         | [star_index/gencode_38/2.7.3a.tar.gz](https://pub-cf6ba01919994c3cbd354659947f74d8.r2.dev/genomes/GRCh38_hmf/24.0/star_index/gencode_38/2.7.3a.tar.gz)                                                       |
-| WiGiTS data          | [hmf_pipeline_resources.38_v6.0--2.tar.gz](https://pub-cf6ba01919994c3cbd354659947f74d8.r2.dev/hmf_reference_data/hmftools/hmf_pipeline_resources.38_v6.0--2.tar.gz)                                         |
-| TSO500 panel data    | [hmf_panel_resources.tso500.38_v6.0--2.tar.gz](https://pub-cf6ba01919994c3cbd354659947f74d8.r2.dev/hmf_reference_data/panels/hmf_panel_resources.tso500.38_v6.0--2.tar.gz)                                   |
+| WiGiTS data          | [hmf_pipeline_resources.38_v2.0.0--2.tar.gz](https://pub-cf6ba01919994c3cbd354659947f74d8.r2.dev/hmf_reference_data/hmftools/hmf_pipeline_resources.38_v2.0.0--2.tar.gz)                                     |
+| TSO500 panel data    | [hmf_panel_resources.tso500.38_v2.0.0--2.tar.gz](https://pub-cf6ba01919994c3cbd354659947f74d8.r2.dev/hmf_reference_data/panels/hmf_panel_resources.tso500.38_v2.0.0--2.tar.gz)                               |
 
 ### Custom panel reference data
 
