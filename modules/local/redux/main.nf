@@ -2,6 +2,7 @@ process REDUX {
     tag "${meta.id}"
     label 'process_medium'
 
+    conda "${moduleDir}/environment.yml"
     container "${ workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container ?
         'https://depot.galaxyproject.org/singularity/hmftools-redux:1.0_beta--hdfd78af_6' :
         'biocontainers/hmftools-redux:1.0_beta--hdfd78af_6' }"
