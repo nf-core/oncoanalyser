@@ -4,12 +4,14 @@
 
 > _Documentation of pipeline parameters is generated automatically from the pipeline schema and can no longer be found in markdown files._
 
-## Table of contents (TEMPORARY)
+## Table of contents
+
+**TEMPORARY: REMOVE THIS BEFORE PUBLISHING TO NF-CORE**
 
 <!-- TOC -->
 * [nf-core/oncoanalyser: Usage](#nf-coreoncoanalyser--usage)
   * [:warning: Please read this documentation on the nf-core website: https://nf-co.re/oncoanalyser/usage](#-warning--please-read-this-documentation-on-the-nf-core-website--httpsnf-coreoncoanalyserusage)
-  * [Table of contents (TEMPORARY)](#table-of-contents--temporary-)
+  * [Table of contents](#table-of-contents)
   * [Introduction](#introduction)
   * [Getting started](#getting-started)
   * [Running the pipeline](#running-the-pipeline)
@@ -285,7 +287,7 @@ PATIENT1,PATIENT1,PATIENT1-T,tumor,dna,redux_ms_tsv,/path/dir/PATIENT1-T.dna.ms_
 ### Sample setups
 
 Providing `sample_type` and `sequence_type` in different combinations allows `oncoanalyser` to run in different sample setups. The below
-samplesheets use BAM files, but different sample setups can also be specified for FASTQ or CRAM files.
+samplesheet examples use BAM files, but different sample setups can also be specified for FASTQ or CRAM files.
 
 #### Tumor/normal DNA
 ```csv title="samplesheet.tn_dna.csv"
@@ -386,7 +388,12 @@ nextflow run nf-core/oncoanalyser \
 To request `oncoanalyser` to stage reference data without running the full pipeline, add the `--prepare_reference_only` argument:
 ```bash
 nextflow run nf-core/oncoanalyser \
-  <...>
+  -profile docker \
+  -revision 2.0.0 \
+  --mode wgts \
+  --genome GRCh38_hmf \
+  --input samplesheet.csv \
+  --outdir output/ \
   --prepare_reference_only
 ```
 
@@ -396,11 +403,7 @@ The Nextflow `work/` directory can be removed after staging data to free disk sp
 ### Manually staging reference data
 
 To manually stage reference data, download the files from the link in [**Reference data URLs**](#reference-data-urls).
-TAR files will need to be extracted, e.g. using the below template command:
-
-```bash
-tar -xzvf <TAR_FILE> --strip-components 1 -C <OUTPUT_DIR>
-```
+TAR files will need to be extracted, e.g. using `tar -xzvf <file>`.
 
 Then, create a config file can be used to point to the file paths:
 
@@ -788,13 +791,13 @@ requests (2 x original, then 3 x original). If it still fails after the third at
 
 ### Container images
 
-You may want to change which container or conda environment a step of the pipeline uses for a particular tool, e.g. due to a newer tool
-version being available. Please see [updating tool versions](https://nf-co.re/docs/usage/configuration#updating-tool-versions) for
+You may want to change which container or conda environment uses for a particular process (e.g. due to a newer tool
+version being available). Please see [updating tool versions](https://nf-co.re/docs/usage/configuration#updating-tool-versions) for
 instructions.
 
 #### Setting up Singularity
 
-Some restricted compute environments (e.g. HPC)  do not allow Docker to be used. and/or dynamic download of images upon running
+Some restricted compute environments (e.g. HPC) do not allow Docker to be used and/or dynamic download of images upon running
 `oncoanalyser`. In these cases, it is recommended to use Singularity (now known as Apptainer) images that are cached for offline use. See
 the [Downloading Apptainer containers](https://nf-co.re/docs/nf-core-tools/pipelines/download#downloading-apptainer-containers) section
 of the nf-core-tools documentation for details.
@@ -829,7 +832,7 @@ Below is information on how these images can be accessed should you want to down
 
 **Singularity (Bioconda)**
 - Host: [Galaxy Project](https://depot.galaxyproject.org/singularity/)
-- Image URL example: https://depot.galaxyproject.org/singularity/hmftools-sage:1.1--hdfd78af_1
+- Image URL example: https://depot.galaxyproject.org/singularity/hmftools-redux:1.1--hdfd78af_1
 
 **Bioconda recipes** for the above containers are found here:
 - Host: https://github.com/bioconda/bioconda-recipes/
@@ -968,8 +971,9 @@ tumor purity or a high number of subclonal variants.
 
 ### My HPC does not allow Docker
 
-Some compute environments (especisally HPCs) do not allow Docker as it runs a daemon as root which is deemed a security issue. In these
-cases, using Singularity is recommended by providing `-profile singularity` when running `oncoanalyser`.
+Some compute environments (especially HPCs) do not allow Docker as it runs a daemon as root which is deemed a security issue. In these
+cases, using Singularity is recommended by providing `-profile singularity` when running `oncoanalyser` (also see:
+[Setting up singularity](#setting-up-singularity)).
 
 ### Firewall prevents `oncoanalyser` from pulling Singularity images
 
