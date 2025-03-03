@@ -102,6 +102,7 @@ are installed, setting up and running `oncoanalyser` involves the following step
 ### Recommended configuration
 
 Recommended configurations for oncoanalyser can readily be loaded using the ```-profile hartwig``` command line argument, whenever launching a run.
+Those specifications can currently be found [here](https://github.com/nf-core/oncoanalyser/blob/dev-2.1.0/conf/hartwig.config) (will be replaced with nf-core repo path)
 
 :::tip
 
