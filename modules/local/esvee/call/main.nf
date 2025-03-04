@@ -67,11 +67,12 @@ process ESVEE_CALL {
 
     echo \${vcf_template} | gzip -c > caller/${meta.tumor_id}.esvee.unfiltered.vcf.gz
     echo \${vcf_template} | gzip -c > caller/${meta.tumor_id}.esvee.somatic.vcf.gz
-    echo \${vcf_template} | gzip -c > caller/${meta.tumor_id}.esvee.germline.vcf.gz
 
     touch caller/${meta.tumor_id}.esvee.unfiltered.vcf.gz.tbi
     touch caller/${meta.tumor_id}.esvee.somatic.vcf.gz.tbi
-    touch caller/${meta.tumor_id}.esvee.germline.vcf.gz.tbi
+
+    ${ (meta.normal_id != null) ? "touch caller/${meta.tumor_id}.esvee.germline.vcf.gz" : "" }
+    ${ (meta.normal_id != null) ? "touch caller/${meta.tumor_id}.esvee.germline.vcf.gz.tbi" : "" }
 
     echo -e '${task.process}:\\n  stub: noversions\\n' > versions.yml
     """
