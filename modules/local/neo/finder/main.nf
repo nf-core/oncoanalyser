@@ -2,7 +2,10 @@ process NEO_FINDER {
     tag "${meta.id}"
     label 'process_low'
 
-    container 'docker.io/scwatts/neo:1.2_beta--1'
+    conda "${moduleDir}/environment.yml"
+    container "${ workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container ?
+        'https://depot.galaxyproject.org/singularity/hmftools-neo:1.2--hdfd78af_1' :
+        'biocontainers/hmftools-neo:1.2--hdfd78af_1' }"
 
     input:
     tuple val(meta), path(purple_dir), path(linx_annotation_dir)

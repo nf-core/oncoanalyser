@@ -18,6 +18,7 @@ workflow ISOFOX_QUANTIFICATION {
     genome_version         // channel: [mandatory] genome version
     genome_fai             // channel: [mandatory] /path/to/genome_fai
     ensembl_data_resources // channel: [mandatory] /path/to/ensembl_data_resources/
+    known_fusion_data      // channel: [mandatory] /path/to/known_fusion_data
     isofox_counts          // channel: [mandatory] /path/to/isofox_counts
     isofox_gc_ratios       // channel: [mandatory] /path/to/isofox_gc_ratios
     isofox_gene_ids        // channel: [optional]  /path/to/gene_ids
@@ -73,6 +74,7 @@ workflow ISOFOX_QUANTIFICATION {
         genome_version,
         genome_fai,
         ensembl_data_resources,
+        known_fusion_data,
         isofox_counts,
         isofox_gc_ratios,
         isofox_gene_ids,

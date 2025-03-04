@@ -1,7 +1,0 @@
-name: gripss_somatic
-channels:
-  - conda-forge
-  - bioconda
-  - defaults
-dependencies:
-  - bioconda::hmftools-gripss=2.4

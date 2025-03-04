@@ -15,8 +15,8 @@ output/
 │   ├── chord/
 │   ├── cobalt/
 │   ├── cuppa/
+│   ├── esvee/
 │   ├── flagstats/
-│   ├── gridss/
 │   ├── gripss/
 │   ├── isofox/
 │   ├── lilac/
@@ -43,15 +43,13 @@ output/
   - [bwa-mem2](#bwa-mem2) - DNA alignment
   - [STAR](#star) - RNA alignment
 - [Alignment post-processing](#alignment-post-processing)
-  - [MarkDups](#markdups) - General alignment processing
+  - [REDUX](#redux) - General alignment processing
   - [Picard Markduplicates](#picard-markduplicates) - Duplicate read marking
 - [SNV, MNV, INDEL calling](#snv-mnv-indel-calling)
   - [SAGE](#sage) - SNV, MNV, INDEL calling
   - [PAVE](#pave) - Small variant annotation (transcript/coding effects)
 - [SV calling](#sv-calling)
-  - [SvPrep](#svprep) - Read filtering for SV calling
-  - [GRIDSS](#gridss) - SV calling
-  - [GRIPSS](#gripss) - SV filtering and post-processing
+  - [ESVEE](#esvee) - Read selection, SV calling, and variant filtering
 - [CNV calling](#cnv-calling)
   - [AMBER](#amber) - β-allele frequencies
   - [COBALT](#cobalt) - Read depth ratios
@@ -197,48 +195,15 @@ information with regards to transcript and coding effects.
 
 ### SV calling
 
-#### SvPrep
-
-[SvPrep](https://github.com/hartwigmedical/hmftools/tree/master/sv-prep) runs prior to SV calling to reducing runtime by
-rapidly identifying reads that are likely to be involved in a SV event.
-
-_No outputs are published directly from SvPrep, see [GRIPSS](#gripss) for the fully processed SV calling outputs_
-
-#### GRIDSS
+#### ESVEE
 
 <details markdown="1">
 <summary>Output files</summary>
 
-- `<group_id>/gridss/`
-  - `<tumor_dna_id>.gridss.vcf.gz`: GRIDSS structural variants.
-  - `<tumor_dna_id>.gridss.vcf.gz.tbi`: GRIDSS structural variants index.
-
 </details>
 
-[GRIDSS](https://github.com/PapenfussLab/gridss) is a SV caller than uses both read support and local
-breakend/breakpoint assemblies to call variants.
-
-#### GRIPSS
-
-<details markdown="1">
-<summary>Output files</summary>
-
-- `<group_id>/gripss/germline/`
-
-  - `<tumor_dna_id>.gripss.filtered.germline.vcf.gz`: Filtered GRIDSS germline structural variants.
-  - `<tumor_dna_id>.gripss.filtered.germline.vcf.gz.tbi`: Filtered GRIDSS germline structural variants index.
-  - `<tumor_dna_id>.gripss.germline.vcf.gz`: GRIDSS structural variants (GRIPSS filters set but not applied).
-  - `<tumor_dna_id>.gripss.germline.vcf.gz.tbi`: GRIDSS structural variants index (GRIPSS filters set but not applied).
-
-- `<group_id>/gripss/somatic/`
-  - `<tumor_dna_id>.gripss.filtered.somatic.vcf.gz`: Filtered GRIDSS somatic structural variants.
-  - `<tumor_dna_id>.gripss.filtered.somatic.vcf.gz.tbi`: Filtered GRIDSS somatic structural variants index.
-  - `<tumor_dna_id>.gripss.somatic.vcf.gz`: GRIDSS structural variants (GRIPSS filters set but not applied).
-  - `<tumor_dna_id>.gripss.somatic.vcf.gz.tbi`: GRIDSS structural variants index (GRIPSS filters set but not applied).
-
-</details>
-
-[GRIPSS](https://github.com/hartwigmedical/hmftools/tree/master/gripss) applies filter and post-processing to SV calls.
+[ESVEE](https://github.com/hartwigmedical/hmftools/tree/master/esvee) is a SV caller than uses both read support and
+local breakend/breakpoint assemblies to call variants.
 
 ### CNV calling
 

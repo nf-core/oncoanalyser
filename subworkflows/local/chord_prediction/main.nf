@@ -12,9 +12,9 @@ workflow CHORD_PREDICTION {
     // Sample data
     ch_inputs      // channel: [mandatory] [ meta ]
     ch_purple      // channel: [mandatory] [ meta, purple_dir ]
-
-    // Reference data
-    genome_version // channel: [mandatory] genome version
+    genome_fasta   // channel: [mandatory] /path/to/genome_fasta
+    genome_fai     // channel: [mandatory] /path/to/genome_fai
+    genome_dict    // channel: [mandatory] /path/to/genome_dict
 
     main:
     // Channel for version.yml files
@@ -75,7 +75,9 @@ workflow CHORD_PREDICTION {
     // Run process
     CHORD(
         ch_chord_inputs,
-        genome_version,
+        genome_fasta,
+        genome_fai,
+        genome_dict,
     )
 
     ch_versions = ch_versions.mix(CHORD.out.versions)

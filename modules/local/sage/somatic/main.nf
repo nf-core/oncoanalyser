@@ -6,11 +6,12 @@ process SAGE_SOMATIC {
 
     conda "${moduleDir}/environment.yml"
     container "${ workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container ?
-        'https://depot.galaxyproject.org/singularity/hmftools-sage:3.4.4--hdfd78af_0' :
-        'biocontainers/hmftools-sage:3.4.4--hdfd78af_0' }"
+        'https://depot.galaxyproject.org/singularity/hmftools-sage:4.0--hdfd78af_0' :
+        'biocontainers/hmftools-sage:4.0--hdfd78af_0' }"
 
     input:
-    tuple val(meta), path(tumor_bam), path(normal_bam), path(donor_bam), path(tumor_bai), path(normal_bai), path(donor_bai)
+    tuple val(meta), path(tumor_bam), path(normal_bam), path(donor_bam), path(tumor_bai), path(normal_bai), path(donor_bai), path(redux_tsvs)
+
     path genome_fasta
     val genome_ver
     path genome_fai
@@ -46,6 +47,9 @@ process SAGE_SOMATIC {
 
     def ref_sample_count_arg = "-ref_sample_count ${reference_ids.size()}"
 
+    def run_mode = Utils.getEnumFromString(params.mode, Constants.RunMode)
+    def high_depth_mode_arg = (run_mode === Constants.RunMode.TARGETED) ? "-high_depth_mode" : ""
+
     """
     mkdir -p somatic/
 
@@ -57,6 +61,7 @@ process SAGE_SOMATIC {
         ${ref_sample_count_arg} \\
         -tumor ${meta.tumor_id} \\
         -tumor_bam ${tumor_bam} \\
+        -jitter_param_dir ./ \\
         -ref_genome ${genome_fasta} \\
         -ref_genome_version ${genome_ver} \\
         -hotspots ${sage_known_hotspots_somatic} \\
@@ -64,8 +69,8 @@ process SAGE_SOMATIC {
         -coverage_bed ${sage_coverage_panel} \\
         -high_confidence_bed ${sage_highconf_regions} \\
         -ensembl_data_dir ${ensembl_data_resources} \\
-        -write_bqr_data \\
-        -write_bqr_plot \\
+        ${high_depth_mode_arg} \\
+        -bqr_write_plot \\
         -threads ${task.cpus} \\
         -output_vcf somatic/${meta.tumor_id}.sage.somatic.vcf.gz
 

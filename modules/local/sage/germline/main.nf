@@ -4,11 +4,11 @@ process SAGE_GERMLINE {
 
     conda "${moduleDir}/environment.yml"
     container "${ workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container ?
-        'https://depot.galaxyproject.org/singularity/hmftools-sage:3.4.4--hdfd78af_0' :
-        'biocontainers/hmftools-sage:3.4.4--hdfd78af_0' }"
+        'https://depot.galaxyproject.org/singularity/hmftools-sage:4.0--hdfd78af_0' :
+        'biocontainers/hmftools-sage:4.0--hdfd78af_0' }"
 
     input:
-    tuple val(meta), path(tumor_bam), path(normal_bam), path(tumor_bai), path(normal_bai)
+    tuple val(meta), path(tumor_bam), path(normal_bam), path(tumor_bai), path(normal_bai), path(redux_tsvs)
     path genome_fasta
     val genome_ver
     path genome_fai
@@ -33,7 +33,7 @@ process SAGE_GERMLINE {
     def xmx_mod = task.ext.xmx_mod ?: 0.95
 
     """
-    mkdir germline/
+    mkdir -p germline/
 
     sage \\
         -Xmx${Math.round(task.memory.bytes * xmx_mod)} \\
@@ -42,6 +42,7 @@ process SAGE_GERMLINE {
         -tumor_bam ${normal_bam} \\
         -reference ${meta.tumor_id} \\
         -reference_bam ${tumor_bam} \\
+        -jitter_param_dir ./ \\
         -ref_genome ${genome_fasta} \\
         -ref_genome_version ${genome_ver} \\
         -hotspots ${sage_known_hotspots_germline} \\
@@ -49,16 +50,10 @@ process SAGE_GERMLINE {
         -coverage_bed ${sage_coverage_panel} \\
         -high_confidence_bed ${sage_highconf_regions} \\
         -ensembl_data_dir ${ensembl_data_resources} \\
-        -hotspot_min_tumor_qual 50 \\
-        -panel_min_tumor_qual 75 \\
-        -hotspot_max_germline_vaf 100 \\
-        -hotspot_max_germline_rel_raw_base_qual 100 \\
-        -panel_max_germline_vaf 100 \\
-        -panel_max_germline_rel_raw_base_qual 100 \\
-        -ref_sample_count 0 \\
+        -germline \\
         -panel_only \\
-        -write_bqr_data \\
-        -write_bqr_plot \\
+        -ref_sample_count 0 \\
+        -bqr_write_plot \\
         -threads ${task.cpus} \\
         -output_vcf germline/${meta.tumor_id}.sage.germline.vcf.gz
 

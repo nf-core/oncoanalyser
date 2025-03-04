@@ -73,20 +73,20 @@ class WorkflowMain {
                 }
             }
 
-            // When fastp UMI is enabled, MarkDups UMI should be as well
-            if (params.fastp_umi && (!params.containsKey('markdups_umi') || !params.markdups_umi)) {
-                params.markdups_umi = true
+            // When fastp UMI is enabled, REDUX UMI should be as well
+            if (params.fastp_umi && (!params.containsKey('redux_umi') || !params.redux_umi)) {
+                params.redux_umi = true
             }
 
-            // Set the MarkDups UMI duplex delimiter to '_' when the following conditions are met:
-            //   - both fastp and MarkDups UMI processing enabled
+            // Set the REDUX UMI duplex delimiter to '_' when the following conditions are met:
+            //   - both fastp and REDUX UMI processing enabled
             //   - fastp is using a duplex UMI location type (per_index or per_read)
-            //   - no MarkDups duplex delimiter has been set
-            def fastp_and_markdups_umi = params.fastp_umi && params.markdups_umi
+            //   - no REDUX duplex delimiter has been set
+            def fastp_and_redux_umi = params.fastp_umi && params.redux_umi
             def fastp_duplex_location = params.containsKey('fastp_umi_location') && (params.fastp_umi_location == 'per_index' || params.fastp_umi_location == 'per_read')
-            def no_umi_duplex_delim = !params.containsKey('markdups_umi_duplex_delim') || !params.markdups_umi_duplex_delim
-            if (fastp_and_markdups_umi && fastp_duplex_location && no_umi_duplex_delim) {
-                params.markdups_umi_duplex_delim = '_'
+            def no_umi_duplex_delim = !params.containsKey('redux_umi_duplex_delim') || !params.redux_umi_duplex_delim
+            if (fastp_and_redux_umi && fastp_duplex_location && no_umi_duplex_delim) {
+                params.redux_umi_duplex_delim = '_'
             }
 
         }
@@ -97,10 +97,6 @@ class WorkflowMain {
             params.processes_manual,
             log,
         )
-
-        if (!params.containsKey('ref_data_virusbreakenddb_path') && stages.virusinterpreter && run_mode === Constants.RunMode.WGTS){
-            params.ref_data_virusbreakenddb_path = Constants.VIRUSBREAKENDDB_PATH
-        }
 
         if (!params.containsKey('ref_data_hla_slice_bed') && stages.lilac) {
             if (params.genome_version.toString() == '38' && params.genome_type == 'alt') {
@@ -114,13 +110,12 @@ class WorkflowMain {
         if (!params.containsKey('ref_data_genome_gtf')) params.ref_data_genome_gtf = null
         if (!params.containsKey('ref_data_hla_slice_bed')) params.ref_data_hla_slice_bed = null
         if (!params.containsKey('ref_data_panel_data_path')) params.ref_data_panel_data_path = null
-        if (!params.containsKey('ref_data_virusbreakenddb_path')) params.ref_data_virusbreakenddb_path = null
 
         // Additionally set selected parameters with false-ish truthy values to avoid passing null values as inputs
         if (!params.containsKey('fastp_umi_location')) params.fastp_umi_location = ''
         if (!params.containsKey('fastp_umi_length')) params.fastp_umi_length = 0
         if (!params.containsKey('fastp_umi_skip')) params.fastp_umi_skip = -1
-        if (!params.containsKey('markdups_umi_duplex_delim')) params.markdups_umi_duplex_delim = ''
+        if (!params.containsKey('redux_umi_duplex_delim')) params.redux_umi_duplex_delim = ''
 
     }
 
@@ -270,10 +265,10 @@ class WorkflowMain {
             Nextflow.exit(1)
         }
 
-        if (params.markdups_umi_duplex_delim && params.markdups_umi === false) {
+        if (params.redux_umi_duplex_delim && params.redux_umi === false) {
             log.error "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n" +
-                "  Detected use of MarkDups UMI parameters but MarkDups UMI processing has not been\n" +
-                "  enabled. Please review your configuration and set the markdups_umi flag or\n" +
+                "  Detected use of REDUX UMI parameters but REDUX UMI processing has not been\n" +
+                "  enabled. Please review your configuration and set the redux_umi flag or\n" +
                 "  otherwise adjust accordingly.\n" +
                 "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
             Nextflow.exit(1)

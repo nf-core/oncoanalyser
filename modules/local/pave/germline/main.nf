@@ -8,8 +8,8 @@ process PAVE_GERMLINE {
 
     conda "${moduleDir}/environment.yml"
     container "${ workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container ?
-        'https://depot.galaxyproject.org/singularity/hmftools-pave:1.6--hdfd78af_0' :
-        'biocontainers/hmftools-pave:1.6--hdfd78af_0' }"
+        'https://depot.galaxyproject.org/singularity/hmftools-pave:1.7--hdfd78af_0' :
+        'biocontainers/hmftools-pave:1.7--hdfd78af_0' }"
 
     input:
     tuple val(meta), path(sage_vcf), path(sage_tbi)
@@ -60,8 +60,8 @@ process PAVE_GERMLINE {
         -ensembl_data_dir ${ensembl_data_resources} \\
         -blacklist_bed ${sage_blocklist_regions} \\
         -blacklist_vcf ${sage_blocklist_sites} \\
-        -gnomad_pon_filter -1 \\
         ${gnomad_args} \\
+        -gnomad_no_filter \\
         -read_pass_only \\
         -threads ${task.cpus} \\
         -output_dir ./

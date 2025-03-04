@@ -4,8 +4,8 @@ process ISOFOX {
 
     conda "${moduleDir}/environment.yml"
     container "${ workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container ?
-        'https://depot.galaxyproject.org/singularity/hmftools-isofox:1.7.1--hdfd78af_0' :
-        'biocontainers/hmftools-isofox:1.7.1--hdfd78af_0' }"
+        'https://depot.galaxyproject.org/singularity/hmftools-isofox:1.7.1--hdfd78af_1' :
+        'biocontainers/hmftools-isofox:1.7.1--hdfd78af_1' }"
 
     input:
     tuple val(meta), path(bam), path(bai)
@@ -15,6 +15,7 @@ process ISOFOX {
     val genome_ver
     path genome_fai
     path ensembl_data_resources
+    path known_fusion_data
     path exp_counts
     path exp_gc_ratios
     path gene_ids
@@ -53,6 +54,7 @@ process ISOFOX {
         -ref_genome ${genome_fasta} \\
         -ref_genome_version ${genome_ver} \\
         -ensembl_data_dir ${ensembl_data_resources} \\
+        -known_fusion_file ${known_fusion_data} \\
         ${exp_counts_arg} \\
         ${exp_gc_ratios_arg} \\
         ${gene_ids_arg} \\

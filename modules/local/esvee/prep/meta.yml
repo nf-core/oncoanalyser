@@ -1,0 +1,68 @@
+name: esvee_prep
+description: Select reads associated with SV events
+keywords:
+  - filtering
+  - reads
+  - sv
+tools:
+  - esvee:
+      description: Structural variant (SV) calling
+      homepage: https://github.com/hartwigmedical/hmftools/tree/master/esvee
+      documentation: https://github.com/hartwigmedical/hmftools/tree/master/esvee
+      licence: ["GPL >=3"]
+input:
+  - meta:
+      type: map
+      description: |
+        Groovy Map containing sample information
+        e.g. [id: 'sample_id']
+  - bam:
+      type: file
+      description: BAM file
+      pattern: "*.{bam}"
+  - bai:
+      type: file
+      description: BAI file
+      pattern: "*.{bai}"
+  - junctions:
+      type: file
+      description: Existing candidate SV junctions file (optional)
+      pattern: "*.{csv}"
+  - genome_fasta:
+      type: file
+      description: Reference genome assembly FASTA file
+      pattern: "*.{fa,fasta}"
+  - genome_ver:
+      type: string
+      description: Reference genome version
+  - sv_blocklist:
+      type: file
+      description: SV Prep blocklist file
+      pattern: "*.{bed}"
+  - known_fusions:
+      type: file
+      description: Known fusions file
+      pattern: "*.{bedpe}"
+  - write_types:
+      type: string
+      description: Type of output files to write
+output:
+  - meta:
+      type: map
+      description: |
+        Groovy Map containing sample information
+        e.g. [id: 'sample_id']
+  - bam:
+      type: file
+      description: BAM file containing selected reads
+      pattern: "*.{bam}"
+  - junctions:
+      type: file
+      description: Candidate SV junctions file
+      pattern: "*.{csv}"
+  - versions:
+      type: file
+      description: File containing software versions
+      pattern: "versions.yml"
+authors:
+  - "@scwatts"

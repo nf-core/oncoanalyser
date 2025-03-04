@@ -11,15 +11,12 @@ class Constants {
     static List PANELS_DEFINED     = ['tso500']
 
 
-    static String HMF_DATA_37_PATH = 'https://pub-cf6ba01919994c3cbd354659947f74d8.r2.dev/hmf_reference_data/hmftools/5.34_37--2.tar.gz'
-    static String HMF_DATA_38_PATH = 'https://pub-cf6ba01919994c3cbd354659947f74d8.r2.dev/hmf_reference_data/hmftools/5.34_38--2.tar.gz'
+    // NOTE(SW): these public URLs are for the oncoanalyser dev bucket
+    static String HMF_DATA_37_PATH = 'https://pub-cf6ba01919994c3cbd354659947f74d8.r2.dev/hmf_reference_data/hmftools/hmf_pipeline_resources.37_v2.0.0--2.tar.gz'
+    static String HMF_DATA_38_PATH = 'https://pub-cf6ba01919994c3cbd354659947f74d8.r2.dev/hmf_reference_data/hmftools/hmf_pipeline_resources.38_v2.0.0--2.tar.gz'
 
-
-    static String TSO500_PANEL_37_PATH = 'https://pub-cf6ba01919994c3cbd354659947f74d8.r2.dev/hmf_reference_data/panels/tso500_5.34_37--1.tar.gz'
-    static String TSO500_PANEL_38_PATH = 'https://pub-cf6ba01919994c3cbd354659947f74d8.r2.dev/hmf_reference_data/panels/tso500_5.34_38--1.tar.gz'
-
-
-    static String VIRUSBREAKENDDB_PATH = 'https://pub-cf6ba01919994c3cbd354659947f74d8.r2.dev/virusbreakend/virusbreakenddb_20210401.tar.gz'
+    static String TSO500_PANEL_37_PATH = 'https://pub-cf6ba01919994c3cbd354659947f74d8.r2.dev/hmf_reference_data/panels/hmf_panel_resources.tso500.37_v2.0.0--2.tar.gz'
+    static String TSO500_PANEL_38_PATH = 'https://pub-cf6ba01919994c3cbd354659947f74d8.r2.dev/hmf_reference_data/panels/hmf_panel_resources.tso500.38_v2.0.0--2.tar.gz'
 
     static String HLA_SLICE_BED_GRCH38_ALT_PATH = 'https://pub-cf6ba01919994c3cbd354659947f74d8.r2.dev/other/hla_slice/grch38_alt.plus_homologous.bed'
 
@@ -40,17 +37,15 @@ class Constants {
         CHORD,
         COBALT,
         CUPPA,
-        FLAGSTAT,
-        GRIDSS,
-        GRIPSS,
+        ESVEE,
         ISOFOX,
         LILAC,
         LINX,
-        MARKDUPS,
         NEO,
         ORANGE,
         PAVE,
         PURPLE,
+        REDUX,
         SAGE,
         SIGS,
         VIRUSINTERPRETER,
@@ -59,19 +54,20 @@ class Constants {
     static enum FileType {
         // Generic
         BAM,
-        BAM_MARKDUPS,
         BAI,
         FASTQ,
+        // Redux
+        BAM_REDUX,
+        REDUX_DUP_FREQ_TSV,
+        REDUX_JITTER_TSV,
+        REDUX_MS_TSV,
         // Process
         AMBER_DIR,
         BAMTOOLS,
+        BAMTOOLS_DIR,
         COBALT_DIR,
-        GRIDSS_VCF,
-        GRIDSS_VCF_TBI,
-        GRIPSS_VCF,
-        GRIPSS_VCF_TBI,
-        GRIPSS_UNFILTERED_VCF,
-        GRIPSS_UNFILTERED_VCF_TBI,
+        ESVEE_VCF,
+        ESVEE_VCF_TBI,
         ISOFOX_DIR,
         LILAC_DIR,
         LINX_ANNO_DIR,
@@ -85,7 +81,6 @@ class Constants {
         CHORD_DIR,
         SIGS_DIR,
         CUPPA_DIR,
-        FLAGSTAT,
         LINX_PLOT_DIR,
         SAGE_DIR,
     }
@@ -114,14 +109,9 @@ class Constants {
 
     static Map INPUT = [
 
+        // Bams
         BAM_DNA_TUMOR: [
             FileType.BAM,
-            SampleType.TUMOR,
-            SequenceType.DNA,
-        ],
-
-        BAM_MARKDUPS_DNA_TUMOR: [
-            FileType.BAM_MARKDUPS,
             SampleType.TUMOR,
             SequenceType.DNA,
         ],
@@ -132,20 +122,8 @@ class Constants {
             SequenceType.DNA,
         ],
 
-        BAM_MARKDUPS_DNA_NORMAL: [
-            FileType.BAM_MARKDUPS,
-            SampleType.NORMAL,
-            SequenceType.DNA,
-        ],
-
         BAM_DNA_DONOR: [
             FileType.BAM,
-            SampleType.DONOR,
-            SequenceType.DNA,
-        ],
-
-        BAM_MARKDUPS_DNA_DONOR: [
-            FileType.BAM_MARKDUPS,
             SampleType.DONOR,
             SequenceType.DNA,
         ],
@@ -180,6 +158,82 @@ class Constants {
             SequenceType.RNA,
         ],
 
+
+        // REDUX
+        BAM_REDUX_DNA_TUMOR: [
+            FileType.BAM_REDUX,
+            SampleType.TUMOR,
+            SequenceType.DNA,
+        ],
+
+        REDUX_DUP_FREQ_TSV_TUMOR: [
+            FileType.REDUX_DUP_FREQ_TSV,
+            SampleType.TUMOR,
+            SequenceType.DNA,
+        ],
+
+        REDUX_JITTER_TSV_TUMOR: [
+            FileType.REDUX_JITTER_TSV,
+            SampleType.TUMOR,
+            SequenceType.DNA,
+        ],
+
+        REDUX_MS_TSV_TUMOR: [
+            FileType.REDUX_MS_TSV,
+            SampleType.TUMOR,
+            SequenceType.DNA,
+        ],
+
+        BAM_REDUX_DNA_NORMAL: [
+            FileType.BAM_REDUX,
+            SampleType.NORMAL,
+            SequenceType.DNA,
+        ],
+
+        REDUX_DUP_FREQ_TSV_NORMAL: [
+            FileType.REDUX_DUP_FREQ_TSV,
+            SampleType.NORMAL,
+            SequenceType.DNA,
+        ],
+
+        REDUX_JITTER_TSV_NORMAL: [
+            FileType.REDUX_JITTER_TSV,
+            SampleType.NORMAL,
+            SequenceType.DNA,
+        ],
+
+        REDUX_MS_TSV_NORMAL: [
+            FileType.REDUX_MS_TSV,
+            SampleType.NORMAL,
+            SequenceType.DNA,
+        ],
+
+        BAM_REDUX_DNA_DONOR: [
+            FileType.BAM_REDUX,
+            SampleType.DONOR,
+            SequenceType.DNA,
+        ],
+
+        REDUX_DUP_FREQ_TSV_DONOR: [
+            FileType.REDUX_DUP_FREQ_TSV,
+            SampleType.DONOR,
+            SequenceType.DNA,
+        ],
+
+        REDUX_JITTER_TSV_DONOR: [
+            FileType.REDUX_JITTER_TSV,
+            SampleType.DONOR,
+            SequenceType.DNA,
+        ],
+
+        REDUX_MS_TSV_DONOR: [
+            FileType.REDUX_MS_TSV,
+            SampleType.DONOR,
+            SequenceType.DNA,
+        ],
+
+
+        // Other tools
         ISOFOX_DIR: [
             FileType.ISOFOX_DIR,
             SampleType.TUMOR,
@@ -197,6 +251,11 @@ class Constants {
             SequenceType.DNA,
         ],
 
+        BAMTOOLS_DIR: [
+            FileType.BAMTOOLS_DIR,
+            [SampleType.TUMOR, SampleType.TUMOR_NORMAL],
+            SequenceType.DNA,
+        ],
         BAMTOOLS_TUMOR: [
             FileType.BAMTOOLS,
             SampleType.TUMOR,
@@ -204,17 +263,6 @@ class Constants {
         ],
         BAMTOOLS_NORMAL: [
             FileType.BAMTOOLS,
-            SampleType.NORMAL,
-            SequenceType.DNA,
-        ],
-
-        FLAGSTAT_TUMOR: [
-            FileType.FLAGSTAT,
-            SampleType.TUMOR,
-            SequenceType.DNA,
-        ],
-        FLAGSTAT_NORMAL: [
-            FileType.FLAGSTAT,
             SampleType.NORMAL,
             SequenceType.DNA,
         ],
@@ -271,44 +319,23 @@ class Constants {
             SequenceType.DNA,
         ],
 
-        GRIDSS_VCF: [
-            FileType.GRIDSS_VCF,
+        ESVEE_VCF_TUMOR: [
+            FileType.ESVEE_VCF,
             [SampleType.TUMOR, SampleType.TUMOR_NORMAL],
             SequenceType.DNA,
         ],
-
-        GRIPSS_VCF_TUMOR: [
-            FileType.GRIPSS_VCF,
+        ESVEE_VCF_TUMOR_TBI: [
+            FileType.ESVEE_VCF_TBI,
             [SampleType.TUMOR, SampleType.TUMOR_NORMAL],
             SequenceType.DNA,
         ],
-        GRIPSS_VCF_TUMOR_TBI: [
-            FileType.GRIPSS_VCF_TBI,
-            [SampleType.TUMOR, SampleType.TUMOR_NORMAL],
-            SequenceType.DNA,
-        ],
-        GRIPSS_VCF_NORMAL: [
-            FileType.GRIPSS_VCF,
+        ESVEE_VCF_NORMAL: [
+            FileType.ESVEE_VCF,
             SampleType.NORMAL,
             SequenceType.DNA,
         ],
-        GRIPSS_VCF_NORMAL_TBI: [
-            FileType.GRIPSS_VCF_TBI,
-            SampleType.NORMAL,
-            SequenceType.DNA,
-        ],
-        GRIPSS_UNFILTERED_VCF_TUMOR: [
-            FileType.GRIPSS_UNFILTERED_VCF,
-            [SampleType.TUMOR, SampleType.TUMOR_NORMAL],
-            SequenceType.DNA,
-        ],
-        GRIPSS_UNFILTERED_VCF_TUMOR_TBI: [
-            FileType.GRIPSS_UNFILTERED_VCF_TBI,
-            [SampleType.TUMOR, SampleType.TUMOR_NORMAL],
-            SequenceType.DNA,
-        ],
-        GRIPSS_UNFILTERED_VCF_NORMAL: [
-            FileType.GRIPSS_UNFILTERED_VCF,
+        ESVEE_VCF_NORMAL_TBI: [
+            FileType.ESVEE_VCF_TBI,
             SampleType.NORMAL,
             SequenceType.DNA,
         ],
