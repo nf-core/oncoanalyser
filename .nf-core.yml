@@ -17,6 +17,10 @@ lint:
     - lib/Utils.groovy
     - lib/WorkflowMain.groovy
     - lib/WorkflowOncoanalyser.groovy
+  files_unchanged:
+    - assets/nf-core-oncoanalyser_logo_light.png
+    - docs/images/nf-core-oncoanalyser_logo_dark.png
+    - docs/images/nf-core-oncoanalyser_logo_light.png
   nextflow_config:
     - config_defaults:
         - params.fastp_umi_length

@@ -52,13 +52,13 @@ workflow SAGE_CALLING {
         ch_donor_tsv,
     )
         .map { meta,
-               tumor_bam,  tumor_bai,
-               normal_bam, normal_bai,
-               donor_bam,  donor_bai,
+            tumor_bam,  tumor_bai,
+            normal_bam, normal_bai,
+            donor_bam,  donor_bai,
 
-               tumor_dup_freq_tsv,  tumor_jitter_tsv,  tumor_ms_tsv,
-               normal_dup_freq_tsv, normal_jitter_tsv, normal_ms_tsv,
-               donor_dup_freq_tsv,  donor_jitter_tsv,  donor_ms_tsv ->
+            tumor_dup_freq_tsv,  tumor_jitter_tsv,  tumor_ms_tsv,
+            normal_dup_freq_tsv, normal_jitter_tsv, normal_ms_tsv,
+            donor_dup_freq_tsv,  donor_jitter_tsv,  donor_ms_tsv ->
 
             def redux_tsv_list = [
                 tumor_dup_freq_tsv  ?: Utils.getInput(meta, Constants.INPUT.REDUX_DUP_FREQ_TSV_TUMOR),
