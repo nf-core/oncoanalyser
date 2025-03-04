@@ -8,7 +8,6 @@ include { BWAMEM2_INDEX         } from '../../../modules/nf-core/bwamem2/index/m
 include { BWA_INDEX             } from '../../../modules/nf-core/bwa/index/main'
 include { SAMTOOLS_DICT         } from '../../../modules/nf-core/samtools/dict/main'
 include { SAMTOOLS_FAIDX        } from '../../../modules/nf-core/samtools/faidx/main'
-include { GATK4_BWA_INDEX_IMAGE } from '../../../modules/nf-core/gatk4/bwaindeximage/main'
 include { STAR_GENOMEGENERATE   } from '../../../modules/nf-core/star/genomegenerate/main'
 
 include { CUSTOM_EXTRACTTARBALL as DECOMP_BWAMEM2_INDEX    } from '../../../modules/local/custom/extract_tarball/main'
@@ -16,6 +15,7 @@ include { CUSTOM_EXTRACTTARBALL as DECOMP_GRIDSS_INDEX     } from '../../../modu
 include { CUSTOM_EXTRACTTARBALL as DECOMP_HMF_DATA         } from '../../../modules/local/custom/extract_tarball/main'
 include { CUSTOM_EXTRACTTARBALL as DECOMP_PANEL_DATA       } from '../../../modules/local/custom/extract_tarball/main'
 include { CUSTOM_EXTRACTTARBALL as DECOMP_STAR_INDEX       } from '../../../modules/local/custom/extract_tarball/main'
+include { GATK4_BWA_INDEX_IMAGE                            } from '../../../modules/local/gatk4/bwaindeximage/main'
 include { GRIDSS_INDEX                                     } from '../../../modules/local/gridss/index/main'
 include { WRITE_REFERENCE_DATA                             } from '../../../modules/local/custom/write_reference_data/main'
 
