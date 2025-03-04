@@ -9,68 +9,67 @@
 **TEMPORARY: REMOVE THIS BEFORE PUBLISHING TO NF-CORE**
 
 <!-- TOC -->
-- [nf-core/oncoanalyser: Usage](#nf-coreoncoanalyser-usage)
-  - [:warning: Please read this documentation on the nf-core website: https://nf-co.re/oncoanalyser/usage](#warning-please-read-this-documentation-on-the-nf-core-website-httpsnf-coreoncoanalyserusage)
-  - [Table of contents](#table-of-contents)
-  - [Introduction](#introduction)
-  - [Getting started](#getting-started)
-    - [Recommended configuration](#recommended-configuration)
-  - [Running the pipeline](#running-the-pipeline)
-    - [Command line interface (CLI)](#command-line-interface-cli)
-    - [Outputs](#outputs)
-    - [Reusing CLI arguments](#reusing-cli-arguments)
-    - [Versions and reproducibility](#versions-and-reproducibility)
-  - [Samplesheet](#samplesheet)
-    - [Input starting points](#input-starting-points)
-      - [FASTQ](#fastq)
-      - [BAM / CRAM](#bam--cram)
-      - [REDUX BAM](#redux-bam)
-    - [Sample setups](#sample-setups)
-      - [Tumor/normal DNA](#tumornormal-dna)
-      - [Tumor-only DNA](#tumor-only-dna)
-      - [Tumor-only RNA](#tumor-only-rna)
-      - [Tumor/normal DNA and tumor-only RNA](#tumornormal-dna-and-tumor-only-rna)
-      - [Tumor/normal DNA with donor sample](#tumornormal-dna-with-donor-sample)
-    - [Multiple samples](#multiple-samples)
-  - [Reference data](#reference-data)
-    - [Automatic staging of reference data](#automatic-staging-of-reference-data)
-    - [Manually staging reference data](#manually-staging-reference-data)
-    - [Reference data URLs](#reference-data-urls)
-    - [Custom panel reference data](#custom-panel-reference-data)
-    - [Custom genomes](#custom-genomes)
-  - [Process selection](#process-selection)
-    - [Excluding processes](#excluding-processes)
-    - [Manual process selection](#manual-process-selection)
-    - [Starting from existing inputs](#starting-from-existing-inputs)
-  - [Core Nextflow arguments](#core-nextflow-arguments)
-    - [`-profile`](#-profile)
-    - [`-resume`](#-resume)
-    - [`-c`](#-c)
-  - [Custom configuration](#custom-configuration)
-    - [Compute resources](#compute-resources)
-    - [Container images](#container-images)
-      - [Setting up Singularity](#setting-up-singularity)
-      - [Container image sources](#container-image-sources)
-    - [Custom tool arguments](#custom-tool-arguments)
-    - [UMI processing](#umi-processing)
-    - [nf-core/configs](#nf-coreconfigs)
-  - [FAQ and troubleshooting](#faq-and-troubleshooting)
-    - [How to start from CRAM?](#how-to-start-from-cram)
-    - [How to handle UMIs?](#how-to-handle-umis)
-    - [How to use oncoanalyser with a custom panel or whole exome?](#how-to-use-oncoanalyser-with-a-custom-panel-or-whole-exome)
-    - [Incompatible BAM files](#incompatible-bam-files)
-    - [I want to store the output BAMs. Why are there only REDUX BAM(s) with additional files?](#i-want-to-store-the-output-bams-why-are-there-only-redux-bams-with-additional-files)
-    - [I only want variant calls](#i-only-want-variant-calls)
-    - [Why does `oncoanalyser` call too many / too few variants than another pipeline?](#why-does-oncoanalyser-call-too-many--too-few-variants-than-another-pipeline)
-    - [My HPC does not allow Docker](#my-hpc-does-not-allow-docker)
-    - [Firewall prevents `oncoanalyser` from pulling Singularity images](#firewall-prevents-oncoanalyser-from-pulling-singularity-images)
-    - [Network timeout](#network-timeout)
-    - [Run fails due to insufficient CPUs/RAM/disk](#run-fails-due-to-insufficient-cpusramdisk)
-    - [Can `oncoanalyser` CLI arguments be put in a config file?](#can-oncoanalyser-cli-arguments-be-put-in-a-config-file)
-    - [Errors and navigating the `work/` directory](#errors-and-navigating-the-work-directory)
-  - [Azure resource requests](#azure-resource-requests)
-  - [Running in the background](#running-in-the-background)
-  - [Nextflow memory requirements](#nextflow-memory-requirements)
+* [nf-core/oncoanalyser: Usage](#nf-coreoncoanalyser--usage)
+  * [:warning: Please read this documentation on the nf-core website: https://nf-co.re/oncoanalyser/usage](#-warning--please-read-this-documentation-on-the-nf-core-website--httpsnf-coreoncoanalyserusage)
+  * [Table of contents](#table-of-contents)
+  * [Introduction](#introduction)
+  * [Getting started](#getting-started)
+  * [Running the pipeline](#running-the-pipeline)
+    * [Command line interface (CLI)](#command-line-interface--cli-)
+    * [Outputs](#outputs)
+    * [Reusing CLI arguments](#reusing-cli-arguments)
+    * [Versions and reproducibility](#versions-and-reproducibility)
+  * [Samplesheet](#samplesheet)
+    * [Input starting points](#input-starting-points)
+      * [FASTQ](#fastq)
+      * [BAM / CRAM](#bam--cram)
+      * [REDUX BAM](#redux-bam)
+    * [Sample setups](#sample-setups)
+      * [Tumor/normal DNA](#tumornormal-dna)
+      * [Tumor-only DNA](#tumor-only-dna)
+      * [Tumor-only RNA](#tumor-only-rna)
+      * [Tumor/normal DNA and tumor-only RNA](#tumornormal-dna-and-tumor-only-rna)
+      * [Tumor/normal DNA with donor sample](#tumornormal-dna-with-donor-sample)
+    * [Multiple samples](#multiple-samples)
+  * [Reference data](#reference-data)
+    * [Automatic staging of reference data](#automatic-staging-of-reference-data)
+    * [Manually staging reference data](#manually-staging-reference-data)
+    * [Reference data URLs](#reference-data-urls)
+    * [Custom panel reference data](#custom-panel-reference-data)
+    * [Custom genomes](#custom-genomes)
+  * [Process selection](#process-selection)
+    * [Excluding processes](#excluding-processes)
+    * [Manual process selection](#manual-process-selection)
+    * [Starting from existing inputs](#starting-from-existing-inputs)
+  * [Core Nextflow arguments](#core-nextflow-arguments)
+    * [`-profile`](#-profile)
+    * [`-resume`](#-resume)
+    * [`-c`](#-c)
+  * [Custom configuration](#custom-configuration)
+    * [Compute resources](#compute-resources)
+    * [Container images](#container-images)
+      * [Setting up Singularity](#setting-up-singularity)
+      * [Container image sources](#container-image-sources)
+    * [Custom tool arguments](#custom-tool-arguments)
+    * [UMI processing](#umi-processing)
+    * [nf-core/configs](#nf-coreconfigs)
+  * [FAQ and troubleshooting](#faq-and-troubleshooting)
+    * [How to start from CRAM?](#how-to-start-from-cram)
+    * [How to handle UMIs?](#how-to-handle-umis)
+    * [How to use oncoanalyser with a custom panel or whole exome?](#how-to-use-oncoanalyser-with-a-custom-panel-or-whole-exome)
+    * [Incompatible BAM files](#incompatible-bam-files)
+    * [I want to store the output BAMs. Why are there only REDUX BAM(s) with additional files?](#i-want-to-store-the-output-bams-why-are-there-only-redux-bam--s--with-additional-files)
+    * [I only want variant calls](#i-only-want-variant-calls)
+    * [Why does `oncoanalyser` call too many / too few variants than another pipeline?](#why-does-oncoanalyser-call-too-many--too-few-variants-than-another-pipeline)
+    * [My HPC does not allow Docker](#my-hpc-does-not-allow-docker)
+    * [Firewall prevents `oncoanalyser` from pulling Singularity images](#firewall-prevents-oncoanalyser-from-pulling-singularity-images)
+    * [Network timeout](#network-timeout)
+    * [Run fails due to insufficient CPUs/RAM/disk](#run-fails-due-to-insufficient-cpusramdisk)
+    * [Can `oncoanalyser` CLI arguments be put in a config file?](#can-oncoanalyser-cli-arguments-be-put-in-a-config-file)
+    * [Errors and navigating the `work/` directory](#errors-and-navigating-the-work-directory)
+  * [Azure resource requests](#azure-resource-requests)
+  * [Running in the background](#running-in-the-background)
+  * [Nextflow memory requirements](#nextflow-memory-requirements)
 <!-- TOC -->
 
 ## Introduction
@@ -98,11 +97,6 @@ are installed, setting up and running `oncoanalyser` involves the following step
 2. (Optional) [**Other configuration**](#custom-configuration) (e.g. compute resources)
 3. Create [**samplesheet**](#samplesheet) specifying input files
 4. [**Run**](#running-the-pipeline) `oncoanalyser`
-
-### Recommended configuration
-
-Recommended configurations for oncoanalyser can readily be loaded using the ```-profile hartwig``` command line argument, whenever launching a run.
-Those specifications can currently be found [here](https://github.com/nf-core/oncoanalyser/blob/dev-2.1.0/conf/hartwig.config) (will be replaced with nf-core repo path)
 
 :::tip
 
@@ -783,6 +777,19 @@ Specify the path to a specific config file (this is a core Nextflow command). Se
 Custom configuration can be provided to `oncoanalyser` by providing a config file to the CLI argument `-config <file>` or `-c <file>`.
 Syntax and examples of config items are described in the [Nextflow documentation](https://www.nextflow.io/docs/latest/config.html) and
 [nf-core documentation](https://nf-co.re/usage/configuration). Below a subsections describe common use cases for custom configuration.
+
+:::tip
+
+See [this example config file](https://github.com/nf-core/oncoanalyser/blob/update-docs-v2.0/conf/hartwig.config) for common configuration
+options.
+
+:::
+
+### Recommended configuration
+
+Recommended configurations for oncoanalyser can readily be loaded using the ```-profile hartwig``` command line argument, whenever launching a run.
+Those specifications can currently be found [here](https://github.com/nf-core/oncoanalyser/blob/update-docs-v2.0/conf/hartwig.config) (will be replaced with nf-core repo path)
+
 
 ### Compute resources
 
