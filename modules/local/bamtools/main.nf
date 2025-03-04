@@ -47,11 +47,13 @@ process BAMTOOLS {
 
     stub:
     """
-    touch ${meta.sample_id}.bam_metric.summary.tsv;
-    touch ${meta.sample_id}.bam_metric.coverage.tsv;
-    touch ${meta.sample_id}.bam_metric.frag_length.tsv;
-    touch ${meta.sample_id}.bam_metric.flag_counts.tsv;
-    touch ${meta.sample_id}.bam_metric.partition_stats.tsv;
+    mkdir -p ${meta.id}_bamtools/
+
+    touch ${meta.id}_bamtools/${meta.sample_id}.bam_metric.summary.tsv;
+    touch ${meta.id}_bamtools/${meta.sample_id}.bam_metric.coverage.tsv;
+    touch ${meta.id}_bamtools/${meta.sample_id}.bam_metric.frag_length.tsv;
+    touch ${meta.id}_bamtools/${meta.sample_id}.bam_metric.flag_counts.tsv;
+    touch ${meta.id}_bamtools/${meta.sample_id}.bam_metric.partition_stats.tsv;
 
     echo -e '${task.process}:\\n  stub: noversions\\n' > versions.yml
     """
