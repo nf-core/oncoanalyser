@@ -41,7 +41,7 @@ process GRIDSS_INDEX {
     mv ${genome_fasta.name}.img gridss_index/
 
     # Symlink BWA index files into output directory
-    ln -s ../${genome_fasta.name}.{amb,ann,pac,sa} gridss_index/
+    ln -s ../${genome_fasta.name}.{amb,ann,pac} gridss_index/
 
     # Also include the ALT file if present
     if [[ -e ${genome_fasta.name}.alt || -L ${genome_fasta.name}.alt ]]; then
@@ -57,7 +57,7 @@ process GRIDSS_INDEX {
     stub:
     """
     mkdir -p gridss_index/
-    touch gridss_index/${genome_fasta.name}.{sa,pac,ann,amb}
+    touch gridss_index/${genome_fasta.name}.{amb,ann,pac}
     touch gridss_index/${genome_fasta.name}.img
 
     echo -e '${task.process}:\\n  stub: noversions\\n' > versions.yml
