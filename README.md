@@ -151,10 +151,8 @@ channel](https://nfcore.slack.com/channels/oncoanalyser) (you can join with [thi
 
 ## Citations
 
-<!-- TODO nf-core: Add citation for pipeline after first release. Uncomment lines below and update Zenodo doi and badge at the top of this file. -->
-<!-- If you use nf-core/oncoanalyser for your analysis, please cite it using the following doi: [10.5281/zenodo.XXXXXX](https://doi.org/10.5281/zenodo.XXXXXX) -->
-
-<!-- TODO nf-core: Add bibliography of tools and data used in your pipeline -->
+You can cite the `oncoanalyser` zenodo record for a specific version using the following doi:
+[10.5281/zenodo.XXXXXXX](https://doi.org/10.5281/zenodo.XXXXXXX)
 
 An extensive list of references for the tools used by the pipeline can be found in the [`CITATIONS.md`](CITATIONS.md)
 file.
