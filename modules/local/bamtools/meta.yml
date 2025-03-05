@@ -35,9 +35,9 @@ output:
       description: |
         Groovy Map containing sample information
         e.g. [id: 'sample_id']
-  - metrics:
-      description: BAM metrics file
-      pattern: "*.{wgsmetrics}"
+  - metrics_dir:
+      type: directory
+      description: BAM metrics directory
   - versions:
       type: file
       description: File containing software versions

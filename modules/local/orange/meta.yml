@@ -80,14 +80,18 @@ input:
   - known_fusion_data:
       type: file
       description: Known fusions data file
-      pattern: "*.{bedpe}"
+      pattern: "*.{csv}"
   - driver_gene_panel:
       type: file
       description: Driver gene panel file
-      pattern: "*.{csv}"
+      pattern: "*.{tsv}"
   - ensembl_data_resources:
       type: directory
       description: HMF ensembl data resources directory
+  - sigs_etiology:
+      type: file
+      description: Mutational signature etiologies file
+      pattern: "*.{tsv}"
   - isofox_alt_sj:
       type: file
       description: Isofox cohort alternate slice junction file
@@ -107,11 +111,11 @@ output:
         e.g. [id: 'sample_id']
   - pdf:
       type: file
-      description: Report file
+      description: PDF report file (optional)
       pattern: "*.{pdf}"
   - json:
       type: file
-      description: Compiled JSON output file
+      description: Compiled JSON output file (optional)
       pattern: "*.{json}"
   - versions:
       type: file

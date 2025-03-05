@@ -4,4 +4,4 @@ channels:
   - bioconda
   - defaults
 dependencies:
-  - bioconda::hmftools-neo=1.2_beta
+  - bioconda::hmftools-neo=1.2

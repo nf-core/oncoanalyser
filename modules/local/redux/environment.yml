@@ -4,4 +4,4 @@ channels:
   - bioconda
   - defaults
 dependencies:
-  - bioconda::hmftools-redux=1.0_beta
+  - bioconda::hmftools-redux=1.1

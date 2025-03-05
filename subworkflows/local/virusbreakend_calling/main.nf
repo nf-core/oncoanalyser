@@ -24,7 +24,7 @@ workflow VIRUSBREAKEND_CALLING {
     virusbreakenddb        // channel: [mandatory] /path/to/virusbreakenddb/
     virus_taxonomy_db      // channel: [mandatory] /path/to/virus_taxonomy_db
     virus_reporting_db     // channel: [mandatory] /path/to/virus_reporting_db
-    virus_blacklist_db     // channel: [mandatory] /path/to/virus_blacklist_db
+    virus_blocklist_db     // channel: [mandatory] /path/to/virus_blocklist_db
 
     // Params
     gridss_config          // channel: [optional] /path/to/gridss_config
@@ -135,7 +135,7 @@ workflow VIRUSBREAKEND_CALLING {
         ch_virusinterpreter_inputs,
         virus_taxonomy_db,
         virus_reporting_db,
-        virus_blacklist_db,
+        virus_blocklist_db,
     )
 
     ch_versions = ch_versions.mix(VIRUSINTERPRETER.out.versions)

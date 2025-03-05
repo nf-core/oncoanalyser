@@ -78,7 +78,7 @@ input:
   - driver_gene_panel:
       type: file
       description: Driver gene panel file
-      pattern: "*.{csv}"
+      pattern: "*.{tsv}"
   - ensembl_data_resources:
       type: directory
       description: HMF ensembl data resources directory

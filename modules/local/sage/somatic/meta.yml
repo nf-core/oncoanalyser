@@ -41,6 +41,10 @@ input:
       type: file
       description: Donor BAI file
       pattern: "*.{bai}"
+  - redux_tsvs:
+      type: list
+      description: REDUX MS files
+      pattern: "*.{bai}"
   - genome_fasta:
       type: file
       description: Reference genome assembly FASTA file

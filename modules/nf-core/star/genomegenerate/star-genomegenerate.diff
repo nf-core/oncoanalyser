@@ -1,4 +1,5 @@
 Changes in module 'nf-core/star/genomegenerate'
+Changes in 'star/genomegenerate/environment.yml':
 --- modules/nf-core/star/genomegenerate/environment.yml
 +++ modules/nf-core/star/genomegenerate/environment.yml
 @@ -4,7 +4,4 @@
@@ -11,6 +12,40 @@ Changes in module 'nf-core/star/genomegenerate'
 -  - conda-forge::gawk=5.1.0
 +  - bioconda::star=2.7.3a
 
+Changes in 'star/genomegenerate/meta.yml':
+--- modules/nf-core/star/genomegenerate/meta.yml
++++ modules/nf-core/star/genomegenerate/meta.yml
+@@ -15,28 +15,13 @@
+       doi: 10.1093/bioinformatics/bts635
+       licence: ["MIT"]
+ input:
+-  - meta:
+-      type: map
+-      description: |
+-        Groovy Map containing sample information
+-        e.g. [ id:'test', single_end:false ]
+   - fasta:
+       type: file
+       description: Fasta file of the reference genome
+-  - meta2:
+-      type: map
+-      description: |
+-        Groovy Map containing reference information
+-        e.g. [ id:'test' ]
+   - gtf:
+       type: file
+       description: GTF file of the reference genome
+ output:
+-  - meta:
+-      type: map
+-      description: |
+-        Groovy Map containing sample information
+-        e.g. [ id:'test', single_end:false ]
+   - index:
+       type: directory
+       description: Folder containing the star index files
+
+Changes in 'star/genomegenerate/main.nf':
 --- modules/nf-core/star/genomegenerate/main.nf
 +++ modules/nf-core/star/genomegenerate/main.nf
 @@ -4,16 +4,16 @@
@@ -36,7 +71,7 @@ Changes in module 'nf-core/star/genomegenerate'
  
      when:
      task.ext.when == null || task.ext.when
-@@ -23,96 +23,69 @@
+@@ -23,97 +23,62 @@
      def args_list   = args.tokenize()
      def memory      = task.memory ? "--limitGenomeGenerateRAM ${task.memory.toBytes() - 100000000}" : ''
      def include_gtf = gtf ? "--sjdbGTFfile $gtf" : ''
@@ -68,10 +103,59 @@ Changes in module 'nf-core/star/genomegenerate'
 -            --runThreadN $task.cpus \\
 -            $memory \\
 -            $args
-+
-+    stub:
-+    if (gtf) {
-+        """
+-
+-        cat <<-END_VERSIONS > versions.yml
+-        "${task.process}":
+-            star: \$(STAR --version | sed -e "s/STAR_//g")
+-            samtools: \$(echo \$(samtools --version 2>&1) | sed 's/^.*samtools //; s/Using.*\$//')
+-            gawk: \$(echo \$(gawk --version 2>&1) | sed 's/^.*GNU Awk //; s/, .*\$//')
+-        END_VERSIONS
+-        """
+-    } else {
+-        """
+-        samtools faidx $fasta
+-        NUM_BASES=`gawk '{sum = sum + \$2}END{if ((log(sum)/log(2))/2 - 1 > 14) {printf "%.0f", 14} else {printf "%.0f", (log(sum)/log(2))/2 - 1}}' ${fasta}.fai`
+-
+-        mkdir star
+-        STAR \\
+-            --runMode genomeGenerate \\
+-            --genomeDir star/ \\
+-            --genomeFastaFiles $fasta \\
+-            $include_gtf \\
+-            --runThreadN $task.cpus \\
+-            --genomeSAindexNbases \$NUM_BASES \\
+-            $memory \\
+-            $args
+-
+-        cat <<-END_VERSIONS > versions.yml
+-        "${task.process}":
+-            star: \$(STAR --version | sed -e "s/STAR_//g")
+-            samtools: \$(echo \$(samtools --version 2>&1) | sed 's/^.*samtools //; s/Using.*\$//')
+-            gawk: \$(echo \$(gawk --version 2>&1) | sed 's/^.*GNU Awk //; s/, .*\$//')
+-        END_VERSIONS
+-        """
+-    }
+ 
+     stub:
+     if (gtf) {
+         """
+-        mkdir star
+-        touch star/Genome
+-        touch star/Log.out
+-        touch star/SA
+-        touch star/SAindex
+-        touch star/chrLength.txt
+-        touch star/chrName.txt
+-        touch star/chrNameLength.txt
+-        touch star/chrStart.txt
+-        touch star/exonGeTrInfo.tab
+-        touch star/exonInfo.tab
+-        touch star/geneInfo.tab
+-        touch star/genomeParameters.txt
+-        touch star/sjdbInfo.txt
+-        touch star/sjdbList.fromGTF.out.tab
+-        touch star/sjdbList.out.tab
+-        touch star/transcriptInfo.tab
 +        mkdir -p star_index/
 +        touch star_index/Genome
 +        touch star_index/Log.out
@@ -90,28 +174,26 @@ Changes in module 'nf-core/star/genomegenerate'
 +        touch star_index/sjdbList.out.tab
 +        touch star_index/transcriptInfo.tab
  
-         cat <<-END_VERSIONS > versions.yml
-         "${task.process}":
-             star: \$(STAR --version | sed -e "s/STAR_//g")
-             samtools: \$(echo \$(samtools --version 2>&1) | sed 's/^.*samtools //; s/Using.*\$//')
+-        cat <<-END_VERSIONS > versions.yml
+-        "${task.process}":
+-            star: \$(STAR --version | sed -e "s/STAR_//g")
+-            samtools: \$(echo \$(samtools --version 2>&1) | sed 's/^.*samtools //; s/Using.*\$//')
 -            gawk: \$(echo \$(gawk --version 2>&1) | sed 's/^.*GNU Awk //; s/, .*\$//')
-         END_VERSIONS
+-        END_VERSIONS
++        echo -e '${task.process}:\\n  stub: noversions\\n' > versions.yml
          """
      } else {
          """
--        samtools faidx $fasta
--        NUM_BASES=`gawk '{sum = sum + \$2}END{if ((log(sum)/log(2))/2 - 1 > 14) {printf "%.0f", 14} else {printf "%.0f", (log(sum)/log(2))/2 - 1}}' ${fasta}.fai`
--
 -        mkdir star
--        STAR \\
--            --runMode genomeGenerate \\
--            --genomeDir star/ \\
--            --genomeFastaFiles $fasta \\
--            $include_gtf \\
--            --runThreadN $task.cpus \\
--            --genomeSAindexNbases \$NUM_BASES \\
--            $memory \\
--            $args
+-        touch star/Genome
+-        touch star/Log.out
+-        touch star/SA
+-        touch star/SAindex
+-        touch star/chrLength.txt
+-        touch star/chrName.txt
+-        touch star/chrNameLength.txt
+-        touch star/chrStart.txt
+-        touch star/genomeParameters.txt
 +        mkdir -p star_index/
 +        touch star_index/Genome
 +        touch star_index/Log.out
@@ -123,63 +205,18 @@ Changes in module 'nf-core/star/genomegenerate'
 +        touch star_index/chrStart.txt
 +        touch star_index/genomeParameters.txt
  
-         cat <<-END_VERSIONS > versions.yml
-         "${task.process}":
-             star: \$(STAR --version | sed -e "s/STAR_//g")
-             samtools: \$(echo \$(samtools --version 2>&1) | sed 's/^.*samtools //; s/Using.*\$//')
--            gawk: \$(echo \$(gawk --version 2>&1) | sed 's/^.*GNU Awk //; s/, .*\$//')
--        END_VERSIONS
--        """
--    }
--
--    stub:
--    if (gtf) {
--        """
--        mkdir star
--        touch star/Genome
--        touch star/Log.out
--        touch star/SA
--        touch star/SAindex
--        touch star/chrLength.txt
--        touch star/chrName.txt
--        touch star/chrNameLength.txt
--        touch star/chrStart.txt
--        touch star/exonGeTrInfo.tab
--        touch star/exonInfo.tab
--        touch star/geneInfo.tab
--        touch star/genomeParameters.txt
--        touch star/sjdbInfo.txt
--        touch star/sjdbList.fromGTF.out.tab
--        touch star/sjdbList.out.tab
--        touch star/transcriptInfo.tab
--
 -        cat <<-END_VERSIONS > versions.yml
 -        "${task.process}":
 -            star: \$(STAR --version | sed -e "s/STAR_//g")
 -            samtools: \$(echo \$(samtools --version 2>&1) | sed 's/^.*samtools //; s/Using.*\$//')
 -            gawk: \$(echo \$(gawk --version 2>&1) | sed 's/^.*GNU Awk //; s/, .*\$//')
 -        END_VERSIONS
--        """
--    } else {
--        """
--        mkdir star
--        touch star/Genome
--        touch star/Log.out
--        touch star/SA
--        touch star/SAindex
--        touch star/chrLength.txt
--        touch star/chrName.txt
--        touch star/chrNameLength.txt
--        touch star/chrStart.txt
--        touch star/genomeParameters.txt
--
--        cat <<-END_VERSIONS > versions.yml
--        "${task.process}":
--            star: \$(STAR --version | sed -e "s/STAR_//g")
--            samtools: \$(echo \$(samtools --version 2>&1) | sed 's/^.*samtools //; s/Using.*\$//')
--            gawk: \$(echo \$(gawk --version 2>&1) | sed 's/^.*GNU Awk //; s/, .*\$//')
-         END_VERSIONS
++        echo -e '${task.process}:\\n  stub: noversions\\n' > versions.yml
          """
      }
+ }
 
+'modules/nf-core/star/genomegenerate/tests/main.nf.test.snap' is unchanged
+'modules/nf-core/star/genomegenerate/tests/tags.yml' is unchanged
+'modules/nf-core/star/genomegenerate/tests/main.nf.test' is unchanged
 ************************************************************

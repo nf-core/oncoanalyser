@@ -15,51 +15,56 @@ input:
       description: |
         Groovy Map containing sample information
         e.g. [id: 'sample_id']
-  - bams:
-      type: list
-      description: List of BAM files
-  - bams_filtered:
-      type: list
-      description: List of filtered BAM files
-  - assemble_dir:
+  - ref_depth_vcf:
+      type: file
+      description: ESVEE depth annotated VCF file
+      pattern: "*.{vcf.gz}"
+  - prep_dir:
       type: directory
-      description: GRIDSS assemble output directory
-  - labels:
-      type: list
-      description: List of labels corresponding to BAMs and GRIDSS preprocess output directories
+      description: ESVEE prep output directory
   - genome_fasta:
       type: file
       description: Reference genome assembly FASTA file
       pattern: "*.{fa,fasta}"
-  - genome_fai:
+  - genome_ver:
+      type: string
+      description: Reference genome version
+  - pon_breakend:
       type: file
-      description: Reference genome assembly fai file
-      pattern: "*.{fai}"
-  - genome_dict:
-      type: file
-      description: Reference genome assembly dict file
-      pattern: "*.{dict}"
-  - genome_gridss_index:
-      type: file
-      description: Reference genome assembly GRIDSS index file
-      pattern: "*.{gridsscache}"
-  - blocklist:
-      type: file
-      description: GRIDSS blocklist file
+      description: GRIDSS breakend PON file
       pattern: "*.{bed.gz}"
-  - gridss_config:
+  - pon_breakpoints:
       type: file
-      description: GRIDSS configuration file (optional)
+      description: GRIDSS breakpoint PON file
+      pattern: "*.{bedpe.gz}"
+  - known_fusions:
+      type: file
+      description: HMF Known Fusions file
+      pattern: "*.{bedpe}"
+  - repeatmasker_annotations:
+      type: file
+      description: RepeatMasker annotations file
 output:
   - meta:
       type: map
       description: |
         Groovy Map containing sample information
         e.g. [id: 'sample_id']
-  - vcf:
-      type: file
-      description: VCF file
-      pattern: "*.{vcf.gz}"
+  - caller_dir:
+      type: directory
+      description: ESVEE call output directory
+  - unfiltered_vcf:
+      type: list
+      description: Unfiltered VCF file
+      pattern: "*.{vcf.gz,vcf.gz.tbi}"
+  - somatic_vcf:
+      type: list
+      description: Somatic VCF file
+      pattern: "*.{vcf.gz,vcf.gz.tbi}"
+  - germline_vcf:
+      type: list
+      description: Germline VCF file (optional)
+      pattern: "*.{vcf.gz,vcf.gz.tbi}"
   - versions:
       type: file
       description: File containing software versions

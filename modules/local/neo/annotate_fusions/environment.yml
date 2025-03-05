@@ -1,4 +1,4 @@
-name: isofox
+name: neo_annotate_fusions
 channels:
   - conda-forge
   - bioconda

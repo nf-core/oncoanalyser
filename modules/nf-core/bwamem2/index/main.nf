@@ -57,9 +57,6 @@ process BWAMEM2_INDEX {
         ln -s ../${alt} bwa-mem2_index/;
     fi;
 
-    cat <<-END_VERSIONS > versions.yml
-    "${task.process}":
-        bwamem2: \$(echo \$(bwa-mem2 version 2>&1) | sed 's/.* //')
-    END_VERSIONS
+    echo -e '${task.process}:\\n  stub: noversions\\n' > versions.yml
     """
 }

@@ -11,7 +11,7 @@ process VIRUSINTERPRETER {
     tuple val(meta), path(virus_tsv), path(purple_dir), path(bamtools_somatic_dir)
     path taxonomy_db
     path reporting_db
-    path blacklist_db
+    path blocklist_db
 
     output:
     tuple val(meta), path('virusinterpreter/'), emit: virusinterpreter_dir
@@ -37,7 +37,7 @@ process VIRUSINTERPRETER {
         -virus_breakend_tsv ${virus_tsv} \\
         -taxonomy_db_tsv ${taxonomy_db} \\
         -virus_reporting_db_tsv ${reporting_db} \\
-        -virus_blacklisting_db_tsv ${blacklist_db} \\
+        -virus_blacklisting_db_tsv ${blocklist_db} \\
         -output_dir virusinterpreter/
 
     cat <<-END_VERSIONS > versions.yml
