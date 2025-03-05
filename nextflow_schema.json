@@ -48,7 +48,7 @@
                     "type": "string",
                     "description": "Workflow run mode.",
                     "fa_icon": "fas fa-diagram-project",
-                    "pattern": "^(wgts|targeted)"
+                    "enum": ["wgts", "targeted"]
                 },
                 "panel": {
                     "type": "string",
@@ -210,11 +210,6 @@
                     "type": "string",
                     "description": "Path to panel data.",
                     "fa_icon": "far fa-folder-open"
-                },
-                "ref_data_virusbreakenddb_path": {
-                    "type": "string",
-                    "description": "Path to VIRUSBreakend database (directory or tarball).",
-                    "fa_icon": "far fa-file-code"
                 },
                 "ref_data_hla_slice_bed": {
                     "type": "string",

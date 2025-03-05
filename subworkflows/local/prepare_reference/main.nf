@@ -222,6 +222,7 @@ workflow PREPARE_REFERENCE {
                 ch_genome_fasta,
                 ch_genome_fai,
                 ch_genome_dict,
+                ch_genome_img,
                 ch_genome_bwamem2_index,
                 ch_genome_gridss_index,
                 ch_genome_star_index,
