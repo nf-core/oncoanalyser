@@ -15,18 +15,25 @@ input:
       description: |
         Groovy Map containing sample information
         e.g. [id: 'sample_id']
-  - bams:
-      type: list
-      description: List of BAM files
-  - bams_filtered:
-      type: list
-      description: List of filtered BAM files
-  - preprocess_dirs:
-      type: list
-      description: List of GRIDSS preprocess output directories
-  - labels:
-      type: list
-      description: List of labels corresponding to BAMs and GRIDSS preprocess output directories
+  - tumor_prep_bam:
+      type: file
+      description: Tumor prep BAM file
+      pattern: "*.{bam}"
+  - tumor_prep_bai:
+      type: file
+      description: Tumor prep BAI file
+      pattern: "*.{bai}"
+  - normal_prep_bam:
+      type: file
+      description: Normal prep BAM file
+      pattern: "*.{bam}"
+  - normal_prep_bai:
+      type: file
+      description: Normal prep BAI file
+      pattern: "*.{bai}"
+  - prep_dir:
+      type: directory
+      description: ESVEE prep output directory
   - genome_fasta:
       type: file
       description: Reference genome assembly FASTA file
@@ -39,17 +46,14 @@ input:
       type: file
       description: Reference genome assembly dict file
       pattern: "*.{dict}"
-  - genome_gridss_index:
+  - genome_img:
       type: file
-      description: Reference genome assembly GRIDSS index file
-      pattern: "*.{gridsscache}"
-  - blocklist:
+      description: Reference genome assembly img file
+      pattern: "*.{img}"
+  - decouy_sequences_image:
       type: file
-      description: GRIDSS blocklist file
-      pattern: "*.{bed.gz}"
-  - gridss_config:
-      type: file
-      description: GRIDSS configuration file (optional)
+      description: ESVEE decoy sequences images file
+      pattern: "*.{img}"
 output:
   - meta:
       type: map
@@ -58,7 +62,11 @@ output:
         e.g. [id: 'sample_id']
   - assembly_dir:
       type: directory
-      description: GRIDSS assemble output directory
+      description: ESVEE assemble output directory
+  - raw_vcf:
+      type: file
+      description: Raw VCF output file
+      pattern: "*.{vcf.gz}"
   - versions:
       type: file
       description: File containing software versions

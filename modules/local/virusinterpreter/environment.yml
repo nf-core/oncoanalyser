@@ -4,4 +4,4 @@ channels:
   - bioconda
   - defaults
 dependencies:
-  - bioconda::hmftools-virus-interpreter=3.7_beta
+  - bioconda::hmftools-virus-interpreter=1.7

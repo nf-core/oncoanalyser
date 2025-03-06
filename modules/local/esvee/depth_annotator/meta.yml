@@ -16,19 +16,26 @@ input:
       description: |
         Groovy Map containing sample information
         e.g. [id: 'sample_id']
-  - bams:
-      type: list
-      description: BAM files
-  - bai:
-      type: list
-      description: BAI files
-  - vcf:
+  - tumor_bam:
       type: file
-      description: VCF file
+      description: Tumor BAM file
+      pattern: "*.{bam}"
+  - tumor_bai:
+      type: file
+      description: Tumor BAI file
+      pattern: "*.{bai}"
+  - normal_bam:
+      type: file
+      description: Normal BAM file
+      pattern: "*.{bam}"
+  - normal_bai:
+      type: file
+      description: Normal BAI file
+      pattern: "*.{bai}"
+  - raw_vcf:
+      type: file
+      description: ESVEE assemble raw VCF file
       pattern: "*.{vcf.gz}"
-  - labels:
-      type: list
-      description: List of labels corresponding to BAMs and GRIDSS preprocess output directories
   - genome_fasta:
       type: file
       description: Reference genome assembly FASTA file
@@ -36,20 +43,23 @@ input:
   - genome_ver:
       type: string
       description: Reference genome version
+  - unmap_regions:
+      type: file
+      description: Hartwig unmap regions file
+      pattern: "*.{tsv}"
 output:
   - meta:
       type: map
       description: |
         Groovy Map containing sample information
         e.g. [id: 'sample_id']
-  - vcf:
+  - depth_annotation_dir:
+      type: directory
+      description: ESVEE depth annotation output directory
+  - ref_depth_vcf:
       type: file
-      description: VCF file
+      description: Depth annotated VCF file
       pattern: "*.{vcf.gz}"
-  - tbi:
-      type: file
-      description: VCF index file
-      pattern: "*.{vcf.gz.tbi}"
   - versions:
       type: file
       description: File containing software versions

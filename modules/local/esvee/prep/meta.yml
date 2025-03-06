@@ -16,18 +16,22 @@ input:
       description: |
         Groovy Map containing sample information
         e.g. [id: 'sample_id']
-  - bam:
+  - tumor_bam:
       type: file
-      description: BAM file
+      description: Tumor BAM file
       pattern: "*.{bam}"
-  - bai:
+  - tumor_bai:
       type: file
-      description: BAI file
+      description: Tumor BAI file
       pattern: "*.{bai}"
-  - junctions:
+  - normal_bam:
       type: file
-      description: Existing candidate SV junctions file (optional)
-      pattern: "*.{csv}"
+      description: Normal BAM file
+      pattern: "*.{bam}"
+  - normal_bai:
+      type: file
+      description: Normal BAI file
+      pattern: "*.{bai}"
   - genome_fasta:
       type: file
       description: Reference genome assembly FASTA file
@@ -43,23 +47,23 @@ input:
       type: file
       description: Known fusions file
       pattern: "*.{bedpe}"
-  - write_types:
-      type: string
-      description: Type of output files to write
 output:
   - meta:
       type: map
       description: |
         Groovy Map containing sample information
         e.g. [id: 'sample_id']
-  - bam:
-      type: file
-      description: BAM file containing selected reads
-      pattern: "*.{bam}"
-  - junctions:
-      type: file
-      description: Candidate SV junctions file
-      pattern: "*.{csv}"
+  - prep_dir:
+      type: directory
+      description: ESVEE prep output directory
+  - tumor_prep_bam:
+      type: list
+      description: Tumor prep BAM and BAI file
+      pattern: "*.{bam,bam.bai}"
+  - normal_prep_bam:
+      type: list
+      description: Normal prep BAM and BAI file (optional)
+      pattern: "*.{bam,bam.bai}"
   - versions:
       type: file
       description: File containing software versions

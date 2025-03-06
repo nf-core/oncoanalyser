@@ -1,0 +1,66 @@
+Changes in module 'nf-core/gatk4/markduplicates'
+'modules/nf-core/gatk4/markduplicates/meta.yml' is unchanged
+Changes in 'gatk4/markduplicates/main.nf':
+--- modules/nf-core/gatk4/markduplicates/main.nf
++++ modules/nf-core/gatk4/markduplicates/main.nf
+@@ -2,10 +2,10 @@
+     tag "$meta.id"
+     label 'process_medium'
+ 
+-    conda "bioconda::gatk4=4.4.0.0"
++    conda "bioconda::gatk4=4.6.1.0"
+     container "${ workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container ?
+-        'https://depot.galaxyproject.org/singularity/gatk4:4.4.0.0--py36hdfd78af_0':
+-        'biocontainers/gatk4:4.4.0.0--py36hdfd78af_0' }"
++        'https://depot.galaxyproject.org/singularity/gatk4:4.6.1.0--py310hdfd78af_0' :
++        'biocontainers/gatk4:4.6.1.0--py310hdfd78af_0' }"
+ 
+     input:
+     tuple val(meta), path(bam)
+@@ -25,7 +25,7 @@
+ 
+     script:
+     def args = task.ext.args ?: ''
+-    prefix = task.ext.prefix ?: "${meta.id}"
++    prefix = task.ext.prefix ?: "${meta.sample_id}"
+     def input_list = bam.collect{"--INPUT $it"}.join(' ')
+     def reference = fasta ? "--REFERENCE_SEQUENCE ${fasta}" : ""
+ 
+@@ -38,20 +38,29 @@
+     """
+     gatk --java-options "-Xmx${avail_mem}M" MarkDuplicates \\
+         $input_list \\
+-        --OUTPUT ${prefix} \\
+-        --METRICS_FILE ${prefix}.metrics \\
++        --OUTPUT ${prefix}.md.bam \\
++        --METRICS_FILE ${prefix}.md.metrics \\
+         --TMP_DIR . \\
++        --CREATE_INDEX \\
+         ${reference} \\
+         $args
+ 
+-
+-    if  [[ ${prefix} == *.cram ]]&&[[ -f ${prefix}.bai ]]; then
+-        mv ${prefix}.bai ${prefix}.crai
+-    fi
++    mv ${prefix}.md.bai ${prefix}.md.bam.bai
+ 
+     cat <<-END_VERSIONS > versions.yml
+     "${task.process}":
+         gatk4: \$(echo \$(gatk --version 2>&1) | sed 's/^.*(GATK) v//; s/ .*\$//')
+     END_VERSIONS
+     """
++
++    stub:
++    prefix = task.ext.prefix ?: "${meta.sample_id}"
++
++    """
++    touch ${prefix}.md.bam
++    touch ${prefix}.md.bam.bai
++    touch ${prefix}.md.metrics
++
++    echo -e '${task.process}:\\n  stub: noversions\\n' > versions.yml
++    """
+ }
+
+************************************************************

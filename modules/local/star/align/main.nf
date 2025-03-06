@@ -2,6 +2,7 @@ process STAR_ALIGN {
     tag "${meta.id}"
     label 'process_high'
 
+    conda "${moduleDir}/environment.yml"
     container "${ workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container ?
         'https://depot.galaxyproject.org/singularity/star:2.7.3a--0' :
         'biocontainers/star:2.7.3a--0' }"

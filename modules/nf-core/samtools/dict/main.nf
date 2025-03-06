@@ -2,10 +2,10 @@ process SAMTOOLS_DICT {
     tag "$fasta"
     label 'process_single'
 
-    conda (params.enable_conda ? "bioconda::samtools=1.16.1" : null)
+    conda "${moduleDir}/environment.yml"
     container "${ workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container ?
-        'https://depot.galaxyproject.org/singularity/samtools:1.16.1--h6899075_1' :
-        'biocontainers/samtools:1.16.1--h6899075_1' }"
+        'https://depot.galaxyproject.org/singularity/samtools:1.21--h50ea8bc_0' :
+        'biocontainers/samtools:1.21--h50ea8bc_0' }"
 
     input:
     path fasta
@@ -35,10 +35,7 @@ process SAMTOOLS_DICT {
     stub:
     """
     touch ${fasta}.dict
-    cat <<-END_VERSIONS > versions.yml
 
-    "${task.process}":
-        samtools: \$(echo \$(samtools --version 2>&1) | sed 's/^.*samtools //; s/Using.*\$//')
-    END_VERSIONS
+    echo -e '${task.process}:\\n  stub: noversions\\n' > versions.yml
     """
 }

@@ -14,24 +14,18 @@ tools:
       documentation: https://github.com/bwa-mem2/bwa-mem2#usage
       licence: ["MIT"]
 input:
-  - meta:
-      type: map
-      description: |
-        Groovy Map containing sample information
-        e.g. [ id:'test', single_end:false ]
   - fasta:
       type: file
       description: Input genome fasta file
+  - alt:
+      type: file
+      description: Input genome ALT file (optional)
+      pattern: "*.{alt}"
 output:
-  - meta:
-      type: map
-      description: |
-        Groovy Map containing sample information
-        e.g. [ id:'test', single_end:false ]
   - index:
       type: file
       description: BWA genome index files
-      pattern: "*.{0123,amb,ann,bwt.2bit.64,pac}"
+      pattern: "*.{0123,amb,ann,bwt.2bit.64,pac,alt}"
   - versions:
       type: file
       description: File containing software versions

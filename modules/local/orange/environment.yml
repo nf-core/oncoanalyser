@@ -4,4 +4,4 @@ channels:
   - bioconda
   - defaults
 dependencies:
-  - bioconda::hmftools-orange=3.7.1_beta
+  - bioconda::hmftools-orange=3.7.1

@@ -2,6 +2,7 @@ process SAMBAMBA_MERGE {
     tag "${meta.id}"
     label 'process_medium'
 
+    conda "${moduleDir}/environment.yml"
     container "${ workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container ?
         'https://depot.galaxyproject.org/singularity/sambamba:1.0.1--h6f6fda4_0' :
         'biocontainers/sambamba:1.0.1--h6f6fda4_0' }"

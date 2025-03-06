@@ -1,44 +1,42 @@
 process GATK4_BWA_INDEX_IMAGE {
-    tag "$meta.id"
+    tag "${meta.id}"
     label 'process_medium'
 
-    conda "bioconda::gatk4=4.4.0.0"
+    conda "bioconda::gatk4:4.6.1.0"
     container "${ workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container ?
-        'https://depot.galaxyproject.org/singularity/gatk4:4.4.0.0--py36hdfd78af_0':
-        'biocontainers/gatk4:4.4.0.0--py36hdfd78af_0' }"
+        'https://depot.galaxyproject.org/singularity/gatk4:4.6.1.0--py310hdfd78af_0' :
+        'biocontainers/gatk4:4.6.1.0--py310hdfd78af_0' }"
 
     input:
-    path  fasta
+    tuple val(meta), path(genome_fasta)
 
     output:
-    path "*.img"       , emit: img
-    path "versions.yml", emit: versions
+    path "${genome_fasta}.img", emit: img
+    path 'versions.yml'       , emit: versions
 
     when:
     task.ext.when == null || task.ext.when
 
     script:
     def args = task.ext.args ?: ''
+
     """
     gatk \\
         BwaMemIndexImageCreator \\
-        $args \\
-        -I ${fasta}
-        -O ${fasta}.img
+        ${args} \\
+        -I ${genome_fasta}
+        -O ${genome_fasta}.img
 
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":
-        gatk4: \$(echo \$(gatk --version 2>&1) | sed 's/^.*(GATK) v//; s/ .*\$//')
+        gatk4: \$(gatk --version | sed -n '/GATK/ { s/^.* v//p }')
     END_VERSIONS
     """
 
     stub:
     """
-    touch ${fasta}.img
-    cat <<-END_VERSIONS > versions.yml
+    touch ${genome_fasta}.img
 
-    "${task.process}":
-        gatk4: \$(echo \$(gatk --version 2>&1) | sed 's/^.*(GATK) v//; s/ .*\$//')
-    END_VERSIONS
+    echo -e '${task.process}:\\n  stub: noversions\\n' > versions.yml
     """
 }

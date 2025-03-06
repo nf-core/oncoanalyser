@@ -661,7 +661,7 @@ workflow WGTS {
             hmf_data.virusbreakend_db,
             hmf_data.virus_taxonomy_db,
             hmf_data.virus_reporting_db,
-            hmf_data.virus_blacklist_db,
+            hmf_data.virus_blocklist_db,
             gridss_config,
         )
 
