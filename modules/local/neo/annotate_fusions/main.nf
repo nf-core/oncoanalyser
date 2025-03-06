@@ -1,4 +1,4 @@
-process ANNOTATE_FUSIONS {
+process NEO_ANNOTATE_FUSIONS {
     tag "${meta.id}"
     label 'process_medium'
 

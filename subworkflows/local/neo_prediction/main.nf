@@ -5,9 +5,9 @@
 import Constants
 import Utils
 
-include { ANNOTATE_FUSIONS } from '../../../modules/local/neo/annotate_fusions/main'
-include { NEO_FINDER       } from '../../../modules/local/neo/finder/main'
-include { NEO_SCORER       } from '../../../modules/local/neo/scorer/main'
+include { NEO_ANNOTATE_FUSIONS } from '../../../modules/local/neo/annotate_fusions/main'
+include { NEO_FINDER           } from '../../../modules/local/neo/finder/main'
+include { NEO_SCORER           } from '../../../modules/local/neo/scorer/main'
 
 workflow NEO_PREDICTION {
     take:
@@ -141,7 +141,7 @@ workflow NEO_PREDICTION {
         }
 
     // Run process
-    ANNOTATE_FUSIONS(
+    NEO_ANNOTATE_FUSIONS(
         ch_isofox_inputs,
         isofox_read_length,
         genome_fasta,
@@ -150,13 +150,13 @@ workflow NEO_PREDICTION {
         ensembl_data_resources,
     )
 
-    ch_versions = ch_versions.mix(ANNOTATE_FUSIONS.out.versions)
+    ch_versions = ch_versions.mix(NEO_ANNOTATE_FUSIONS.out.versions)
 
     // Set outputs, restoring original meta
     // channel: [ meta, annotated_fusions ]
     ch_annotate_fusions_out = Channel.empty()
         .mix(
-            WorkflowOncoanalyser.restoreMeta(ANNOTATE_FUSIONS.out.annotated_fusions, ch_inputs),
+            WorkflowOncoanalyser.restoreMeta(NEO_ANNOTATE_FUSIONS.out.annotated_fusions, ch_inputs),
             ch_isofox_inputs_sorted.skip.map { meta -> [meta, []] },
         )
 

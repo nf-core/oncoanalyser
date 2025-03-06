@@ -5,8 +5,8 @@
 import Constants
 import Utils
 
-// include { LINXREPORT as REPORT           } from '../../../modules/local/linxreport/main'
-include { LINX_VISUALISER as VISUALISER } from '../../../modules/local/linx/visualiser/main'
+//include { LINXREPORT      } from '../../../modules/local/linxreport/main'
+include { LINX_VISUALISER } from '../../../modules/local/linx/visualiser/main'
 
 workflow LINX_PLOTTING {
     take:
@@ -60,13 +60,13 @@ workflow LINX_PLOTTING {
         }
 
     // Run process
-    VISUALISER(
+    LINX_VISUALISER(
         ch_linx_visualiser_inputs,
         genome_version,
         ensembl_data_resources,
     )
 
-    ch_versions = ch_versions.mix(VISUALISER.out.versions)
+    ch_versions = ch_versions.mix(LINX_VISUALISER.out.versions)
 
 //    //
 //    // MODULE: gpgr LINX report
@@ -75,7 +75,7 @@ workflow LINX_PLOTTING {
 //    // channel: [ meta_gpgr, annotation_dir, visualiser_dir ]
 //    ch_gpgr_linx_inputs = WorkflowOncoanalyser.groupByMeta(
 //        ch_inputs_sorted.runnable,
-//        WorkflowOncoanalyser.restoreMeta(VISUALISER.out.plots, ch_inputs),
+//        WorkflowOncoanalyser.restoreMeta(LINX_VISUALISER.out.plots, ch_inputs),
 //    )
 //        .map { meta, annotation_dir, visualiser_dir ->
 //
@@ -89,17 +89,17 @@ workflow LINX_PLOTTING {
 //        }
 //
 //    // Run process
-//    REPORT(
+//    LINXREPORT(
 //        ch_gpgr_linx_inputs,
 //    )
 //
-//    ch_versions = ch_versions.mix(REPORT.out.versions)
+//    ch_versions = ch_versions.mix(LINXREPORT.out.versions)
 
     // Set outputs, restoring original meta
     // channel: [ meta, visualiser_dir ]
     ch_visualiser_dir_out = Channel.empty()
         .mix(
-            WorkflowOncoanalyser.restoreMeta(VISUALISER.out.plots, ch_inputs),
+            WorkflowOncoanalyser.restoreMeta(LINX_VISUALISER.out.plots, ch_inputs),
             ch_inputs_sorted.skip.map { meta -> [meta, []] },
         )
 
