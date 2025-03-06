@@ -249,6 +249,7 @@ workflow TARGETED {
         )
 
         ch_versions = ch_versions.mix(AMBER_PROFILING.out.versions)
+
         ch_amber_out = ch_amber_out.mix(AMBER_PROFILING.out.amber_dir)
 
     } else {
