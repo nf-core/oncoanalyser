@@ -39,6 +39,7 @@ process FASTP {
         --in2 ${reads_rev} \\
         ${umi_args} \\
         ${split_by_lines_arg} \\
+        --thread ${task.cpus} \\
         --out1 ${meta.sample_id}_${meta.library_id}_${meta.lane}_R1.fastp.fastq.gz \\
         --out2 ${meta.sample_id}_${meta.library_id}_${meta.lane}_R2.fastp.fastq.gz
 
