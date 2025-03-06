@@ -37,10 +37,6 @@ process FASTP {
         ${args} \\
         --in1 ${reads_fwd} \\
         --in2 ${reads_rev} \\
-        --disable_quality_filtering \\
-        --disable_length_filtering \\
-        --disable_adapter_trimming \\
-        --disable_trim_poly_g \\
         ${umi_args} \\
         ${split_by_lines_arg} \\
         --out1 ${meta.sample_id}_${meta.library_id}_${meta.lane}_R1.fastp.fastq.gz \\
