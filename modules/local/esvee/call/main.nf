@@ -17,11 +17,11 @@ process ESVEE_CALL {
     path repeatmasker_annotations
 
     output:
-    tuple val(meta), path("caller/"), emit: caller_dir
+    tuple val(meta), path("caller/")                                                                                                     , emit: caller_dir
     tuple val(meta), path("caller/${meta.tumor_id}.esvee.unfiltered.vcf.gz"), path("caller/${meta.tumor_id}.esvee.unfiltered.vcf.gz.tbi"), emit: unfiltered_vcf
-    tuple val(meta), path("caller/${meta.tumor_id}.esvee.somatic.vcf.gz"),    path("caller/${meta.tumor_id}.esvee.somatic.vcf.gz.tbi"),    emit: somatic_vcf
-    tuple val(meta), path("caller/${meta.tumor_id}.esvee.germline.vcf.gz"),   path("caller/${meta.tumor_id}.esvee.germline.vcf.gz.tbi"),   emit: germline_vcf, optional: true
-    path 'versions.yml', emit: versions
+    tuple val(meta), path("caller/${meta.tumor_id}.esvee.somatic.vcf.gz"),    path("caller/${meta.tumor_id}.esvee.somatic.vcf.gz.tbi")   , emit: somatic_vcf
+    tuple val(meta), path("caller/${meta.tumor_id}.esvee.germline.vcf.gz"),   path("caller/${meta.tumor_id}.esvee.germline.vcf.gz.tbi")  , emit: germline_vcf, optional: true
+    path 'versions.yml'                                                                                                                  , emit: versions
 
     when:
     task.ext.when == null || task.ext.when

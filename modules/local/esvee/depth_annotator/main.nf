@@ -14,9 +14,9 @@ process ESVEE_DEPTH_ANNOTATOR {
     path unmap_regions
 
     output:
-    tuple val(meta), path("depth_annotation/")                                           , emit: depth_annotation_dir
-    tuple val(meta), path("depth_annotation/${meta.tumor_id}.esvee.ref_depth.vcf.gz")    , emit: ref_depth_vcf
-    path 'versions.yml'                                                                  , emit: versions
+    tuple val(meta), path("depth_annotation/")                                       , emit: depth_annotation_dir
+    tuple val(meta), path("depth_annotation/${meta.tumor_id}.esvee.ref_depth.vcf.gz"), emit: ref_depth_vcf
+    path 'versions.yml'                                                              , emit: versions
 
     when:
     task.ext.when == null || task.ext.when
