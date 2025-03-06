@@ -29,18 +29,17 @@ process NEO_FINDER {
     """
     mkdir -p neo_finder/
 
-    java \\
+    neo \\
         -Xmx${Math.round(task.memory.bytes * xmx_mod)} \\
-        -jar ${task.ext.jarPath} \\
-            ${args} \\
-            -sample ${meta.sample_id} \\
-            -linx_dir ${linx_annotation_dir} \\
-            -somatic_vcf ${purple_dir}/${meta.sample_id}.purple.somatic.vcf.gz \\
-            -ref_genome ${genome_fasta} \\
-            -ref_genome_version ${genome_ver} \\
-            -ensembl_data_dir ${ensembl_data_resources} \\
-            -log_debug \\
-            -output_dir neo_finder/
+        ${args} \\
+        -sample ${meta.sample_id} \\
+        -linx_dir ${linx_annotation_dir} \\
+        -somatic_vcf ${purple_dir}/${meta.sample_id}.purple.somatic.vcf.gz \\
+        -ref_genome ${genome_fasta} \\
+        -ref_genome_version ${genome_ver} \\
+        -ensembl_data_dir ${ensembl_data_resources} \\
+        -log_debug \\
+        -output_dir neo_finder/
 
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":
@@ -54,4 +53,3 @@ process NEO_FINDER {
     echo -e '${task.process}:\\n  stub: noversions\\n' > versions.yml
     """
 }
-

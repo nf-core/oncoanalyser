@@ -116,60 +116,51 @@ process ORANGE {
         mkdir -p ${plot_dir}/;
     fi;
 
-    # NOTE(SW): '--add-opens java.base/java.time=ALL-UNNAMED' resolves issue writing JSON, see:
-    # https://stackoverflow.com/questions/70412805/what-does-this-error-mean-java-lang-reflect-inaccessibleobjectexception-unable/70878195#70878195
-
     # NOTE(SW): DOID label: 162 [cancer]; Hartwig cohort group: unknown
 
     mkdir -p output/
 
-    # NOTE(SW): manually locating ORANGE install directory so that we can applu `--add-opens`, won't fix old bioconda recipe
-    orange_install_dir=\$(which orange | xargs realpath | xargs dirname)
-    orange_jar=\${orange_install_dir}/orange.jar
-
-    java \\
-        --add-opens java.base/java.time=ALL-UNNAMED \\
+    orange \\
         -Xmx${Math.round(task.memory.bytes * xmx_mod)} \\
-        -jar \${orange_jar} \\
-            ${args} \\
-            \\
-            -add_disclaimer \\
-            -pipeline_version_file pipeline_version.txt \\
-            -experiment_type ${experiment_type} \\
-            \\
-            -tumor_sample_id ${meta.tumor_id} \\
-            -primary_tumor_doids ${doid_arg} \\
-            -sage_dir ${sage_somatic_dir} \\
-            -purple_dir \${purple_dir_local} \\
-            -purple_plot_dir \${purple_dir_local}/plot/ \\
-            -linx_dir ${linx_somatic_anno_dir} \\
-            -linx_plot_dir ${plot_dir}/ \\
-            ${virus_dir_arg} \\
-            ${lilac_dir_arg} \\
-            ${chord_dir_arg} \\
-            ${sigs_dir_arg} \\
-            ${cuppa_dir_arg} \\
-            \\
-            ${normal_id_arg} \\
-            ${normal_metrics_arg} \\
-            ${tumor_metrics_arg} \\
-            ${normal_sage_dir} \\
-            ${normal_linx_arg} \\
-            \\
-            ${rna_id_arg} \\
-            ${isofox_dir_arg} \\
-            \\
-            -ref_genome_version ${genome_ver} \\
-            -doid_json ${disease_ontology} \\
-            -cohort_mapping_tsv ${cohort_mapping} \\
-            -cohort_percentiles_tsv ${cohort_percentiles} \\
-            -known_fusion_file ${known_fusion_data} \\
-            -driver_gene_panel ${driver_gene_panel} \\
-            -signatures_etiology_tsv ${sigs_etiology} \\
-            -ensembl_data_dir ${ensembl_data_resources} \\
-            ${isofox_gene_distribution_arg} \\
-            ${isofox_alt_sj_arg} \\
-            -output_dir output/
+        ${args} \\
+        \\
+        -add_disclaimer \\
+        -pipeline_version_file pipeline_version.txt \\
+        -experiment_type ${experiment_type} \\
+        \\
+        -tumor_sample_id ${meta.tumor_id} \\
+        -primary_tumor_doids ${doid_arg} \\
+        -sage_dir ${sage_somatic_dir} \\
+        -purple_dir \${purple_dir_local} \\
+        -purple_plot_dir \${purple_dir_local}/plot/ \\
+        -linx_dir ${linx_somatic_anno_dir} \\
+        -linx_plot_dir ${plot_dir}/ \\
+        ${virus_dir_arg} \\
+        ${lilac_dir_arg} \\
+        ${chord_dir_arg} \\
+        ${sigs_dir_arg} \\
+        ${cuppa_dir_arg} \\
+        \\
+        ${normal_id_arg} \\
+        ${normal_metrics_arg} \\
+        ${tumor_metrics_arg} \\
+        ${normal_sage_dir} \\
+        ${normal_linx_arg} \\
+        \\
+        ${rna_id_arg} \\
+        ${isofox_dir_arg} \\
+        \\
+        -ref_genome_version ${genome_ver} \\
+        -doid_json ${disease_ontology} \\
+        -cohort_mapping_tsv ${cohort_mapping} \\
+        -cohort_percentiles_tsv ${cohort_percentiles} \\
+        -known_fusion_file ${known_fusion_data} \\
+        -driver_gene_panel ${driver_gene_panel} \\
+        -signatures_etiology_tsv ${sigs_etiology} \\
+        -ensembl_data_dir ${ensembl_data_resources} \\
+        ${isofox_gene_distribution_arg} \\
+        ${isofox_alt_sj_arg} \\
+        -output_dir output/
 
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":

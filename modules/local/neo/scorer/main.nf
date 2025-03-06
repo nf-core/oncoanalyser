@@ -43,24 +43,23 @@ process NEO_SCORER {
 
     mkdir -p neo_scorer/
 
-    java \\
+    neo \\
         -Xmx${Math.round(task.memory.bytes * xmx_mod)} \\
-        -cp ${task.ext.jarPath} \\
         com.hartwig.hmftools.neo.score.NeoScorer \\
-            ${args} \\
-            -sample ${meta.sample_id} \\
-            ${cancer_type_arg} \\
-            ${rna_sample_arg} \\
-            \${isofox_dir_arg} \\
-            -purple_dir ${purple_dir} \\
-            ${rna_somatic_vcf_arg} \\
-            -lilac_dir ${lilac_dir} \\
-            -neo_dir ${neo_finder_dir} \\
-            -ensembl_data_dir ${ensembl_data_resources} \\
-            -score_file_dir ${neo_resources} \\
-            -cancer_tpm_medians_file ${cohort_tpm_medians} \\
-            -log_debug \\
-            -output_dir neo_scorer/
+        ${args} \\
+        -sample ${meta.sample_id} \\
+        ${cancer_type_arg} \\
+        ${rna_sample_arg} \\
+        \${isofox_dir_arg} \\
+        -purple_dir ${purple_dir} \\
+        ${rna_somatic_vcf_arg} \\
+        -lilac_dir ${lilac_dir} \\
+        -neo_dir ${neo_finder_dir} \\
+        -ensembl_data_dir ${ensembl_data_resources} \\
+        -score_file_dir ${neo_resources} \\
+        -cancer_tpm_medians_file ${cohort_tpm_medians} \\
+        -log_debug \\
+        -output_dir neo_scorer/
 
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":
