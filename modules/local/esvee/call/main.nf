@@ -29,13 +29,15 @@ process ESVEE_CALL {
     script:
     def args = task.ext.args ?: ''
 
+    def xmx_mod = task.ext.xmx_mod ?: 0.95
+
     def reference_arg = meta.normal_id != null ? "-reference ${meta.normal_id}" : ""
 
     """
     mkdir -p caller/
 
     esvee com.hartwig.hmftools.esvee.caller.CallerApplication \\
-        -Xmx${Math.round(task.memory.bytes * 0.95)} \\
+        -Xmx${Math.round(task.memory.bytes * xmx_mod)} \\
         ${args} \\
         -sample ${meta.tumor_id} \\
         ${reference_arg} \\

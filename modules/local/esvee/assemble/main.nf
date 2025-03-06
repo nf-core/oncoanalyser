@@ -27,6 +27,8 @@ process ESVEE_ASSEMBLE {
     script:
     def args = task.ext.args ?: ''
 
+    def xmx_mod = task.ext.xmx_mod ?: 0.95
+
     def reference_arg = meta.normal_id != null ? "-reference ${meta.normal_id}" : ""
     def reference_bam_arg = meta.normal_id != null ? "-reference_bam ${normal_prep_bam}" : ""
 
@@ -36,7 +38,7 @@ process ESVEE_ASSEMBLE {
     mkdir -p assemble/
 
     esvee com.hartwig.hmftools.esvee.assembly.AssemblyApplication \\
-        -Xmx${Math.round(task.memory.bytes * 0.95)} \\
+        -Xmx${Math.round(task.memory.bytes * xmx_mod)} \\
         ${args} \\
         -tumor ${meta.tumor_id} \\
         -tumor_bam ${tumor_prep_bam} \\

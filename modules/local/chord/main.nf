@@ -23,6 +23,8 @@ process CHORD {
     script:
     def args = task.ext.args ?: ''
 
+    def xmx_mod = task.ext.xmx_mod ?: 0.95
+
     """
     ## NOTE(LN): The CHORD jar runs an embedded R script using 'com.hartwig.hmftools.common.utils.r.RExecutor' which requires absolute
     ## paths. Relative paths don't work because RExecutor executes from a tmp dir, and not the working dir of this nextflow process
@@ -30,7 +32,7 @@ process CHORD {
     mkdir -p chord/
 
     chord \\
-        -Xmx${Math.round(task.memory.bytes * 0.95)} \\
+        -Xmx${Math.round(task.memory.bytes * xmx_mod)} \\
         ${args} \\
         -sample ${meta.sample_id} \\
         -snv_indel_vcf_file \$(realpath ${smlv_vcf}) \\

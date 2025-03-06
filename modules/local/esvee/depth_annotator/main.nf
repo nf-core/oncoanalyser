@@ -24,6 +24,8 @@ process ESVEE_DEPTH_ANNOTATOR {
     script:
     def args = task.ext.args ?: ''
 
+    def xmx_mod = task.ext.xmx_mod ?: 0.75
+
     def sample_ids = [meta.tumor_id]
     def bam_files = [tumor_bam.toString()]
 
@@ -39,7 +41,7 @@ process ESVEE_DEPTH_ANNOTATOR {
     mkdir -p depth_annotation/
 
     esvee com.hartwig.hmftools.esvee.depth.DepthAnnotator \\
-        -Xmx${Math.round(task.memory.bytes * 0.75)} \\
+        -Xmx${Math.round(task.memory.bytes * xmx_mod)} \\
         ${args} \\
         -sample ${sample_ids_string} \\
         -bam_file ${bam_files_string} \\

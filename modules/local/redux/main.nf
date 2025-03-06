@@ -31,6 +31,8 @@ process REDUX {
     script:
     def args = task.ext.args ?: ''
 
+    def xmx_mod = task.ext.xmx_mod ?: 0.95
+
     def form_consensus_arg = umi_enable ? '' : '-form_consensus'
 
     def umi_args_list = []
@@ -40,7 +42,7 @@ process REDUX {
 
     """
     redux \\
-        -Xmx${Math.round(task.memory.bytes * 0.95)} \\
+        -Xmx${Math.round(task.memory.bytes * xmx_mod)} \\
         ${args} \\
         -sample ${meta.sample_id} \\
         -input_bam ${bams.join(',')} \\

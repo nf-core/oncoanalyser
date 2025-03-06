@@ -23,6 +23,8 @@ process NEO_SCORER {
     script:
     def args = task.ext.args ?: ''
 
+    def xmx_mod = task.ext.xmx_mod ?: 0.95
+
     def rna_sample_arg = meta.containsKey('sample_rna_id') ? "-rna_sample ${meta.sample_rna_id}" : ''
     def rna_somatic_vcf_arg = meta.containsKey('sample_rna_id') ? "-rna_somatic_vcf ${sage_vcf}" : ''
 
@@ -42,7 +44,7 @@ process NEO_SCORER {
     mkdir -p neo_scorer/
 
     java \\
-        -Xmx${Math.round(task.memory.bytes * 0.95)} \\
+        -Xmx${Math.round(task.memory.bytes * xmx_mod)} \\
         -cp ${task.ext.jarPath} \\
         com.hartwig.hmftools.neo.score.NeoScorer \\
             ${args} \\
