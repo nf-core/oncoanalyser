@@ -57,7 +57,7 @@ process BWAMEM2_ALIGN {
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":
         bwa-mem2: \$(bwa-mem2 version 2>/dev/null)
-        sambamba: \$(sambamba --version 2>&1 | egrep '^sambamba' | head -n 1 | awk '{ print \$NF }')
+        sambamba: \$(sambamba --version 2>&1 | sed -n '/^sambamba / { s/^.* //p }' | head -n1)
     END_VERSIONS
     """
 

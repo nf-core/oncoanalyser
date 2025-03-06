@@ -1,4 +1,4 @@
-process ANNOTATE_FUSIONS {
+process NEO_ANNOTATE_FUSIONS {
     tag "${meta.id}"
     label 'process_medium'
 
@@ -25,11 +25,13 @@ process ANNOTATE_FUSIONS {
     script:
     def args = task.ext.args ?: ''
 
+    def xmx_mod = task.ext.xmx_mod ?: 0.95
+
     """
     mkdir -p isofox/
 
     isofox \\
-        -Xmx${Math.round(task.memory.bytes * 0.95)} \\
+        -Xmx${Math.round(task.memory.bytes * xmx_mod)} \\
         ${args} \\
         -sample ${meta.sample_id} \\
         -bam_file ${bam} \\
@@ -44,7 +46,7 @@ process ANNOTATE_FUSIONS {
 
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":
-        isofox: \$(isofox -version | sed 's/^.* //')
+        isofox: \$(isofox -version | sed -n '/^Isofox version / { s/^.* //p }')
     END_VERSIONS
     """
 

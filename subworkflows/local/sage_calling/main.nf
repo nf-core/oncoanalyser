@@ -7,8 +7,8 @@ import Utils
 
 import java.nio.channels.Channel
 
-include { SAGE_GERMLINE as GERMLINE } from '../../../modules/local/sage/germline/main'
-include { SAGE_SOMATIC as SOMATIC   } from '../../../modules/local/sage/somatic/main'
+include { SAGE_GERMLINE } from '../../../modules/local/sage/germline/main'
+include { SAGE_SOMATIC  } from '../../../modules/local/sage/somatic/main'
 
 workflow SAGE_CALLING {
     take:
@@ -129,7 +129,7 @@ workflow SAGE_CALLING {
         }
 
     // Run process
-    GERMLINE(
+    SAGE_GERMLINE(
         ch_sage_germline_inputs,
         genome_fasta,
         genome_version,
@@ -142,7 +142,7 @@ workflow SAGE_CALLING {
         ensembl_data_resources,
     )
 
-    ch_versions = ch_versions.mix(GERMLINE.out.versions)
+    ch_versions = ch_versions.mix(SAGE_GERMLINE.out.versions)
 
     //
     // MODULE: SAGE somatic
@@ -185,7 +185,7 @@ workflow SAGE_CALLING {
         }
 
     // Run process
-    SOMATIC(
+    SAGE_SOMATIC(
         ch_sage_somatic_inputs,
         genome_fasta,
         genome_version,
@@ -198,13 +198,13 @@ workflow SAGE_CALLING {
         ensembl_data_resources,
     )
 
-    ch_versions = ch_versions.mix(SOMATIC.out.versions)
+    ch_versions = ch_versions.mix(SAGE_SOMATIC.out.versions)
 
     // Set outputs, restoring original meta
     // channel: [ meta, sage_vcf, sage_tbi ]
     ch_somatic_vcf_out = Channel.empty()
         .mix(
-            WorkflowOncoanalyser.restoreMeta(SOMATIC.out.vcf, ch_inputs),
+            WorkflowOncoanalyser.restoreMeta(SAGE_SOMATIC.out.vcf, ch_inputs),
             ch_inputs_somatic_sorted.skip.map { meta -> [meta, [], []] },
             ch_inputs_sorted.skip.map { meta -> [meta, [], []] },
         )
@@ -212,7 +212,7 @@ workflow SAGE_CALLING {
     // channel: [ meta, sage_vcf, sage_tbi ]
     ch_germline_vcf_out = Channel.empty()
         .mix(
-            WorkflowOncoanalyser.restoreMeta(GERMLINE.out.vcf, ch_inputs),
+            WorkflowOncoanalyser.restoreMeta(SAGE_GERMLINE.out.vcf, ch_inputs),
             ch_inputs_germline_sorted.skip.map { meta -> [meta, [], []] },
             ch_inputs_sorted.skip.map { meta -> [meta, [], []] },
         )
@@ -220,7 +220,7 @@ workflow SAGE_CALLING {
     // channel: [ meta, sage_dir ]
     ch_somatic_dir = Channel.empty()
         .mix(
-            WorkflowOncoanalyser.restoreMeta(SOMATIC.out.sage_dir, ch_inputs),
+            WorkflowOncoanalyser.restoreMeta(SAGE_SOMATIC.out.sage_dir, ch_inputs),
             ch_inputs_somatic_sorted.skip.map { meta -> [meta, []] },
             ch_inputs_sorted.skip.map { meta -> [meta, []] },
         )
@@ -228,7 +228,7 @@ workflow SAGE_CALLING {
     // channel: [ meta, sage_dir ]
     ch_germline_dir = Channel.empty()
         .mix(
-            WorkflowOncoanalyser.restoreMeta(GERMLINE.out.sage_dir, ch_inputs),
+            WorkflowOncoanalyser.restoreMeta(SAGE_GERMLINE.out.sage_dir, ch_inputs),
             ch_inputs_germline_sorted.skip.map { meta -> [meta, []] },
             ch_inputs_sorted.skip.map { meta -> [meta, []] },
         )

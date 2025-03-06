@@ -29,7 +29,7 @@ process SAMBAMBA_MERGE {
 
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":
-        sambamba: \$(sambamba --version 2>&1 | grep -m1 sambamba | sed 's/^sambamba //')
+        sambamba: \$(sambamba --version 2>&1 | sed -n '/^sambamba / { s/^.* //p }' | head -n1)
     END_VERSIONS
     """
 

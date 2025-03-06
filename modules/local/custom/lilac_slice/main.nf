@@ -34,7 +34,7 @@ process CUSTOM_SLICE {
 
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":
-        samtools: \$(echo \$(samtools --version 2>&1) | sed 's/^.*samtools //; s/Using.*\$//')
+        samtools: \$(samtools --version | sed -n '/^samtools / { s/^.* //p }')
     END_VERSIONS
     """
 

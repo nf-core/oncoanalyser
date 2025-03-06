@@ -70,7 +70,7 @@ process PAVE_SOMATIC {
 
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":
-        pave: \$(pave -version | sed 's/^.* //')
+        pave: \$(pave -version | sed -n '/^Pave version / { s/^.* //p }')
     END_VERSIONS
     """
 

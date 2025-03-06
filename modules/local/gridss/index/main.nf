@@ -51,7 +51,7 @@ process GRIDSS_INDEX {
 
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":
-        gridss: \$(CallVariants --version 2>&1 | sed 's/-gridss\$//')
+        gridss: \$(CallVariants --version 2>&1 | sed -n '/-gridss\$/ { s/-gridss//p }')
     END_VERSIONS
     """
 

@@ -26,6 +26,8 @@ process ESVEE_PREP {
     script:
     def args = task.ext.args ?: ''
 
+    def xmx_mod = task.ext.xmx_mod ?: 0.75
+
     def sample_ids = [meta.tumor_id]
     def bam_files = [tumor_bam.toString()]
 
@@ -43,7 +45,7 @@ process ESVEE_PREP {
     SAMBAMBA_PATH=\$(which sambamba)
 
     esvee com.hartwig.hmftools.esvee.prep.PrepApplication \\
-        -Xmx${Math.round(task.memory.bytes * 0.75)} \\
+        -Xmx${Math.round(task.memory.bytes * xmx_mod)} \\
         ${args} \\
         -sample "${sample_ids_string}" \\
         -bam_file "${bam_files_string}" \\
@@ -59,7 +61,7 @@ process ESVEE_PREP {
 
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":
-        esvee: \$(esvee -version | grep 'Esvee version' | sed 's/^.* //')
+        esvee: \$(esvee -version | sed -n '/^Esvee version/ { s/^.* //p }')
     END_VERSIONS
     """
 

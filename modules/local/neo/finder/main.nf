@@ -24,11 +24,13 @@ process NEO_FINDER {
     script:
     def args = task.ext.args ?: ''
 
+    def xmx_mod = task.ext.xmx_mod ?: 0.95
+
     """
     mkdir -p neo_finder/
 
     neo \\
-        -Xmx${Math.round(task.memory.bytes * 0.95)} \\
+        -Xmx${Math.round(task.memory.bytes * xmx_mod)} \\
         ${args} \\
         -sample ${meta.sample_id} \\
         -linx_dir ${linx_annotation_dir} \\

@@ -1,4 +1,4 @@
-name: annotate_fusions
+name: neo_annotate_fusions
 description: Annotate neoeptitopes with RNA fusion data
 keywords:
   - neoepitopes
