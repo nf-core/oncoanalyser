@@ -59,9 +59,9 @@ process CUSTOM_REALIGNREADS {
 
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":
-        bwa-mem2: \$(bwa-mem2 version 2>/dev/null)
-        samtools: \$(echo \$(samtools --version 2>&1) | sed 's/^.*samtools //; s/Using.*\$//')
-        sambamba: \$(sambamba --version 2>&1 | egrep '^sambamba' | head -n 1 | awk '{ print \$NF }')
+        bwa-mem2: \$(bwa-mem2 version)
+        sambamba: \$(sambamba --version 2>&1 | sed -n '/^sambamba / { s/^.* //p }' | head -n1)
+        samtools: \$(samtools --version | sed -n '/^samtools / { s/^.* //p }')
     END_VERSIONS
     """
 

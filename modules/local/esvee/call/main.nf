@@ -51,7 +51,7 @@ process ESVEE_CALL {
 
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":
-        esvee: \$(esvee -version | grep -m1 'Esvee version' | sed 's/^.* //')
+        esvee: \$(esvee -version | sed -n '/^Esvee version/ { s/^.* //p }')
     END_VERSIONS
     """
 

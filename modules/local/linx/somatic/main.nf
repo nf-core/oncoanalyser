@@ -43,7 +43,7 @@ process LINX_SOMATIC {
 
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":
-        linx: \$(linx -version | sed 's/^.* //')
+        linx: \$(linx -version | sed -n '/^Linx version / { s/^.* //p }')
     END_VERSIONS
     """
 

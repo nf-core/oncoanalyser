@@ -62,7 +62,7 @@ process NEO_SCORER {
 
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":
-        neo: \$(java -jar ${task.ext.jarPath} -version | sed 's/^.* //')
+        neo: \$(neo -version | sed -n '/^Neo version / { s/^.* //p }')
     END_VERSIONS
     """
 

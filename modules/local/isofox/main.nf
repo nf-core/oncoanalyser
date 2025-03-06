@@ -64,7 +64,7 @@ process ISOFOX {
 
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":
-        isofox: \$(isofox -version | sed 's/^.* //')
+        isofox: \$(isofox -version | sed -n '/^Isofox version / { s/^.* //p }')
     END_VERSIONS
     """
 

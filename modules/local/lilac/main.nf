@@ -51,7 +51,7 @@ process LILAC {
 
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":
-        lilac: \$(lilac -version | sed 's/^.* //')
+        lilac: \$(lilac -version | sed -n '/^Lilac version / { s/^.* //p }')
     END_VERSIONS
     """
 

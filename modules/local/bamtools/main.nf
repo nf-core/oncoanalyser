@@ -41,7 +41,7 @@ process BAMTOOLS {
 
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":
-        bamtools: \$(bamtools -version | sed 's/^.* //')
+        bamtools: \$(bamtools -version | sed -n '/^BamTools version/ { s/^.* //p }')
     END_VERSIONS
     """
 

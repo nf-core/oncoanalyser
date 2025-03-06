@@ -76,7 +76,7 @@ process SAGE_SOMATIC {
 
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":
-        sage: \$(sage -version | sed 's/^.* //')
+        sage: \$(sage -version | sed -n '/^Sage version / { s/^.* //p }')
     END_VERSIONS
     """
 

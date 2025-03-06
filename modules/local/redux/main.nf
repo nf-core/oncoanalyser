@@ -59,8 +59,8 @@ process REDUX {
 
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":
-        redux: \$(redux -version | awk '{ print \$NF }')
-        sambamba: \$(sambamba --version 2>&1 | egrep '^sambamba' | head -n 1 | awk '{ print \$NF }')
+        redux: \$(redux -version | sed -n '/^Redux version/ { s/^.* //p }')
+        samtools: \$(samtools --version | sed -n '/^samtools / { s/^.* //p }')
     END_VERSIONS
     """
 

@@ -41,7 +41,7 @@ process CHORD {
 
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":
-        chord: \$(chord -version | awk '{ print \$NF }')
+        chord: \$(chord -version | sed -n '/^CHORD version/ { s/^.* //p }')
     END_VERSIONS
 
     """
