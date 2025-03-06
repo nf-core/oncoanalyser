@@ -26,15 +26,15 @@ process CUPPA {
 
     def xmx_mod = task.ext.xmx_mod ?: 0.75
 
-    def isofox_dir_arg = isofox_dir ? "-isofox_dir ${isofox_dir}" : ""
+    def isofox_dir_arg = isofox_dir ? "-isofox_dir isofox_dir__prepared/" : ""
     def ref_alt_sj_sites_arg = isofox_dir ? "-ref_alt_sj_sites ${cuppa_alt_sj}" : ""
 
     """
-    if [[ -d "${isofox_dir}" ]]; then
+    if [[ -n "${isofox_dir}" ]]; then
         # NOTE(SW): CUPPA requires that the RNA sample name matches the DNA sample name
-        for file_path in \$(find -L ${isofox_dir} -maxdepth 1 -type f -exec realpath {} \\;); do
-            new_file_name=\$(basename \${file_path} | sed 's/^${meta.sample_rna_id}/${meta.sample_id}/')
-            ln -sf \${file_path} ${isofox_dir}/\${new_file_name}
+        mkdir -p isofox_dir__prepared/
+        for fp in ${isofox_dir}/*; do
+            cp -L \${fp} isofox_dir__prepared/\$(sed 's/${meta.sample_rna_id}/${meta.sample_id}/' <<< \${fp##*/});
         done;
     fi;
 
