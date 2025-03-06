@@ -5,8 +5,8 @@
 import Constants
 import Utils
 
-include { LINX_GERMLINE as GERMLINE } from '../../../modules/local/linx/germline/main'
-include { LINX_SOMATIC as SOMATIC   } from '../../../modules/local/linx/somatic/main'
+include { LINX_GERMLINE } from '../../../modules/local/linx/germline/main'
+include { LINX_SOMATIC  } from '../../../modules/local/linx/somatic/main'
 
 workflow LINX_ANNOTATION {
     take:
@@ -80,14 +80,14 @@ workflow LINX_ANNOTATION {
         }
 
     // Run process
-    GERMLINE(
+    LINX_GERMLINE(
         ch_linx_germline_inputs,
         genome_version,
         ensembl_data_resources,
         driver_gene_panel,
     )
 
-    ch_versions = ch_versions.mix(GERMLINE.out.versions)
+    ch_versions = ch_versions.mix(LINX_GERMLINE.out.versions)
 
     //
     // MODULE: LINX somatic annotation
@@ -121,7 +121,7 @@ workflow LINX_ANNOTATION {
         }
 
     // Run process
-    SOMATIC(
+    LINX_SOMATIC(
         ch_linx_somatic_inputs,
         genome_version,
         ensembl_data_resources,
@@ -129,21 +129,21 @@ workflow LINX_ANNOTATION {
         driver_gene_panel,
     )
 
-    ch_versions = ch_versions.mix(SOMATIC.out.versions)
+    ch_versions = ch_versions.mix(LINX_SOMATIC.out.versions)
 
 
     // Set outputs, restoring original meta
     // channel: [ meta, linx_annotation_dir ]
     ch_somatic_out = Channel.empty()
         .mix(
-            WorkflowOncoanalyser.restoreMeta(SOMATIC.out.annotation_dir, ch_inputs),
+            WorkflowOncoanalyser.restoreMeta(LINX_SOMATIC.out.annotation_dir, ch_inputs),
             ch_inputs_somatic_sorted.skip.map { meta -> [meta, []] },
             ch_inputs_sorted.skip.map { meta -> [meta, []] },
         )
 
     ch_germline_out = Channel.empty()
         .mix(
-            WorkflowOncoanalyser.restoreMeta(GERMLINE.out.annotation_dir, ch_inputs),
+            WorkflowOncoanalyser.restoreMeta(LINX_GERMLINE.out.annotation_dir, ch_inputs),
             ch_inputs_germline_sorted.skip.map { meta -> [meta, []] },
             ch_inputs_sorted.skip.map { meta -> [meta, []] },
         )

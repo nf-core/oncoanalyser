@@ -5,8 +5,8 @@
 import Constants
 import Utils
 
-include { PAVE_GERMLINE as GERMLINE } from '../../../modules/local/pave/germline/main'
-include { PAVE_SOMATIC as SOMATIC   } from '../../../modules/local/pave/somatic/main'
+include { PAVE_GERMLINE } from '../../../modules/local/pave/germline/main'
+include { PAVE_SOMATIC  } from '../../../modules/local/pave/somatic/main'
 
 workflow PAVE_ANNOTATION {
     take:
@@ -71,7 +71,7 @@ workflow PAVE_ANNOTATION {
         }
 
     // Run process
-    GERMLINE(
+    PAVE_GERMLINE(
         ch_pave_germline_inputs,
         genome_fasta,
         genome_version,
@@ -85,7 +85,7 @@ workflow PAVE_ANNOTATION {
         gnomad_resource,
     )
 
-    ch_versions = ch_versions.mix(GERMLINE.out.versions)
+    ch_versions = ch_versions.mix(PAVE_GERMLINE.out.versions)
 
     //
     // MODULE: PAVE somatic
@@ -125,7 +125,7 @@ workflow PAVE_ANNOTATION {
         }
 
     // Run process
-    SOMATIC(
+    PAVE_SOMATIC(
         ch_pave_somatic_inputs,
         genome_fasta,
         genome_version,
@@ -139,19 +139,19 @@ workflow PAVE_ANNOTATION {
         gnomad_resource,
     )
 
-    ch_versions = ch_versions.mix(SOMATIC.out.versions)
+    ch_versions = ch_versions.mix(PAVE_SOMATIC.out.versions)
 
     // Set outputs, restoring original meta
     // channel: [ meta, pave_vcf ]
     ch_somatic_out = Channel.empty()
         .mix(
-            WorkflowOncoanalyser.restoreMeta(SOMATIC.out.vcf, ch_inputs),
+            WorkflowOncoanalyser.restoreMeta(PAVE_SOMATIC.out.vcf, ch_inputs),
             ch_sage_somatic_inputs_sorted.skip.map { meta -> [meta, []] },
         )
 
     ch_germline_out = Channel.empty()
         .mix(
-            WorkflowOncoanalyser.restoreMeta(GERMLINE.out.vcf, ch_inputs),
+            WorkflowOncoanalyser.restoreMeta(PAVE_GERMLINE.out.vcf, ch_inputs),
             ch_sage_germline_inputs_sorted.skip.map { meta -> [meta, []] },
         )
 
