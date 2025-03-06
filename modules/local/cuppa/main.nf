@@ -23,18 +23,24 @@ process CUPPA {
 
     script:
     def args = task.ext.args ?: ''
+    def args2 = task.ext.args2 ?: ''
 
     def xmx_mod = task.ext.xmx_mod ?: 0.75
 
-    def isofox_dir_arg = isofox_dir ? "-isofox_dir isofox_dir__prepared/" : ""
+    def isofox_dir_name = categories == 'ALL' ? 'isofox_dir__prepared' : isofox_dir
+    def isofox_dir_arg = isofox_dir ? "-isofox_dir ${isofox_dir_name}" : ""
     def ref_alt_sj_sites_arg = isofox_dir ? "-ref_alt_sj_sites ${cuppa_alt_sj}" : ""
 
+    def purple_dir_arg = purple_dir ? "-purple_dir ${purple_dir}" : ''
+    def linx_dir_arg = linx_dir ? "-linx_dir ${linx_dir}" : ''
+    def virusinterpreter_dir_arg = virusinterpreter_dir ? "-virus_dir ${virusinterpreter_dir}" : ''
+
     """
-    if [[ -n "${isofox_dir}" ]]; then
-        # NOTE(SW): CUPPA requires that the RNA sample name matches the DNA sample name
-        mkdir -p isofox_dir__prepared/
+    if [[ -n "${isofox_dir}" && "${categories}" == 'ALL' ]]; then
+        # NOTE(SW): when DNA and RNA inputs are provide the DNA sample ID must be used in all filenames
+        mkdir -p ${isofox_dir_name}/;
         for fp in ${isofox_dir}/*; do
-            cp -L \${fp} isofox_dir__prepared/\$(sed 's/${meta.sample_rna_id}/${meta.sample_id}/' <<< \${fp##*/});
+            cp -L \${fp} ${isofox_dir_name}/\$(sed 's/${meta.sample_rna_id}/${meta.sample_id}/' <<< \${fp##*/});
         done;
     fi;
 
@@ -47,21 +53,22 @@ process CUPPA {
         ${args} \\
         -sample ${meta.sample_id} \\
         -categories ${categories} \\
-        -ref_genome_version ${genome_ver} \\
-        -output_dir cuppa/ \\
-        -purple_dir ${purple_dir} \\
-        -linx_dir ${linx_dir} \\
-        -virus_dir ${virusinterpreter_dir} \\
+        ${purple_dir_arg} \\
+        ${linx_dir_arg} \\
+        ${virusinterpreter_dir_arg} \\
         ${isofox_dir_arg} \\
-        ${ref_alt_sj_sites_arg}
+        ${ref_alt_sj_sites_arg} \\
+        -ref_genome_version ${genome_ver} \\
+        -output_dir cuppa/
 
     # Make predictions
     python -m cuppa.predict \\
+        ${args2} \\
         --sample_id ${meta.sample_id} \\
-        --classifier_path ${cuppa_classifier} \\
         --features_path cuppa/${meta.sample_id}.cuppa_data.tsv.gz \\
-        --output_dir cuppa/ \\
-        --clf_group ${categories}
+        --clf_group ${categories} \\
+        --classifier_path ${cuppa_classifier} \\
+        --output_dir cuppa/
 
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":
