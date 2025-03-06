@@ -75,6 +75,7 @@ process ORANGE {
     def isofox_gene_distribution_arg = isofox_gene_distribution ? "-isofox_gene_distribution ${isofox_gene_distribution}" : ''
     def isofox_alt_sj_arg = isofox_alt_sj ? "-isofox_alt_sj_cohort ${isofox_alt_sj}" : ''
 
+    // NOTE(SW): DOID label: 162 [cancer]; Hartwig cohort group: unknown
     def doid_arg = meta.cancer_type ?: "162"
 
     """
@@ -115,8 +116,6 @@ process ORANGE {
     if [[ ! -e ${plot_dir}/ ]]; then
         mkdir -p ${plot_dir}/;
     fi;
-
-    # NOTE(SW): DOID label: 162 [cancer]; Hartwig cohort group: unknown
 
     mkdir -p output/
 
