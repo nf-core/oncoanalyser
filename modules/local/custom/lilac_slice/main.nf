@@ -2,10 +2,10 @@ process CUSTOM_SLICE {
     tag "${meta.id}"
     label 'process_single'
 
-    conda "samtools=1.19.2"
+    conda "samtools=1.21"
     container "${ workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container ?
-        'https://depot.galaxyproject.org/singularity/samtools:1.19.2--h50ea8bc_0' :
-        'biocontainers/samtools:1.19.2--h50ea8bc_0' }"
+        'https://depot.galaxyproject.org/singularity/samtools:1.21--h96c455f_1' :
+        'biocontainers/samtools:1.21--h96c455f_1' }"
 
     input:
     tuple val(meta), path(bam), path(bai)

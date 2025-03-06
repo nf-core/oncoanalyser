@@ -1,7 +1,0 @@
-name: svprep_call
-channels:
-  - conda-forge
-  - bioconda
-  - defaults
-dependencies:
-  - bioconda::hmftools-sv-prep=1.2.4

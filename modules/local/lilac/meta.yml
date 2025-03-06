@@ -47,6 +47,10 @@ input:
       type: file
       description: Reference genome assembly FASTA file
       pattern: "*.{fa,fasta}"
+  - genome_fai:
+      type: file
+      description: Reference genome assembly fai file
+      pattern: "*.{fai}"
   - genome_ver:
       type: string
       description: Reference genome version

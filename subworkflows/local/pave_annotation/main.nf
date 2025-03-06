@@ -124,20 +124,6 @@ workflow PAVE_ANNOTATION {
             return [meta_pave, sage_vcf, sage_tbi]
         }
 
-    // Set resource files according to run mode
-    // NOTE(SW): required since certain files can be used in germline and somatic depending on mode
-    // but want to avoid duplicating as multiple inputs
-    // NOTE(SW): this pattern should be used only sparingly; implicit config from workflows is prefered
-    sage_blocklist_regions_somatic = sage_blocklist_regions
-    sage_blocklist_sites_somatic = sage_blocklist_sites
-    clinvar_annotations_somatic = clinvar_annotations
-    run_mode = Utils.getEnumFromString(params.mode, Constants.RunMode)
-    if (run_mode === Constants.RunMode.WGTS) {
-        sage_blocklist_regions_somatic = []
-        sage_blocklist_sites_somatic = []
-        clinvar_annotations_somatic = []
-    }
-
     // Run process
     SOMATIC(
         ch_pave_somatic_inputs,
@@ -146,9 +132,7 @@ workflow PAVE_ANNOTATION {
         genome_fai,
         sage_pon,
         pon_artefacts,
-        sage_blocklist_regions_somatic,
-        sage_blocklist_sites_somatic,
-        clinvar_annotations_somatic,
+        clinvar_annotations,
         segment_mappability,
         driver_gene_panel,
         ensembl_data_resources,

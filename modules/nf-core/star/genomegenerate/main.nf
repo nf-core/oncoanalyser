@@ -63,11 +63,7 @@ process STAR_GENOMEGENERATE {
         touch star_index/sjdbList.out.tab
         touch star_index/transcriptInfo.tab
 
-        cat <<-END_VERSIONS > versions.yml
-        "${task.process}":
-            star: \$(STAR --version | sed -e "s/STAR_//g")
-            samtools: \$(echo \$(samtools --version 2>&1) | sed 's/^.*samtools //; s/Using.*\$//')
-        END_VERSIONS
+        echo -e '${task.process}:\\n  stub: noversions\\n' > versions.yml
         """
     } else {
         """
@@ -82,11 +78,7 @@ process STAR_GENOMEGENERATE {
         touch star_index/chrStart.txt
         touch star_index/genomeParameters.txt
 
-        cat <<-END_VERSIONS > versions.yml
-        "${task.process}":
-            star: \$(STAR --version | sed -e "s/STAR_//g")
-            samtools: \$(echo \$(samtools --version 2>&1) | sed 's/^.*samtools //; s/Using.*\$//')
-        END_VERSIONS
+        echo -e '${task.process}:\\n  stub: noversions\\n' > versions.yml
         """
     }
 }

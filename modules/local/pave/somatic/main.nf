@@ -4,8 +4,8 @@ process PAVE_SOMATIC {
 
     conda "${moduleDir}/environment.yml"
     container "${ workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container ?
-        'https://depot.galaxyproject.org/singularity/hmftools-pave:1.6--hdfd78af_0' :
-        'biocontainers/hmftools-pave:1.6--hdfd78af_0' }"
+        'https://depot.galaxyproject.org/singularity/hmftools-pave:1.7--hdfd78af_0' :
+        'biocontainers/hmftools-pave:1.7--hdfd78af_0' }"
 
     input:
     tuple val(meta), path(sage_vcf), path(sage_tbi)
@@ -14,8 +14,6 @@ process PAVE_SOMATIC {
     path genome_fai
     path sage_pon
     path pon_artefacts
-    path sage_blocklist_regions
-    path sage_blocklist_sites
     path clinvar_annotations
     path segment_mappability
     path driver_gene_panel
@@ -33,6 +31,8 @@ process PAVE_SOMATIC {
     script:
     def args = task.ext.args ?: ''
 
+    def xmx_mod = task.ext.xmx_mod ?: 0.75
+
     def pon_filters
     def gnomad_args
     if (genome_ver.toString() == '37') {
@@ -47,13 +47,10 @@ process PAVE_SOMATIC {
 
     // Targeted mode
     def pon_artefact_arg = pon_artefacts ? "-pon_artefact_file ${pon_artefacts}" : ''
-    def sage_blocklist_regions_arg = sage_blocklist_regions ? "-blacklist_bed ${sage_blocklist_regions}" : ''
-    def sage_blocklist_sites_arg = sage_blocklist_sites ? "-blacklist_vcf ${sage_blocklist_sites}" : ''
-    def clinvar_annotations = clinvar_annotations ? "-clinvar_vcf ${clinvar_annotations}" : ''
 
     """
     pave \\
-        -Xmx${Math.round(task.memory.bytes * 0.95)} \\
+        -Xmx${Math.round(task.memory.bytes * xmx_mod)} \\
         ${args} \\
         -sample ${meta.sample_id} \\
         -vcf_file ${sage_vcf} \\
@@ -62,12 +59,10 @@ process PAVE_SOMATIC {
         -pon_file ${sage_pon} \\
         -pon_filters "${pon_filters}" \\
         ${pon_artefact_arg} \\
-        ${clinvar_annotations} \\
+        -clinvar_vcf ${clinvar_annotations} \\
         -driver_gene_panel ${driver_gene_panel} \\
         -mappability_bed ${segment_mappability} \\
         -ensembl_data_dir ${ensembl_data_resources} \\
-        ${sage_blocklist_regions_arg} \\
-        ${sage_blocklist_sites_arg} \\
         ${gnomad_args} \\
         -read_pass_only \\
         -threads ${task.cpus} \\

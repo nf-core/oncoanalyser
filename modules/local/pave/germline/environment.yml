@@ -4,4 +4,4 @@ channels:
   - bioconda
   - defaults
 dependencies:
-  - bioconda::hmftools-pave=1.6
+  - bioconda::hmftools-pave=1.7

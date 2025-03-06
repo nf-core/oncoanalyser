@@ -4,8 +4,8 @@ process LINX_SOMATIC {
 
     conda "${moduleDir}/environment.yml"
     container "${ workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container ?
-        'https://depot.galaxyproject.org/singularity/hmftools-linx:1.25--hdfd78af_0' :
-        'biocontainers/hmftools-linx:1.25--hdfd78af_0' }"
+        'https://depot.galaxyproject.org/singularity/hmftools-linx:2.0--hdfd78af_0' :
+        'biocontainers/hmftools-linx:2.0--hdfd78af_0' }"
 
     input:
     tuple val(meta), path(purple_dir)
@@ -24,9 +24,11 @@ process LINX_SOMATIC {
     script:
     def args = task.ext.args ?: ''
 
+    def xmx_mod = task.ext.xmx_mod ?: 0.75
+
     """
     linx \\
-        -Xmx${Math.round(task.memory.bytes * 0.95)} \\
+        -Xmx${Math.round(task.memory.bytes * xmx_mod)} \\
         ${args} \\
         -sample ${meta.sample_id} \\
         -sv_vcf ${purple_dir}/${meta.sample_id}.purple.sv.vcf.gz \\
@@ -36,6 +38,7 @@ process LINX_SOMATIC {
         -known_fusion_file ${known_fusion_data} \\
         -driver_gene_panel ${driver_gene_panel} \\
         -write_vis_data \\
+        -write_neo_epitopes \\
         -output_dir linx_somatic/
 
     cat <<-END_VERSIONS > versions.yml

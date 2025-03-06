@@ -66,7 +66,7 @@ details and columns are [described below](#column-descriptions).
 
 Several different input filetypes beyond FASTQ and BAM are recognised, including intermediate output files generated
 during execution such as the PURPLE output directory. The full list of recognised input filetypes is available
-[here](https://github.com/nf-core/oncoanalyser/blob/1.0.0/lib/Constants.groovy#L58-L90).
+[here](https://github.com/nf-core/oncoanalyser/blob/dev/lib/Constants.groovy#L58-L90).
 
 ### Simple example
 
@@ -157,14 +157,14 @@ The typical command for running the pipeline is as follows:
 ```bash
 nextflow run nf-core/oncoanalyser \
   -profile docker \
-  -revision 1.0.0 \
+  -revision dev \
   --mode <wgts|targeted> \
   --genome <GRCh37_hmf|GRCh38_hmf> \
   --input samplesheet.csv \
   --outdir <output_directory>
 ```
 
-This will launch the pipeline with the `docker` configuration profile. See below for more information on profiles.
+This will launch the pipeline with the `docker` configuration profile. See below for more information about profiles.
 
 :::note
 
@@ -189,10 +189,7 @@ Pipeline settings can be provided in a `yaml` or `json` file via `-params-file <
 
 :::warning
 
-Do not use `-c <file>` to specify parameters as this will result in errors. Custom config files specified with `-c` must
-only be used for [tuning process resource
-specifications](https://nf-co.re/docs/usage/configuration#tuning-workflow-resources), other infrastructural tweaks (such
-as output directories), or module arguments (args).
+Do not use `-c <file>` to specify parameters as this will result in errors. Custom config files specified with `-c` must only be used for [tuning process resource specifications](https://nf-co.re/docs/usage/configuration#tuning-workflow-resources), other infrastructural tweaks (such as output directories), or module arguments (args).
 
 :::
 
@@ -202,9 +199,9 @@ The above pipeline run specified with a params file in yaml format:
 nextflow run nf-core/oncoanalyser -profile docker -params-file params.yaml
 ```
 
-with `params.yaml` containing the following as an example:
+with:
 
-```yaml
+```yaml title="params.yaml"
 mode: 'wgts'
 genome: 'GRCh38_hmf'
 input: './samplesheet.csv'
@@ -241,7 +238,7 @@ If you wish to share such profile (such as upload as supplementary material for 
 ### Selecting processes
 
 Most of the major components in `oncoanalyser` can be skipped using `--processes_exclude` (the full list of available
-processes can be viewed [here](https://github.com/nf-core/oncoanalyser/blob/1.0.0/lib/Constants.groovy#L36-L56)).
+processes can be viewed [here](https://github.com/nf-core/oncoanalyser/blob/dev/lib/Constants.groovy#L36-L56)).
 Multiple processes can be given as a comma-separated list. While there are some use-cases for this feature (e.g.
 skipping resource intensive processes such as VIRUSBreakend), it becomes more powerful when combined with existing
 inputs as described in the following section.
@@ -284,7 +281,7 @@ And now run and skip variant calling:
 ```bash
 nextflow run nf-core/oncoanalyser \
   -profile docker \
-  -revision 1.0.0 \
+  -revision dev \
   --mode wgts \
   --processes_exclude markdups,amber,cobalt,gridss,gripss,sage,pave \
   --genome GRCh38_hmf \
@@ -354,7 +351,7 @@ P1_wgts,P1,SC,tumor,rna,bam,/path/to/P1.SC.tumor.rna.wts.bam
 ```bash
 nextflow run nf-core/oncoanalyser \
   -profile docker \
-  -revision 1.0.0 \
+  -revision dev \
   --mode wgts \
   --genome GRCh38_hmf \
   --prepare_reference_only \
@@ -363,7 +360,7 @@ nextflow run nf-core/oncoanalyser \
 ```
 
 Executing the above command will download and unpack default reference data without running any analysis, and once
-complete the prepared reference files can found in `./prepare_reference/reference_data/1.0.0/<datetimestamp>/`. It is
+complete the prepared reference files can found in `./prepare_reference/reference_data/1.1.0dev/<datetimestamp>/`. It is
 recommended to remove the Nextflow work directory after staging data to free disk space.
 
 For `oncoanalyser` to use locally staged reference data a custom config can be used:
@@ -455,7 +452,7 @@ config file. This avoids having to regenerate indexes for each new analysis.
 ```bash
 nextflow run nf-core/oncoanalyser \
   -profile docker \
-  -revision 1.0.0 \
+  -revision dev \
   -config genome.custom.config \
   --mode wgts \
   \
@@ -567,14 +564,6 @@ In most cases, you will only need to create a custom config as a one-off but if 
 See the main [Nextflow documentation](https://www.nextflow.io/docs/latest/config.html) for more information about creating your own configuration files.
 
 If you have any questions or issues please send us a message on [Slack](https://nf-co.re/join/slack) on the [`#configs` channel](https://nfcore.slack.com/channels/configs).
-
-## Azure resource requests
-
-To be used with the `azurebatch` profile by specifying the `-profile azurebatch`.
-We recommend providing a compute `params.vm_type` of `Standard_D16_v3` VMs by default but these options can be changed if required.
-
-Note that the choice of VM size depends on your quota and the overall workload during the analysis.
-For a thorough list, please refer to the [Azure Sizes for virtual machines in Azure](https://docs.microsoft.com/en-us/azure/virtual-machines/sizes).
 
 ## Running in the background
 

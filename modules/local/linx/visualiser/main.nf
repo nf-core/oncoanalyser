@@ -4,8 +4,8 @@ process LINX_VISUALISER {
 
     conda "${moduleDir}/environment.yml"
     container "${ workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container ?
-        'https://depot.galaxyproject.org/singularity/hmftools-linx:1.25--hdfd78af_0' :
-        'biocontainers/hmftools-linx:1.25--hdfd78af_0' }"
+        'https://depot.galaxyproject.org/singularity/hmftools-linx:2.0--hdfd78af_0' :
+        'biocontainers/hmftools-linx:2.0--hdfd78af_0' }"
 
     input:
     tuple val(meta), path(linx_annotation_dir)
@@ -22,6 +22,8 @@ process LINX_VISUALISER {
     script:
     def args = task.ext.args ?: ''
     def args2 = task.ext.args2 ?: ''
+
+    def xmx_mod = task.ext.xmx_mod ?: 0.75
 
     """
     # NOTE(SW): the output plot directories are always required for ORANGE, which is straightfoward to handle with POSIX
@@ -43,7 +45,7 @@ process LINX_VISUALISER {
     # Generate all chromosome and cluster plots by default
 
     linx \\
-        -Xmx${Math.round(task.memory.bytes * 0.95)} \\
+        -Xmx${Math.round(task.memory.bytes * xmx_mod)} \\
         com.hartwig.hmftools.linx.visualiser.SvVisualiser \\
         ${args} \\
         -sample ${meta.sample_id} \\
@@ -66,7 +68,7 @@ process LINX_VISUALISER {
     # https://github.com/hartwigmedical/hmftools/blob/linx-v1.24.1/linx/src/main/java/com/hartwig/hmftools/linx/visualiser/SampleData.java#L220-L236
 
     linx \\
-        -Xmx${Math.round(task.memory.bytes * 0.95)} \\
+        -Xmx${Math.round(task.memory.bytes * xmx_mod)} \\
         com.hartwig.hmftools.linx.visualiser.SvVisualiser \\
         ${args2} \\
         -sample ${meta.sample_id} \\

@@ -11,14 +11,18 @@ include { FASTP          } from '../../../modules/local/fastp/main'
 workflow READ_ALIGNMENT_DNA {
     take:
     // Sample data
-    ch_inputs              // channel: [mandatory] [ meta ]
+    ch_inputs            // channel: [mandatory] [ meta ]
 
     // Reference data
-    genome_fasta           // channel: [mandatory] /path/to/genome_fasta
-    genome_bwamem2_index   // channel: [mandatory] /path/to/genome_bwa-mem2_index_dir/
+    genome_fasta         // channel: [mandatory] /path/to/genome_fasta
+    genome_bwamem2_index // channel: [mandatory] /path/to/genome_bwa-mem2_index_dir/
 
     // Params
-    max_fastq_records      // numeric: [mandatory] max number of FASTQ records per split
+    max_fastq_records    // numeric: [optional]  max number of FASTQ records per split
+    umi_enable           // boolean: [mandatory] enable UMI processing
+    umi_location         //  string: [optional]  fastp UMI location argument (--umi_loc)
+    umi_length           // numeric: [optional]  fastp UMI length argument (--umi_len)
+    umi_skip             // numeric: [optional]  fastp UMI skip argument (--umi_skip)
 
     main:
     // Channel for version.yml files
@@ -41,12 +45,20 @@ workflow READ_ALIGNMENT_DNA {
             skip: true
         }
 
+    ch_inputs_donor_sorted = ch_inputs
+        .branch { meta ->
+            def has_existing = Utils.hasExistingInput(meta, Constants.INPUT.BAM_DNA_DONOR)
+            runnable: Utils.hasDonorDnaFastq(meta) && !has_existing
+            skip: true
+        }
+
     // Create FASTQ input channel
     // channel: [ meta_fastq, fastq_fwd, fastq_rev ]
     ch_fastq_inputs = Channel.empty()
         .mix(
             ch_inputs_tumor_sorted.runnable.map { meta -> [meta, Utils.getTumorDnaSample(meta), 'tumor'] },
             ch_inputs_normal_sorted.runnable.map { meta -> [meta, Utils.getNormalDnaSample(meta), 'normal'] },
+            ch_inputs_donor_sorted.runnable.map { meta -> [meta, Utils.getDonorDnaSample(meta), 'donor'] },
         )
         .flatMap { meta, meta_sample, sample_type ->
             meta_sample
@@ -73,17 +85,24 @@ workflow READ_ALIGNMENT_DNA {
     // Split FASTQ into chunks if requested for distributed processing
     // channel: [ meta_fastq_ready, fastq_fwd, fastq_fwd ]
     ch_fastqs_ready = Channel.empty()
-    if (max_fastq_records > 0) {
+    if (max_fastq_records > 0 || umi_enable) {
 
         // Run process
         FASTP(
             ch_fastq_inputs,
             max_fastq_records,
+            umi_location,
+            umi_length,
+            umi_skip,
         )
 
         ch_versions = ch_versions.mix(FASTP.out.versions)
 
-        // Prepare outputs within conditional block
+    }
+
+    // Now prepare according to FASTQs splitting
+    if (max_fastq_records > 0) {
+
         ch_fastqs_ready = FASTP.out.fastq
             .flatMap { meta_fastq, reads_fwd, reads_rev ->
 
@@ -111,7 +130,10 @@ workflow READ_ALIGNMENT_DNA {
 
     } else {
 
-        ch_fastqs_ready = ch_fastq_inputs
+        // Select appropriate source
+        ch_fastq_source = umi_enable ? FASTP.out.fastq : ch_fastq_inputs
+
+        ch_fastqs_ready = ch_fastq_source
             .map { meta_fastq, fastq_fwd, fastq_rev ->
 
                 def meta_fastq_ready = [
@@ -185,9 +207,10 @@ workflow READ_ALIGNMENT_DNA {
         }
         .groupTuple()
         .branch { meta_group, bams, bais ->
-            assert ['tumor', 'normal'].contains(meta_group.sample_type)
+            assert ['tumor', 'normal', 'donor'].contains(meta_group.sample_type)
             tumor: meta_group.sample_type == 'tumor'
             normal: meta_group.sample_type == 'normal'
+            donor: meta_group.sample_type == 'donor'
             placeholder: true
         }
 
@@ -205,9 +228,16 @@ workflow READ_ALIGNMENT_DNA {
             ch_inputs_normal_sorted.skip.map { meta -> [meta, [], []] },
         )
 
+    ch_bam_donor_out = Channel.empty()
+        .mix(
+            WorkflowOncoanalyser.restoreMeta(ch_bams_united.donor, ch_inputs),
+            ch_inputs_donor_sorted.skip.map { meta -> [meta, [], []] },
+        )
+
     emit:
     dna_tumor  = ch_bam_tumor_out  // channel: [ meta, [bam, ...], [bai, ...] ]
     dna_normal = ch_bam_normal_out // channel: [ meta, [bam, ...], [bai, ...] ]
+    dna_donor  = ch_bam_donor_out  // channel: [ meta, [bam, ...], [bai, ...] ]
 
     versions   = ch_versions       // channel: [ versions.yml ]
 }

@@ -43,6 +43,10 @@ input:
   - ensembl_data_resources:
       type: directory
       description: HMF ensembl data resources directory
+  - known_fusion_data:
+      type: file
+      description: Known fusions data file
+      pattern: "*.{csv}"
   - exp_counts:
       type: file
       description: Isofox expected counts file (optional)

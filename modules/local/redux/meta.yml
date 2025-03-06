@@ -1,0 +1,81 @@
+name: redux
+description: Identify and mark duplicate reads from alignment data
+keywords:
+  - duplicating marking
+  - redux
+tools:
+  - REDUX:
+      description: Identify and mark duplicate reads from alignment data
+      homepage: https://github.com/hartwigmedical/hmftools/tree/master/redux
+      documentation: https://github.com/hartwigmedical/hmftools/tree/master/redux
+      licence: ["GPL v3"]
+input:
+  - meta:
+      type: map
+      description: |
+        Groovy Map containing sample information
+        e.g. [id: 'sample_id', tumor_id: 'tumor_name', normal_id: 'normal_name']
+  - bams:
+      type: list
+      description: List BAM files
+  - bais:
+      type: list
+      description: List BAI files
+  - genome_fasta:
+      type: file
+      description: Reference genome assembly FASTA file
+      pattern: "*.{fa,fasta}"
+  - genome_ver:
+      type: string
+      description: Reference genome version
+  - genome_fai:
+      type: file
+      description: Reference genome assembly fai file
+      pattern: "*.{fai}"
+  - genome_dict:
+      type: file
+      description: Reference genome assembly dict file
+      pattern: "*.{dict}"
+  - unmap_regions:
+      type: file
+      description: Unmapped regions file
+      pattern: "*.{tsv}"
+  - msi_jitter_sites:
+      type: file
+      description: MSI jitter sites file
+      pattern: "*.{tsv.gz}"
+  - umi_enable:
+      type: boolean
+      description: Flag to enable UMI processing
+  - umi_duplex_delim:
+      type: string
+      description: UMI duplex delimiter
+output:
+  - meta:
+      type: map
+      description: |
+        Groovy Map containing sample information
+        e.g. [id: 'sample_id', tumor_id: 'tumor_name', normal_id: 'normal_name']
+  - bam:
+      type: list
+      description: BAM and BAI file
+      pattern: "*.{bam,bam.bai}"
+  - dup_freq_tsv:
+      type: file
+      description: MS duplicate frequency file
+      pattern: "*.{tsv}"
+  - jitter_tsv:
+      type: file
+      description: MS jitter model parameter file
+      pattern: "*.{tsv}"
+  - ms_tsv:
+      type: file
+      description: MS table file
+      pattern: "*.{tsv.gz}"
+  - versions:
+      type: file
+      description: File containing software versions
+      pattern: "versions.yml"
+authors:
+  - "@scwatts"
+  - "@mkcmkc"
