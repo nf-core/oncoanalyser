@@ -281,6 +281,7 @@ def getRefdataFile(filepath, ref_data_path) {
 def getDataBaseDirectory(data) {
     def c = []
     data
+        .findAll { it.value }
         .collect { it.value.toUriString().getChars() }
         .transpose()
         .findIndexOf {
