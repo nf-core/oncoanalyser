@@ -13,9 +13,7 @@
   * [:warning: Please read this documentation on the nf-core website: https://nf-co.re/oncoanalyser/usage](#-warning--please-read-this-documentation-on-the-nf-core-website--httpsnf-coreoncoanalyserusage)
   * [Table of contents](#table-of-contents)
   * [Introduction](#introduction)
-  * [Getting started](#getting-started)
   * [Running the pipeline](#running-the-pipeline)
-    * [Command line interface (CLI)](#command-line-interface--cli-)
     * [Outputs](#outputs)
     * [Reusing CLI arguments](#reusing-cli-arguments)
     * [Versions and reproducibility](#versions-and-reproducibility)
@@ -35,7 +33,7 @@
     * [Automatic staging of reference data](#automatic-staging-of-reference-data)
     * [Manually staging reference data](#manually-staging-reference-data)
     * [Reference data URLs](#reference-data-urls)
-    * [Custom panel reference data](#custom-panel-reference-data)
+    * [Panel reference data](#panel-reference-data)
     * [Custom genomes](#custom-genomes)
   * [Process selection](#process-selection)
     * [Excluding processes](#excluding-processes)
@@ -46,6 +44,7 @@
     * [`-resume`](#-resume)
     * [`-c`](#-c)
   * [Custom configuration](#custom-configuration)
+    * [Recommended configuration](#recommended-configuration)
     * [Compute resources](#compute-resources)
     * [Container images](#container-images)
       * [Setting up Singularity](#setting-up-singularity)
@@ -56,7 +55,7 @@
   * [FAQ and troubleshooting](#faq-and-troubleshooting)
     * [How to start from CRAM?](#how-to-start-from-cram)
     * [How to handle UMIs?](#how-to-handle-umis)
-    * [How to use oncoanalyser with a custom panel or whole exome?](#how-to-use-oncoanalyser-with-a-custom-panel-or-whole-exome)
+    * [How to use oncoanalyser with a panel or whole exome?](#how-to-use-oncoanalyser-with-a-panel-or-whole-exome)
     * [Incompatible BAM files](#incompatible-bam-files)
     * [I want to store the output BAMs. Why are there only REDUX BAM(s) with additional files?](#i-want-to-store-the-output-bams-why-are-there-only-redux-bam--s--with-additional-files)
     * [I only want variant calls](#i-only-want-variant-calls)
@@ -75,56 +74,40 @@
 ## Introduction
 
 The `oncoanalyser` pipeline typically runs from  **FASTQ**, **BAM** or **CRAM** [input files](#input-starting-points), supports most
-**GRCh37** and **GRCh38** human reference genome builds, and supports **UMI** ([unique molecular identifier](#umi-processing)) processing
-for DNA sequencing data.
+**GRCh37** and **GRCh38** human [reference genome builds](#custom-genomes), and supports
+**UMI** ([unique molecular identifier](#umi-processing)) processing for DNA sequencing data.
 
-The pipeline supports **WGTS** (whole genome and/or transcriptome) and **targeted** panel workflow modes; and supports **tumor/normal**
-(with optional donor sample) and **tumor-only** [sample setups](#sample-setups). The below table summarises the supported analyses:
+The pipeline supports two workflow modes: 1) **WGTS** (whole genome and/or transcriptome) and 2) **targeted** [panel](#panel-reference-data).
+Both modes accept **DNA** and **RNA** sequencing data from matched **tumor/normal** (with optional **donor** sample) and **tumor-only** samples.
+The below table shows the supported [sample setups](#sample-setups):
 
-| Sample setup           | WGTS workflow  | Targeted workflow |
-|------------------------|----------------|-------------------|
-| Tumor / Normal         | DNA and/or RNA | DNA only          |
-| Tumor / Normal / Donor | DNA and/or RNA | DNA only          |
-| Tumor-only             | DNA and/or RNA | DNA and/or RNA    |
+| Data type | Tumor DNA          | Normal DNA         | Donor DNA          | Tumor RNA          |
+|-----------|--------------------|--------------------|--------------------|--------------------|
+| DNA       | :white_check_mark: | -                  | -                  | -                  |
+| DNA       | :white_check_mark: | :white_check_mark: | -                  | -                  |
+| DNA       | :white_check_mark: | :white_check_mark: | :white_check_mark: | -                  |
+| DNA + RNA | :white_check_mark: | -                  | -                  | :white_check_mark: |
+| DNA + RNA | :white_check_mark: | :white_check_mark: | -                  | :white_check_mark: |
+| DNA + RNA | :white_check_mark: | :white_check_mark: | :white_check_mark: | :white_check_mark: |
+| RNA       | -                  | -                  | -                  | :white_check_mark: |
 
-## Getting started
-
-Assuming that [**Nextflow**](https://www.nextflow.io/docs/latest/install.html) and
-[**Docker**](https://docs.docker.com/engine/install/) or [**Singularity**](https://docs.sylabs.io/guides/3.0/user-guide/quick_start.html#)
-are installed, setting up and running `oncoanalyser` involves the following steps:
-
-1. Download and configure [**reference data**](#reference-data) (e.g. reference genome)
-2. (Optional) [**Other configuration**](#custom-configuration) (e.g. compute resources)
-3. Create [**samplesheet**](#samplesheet) specifying input files
-4. [**Run**](#running-the-pipeline) `oncoanalyser`
-
-:::tip
-
-Jump to [**FAQ and troubleshooting**](#faq-and-troubleshooting).
-
-:::
 
 ## Running the pipeline
 
-### Command line interface (CLI)
 A typical command for running `oncoanalyser` is shown below:
 
 ```bash
 nextflow run nf-core/oncoanalyser \
   -profile docker \
   -revision 2.0.0 \
-  --mode wgts \
-  --genome GRCh38_hmf \
+  --mode <wgts|targeted> \
+  --genome <GRCh37_hmf|GRCh38_hmf> \
   --input samplesheet.csv \
   --outdir output/ \
-  -config oncoanalyser.config ## Optional; see below note
+  -config oncoanalyser.config
 ```
 
-`oncoanalyser` supports two analysis `--mode`s:
-- `wgts`: whole genome and/or transcriptome sequencing data
-- `targeted`: targeted sequencing data (panels or exomes)
-
-:::tip
+:::note
 
 **Nextflow** arguments have **one hyphen** (`-`) and are detailed in the [**Nextflow CLI documentation**](https://www.nextflow.io/docs/latest/reference/cli.html).
 
@@ -132,11 +115,19 @@ nextflow run nf-core/oncoanalyser \
 
 :::
 
-:::note
+The [**samplesheet**](#samplesheet) provided to `--input` specifies the input files to `oncoanalyser` (e.g. paths to BAM files).
 
-It is strongly recommended to locally stage and configure reference data paths (e.g. reference genome) with `-config <file>`
-(see: [**Manually setting up reference data**](#manually-staging-reference-data)). If not configured, `oncoanalyser` will automatically
-re-download reference data for every run executed from a different working directory, which can lead to unnecessary disk/network usage.
+The file provided to `-config` is optional but recommended. It can contain configuration for:
+- **Reference genome** and **tool specific data**. It is strongly recommended to [manually download/configure](#manually-staging-reference-data)
+these files. Otherwise,`oncoanalyser` [automatically stages](#automatic-staging-of-reference-data) them for every run executed from a
+different working directory resulting in unnecessary disk/network usage.
+- **Panel normalisation data**. The TSO500 panel supported by default (by specifying `--mode targeted --panel tso500`).
+Other panels require [additional setup](#panel-reference-data) of reference data.
+- [**Other configuration**](#custom-configuration) such as [compute resources](#compute-resources) or [UMI settings](#umi-processing).
+
+:::tip
+
+Jump to [**FAQ and troubleshooting**](#faq-and-troubleshooting).
 
 :::
 
@@ -156,7 +147,7 @@ Descriptions of each file in `output/` is described in the [**Output**](https://
 ### Reusing CLI arguments
 
 To use the same CLI arguments across multiple runs, it may be handy to specify these in a `yaml` or `json` file via `-params-file <file>`.
-The [above command](#command-line-interface--cli-) would have the equivalent `yaml` file:
+The [above command](#running-the-pipeline) would have the equivalent `yaml` file:
 
 ```yaml title="params.yaml
 mode:   'wgts'
@@ -470,18 +461,22 @@ _GRCh38 genome (Hartwig): `GRCh38_hmf`_
 | WiGiTS data          | [hmf_pipeline_resources.38_v2.0.0--2.tar.gz](https://pub-cf6ba01919994c3cbd354659947f74d8.r2.dev/hmf_reference_data/hmftools/hmf_pipeline_resources.38_v2.0.0--2.tar.gz)                                            |
 | TSO500 panel data    | [hmf_panel_resources.tso500.38_v2.0.0--2.tar.gz](https://pub-cf6ba01919994c3cbd354659947f74d8.r2.dev/hmf_reference_data/panels/hmf_panel_resources.tso500.38_v2.0.0--2.tar.gz)                                      |
 
-### Custom panel reference data
+### Panel reference data
 
-To use custom panels, reference data must first be generated using a training procedure detailed
-[here](https://github.com/hartwigmedical/hmftools/blob/master/pipeline/README_TARGETED.md). This procedure allows for normalisation of
-copy number, tumor mutational burden, and RNA transcript counts, as well as to filter out panel specific artefacts.
+Analysis of panel/targeted sequencing data requires some reference data for panel specific normalisations (e.g. to copy number or RNA
+transcript counts) as well as filtering of artefacts. This data is included by default for the TSO500 panel, and running `oncoanalyser` for
+this panel can be done like so:
 
-:::note
+```bash
+nextflow run nf-core/oncoanalyser \
+  --mode targeted \
+  --panel tso500 \
+  -config refdata.config \
+  <...>
+```
 
-The panel reference data training will soon be integrated into `oncoanalyser` which will greatly simplify the process.
-
-:::
-
+For other custom panels (including whole exome), the panel specific reference data must first be generated using a training procedure
+detailed [here](https://github.com/hartwigmedical/hmftools/blob/master/pipeline/README_TARGETED.md).
 The panel reference data paths must then be provided in a config file:
 
 ```groovy title="panel.config"
@@ -521,7 +516,7 @@ params {
 Lastly, run `oncoanalyser`:
 - Provide both the general and panel reference data config files to `-config`
 - Pass the panel name to `--panel`. This should match the name defined in the panel resources config file
-- Provide argument `--force_panel` if `--panel` is not `tso500` (this is currently the only supported panel type)
+- Provide argument `--force_panel` (when `--panel` is not `tso500`, currently the only supported panel type)
 
 ```bash
 nextflow run nf-core/oncoanalyser \
@@ -910,10 +905,10 @@ Simply specify a CRAM path instead of a BAM path in the sample sheet. See sectio
 ### How to handle UMIs?
 UMI processing can be enabled and configured via a config file. See section [UMI processing](#umi-processing).
 
-### How to use oncoanalyser with a custom panel or whole exome?
-`oncoanalyser` currently has built-in support for the TSO500 panel. For custom panels however, reference data must first be generated using
-a training procedure detailed [here](https://github.com/hartwigmedical/hmftools/blob/master/pipeline/README_TARGETED.md). This procedure
-allows for normalisation of copy number, TMB, and TPM data as well as filtering of panel specific artefacts.
+### How to use oncoanalyser with a panel or whole exome?
+`oncoanalyser` currently has built-in support for the TSO500 panel. For custom panels however, reference data (for panel specific
+normalisation and filtering) must first be generated using a training procedure detailed
+[here](https://github.com/hartwigmedical/hmftools/blob/master/pipeline/README_TARGETED.md).
 
 :::note
 
