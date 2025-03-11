@@ -50,6 +50,7 @@ process ESVEE_PREP {
         -ref_genome ${genome_fasta} \\
         -ref_genome_version ${genome_ver} \\
         -blacklist_bed ${sv_blocklist} \\
+        -known_fusion_file ${known_fusions} \\
         -bamtool \$SAMBAMBA_PATH \\
         -write_types "JUNCTIONS;BAM;FRAGMENT_LENGTH_DIST" \\
         -output_dir prep/ \\
