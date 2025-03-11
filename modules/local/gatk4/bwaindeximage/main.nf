@@ -1,5 +1,5 @@
 process GATK4_BWA_INDEX_IMAGE {
-    tag "${meta.id}"
+    tag "${genome_fasta.name}"
     label 'process_medium'
 
     conda "bioconda::gatk4:4.6.1.0"
@@ -8,7 +8,7 @@ process GATK4_BWA_INDEX_IMAGE {
         'biocontainers/gatk4:4.6.1.0--py310hdfd78af_0' }"
 
     input:
-    tuple val(meta), path(genome_fasta)
+    path genome_fasta
 
     output:
     path "${genome_fasta}.img", emit: img
@@ -24,7 +24,7 @@ process GATK4_BWA_INDEX_IMAGE {
     gatk \\
         BwaMemIndexImageCreator \\
         ${args} \\
-        -I ${genome_fasta}
+        -I ${genome_fasta} \\
         -O ${genome_fasta}.img
 
     cat <<-END_VERSIONS > versions.yml
