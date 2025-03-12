@@ -34,14 +34,14 @@ process GRIDSS_INDEX {
         REFERENCE_SEQUENCE=${genome_fasta} \\
         CREATE_SEQUENCE_DICTIONARY='false' \\
         CREATE_BWA_INDEX_IMAGE='true' \\
-        CREATE_GRIDSS_REFERENCE_CACHE='false'
+        CREATE_GRIDSS_REFERENCE_CACHE='true'
 
     # Move under single directory for output
     mkdir -p gridss_index/
     mv ${genome_fasta.name}.img gridss_index/
 
     # Symlink BWA index files into output directory
-    ln -s ../${genome_fasta.name}.{amb,ann,pac} gridss_index/
+    ln -s ../${genome_fasta.name}.{amb,ann,bwt,pac,sa} gridss_index/
 
     # Also include the ALT file if present
     if [[ -e ${genome_fasta.name}.alt || -L ${genome_fasta.name}.alt ]]; then
@@ -57,8 +57,9 @@ process GRIDSS_INDEX {
     stub:
     """
     mkdir -p gridss_index/
-    touch gridss_index/${genome_fasta.name}.{amb,ann,pac}
+    touch gridss_index/${genome_fasta.name}.{sa,bwt,amb,ann,pac}
     touch gridss_index/${genome_fasta.name}.img
+    touch gridss_index/${genome_fasta.name}.gridsscache
 
     echo -e '${task.process}:\\n  stub: noversions\\n' > versions.yml
     """
