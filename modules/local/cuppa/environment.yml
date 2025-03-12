@@ -4,4 +4,4 @@ channels:
   - bioconda
   - defaults
 dependencies:
-  - bioconda::hmftools-cuppa=2.3.0_beta
+  - bioconda::hmftools-cuppa=2.3.1
