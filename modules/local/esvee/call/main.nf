@@ -37,8 +37,8 @@ process ESVEE_CALL {
     esvee com.hartwig.hmftools.esvee.caller.CallerApplication \\
         -Xmx${Math.round(task.memory.bytes * 0.95)} \\
         ${args} \\
-        -sample ${meta.tumor_id} \\
-        ${reference_arg} \\
+        -tumor ${meta.tumor_id} \\
+        -reference ${reference_arg} \\
         -input_vcf ${ref_depth_vcf} \\
         -esvee_prep_dir ${prep_dir}/ \\
         -ref_genome_version ${genome_ver} \\
@@ -47,7 +47,8 @@ process ESVEE_CALL {
         -pon_sv_file ${pon_breakpoints} \\
         -repeat_mask_file ${repeatmasker_annotations} \\
         -output_dir caller/ \\
-        -log_level DEBUG
+        -log_level DEBUG \\
+        -threads 16
 
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":
