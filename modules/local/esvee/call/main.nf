@@ -47,8 +47,7 @@ process ESVEE_CALL {
         -pon_sv_file ${pon_breakpoints} \\
         -repeat_mask_file ${repeatmasker_annotations} \\
         -output_dir caller/ \\
-        -log_level DEBUG \\
-        -threads 16
+        -log_level DEBUG
 
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":
