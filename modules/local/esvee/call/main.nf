@@ -38,7 +38,7 @@ process ESVEE_CALL {
         -Xmx${Math.round(task.memory.bytes * 0.95)} \\
         ${args} \\
         -tumor ${meta.tumor_id} \\
-        -reference ${reference_arg} \\
+        ${reference_arg} \\
         -input_vcf ${ref_depth_vcf} \\
         -esvee_prep_dir ${prep_dir}/ \\
         -ref_genome_version ${genome_ver} \\
