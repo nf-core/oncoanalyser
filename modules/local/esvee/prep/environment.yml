@@ -1,7 +1,7 @@
 name: esvee_prep
 channels:
-  - conda-forge
   - brainstorm
+  - conda-forge
   - bioconda
   - defaults
 dependencies:

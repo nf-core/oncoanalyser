@@ -1,8 +1,8 @@
 name: esvee_assemble
 channels:
-  - conda-forge
   - brainstorm
   - bioconda
+  - conda-forge
   - defaults
 dependencies:
-  - bioconda::hmftools-esvee=1.0.2
+  - brainstorm::hmftools-esvee=1.0.2
