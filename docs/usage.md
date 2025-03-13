@@ -403,10 +403,10 @@ params {
 
     genomes {
         GRCh38_hmf {
-            fasta            = "/path/to/GCA_000001405.15_GRCh38_no_alt_analysis_set.fna"
-            fai              = "/path/to/GCA_000001405.15_GRCh38_no_alt_analysis_set.fna.fai"
-            dict             = "/path/to/GCA_000001405.15_GRCh38_no_alt_analysis_set.fna.dict"
-            img              = "/path/to/GCA_000001405.15_GRCh38_no_alt_analysis_set.fna.img"
+            fasta            = "/path/to/Homo_sapiens_assembly38.alt.masked.fasta"
+            fai              = "/path/to/Homo_sapiens_assembly38.alt.masked.fasta.fai"
+            dict             = "/path/to/Homo_sapiens_assembly38.alt.masked.fasta.dict"
+            img              = "/path/to/Homo_sapiens_assembly38.alt.masked.fasta.img"
 
             // Only required when aligning DNA reads from FASTQ
             bwamem2_index    = "/path/to/bwa-mem2_index_dir/"
