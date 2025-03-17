@@ -2,7 +2,7 @@ process GATK4_BWA_INDEX_IMAGE {
     tag "${genome_fasta.name}"
     label 'process_medium'
 
-    conda "bioconda::gatk4:4.6.1.0"
+    conda "bioconda::gatk4=4.6.1.0"
     container "${ workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container ?
         'https://depot.galaxyproject.org/singularity/gatk4:4.6.1.0--py310hdfd78af_0' :
         'biocontainers/gatk4:4.6.1.0--py310hdfd78af_0' }"
