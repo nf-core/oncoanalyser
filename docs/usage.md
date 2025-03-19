@@ -94,6 +94,12 @@ The below table shows the supported [sample setups](#sample-setups):
 
 ## Running the pipeline
 
+:::tip
+
+**Jump to [FAQ and troubleshooting](#faq-and-troubleshooting).**
+
+:::
+
 A typical command for running `oncoanalyser` is shown below:
 
 ```bash
@@ -124,12 +130,6 @@ different working directory resulting in unnecessary disk/network usage.
 - **Panel normalisation data**. The TSO500 panel supported by default (by specifying `--mode targeted --panel tso500`).
 Other panels require [additional setup](#panel-reference-data) of reference data.
 - [**Other configuration**](#custom-configuration) such as [compute resources](#compute-resources) or [UMI settings](#umi-processing).
-
-:::tip
-
-Jump to [**FAQ and troubleshooting**](#faq-and-troubleshooting).
-
-:::
 
 ### Outputs
 
