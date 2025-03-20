@@ -4,8 +4,8 @@ process ESVEE_PREP {
 
     conda "${moduleDir}/environment.yml"
     container "${ workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container ?
-        'https://depot.galaxyproject.org/singularity/hmftools-esvee:1.0--hdfd78af_0' :
-        'biocontainers/hmftools-esvee:1.0--hdfd78af_0' }"
+        'https://depot.galaxyproject.org/singularity/hmftools-esvee:1.0.3--hdfd78af_0' :
+        'biocontainers/hmftools-esvee:1.0.3--hdfd78af_0' }"
 
     input:
     tuple val(meta), path(tumor_bam), path(tumor_bai), path(normal_bam), path(normal_bai)
