@@ -5,7 +5,7 @@
 import Constants
 import Utils
 
-//include { LINXREPORT      } from '../../../modules/local/linxreport/main'
+include { LINXREPORT      } from '../../../modules/local/linxreport/main'
 include { LINX_VISUALISER } from '../../../modules/local/linx/visualiser/main'
 
 workflow LINX_PLOTTING {
@@ -68,32 +68,32 @@ workflow LINX_PLOTTING {
 
     ch_versions = ch_versions.mix(LINX_VISUALISER.out.versions)
 
-//    //
-//    // MODULE: gpgr LINX report
-//    //
-//    // Create process input channel
-//    // channel: [ meta_gpgr, annotation_dir, visualiser_dir ]
-//    ch_gpgr_linx_inputs = WorkflowOncoanalyser.groupByMeta(
-//        ch_inputs_sorted.runnable,
-//        WorkflowOncoanalyser.restoreMeta(LINX_VISUALISER.out.plots, ch_inputs),
-//    )
-//        .map { meta, annotation_dir, visualiser_dir ->
-//
-//            def meta_gpgr_linx = [
-//                key: meta.group_id,
-//                id: meta.group_id,
-//                sample_id: Utils.getTumorDnaSampleName(meta),
-//            ]
-//
-//            return [meta_gpgr_linx, annotation_dir, visualiser_dir]
-//        }
-//
-//    // Run process
-//    LINXREPORT(
-//        ch_gpgr_linx_inputs,
-//    )
-//
-//    ch_versions = ch_versions.mix(LINXREPORT.out.versions)
+    //
+    // MODULE: gpgr LINX report
+    //
+    // Create process input channel
+    // channel: [ meta_gpgr, annotation_dir, visualiser_dir ]
+    ch_gpgr_linx_inputs = WorkflowOncoanalyser.groupByMeta(
+        ch_inputs_sorted.runnable,
+        WorkflowOncoanalyser.restoreMeta(LINX_VISUALISER.out.plots, ch_inputs),
+    )
+        .map { meta, annotation_dir, visualiser_dir ->
+
+            def meta_gpgr_linx = [
+                key: meta.group_id,
+                id: meta.group_id,
+                sample_id: Utils.getTumorDnaSampleName(meta),
+            ]
+
+            return [meta_gpgr_linx, annotation_dir, visualiser_dir]
+        }
+
+    // Run process
+    LINXREPORT(
+        ch_gpgr_linx_inputs,
+    )
+
+    ch_versions = ch_versions.mix(LINXREPORT.out.versions)
 
     // Set outputs, restoring original meta
     // channel: [ meta, visualiser_dir ]
