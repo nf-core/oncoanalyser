@@ -66,6 +66,7 @@
     * [Run fails due to insufficient CPUs/RAM/disk](#run-fails-due-to-insufficient-cpusramdisk)
     * [Can `oncoanalyser` CLI arguments be put in a config file?](#can-oncoanalyser-cli-arguments-be-put-in-a-config-file)
     * [Errors and navigating the `work/` directory](#errors-and-navigating-the-work-directory)
+    * [Saving logs from the `work/` directory](#saving-logs-from-the-work-directory)
   * [Azure resource requests](#azure-resource-requests)
   * [Running in the background](#running-in-the-background)
   * [Nextflow memory requirements](#nextflow-memory-requirements)
@@ -78,7 +79,8 @@ The `oncoanalyser` pipeline typically runs from  **FASTQ**, **BAM** or **CRAM** 
 **UMI** ([unique molecular identifier](#umi-processing)) processing for DNA sequencing data.
 
 The pipeline supports two workflow modes: 1) **WGTS** (whole genome and/or transcriptome) and 2) **targeted** [panel](#panel-reference-data).
-Both modes accept **DNA** and **RNA** sequencing data from matched **tumor/normal** (with optional **donor** sample) and **tumor-only** samples.
+Both modes accept **DNA** and **RNA** sequencing data from matched **tumor/normal**
+(with optional [**donor**](#tumornormal-dna-with-donor-sample) sample) and **tumor-only** samples.
 The below table shows the supported [sample setups](#sample-setups):
 
 | Data type | Tumor DNA          | Normal DNA         | Donor DNA          | Tumor RNA          |
@@ -1031,7 +1033,7 @@ nextflow run nf-core/oncoanalyser \
   --outdir /path/to/outdir/
 ```
 
-can be specified in a config file like so:
+can be specified in a config file by stripping the `--` like so:
 ```groovy title='params.config'
 params {
     mode = "wgts"
@@ -1075,7 +1077,7 @@ work/
 │       ├── .command.sh     # Bash script used to run the process *within the container*
 │       ├── .command.run    # Bash script used to run the process in the host machine
 │       ├── .command.begin
-│       ├── .command.log    # All log messages
+│       ├── .command.log    # All log messages (combination of stdout and stderr)
 │       ├── .command.err    # stderr log messages
 │       ├── .command.out    # stdout log messages
 │       ├── .command.trace  # Compute resource usage stats
@@ -1094,6 +1096,36 @@ console while running `oncoanalyser` (but can also be found in the `.nextflow.lo
 
 Otherwise, you can use a utility like [tree](https://en.wikipedia.org/wiki/Tree_(command)) to show the directory structure, which allows
 you to manually find the target process directory.
+
+### Saving logs from the `work/` directory
+
+To save logs to the final output directory (i.e. path provided to `--outdir`), we can provide the below
+[afterScript](https://www.nextflow.io/docs/latest/reference/process.html#afterscript) directive in a config file:
+
+```groovy
+// Adapted from this GitHub issue: https://github.com/nextflow-io/nextflow/issues/1166
+process.afterScript = {
+    // params.outdir: --outdir arg
+    // meta.key: sample_id from the sample sheet
+    log_dir = "${params.outdir}/${meta.key}/logs"
+
+    // task.process: name of the process
+    // meta.id: concatenation of the group_id and sample_id from the sample sheet
+    dest_file_prefix = "${log_dir}/${task.process}.${meta.id}"
+
+    // The value of afterScript is simply a bash command as a string
+    cmd =  "mkdir -p ${log_dir}; "
+    cmd += "for file in .command.{sh,log}; do cp \$file ${dest_file_prefix}\${file}; done"
+    cmd
+}
+```
+
+The above afterScript directive will copy `.sh` and `.log` files from the `work/` directory for every process. Each destination file will
+have the below example path:
+```shell
+outdir/coloMini/logs/NFCORE_ONCOANALYSER:WGTS:REDUX_PROCESSING:REDUX.coloMini_coloMiniT.command.log
+```
+
 
 ## Azure resource requests
 
