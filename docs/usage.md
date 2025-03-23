@@ -64,7 +64,7 @@
     * [Firewall prevents `oncoanalyser` from pulling Singularity images](#firewall-prevents-oncoanalyser-from-pulling-singularity-images)
     * [Network timeout](#network-timeout)
     * [Run fails due to insufficient CPUs/RAM/disk](#run-fails-due-to-insufficient-cpusramdisk)
-    * [Can `oncoanalyser` CLI arguments be put in a config file?](#can-oncoanalyser-cli-arguments-be-put-in-a-config-file)
+    * [Putting `oncoanalyser` CLI arguments be put in a config file](#putting-oncoanalyser-cli-arguments-be-put-in-a-config-file)
     * [Errors and navigating the `work/` directory](#errors-and-navigating-the-work-directory)
     * [Saving logs from the `work/` directory](#saving-logs-from-the-work-directory)
   * [Azure resource requests](#azure-resource-requests)
@@ -782,22 +782,51 @@ options.
 
 :::
 
-### Recommended configuration
-
-Recommended configurations for oncoanalyser can readily be loaded using the ```-profile hartwig``` command line argument, whenever launching a run.
-Those specifications can currently be found [here](https://github.com/nf-core/oncoanalyser/blob/update-docs-v2.0/conf/hartwig.config) (will be replaced with nf-core repo path)
-
-
 ### Compute resources
 
-Depending on the compute environment/setup, the default compute resources (e.g. CPUs, RAM, disk space) configured in `oncoanalyser` may not
-be sufficient for one or more processes. To change the resource requests, please see the
-[max resources](https://nf-co.re/docs/usage/configuration#max-resources) and
+The default compute resources (e.g. CPUs, RAM, disk space) configured in `oncoanalyser` may not be sufficient for one or more processes.
+To change the resource requests, please see the [max resources](https://nf-co.re/docs/usage/configuration#max-resources) and
 [tuning workflow resources](https://nf-co.re/docs/usage/configuration#tuning-workflow-resources) sections of the nf-core website.
 
-Note that for most of the steps in the pipeline, failing jobs with any of the error codes specified in
-[this](https://github.com/nf-core/oncoanalyser/blob/master/conf/base.config) base config file will automatically be resubmitted with higher
-requests (2 x original, then 3 x original). If it still fails after the third attempt then the pipeline execution is stopped.
+Below are the settings per WiGiTS tool that Hartwig uses internally and recommends:
+
+```groovy
+process {
+
+    withName: AMBER            { memory = 24.GB; cpus = 16 }
+    withName: BAMTOOLS         { memory = 24.GB; cpus = 16 }
+    withName: CHORD            { memory = 12.GB; cpus = 4  }
+    withName: COBALT           { memory = 24.GB; cpus = 16 }
+    withName: CUPPA            { memory = 16.GB; cpus = 4  }
+    withName: 'ESVEE.*'        { memory = 64.GB; cpus = 32 } // We can use regex to cover multiple process names
+    withName: LILAC            { memory = 24.GB; cpus = 16 }
+    withName: 'LINX.*'         { memory = 16.GB; cpus = 16 }
+    withName: REDUX            { memory = 64.GB; cpus = 32 }
+    withName: ORANGE           { memory = 16.GB; cpus = 4  }
+    withName: 'PAVE.*'         { memory = 32.GB; cpus = 8  }
+    withName: PURPLE           { memory = 40.GB; cpus = 8  }
+    withName: 'SAGE.*'         { memory = 64.GB; cpus = 32 }
+    withName: VIRUSBREAKEND    { memory = 64.GB; cpus = 8  }
+    withName: VIRUSINTERPRETER { memory = 8.GB;  cpus = 2  }
+
+    // Process names can be found at the top of the main.nf files in the modules/ dir, e.g.
+    // https://github.com/nf-core/oncoanalyser/blob/master/modules/local/sage/somatic/main.nf
+}
+```
+
+We also set an upper limit on total resources that `oncoanalyser` is allowed to use (applicable when processes run in parallel).
+This will typically be the max resources available to the VM / compute job:
+
+```groovy
+process {
+    resourceLimits = [
+        cpus:   64,
+        memory: 124.GB, // = 0.97 * 128.GB
+        disk:   1500.GB,
+        time:   48.h
+    ]
+}
+```
 
 ### Container images
 
@@ -1017,7 +1046,8 @@ setting up reference data [manually](#manually-staging-reference-data) instead.
 
 Please see section: [Compute resources](#compute-resources)
 
-### Can `oncoanalyser` CLI arguments be put in a config file?
+### Putting `oncoanalyser` CLI arguments be put in a config file
+
 Almost all `oncoanalyser` arguments in the [**Parameters tab**](https://nf-co.re/oncoanalyser/parameters) can be placed in a config file.
 
 For example, the `oncoanalyser` arguments which start with `--` in this command:
@@ -1036,9 +1066,9 @@ nextflow run nf-core/oncoanalyser \
 can be specified in a config file by stripping the `--` like so:
 ```groovy title='params.config'
 params {
-    mode = "wgts"
+    mode   = "wgts"
     genome = "GRCh38_hmf"
-    input = "/path/to/samplesheet.csv"
+    input  = "/path/to/samplesheet.csv"
     outdir = "/path/to/outdir/"
 }
 ```
