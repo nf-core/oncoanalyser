@@ -44,11 +44,8 @@
     * [`-resume`](#-resume)
     * [`-c`](#-c)
   * [Custom configuration](#custom-configuration)
-    * [Recommended configuration](#recommended-configuration)
     * [Compute resources](#compute-resources)
     * [Container images](#container-images)
-      * [Setting up Singularity](#setting-up-singularity)
-      * [Container image sources](#container-image-sources)
     * [Custom tool arguments](#custom-tool-arguments)
     * [UMI processing](#umi-processing)
     * [nf-core/configs](#nf-coreconfigs)
@@ -60,8 +57,8 @@
     * [I want to store the output BAMs. Why are there only REDUX BAM(s) with additional files?](#i-want-to-store-the-output-bams-why-are-there-only-redux-bam--s--with-additional-files)
     * [I only want variant calls](#i-only-want-variant-calls)
     * [Why does `oncoanalyser` call too many / too few variants than another pipeline?](#why-does-oncoanalyser-call-too-many--too-few-variants-than-another-pipeline)
-    * [My HPC does not allow Docker](#my-hpc-does-not-allow-docker)
-    * [Firewall prevents `oncoanalyser` from pulling Singularity images](#firewall-prevents-oncoanalyser-from-pulling-singularity-images)
+    * [My compute environment does not allow Docker](#my-compute-environment-does-not-allow-docker)
+    * [Running `oncoanalyser` offline](#running-oncoanalyser-offline)
     * [Network timeout](#network-timeout)
     * [Run fails due to insufficient CPUs/RAM/disk](#run-fails-due-to-insufficient-cpusramdisk)
     * [Putting `oncoanalyser` CLI arguments be put in a config file](#putting-oncoanalyser-cli-arguments-be-put-in-a-config-file)
@@ -793,12 +790,13 @@ Below are the settings per WiGiTS tool that Hartwig uses internally and recommen
 ```groovy
 process {
 
+    withName: '.*ALIGN'        { memory = 72.GB; cpus = 12 } // We can use regex to cover multiple process names
     withName: AMBER            { memory = 24.GB; cpus = 16 }
     withName: BAMTOOLS         { memory = 24.GB; cpus = 16 }
     withName: CHORD            { memory = 12.GB; cpus = 4  }
     withName: COBALT           { memory = 24.GB; cpus = 16 }
     withName: CUPPA            { memory = 16.GB; cpus = 4  }
-    withName: 'ESVEE.*'        { memory = 64.GB; cpus = 32 } // We can use regex to cover multiple process names
+    withName: 'ESVEE.*'        { memory = 64.GB; cpus = 32 }
     withName: LILAC            { memory = 24.GB; cpus = 16 }
     withName: 'LINX.*'         { memory = 16.GB; cpus = 16 }
     withName: REDUX            { memory = 64.GB; cpus = 32 }
@@ -834,35 +832,10 @@ You may want to change which container or conda environment uses for a particula
 version being available). Please see [updating tool versions](https://nf-co.re/docs/usage/configuration#updating-tool-versions) for
 instructions.
 
-#### Setting up Singularity
-
-Some restricted compute environments (e.g. HPC) do not allow Docker to be used and/or dynamic download of images upon running
-`oncoanalyser`. In these cases, it is recommended to use Singularity (now known as Apptainer) images that are cached for offline use. See
-the [Downloading Apptainer containers](https://nf-co.re/docs/nf-core-tools/pipelines/download#downloading-apptainer-containers) section
-of the nf-core-tools documentation for details.
-
-:::warning
-
-When manually downloading singularity images, do not execute multiple `singularity pull` commands in parallel. E.g. do not pull different
-singularity images in separate terminal sessions on the same compute environment. This will result in a
-"[no descriptor found for reference](https://github.com/apptainer/singularity/issues/4555)" error.
-
-:::
-
-:::tip
-
-Docker images can be [pulled with Singularity](https://docs.sylabs.io/guides/2.6/user-guide/singularity_and_docker.html) using
-`singularity pull --name <output_path> <docker_image_url>`
-
-:::
-
-#### Container image sources
-
-Oncoanalyser by default runs each tool using [Docker](https://docs.docker.com/engine/install/) or
+By default, `oncoanalyser` runs each tool using [Docker](https://docs.docker.com/engine/install/) or
 [Singularity](https://docs.sylabs.io/guides/3.0/user-guide/quick_start.html#) container images which are built by the
 [Bioconda recipes](https://github.com/bioconda/bioconda-recipes/tree/master/recipes) CI/CD infrastructure.
-Below is information on how these images can be accessed should you want to download images manually
-(e.g. to [set up Singularity for offline use](#setting-up-singularity)).
+Below are links to these default images should you want to download images manually (e.g. to run `oncoanalyser` offline)
 
 **Docker (Bioconda)**
 - Host: [quay.io](https://quay.io/organization/biocontainers)
@@ -880,7 +853,7 @@ Below is information on how these images can be accessed should you want to down
 **Docker** images built by Hartwig's CI/CD infrastructure are also available, intended for beta releases and not used by default in `oncoanalyser`
 - Host: [Dockerhub](https://hub.docker.com/r/hartwigmedicalfoundation)
 - Repo URL example: https://hub.docker.com/r/hartwigmedicalfoundation/redux/tags
-- Image URI example: `docker.io/hartwigmedicalfoundation/sage:1.1`
+- Image URI example: `docker.io/hartwigmedicalfoundation/redux:1.1`
 
 ### Custom tool arguments
 
@@ -1008,17 +981,49 @@ nextflow run nf-core/oncoanalyser \
 `oncoanalyser` uses variants with > 2% VAF. Other pipelines may have different assumptions which may cause differences in samples with low
 tumor purity or a high number of subclonal variants.
 
-### My HPC does not allow Docker
+### My compute environment does not allow Docker
 
-Some compute environments (especially HPCs) do not allow Docker as it runs a daemon as root which is deemed a security issue. In these
-cases, using Singularity is recommended by providing `-profile singularity` when running `oncoanalyser` (also see:
-[Setting up singularity](#setting-up-singularity)).
+Docker is not allowed on some compute environments (especially HPCs) as it runs a daemon as root which is deemed a security issue. In these
+cases, using Singularity is recommended by providing `-profile singularity` when running `oncoanalyser` In these cases, it is recommended to
+use Singularity (now known as Apptainer) images that are cached for offline use (see the [Downloading Apptainer containers](https://nf-co.re/docs/nf-core-tools/pipelines/download#downloading-apptainer-containers)).
 
-### Firewall prevents `oncoanalyser` from pulling Singularity images
+:::warning
 
-Oncoanalyser can fail to pull Singularity images when there is a firewall set up. We recommend in these cases to manually download and cache
-singularity containers. See [Downloading Apptainer containers](https://nf-co.re/docs/nf-core-tools/pipelines/download#downloading-apptainer-containers)
-for more details.
+When manually downloading singularity images, do not execute multiple `singularity pull` commands in parallel. E.g. do not pull different
+singularity images in separate terminal sessions on the same compute environment. This will result in a
+"[no descriptor found for reference](https://github.com/apptainer/singularity/issues/4555)" error.
+
+:::
+
+:::tip
+
+Docker images can be [pulled with Singularity](https://docs.sylabs.io/guides/2.6/user-guide/singularity_and_docker.html) using
+`singularity pull --name <output_path> <docker_image_url>`
+
+:::
+
+### Running `oncoanalyser` offline
+
+Sometimes you may need to run `oncoanalyser` on a cloud VM or HPC system with no internet connection. To do this, you will need to: 1)
+[manually set up reference data](#manually-staging-reference-data) and 2) run `oncoanalyser` once (e.g. using the test profile) to cache
+Nextflow dependencies and download container images (see nf-core docs
+[for running pipelines offline](https://nf-co.re/docs/usage/getting_started/offline)).
+
+Additionally, you may want to add the below item to config your config file:
+
+```groovy
+env {
+  // Disable automatic update checks, prevents downloading dependencies, execute nextflow using locally available resources
+  NXF_OFFLINE = 'true'
+
+  // If NXF_OFFLINE doesn't work, reduce the http timeout to basically zero so that nextflow doesn't hang and throw this error:
+  // "Failed to connect to www.nextflow.io port 443 after 300479 ms: Timeout was reached"
+  NXF_HTTP_TIMEOUT = '1ms'
+
+  // Nextflow creates and caches dependencies to the '.nextflow/` dir in the current working dir
+  NXF_HOME = "/path/to/.nextflow/"
+}
+```
 
 ### Network timeout
 
