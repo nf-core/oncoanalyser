@@ -90,14 +90,14 @@ nextflow run nf-core/oncoanalyser \
 > Nextflow option can be used to provide any configuration _**except for parameters**_;
 > see [docs](https://nf-co.re/usage/configuration#custom-configuration-files).
 
-For more details and further functionality, please refer to the [usage documentation](https://nf-co.re/oncoanalyser/usage) and the
+For more details and further functionality, please refer to the [usage documentation](docs/usage.md) and the
 [parameter documentation](https://nf-co.re/oncoanalyser/parameters).
 
 ## Pipeline output
 
 To see the results of an example test run with a full size dataset refer to the [results](https://nf-co.re/oncoanalyser/results) tab on the
 nf-core website pipeline page. For more details about the output files and reports, please refer to the
-[output documentation](https://nf-co.re/oncoanalyser/output).
+[output documentation](docs/output.md).
 
 ## Credits
 
