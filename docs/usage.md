@@ -46,6 +46,9 @@
   * [Custom configuration](#custom-configuration)
     * [Compute resources](#compute-resources)
     * [Container images](#container-images)
+      * [Custom containers](#custom-containers)
+      * [Default containers](#default-containers)
+      * [Container configuration](#container-configuration)
     * [Custom tool arguments](#custom-tool-arguments)
     * [UMI processing](#umi-processing)
     * [nf-core/configs](#nf-coreconfigs)
@@ -828,14 +831,19 @@ process {
 
 ### Container images
 
+#### Custom containers
+
 You may want to change which container or conda environment uses for a particular process (e.g. due to a newer tool
 version being available). Please see [updating tool versions](https://nf-co.re/docs/usage/configuration#updating-tool-versions) for
 instructions.
 
+#### Default containers
+
 By default, `oncoanalyser` runs each tool using [Docker](https://docs.docker.com/engine/install/) or
 [Singularity](https://docs.sylabs.io/guides/3.0/user-guide/quick_start.html#) container images which are built by the
 [Bioconda recipes](https://github.com/bioconda/bioconda-recipes/tree/master/recipes) CI/CD infrastructure.
-Below are links to these default images should you want to download images manually (e.g. to run `oncoanalyser` offline)
+Below are links to these default images should you want to download images manually (e.g. to
+[run oncoanalyser offline](https://nf-co.re/docs/usage/getting_started/offline)).
 
 **Docker (Bioconda)**
 - Host: [quay.io](https://quay.io/organization/biocontainers)
@@ -854,6 +862,30 @@ Below are links to these default images should you want to download images manua
 - Host: [Dockerhub](https://hub.docker.com/r/hartwigmedicalfoundation)
 - Repo URL example: https://hub.docker.com/r/hartwigmedicalfoundation/redux/tags
 - Image URI example: `docker.io/hartwigmedicalfoundation/redux:1.1`
+
+:::tip
+
+You can get the URIs for the default container images from the oncoanalyser repo with the below shell commands:
+
+- Docker: `grep -rohE "'biocontainers.*'" oncoanalyser/modules/local/ | sort | uniq`
+- Singularity: `grep -rohE "'https://depot.galaxyproject.*'" oncoanalyser/modules/local/ | sort | uniq`
+
+:::
+
+#### Container configuration
+
+All configuration options for containers can be found in the [Nextflow configuration documentation](https://www.nextflow.io/docs/latest/reference/config.html).
+A typical config might look like this:
+
+```groovy
+singularity {
+    enabled = true
+    cacheDir = '/path/to/cache_dir/'
+    autoMounts = true
+    runOptions = "-B </path/to/desired/mounted/volume/>"
+    pullTimeout = '2h'
+}
+```
 
 ### Custom tool arguments
 
