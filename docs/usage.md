@@ -49,6 +49,7 @@
       * [Custom containers](#custom-containers)
       * [Default containers](#default-containers)
       * [Container configuration](#container-configuration)
+    * [Executors](#executors)
     * [Custom tool arguments](#custom-tool-arguments)
     * [UMI processing](#umi-processing)
     * [nf-core/configs](#nf-coreconfigs)
@@ -773,7 +774,7 @@ Specify the path to a specific config file (this is a core Nextflow command). Se
 
 Custom configuration can be provided to `oncoanalyser` by providing a config file to the CLI argument `-config <file>` or `-c <file>`.
 Syntax and examples of config items are described in the [Nextflow documentation](https://www.nextflow.io/docs/latest/config.html) and
-[nf-core documentation](https://nf-co.re/usage/configuration). Below a subsections describe common use cases for custom configuration.
+[nf-core documentation](https://nf-co.re/usage/configuration). Below subsections describe common use cases for custom configuration.
 
 :::tip
 
@@ -884,6 +885,31 @@ singularity {
     autoMounts = true
     runOptions = "-B </path/to/desired/mounted/volume/>"
     pullTimeout = '2h'
+}
+```
+
+### Executors
+
+The [executor](https://www.nextflow.io/docs/latest/executor.html) is a Nextflow component that allows to submission of jobs for example via
+SLURM on an HPC, or via AWS/Azure/Google Batch in the cloud.
+
+To enable SLURM for example, you would provide the below config:
+
+```groovy
+process {
+    executor = "slurm"
+}
+```
+
+Additional options (see [Config: Executor](https://www.nextflow.io/docs/latest/reference/config.html#executor) Nextflow documentation for all
+options) can be provided to the `executor` directive, like so:
+
+```groovy
+executor {
+    queueSize         = 100
+    queueStatInterval = '10 sec'
+    pollInterval      = '10 sec'
+    submitRateLimit   = '10 sec'
 }
 ```
 
