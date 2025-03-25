@@ -4,75 +4,6 @@
 
 > _Documentation of pipeline parameters is generated automatically from the pipeline schema and can no longer be found in markdown files._
 
-## Table of contents
-
-**TEMPORARY: REMOVE THIS BEFORE PUBLISHING TO NF-CORE**
-
-<!-- TOC -->
-* [nf-core/oncoanalyser: Usage](#nf-coreoncoanalyser--usage)
-  * [:warning: Please read this documentation on the nf-core website: https://nf-co.re/oncoanalyser/usage](#-warning--please-read-this-documentation-on-the-nf-core-website--httpsnf-coreoncoanalyserusage)
-  * [Table of contents](#table-of-contents)
-  * [Introduction](#introduction)
-  * [Running the pipeline](#running-the-pipeline)
-    * [Outputs](#outputs)
-    * [Reusing CLI arguments](#reusing-cli-arguments)
-    * [Versions and reproducibility](#versions-and-reproducibility)
-  * [Samplesheet](#samplesheet)
-    * [Input starting points](#input-starting-points)
-      * [FASTQ](#fastq)
-      * [BAM / CRAM](#bam--cram)
-      * [REDUX BAM](#redux-bam)
-    * [Sample setups](#sample-setups)
-      * [Tumor/normal DNA](#tumornormal-dna)
-      * [Tumor-only DNA](#tumor-only-dna)
-      * [Tumor-only RNA](#tumor-only-rna)
-      * [Tumor/normal DNA and tumor-only RNA](#tumornormal-dna-and-tumor-only-rna)
-      * [Tumor/normal DNA with donor sample](#tumornormal-dna-with-donor-sample)
-    * [Multiple samples](#multiple-samples)
-  * [Reference data](#reference-data)
-    * [Automatic staging of reference data](#automatic-staging-of-reference-data)
-    * [Manually staging reference data](#manually-staging-reference-data)
-    * [Reference data URLs](#reference-data-urls)
-    * [Panel reference data](#panel-reference-data)
-    * [Custom genomes](#custom-genomes)
-  * [Process selection](#process-selection)
-    * [Excluding processes](#excluding-processes)
-    * [Manual process selection](#manual-process-selection)
-    * [Starting from existing inputs](#starting-from-existing-inputs)
-  * [Core Nextflow arguments](#core-nextflow-arguments)
-    * [`-profile`](#-profile)
-    * [`-resume`](#-resume)
-    * [`-c`](#-c)
-  * [Custom configuration](#custom-configuration)
-    * [Compute resources](#compute-resources)
-    * [Container images](#container-images)
-      * [Custom containers](#custom-containers)
-      * [Default containers](#default-containers)
-      * [Container configuration](#container-configuration)
-    * [Executors](#executors)
-    * [Custom tool arguments](#custom-tool-arguments)
-    * [UMI processing](#umi-processing)
-    * [nf-core/configs](#nf-coreconfigs)
-  * [FAQ and troubleshooting](#faq-and-troubleshooting)
-    * [How to start from CRAM?](#how-to-start-from-cram)
-    * [How to handle UMIs?](#how-to-handle-umis)
-    * [How to use oncoanalyser with a panel or whole exome?](#how-to-use-oncoanalyser-with-a-panel-or-whole-exome)
-    * [Incompatible BAM files](#incompatible-bam-files)
-    * [I want to store the output BAMs. Why are there only REDUX BAM(s) with additional files?](#i-want-to-store-the-output-bams-why-are-there-only-redux-bam--s--with-additional-files)
-    * [I only want variant calls](#i-only-want-variant-calls)
-    * [Why does `oncoanalyser` call too many / too few variants than another pipeline?](#why-does-oncoanalyser-call-too-many--too-few-variants-than-another-pipeline)
-    * [My compute environment does not allow Docker](#my-compute-environment-does-not-allow-docker)
-    * [Running `oncoanalyser` offline](#running-oncoanalyser-offline)
-    * [Network timeout](#network-timeout)
-    * [Run fails due to insufficient CPUs/RAM/disk](#run-fails-due-to-insufficient-cpusramdisk)
-    * [Putting `oncoanalyser` CLI arguments be put in a config file](#putting-oncoanalyser-cli-arguments-be-put-in-a-config-file)
-    * [Errors and navigating the `work/` directory](#errors-and-navigating-the-work-directory)
-    * [Saving logs from the `work/` directory](#saving-logs-from-the-work-directory)
-  * [Azure resource requests](#azure-resource-requests)
-  * [Running in the background](#running-in-the-background)
-  * [Nextflow memory requirements](#nextflow-memory-requirements)
-<!-- TOC -->
-
 ## Introduction
 
 The `oncoanalyser` pipeline typically runs from  **FASTQ**, **BAM** or **CRAM** [input files](#input-starting-points), supports most
@@ -786,10 +717,11 @@ options.
 ### Compute resources
 
 The default compute resources (e.g. CPUs, RAM, disk space) configured in `oncoanalyser` may not be sufficient for one or more processes.
-To change the resource requests, please see the [max resources](https://nf-co.re/docs/usage/configuration#max-resources) and
-[tuning workflow resources](https://nf-co.re/docs/usage/configuration#tuning-workflow-resources) sections of the nf-core website.
+To change the resource requests, please see the [tuning workflow resources](https://nf-co.re/docs/usage/configuration#tuning-workflow-resources)
+and [max resources](https://nf-co.re/docs/usage/configuration#max-resources) sections of the nf-core website.
 
-Below are the settings per WiGiTS tool that Hartwig uses internally and recommends:
+Below are the settings per WiGiTS tool that Hartwig uses internally and recommends. For high depth samples (e.g. panel samples), you may
+need increase the memory for alignment, read processing (REDUX) and/or variant calling (SAGE or ESVEE) steps.
 
 ```groovy
 process {
@@ -816,8 +748,10 @@ process {
 }
 ```
 
-We also set an upper limit on total resources that `oncoanalyser` is allowed to use (applicable when processes run in parallel).
-This will typically be the max resources available to the VM / compute job:
+Lastly, we recommend setting an upper limit on total resources that `oncoanalyser` is allowed to use. This will typically be the max resources
+available to the VM / compute job. Below are the settings Hartwig uses internally. When running multiple steps and/or samples in parallel,
+this will prevent `oncoanalyser` from requesting more resources than available on the machine.
+
 
 ```groovy
 process {
@@ -891,7 +825,9 @@ singularity {
 ### Executors
 
 The [executor](https://www.nextflow.io/docs/latest/executor.html) is a Nextflow component that allows to submission of jobs for example via
-SLURM on an HPC, or via AWS/Azure/Google Batch in the cloud.
+[SLURM](https://www.nextflow.io/docs/latest/executor.html#slurm) (typically on an HPC),
+[AWS Batch](https://www.nextflow.io/docs/latest/aws.html), or
+[Google Batch](https://www.nextflow.io/docs/latest/google.html).
 
 To enable SLURM for example, you would provide the below config:
 
@@ -901,8 +837,8 @@ process {
 }
 ```
 
-Additional options (see [Config: Executor](https://www.nextflow.io/docs/latest/reference/config.html#executor) Nextflow documentation for all
-options) can be provided to the `executor` directive, like so:
+Additional options for the enabled executor can be provided to the `executor` directive as shown below. See the
+[Config: Executor](https://www.nextflow.io/docs/latest/reference/config.html#executor) Nextflow documentation for all options.
 
 ```groovy
 executor {
@@ -961,6 +897,24 @@ If you have any questions or issues please send us a message on [Slack](https://
 
 ## FAQ and troubleshooting
 
+* [How to start from CRAM?](#how-to-start-from-cram)
+* [How to handle UMIs?](#how-to-handle-umis)
+* [How to use oncoanalyser with a panel or whole exome?](#how-to-use-oncoanalyser-with-a-panel-or-whole-exome)
+* [Why does LILAC crash on my panel sample?](#why-does-lilac-crash-on-my-panel-sample)
+* [Incompatible BAM files](#incompatible-bam-files)
+* [I want to store the output BAMs. Why are there only REDUX BAM(s) with additional files?](#i-want-to-store-the-output-bams-why-are-there-only-redux-bam--s--with-additional-files)
+* [I only want variant calls](#i-only-want-variant-calls)
+* [Why does `oncoanalyser` call too many / too few variants than another pipeline?](#why-does-oncoanalyser-call-too-many--too-few-variants-than-another-pipeline)
+* [My compute environment does not allow Docker](#my-compute-environment-does-not-allow-docker)
+* [Running `oncoanalyser` offline](#running-oncoanalyser-offline)
+* [Network timeout](#network-timeout)
+* [Run fails due to insufficient CPUs/RAM/disk](#run-fails-due-to-insufficient-cpusramdisk)
+* [Automatically increasing compute resources after failed runs](#automatically-increasing-compute-resources-after-failed-runs)
+* [Putting `oncoanalyser` CLI arguments be put in a config file](#putting-oncoanalyser-cli-arguments-be-put-in-a-config-file)
+* [Errors and navigating the `work/` directory](#errors-and-navigating-the-work-directory)
+* [Saving logs from the `work/` directory](#saving-logs-from-the-work-directory)
+* [Resuming runs in Google Batch?](#resuming-runs-in-google-batch)
+
 ### How to start from CRAM?
 Simply specify a CRAM path instead of a BAM path in the sample sheet. See section [Input starting points: BAM / CRAM](#bam--cram).
 
@@ -977,6 +931,11 @@ normalisation and filtering) must first be generated using a training procedure 
 We realise that the panel training procedure is not very straight forward and will therefore be integrated into `oncoanalyser` in the next minor release!
 
 :::
+
+### Why does LILAC crash on my panel sample?
+
+If your panel does not include HLA class I regions, there will be no reads in those regions which causes LILAC to crash. To get around this,
+simply skip running LILAC by specifying `--processes_exclude lilac`.
 
 ### Incompatible BAM files
 `oncoanalyser` has been validated on with BAMs aligned with BWA-MEM, BWA-MEM2 and DRAGEN. BAM files from other aligners / sources may be
@@ -1107,7 +1066,28 @@ setting up reference data [manually](#manually-staging-reference-data) instead.
 
 ### Run fails due to insufficient CPUs/RAM/disk
 
-Please see section: [Compute resources](#compute-resources)
+You may want to increase the compute resources `oncoanalyser` can request. Please see section: [Compute resources](#compute-resources).
+
+### Automatically increasing compute resources after failed runs
+
+We can tell `oncoanalyser` to retry when a run crashes using
+[errorStrategy](https://www.nextflow.io/docs/latest/reference/process.html#errorstrategy)
+and [maxRetries](https://www.nextflow.io/docs/latest/reference/process.html#maxretries), and upon each retry, increase the memory that a
+problematic process (e.g. REDUX) can request:
+
+```groovy
+process {
+  // Currently, all of WiGiTS tools return a exit code of 1 on failure.
+  // We only want to retry for other exit codes which relate to Nextflow or the environment (e.g. out of memory error).
+  errorStrategy = { task.exitStatus != 1 ? 'retry' : 'finish' }
+
+  maxRetries = 3
+
+  withName: REDUX {
+    memory = check_max( 64.GB * task.attempt, 'memory' )
+  }
+}
+```
 
 ### Putting `oncoanalyser` CLI arguments be put in a config file
 
@@ -1217,6 +1197,37 @@ The above afterScript directive will copy `.sh` and `.log` files from the `work/
 have the below example path:
 ```shell
 outdir/coloMini/logs/NFCORE_ONCOANALYSER:WGTS:REDUX_PROCESSING:REDUX.coloMini_coloMiniT.command.log
+```
+
+### Resuming runs in Google Batch?
+
+When resuming with runs in Google Batch (using `-resume`), you will need to enable overwriting of the `pipeline_info` files (performance
+and run time stats) as shown below. By default, these files are not overwritten thus preventing `oncoanalyser` from starting.
+
+```groovy
+timeline {
+    enabled   = true
+    overwrite = true
+    file      = "${params.outdir}/pipeline_info/execution_timeline.html"
+}
+
+report {
+    enabled   = true
+    overwrite = true
+    file      = "${params.outdir}/pipeline_info/execution_report.html"
+}
+
+trace {
+    enabled   = true
+    overwrite = true
+    file      = "${params.outdir}/pipeline_info/execution_trace.txt"
+}
+
+dag {
+    enabled   = true
+    overwrite = true
+    file      = "${params.outdir}/pipeline_info/pipeline_dag.svg"
+}
 ```
 
 
