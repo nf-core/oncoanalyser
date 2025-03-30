@@ -65,6 +65,17 @@ different working directory resulting in unnecessary disk/network usage.
 Other panels require [additional setup](#panel-reference-data) of reference data.
 - [**Other configuration**](#custom-configuration) such as [compute resources](#compute-resources) or [UMI settings](#umi-processing).
 
+
+:::note
+
+The default settings of `oncoanalyser` will accommodate typical sequencing depths for sample inputs and each individual
+tool is generally sequencing depth agnostic. However, variant calling is optimised for 100x tumor and 40x normal when
+invoked in `wgts` mode and expects sparse high-depth read data characteristic of panel sequencing when run in `targeted`
+mode. For atypical input sequence data you may consult the [WiGiTS documentation](https://github.com/hartwigmedical/hmftools) and
+[configure](#custom-tool-arguments) `oncoanalyser` accordingly.
+
+:::
+
 ### Outputs
 
 `oncoanalyser` will create the following files in your working directory:
