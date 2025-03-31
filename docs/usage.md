@@ -421,21 +421,18 @@ nextflow run nf-core/oncoanalyser \
 ```
 
 For other custom panels (including whole exome), the panel specific reference data must first be generated using a training procedure
-detailed [here](https://github.com/hartwigmedical/hmftools/blob/master/pipeline/README_TARGETED.md).
-The panel reference data paths must then be provided in a config file:
+detailed [here](https://github.com/hartwigmedical/hmftools/blob/master/pipeline/README_TARGETED.md). The panel reference data paths must
+then be provided in a config. The below config file shows how reference data paths would be provided for TSO500 as an example.
 
 ```groovy title="panel.config"
 params {
-    //
     ref_data_panel_data_path = "/path/to/panel_resources/"
 
-    // These are relative paths within the dir provided by `ref_data_panel_data_path`
-    panel_data_paths {
+    panel_data_paths { // These are relative paths within the dir provided by `ref_data_panel_data_path`
 
-        custom_panel { // This is the name that should be passed to the `--panel` argument
+        tso500 { // This should be identical to the name passed to the `--panel` argument
 
-            // Can be '37' or '38'
-            '38' {
+            '38' { // Ref genome version; can be '37' or '38'
 
                 driver_gene_panel           = 'common/DriverGenePanel.custom_panel.38.tsv'
                 sage_actionable_panel       = 'variants/ActionableCodingPanel.custom_panel.38.bed.gz'
@@ -461,7 +458,7 @@ params {
 Lastly, run `oncoanalyser`:
 - Provide both the general and panel reference data config files to `-config`
 - Pass the panel name to `--panel`. This should match the name defined in the panel resources config file
-- Provide argument `--force_panel` (when `--panel` is not `tso500`, currently the only supported panel type)
+- Provide argument `--force_panel` (when `--panel` is not `tso500`, currently the only pre-defined panel type)
 
 ```bash
 nextflow run nf-core/oncoanalyser \
