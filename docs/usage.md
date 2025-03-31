@@ -205,8 +205,8 @@ explicitly provide the BAM index with `filetype` as `bai`.
 
 ```csv title="samplesheet.redux_bam.csv"
 group_id,subject_id,sample_id,sample_type,sequence_type,filetype,filepath
-PATIENT1,PATIENT1,PATIENT1-T,tumor,dna,bam_redux,/path/to/PATIENT1-T.dna.redux.bam
-PATIENT1,PATIENT1,PATIENT1-T,tumor,dna,bai,/other/dir/PATIENT1-T.dna.redux.bam.bai
+PATIENT1,PATIENT1,PATIENT1-T,tumor,dna,bam_redux,/path/to/PATIENT1-T.redux.bam
+PATIENT1,PATIENT1,PATIENT1-T,tumor,dna,bai,/other/dir/PATIENT1-T.redux.bam.bai
 ```
 
 The `*.jitter_params.tsv` and `*.ms_table.tsv.gz` REDUX output files are expected to be in the same directory as the REDUX BAM, and are
@@ -215,10 +215,28 @@ be explicitly provided by specifying `redux_jitter_tsv` and `redux_ms_tsv` under
 
 ```csv title="samplesheet.redux_inputs.csv"
 group_id,subject_id,sample_id,sample_type,sequence_type,filetype,filepath
-PATIENT1,PATIENT1,PATIENT1-T,tumor,dna,bam_redux,/path/to/PATIENT1-T.dna.redux.bam
-PATIENT1,PATIENT1,PATIENT1-T,tumor,dna,redux_jitter_tsv,/other/dir/PATIENT1-T.dna.jitter_params.tsv
-PATIENT1,PATIENT1,PATIENT1-T,tumor,dna,redux_ms_tsv,/path/dir/PATIENT1-T.dna.ms_table.tsv.gz
+PATIENT1,PATIENT1,PATIENT1-T,tumor,dna,bam_redux,/path/to/PATIENT1-T.redux.bam
+PATIENT1,PATIENT1,PATIENT1-T,tumor,dna,redux_jitter_tsv,/other/dir/PATIENT1-T.jitter_params.tsv
+PATIENT1,PATIENT1,PATIENT1-T,tumor,dna,redux_ms_tsv,/path/dir/PATIENT1-T.ms_table.tsv.gz
 ```
+
+:::tip
+
+You can also [start from existing inputs](#starting-from-existing-inputs) other than from REDUX BAM
+
+:::
+
+:::warning
+
+When starting from REDUX BAM, the filenames must have the format:
+- `<sample_id>.redux.bam`
+- `<sample_id>.redux.bam.bai`
+- `<sample_id>.jitter_params.tsv`
+- `<sample_id>.ms_table.tsv.gz`
+
+For example, if `sample_id` is `PATIENT1-T`, the BAM filename must be `PATIENT1-T.redux.bam` and not e.g. `PATIENT1.redux.bam`
+
+:::
 
 ### Sample setups
 
