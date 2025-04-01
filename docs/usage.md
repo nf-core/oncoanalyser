@@ -366,10 +366,10 @@ params {
 
     genomes {
         GRCh38_hmf {
-            fasta            = "/path/to/Homo_sapiens_assembly38.alt.masked.fasta"
-            fai              = "/path/to/Homo_sapiens_assembly38.alt.masked.fasta.fai"
-            dict             = "/path/to/Homo_sapiens_assembly38.alt.masked.fasta.dict"
-            img              = "/path/to/Homo_sapiens_assembly38.alt.masked.fasta.img"
+            fasta            = "/path/to/GRCh38_masked_exclusions_alts_hlas.fasta"
+            fai              = "/path/to/GRCh38_masked_exclusions_alts_hlas.fasta.fai"
+            dict             = "/path/to/GRCh38_masked_exclusions_alts_hlas.fasta.dict"
+            img              = "/path/to/GRCh38_masked_exclusions_alts_hlas.fasta.img"
 
             // Only required when aligning DNA reads from FASTQ
             bwamem2_index    = "/path/to/bwa-mem2_index_dir/"
@@ -414,13 +414,13 @@ _GRCh38 genome (Hartwig): `GRCh38_hmf`_
 
 | Type                 | Link                                                                                                                                                                                                  |
 |:---------------------|:------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| FASTA                | [Homo_sapiens_assembly38.alt.masked.fasta](https://pub-cf6ba01919994c3cbd354659947f74d8.r2.dev/genomes/GRCh38_hmf/25.0/Homo_sapiens_assembly38.alt.masked.fasta)                                      |
-| FASTA index          | [Homo_sapiens_assembly38.alt.masked.fasta.fai](https://pub-cf6ba01919994c3cbd354659947f74d8.r2.dev/genomes/GRCh38_hmf/25.0/samtools_index-1.16/Homo_sapiens_assembly38.alt.masked.fasta.fai)          |
-| FASTA dictionary     | [Homo_sapiens_assembly38.alt.masked.fasta.dict](https://pub-cf6ba01919994c3cbd354659947f74d8.r2.dev/genomes/GRCh38_hmf/25.0/samtools_index-1.16/Homo_sapiens_assembly38.alt.masked.fasta.dict)        |
-| BWA-MEM2 index image | [Homo_sapiens_assembly38.alt.masked.fasta.img](https://pub-cf6ba01919994c3cbd354659947f74d8.r2.dev/genomes/GRCh38_hmf/25.0/bwa_index_image-0.7.18-r1243/Homo_sapiens_assembly38.alt.masked.fasta.img) |
-| BWA-MEM2 indexes     | [bwa-mem2_index-2.2.1.tar.gz](https://pub-cf6ba01919994c3cbd354659947f74d8.r2.dev/genomes/GRCh38_hmf/25.0/bwa-mem2_index-2.2.1.tar.gz)                                                                |
-| GRIDSS indexes       | [gridss_index-2.13.2.tar.gz](https://pub-cf6ba01919994c3cbd354659947f74d8.r2.dev/genomes/GRCh38_hmf/25.0/gridss_index-2.13.2.tar.gz)                                                                  |
-| STAR indexes         | [star_index-gencode_38-2.7.3a.tar.gz](https://pub-cf6ba01919994c3cbd354659947f74d8.r2.dev/genomes/GRCh38_hmf/25.0/star_index-gencode_38-2.7.3a.tar.gz)                                                |
+| FASTA                | [GRCh38_masked_exclusions_alts_hlas.fasta](https://pub-cf6ba01919994c3cbd354659947f74d8.r2.dev/genomes/GRCh38_hmf/25.1/GRCh38_masked_exclusions_alts_hlas.fasta)                                      |
+| FASTA index          | [GRCh38_masked_exclusions_alts_hlas.fasta.fai](https://pub-cf6ba01919994c3cbd354659947f74d8.r2.dev/genomes/GRCh38_hmf/25.1/samtools_index-1.16/GRCh38_masked_exclusions_alts_hlas.fasta.fai)          |
+| FASTA dictionary     | [GRCh38_masked_exclusions_alts_hlas.fasta.dict](https://pub-cf6ba01919994c3cbd354659947f74d8.r2.dev/genomes/GRCh38_hmf/25.1/samtools_index-1.16/GRCh38_masked_exclusions_alts_hlas.fasta.dict)        |
+| BWA-MEM2 index image | [GRCh38_masked_exclusions_alts_hlas.fasta.img](https://pub-cf6ba01919994c3cbd354659947f74d8.r2.dev/genomes/GRCh38_hmf/25.1/bwa_index_image-gatk-4.6.1.0/GRCh38_masked_exclusions_alts_hlas.fasta.img) |
+| BWA-MEM2 indexes     | [bwa-mem2_index-2.2.1.tar.gz](https://pub-cf6ba01919994c3cbd354659947f74d8.r2.dev/genomes/GRCh38_hmf/25.1/bwa-mem2_index-2.2.1.tar.gz)                                                                |
+| GRIDSS indexes       | [gridss_index-2.13.2.tar.gz](https://pub-cf6ba01919994c3cbd354659947f74d8.r2.dev/genomes/GRCh38_hmf/25.1/gridss_index-2.13.2.tar.gz)                                                                  |
+| STAR indexes         | [star_index-gencode_38-2.7.3a.tar.gz](https://pub-cf6ba01919994c3cbd354659947f74d8.r2.dev/genomes/GRCh38_hmf/25.1/star_index-gencode_38-2.7.3a.tar.gz)                                                |
 | WiGiTS data          | [hmf_pipeline_resources.38_v2.0.0--3.tar.gz](https://pub-cf6ba01919994c3cbd354659947f74d8.r2.dev/hmf_reference_data/hmftools/hmf_pipeline_resources.38_v2.0.0--3.tar.gz)                              |
 | TSO500 panel data    | [hmf_panel_resources.tso500.38_v2.0.0--3.tar.gz](https://pub-cf6ba01919994c3cbd354659947f74d8.r2.dev/hmf_reference_data/panels/hmf_panel_resources.tso500.38_v2.0.0--3.tar.gz)                        |
 
