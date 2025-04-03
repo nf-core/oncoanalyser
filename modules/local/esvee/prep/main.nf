@@ -36,8 +36,8 @@ process ESVEE_PREP {
         bam_files.add(normal_bam.toString())
     }
 
-    def sample_ids_string = String.join(",", sample_ids)
-    def bam_files_string = String.join(",", bam_files)
+    def sample_ids_string = String.join(',', sample_ids)
+    def bam_files_string = String.join(',', bam_files)
 
     """
     mkdir -p prep/
@@ -54,7 +54,7 @@ process ESVEE_PREP {
         -blacklist_bed ${sv_blocklist} \\
         -known_fusion_bed ${known_fusions} \\
         -bamtool \$SAMBAMBA_PATH \\
-        -write_types "JUNCTIONS;BAM;FRAGMENT_LENGTH_DIST" \\
+        -write_types 'JUNCTIONS;BAM;FRAGMENT_LENGTH_DIST' \\
         -output_dir prep/ \\
         -threads ${task.cpus} \\
         -log_level DEBUG \\
@@ -69,8 +69,8 @@ process ESVEE_PREP {
     """
     mkdir -p prep/
 
-    ${ (meta.normal_id != null) ? "touch prep/${meta.normal_id}.esvee.prep.bam" : "" }
-    ${ (meta.normal_id != null) ? "touch prep/${meta.normal_id}.esvee.prep.bam.bai" : "" }
+    ${ (meta.normal_id != null) ? "touch prep/${meta.normal_id}.esvee.prep.bam" : '' }
+    ${ (meta.normal_id != null) ? "touch prep/${meta.normal_id}.esvee.prep.bam.bai" : '' }
     touch "prep/${meta.tumor_id}.esvee.prep.bam"
     touch "prep/${meta.tumor_id}.esvee.prep.bam.bai"
     touch "prep/${meta.tumor_id}.esvee.prep.fragment_length.tsv"

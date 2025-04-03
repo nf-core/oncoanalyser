@@ -34,8 +34,8 @@ process ESVEE_DEPTH_ANNOTATOR {
         bam_files.add(normal_bam.toString())
     }
 
-    def sample_ids_string = String.join(",", sample_ids)
-    def bam_files_string = String.join(",", bam_files)
+    def sample_ids_string = String.join(',', sample_ids)
+    def bam_files_string = String.join(',', bam_files)
 
     """
     mkdir -p depth_annotation/

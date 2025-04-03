@@ -38,17 +38,17 @@ process SAGE_SOMATIC {
     def reference_ids = []
     if (meta.normal_id != null) reference_ids.add(meta.normal_id)
     if (meta.donor_id != null) reference_ids.add(meta.donor_id)
-    def reference_arg = reference_ids.size() > 0 ? "-reference ${String.join(",", reference_ids)}" : ""
+    def reference_arg = reference_ids.size() > 0 ? "-reference ${String.join(',', reference_ids)}" : ''
 
     def reference_bams = []
     if (normal_bam) reference_bams.add(normal_bam.toString())
     if (donor_bam) reference_bams.add(donor_bam.toString())
-    def reference_bam_arg = reference_bams.size() > 0 ? "-reference_bam ${String.join(",", reference_bams)}" : ""
+    def reference_bam_arg = reference_bams.size() > 0 ? "-reference_bam ${String.join(',', reference_bams)}" : ''
 
     def ref_sample_count_arg = "-ref_sample_count ${reference_ids.size()}"
 
     def run_mode = Utils.getEnumFromString(params.mode, Constants.RunMode)
-    def high_depth_mode_arg = (run_mode === Constants.RunMode.TARGETED) ? "-high_depth_mode" : ""
+    def high_depth_mode_arg = (run_mode === Constants.RunMode.TARGETED) ? '-high_depth_mode' : ''
 
     """
     mkdir -p somatic/

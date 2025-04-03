@@ -29,10 +29,10 @@ process ESVEE_ASSEMBLE {
 
     def xmx_mod = task.ext.xmx_mod ?: 0.95
 
-    def reference_arg = meta.normal_id != null ? "-reference ${meta.normal_id}" : ""
-    def reference_bam_arg = meta.normal_id != null ? "-reference_bam ${normal_prep_bam}" : ""
+    def reference_arg = meta.normal_id != null ? "-reference ${meta.normal_id}" : ''
+    def reference_bam_arg = meta.normal_id != null ? "-reference_bam ${normal_prep_bam}" : ''
 
-    def decoy_genome_arg = decoy_sequences_image ? "-decoy_genome ${decoy_sequences_image}" : ""
+    def decoy_genome_arg = decoy_sequences_image ? "-decoy_genome ${decoy_sequences_image}" : ''
 
     """
     mkdir -p assemble/
@@ -48,7 +48,7 @@ process ESVEE_ASSEMBLE {
         -ref_genome ${genome_fasta} \\
         -ref_genome_version ${genome_ver} \\
         ${decoy_genome_arg} \\
-        -write_types "JUNC_ASSEMBLY;PHASED_ASSEMBLY;ALIGNMENT;BREAKEND;VCF" \\
+        -write_types 'JUNC_ASSEMBLY;PHASED_ASSEMBLY;ALIGNMENT;BREAKEND;VCF' \\
         -output_dir assemble/ \\
         -threads ${task.cpus} \\
         -perf_log_time 10 \\

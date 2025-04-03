@@ -28,8 +28,8 @@ process CUPPA {
     def xmx_mod = task.ext.xmx_mod ?: 0.75
 
     def isofox_dir_name = categories == 'ALL' ? 'isofox_dir__prepared' : isofox_dir
-    def isofox_dir_arg = isofox_dir ? "-isofox_dir ${isofox_dir_name}" : ""
-    def ref_alt_sj_sites_arg = isofox_dir ? "-ref_alt_sj_sites ${cuppa_alt_sj}" : ""
+    def isofox_dir_arg = isofox_dir ? "-isofox_dir ${isofox_dir_name}" : ''
+    def ref_alt_sj_sites_arg = isofox_dir ? "-ref_alt_sj_sites ${cuppa_alt_sj}" : ''
 
     def purple_dir_arg = purple_dir ? "-purple_dir ${purple_dir}" : ''
     def linx_dir_arg = linx_dir ? "-linx_dir ${linx_dir}" : ''

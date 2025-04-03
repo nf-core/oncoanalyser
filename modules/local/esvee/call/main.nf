@@ -31,7 +31,7 @@ process ESVEE_CALL {
 
     def xmx_mod = task.ext.xmx_mod ?: 0.95
 
-    def reference_arg = meta.normal_id != null ? "-reference ${meta.normal_id}" : ""
+    def reference_arg = meta.normal_id != null ? "-reference ${meta.normal_id}" : ''
 
     """
     mkdir -p caller/
@@ -73,8 +73,8 @@ process ESVEE_CALL {
     touch caller/${meta.tumor_id}.esvee.unfiltered.vcf.gz.tbi
     touch caller/${meta.tumor_id}.esvee.somatic.vcf.gz.tbi
 
-    ${ (meta.normal_id != null) ? "touch caller/${meta.tumor_id}.esvee.germline.vcf.gz" : "" }
-    ${ (meta.normal_id != null) ? "touch caller/${meta.tumor_id}.esvee.germline.vcf.gz.tbi" : "" }
+    ${ (meta.normal_id != null) ? "touch caller/${meta.tumor_id}.esvee.germline.vcf.gz" : '' }
+    ${ (meta.normal_id != null) ? "touch caller/${meta.tumor_id}.esvee.germline.vcf.gz.tbi" : '' }
 
     echo -e '${task.process}:\\n  stub: noversions\\n' > versions.yml
     """
