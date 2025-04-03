@@ -609,7 +609,7 @@ nextflow run nf-core/oncoanalyser \
   --input samplesheet.neo_inputs.csv \
   --outdir output/ \
   --processes_manual \
-  --processes_include neo,redux,amber,cobalt,sage,pave,esvee,purple,lilac,isofox
+  --processes_include neo,redux,amber,cobalt,sage,pave,esvee,purple,linx,lilac,isofox
 ```
 
 :::warning
@@ -633,6 +633,7 @@ PATIENT1,PATIENT1,PATIENT1-T,tumor,dna,bam,/path/to/PATIENT1-T.dna.wgs.bam
 PATIENT1,PATIENT1,PATIENT1-RNA,tumor,rna,bam,/path/to/PATIENT1-T.rna.wgs.bam
 PATIENT1,PATIENT1,PATIENT1-RNA,tumor,rna,isofox_dir,/path/to/PATIENT1.isofox_dir/
 PATIENT1,PATIENT1,PATIENT1-T,tumor,dna,purple_dir,/path/to/PATIENT1.purple_dir/
+PATIENT1,PATIENT1,PATIENT1-T,tumor,dna,linx_anno_dir,/path/to/PATIENT1.linx_anno_dir/
 PATIENT1,PATIENT1,PATIENT1-T,tumor,dna,lilac_dir,/path/to/PATIENT1.lilac_dir/
 ```
 
