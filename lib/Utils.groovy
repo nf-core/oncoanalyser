@@ -348,6 +348,12 @@ class Utils {
                 Nextflow.exit(1)
             }
 
+            // Do not allow CRAM RNA input
+            if (Utils.hasTumorRnaBam(meta) && Utils.getTumorRnaBam(meta).toString().endsWith('cram')) {
+                log.error "found tumor RNA CRAM input for ${meta.group_id} but RNA CRAM input is not supported"
+                Nextflow.exit(1)
+            }
+
             // Enforce unique samples names within groups
             def sample_ids_duplicated = sample_keys
                 .groupBy { meta.getOrDefault(it, [:]).getOrDefault('sample_id', null) }
