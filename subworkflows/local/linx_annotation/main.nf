@@ -54,7 +54,7 @@ workflow LINX_ANNOTATION {
 
             def has_tumor_normal = Utils.hasTumorDna(meta) && Utils.hasNormalDna(meta)
             def has_sv_germline_vcf = file(purple_dir).resolve("${tumor_id}.purple.sv.germline.vcf.gz")
-            def has_existing = Utils.hasExistingInput(meta, Constants.INPUT.PURPLE_DIR)
+            def has_existing = Utils.hasExistingInput(meta, Constants.INPUT.LINX_ANNO_DIR_NORMAL)
 
             runnable: has_tumor_normal && has_sv_germline_vcf && !has_existing
             skip: true
@@ -99,7 +99,7 @@ workflow LINX_ANNOTATION {
         .branch { meta, purple_dir ->
 
             def has_tumor = Utils.hasTumorDna(meta)
-            def has_existing = Utils.hasExistingInput(meta, Constants.INPUT.PURPLE_DIR)
+            def has_existing = Utils.hasExistingInput(meta, Constants.INPUT.LINX_ANNO_DIR_TUMOR)
 
             runnable: has_tumor && !has_existing
             skip: true
