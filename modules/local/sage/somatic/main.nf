@@ -47,6 +47,10 @@ process SAGE_SOMATIC {
     if (donor_bam) reference_bams.add(donor_bam.toString())
     def reference_bam_arg = reference_bams.size() > 0 ? "-reference_bam ${String.join(",", reference_bams)}" : ""
 
+    def run_tinc_arg = ""
+    if(!donor_bam)
+        run_tinc_arg = "-run_tinc" // TINC mode is incompatible with donor samples
+
     def ref_sample_count_arg = "-ref_sample_count ${reference_ids.size()}"
 
     // High depth mode
@@ -85,7 +89,7 @@ process SAGE_SOMATIC {
         -ensembl_data_dir ${ensembl_data_resources} \\
         ${high_depth_mode_arg} \\
         ${gnomad_args} \\
-        -run_tinc \\
+        ${run_tinc_arg} \\
         -bqr_write_plot \\
         -threads ${task.cpus} \\
         -output_vcf somatic/${meta.tumor_id}.sage.somatic.vcf.gz \\
