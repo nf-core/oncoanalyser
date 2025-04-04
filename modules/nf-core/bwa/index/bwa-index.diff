@@ -1,5 +1,14 @@
 Changes in module 'nf-core/bwa/index'
-'modules/nf-core/bwa/index/environment.yml' is unchanged
+Changes in 'bwa/index/environment.yml':
+--- modules/nf-core/bwa/index/environment.yml
++++ modules/nf-core/bwa/index/environment.yml
+@@ -4,4 +4,4 @@
+   - conda-forge
+   - bioconda
+ dependencies:
+-  - bioconda::bwa=0.7.18
++  - bioconda::bwa=0.7.19
+
 Changes in 'bwa/index/meta.yml':
 --- modules/nf-core/bwa/index/meta.yml
 +++ modules/nf-core/bwa/index/meta.yml
@@ -60,8 +69,14 @@ Changes in 'bwa/index/meta.yml':
 Changes in 'bwa/index/main.nf':
 --- modules/nf-core/bwa/index/main.nf
 +++ modules/nf-core/bwa/index/main.nf
-@@ -8,25 +8,33 @@
-         'biocontainers/bwa:0.7.18--he4a0461_0' }"
+@@ -4,29 +4,37 @@
+ 
+     conda "${moduleDir}/environment.yml"
+     container "${ workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container ?
+-        'https://depot.galaxyproject.org/singularity/bwa:0.7.18--he4a0461_0' :
+-        'biocontainers/bwa:0.7.18--he4a0461_0' }"
++        'https://depot.galaxyproject.org/singularity/bwa:0.7.19--h577a1d6_0' :
++        'biocontainers/bwa:0.7.19--h577a1d6_0' }"
  
      input:
 -    tuple val(meta), path(fasta)
