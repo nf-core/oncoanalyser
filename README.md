@@ -127,7 +127,7 @@ in the below table.
 
 ## Known issues
 
-There are currently no known issues.
+Please refer to [this page](https://github.com/nf-core/oncoanalyser/issues/177) for details regarding any known issues.
 
 ## Credits
 
