@@ -63,7 +63,6 @@ class Constants {
         REDUX_MS_TSV,
         // Process
         AMBER_DIR,
-        BAMTOOLS,
         BAMTOOLS_DIR,
         COBALT_DIR,
         ESVEE_VCF,
@@ -251,18 +250,13 @@ class Constants {
             SequenceType.DNA,
         ],
 
-        BAMTOOLS_DIR: [
+        BAMTOOLS_DIR_TUMOR: [
             FileType.BAMTOOLS_DIR,
-            [SampleType.TUMOR, SampleType.TUMOR_NORMAL],
-            SequenceType.DNA,
-        ],
-        BAMTOOLS_TUMOR: [
-            FileType.BAMTOOLS,
             SampleType.TUMOR,
             SequenceType.DNA,
         ],
-        BAMTOOLS_NORMAL: [
-            FileType.BAMTOOLS,
+        BAMTOOLS_DIR_NORMAL: [
+            FileType.BAMTOOLS_DIR,
             SampleType.NORMAL,
             SequenceType.DNA,
         ],

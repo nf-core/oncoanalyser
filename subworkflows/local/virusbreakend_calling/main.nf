@@ -97,7 +97,7 @@ workflow VIRUSBREAKEND_CALLING {
             def inputs = [
                 virus_tsv,
                 Utils.selectCurrentOrExisting(purple_dir, meta, Constants.INPUT.PURPLE_DIR),
-                Utils.selectCurrentOrExisting(somatic_metrics, meta, Constants.INPUT.BAMTOOLS_DIR),
+                Utils.selectCurrentOrExisting(somatic_metrics, meta, Constants.INPUT.BAMTOOLS_DIR_TUMOR),
             ]
 
             return [meta, *inputs]

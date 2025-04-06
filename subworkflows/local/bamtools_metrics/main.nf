@@ -35,7 +35,7 @@ workflow BAMTOOLS_METRICS {
             ]
         }
         .branch { meta, bam, bai ->
-            def has_existing = Utils.hasExistingInput(meta, Constants.INPUT.BAMTOOLS_TUMOR)
+            def has_existing = Utils.hasExistingInput(meta, Constants.INPUT.BAMTOOLS_DIR_TUMOR)
             runnable: bam && !has_existing
             skip: true
                 return meta
@@ -52,7 +52,7 @@ workflow BAMTOOLS_METRICS {
             ]
         }
         .branch { meta, bam, bai ->
-            def has_existing = Utils.hasExistingInput(meta, Constants.INPUT.BAMTOOLS_NORMAL)
+            def has_existing = Utils.hasExistingInput(meta, Constants.INPUT.BAMTOOLS_DIR_NORMAL)
             runnable: bam && !has_existing
             skip: true
                 return meta

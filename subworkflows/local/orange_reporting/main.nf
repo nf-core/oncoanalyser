@@ -99,8 +99,8 @@ workflow ORANGE_REPORTING {
             // NOTE(SW): avoiding further complexity with loops etc
 
             def inputs_selected = [
-                Utils.selectCurrentOrExisting(inputs[0], meta, Constants.INPUT.BAMTOOLS_TUMOR),
-                Utils.selectCurrentOrExisting(inputs[1], meta, Constants.INPUT.BAMTOOLS_NORMAL),
+                Utils.selectCurrentOrExisting(inputs[0], meta, Constants.INPUT.BAMTOOLS_DIR_TUMOR),
+                Utils.selectCurrentOrExisting(inputs[1], meta, Constants.INPUT.BAMTOOLS_DIR_NORMAL),
                 Utils.selectCurrentOrExisting(inputs[2], meta, Constants.INPUT.SAGE_DIR_TUMOR),
                 Utils.selectCurrentOrExisting(inputs[3], meta, Constants.INPUT.SAGE_DIR_NORMAL),
                 Utils.selectCurrentOrExisting(inputs[4], meta, Constants.INPUT.SAGE_APPEND_VCF_TUMOR),
