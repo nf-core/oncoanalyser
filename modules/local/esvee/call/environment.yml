@@ -4,4 +4,4 @@ channels:
   - bioconda
   - defaults
 dependencies:
-  - bioconda::hmftools-esvee=1.0
+  - bioconda::hmftools-esvee=1.0.3

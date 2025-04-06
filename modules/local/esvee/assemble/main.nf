@@ -4,8 +4,8 @@ process ESVEE_ASSEMBLE {
 
     conda "${moduleDir}/environment.yml"
     container "${ workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container ?
-        'https://depot.galaxyproject.org/singularity/hmftools-esvee:1.0--hdfd78af_0' :
-        'biocontainers/hmftools-esvee:1.0--hdfd78af_0' }"
+        'https://depot.galaxyproject.org/singularity/hmftools-esvee:1.0.3--hdfd78af_0' :
+        'biocontainers/hmftools-esvee:1.0.3--hdfd78af_0' }"
 
     input:
     tuple val(meta), path(tumor_prep_bam), path(tumor_prep_bai), path(normal_prep_bam), path(normal_prep_bai), path(prep_dir)
@@ -29,10 +29,10 @@ process ESVEE_ASSEMBLE {
 
     def xmx_mod = task.ext.xmx_mod ?: 0.95
 
-    def reference_arg = meta.normal_id != null ? "-reference ${meta.normal_id}" : ""
-    def reference_bam_arg = meta.normal_id != null ? "-reference_bam ${normal_prep_bam}" : ""
+    def reference_arg = meta.normal_id != null ? "-reference ${meta.normal_id}" : ''
+    def reference_bam_arg = meta.normal_id != null ? "-reference_bam ${normal_prep_bam}" : ''
 
-    def decoy_genome_arg = decoy_sequences_image ? "-decoy_genome ${decoy_sequences_image}" : ""
+    def decoy_genome_arg = decoy_sequences_image ? "-decoy_genome ${decoy_sequences_image}" : ''
 
     """
     mkdir -p assemble/
@@ -48,7 +48,7 @@ process ESVEE_ASSEMBLE {
         -ref_genome ${genome_fasta} \\
         -ref_genome_version ${genome_ver} \\
         ${decoy_genome_arg} \\
-        -write_types "JUNC_ASSEMBLY;PHASED_ASSEMBLY;ALIGNMENT;BREAKEND;VCF" \\
+        -write_types 'JUNC_ASSEMBLY;PHASED_ASSEMBLY;ALIGNMENT;BREAKEND;VCF' \\
         -output_dir assemble/ \\
         -threads ${task.cpus} \\
         -perf_log_time 10 \\

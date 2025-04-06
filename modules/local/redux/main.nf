@@ -1,11 +1,11 @@
 process REDUX {
     tag "${meta.id}"
-    label 'process_medium'
+    label 'process_high'
 
     conda "${moduleDir}/environment.yml"
     container "${ workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container ?
-        'https://depot.galaxyproject.org/singularity/hmftools-redux:1.1--hdfd78af_1' :
-        'biocontainers/hmftools-redux:1.1--hdfd78af_1' }"
+        'https://depot.galaxyproject.org/singularity/hmftools-redux:1.1.2--hdfd78af_0' :
+        'biocontainers/hmftools-redux:1.1.2--hdfd78af_0' }"
 
     input:
     tuple val(meta), path(bams), path(bais)

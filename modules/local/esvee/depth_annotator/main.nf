@@ -4,8 +4,8 @@ process ESVEE_DEPTH_ANNOTATOR {
 
     conda "${moduleDir}/environment.yml"
     container "${ workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container ?
-        'https://depot.galaxyproject.org/singularity/hmftools-esvee:1.0--hdfd78af_0' :
-        'biocontainers/hmftools-esvee:1.0--hdfd78af_0' }"
+        'https://depot.galaxyproject.org/singularity/hmftools-esvee:1.0.3--hdfd78af_0' :
+        'biocontainers/hmftools-esvee:1.0.3--hdfd78af_0' }"
 
     input:
     tuple val(meta), path(tumor_bam), path(tumor_bai), path(normal_bam), path(normal_bai), path(raw_vcf)
@@ -14,9 +14,9 @@ process ESVEE_DEPTH_ANNOTATOR {
     path unmap_regions
 
     output:
-    tuple val(meta), path("depth_annotation/")                                           , emit: depth_annotation_dir
-    tuple val(meta), path("depth_annotation/${meta.tumor_id}.esvee.ref_depth.vcf.gz")    , emit: ref_depth_vcf
-    path 'versions.yml'                                                                  , emit: versions
+    tuple val(meta), path("depth_annotation/")                                       , emit: depth_annotation_dir
+    tuple val(meta), path("depth_annotation/${meta.tumor_id}.esvee.ref_depth.vcf.gz"), emit: ref_depth_vcf
+    path 'versions.yml'                                                              , emit: versions
 
     when:
     task.ext.when == null || task.ext.when
@@ -34,8 +34,8 @@ process ESVEE_DEPTH_ANNOTATOR {
         bam_files.add(normal_bam.toString())
     }
 
-    def sample_ids_string = String.join(",", sample_ids)
-    def bam_files_string = String.join(",", bam_files)
+    def sample_ids_string = String.join(',', sample_ids)
+    def bam_files_string = String.join(',', bam_files)
 
     """
     mkdir -p depth_annotation/

@@ -4,8 +4,8 @@ process ESVEE_CALL {
 
     conda "${moduleDir}/environment.yml"
     container "${ workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container ?
-        'https://depot.galaxyproject.org/singularity/hmftools-esvee:1.0--hdfd78af_0' :
-        'biocontainers/hmftools-esvee:1.0--hdfd78af_0' }"
+        'https://depot.galaxyproject.org/singularity/hmftools-esvee:1.0.3--hdfd78af_0' :
+        'biocontainers/hmftools-esvee:1.0.3--hdfd78af_0' }"
 
     input:
     tuple val(meta), path(ref_depth_vcf), path(prep_dir)
@@ -17,11 +17,11 @@ process ESVEE_CALL {
     path repeatmasker_annotations
 
     output:
-    tuple val(meta), path("caller/"), emit: caller_dir
+    tuple val(meta), path("caller/")                                                                                                     , emit: caller_dir
     tuple val(meta), path("caller/${meta.tumor_id}.esvee.unfiltered.vcf.gz"), path("caller/${meta.tumor_id}.esvee.unfiltered.vcf.gz.tbi"), emit: unfiltered_vcf
-    tuple val(meta), path("caller/${meta.tumor_id}.esvee.somatic.vcf.gz"),    path("caller/${meta.tumor_id}.esvee.somatic.vcf.gz.tbi"),    emit: somatic_vcf
-    tuple val(meta), path("caller/${meta.tumor_id}.esvee.germline.vcf.gz"),   path("caller/${meta.tumor_id}.esvee.germline.vcf.gz.tbi"),   emit: germline_vcf, optional: true
-    path 'versions.yml', emit: versions
+    tuple val(meta), path("caller/${meta.tumor_id}.esvee.somatic.vcf.gz"),    path("caller/${meta.tumor_id}.esvee.somatic.vcf.gz.tbi")   , emit: somatic_vcf
+    tuple val(meta), path("caller/${meta.tumor_id}.esvee.germline.vcf.gz"),   path("caller/${meta.tumor_id}.esvee.germline.vcf.gz.tbi")  , emit: germline_vcf, optional: true
+    path 'versions.yml'                                                                                                                  , emit: versions
 
     when:
     task.ext.when == null || task.ext.when
@@ -31,7 +31,7 @@ process ESVEE_CALL {
 
     def xmx_mod = task.ext.xmx_mod ?: 0.95
 
-    def reference_arg = meta.normal_id != null ? "-reference ${meta.normal_id}" : ""
+    def reference_arg = meta.normal_id != null ? "-reference ${meta.normal_id}" : ''
 
     """
     mkdir -p caller/
@@ -73,8 +73,8 @@ process ESVEE_CALL {
     touch caller/${meta.tumor_id}.esvee.unfiltered.vcf.gz.tbi
     touch caller/${meta.tumor_id}.esvee.somatic.vcf.gz.tbi
 
-    ${ (meta.normal_id != null) ? "touch caller/${meta.tumor_id}.esvee.germline.vcf.gz" : "" }
-    ${ (meta.normal_id != null) ? "touch caller/${meta.tumor_id}.esvee.germline.vcf.gz.tbi" : "" }
+    ${ (meta.normal_id != null) ? "touch caller/${meta.tumor_id}.esvee.germline.vcf.gz" : '' }
+    ${ (meta.normal_id != null) ? "touch caller/${meta.tumor_id}.esvee.germline.vcf.gz.tbi" : '' }
 
     echo -e '${task.process}:\\n  stub: noversions\\n' > versions.yml
     """

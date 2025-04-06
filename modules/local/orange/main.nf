@@ -4,8 +4,8 @@ process ORANGE {
 
     conda "${moduleDir}/environment.yml"
     container "${ workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container ?
-        'https://depot.galaxyproject.org/singularity/hmftools-orange:3.7.1--hdfd78af_0' :
-        'biocontainers/hmftools-orange:3.7.1--hdfd78af_0' }"
+        'https://depot.galaxyproject.org/singularity/hmftools-orange:3.8.1--hdfd78af_0' :
+        'biocontainers/hmftools-orange:3.8.1--hdfd78af_0' }"
 
     input:
     tuple val(meta),
@@ -53,7 +53,7 @@ process ORANGE {
     def pipeline_version_str = pipeline_version ?: 'not specified'
 
     def run_mode = Utils.getEnumFromString(params.mode, Constants.RunMode);
-    def experiment_type = (run_mode === Constants.RunMode.WGTS) ? "WGS" : "PANEL"
+    def experiment_type = (run_mode === Constants.RunMode.WGTS) ? 'WGS' : 'PANEL'
 
     def virus_dir_arg = virusinterpreter_dir ? "-virus_dir ${virusinterpreter_dir}" : ''
     def lilac_dir_arg = lilac_dir ? "-lilac_dir ${lilac_dir}" : ''
@@ -75,7 +75,8 @@ process ORANGE {
     def isofox_gene_distribution_arg = isofox_gene_distribution ? "-isofox_gene_distribution ${isofox_gene_distribution}" : ''
     def isofox_alt_sj_arg = isofox_alt_sj ? "-isofox_alt_sj_cohort ${isofox_alt_sj}" : ''
 
-    def doid_arg = meta.cancer_type ?: "162"
+    // NOTE(SW): DOID label: 162 [cancer]; Hartwig cohort group: unknown
+    def doid_arg = meta.cancer_type ?: '162'
 
     """
     echo "${pipeline_version_str}" > pipeline_version.txt
@@ -115,8 +116,6 @@ process ORANGE {
     if [[ ! -e ${plot_dir}/ ]]; then
         mkdir -p ${plot_dir}/;
     fi;
-
-    # NOTE(SW): DOID label: 162 [cancer]; Hartwig cohort group: unknown
 
     mkdir -p output/
 
