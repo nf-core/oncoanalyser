@@ -24,7 +24,7 @@ process FASTP {
     script:
     def args = task.ext.args ?: ''
 
-    def split_by_lines_arg = max_fastq_records > 0 ? "--split_by_lines ${4 * max_fastq_records}" : ''
+    def split_by_lines_arg = max_fastq_records > 0 ? "--split_by_lines ${4 * max_fastq_records.toLong()}" : ''
 
     def umi_args_list = []
     if (umi_location) umi_args_list.add("--umi_loc ${umi_location}")
