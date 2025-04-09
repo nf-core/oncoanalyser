@@ -15,15 +15,15 @@ accept DNA and RNA sequencing data from matched tumor / normal (with optional
 [donor](#paired-tumor-and-normal-dna-with-donor-sample) sample) and tumor-only samples. The below table shows the
 supported [sample setups](#sample-setups):
 
-| Data type | Tumor DNA          | Normal DNA         | Donor DNA          | Tumor RNA          |
-| --------- | ------------------ | ------------------ | ------------------ | ------------------ |
-| DNA       | :white_check_mark: | -                  | -                  | -                  |
-| DNA       | :white_check_mark: | :white_check_mark: | -                  | -                  |
-| DNA       | :white_check_mark: | :white_check_mark: | :white_check_mark: | -                  |
-| DNA + RNA | :white_check_mark: | -                  | -                  | :white_check_mark: |
-| DNA + RNA | :white_check_mark: | :white_check_mark: | -                  | :white_check_mark: |
+| Data type |     Tumor DNA      |     Normal DNA     |     Donor DNA      |     Tumor RNA      |
+| --------- | :----------------: | :----------------: | :----------------: | :----------------: |
+| DNA       | :white_check_mark: |         -          |         -          |         -          |
+| DNA       | :white_check_mark: | :white_check_mark: |         -          |         -          |
+| DNA       | :white_check_mark: | :white_check_mark: | :white_check_mark: |         -          |
+| DNA + RNA | :white_check_mark: |         -          |         -          | :white_check_mark: |
+| DNA + RNA | :white_check_mark: | :white_check_mark: |         -          | :white_check_mark: |
 | DNA + RNA | :white_check_mark: | :white_check_mark: | :white_check_mark: | :white_check_mark: |
-| RNA       | -                  | -                  | -                  | :white_check_mark: |
+| RNA       |         -          |         -          |         -          | :white_check_mark: |
 
 ## Running the pipeline
 
@@ -97,14 +97,14 @@ You can also generate such `yaml`/`json` files via [nf-core/launch](https://nf-c
 When you run the above command, Nextflow automatically pulls the pipeline code from GitHub and stores it as a cached version. When running the pipeline after this, it will always use the cached version if available - even if the pipeline has been updated since. To make sure that you're running the latest version of the pipeline, make sure that you regularly update the cached version of the pipeline:
 
 ```bash
-nextflow pull oncoanalyser
+nextflow pull nf-core/oncoanalyser
 ```
 
 ### Reproducibility
 
 It is a good idea to specify a pipeline version when running the pipeline on your data. This ensures that a specific version of the pipeline code and software are used when you run your pipeline. If you keep using the same tag, you'll be running the same version of the pipeline, even if there have been changes to the code since.
 
-First, go to the [nf-core/oncoanalyser releases page](https://github.com/nf-core/oncoanalyser/releases) and find the latest pipeline version - numeric only (e.g. `1.0.0`). Then specify this when running the pipeline with `-r` (one hyphen) - e.g. `-r 1.0.0`. Of course, you can switch to another version by changing the number after the `-r` flag.
+First, go to the [nf-core/oncoanalyser releases page](https://github.com/nf-core/oncoanalyser/releases) and find the latest pipeline version - numeric only (e.g. `2.0.0`). Then specify this when running the pipeline with `-r` (one hyphen) - e.g. `-r 2.0.0`. Of course, you can switch to another version by changing the number after the `-r` flag.
 
 This version number will be logged in reports when you run the pipeline, so that you'll know what you used when you look back in the future. For example, in the `<outdir>/pipeline_info/software_versions.yml` file.
 
@@ -121,16 +121,16 @@ If you wish to share such a profile (such as upload as supplementary material fo
 The samplesheet contains information in CSV format for each sample to be analysed by `oncoanalyser`, and uses a header
 row as the first line with the below columns:
 
-| Column          | Description                                                                                                                                                                         |
-| :-------------- | :---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `group_id`      | Groups `sample_id` entries (e.g. tumor DNA, normal DNA, tumor RNA for one patient) into the same analysis                                                                           |
-| `subject_id`    | Subject/patient identifier, used internally to perform sanity check when processing multiple groups                                                                                 |
-| `sample_id`     | Sample identifier                                                                                                                                                                   |
-| `sample_type`   | Sample type: `tumor`, `normal`                                                                                                                                                      |
-| `sequence_type` | Sequence type: `dna`, `rna`                                                                                                                                                         |
-| `filetype`      | File type: e.g. `fastq`, `bam`, `bai`, `cram`, `crai`; a full list of valid values can be found [here](https://github.com/nf-core/oncoanalyser/blob/2.0.0/lib/Constants.groovy#L54) |
-| `info`          | Additional sample information such as sequencing library and lane for [FASTQ](#fastq) files, this column is only required when running an analysis from FASTQ                       |
-| `filepath`      | Absolute filepath to input file, which can be a local filepath or supported protocol (http, https, ftp, s3, az, gz)                                                                 |
+| Column          | Description                                                                                                                                                         |
+| :-------------- | :------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `group_id`      | Groups `sample_id` entries (e.g. tumor DNA, normal DNA, tumor RNA for one patient) into the same analysis                                                           |
+| `subject_id`    | Subject/patient identifier, used internally to perform sanity check when processing multiple groups                                                                 |
+| `sample_id`     | Sample identifier                                                                                                                                                   |
+| `sample_type`   | Sample type: `tumor`, `normal`                                                                                                                                      |
+| `sequence_type` | Sequence type: `dna`, `rna`                                                                                                                                         |
+| `filetype`      | File type: e.g. `fastq`, `bam`, `bai`; a full list of valid values can be found [here](https://github.com/nf-core/oncoanalyser/blob/2.0.0/lib/Constants.groovy#L54) |
+| `info`          | Additional sample information such as sequencing library and lane for [FASTQ](#fastq) files, this column is only required when running an analysis from FASTQ       |
+| `filepath`      | Absolute filepath to input file, which can be a local filepath or supported protocol (http, https, ftp, s3, az, gz)                                                 |
 
 The identifiers provided in the samplesheet are used to determine output file paths:
 
@@ -344,10 +344,11 @@ nextflow run nf-core/oncoanalyser \
 ```
 
 Executing the above command will download and prepare default reference data without running any analysis, and once
-complete the prepared reference files can be found in `./prepare_reference/reference_data/2.0.0/<datetimestamp>/`. It is
-recommended to remove the Nextflow work directory after staging data to free disk space.
+complete the prepared reference files can be found in `./prepare_reference/reference_data/2.0.0/<datetimestamp>/`. You can then provide
+a config file that points to these reference files (see [Configuring reference data](#configuring-reference-data)) which can
+be used for subsequent `oncoanalyser` runs.
 
-To use locally staged reference data, see [Configuring reference data](#configuring-reference-data).
+It is recommended to remove the Nextflow work directory once reference data staging is complete to free disk space.
 
 #### Manual staging
 
