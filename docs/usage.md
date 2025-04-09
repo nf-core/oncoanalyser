@@ -508,9 +508,11 @@ Each index required for the analysis will first be created before running the re
 
 :::warning
 
-For GRCh38 genome builds, It is strongly recommended to remove or mask HLA class I alt contigs. These lead to poor variant calling in HLA
-class I genes and poor HLA typing. We will soon release a standalone utility to remap HLA contigs back to the original BAM for users who
-want to start from BAM.
+For GRCh38 genome builds, HLA typing and variant calling in `oncoanalyser` is incompatible with BAMs with fragments aligned to HLA class I
+ALT contigs. These contigs should be removed or hard masked from the genome prior to use in `oncoanalyser`. For cohorts already mapped to a
+genome wth HLA class I ALT contigs, these can either be converted to FASTQ and remapped with an appropriate build, or you can stand-alone
+utility to remap the HLA reads ([BamTools executable](https://github.com/hartwigmedical/hmftools/releases/tag/bam-tools-v1.4-beta.2),
+see instructions in [readme](https://github.com/hartwigmedical/hmftools/tree/master/bam-tools#altcontigremapper)).
 
 :::
 
