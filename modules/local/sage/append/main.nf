@@ -4,8 +4,8 @@ process SAGE_APPEND {
 
     conda "${moduleDir}/environment.yml"
     container "${ workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container ?
-        'https://depot.galaxyproject.org/singularity/hmftools-sage:3.4.4--hdfd78af_0' :
-        'biocontainers/hmftools-sage:3.4.4--hdfd78af_0' }"
+        'https://depot.galaxyproject.org/singularity/hmftools-sage:4.0--hdfd78af_0' :
+        'biocontainers/hmftools-sage:4.0--hdfd78af_0' }"
 
     input:
     tuple val(meta), path(vcf), path(bam), path(bai)
@@ -24,9 +24,11 @@ process SAGE_APPEND {
     script:
     def args = task.ext.args ?: ''
 
+    def xmx_mod = task.ext.xmx_mod ?: 0.75
+
     """
     sage \\
-        -Xmx${Math.round(task.memory.bytes * 0.95)} \\
+        -Xmx${Math.round(task.memory.bytes * xmx_mod)} \\
         com.hartwig.hmftools.sage.append.SageAppendApplication \\
         ${args} \\
         -input_vcf ${vcf} \\
@@ -34,12 +36,13 @@ process SAGE_APPEND {
         -reference_bam ${bam} \\
         -ref_genome ${genome_fasta} \\
         -ref_genome_version ${genome_ver} \\
+        -skip_msi_jitter \\
         -threads ${task.cpus} \\
         -output_vcf ${meta.dna_id}.sage.append.vcf.gz
 
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":
-        sage: \$(sage -version | sed 's/^.* //')
+        sage: \$(sage -version | sed -n '/^Sage version / { s/^.* //p }')
     END_VERSIONS
     """
 

@@ -8,8 +8,8 @@ process PAVE_GERMLINE {
 
     conda "${moduleDir}/environment.yml"
     container "${ workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container ?
-        'https://depot.galaxyproject.org/singularity/hmftools-pave:1.6--hdfd78af_0' :
-        'biocontainers/hmftools-pave:1.6--hdfd78af_0' }"
+        'https://depot.galaxyproject.org/singularity/hmftools-pave:1.7--hdfd78af_0' :
+        'biocontainers/hmftools-pave:1.7--hdfd78af_0' }"
 
     input:
     tuple val(meta), path(sage_vcf), path(sage_tbi)
@@ -35,6 +35,8 @@ process PAVE_GERMLINE {
     script:
     def args = task.ext.args ?: ''
 
+    def xmx_mod = task.ext.xmx_mod ?: 0.75
+
     def gnomad_args
     if (genome_ver.toString() == '37') {
         gnomad_args = "-gnomad_freq_file ${gnomad_resource}"
@@ -46,7 +48,7 @@ process PAVE_GERMLINE {
 
     """
     pave \\
-        -Xmx${Math.round(task.memory.bytes * 0.95)} \\
+        -Xmx${Math.round(task.memory.bytes * xmx_mod)} \\
         ${args} \\
         -sample ${meta.sample_id} \\
         -vcf_file ${sage_vcf} \\
@@ -58,15 +60,15 @@ process PAVE_GERMLINE {
         -ensembl_data_dir ${ensembl_data_resources} \\
         -blacklist_bed ${sage_blocklist_regions} \\
         -blacklist_vcf ${sage_blocklist_sites} \\
-        -gnomad_pon_filter -1 \\
         ${gnomad_args} \\
+        -gnomad_no_filter \\
         -read_pass_only \\
         -threads ${task.cpus} \\
         -output_dir ./
 
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":
-        pave: \$(pave -version | sed 's/^.* //')
+        pave: \$(pave -version | sed -n '/^Pave version / { s/^.* //p }')
     END_VERSIONS
     """
 

@@ -4,18 +4,18 @@
 
 import Constants
 
-include { BWAMEM2_INDEX       } from '../../../modules/nf-core/bwamem2/index/main'
-include { BWA_INDEX           } from '../../../modules/nf-core/bwa/index/main'
-include { SAMTOOLS_DICT       } from '../../../modules/nf-core/samtools/dict/main'
-include { SAMTOOLS_FAIDX      } from '../../../modules/nf-core/samtools/faidx/main'
-include { STAR_GENOMEGENERATE } from '../../../modules/nf-core/star/genomegenerate/main'
+include { BWAMEM2_INDEX         } from '../../../modules/nf-core/bwamem2/index/main'
+include { BWA_INDEX             } from '../../../modules/nf-core/bwa/index/main'
+include { SAMTOOLS_DICT         } from '../../../modules/nf-core/samtools/dict/main'
+include { SAMTOOLS_FAIDX        } from '../../../modules/nf-core/samtools/faidx/main'
+include { STAR_GENOMEGENERATE   } from '../../../modules/nf-core/star/genomegenerate/main'
 
 include { CUSTOM_EXTRACTTARBALL as DECOMP_BWAMEM2_INDEX    } from '../../../modules/local/custom/extract_tarball/main'
 include { CUSTOM_EXTRACTTARBALL as DECOMP_GRIDSS_INDEX     } from '../../../modules/local/custom/extract_tarball/main'
 include { CUSTOM_EXTRACTTARBALL as DECOMP_HMF_DATA         } from '../../../modules/local/custom/extract_tarball/main'
 include { CUSTOM_EXTRACTTARBALL as DECOMP_PANEL_DATA       } from '../../../modules/local/custom/extract_tarball/main'
 include { CUSTOM_EXTRACTTARBALL as DECOMP_STAR_INDEX       } from '../../../modules/local/custom/extract_tarball/main'
-include { CUSTOM_EXTRACTTARBALL as DECOMP_VIRUSBREAKEND_DB } from '../../../modules/local/custom/extract_tarball/main'
+include { GATK4_BWA_INDEX_IMAGE                            } from '../../../modules/local/gatk4/bwaindeximage/main'
 include { GRIDSS_INDEX                                     } from '../../../modules/local/gridss/index/main'
 include { WRITE_REFERENCE_DATA                             } from '../../../modules/local/custom/write_reference_data/main'
 
@@ -50,6 +50,13 @@ workflow PREPARE_REFERENCE {
         SAMTOOLS_DICT(ch_genome_fasta)
         ch_genome_dict = SAMTOOLS_DICT.out.dict
         ch_versions = ch_versions.mix(SAMTOOLS_DICT.out.versions)
+    }
+
+    ch_genome_img = getRefFileChannel('ref_data_genome_img')
+    if (!params.ref_data_genome_img) {
+        GATK4_BWA_INDEX_IMAGE(ch_genome_fasta)
+        ch_genome_img = GATK4_BWA_INDEX_IMAGE.out.img
+        ch_versions = ch_versions.mix(GATK4_BWA_INDEX_IMAGE.out.versions)
     }
 
     //
@@ -148,26 +155,6 @@ workflow PREPARE_REFERENCE {
     }
 
     //
-    // Set VIRUSBreakend database, unpack if required
-    //
-    ch_virusbreakenddb = Channel.empty()
-    if (run_config.has_dna && run_virusinterpreter) {
-        if (params.ref_data_virusbreakenddb_path.endsWith('.tar.gz')) {
-
-            ch_virusbreakenddb_inputs = Channel.fromPath(params.ref_data_virusbreakenddb_path)
-                .map { [[id: it.name.replaceAll('\\.tar\\.gz$', '')], it] }
-
-            DECOMP_VIRUSBREAKEND_DB(ch_virusbreakenddb_inputs)
-            ch_virusbreakenddb = DECOMP_VIRUSBREAKEND_DB.out.extracted_dir
-
-        } else {
-
-            ch_virusbreakenddb = Channel.fromPath(params.ref_data_virusbreakenddb_path)
-
-        }
-    }
-
-    //
     // Set HMF reference data, unpack if required
     //
     ch_hmf_data = Channel.empty()
@@ -235,10 +222,10 @@ workflow PREPARE_REFERENCE {
                 ch_genome_fasta,
                 ch_genome_fai,
                 ch_genome_dict,
+                ch_genome_img,
                 ch_genome_bwamem2_index,
                 ch_genome_gridss_index,
                 ch_genome_star_index,
-                ch_virusbreakenddb,
                 // Also include base paths for hmf_data and panel_data
                 Channel.empty()
                     .mix(
@@ -261,12 +248,12 @@ workflow PREPARE_REFERENCE {
     genome_fasta         = ch_genome_fasta.first()         // path: genome_fasta
     genome_fai           = ch_genome_fai.first()           // path: genome_fai
     genome_dict          = ch_genome_dict.first()          // path: genome_dict
+    genome_img           = ch_genome_img.first()           // path: genome_img
     genome_bwamem2_index = ch_genome_bwamem2_index.first() // path: genome_bwa-mem2_index
     genome_gridss_index  = ch_genome_gridss_index.first()  // path: genome_gridss_index
     genome_star_index    = ch_genome_star_index.first()    // path: genome_star_index
     genome_version       = ch_genome_version               // val:  genome_version
 
-    virusbreakenddb      = ch_virusbreakenddb.first()      // path: VIRUSBreakend database
     hmf_data             = ch_hmf_data                     // map:  HMF data paths
     panel_data           = ch_panel_data                   // map:  Panel data paths
 
@@ -281,7 +268,7 @@ def getRefFileChannel(key) {
 def createDataMap(entries, ref_data_path) {
     return entries
         .collectEntries { name, path ->
-            def ref_data_file = getRefdataFile(path, ref_data_path)
+            def ref_data_file = path == [] ? [] : getRefdataFile(path, ref_data_path)
             return [name, ref_data_file]
         }
 }
@@ -294,6 +281,7 @@ def getRefdataFile(filepath, ref_data_path) {
 def getDataBaseDirectory(data) {
     def c = []
     data
+        .findAll { it.value }
         .collect { it.value.toUriString().getChars() }
         .transpose()
         .findIndexOf {

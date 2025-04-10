@@ -1,10 +1,10 @@
 {
-    "$schema": "http://json-schema.org/draft-07/schema",
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
     "$id": "https://raw.githubusercontent.com/nf-core/oncoanalyser/master/nextflow_schema.json",
     "title": "nf-core/oncoanalyser pipeline parameters",
     "description": "A comprehensive cancer DNA/RNA analysis and reporting pipeline",
     "type": "object",
-    "definitions": {
+    "$defs": {
         "input_output_options": {
             "title": "Input/output options",
             "type": "object",
@@ -61,6 +61,12 @@
                     "default": false,
                     "fa_icon": "fas fa-palette"
                 },
+                "force_panel": {
+                    "type": "boolean",
+                    "description": "Skip check for known panels.",
+                    "default": false,
+                    "fa_icon": "fas fa-palette"
+                },
                 "processes_manual": {
                     "type": "boolean",
                     "description": "Run only processes manually provided in processes_include.",
@@ -91,6 +97,41 @@
                 "max_fastq_records": {
                     "type": "integer",
                     "description": "When positive, will use fastp to split fastq files so that each resultant fastq file has no more than max_fastq_records records. When nonpositive, fastp is not used and the provided fastq files are passed as-is to the aligner.",
+                    "default": 10000000,
+                    "fa_icon": "fas fa-cog"
+                },
+                "fastp_umi": {
+                    "type": "boolean",
+                    "description": "Enable fastp UMI processing.",
+                    "default": false,
+                    "fa_icon": "fas fa-cog"
+                },
+                "fastp_umi_location": {
+                    "type": "string",
+                    "description": "fastp UMI location parameter (--umi_loc).",
+                    "fa_icon": "fas fa-cog"
+                },
+                "fastp_umi_length": {
+                    "type": "integer",
+                    "description": "fastp UMI length parameter (--umi_len)",
+                    "default": 0,
+                    "fa_icon": "fas fa-cog"
+                },
+                "fastp_umi_skip": {
+                    "type": "integer",
+                    "description": "fastp UMI skip parameter (--umi_skip)",
+                    "default": -1,
+                    "fa_icon": "fas fa-cog"
+                },
+                "redux_umi": {
+                    "type": "boolean",
+                    "description": "Enable REDUX UMI processing.",
+                    "default": false,
+                    "fa_icon": "fas fa-cog"
+                },
+                "redux_umi_duplex_delim": {
+                    "type": "string",
+                    "description": "UMI duplex delimiter as used by REDUX.",
                     "fa_icon": "fas fa-cog"
                 },
                 "gridss_config": {
@@ -161,7 +202,24 @@
                     "description": "Do not load the iGenomes reference config.",
                     "fa_icon": "fas fa-ban",
                     "hidden": true,
-                    "help_text": "Do not load `igenomes.config` when running the pipeline. You may choose this option if you observe c lashes between custom parameters and those supplied in `igenomes.config`."
+                    "default": true,
+                    "help_text": "Do not load `igenomes.config` when running the pipeline. You may choose this option if you observe clashes between custom parameters and those supplied in `igenomes.config`."
+                },
+                "igenomes_base": {
+                    "type": "string",
+                    "format": "directory-path",
+                    "description": "The base path to the igenomes reference files",
+                    "fa_icon": "fas fa-ban",
+                    "hidden": true,
+                    "default": "s3://ngi-igenomes/igenomes/"
+                },
+                "hmf_genomes_base": {
+                    "type": "string",
+                    "format": "directory-path",
+                    "description": "The base path to the HMF genome reference files",
+                    "fa_icon": "fas fa-ban",
+                    "hidden": true,
+                    "default": "https://pub-cf6ba01919994c3cbd354659947f74d8.r2.dev/genomes"
                 },
                 "ref_data_hmf_data_path": {
                     "type": "string",
@@ -173,12 +231,48 @@
                     "description": "Path to panel data.",
                     "fa_icon": "far fa-folder-open"
                 },
-                "ref_data_virusbreakenddb_path": {
+                "ref_data_genome_fasta": {
                     "type": "string",
-                    "description": "Path to VIRUSBreakend database (directory or tarball).",
+                    "description": "Path to reference genome FASTA.",
+                    "fa_icon": "far fa-file-code"
+                },
+                "ref_data_genome_fai": {
+                    "type": "string",
+                    "description": "Path to reference genome FAI.",
+                    "fa_icon": "far fa-file-code"
+                },
+                "ref_data_genome_dict": {
+                    "type": "string",
+                    "description": "Path to reference genome dict.",
+                    "fa_icon": "far fa-file-code"
+                },
+                "ref_data_genome_bwamem2_index": {
+                    "type": "string",
+                    "description": "Path to reference genome bwa-mem2 index.",
+                    "fa_icon": "far fa-file-code"
+                },
+                "ref_data_genome_img": {
+                    "type": "string",
+                    "description": "Path to reference genome img.",
+                    "fa_icon": "far fa-file-code"
+                },
+                "ref_data_genome_gridss_index": {
+                    "type": "string",
+                    "description": "Path to reference genome GRIDSS index.",
+                    "fa_icon": "far fa-file-code"
+                },
+                "ref_data_genome_star_index": {
+                    "type": "string",
+                    "description": "Path to reference genome STAR index.",
+                    "fa_icon": "far fa-file-code"
+                },
+                "ref_data_genome_gtf": {
+                    "type": "string",
+                    "description": "Path to reference genome GTF.",
                     "fa_icon": "far fa-file-code"
                 },
                 "ref_data_hla_slice_bed": {
+                    "type": "string",
                     "format": "file-path",
                     "pattern": "^\\S+\\.bed$",
                     "description": "Path to HLA slice BED file.",
@@ -234,41 +328,6 @@
                 }
             }
         },
-        "max_job_request_options": {
-            "title": "Max job request options",
-            "type": "object",
-            "fa_icon": "fab fa-acquisitions-incorporated",
-            "description": "Set the top limit for requested resources for any single job.",
-            "help_text": "If you are running on a smaller system, a pipeline step requesting more resources than are available may cause the Nextflow to stop the run with an error. These options allow you to cap the maximum resources requested by any single job so that the pipeline will run on your system.\n\nNote that you can not _increase_ the resources requested by any job using these options. For that you will need your own configuration file. See [the nf-core website](https://nf-co.re/usage/configuration) for details.",
-            "properties": {
-                "max_cpus": {
-                    "type": "integer",
-                    "description": "Maximum number of CPUs that can be requested for any single job.",
-                    "default": 16,
-                    "fa_icon": "fas fa-microchip",
-                    "hidden": true,
-                    "help_text": "Use to set an upper-limit for the CPU requirement for each process. Should be an integer e.g. `--max_cpus 1`"
-                },
-                "max_memory": {
-                    "type": "string",
-                    "description": "Maximum amount of memory that can be requested for any single job.",
-                    "default": "128.GB",
-                    "fa_icon": "fas fa-memory",
-                    "pattern": "^\\d+(\\.\\d+)?\\.?\\s*(K|M|G|T)?B$",
-                    "hidden": true,
-                    "help_text": "Use to set an upper-limit for the memory requirement for each process. Should be a string in the format integer-unit e.g. `--max_memory '8.GB'`"
-                },
-                "max_time": {
-                    "type": "string",
-                    "description": "Maximum amount of time that can be requested for any single job.",
-                    "default": "240.h",
-                    "fa_icon": "far fa-clock",
-                    "pattern": "^(\\d+\\.?\\s*(s|m|h|d|day)\\s*)+$",
-                    "hidden": true,
-                    "help_text": "Use to set an upper-limit for the time requirement for each process. Should be a string in the format integer-unit e.g. `--max_time '2.h'`"
-                }
-            }
-        },
         "generic_options": {
             "title": "Generic options",
             "type": "object",
@@ -276,12 +335,6 @@
             "description": "Less common options for the pipeline, typically set in a config file.",
             "help_text": "These options are common to all nf-core pipelines and allow you to customise some of the core preferences for how the pipeline runs.\n\nTypically these options would be set in a Nextflow config file loaded for all pipeline runs, such as `~/.nextflow/config`.",
             "properties": {
-                "help": {
-                    "type": "boolean",
-                    "description": "Display help text.",
-                    "fa_icon": "fas fa-question-circle",
-                    "hidden": true
-                },
                 "version": {
                     "type": "boolean",
                     "description": "Display version and exit.",
@@ -331,48 +384,31 @@
                     "fa_icon": "fas fa-check-square",
                     "hidden": true
                 },
-                "validationShowHiddenParams": {
-                    "type": "boolean",
-                    "fa_icon": "far fa-eye-slash",
-                    "description": "Show all params when using `--help`",
-                    "hidden": true,
-                    "help_text": "By default, parameters set as _hidden_ in the schema are not shown on the command line when a user runs with `--help`. Specifying this option will tell the pipeline to show all parameters."
-                },
-                "validationFailUnrecognisedParams": {
-                    "type": "boolean",
+                "pipelines_testdata_base_path": {
+                    "type": "string",
                     "fa_icon": "far fa-check-circle",
-                    "description": "Validation of parameters fails when an unrecognised parameter is found.",
-                    "hidden": true,
-                    "help_text": "By default, when an unrecognised parameter is found, it returns a warinig."
-                },
-                "validationLenientMode": {
-                    "type": "boolean",
-                    "fa_icon": "far fa-check-circle",
-                    "description": "Validation of parameters in lenient more.",
-                    "hidden": true,
-                    "help_text": "Allows string values that are parseable as numbers or booleans. For further information see [JSONSchema docs](https://github.com/everit-org/json-schema#lenient-mode)."
+                    "description": "Base URL or local path to location of pipeline test dataset files",
+                    "default": "https://raw.githubusercontent.com/nf-core/test-datasets/oncoanalyser",
+                    "hidden": true
                 }
             }
         }
     },
     "allOf": [
         {
-            "$ref": "#/definitions/input_output_options"
+            "$ref": "#/$defs/input_output_options"
         },
         {
-            "$ref": "#/definitions/other_options"
+            "$ref": "#/$defs/reference_data_options"
         },
         {
-            "$ref": "#/definitions/reference_data_options"
+            "$ref": "#/$defs/institutional_config_options"
         },
         {
-            "$ref": "#/definitions/institutional_config_options"
+            "$ref": "#/$defs/other_options"
         },
         {
-            "$ref": "#/definitions/max_job_request_options"
-        },
-        {
-            "$ref": "#/definitions/generic_options"
+            "$ref": "#/$defs/generic_options"
         }
     ]
 }

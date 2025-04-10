@@ -30,12 +30,12 @@ workflow BAMTOOLS_METRICS {
         .map { meta, bam, bai ->
             return [
                 meta,
-                Utils.selectCurrentOrExisting(bam, meta, Constants.INPUT.BAM_MARKDUPS_DNA_TUMOR),
+                Utils.selectCurrentOrExisting(bam, meta, Constants.INPUT.BAM_REDUX_DNA_TUMOR),
                 bai ?: Utils.getInput(meta, Constants.INPUT.BAI_DNA_TUMOR),
             ]
         }
         .branch { meta, bam, bai ->
-            def has_existing = Utils.hasExistingInput(meta, Constants.INPUT.BAMTOOLS_TUMOR)
+            def has_existing = Utils.hasExistingInput(meta, Constants.INPUT.BAMTOOLS_DIR_TUMOR)
             runnable: bam && !has_existing
             skip: true
                 return meta
@@ -47,12 +47,12 @@ workflow BAMTOOLS_METRICS {
         .map { meta, bam, bai ->
             return [
                 meta,
-                Utils.selectCurrentOrExisting(bam, meta, Constants.INPUT.BAM_MARKDUPS_DNA_NORMAL),
+                Utils.selectCurrentOrExisting(bam, meta, Constants.INPUT.BAM_REDUX_DNA_NORMAL),
                 bai ?: Utils.getInput(meta, Constants.INPUT.BAI_DNA_NORMAL),
             ]
         }
         .branch { meta, bam, bai ->
-            def has_existing = Utils.hasExistingInput(meta, Constants.INPUT.BAMTOOLS_NORMAL)
+            def has_existing = Utils.hasExistingInput(meta, Constants.INPUT.BAMTOOLS_DIR_NORMAL)
             runnable: bam && !has_existing
             skip: true
                 return meta
@@ -87,8 +87,8 @@ workflow BAMTOOLS_METRICS {
     ch_versions = ch_versions.mix(BAMTOOLS.out.versions)
 
     // Sort into a tumor and normal channel
-    ch_bamtools_out = BAMTOOLS.out.metrics
-        .branch { meta_bamtools, metrics ->
+    ch_bamtools_out = BAMTOOLS.out.metrics_dir
+        .branch { meta_bamtools, metrics_dir ->
             assert ['tumor', 'normal'].contains(meta_bamtools.sample_type)
             tumor: meta_bamtools.sample_type == 'tumor'
             normal: meta_bamtools.sample_type == 'normal'
@@ -96,22 +96,22 @@ workflow BAMTOOLS_METRICS {
         }
 
     // Set outputs, restoring original meta
-    // channel: [ meta, metrics ]
-    ch_somatic_metrics = Channel.empty()
+    // channel: [ meta, metrics_dir ]
+    ch_somatic_metrics_dir = Channel.empty()
         .mix(
             WorkflowOncoanalyser.restoreMeta(ch_bamtools_out.tumor, ch_inputs),
             ch_inputs_tumor_sorted.skip.map { meta -> [meta, []] },
         )
 
-    ch_germline_metrics = Channel.empty()
+    ch_germline_metrics_dir = Channel.empty()
         .mix(
             WorkflowOncoanalyser.restoreMeta(ch_bamtools_out.normal, ch_inputs),
             ch_inputs_normal_sorted.skip.map { meta -> [meta, []] },
         )
 
     emit:
-    somatic  = ch_somatic_metrics  // channel: [ meta, metrics ]
-    germline = ch_germline_metrics // channel: [ meta, metrics ]
+    somatic  = ch_somatic_metrics_dir  // channel: [ meta, metrics_dir ]
+    germline = ch_germline_metrics_dir // channel: [ meta, metrics_dir ]
 
-    versions = ch_versions         // channel: [ versions.yml ]
+    versions = ch_versions             // channel: [ versions.yml ]
 }

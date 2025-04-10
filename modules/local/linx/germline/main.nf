@@ -4,8 +4,8 @@ process LINX_GERMLINE {
 
     conda "${moduleDir}/environment.yml"
     container "${ workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container ?
-        'https://depot.galaxyproject.org/singularity/hmftools-linx:1.25--hdfd78af_0' :
-        'biocontainers/hmftools-linx:1.25--hdfd78af_0' }"
+        'https://depot.galaxyproject.org/singularity/hmftools-linx:2.0--hdfd78af_0' :
+        'biocontainers/hmftools-linx:2.0--hdfd78af_0' }"
 
     input:
     tuple val(meta), path(sv_vcf)
@@ -23,9 +23,11 @@ process LINX_GERMLINE {
     script:
     def args = task.ext.args ?: ''
 
+    def xmx_mod = task.ext.xmx_mod ?: 0.75
+
     """
     linx \\
-        -Xmx${Math.round(task.memory.bytes * 0.95)} \\
+        -Xmx${Math.round(task.memory.bytes * xmx_mod)} \\
         ${args} \\
         -sample ${meta.sample_id} \\
         -sv_vcf ${sv_vcf} \\
@@ -37,7 +39,7 @@ process LINX_GERMLINE {
 
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":
-        linx: \$(linx -version | sed 's/^.* //')
+        linx: \$(linx -version | sed -n '/^Linx version / { s/^.* //p }')
     END_VERSIONS
     """
 

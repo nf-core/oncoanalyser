@@ -4,12 +4,13 @@ process LILAC {
 
     conda "${moduleDir}/environment.yml"
     container "${ workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container ?
-        'https://depot.galaxyproject.org/singularity/hmftools-lilac:1.6--hdfd78af_0' :
-        'biocontainers/hmftools-lilac:1.6--hdfd78af_0' }"
+        'https://depot.galaxyproject.org/singularity/hmftools-lilac:1.6--hdfd78af_1' :
+        'biocontainers/hmftools-lilac:1.6--hdfd78af_1' }"
 
     input:
     tuple val(meta), path(normal_dna_bam), path(normal_dna_bai), path(tumor_dna_bam), path(tumor_dna_bai), path(tumor_rna_bam), path(tumor_rna_bai), path(purple_dir)
     path genome_fasta
+    path genome_fai
     val genome_ver
     path lilac_resources, stageAs: 'lilac_resources'
 
@@ -23,6 +24,8 @@ process LILAC {
     script:
     def args = task.ext.args ?: ''
 
+    def xmx_mod = task.ext.xmx_mod ?: 0.75
+
     def sample_name = getSampleName(meta, tumor_dna_bam, normal_dna_bam)
 
     def normal_bam_arg = normal_dna_bam ? "-reference_bam ${normal_dna_bam}" : ''
@@ -33,7 +36,7 @@ process LILAC {
 
     """
     lilac \\
-        -Xmx${Math.round(task.memory.bytes * 0.95)} \\
+        -Xmx${Math.round(task.memory.bytes * xmx_mod)} \\
         ${args} \\
         -sample ${sample_name} \\
         ${normal_bam_arg} \\
@@ -48,7 +51,7 @@ process LILAC {
 
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":
-        lilac: \$(lilac -version | sed 's/^.* //')
+        lilac: \$(lilac -version | sed -n '/^Lilac version / { s/^.* //p }')
     END_VERSIONS
     """
 

@@ -4,8 +4,8 @@ process COBALT {
 
     conda "${moduleDir}/environment.yml"
     container "${ workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container ?
-        'https://depot.galaxyproject.org/singularity/hmftools-cobalt:1.16--hdfd78af_0' :
-        'biocontainers/hmftools-cobalt:1.16--hdfd78af_0' }"
+        'https://depot.galaxyproject.org/singularity/hmftools-cobalt:2.0--hdfd78af_0' :
+        'biocontainers/hmftools-cobalt:2.0--hdfd78af_0' }"
 
     input:
     tuple val(meta), path(tumor_bam), path(normal_bam), path(tumor_bai), path(normal_bai)
@@ -23,6 +23,8 @@ process COBALT {
     script:
     def args = task.ext.args ?: ''
 
+    def xmx_mod = task.ext.xmx_mod ?: 0.75
+
     def reference_arg = meta.containsKey('normal_id') ? "-reference ${meta.normal_id}" : ''
     def reference_bam_arg = normal_bam ? "-reference_bam ${normal_bam}" : ''
 
@@ -31,7 +33,7 @@ process COBALT {
 
     """
     cobalt \\
-        -Xmx${Math.round(task.memory.bytes * 0.95)} \\
+        -Xmx${Math.round(task.memory.bytes * xmx_mod)} \\
         ${args} \\
         -tumor ${meta.tumor_id} \\
         -tumor_bam ${tumor_bam} \\
@@ -45,7 +47,7 @@ process COBALT {
 
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":
-        cobalt: \$(cobalt -version | sed 's/^.* //')
+        cobalt: \$(cobalt -version | sed -n '/^Cobalt version/ { s/^.* //p }')
     END_VERSIONS
     """
 

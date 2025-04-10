@@ -29,7 +29,7 @@ input:
   - driver_gene_panel:
       type: file
       description: Driver gene panel file
-      pattern: "*.{csv}"
+      pattern: "*.{tsv}"
 output:
   - meta:
       type: map

@@ -2,10 +2,10 @@ process CUSTOM_REALIGNREADS {
     tag "${meta.id}"
     label 'process_low'
 
-    conda "bioconda::bwa-mem2=2.2.1 bioconda::samtools=1.19.2 bioconda::sambamba=1.0.1"
+    conda "bioconda::bwa-mem2=2.2.1 bioconda::samtools=1.21 bioconda::sambamba=1.0.1"
     container "${ workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container ?
-        'https://depot.galaxyproject.org/singularity/mulled-v2-4dde50190ae599f2bb2027cb2c8763ea00fb5084:4163e62e1daead7b7ea0228baece715bec295c22-0' :
-        'biocontainers/mulled-v2-4dde50190ae599f2bb2027cb2c8763ea00fb5084:4163e62e1daead7b7ea0228baece715bec295c22-0' }"
+        'https://depot.galaxyproject.org/singularity/mulled-v2-4dde50190ae599f2bb2027cb2c8763ea00fb5084:b39930b2feee9b7a3e5cbef88b34f0d5c5f64897-0' :
+        'biocontainers/mulled-v2-4dde50190ae599f2bb2027cb2c8763ea00fb5084:b39930b2feee9b7a3e5cbef88b34f0d5c5f64897-0' }"
 
     input:
     tuple val(meta), path(bam), path(bai)
@@ -59,9 +59,9 @@ process CUSTOM_REALIGNREADS {
 
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":
-        bwa-mem2: \$(bwa-mem2 version 2>/dev/null)
-        samtools: \$(echo \$(samtools --version 2>&1) | sed 's/^.*samtools //; s/Using.*\$//')
-        sambamba: \$(sambamba --version 2>&1 | egrep '^sambamba' | head -n 1 | awk '{ print \$NF }')
+        bwa-mem2: \$(bwa-mem2 version)
+        sambamba: \$(sambamba --version 2>&1 | sed -n '/^sambamba / { s/^.* //p }' | head -n1)
+        samtools: \$(samtools --version | sed -n '/^samtools / { s/^.* //p }')
     END_VERSIONS
     """
 

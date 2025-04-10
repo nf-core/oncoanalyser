@@ -4,8 +4,8 @@ process BWA_INDEX {
 
     conda "${moduleDir}/environment.yml"
     container "${ workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container ?
-        'https://depot.galaxyproject.org/singularity/bwa:0.7.17--hed695b0_7' :
-        'biocontainers/bwa:0.7.17--hed695b0_7' }"
+        'https://depot.galaxyproject.org/singularity/bwa:0.7.19--h577a1d6_0' :
+        'biocontainers/bwa:0.7.19--h577a1d6_0' }"
 
     input:
     path fasta
@@ -19,8 +19,9 @@ process BWA_INDEX {
     task.ext.when == null || task.ext.when
 
     script:
-    def prefix = task.ext.prefix ?: "${fasta.name}"
     def args   = task.ext.args ?: ''
+
+    def prefix = task.ext.prefix ?: "${fasta.name}"
 
     """
     mkdir -p bwa_index/
@@ -43,6 +44,7 @@ process BWA_INDEX {
 
     stub:
     def prefix = task.ext.prefix ?: "${fasta.name}"
+
     """
     mkdir -p bwa_index/
 
@@ -52,9 +54,6 @@ process BWA_INDEX {
     touch bwa_index/${prefix}.pac
     touch bwa_index/${prefix}.sa
 
-    cat <<-END_VERSIONS > versions.yml
-    "${task.process}":
-        bwa: \$(echo \$(bwa 2>&1) | sed 's/^.*Version: //; s/Contact:.*\$//')
-    END_VERSIONS
+    echo -e '${task.process}:\\n  stub: noversions\\n' > versions.yml
     """
 }

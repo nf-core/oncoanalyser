@@ -2,10 +2,7 @@
 // This file holds several Groovy functions that could be useful for any Nextflow pipeline
 //
 
-import org.yaml.snakeyaml.Yaml
-
 import nextflow.Nextflow
-import nextflow.splitter.SplitterEx
 
 class Utils {
 
@@ -149,18 +146,12 @@ class Utils {
 
                         if (key === Constants.FileType.BAM) {
                             index_enum = Constants.FileType.BAI
-                            index_str = 'bai'
-                        } else if (key === Constants.FileType.BAM_MARKDUPS) {
+                            index_str = (meta[sample_key][key].toString().endsWith('cram')) ? 'crai' : 'bai'
+                        } else if (key === Constants.FileType.BAM_REDUX) {
                             index_enum = Constants.FileType.BAI
                             index_str = 'bai'
-                        } else if (key === Constants.FileType.GRIDSS_VCF) {
-                            index_enum = Constants.FileType.GRIDSS_VCF_TBI
-                            index_str = 'tbi'
-                        } else if (key === Constants.FileType.GRIPSS_VCF) {
-                            index_enum = Constants.FileType.GRIPSS_VCF_TBI
-                            index_str = 'tbi'
-                        } else if (key === Constants.FileType.GRIPSS_UNFILTERED_VCF) {
-                            index_enum = Constants.FileType.GRIPSS_UNFILTERED_VCF_TBI
+                        } else if (key === Constants.FileType.ESVEE_VCF) {
+                            index_enum = Constants.FileType.ESVEE_VCF_TBI
                             index_str = 'tbi'
                         } else if (key === Constants.FileType.SAGE_VCF) {
                             index_enum = Constants.FileType.SAGE_VCF_TBI
@@ -187,6 +178,63 @@ class Utils {
                     }
                 }
 
+                // Check that REDUX TSVs are present
+                sample_keys.each { sample_key ->
+
+                    if(stub_run)
+                        return
+
+                    def meta_sample = meta[sample_key]
+                    def sample_id = meta_sample.sample_id
+
+                    if(!meta_sample.containsKey(Constants.FileType.BAM_REDUX))
+                        return
+
+                    if(meta_sample.containsKey(Constants.FileType.BAM)) {
+                        log.error "${Constants.FileType.BAM} and ${Constants.FileType.BAM_REDUX} provided for sample ${sample_id}. Please only provide one or the other"
+                        Nextflow.exit(1)
+                    }
+
+                    def bam_path = meta_sample[Constants.FileType.BAM_REDUX].toString()
+                    def bam_dir = new File(bam_path).getParent()
+
+                    // Get user specified TSV paths
+                    def jitter_tsv   = meta_sample[Constants.FileType.REDUX_JITTER_TSV]
+                    def ms_tsv       = meta_sample[Constants.FileType.REDUX_MS_TSV]
+
+                    // If TSV paths not provided, default to TSV paths in the same dir as the BAM
+                    jitter_tsv   = jitter_tsv   ?: "${bam_dir}/${sample_id}.jitter_params.tsv"
+                    ms_tsv       = ms_tsv       ?: "${bam_dir}/${sample_id}.ms_table.tsv.gz"
+
+                    jitter_tsv   = nextflow.Nextflow.file(jitter_tsv)
+                    ms_tsv       = nextflow.Nextflow.file(ms_tsv)
+
+                    def missing_tsvs = [:]
+                    if(!jitter_tsv.exists()) missing_tsvs[Constants.FileType.REDUX_JITTER_TSV] = jitter_tsv
+                    if(!ms_tsv.exists())     missing_tsvs[Constants.FileType.REDUX_MS_TSV] = ms_tsv
+
+                    if(missing_tsvs.size() > 0){
+
+                        def error_message = []
+
+                        error_message.add("When only specifying filetype ${Constants.FileType.BAM_REDUX} in the sample sheet, make sure the REDUX BAM and TSVs are in the same dir:")
+                        error_message.add("${bam_path} (${Constants.FileType.BAM_REDUX})")
+                        missing_tsvs.each { error_message.add("${it.value} (missing expected ${it.key})") }
+                        error_message.add("")
+                        error_message.add("Alternatively, provide the TSV paths in the sample sheet using filetype values: " +
+                            "${Constants.FileType.REDUX_JITTER_TSV}, " +
+                            "${Constants.FileType.REDUX_MS_TSV}"
+                        )
+
+                        log.error error_message.join("\n")
+                        Nextflow.exit(1)
+                    }
+
+                    // Set parsed REDUX TSV paths in metadata object
+                    meta_sample[Constants.FileType.REDUX_JITTER_TSV] = jitter_tsv
+                    meta_sample[Constants.FileType.REDUX_MS_TSV] = ms_tsv
+                }
+
                 return meta
             }
 
@@ -204,7 +252,6 @@ class Utils {
             params.ref_data_genome_gridss_index,
             params.ref_data_genome_gtf,
             params.ref_data_genome_star_index,
-            params.ref_data_virusbreakenddb_path,
         ]
 
         params.hmf_data_paths[params.genome_version.toString()]
@@ -257,7 +304,7 @@ class Utils {
                 def (sample_type, sequence_type) = key
 
                 if (!meta[key].containsKey(Constants.FileType.BAM) &&
-                    !meta[key].containsKey(Constants.FileType.BAM_MARKDUPS) &&
+                    !meta[key].containsKey(Constants.FileType.BAM_REDUX) &&
                     !meta[key].containsKey(Constants.FileType.FASTQ)) {
 
                     log.error "no BAMs nor BAM_MARKDUPs nor FASTQs provided for ${meta.group_id} ${sample_type}/${sequence_type}\n\n" +
@@ -267,28 +314,28 @@ class Utils {
 
             }
 
+            // Do not allow donor sample without normal sample
+            if (Utils.hasDonorDna(meta) && ! Utils.hasNormalDna(meta)) {
+                log.error "a donor sample but not normal sample was found for ${meta.group_id}\n\n" +
+                    "Analysis with a donor sample requires a normal sample."
+                Nextflow.exit(1)
+            }
+
             // Apply some required restrictions to targeted mode
             if (run_config.mode === Constants.RunMode.TARGETED) {
 
-                // Do not allow normal DNA
-                if (Utils.hasNormalDna(meta)) {
-                    log.error "targeted mode is not compatible with the normal DNA BAM provided for ${meta.group_id}\n\n" +
-                        "The targeted workflow supports only tumor DNA BAMs (and tumor RNA BAMs for TSO500)"
+                // Do not allow donor DNA
+                if (Utils.hasDonorDna(meta)) {
+                    log.error "targeted mode is not compatible with the donor DNA BAM provided for ${meta.group_id}\n\n" +
+                        "The targeted workflow supports only tumor and normal DNA BAMs (and tumor RNA BAMs for TSO500)"
                     Nextflow.exit(1)
                 }
 
                 // Do not allow only tumor RNA
-                if (Utils.hasTumorRnaBam(meta) && !Utils.hasTumorDna(meta)) {
+                if (Utils.hasTumorRna(meta) && !Utils.hasTumorDna(meta)) {
                     log.error "targeted mode is not compatible with only tumor RNA provided for ${meta.group_id}\n\n" +
                         "The targeted workflow requires tumor DNA and can optionally take tumor RNA, depending on " +
                         "the configured panel."
-                    Nextflow.exit(1)
-                }
-
-                // Restrict tumor RNA inputs to the TSO500 panel
-                if (Utils.hasTumorRnaBam(meta) && run_config.panel != 'tso500') {
-                    def panel = run_config.panel.toUpperCase()
-                    log.error "only the TSO500 panel supports tumor RNA analysis but got: ${panel}"
                     Nextflow.exit(1)
                 }
 
@@ -296,7 +343,13 @@ class Utils {
 
             // Do not allow normal DNA only
             if (Utils.hasNormalDna(meta) && !Utils.hasTumorDna(meta)) {
-                log.error "germline only mode not supported, found only a normal DNA BAM for ${meta.group_id}"
+                log.error "found only normal DNA input for ${meta.group_id} but germline only analysis is not supported"
+                Nextflow.exit(1)
+            }
+
+            // Do not allow CRAM RNA input
+            if (Utils.hasTumorRnaBam(meta) && Utils.getTumorRnaBam(meta).toString().endsWith('cram')) {
+                log.error "found tumor RNA CRAM input for ${meta.group_id} but RNA CRAM input is not supported"
                 Nextflow.exit(1)
             }
 
@@ -381,7 +434,7 @@ class Utils {
         def run_mode_enum = Utils.getEnumFromString(run_mode, Constants.RunMode)
         if (!run_mode_enum) {
             def run_modes_str = Utils.getEnumNames(Constants.RunMode).join('\n  - ')
-            log.error "recieved an invalid run mode: '${run_mode}'. Valid options are:\n  - ${run_modes_str}"
+            log.error "received an invalid run mode: '${run_mode}'. Valid options are:\n  - ${run_modes_str}"
             Nextflow.exit(1)
         }
         return run_mode_enum
@@ -401,6 +454,9 @@ class Utils {
         return meta.getOrDefault([Constants.SampleType.NORMAL, Constants.SequenceType.DNA], [:])
     }
 
+    static public getDonorDnaSample(meta) {
+        return meta.getOrDefault([Constants.SampleType.DONOR, Constants.SequenceType.DNA], [:])
+    }
 
     // Sample names
     static public getTumorDnaSampleName(meta) {
@@ -415,8 +471,12 @@ class Utils {
         return getNormalDnaSample(meta)['sample_id']
     }
 
+    static public getDonorDnaSampleName(meta) {
+        return getDonorDnaSample(meta)['sample_id']
+    }
 
-    // Files
+
+    // Files - Tumor DNA
     static public getTumorDnaFastq(meta) {
         return getTumorDnaSample(meta).getOrDefault(Constants.FileType.FASTQ, null)
     }
@@ -425,8 +485,8 @@ class Utils {
         return getTumorDnaSample(meta).getOrDefault(Constants.FileType.BAM, null)
     }
 
-    static public getTumorDnaMarkdupsBam(meta) {
-        return getTumorDnaSample(meta).getOrDefault(Constants.FileType.BAM_MARKDUPS, null)
+    static public getTumorDnaReduxBam(meta) {
+        return getTumorDnaSample(meta).getOrDefault(Constants.FileType.BAM_REDUX, null)
     }
 
     static public getTumorDnaBai(meta) {
@@ -442,11 +502,12 @@ class Utils {
         return getTumorDnaBam(meta) !== null
     }
 
-    static public hasTumorDnaMarkdupsBam(meta) {
-        return getTumorDnaMarkdupsBam(meta) !== null
+    static public hasTumorDnaReduxBam(meta) {
+        return getTumorDnaReduxBam(meta) !== null
     }
 
 
+    // Files - Normal DNA
     static public getNormalDnaFastq(meta) {
         return getNormalDnaSample(meta).getOrDefault(Constants.FileType.FASTQ, null)
     }
@@ -455,8 +516,8 @@ class Utils {
         return getNormalDnaSample(meta).getOrDefault(Constants.FileType.BAM, null)
     }
 
-    static public getNormalDnaMarkdupsBam(meta) {
-        return getNormalDnaSample(meta).getOrDefault(Constants.FileType.BAM_MARKDUPS, null)
+    static public getNormalDnaReduxBam(meta) {
+        return getNormalDnaSample(meta).getOrDefault(Constants.FileType.BAM_REDUX, null)
     }
     static public getNormalDnaBai(meta) {
         return getNormalDnaSample(meta).getOrDefault(Constants.FileType.BAI, null)
@@ -471,20 +532,51 @@ class Utils {
         return getNormalDnaBam(meta) !== null
     }
 
-    static public hasNormalDnaMarkdupsBam(meta) {
-        return getNormalDnaMarkdupsBam(meta) !== null
+    static public hasNormalDnaReduxBam(meta) {
+        return getNormalDnaReduxBam(meta) !== null
     }
-
 
     static public hasDnaFastq(meta) {
         return hasNormalDnaFastq(meta) || hasTumorDnaFastq(meta)
     }
 
-    static public hasDnaMarkdupsBam(meta) {
-        return hasNormalDnaMarkdupsBam(meta) || hasTumorDnaMarkdupsBam(meta)
+    static public hasDnaReduxBam(meta) {
+        return hasNormalDnaReduxBam(meta) || hasTumorDnaReduxBam(meta)
     }
 
 
+    // Files - Donor DNA
+    static public getDonorDnaFastq(meta) {
+        return getDonorDnaSample(meta).getOrDefault(Constants.FileType.FASTQ, null)
+    }
+
+    static public getDonorDnaBam(meta) {
+        return getDonorDnaSample(meta).getOrDefault(Constants.FileType.BAM, null)
+    }
+
+    static public getDonorDnaReduxBam(meta) {
+        return getDonorDnaSample(meta).getOrDefault(Constants.FileType.BAM_REDUX, null)
+    }
+
+    static public getDonorDnaBai(meta) {
+        return getDonorDnaSample(meta).getOrDefault(Constants.FileType.BAI, null)
+    }
+
+
+    static public hasDonorDnaFastq(meta) {
+        return getDonorDnaFastq(meta) !== null
+    }
+
+    static public hasDonorDnaBam(meta) {
+        return getDonorDnaBam(meta) !== null
+    }
+
+    static public hasDonorDnaReduxBam(meta) {
+        return getDonorDnaReduxBam(meta) !== null
+    }
+
+
+    // Files - Tumor RNA
     static public getTumorRnaFastq(meta) {
         return getTumorRnaSample(meta).getOrDefault(Constants.FileType.FASTQ, null)
     }
@@ -509,11 +601,15 @@ class Utils {
 
     // Status
     static public hasTumorDna(meta) {
-        return hasTumorDnaBam(meta) || hasTumorDnaMarkdupsBam(meta) || hasTumorDnaFastq(meta)
+        return hasTumorDnaBam(meta) || hasTumorDnaReduxBam(meta) || hasTumorDnaFastq(meta)
     }
 
     static public hasNormalDna(meta) {
-        return hasNormalDnaBam(meta) || hasNormalDnaMarkdupsBam(meta) || hasNormalDnaFastq(meta)
+        return hasNormalDnaBam(meta) || hasNormalDnaReduxBam(meta) || hasNormalDnaFastq(meta)
+    }
+
+    static public hasDonorDna(meta) {
+        return hasDonorDnaBam(meta) || hasDonorDnaReduxBam(meta) || hasDonorDnaFastq(meta)
     }
 
     static public hasTumorRna(meta) {

@@ -7,7 +7,17 @@ import Utils
 class Processes {
 
     public static getRunStages(include, exclude, manual_select, log) {
-        def processes = manual_select ? [] : Constants.Process.values().toList()
+
+        // Get default processes
+        // NOTE(SW): currently set all except Neo to run by default; Process.NEO excluded to be more concise in code
+        def processes
+        if (manual_select) {
+            processes = []
+        } else {
+            processes = Constants.Process.values().toList()
+            processes.remove(Constants.Process.NEO)
+        }
+
         def include_list = this.getProcessList(include, log)
         def exclude_list = this.getProcessList(exclude, log)
         this.checkIncludeExcludeList(include_list, exclude_list, log)
@@ -31,7 +41,7 @@ class Processes {
                     return Constants.Process.valueOf(name.toUpperCase())
                 } catch(java.lang.IllegalArgumentException e) {
                     def processes_str = Processes.getProcessNames().join('\n  - ')
-                    log.error "recieved invalid process: '${name}'. Valid options are:\n  - ${processes_str}"
+                    log.error "received invalid process: '${name}'. Valid options are:\n  - ${processes_str}"
                     Nextflow.exit(1)
                 }
             }

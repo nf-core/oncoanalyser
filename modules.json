@@ -7,7 +7,7 @@
                 "nf-core": {
                     "bwa/index": {
                         "branch": "master",
-                        "git_sha": "6278bf9afd4a4b2d00fa6052250e73da3d91546f",
+                        "git_sha": "15a93581f7f81d05c04b828954004a089360ea9b",
                         "installed_by": ["modules"],
                         "patch": "modules/nf-core/bwa/index/bwa-index.diff"
                     },
@@ -19,30 +19,27 @@
                     },
                     "gatk4/markduplicates": {
                         "branch": "master",
-                        "git_sha": "e726b1730dff525bde4a6839e544dabfea4cd7fd",
-                        "installed_by": ["modules"]
+                        "git_sha": "c066b820236aa43fce94c7b5353a6e0cccff9910",
+                        "installed_by": ["modules"],
+                        "patch": "modules/nf-core/gatk4/markduplicates/gatk4-markduplicates.diff"
                     },
                     "samtools/dict": {
                         "branch": "master",
-                        "git_sha": "cf5b9c30a2adacc581793afb79fae5f5b50bed01",
+                        "git_sha": "b13f07be4c508d6ff6312d354d09f2493243e208",
                         "installed_by": ["modules"],
                         "patch": "modules/nf-core/samtools/dict/samtools-dict.diff"
                     },
                     "samtools/faidx": {
                         "branch": "master",
-                        "git_sha": "cf5b9c30a2adacc581793afb79fae5f5b50bed01",
+                        "git_sha": "b13f07be4c508d6ff6312d354d09f2493243e208",
                         "installed_by": ["modules"],
                         "patch": "modules/nf-core/samtools/faidx/samtools-faidx.diff"
                     },
-                    "samtools/flagstat": {
-                        "branch": "master",
-                        "git_sha": "bbb99cb8d679555cc01c98766de7869f83283545",
-                        "installed_by": ["modules"]
-                    },
                     "samtools/sort": {
                         "branch": "master",
-                        "git_sha": "d5d785b3d8b422cda9c6d84a23f629a8e9ff8cd8",
-                        "installed_by": ["modules"]
+                        "git_sha": "b7800db9b069ed505db3f9d91b8c72faea9be17b",
+                        "installed_by": ["modules"],
+                        "patch": "modules/nf-core/samtools/sort/samtools-sort.diff"
                     },
                     "star/genomegenerate": {
                         "branch": "master",
@@ -56,17 +53,17 @@
                 "nf-core": {
                     "utils_nextflow_pipeline": {
                         "branch": "master",
-                        "git_sha": "5caf7640a9ef1d18d765d55339be751bb0969dfa",
+                        "git_sha": "3aa0aec1d52d492fe241919f0c6100ebf0074082",
                         "installed_by": ["subworkflows"]
                     },
                     "utils_nfcore_pipeline": {
                         "branch": "master",
-                        "git_sha": "92de218a329bfc9a9033116eb5f65fd270e72ba3",
+                        "git_sha": "1b6b9a3338d011367137808b49b923515080e3ba",
                         "installed_by": ["subworkflows"]
                     },
-                    "utils_nfvalidation_plugin": {
+                    "utils_nfschema_plugin": {
                         "branch": "master",
-                        "git_sha": "5caf7640a9ef1d18d765d55339be751bb0969dfa",
+                        "git_sha": "bbd5a41f4535a8defafe6080e00ea74c45f4f96c",
                         "installed_by": ["subworkflows"]
                     }
                 }

@@ -28,7 +28,7 @@ input:
   - known_fusion_data:
       type: file
       description: Known fusions data file
-      pattern: "*.{bedpe}"
+      pattern: "*.{csv}"
   - driver_gene_panel:
       type: file
       description: Driver Gene Panel file

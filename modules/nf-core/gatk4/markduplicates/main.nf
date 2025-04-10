@@ -2,10 +2,10 @@ process GATK4_MARKDUPLICATES {
     tag "$meta.id"
     label 'process_medium'
 
-    conda "bioconda::gatk4=4.4.0.0"
+    conda "bioconda::gatk4=4.6.1.0"
     container "${ workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container ?
-        'https://depot.galaxyproject.org/singularity/gatk4:4.4.0.0--py36hdfd78af_0':
-        'biocontainers/gatk4:4.4.0.0--py36hdfd78af_0' }"
+        'https://depot.galaxyproject.org/singularity/gatk4:4.6.1.0--py310hdfd78af_0' :
+        'biocontainers/gatk4:4.6.1.0--py310hdfd78af_0' }"
 
     input:
     tuple val(meta), path(bam)
@@ -60,6 +60,7 @@ process GATK4_MARKDUPLICATES {
     touch ${prefix}.md.bam
     touch ${prefix}.md.bam.bai
     touch ${prefix}.md.metrics
+
     echo -e '${task.process}:\\n  stub: noversions\\n' > versions.yml
     """
 }

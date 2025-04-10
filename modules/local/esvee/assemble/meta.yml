@@ -1,0 +1,75 @@
+name: esvee_assemble
+description: Assemble SVs with ESVEE
+keywords:
+  - assemble
+  - sv
+tools:
+  - esvee:
+      description: Structural variant (SV) calling
+      homepage: https://github.com/hartwigmedical/hmftools/tree/master/esvee
+      documentation: https://github.com/hartwigmedical/hmftools/tree/master/esvee
+      licence: ["GPL >=3"]
+input:
+  - meta:
+      type: map
+      description: |
+        Groovy Map containing sample information
+        e.g. [id: 'sample_id']
+  - tumor_prep_bam:
+      type: file
+      description: Tumor prep BAM file
+      pattern: "*.{bam}"
+  - tumor_prep_bai:
+      type: file
+      description: Tumor prep BAI file
+      pattern: "*.{bai}"
+  - normal_prep_bam:
+      type: file
+      description: Normal prep BAM file
+      pattern: "*.{bam}"
+  - normal_prep_bai:
+      type: file
+      description: Normal prep BAI file
+      pattern: "*.{bai}"
+  - prep_dir:
+      type: directory
+      description: ESVEE prep output directory
+  - genome_fasta:
+      type: file
+      description: Reference genome assembly FASTA file
+      pattern: "*.{fa,fasta}"
+  - genome_fai:
+      type: file
+      description: Reference genome assembly fai file
+      pattern: "*.{fai}"
+  - genome_dict:
+      type: file
+      description: Reference genome assembly dict file
+      pattern: "*.{dict}"
+  - genome_img:
+      type: file
+      description: Reference genome assembly img file
+      pattern: "*.{img}"
+  - decouy_sequences_image:
+      type: file
+      description: ESVEE decoy sequences images file
+      pattern: "*.{img}"
+output:
+  - meta:
+      type: map
+      description: |
+        Groovy Map containing sample information
+        e.g. [id: 'sample_id']
+  - assembly_dir:
+      type: directory
+      description: ESVEE assemble output directory
+  - raw_vcf:
+      type: file
+      description: Raw VCF output file
+      pattern: "*.{vcf.gz}"
+  - versions:
+      type: file
+      description: File containing software versions
+      pattern: "versions.yml"
+authors:
+  - "@scwatts"

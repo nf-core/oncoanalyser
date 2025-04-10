@@ -32,14 +32,6 @@ input:
       type: file
       description: GRIPSS somatic VCF index file (optional)
       pattern: "*.{vcf.gz.tbi}"
-  - sv_tumor_unfiltered_vcf:
-      type: file
-      description: GRIPSS unfiltered somatic VCF file (optional)
-      pattern: "*.{vcf.gz}"
-  - sv_tumor_unfiltered_tbi:
-      type: file
-      description: GRIPSS unfiltered somatic VCF index file (optional)
-      pattern: "*.{vcf.gz.tbi}"
   - sv_normal_vcf:
       type: file
       description: GRIPSS germline VCF file (optional)
@@ -86,7 +78,7 @@ input:
   - driver_gene_panel:
       type: file
       description: Driver gene panel file
-      pattern: "*.{csv}"
+      pattern: "*.{tsv}"
   - ensembl_data_resources:
       type: directory
       description: HMF ensembl data resources directory

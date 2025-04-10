@@ -27,13 +27,15 @@ process VIRUSBREAKEND {
     script:
     def args = task.ext.args ?: ''
 
+    def xmx_mod = task.ext.xmx_mod ?: 0.95
+
     """
     # Symlink indices next to assembly FASTA
-    ln -s \$(find -L ${genome_gridss_index} -regex '.*\\.\\(amb\\|ann\\|pac\\|gridsscache\\|sa\\|bwt\\|img\\|alt\\)') ./
+    ln -sf \$(find -L ${genome_gridss_index} -regex '.*\\.\\(amb\\|ann\\|pac\\|gridsscache\\|sa\\|bwt\\|img\\|alt\\)') ./
 
     virusbreakend \\
         ${args} \\
-        --gridssargs "--jvmheap ${Math.round(task.memory.bytes * 0.95)}" \\
+        --gridssargs "--jvmheap ${Math.round(task.memory.bytes * xmx_mod)}" \\
         --threads ${task.cpus} \\
         --db ${virusbreakenddb.toString().replaceAll("/\$", "")}/ \\
         --output ${meta.sample_id}.virusbreakend.vcf \\
@@ -42,7 +44,7 @@ process VIRUSBREAKEND {
 
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":
-        gridss: \$(CallVariants --version 2>&1 | sed 's/-gridss\$//')
+        gridss: \$(CallVariants --version 2>&1 | sed -n '/-gridss\$/ { s/-gridss//p }')
     END_VERSIONS
     """
 

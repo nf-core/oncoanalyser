@@ -5,8 +5,8 @@
 import Constants
 import Utils
 
-include { SAGE_APPEND as SOMATIC } from '../../../modules/local/sage/append/main'
-include { SAGE_APPEND as GERMLINE } from '../../../modules/local/sage/append/main'
+include { SAGE_APPEND as SAGE_APPEND_SOMATIC } from '../../../modules/local/sage/append/main'
+include { SAGE_APPEND as SAGE_APPEND_GERMLINE } from '../../../modules/local/sage/append/main'
 
 workflow SAGE_APPEND {
     take:
@@ -20,6 +20,9 @@ workflow SAGE_APPEND {
     genome_version   // channel: [mandatory] genome version
     genome_fai       // channel: [mandatory] /path/to/genome_fai
     genome_dict      // channel: [mandatory] /path/to/genome_dict
+
+    // Params
+    run_germline     // boolean: [mandatory] Run germline flag
 
     main:
     // Channel for version.yml files
@@ -63,7 +66,7 @@ workflow SAGE_APPEND {
             def has_smlv_germline = file(purple_dir).resolve("${tumor_dna_id}.purple.germline.vcf.gz")
             def has_existing = Utils.hasExistingInput(meta, Constants.INPUT.SAGE_APPEND_VCF_NORMAL)
 
-            runnable: has_normal_dna && has_tumor_rna && has_smlv_germline && !has_existing
+            runnable: has_normal_dna && has_tumor_rna && has_smlv_germline && !has_existing && run_germline
             skip: true
                 return meta
         }
@@ -88,7 +91,7 @@ workflow SAGE_APPEND {
         }
 
     // Run process
-    GERMLINE(
+    SAGE_APPEND_GERMLINE(
         ch_sage_append_germline_inputs,
         genome_fasta,
         genome_version,
@@ -96,7 +99,7 @@ workflow SAGE_APPEND {
         genome_dict,
     )
 
-    ch_versions = ch_versions.mix(GERMLINE.out.versions)
+    ch_versions = ch_versions.mix(SAGE_APPEND_GERMLINE.out.versions)
 
     //
     // MODULE: SAGE append somatic
@@ -138,7 +141,7 @@ workflow SAGE_APPEND {
         }
 
     // Run process
-    SOMATIC(
+    SAGE_APPEND_SOMATIC(
         ch_sage_append_somatic_inputs,
         genome_fasta,
         genome_version,
@@ -146,20 +149,20 @@ workflow SAGE_APPEND {
         genome_dict,
     )
 
-    ch_versions = ch_versions.mix(SOMATIC.out.versions)
+    ch_versions = ch_versions.mix(SAGE_APPEND_SOMATIC.out.versions)
 
     // Set outputs, restoring original meta
     // channel: [ meta, sage_append_vcf ]
     ch_somatic_vcf = Channel.empty()
         .mix(
-            WorkflowOncoanalyser.restoreMeta(SOMATIC.out.vcf, ch_inputs),
+            WorkflowOncoanalyser.restoreMeta(SAGE_APPEND_SOMATIC.out.vcf, ch_inputs),
             ch_inputs_somatic_sorted.skip.map { meta -> [meta, []] },
             ch_inputs_sorted.skip.map { meta -> [meta, []] },
         )
 
     ch_germline_vcf = Channel.empty()
         .mix(
-            WorkflowOncoanalyser.restoreMeta(GERMLINE.out.vcf, ch_inputs),
+            WorkflowOncoanalyser.restoreMeta(SAGE_APPEND_GERMLINE.out.vcf, ch_inputs),
             ch_inputs_germline_sorted.skip.map { meta -> [meta, []] },
             ch_inputs_sorted.skip.map { meta -> [meta, []] },
         )

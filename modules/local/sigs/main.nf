@@ -4,8 +4,8 @@ process SIGS {
 
     conda "${moduleDir}/environment.yml"
     container "${ workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container ?
-        'https://depot.galaxyproject.org/singularity/hmftools-sigs:1.2.1--hdfd78af_0' :
-        'biocontainers/hmftools-sigs:1.2.1--hdfd78af_0' }"
+        'https://depot.galaxyproject.org/singularity/hmftools-sigs:1.2.1--hdfd78af_1' :
+        'biocontainers/hmftools-sigs:1.2.1--hdfd78af_1' }"
 
     input:
     tuple val(meta), path(smlv_vcf)
@@ -21,11 +21,13 @@ process SIGS {
     script:
     def args = task.ext.args ?: ''
 
+    def xmx_mod = task.ext.xmx_mod ?: 0.75
+
     """
     mkdir -p sigs/
 
     sigs \\
-        -Xmx${Math.round(task.memory.bytes * 0.95)} \\
+        -Xmx${Math.round(task.memory.bytes * xmx_mod)} \\
         ${args} \\
         -sample ${meta.sample_id} \\
         -somatic_vcf_file ${smlv_vcf} \\
@@ -34,7 +36,7 @@ process SIGS {
 
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":
-        sigs: \$(sigs -version | sed 's/^.* //')
+        sigs: \$(sigs -version | sed -n '/^Sigs version / { s/^.* //p }')
     END_VERSIONS
     """
 
