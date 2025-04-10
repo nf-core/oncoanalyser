@@ -750,13 +750,6 @@ Custom configuration can be provided to `oncoanalyser` by providing a config fil
 Syntax and examples of config items are described in the [Nextflow documentation](https://www.nextflow.io/docs/latest/config.html) and
 [nf-core documentation](https://nf-co.re/usage/configuration). Below subsections describe common use cases for custom configuration.
 
-:::tip
-
-See [this example config file](https://github.com/nf-core/oncoanalyser/blob/update-docs-v2.0/conf/hartwig.config) for common configuration
-options.
-
-:::
-
 ### Compute resources
 
 The default compute resources (e.g. CPUs, RAM, disk space) configured in `oncoanalyser` may not be sufficient for one or
@@ -817,8 +810,8 @@ instructions.
 
 By default, `oncoanalyser` runs each tool using [Docker](https://docs.docker.com/engine/install/) or
 [Singularity](https://docs.sylabs.io/guides/3.0/user-guide/quick_start.html#) container images which are built by the
-[Bioconda recipes](https://github.com/bioconda/bioconda-recipes/tree/master/recipes) CI/CD infrastructure. Below are
-links to these default images should you want to download images manually (e.g. to [run `oncoanalyser`
+[Bioconda recipes](https://github.com/bioconda/bioconda-recipes/) CI/CD infrastructure. Below are links to these default
+images should you want to download images manually (e.g. to [run `oncoanalyser`
 offline](https://nf-co.re/docs/usage/getting_started/offline)).
 
 **Docker (Bioconda)**
