@@ -83,20 +83,12 @@ jobs:
           echo "Initial container image count: $image_count"
           echo "IMAGE_COUNT_INITIAL=$image_count" >> ${GITHUB_ENV}
 
-      - name: Run the downloaded pipeline (stub)
+      - name: Run the downloaded pipeline
         id: stub_run_pipeline
-        continue-on-error: true
         env:
           NXF_SINGULARITY_CACHEDIR: ./singularity_container_images
           NXF_SINGULARITY_HOME_MOUNT: true
         run: nextflow run ./${{ env.REPOTITLE_LOWERCASE }}/$( sed 's/\W/_/g' <<< ${{ env.REPO_BRANCH }}) -stub -profile test_stub,singularity --outdir ./results
-      - name: Run the downloaded pipeline (stub run not supported)
-        id: run_pipeline
-        if: ${{ job.steps.stub_run_pipeline.status == failure() }}
-        env:
-          NXF_SINGULARITY_CACHEDIR: ./singularity_container_images
-          NXF_SINGULARITY_HOME_MOUNT: true
-        run: nextflow run ./${{ env.REPOTITLE_LOWERCASE }}/$( sed 's/\W/_/g' <<< ${{ env.REPO_BRANCH }}) -profile test_stub,singularity --outdir ./results
 
       - name: Count the downloaded number of container images
         id: count_afterwards
