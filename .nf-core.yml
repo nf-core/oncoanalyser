@@ -9,7 +9,7 @@ template:
   org: nf-core
   outdir: .
   skip_features: null
-  version: 1.1.0dev
+  version: 2.0.0
 lint:
   actions_ci: False
   multiqc_config: False

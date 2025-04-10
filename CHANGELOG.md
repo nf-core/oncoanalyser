@@ -3,7 +3,7 @@
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/) and this project mostly adheres to
 [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [dev]
+## [[2.0.0](https://github.com/nf-core/oncoanalyser/releases/tag/2.0.0)] Flame Robin - 2025-04-10
 
 - [178](https://github.com/nf-core/oncoanalyser/pull/178) - Apply minor fixes and updates
   - Bump REDUX to 1.1.2
