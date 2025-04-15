@@ -4,6 +4,6 @@ channels:
   - bioconda
   - defaults
 dependencies:
-  - bioconda::gridss=2.13.2=h50ea8bc_3
+  - bioconda::gridss=2.13.2
   - repeatmasker=4.1.5
   - grep
