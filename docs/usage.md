@@ -752,50 +752,57 @@ Syntax and examples of config items are described in the [Nextflow documentation
 ### Compute resources
 
 The default compute resources (e.g. CPUs, RAM, disk space) configured in `oncoanalyser` may not be sufficient for one or
-more processes. To change the resource requests, please see the [tuning workflow
-resources](https://nf-co.re/docs/usage/configuration#tuning-workflow-resources) and [max
-resources](https://nf-co.re/docs/usage/configuration#max-resources) sections of the nf-core website.
+more processes (nf-core documentation: [tuning workflow resources](https://nf-co.re/docs/usage/configuration#tuning-workflow-resources)). 
+For example, for high depth samples (e.g. panel samples), you may need increase the memory for alignment, read processing (REDUX), 
+small variant calling (SAGE), or structural variant calling (ESVEE) steps.
 
-Below are the settings per WiGiTS tool that Hartwig uses internally and recommends. For high depth samples (e.g. panel
-samples), you may need increase the memory for alignment, read processing (REDUX) and/or variant calling (SAGE or ESVEE)
-steps.
+Below are the settings per tool that Hartwig Medical Foundation uses when running `oncoanalyser` in Google cloud:
 
 ```groovy
 process {
-    withName: '.*ALIGN'        { cpus = 12; memory = 72.GB; }
-    withName: AMBER            { cpus = 16; memory = 24.GB; }
-    withName: BAMTOOLS         { cpus = 16; memory = 24.GB; }
-    withName: CHORD            { cpus = 4;  memory = 12.GB; }
-    withName: COBALT           { cpus = 16; memory = 24.GB; }
-    withName: CUPPA            { cpus = 4;  memory = 16.GB; }
-    withName: 'ESVEE.*'        { cpus = 32; memory = 64.GB; }
-    withName: LILAC            { cpus = 16; memory = 24.GB; }
-    withName: 'LINX.*'         { cpus = 16; memory = 16.GB; }
-    withName: REDUX            { cpus = 32; memory = 64.GB; }
-    withName: ORANGE           { cpus = 4;  memory = 16.GB; }
-    withName: 'PAVE.*'         { cpus = 8;  memory = 32.GB; }
-    withName: PURPLE           { cpus = 8;  memory = 40.GB; }
-    withName: 'SAGE.*'         { cpus = 32; memory = 64.GB; }
-    withName: VIRUSBREAKEND    { cpus = 8;  memory = 64.GB; }
-    withName: VIRUSINTERPRETER { cpus = 2;  memory = 8.GB;  }
+    withName: '.*ALIGN'          { memory = 72.GB; cpus = 12; disk = 750.GB }
+    withName: 'AMBER'            { memory = 24.GB; cpus = 16; disk = 375.GB }
+    withName: 'BAMTOOLS'         { memory = 24.GB; cpus = 16; disk = 375.GB }
+    withName: 'CHORD'            { memory = 12.GB; cpus = 4 ; disk = 375.GB }
+    withName: 'CIDER'            { memory = 24.GB; cpus = 16; disk = 375.GB }
+    withName: 'COBALT'           { memory = 24.GB; cpus = 16; disk = 375.GB }
+    withName: 'CUPPA'            { memory = 16.GB; cpus = 4 ; disk = 375.GB }
+    withName: 'ESVEE'            { memory = 96.GB; cpus = 32; disk = 375.GB }
+    withName: 'ISOFOX'           { memory = 24.GB; cpus = 16; disk = 375.GB }
+    withName: 'LILAC'            { memory = 24.GB; cpus = 16; disk = 375.GB }
+    withName: 'LINX_.*'          { memory = 16.GB; cpus = 8 ; disk = 375.GB }
+    withName: 'REDUX'            { memory = 64.GB; cpus = 32; disk = 750.GB }
+    withName: 'ORANGE'           { memory = 16.GB; cpus = 4 ; disk = 375.GB }
+    withName: 'PAVE.*'           { memory = 32.GB; cpus = 8 ; disk = 375.GB }
+    withName: 'PEACH'            { memory = 4.GB ; cpus = 2 ; disk = 375.GB }
+    withName: 'PURPLE'           { memory = 40.GB; cpus = 8 ; disk = 375.GB }
+    withName: 'SAGE.*'           { memory = 64.GB; cpus = 32; disk = 375.GB }
+    withName: 'TEAL.*'           { memory = 32.GB; cpus = 32; disk = 375.GB }
+    withName: 'VIRUSBREAKEND'    { memory = 64.GB; cpus = 16; disk = 375.GB }
+    withName: 'VIRUSINTERPRETER' { memory = 8.GB ; cpus = 2 ; disk = 375.GB }
+    withName: 'WISP'             { memory = 16.GB; cpus = 4 ; disk = 375.GB }
 }
 ```
 
-Lastly, we recommend setting an upper limit on total resources that `oncoanalyser` is allowed to use. This will
-typically be the max resources available to the VM / compute job. Below are the settings that Hartwig Medical Foundation
-uses internally. When running multiple steps and/or samples in parallel, this will prevent `oncoanalyser` from
-requesting more resources than available on the machine.
+We recommend setting an upper limit on total resources that `oncoanalyser` is allowed to use (nf-core 
+documentation: [max resources](https://nf-co.re/docs/usage/configuration#max-resources)). Otherwise, `oncoanalyser` may 
+crash when it tries to request more resources than available on a machine or compute job.
+Below are some recommended resource limit settings: 
 
 ```groovy
 process {
     resourceLimits = [
         cpus:   64,
-        memory: 124.GB, // = 0.97 * 128.GB
+        memory: 120.GB, // Provides leeway on a 128.GB machine
         disk:   1500.GB,
         time:   48.h
     ]
 }
 ```
+
+The total runtime of `oncoanalyser` is ~3h for a paired 100x/30x tumor/normal WGS run starting from BAMs with parallel job execution via
+Google batch. However, your runtime will vary depending on several factors such as sequencing depth, number of small/structural variants, or
+parallel vs. non-parallel job execution.
 
 ### Container images
 
