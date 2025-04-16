@@ -34,6 +34,7 @@ workflow SAGE_CALLING {
     segment_mappability          // channel: [mandatory] /path/to/segment_mappability
     driver_gene_panel            // channel: [mandatory] /path/to/driver_gene_panel
     ensembl_data_resources       // channel: [mandatory] /path/to/ensembl_data_resources/
+    enable_germline              // boolean: [mandatory] Enable germline mode
 
     main:
     // Channel for version.yml files
@@ -108,7 +109,7 @@ workflow SAGE_CALLING {
             def has_tumor_normal = tumor_bam && normal_bam
             def has_existing = Utils.hasExistingInput(meta, Constants.INPUT.SAGE_VCF_NORMAL)
 
-            runnable: has_tumor_normal && !has_existing
+            runnable: has_tumor_normal && !has_existing && enable_germline
             skip: true
                 return meta
         }

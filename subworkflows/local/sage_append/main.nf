@@ -22,7 +22,7 @@ workflow SAGE_APPEND {
     genome_dict      // channel: [mandatory] /path/to/genome_dict
 
     // Params
-    run_germline     // boolean: [mandatory] Run germline flag
+    enable_germline  // boolean: [mandatory] Enable germline
 
     main:
     // Channel for version.yml files
