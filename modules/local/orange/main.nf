@@ -55,7 +55,15 @@ process ORANGE {
     def run_mode = Utils.getEnumFromString(params.mode, Constants.RunMode);
     def experiment_type = (run_mode === Constants.RunMode.WGTS) ? 'WGS' : 'PANEL'
 
-    def virus_dir_arg = virusinterpreter_dir ? "-virus_dir ${virusinterpreter_dir}" : ''
+    // Given the GRIDSS bug that trickles down to VIRUSBREAKEND, VIRUSINTERPRETER and ORANGE, 
+    // the ORANGE command could be adjusted to still generate the report even if the the 
+    // virus output is missing 
+    // def virus_dir_arg = virusinterpreter_dir ? "-virus_dir ${virusinterpreter_dir}" : ''
+    def virus_dir_arg = virusinterpreter_dir && virusinterpreter_dir.exists() ? "-virus_dir ${virusinterpreter_dir}" : ''
+    if (!virus_dir_arg) {
+        log.warn "VirusInterpreter directory not found or invalid for sample ${meta.id}. Proceeding without it."
+    }
+
     def lilac_dir_arg = lilac_dir ? "-lilac_dir ${lilac_dir}" : ''
     def chord_dir_arg = chord_dir ? "-chord_dir ${chord_dir}" : ''
     def sigs_dir_arg = sigs_dir ? "-sigs_dir ${sigs_dir}" : ''

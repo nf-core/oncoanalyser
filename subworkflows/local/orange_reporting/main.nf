@@ -21,7 +21,7 @@ workflow ORANGE_REPORTING {
     ch_linx_somatic_annotation  // channel: [mandatory] [ meta, linx_annotation_dir ]
     ch_linx_somatic_plot        // channel: [mandatory] [ meta, linx_visualiser_dir ]
     ch_linx_germline_annotation // channel: [mandatory] [ meta, linx_annotation_dir ]
-    ch_virusinterpreter         // channel: [mandatory] [ meta, virusinterpreter_dir ]
+    ch_virusinterpreter         // channel: [optional] [ meta, virusinterpreter_dir ]
     ch_chord                    // channel: [mandatory] [ meta, chord_dir ]
     ch_sigs                     // channel: [mandatory] [ meta, sigs_dir ]
     ch_lilac                    // channel: [optional]  [ meta, lilac_dir ]
@@ -82,7 +82,8 @@ workflow ORANGE_REPORTING {
         ch_linx_somatic_annotation,
         ch_linx_somatic_plot,
         ch_linx_germline_annotation,
-        ch_virusinterpreter,
+        // ch_virusinterpreter,
+        ch_virusinterpreter = ch_virusinterpreter.ifEmpty { Channel.of([meta: [:], virusinterpreter_dir: null]) }, // For graceful handling of empty vurusinterpreter channel
         ch_chord,
         ch_sigs,
         ch_lilac,
