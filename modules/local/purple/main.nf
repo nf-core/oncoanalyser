@@ -8,7 +8,7 @@ process PURPLE {
         'biocontainers/hmftools-purple:4.1--hdfd78af_0' }"
 
     input:
-    tuple val(meta), path(amber), path(cobalt), path(sv_tumor_vcf), path(sv_tumor_tbi), path(sv_normal_vcf), path(sv_normal_tbi), path(smlv_tumor_vcf), path(smlv_normal_vcf)
+    tuple val(meta), path(amber_dir), path(cobalt_dir), path(sv_tumor_vcf), path(sv_tumor_tbi), path(sv_normal_vcf), path(sv_normal_tbi), path(smlv_tumor_vcf), path(smlv_normal_vcf)
     path genome_fasta
     val genome_ver
     path genome_fai
@@ -56,8 +56,8 @@ process PURPLE {
         ${args} \\
         -tumor ${meta.tumor_id} \\
         ${reference_arg} \\
-        -amber ${amber} \\
-        -cobalt ${cobalt} \\
+        -amber ${amber_dir} \\
+        -cobalt ${cobalt_dir} \\
         ${sv_tumor_vcf_arg} \\
         ${sv_normal_vcf_arg} \\
         ${smlv_tumor_vcf_arg} \\
