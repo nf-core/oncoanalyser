@@ -4,12 +4,16 @@ lint:
     - lib/Utils.groovy
     - lib/WorkflowMain.groovy
     - lib/WorkflowOncoanalyser.groovy
+  files_unchanged:
+    - assets/nf-core-oncoanalyser_logo_light.png
+    - docs/images/nf-core-oncoanalyser_logo_dark.png
+    - docs/images/nf-core-oncoanalyser_logo_light.png
   multiqc_config: false
   nextflow_config:
     - config_defaults:
         - params.fastp_umi_length
         - params.fastp_umi_skip
-nf_core_version: 3.2.0
+nf_core_version: 3.2.1
 repository_type: pipeline
 template:
   author: Stephen Watts
@@ -19,4 +23,4 @@ template:
   name: oncoanalyser
   org: nf-core
   outdir: .
-  version: 1.1.0dev
+  version: 2.0.0
