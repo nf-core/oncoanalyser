@@ -36,7 +36,6 @@ input:
   - redux_tsvs:
       type: list
       description: REDUX MS files
-      pattern: "*.{bai}"
   - genome_fasta:
       type: file
       description: Reference genome assembly FASTA file
