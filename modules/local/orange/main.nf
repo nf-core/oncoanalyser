@@ -24,6 +24,7 @@ process ORANGE {
         path(sigs_dir),
         path(lilac_dir),
         path(cuppa_dir),
+        path(peach_dir),
         path(isofox_dir)
     val genome_ver
     path disease_ontology
@@ -60,6 +61,7 @@ process ORANGE {
     def chord_dir_arg = chord_dir ? "-chord_dir ${chord_dir}" : ''
     def sigs_dir_arg = sigs_dir ? "-sigs_dir ${sigs_dir}" : ''
     def cuppa_dir_arg = cuppa_dir ? "-cuppa_dir ${cuppa_dir}" : ''
+    def peach_dir_arg = peach_dir ? "-peach_dir ${peach_dir}" : ''
     def plot_dir = linx_somatic_plot_dir.resolve('reportable/').toUriString().replaceAll('/$', '')
 
     def tumor_metrics_arg = "-tumor_metrics_dir ${bamtools_somatic_dir}"
@@ -139,6 +141,7 @@ process ORANGE {
         ${chord_dir_arg} \\
         ${sigs_dir_arg} \\
         ${cuppa_dir_arg} \\
+        ${peach_dir_arg} \\
         \\
         ${normal_id_arg} \\
         ${normal_metrics_arg} \\
