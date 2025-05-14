@@ -27,6 +27,7 @@ include { READ_ALIGNMENT_RNA    } from '../subworkflows/local/read_alignment_rna
 include { REDUX_PROCESSING      } from '../subworkflows/local/redux_processing'
 include { SAGE_APPEND           } from '../subworkflows/local/sage_append'
 include { SAGE_CALLING          } from '../subworkflows/local/sage_calling'
+include { VCUPPA_PREDICTION     } from '../subworkflows/local/vcuppa_prediction'
 
 include { softwareVersionsToYAML } from '../subworkflows/nf-core/utils_nfcore_pipeline'
 
@@ -628,6 +629,23 @@ workflow TARGETED {
     } else {
 
         ch_peach_out = ch_inputs.map { meta -> [meta, []] }
+
+    }
+
+    //
+    // SUBWORKFLOW: Run vCUPPA predict tissue of origin
+    //
+    if (run_config.stages.vcuppa) {
+
+        VCUPPA_PREDICTION(
+            ch_inputs,
+            ch_purple_out,
+            ref_data.genome_version,
+            panel_data.vcuppa_model,
+            panel_data.vcuppa_features_list,
+        )
+
+        ch_versions = ch_versions.mix(VCUPPA_PREDICTION.out.versions)
 
     }
 

@@ -73,6 +73,7 @@ class Constants {
         SAGE,
         SIGS,
         TEAL,
+        VCUPPA,
         VIRUSINTERPRETER,
         WISP,
     }
