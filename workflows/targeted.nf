@@ -27,6 +27,7 @@ include { READ_ALIGNMENT_RNA    } from '../subworkflows/local/read_alignment_rna
 include { REDUX_PROCESSING      } from '../subworkflows/local/redux_processing'
 include { SAGE_APPEND           } from '../subworkflows/local/sage_append'
 include { SAGE_CALLING          } from '../subworkflows/local/sage_calling'
+include { VCHORD_PREDICTION     } from '../subworkflows/local/vchord_prediction'
 
 include { softwareVersionsToYAML } from '../subworkflows/nf-core/utils_nfcore_pipeline'
 
@@ -628,6 +629,21 @@ workflow TARGETED {
     } else {
 
         ch_peach_out = ch_inputs.map { meta -> [meta, []] }
+
+    }
+
+    //
+    // SUBWORKFLOW: Run vCHORD to predict HRD status
+    //
+    if (run_config.stages.vchord) {
+
+        VCHORD_PREDICTION(
+            ch_inputs,
+            ch_purple_out,
+            panel_data.vchord_model,
+        )
+
+        ch_versions = ch_versions.mix(VCHORD_PREDICTION.out.versions)
 
     }
 
