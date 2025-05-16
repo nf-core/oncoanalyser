@@ -169,7 +169,7 @@ class Utils {
                             index_str = (meta[sample_key][key].toString().endsWith('cram')) ? 'crai' : 'bai'
                         } else if (key === Constants.FileType.BAM_REDUX) {
                             index_enum = Constants.FileType.BAI
-                            index_str = 'bai'
+                            index_str = (meta[sample_key][key].toString().endsWith('cram')) ? 'crai' : 'bai'
                         } else if (key === Constants.FileType.ESVEE_VCF) {
                             index_enum = Constants.FileType.ESVEE_VCF_TBI
                             index_str = 'tbi'
