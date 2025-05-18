@@ -11,7 +11,6 @@ process SAGE_SOMATIC {
 
     input:
     tuple val(meta), path(tumor_bam), path(normal_bam), path(donor_bam), path(tumor_bai), path(normal_bai), path(donor_bai), path(redux_tsvs)
-
     path genome_fasta
     val genome_ver
     path genome_fai
