@@ -45,6 +45,9 @@ input:
   - purple_dir:
       type: directory
       description: PURPLE output directory (optional)
+  - genome_ver:
+      type: string
+      description: Reference genome version
 output:
   - meta:
       type: map
