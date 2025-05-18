@@ -10,10 +10,10 @@ include { REDUX } from '../../../modules/local/redux/main'
 workflow REDUX_PROCESSING {
     take:
     // Sample data
-    ch_inputs     // channel: [mandatory] [ meta ]
-    ch_dna_tumor  // channel: [mandatory] [ meta, [bam, ...], [bai, ...] ]
-    ch_dna_normal // channel: [mandatory] [ meta, [bam, ...], [bai, ...] ]
-    ch_dna_donor  // channel: [mandatory] [ meta, [bam, ...], [bai, ...] ]
+    ch_inputs        // channel: [mandatory] [ meta ]
+    ch_dna_tumor     // channel: [mandatory] [ meta, [bam, ...], [bai, ...] ]
+    ch_dna_normal    // channel: [mandatory] [ meta, [bam, ...], [bai, ...] ]
+    ch_dna_donor     // channel: [mandatory] [ meta, [bam, ...], [bai, ...] ]
 
     // Reference data
     genome_fasta     // channel: [mandatory] /path/to/genome_fasta

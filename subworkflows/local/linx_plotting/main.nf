@@ -11,12 +11,12 @@ include { LINX_VISUALISER } from '../../../modules/local/linx/visualiser/main'
 workflow LINX_PLOTTING {
     take:
     // Sample data
-    ch_inputs                     // channel: [mandatory] [ meta ]
-    ch_annotations                // channel: [mandatory] [ meta, annotation_dir ]
+    ch_inputs              // channel: [mandatory] [ meta ]
+    ch_annotations         // channel: [mandatory] [ meta, annotation_dir ]
 
     // Reference data
-    genome_version                // channel: [mandatory] genome version
-    ensembl_data_resources        // channel: [mandatory] /path/to/ensembl_data_resources/
+    genome_version         // channel: [mandatory] genome version
+    ensembl_data_resources // channel: [mandatory] /path/to/ensembl_data_resources/
 
     main:
     // Channel for versions.yml files

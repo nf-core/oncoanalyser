@@ -10,11 +10,11 @@ include { CHORD } from '../../../modules/local/chord/main'
 workflow CHORD_PREDICTION {
     take:
     // Sample data
-    ch_inputs      // channel: [mandatory] [ meta ]
-    ch_purple      // channel: [mandatory] [ meta, purple_dir ]
-    genome_fasta   // channel: [mandatory] /path/to/genome_fasta
-    genome_fai     // channel: [mandatory] /path/to/genome_fai
-    genome_dict    // channel: [mandatory] /path/to/genome_dict
+    ch_inputs    // channel: [mandatory] [ meta ]
+    ch_purple    // channel: [mandatory] [ meta, purple_dir ]
+    genome_fasta // channel: [mandatory] /path/to/genome_fasta
+    genome_fai   // channel: [mandatory] /path/to/genome_fai
+    genome_dict  // channel: [mandatory] /path/to/genome_dict
 
     main:
     // Channel for version.yml files
