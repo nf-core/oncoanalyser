@@ -215,6 +215,10 @@ class Utils {
                         Nextflow.exit(1)
                     }
 
+                    if (sample_id == meta_sample['longitudinal_sample_id'] && meta_sample.containsKey(Constants.FileType.BAM_REDUX)) {
+                        return
+                    }
+
                     def bam_path = meta_sample[Constants.FileType.BAM_REDUX]
                     def bam_dir = bam_path.getParent().toUriString()
 
