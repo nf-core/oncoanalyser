@@ -162,7 +162,8 @@ process ORANGE {
         -ensembl_data_dir ${ensembl_data_resources} \\
         ${isofox_gene_distribution_arg} \\
         ${isofox_alt_sj_arg} \\
-        -output_dir output/
+        -output_dir output/ \\
+        -log_level ${params.module_log_level}
 
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":

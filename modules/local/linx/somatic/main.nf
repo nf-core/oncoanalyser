@@ -39,7 +39,8 @@ process LINX_SOMATIC {
         -driver_gene_panel ${driver_gene_panel} \\
         -write_vis_data \\
         -write_neo_epitopes \\
-        -output_dir linx_somatic/
+        -output_dir linx_somatic/ \\
+        -log_level ${params.module_log_level}
 
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":

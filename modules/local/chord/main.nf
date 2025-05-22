@@ -39,7 +39,7 @@ process CHORD {
         -sv_vcf_file \$(realpath ${sv_vcf}) \\
         -output_dir \$(realpath chord/) \\
         -ref_genome ${genome_fasta} \\
-        -log_level DEBUG
+        -log_level ${params.module_log_level}
 
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":

@@ -77,7 +77,9 @@ process SAGE_SOMATIC {
         ${high_depth_mode_arg} \\
         -bqr_write_plot \\
         -threads ${task.cpus} \\
-        -output_vcf somatic/${meta.tumor_id}.sage.somatic.vcf.gz
+        -output_vcf somatic/${meta.tumor_id}.sage.somatic.vcf.gz \\
+        -write_fit_variants \\
+        -log_level ${params.module_log_level}
 
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":

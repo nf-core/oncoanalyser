@@ -55,7 +55,8 @@ process LINX_VISUALISER {
         -circos \$(which circos) \\
         -threads ${task.cpus} \\
         -plot_out plots/all/ \\
-        -data_out data/all/
+        -data_out data/all/ \\
+        -log_level ${params.module_log_level}
 
     # Rerun LINX to render only reportable cluster plots in a separate directory. While this is regenerating existing
     # cluster plots, the number of reportable plots is generally very small and I prefer to rely on the internal LINX
@@ -79,7 +80,8 @@ process LINX_VISUALISER {
         -plot_reportable \\
         -threads ${task.cpus} \\
         -plot_out plots/reportable/ \\
-        -data_out data/reportable/
+        -data_out data/reportable/ \\
+        -log_level ${params.module_log_level}
 
     # Create placeholders to force FusionFS to create parent plot directory on S3
     if [[ \$(ls plots/ | wc -l) -eq 0 ]]; then

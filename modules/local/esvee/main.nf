@@ -68,7 +68,7 @@ process ESVEE {
         -output_dir esvee/ \\
         -esvee_prep_dir esvee/ \\
         -threads ${task.cpus} \\
-        -log_level DEBUG
+        -log_level ${params.module_log_level}
 
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":

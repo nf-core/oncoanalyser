@@ -38,7 +38,8 @@ process VIRUSINTERPRETER {
         -taxonomy_db_tsv ${taxonomy_db} \\
         -virus_reporting_db_tsv ${reporting_db} \\
         -virus_blacklisting_db_tsv ${blocklist_db} \\
-        -output_dir virusinterpreter/
+        -output_dir virusinterpreter/ \\
+        -log_level ${params.module_log_level}
 
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":

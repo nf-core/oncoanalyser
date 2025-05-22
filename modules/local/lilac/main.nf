@@ -47,7 +47,8 @@ process LILAC {
         -ref_genome_version ${genome_ver} \\
         -resource_dir ${lilac_resources} \\
         -threads ${task.cpus} \\
-        -output_dir lilac/
+        -output_dir lilac/ \\
+        -log_level ${params.module_log_level}
 
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":

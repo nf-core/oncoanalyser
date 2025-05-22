@@ -66,7 +66,8 @@ process PAVE_SOMATIC {
         ${gnomad_args} \\
         -read_pass_only \\
         -threads ${task.cpus} \\
-        -output_dir ./
+        -output_dir ./ \\
+        -log_level ${params.module_log_level}
 
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":

@@ -58,7 +58,7 @@ process NEO_SCORER {
         -ensembl_data_dir ${ensembl_data_resources} \\
         -score_file_dir ${neo_resources} \\
         -cancer_tpm_medians_file ${cohort_tpm_medians} \\
-        -log_debug \\
+        -log_level ${params.module_log_level} \\
         -output_dir neo_scorer/
 
     cat <<-END_VERSIONS > versions.yml

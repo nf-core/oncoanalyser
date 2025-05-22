@@ -60,7 +60,8 @@ process ISOFOX {
         ${gene_ids_arg} \\
         ${tpm_norm_arg} \\
         -threads ${task.cpus} \\
-        -output_dir isofox/
+        -output_dir isofox/ \\
+        -log_level ${params.module_log_level}
 
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":

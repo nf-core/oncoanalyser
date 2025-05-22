@@ -75,7 +75,8 @@ process PURPLE {
         -gc_profile ${gc_profile} \\
         -circos \$(which circos) \\
         -threads ${task.cpus} \\
-        -output_dir purple/
+        -output_dir purple/ \\
+        -log_level ${params.module_log_level}
 
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":

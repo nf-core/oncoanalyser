@@ -57,7 +57,7 @@ process REDUX {
         ${umi_args} \\
         -write_stats \\
         -threads ${task.cpus} \\
-        -log_level DEBUG
+        -log_level ${params.module_log_level}
 
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":

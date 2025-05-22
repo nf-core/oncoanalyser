@@ -48,7 +48,7 @@ process SAGE_APPEND {
         -write_frag_lengths \\
         ${high_depth_mode_arg} \\
         -threads ${task.cpus} \\
-        -output_vcf sage_append/${meta.sample_id}.sage.append.vcf.gz
+        -output_vcf ${meta.dna_id}.sage.append.vcf.gz \\
         -log_level ${params.module_log_level}
 
     cat <<-END_VERSIONS > versions.yml
