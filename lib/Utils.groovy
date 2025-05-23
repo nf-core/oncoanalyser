@@ -403,7 +403,7 @@ class Utils {
         if (run_star_index && !params.ref_data_genome_gtf) {
             log.error "\n~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n" +
                 "  Creating a STAR index requires the appropriate genome transcript annotations\n" +
-                "  as a GTF file. Please contact us on Slack for further information."
+                "  as a GTF file. Please contact us on Slack for further information.\n" +
                 "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
             Nextflow.exit(1)
         }
