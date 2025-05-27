@@ -74,18 +74,18 @@
                     "fa_icon": "fas fa-palette"
                 },
                 "processes_manual": {
-                    "type": "boolean",
-                    "description": "Run only processes manually provided in processes_include.",
+                    "type": "string",
+                    "description": "Manually run processes provided as a comma separated list.",
                     "fa_icon": "fas fa-diagram-project"
                 },
                 "processes_exclude": {
                     "type": "string",
-                    "description": "Pipeline processes to exclude.",
+                    "description": "Exclude processes provided as a comma separated list.",
                     "fa_icon": "fas fa-diagram-project"
                 },
                 "processes_include": {
                     "type": "string",
-                    "description": "Pipeline processes to include.",
+                    "description": "Include processes that are excluded by default, provided as a comma separated list.",
                     "fa_icon": "fas fa-diagram-project"
                 },
                 "ref_data_types": {

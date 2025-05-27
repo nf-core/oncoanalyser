@@ -8,22 +8,30 @@ class Processes {
 
     public static getRunStages(include, exclude, manual_select, log) {
 
-        // Get default processes
-        // NOTE(SW): currently set all except Neo to run by default; Process.NEO excluded to be more concise in code
         def processes
-        if (manual_select) {
-            processes = []
+
+        if(manual_select) {
+            processes = this.getProcessList(manual_select, log)
+
+            if(include || exclude){
+                log.warning "When manually selecting processes, including/excluding processes is ignored"
+            }
+
         } else {
+
+            // Get default processes
             processes = Constants.Process.values().toList()
-            processes.remove(Constants.Process.NEO)
+
+            // NOTE(LN): Disable some processes from running by default
+            Constants.DEFAULT_EXCLUDED_PROCESSES.each {it -> processes.remove(it) }
+
+            def include_list = this.getProcessList(include, log)
+            def exclude_list = this.getProcessList(exclude, log)
+            this.checkIncludeExcludeList(include_list, exclude_list, log)
+
+            processes.addAll(include_list)
+            processes.removeAll(exclude_list)
         }
-
-        def include_list = this.getProcessList(include, log)
-        def exclude_list = this.getProcessList(exclude, log)
-        this.checkIncludeExcludeList(include_list, exclude_list, log)
-
-        processes.addAll(include_list)
-        processes.removeAll(exclude_list)
 
         return Constants.Process
             .values()
