@@ -76,7 +76,7 @@ workflow PREPARE_REFERENCE {
         } else if (params.ref_data_genome_bwamem2_index.endsWith('.tar.gz')) {
 
             ch_genome_bwamem2_index_inputs = Channel.fromPath(params.ref_data_genome_bwamem2_index)
-                .map { [[id: "bwa-mem2_index_${it.name.replaceAll('\\.tar\\.gz$', '')}"], it] }
+                .map { [[id: "${it.name.replaceAll('\\.tar\\.gz$', '')}"], it] }
 
             DECOMP_BWAMEM2_INDEX(ch_genome_bwamem2_index_inputs)
             ch_genome_bwamem2_index = DECOMP_BWAMEM2_INDEX.out.extracted_dir
@@ -113,7 +113,7 @@ workflow PREPARE_REFERENCE {
         } else if (params.ref_data_genome_gridss_index.endsWith('.tar.gz')) {
 
             ch_genome_gridss_index_inputs = Channel.fromPath(params.ref_data_genome_gridss_index)
-                .map { [[id: "gridss_index_${it.name.replaceAll('\\.tar\\.gz$', '')}"], it] }
+                .map { [[id: "${it.name.replaceAll('\\.tar\\.gz$', '')}"], it] }
 
             DECOMP_GRIDSS_INDEX(ch_genome_gridss_index_inputs)
             ch_genome_gridss_index = DECOMP_GRIDSS_INDEX.out.extracted_dir
@@ -142,7 +142,7 @@ workflow PREPARE_REFERENCE {
         } else if (params.ref_data_genome_star_index.endsWith('.tar.gz')) {
 
             ch_genome_star_index_inputs = Channel.fromPath(params.ref_data_genome_star_index)
-                .map { [[id: "star_index_${it.name.replaceAll('\\.tar\\.gz$', '')}"], it] }
+                .map { [[id: "${it.name.replaceAll('\\.tar\\.gz$', '')}"], it] }
 
             DECOMP_STAR_INDEX(ch_genome_star_index_inputs)
             ch_genome_star_index = DECOMP_STAR_INDEX.out.extracted_dir
@@ -162,7 +162,7 @@ workflow PREPARE_REFERENCE {
     if (params.ref_data_hmf_data_path.endsWith('tar.gz')) {
 
         ch_hmf_data_inputs = Channel.fromPath(params.ref_data_hmf_data_path)
-            .map { [[id: "hmf_data_${it.name.replaceAll('\\.tar\\.gz$', '')}"], it] }
+            .map { [[id: "${it.name.replaceAll('\\.tar\\.gz$', '')}"], it] }
 
         DECOMP_HMF_DATA(ch_hmf_data_inputs)
 
@@ -192,7 +192,7 @@ workflow PREPARE_REFERENCE {
         if (params.ref_data_panel_data_path.endsWith('tar.gz')) {
 
             ch_panel_data_inputs = Channel.fromPath(params.ref_data_panel_data_path)
-                .map { [[id: "panel_data_${it.name.replaceAll('\\.tar\\.gz$', '')}"], it] }
+                .map { [[id: "${it.name.replaceAll('\\.tar\\.gz$', '')}"], it] }
 
             DECOMP_PANEL_DATA(ch_panel_data_inputs)
 
