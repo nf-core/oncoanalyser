@@ -81,9 +81,12 @@ class Constants {
         // Generic
         BAM,
         BAI,
+        CRAM,
+        CRAI,
         FASTQ,
         // Redux
         BAM_REDUX,
+        CRAM_REDUX,
         REDUX_DUP_FREQ_TSV,
         REDUX_JITTER_TSV,
         REDUX_MS_TSV,
