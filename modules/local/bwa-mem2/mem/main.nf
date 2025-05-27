@@ -3,9 +3,6 @@ process BWAMEM2_ALIGN {
     label 'process_high'
 
     conda "${moduleDir}/environment.yml"
-    container "${ workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container ?
-        'https://depot.galaxyproject.org/singularity/mulled-v2-4dde50190ae599f2bb2027cb2c8763ea00fb5084:b39930b2feee9b7a3e5cbef88b34f0d5c5f64897-0' :
-        'biocontainers/mulled-v2-4dde50190ae599f2bb2027cb2c8763ea00fb5084:b39930b2feee9b7a3e5cbef88b34f0d5c5f64897-0' }"
 
     input:
     tuple val(meta), path(reads_fwd), path(reads_rev)
