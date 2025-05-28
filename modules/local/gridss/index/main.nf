@@ -26,7 +26,7 @@ process GRIDSS_INDEX {
 
     """
     # Symlink BWA indices next to assembly FASTA
-    ln -s \$(find -L ${genome_bwa_index} -type f) ./
+    ln -s \$(find -L ${genome_bwa_index}/${genome_fasta.name}.*) ./
 
     # Create indexes
     PrepareReference \\
