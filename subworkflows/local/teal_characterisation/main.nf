@@ -86,9 +86,16 @@ workflow TEAL_CHARACTERISATION {
     ch_tumor_teal_bam = WorkflowOncoanalyser.restoreMeta(TEAL_PREP.out.tumor_bam, ch_inputs)
         .map { meta, bam_bai -> [meta, *bam_bai] }
 
+    ch_normal_teal_bam_placeholder = WorkflowOncoanalyser.restoreMeta(
+        ch_teal_prep_inputs
+            .filter { it[0].normal_id == null } // Only populate placeholder channel if normal sample is missing
+            .map { [ it[0], [], [] ] },
+        ch_inputs
+    )
+
     ch_normal_teal_bam = WorkflowOncoanalyser.restoreMeta(TEAL_PREP.out.normal_bam, ch_inputs)
         .map { meta, bam_bai -> [meta, *bam_bai] }
-        .mix(ch_inputs.map { meta -> [meta, [], []] }) // Add placeholder when normal sample is missing
+        .mix(ch_normal_teal_bam_placeholder)
 
     //
     // MODULE: Teal pipeline
