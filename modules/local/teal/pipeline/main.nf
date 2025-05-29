@@ -8,7 +8,10 @@ process TEAL_PIPELINE {
         'biocontainers/hmftools-teal:1.3.3--hdfd78af_0' }"
 
     input:
-    tuple val(meta), path(tumor_teal_bam), path(tumor_bai), path(normal_teal_bam), path(tumor_bai), path(tumor_metrics_dir), path(normal_metrics_dir), path(cobalt_dir), path(purple_dir)
+    tuple val(meta),
+        path(tumor_teal_bam), path(tumor_teal_bai),
+        path(normal_teal_bam), path(normal_teal_bai),
+        path(tumor_metrics_dir), path(normal_metrics_dir), path(cobalt_dir), path(purple_dir)
     val genome_ver
 
     output:

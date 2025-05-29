@@ -81,21 +81,21 @@ workflow TEAL_CHARACTERISATION {
 
     ch_versions = ch_versions.mix(TEAL_PREP.out.versions)
 
+    // Flatten TEAL_PREP output
+    // channel: [ meta, teal_bam, teal_bai ]
+    ch_tumor_teal_bam = WorkflowOncoanalyser.restoreMeta(TEAL_PREP.out.tumor_bam, ch_inputs)
+        .map { meta, bam_bai -> [meta, *bam_bai] }
 
-
-    ch_tumor_teal_bam = WorkflowOncoanalyser.restoreMeta(TEAL_PREP.out.tumor_teal_bam, ch_inputs)
-    ch_normal_teal_bam = Channel.empty()
-        .mix(
-            WorkflowOncoanalyser.restoreMeta(TEAL_PREP.out.normal_teal_bam, ch_inputs),
-            ch_inputs.map { meta -> [meta, []] }
-        )
+    ch_normal_teal_bam = WorkflowOncoanalyser.restoreMeta(TEAL_PREP.out.normal_bam, ch_inputs)
+        .map { meta, bam_bai -> [meta, *bam_bai] }
+        .mix(ch_inputs.map { meta -> [meta, [], []] }) // Add placeholder when normal sample is missing
 
     //
     // MODULE: Teal pipeline
     //
 
     // Select input sources and sort
-    // channel: runnable: [ meta, tumor_teal_bam, normal_teal_bam, tumor_metrics_dir, normal_metrics_dir, cobalt_dir, purple_dir ]
+    // channel: runnable: [ meta, tumor_teal_bam, tumor_teal_bai, normal_teal_bam, normal_teal_bai, tumor_metrics_dir, normal_metrics_dir, cobalt_dir, purple_dir ]
     // channel: skip: [ meta ]
     ch_teal_pipeline_inputs_sorted = WorkflowOncoanalyser.groupByMeta(
         ch_tumor_teal_bam,
@@ -105,19 +105,19 @@ workflow TEAL_CHARACTERISATION {
         ch_cobalt_dir,
         ch_purple_dir,
     )
-        .map { meta, tumor_teal_bam, normal_teal_bam, tumor_metrics_dir, normal_metrics_dir, cobalt_dir, purple_dir ->
+        .map { meta, tumor_teal_bam, tumor_teal_bai, normal_teal_bam, normal_teal_bai, tumor_metrics_dir, normal_metrics_dir, cobalt_dir, purple_dir ->
 
             return [
                 meta,
-                tumor_teal_bam,
-                normal_teal_bam,
+                tumor_teal_bam, tumor_teal_bai,
+                normal_teal_bam, normal_teal_bai,
                 Utils.selectCurrentOrExisting(tumor_metrics_dir, meta, Constants.INPUT.BAMTOOLS_DIR_TUMOR),
                 Utils.selectCurrentOrExisting(normal_metrics_dir, meta, Constants.INPUT.BAMTOOLS_DIR_NORMAL),
                 Utils.selectCurrentOrExisting(cobalt_dir, meta, Constants.INPUT.COBALT_DIR),
                 Utils.selectCurrentOrExisting(purple_dir, meta, Constants.INPUT.PURPLE_DIR),
             ]
         }
-        .branch { meta_teal, tumor_teal_bam, normal_teal_bam, tumor_metrics_dir, normal_metrics_dir, cobalt_dir, purple_dir ->
+        .branch { meta_teal, tumor_teal_bam, tumor_teal_bai, normal_teal_bam, normal_teal_bai, tumor_metrics_dir, normal_metrics_dir, cobalt_dir, purple_dir ->
 
              def has_tumor = tumor_teal_bam && tumor_metrics_dir && purple_dir
              def has_normal = normal_teal_bam && normal_metrics_dir
@@ -128,9 +128,9 @@ workflow TEAL_CHARACTERISATION {
         }
 
     // Create process input channel
-    // channel: [ meta_teal, tumor_teal_bam, normal_teal_bam, tumor_metrics_dir, normal_metrics_dir, cobalt_dir, purple_dir ]
+    // channel: [ meta_teal, tumor_teal_bam, tumor_teal_bai, normal_teal_bam, normal_teal_bai, tumor_metrics_dir, normal_metrics_dir, cobalt_dir, purple_dir ]
     ch_teal_pipeline_inputs = ch_teal_pipeline_inputs_sorted.runnable
-        .map { meta, tumor_teal_bam, normal_teal_bam, tumor_metrics_dir, normal_metrics_dir, cobalt_dir, purple_dir ->
+        .map { meta, tumor_teal_bam, tumor_teal_bai, normal_teal_bam, normal_teal_bai, tumor_metrics_dir, normal_metrics_dir, cobalt_dir, purple_dir ->
 
             def meta_teal = [
                 key: meta.group_id,
@@ -139,10 +139,9 @@ workflow TEAL_CHARACTERISATION {
                 normal_id: normal_teal_bam ? Utils.getNormalDnaSampleName(meta) : null,
             ]
 
-            return [meta_teal, tumor_teal_bam, normal_teal_bam, tumor_metrics_dir, normal_metrics_dir, cobalt_dir, purple_dir]
+            return [ meta_teal, tumor_teal_bam, tumor_teal_bai, normal_teal_bam, normal_teal_bai, tumor_metrics_dir, normal_metrics_dir, cobalt_dir, purple_dir ]
         }
 
-    ch_teal_pipeline_inputs.view()
 
     TEAL_PIPELINE(
         ch_teal_pipeline_inputs,
