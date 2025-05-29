@@ -4,8 +4,8 @@ process LINX_GERMLINE {
 
     conda "${moduleDir}/environment.yml"
     container "${ workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container ?
-        'https://depot.galaxyproject.org/singularity/hmftools-linx:2.0--hdfd78af_0' :
-        'biocontainers/hmftools-linx:2.0--hdfd78af_0' }"
+        'https://depot.galaxyproject.org/singularity/hmftools-linx:2.0.2--hdfd78af_0' :
+        'biocontainers/hmftools-linx:2.0.2--hdfd78af_0' }"
 
     input:
     tuple val(meta), path(sv_vcf)
