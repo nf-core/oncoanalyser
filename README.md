@@ -78,12 +78,12 @@ Launch `oncoanalyser`:
 
 ```bash
 nextflow run nf-core/oncoanalyser \
-  -profile <docker|singularity|...> \
-  -revision 2.0.0 \
-  --mode <wgts|targeted> \
-  --genome <GRCh37_hmf|GRCh38_hmf> \
-  --input samplesheet.csv \
-  --outdir output/
+    -profile <docker/singularity/.../institute> \
+    -revision 2.0.0 \
+    --mode <wgts/targeted> \
+    --genome <GRCh37_hmf/GRCh38_hmf> \
+    --input samplesheet.csv \
+    --outdir output/
 ```
 
 > [!WARNING]

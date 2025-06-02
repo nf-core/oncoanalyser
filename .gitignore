@@ -1,5 +1,3 @@
-examples/
-*.tar.gz
 .nextflow*
 work/
 data/
