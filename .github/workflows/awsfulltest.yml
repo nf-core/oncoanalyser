@@ -1,35 +1,27 @@
 name: nf-core AWS full size tests
-# This workflow is triggered on PRs opened against the master branch.
+# This workflow is triggered on PRs opened against the main/master branch.
 # It can be additionally triggered manually with GitHub actions workflow dispatch button.
 # It runs the -profile 'test_full' on AWS batch
 
 on:
-  pull_request:
-    branches:
-      - master
   workflow_dispatch:
   pull_request_review:
     types: [submitted]
+  release:
+    types: [published]
 
 jobs:
   run-platform:
     name: Run AWS full tests
-    # run only if the PR is approved by at least 2 reviewers and against the master branch or manually triggered
-    if: github.repository == 'nf-core/oncoanalyser' && github.event.review.state == 'approved' && github.event.pull_request.base.ref == 'master' || github.event_name == 'workflow_dispatch'
+    # run only if the PR is approved by at least 2 reviewers and against the master/main branch or manually triggered
+    if: github.repository == 'nf-core/oncoanalyser' && github.event.review.state == 'approved' && (github.event.pull_request.base.ref == 'master' || github.event.pull_request.base.ref == 'main') || github.event_name == 'workflow_dispatch'
     runs-on: ubuntu-latest
     steps:
-      - uses: octokit/request-action@v2.x
-        id: check_approvals
-        with:
-          route: GET /repos/${{ github.repository }}/pulls/${{ github.event.pull_request.number }}/reviews
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      - id: test_variables
-        if: github.event_name != 'workflow_dispatch'
+      - name: Set revision variable
+        id: revision
         run: |
-          JSON_RESPONSE='${{ steps.check_approvals.outputs.data }}'
-          CURRENT_APPROVALS_COUNT=$(echo $JSON_RESPONSE | jq -c '[.[] | select(.state | contains("APPROVED")) ] | length')
-          test $CURRENT_APPROVALS_COUNT -ge 2 || exit 1 # At least 2 approvals are required
+          echo "revision=${{ (github.event_name == 'workflow_dispatch' || github.event_name == 'release') && github.sha || 'dev' }}" >> "$GITHUB_OUTPUT"
+
       - name: Launch workflow via Seqera Platform
         uses: seqeralabs/action-tower-launch@v2
         # TODO nf-core: You can customise AWS full pipeline tests as required
@@ -39,12 +31,12 @@ jobs:
           workspace_id: ${{ secrets.TOWER_WORKSPACE_ID }}
           access_token: ${{ secrets.TOWER_ACCESS_TOKEN }}
           compute_env: ${{ secrets.TOWER_COMPUTE_ENV }}
-          revision: ${{ github.sha }}
-          workdir: s3://${{ secrets.AWS_S3_BUCKET }}/work/oncoanalyser/work-${{ github.sha }}
+          revision: ${{ steps.revision.outputs.revision }}
+          workdir: s3://${{ secrets.AWS_S3_BUCKET }}/work/oncoanalyser/work-${{ steps.revision.outputs.revision }}
           parameters: |
             {
               "hook_url": "${{ secrets.MEGATESTS_ALERTS_SLACK_HOOK_URL }}",
-              "outdir": "s3://${{ secrets.AWS_S3_BUCKET }}/oncoanalyser/results-${{ github.sha }}"
+              "outdir": "s3://${{ secrets.AWS_S3_BUCKET }}/oncoanalyser/results-${{ steps.revision.outputs.revision }}"
             }
           profiles: test_full
 
