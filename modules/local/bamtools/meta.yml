@@ -1,0 +1,46 @@
+name: bamtools
+description: Rapidly process BAMs for various tasks
+keywords:
+  - bam
+tools:
+  - bamtools:
+      description: Performs rapid processing of BAM files
+      homepage: https://github.com/hartwigmedical/hmftools/tree/master/bam-tools
+      documentation: https://github.com/hartwigmedical/hmftools/tree/master/bam-tools
+      licence: ["GPL v3"]
+input:
+  - meta:
+      type: map
+      description: |
+        Groovy Map containing sample information
+        e.g. [id: 'sample_id']
+  - bam:
+      type: file
+      description: BAM file
+      pattern: "*.{bam}"
+  - bai:
+      type: file
+      description: BAI file
+      pattern: "*.{bai}"
+  - genome_fasta:
+      type: file
+      description: Reference genome assembly FASTA file
+      pattern: "*.{fa,fasta}"
+  - genome_ver:
+      type: string
+      description: Reference genome version
+output:
+  - meta:
+      type: map
+      description: |
+        Groovy Map containing sample information
+        e.g. [id: 'sample_id']
+  - metrics_dir:
+      type: directory
+      description: BAM metrics directory
+  - versions:
+      type: file
+      description: File containing software versions
+      pattern: "versions.yml"
+authors:
+  - "@scwatts"

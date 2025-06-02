@@ -1,0 +1,68 @@
+name: esvee_depth_annotator
+description: Annotate ESVEE VCFs with depth information
+keywords:
+  - depth
+  - annotation
+  - sv
+tools:
+  - esvee:
+      description: Structural variant (SV) calling
+      homepage: https://github.com/hartwigmedical/hmftools/tree/master/esvee
+      documentation: https://github.com/hartwigmedical/hmftools/tree/master/esvee
+      licence: ["GPL >=3"]
+input:
+  - meta:
+      type: map
+      description: |
+        Groovy Map containing sample information
+        e.g. [id: 'sample_id']
+  - tumor_bam:
+      type: file
+      description: Tumor BAM file
+      pattern: "*.{bam}"
+  - tumor_bai:
+      type: file
+      description: Tumor BAI file
+      pattern: "*.{bai}"
+  - normal_bam:
+      type: file
+      description: Normal BAM file
+      pattern: "*.{bam}"
+  - normal_bai:
+      type: file
+      description: Normal BAI file
+      pattern: "*.{bai}"
+  - raw_vcf:
+      type: file
+      description: ESVEE assemble raw VCF file
+      pattern: "*.{vcf.gz}"
+  - genome_fasta:
+      type: file
+      description: Reference genome assembly FASTA file
+      pattern: "*.{fa,fasta}"
+  - genome_ver:
+      type: string
+      description: Reference genome version
+  - unmap_regions:
+      type: file
+      description: Hartwig unmap regions file
+      pattern: "*.{tsv}"
+output:
+  - meta:
+      type: map
+      description: |
+        Groovy Map containing sample information
+        e.g. [id: 'sample_id']
+  - depth_annotation_dir:
+      type: directory
+      description: ESVEE depth annotation output directory
+  - ref_depth_vcf:
+      type: file
+      description: Depth annotated VCF file
+      pattern: "*.{vcf.gz}"
+  - versions:
+      type: file
+      description: File containing software versions
+      pattern: "versions.yml"
+authors:
+  - "@scwatts"

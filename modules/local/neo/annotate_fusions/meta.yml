@@ -1,0 +1,63 @@
+name: neo_annotate_fusions
+description: Annotate neoeptitopes with RNA fusion data
+keywords:
+  - neoepitopes
+  - rna
+  - rnaseq
+tools:
+  - isofox:
+      description: Characterises and counts gene, transcript features
+      homepage: https://github.com/hartwigmedical/hmftools/tree/master/isofox
+      documentation: https://github.com/hartwigmedical/hmftools/tree/master/isofox
+      licence: ["GPL v3"]
+input:
+  - meta:
+      type: map
+      description: |
+        Groovy Map containing sample information
+        e.g. [id: 'sample_id']
+  - neo_finder_dir:
+      type: directory
+      description: Neo Finder directory
+  - bam:
+      type: file
+      description: BAM file
+      pattern: "*.{bam}"
+  - bai:
+      type: file
+      description: BAI file
+      pattern: "*.{bai}"
+  - read_length:
+      type: integer
+      description: Read length
+  - genome_fasta:
+      type: file
+      description: Reference genome assembly FASTA file
+      pattern: "*.{fa,fasta}"
+  - genome_ver:
+      type: string
+      description: Reference genome version
+  - genome_fai:
+      type: file
+      description: Reference genome assembly fai file
+      pattern: "*.{fai}"
+  - ensembl_data_resources:
+      type: directory
+      description: HMF ensembl data resources directory
+output:
+  - meta:
+      type: map
+      description: |
+        Groovy Map containing sample information
+        e.g. [id: 'sample_id']
+  - annotated_fusions:
+      type: file
+      description: Annotated neoepitopes file
+      pattern: "*.{tsv}"
+  - versions:
+      type: file
+      description: File containing software versions
+      pattern: "versions.yml"
+authors:
+  - "@scwatts"
+  - "@charlesshale"
