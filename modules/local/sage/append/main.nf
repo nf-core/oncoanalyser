@@ -27,7 +27,7 @@ process SAGE_APPEND {
 
     def xmx_mod = task.ext.xmx_mod ?: 0.75
 
-    def log_file_id = "${task.process.split(':')[-1]}.${meta.sample_id}"
+    def log_file_id = "${task.process.split(':')[-1]}.${meta.dna_id}"
 
     """
     sage \\

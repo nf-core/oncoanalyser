@@ -26,7 +26,7 @@ process GATK4_MARKDUPLICATES {
 
     script:
     def args = task.ext.args ?: ''
-    prefix = task.ext.prefix ?: "${meta.sample_id}"
+    def prefix = task.ext.prefix ?: "${meta.sample_id}"
     def input_list = bam.collect{"--INPUT $it"}.join(' ')
     def reference = fasta ? "--REFERENCE_SEQUENCE ${fasta}" : ""
 
@@ -37,7 +37,7 @@ process GATK4_MARKDUPLICATES {
         avail_mem = (task.memory.mega*0.8).intValue()
     }
 
-    def log_file_id = "${task.process.split(':')[-1]}.${meta.sample_id}"
+    def log_file_id = "${task.process.split(':')[-1]}.${prefix}"
 
     """
     gatk --java-options "-Xmx${avail_mem}M" MarkDuplicates \\
@@ -62,7 +62,7 @@ process GATK4_MARKDUPLICATES {
     """
 
     stub:
-    prefix = task.ext.prefix ?: "${meta.sample_id}"
+    def prefix = task.ext.prefix ?: "${meta.sample_id}"
 
     """
     touch ${prefix}.md.bam

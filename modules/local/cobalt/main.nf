@@ -32,7 +32,7 @@ process COBALT {
     def diploid_regions_arg = diploid_regions ? "-tumor_only_diploid_bed ${diploid_regions}" : ''
     def target_region_arg = target_region_normalisation ? "-target_region ${target_region_normalisation}" : ''
 
-    def log_file_id = "${task.process.split(':')[-1]}.${meta.sample_id}"
+    def log_file_id = "${task.process.split(':')[-1]}.${meta.tumor_id}"
 
     """
     cobalt \\

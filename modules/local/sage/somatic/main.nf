@@ -67,7 +67,7 @@ process SAGE_SOMATIC {
         error "got bad genome version: ${genome_ver}"
     }
 
-    def log_file_id = "${task.process.split(':')[-1]}.${meta.sample_id}"
+    def log_file_id = "${task.process.split(':')[-1]}.${meta.tumor_id}"
 
     """
     mkdir -p somatic/

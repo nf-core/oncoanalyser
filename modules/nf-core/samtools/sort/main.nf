@@ -24,7 +24,7 @@ process SAMTOOLS_SORT {
     def prefix = task.ext.prefix ?: "${meta.prefix}"
     if ("${bam}" == "${prefix}.bam") error "Input and output names are the same, use \"task.ext.prefix\" to disambiguate!"
 
-    def log_file_id = "${task.process.split(':')[-1]}.${meta.sample_id}"
+    def log_file_id = "${task.process.split(':')[-1]}.${prefix}"
 
     """
     samtools sort \\

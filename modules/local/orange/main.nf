@@ -79,7 +79,7 @@ process ORANGE {
     // NOTE(SW): DOID label: 162 [cancer]; Hartwig cohort group: unknown
     def doid_arg = meta.cancer_type ?: '162'
 
-    def log_file_id = "${task.process.split(':')[-1]}.${meta.sample_id}"
+    def log_file_id = "${task.process.split(':')[-1]}.${meta.tumor_id}"
 
     """
     echo "${pipeline_version_str}" > pipeline_version.txt

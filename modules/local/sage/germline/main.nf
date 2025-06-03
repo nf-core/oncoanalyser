@@ -30,7 +30,7 @@ process SAGE_GERMLINE {
     script:
     def args = task.ext.args ?: ''
 
-    def log_file_id = "${task.process.split(':')[-1]}.${meta.sample_id}"
+    def log_file_id = "${task.process.split(':')[-1]}.${meta.tumor_id}"
 
     """
     mkdir -p germline/

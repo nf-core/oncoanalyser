@@ -38,7 +38,7 @@ process AMBER {
 
     def target_regions_bed_arg = target_region_bed ? "-target_regions_bed ${target_region_bed}" : ''
 
-    def log_file_id = "${task.process.split(':')[-1]}.${meta.sample_id}"
+    def log_file_id = "${task.process.split(':')[-1]}.${meta.tumor_id}"
 
     """
     amber \\
