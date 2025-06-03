@@ -210,10 +210,10 @@ workflow ORANGE_REPORTING {
             // ORANGE only accepts CUPPA with DNA; when providing DNA/RNA inputs but skipping Virus Interpreter CUPPA
             // will generate RNA only outputs and no visualisation, which triggers missing file error in ORANGE
             if (inputs_selected[cuppa_dir_index]) {
-              def cuppa_vis_data_fp = inputs_selected[cuppa_dir_index].resolve("${meta_orange.tumor_id}.cuppa.vis_data.tsv")
-              if (! cuppa_vis_data_fp.exists()) {
-                  inputs_selected[cuppa_dir_index] = []
-              }
+                def cuppa_vis_data_fp = inputs_selected[cuppa_dir_index].resolve("${meta_orange.tumor_id}.cuppa.vis_data.tsv")
+                if (! cuppa_vis_data_fp.exists()) {
+                    inputs_selected[cuppa_dir_index] = []
+                }
             }
 
             assert inputs_selected.size() == input_expected_size
