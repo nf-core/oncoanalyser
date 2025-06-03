@@ -14,7 +14,6 @@ process LINX_VISUALISER {
 
     output:
     tuple val(meta), path('plots/'), emit: plots
-    path 'command.*.{sh,out,err}'  , emit: logs
     path 'versions.yml'            , emit: versions
 
     when:
@@ -92,7 +91,7 @@ process LINX_VISUALISER {
     fi;
 
     for log_file_ext in sh out err; do
-        cp .command.\${log_file_ext} command.${log_file_id}.\${log_file_ext}
+        cp .command.\${log_file_ext} plots/command.${log_file_id}.\${log_file_ext}
     done
 
     cat <<-END_VERSIONS > versions.yml

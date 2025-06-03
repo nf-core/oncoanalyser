@@ -15,7 +15,6 @@ process VIRUSINTERPRETER {
 
     output:
     tuple val(meta), path('virusinterpreter/'), emit: virusinterpreter_dir
-    path 'command.*.{sh,out,err}'             , emit: logs
     path 'versions.yml'                       , emit: versions
 
     when:
@@ -45,7 +44,7 @@ process VIRUSINTERPRETER {
         -log_level ${params.module_log_level}
 
     for log_file_ext in sh out err; do
-        cp .command.\${log_file_ext} command.${log_file_id}.\${log_file_ext}
+        cp .command.\${log_file_ext} virusinterpreter/command.${log_file_id}.\${log_file_ext}
     done
 
     cat <<-END_VERSIONS > versions.yml

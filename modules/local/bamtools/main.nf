@@ -16,7 +16,6 @@ process BAMTOOLS {
 
     output:
     tuple val(meta), path("${meta.id}_bamtools/"), emit: metrics_dir
-    path 'command.*.{sh,out,err}'                , emit: logs
     path 'versions.yml'                          , emit: versions
 
     when:
@@ -27,10 +26,12 @@ process BAMTOOLS {
 
     def xmx_mod = task.ext.xmx_mod ?: 0.75
 
+    def output_dir = "${meta.id}_bamtools/"
+
     def log_file_id = "${task.process.split(':')[-1]}.${meta.sample_id}"
 
     """
-    mkdir -p ${meta.id}_bamtools/
+    mkdir -p ${output_dir}
 
     bamtools \\
         -Xmx${Math.round(task.memory.bytes * xmx_mod)} \\
@@ -44,10 +45,10 @@ process BAMTOOLS {
         -ensembl_data_dir ${ensembl_data_resources} \\
         -threads ${task.cpus} \\
         -log_level ${params.module_log_level} \\
-        -output_dir ${meta.id}_bamtools/
+        -output_dir ${output_dir}
 
     for log_file_ext in sh out err; do
-        cp .command.\${log_file_ext} command.${log_file_id}.\${log_file_ext}
+        cp .command.\${log_file_ext} ${output_dir}/command.${log_file_id}.\${log_file_ext}
     done
 
     cat <<-END_VERSIONS > versions.yml
