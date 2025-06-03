@@ -23,6 +23,7 @@ process REDUX {
     tuple val(meta), path('*.duplicate_freq.tsv')                , emit: dup_freq_tsv
     tuple val(meta), path('*.jitter_params.tsv')                 , emit: jitter_tsv
     tuple val(meta), path('*.ms_table.tsv.gz')                   , emit: ms_tsv
+    path 'command.*.{sh,out,err}'                                , emit: logs
     path 'versions.yml'                                          , emit: versions
 
     when:
@@ -39,6 +40,8 @@ process REDUX {
     if (umi_enable) umi_args_list.add('-umi_enabled')
     if (umi_duplex_delim) umi_args_list.add("-umi_duplex -umi_duplex_delim ${umi_duplex_delim}")
     def umi_args = umi_args_list ? umi_args_list.join(' ') : ''
+
+    def log_file_id = "${task.process.split(':')[-1]}.${meta.sample_id}"
 
     """
     redux \\
@@ -58,6 +61,10 @@ process REDUX {
         -write_stats \\
         -threads ${task.cpus} \\
         -log_level ${params.module_log_level}
+
+    for log_file_ext in sh out err; do
+        cp .command.\${log_file_ext} command.${log_file_id}.\${log_file_ext}
+    done
 
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":
