@@ -1,5 +1,4 @@
 lint:
-  actions_ci: false
   files_exist:
     - lib/Utils.groovy
     - lib/WorkflowMain.groovy
@@ -13,7 +12,7 @@ lint:
     - config_defaults:
         - params.fastp_umi_length
         - params.fastp_umi_skip
-nf_core_version: 3.2.1
+nf_core_version: 3.3.1
 repository_type: pipeline
 template:
   author: Stephen Watts
@@ -23,4 +22,4 @@ template:
   name: oncoanalyser
   org: nf-core
   outdir: .
-  version: 2.0.0
+  version: 2.1.0dev
