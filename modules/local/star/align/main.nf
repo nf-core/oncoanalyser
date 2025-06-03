@@ -13,7 +13,6 @@ process STAR_ALIGN {
 
     output:
     tuple val(meta), path('*bam'), emit: bam
-    path 'command.*.{sh,out,err}', emit: logs
     path 'versions.yml'          , emit: versions
 
     when:
@@ -21,9 +20,6 @@ process STAR_ALIGN {
 
     script:
     def args = task.ext.args ?: ''
-
-    def log_file_id = "${task.process.split(':')[-1]}.${meta.sample_id}"
-
     """
     STAR \\
         ${args} \\
@@ -54,10 +50,6 @@ process STAR_ALIGN {
         --outSAMtype BAM Unsorted \\
         --outSAMunmapped Within \\
         --runRNGseed 0
-
-    for log_file_ext in sh out err; do
-        cp .command.\${log_file_ext} command.${log_file_id}.\${log_file_ext}
-    done
 
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":

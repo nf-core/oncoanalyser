@@ -12,7 +12,6 @@ process SAMTOOLS_SORT {
 
     output:
     tuple val(meta), path("*.bam"),  emit: bam
-    path 'command.*.{sh,out,err}' ,  emit: logs
     path "versions.yml"           ,  emit: versions
 
     when:
@@ -24,8 +23,6 @@ process SAMTOOLS_SORT {
     def prefix = task.ext.prefix ?: "${meta.prefix}"
     if ("${bam}" == "${prefix}.bam") error "Input and output names are the same, use \"task.ext.prefix\" to disambiguate!"
 
-    def log_file_id = "${task.process.split(':')[-1]}.${prefix}"
-
     """
     samtools sort \\
         ${args} \\
@@ -33,10 +30,6 @@ process SAMTOOLS_SORT {
         --threads ${task.cpus} \\
         -o ${prefix}.bam \\
         ${bam}
-
-    for log_file_ext in sh out err; do
-        cp .command.\${log_file_ext} command.${log_file_id}.\${log_file_ext}
-    done
 
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":

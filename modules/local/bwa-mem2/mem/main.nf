@@ -14,7 +14,6 @@ process BWAMEM2_ALIGN {
 
     output:
     tuple val(meta), path('*.bam'), path('*.bai'), emit: bam
-    path 'command.*.{sh,out,err}'                , emit: logs
     path 'versions.yml'                          , emit: versions
 
     when:
@@ -27,8 +26,6 @@ process BWAMEM2_ALIGN {
 
     def read_group_tag = "@RG\\tID:${meta.read_group}\\tSM:${meta.sample_id}"
     def output_fn = meta.split ? "${meta.split}.${meta.sample_id}.${meta.read_group}.bam" : "${meta.sample_id}.${meta.read_group}.bam"
-
-    def log_file_id = "${task.process.split(':')[-1]}.${meta.sample_id}"
 
     """
     ln -fs \$(find -L ${genome_bwamem2_index} -type f) ./
@@ -56,10 +53,6 @@ process BWAMEM2_ALIGN {
             --nthreads ${task.cpus} \\
             --out ${output_fn} \\
             /dev/stdin
-
-    for log_file_ext in sh out err; do
-        cp .command.\${log_file_ext} command.${log_file_id}.\${log_file_ext}
-    done
 
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":

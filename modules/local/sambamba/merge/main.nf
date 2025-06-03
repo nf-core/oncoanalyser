@@ -12,7 +12,6 @@ process SAMBAMBA_MERGE {
 
     output:
     tuple val(meta), path('*bam'), emit: bam
-    path 'command.*.{sh,out,err}', emit: logs
     path 'versions.yml'          , emit: versions
 
     when:
@@ -20,20 +19,12 @@ process SAMBAMBA_MERGE {
 
     script:
     def args = task.ext.args ?: ''
-
-    def log_file_id = "${task.process.split(':')[-1]}.${meta.sample_id}"
-
     """
     sambamba merge \\
         ${args} \\
         --nthreads ${task.cpus} \\
         ${meta.sample_id}.bam \\
         ${bams}
-
-    for log_file_ext in sh out err; do
-        cp .command.\${log_file_ext} command.${log_file_id}.\${log_file_ext}
-    done
-
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":
         sambamba: \$(sambamba --version 2>&1 | sed -n '/^sambamba / { s/^.* //p }' | head -n1)
