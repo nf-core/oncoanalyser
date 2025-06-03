@@ -1,58 +1,56 @@
-name: "TEAL"
+name: teal
 description: TEAL measures telomere content, and estimates telomeric length based on WGS read data
 keywords:
-  - teal
   - telomere
+  - telomere length
+  - rearrangements
 tools:
-  - "TEAL":
-      description: "TEAL measures telomere content, and estimates telomeric length based on WGS read data."
-      homepage: "https://github.com/hartwigmedical/hmftools/tree/master/teal"
-      documentation: "https://github.com/hartwigmedical/hmftools/tree/master/teal"
-      tool_dev_url: "https://github.com/hartwigmedical/hmftools/tree/master/teal"
-      doi: ""
-      licence: "['GPL v3']"
-
+  - teal:
+      description: TEAL measures telomere content, and estimates telomeric length based on WGS read data.
+      homepage: https://github.com/hartwigmedical/hmftools/tree/master/teal
+      documentation: https://github.com/hartwigmedical/hmftools/tree/master/teal
+      tool_dev_url: https://github.com/hartwigmedical/hmftools/tree/master/teal
+      licence: ["GPL v3"]
 input:
   - meta:
       type: map
       description: |
         Groovy Map containing sample information
-        e.g. [['sample_name', 'tumor']: 'sample_tumor', ['sample_name', 'normal']: 'sample_normal']
+        e.g. [id: 'sample_id', tumor_id: 'tumor_name', normal_id: 'normal_name']
   - tumor_bam:
       type: file
-      description: Optional tumor BAM file
+      description: Tumor BAM file (optional)
       pattern: "*.{bam}"
   - normal_bam:
       type: file
-      description: Optional normal BAM file
+      description: Normal BAM file (optional)
       pattern: "*.{bam}"
   - tumor_bai:
       type: file
-      description: Tumor BAI file
+      description: Tumor BAI file (optional)
       pattern: "*.{bai}"
   - normal_bai:
       type: file
-      description: Normal BAI file
+      description: Normal BAI file (optional)
       pattern: "*.{bai}"
-  - tumor_wgs_metrics:
-      type: file
-      description: Optional tumor WGS metrics file
+  - tumor_wgs_metrics_dir:
+      type: directory
+      description: Tumor WGS metrics directory (optional)
   - normal_wgs_metrics:
-      type: file
-      description: Optional normal WGS metrics file
+      type: directory
+      description: Normal WGS metrics directory (optional)
   - cobalt_dir:
       type: directory
       description: COBALT output directory
   - purple_dir:
       type: directory
-      description: PURPLE output directory
-
+      description: PURPLE output directory (optional)
 output:
   - meta:
       type: map
       description: |
         Groovy Map containing sample information
-        e.g. [['sample_name', 'tumor']: 'sample_tumor', ['sample_name', 'normal']: 'sample_normal']
+        e.g. [id: 'sample_id', tumor_id: 'tumor_name', normal_id: 'normal_name']
   - teal_dir:
       type: directory
       description: TEAL output directory
@@ -60,6 +58,5 @@ output:
       type: file
       description: File containing software versions
       pattern: "versions.yml"
-
 authors:
   - "@scwatts"
