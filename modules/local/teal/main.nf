@@ -9,6 +9,7 @@ process TEAL {
 
     input:
     tuple val(meta), path(tumor_bam), path(tumor_bai), path(normal_bam), path(normal_bai), path(tumor_metrics_dir), path(normal_metrics_dir), path(cobalt_dir), path(purple_dir)
+    val genome_ver
 
     output:
     tuple val(meta), path('teal/'), emit: teal_dir
@@ -47,6 +48,7 @@ process TEAL {
         ${purple_arg} \\
         ${reference_wgs_metrics_arg} \\
         ${tumor_wgs_metrics_arg} \\
+        -ref_genome_version ${genome_ver} \\
         -threads ${task.cpus} \\
         -output_dir teal/
 

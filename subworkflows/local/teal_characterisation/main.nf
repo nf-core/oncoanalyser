@@ -18,6 +18,9 @@ workflow TEAL_CHARACTERISATION {
     ch_cobalt         // channel: [mandatory] [ meta, cobalt_dir ]
     ch_purple         // channel: [mandatory] [ meta, purple_dir ]
 
+    // Reference data
+    genome_version    // channel: [mandatory] genome version
+
     main:
     // Channel for version.yml files
     // channel: [ versions.yml ]
@@ -82,6 +85,7 @@ workflow TEAL_CHARACTERISATION {
     // Run process
     TEAL(
         ch_teal_inputs,
+        genome_version,
     )
 
     ch_versions = ch_versions.mix(TEAL.out.versions)

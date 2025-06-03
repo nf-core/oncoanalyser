@@ -657,6 +657,7 @@ workflow WGTS {
             ch_bamtools_germline_out,
             ch_cobalt_out,
             ch_purple_out,
+            ref_data.genome_version,
         )
 
         ch_versions = ch_versions.mix(TEAL_CHARACTERISATION.out.versions)
