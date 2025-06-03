@@ -126,12 +126,12 @@ workflow TEAL_CHARACTERISATION {
         }
         .branch { meta_teal, tumor_teal_bam, tumor_teal_bai, normal_teal_bam, normal_teal_bai, tumor_metrics_dir, normal_metrics_dir, cobalt_dir, purple_dir ->
 
-             def has_tumor = tumor_teal_bam && tumor_metrics_dir && purple_dir
-             def has_normal = normal_teal_bam && normal_metrics_dir
+            def has_tumor = tumor_teal_bam && tumor_metrics_dir && purple_dir
+            def has_normal = normal_teal_bam && normal_metrics_dir
 
-             runnable: (has_tumor || has_normal) && cobalt_dir
-             skip: true
-                 return meta
+            runnable: (has_tumor || has_normal) && cobalt_dir
+            skip: true
+                return meta
         }
 
     // Create process input channel
@@ -155,7 +155,7 @@ workflow TEAL_CHARACTERISATION {
         genome_version,
     )
 
-   ch_versions = ch_versions.mix(TEAL_PIPELINE.out.versions)
+    ch_versions = ch_versions.mix(TEAL_PIPELINE.out.versions)
 
 
     emit:
