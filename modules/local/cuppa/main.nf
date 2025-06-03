@@ -16,6 +16,7 @@ process CUPPA {
 
     output:
     tuple val(meta), path('cuppa/'), emit: cuppa_dir
+    path 'command.*.{sh,out,err}'  , emit: logs
     path 'versions.yml'            , emit: versions
 
     when:
@@ -34,6 +35,8 @@ process CUPPA {
     def purple_dir_arg = purple_dir ? "-purple_dir ${purple_dir}" : ''
     def linx_dir_arg = linx_dir ? "-linx_dir ${linx_dir}" : ''
     def virusinterpreter_dir_arg = virusinterpreter_dir ? "-virus_dir ${virusinterpreter_dir}" : ''
+
+    def log_file_id = "${task.process.split(':')[-1]}.${meta.sample_id}"
 
     """
     if [[ -n "${isofox_dir}" && "${categories}" == 'ALL' ]]; then
@@ -70,6 +73,10 @@ process CUPPA {
         --clf_group ${categories} \\
         --classifier_path ${cuppa_classifier} \\
         --output_dir cuppa/
+
+    for log_file_ext in sh out err; do
+        cp .command.\${log_file_ext} command.${log_file_id}.\${log_file_ext}
+    done
 
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":

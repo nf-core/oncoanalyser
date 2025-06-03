@@ -16,6 +16,7 @@ process LILAC {
 
     output:
     tuple val(meta), path('lilac/'), emit: lilac_dir
+    path 'command.*.{sh,out,err}'  , emit: logs
     path 'versions.yml'            , emit: versions
 
     when:
@@ -34,6 +35,8 @@ process LILAC {
 
     def purple_dir_arg = purple_dir ? "-purple_dir ${purple_dir}" : ''
 
+    def log_file_id = "${task.process.split(':')[-1]}.${meta.sample_id}"
+
     """
     lilac \\
         -Xmx${Math.round(task.memory.bytes * xmx_mod)} \\
@@ -49,6 +52,10 @@ process LILAC {
         -threads ${task.cpus} \\
         -output_dir lilac/ \\
         -log_level ${params.module_log_level}
+
+    for log_file_ext in sh out err; do
+        cp .command.\${log_file_ext} command.${log_file_id}.\${log_file_ext}
+    done
 
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":

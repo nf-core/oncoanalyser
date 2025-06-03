@@ -13,6 +13,7 @@ process SIGS {
 
     output:
     tuple val(meta), path('sigs/'), emit: sigs_dir
+    path 'command.*.{sh,out,err}' , emit: logs
     path 'versions.yml'           , emit: versions
 
     when:
@@ -22,6 +23,8 @@ process SIGS {
     def args = task.ext.args ?: ''
 
     def xmx_mod = task.ext.xmx_mod ?: 0.75
+
+    def log_file_id = "${task.process.split(':')[-1]}.${meta.sample_id}"
 
     """
     mkdir -p sigs/
@@ -34,6 +37,10 @@ process SIGS {
         -signatures_file ${signatures} \\
         -output_dir sigs/ \\
         -log_level ${params.module_log_level}
+
+    for log_file_ext in sh out err; do
+        cp .command.\${log_file_ext} command.${log_file_id}.\${log_file_ext}
+    done
 
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":

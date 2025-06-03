@@ -17,6 +17,7 @@ process NEO_ANNOTATE_FUSIONS {
 
     output:
     tuple val(meta), path('*isf.neoepitope.tsv'), emit: annotated_fusions
+    path 'command.*.{sh,out,err}'               , emit: logs
     path 'versions.yml'                         , emit: versions
 
     when:
@@ -26,6 +27,8 @@ process NEO_ANNOTATE_FUSIONS {
     def args = task.ext.args ?: ''
 
     def xmx_mod = task.ext.xmx_mod ?: 0.95
+
+    def log_file_id = "${task.process.split(':')[-1]}.${meta.sample_id}"
 
     """
     mkdir -p isofox/
@@ -44,6 +47,10 @@ process NEO_ANNOTATE_FUSIONS {
         -threads ${task.cpus} \\
         -output_dir ./ \\
         -log_level ${params.module_log_level}
+
+    for log_file_ext in sh out err; do
+        cp .command.\${log_file_ext} command.${log_file_id}.\${log_file_ext}
+    done
 
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":

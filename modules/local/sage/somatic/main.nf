@@ -26,6 +26,7 @@ process SAGE_SOMATIC {
     output:
     tuple val(meta), path('somatic/*.sage.somatic.vcf.gz'), path('somatic/*.sage.somatic.vcf.gz.tbi'), emit: vcf
     tuple val(meta), path('somatic/')                                                                , emit: sage_dir
+    path 'command.*.{sh,out,err}'                                                                    , emit: logs
     path 'versions.yml'                                                                              , emit: versions
 
     when:
@@ -66,6 +67,8 @@ process SAGE_SOMATIC {
         error "got bad genome version: ${genome_ver}"
     }
 
+    def log_file_id = "${task.process.split(':')[-1]}.${meta.sample_id}"
+
     """
     mkdir -p somatic/
 
@@ -93,6 +96,10 @@ process SAGE_SOMATIC {
         -output_vcf somatic/${meta.tumor_id}.sage.somatic.vcf.gz \\
         -write_fit_variants \\
         -log_level ${params.module_log_level}
+
+    for log_file_ext in sh out err; do
+        cp .command.\${log_file_ext} command.${log_file_id}.\${log_file_ext}
+    done
 
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":

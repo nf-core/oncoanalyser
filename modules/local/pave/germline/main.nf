@@ -22,6 +22,7 @@ process PAVE_GERMLINE {
     output:
     tuple val(meta), path("*.vcf.gz")    , emit: vcf
     tuple val(meta), path("*.vcf.gz.tbi"), emit: index
+    path 'command.*.{sh,out,err}'        , emit: logs
     path 'versions.yml'                  , emit: versions
 
     when:
@@ -29,6 +30,8 @@ process PAVE_GERMLINE {
 
     script:
     def args = task.ext.args ?: ''
+
+    def log_file_id = "${task.process.split(':')[-1]}.${meta.sample_id}"
 
     """
     pave \\
@@ -50,6 +53,10 @@ process PAVE_GERMLINE {
         -threads ${task.cpus} \\
         -output_dir ./ \\
         -log_level ${params.module_log_level}
+
+    for log_file_ext in sh out err; do
+        cp .command.\${log_file_ext} command.${log_file_id}.\${log_file_ext}
+    done
 
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":

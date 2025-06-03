@@ -40,6 +40,7 @@ process ORANGE {
     output:
     tuple val(meta), path('output/*.orange.pdf') , emit: pdf, optional: true
     tuple val(meta), path('output/*.orange.json'), emit: json, optional: true
+    path 'command.*.{sh,out,err}'                , emit: logs
     path 'versions.yml'                          , emit: versions
 
     when:
@@ -77,6 +78,8 @@ process ORANGE {
 
     // NOTE(SW): DOID label: 162 [cancer]; Hartwig cohort group: unknown
     def doid_arg = meta.cancer_type ?: '162'
+
+    def log_file_id = "${task.process.split(':')[-1]}.${meta.sample_id}"
 
     """
     echo "${pipeline_version_str}" > pipeline_version.txt
@@ -161,6 +164,10 @@ process ORANGE {
         ${isofox_alt_sj_arg} \\
         -output_dir output/ \\
         -log_level ${params.module_log_level}
+
+    for log_file_ext in sh out err; do
+        cp .command.\${log_file_ext} command.${log_file_id}.\${log_file_ext}
+    done
 
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":

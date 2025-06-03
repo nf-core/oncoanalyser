@@ -23,6 +23,7 @@ process ISOFOX {
 
     output:
     tuple val(meta), path('isofox/'), emit: isofox_dir
+    path 'command.*.{sh,out,err}'   , emit: logs
     path 'versions.yml'             , emit: versions
 
     when:
@@ -40,6 +41,8 @@ process ISOFOX {
 
     def gene_ids_arg = gene_ids ? "-gene_id_file ${gene_ids}" : ''
     def tpm_norm_arg = tpm_norm ? "-panel_tpm_norm_file ${tpm_norm}" : ''
+
+    def log_file_id = "${task.process.split(':')[-1]}.${meta.sample_id}"
 
     """
     mkdir -p isofox/
@@ -62,6 +65,10 @@ process ISOFOX {
         -threads ${task.cpus} \\
         -output_dir isofox/ \\
         -log_level ${params.module_log_level}
+
+    for log_file_ext in sh out err; do
+        cp .command.\${log_file_ext} command.${log_file_id}.\${log_file_ext}
+    done
 
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":

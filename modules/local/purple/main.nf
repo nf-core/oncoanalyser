@@ -25,6 +25,7 @@ process PURPLE {
 
     output:
     tuple val(meta), path('purple/'), emit: purple_dir
+    path 'command.*.{sh,out,err}'   , emit: logs
     path 'versions.yml'             , emit: versions
 
     when:
@@ -49,6 +50,8 @@ process PURPLE {
     def target_region_bed_arg = target_region_bed ? "-target_regions_bed ${target_region_bed}" : ''
     def target_region_ratios_arg = target_region_ratios ? "-target_regions_ratios ${target_region_ratios}" : ''
     def target_region_msi_indels_arg = target_region_msi_indels ? "-target_regions_msi_indels ${target_region_msi_indels}" : ''
+
+    def log_file_id = "${task.process.split(':')[-1]}.${meta.sample_id}"
 
     """
     purple \\
@@ -77,6 +80,10 @@ process PURPLE {
         -threads ${task.cpus} \\
         -output_dir purple/ \\
         -log_level ${params.module_log_level}
+
+    for log_file_ext in sh out err; do
+        cp .command.\${log_file_ext} command.${log_file_id}.\${log_file_ext}
+    done
 
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":

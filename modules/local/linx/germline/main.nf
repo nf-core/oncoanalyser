@@ -15,6 +15,7 @@ process LINX_GERMLINE {
 
     output:
     tuple val(meta), path('linx_germline/'), emit: annotation_dir
+    path 'command.*.{sh,out,err}'          , emit: logs
     path 'versions.yml'                    , emit: versions
 
     when:
@@ -24,6 +25,8 @@ process LINX_GERMLINE {
     def args = task.ext.args ?: ''
 
     def xmx_mod = task.ext.xmx_mod ?: 0.75
+
+    def log_file_id = "${task.process.split(':')[-1]}.${meta.sample_id}"
 
     """
     linx \\
@@ -37,6 +40,10 @@ process LINX_GERMLINE {
         -driver_gene_panel ${driver_gene_panel} \\
         -output_dir linx_germline/ \\
         -log_level ${params.module_log_level}
+
+    for log_file_ext in sh out err; do
+        cp .command.\${log_file_ext} command.${log_file_id}.\${log_file_ext}
+    done
 
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":

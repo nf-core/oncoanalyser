@@ -16,6 +16,7 @@ process NEO_FINDER {
 
     output:
     tuple val(meta), path('neo_finder/'), emit: neo_finder_dir
+    path 'command.*.{sh,out,err}'       , emit: logs
     path 'versions.yml'                 , emit: versions
 
     when:
@@ -25,6 +26,8 @@ process NEO_FINDER {
     def args = task.ext.args ?: ''
 
     def xmx_mod = task.ext.xmx_mod ?: 0.95
+
+    def log_file_id = "${task.process.split(':')[-1]}.${meta.sample_id}"
 
     """
     mkdir -p neo_finder/
@@ -40,6 +43,10 @@ process NEO_FINDER {
         -ensembl_data_dir ${ensembl_data_resources} \\
         -log_level ${params.module_log_level} \\
         -output_dir neo_finder/
+
+    for log_file_ext in sh out err; do
+        cp .command.\${log_file_ext} command.${log_file_id}.\${log_file_ext}
+    done
 
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":

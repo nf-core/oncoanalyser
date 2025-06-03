@@ -15,6 +15,7 @@ process CHORD {
 
     output:
     tuple val(meta), path('chord/'), emit: chord_dir
+    path 'command.*.{sh,out,err}'  , emit: logs
     path 'versions.yml'            , emit: versions
 
     when:
@@ -24,6 +25,8 @@ process CHORD {
     def args = task.ext.args ?: ''
 
     def xmx_mod = task.ext.xmx_mod ?: 0.95
+
+    def log_file_id = "${task.process.split(':')[-1]}.${meta.sample_id}"
 
     """
     ## NOTE(LN): The CHORD jar runs an embedded R script using 'com.hartwig.hmftools.common.utils.r.RExecutor' which requires absolute
@@ -41,11 +44,14 @@ process CHORD {
         -ref_genome ${genome_fasta} \\
         -log_level ${params.module_log_level}
 
+    for log_file_ext in sh out err; do
+        cp .command.\${log_file_ext} command.${log_file_id}.\${log_file_ext}
+    done
+
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":
         chord: \$(chord -version | sed -n '/^CHORD version/ { s/^.* //p }')
     END_VERSIONS
-
     """
 
     stub:

@@ -16,6 +16,7 @@ process SAGE_APPEND {
 
     output:
     tuple val(meta), path('*.append.vcf.gz'), emit: vcf
+    path 'command.*.{sh,out,err}'           , emit: logs
     path 'versions.yml'                     , emit: versions
 
     when:
@@ -25,6 +26,8 @@ process SAGE_APPEND {
     def args = task.ext.args ?: ''
 
     def xmx_mod = task.ext.xmx_mod ?: 0.75
+
+    def log_file_id = "${task.process.split(':')[-1]}.${meta.sample_id}"
 
     """
     sage \\
@@ -40,6 +43,10 @@ process SAGE_APPEND {
         -threads ${task.cpus} \\
         -output_vcf ${meta.dna_id}.sage.append.vcf.gz \\
         -log_level ${params.module_log_level}
+
+    for log_file_ext in sh out err; do
+        cp .command.\${log_file_ext} command.${log_file_id}.\${log_file_ext}
+    done
 
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":

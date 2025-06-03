@@ -14,6 +14,7 @@ process LINX_VISUALISER {
 
     output:
     tuple val(meta), path('plots/'), emit: plots
+    path 'command.*.{sh,out,err}'  , emit: logs
     path 'versions.yml'            , emit: versions
 
     when:
@@ -24,6 +25,8 @@ process LINX_VISUALISER {
     def args2 = task.ext.args2 ?: ''
 
     def xmx_mod = task.ext.xmx_mod ?: 0.75
+
+    def log_file_id = "${task.process.split(':')[-1]}.${meta.sample_id}"
 
     """
     # NOTE(SW): the output plot directories are always required for ORANGE, which is straightfoward to handle with POSIX
@@ -87,6 +90,10 @@ process LINX_VISUALISER {
     if [[ \$(ls plots/ | wc -l) -eq 0 ]]; then
         touch plots/.keep;
     fi;
+
+    for log_file_ext in sh out err; do
+        cp .command.\${log_file_ext} command.${log_file_id}.\${log_file_ext}
+    done
 
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":

@@ -15,6 +15,7 @@ process NEO_SCORER {
 
     output:
     tuple val(meta), path('neo_scorer/'), emit: neo_scorer_dir
+    path 'command.*.{sh,out,err}'       , emit: logs
     path 'versions.yml'                 , emit: versions
 
     when:
@@ -29,6 +30,8 @@ process NEO_SCORER {
     def rna_somatic_vcf_arg = meta.containsKey('sample_rna_id') ? "-rna_somatic_vcf ${sage_vcf}" : ''
 
     def cancer_type_arg = meta.containsKey('cancer_type') ? "-cancer_type ${meta.cancer_type}" : ''
+
+    def log_file_id = "${task.process.split(':')[-1]}.${meta.sample_id}"
 
     """
     isofox_dir_arg=''
@@ -60,6 +63,10 @@ process NEO_SCORER {
         -cancer_tpm_medians_file ${cohort_tpm_medians} \\
         -log_level ${params.module_log_level} \\
         -output_dir neo_scorer/
+
+    for log_file_ext in sh out err; do
+        cp .command.\${log_file_ext} command.${log_file_id}.\${log_file_ext}
+    done
 
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":

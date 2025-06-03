@@ -15,6 +15,7 @@ process AMBER {
 
     output:
     tuple val(meta), path('amber/'), emit: amber_dir
+    path 'command.*.{sh,out,err}'  , emit: logs
     path 'versions.yml'            , emit: versions
 
     when:
@@ -37,6 +38,8 @@ process AMBER {
 
     def target_regions_bed_arg = target_region_bed ? "-target_regions_bed ${target_region_bed}" : ''
 
+    def log_file_id = "${task.process.split(':')[-1]}.${meta.sample_id}"
+
     """
     amber \\
         -Xmx${Math.round(task.memory.bytes * xmx_mod)} \\
@@ -51,6 +54,10 @@ process AMBER {
         -threads ${task.cpus} \\
         -output_dir amber/ \\
         -log_level ${params.module_log_level}
+
+    for log_file_ext in sh out err; do
+        cp .command.\${log_file_ext} command.${log_file_id}.\${log_file_ext}
+    done
 
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":

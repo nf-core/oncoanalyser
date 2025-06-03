@@ -25,7 +25,8 @@ process ESVEE_CALL {
     tuple val(meta), path("esvee/${meta.tumor_id}.esvee.unfiltered.vcf.gz"), path("esvee/${meta.tumor_id}.esvee.unfiltered.vcf.gz.tbi"), emit: unfiltered_vcf
     tuple val(meta), path("esvee/${meta.tumor_id}.esvee.somatic.vcf.gz"),    path("esvee/${meta.tumor_id}.esvee.somatic.vcf.gz.tbi"),    emit: somatic_vcf
     tuple val(meta), path("esvee/${meta.tumor_id}.esvee.germline.vcf.gz"),   path("esvee/${meta.tumor_id}.esvee.germline.vcf.gz.tbi"),   emit: germline_vcf, optional: true
-    path 'versions.yml', emit: versions
+    path 'command.*.{sh,out,err}'  , emit: logs
+    path 'versions.yml'            , emit: versions
 
     when:
     task.ext.when == null || task.ext.when
@@ -44,6 +45,7 @@ process ESVEE_CALL {
         sample_ids.add(meta.normal_id)
     }
 
+    def log_file_id = "${task.process.split(':')[-1]}.${meta.sample_id}"
 
     """
     mkdir -p esvee/
@@ -68,6 +70,10 @@ process ESVEE_CALL {
         -esvee_prep_dir esvee/ \\
         -threads ${task.cpus} \\
         -log_level ${params.module_log_level}
+
+    for log_file_ext in sh out err; do
+        cp .command.\${log_file_ext} command.${log_file_id}.\${log_file_ext}
+    done
 
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":

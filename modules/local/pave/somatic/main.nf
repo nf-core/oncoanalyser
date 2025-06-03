@@ -23,6 +23,7 @@ process PAVE_SOMATIC {
     output:
     tuple val(meta), path("*.vcf.gz")    , emit: vcf
     tuple val(meta), path("*.vcf.gz.tbi"), emit: index
+    path 'command.*.{sh,out,err}'        , emit: logs
     path 'versions.yml'                  , emit: versions
 
     when:
@@ -48,6 +49,8 @@ process PAVE_SOMATIC {
     // Targeted mode
     def pon_artefact_arg = pon_artefacts ? "-pon_artefact_file ${pon_artefacts}" : ''
 
+    def log_file_id = "${task.process.split(':')[-1]}.${meta.sample_id}"
+
     """
     pave \\
         -Xmx${Math.round(task.memory.bytes * xmx_mod)} \\
@@ -69,6 +72,10 @@ process PAVE_SOMATIC {
         -threads ${task.cpus} \\
         -output_dir ./ \\
         -log_level ${params.module_log_level}
+
+    for log_file_ext in sh out err; do
+        cp .command.\${log_file_ext} command.${log_file_id}.\${log_file_ext}
+    done
 
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":

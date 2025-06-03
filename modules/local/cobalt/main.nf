@@ -15,6 +15,7 @@ process COBALT {
 
     output:
     tuple val(meta), path('cobalt/'), emit: cobalt_dir
+    path 'command.*.{sh,out,err}'   , emit: logs
     path 'versions.yml'             , emit: versions
 
     when:
@@ -31,6 +32,8 @@ process COBALT {
     def diploid_regions_arg = diploid_regions ? "-tumor_only_diploid_bed ${diploid_regions}" : ''
     def target_region_arg = target_region_normalisation ? "-target_region ${target_region_normalisation}" : ''
 
+    def log_file_id = "${task.process.split(':')[-1]}.${meta.sample_id}"
+
     """
     cobalt \\
         -Xmx${Math.round(task.memory.bytes * xmx_mod)} \\
@@ -45,6 +48,10 @@ process COBALT {
         ${target_region_arg} \\
         -output_dir cobalt/ \\
         -log_level ${params.module_log_level}
+
+    for log_file_ext in sh out err; do
+        cp .command.\${log_file_ext} command.${log_file_id}.\${log_file_ext}
+    done
 
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":

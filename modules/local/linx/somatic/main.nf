@@ -16,6 +16,7 @@ process LINX_SOMATIC {
 
     output:
     tuple val(meta), path('linx_somatic/'), emit: annotation_dir
+    path 'command.*.{sh,out,err}'         , emit: logs
     path 'versions.yml'                   , emit: versions
 
     when:
@@ -25,6 +26,8 @@ process LINX_SOMATIC {
     def args = task.ext.args ?: ''
 
     def xmx_mod = task.ext.xmx_mod ?: 0.75
+
+    def log_file_id = "${task.process.split(':')[-1]}.${meta.sample_id}"
 
     """
     linx \\
@@ -41,6 +44,10 @@ process LINX_SOMATIC {
         -write_neo_epitopes \\
         -output_dir linx_somatic/ \\
         -log_level ${params.module_log_level}
+
+    for log_file_ext in sh out err; do
+        cp .command.\${log_file_ext} command.${log_file_id}.\${log_file_ext}
+    done
 
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":
