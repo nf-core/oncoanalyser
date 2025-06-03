@@ -16,6 +16,7 @@ process FASTP {
 
     output:
     tuple val(meta), path('*_R1.fastp.fastq.gz'), path('*_R2.fastp.fastq.gz'), emit: fastq
+    path 'command.*.{sh,out,err}'                                            , emit: logs
     path 'versions.yml'                                                      , emit: versions
 
     when:
@@ -32,6 +33,8 @@ process FASTP {
     if (umi_skip >= 0) umi_args_list.add("--umi_skip ${umi_skip}")
     def umi_args = umi_args_list ? '--umi ' + umi_args_list.join(' ') : ''
 
+    def log_file_id = "${task.process.split(':')[-1]}.${meta.sample_id}"
+
     """
     fastp \\
         ${args} \\
@@ -42,6 +45,10 @@ process FASTP {
         --thread ${task.cpus} \\
         --out1 ${meta.sample_id}_${meta.library_id}_${meta.lane}_R1.fastp.fastq.gz \\
         --out2 ${meta.sample_id}_${meta.library_id}_${meta.lane}_R2.fastp.fastq.gz
+
+    for log_file_ext in sh out err; do
+        cp .command.\${log_file_ext} command.${log_file_id}.\${log_file_ext}
+    done
 
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":

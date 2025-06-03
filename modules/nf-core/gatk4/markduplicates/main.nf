@@ -18,6 +18,7 @@ process GATK4_MARKDUPLICATES {
     tuple val(meta), path("*.crai"),    emit: crai,  optional: true
     tuple val(meta), path("*.bai"),     emit: bai,   optional: true
     tuple val(meta), path("*.metrics"), emit: metrics
+    path 'command.*.{sh,out,err}',      emit: logs
     path "versions.yml",                emit: versions
 
     when:
@@ -35,6 +36,9 @@ process GATK4_MARKDUPLICATES {
     } else {
         avail_mem = (task.memory.mega*0.8).intValue()
     }
+
+    def log_file_id = "${task.process.split(':')[-1]}.${meta.sample_id}"
+
     """
     gatk --java-options "-Xmx${avail_mem}M" MarkDuplicates \\
         $input_list \\
@@ -46,6 +50,10 @@ process GATK4_MARKDUPLICATES {
         $args
 
     mv ${prefix}.md.bai ${prefix}.md.bam.bai
+
+    for log_file_ext in sh out err; do
+        cp .command.\${log_file_ext} command.${log_file_id}.\${log_file_ext}
+    done
 
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":

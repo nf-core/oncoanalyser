@@ -12,6 +12,7 @@ process LINXREPORT {
 
     output:
     tuple val(meta), path('*_linx.html'), emit: html
+    path 'command.*.{sh,out,err}'       , emit: logs
     path 'versions.yml'                 , emit: versions
 
     when:
@@ -21,6 +22,8 @@ process LINXREPORT {
     def args = task.ext.args ?: ''
 
     def plot_dir = linx_visualiser_dir.resolve('all/').toUriString()
+
+    def log_file_id = "${task.process.split(':')[-1]}.${meta.sample_id}"
 
     """
     # Set input plot directory and create it doesn't exist. See the LINX visualiser module for further info.
@@ -34,6 +37,10 @@ process LINXREPORT {
         --plot ${plot_dir} \\
         --table ${linx_annotation_dir} \\
         --out ${meta.sample_id}_linx.html
+
+    for log_file_ext in sh out err; do
+        cp .command.\${log_file_ext} command.${log_file_id}.\${log_file_ext}
+    done
 
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":
