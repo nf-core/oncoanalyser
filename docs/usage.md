@@ -15,8 +15,8 @@ accept DNA and RNA sequencing data from matched tumor / normal (with optional
 [donor](#paired-tumor-and-normal-dna-with-donor-sample) sample) and tumor-only samples. The below table shows the
 supported [sample setups](#sample-setups):
 
-| Data type |     Tumor DNA      |     Normal DNA     |     Donor DNA      |     Tumor RNA      |
-| --------- | :----------------: | :----------------: | :----------------: | :----------------: |
+| Data Type | Tumor DNA          | Normal DNA         | Donor DNA          | Tumor RNA          |
+| ---       | ---                | ---                | ---                | ---                |
 | DNA       | :white_check_mark: |         -          |         -          |         -          |
 | DNA       | :white_check_mark: | :white_check_mark: |         -          |         -          |
 | DNA       | :white_check_mark: | :white_check_mark: | :white_check_mark: |         -          |
