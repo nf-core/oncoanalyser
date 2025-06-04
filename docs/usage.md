@@ -16,14 +16,14 @@ accept DNA and RNA sequencing data from matched tumor / normal (with optional
 supported [sample setups](#sample-setups):
 
 | Data Type | Tumor DNA          | Normal DNA         | Donor DNA          | Tumor RNA          |
-| ---       | ---                | ---                | ---                | ---                |
-| DNA       | :white_check_mark: |         -          |         -          |         -          |
-| DNA       | :white_check_mark: | :white_check_mark: |         -          |         -          |
-| DNA       | :white_check_mark: | :white_check_mark: | :white_check_mark: |         -          |
-| DNA + RNA | :white_check_mark: |         -          |         -          | :white_check_mark: |
-| DNA + RNA | :white_check_mark: | :white_check_mark: |         -          | :white_check_mark: |
+| --------- | ------------------ | ------------------ | ------------------ | ------------------ |
+| DNA       | :white_check_mark: | -                  | -                  | -                  |
+| DNA       | :white_check_mark: | :white_check_mark: | -                  | -                  |
+| DNA       | :white_check_mark: | :white_check_mark: | :white_check_mark: | -                  |
+| DNA + RNA | :white_check_mark: | -                  | -                  | :white_check_mark: |
+| DNA + RNA | :white_check_mark: | :white_check_mark: | -                  | :white_check_mark: |
 | DNA + RNA | :white_check_mark: | :white_check_mark: | :white_check_mark: | :white_check_mark: |
-| RNA       |         -          |         -          |         -          | :white_check_mark: |
+| RNA       | -                  | -                  | -                  | :white_check_mark: |
 
 ## Running the pipeline
 
