@@ -124,7 +124,7 @@ workflow TEAL_CHARACTERISATION {
                 Utils.selectCurrentOrExisting(purple_dir, meta, Constants.INPUT.PURPLE_DIR),
             ]
         }
-        .branch { meta_teal, tumor_teal_bam, tumor_teal_bai, normal_teal_bam, normal_teal_bai, tumor_metrics_dir, normal_metrics_dir, cobalt_dir, purple_dir ->
+        .branch { meta, tumor_teal_bam, tumor_teal_bai, normal_teal_bam, normal_teal_bai, tumor_metrics_dir, normal_metrics_dir, cobalt_dir, purple_dir ->
 
             def has_tumor = tumor_teal_bam && tumor_metrics_dir && purple_dir
             def has_normal = normal_teal_bam && normal_metrics_dir
