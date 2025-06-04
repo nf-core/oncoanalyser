@@ -44,6 +44,7 @@ class Constants {
         NEO,
         ORANGE,
         PAVE,
+        PEACH,
         PURPLE,
         REDUX,
         SAGE,
@@ -82,6 +83,7 @@ class Constants {
         CUPPA_DIR,
         LINX_PLOT_DIR,
         SAGE_DIR,
+        PEACH_DIR,
     }
 
     static enum SampleType {
@@ -382,6 +384,12 @@ class Constants {
             FileType.CUPPA_DIR,
             SampleType.TUMOR,
             [SequenceType.DNA, SequenceType.RNA, SequenceType.DNA_RNA],
+        ],
+
+        PEACH_DIR: [
+            FileType.PEACH_DIR,
+            SampleType.NORMAL,
+            SequenceType.DNA,
         ],
 
     ]
