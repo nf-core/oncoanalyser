@@ -57,7 +57,7 @@ process TEAL_PIPELINE {
 
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":
-        teal: \$(teal -output_dir ./ | sed -n '/ Teal version:/ { s/^.*: //p }')
+        teal: \$(teal -version | sed -n '/Teal version/ { s/^.* //p }')
     END_VERSIONS
     """
 
