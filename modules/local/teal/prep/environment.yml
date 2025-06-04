@@ -1,0 +1,7 @@
+name: teal
+channels:
+  - conda-forge
+  - bioconda
+  - defaults
+dependencies:
+  - bioconda::hmftools-teal=1.3.5

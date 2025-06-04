@@ -49,6 +49,7 @@ class Constants {
         REDUX,
         SAGE,
         SIGS,
+        TEAL,
         VIRUSINTERPRETER,
     }
 

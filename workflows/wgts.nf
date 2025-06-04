@@ -68,6 +68,7 @@ include { REDUX_PROCESSING      } from '../subworkflows/local/redux_processing'
 include { SAGE_APPEND           } from '../subworkflows/local/sage_append'
 include { SAGE_CALLING          } from '../subworkflows/local/sage_calling'
 include { SIGS_FITTING          } from '../subworkflows/local/sigs_fitting'
+include { TEAL_CHARACTERISATION } from '../subworkflows/local/teal_characterisation'
 include { VIRUSBREAKEND_CALLING } from '../subworkflows/local/virusbreakend_calling'
 
 /*
@@ -641,6 +642,26 @@ workflow WGTS {
     } else {
 
         ch_lilac_out = ch_inputs.map { meta -> [meta, []] }
+
+    }
+
+    //
+    // SUBWORKFLOW: Run TEAL for characterisation of telometic regions
+    //
+    if (run_config.stages.teal) {
+
+        TEAL_CHARACTERISATION(
+            ch_inputs,
+            ch_redux_dna_tumor_out,
+            ch_redux_dna_normal_out,
+            ch_bamtools_somatic_out,
+            ch_bamtools_germline_out,
+            ch_cobalt_out,
+            ch_purple_out,
+            ref_data.genome_version,
+        )
+
+        ch_versions = ch_versions.mix(TEAL_CHARACTERISATION.out.versions)
 
     }
 
