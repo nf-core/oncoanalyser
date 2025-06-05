@@ -94,7 +94,7 @@ example, you would run `oncoanalyser` with the below command (assuming starting 
 
 ```bash
 nextflow run nf-core/oncoanalyser \
-  -revision 2.0.0 \
+  -revision 2.1.0 \
   -profile docker \
   --mode wgts \
   --genome GRCh38_hmf \
@@ -213,7 +213,7 @@ For example, the `oncoanalyser` arguments which start with `--` in this command:
 
 ```shell
 nextflow run nf-core/oncoanalyser \
-  -revision 2.0.0 \
+  -revision 2.1.0 \
   -config refdata.config \
   -profile docker \
   --mode wgts \
@@ -239,7 +239,7 @@ and provided as a config file when running `oncoanalyser`:
 nextflow run nf-core/oncoanalyser \
   -config refdata.config \
   -config params.config \
-  -revision 2.0.0 \
+  -revision 2.1.0 \
   -profile docker \
   <...>
 ```

@@ -38,7 +38,7 @@ A typical command for running `oncoanalyser` is shown below:
 ```bash
 nextflow run nf-core/oncoanalyser \
   -profile docker \
-  -revision 2.0.0 \
+  -revision 2.1.0 \
   --mode wgts \
   --genome GRCh38_hmf \
   --input samplesheet.csv \
@@ -87,7 +87,7 @@ outdir: 'output/'
 and be run using this command:
 
 ```bash
-nextflow run nf-core/oncoanalyser -revision 2.0.0 -profile docker -params-file params.yaml
+nextflow run nf-core/oncoanalyser -revision 2.1.0 -profile docker -params-file params.yaml
 ```
 
 You can also generate such `yaml`/`json` files via [nf-core/launch](https://nf-co.re/launch).
@@ -104,7 +104,7 @@ nextflow pull nf-core/oncoanalyser
 
 It is a good idea to specify a pipeline version when running the pipeline on your data. This ensures that a specific version of the pipeline code and software are used when you run your pipeline. If you keep using the same tag, you'll be running the same version of the pipeline, even if there have been changes to the code since.
 
-First, go to the [nf-core/oncoanalyser releases page](https://github.com/nf-core/oncoanalyser/releases) and find the latest pipeline version - numeric only (e.g. `2.0.0`). Then specify this when running the pipeline with `-r` (one hyphen) - e.g. `-r 2.0.0`. Of course, you can switch to another version by changing the number after the `-r` flag.
+First, go to the [nf-core/oncoanalyser releases page](https://github.com/nf-core/oncoanalyser/releases) and find the latest pipeline version - numeric only (e.g. `2.1.0`). Then specify this when running the pipeline with `-r` (one hyphen) - e.g. `-r 2.1.0`. Of course, you can switch to another version by changing the number after the `-r` flag.
 
 This version number will be logged in reports when you run the pipeline, so that you'll know what you used when you look back in the future. For example, in the `<outdir>/pipeline_info/software_versions.yml` file.
 
@@ -128,7 +128,7 @@ row as the first line with the below columns:
 | `sample_id`     | Sample identifier                                                                                                                                                   |
 | `sample_type`   | Sample type: `tumor`, `normal`                                                                                                                                      |
 | `sequence_type` | Sequence type: `dna`, `rna`                                                                                                                                         |
-| `filetype`      | File type: e.g. `fastq`, `bam`, `bai`; a full list of valid values can be found [here](https://github.com/nf-core/oncoanalyser/blob/2.0.0/lib/Constants.groovy#L54) |
+| `filetype`      | File type: e.g. `fastq`, `bam`, `bai`; a full list of valid values can be found [here](https://github.com/nf-core/oncoanalyser/blob/2.1.0/lib/Constants.groovy#L57) |
 | `info`          | Additional sample information such as sequencing library and lane for [FASTQ](#fastq) files, this column is only required when running an analysis from FASTQ       |
 | `filepath`      | Absolute filepath to input file, which can be a local filepath or supported protocol (http, https, ftp, s3, az, gz)                                                 |
 
@@ -334,7 +334,7 @@ PATIENT1,PATIENT1,PATIENT1-T,tumor,dna,bam,/path/to/PATIENT1-T.dna.bam
 
 ```bash
 nextflow run nf-core/oncoanalyser \
-  -revision 2.0.0 \
+  -revision 2.1.0 \
   -profile docker \
   --mode wgts \
   --genome GRCh38_hmf \
@@ -344,7 +344,7 @@ nextflow run nf-core/oncoanalyser \
 ```
 
 Executing the above command will download and prepare default reference data without running any analysis, and once
-complete the prepared reference files can be found in `./prepare_reference/reference_data/2.0.0/<datetimestamp>/`. You can then provide
+complete the prepared reference files can be found in `./prepare_reference/reference_data/2.1.0/<datetimestamp>/`. You can then provide
 a config file that points to these reference files (see [Configuring reference data](#configuring-reference-data)) which can
 be used for subsequent `oncoanalyser` runs.
 
@@ -385,7 +385,7 @@ The configuration file can then be supplied to `oncoanalyser` via the `-config <
 
 ```bash
 nextflow run nf-core/oncoanalyser \
-  -revision 2.0.0 \
+  -revision 2.1.0 \
   -config refdata.config  \
   <...>
 ```
@@ -399,7 +399,7 @@ for the TSO500 panel, and can be used to analyse TSO500 sequence data by setting
 
 ```bash
 nextflow run nf-core/oncoanalyser \
-  -revision 2.0.0 \
+  -revision 2.1.0 \
   -config refdata.config \
   -profile docker \
   --genome GRCh38_hmf \
@@ -453,7 +453,7 @@ To run an analysis of panel sequence data:
 
 ```bash
 nextflow run nf-core/oncoanalyser \
-  -revision 2.0.0 \
+  -revision 2.1.0 \
   -config panel.config \
   -profile docker \
   --genome GRCh38_hmf \
@@ -504,7 +504,7 @@ config file. This avoids having to regenerate indexes for each new analysis.
 
 ```bash
 nextflow run nf-core/oncoanalyser \
-  -revision 2.0.0 \
+  -revision 2.1.0 \
   -profile docker \
   -config genome.custom.config \
   --mode wgts \
@@ -568,7 +568,7 @@ _GRCh38 genome (Hartwig): `GRCh38_hmf`_
 ## Process selection
 
 It is possible to exclude or include specific processes when running `oncoanalyser`. The full list of processes that can
-be selected is available [here](https://github.com/nf-core/oncoanalyser/blob/2.0.0/lib/Constants.groovy#L33-L52).
+be selected is available [here](https://github.com/nf-core/oncoanalyser/blob/2.1.0/lib/Constants.groovy#L33).
 
 ### Excluding processes
 
@@ -579,7 +579,7 @@ processes, the `oncoanalyser` command would take the following form:
 
 ```bash
 nextflow run nf-core/oncoanalyser \
-  -revision 2.0.0 \
+  -revision 2.1.0 \
   -profile docker \
   --mode wgts \
   --processes_exclude virusinterpreter,orange \
@@ -613,7 +613,7 @@ Then, run `oncoanalyser` with the `neo` process selected as well as all required
 
 ```bash
 nextflow run nf-core/oncoanalyser \
-  -revision 2.0.0 \
+  -revision 2.1.0 \
   -profile docker \
   --mode wgts \
   --processes_manual \
@@ -662,7 +662,7 @@ Then, run `oncoanalyser` skipping all processes except for `neo`:
 
 ```bash
 nextflow run nf-core/oncoanalyser \
-  -revision 2.0.0 \
+  -revision 2.1.0 \
   -profile docker \
   --mode wgts \
   --processes_manual \
