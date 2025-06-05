@@ -5,6 +5,13 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/) 
 
 ## [dev]
 
+- [207](https://github.com/nf-core/oncoanalyser/pull/207) - Apply minor fixes and updates
+  - Update the HMF SAGE PON
+  - Bump HMF pipeline resource bundles to 2.1.0--1
+  - Bump LINX to 2.0.2
+  - Bump PAVE to 1.7.1
+  - Update CHANGELOG.md
+- [205](https://github.com/nf-core/oncoanalyser/pull/205) - Fix output prepared reference data directory names
 - [189](https://github.com/nf-core/oncoanalyser/pull/189) - Implement TEAL subworkflow
 - [188](https://github.com/nf-core/oncoanalyser/pull/188) - Implement CIDER subworkflow
 - [187](https://github.com/nf-core/oncoanalyser/pull/187) - Implement PEACH subworkflow
