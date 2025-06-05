@@ -4,8 +4,8 @@ process PAVE_SOMATIC {
 
     conda "${moduleDir}/environment.yml"
     container "${ workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container ?
-        'https://depot.galaxyproject.org/singularity/hmftools-pave:1.7--hdfd78af_0' :
-        'biocontainers/hmftools-pave:1.7--hdfd78af_0' }"
+        'https://depot.galaxyproject.org/singularity/hmftools-pave:1.7.1--hdfd78af_0 ' :
+        'biocontainers/hmftools-pave:1.7.1--hdfd78af_0' }"
 
     input:
     tuple val(meta), path(sage_vcf), path(sage_tbi)
@@ -39,7 +39,7 @@ process PAVE_SOMATIC {
         pon_filters = 'HOTSPOT:10:5;PANEL:6:5;UNKNOWN:6:0'
         gnomad_args = "-gnomad_freq_file ${gnomad_resource}"
     } else if (genome_ver.toString() == '38') {
-        pon_filters = 'HOTSPOT:5:5;PANEL:2:5;UNKNOWN:2:0'
+        pon_filters = 'HOTSPOT:6:5;PANEL:3:3;UNKNOWN:3:0'
         gnomad_args = "-gnomad_freq_dir ${gnomad_resource}"
     } else {
         error "got bad genome version: ${genome_ver}"

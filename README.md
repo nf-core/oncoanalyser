@@ -8,7 +8,7 @@
 [![GitHub Actions CI Status](https://github.com/nf-core/oncoanalyser/actions/workflows/ci.yml/badge.svg)](https://github.com/nf-core/oncoanalyser/actions/workflows/ci.yml)
 [![GitHub Actions Linting Status](https://github.com/nf-core/oncoanalyser/actions/workflows/linting.yml/badge.svg)](https://github.com/nf-core/oncoanalyser/actions/workflows/linting.yml)
 [![AWS CI](https://img.shields.io/badge/CI%20tests-full%20size-FF9900?labelColor=000000&logo=Amazon%20AWS)](https://nf-co.re/oncoanalyser/results)
-[![Cite with Zenodo](http://img.shields.io/badge/DOI-10.5281/zenodo.XXXXXXX-1073c8?labelColor=000000)](https://doi.org/10.5281/zenodo.XXXXXXX)
+[![Cite with Zenodo](http://img.shields.io/badge/DOI-10.5281/zenodo.15189386-1073c8?labelColor=000000)](https://doi.org/10.5281/zenodo.15189386)
 [![nf-test](https://img.shields.io/badge/unit_tests-nf--test-337ab7.svg)](https://www.nf-test.com)
 
 [![Nextflow](https://img.shields.io/badge/version-%E2%89%A524.04.2-green?style=flat&logo=nextflow&logoColor=white&color=%230DC09D&link=https%3A%2F%2Fnextflow.io)](https://www.nextflow.io/)
@@ -55,10 +55,12 @@ tools. Due to the limitations of panel data, certain tools (indicated with `*` b
 - SV and driver event interpretation: [LINX](https://github.com/hartwigmedical/hmftools/tree/master/linx)
 - RNA transcript analysis: [ISOFOX](https://github.com/hartwigmedical/hmftools/tree/master/isofox)
 - Oncoviral detection: [VIRUSbreakend](https://github.com/PapenfussLab/gridss)\*, [VirusInterpreter](https://github.com/hartwigmedical/hmftools/tree/master/virus-interpreter)\*
-- Immune analysis: [LILAC](https://github.com/hartwigmedical/hmftools/tree/master/lilac), [NEO](https://github.com/hartwigmedical/hmftools/tree/master/neo)\*
+- Telomere characterisation: [TEAL](https://github.com/hartwigmedical/hmftools/tree/master/teal)\*
+- Immune analysis: [LILAC](https://github.com/hartwigmedical/hmftools/tree/master/lilac), [CIDER](https://github.com/hartwigmedical/hmftools/tree/master/cider), [NEO](https://github.com/hartwigmedical/hmftools/tree/master/neo)\*
 - Mutational signature fitting: [SIGS](https://github.com/hartwigmedical/hmftools/tree/master/sigs)\*
 - HRD prediction: [CHORD](https://github.com/hartwigmedical/hmftools/tree/master/chord)\*
 - Tissue of origin prediction: [CUPPA](https://github.com/hartwigmedical/hmftools/tree/master/cuppa)\*
+- Pharmacogenomics: [PEACH](https://github.com/hartwigmedical/hmftools/tree/master/peach)
 - Summary report: [ORANGE](https://github.com/hartwigmedical/hmftools/tree/master/orange), [linxreport](https://github.com/umccr/linxreport)
 
 ## Usage
@@ -80,7 +82,7 @@ Launch `oncoanalyser`:
 ```bash
 nextflow run nf-core/oncoanalyser \
   -profile <docker/singularity/.../institute> \
-  -revision 2.0.0 \
+  -revision 2.1.0 \
   --mode <wgts/targeted> \
   --genome <GRCh37_hmf/GRCh38_hmf> \
   --input samplesheet.csv \
@@ -121,7 +123,8 @@ Please refer to [this page](https://github.com/nf-core/oncoanalyser/issues/177) 
 
 ## Credits
 
-The `oncoanalyser` pipeline was written by Stephen Watts while in the [Genomics Platform
+The `oncoanalyser` pipeline was written and is maintained by Stephen Watts ([@scwatts](https://github.com/scwatts)) from
+the [Genomics Platform
 Group](https://mdhs.unimelb.edu.au/centre-for-cancer-research/our-research/genomics-platform-group) at the [University
 of Melbourne Centre for Cancer Research](https://mdhs.unimelb.edu.au/centre-for-cancer-research).
 
@@ -141,8 +144,8 @@ channel](https://nfcore.slack.com/channels/oncoanalyser) (you can join with [thi
 
 ## Citations
 
-You can cite the `oncoanalyser` zenodo record for a specific version using the following doi:
-[10.5281/zenodo.XXXXXXX](https://doi.org/10.5281/zenodo.XXXXXXX)
+You can cite the `oncoanalyser` Zenodo record for a specific version using the following DOI:
+[10.5281/zenodo.15189386](https://doi.org/10.5281/zenodo.15189386)
 
 An extensive list of references for the tools used by the pipeline can be found in the [`CITATIONS.md`](CITATIONS.md)
 file.

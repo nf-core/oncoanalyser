@@ -18,10 +18,10 @@ input:
       description: |
         Groovy Map containing sample information
         e.g. [id: 'sample_id', tumor_id: 'tumor_name', normal_id: 'normal_name']
-  - amber:
+  - amber_dir:
       type: directory
       description: AMBER output directory
-  - cobalt:
+  - cobalt_dir:
       type: directory
       description: COBALT output directory
   - sv_tumor_vcf:

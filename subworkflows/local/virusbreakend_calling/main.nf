@@ -11,20 +11,20 @@ include { VIRUSINTERPRETER } from '../../../modules/local/virusinterpreter/main'
 workflow VIRUSBREAKEND_CALLING {
     take:
     // Sample data
-    ch_inputs              // channel: [mandatory] [ meta ]
-    ch_tumor_bam           // channel: [mandatory] [ meta, bam, bai ]
-    ch_purple              // channel: [mandatory] [ meta, purple_dir ]
-    ch_bamtools_somatic    // channel: [mandatory] [ meta, metrics ]
+    ch_inputs           // channel: [mandatory] [ meta ]
+    ch_tumor_bam        // channel: [mandatory] [ meta, bam, bai ]
+    ch_purple           // channel: [mandatory] [ meta, purple_dir ]
+    ch_bamtools_somatic // channel: [mandatory] [ meta, metrics ]
 
     // Reference data
-    genome_fasta           // channel: [mandatory] /path/to/genome_fasta
-    genome_fai             // channel: [mandatory] /path/to/genome_fai
-    genome_dict            // channel: [mandatory] /path/to/genome_dict
-    genome_gridss_index    // channel: [mandatory] /path/to/genome_gridss_index
-    virusbreakenddb        // channel: [mandatory] /path/to/virusbreakenddb/
-    virus_taxonomy_db      // channel: [mandatory] /path/to/virus_taxonomy_db
-    virus_reporting_db     // channel: [mandatory] /path/to/virus_reporting_db
-    virus_blocklist_db     // channel: [mandatory] /path/to/virus_blocklist_db
+    genome_fasta        // channel: [mandatory] /path/to/genome_fasta
+    genome_fai          // channel: [mandatory] /path/to/genome_fai
+    genome_dict         // channel: [mandatory] /path/to/genome_dict
+    genome_gridss_index // channel: [mandatory] /path/to/genome_gridss_index
+    virusbreakenddb     // channel: [mandatory] /path/to/virusbreakenddb/
+    virus_taxonomy_db   // channel: [mandatory] /path/to/virus_taxonomy_db
+    virus_reporting_db  // channel: [mandatory] /path/to/virus_reporting_db
+    virus_blocklist_db  // channel: [mandatory] /path/to/virus_blocklist_db
 
     // Params
     gridss_config          // channel: [optional] /path/to/gridss_config

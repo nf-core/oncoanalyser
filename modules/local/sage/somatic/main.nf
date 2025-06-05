@@ -11,7 +11,6 @@ process SAGE_SOMATIC {
 
     input:
     tuple val(meta), path(tumor_bam), path(normal_bam), path(donor_bam), path(tumor_bai), path(normal_bai), path(donor_bai), path(redux_tsvs)
-
     path genome_fasta
     val genome_ver
     path genome_fai
@@ -83,13 +82,14 @@ process SAGE_SOMATIC {
     stub:
     """
     mkdir -p somatic/
+
     touch somatic/${meta.tumor_id}.sage.somatic.vcf.gz
     touch somatic/${meta.tumor_id}.sage.somatic.vcf.gz.tbi
     touch somatic/${meta.tumor_id}.gene.coverage.tsv
     touch somatic/${meta.tumor_id}.sage.bqr.png
     touch somatic/${meta.tumor_id}.sage.bqr.tsv
-    touch somatic/${meta.normal_id}.sage.bqr.png
-    touch somatic/${meta.normal_id}.sage.bqr.tsv
+
+    ${ (meta.normal_id != null) ? "touch somatic/${meta.normal_id}.sage.bqr.{png,tsv}" : '' }
 
     echo -e '${task.process}:\\n  stub: noversions\\n' > versions.yml
     """
