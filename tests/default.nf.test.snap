@@ -1,7 +1,7 @@
 {
     "-profile test_stub": {
         "content": [
-            27,
+            23,
             [
                 "pipeline_info",
                 "pipeline_info/software_versions.yml",
@@ -35,11 +35,6 @@
                 "subject_a/bamtools/subject_a_subject_a.tumor_bamtools/subject_a.tumor.bam_metric.summary.tsv",
                 "subject_a/cobalt",
                 "subject_a/cobalt/placeholder",
-                "subject_a/cuppa",
-                "subject_a/cuppa/subject_a.tumor.cuppa.pred_summ.tsv",
-                "subject_a/cuppa/subject_a.tumor.cuppa.vis.png",
-                "subject_a/cuppa/subject_a.tumor.cuppa.vis_data.tsv",
-                "subject_a/cuppa/subject_a.tumor.cuppa_data.tsv.gz",
                 "subject_a/esvee",
                 "subject_a/esvee/assemble",
                 "subject_a/esvee/assemble/subject_a.tumor.esvee.alignment.tsv",
@@ -67,8 +62,6 @@
                 "subject_a/esvee/prep/subject_a.tumor.esvee.prep.junction.tsv",
                 "subject_a/isofox",
                 "subject_a/isofox/placeholder",
-                "subject_a/lilac",
-                "subject_a/lilac/placeholder",
                 "subject_a/linx",
                 "subject_a/linx/germline_annotations",
                 "subject_a/linx/germline_annotations/placeholder",
@@ -118,18 +111,13 @@
                 "subject_a/sage/somatic/subject_a.tumor.sage.bqr.png",
                 "subject_a/sage/somatic/subject_a.tumor.sage.bqr.tsv",
                 "subject_a/sage/somatic/subject_a.tumor.sage.somatic.vcf.gz",
-                "subject_a/sage/somatic/subject_a.tumor.sage.somatic.vcf.gz.tbi",
-                "subject_a/virusbreakend",
-                "subject_a/virusbreakend/subject_a.tumor.summary.tsv",
-                "subject_a/virusbreakend/subject_a.tumor.virusbreakend.vcf",
-                "subject_a/virusinterpreter",
-                "subject_a/virusinterpreter/subject_a.tumor.virus.annotated.tsv"
+                "subject_a/sage/somatic/subject_a.tumor.sage.somatic.vcf.gz.tbi"
             ]
         ],
         "meta": {
             "nf-test": "0.9.2",
             "nextflow": "24.10.0"
         },
-        "timestamp": "2025-06-05T15:09:19.813143"
+        "timestamp": "2025-06-05T15:35:26.796569"
     }
 }
