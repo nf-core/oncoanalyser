@@ -21,9 +21,9 @@
         {
             "@id": "./",
             "@type": "Dataset",
-            "creativeWorkStatus": "Stable",
-            "datePublished": "2025-04-30T12:27:02+00:00",
-            "description": "<h1>\n  <picture>\n    <source media=\"(prefers-color-scheme: dark)\" srcset=\"docs/images/nf-core-oncoanalyser_logo_dark.png\">\n    <img alt=\"nf-core/oncoanalyser\" src=\"docs/images/nf-core-oncoanalyser_logo_light.png\">\n  </picture>\n</h1>\n\n[![GitHub Actions CI Status](https://github.com/nf-core/oncoanalyser/actions/workflows/ci.yml/badge.svg)](https://github.com/nf-core/oncoanalyser/actions/workflows/ci.yml)\n[![GitHub Actions Linting Status](https://github.com/nf-core/oncoanalyser/actions/workflows/linting.yml/badge.svg)](https://github.com/nf-core/oncoanalyser/actions/workflows/linting.yml)[![AWS CI](https://img.shields.io/badge/CI%20tests-full%20size-FF9900?labelColor=000000&logo=Amazon%20AWS)](https://nf-co.re/oncoanalyser/results)[![Cite with Zenodo](http://img.shields.io/badge/DOI-10.5281/zenodo.XXXXXXX-1073c8?labelColor=000000)](https://doi.org/10.5281/zenodo.XXXXXXX)\n[![nf-test](https://img.shields.io/badge/unit_tests-nf--test-337ab7.svg)](https://www.nf-test.com)\n\n[![Nextflow](https://img.shields.io/badge/nextflow%20DSL2-%E2%89%A524.04.2-23aa62.svg)](https://www.nextflow.io/)\n[![run with conda](http://img.shields.io/badge/run%20with-conda-3EB049?labelColor=000000&logo=anaconda)](https://docs.conda.io/en/latest/)\n[![run with docker](https://img.shields.io/badge/run%20with-docker-0db7ed?labelColor=000000&logo=docker)](https://www.docker.com/)\n[![run with singularity](https://img.shields.io/badge/run%20with-singularity-1d355c.svg?labelColor=000000)](https://sylabs.io/docs/)\n[![Launch on Seqera Platform](https://img.shields.io/badge/Launch%20%F0%9F%9A%80-Seqera%20Platform-%234256e7)](https://cloud.seqera.io/launch?pipeline=https://github.com/nf-core/oncoanalyser)\n\n[![Get help on Slack](http://img.shields.io/badge/slack-nf--core%20%23oncoanalyser-4A154B?labelColor=000000&logo=slack)](https://nfcore.slack.com/channels/oncoanalyser)[![Follow on Twitter](http://img.shields.io/badge/twitter-%40nf__core-1DA1F2?labelColor=000000&logo=twitter)](https://twitter.com/nf_core)[![Follow on Mastodon](https://img.shields.io/badge/mastodon-nf__core-6364ff?labelColor=FFFFFF&logo=mastodon)](https://mstdn.science/@nf_core)[![Watch on YouTube](http://img.shields.io/badge/youtube-nf--core-FF0000?labelColor=000000&logo=youtube)](https://www.youtube.com/c/nf-core)\n\n## Introduction\n\n**nf-core/oncoanalyser** is a bioinformatics pipeline that ...\n\n<!-- TODO nf-core:\n   Complete this sentence with a 2-3 sentence summary of what types of data the pipeline ingests, a brief overview of the\n   major pipeline sections and the types of output it produces. You're giving an overview to someone new\n   to nf-core here, in 15-20 seconds. For an example, see https://github.com/nf-core/rnaseq/blob/master/README.md#introduction\n-->\n\n<!-- TODO nf-core: Include a figure that guides the user through the major workflow steps. Many nf-core\n     workflows use the \"tube map\" design for that. See https://nf-co.re/docs/contributing/design_guidelines#examples for examples.   -->\n<!-- TODO nf-core: Fill in short bullet-pointed list of the default steps in the pipeline -->1. Read QC ([`FastQC`](https://www.bioinformatics.babraham.ac.uk/projects/fastqc/))2. Present QC for raw reads ([`MultiQC`](http://multiqc.info/))\n\n## Usage\n\n> [!NOTE]\n> If you are new to Nextflow and nf-core, please refer to [this page](https://nf-co.re/docs/usage/installation) on how to set-up Nextflow. Make sure to [test your setup](https://nf-co.re/docs/usage/introduction#how-to-run-a-pipeline) with `-profile test` before running the workflow on actual data.\n\n<!-- TODO nf-core: Describe the minimum required steps to execute the pipeline, e.g. how to prepare samplesheets.\n     Explain what rows and columns represent. For instance (please edit as appropriate):\n\nFirst, prepare a samplesheet with your input data that looks as follows:\n\n`samplesheet.csv`:\n\n```csv\nsample,fastq_1,fastq_2\nCONTROL_REP1,AEG588A1_S1_L002_R1_001.fastq.gz,AEG588A1_S1_L002_R2_001.fastq.gz\n```\n\nEach row represents a fastq file (single-end) or a pair of fastq files (paired end).\n\n-->\n\nNow, you can run the pipeline using:\n\n<!-- TODO nf-core: update the following command to include all required parameters for a minimal example -->\n\n```bash\nnextflow run nf-core/oncoanalyser \\\n   -profile <docker/singularity/.../institute> \\\n   --input samplesheet.csv \\\n   --outdir <OUTDIR>\n```\n\n> [!WARNING]\n> Please provide pipeline parameters via the CLI or Nextflow `-params-file` option. Custom config files including those provided by the `-c` Nextflow option can be used to provide any configuration _**except for parameters**_; see [docs](https://nf-co.re/docs/usage/getting_started/configuration#custom-configuration-files).\n\nFor more details and further functionality, please refer to the [usage documentation](https://nf-co.re/oncoanalyser/usage) and the [parameter documentation](https://nf-co.re/oncoanalyser/parameters).\n\n## Pipeline output\n\nTo see the results of an example test run with a full size dataset refer to the [results](https://nf-co.re/oncoanalyser/results) tab on the nf-core website pipeline page.\nFor more details about the output files and reports, please refer to the\n[output documentation](https://nf-co.re/oncoanalyser/output).\n\n## Credits\n\nnf-core/oncoanalyser was originally written by Stephen Watts.\n\nWe thank the following people for their extensive assistance in the development of this pipeline:\n\n<!-- TODO nf-core: If applicable, make list of people who have also contributed -->\n\n## Contributions and Support\n\nIf you would like to contribute to this pipeline, please see the [contributing guidelines](.github/CONTRIBUTING.md).\n\nFor further information or help, don't hesitate to get in touch on the [Slack `#oncoanalyser` channel](https://nfcore.slack.com/channels/oncoanalyser) (you can join with [this invite](https://nf-co.re/join/slack)).\n\n## Citations\n\n<!-- TODO nf-core: Add citation for pipeline after first release. Uncomment lines below and update Zenodo doi and badge at the top of this file. -->\n<!-- If you use nf-core/oncoanalyser for your analysis, please cite it using the following doi: [10.5281/zenodo.XXXXXX](https://doi.org/10.5281/zenodo.XXXXXX) -->\n\n<!-- TODO nf-core: Add bibliography of tools and data used in your pipeline -->\n\nAn extensive list of references for the tools used by the pipeline can be found in the [`CITATIONS.md`](CITATIONS.md) file.\n\nYou can cite the `nf-core` publication as follows:\n\n> **The nf-core framework for community-curated bioinformatics pipelines.**\n>\n> Philip Ewels, Alexander Peltzer, Sven Fillinger, Harshil Patel, Johannes Alneberg, Andreas Wilm, Maxime Ulysse Garcia, Paolo Di Tommaso & Sven Nahnsen.\n>\n> _Nat Biotechnol._ 2020 Feb 13. doi: [10.1038/s41587-020-0439-x](https://dx.doi.org/10.1038/s41587-020-0439-x).\n",
+            "creativeWorkStatus": "InProgress",
+            "datePublished": "2025-06-03T11:02:02+00:00",
+            "description": "<h1>\n  <picture>\n    <source media=\"(prefers-color-scheme: dark)\" srcset=\"docs/images/nf-core-oncoanalyser_logo_dark.png\">\n    <img alt=\"nf-core/oncoanalyser\" src=\"docs/images/nf-core-oncoanalyser_logo_light.png\">\n  </picture>\n</h1>\n\n[![GitHub Actions CI Status](https://github.com/nf-core/oncoanalyser/actions/workflows/ci.yml/badge.svg)](https://github.com/nf-core/oncoanalyser/actions/workflows/ci.yml)\n[![GitHub Actions Linting Status](https://github.com/nf-core/oncoanalyser/actions/workflows/linting.yml/badge.svg)](https://github.com/nf-core/oncoanalyser/actions/workflows/linting.yml)\n[![AWS CI](https://img.shields.io/badge/CI%20tests-full%20size-FF9900?labelColor=000000&logo=Amazon%20AWS)](https://nf-co.re/oncoanalyser/results)\n[![Cite with Zenodo](http://img.shields.io/badge/DOI-10.5281/zenodo.XXXXXXX-1073c8?labelColor=000000)](https://doi.org/10.5281/zenodo.XXXXXXX)\n[![nf-test](https://img.shields.io/badge/unit_tests-nf--test-337ab7.svg)](https://www.nf-test.com)\n\n[![Nextflow](https://img.shields.io/badge/version-%E2%89%A524.04.2-green?style=flat&logo=nextflow&logoColor=white&color=%230DC09D&link=https%3A%2F%2Fnextflow.io)](https://www.nextflow.io/)\n[![nf-core template version](https://img.shields.io/badge/nf--core_template-3.3.1-green?style=flat&logo=nfcore&logoColor=white&color=%2324B064&link=https%3A%2F%2Fnf-co.re)](https://github.com/nf-core/tools/releases/tag/3.3.1)\n[![run with conda](http://img.shields.io/badge/run%20with-conda-3EB049?labelColor=000000&logo=anaconda)](https://docs.conda.io/en/latest/)\n[![run with docker](https://img.shields.io/badge/run%20with-docker-0db7ed?labelColor=000000&logo=docker)](https://www.docker.com/)\n[![run with singularity](https://img.shields.io/badge/run%20with-singularity-1d355c.svg?labelColor=000000)](https://sylabs.io/docs/)\n[![Launch on Seqera Platform](https://img.shields.io/badge/Launch%20%F0%9F%9A%80-Seqera%20Platform-%234256e7)](https://cloud.seqera.io/launch?pipeline=https://github.com/nf-core/oncoanalyser)\n\n[![Get help on Slack](http://img.shields.io/badge/slack-nf--core%20%23oncoanalyser-4A154B?labelColor=000000&logo=slack)](https://nfcore.slack.com/channels/oncoanalyser)\n[![Follow on Bluesky](https://img.shields.io/badge/bluesky-%40nf__core-1185fe?labelColor=000000&logo=bluesky)](https://bsky.app/profile/nf-co.re)\n[![Follow on Mastodon](https://img.shields.io/badge/mastodon-nf__core-6364ff?labelColor=FFFFFF&logo=mastodon)](https://mstdn.science/@nf_core)\n[![Watch on YouTube](http://img.shields.io/badge/youtube-nf--core-FF0000?labelColor=000000&logo=youtube)](https://www.youtube.com/c/nf-core)\n\n## Introduction\n\n**nf-core/oncoanalyser** is a Nextflow pipeline for the comprehensive analysis of cancer genomes and transcriptomes\nusing the [WiGiTS](https://github.com/hartwigmedical/hmftools) toolkit from the Hartwig Medical Foundation. The pipeline\nsupports a wide range of experimental setups:\n\n- FASTQ, BAM, or CRAM input files\n- WGS (whole genome sequencing), WTS (whole transcriptome sequencing), and targeted / panel sequencing (built-in support\n  for the [TSO500\n  panel](https://sapac.illumina.com/products/by-type/clinical-research-products/trusight-oncology-500.html) with other\n  panels and exome requiring [panel reference data\n  generation](https://github.com/hartwigmedical/hmftools/blob/master/pipeline/README_TARGETED.md))\n- Paired tumor / normal and tumor-only sample setups, donor sample support for further normal subtraction (e.g. for\n  patients with bone marrow transplants or other contaminants in the tumor)\n- UMI (unique molecular identifier) processing supported for DNA sequencing data\n- Most GRCh37 and GRCh38 reference genome builds\n\n## Pipeline overview\n\n<p align=\"center\"><img width=\"550\" src=\"docs/images/oncoanalyser_pipeline.png\"></p>\n\nThe pipeline mainly uses tools from [WiGiTS](https://github.com/hartwigmedical/hmftools), as well as some external\ntools. Due to the limitations of panel data, certain tools (indicated with `*` below) do not run in `targeted` mode.\n\n- Read alignment: [BWA-MEM2](https://github.com/bwa-mem2/bwa-mem2) (DNA), [STAR](https://github.com/alexdobin/STAR) (RNA)\n- Read post-processing: [REDUX](https://github.com/hartwigmedical/hmftools/tree/master/redux) (DNA), [Picard MarkDuplicates](https://gatk.broadinstitute.org/hc/en-us/articles/360037052812-MarkDuplicates-Picard) (RNA)\n- SNV, MNV, INDEL calling: [SAGE](https://github.com/hartwigmedical/hmftools/tree/master/sage), [PAVE](https://github.com/hartwigmedical/hmftools/tree/master/pave)\n- SV calling: [ESVEE](https://github.com/hartwigmedical/hmftools/tree/master/esvee)\n- CNV calling: [AMBER](https://github.com/hartwigmedical/hmftools/tree/master/amber), [COBALT](https://github.com/hartwigmedical/hmftools/tree/master/cobalt), [PURPLE](https://github.com/hartwigmedical/hmftools/tree/master/purple)\n- SV and driver event interpretation: [LINX](https://github.com/hartwigmedical/hmftools/tree/master/linx)\n- RNA transcript analysis: [ISOFOX](https://github.com/hartwigmedical/hmftools/tree/master/isofox)\n- Oncoviral detection: [VIRUSbreakend](https://github.com/PapenfussLab/gridss)\\*, [VirusInterpreter](https://github.com/hartwigmedical/hmftools/tree/master/virus-interpreter)\\*\n- Immune analysis: [LILAC](https://github.com/hartwigmedical/hmftools/tree/master/lilac), [NEO](https://github.com/hartwigmedical/hmftools/tree/master/neo)\\*\n- Mutational signature fitting: [SIGS](https://github.com/hartwigmedical/hmftools/tree/master/sigs)\\*\n- HRD prediction: [CHORD](https://github.com/hartwigmedical/hmftools/tree/master/chord)\\*\n- Tissue of origin prediction: [CUPPA](https://github.com/hartwigmedical/hmftools/tree/master/cuppa)\\*\n- Summary report: [ORANGE](https://github.com/hartwigmedical/hmftools/tree/master/orange), [linxreport](https://github.com/umccr/linxreport)\n\n## Usage\n\n> [!NOTE]\n> If you are new to Nextflow and nf-core, please refer to [this page](https://nf-co.re/docs/usage/installation) on how to set-up Nextflow. Make sure to [test your setup](https://nf-co.re/docs/usage/introduction#how-to-run-a-pipeline) with `-profile test` before running the workflow on actual data.\n\nCreate a samplesheet with your inputs (WGS/WTS BAMs in this example):\n\n```csv\ngroup_id,subject_id,sample_id,sample_type,sequence_type,filetype,filepath\nPATIENT1_WGTS,PATIENT1,PATIENT1-N,normal,dna,bam,/path/to/PATIENT1-N.dna.bam\nPATIENT1_WGTS,PATIENT1,PATIENT1-T,tumor,dna,bam,/path/to/PATIENT1-T.dna.bam\nPATIENT1_WGTS,PATIENT1,PATIENT1-T-RNA,tumor,rna,bam,/path/to/PATIENT1-T.rna.bam\n```\n\nLaunch `oncoanalyser`:\n\n```bash\nnextflow run nf-core/oncoanalyser \\\n  -profile <docker/singularity/.../institute> \\\n  -revision 2.0.0 \\\n  --mode <wgts/targeted> \\\n  --genome <GRCh37_hmf/GRCh38_hmf> \\\n  --input samplesheet.csv \\\n  --outdir output/\n```\n\n> [!WARNING]\n> Please provide pipeline parameters via the CLI or Nextflow `-params-file` option. Custom config files including those provided by the `-c` Nextflow option can be used to provide any configuration _**except for parameters**_; see [docs](https://nf-co.re/docs/usage/getting_started/configuration#custom-configuration-files).\n\nFor more details and further functionality, please refer to the [usage documentation](https://nf-co.re/oncoanalyser/usage) and the [parameter documentation](https://nf-co.re/oncoanalyser/parameters).\n\n## Pipeline output\n\nTo see the results of an example test run with a full size dataset refer to the [results](https://nf-co.re/oncoanalyser/results) tab on the nf-core website pipeline page.\nFor more details about the output files and reports, please refer to the\n[output documentation](https://nf-co.re/oncoanalyser/output).\n\n## Version information\n\n### Extended support\n\nAs `oncoanalyser` is used in clinical settings and subject to accreditation standards in some instances, there is a need\nfor long-term stability and reliability for feature releases in order to meet operational requirements. This is\naccomplished through long-term support of several nominated feature releases, which all receive bug fixes and security\nfixes during the period of extended support.\n\nEach release that is given extended support is allocated a separate long-lived git branch with the 'stable' prefix, e.g.\n`stable/1.2.x`, `stable/1.5.x`. Feature development otherwise occurs on the `dev` branch with stable releases pushed to\n`master`.\n\nVersions nominated to have current long-term support:\n\n- TBD\n\n## Known issues\n\nPlease refer to [this page](https://github.com/nf-core/oncoanalyser/issues/177) for details regarding any known issues.\n\n## Credits\n\nThe `oncoanalyser` pipeline was written by Stephen Watts while in the [Genomics Platform\nGroup](https://mdhs.unimelb.edu.au/centre-for-cancer-research/our-research/genomics-platform-group) at the [University\nof Melbourne Centre for Cancer Research](https://mdhs.unimelb.edu.au/centre-for-cancer-research).\n\nWe thank the following organisations and people for their extensive assistance in the development of this pipeline,\nlisted in alphabetical order:\n\n- [Hartwig Medical Foundation\n  Australia](https://www.hartwigmedicalfoundation.nl/en/partnerships/hartwig-medical-foundation-australia/)\n- Oliver Hofmann\n\n## Contributions and Support\n\nIf you would like to contribute to this pipeline, please see the [contributing guidelines](.github/CONTRIBUTING.md).\n\nFor further information or help, don't hesitate to get in touch on the [Slack `#oncoanalyser`\nchannel](https://nfcore.slack.com/channels/oncoanalyser) (you can join with [this invite](https://nf-co.re/join/slack)).\n\n## Citations\n\nYou can cite the `oncoanalyser` zenodo record for a specific version using the following doi:\n[10.5281/zenodo.XXXXXXX](https://doi.org/10.5281/zenodo.XXXXXXX)\n\nAn extensive list of references for the tools used by the pipeline can be found in the [`CITATIONS.md`](CITATIONS.md)\nfile.\n\nYou can cite the `nf-core` publication as follows:\n\n> **The nf-core framework for community-curated bioinformatics pipelines.**\n>\n> Philip Ewels, Alexander Peltzer, Sven Fillinger, Harshil Patel, Johannes Alneberg, Andreas Wilm, Maxime Ulysse Garcia,\n> Paolo Di Tommaso & Sven Nahnsen.\n>\n> _Nat Biotechnol._ 2020 Feb 13. doi: [10.1038/s41587-020-0439-x](https://dx.doi.org/10.1038/s41587-020-0439-x).\n",
             "hasPart": [
                 {
                     "@id": "main.nf"
@@ -99,7 +99,7 @@
             },
             "mentions": [
                 {
-                    "@id": "#f8f5cdb4-af7c-4d13-a495-e67d9a8b03ac"
+                    "@id": "#32a9e1da-9051-46b0-b25a-1b1befa7dd48"
                 }
             ],
             "name": "nf-core/oncoanalyser"
@@ -121,14 +121,18 @@
         },
         {
             "@id": "main.nf",
-            "@type": ["File", "SoftwareSourceCode", "ComputationalWorkflow"],
+            "@type": [
+                "File",
+                "SoftwareSourceCode",
+                "ComputationalWorkflow"
+            ],
             "creator": [
                 {
                     "@id": "#hello@stephen.ac"
                 }
             ],
             "dateCreated": "",
-            "dateModified": "2025-04-30T12:27:02Z",
+            "dateModified": "2025-06-03T11:02:02Z",
             "dct:conformsTo": "https://bioschemas.org/profiles/ComputationalWorkflow/1.0-RELEASE/",
             "keywords": [
                 "nf-core",
@@ -145,21 +149,30 @@
                 "wigits",
                 "wts"
             ],
-            "license": ["MIT"],
+            "license": [
+                "MIT"
+            ],
             "maintainer": [
                 {
                     "@id": "#hello@stephen.ac"
                 }
             ],
-            "name": ["nf-core/oncoanalyser"],
+            "name": [
+                "nf-core/oncoanalyser"
+            ],
             "programmingLanguage": {
                 "@id": "https://w3id.org/workflowhub/workflow-ro-crate#nextflow"
             },
             "sdPublisher": {
                 "@id": "https://nf-co.re/"
             },
-            "url": ["https://github.com/nf-core/oncoanalyser", "https://nf-co.re/oncoanalyser/2.0.0/"],
-            "version": ["2.0.0"]
+            "url": [
+                "https://github.com/nf-core/oncoanalyser",
+                "https://nf-co.re/oncoanalyser/dev/"
+            ],
+            "version": [
+                "2.1.0dev"
+            ]
         },
         {
             "@id": "https://w3id.org/workflowhub/workflow-ro-crate#nextflow",
@@ -174,11 +187,11 @@
             "version": "!>=24.04.2"
         },
         {
-            "@id": "#f8f5cdb4-af7c-4d13-a495-e67d9a8b03ac",
+            "@id": "#32a9e1da-9051-46b0-b25a-1b1befa7dd48",
             "@type": "TestSuite",
             "instance": [
                 {
-                    "@id": "#3b6311cf-bad8-4e34-b90a-26af1bea2e5b"
+                    "@id": "#23ed753d-f441-4fe9-9cd9-f831c5e33ad0"
                 }
             ],
             "mainEntity": {
@@ -187,10 +200,10 @@
             "name": "Test suite for nf-core/oncoanalyser"
         },
         {
-            "@id": "#3b6311cf-bad8-4e34-b90a-26af1bea2e5b",
+            "@id": "#23ed753d-f441-4fe9-9cd9-f831c5e33ad0",
             "@type": "TestInstance",
             "name": "GitHub Actions workflow for testing nf-core/oncoanalyser",
-            "resource": "repos/nf-core/oncoanalyser/actions/workflows/ci.yml",
+            "resource": "repos/nf-core/oncoanalyser/actions/workflows/nf-test.yml",
             "runsOn": {
                 "@id": "https://w3id.org/ro/terms/test#GithubService"
             },

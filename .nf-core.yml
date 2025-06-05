@@ -1,5 +1,5 @@
 repository_type: pipeline
-nf_core_version: 3.2.1
+nf_core_version: 3.3.1
 template:
   author: Stephen Watts
   description: A comprehensive cancer DNA/RNA analysis and reporting pipeline
@@ -8,11 +8,13 @@ template:
   name: oncoanalyser
   org: nf-core
   outdir: .
-  skip_features: null
   version: 2.1.0dev
+  skip_features:
+    - nf-test
 lint:
   actions_ci: false
   multiqc_config: false
+  nf_test_content: false
   files_exist:
     - lib/Utils.groovy
     - lib/WorkflowMain.groovy
