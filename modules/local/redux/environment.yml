@@ -1,0 +1,7 @@
+name: redux
+channels:
+  - conda-forge
+  - bioconda
+  - defaults
+dependencies:
+  - bioconda::hmftools-redux=1.1.2

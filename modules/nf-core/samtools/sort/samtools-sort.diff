@@ -1,0 +1,172 @@
+Changes in module 'nf-core/samtools/sort'
+'modules/nf-core/samtools/sort/environment.yml' is unchanged
+Changes in 'samtools/sort/meta.yml':
+--- modules/nf-core/samtools/sort/meta.yml
++++ modules/nf-core/samtools/sort/meta.yml
+@@ -1,10 +1,8 @@
+ name: samtools_sort
+-description: Sort SAM/BAM/CRAM file
++description: Sort BAM file
+ keywords:
+   - sort
+   - bam
+-  - sam
+-  - cram
+ tools:
+   - samtools:
+       description: |
+@@ -24,18 +22,8 @@
+           e.g. [ id:'test', single_end:false ]
+     - bam:
+         type: file
+-        description: BAM/CRAM/SAM file(s)
+-        pattern: "*.{bam,cram,sam}"
+-  - - meta2:
+-        type: map
+-        description: |
+-          Groovy Map containing reference information
+-          e.g. [ id:'genome' ]
+-    - fasta:
+-        type: file
+-        description: Reference genome FASTA file
+-        pattern: "*.{fa,fasta,fna}"
+-        optional: true
++        description: BAM file
++        pattern: "*.{bam}"
+ output:
+   - bam:
+       - meta:
+@@ -47,36 +35,6 @@
+           type: file
+           description: Sorted BAM file
+           pattern: "*.{bam}"
+-  - cram:
+-      - meta:
+-          type: map
+-          description: |
+-            Groovy Map containing sample information
+-            e.g. [ id:'test', single_end:false ]
+-      - "*.cram":
+-          type: file
+-          description: Sorted CRAM file
+-          pattern: "*.{cram}"
+-  - crai:
+-      - meta:
+-          type: map
+-          description: |
+-            Groovy Map containing sample information
+-            e.g. [ id:'test', single_end:false ]
+-      - "*.crai":
+-          type: file
+-          description: CRAM index file (optional)
+-          pattern: "*.crai"
+-  - csi:
+-      - meta:
+-          type: map
+-          description: |
+-            Groovy Map containing sample information
+-            e.g. [ id:'test', single_end:false ]
+-      - "*.csi":
+-          type: file
+-          description: BAM index file (optional)
+-          pattern: "*.csi"
+   - versions:
+       - versions.yml:
+           type: file
+
+Changes in 'samtools/sort/main.nf':
+--- modules/nf-core/samtools/sort/main.nf
++++ modules/nf-core/samtools/sort/main.nf
+@@ -1,5 +1,5 @@
+ process SAMTOOLS_SORT {
+-    tag "$meta.id"
++    tag "${meta.id}"
+     label 'process_medium'
+ 
+     conda "${moduleDir}/environment.yml"
+@@ -8,39 +8,28 @@
+         'biocontainers/samtools:1.21--h50ea8bc_0' }"
+ 
+     input:
+-    tuple val(meta) , path(bam)
+-    tuple val(meta2), path(fasta)
++    tuple val(meta), path(bam)
+ 
+     output:
+-    tuple val(meta), path("*.bam"),  emit: bam,  optional: true
+-    tuple val(meta), path("*.cram"), emit: cram, optional: true
+-    tuple val(meta), path("*.crai"), emit: crai, optional: true
+-    tuple val(meta), path("*.csi"),  emit: csi,  optional: true
+-    path  "versions.yml",            emit: versions
++    tuple val(meta), path("*.bam"),  emit: bam
++    path "versions.yml"           ,  emit: versions
+ 
+     when:
+     task.ext.when == null || task.ext.when
+ 
+     script:
+     def args = task.ext.args ?: ''
+-    def prefix = task.ext.prefix ?: "${meta.id}"
+-    def extension = args.contains("--output-fmt sam") ? "sam" :
+-                    args.contains("--output-fmt cram") ? "cram" :
+-                    "bam"
+-    def reference = fasta ? "--reference ${fasta}" : ""
+-    if ("$bam" == "${prefix}.bam") error "Input and output names are the same, use \"task.ext.prefix\" to disambiguate!"
++
++    def prefix = task.ext.prefix ?: "${meta.prefix}"
++    if ("${bam}" == "${prefix}.bam") error "Input and output names are the same, use \"task.ext.prefix\" to disambiguate!"
+ 
+     """
+-    samtools cat \\
+-        ${bam} \\
+-    | \\
+     samtools sort \\
+-        $args \\
++        ${args} \\
+         -T ${prefix} \\
+-        --threads $task.cpus \\
+-        ${reference} \\
+-        -o ${prefix}.${extension} \\
+-        -
++        --threads ${task.cpus} \\
++        -o ${prefix}.bam \\
++        ${bam}
+ 
+     cat <<-END_VERSIONS > versions.yml
+     "${task.process}":
+@@ -49,24 +38,11 @@
+     """
+ 
+     stub:
+-    def args = task.ext.args ?: ''
+-    def prefix = task.ext.prefix ?: "${meta.id}"
+-    def extension = args.contains("--output-fmt sam") ? "sam" :
+-                    args.contains("--output-fmt cram") ? "cram" :
+-                    "bam"
++    def prefix = task.ext.prefix ?: "${meta.prefix}"
++
+     """
+-    touch ${prefix}.${extension}
+-    if [ "${extension}" == "bam" ];
+-    then
+-        touch ${prefix}.${extension}.csi
+-    elif [ "${extension}" == "cram" ];
+-    then
+-        touch ${prefix}.${extension}.crai
+-    fi
++    touch ${prefix}.bam
+ 
+-    cat <<-END_VERSIONS > versions.yml
+-    "${task.process}":
+-        samtools: \$(echo \$(samtools --version 2>&1) | sed 's/^.*samtools //; s/Using.*\$//')
+-    END_VERSIONS
++    echo -e '${task.process}:\\n  stub: noversions\\n' > versions.yml
+     """
+ }
+
+'modules/nf-core/samtools/sort/tests/main.nf.test.snap' is unchanged
+'modules/nf-core/samtools/sort/tests/tags.yml' is unchanged
+'modules/nf-core/samtools/sort/tests/nextflow_cram.config' is unchanged
+'modules/nf-core/samtools/sort/tests/nextflow.config' is unchanged
+'modules/nf-core/samtools/sort/tests/main.nf.test' is unchanged
+************************************************************
