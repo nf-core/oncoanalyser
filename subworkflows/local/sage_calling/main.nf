@@ -62,15 +62,12 @@ workflow SAGE_CALLING {
             donor_dup_freq_tsv,  donor_jitter_tsv,  donor_ms_tsv ->
 
             def redux_tsv_list = [
-                tumor_dup_freq_tsv  ?: Utils.getInput(meta, Constants.INPUT.REDUX_DUP_FREQ_TSV_TUMOR),
                 tumor_jitter_tsv    ?: Utils.getInput(meta, Constants.INPUT.REDUX_JITTER_TSV_TUMOR),
                 tumor_ms_tsv        ?: Utils.getInput(meta, Constants.INPUT.REDUX_MS_TSV_TUMOR),
 
-                normal_dup_freq_tsv ?: Utils.getInput(meta, Constants.INPUT.REDUX_DUP_FREQ_TSV_NORMAL),
                 normal_jitter_tsv   ?: Utils.getInput(meta, Constants.INPUT.REDUX_JITTER_TSV_NORMAL),
                 normal_ms_tsv       ?: Utils.getInput(meta, Constants.INPUT.REDUX_MS_TSV_NORMAL),
 
-                donor_dup_freq_tsv  ?: Utils.getInput(meta, Constants.INPUT.REDUX_DUP_FREQ_TSV_DONOR),
                 donor_jitter_tsv    ?: Utils.getInput(meta, Constants.INPUT.REDUX_JITTER_TSV_DONOR),
                 donor_ms_tsv        ?: Utils.getInput(meta, Constants.INPUT.REDUX_MS_TSV_DONOR),
             ]

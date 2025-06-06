@@ -156,7 +156,7 @@ workflow WGTS {
     ch_redux_dna_normal_out = Channel.empty()
     ch_redux_dna_donor_out = Channel.empty()
 
-    // channel: [ meta, dup_freq_tsv, jitter_tsv, ms_tsv, repeat_tsv ]
+    // channel: [ meta, dup_freq_tsv, jitter_tsv, ms_tsv ]
     ch_redux_dna_tumor_tsv_out = Channel.empty()
     ch_redux_dna_normal_tsv_out = Channel.empty()
     ch_redux_dna_donor_tsv_out = Channel.empty()
@@ -194,9 +194,9 @@ workflow WGTS {
         ch_redux_dna_normal_out = ch_inputs.map { meta -> [meta, [], []] }
         ch_redux_dna_donor_out = ch_inputs.map { meta -> [meta, [], []] }
 
-        ch_redux_dna_tumor_tsv_out = ch_inputs.map { meta -> [meta, [], [], [], []] }
-        ch_redux_dna_normal_tsv_out = ch_inputs.map { meta -> [meta, [], [], [], []] }
-        ch_redux_dna_donor_tsv_out = ch_inputs.map { meta -> [meta, [], [], [], []] }
+        ch_redux_dna_tumor_tsv_out = ch_inputs.map { meta -> [meta, [], [], []] }
+        ch_redux_dna_normal_tsv_out = ch_inputs.map { meta -> [meta, [], [], []] }
+        ch_redux_dna_donor_tsv_out = ch_inputs.map { meta -> [meta, [], [], []] }
 
     }
 
