@@ -4,8 +4,8 @@ process BWAMEM2_ALIGN {
 
     conda "${moduleDir}/environment.yml"
     container "${ workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container ?
-        'https://depot.galaxyproject.org/singularity/mulled-v2-4dde50190ae599f2bb2027cb2c8763ea00fb5084:b39930b2feee9b7a3e5cbef88b34f0d5c5f64897-0' :
-        'biocontainers/mulled-v2-4dde50190ae599f2bb2027cb2c8763ea00fb5084:b39930b2feee9b7a3e5cbef88b34f0d5c5f64897-0' }"
+        'https://depot.galaxyproject.org/singularity/hmftools-bwa-plus:1.0.0--h077b44d_0' :
+        'biocontainers/hmftools-bwa-plus:1.0.0--h077b44d_0' }"
 
     input:
     tuple val(meta), path(reads_fwd), path(reads_rev)
@@ -30,7 +30,7 @@ process BWAMEM2_ALIGN {
     """
     ln -fs \$(find -L ${genome_bwamem2_index} -type f) ./
 
-    bwa-mem2 mem \\
+    bwa-plus mem \\
         ${args} \\
         -Y \\
         -K 100000000 \\
@@ -56,7 +56,7 @@ process BWAMEM2_ALIGN {
 
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":
-        bwa-mem2: \$(bwa-mem2 version 2>/dev/null)
+        bwa-plus: \$(bwa-plus version 2>/dev/null)
         sambamba: \$(sambamba --version 2>&1 | sed -n '/^sambamba / { s/^.* //p }' | head -n1)
     END_VERSIONS
     """
