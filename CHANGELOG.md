@@ -5,6 +5,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/) 
 
 ## [dev]
 
+- [210](https://github.com/nf-core/oncoanalyser/pull/210) - Switch to bwa-plus from bwa-mem2
 - [207](https://github.com/nf-core/oncoanalyser/pull/207) - Apply minor fixes and updates
   - Update the HMF SAGE PON
   - Bump HMF pipeline resource bundles to 2.1.0--1
