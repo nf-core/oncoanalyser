@@ -12,6 +12,7 @@ process AMBER {
     val genome_ver
     path heterozygous_sites
     path target_regions_bed
+    val tumor_min_depth
 
     output:
     tuple val(meta), path('amber/'), emit: amber_dir
@@ -37,10 +38,7 @@ process AMBER {
 
     def target_regions_bed_arg = target_regions_bed ? "-target_regions_bed ${target_regions_bed}" : ''
 
-    def run_mode = Utils.getEnumFromString(params.mode, Constants.RunMode)
-    def purity_estimate_mode = Utils.getEnumFromString(params.purity_estimate_mode, Constants.RunMode)
-    def tumor_min_depth_arg = run_mode === Constants.RunMode.PURITY_ESTIMATE && purity_estimate_mode === Constants.RunMode.WGTS
-        ? "-tumor_min_depth 1" : ""
+    def tumor_min_depth_arg = tumor_min_depth ? "-tumor_min_depth ${tumor_min_depth}" : ''
 
     """
     amber \\

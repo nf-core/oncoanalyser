@@ -11,6 +11,8 @@ process BAMTOOLS {
     tuple val(meta), path(bam), path(bai)
     path genome_fasta
     val genome_ver
+    path driver_gene_panel
+    path ensembl_data_resources
 
     output:
     tuple val(meta), path("${meta.id}_bamtools/"), emit: metrics_dir
@@ -35,6 +37,8 @@ process BAMTOOLS {
         -bam_file ${bam} \\
         -ref_genome ${genome_fasta} \\
         -ref_genome_version ${genome_ver} \\
+        -driver_gene_panel ${driver_gene_panel} \\
+        -ensembl_data_dir ${ensembl_data_resources} \\
         -threads ${task.cpus} \\
         -output_dir ${meta.id}_bamtools/ \\
         -log_level ${params.module_log_level}

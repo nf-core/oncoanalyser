@@ -13,6 +13,7 @@ process LILAC {
     path genome_fai
     val genome_ver
     path lilac_resources, stageAs: 'lilac_resources'
+    val is_targeted_mode
 
     output:
     tuple val(meta), path('lilac/'), emit: lilac_dir
@@ -34,6 +35,8 @@ process LILAC {
 
     def purple_dir_arg = purple_dir ? "-purple_dir ${purple_dir}" : ''
 
+    def freq_score_penalty = is_targeted_mode ? "0.0018" : "0.0009"
+
     """
     lilac \\
         -Xmx${Math.round(task.memory.bytes * xmx_mod)} \\
@@ -46,6 +49,7 @@ process LILAC {
         -ref_genome ${genome_fasta} \\
         -ref_genome_version ${genome_ver} \\
         -resource_dir ${lilac_resources} \\
+        -freq_score_penalty ${freq_score_penalty} \\
         -threads ${task.cpus} \\
         -output_dir lilac/ \\
         -log_level ${params.module_log_level}
