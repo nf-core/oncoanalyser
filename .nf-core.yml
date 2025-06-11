@@ -8,7 +8,7 @@ template:
   name: oncoanalyser
   org: nf-core
   outdir: .
-  version: 2.1.0dev
+  version: 2.1.0
   skip_features:
     - nf-test
 lint:
