@@ -4,7 +4,7 @@ process PAVE_SOMATIC {
 
     conda "${moduleDir}/environment.yml"
     container "${ workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container ?
-        'https://depot.galaxyproject.org/singularity/hmftools-pave:1.7.1--hdfd78af_0 ' :
+        'https://depot.galaxyproject.org/singularity/hmftools-pave:1.7.1--hdfd78af_0' :
         'biocontainers/hmftools-pave:1.7.1--hdfd78af_0' }"
 
     input:
