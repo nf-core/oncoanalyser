@@ -46,13 +46,11 @@ workflow WISP_ANALYSIS {
     )
         .branch { meta, sage_append_dir, amber_dir, cobalt_dir, primary_amber_dir, primary_purple_dir ->
 
-            // NOTE(SW): follow requirements for purity estimate methods
-            //   - somatic variant: PURPLE VCF (primary) with SAGE append data (sample)
-            //      - purple_dir requirement is implicit here as it is applied in order to run SAGE append; passing this along regardless
-            //   - copy number: PURPLE (primary) + COBALT (sample)
-            //   - loh: PURPLE (primary) + AMBER (primary) + AMBER (sample)
+            def purity_estimate_mode = Utils.getEnumFromString(params.purity_estimate_mode, Constants.RunMode)
 
-            def runnable = sage_append_dir || (amber_dir && primary_amber_dir && primary_purple_dir) || (cobalt_dir && primary_purple_dir)
+            def runnable = purity_estimate_mode === Constants.RunMode.WGTS
+                ? primary_purple_dir && primary_amber_dir && sage_append_dir && amber_dir && cobalt_dir
+                : primary_purple_dir                      && sage_append_dir
 
             runnable: runnable
             skip: true

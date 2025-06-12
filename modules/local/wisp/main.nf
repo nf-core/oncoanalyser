@@ -19,33 +19,38 @@ process WISP {
     script:
     def args = task.ext.args ?: ''
 
-    def somatic_dir_arg = sage_append_dir ? "-somatic_dir somatic_dir__prepared/" : ''
-    def amber_dir_arg = sample_amber_dir && primary_amber_dir ? "-amber_dir amber_dir__prepared/" : ''
-    def cobalt_dir_arg = cobalt_dir ? "-cobalt_dir ${cobalt_dir}" : ''
-    def purple_dir_arg = primary_purple_dir ? "-purple_dir ${primary_purple_dir}" : ''
+    def purity_estimate_mode = Utils.getEnumFromString(params.purity_estimate_mode, Constants.RunMode)
 
-    def purity_methods_list = []
-    if (somatic_dir_arg) purity_methods_list.add('SOMATIC_VARIANT')
-    if (amber_dir_arg) purity_methods_list.add('AMBER_LOH')
-    if (cobalt_dir_arg) purity_methods_list.add('COPY_NUMBER')
+    def purity_methods
+    def amber_dir_arg
+    def cobalt_dir_arg
+    def gc_ratio_min_arg
 
-    def purity_methods_arg = purity_methods_list ? "-purity_methods '${purity_methods_list.join(';')}'" : ''
+    if (purity_estimate_mode === Constants.RunMode.WGTS) {
+        purity_methods      = "'SOMATIC_VARIANT;AMBER_LOH;COPY_NUMBER'"
+        amber_dir_arg       = "-amber_dir amber_dir__prepared/"
+        cobalt_dir_arg      = "-cobalt_dir ${cobalt_dir}"
+        gc_ratio_min_arg    = ""
+
+    } else if(purity_estimate_mode === Constants.RunMode.TARGETED) {
+        purity_methods      = "'SOMATIC_VARIANT'"
+        amber_dir_arg       = ""
+        cobalt_dir_arg      = ""
+        gc_ratio_min_arg    = "-gc_ratio_min 0.4"
+    }
 
     """
-    # Prepare SAGE append directory (-somatic_dir)
-    if [[ -n "${somatic_dir_arg}" ]]; then
-      mkdir -p somatic_dir__prepared/
-      ln -s ../${sage_append_dir}/${meta.primary_id}.sage.append.vcf.gz somatic_dir__prepared/${meta.primary_id}.purple.somatic.ctdna.vcf.gz;
-      ln -s ../${sage_append_dir}/${meta.primary_id}.sage.append.vcf.gz.tbi somatic_dir__prepared/${meta.primary_id}.purple.somatic.ctdna.vcf.gz.tbi;
-      ln -s ../${sage_append_dir}/${meta.sample_id}.sage.bqr.tsv somatic_dir__prepared/;
-      ln -s ../${sage_append_dir}/${meta.sample_id}.frag_lengths.tsv.gz somatic_dir__prepared/;
-    fi
+    # Rename SAGE append files to the names expected by WISP
+    mkdir -p somatic_dir__prepared/
+    ln -sf ../${sage_append_dir}/${meta.primary_id}.sage.append.vcf.gz              somatic_dir__prepared/${meta.primary_id}.purple.somatic.ctdna.vcf.gz;
+    ln -sf ../${sage_append_dir}/${meta.primary_id}.sage.append.vcf.gz.tbi          somatic_dir__prepared/${meta.primary_id}.purple.somatic.ctdna.vcf.gz.tbi;
+    ln -sf ../${sage_append_dir}/${meta.primary_id}.sage.append.frag_lengths.tsv.gz somatic_dir__prepared/${meta.primary_id}.frag_lengths.tsv.gz;
 
-    # Prepare AMBER directory (-amber_dir)
+    # Put AMBER outputs from all samples into the same dir
     if [[ -n "${amber_dir_arg}" ]]; then
-      mkdir -p amber_dir__prepared/;
-      for fp in ${primary_amber_dir}/${meta.primary_id}.*; do ln -fs ../\${fp} amber_dir__prepared/; done;
-      for fp in ${sample_amber_dir}/${meta.sample_id}.*; do fn=\${fp##*/}; ln -fs ../\${fp} amber_dir__prepared/; done;
+        mkdir -p amber_dir__prepared/;
+        for fp in ${primary_amber_dir}/*.amber.*; do ln -sf ../\$fp amber_dir__prepared/; done
+        for fp in ${sample_amber_dir}/*.amber.*;  do ln -sf ../\$fp amber_dir__prepared/; done
     fi;
 
     # Run WISP
@@ -54,24 +59,20 @@ process WISP {
     java \\
         -Xmx${Math.round(task.memory.bytes * 0.95)} \\
         -cp /opt/wisp/wisp.jar com.hartwig.hmftools.wisp.purity.PurityEstimator \\
-            ${args} \\
-            -patient_id ${meta.subject_id} \\
-            -tumor_id ${meta.primary_id} \\
-            -samples ${meta.sample_id} \\
-            \\
-            ${purity_methods_arg} \\
-            \\
-            ${somatic_dir_arg} \\
-            ${amber_dir_arg} \\
-            ${cobalt_dir_arg} \\
-            ${purple_dir_arg} \\
-            \\
-            -ref_genome ${genome_fasta} \\
-            \\
-            -write_types ALL \\
-            -log_debug \\
-            \\
-            -output_dir wisp/
+        ${args} \\
+        -patient_id ${meta.subject_id} \\
+        -tumor_id ${meta.primary_id} \\
+        -samples ${meta.sample_id} \\
+        -ref_genome ${genome_fasta} \\
+        -purity_methods ${purity_methods} \\
+        -somatic_dir somatic_dir__prepared/ \\
+        -purple_dir ${primary_purple_dir} \\
+        ${amber_dir_arg} \\
+        ${cobalt_dir_arg} \\
+        ${gc_ratio_min_arg} \\
+        -output_dir wisp/ \\
+        -write_types ALL \\
+        -log_level ${params.module_log_level}
 
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":
