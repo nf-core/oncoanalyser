@@ -69,7 +69,6 @@ workflow PREPARE_REFERENCE {
         }
     }
 
-
     ch_genome_img = Channel.empty()
     if(prep_config.require_img) {
 

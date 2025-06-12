@@ -25,6 +25,7 @@ workflow SAGE_APPEND {
 
     // Params
     enable_germline  // boolean: [mandatory] Enable germline
+    is_targeted_mode // boolean: [mandatory] Running in targeted/panel mode?
 
     main:
     // Channel for version.yml files
@@ -84,7 +85,7 @@ workflow SAGE_APPEND {
             def has_smlv_germline = file(purple_dir).resolve("${tumor_dna_id}.purple.germline.vcf.gz")
             def has_existing = Utils.hasExistingInput(meta, Constants.INPUT.SAGE_APPEND_DIR_NORMAL)
 
-            runnable: has_normal_dna && has_tumor_rna && has_smlv_germline && !has_existing && run_germline
+            runnable: has_normal_dna && has_tumor_rna && has_smlv_germline && !has_existing && enable_germline
             skip: true
                 return meta
         }
@@ -120,6 +121,7 @@ workflow SAGE_APPEND {
         genome_version,
         genome_fai,
         genome_dict,
+        is_targeted_mode,
     )
 
     ch_versions = ch_versions.mix(SAGE_APPEND_GERMLINE.out.versions)
@@ -192,6 +194,7 @@ workflow SAGE_APPEND {
         genome_version,
         genome_fai,
         genome_dict,
+        is_targeted_mode,
     )
 
     ch_versions = ch_versions.mix(SAGE_APPEND_SOMATIC.out.versions)

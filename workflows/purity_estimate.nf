@@ -52,6 +52,8 @@ include { WISP_ANALYSIS      } from '../subworkflows/local/wisp_analysis'
 // Get absolute file paths
 samplesheet = Utils.getFileObject(params.input)
 
+purity_estimate_run_mode = Utils.getEnumFromString(params.purity_estimate_mode, Constants.RunMode)
+
 workflow PURITY_ESTIMATE {
     // Create channel for versions
     // channel: [ versions.yml ]
@@ -85,7 +87,7 @@ workflow PURITY_ESTIMATE {
             ref_data.genome_fasta,
             ref_data.genome_bwamem2_index,
             params.max_fastq_records,
-            params.fastp_umi,
+            params.fastp_umi_enabled,
             params.fastp_umi_location,
             params.fastp_umi_length,
             params.fastp_umi_skip,
@@ -131,7 +133,7 @@ workflow PURITY_ESTIMATE {
             ref_data.genome_dict,
             hmf_data.unmap_regions,
             hmf_data.msi_jitter_sites,
-            params.redux_umi,
+            params.redux_umi_enabled,
             params.redux_umi_duplex_delim,
         )
 
@@ -164,6 +166,8 @@ workflow PURITY_ESTIMATE {
     ch_amber_out = Channel.empty()
     if (run_config.stages.amber && purity_estimate_run_mode === Constants.RunMode.WGTS) {
 
+        tumor_min_depth = purity_estimate_run_mode === Constants.RunMode.WGTS ? 1 : []
+
         AMBER_PROFILING(
             ch_inputs,
             ch_redux_dna_tumor_out,
@@ -172,6 +176,7 @@ workflow PURITY_ESTIMATE {
             ref_data.genome_version,
             hmf_data.heterozygous_sites,
             [],  // target_region_bed
+            tumor_min_depth,
         )
 
         ch_versions = ch_versions.mix(AMBER_PROFILING.out.versions)
@@ -198,6 +203,7 @@ workflow PURITY_ESTIMATE {
             hmf_data.gc_profile,
             hmf_data.diploid_bed,
             [],  // panel_target_region_normalisation
+            purity_estimate_run_mode === Constants.RunMode.TARGETED,  // is_targeted_mode
         )
 
         ch_versions = ch_versions.mix(COBALT_PROFILING.out.versions)
@@ -228,6 +234,7 @@ workflow PURITY_ESTIMATE {
             ref_data.genome_fai,
             ref_data.genome_dict,
             false,  // run_germline
+            purity_estimate_run_mode === Constants.RunMode.TARGETED,  // is_targeted_mode
         )
 
         ch_versions = ch_versions.mix(SAGE_APPEND.out.versions)
