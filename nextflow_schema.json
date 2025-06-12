@@ -50,6 +50,12 @@
                     "fa_icon": "fas fa-diagram-project",
                     "pattern": "^(wgts|targeted|purity_estimate)"
                 },
+                "purity_estimate_mode": {
+                    "type": "string",
+                    "description": "Purity estimate workflow run mode.",
+                    "fa_icon": "fas fa-diagram-project",
+                    "pattern": "^(wgts|targeted)"
+                },
                 "panel": {
                     "type": "string",
                     "description": "Name of panel to use.",

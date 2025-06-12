@@ -224,6 +224,17 @@ class WorkflowMain {
             }
         }
 
+        if (run_mode === Constants.RunMode.PURITY_ESTIMATE && !params.purity_estimate_mode) {
+            log.error "\n~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n" +
+                "  Purity estimate run mode must be set using the --purity_estimate_mode CLI argument or\n" +
+                "  in a configuration file.\n" +
+                "  Currently, the available run modes are:\n" +
+                "    - ${Constants.RunMode.WGTS.toString().toLowerCase()}\n" +
+                "    - ${Constants.RunMode.TARGETED.toString().toLowerCase()}\n" +
+                "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
+            Nextflow.exit(1)
+        }
+
         if (params.ref_data_genome_alt !== null) {
             if (params.genome_type != 'alt') {
                 log.error "\n~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n" +
