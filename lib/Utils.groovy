@@ -194,8 +194,25 @@ class Utils {
                         }
 
                         meta[sample_key][index_enum] = index_fp
-
                     }
+                }
+
+                // CRAMs are passed to hmftools as if they were BAMs, e.g. `-bam_file /path/to/tumor.cram`
+                // We therefore set the BAM/BAI path to be the CRAM/CRAI path
+                sample_keys.each { sample_key ->
+
+                    def meta_sample = meta[sample_key]
+
+                    if(meta_sample.containsKey(Constants.FileType.CRAM_REDUX))
+                        meta_sample[Constants.FileType.BAM_REDUX] = meta_sample[Constants.FileType.CRAM_REDUX]
+
+                    if(meta_sample.containsKey(Constants.FileType.CRAM))
+                        meta_sample[Constants.FileType.BAM] = meta_sample[Constants.FileType.CRAM]
+
+                    // The BAI key is used to store the index for both regular/REDUX CRAMs/BAMs
+                    if(meta_sample.containsKey(Constants.FileType.CRAI))
+                        meta_sample[Constants.FileType.BAI] = meta_sample[Constants.FileType.CRAI]
+
                 }
 
                 // Check that REDUX TSVs are present
@@ -205,7 +222,6 @@ class Utils {
                         return
 
                     def meta_sample = meta[sample_key]
-                    def sample_id = meta_sample.sample_id
 
                     if(!meta_sample.containsKey(Constants.FileType.BAM_REDUX))
                         return
@@ -223,6 +239,7 @@ class Utils {
                     def ms_tsv       = meta_sample[Constants.FileType.REDUX_MS_TSV]
 
                     // If TSV paths not provided, default to TSV paths in the same dir as the BAM
+                    def sample_id = meta_sample.getOrDefault('longitudinal_sample_id', meta_sample['sample_id'])
                     jitter_tsv   = jitter_tsv   ?: "${bam_dir}/${sample_id}.jitter_params.tsv"
                     ms_tsv       = ms_tsv       ?: "${bam_dir}/${sample_id}.ms_table.tsv.gz"
 

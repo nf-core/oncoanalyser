@@ -5,9 +5,15 @@ process WISP {
     container 'docker.io/scwatts/wisp:1.2_beta.2--0'
 
     input:
-    tuple val(meta), path(sage_append_dir), path('sample_amber_dir'), path(cobalt_dir), path('primary_amber_dir'), path(primary_purple_dir)
+    tuple val(meta),
+        path(primary_purple_dir),
+        path('primary_amber_dir'),
+        path('sample_amber_dir'),
+        path(cobalt_dir),
+        path(sage_append_dir)
     path genome_fasta
     path genome_fai
+    val is_targeted_mode
 
     output:
     path 'wisp/'       , emit: wisp_dir
@@ -26,17 +32,16 @@ process WISP {
     def cobalt_dir_arg
     def gc_ratio_min_arg
 
-    if (purity_estimate_mode === Constants.RunMode.WGTS) {
-        purity_methods      = "'SOMATIC_VARIANT;AMBER_LOH;COPY_NUMBER'"
-        amber_dir_arg       = "-amber_dir amber_dir__prepared/"
-        cobalt_dir_arg      = "-cobalt_dir ${cobalt_dir}"
-        gc_ratio_min_arg    = ""
-
-    } else if(purity_estimate_mode === Constants.RunMode.TARGETED) {
+    if(is_targeted_mode) {
         purity_methods      = "'SOMATIC_VARIANT'"
         amber_dir_arg       = ""
         cobalt_dir_arg      = ""
         gc_ratio_min_arg    = "-gc_ratio_min 0.4"
+    } else {
+        purity_methods      = "'SOMATIC_VARIANT;AMBER_LOH;COPY_NUMBER'"
+        amber_dir_arg       = "-amber_dir amber_dir__prepared/"
+        cobalt_dir_arg      = "-cobalt_dir ${cobalt_dir}"
+        gc_ratio_min_arg    = ""
     }
 
     """
@@ -62,7 +67,7 @@ process WISP {
         ${args} \\
         -patient_id ${meta.subject_id} \\
         -tumor_id ${meta.primary_id} \\
-        -samples ${meta.sample_id} \\
+        -samples ${meta.longitudinal_id} \\
         -ref_genome ${genome_fasta} \\
         -purity_methods ${purity_methods} \\
         -somatic_dir somatic_dir__prepared/ \\
@@ -83,13 +88,13 @@ process WISP {
     stub:
     """
     mkdir -p wisp/
-    touch wisp/${meta.patient_id}_${meta.sample_id}.wisp.cn_plot_calcs.tsv
-    touch wisp/${meta.patient_id}_${meta.sample_id}.wisp.cn_segments.tsv
-    touch wisp/${meta.patient_id}_${meta.sample_id}.wisp.somatic_peak.tsv
-    touch wisp/${meta.patient_id}_${meta.sample_id}.wisp.somatic_variants.tsv
-    touch wisp/${meta.patient_id}_${meta.sample_id}.wisp.summary.tsv
-    touch wisp/${meta.sample_id}.cn_gc_ratio_fit.png
-    touch wisp/${meta.sample_id}.somatic_vaf.png
+    touch wisp/${meta.subject_id}_${meta.longitudinal_id}.wisp.cn_plot_calcs.tsv
+    touch wisp/${meta.subject_id}_${meta.longitudinal_id}.wisp.cn_segments.tsv
+    touch wisp/${meta.subject_id}_${meta.longitudinal_id}.wisp.somatic_peak.tsv
+    touch wisp/${meta.subject_id}_${meta.longitudinal_id}.wisp.somatic_variants.tsv
+    touch wisp/${meta.subject_id}_${meta.longitudinal_id}.wisp.summary.tsv
+    touch wisp/${meta.longitudinal_id}.cn_gc_ratio_fit.png
+    touch wisp/${meta.longitudinal_id}.somatic_vaf.png
 
     echo -e '${task.process}:\\n  stub: noversions\\n' > versions.yml
     """

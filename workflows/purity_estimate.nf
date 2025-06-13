@@ -151,9 +151,9 @@ workflow PURITY_ESTIMATE {
         ch_redux_dna_normal_out = ch_inputs.map { meta -> [meta, [], []] }
         ch_redux_dna_donor_out = ch_inputs.map { meta -> [meta, [], []] }
 
-        ch_redux_dna_tumor_tsv_out = ch_inputs.map { meta -> [meta, [], [], [], []] }
-        ch_redux_dna_normal_tsv_out = ch_inputs.map { meta -> [meta, [], [], [], []] }
-        ch_redux_dna_donor_tsv_out = ch_inputs.map { meta -> [meta, [], [], [], []] }
+        ch_redux_dna_tumor_tsv_out = ch_inputs.map { meta -> [meta, [], [], []] }
+        ch_redux_dna_normal_tsv_out = ch_inputs.map { meta -> [meta, [], [], []] }
+        ch_redux_dna_donor_tsv_out = ch_inputs.map { meta -> [meta, [], [], []] }
 
     }
 
@@ -162,7 +162,7 @@ workflow PURITY_ESTIMATE {
     //
     // channel: [ meta, amber_dir ]
     ch_amber_out = Channel.empty()
-    if (run_config.stages.amber) {
+    if (run_config.stages.amber && purity_estimate_run_mode === Constants.RunMode.WGTS) {
 
         AMBER_PROFILING(
             ch_inputs,
@@ -189,7 +189,7 @@ workflow PURITY_ESTIMATE {
     //
     // channel: [ meta, cobalt_dir ]
     ch_cobalt_out = Channel.empty()
-    if (run_config.stages.cobalt) {
+    if (run_config.stages.cobalt && purity_estimate_run_mode === Constants.RunMode.WGTS) {
 
         COBALT_PROFILING(
             ch_inputs,
@@ -219,9 +219,10 @@ workflow PURITY_ESTIMATE {
 
         SAGE_APPEND(
             ch_inputs,
-            ch_inputs.map { meta -> [meta, []] },  // purple_dir
+            ch_inputs.map { meta -> [meta, []] },  // ch_purple_dir
             ch_redux_dna_tumor_out,
-            ch_inputs.map { meta -> [meta, [], []] },  // ch_rna_bam
+            ch_redux_dna_tumor_tsv_out,
+            ch_inputs.map { meta -> [meta, [], []] },  // ch_tumor_rna_bam
             ref_data.genome_fasta,
             ref_data.genome_version,
             ref_data.genome_fai,
@@ -257,6 +258,7 @@ workflow PURITY_ESTIMATE {
             ch_sage_somatic_append_out,
             ref_data.genome_fasta,
             ref_data.genome_fai,
+            purity_estimate_run_mode === Constants.RunMode.TARGETED,  // is_targeted_mode
         )
 
         ch_versions = ch_versions.mix(WISP_ANALYSIS.out.versions)
