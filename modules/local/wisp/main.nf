@@ -5,7 +5,12 @@ process WISP {
     container 'docker.io/scwatts/wisp:1.2_beta.2--0'
 
     input:
-    tuple val(meta), path(sage_append_dir), path('sample_amber_dir'), path(cobalt_dir), path('primary_amber_dir'), path(primary_purple_dir)
+    tuple val(meta),
+        path(primary_purple_dir),
+        path('primary_amber_dir'),
+        path('sample_amber_dir'),
+        path(cobalt_dir),
+        path(sage_append_dir)
     path genome_fasta
     path genome_fai
 

@@ -24,27 +24,18 @@ workflow WISP_ANALYSIS {
     // channel: [ versions.yml ]
     ch_versions = Channel.empty()
 
-    ch_primary_amber_dir = ch_inputs
-        .map { meta ->
-            return [meta, Utils.selectCurrentOrExisting([], meta, Constants.INPUT.AMBER_DIR)]
-        }
-
-    ch_primary_purple_dir = ch_inputs
-        .map { meta ->
-            return [meta, Utils.selectCurrentOrExisting([], meta, Constants.INPUT.PURPLE_DIR)]
-        }
-
     // Select input sources and sort
     // channel: runnable: [ meta, ... ]
     // channel: skip: [ meta ]
     ch_inputs_sorted = WorkflowOncoanalyser.groupByMeta(
-        ch_sage_somatic_append_out,
         ch_amber_out,
         ch_cobalt_out,
-        ch_primary_amber_dir,
-        ch_primary_purple_dir,
+        ch_sage_somatic_append_out,
     )
-        .branch { meta, sage_append_dir, amber_dir, cobalt_dir, primary_amber_dir, primary_purple_dir ->
+        .branch { meta, amber_dir, cobalt_dir, sage_append_dir ->
+
+            primary_purple_dir = Utils.getInput(meta, Constants.INPUT.PURPLE_DIR)
+            primary_amber_dir  = Utils.getInput(meta, Constants.INPUT.AMBER_DIR)
 
             def purity_estimate_mode = Utils.getEnumFromString(params.purity_estimate_mode, Constants.RunMode)
 
@@ -53,6 +44,7 @@ workflow WISP_ANALYSIS {
                 : primary_purple_dir && primary_amber_dir && sage_append_dir
 
             runnable: runnable
+                return [meta, primary_purple_dir, primary_amber_dir, amber_dir, cobalt_dir, sage_append_dir]
             skip: true
                 return meta
         }
@@ -61,7 +53,7 @@ workflow WISP_ANALYSIS {
     // channel: [ meta_wisp, ... ]
     ch_wisp_inputs = ch_inputs_sorted.runnable
 
-        .map { meta, sage_append_dir, amber_dir, cobalt_dir, primary_amber_dir, primary_purple_dir ->
+        .map { meta, primary_purple_dir, primary_amber_dir, amber_dir, cobalt_dir, sage_append_dir ->
 
             def tumor_dna_id = Utils.getTumorDnaSampleName(meta, primary: true)
 
@@ -73,7 +65,7 @@ workflow WISP_ANALYSIS {
                 sample_id: Utils.getTumorDnaSampleName(meta),
             ]
 
-            return [meta_wisp, sage_append_dir, amber_dir, cobalt_dir, primary_amber_dir, primary_purple_dir]
+            return [meta_wisp, primary_purple_dir, primary_amber_dir, amber_dir, cobalt_dir, sage_append_dir]
         }
 
 
