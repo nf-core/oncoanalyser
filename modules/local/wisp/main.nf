@@ -34,26 +34,23 @@ process WISP {
     def amber_dir_arg
     def cobalt_dir_arg
     def gc_ratio_min_arg
+    def write_types_arg
 
     if(is_targeted_mode) {
-        purity_methods      = "'SOMATIC_VARIANT'"
+        purity_methods      = "SOMATIC_VARIANT"
         amber_dir_arg       = ""
         cobalt_dir_arg      = ""
         gc_ratio_min_arg    = "-gc_ratio_min 0.4"
+        write_types_arg     = "-write_types 'SOMATIC_DATA;SOMATIC_PLOT'"
     } else {
         purity_methods      = "'SOMATIC_VARIANT;AMBER_LOH;COPY_NUMBER'"
         amber_dir_arg       = "-amber_dir amber_dir__prepared/"
         cobalt_dir_arg      = "-cobalt_dir ${cobalt_dir}"
         gc_ratio_min_arg    = ""
+        write_types_arg     = "-write_types ALL"
     }
 
     """
-    # Rename SAGE append files to the names expected by WISP
-    mkdir -p somatic_dir__prepared/
-    ln -sf ../${sage_append_dir}/${meta.primary_id}.sage.append.vcf.gz              somatic_dir__prepared/${meta.primary_id}.purple.somatic.ctdna.vcf.gz;
-    ln -sf ../${sage_append_dir}/${meta.primary_id}.sage.append.vcf.gz.tbi          somatic_dir__prepared/${meta.primary_id}.purple.somatic.ctdna.vcf.gz.tbi;
-    ln -sf ../${sage_append_dir}/${meta.primary_id}.sage.append.frag_lengths.tsv.gz somatic_dir__prepared/${meta.primary_id}.frag_lengths.tsv.gz;
-
     # Put AMBER outputs from all samples into the same dir
     if [[ -n "${amber_dir_arg}" ]]; then
         mkdir -p amber_dir__prepared/;
@@ -73,13 +70,13 @@ process WISP {
         -samples ${meta.longitudinal_id} \\
         -ref_genome ${genome_fasta} \\
         -purity_methods ${purity_methods} \\
-        -somatic_dir somatic_dir__prepared/ \\
+        -somatic_vcf ${sage_append_dir}/${meta.longitudinal_id}.sage.append.vcf.gz \\
         -purple_dir ${primary_purple_dir} \\
         ${amber_dir_arg} \\
         ${cobalt_dir_arg} \\
         ${gc_ratio_min_arg} \\
+        ${write_types_arg} \\
         -output_dir wisp/ \\
-        -write_types ALL \\
         -log_level ${params.module_log_level}
 
     cat <<-END_VERSIONS > versions.yml

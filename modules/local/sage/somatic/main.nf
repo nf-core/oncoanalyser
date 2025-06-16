@@ -47,7 +47,11 @@ process SAGE_SOMATIC {
     def ref_sample_count_arg = "-ref_sample_count ${reference_ids.size()}"
 
     def run_mode = Utils.getEnumFromString(params.mode, Constants.RunMode)
-    def high_depth_mode_arg = (run_mode === Constants.RunMode.TARGETED) ? '-high_depth_mode' : ''
+    def effective_run_mode = run_mode === Constants.RunMode.PURITY_ESTIMATE
+        ? Utils.getEnumFromString(params.purity_estimate_mode, Constants.RunMode)
+        : run_mode
+
+    def high_depth_mode_arg = effective_run_mode === Constants.RunMode.TARGETED ? "-high_depth_mode" : ""
 
     """
     mkdir -p somatic/
