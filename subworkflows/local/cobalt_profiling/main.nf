@@ -19,9 +19,6 @@ workflow COBALT_PROFILING {
     diploid_bed                 // channel: [optional]  /path/to/diploid_bed
     target_region_normalisation // channel: [optional]  /path/to/target_region_normalisation
 
-    // Params
-    run_mode                    // enum: [mandatory] run mode
-
     main:
     // Channel for version.yml files
     // channel: [ versions.yml ]
@@ -87,7 +84,6 @@ workflow COBALT_PROFILING {
         gc_profile,
         ch_cobalt_inputs.diploid_bed,
         target_region_normalisation,
-        run_mode,
     )
 
     ch_versions = ch_versions.mix(COBALT.out.versions)

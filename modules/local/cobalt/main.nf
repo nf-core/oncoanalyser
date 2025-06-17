@@ -1,5 +1,3 @@
-import Constants
-
 process COBALT {
     tag "${meta.id}"
     label 'process_medium'
@@ -14,7 +12,6 @@ process COBALT {
     path gc_profile
     path diploid_regions
     path target_region_normalisation
-    val run_mode
 
     output:
     tuple val(meta), path('cobalt/'), emit: cobalt_dir
@@ -34,6 +31,7 @@ process COBALT {
     def diploid_regions_arg = diploid_regions ? "-tumor_only_diploid_bed ${diploid_regions}" : ''
     def target_region_arg = target_region_normalisation ? "-target_region ${target_region_normalisation}" : ''
 
+    def run_mode = Utils.getEnumFromString(params.mode, Constants.RunMode)
     def pcf_gamma_arg = run_mode === Constants.RunMode.TARGETED && !meta.containsKey('normal_id')
         ? "-pcf_gamma 50" : ""
 
