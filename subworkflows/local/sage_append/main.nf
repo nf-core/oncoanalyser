@@ -120,10 +120,6 @@ workflow SAGE_APPEND {
                 bais.add(tumor_rna_bai)
             }
 
-            bams = [tumor_rna_bam]
-            bais = [tumor_rna_bai]
-            meta_append.reference_ids = [Utils.getTumorRnaSampleName(meta)]
-
             def purple_smlv_vcf = file(purple_dir).resolve("${tumor_dna_id}.purple.germline.vcf.gz")
 
             return [meta_append, purple_smlv_vcf, bams, bais, tumor_dna_redux_tsv]
