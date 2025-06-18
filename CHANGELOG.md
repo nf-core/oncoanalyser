@@ -3,7 +3,7 @@
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/) and this project mostly adheres to
 [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [[2.1.0](https://github.com/nf-core/oncoanalyser/releases/tag/2.1.0)] Peruvian Pelican
+## [[2.1.0](https://github.com/nf-core/oncoanalyser/releases/tag/2.1.0)] Peruvian Pelican - 2025-06-24
 
 - [217](https://github.com/nf-core/oncoanalyser/pull/217) - Fix targeted mode parameters
 - [210](https://github.com/nf-core/oncoanalyser/pull/210) - Switch to bwa-plus from bwa-mem2
