@@ -29,7 +29,7 @@ supported [sample setups](#sample-setups):
 
 :::tip
 
-Jump to [FAQ and troubleshooting](faq_and_troubleshooting)
+Jump to [FAQ and troubleshooting](/oncoanalyser/2.1.0/docs/usage/faq_and_troubleshooting)
 
 :::
 
