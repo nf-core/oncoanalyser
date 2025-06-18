@@ -24,6 +24,9 @@ process SAGE_GERMLINE {
     tuple val(meta), path('germline/')                                                                   , emit: sage_dir
     path 'versions.yml'                                                                                  , emit: versions
 
+    def run_mode = Utils.getEnumFromString(params.mode, Constants.RunMode)
+    def high_depth_mode_arg = (run_mode === Constants.RunMode.TARGETED) ? '-high_depth_mode' : ''
+
     when:
     task.ext.when == null || task.ext.when
 
@@ -53,6 +56,7 @@ process SAGE_GERMLINE {
         -germline \\
         -panel_only \\
         -ref_sample_count 0 \\
+        ${high_depth_mode_arg} \\
         -bqr_write_plot \\
         -threads ${task.cpus} \\
         -output_vcf germline/${meta.tumor_id}.sage.germline.vcf.gz
