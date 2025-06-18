@@ -26,6 +26,10 @@ process SAGE_APPEND {
 
     def xmx_mod = task.ext.xmx_mod ?: 0.75
 
+    def skip_msi_jitter_arg  = ""
+    if(!redux_tsvs)
+        skip_msi_jitter_arg = "-skip_msi_jitter"
+
     def run_mode = Utils.getEnumFromString(params.mode, Constants.RunMode)
     def effective_run_mode = run_mode === Constants.RunMode.PURITY_ESTIMATE
         ? Utils.getEnumFromString(params.purity_estimate_mode, Constants.RunMode)
@@ -47,6 +51,7 @@ process SAGE_APPEND {
         -ref_genome_version ${genome_ver} \\
         -write_frag_lengths \\
         ${high_depth_mode_arg} \\
+        ${skip_msi_jitter_arg} \\
         -threads ${task.cpus} \\
         -output_vcf sage_append/${meta.output_file_id}.sage.append.vcf.gz \\
         -log_level ${params.module_log_level}
