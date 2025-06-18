@@ -55,14 +55,6 @@ input:
       type: file
       description: SAGE germline known hotspots file
       pattern: "*.{vcf.gz}"
-  - sage_actionable_panel:
-      type: file
-      description: SAGE actionable panel file
-      pattern: "*.{bed.gz}"
-  - sage_coverage_panel:
-      type: file
-      description: SAGE coverage gene panel file
-      pattern: "*.{bed.gz}"
   - sage_highconf_regions:
       type: file
       description: SAGE high confidence regions file
