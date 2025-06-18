@@ -19,7 +19,6 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/) 
 - [187](https://github.com/nf-core/oncoanalyser/pull/187) - Implement PEACH subworkflow
 - [201](https://github.com/nf-core/oncoanalyser/pull/201) - Fix REDUX TSV discovery for non-local files
 - [190](https://github.com/nf-core/oncoanalyser/pull/190) - Fix integer overflow of fastp `--split_by_lines` value
-- [200](https://github.com/nf-core/oncoanalyser/pull/200) - Downgrade nf-schema to 2.2.0
 - [199](https://github.com/nf-core/oncoanalyser/pull/199) - Post-release bump
 
 ## [[2.0.0](https://github.com/nf-core/oncoanalyser/releases/tag/2.0.0)] Flame Robin - 2025-04-10
