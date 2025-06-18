@@ -29,7 +29,7 @@ supported [sample setups](#sample-setups):
 
 :::tip
 
-Jump to [FAQ and troubleshooting](faq_and_troubleshooting)
+Jump to [FAQ and troubleshooting](/oncoanalyser/2.1.0/docs/usage/faq_and_troubleshooting)
 
 :::
 
@@ -104,7 +104,7 @@ nextflow pull nf-core/oncoanalyser
 
 It is a good idea to specify a pipeline version when running the pipeline on your data. This ensures that a specific version of the pipeline code and software are used when you run your pipeline. If you keep using the same tag, you'll be running the same version of the pipeline, even if there have been changes to the code since.
 
-First, go to the [nf-core/oncoanalyser releases page](https://github.com/nf-core/oncoanalyser/releases) and find the latest pipeline version - numeric only (e.g. `2.1.0`). Then specify this when running the pipeline with `-r` (one hyphen) - e.g. `-r 2.1.0`. Of course, you can switch to another version by changing the number after the `-r` flag.
+First, go to the [nf-core/oncoanalyser releases page](https://github.com/nf-core/oncoanalyser/releases) and find the latest pipeline version - numeric only (e.g. `2.1.0`). Then specify this when running the pipeline with `-revision` (one hyphen) - e.g. `-revision 2.1.0`. Of course, you can switch to another version by changing the number after the `-revision` flag.
 
 This version number will be logged in reports when you run the pipeline, so that you'll know what you used when you look back in the future. For example, in the `<outdir>/pipeline_info/software_versions.yml` file.
 
@@ -128,7 +128,7 @@ row as the first line with the below columns:
 | `sample_id`     | Sample identifier                                                                                                                                                   |
 | `sample_type`   | Sample type: `tumor`, `normal`                                                                                                                                      |
 | `sequence_type` | Sequence type: `dna`, `rna`                                                                                                                                         |
-| `filetype`      | File type: e.g. `fastq`, `bam`, `bai`; a full list of valid values can be found [here](https://github.com/nf-core/oncoanalyser/blob/2.1.0/lib/Constants.groovy#L57) |
+| `filetype`      | File type: e.g. `fastq`, `bam`, `bai`; a full list of valid values can be found [here](https://github.com/nf-core/oncoanalyser/blob/2.1.0/lib/Constants.groovy#L56) |
 | `info`          | Additional sample information such as sequencing library and lane for [FASTQ](#fastq) files, this column is only required when running an analysis from FASTQ       |
 | `filepath`      | Absolute filepath to input file, which can be a local filepath or supported protocol (http, https, ftp, s3, az, gz)                                                 |
 
@@ -568,7 +568,7 @@ _GRCh38 genome (Hartwig): `GRCh38_hmf`_
 ## Process selection
 
 It is possible to exclude or include specific processes when running `oncoanalyser`. The full list of processes that can
-be selected is available [here](https://github.com/nf-core/oncoanalyser/blob/2.1.0/lib/Constants.groovy#L33).
+be selected is available [here](https://github.com/nf-core/oncoanalyser/blob/2.1.0/lib/Constants.groovy#L32).
 
 ### Excluding processes
 
