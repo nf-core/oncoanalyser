@@ -38,7 +38,10 @@ process AMBER {
     def target_regions_bed_arg = target_region_bed ? "-target_regions_bed ${target_region_bed}" : ''
 
     def run_mode = Utils.getEnumFromString(params.mode, Constants.RunMode)
-    def purity_estimate_mode = Utils.getEnumFromString(params.purity_estimate_mode, Constants.RunMode)
+    def effective_run_mode = run_mode === Constants.RunMode.PURITY_ESTIMATE
+        ? Utils.getEnumFromString(params.purity_estimate_mode, Constants.RunMode)
+        : run_mode
+
     def tumor_min_depth_arg = run_mode === Constants.RunMode.PURITY_ESTIMATE && purity_estimate_mode === Constants.RunMode.WGTS
         ? "-tumor_min_depth 1" : ""
 
