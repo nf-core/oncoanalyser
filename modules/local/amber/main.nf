@@ -42,7 +42,7 @@ process AMBER {
         ? Utils.getEnumFromString(params.purity_estimate_mode, Constants.RunMode)
         : run_mode
 
-    def tumor_min_depth_arg = run_mode === Constants.RunMode.PURITY_ESTIMATE && purity_estimate_mode === Constants.RunMode.WGTS
+    def tumor_min_depth_arg = run_mode === Constants.RunMode.PURITY_ESTIMATE && effective_run_mode === Constants.RunMode.WGTS
         ? "-tumor_min_depth 1" : ""
 
     """
