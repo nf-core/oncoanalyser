@@ -26,7 +26,7 @@ process COBALT_PANEL_NORMALISATION {
     mkdir -p inputs/
 
     for fp in \$(find -L amber_dir.* cobalt_dir.* -type f ! -name '*.version'); do
-        ln -s ../\${fp} inputs/\${fp##*/};
+        ln -sf ../\${fp} inputs/\${fp##*/};
     done
 
     (
@@ -37,14 +37,15 @@ process COBALT_PANEL_NORMALISATION {
     java -cp /usr/local/share/hmftools-cobalt-2.0-0/cobalt.jar \\
         -Xmx${Math.round(task.memory.bytes * 0.95)} \\
         com.hartwig.hmftools.cobalt.norm.NormalisationFileBuilder \\
-            ${args} \\
-            -sample_id_file sample_ids.txt \\
-            -amber_dir inputs/ \\
-            -cobalt_dir inputs/ \\
-            -ref_genome_version ${genome_ver} \\
-            -gc_profile ${gc_profile} \\
-            -target_regions_bed ${target_regions_bed} \\
-            -output_file cobalt.region_normalisation.${genome_ver}.tsv
+        ${args} \\
+        -sample_id_file sample_ids.txt \\
+        -amber_dir inputs/ \\
+        -cobalt_dir inputs/ \\
+        -ref_genome_version ${genome_ver} \\
+        -gc_profile ${gc_profile} \\
+        -target_regions_bed ${target_regions_bed} \\
+        -output_file cobalt.region_normalisation.${genome_ver}.tsv \\
+        -log_level ${params.module_log_level}
 
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":

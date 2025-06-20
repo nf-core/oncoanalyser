@@ -28,14 +28,13 @@ process PAVE_PON_PANEL_CREATION {
 
     java -cp /usr/local/share/hmftools-pave-1.7-0/pave.jar \\
         -Xmx${Math.round(task.memory.bytes * 0.95)} \\
-        com.hartwig.hmftools.pave.resources.PonBuilder \\
-            ${args} \\
-            -sample_id_file sample_ids.txt \\
-            -vcf_path '*.sage.somatic.vcf.gz' \\
-            -ref_genome_version ${genome_ver} \\
-            -output_dir ./
-
-    mv somatic_pon_*.tsv pave.somatic_artefacts.${genome_ver}.tsv
+        com.hartwig.hmftools.pave.pon_gen.PonBuilder \\
+        ${args} \\
+        -sample_id_file sample_ids.txt \\
+        -vcf_path '*.sage.somatic.vcf.gz' \\
+        -ref_genome_version ${genome_ver} \\
+        -output_pon_file pave.somatic_artefacts.${genome_ver}.tsv \\
+        -log_level ${params.module_log_level}
 
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":

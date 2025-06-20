@@ -99,7 +99,7 @@ workflow PANEL_RESOURCE_CREATION {
         ref_data.genome_fasta,
         ref_data.genome_bwamem2_index,
         params.max_fastq_records,
-        params.fastp_umi,
+        params.fastp_umi_enabled,
         params.fastp_umi_location,
         params.fastp_umi_length,
         params.fastp_umi_skip,
@@ -135,7 +135,7 @@ workflow PANEL_RESOURCE_CREATION {
         ref_data.genome_dict,
         hmf_data.unmap_regions,
         hmf_data.msi_jitter_sites,
-        params.redux_umi,
+        params.redux_umi_enabled,
         params.redux_umi_duplex_delim,
     )
 
@@ -186,7 +186,8 @@ workflow PANEL_RESOURCE_CREATION {
         ch_inputs.map { meta -> [meta, [], []] },  // ch_donor_bam
         ref_data.genome_version,
         hmf_data.heterozygous_sites,
-        [],  // target_regions_bed
+        params.target_regions_bed,
+        2,   // tumor_min_depth
     )
 
     ch_versions = ch_versions.mix(AMBER_PROFILING.out.versions)
@@ -226,15 +227,15 @@ workflow PANEL_RESOURCE_CREATION {
         ref_data.genome_version,
         ref_data.genome_fai,
         ref_data.genome_dict,
+        hmf_data.sage_pon,
         hmf_data.sage_known_hotspots_somatic,
-        [],  // sage_known_hotspots_germline
-        hmf_data.sage_actionable_panel,
-        [],  // sage_coverage_panel
+        hmf_data.sage_known_hotspots_germline,
         hmf_data.sage_highconf_regions,
-        [],  // segment_mappability
-        [],  // driver_gene_panel
+        hmf_data.segment_mappability,
+        params.driver_gene_panel,
         hmf_data.ensembl_data_resources,
-        false,  // enable_germline
+        hmf_data.gnomad_resource,
+        true,  // enable_germline
     )
 
     ch_versions = ch_versions.mix(SAGE_CALLING.out.versions)

@@ -24,7 +24,7 @@ process ISOFOX_PANEL_NORMALISATION {
 
     """
     mkdir -p inputs/
-    for fp in \$(find -L isofox_dirs.* -name '*.gene_data.csv'); do ln -s ../\${fp} inputs/; done
+    for fp in \$(find -L isofox_dirs.* -name '*.gene_data.csv'); do ln -sf ../\${fp} inputs/; done
 
     (
        echo SampleId;
@@ -34,13 +34,14 @@ process ISOFOX_PANEL_NORMALISATION {
     java -cp /usr/local/share/hmftools-isofox-1.7.1-0/isofox.jar \\
         -Xmx${Math.round(task.memory.bytes * 0.95)} \\
         com.hartwig.hmftools.isofox.cohort.CohortAnalyser \\
-            ${args} \\
-            -sample_data_file sample_ids.txt \\
-            -root_data_dir inputs/ \\
-            -analyses PANEL_TPM_NORMALISATION \\
-            -gene_id_file ${gene_ids} \\
-            -gene_distribution_file ${gene_distribution} \\
-            -output_dir ./
+        ${args} \\
+        -sample_data_file sample_ids.txt \\
+        -root_data_dir inputs/ \\
+        -analyses PANEL_TPM_NORMALISATION \\
+        -gene_id_file ${gene_ids} \\
+        -gene_distribution_file ${gene_distribution} \\
+        -output_dir ./ \\
+        -log_level ${params.module_log_level}
 
     mv isofox.panel_gene_normalisation.csv isofox.gene_normalisation.${genome_ver}.csv
 

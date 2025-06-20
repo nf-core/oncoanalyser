@@ -31,11 +31,12 @@ process GENE_UTILS_SAGE_REGIONS {
     java -cp /opt/gene-utils/gene-utils.jar \\
         -Xmx${Math.round(task.memory.bytes * xmx_mod)} \\
         com.hartwig.hmftools.geneutils.drivers.GenerateDriverGeneFiles \\
-            -ref_genome_version ${genome_ver} \\
-            -resource_repo_dir resources/ \\
-            -driver_gene_panel ${driver_gene_panel} \\
-            -log_debug \\
-            -output_dir ./
+        -ref_genome_version ${genome_ver} \\
+        -resource_repo_dir resources/ \\
+        -driver_gene_panel ${driver_gene_panel} \\
+        -log_debug \\
+        -output_dir ./ \\
+        -log_level ${params.module_log_level}
 
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":
