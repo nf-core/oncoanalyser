@@ -36,7 +36,8 @@ process CIDER {
         -ref_genome_version ${genome_ver} \\
         -threads ${task.cpus} \\
         -write_cider_bam \\
-        -output_dir cider/
+        -output_dir cider/ \\
+        -log_level ${params.module_log_level}
 
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":

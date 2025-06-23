@@ -36,8 +36,8 @@ process BAMTOOLS {
         -ref_genome ${genome_fasta} \\
         -ref_genome_version ${genome_ver} \\
         -threads ${task.cpus} \\
-        -log_level ${params.module_log_level} \\
-        -output_dir ${meta.id}_bamtools/
+        -output_dir ${meta.id}_bamtools/ \\
+        -log_level ${params.module_log_level}
 
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":
