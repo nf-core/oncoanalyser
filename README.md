@@ -42,7 +42,7 @@ supports a wide range of experimental setups:
 
 ## Pipeline overview
 
-<p align="center"><img width="550" src="docs/images/oncoanalyser_pipeline.png"></p>
+<p align="center"><img src="docs/images/oncoanalyser_pipeline.png"></p>
 
 The pipeline mainly uses tools from [WiGiTS](https://github.com/hartwigmedical/hmftools), as well as some external
 tools. Due to the limitations of panel data, certain tools (indicated with `*` below) do not run in `targeted` mode.
