@@ -169,6 +169,13 @@
                     "description": "Semicolon-separated list of Isofox functions to run",
                     "default": "TRANSCRIPT_COUNTS;ALT_SPLICE_JUNCTIONS;FUSIONS;RETAINED_INTRONS",
                     "fa_icon": "fas fa-cog"
+                },
+                "driver_gene_panel": {
+                    "type": "string",
+                    "description": "Path to the driver gene panel TSV file.",
+                    "fa_icon": "fas fa-file-alt",
+                    "help_text": "Specify the path to the driver gene panel file. If not provided, the pipeline will use the default based on the genome version.",
+                    "pattern": "^.+\\.tsv$"
                 }
             }
         },
