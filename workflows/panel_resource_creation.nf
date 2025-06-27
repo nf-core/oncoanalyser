@@ -54,7 +54,6 @@ include { softwareVersionsToYAML } from '../subworkflows/nf-core/utils_nfcore_pi
 include { AMBER_PROFILING            } from '../subworkflows/local/amber_profiling'
 include { COBALT_NORMALISATION       } from '../subworkflows/local/cobalt_normalisation'
 include { COBALT_PROFILING           } from '../subworkflows/local/cobalt_profiling'
-include { GENE_UTILS_REGION_CREATION } from '../subworkflows/local/gene_utils_region_creation'
 include { ISOFOX_NORMALISATION       } from '../subworkflows/local/isofox_normalisation'
 include { ISOFOX_QUANTIFICATION      } from '../subworkflows/local/isofox_quantification'
 include { PAVE_PON_CREATION          } from '../subworkflows/local/pave_pon_creation'
@@ -281,20 +280,6 @@ workflow PANEL_RESOURCE_CREATION {
     )
 
     ch_versions = ch_versions.mix(ISOFOX_NORMALISATION.out.versions)
-
-    //
-    // SUBWORKFLOW: Run gene-utils SAGE region creation
-    //
-    driver_gene_panel = params.driver_gene_panel ? file(params.driver_gene_panel) : []
-
-    GENE_UTILS_REGION_CREATION(
-        driver_gene_panel,
-        ref_data.genome_version,
-        hmf_data.clinvar_annotations,
-        hmf_data.ensembl_data_resources,
-    )
-
-    ch_versions = ch_versions.mix(GENE_UTILS_REGION_CREATION.out.versions)
 
     //
     // TASK: Aggregate software versions
