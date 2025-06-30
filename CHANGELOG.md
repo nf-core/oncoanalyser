@@ -3,6 +3,11 @@
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/) and this project mostly adheres to
 [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [dev]
+
+- [220](https://github.com/nf-core/oncoanalyser/pull/220) - Add reports to tower.yml
+- [222](https://github.com/nf-core/oncoanalyser/pull/222) - Post-release bump
+
 ## [[2.1.0](https://github.com/nf-core/oncoanalyser/releases/tag/2.1.0)] Peruvian Pelican - 2025-06-30
 
 - [219](https://github.com/nf-core/oncoanalyser/pull/219) - Add metromap-style diagram for pipeline overview
