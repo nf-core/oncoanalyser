@@ -180,6 +180,18 @@ workflow PREPARE_REFERENCE {
 
     }
 
+    // Override driver gene panel if user provided one
+    if (params.driver_gene_panel) {
+        // log.info "Using custom driver gene panel: ${params.driver_gene_panel}"
+        def custom_driver_panel = file(params.driver_gene_panel, checkIfExists: true)
+        // log.info "File object created: ${custom_driver_panel}"
+        ch_hmf_data = ch_hmf_data
+            .map { d ->
+                d.driver_gene_panel = custom_driver_panel
+                return d
+            }
+    }
+
     //
     // Set panel reference data, unpack if required
     //

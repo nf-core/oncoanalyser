@@ -47,15 +47,15 @@ class WorkflowMain {
             }
         }
 
-        if (!params.containsKey('driver_gene_panel')) {
-            if (params.genome_version.toString() == '37') {
-                params.driver_gene_panel = Constants.DRIVER_GENE_PANEL_37_PATH
-            } else if (params.genome_version.toString() == '38') {
-                params.driver_gene_panel = Constants.DRIVER_GENE_PANEL_38_PATH
-            } else {
-                default_invalid = true
-            }
-        }
+        // if (!params.containsKey('driver_gene_panel')) {
+        //     if (params.genome_version.toString() == '37') {
+        //         params.driver_gene_panel = Constants.DRIVER_GENE_PANEL_37_PATH
+        //     } else if (params.genome_version.toString() == '38') {
+        //         params.driver_gene_panel = Constants.DRIVER_GENE_PANEL_38_PATH
+        //     } else {
+        //         default_invalid = true
+        //     }
+        // }
 
         // Bad configuration, catch in validateParams
         if (default_invalid) {
