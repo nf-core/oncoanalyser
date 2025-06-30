@@ -49,6 +49,7 @@ include { softwareVersionsToYAML } from '../subworkflows/nf-core/utils_nfcore_pi
 include { AMBER_PROFILING       } from '../subworkflows/local/amber_profiling'
 include { BAMTOOLS_METRICS      } from '../subworkflows/local/bamtools_metrics'
 include { CHORD_PREDICTION      } from '../subworkflows/local/chord_prediction'
+include { CIDER_CALLING         } from '../subworkflows/local/cider_calling'
 include { COBALT_PROFILING      } from '../subworkflows/local/cobalt_profiling'
 include { CUPPA_PREDICTION      } from '../subworkflows/local/cuppa_prediction'
 include { ESVEE_CALLING         } from '../subworkflows/local/esvee_calling'
@@ -59,6 +60,7 @@ include { LINX_PLOTTING         } from '../subworkflows/local/linx_plotting'
 include { NEO_PREDICTION        } from '../subworkflows/local/neo_prediction'
 include { ORANGE_REPORTING      } from '../subworkflows/local/orange_reporting'
 include { PAVE_ANNOTATION       } from '../subworkflows/local/pave_annotation'
+include { PEACH_CALLING         } from '../subworkflows/local/peach_calling'
 include { PREPARE_REFERENCE     } from '../subworkflows/local/prepare_reference'
 include { PURPLE_CALLING        } from '../subworkflows/local/purple_calling'
 include { READ_ALIGNMENT_DNA    } from '../subworkflows/local/read_alignment_dna'
@@ -67,6 +69,7 @@ include { REDUX_PROCESSING      } from '../subworkflows/local/redux_processing'
 include { SAGE_APPEND           } from '../subworkflows/local/sage_append'
 include { SAGE_CALLING          } from '../subworkflows/local/sage_calling'
 include { SIGS_FITTING          } from '../subworkflows/local/sigs_fitting'
+include { TEAL_CHARACTERISATION } from '../subworkflows/local/teal_characterisation'
 include { VIRUSBREAKEND_CALLING } from '../subworkflows/local/virusbreakend_calling'
 
 /*
@@ -563,6 +566,23 @@ workflow WGTS {
     }
 
     //
+    // SUBWORKFLOW: Run CIDER to identify and annotate CDR3 sequences of IG and TCR loci
+    //
+    if (run_config.stages.cider) {
+
+        CIDER_CALLING(
+            ch_inputs,
+            ch_redux_dna_tumor_out,
+            ch_align_rna_tumor_out,
+            ref_data.genome_version,
+            hmf_data.cider_blastdb,
+        )
+
+        ch_versions = ch_versions.mix(CIDER_CALLING.out.versions)
+
+    }
+
+    //
     // SUBWORKFLOW: Run Sigs to fit somatic smlv to signature definitions
     //
     // channel: [ meta, sigs_dir ]
@@ -644,6 +664,26 @@ workflow WGTS {
     }
 
     //
+    // SUBWORKFLOW: Run TEAL for characterisation of telometic regions
+    //
+    if (run_config.stages.teal) {
+
+        TEAL_CHARACTERISATION(
+            ch_inputs,
+            ch_redux_dna_tumor_out,
+            ch_redux_dna_normal_out,
+            ch_bamtools_somatic_out,
+            ch_bamtools_germline_out,
+            ch_cobalt_out,
+            ch_purple_out,
+            ref_data.genome_version,
+        )
+
+        ch_versions = ch_versions.mix(TEAL_CHARACTERISATION.out.versions)
+
+    }
+
+    //
     // SUBWORKFLOW: Run VIRUSBreakend and Virus Interpreter to quantify viral content
     //
     // channel: [ meta, virusinterpreter_dir ]
@@ -673,6 +713,31 @@ workflow WGTS {
     } else {
 
         ch_virusinterpreter_out = ch_inputs.map { meta -> [meta, []] }
+
+    }
+
+    //
+    // SUBWORKFLOW: Run PEACH to call germline haplotypes and report pharmacogenomics
+    //
+    // channel: [ meta, peach_dir ]
+    ch_peach_out = Channel.empty()
+    if (run_config.stages.peach) {
+
+        PEACH_CALLING(
+            ch_inputs,
+            ch_purple_out,
+            hmf_data.peach_haplotypes,
+            hmf_data.peach_haplotype_functions,
+            hmf_data.peach_drug_info,
+        )
+
+        ch_versions = ch_versions.mix(PEACH_CALLING.out.versions)
+
+        ch_peach_out = ch_peach_out.mix(PEACH_CALLING.out.peach_dir)
+
+    } else {
+
+        ch_peach_out = ch_inputs.map { meta -> [meta, []] }
 
     }
 
@@ -752,6 +817,7 @@ workflow WGTS {
             ch_sigs_out,
             ch_lilac_out,
             ch_cuppa_out,
+            ch_peach_out,
             ch_isofox_out,
             ref_data.genome_version,
             hmf_data.disease_ontology,

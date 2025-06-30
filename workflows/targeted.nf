@@ -51,6 +51,7 @@ include { softwareVersionsToYAML } from '../subworkflows/nf-core/utils_nfcore_pi
 
 include { AMBER_PROFILING       } from '../subworkflows/local/amber_profiling'
 include { BAMTOOLS_METRICS      } from '../subworkflows/local/bamtools_metrics'
+include { CIDER_CALLING         } from '../subworkflows/local/cider_calling'
 include { COBALT_PROFILING      } from '../subworkflows/local/cobalt_profiling'
 include { ESVEE_CALLING         } from '../subworkflows/local/esvee_calling'
 include { ISOFOX_QUANTIFICATION } from '../subworkflows/local/isofox_quantification'
@@ -59,6 +60,7 @@ include { LINX_ANNOTATION       } from '../subworkflows/local/linx_annotation'
 include { LINX_PLOTTING         } from '../subworkflows/local/linx_plotting'
 include { ORANGE_REPORTING      } from '../subworkflows/local/orange_reporting'
 include { PAVE_ANNOTATION       } from '../subworkflows/local/pave_annotation'
+include { PEACH_CALLING         } from '../subworkflows/local/peach_calling'
 include { PREPARE_REFERENCE     } from '../subworkflows/local/prepare_reference'
 include { PURPLE_CALLING        } from '../subworkflows/local/purple_calling'
 include { READ_ALIGNMENT_DNA    } from '../subworkflows/local/read_alignment_dna'
@@ -564,6 +566,23 @@ workflow TARGETED {
     }
 
     //
+    // SUBWORKFLOW: Run CIDER to identify and annotate CDR3 sequences of IG and TCR loci
+    //
+    if (run_config.stages.cider) {
+
+        CIDER_CALLING(
+            ch_inputs,
+            ch_redux_dna_tumor_out,
+            ch_align_rna_tumor_out,
+            ref_data.genome_version,
+            hmf_data.cider_blastdb,
+        )
+
+        ch_versions = ch_versions.mix(CIDER_CALLING.out.versions)
+
+    }
+
+    //
     // SUBWORKFLOW: Run LILAC for HLA typing and somatic CNV and SNV calling
     //
     // channel: [ meta, lilac_dir ]
@@ -597,6 +616,31 @@ workflow TARGETED {
     }
 
     //
+    // SUBWORKFLOW: Run PEACH to call germline haplotypes and report pharmacogenomics
+    //
+    // channel: [ meta, peach_dir ]
+    ch_peach_out = Channel.empty()
+    if (run_config.stages.peach) {
+
+        PEACH_CALLING(
+            ch_inputs,
+            ch_purple_out,
+            hmf_data.peach_haplotypes,
+            hmf_data.peach_haplotype_functions,
+            hmf_data.peach_drug_info,
+        )
+
+        ch_versions = ch_versions.mix(PEACH_CALLING.out.versions)
+
+        ch_peach_out = ch_peach_out.mix(PEACH_CALLING.out.peach_dir)
+
+    } else {
+
+        ch_peach_out = ch_inputs.map { meta -> [meta, []] }
+
+    }
+
+    //
     // SUBWORKFLOW: Run ORANGE to generate static PDF report
     //
     if (run_config.stages.orange) {
@@ -624,6 +668,7 @@ workflow TARGETED {
             ch_sigs_out,
             ch_lilac_out,
             ch_cuppa_out,
+            ch_peach_out,
             ch_isofox_out,
             ref_data.genome_version,
             hmf_data.disease_ontology,

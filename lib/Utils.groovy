@@ -195,8 +195,8 @@ class Utils {
                         Nextflow.exit(1)
                     }
 
-                    def bam_path = meta_sample[Constants.FileType.BAM_REDUX].toString()
-                    def bam_dir = new File(bam_path).getParent()
+                    def bam_path = meta_sample[Constants.FileType.BAM_REDUX]
+                    def bam_dir = bam_path.getParent().toUriString()
 
                     // Get user specified TSV paths
                     def jitter_tsv   = meta_sample[Constants.FileType.REDUX_JITTER_TSV]
@@ -218,7 +218,7 @@ class Utils {
                         def error_message = []
 
                         error_message.add("When only specifying filetype ${Constants.FileType.BAM_REDUX} in the sample sheet, make sure the REDUX BAM and TSVs are in the same dir:")
-                        error_message.add("${bam_path} (${Constants.FileType.BAM_REDUX})")
+                        error_message.add("${bam_path.toUriString()} (${Constants.FileType.BAM_REDUX})")
                         missing_tsvs.each { error_message.add("${it.value} (missing expected ${it.key})") }
                         error_message.add("")
                         error_message.add("Alternatively, provide the TSV paths in the sample sheet using filetype values: " +
@@ -403,7 +403,7 @@ class Utils {
         if (run_star_index && !params.ref_data_genome_gtf) {
             log.error "\n~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n" +
                 "  Creating a STAR index requires the appropriate genome transcript annotations\n" +
-                "  as a GTF file. Please contact us on Slack for further information."
+                "  as a GTF file. Please contact us on Slack for further information.\n" +
                 "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
             Nextflow.exit(1)
         }

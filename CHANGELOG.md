@@ -3,6 +3,25 @@
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/) and this project mostly adheres to
 [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [[2.1.0](https://github.com/nf-core/oncoanalyser/releases/tag/2.1.0)] Peruvian Pelican - 2025-06-30
+
+- [219](https://github.com/nf-core/oncoanalyser/pull/219) - Add metromap-style diagram for pipeline overview
+- [217](https://github.com/nf-core/oncoanalyser/pull/217) - Fix targeted mode parameters
+- [210](https://github.com/nf-core/oncoanalyser/pull/210) - Switch to bwa-plus from bwa-mem2
+- [207](https://github.com/nf-core/oncoanalyser/pull/207) - Apply minor fixes and updates
+  - Update the HMF SAGE PON
+  - Bump HMF pipeline resource bundles to 2.1.0--1
+  - Bump LINX to 2.0.2
+  - Bump PAVE to 1.7.1
+  - Update CHANGELOG.md
+- [205](https://github.com/nf-core/oncoanalyser/pull/205) - Fix output prepared reference data directory names
+- [189](https://github.com/nf-core/oncoanalyser/pull/189) - Implement TEAL subworkflow
+- [188](https://github.com/nf-core/oncoanalyser/pull/188) - Implement CIDER subworkflow
+- [187](https://github.com/nf-core/oncoanalyser/pull/187) - Implement PEACH subworkflow
+- [201](https://github.com/nf-core/oncoanalyser/pull/201) - Fix REDUX TSV discovery for non-local files
+- [190](https://github.com/nf-core/oncoanalyser/pull/190) - Fix integer overflow of fastp `--split_by_lines` value
+- [199](https://github.com/nf-core/oncoanalyser/pull/199) - Post-release bump
+
 ## [[2.0.0](https://github.com/nf-core/oncoanalyser/releases/tag/2.0.0)] Flame Robin - 2025-04-10
 
 - [178](https://github.com/nf-core/oncoanalyser/pull/178) - Apply minor fixes and updates

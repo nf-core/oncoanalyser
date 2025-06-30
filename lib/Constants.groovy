@@ -11,9 +11,8 @@ class Constants {
     static List PANELS_DEFINED     = ['tso500']
 
 
-    // NOTE(SW): these public URLs are for the oncoanalyser dev bucket
-    static String HMF_DATA_37_PATH = 'https://pub-cf6ba01919994c3cbd354659947f74d8.r2.dev/hmf_reference_data/hmftools/hmf_pipeline_resources.37_v2.0.0--3.tar.gz'
-    static String HMF_DATA_38_PATH = 'https://pub-cf6ba01919994c3cbd354659947f74d8.r2.dev/hmf_reference_data/hmftools/hmf_pipeline_resources.38_v2.0.0--3.tar.gz'
+    static String HMF_DATA_37_PATH = 'https://pub-cf6ba01919994c3cbd354659947f74d8.r2.dev/hmf_reference_data/hmftools/hmf_pipeline_resources.37_v2.1.0--1.tar.gz'
+    static String HMF_DATA_38_PATH = 'https://pub-cf6ba01919994c3cbd354659947f74d8.r2.dev/hmf_reference_data/hmftools/hmf_pipeline_resources.38_v2.1.0--1.tar.gz'
 
     static String TSO500_PANEL_37_PATH = 'https://pub-cf6ba01919994c3cbd354659947f74d8.r2.dev/hmf_reference_data/panels/hmf_panel_resources.tso500.37_v2.0.0--3.tar.gz'
     static String TSO500_PANEL_38_PATH = 'https://pub-cf6ba01919994c3cbd354659947f74d8.r2.dev/hmf_reference_data/panels/hmf_panel_resources.tso500.38_v2.0.0--3.tar.gz'
@@ -35,6 +34,7 @@ class Constants {
         AMBER,
         BAMTOOLS,
         CHORD,
+        CIDER,
         COBALT,
         CUPPA,
         ESVEE,
@@ -44,10 +44,12 @@ class Constants {
         NEO,
         ORANGE,
         PAVE,
+        PEACH,
         PURPLE,
         REDUX,
         SAGE,
         SIGS,
+        TEAL,
         VIRUSINTERPRETER,
     }
 
@@ -82,6 +84,7 @@ class Constants {
         CUPPA_DIR,
         LINX_PLOT_DIR,
         SAGE_DIR,
+        PEACH_DIR,
     }
 
     static enum SampleType {
@@ -382,6 +385,12 @@ class Constants {
             FileType.CUPPA_DIR,
             SampleType.TUMOR,
             [SequenceType.DNA, SequenceType.RNA, SequenceType.DNA_RNA],
+        ],
+
+        PEACH_DIR: [
+            FileType.PEACH_DIR,
+            SampleType.NORMAL,
+            SequenceType.DNA,
         ],
 
     ]
