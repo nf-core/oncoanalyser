@@ -82,9 +82,16 @@ workflow READ_ALIGNMENT_DNA {
     //
     // MODULE: fastp
     //
+
+
+    // TODO(SW): allow fastp to run in QC-only mode
+
+
     // Split FASTQ into chunks if requested for distributed processing
     // channel: [ meta_fastq_ready, fastq_fwd, fastq_fwd ]
     ch_fastqs_ready = Channel.empty()
+    // channel: [ fastp_json ]
+    ch_fastp_json = Channel.empty()
     if (max_fastq_records > 0 || umi_enable) {
 
         // Run process
@@ -96,6 +103,7 @@ workflow READ_ALIGNMENT_DNA {
             umi_skip,
         )
 
+        ch_fastp_json = FASTP.out.json.map { meta, json -> json }
         ch_versions = ch_versions.mix(FASTP.out.versions)
 
     }
@@ -238,6 +246,8 @@ workflow READ_ALIGNMENT_DNA {
     dna_tumor  = ch_bam_tumor_out  // channel: [ meta, [bam, ...], [bai, ...] ]
     dna_normal = ch_bam_normal_out // channel: [ meta, [bam, ...], [bai, ...] ]
     dna_donor  = ch_bam_donor_out  // channel: [ meta, [bam, ...], [bai, ...] ]
+
+    fastp_json = ch_fastp_json     // channel: [ fastp_json ]
 
     versions   = ch_versions       // channel: [ versions.yml ]
 }

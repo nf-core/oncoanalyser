@@ -131,6 +131,8 @@ workflow TARGETED {
             ref_data.genome_star_index,
         )
 
+        ch_qc_files = ch_qc_files.mix(READ_ALIGNMENT_DNA.out.fastp_json)
+
         ch_versions = ch_versions.mix(
             READ_ALIGNMENT_DNA.out.versions,
             READ_ALIGNMENT_RNA.out.versions,
