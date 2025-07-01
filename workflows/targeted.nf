@@ -47,7 +47,12 @@ isofox_read_length = params.isofox_read_length !== null ? params.isofox_read_len
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 */
 
+include { paramsSummaryMap       } from 'plugin/nf-schema'
+include { paramsSummaryMultiqc   } from '../subworkflows/nf-core/utils_nfcore_pipeline'
 include { softwareVersionsToYAML } from '../subworkflows/nf-core/utils_nfcore_pipeline'
+include { methodsDescriptionText } from '../subworkflows/local/utils_nfcore_oncoanalyser_pipeline'
+
+include { MULTIQC               } from '../modules/nf-core/multiqc/main'
 
 include { AMBER_PROFILING       } from '../subworkflows/local/amber_profiling'
 include { BAMTOOLS_METRICS      } from '../subworkflows/local/bamtools_metrics'
@@ -79,7 +84,10 @@ include { SAGE_CALLING          } from '../subworkflows/local/sage_calling'
 samplesheet = Utils.getFileObject(params.input)
 
 workflow TARGETED {
-    // Create channel for versions
+    // Create channel for QC and version files
+    // channel: [ qc_files ]
+    ch_qc_files = Channel.empty()
+
     // channel: [ versions.yml ]
     ch_versions = Channel.empty()
 
@@ -688,13 +696,62 @@ workflow TARGETED {
     //
     // TASK: Aggregate software versions
     //
-    softwareVersionsToYAML(ch_versions)
+    ch_collated_versions = softwareVersionsToYAML(ch_versions)
         .collectFile(
             storeDir: "${params.outdir}/pipeline_info",
             name: 'software_versions.yml',
             sort: true,
             newLine: true,
         )
+
+    //
+    // TASK: MultiQC
+    //
+
+
+    // NOTE(SW): not wrapped in a subworkflow to match nf-core approach
+
+
+    // channel: [ meta, multiqc_report ]
+    ch_multiqc_out = Channel.empty()
+    if (run_config.stages.multiqc) {
+
+        ch_multiqc_config = Channel.fromPath("$projectDir/assets/multiqc_config.yml", checkIfExists: true)
+        ch_multiqc_custom_config = params.multiqc_config ? Channel.fromPath(params.multiqc_config, checkIfExists: true) : Channel.empty()
+
+        ch_multiqc_logo = params.multiqc_logo ? Channel.fromPath(params.multiqc_logo, checkIfExists: true) : Channel.empty()
+
+        ch_multiqc_files = Channel.empty()
+
+        summary_params = paramsSummaryMap(workflow, parameters_schema: "nextflow_schema.json")
+        ch_workflow_summary = Channel.value(paramsSummaryMultiqc(summary_params))
+
+        ch_multiqc_custom_methods_description = params.multiqc_methods_description ? file(params.multiqc_methods_description, checkIfExists: true) : file("$projectDir/assets/methods_description_template.yml", checkIfExists: true)
+        ch_methods_description = Channel.value(methodsDescriptionText(ch_multiqc_custom_methods_description))
+
+        ch_multiqc_files = ch_multiqc_files.mix(ch_methods_description.collectFile(name: 'methods_description_mqc.yaml', sort: true))
+        ch_multiqc_files = ch_multiqc_files.mix(ch_workflow_summary.collectFile(name: 'workflow_summary_mqc.yaml'))
+
+        ch_multiqc_files = ch_multiqc_files.mix(ch_qc_files)
+        ch_multiqc_files = ch_multiqc_files.mix(ch_collated_versions)
+
+        MULTIQC(
+            ch_multiqc_files.collect(),
+            ch_multiqc_config.toList(),
+            ch_multiqc_custom_config.toList(),
+            ch_multiqc_logo.toList(),
+            [],
+            [],
+        )
+
+        ch_multiqc_out = MULTIQC.out.report.toList()
+
+    }
+
+    emit:
+    multiqc_report = ch_multiqc_out // channel: [ multiqc_report ]
+    versions       = ch_versions    // channel: [ versions.yml ]
+
 }
 
 /*
