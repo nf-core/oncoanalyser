@@ -47,6 +47,10 @@ output:
       type: list
       description: Forward and reverse FASTQ files
       pattern: "*.{fastq.gz}"
+  - json:
+      type: file
+      description: JSON report file
+      pattern: "*.{json}"
   - versions:
       type: file
       description: File containing software versions

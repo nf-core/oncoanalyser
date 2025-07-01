@@ -16,6 +16,7 @@ process FASTP {
 
     output:
     tuple val(meta), path('*_R1.fastp.fastq.gz'), path('*_R2.fastp.fastq.gz'), emit: fastq
+    tuple val(meta), path('*json')                                           , emit: json
     path 'versions.yml'                                                      , emit: versions
 
     when:
@@ -39,6 +40,7 @@ process FASTP {
         --in2 ${reads_rev} \\
         ${umi_args} \\
         ${split_by_lines_arg} \\
+        --json ${meta.sample_id}_${meta.library_id}_${meta.lane}.fastp.json \\
         --thread ${task.cpus} \\
         --out1 ${meta.sample_id}_${meta.library_id}_${meta.lane}_R1.fastp.fastq.gz \\
         --out2 ${meta.sample_id}_${meta.library_id}_${meta.lane}_R2.fastp.fastq.gz
@@ -53,6 +55,8 @@ process FASTP {
     """
     touch 00{1..4}.${meta.sample_id}_${meta.library_id}_${meta.lane}_R1.fastp.fastq.gz
     touch 00{1..4}.${meta.sample_id}_${meta.library_id}_${meta.lane}_R2.fastp.fastq.gz
+
+    touch ${meta.sample_id}_${meta.library_id}_${meta.lane}.fastp.json
 
     echo -e '${task.process}:\\n  stub: noversions\\n' > versions.yml
     """
