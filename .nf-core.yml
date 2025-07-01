@@ -13,7 +13,6 @@ template:
     - nf-test
 lint:
   actions_ci: false
-  multiqc_config: false
   nf_test_content: false
   files_exist:
     - lib/Utils.groovy

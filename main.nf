@@ -74,14 +74,23 @@ run_mode = Utils.getRunMode(params.mode, log)
 
 workflow NFCORE_ONCOANALYSER {
 
+    // Define MultiQC output channel
+    ch_multiqc = Channel.empty()
+
+    // Run selected workflow
     if (run_mode === Constants.RunMode.WGTS) {
         WGTS()
+        ch_multiqc = WGTS.out.multiqc_report
     } else if (run_mode === Constants.RunMode.TARGETED) {
         TARGETED()
+        ch_multiqc = TARGETED.out.multiqc_report
     } else {
         log.error("received bad run mode: ${run_mode}")
         Nextflow.exit(1)
     }
+
+    emit:
+    multiqc_report = ch_multiqc // channel: [ multiqc_report ]
 
 }
 
@@ -119,7 +128,9 @@ workflow {
         params.outdir,
         params.monochrome_logs,
         params.hook_url,
+        NFCORE_ONCOANALYSER.out.multiqc_report
     )
+
 }
 
 /*
