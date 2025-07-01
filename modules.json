@@ -23,6 +23,11 @@
                         "installed_by": ["modules"],
                         "patch": "modules/nf-core/gatk4/markduplicates/gatk4-markduplicates.diff"
                     },
+                    "multiqc": {
+                        "branch": "master",
+                        "git_sha": "e594e9dfaffa7572afc11bafc634984fd4cbd87b",
+                        "installed_by": ["modules"]
+                    },
                     "samtools/dict": {
                         "branch": "master",
                         "git_sha": "b13f07be4c508d6ff6312d354d09f2493243e208",
