@@ -10,20 +10,27 @@ The `oncoanalyser` pipeline typically runs from FASTQ, BAM, or CRAM [input files
 most GRCh37 and GRCh38 human [reference genome builds](#custom-genomes), and provides UMI ([unique molecular
 identifier](#umi-processing)) processing for DNA sequencing data.
 
-The pipeline supports two workflow modes: (1) whole genome and/or transcriptome, and (2) targeted panel. Both modes
-accept DNA and RNA sequencing data from matched tumor / normal (with optional
-[donor](#paired-tumor-and-normal-dna-with-donor-sample) sample) and tumor-only samples. The below table shows the
-supported [sample setups](#sample-setups):
+Two main analysis modes are supported by `oncoanalyser`:
+- [**wgts**](#whole-genome--transcriptome-sequencing-wgts): whole genome and/or transcriptome sequening
+- [**targeted**](#targeted-sequencing): targeted/panel sequencing
 
-| Data Type | Tumor DNA          | Normal DNA         | Donor DNA          | Tumor RNA          |
-| --------- | ------------------ | ------------------ | ------------------ | ------------------ |
-| DNA       | :white_check_mark: | -                  | -                  | -                  |
-| DNA       | :white_check_mark: | :white_check_mark: | -                  | -                  |
-| DNA       | :white_check_mark: | :white_check_mark: | :white_check_mark: | -                  |
-| DNA + RNA | :white_check_mark: | -                  | -                  | :white_check_mark: |
-| DNA + RNA | :white_check_mark: | :white_check_mark: | -                  | :white_check_mark: |
-| DNA + RNA | :white_check_mark: | :white_check_mark: | :white_check_mark: | :white_check_mark: |
-| RNA       | -                  | -                  | -                  | :white_check_mark: |
+Both modes accept various combinations of DNA and/or RNA sequencing data from tumor-only or matched tumor / normal (with optional
+[donor](#paired-tumor-and-normal-dna-with-donor-sample) sample). The below table shows the supported [sample setups](#sample-setups):
+
+| DNA samples              | RNA samples |
+|--------------------------|-------------|
+| `tumor`                  | -           |
+| `tumor`+`normal`         | -           |
+| `tumor`+`normal`+`donor` | -           |
+| `tumor`                  | `tumor`     |
+| `tumor`+`normal`         | `tumor`     |
+| `tumor`+`normal`+`donor` | `tumor`     |
+| -                        | `tumor`     |
+
+Besides the main analysis modes, several other modes are also available:
+- [**purity_estimate**](#purity-estimate): tumor fraction estimation in longitudinal samples (e.g. for MRD)
+- [**prepare_reference**](#automatic-staging): staging genomes and WiGiTS tool reference data
+- [**panel_resource_creation**](#custom-panels): creating reference data for custom panels
 
 ## Running the pipeline
 
@@ -44,18 +51,16 @@ nextflow run nf-core/oncoanalyser \
   -config reference_data.config # Optional but recommended
 ```
 
-The [samplesheet](#samplesheet) provided to `--input` argument contains input sample details and corresponding files to
-be analysed.
-
-The `-config` argument is used to provide configuration files for customising:
-- Genome and tool specific data (as mentioned above)
-- Panel normalisation data. All panels except the built-in TSO500 panel require [additional
-  setup](#panel-reference-data) of reference data
-- [Other configuration](#custom-configuration). This may include e.g. [compute resources](#compute-resources), 
-[executor](#executors) settings for cloud compute, or [UMI settings](#umi-processing)
-
-The `-profile` argument specifies configuration presets for different compute environments 
-(see section [-profile](#-profile)).
+Below is a brief description of each argument:
+- `-profile`: [configuration presets](#-profile) for different compute environments
+- `-revision`: `oncoanalyser` version to run (can be a git [tag](https://github.com/nf-core/oncoanalyser/tags), [branch](https://github.com/nf-core/oncoanalyser/branches), or commit ID) 
+- `--mode`: [run mode](#run-modes)
+- `--genome`: genome version, typically `GRCh38_hmf` or `GRCh37_hmf`
+- `--input`: the [samplesheet](#samplesheet) containing sample details and corresponding files to be analysed
+- `--output`: output directory
+- `-config`: one or more configuration files for customising e.g. genome and tool specific data (as mentioned above), 
+normalisation data for [custom panels](#custom-panels) (TSO500 panel supported by default), [compute resources](#compute-resources), or 
+[other configuration](#custom-configuration)
 
 :::tip
 
@@ -128,7 +133,7 @@ The samplesheet contains information in CSV format for each sample to be analyse
 row as the first line with the below columns:
 
 | Column          | Description                                                                                                                                                         |
-| :-------------- |:--------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+|:----------------|:--------------------------------------------------------------------------------------------------------------------------------------------------------------------|
 | `group_id`      | Groups `sample_id` entries (e.g. tumor DNA, normal DNA, tumor RNA for one patient) into the same analysis                                                           |
 | `subject_id`    | Subject/patient identifier, used internally to perform sanity check when processing multiple groups                                                                 |
 | `sample_id`     | Sample identifier                                                                                                                                                   |
@@ -427,80 +432,6 @@ nextflow run nf-core/oncoanalyser \
   <...>
 ```
 
-### Panel reference data
-
-Analysis of panel / targeted sequencing data requires additional panel-specific reference data (e.g. region / gene
-definitions, copy number and transcript normalisation data, known artefacts). This data is included and pre-configured
-for the TSO500 panel, and can be used to analyse TSO500 sequence data by setting `--panel tso500` when running in
-`targeted` mode:
-
-```bash
-nextflow run nf-core/oncoanalyser \
-  -revision 2.2.0 \
-  -config refdata.config \
-  -profile docker \
-  --genome GRCh38_hmf \
-  --mode targeted \
-  --panel tso500 \
-  --input samplesheet.csv \
-  --outdir output/
-```
-
-For panels other than TSO500 (including whole exome), the panel-specific reference data must first be generated using a
-training procedure detailed [here](https://github.com/hartwigmedical/hmftools/blob/master/pipeline/README_TARGETED.md).
-The resulting panel-specific reference data must then be defined in a configuration file:
-
-```groovy title="panel.config"
-params {
-    ref_data_panel_data_path = "/path/to/my_custom_panel_resources/"
-
-    // These are relative paths within the dir provided by `ref_data_panel_data_path` above
-    panel_data_paths {
-
-        mycustompanel {  // This is the name that should be passed to the `--panel` argument
-
-            // Genome version: '37' or '38'
-            '38' {
-                driver_gene_panel           = 'common/DriverGenePanel.custom_panel.38.tsv'
-                sage_actionable_panel       = 'variants/ActionableCodingPanel.custom_panel.38.bed.gz'
-                sage_coverage_panel         = 'variants/CoverageCodingPanel.custom_panel.38.bed.gz'
-                pon_artefacts               = 'variants/pon_artefacts.custom_panel.38.tsv.gz'
-                target_region_bed           = 'copy_number/target_regions_definition.custom_panel.38.bed.gz'
-                target_region_normalisation = 'copy_number/cobalt_normalisation.custom_panel.38.tsv'
-                target_region_ratios        = 'copy_number/target_regions_ratios.custom_panel.38.tsv'
-                target_region_msi_indels    = 'copy_number/target_regions_msi_indels.custom_panel.38.tsv'
-
-                // The below are optional and filepaths can be omitted for non-RNA panels by providing an empty list, e.g.:
-                // isofox_tpm_norm = []
-                isofox_tpm_norm             = 'rna_resources/isofox.gene_normalisation.custom_panel.38.csv'
-                isofox_gene_ids             = 'rna_resources/custom_panel.rna_gene_ids.csv'
-                isofox_counts               = 'rna_resources/read_93_exp_counts.38.csv'
-                isofox_gc_ratios            = 'rna_resources/read_93_exp_gc_ratios.38.csv'
-            }
-        }
-    }
-}
-```
-
-To run an analysis of panel sequence data:
-
-- provide both the panel-specific reference data configuration file via the `-config <file>` argument
-- set the panel name in the `--panel <name>` argument, this must match the name defined in the configuration file
-- set the `--force_panel` argument, which is required when not using the built-in `tso500` panel
-
-```bash
-nextflow run nf-core/oncoanalyser \
-  -revision 2.2.0 \
-  -config panel.config \
-  -profile docker \
-  --genome GRCh38_hmf \
-  --mode targeted \
-  --panel mycustompanel \
-  --force_panel \
-  --input samplesheet.csv \
-  --outdir output/
-```
-
 ### Custom genomes
 
 It is strongly recommended to use a Hartwig-distributed reference genome for alignments and subsequent analysis
@@ -592,6 +523,135 @@ _GRCh38 genome (Hartwig): `GRCh38_hmf`_
 | STAR index           | [star_index-gencode_38-2.7.3a.tar.gz](https://pub-cf6ba01919994c3cbd354659947f74d8.r2.dev/genomes/GRCh38_hmf/25.1/star_index-gencode_38-2.7.3a.tar.gz)                                                |
 | WiGiTS data          | [hmf_pipeline_resources.38_v2.1.0--1.tar.gz](https://pub-cf6ba01919994c3cbd354659947f74d8.r2.dev/hmf_reference_data/hmftools/hmf_pipeline_resources.38_v2.1.0--1.tar.gz)                              |
 | TSO500 panel data    | [hmf_panel_resources.tso500.38_v2.0.0--3.tar.gz](https://pub-cf6ba01919994c3cbd354659947f74d8.r2.dev/hmf_reference_data/panels/hmf_panel_resources.tso500.38_v2.0.0--3.tar.gz)                        |
+
+## Run modes
+
+### Targeted / panel sequencing: `--mode targeted`
+
+Targeted or panel sequencing samples can be analysed using `--mode targeted`. The TSO500 panel has in-built support by setting
+`--panel tso500`. A typical run command for TSO500 panels would be:
+
+```bash
+nextflow run nf-core/oncoanalyser \
+  -profile docker \
+  -revision 2.2.0 \
+  -config refdata.config \
+  --genome GRCh38_hmf \
+  --mode targeted \
+  --panel tso500 \
+  --input samplesheet.csv \
+  --outdir output/
+```
+
+Panels other than TSO500 require additional arguments, as well as custom reference data to be created. 
+Please see [Custom panels](#custom-panels---mode-panel_resource_creation).
+
+### Custom panels: `--mode panel_resource_creation`
+
+For panels other than TSO500, custom panel reference data files must first be created which fit and normalise the biases inherent to
+that specific panel. 
+
+As summarised in the below table, some of these files need to be manually created, and instructions can be found on the 
+[**WiGiTS targeted analysis readme**](https://github.com/hartwigmedical/hmftools/blob/master/pipeline/README_TARGETED.md). 
+Some of the manually created are also passed to `oncoanalyser` running in `--mode panel_resource_creation` to create the remaining 
+required reference data files (described below).
+
+| Data type | File / config name            | Comment                                                                                                                 |
+|:----------|:------------------------------|:------------------------------------------------------------------------------------------------------------------------|
+| DNA       | `driver_gene_panel`           | Manually created                                                                                                        |
+| DNA       | `target_region_bed`           | Manually created                                                                                                        |
+| DNA       | `target_region_msi_indels`    | Manually created                                                                                                        |
+| DNA       | `target_region_ratios`        | Manually created                                                                                                        |
+| DNA       | `target_region_normalisation` | Output from `--mode panel_resource_creation`                                                                            |
+| DNA       | `pon_artefacts`               | Output from `--mode panel_resource_creation`                                                                            |
+| RNA       | `isofox_gene_ids`             | Manually created                                                                                                        |
+| RNA       | `isofox_tpm_norm`             | Output from `--mode panel_resource_creation`                                                                            |
+| RNA       | `isofox_counts`               | Recommended to use `read_151_exp_counts.<ref_genome_version>.csv` from [WiGiTS reference data](#reference-data-urls)    |
+| RNA       | `isofox_gc_ratios`            | Recommended to use `read_100_exp_gc_ratios.<ref_genome_version>.csv` from [WiGiTS reference data](#reference-data-urls) |
+
+:::note
+
+RNA reference data is only required if your panel supports RNA sequencing data.
+
+:::
+
+Once your manually created files are ready, create a samplesheet with a representative set of panel sequencing samples 
+(**≥20 recommended**). The below example samplesheet provides BAM files, but [FASTQ files](#fastq) can also be provided.
+
+```csv title="samplesheet.panel_resource_creation.csv"
+group_id,subject_id,sample_id,sample_type,sequence_type,filetype,filepath
+PATIENT1,PATIENT1,PATIENT1-T,tumor,dna,bam,/path/to/PATIENT1-T.dna.bam
+PATIENT1,PATIENT1,PATIENT1-T,tumor,dna,bai,/path/to/PATIENT1-T.dna.bam.bai
+PATIENT2,PATIENT2,PATIENT2-T,tumor,dna,bam,/path/to/PATIENT2-T.dna.bam
+PATIENT2,PATIENT2,PATIENT2-T,tumor,dna,bai,/path/to/PATIENT2-T.dna.bam.bai
+```
+
+Then, run `oncoanalyser` with `--mode panel_resource_creation` providing the samplesheet, as well as the relevant manually created files 
+to arguments `--driver_gene_panel`, `--target_regions_bed`, and `--isofox_gene_ids`:
+
+```bash
+nextflow run nf-core/oncoanalyser \
+  -profile docker \
+  -revision 2.2.0 \
+  -config refdata.config \
+  --genome GRCh38_hmf \
+  --mode panel_resource_creation \
+  --input samplesheet.panel_resource_creation.csv \
+  --outdir output/ \
+  \
+  --driver_gene_panel DriverGenePanel.38.tsv \
+  --target_regions_bed target_regions_definition.38.bed.gz \
+  --isofox_gene_ids rna_gene_ids.csv # Optional, only provide if panel supports RNA sequencing data
+```
+
+Place the all the custom panel reference data files in a directory, and define the paths / file names in a configuration file:
+
+```groovy title="panel.config"
+params {
+    ref_data_panel_data_path = "/directory/containing/my_custom_panel_resources/"
+
+    // These are relative paths within the dir provided by `ref_data_panel_data_path` above
+    panel_data_paths {
+
+        my_custom_panel {  // This is the name that should be passed to the `--panel` argument
+
+            // Genome version: '37' or '38'
+            '38' {
+                driver_gene_panel           = 'DriverGenePanel.38.tsv'
+                pon_artefacts               = 'pave.somatic_artefacts.38.tsv'
+                target_region_bed           = 'target_regions_definition.38.bed.gz'
+                target_region_normalisation = 'cobalt.region_normalisation.38.tsv'
+                target_region_ratios        = 'target_regions_ratios.38.tsv'
+                target_region_msi_indels    = 'target_regions_msi_indels.38.tsv'
+
+                // RNA. Optional, only provide if panel supports RNA data.
+                isofox_gene_ids             = 'rna_gene_ids.csv'
+                isofox_tpm_norm             = 'isofox.gene_normalisation.38.csv'
+                isofox_counts               = 'read_151_exp_counts.37.csv'
+                isofox_gc_ratios            = 'read_100_exp_gc_ratios.37.csv' 
+            }
+        }
+    }
+}
+```
+
+Lastly, run `oncoanalyser` with `--mode targeted` to analyse your panel sequencing sample. You will also need to:
+- provide the custom panel reference data configuration file to the `-config <file>` argument
+- set the panel name in the `--panel <name>` argument which the name defined in the configuration file (e.g. `my_custom_panel`)
+- set the `--force_panel` argument
+
+```bash
+nextflow run nf-core/oncoanalyser \
+  -revision 2.2.0 \
+  -config panel.config \
+  -profile docker \
+  --genome GRCh38_hmf \
+  --mode targeted \
+  --panel my_custom_panel \
+  --force_panel \
+  --input samplesheet.csv \
+  --outdir output/
+```
 
 ## Process selection
 
