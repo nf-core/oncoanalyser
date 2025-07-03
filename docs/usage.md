@@ -432,9 +432,9 @@ for the TSO500 panel, and can be used to analyse TSO500 sequence data by setting
 
 ```bash
 nextflow run nf-core/oncoanalyser \
+  -profile docker \
   -revision 2.2.0 \
   -config refdata.config \
-  -profile docker \
   --genome GRCh38_hmf \
   --mode targeted \
   --panel tso500 \
@@ -442,9 +442,42 @@ nextflow run nf-core/oncoanalyser \
   --outdir output/
 ```
 
-For panels other than TSO500 (including whole exome), the panel-specific reference data must first be generated using a
-training procedure detailed [here](https://github.com/hartwigmedical/hmftools/blob/master/pipeline/README_TARGETED.md).
-The resulting panel-specific reference data must then be defined in a configuration file:
+### Custom panels
+
+For panels other than TSO500, custom panel reference data must first be created using 
+`--mode panel_resource_creation`, which are required to fit and normalise the biases inherent to that specific panel.
+The steps performed in this mode are detailed [here](https://github.com/hartwigmedical/hmftools/blob/master/pipeline/README_TARGETED.md).
+
+First create a samplesheet with a set of samples from your panel sequencing run (the more samples, the better the 
+reference data that's created). The below example samplesheet provides BAM files, but FASTQs can also be provided 
+(see [Samplesheet: FASTQ](#fastq)).
+
+```csv title="samplesheet.panel_resource_creation.csv"
+group_id,subject_id,sample_id,sample_type,sequence_type,filetype,filepath
+PATIENT1,PATIENT1,PATIENT1-T,tumor,dna,bam,/path/to/PATIENT1-T.dna.bam
+PATIENT1,PATIENT1,PATIENT1-T,tumor,dna,bai,/path/to/PATIENT1-T.dna.bam.bai
+PATIENT2,PATIENT2,PATIENT2-T,tumor,dna,bam,/path/to/PATIENT2-T.dna.bam
+PATIENT2,PATIENT2,PATIENT2-T,tumor,dna,bai,/path/to/PATIENT2-T.dna.bam.bai
+```
+
+Then, run `oncoanalyser` with `--mode panel_resource_creation`:
+
+```bash
+nextflow run nf-core/oncoanalyser \
+  -profile docker \
+  -revision 2.2.0 \
+  -config refdata.config \
+  --genome GRCh38_hmf \
+  --mode panel_resource_creation \
+  --input samplesheet.panel_resource_creation.csv \
+  --outdir output/ \
+  \
+  --driver_gene_panel DriverGenePanel.38.tsv \
+  --target_regions_bed target_regions_definition.38.bed.gz \
+  --isofox_gene_ids rna_gene_ids.csv # Optional, only provide if panel supports RNA data
+```
+
+The resulting custom panel reference data paths can then be defined in a configuration file:
 
 ```groovy title="panel.config"
 params {
@@ -453,35 +486,37 @@ params {
     // These are relative paths within the dir provided by `ref_data_panel_data_path` above
     panel_data_paths {
 
-        mycustompanel {  // This is the name that should be passed to the `--panel` argument
+        my_custom_panel {  // This is the name that should be passed to the `--panel` argument
 
             // Genome version: '37' or '38'
             '38' {
-                driver_gene_panel           = 'common/DriverGenePanel.custom_panel.38.tsv'
-                sage_actionable_panel       = 'variants/ActionableCodingPanel.custom_panel.38.bed.gz'
-                sage_coverage_panel         = 'variants/CoverageCodingPanel.custom_panel.38.bed.gz'
-                pon_artefacts               = 'variants/pon_artefacts.custom_panel.38.tsv.gz'
-                target_region_bed           = 'copy_number/target_regions_definition.custom_panel.38.bed.gz'
-                target_region_normalisation = 'copy_number/cobalt_normalisation.custom_panel.38.tsv'
-                target_region_ratios        = 'copy_number/target_regions_ratios.custom_panel.38.tsv'
-                target_region_msi_indels    = 'copy_number/target_regions_msi_indels.custom_panel.38.tsv'
+                driver_gene_panel           = 'DriverGenePanel.38.tsv' // Input file for `--mode panel_resource_creation`
+                
+                // Variants
+                sage_actionable_panel       = 'ActionableCodingPanel.38.bed.gz'
+                sage_coverage_panel         = 'CoverageCodingPanel.my_custom_panel.38.bed.gz'
+                pon_artefacts               = 'pave.somatic_artefacts.38.tsv'
+                
+                // Copy number
+                target_region_bed           = 'target_regions_definition.38.bed.gz' // Input file for `--mode panel_resource_creation`
+                target_region_normalisation = 'cobalt.region_normalisation.38.tsv'
+                target_region_ratios        = [] // Optional. Manually created per panel
+                target_region_msi_indels    = [] // Optional. Manually created per panel
 
-                // The below are optional and filepaths can be omitted for non-RNA panels by providing an empty list, e.g.:
-                // isofox_tpm_norm = []
-                isofox_tpm_norm             = 'rna_resources/isofox.gene_normalisation.custom_panel.38.csv'
-                isofox_gene_ids             = 'rna_resources/custom_panel.rna_gene_ids.csv'
-                isofox_counts               = 'rna_resources/read_93_exp_counts.38.csv'
-                isofox_gc_ratios            = 'rna_resources/read_93_exp_gc_ratios.38.csv'
+                // RNA. Optional, only provide if panel supports RNA data.
+                isofox_gene_ids             = 'rna_gene_ids.csv' // Input file for `--mode panel_resource_creation`
+                isofox_tpm_norm             = 'isofox.gene_normalisation.38.csv'
+                isofox_counts               = [] // Optional. Get from public resources
+                isofox_gc_ratios            = [] // Optional. Get from public resources 
             }
         }
     }
 }
 ```
 
-To run an analysis of panel sequence data:
-
-- provide both the panel-specific reference data configuration file via the `-config <file>` argument
-- set the panel name in the `--panel <name>` argument, this must match the name defined in the configuration file
+Lastly, run `oncoanalyser` with `--mode targeted` to analyse your panel sequencing sample. You will also need to:
+- provide the custom panel reference data configuration file to the `-config <file>` argument
+- set the panel name in the `--panel <name>` argument, which must match the name defined in the configuration file (e.g. `my_custom_panel`)
 - set the `--force_panel` argument, which is required when not using the built-in `tso500` panel
 
 ```bash
@@ -491,7 +526,7 @@ nextflow run nf-core/oncoanalyser \
   -profile docker \
   --genome GRCh38_hmf \
   --mode targeted \
-  --panel mycustompanel \
+  --panel my_custom_panel \
   --force_panel \
   --input samplesheet.csv \
   --outdir output/
