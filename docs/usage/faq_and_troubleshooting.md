@@ -24,8 +24,8 @@
 
 ## How to start from CRAM?
 
-Simply specify a CRAM path instead of a BAM path in the sample sheet. See section [Input starting points: BAM /
-CRAM](./#bam-and-cram).
+Simply provide a CRAM path under filetype `cram` in the sample sheet. See section [Input starting points: CRAM](./#cram)
+for details.
 
 ## How to handle UMIs?
 

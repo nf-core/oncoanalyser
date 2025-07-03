@@ -100,7 +100,7 @@
                     "default": 10000000,
                     "fa_icon": "fas fa-cog"
                 },
-                "fastp_umi": {
+                "fastp_umi_enabled": {
                     "type": "boolean",
                     "description": "Enable fastp UMI processing.",
                     "default": false,
@@ -123,7 +123,7 @@
                     "default": -1,
                     "fa_icon": "fas fa-cog"
                 },
-                "redux_umi": {
+                "redux_umi_enabled": {
                     "type": "boolean",
                     "description": "Enable REDUX UMI processing.",
                     "default": false,

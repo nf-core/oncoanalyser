@@ -112,7 +112,7 @@ workflow TARGETED {
             ref_data.genome_fasta,
             ref_data.genome_bwamem2_index,
             params.max_fastq_records,
-            params.fastp_umi,
+            params.fastp_umi_enabled,
             params.fastp_umi_location,
             params.fastp_umi_length,
             params.fastp_umi_skip,
@@ -168,7 +168,7 @@ workflow TARGETED {
             ref_data.genome_dict,
             hmf_data.unmap_regions,
             hmf_data.msi_jitter_sites,
-            params.redux_umi,
+            params.redux_umi_enabled,
             params.redux_umi_duplex_delim,
         )
 

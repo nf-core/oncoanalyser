@@ -29,7 +29,7 @@ supported [sample setups](#sample-setups):
 
 :::tip
 
-Jump to [FAQ and troubleshooting](/oncoanalyser/2.1.0/docs/usage/faq_and_troubleshooting)
+Jump to [FAQ and troubleshooting](/oncoanalyser/2.2.0/docs/usage/faq_and_troubleshooting)
 
 :::
 
@@ -38,7 +38,7 @@ A typical command for running `oncoanalyser` is shown below:
 ```bash
 nextflow run nf-core/oncoanalyser \
   -profile docker \
-  -revision 2.1.0 \
+  -revision 2.2.0 \
   --mode wgts \
   --genome GRCh38_hmf \
   --input samplesheet.csv \
@@ -87,7 +87,7 @@ outdir: 'output/'
 and be run using this command:
 
 ```bash
-nextflow run nf-core/oncoanalyser -revision 2.1.0 -profile docker -params-file params.yaml
+nextflow run nf-core/oncoanalyser -revision 2.2.0 -profile docker -params-file params.yaml
 ```
 
 You can also generate such `yaml`/`json` files via [nf-core/launch](https://nf-co.re/launch).
@@ -104,7 +104,7 @@ nextflow pull nf-core/oncoanalyser
 
 It is a good idea to specify a pipeline version when running the pipeline on your data. This ensures that a specific version of the pipeline code and software are used when you run your pipeline. If you keep using the same tag, you'll be running the same version of the pipeline, even if there have been changes to the code since.
 
-First, go to the [nf-core/oncoanalyser releases page](https://github.com/nf-core/oncoanalyser/releases) and find the latest pipeline version - numeric only (e.g. `2.1.0`). Then specify this when running the pipeline with `-revision` (one hyphen) - e.g. `-revision 2.1.0`. Of course, you can switch to another version by changing the number after the `-revision` flag.
+First, go to the [nf-core/oncoanalyser releases page](https://github.com/nf-core/oncoanalyser/releases) and find the latest pipeline version - numeric only (e.g. `2.2.0`). Then specify this when running the pipeline with `-revision` (one hyphen) - e.g. `-revision 2.2.0`. Of course, you can switch to another version by changing the number after the `-revision` flag.
 
 This version number will be logged in reports when you run the pipeline, so that you'll know what you used when you look back in the future. For example, in the `<outdir>/pipeline_info/software_versions.yml` file.
 
@@ -122,13 +122,13 @@ The samplesheet contains information in CSV format for each sample to be analyse
 row as the first line with the below columns:
 
 | Column          | Description                                                                                                                                                         |
-| :-------------- | :------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| :-------------- |:--------------------------------------------------------------------------------------------------------------------------------------------------------------------|
 | `group_id`      | Groups `sample_id` entries (e.g. tumor DNA, normal DNA, tumor RNA for one patient) into the same analysis                                                           |
 | `subject_id`    | Subject/patient identifier, used internally to perform sanity check when processing multiple groups                                                                 |
 | `sample_id`     | Sample identifier                                                                                                                                                   |
 | `sample_type`   | Sample type: `tumor`, `normal`                                                                                                                                      |
 | `sequence_type` | Sequence type: `dna`, `rna`                                                                                                                                         |
-| `filetype`      | File type: e.g. `fastq`, `bam`, `bai`; a full list of valid values can be found [here](https://github.com/nf-core/oncoanalyser/blob/2.1.0/lib/Constants.groovy#L56) |
+| `filetype`      | File type: e.g. `fastq`, `bam`, `bai`; a full list of valid values can be found [here](https://github.com/nf-core/oncoanalyser/blob/2.2.0/lib/Constants.groovy#L80) |
 | `info`          | Additional sample information such as sequencing library and lane for [FASTQ](#fastq) files, this column is only required when running an analysis from FASTQ       |
 | `filepath`      | Absolute filepath to input file, which can be a local filepath or supported protocol (http, https, ftp, s3, az, gz)                                                 |
 
@@ -164,7 +164,7 @@ Currently only gzip compressed, non-interleaved paired-end FASTQ files are curre
 
 :::
 
-#### BAM and CRAM
+#### BAM
 
 To run from BAM, specify `bam` in the `filetype` field:
 
@@ -183,27 +183,55 @@ PATIENT1,PATIENT1,PATIENT1-T,tumor,dna,bam,/path/to/PATIENT1-T.dna.bam
 PATIENT1,PATIENT1,PATIENT1-T,tumor,dna,bai,/other/dir/PATIENT1-T.dna.bam.bai
 ```
 
-To run from CRAM, simply provide the CRAM and optionally the CRAM index with `bam` or `bai` in the `filetype` field:
+#### CRAM
 
-```csv title="samplesheet.cram_crai.csv"
+To run from CRAM, use `cram` and `crai` in the `filetype` field. `crai` only needs to be provided if the CRAM index is
+not in the same directory as the CRAM file:
+
+```csv title="samplesheet.cram.csv"
 group_id,subject_id,sample_id,sample_type,sequence_type,filetype,filepath
-PATIENT1,PATIENT1,PATIENT1-T,tumor,dna,bam,/path/to/PATIENT1-T.dna.cram
-PATIENT1,PATIENT1,PATIENT1-T,tumor,dna,bai,/other/dir/PATIENT1-T.dna.cram.crai
+PATIENT1,PATIENT1,PATIENT1-T,tumor,dna,cram,/path/to/PATIENT1-T.dna.cram
+PATIENT1,PATIENT1,PATIENT1-T,tumor,dna,crai,/other/dir/PATIENT1-T.dna.cram.crai
 ```
 
-#### REDUX BAM
+Similarly, for REDUX CRAMs, provide `cram_redux` and optionally `crai`:
+
+```csv title="samplesheet.redux_cram.csv"
+group_id,subject_id,sample_id,sample_type,sequence_type,filetype,filepath
+PATIENT1,PATIENT1,PATIENT1-T,tumor,dna,cram_redux,/path/to/PATIENT1-T.dna.redux.cram
+PATIENT1,PATIENT1,PATIENT1-T,tumor,dna,crai,/other/dir/PATIENT1-T.dna.cram.crai
+```
+
+:::warning
+
+There is a fixed performance cost associated with reading CRAM files. This means the time it takes to read large CRAMs
+vs BAMs is similar, whereas reading small CRAMs can take significantly longer (>10x) than reading small BAMs. If you
+have small CRAMs (e.g. <10GB), it will be faster to decompress the CRAM into a BAM, and then run `oncoanalyser` with
+this BAM.
+
+This performance issue is due to how CRAM reading is implemented in
+[htsjdk](https://github.com/samtools/htsjdk/blob/master/src/main/java/htsjdk/samtools/CRAMFileReader.java) (which is
+used throughout the WiGiTS tools). We plan to address this issue in future releases of `oncoanalyser`.
+
+:::
+
+#### REDUX BAM / CRAM
 
 When running an analysis with DNA data from FASTQ, two of the most time consuming and resource intensive pipeline steps
 are [BWA-MEM2](https://github.com/bwa-mem2/bwa-mem2) read alignment and
-[REDUX](https://github.com/hartwigmedical/hmftools/tree/master/redux) alignment processing. Where the REDUX output BAM
-already exists for a given sample from a prior analysis, these read alignment and processing steps can be skipped by
-providing the REDUX BAM as `bam_redux` in the `filetype` field. The REDUX BAM index can also optionally be provided with
-`filetype` as `bai` if required.
+[REDUX](https://github.com/hartwigmedical/hmftools/tree/master/redux) alignment processing. 
+
+`oncoanalyser` can be run starting from REDUX BAMs or CRAMs if they already exist from a prior analysis.
+
+For REDUX BAMs, provide `bam_redux`/`cram_redux` in the `filetype` field, and optionally the BAM/CRAM index to `bai`/`crai` (only required
+if indexes are not in the same directory as the BAM/CRAM):
 
 ```csv title="samplesheet.redux_bam_bai.csv"
 group_id,subject_id,sample_id,sample_type,sequence_type,filetype,filepath
 PATIENT1,PATIENT1,PATIENT1-T,tumor,dna,bam_redux,/path/to/PATIENT1-T.dna.redux.bam
 PATIENT1,PATIENT1,PATIENT1-T,tumor,dna,bai,/other/dir/PATIENT1-T.dna.redux.bam.bai
+PATIENT2,PATIENT2,PATIENT2-T,tumor,dna,cram_redux,/path/to/PATIENT2-T.dna.redux.cram
+PATIENT2,PATIENT2,PATIENT2-T,tumor,dna,crai,/other/dir/PATIENT2-T.dna.redux.cram.crai
 ```
 
 The `*.jitter_params.tsv` and `*.ms_table.tsv.gz` REDUX output files are expected to be in the same directory as the
@@ -226,10 +254,10 @@ You can also [start from existing inputs](#starting-from-existing-inputs) other 
 
 :::warning
 
-When starting from REDUX BAM, the filenames must have the format:
+When starting from REDUX BAM/CRAM, the filenames must have the format:
 
-- `<sample_id>.redux.bam`
-- `<sample_id>.redux.bam.bai`
+- `<sample_id>.redux.bam` or `<sample_id>.redux.cram` 
+- `<sample_id>.redux.bam.bai` or `<sample_id>.redux.cram.crai`
 - `<sample_id>.jitter_params.tsv`
 - `<sample_id>.ms_table.tsv.gz`
 
@@ -334,7 +362,7 @@ PATIENT1,PATIENT1,PATIENT1-T,tumor,dna,bam,/path/to/PATIENT1-T.dna.bam
 
 ```bash
 nextflow run nf-core/oncoanalyser \
-  -revision 2.1.0 \
+  -revision 2.2.0 \
   -profile docker \
   --mode wgts \
   --genome GRCh38_hmf \
@@ -344,7 +372,7 @@ nextflow run nf-core/oncoanalyser \
 ```
 
 Executing the above command will download and prepare default reference data without running any analysis, and once
-complete the prepared reference files can be found in `./prepare_reference/reference_data/2.1.0/<datetimestamp>/`. You can then provide
+complete the prepared reference files can be found in `./prepare_reference/reference_data/2.2.0/<datetimestamp>/`. You can then provide
 a config file that points to these reference files (see [Configuring reference data](#configuring-reference-data)) which can
 be used for subsequent `oncoanalyser` runs.
 
@@ -385,7 +413,7 @@ The configuration file can then be supplied to `oncoanalyser` via the `-config <
 
 ```bash
 nextflow run nf-core/oncoanalyser \
-  -revision 2.1.0 \
+  -revision 2.2.0 \
   -config refdata.config  \
   <...>
 ```
@@ -399,7 +427,7 @@ for the TSO500 panel, and can be used to analyse TSO500 sequence data by setting
 
 ```bash
 nextflow run nf-core/oncoanalyser \
-  -revision 2.1.0 \
+  -revision 2.2.0 \
   -config refdata.config \
   -profile docker \
   --genome GRCh38_hmf \
@@ -453,7 +481,7 @@ To run an analysis of panel sequence data:
 
 ```bash
 nextflow run nf-core/oncoanalyser \
-  -revision 2.1.0 \
+  -revision 2.2.0 \
   -config panel.config \
   -profile docker \
   --genome GRCh38_hmf \
@@ -504,7 +532,7 @@ config file. This avoids having to regenerate indexes for each new analysis.
 
 ```bash
 nextflow run nf-core/oncoanalyser \
-  -revision 2.1.0 \
+  -revision 2.2.0 \
   -profile docker \
   -config genome.custom.config \
   --mode wgts \
@@ -567,61 +595,8 @@ _GRCh38 genome (Hartwig): `GRCh38_hmf`_
 
 ## Process selection
 
-It is possible to exclude or include specific processes when running `oncoanalyser`. The full list of processes that can
-be selected is available [here](https://github.com/nf-core/oncoanalyser/blob/2.1.0/lib/Constants.groovy#L32).
-
-### Excluding processes
-
-Most of the major components in `oncoanalyser` can be skipped using the `--processes_exclude` argument. There are
-circumstances where it is desirable to skip resource intensive processes like VIRUSBreakend or where you have no use for
-the outputs from some process such as the ORANGE report. In the example of skipping the VIRUSBreakend and ORANGE
-processes, the `oncoanalyser` command would take the following form:
-
-```bash
-nextflow run nf-core/oncoanalyser \
-  -revision 2.1.0 \
-  -profile docker \
-  --mode wgts \
-  --processes_exclude virusinterpreter,orange \
-  --genome GRCh38_hmf \
-  --input samplesheet.csv \
-  --outdir output/
-```
-
-:::warning
-
-When skipping components no checks are done to identify orphan processes in the execution DAG or for redundant
-processes.
-
-:::
-
-### Manual process selection
-
-The `--processes_manual` argument can be used to enable manual process selection and `--processes_include
-<process_1,process_2>` to configure individual processes to execute. One use case would be to run processes which are
-not run by default, such as neoepitope calling with [NEO](https://github.com/hartwigmedical/hmftools/tree/master/neo).
-To do this, provide the below example samplesheet:
-
-```csv title='samplesheet.manual.csv'
-group_id,subject_id,sample_id,sample_type,sequence_type,filetype,filepath
-PATIENT1,PATIENT1,PATIENT1-N,normal,dna,bam,/path/to/PATIENT1-N.dna.wgs.bam
-PATIENT1,PATIENT1,PATIENT1-T,tumor,dna,bam,/path/to/PATIENT1-T.dna.wgs.bam
-PATIENT1,PATIENT1,PATIENT1-T-RNA,tumor,rna,bam,/path/to/PATIENT1-T.rna.wgs.bam
-```
-
-Then, run `oncoanalyser` with the `neo` process selected as well as all required upstream processes:
-
-```bash
-nextflow run nf-core/oncoanalyser \
-  -revision 2.1.0 \
-  -profile docker \
-  --mode wgts \
-  --processes_manual \
-  --processes_include isofox,redux,amber,cobalt,sage,pave,esvee,purple,linx,lilac,neo \
-  --genome GRCh38_hmf \
-  --input samplesheet.neo_inputs.csv \
-  --outdir output/
-```
+It is possible to exclude or manually select specific processes when running `oncoanalyser`. The full list of processes that can
+be selected is available [here](https://github.com/nf-core/oncoanalyser/blob/2.2.0/lib/Constants.groovy#L53).
 
 :::warning
 
@@ -630,6 +605,38 @@ required processes are selected, `oncoanalyser` will not raise an error but inst
 process running.
 
 :::
+
+### Excluding processes
+
+Most of the major components in `oncoanalyser` can be skipped using the `--processes_exclude` argument. You may want to
+skip resource intensive processes like Virusbreakend, or ORANGE because you do not require the report, for example:
+
+```bash
+nextflow run nf-core/oncoanalyser \
+  -revision 2.2.0 \
+  -profile docker \
+  --mode wgts \
+  --genome GRCh38_hmf \
+  --input samplesheet.csv \
+  --outdir output/ \
+  --processes_exclude virusinterpreter,orange
+```
+
+### Manual process selection
+
+The `--processes_manual` argument can be used to select the exact processes that `onconalyser` will run. For example,
+you may only want to run alignment and SNV/indel, SV and CNV calling from DNA FASTQs, like so:
+
+```bash
+nextflow run nf-core/oncoanalyser \
+  -revision 2.2.0 \
+  -profile docker \
+  --mode wgts \
+  --genome GRCh38_hmf \
+  --input samplesheet.csv \
+  --outdir output/ \
+  --processes_manual alignment,redux,sage,amber,cobalt,esvee,sage,pave,purple
+```
 
 ### Starting from existing inputs
 
@@ -662,22 +669,14 @@ Then, run `oncoanalyser` skipping all processes except for `neo`:
 
 ```bash
 nextflow run nf-core/oncoanalyser \
-  -revision 2.1.0 \
+  -revision 2.2.0 \
   -profile docker \
   --mode wgts \
-  --processes_manual \
-  --processes_include neo \
+  --processes_manual neo \
   --genome GRCh38_hmf \
   --input samplesheet.neo_inputs.csv \
   --outdir output/
 ```
-
-:::warning
-
-Providing existing inputs will cause `oncoanalyser` to skip the corresponding process but none of the upstream
-processes. It is the responsibility of the user to skip all relevant processes.
-
-:::
 
 ## Core Nextflow arguments
 
@@ -905,13 +904,13 @@ on the presence/format of your UMI strings, you may need to configure one or mor
 ```groovy title='umi.config'
 params {
     // For FASTQ files
-    fastp_umi = true                // Enable UMI processing by fastp
+    fastp_umi_enabled = true        // Enable UMI processing by fastp
     fastp_umi_location = "per_read" // --umi_loc fastp arg
     fastp_umi_length = 7            // --umi_len fastp arg
     fastp_umi_skip = 0              // --umi_skip fastp arg
 
     // For BAM files
-    redux_umi = true                // Enable UMI processing by REDUX
+    redux_umi_enabled = true        // Enable UMI processing by REDUX
     redux_umi_duplex_delim = "_"    // Duplex UMI delimiter
 }
 ```
