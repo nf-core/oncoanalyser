@@ -134,7 +134,7 @@ row as the first line with the below columns:
 | `sample_id`     | Sample identifier                                                                                                                                                   |
 | `sample_type`   | Sample type: `tumor`, `normal`                                                                                                                                      |
 | `sequence_type` | Sequence type: `dna`, `rna`                                                                                                                                         |
-| `filetype`      | File type: e.g. `fastq`, `bam`, `bai`; a full list of valid values can be found [here](https://github.com/nf-core/oncoanalyser/blob/2.2.0/lib/Constants.groovy#L53) |
+| `filetype`      | File type: e.g. `fastq`, `bam`, `bai`; a full list of valid values can be found [here](https://github.com/nf-core/oncoanalyser/blob/2.2.0/lib/Constants.groovy#L80) |
 | `info`          | Additional sample information such as sequencing library and lane for [FASTQ](#fastq) files, this column is only required when running an analysis from FASTQ       |
 | `filepath`      | Absolute filepath to input file, which can be a local filepath or supported protocol (http, https, ftp, s3, az, gz)                                                 |
 
@@ -600,61 +600,8 @@ _GRCh38 genome (Hartwig): `GRCh38_hmf`_
 
 ## Process selection
 
-It is possible to exclude or include specific processes when running `oncoanalyser`. The full list of processes that can
-be selected is available [here](https://github.com/nf-core/oncoanalyser/blob/2.1.0/lib/Constants.groovy#L32).
-
-### Excluding processes
-
-Most of the major components in `oncoanalyser` can be skipped using the `--processes_exclude` argument. There are
-circumstances where it is desirable to skip resource intensive processes like VIRUSBreakend or where you have no use for
-the outputs from some process such as the ORANGE report. In the example of skipping the VIRUSBreakend and ORANGE
-processes, the `oncoanalyser` command would take the following form:
-
-```bash
-nextflow run nf-core/oncoanalyser \
-  -revision 2.2.0 \
-  -profile docker \
-  --mode wgts \
-  --processes_exclude virusinterpreter,orange \
-  --genome GRCh38_hmf \
-  --input samplesheet.csv \
-  --outdir output/
-```
-
-:::warning
-
-When skipping components no checks are done to identify orphan processes in the execution DAG or for redundant
-processes.
-
-:::
-
-### Manual process selection
-
-The `--processes_manual` argument can be used to enable manual process selection and `--processes_include
-<process_1,process_2>` to configure individual processes to execute. One use case would be to run processes which are
-not run by default, such as neoepitope calling with [NEO](https://github.com/hartwigmedical/hmftools/tree/master/neo).
-To do this, provide the below example samplesheet:
-
-```csv title='samplesheet.manual.csv'
-group_id,subject_id,sample_id,sample_type,sequence_type,filetype,filepath
-PATIENT1,PATIENT1,PATIENT1-N,normal,dna,bam,/path/to/PATIENT1-N.dna.wgs.bam
-PATIENT1,PATIENT1,PATIENT1-T,tumor,dna,bam,/path/to/PATIENT1-T.dna.wgs.bam
-PATIENT1,PATIENT1,PATIENT1-T-RNA,tumor,rna,bam,/path/to/PATIENT1-T.rna.wgs.bam
-```
-
-Then, run `oncoanalyser` with the `neo` process selected as well as all required upstream processes:
-
-```bash
-nextflow run nf-core/oncoanalyser \
-  -revision 2.2.0 \
-  -profile docker \
-  --mode wgts \
-  --processes_manual \
-  --processes_include isofox,redux,amber,cobalt,sage,pave,esvee,purple,linx,lilac,neo \
-  --genome GRCh38_hmf \
-  --input samplesheet.neo_inputs.csv \
-  --outdir output/
-```
+It is possible to exclude or manually select specific processes when running `oncoanalyser`. The full list of processes that can
+be selected is available [here](https://github.com/nf-core/oncoanalyser/blob/2.2.0/lib/Constants.groovy#L53).
 
 :::warning
 
@@ -663,6 +610,38 @@ required processes are selected, `oncoanalyser` will not raise an error but inst
 process running.
 
 :::
+
+### Excluding processes
+
+Most of the major components in `oncoanalyser` can be skipped using the `--processes_exclude` argument. You may want to
+skip resource intensive processes like Virusbreakend, or ORANGE because you do not require the report, for example:
+
+```bash
+nextflow run nf-core/oncoanalyser \
+  -revision 2.2.0 \
+  -profile docker \
+  --mode wgts \
+  --genome GRCh38_hmf \
+  --input samplesheet.csv \
+  --outdir output/ \
+  --processes_exclude virusinterpreter,orange
+```
+
+### Manual process selection
+
+The `--processes_manual` argument can be used to select the exact processes that `onconalyser` will run. For example,
+you may only want to run alignment and SNV/indel, SV and CNV calling from DNA FASTQs, like so:
+
+```bash
+nextflow run nf-core/oncoanalyser \
+  -revision 2.2.0 \
+  -profile docker \
+  --mode wgts \
+  --genome GRCh38_hmf \
+  --input samplesheet.csv \
+  --outdir output/ \
+  --processes_manual alignment,redux,sage,amber,cobalt,esvee,sage,pave,purple
+```
 
 ### Starting from existing inputs
 
@@ -698,19 +677,11 @@ nextflow run nf-core/oncoanalyser \
   -revision 2.2.0 \
   -profile docker \
   --mode wgts \
-  --processes_manual \
-  --processes_include neo \
+  --processes_manual neo \
   --genome GRCh38_hmf \
   --input samplesheet.neo_inputs.csv \
   --outdir output/
 ```
-
-:::warning
-
-Providing existing inputs will cause `oncoanalyser` to skip the corresponding process but none of the upstream
-processes. It is the responsibility of the user to skip all relevant processes.
-
-:::
 
 ## Core Nextflow arguments
 
