@@ -27,11 +27,9 @@ supported [sample setups](#sample-setups):
 
 ## Running the pipeline
 
-:::tip
-
-Jump to [FAQ and troubleshooting](/oncoanalyser/2.2.0/docs/usage/faq_and_troubleshooting)
-
-:::
+If you intend to run `oncoanalyser` on more than one sample, we recommend first [staging](#staging-reference-data) and 
+[configuring](#configuring-reference-data) reference data (genome and tool specific data). Otherwise, reference data is 
+automatically staged every run resulting in unnecessary disk/network usage.
 
 A typical command for running `oncoanalyser` is shown below:
 
@@ -42,21 +40,29 @@ nextflow run nf-core/oncoanalyser \
   --mode wgts \
   --genome GRCh38_hmf \
   --input samplesheet.csv \
-  --outdir output/
+  --outdir output/ \
+  -config reference_data.config # Optional but recommended
 ```
 
 The [samplesheet](#samplesheet) provided to `--input` argument contains input sample details and corresponding files to
 be analysed.
 
-Additionally, various features of `oncoanalyser` can be configured by using a file provided to the `-config` argument.
-This is generally recommended and it can be used to customise a number of settings or resources including:
-
-- Reference genome and tool specific data: it is strongly recommended to [stage](#staging-reference-data) these files.
-  Otherwise, `oncoanalyser` automatically stages them every run resulting in unnecessary disk/network usage
-- Panel normalisation data: all panels except the built-in TSO500 panel require [additional
+The `-config` argument is used to provide configuration files for customising:
+- Genome and tool specific data (as mentioned above)
+- Panel normalisation data. All panels except the built-in TSO500 panel require [additional
   setup](#panel-reference-data) of reference data
-- [Other configuration](#custom-configuration): this may include [compute resources](#compute-resources) or [UMI
-  settings](#umi-processing)
+- [Other configuration](#custom-configuration). This may include e.g. [compute resources](#compute-resources), 
+[executor](#executors) settings for cloud compute, or [UMI settings](#umi-processing)
+
+The `-profile` argument specifies configuration presets for different compute environments 
+(see section [-profile](#-profile)).
+
+:::tip
+
+If you encounter any issues setting up or running `oncoanalyser`, please see
+[FAQ and troubleshooting](/oncoanalyser/2.2.0/docs/usage/faq_and_troubleshooting)
+
+:::
 
 ### Outputs
 
@@ -340,43 +346,46 @@ documentation](https://github.com/hartwigmedical/hmftools/blob/master/pipeline/R
 ### Staging reference data
 
 By default `oncoanalyser` will download the required pre-configured reference data (based on the provided samplesheet
-and CLI arguments) to the Nextflow work directory during every run before proceeding with the analysis. It is therefore
-strongly recommended to first stage and configure reference data to avoid repeated retrieval when performing multiple
-`oncoanalyser` analyses.
+and CLI arguments) to the Nextflow work directory during every run before proceeding with the analysis. 
+
+However, strongly recommended to first stage and configure reference data to avoid repeated retrieval when 
+performing multiple `oncoanalyser` analyses. See the below for instructions.
 
 #### Automatic staging
 
-All reference data required for an analysis can be staged and prepared automatically by `oncoanalyser`. This is done by
-configuring the desired analysis and then including the `--prepare_reference_only` argument, which causes `oncoanalyser`
-to write reference data to the specified output directory without running the full pipeline.
-
-For example the below samplesheet and command for analysing DNA data in `wgts` mode will stage the required `GRCh38_hmf`
-genome (and indexes) and [WiGiTS](https://github.com/hartwigmedical/hmftools) resources files. As this analysis only
-involves WGS data, no reference data files related to RNA or the `panel` mode will be retrieved.
-
-```csv title="samplesheet.tn_dna.csv"
-group_id,subject_id,sample_id,sample_type,sequence_type,filetype,filepath
-PATIENT1,PATIENT1,PATIENT1-N,normal,dna,bam,/path/to/PATIENT1-N.dna.bam
-PATIENT1,PATIENT1,PATIENT1-T,tumor,dna,bam,/path/to/PATIENT1-T.dna.bam
-```
+The reference data required for running `oncoanalyser` can be staged automatically using 
+`--mode prepare_reference` and specifying `--ref_data_types`. The below example command will stage the required 
+`GRCh38_hmf` genome (and indexes) and [WiGiTS](https://github.com/hartwigmedical/hmftools) resources files for WGS 
+analysis from BAM.
 
 ```bash
 nextflow run nf-core/oncoanalyser \
   -revision 2.2.0 \
   -profile docker \
-  --mode wgts \
+  --mode prepare_reference \
+  --ref_data_types wgs \
   --genome GRCh38_hmf \
-  --input samplesheet.csv \
-  --outdir output/ \
-  --prepare_reference_only
+  --outdir output/
 ```
 
-Executing the above command will download and prepare default reference data without running any analysis, and once
-complete the prepared reference files can be found in `./prepare_reference/reference_data/2.2.0/<datetimestamp>/`. You can then provide
-a config file that points to these reference files (see [Configuring reference data](#configuring-reference-data)) which can
-be used for subsequent `oncoanalyser` runs.
+Once the above commands complete, the stated reference data can be found in `<outdir>/reference_data/2.2.0`. You will 
+then need to provide a config file that points to these reference files (see [Configuring reference data](#configuring-reference-data)) 
+which can be used for subsequent `oncoanalyser` runs. The Nextflow work directory can also be removed to free up disk 
+space.
 
-It is recommended to remove the Nextflow work directory once reference data staging is complete to free disk space.
+The below table shows the possible values for `--ref_data_types`. Note that multiple can be provided as comma separated 
+list, e.g. `--ref_data_types wgs,dna_alignment`
+
+| Value                           | Description                                                                               | Combination of                                            |
+|:--------------------------------|:------------------------------------------------------------------------------------------|:----------------------------------------------------------|
+| `wgs`                           | Ref data for WGS analysis from BAM                                                        | `fasta`, `fai`, `dict`, `img`, `hmftools`, `gridss_index` |
+| `wts`                           | Ref data for WTS analysis from BAM                                                        | `fasta`, `fai`, `dict`, `img`, `hmftools`                 |
+| `targeted`                      | Ref data for targeted analysis from BAM                                                   | `fasta`, `fai`, `dict`, `img`, `hmftools`, `panel`        |
+| `bwa_index` or `dna_alignment`  | BWA-MEM2 index. Required if aligning DNA FASTQs                                           |                                                           |
+| `star_index` or `rna_alignment` | STAR index. Required if aligning RNA FASTQs                                               |                                                           |
+| `gridss_index`                  | GRIDSS index. Required if running Virusbreakend/Virusinterpreter                          |                                                           |
+| `hmftools`                      | [WiGiTS](https://github.com/hartwigmedical/hmftools) resources files                      |                                                           |
+| `panel`                         | Panel ref data. Only TSO500 currently supported. Please also specify arg `--panel tso500` |                                                           |
 
 #### Manual staging
 
