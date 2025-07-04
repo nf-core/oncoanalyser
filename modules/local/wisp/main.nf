@@ -19,8 +19,9 @@ process WISP {
     val is_targeted_mode
 
     output:
-    path 'wisp/'       , emit: wisp_dir
-    path 'versions.yml', emit: versions
+    path 'wisp/'            , emit: wisp_dir
+    path 'versions.yml'     , emit: versions
+    path '.command.{sh,log}', emit: command_files
 
     when:
     task.ext.when == null || task.ext.when

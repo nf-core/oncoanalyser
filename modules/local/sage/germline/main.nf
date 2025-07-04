@@ -23,6 +23,7 @@ process SAGE_GERMLINE {
     tuple val(meta), path('germline/*.sage.germline.vcf.gz'), path('germline/*.sage.germline.vcf.gz.tbi'), emit: vcf
     tuple val(meta), path('germline/')                                                                   , emit: sage_dir
     path 'versions.yml'                                                                                  , emit: versions
+    path '.command.{sh,log}'                                                                             , emit: command_files
 
     def run_mode = Utils.getEnumFromString(params.mode, Constants.RunMode)
     def effective_run_mode = run_mode === Constants.RunMode.PURITY_ESTIMATE

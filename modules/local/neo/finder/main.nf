@@ -17,6 +17,7 @@ process NEO_FINDER {
     output:
     tuple val(meta), path('neo_finder/'), emit: neo_finder_dir
     path 'versions.yml'                 , emit: versions
+    path '.command.{sh,log}'            , emit: command_files
 
     when:
     task.ext.when == null || task.ext.when

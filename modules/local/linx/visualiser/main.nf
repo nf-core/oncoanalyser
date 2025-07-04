@@ -15,6 +15,7 @@ process LINX_VISUALISER {
     output:
     tuple val(meta), path('plots/'), emit: plots
     path 'versions.yml'            , emit: versions
+    path '.command.{sh,log}'       , emit: command_files
 
     when:
     task.ext.when == null || task.ext.when
