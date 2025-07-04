@@ -26,6 +26,7 @@ process ESVEE_CALL {
     tuple val(meta), path("esvee/${meta.tumor_id}.esvee.somatic.vcf.gz"),    path("esvee/${meta.tumor_id}.esvee.somatic.vcf.gz.tbi"),    emit: somatic_vcf
     tuple val(meta), path("esvee/${meta.tumor_id}.esvee.germline.vcf.gz"),   path("esvee/${meta.tumor_id}.esvee.germline.vcf.gz.tbi"),   emit: germline_vcf, optional: true
     path 'versions.yml', emit: versions
+    path '.command.{sh,log}', emit: command_files
 
     when:
     task.ext.when == null || task.ext.when

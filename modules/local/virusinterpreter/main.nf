@@ -16,6 +16,7 @@ process VIRUSINTERPRETER {
     output:
     tuple val(meta), path('virusinterpreter/'), emit: virusinterpreter_dir
     path 'versions.yml'                       , emit: versions
+    path '.command.{sh,log}'                  , emit: command_files
 
     when:
     task.ext.when == null || task.ext.when

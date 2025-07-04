@@ -19,6 +19,7 @@ process GATK4_MARKDUPLICATES {
     tuple val(meta), path("*.bai"),     emit: bai,   optional: true
     tuple val(meta), path("*.metrics"), emit: metrics
     path "versions.yml",                emit: versions
+    path '.command.{sh,log}',           emit: command_files
 
     when:
     task.ext.when == null || task.ext.when
