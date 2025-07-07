@@ -128,7 +128,7 @@ The samplesheet contains information in CSV format for each sample to be analyse
 row as the first line with the below columns:
 
 | Column          | Description                                                                                                                                                         |
-| :-------------- |:--------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+|:----------------|:--------------------------------------------------------------------------------------------------------------------------------------------------------------------|
 | `group_id`      | Groups `sample_id` entries (e.g. tumor DNA, normal DNA, tumor RNA for one patient) into the same analysis                                                           |
 | `subject_id`    | Subject/patient identifier, used internally to perform sanity check when processing multiple groups                                                                 |
 | `sample_id`     | Sample identifier                                                                                                                                                   |
@@ -423,115 +423,6 @@ nextflow run nf-core/oncoanalyser \
   <...>
 ```
 
-### Panel reference data
-
-Analysis of panel / targeted sequencing data requires additional panel-specific reference data (e.g. region / gene
-definitions, copy number and transcript normalisation data, known artefacts). This data is included and pre-configured
-for the TSO500 panel, and can be used to analyse TSO500 sequence data by setting `--panel tso500` when running in
-`targeted` mode:
-
-```bash
-nextflow run nf-core/oncoanalyser \
-  -profile docker \
-  -revision 2.2.0 \
-  -config refdata.config \
-  --genome GRCh38_hmf \
-  --mode targeted \
-  --panel tso500 \
-  --input samplesheet.csv \
-  --outdir output/
-```
-
-### Custom panels
-
-For panels other than TSO500, custom panel reference data must first be created using 
-`--mode panel_resource_creation`, which are required to fit and normalise the biases inherent to that specific panel.
-The steps performed in this mode are detailed [here](https://github.com/hartwigmedical/hmftools/blob/master/pipeline/README_TARGETED.md).
-
-First create a samplesheet with a set of samples from your panel sequencing run (the more samples, the better the 
-reference data that's created). The below example samplesheet provides BAM files, but FASTQs can also be provided 
-(see [Samplesheet: FASTQ](#fastq)).
-
-```csv title="samplesheet.panel_resource_creation.csv"
-group_id,subject_id,sample_id,sample_type,sequence_type,filetype,filepath
-PATIENT1,PATIENT1,PATIENT1-T,tumor,dna,bam,/path/to/PATIENT1-T.dna.bam
-PATIENT1,PATIENT1,PATIENT1-T,tumor,dna,bai,/path/to/PATIENT1-T.dna.bam.bai
-PATIENT2,PATIENT2,PATIENT2-T,tumor,dna,bam,/path/to/PATIENT2-T.dna.bam
-PATIENT2,PATIENT2,PATIENT2-T,tumor,dna,bai,/path/to/PATIENT2-T.dna.bam.bai
-```
-
-Then, run `oncoanalyser` with `--mode panel_resource_creation`:
-
-```bash
-nextflow run nf-core/oncoanalyser \
-  -profile docker \
-  -revision 2.2.0 \
-  -config refdata.config \
-  --genome GRCh38_hmf \
-  --mode panel_resource_creation \
-  --input samplesheet.panel_resource_creation.csv \
-  --outdir output/ \
-  \
-  --driver_gene_panel DriverGenePanel.38.tsv \
-  --target_regions_bed target_regions_definition.38.bed.gz \
-  --isofox_gene_ids rna_gene_ids.csv # Optional, only provide if panel supports RNA data
-```
-
-The resulting custom panel reference data paths can then be defined in a configuration file:
-
-```groovy title="panel.config"
-params {
-    ref_data_panel_data_path = "/path/to/my_custom_panel_resources/"
-
-    // These are relative paths within the dir provided by `ref_data_panel_data_path` above
-    panel_data_paths {
-
-        my_custom_panel {  // This is the name that should be passed to the `--panel` argument
-
-            // Genome version: '37' or '38'
-            '38' {
-                driver_gene_panel           = 'DriverGenePanel.38.tsv' // Input file for `--mode panel_resource_creation`
-                
-                // Variants
-                sage_actionable_panel       = 'ActionableCodingPanel.38.bed.gz'
-                sage_coverage_panel         = 'CoverageCodingPanel.my_custom_panel.38.bed.gz'
-                pon_artefacts               = 'pave.somatic_artefacts.38.tsv'
-                
-                // Copy number
-                target_region_bed           = 'target_regions_definition.38.bed.gz' // Input file for `--mode panel_resource_creation`
-                target_region_normalisation = 'cobalt.region_normalisation.38.tsv'
-                target_region_ratios        = [] // Optional. Manually created per panel
-                target_region_msi_indels    = [] // Optional. Manually created per panel
-
-                // RNA. Optional, only provide if panel supports RNA data.
-                isofox_gene_ids             = 'rna_gene_ids.csv' // Input file for `--mode panel_resource_creation`
-                isofox_tpm_norm             = 'isofox.gene_normalisation.38.csv'
-                isofox_counts               = [] // Optional. Get from public resources
-                isofox_gc_ratios            = [] // Optional. Get from public resources 
-            }
-        }
-    }
-}
-```
-
-Lastly, run `oncoanalyser` with `--mode targeted` to analyse your panel sequencing sample. You will also need to:
-- provide the custom panel reference data configuration file to the `-config <file>` argument
-- set the panel name in the `--panel <name>` argument, which must match the name defined in the configuration file (e.g. `my_custom_panel`)
-- set the `--force_panel` argument, which is required when not using the built-in `tso500` panel
-
-```bash
-nextflow run nf-core/oncoanalyser \
-  -revision 2.2.0 \
-  -config panel.config \
-  -profile docker \
-  --genome GRCh38_hmf \
-  --mode targeted \
-  --panel my_custom_panel \
-  --force_panel \
-  --input samplesheet.csv \
-  --outdir output/
-```
-
 ### Custom genomes
 
 It is strongly recommended to use a Hartwig-distributed reference genome for alignments and subsequent analysis
@@ -632,6 +523,135 @@ _GRCh38 genome (Hartwig): `GRCh38_hmf`_
 | STAR index           | [star_index-gencode_38-2.7.3a.tar.gz](https://pub-cf6ba01919994c3cbd354659947f74d8.r2.dev/genomes/GRCh38_hmf/25.1/star_index-gencode_38-2.7.3a.tar.gz)                                                |
 | WiGiTS data          | [hmf_pipeline_resources.38_v2.1.0--1.tar.gz](https://pub-cf6ba01919994c3cbd354659947f74d8.r2.dev/hmf_reference_data/hmftools/hmf_pipeline_resources.38_v2.1.0--1.tar.gz)                              |
 | TSO500 panel data    | [hmf_panel_resources.tso500.38_v2.0.0--3.tar.gz](https://pub-cf6ba01919994c3cbd354659947f74d8.r2.dev/hmf_reference_data/panels/hmf_panel_resources.tso500.38_v2.0.0--3.tar.gz)                        |
+
+## Run modes
+
+### Targeted / panel sequencing: `--mode targeted`
+
+Targeted or panel sequencing samples can be analysed using `--mode targeted`. The TSO500 panel has in-built support by setting
+`--panel tso500`. A typical run command for TSO500 panels would be:
+
+```bash
+nextflow run nf-core/oncoanalyser \
+  -profile docker \
+  -revision 2.2.0 \
+  -config refdata.config \
+  --genome GRCh38_hmf \
+  --mode targeted \
+  --panel tso500 \
+  --input samplesheet.csv \
+  --outdir output/
+```
+
+Panels other than TSO500 require additional arguments, as well as custom reference data to be created. 
+Please see [Custom panels](#custom-panels---mode-panel_resource_creation).
+
+### Custom panels: `--mode panel_resource_creation`
+
+For panels other than TSO500, custom panel reference data files must first be created which fit and normalise the biases inherent to
+that specific panel. 
+
+As summarised in the below table, some of these files need to be manually created, and instructions can be found on the 
+[**WiGiTS targeted analysis readme**](https://github.com/hartwigmedical/hmftools/blob/master/pipeline/README_TARGETED.md). 
+Some of the manually created are also passed to `oncoanalyser` running in `--mode panel_resource_creation` to create the remaining 
+required reference data files (described below).
+
+| Data type | File / config name            | Comment                                                                                                                 |
+|:----------|:------------------------------|:------------------------------------------------------------------------------------------------------------------------|
+| DNA       | `driver_gene_panel`           | Manually created                                                                                                        |
+| DNA       | `target_region_bed`           | Manually created                                                                                                        |
+| DNA       | `target_region_msi_indels`    | Manually created                                                                                                        |
+| DNA       | `target_region_ratios`        | Manually created                                                                                                        |
+| DNA       | `target_region_normalisation` | Output from `--mode panel_resource_creation`                                                                            |
+| DNA       | `pon_artefacts`               | Output from `--mode panel_resource_creation`                                                                            |
+| RNA       | `isofox_gene_ids`             | Manually created                                                                                                        |
+| RNA       | `isofox_tpm_norm`             | Output from `--mode panel_resource_creation`                                                                            |
+| RNA       | `isofox_counts`               | Recommended to use `read_151_exp_counts.<ref_genome_version>.csv` from [WiGiTS reference data](#reference-data-urls)    |
+| RNA       | `isofox_gc_ratios`            | Recommended to use `read_100_exp_gc_ratios.<ref_genome_version>.csv` from [WiGiTS reference data](#reference-data-urls) |
+
+:::note
+
+RNA reference data is only required if your panel supports RNA sequencing data.
+
+:::
+
+Once your manually created files are ready, create a samplesheet with a representative set of panel sequencing samples 
+(**≥20 recommended**). The below example samplesheet provides BAM files, but [FASTQ files](#fastq) can also be provided.
+
+```csv title="samplesheet.panel_resource_creation.csv"
+group_id,subject_id,sample_id,sample_type,sequence_type,filetype,filepath
+PATIENT1,PATIENT1,PATIENT1-T,tumor,dna,bam,/path/to/PATIENT1-T.dna.bam
+PATIENT1,PATIENT1,PATIENT1-T,tumor,dna,bai,/path/to/PATIENT1-T.dna.bam.bai
+PATIENT2,PATIENT2,PATIENT2-T,tumor,dna,bam,/path/to/PATIENT2-T.dna.bam
+PATIENT2,PATIENT2,PATIENT2-T,tumor,dna,bai,/path/to/PATIENT2-T.dna.bam.bai
+```
+
+Then, run `oncoanalyser` with `--mode panel_resource_creation` providing the samplesheet, as well as the relevant manually created files 
+to arguments `--driver_gene_panel`, `--target_regions_bed`, and `--isofox_gene_ids`:
+
+```bash
+nextflow run nf-core/oncoanalyser \
+  -profile docker \
+  -revision 2.2.0 \
+  -config refdata.config \
+  --genome GRCh38_hmf \
+  --mode panel_resource_creation \
+  --input samplesheet.panel_resource_creation.csv \
+  --outdir output/ \
+  \
+  --driver_gene_panel DriverGenePanel.38.tsv \
+  --target_regions_bed target_regions_definition.38.bed.gz \
+  --isofox_gene_ids rna_gene_ids.csv # Optional, only provide if panel supports RNA sequencing data
+```
+
+Place the all the custom panel reference data files in a directory, and define the paths / file names in a configuration file:
+
+```groovy title="panel.config"
+params {
+    ref_data_panel_data_path = "/directory/containing/my_custom_panel_resources/"
+
+    // These are relative paths within the dir provided by `ref_data_panel_data_path` above
+    panel_data_paths {
+
+        my_custom_panel {  // This is the name that should be passed to the `--panel` argument
+
+            // Genome version: '37' or '38'
+            '38' {
+                driver_gene_panel           = 'DriverGenePanel.38.tsv'
+                pon_artefacts               = 'pave.somatic_artefacts.38.tsv'
+                target_region_bed           = 'target_regions_definition.38.bed.gz'
+                target_region_normalisation = 'cobalt.region_normalisation.38.tsv'
+                target_region_ratios        = 'target_regions_ratios.38.tsv'
+                target_region_msi_indels    = 'target_regions_msi_indels.38.tsv'
+
+                // RNA. Optional, only provide if panel supports RNA data.
+                isofox_gene_ids             = 'rna_gene_ids.csv'
+                isofox_tpm_norm             = 'isofox.gene_normalisation.38.csv'
+                isofox_counts               = 'read_151_exp_counts.37.csv'
+                isofox_gc_ratios            = 'read_100_exp_gc_ratios.37.csv' 
+            }
+        }
+    }
+}
+```
+
+Lastly, run `oncoanalyser` with `--mode targeted` to analyse your panel sequencing sample. You will also need to:
+- provide the custom panel reference data configuration file to the `-config <file>` argument
+- set the panel name in the `--panel <name>` argument which the name defined in the configuration file (e.g. `my_custom_panel`)
+- set the `--force_panel` argument
+
+```bash
+nextflow run nf-core/oncoanalyser \
+  -revision 2.2.0 \
+  -config panel.config \
+  -profile docker \
+  --genome GRCh38_hmf \
+  --mode targeted \
+  --panel my_custom_panel \
+  --force_panel \
+  --input samplesheet.csv \
+  --outdir output/
+```
 
 ## Process selection
 
