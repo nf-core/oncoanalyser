@@ -428,7 +428,7 @@ The configuration file can then be supplied to `oncoanalyser` via the `-config <
 ```bash
 nextflow run nf-core/oncoanalyser \
   -revision 2.2.0 \
-  -config refdata.config  \
+  -config reference_data.config  \
   <...>
 ```
 
@@ -526,16 +526,31 @@ _GRCh38 genome (Hartwig): `GRCh38_hmf`_
 
 ## Run modes
 
-### Targeted / panel sequencing: `--mode targeted`
+### Whole genome / transcriptome sequencing (WGTS)
 
-Targeted or panel sequencing samples can be analysed using `--mode targeted`. The TSO500 panel has in-built support by setting
+`--mode wgts` is used for analysing of whole genome (WGS) and/or whole transcriptome (WTS) sequencing data, and can be run like so:
+
+```bash
+nextflow run nf-core/oncoanalyser \
+-profile docker \
+-revision 2.2.0 \
+-config reference_data.config \
+--mode wgts \
+--genome GRCh38_hmf \
+--input samplesheet.csv \
+--outdir output/
+```
+
+### Targeted sequencing
+
+`--mode targeted` is used for analysing targeted or panel sequencing samples. The TSO500 panel has in-built support by setting 
 `--panel tso500`. A typical run command for TSO500 panels would be:
 
 ```bash
 nextflow run nf-core/oncoanalyser \
   -profile docker \
   -revision 2.2.0 \
-  -config refdata.config \
+  -config reference_data.config \
   --genome GRCh38_hmf \
   --mode targeted \
   --panel tso500 \
@@ -544,16 +559,16 @@ nextflow run nf-core/oncoanalyser \
 ```
 
 Panels other than TSO500 require additional arguments, as well as custom reference data to be created. 
-Please see [Custom panels](#custom-panels---mode-panel_resource_creation).
+Please see [Custom panels](#custom-panels).
 
-### Custom panels: `--mode panel_resource_creation`
+### Custom panels
 
-For panels other than TSO500, custom panel reference data files must first be created which fit and normalise the biases inherent to
-that specific panel. 
+For panels other than TSO500, `--mode panel_resource_creation` assists with creating custom panel reference data files, which fit and 
+normalise the biases inherent to that specific panel.
 
-As summarised in the below table, some of these files need to be manually created, and instructions can be found on the 
+As summarised in the below table, some panel reference data files must first be manually created - instructions can be found on the 
 [**WiGiTS targeted analysis readme**](https://github.com/hartwigmedical/hmftools/blob/master/pipeline/README_TARGETED.md). 
-Some of the manually created are also passed to `oncoanalyser` running in `--mode panel_resource_creation` to create the remaining 
+Some these files are then passed to `oncoanalyser` running in `--mode panel_resource_creation` to create the remaining 
 required reference data files (described below).
 
 | Data type | File / config name            | Comment                                                                                                                 |
@@ -593,7 +608,7 @@ to arguments `--driver_gene_panel`, `--target_regions_bed`, and `--isofox_gene_i
 nextflow run nf-core/oncoanalyser \
   -profile docker \
   -revision 2.2.0 \
-  -config refdata.config \
+  -config reference_data.config \
   --genome GRCh38_hmf \
   --mode panel_resource_creation \
   --input samplesheet.panel_resource_creation.csv \
@@ -643,7 +658,8 @@ Lastly, run `oncoanalyser` with `--mode targeted` to analyse your panel sequenci
 ```bash
 nextflow run nf-core/oncoanalyser \
   -revision 2.2.0 \
-  -config panel.config \
+  -config reference_data.config \
+  -config panel_data.config \
   -profile docker \
   --genome GRCh38_hmf \
   --mode targeted \
@@ -652,6 +668,54 @@ nextflow run nf-core/oncoanalyser \
   --input samplesheet.csv \
   --outdir output/
 ```
+
+### Purity estimate
+
+`--mode purity_estimate` uses [WISP](https://github.com/hartwigmedical/hmftools/tree/master/wisp) to estimate the tumor fraction 
+(aka purity) for a longitudinal sample (typically a ctDNA sample) guided by variants identified in a primary sample of the same patient 
+(typically a primary tissue biopsy). This can be used for example for detecting minimal residual disease (MRD).
+
+The primary sample must first have been run in either [**WGTS**](#whole-genome--transcriptome-sequencing-wgts) or 
+[**targeted**](#targeted-sequencing) mode.
+
+A samplesheet with the paths primary and longitudinal sample data is then created. Specifically:
+- The BAM from the longitudinal tumor sample
+- The AMBER and PURPLE directories from the **primary tumor** sample
+- (Optional) The REDUX BAM of the normal sample, if the normal sample was provided in the primary sample run (i.e. was run in tumor/normal mode)
+
+```csv title="samplesheet.purity_estimate.csv"
+group_id,subject_id,sample_id,sample_type,sequence_type,filetype,info,filepath
+PATEINT1,PATIENT1,PATIENT1-L,tumor,dna,bam,longitudinal_sample,/path/to/PATIENT1-T.dna.longitudinal.bam
+PATEINT1,PATIENT1,PATIENT1-T,tumor,dna,amber_dir,,/path/to/PATIENT1-T/amber/
+PATEINT1,PATIENT1,PATIENT1-T,tumor,dna,purple_dir,,/path/to/PATIENT1-T/purple/
+PATIENT1,PATIENT1,PATIENT1-N,tumor,dna,bam_redux,,/path/to/PATIENT1-N.dna.redux.bam
+```
+
+Then run `oncoanalyser` providing `--mode purity_estimate` and `--purity_estimate_mode <wgts|targeted>` (how the **longitudinal sample** 
+was sequenced):
+
+```bash
+nextflow run nf-core/oncoanalyser \
+  -revision 2.2.0 \
+  -profile docker \
+  -config reference_data.config \
+  --genome GRCh38_hmf \
+  --input samplesheet.purity_estimate.csv \
+  --mode purity_estimate \
+  --purity_estimate_mode targeted
+```
+
+:::note
+
+`--purity_estimate_mode` simply sets different arguments for certain tools (e.g. SAGE). When running with `--purity_estimate_mode targeted`,
+you do not need to configure panel ref data paths with as you would with `--mode targeted`.
+
+:::
+
+### Prepare reference data
+
+`--mode prepare_reference` assists with staging all the reference data required to run `oncoanalyser`. 
+Please see: [Staging reference data: Automatic staging](#automatic-staging)
 
 ## Process selection
 
