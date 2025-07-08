@@ -12,7 +12,8 @@ lint:
     - config_defaults:
         - params.fastp_umi_length
         - params.fastp_umi_skip
-nf_core_version: 3.3.1
+  nf_test_content: false
+nf_core_version: 3.3.2
 repository_type: pipeline
 template:
   author: Stephen Watts
@@ -22,4 +23,6 @@ template:
   name: oncoanalyser
   org: nf-core
   outdir: .
-  version: 2.1.0dev
+  skip_features:
+    - nf-test
+  version: 2.1.0
