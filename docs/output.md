@@ -20,6 +20,7 @@ output/
 │   ├── isofox/
 │   ├── lilac/
 │   ├── linx/
+│   ├── logs/
 │   ├── orange/
 │   ├── pave/
 │   ├── peach/
@@ -79,6 +80,7 @@ output/
 - [Report generation](#report-generation)
   - [ORANGE](#orange) - Summary report
   - [linxreport](#linxreport) - Interactive LINX report
+- [Logs](#logs) - Run command and log files per tool/process
 - [Pipeline information](#pipeline-information) - Workflow execution metrics
 
 ### Read alignment
@@ -586,6 +588,20 @@ hmftool components into a single static PDF report.
 </details>
 
 [linxreport](https://github.com/umccr/linxreport) generates an interactive report containing LINX annotations and plots.
+
+### Logs
+
+<details markdown="1">
+<summary>Output files</summary>
+
+- `<group_id>/logs/`
+  - `<group_id>.<process_name>.command.sh`: Run command with tool arguments
+  - `<group_id>.<process_name>.command.out`: Standard output
+  - `<group_id>.<process_name>.command.err`: Standard error
+  - `<group_id>.<process_name>.command.log`: Combined standard output and error (may not exist for some executors)
+</details>
+
+The logs directory stores the `.command.*` files for each tool from the Nextflow work directory
 
 ### Pipeline information
 
