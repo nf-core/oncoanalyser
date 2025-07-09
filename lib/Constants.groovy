@@ -43,7 +43,7 @@ class Constants {
         FAI,
         DICT,
         IMG,
-        BWA_INDEX, DNA_ALIGNMENT,
+        BWAMEM2_INDEX, DNA_ALIGNMENT,
         GRIDSS_INDEX,
         STAR_INDEX, RNA_ALIGNMENT,
         HMFTOOLS,
