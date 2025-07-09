@@ -679,7 +679,7 @@ A samplesheet with the paths to the primary and longitudinal sample data is then
 - (Optional) The REDUX BAM of the normal sample, if the normal sample was provided in the primary sample run (i.e. was run in tumor/normal mode)
 
 ```csv title="samplesheet.purity_estimate.csv"
-echo "group_id,subject_id,sample_id,sample_type,sequence_type,filetype,info,filepath
+group_id,subject_id,sample_id,sample_type,sequence_type,filetype,info,filepath
 PATEINT1,PATIENT1,PATIENT1-L,tumor,dna,bam,longitudinal_sample,/path/to/PATIENT1-T.dna.longitudinal.bam
 PATEINT1,PATIENT1,PATIENT1-T,tumor,dna,amber_dir,,/path/to/PATIENT1-T/amber/
 PATEINT1,PATIENT1,PATIENT1-T,tumor,dna,purple_dir,,/path/to/PATIENT1-T/purple/
