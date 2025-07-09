@@ -10,20 +10,27 @@ The `oncoanalyser` pipeline typically runs from FASTQ, BAM, or CRAM [input files
 most GRCh37 and GRCh38 human [reference genome builds](#custom-genomes), and provides UMI ([unique molecular
 identifier](#umi-processing)) processing for DNA sequencing data.
 
-The pipeline supports two workflow modes: (1) whole genome and/or transcriptome, and (2) targeted panel. Both modes
-accept DNA and RNA sequencing data from matched tumor / normal (with optional
-[donor](#paired-tumor-and-normal-dna-with-donor-sample) sample) and tumor-only samples. The below table shows the
-supported [sample setups](#sample-setups):
+Two main analysis modes are supported by `oncoanalyser`:
+- [**wgts**](#whole-genome--transcriptome-sequencing-wgts): whole genome and/or transcriptome sequening
+- [**targeted**](#targeted-sequencing): targeted/panel sequencing
 
-| Data Type | Tumor DNA          | Normal DNA         | Donor DNA          | Tumor RNA          |
-| --------- | ------------------ | ------------------ | ------------------ | ------------------ |
-| DNA       | :white_check_mark: | -                  | -                  | -                  |
-| DNA       | :white_check_mark: | :white_check_mark: | -                  | -                  |
-| DNA       | :white_check_mark: | :white_check_mark: | :white_check_mark: | -                  |
-| DNA + RNA | :white_check_mark: | -                  | -                  | :white_check_mark: |
-| DNA + RNA | :white_check_mark: | :white_check_mark: | -                  | :white_check_mark: |
-| DNA + RNA | :white_check_mark: | :white_check_mark: | :white_check_mark: | :white_check_mark: |
-| RNA       | -                  | -                  | -                  | :white_check_mark: |
+Both modes accept various combinations of DNA and/or RNA sequencing data from tumor-only or matched tumor / normal (with optional
+[donor](#paired-tumor-and-normal-dna-with-donor-sample) sample). The below table shows the supported [sample setups](#sample-setups):
+
+| DNA samples              | RNA samples |
+|--------------------------|-------------|
+| `tumor`                  | -           |
+| `tumor`+`normal`         | -           |
+| `tumor`+`normal`+`donor` | -           |
+| `tumor`                  | `tumor`     |
+| `tumor`+`normal`         | `tumor`     |
+| `tumor`+`normal`+`donor` | `tumor`     |
+| -                        | `tumor`     |
+
+Besides the main analysis modes, several other modes are also available:
+- [**purity_estimate**](#purity-estimate): tumor fraction estimation in longitudinal samples (e.g. for MRD)
+- [**prepare_reference**](#automatic-staging): staging genomes and WiGiTS tool reference data
+- [**panel_resource_creation**](#custom-panels): creating reference data for custom panels
 
 ## Running the pipeline
 
@@ -44,18 +51,16 @@ nextflow run nf-core/oncoanalyser \
   -config reference_data.config # Optional but recommended
 ```
 
-The [samplesheet](#samplesheet) provided to `--input` argument contains input sample details and corresponding files to
-be analysed.
-
-The `-config` argument is used to provide configuration files for customising:
-- Genome and tool specific data (as mentioned above)
-- Panel normalisation data. All panels except the built-in TSO500 panel require [additional
-  setup](#panel-reference-data) of reference data
-- [Other configuration](#custom-configuration). This may include e.g. [compute resources](#compute-resources), 
-[executor](#executors) settings for cloud compute, or [UMI settings](#umi-processing)
-
-The `-profile` argument specifies configuration presets for different compute environments 
-(see section [-profile](#-profile)).
+Below is a brief description of each argument:
+- `-profile`: [configuration presets](#-profile) for different compute environments
+- `-revision`: `oncoanalyser` version to run (can be a git [tag](https://github.com/nf-core/oncoanalyser/tags), [branch](https://github.com/nf-core/oncoanalyser/branches), or commit ID) 
+- `--mode`: [run mode](#run-modes)
+- `--genome`: genome version, typically `GRCh38_hmf` or `GRCh37_hmf`
+- `--input`: the [samplesheet](#samplesheet) containing sample details and corresponding files to be analysed
+- `--output`: output directory
+- `-config`: one or more configuration files for customising e.g. genome and tool specific data (as mentioned above), 
+normalisation data for [custom panels](#custom-panels) (TSO500 panel supported by default), [compute resources](#compute-resources), or 
+[other configuration](#custom-configuration)
 
 :::tip
 
