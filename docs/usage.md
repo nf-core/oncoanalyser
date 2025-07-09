@@ -11,7 +11,7 @@ most GRCh37 and GRCh38 human [reference genome builds](#custom-genomes), and pro
 identifier](#umi-processing)) processing for DNA sequencing data.
 
 Two main analysis modes are supported by `oncoanalyser`:
-- [**wgts**](#whole-genome--transcriptome-sequencing-wgts): whole genome and/or transcriptome sequening
+- [**wgts**](#whole-genome--transcriptome-sequencing-wgts): whole genome and/or transcriptome sequencing
 - [**targeted**](#targeted-sequencing): targeted/panel sequencing
 
 Both modes accept various combinations of DNA and/or RNA sequencing data from tumor-only or matched tumor / normal (with optional
@@ -563,13 +563,12 @@ Please see [Custom panels](#custom-panels).
 
 ### Custom panels
 
-For panels other than TSO500, `--mode panel_resource_creation` assists with creating custom panel reference data files, which fit and 
+`--mode panel_resource_creation` assists with creating custom panel reference data files (for panels other than TSO500), which fit and 
 normalise the biases inherent to that specific panel.
 
-As summarised in the below table, some panel reference data files must first be manually created - instructions can be found on the 
-[**WiGiTS targeted analysis readme**](https://github.com/hartwigmedical/hmftools/blob/master/pipeline/README_TARGETED.md). 
-Some these files are then passed to `oncoanalyser` running in `--mode panel_resource_creation` to create the remaining 
-required reference data files (described below).
+The below table summarises the required reference data files. Some panel reference data files must first be manually created - instructions 
+can be found on the [**WiGiTS targeted analysis readme**](https://github.com/hartwigmedical/hmftools/blob/master/pipeline/README_TARGETED.md). 
+Some these files are used with `--mode panel_resource_creation` to create the remaining required reference data files.
 
 | Data type | File / config name            | Comment                                                                                                                 |
 |:----------|:------------------------------|:------------------------------------------------------------------------------------------------------------------------|
@@ -652,8 +651,8 @@ params {
 
 Lastly, run `oncoanalyser` with `--mode targeted` to analyse your panel sequencing sample. You will also need to:
 - provide the custom panel reference data configuration file to the `-config <file>` argument
-- set the panel name in the `--panel <name>` argument which the name defined in the configuration file (e.g. `my_custom_panel`)
-- set the `--force_panel` argument
+- set the panel name in the `--panel <name>` argument as defined in the configuration file (e.g. `my_custom_panel`)
+- set the `--force_panel` argument to enable non-built-in panels
 
 ```bash
 nextflow run nf-core/oncoanalyser \
@@ -678,7 +677,7 @@ nextflow run nf-core/oncoanalyser \
 The primary sample must first have been run in either [**WGTS**](#whole-genome--transcriptome-sequencing-wgts) or 
 [**targeted**](#targeted-sequencing) mode.
 
-A samplesheet with the paths primary and longitudinal sample data is then created. Specifically:
+A samplesheet with the paths to the primary and longitudinal sample data is then created. Specifically:
 - The BAM from the longitudinal tumor sample
 - The AMBER and PURPLE directories from the **primary tumor** sample
 - (Optional) The REDUX BAM of the normal sample, if the normal sample was provided in the primary sample run (i.e. was run in tumor/normal mode)
