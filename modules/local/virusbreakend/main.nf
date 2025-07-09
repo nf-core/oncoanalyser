@@ -20,7 +20,7 @@ process VIRUSBREAKEND {
     tuple val(meta), path("*.summary.tsv"), emit: tsv
     path "*.virusbreakend.vcf"            , emit: vcf
     path 'versions.yml'                   , emit: versions
-    path '.command.{sh,log}'              , emit: command_files
+    path '.command.*'                     , emit: command_files
 
     when:
     task.ext.when == null || task.ext.when

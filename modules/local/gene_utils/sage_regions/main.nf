@@ -15,7 +15,7 @@ process GENE_UTILS_SAGE_REGIONS {
     path 'ActionableCodingPanel.*.bed.gz'
     path 'CoverageCodingPanel.*.bed.gz'
     path 'versions.yml'                  , emit: versions
-    path '.command.{sh,log}'             , emit: command_files
+    path '.command.*'                    , emit: command_files
 
     when:
     task.ext.when == null || task.ext.when
