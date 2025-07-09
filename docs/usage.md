@@ -667,9 +667,9 @@ nextflow run nf-core/oncoanalyser \
 
 ### Purity estimate
 
-`--mode purity_estimate` estimates the tumor fraction (aka purity) for a longitudinal sample (typically a ctDNA sample) guided by variants 
-identified in a primary sample of the same patient (typically a primary tissue biopsy). This can be used for example for detecting minimal 
-residual disease (MRD).
+`--mode purity_estimate` uses [WISP](https://github.com/hartwigmedical/hmftools/tree/master/wisp) to estimate the tumor fraction 
+(aka purity) for a longitudinal sample (typically a ctDNA sample) guided by variants identified in a primary sample of the same patient 
+(typically a primary tissue biopsy). This can be used for example for detecting minimal residual disease (MRD).
 
 The primary sample must first have been run in either [**WGTS**](#whole-genome--transcriptome-sequencing-wgts) or 
 [**targeted**](#targeted-sequencing) mode.
