@@ -37,17 +37,15 @@ class Constants {
         WGS,
         WTS,
         TARGETED,
-        DNA_ALIGNMENT,
-        RNA_ALIGNMENT,
 
         // Individual types
         FASTA,
         FAI,
         DICT,
         IMG,
-        BWA_INDEX,
+        BWAMEM2_INDEX, DNA_ALIGNMENT,
         GRIDSS_INDEX,
-        STAR_INDEX,
+        STAR_INDEX, RNA_ALIGNMENT,
         HMFTOOLS,
         PANEL,
     }

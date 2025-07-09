@@ -84,7 +84,7 @@ workflow PREPARE_REFERENCE {
     // Set bwa-mem2 index, unpack or create if required
     //
     ch_genome_bwamem2_index = Channel.empty()
-    if (prep_config.require_bwa_index) {
+    if (prep_config.require_bwamem2_index) {
 
         if (!params.ref_data_genome_bwamem2_index) {
 

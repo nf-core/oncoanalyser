@@ -42,7 +42,7 @@ supports a wide range of experimental setups:
 
 ## Pipeline overview
 
-<p align="center"><img src="docs/images/oncoanalyser_pipeline.png"></p>
+<p align="center"><img width="1000" src="docs/images/oncoanalyser_pipeline.png"></p>
 
 The pipeline mainly uses tools from [WiGiTS](https://github.com/hartwigmedical/hmftools), as well as some external
 tools. Due to the limitations of panel data, certain tools (indicated with `*` below) do not run in `targeted` mode.
@@ -82,7 +82,7 @@ Launch `oncoanalyser`:
 ```bash
 nextflow run nf-core/oncoanalyser \
   -profile <docker/singularity/.../institute> \
-  -revision 2.1.0 \
+  -revision 2.2.0 \
   --mode <wgts/targeted> \
   --genome <GRCh37_hmf/GRCh38_hmf> \
   --input samplesheet.csv \
