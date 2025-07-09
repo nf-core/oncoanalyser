@@ -376,16 +376,16 @@ space.
 The below table shows the possible values for `--ref_data_types`. Note that multiple can be provided as comma separated 
 list, e.g. `--ref_data_types wgs,dna_alignment`
 
-| Value                           | Description                                                                               | Combination of                                            |
-|:--------------------------------|:------------------------------------------------------------------------------------------|:----------------------------------------------------------|
-| `wgs`                           | Ref data for WGS analysis from BAM                                                        | `fasta`, `fai`, `dict`, `img`, `hmftools`, `gridss_index` |
-| `wts`                           | Ref data for WTS analysis from BAM                                                        | `fasta`, `fai`, `dict`, `img`, `hmftools`                 |
-| `targeted`                      | Ref data for targeted analysis from BAM                                                   | `fasta`, `fai`, `dict`, `img`, `hmftools`, `panel`        |
-| `bwa_index` or `dna_alignment`  | BWA-MEM2 index. Required if aligning DNA FASTQs                                           |                                                           |
-| `star_index` or `rna_alignment` | STAR index. Required if aligning RNA FASTQs                                               |                                                           |
-| `gridss_index`                  | GRIDSS index. Required if running Virusbreakend/Virusinterpreter                          |                                                           |
-| `hmftools`                      | [WiGiTS](https://github.com/hartwigmedical/hmftools) resources files                      |                                                           |
-| `panel`                         | Panel ref data. Only TSO500 currently supported. Please also specify arg `--panel tso500` |                                                           |
+| Value                              | Description                                                                               | Combination of                                            |
+|:-----------------------------------|:------------------------------------------------------------------------------------------|:----------------------------------------------------------|
+| `wgs`                              | Ref data for WGS analysis from BAM                                                        | `fasta`, `fai`, `dict`, `img`, `hmftools`, `gridss_index` |
+| `wts`                              | Ref data for WTS analysis from BAM                                                        | `fasta`, `fai`, `dict`, `img`, `hmftools`                 |
+| `targeted`                         | Ref data for targeted analysis from BAM                                                   | `fasta`, `fai`, `dict`, `img`, `hmftools`, `panel`        |
+| `bwamem2_index` or `dna_alignment` | BWA-MEM2 index. Required if aligning DNA FASTQs                                           |                                                           |
+| `star_index` or `rna_alignment`    | STAR index. Required if aligning RNA FASTQs                                               |                                                           |
+| `gridss_index`                     | GRIDSS index. Required if running Virusbreakend/Virusinterpreter                          |                                                           |
+| `hmftools`                         | [WiGiTS](https://github.com/hartwigmedical/hmftools) resources files                      |                                                           |
+| `panel`                            | Panel ref data. Only TSO500 currently supported. Please also specify arg `--panel tso500` |                                                           |
 
 #### Manual staging
 
@@ -528,38 +528,29 @@ params {
 }
 ```
 
-Each index required for the analysis will first be created before running the rest of `oncoanalyser` with the following
-command:
-
-:::tip
-
-In a process similar to [staging reference data](#automatic-staging), you can first generate the required indexes by
-setting `--prepare_reference_only` and then provide the prepared reference files to `oncoanalyser` through a custom
-config file. This avoids having to regenerate indexes for each new analysis.
-
-:::
+Each index can then be created in by using `--mode prepare_reference` and `--ref_data_types` 
+(see section [staging reference data](#automatic-staging)). The below example command would create the indexes for WGS analysis:
 
 ```bash
 nextflow run nf-core/oncoanalyser \
   -revision 2.2.0 \
   -profile docker \
   -config genome.custom.config \
-  --mode wgts \
+  --mode prepare_reference \
+  --ref_data_types wgs,bwamem2_index,gridss_index
   --genome CustomGenome \
   --genome_version <37|38> \
   --genome_type <alt|no_alt> \
   --force_genome \
-  --input samplesheet.csv \
   --outdir output/
 ```
 
-Creation of a STAR index also requires transcript annotations, please provide either of the following GTF files via the
-`--ref_data_genome_gtf` option after decompressing:
+If aligning FASTQs from RNA seq data for WTS analysis, you should also provide `star_index` to `--ref_data_types`. Creating the 
+STAR index also requires transcript annotations; please provide either of the following GTF files via the `--ref_data_genome_gtf` option 
+after decompressing:
 
-- GRCh37: [GENCODE v37 (Ensembl v74)
-  annotations](https://ftp.ebi.ac.uk/pub/databases/gencode/Gencode_human/release_19/gencode.v19.annotation.gtf.gz)
-- GRCh38: [GENCODE v38 (Ensembl v104)
-  annotations](https://ftp.ebi.ac.uk/pub/databases/gencode/Gencode_human/release_38/gencode.v38.annotation.gtf.gz)
+- GRCh37: [GENCODE v37 (Ensembl v74) annotations](https://ftp.ebi.ac.uk/pub/databases/gencode/Gencode_human/release_19/gencode.v19.annotation.gtf.gz)
+- GRCh38: [GENCODE v38 (Ensembl v104) annotations](https://ftp.ebi.ac.uk/pub/databases/gencode/Gencode_human/release_38/gencode.v38.annotation.gtf.gz)
 
 :::warning
 
