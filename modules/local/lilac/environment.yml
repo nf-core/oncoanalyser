@@ -1,0 +1,7 @@
+name: lilac
+channels:
+  - conda-forge
+  - bioconda
+  - defaults
+dependencies:
+  - bioconda::hmftools-lilac=1.6

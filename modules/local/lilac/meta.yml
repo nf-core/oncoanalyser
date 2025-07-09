@@ -1,0 +1,74 @@
+name: lilac
+description: Type HLA alleles and call somatic structural variants
+keywords:
+  - hla
+  - typing
+  - sv
+tools:
+  - lilac:
+      description: Performs HLA typing and calls somatic structural variants
+      homepage: https://github.com/hartwigmedical/hmftools/tree/master/lilac
+      documentation: https://github.com/hartwigmedical/hmftools/tree/master/lilac
+      licence: ["GPL v3"]
+input:
+  - meta:
+      type: map
+      description: |
+        Groovy Map containing sample information
+        e.g. [id: 'sample_id', tumor_id: 'tumor_name', normal_id: 'normal_name']
+  - normal_dna_bam:
+      type: file
+      description: Normal DNA BAM file (optional)
+      pattern: "*.{bam}"
+  - normal_dna_bai:
+      type: file
+      description: Normal DNA BAI file (optional)
+      pattern: "*.{bai}"
+  - tumor_dna_bam:
+      type: file
+      description: Normal DNA BAM file (optional)
+      pattern: "*.{bam}"
+  - tumor_dna_bai:
+      type: file
+      description: Tumor DNA BAI file (optional)
+      pattern: "*.{bai}"
+  - tumor_rna_bam:
+      type: file
+      description: Normal RNA BAM file (optional)
+      pattern: "*.{bam}"
+  - tumor_rna_bai:
+      type: file
+      description: Tumor RNA BAI file (optional)
+      pattern: "*.{bai}"
+  - purple_dir:
+      type: directory
+      description: PURPLE output directory (optional)
+  - genome_fasta:
+      type: file
+      description: Reference genome assembly FASTA file
+      pattern: "*.{fa,fasta}"
+  - genome_fai:
+      type: file
+      description: Reference genome assembly fai file
+      pattern: "*.{fai}"
+  - genome_ver:
+      type: string
+      description: Reference genome version
+  - lilac_resources:
+      type: directory
+      description: LILAC resources directory
+output:
+  - meta:
+      type: map
+      description: |
+        Groovy Map containing sample information
+        e.g. [id: 'sample_id', tumor_id: 'tumor_name', normal_id: 'normal_name']
+  - lilac_dir:
+      type: file
+      description: LILAC output directory
+  - versions:
+      type: file
+      description: File containing software versions
+      pattern: "versions.yml"
+authors:
+  - "@scwatts"

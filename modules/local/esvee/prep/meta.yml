@@ -1,0 +1,72 @@
+name: esvee_prep
+description: Select reads associated with SV events
+keywords:
+  - filtering
+  - reads
+  - sv
+tools:
+  - esvee:
+      description: Structural variant (SV) calling
+      homepage: https://github.com/hartwigmedical/hmftools/tree/master/esvee
+      documentation: https://github.com/hartwigmedical/hmftools/tree/master/esvee
+      licence: ["GPL >=3"]
+input:
+  - meta:
+      type: map
+      description: |
+        Groovy Map containing sample information
+        e.g. [id: 'sample_id']
+  - tumor_bam:
+      type: file
+      description: Tumor BAM file
+      pattern: "*.{bam}"
+  - tumor_bai:
+      type: file
+      description: Tumor BAI file
+      pattern: "*.{bai}"
+  - normal_bam:
+      type: file
+      description: Normal BAM file
+      pattern: "*.{bam}"
+  - normal_bai:
+      type: file
+      description: Normal BAI file
+      pattern: "*.{bai}"
+  - genome_fasta:
+      type: file
+      description: Reference genome assembly FASTA file
+      pattern: "*.{fa,fasta}"
+  - genome_ver:
+      type: string
+      description: Reference genome version
+  - sv_blocklist:
+      type: file
+      description: SV Prep blocklist file
+      pattern: "*.{bed}"
+  - known_fusions:
+      type: file
+      description: Known fusions file
+      pattern: "*.{bedpe}"
+output:
+  - meta:
+      type: map
+      description: |
+        Groovy Map containing sample information
+        e.g. [id: 'sample_id']
+  - prep_dir:
+      type: directory
+      description: ESVEE prep output directory
+  - tumor_prep_bam:
+      type: list
+      description: Tumor prep BAM and BAI file
+      pattern: "*.{bam,bam.bai}"
+  - normal_prep_bam:
+      type: list
+      description: Normal prep BAM and BAI file (optional)
+      pattern: "*.{bam,bam.bai}"
+  - versions:
+      type: file
+      description: File containing software versions
+      pattern: "versions.yml"
+authors:
+  - "@scwatts"

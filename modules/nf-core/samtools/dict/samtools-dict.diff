@@ -1,0 +1,82 @@
+Changes in module 'nf-core/samtools/dict'
+'modules/nf-core/samtools/dict/environment.yml' is unchanged
+Changes in 'samtools/dict/meta.yml':
+--- modules/nf-core/samtools/dict/meta.yml
++++ modules/nf-core/samtools/dict/meta.yml
+@@ -16,31 +16,19 @@
+       licence: ["MIT"]
+       identifier: biotools:samtools
+ input:
+-  - - meta:
+-        type: map
+-        description: |
+-          Groovy Map containing sample information
+-          e.g. [ id:'test', single_end:false ]
+-    - fasta:
+-        type: file
+-        description: FASTA file
+-        pattern: "*.{fa,fasta}"
++  - fasta:
++      type: file
++      description: FASTA file
++      pattern: "*.{fa,fasta}"
+ output:
+   - dict:
+-      - meta:
+-          type: map
+-          description: |
+-            Groovy Map containing sample information
+-            e.g. [ id:'test', single_end:false ]
+-      - "*.dict":
+-          type: file
+-          description: FASTA dictionary file
+-          pattern: "*.{dict}"
++      type: file
++      description: FASTA dictionary file
++      pattern: "*.{dict}"
+   - versions:
+-      - versions.yml:
+-          type: file
+-          description: File containing software versions
+-          pattern: "versions.yml"
++      type: file
++      description: File containing software versions
++      pattern: "versions.yml"
+ authors:
+   - "@muffato"
+ maintainers:
+
+Changes in 'samtools/dict/main.nf':
+--- modules/nf-core/samtools/dict/main.nf
++++ modules/nf-core/samtools/dict/main.nf
+@@ -8,11 +8,11 @@
+         'biocontainers/samtools:1.21--h50ea8bc_0' }"
+ 
+     input:
+-    tuple val(meta), path(fasta)
++    path fasta
+ 
+     output:
+-    tuple val(meta), path ("*.dict"), emit: dict
+-    path "versions.yml"             , emit: versions
++    path "*.dict"      , emit: dict
++    path "versions.yml", emit: versions
+ 
+     when:
+     task.ext.when == null || task.ext.when
+@@ -35,10 +35,7 @@
+     stub:
+     """
+     touch ${fasta}.dict
+-    cat <<-END_VERSIONS > versions.yml
+ 
+-    "${task.process}":
+-        samtools: \$(echo \$(samtools --version 2>&1) | sed 's/^.*samtools //; s/Using.*\$//')
+-    END_VERSIONS
++    echo -e '${task.process}:\\n  stub: noversions\\n' > versions.yml
+     """
+ }
+
+'modules/nf-core/samtools/dict/tests/main.nf.test.snap' is unchanged
+'modules/nf-core/samtools/dict/tests/main.nf.test' is unchanged
+************************************************************

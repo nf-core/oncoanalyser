@@ -1,0 +1,91 @@
+name: sage_germline
+description: A precise and highly sensitive somatic SNV, MNV and small INDEL caller
+keywords:
+  - germline
+  - variant caller
+  - snv
+  - mnv
+tools:
+  - sage:
+      description: A precise and highly sensitive somatic SNV, MNV and small INDEL caller.
+      homepage: https://github.com/hartwigmedical/hmftools/tree/master/sage
+      documentation: https://github.com/hartwigmedical/hmftools/tree/master/sage
+      licence: ["GPL v3"]
+input:
+  - meta:
+      type: map
+      description: |
+        Groovy Map containing sample informatio
+        e.g. [id: 'sample_id', tumor_id: 'tumor_name', normal_id: 'normal_name']
+  - tumor_bam:
+      type: file
+      description: Tumor BAM file
+      pattern: "*.{bam}"
+  - normal_bam:
+      type: file
+      description: Normal BAM file
+      pattern: "*.{bam}"
+  - tumor_bai:
+      type: file
+      description: Tumor BAI file
+      pattern: "*.{bai}"
+  - normal_bai:
+      type: file
+      description: Normal BAI file
+      pattern: "*.{tsv,tsv.gz}"
+  - redux_tsvs:
+      type: list
+      description: REDUX MS files
+  - genome_fasta:
+      type: file
+      description: Reference genome assembly FASTA file
+      pattern: "*.{fa,fasta}"
+  - genome_ver:
+      type: string
+      description: Reference genome version
+  - genome_fai:
+      type: file
+      description: Reference genome assembly fai file
+      pattern: "*.{fai}"
+  - genome_dict:
+      type: file
+      description: Reference genome assembly dict file
+      pattern: "*.{dict}"
+  - sage_known_hotspots_germline:
+      type: file
+      description: SAGE germline known hotspots file
+      pattern: "*.{vcf.gz}"
+  - sage_actionable_panel:
+      type: file
+      description: SAGE actionable panel file
+      pattern: "*.{bed.gz}"
+  - sage_coverage_panel:
+      type: file
+      description: SAGE coverage gene panel file
+      pattern: "*.{bed.gz}"
+  - sage_highconf_regions:
+      type: file
+      description: SAGE high confidence regions file
+      pattern: "*.{bed.gz}"
+  - ensembl_data_resources:
+      type: directory
+      description: HMF ensembl data resources directory
+output:
+  - meta:
+      type: map
+      description: |
+        Groovy Map containing sample information
+        e.g. [id: 'sample_id', tumor_id: 'tumor_name', normal_id: 'normal_name']
+  - vcf:
+      type: file
+      description: VCF file
+      pattern: "*.{vcf.gz}"
+  - sage_dir:
+      type: directory
+      description: SAGE output directory
+  - versions:
+      type: file
+      description: File containing software versions
+      pattern: "versions.yml"
+authors:
+  - "@scwatts"

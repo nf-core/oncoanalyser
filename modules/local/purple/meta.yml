@@ -1,0 +1,115 @@
+name: purple
+description: Estimate purity and ploidy from WGS data
+keywords:
+  - variant caller
+  - ploidy
+  - purity
+  - cnv
+  - sv
+tools:
+  - purple:
+      description: Estimates purity and ploidy from WGS data
+      homepage: https://github.com/hartwigmedical/hmftools/tree/master/purple
+      documentation: https://github.com/hartwigmedical/hmftools/tree/master/purple
+      licence: ["GPL v3"]
+input:
+  - meta:
+      type: map
+      description: |
+        Groovy Map containing sample information
+        e.g. [id: 'sample_id', tumor_id: 'tumor_name', normal_id: 'normal_name']
+  - amber_dir:
+      type: directory
+      description: AMBER output directory
+  - cobalt_dir:
+      type: directory
+      description: COBALT output directory
+  - sv_tumor_vcf:
+      type: file
+      description: GRIPSS somatic VCF file (optional)
+      pattern: "*.{vcf.gz}"
+  - sv_tumor_tbi:
+      type: file
+      description: GRIPSS somatic VCF index file (optional)
+      pattern: "*.{vcf.gz.tbi}"
+  - sv_normal_vcf:
+      type: file
+      description: GRIPSS germline VCF file (optional)
+      pattern: "*.{vcf.gz}"
+  - sv_normal_tbi:
+      type: file
+      description: GRIPSS germline VCF index file (optional)
+      pattern: "*.{vcf.gz.tbi}"
+  - smlv_tumor_vcf:
+      type: file
+      description: Small variant tumor VCF file (optional)
+      pattern: "*.{vcf.gz}"
+  - smlv_normal_vcf:
+      type: file
+      description: Small variant normal VCF file (optional)
+      pattern: "*.{vcf.gz}"
+  - genome_fasta:
+      type: file
+      description: Reference genome assembly FASTA file
+      pattern: "*.{fa,fasta}"
+  - genome_ver:
+      type: string
+      description: Reference genome version
+  - genome_fai:
+      type: file
+      description: Reference genome assembly fai file
+      pattern: "*.{fai}"
+  - genome_dict:
+      type: file
+      description: Reference genome assembly dict file
+      pattern: "*.{dict}"
+  - gc_profile:
+      type: file
+      description: GC profile file
+      pattern: "*.{cnp}"
+  - sage_known_hotspots_somatic:
+      type: file
+      description: SAGE somatic known hotspots file
+      pattern: "*.{vcf.gz}"
+  - sage_known_hotspots_germline:
+      type: file
+      description: SAGE germline known hotspots file
+      pattern: "*.{vcf.gz}"
+  - driver_gene_panel:
+      type: file
+      description: Driver gene panel file
+      pattern: "*.{tsv}"
+  - ensembl_data_resources:
+      type: directory
+      description: HMF ensembl data resources directory
+  - germline_del:
+      type: file
+      description: Cohort frequency for germline deletions (optional)
+      pattern: "*.{csv}"
+  - target_region_bed:
+      type: file
+      description: Target regions BED file (optional)
+      pattern: "*.{bed}"
+  - target_regions_ratios:
+      type: file
+      description: Target regions ratios file (optional)
+      pattern: "*.{tsv}"
+  - target_regions_msi_indels:
+      type: file
+      description: Target regions MSI/INDELS file (optional)
+      pattern: "*.{tsv}"
+output:
+  - meta:
+      type: map
+      description: |
+        Groovy Map containing sample information
+        e.g. [id: 'sample_id', tumor_id: 'tumor_name', normal_id: 'normal_name']
+  - purple_dir:
+      type: directory
+      description: PURPLE output directory
+  - versions:
+      type: file
+      description: File containing software versions
+      pattern: "versions.yml"
+authors:
+  - "@scwatts"

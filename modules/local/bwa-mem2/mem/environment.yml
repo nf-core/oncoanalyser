@@ -1,0 +1,9 @@
+name: bwa-mem2_mem
+channels:
+  - conda-forge
+  - bioconda
+  - defaults
+dependencies:
+  - bioconda::hmftools-bwa-plus=1.0.0
+  - bioconda::samtools=1.21
+  - bioconda::sambamba=1.0.1

@@ -1,0 +1,7 @@
+name: cuppa
+channels:
+  - conda-forge
+  - bioconda
+  - defaults
+dependencies:
+  - bioconda::hmftools-cuppa=2.3.2

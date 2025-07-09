@@ -1,0 +1,49 @@
+name: peach
+description: Infer haplotypes for interpretation in a pharmacogenomic context
+keywords:
+  - pharmacogenomics
+  - haplotypes
+  - germline
+tools:
+  - peach:
+      description: Infer haplotypes for interpretation in a pharmacogenomic context
+      homepage: https://github.com/hartwigmedical/hmftools/tree/master/peach
+      documentation: https://github.com/hartwigmedical/hmftools/tree/master/peach
+      licence: ["GPL v3"]
+input:
+  - meta:
+      type: map
+      description: |
+        Groovy Map containing sample information
+        e.g. [id: 'sample_id', tumor_id: 'tumor_name', normal_id: 'normal_name']
+  - germline_vcf:
+      type: file
+      description: PURPLE germline small variant VCF file
+      pattern: "*.{vcf.gz}"
+  - haplotypes:
+      type: file
+      description: PEACH haplotypes file
+      pattern: "*.{tsv}"
+  - haplotype_functions:
+      type: file
+      description: PEACH haplotype functions file
+      pattern: "*.{tsv}"
+  - drug_info:
+      type: file
+      description: PEACH drug info file
+      pattern: "*.{tsv}"
+output:
+  - meta:
+      type: map
+      description: |
+        Groovy Map containing sample information
+        e.g. [id: 'sample_id', tumor_id: 'tumor_name', normal_id: 'normal_name']
+  - peach_dir:
+      type: directory
+      description: PEACH output directory
+  - versions:
+      type: file
+      description: File containing software versions
+      pattern: "versions.yml"
+authors:
+  - "@scwatts"

@@ -1,0 +1,46 @@
+name: star_align
+description: An ultrafast universal RNA-seq aligner
+keywords:
+  - rna-seq
+  - rna
+  - aligner
+  - star
+tools:
+  - star:
+      description: An ultrafast universal RNA-seq aligner
+      homepage: https://github.com/alexdobin/STAR
+      documentation: https://github.com/alexdobin/STAR/blob/master/doc/STARmanual.pdf
+      licence: ["MIT"]
+input:
+  - meta:
+      type: map
+      description: |
+        Groovy Map containing sample information
+        e.g. [id: 'sample_id', tumor_id: 'tumor_name', normal_id: 'normal_name']
+  - reads_fwd:
+      type: file
+      description: Forward reads FASTQ file
+      pattern: "*.{fastq.gz}"
+  - reads_rev:
+      type: file
+      description: Reverse reads FASTQ file
+      pattern: "*.{fastq.gz}"
+  - genome_star_index:
+      type: directory
+      description: STAR index directory
+output:
+  - meta:
+      type: map
+      description: |
+        Groovy Map containing sample information
+        e.g. [id: 'sample_id', tumor_id: 'tumor_name', normal_id: 'normal_name']
+  - bam:
+      type: file
+      description: BAM file
+      pattern: "*.{bam}"
+  - versions:
+      type: file
+      description: File containing software versions
+      pattern: "versions.yml"
+authors:
+  - "@scwatts"

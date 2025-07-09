@@ -1,0 +1,7 @@
+name: sage_append
+channels:
+  - conda-forge
+  - bioconda
+  - defaults
+dependencies:
+  - bioconda::hmftools-sage=4.0

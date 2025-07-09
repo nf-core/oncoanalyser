@@ -7,27 +7,35 @@
     "items": {
         "type": "object",
         "properties": {
-            "sample": {
+            "group_id": {
                 "type": "string",
                 "pattern": "^\\S+$",
-                "errorMessage": "Sample name must be provided and cannot contain spaces",
-                "meta": ["id"]
+                "errorMessage": "group_id must be provided and cannot contain spaces"
             },
-            "fastq_1": {
-                "type": "string",
-                "format": "file-path",
-                "exists": true,
-                "pattern": "^([\\S\\s]*\\/)?[^\\s\\/]+\\.f(ast)?q\\.gz$",
-                "errorMessage": "FastQ file for reads 1 must be provided, cannot contain spaces and must have extension '.fq.gz' or '.fastq.gz'"
+            "subject_id": {
+                "pattern": "^\\S+$",
+                "errorMessage": "subject_id must be provided and cannot contain spaces"
             },
-            "fastq_2": {
-                "type": "string",
-                "format": "file-path",
-                "exists": true,
-                "pattern": "^([\\S\\s]*\\/)?[^\\s\\/]+\\.f(ast)?q\\.gz$",
-                "errorMessage": "FastQ file for reads 2 cannot contain spaces and must have extension '.fq.gz' or '.fastq.gz'"
+            "sample_id": {
+                "pattern": "^\\S+$",
+                "errorMessage": "subject_id must be provided and cannot contain spaces"
+            },
+            "sample_type": {
+                "pattern": "^\\S+$",
+                "errorMessage": "sample_type must be provided and cannot contain spaces"
+            },
+            "sequence_type": {
+                "pattern": "^\\S+$",
+                "errorMessage": "sequence_type must be provided and cannot contain spaces"
+            },
+            "filetype": {
+                "pattern": "^\\S+$",
+                "errorMessage": "filetype must be provided and cannot contain spaces"
+            },
+            "filepath": {
+                "pattern": "^\\S+$",
+                "errorMessage": "filepath must be provided and cannot contain spaces"
             }
-        },
-        "required": ["sample", "fastq_1"]
+        }
     }
 }

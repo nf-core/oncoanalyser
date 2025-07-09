@@ -1,0 +1,52 @@
+name: neo_finder
+description: Identify candidate neoeptitops
+keywords:
+  - neoepitopes
+tools:
+  - neo:
+      description: Predict and score neoepitopes
+      homepage: https://github.com/hartwigmedical/hmftools/tree/master/neo
+      documentation: https://github.com/hartwigmedical/hmftools/tree/master/neo
+      licence: ["GPL v3"]
+input:
+  - meta:
+      type: map
+      description: |
+        Groovy Map containing sample information
+        e.g. [id: 'sample_id']
+  - purple_dir:
+      type: directory
+      description: PURPLE output directory
+  - linx_annotation_dir:
+      type: directory
+      description: LINX somatic annotation output directory
+  - genome_fasta:
+      type: file
+      description: Reference genome assembly FASTA file
+      pattern: "*.{fa,fasta}"
+  - genome_ver:
+      type: string
+      description: Reference genome version
+  - genome_fai:
+      type: file
+      description: Reference genome assembly fai file
+      pattern: "*.{fai}"
+  - ensembl_data_resources:
+      type: directory
+      description: HMF ensembl data resources directory
+output:
+  - meta:
+      type: map
+      description: |
+        Groovy Map containing sample information
+        e.g. [id: 'sample_id']
+  - neo_finder_dir:
+      type: directory
+      description: Neo Finder output directory
+  - versions:
+      type: file
+      description: File containing software versions
+      pattern: "versions.yml"
+authors:
+  - "@scwatts"
+  - "@charlesshale"

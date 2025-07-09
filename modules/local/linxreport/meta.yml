@@ -1,0 +1,41 @@
+name: linxreport
+description: LINX result reporter
+keywords:
+  - report
+  - linx
+  - sv
+  - cnv
+tools:
+  - linxreport:
+      description: LINX result reporter
+      homepage: https://github.com/umccr/linxreport
+      documentation: https://github.com/umccr/linxreport
+      licence: ["MIT"]
+input:
+  - meta:
+      type: map
+      description: |
+        Groovy Map containing sample information
+        e.g. [id: 'sample_id']
+  - linx_annotation_dir:
+      type: directory
+      description: Somatic LINX annotation output directory
+  - linx_visualiser_dir:
+      type: directory
+      description: Somatic LINX visualiser output directory
+output:
+  - meta:
+      type: map
+      description: |
+        Groovy Map containing sample information
+        e.g. [id: 'sample_id']
+  - html:
+      type: file
+      description: gpgr LINX report file
+      pattern: "*.{html}"
+  - versions:
+      type: file
+      description: File containing software versions
+      pattern: "versions.yml"
+authors:
+  - "@scwatts"

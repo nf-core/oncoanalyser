@@ -1,0 +1,7 @@
+name: virusinterpreter
+channels:
+  - conda-forge
+  - bioconda
+  - defaults
+dependencies:
+  - bioconda::hmftools-virus-interpreter=1.7

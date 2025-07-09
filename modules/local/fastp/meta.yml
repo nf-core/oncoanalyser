@@ -1,0 +1,56 @@
+name: fastp
+description: An ultra-fast all-in-one FASTQ preprocessor
+keywords:
+  - fastp
+  - fastq
+  - processing
+  - quality control
+tools:
+  - fastp:
+      description: An ultra-fast all-in-one FASTQ preprocessor
+      homepage: https://github.com/OpenGene/fastp
+      documentation: https://github.com/OpenGene/fastp
+      licence: ["MIT"]
+input:
+  - meta:
+      type: map
+      description: |
+        Groovy Map containing sample information
+        e.g. [id: 'sample_id', tumor_id: 'tumor_name', normal_id: 'normal_name']
+  - reads_fwd:
+      type: file
+      description: Forward reads FASTQ file
+      pattern: "*.{fastq.gz}"
+  - reads_rev:
+      type: file
+      description: Reverse reads FASTQ file
+      pattern: "*.{fastq.gz}"
+  - max_fastq_records:
+      type: integer
+      description: Maximum number of reads per file (optional)
+  - umi_location:
+      type: string
+      description: UMI location type (optional)
+  - umi_length:
+      type: integer
+      description: UMI length (optional)
+  - umi_skip:
+      type: integer
+      description: UMI base skip (optional)
+output:
+  - meta:
+      type: map
+      description: |
+        Groovy Map containing sample information
+        e.g. [id: 'sample_id', tumor_id: 'tumor_name', normal_id: 'normal_name']
+  - fastq:
+      type: list
+      description: Forward and reverse FASTQ files
+      pattern: "*.{fastq.gz}"
+  - versions:
+      type: file
+      description: File containing software versions
+      pattern: "versions.yml"
+authors:
+  - "@scwatts"
+  - "@mkcmkc"

@@ -1,0 +1,7 @@
+name: peach
+channels:
+  - conda-forge
+  - bioconda
+  - defaults
+dependencies:
+  - bioconda::hmftools-peach=2.0.0

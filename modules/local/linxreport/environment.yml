@@ -1,0 +1,7 @@
+name: linxreport
+channels:
+  - conda-forge
+  - bioconda
+  - defaults
+dependencies:
+  - bioconda::r-linxreport=1.1.0

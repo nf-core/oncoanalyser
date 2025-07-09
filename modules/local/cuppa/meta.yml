@@ -1,0 +1,57 @@
+name: cuppa_classifier
+description: Predict tumor sample tissue of origin
+keywords:
+  - cup
+  - tumor
+  - classification
+tools:
+  - cuppa:
+      description: Prediction of tumor sample tissue of origin
+      homepage: https://github.com/hartwigmedical/hmftools/tree/master/cuppa
+      documentation: https://github.com/hartwigmedical/hmftools/tree/master/cuppa
+      licence: ["GPL v3"]
+input:
+  - meta:
+      type: map
+      description: |
+        Groovy Map containing sample information
+        e.g. [id: 'sample_id']
+  - isofox_dir:
+      type: directory
+      description: Isofox output directory (optional)
+  - purple_dir:
+      type: directory
+      description: PURPLE output directory (optional)
+  - linx_dir:
+      type: directory
+      description: LINX output directory (optional)
+  - virusinterpreter_dir:
+      type: directory
+      description: Virus Interpreter output directory (optional)
+  - genome_ver:
+      type: string
+      description: Reference genome version
+  - cuppa_alt_sj:
+      type: file
+      description: CUPPA ALT slice-junction resource file
+  - cuppa_classifier:
+      type: file
+      description: CUPPA classifier resource file
+  - categories:
+      type: string
+      description: Classifier categories to run
+output:
+  - meta:
+      type: map
+      description: |
+        Groovy Map containing sample information
+        e.g. [id: 'sample_id']
+  - cuppa_dir:
+      type: directory
+      description: CUPPA output directory
+  - versions:
+      type: file
+      description: File containing software versions
+      pattern: "versions.yml"
+authors:
+  - "@scwatts"

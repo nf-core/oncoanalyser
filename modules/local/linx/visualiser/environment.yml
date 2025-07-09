@@ -1,0 +1,7 @@
+name: linx_visualiser
+channels:
+  - conda-forge
+  - bioconda
+  - defaults
+dependencies:
+  - bioconda::hmftools-linx=2.0.2
