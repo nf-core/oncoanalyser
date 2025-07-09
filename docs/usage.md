@@ -377,16 +377,16 @@ space.
 The below table shows the possible values for `--ref_data_types`. Note that multiple can be provided as comma separated 
 list, e.g. `--ref_data_types wgs,dna_alignment`
 
-| Value                           | Description                                                                               | Combination of                                            |
-|:--------------------------------|:------------------------------------------------------------------------------------------|:----------------------------------------------------------|
-| `wgs`                           | Ref data for WGS analysis from BAM                                                        | `fasta`, `fai`, `dict`, `img`, `hmftools`, `gridss_index` |
-| `wts`                           | Ref data for WTS analysis from BAM                                                        | `fasta`, `fai`, `dict`, `img`, `hmftools`                 |
-| `targeted`                      | Ref data for targeted analysis from BAM                                                   | `fasta`, `fai`, `dict`, `img`, `hmftools`, `panel`        |
-| `bwa_index` or `dna_alignment`  | BWA-MEM2 index. Required if aligning DNA FASTQs                                           |                                                           |
-| `star_index` or `rna_alignment` | STAR index. Required if aligning RNA FASTQs                                               |                                                           |
-| `gridss_index`                  | GRIDSS index. Required if running Virusbreakend/Virusinterpreter                          |                                                           |
-| `hmftools`                      | [WiGiTS](https://github.com/hartwigmedical/hmftools) resources files                      |                                                           |
-| `panel`                         | Panel ref data. Only TSO500 currently supported. Please also specify arg `--panel tso500` |                                                           |
+| Value                              | Description                                                                               | Combination of                                            |
+|:-----------------------------------|:------------------------------------------------------------------------------------------|:----------------------------------------------------------|
+| `wgs`                              | Ref data for WGS analysis from BAM                                                        | `fasta`, `fai`, `dict`, `img`, `hmftools`, `gridss_index` |
+| `wts`                              | Ref data for WTS analysis from BAM                                                        | `fasta`, `fai`, `dict`, `img`, `hmftools`                 |
+| `targeted`                         | Ref data for targeted analysis from BAM                                                   | `fasta`, `fai`, `dict`, `img`, `hmftools`, `panel`        |
+| `bwamem2_index` or `dna_alignment` | BWA-MEM2 index. Required if aligning DNA FASTQs                                           |                                                           |
+| `star_index` or `rna_alignment`    | STAR index. Required if aligning RNA FASTQs                                               |                                                           |
+| `gridss_index`                     | GRIDSS index. Required if running Virusbreakend/Virusinterpreter                          |                                                           |
+| `hmftools`                         | [WiGiTS](https://github.com/hartwigmedical/hmftools) resources files                      |                                                           |
+| `panel`                            | Panel ref data. Only TSO500 currently supported. Please also specify arg `--panel tso500` |                                                           |
 
 #### Manual staging
 
@@ -464,7 +464,7 @@ nextflow run nf-core/oncoanalyser \
   -profile docker \
   -config genome.custom.config \
   --mode prepare_reference \
-  --ref_data_types wgs,bwa_index,gridss_index
+  --ref_data_types wgs,bwamem2_index,gridss_index
   --genome CustomGenome \
   --genome_version <37|38> \
   --genome_type <alt|no_alt> \
