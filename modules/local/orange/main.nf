@@ -42,7 +42,7 @@ process ORANGE {
     tuple val(meta), path('output/*.orange.pdf') , emit: pdf, optional: true
     tuple val(meta), path('output/*.orange.json'), emit: json, optional: true
     path 'versions.yml'                          , emit: versions
-    path '.command.{sh,log}'                     , emit: command_files
+    path '.command.*'                            , emit: command_files
 
     when:
     task.ext.when == null || task.ext.when

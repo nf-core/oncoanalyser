@@ -28,7 +28,7 @@ process PAVE_GERMLINE {
     tuple val(meta), path("*.vcf.gz")    , emit: vcf
     tuple val(meta), path("*.vcf.gz.tbi"), emit: index
     path 'versions.yml'                  , emit: versions
-    path '.command.{sh,log}'             , emit: command_files
+    path '.command.*'                    , emit: command_files
 
     when:
     task.ext.when == null || task.ext.when

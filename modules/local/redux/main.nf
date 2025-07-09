@@ -24,7 +24,7 @@ process REDUX {
     tuple val(meta), path('*.jitter_params.tsv')                 , emit: jitter_tsv
     tuple val(meta), path('*.ms_table.tsv.gz')                   , emit: ms_tsv
     path 'versions.yml'                                          , emit: versions
-    path '.command.{sh,log}'                                     , emit: command_files
+    path '.command.*'                                            , emit: command_files
 
     when:
     task.ext.when == null || task.ext.when
