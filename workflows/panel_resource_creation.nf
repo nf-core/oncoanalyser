@@ -184,7 +184,7 @@ workflow PANEL_RESOURCE_CREATION {
         ch_inputs.map { meta -> [meta, [], []] },  // ch_donor_bam
         ref_data.genome_version,
         hmf_data.heterozygous_sites,
-        [],  // target_regions_bed
+        params.target_regions_bed,
         2,   // tumor_min_depth
     )
 
