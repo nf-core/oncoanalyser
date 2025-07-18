@@ -56,9 +56,9 @@ process WISP {
     # Run WISP
     mkdir -p wisp/
 
-    java \\
+    wisp \\
         -Xmx${Math.round(task.memory.bytes * 0.95)} \\
-        -cp /opt/wisp/wisp.jar com.hartwig.hmftools.wisp.purity.PurityEstimator \\
+        com.hartwig.hmftools.wisp.purity.PurityEstimator \\
         ${args} \\
         -patient_id ${meta.subject_id} \\
         -tumor_id ${meta.primary_id} \\
@@ -76,7 +76,7 @@ process WISP {
 
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":
-        wisp: \$(java -jar /opt/wisp/wisp.jar -version | sed 's/^.*version //')
+        wisp: \$(wisp -version | sed 's/^.* //')
     END_VERSIONS
     """
 
