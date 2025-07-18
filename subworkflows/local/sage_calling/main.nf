@@ -35,7 +35,7 @@ workflow SAGE_CALLING {
     ensembl_data_resources       // channel: [mandatory] /path/to/ensembl_data_resources/
     gnomad_resource              // channel: [mandatory] /path/to/gnomad_resource
     enable_germline              // boolean: [mandatory] Enable germline mode
-    enable_high_depth_mode       // boolean: [mandatory] Enable high_depth_mode
+    is_targeted_mode             // boolean: [mandatory] Running in targeted/panel mode?
 
     main:
     // Channel for version.yml files
@@ -138,7 +138,7 @@ workflow SAGE_CALLING {
         driver_gene_panel,
         sage_highconf_regions,
         ensembl_data_resources,
-        enable_high_depth_mode,
+        is_targeted_mode,
     )
 
     ch_versions = ch_versions.mix(SAGE_GERMLINE.out.versions)
@@ -196,7 +196,7 @@ workflow SAGE_CALLING {
         sage_highconf_regions,
         ensembl_data_resources,
         gnomad_resource,
-        enable_high_depth_mode,
+        is_targeted_mode,
     )
 
     ch_versions = ch_versions.mix(SAGE_SOMATIC.out.versions)

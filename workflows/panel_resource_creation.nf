@@ -235,7 +235,7 @@ workflow PANEL_RESOURCE_CREATION {
         hmf_data.ensembl_data_resources,
         hmf_data.gnomad_resource,
         true,  // enable_germline
-        true,  // enable high_depth_mode
+        true,  // is_targeted_mode
     )
 
     ch_versions = ch_versions.mix(SAGE_CALLING.out.versions)

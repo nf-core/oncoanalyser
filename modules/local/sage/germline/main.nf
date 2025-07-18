@@ -17,7 +17,7 @@ process SAGE_GERMLINE {
     path driver_gene_panel
     path sage_highconf_regions
     path ensembl_data_resources
-    val high_depth_mode
+    val is_targeted_mode
 
     output:
     tuple val(meta), path('germline/*.sage.germline.vcf.gz'), path('germline/*.sage.germline.vcf.gz.tbi'), emit: vcf
@@ -31,7 +31,7 @@ process SAGE_GERMLINE {
     script:
     def args = task.ext.args ?: ''
 
-    def high_depth_mode_arg = high_depth_mode ? "-high_depth_mode" : ""
+    def high_depth_mode_arg = is_targeted_mode ? "-high_depth_mode" : ""
 
     """
     mkdir -p germline/

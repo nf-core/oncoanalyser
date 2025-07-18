@@ -234,7 +234,7 @@ workflow PURITY_ESTIMATE {
             ref_data.genome_fai,
             ref_data.genome_dict,
             false,  // run_germline
-            purity_estimate_run_mode === Constants.RunMode.TARGETED,  // enable high_depth_mode
+            purity_estimate_run_mode === Constants.RunMode.TARGETED,  // is_targeted_mode
         )
 
         ch_versions = ch_versions.mix(SAGE_APPEND.out.versions)

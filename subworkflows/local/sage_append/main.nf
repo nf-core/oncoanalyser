@@ -24,8 +24,8 @@ workflow SAGE_APPEND {
     genome_dict      // channel: [mandatory] /path/to/genome_dict
 
     // Params
-    enable_germline        // boolean: [mandatory] Enable germline
-    enable_high_depth_mode // boolean: [mandatory] Enable high_depth_mode
+    enable_germline  // boolean: [mandatory] Enable germline
+    is_targeted_mode // boolean: [mandatory] Running in targeted/panel mode?
 
     main:
     // Channel for version.yml files
@@ -123,7 +123,7 @@ workflow SAGE_APPEND {
         genome_version,
         genome_fai,
         genome_dict,
-        enable_high_depth_mode,
+        is_targeted_mode,
     )
 
     ch_versions = ch_versions.mix(SAGE_APPEND_GERMLINE.out.versions)
@@ -198,7 +198,7 @@ workflow SAGE_APPEND {
         genome_version,
         genome_fai,
         genome_dict,
-        enable_high_depth_mode,
+        is_targeted_mode,
     )
 
     ch_versions = ch_versions.mix(SAGE_APPEND_SOMATIC.out.versions)

@@ -21,7 +21,7 @@ process SAGE_SOMATIC {
     path sage_highconf_regions
     path ensembl_data_resources
     path gnomad_resource
-    val high_depth_mode
+    val is_targeted_mode
 
     output:
     tuple val(meta), path('somatic/*.sage.somatic.vcf.gz'), path('somatic/*.sage.somatic.vcf.gz.tbi'), emit: vcf
@@ -40,6 +40,7 @@ process SAGE_SOMATIC {
     if (meta.normal_id != null) reference_ids.add(meta.normal_id)
     if (meta.donor_id != null) reference_ids.add(meta.donor_id)
     def reference_arg = reference_ids.size() > 0 ? "-reference ${String.join(',', reference_ids)}" : ''
+    def ref_sample_count_arg = reference_ids.size() > 0 ? "-ref_sample_count ${reference_ids.size()}" : ''
 
     // BAMs
     def reference_bams = []
@@ -47,29 +48,29 @@ process SAGE_SOMATIC {
     if (donor_bam) reference_bams.add(donor_bam.toString())
     def reference_bam_arg = reference_bams.size() > 0 ? "-reference_bam ${String.join(',', reference_bams)}" : ''
 
+    // Tumor in normal contamination (TINC): only for WGS tumor/normal samples
     def run_tinc_arg = ""
-    if(!donor_bam)
-        run_tinc_arg = "-run_tinc" // TINC mode is incompatible with donor samples
+    def write_fit_variants_arg = ""
+    def gnomad_arg = ""
+    def pon_file_arg = ""
 
-    def ref_sample_count_arg = "-ref_sample_count ${reference_ids.size()}"
+    if(!is_targeted_mode && tumor_bam && normal_bam){
+        run_tinc_arg =           "-run_tinc"
+        pon_file_arg =           "-pon_file ${sage_pon}"
+        write_fit_variants_arg = "-write_fit_variants"
 
-    // High depth mode
-    def run_mode = Utils.getEnumFromString(params.mode, Constants.RunMode)
-    def effective_run_mode = run_mode === Constants.RunMode.PURITY_ESTIMATE
-        ? Utils.getEnumFromString(params.purity_estimate_mode, Constants.RunMode)
-        : run_mode
-
-    def high_depth_mode_arg = effective_run_mode === Constants.RunMode.TARGETED ? "-high_depth_mode" : ""
-
-    // gnomAD
-    def gnomad_args
-    if (genome_ver.toString() == '37') {
-        gnomad_args = "-gnomad_freq_file ${gnomad_resource}"
-    } else if (genome_ver.toString() == '38') {
-        gnomad_args = "-gnomad_freq_dir ${gnomad_resource}"
-    } else {
-        error "got bad genome version: ${genome_ver}"
+        if (genome_ver.toString() == '37') {
+            gnomad_arg = "-gnomad_freq_file ${gnomad_resource}"
+        } else if (genome_ver.toString() == '38') {
+            gnomad_arg = "-gnomad_freq_dir ${gnomad_resource}"
+        } else {
+            error "got bad genome version: ${genome_ver}"
+        }
     }
+
+    def high_depth_mode_arg = ""
+    if(is_targeted_mode)
+        high_depth_mode_arg = "-high_depth_mode"
 
     """
     mkdir -p somatic/
@@ -89,14 +90,14 @@ process SAGE_SOMATIC {
         -driver_gene_panel ${driver_gene_panel} \\
         -high_confidence_bed ${sage_highconf_regions} \\
         -ensembl_data_dir ${ensembl_data_resources} \\
-        -pon_file ${sage_pon} \\
-        ${gnomad_args} \\
-        ${high_depth_mode_arg} \\
         ${run_tinc_arg} \\
+        ${pon_file_arg} \\
+        ${gnomad_arg} \\
+        ${write_fit_variants_arg} \\
+        ${high_depth_mode_arg} \\
         -bqr_write_plot \\
         -threads ${task.cpus} \\
         -output_vcf somatic/${meta.tumor_id}.sage.somatic.vcf.gz \\
-        -write_fit_variants \\
         -log_level ${params.module_log_level}
 
     cat <<-END_VERSIONS > versions.yml

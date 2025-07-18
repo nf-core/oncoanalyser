@@ -13,7 +13,7 @@ process SAGE_APPEND {
     val genome_ver
     path genome_fai
     path genome_dict
-    val high_depth_mode
+    val is_targeted_mode
 
     output:
     tuple val(meta), path('sage_append'), emit: sage_append_dir
@@ -32,12 +32,7 @@ process SAGE_APPEND {
     if(!redux_tsvs)
         skip_msi_jitter_arg = "-skip_msi_jitter"
 
-    def run_mode = Utils.getEnumFromString(params.mode, Constants.RunMode)
-    def effective_run_mode = run_mode === Constants.RunMode.PURITY_ESTIMATE
-        ? Utils.getEnumFromString(params.purity_estimate_mode, Constants.RunMode)
-        : run_mode
-
-    def high_depth_mode_arg = effective_run_mode === Constants.RunMode.TARGETED ? "-high_depth_mode" : ""
+    def high_depth_mode_arg = is_targeted_mode ? "-high_depth_mode" : ""
 
     """
     mkdir -p sage_append/
