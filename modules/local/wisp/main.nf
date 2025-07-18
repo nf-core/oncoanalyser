@@ -13,6 +13,7 @@ process WISP {
         path(sage_append_dir)
     path genome_fasta
     path genome_fai
+    val is_targeted_mode
 
     output:
     path 'wisp/'       , emit: wisp_dir
@@ -32,17 +33,16 @@ process WISP {
     def cobalt_dir_arg
     def gc_ratio_min_arg
 
-    if (purity_estimate_mode === Constants.RunMode.WGTS) {
-        purity_methods      = "'SOMATIC_VARIANT;AMBER_LOH;COPY_NUMBER'"
-        amber_dir_arg       = "-amber_dir amber_dir__prepared/"
-        cobalt_dir_arg      = "-cobalt_dir ${cobalt_dir}"
-        gc_ratio_min_arg    = ""
-
-    } else if(purity_estimate_mode === Constants.RunMode.TARGETED) {
+    if(is_targeted_mode) {
         purity_methods      = "'SOMATIC_VARIANT'"
         amber_dir_arg       = ""
         cobalt_dir_arg      = ""
         gc_ratio_min_arg    = "-gc_ratio_min 0.4"
+    } else {
+        purity_methods      = "'SOMATIC_VARIANT;AMBER_LOH;COPY_NUMBER'"
+        amber_dir_arg       = "-amber_dir amber_dir__prepared/"
+        cobalt_dir_arg      = "-cobalt_dir ${cobalt_dir}"
+        gc_ratio_min_arg    = ""
     }
 
     """

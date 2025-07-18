@@ -265,6 +265,7 @@ workflow PURITY_ESTIMATE {
             ch_sage_somatic_append_out,
             ref_data.genome_fasta,
             ref_data.genome_fai,
+            purity_estimate_run_mode === Constants.RunMode.TARGETED,  // is_targeted_mode
         )
 
         ch_versions = ch_versions.mix(WISP_ANALYSIS.out.versions)

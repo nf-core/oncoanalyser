@@ -19,6 +19,9 @@ workflow WISP_ANALYSIS {
     genome_fasta     // channel: [mandatory] /path/to/genome_fasta
     genome_fai       // channel: [mandatory] /path/to/genome_fai
 
+    // Params
+    is_targeted_mode // boolean: [mandatory] Running in targeted/panel mode?
+
     main:
     // Channel for version.yml files
     // channel: [ versions.yml ]
@@ -72,6 +75,7 @@ workflow WISP_ANALYSIS {
         ch_wisp_inputs,
         genome_fasta,
         genome_fai,
+        is_targeted_mode,
     )
 
     ch_versions = ch_versions.mix(WISP.out.versions)
