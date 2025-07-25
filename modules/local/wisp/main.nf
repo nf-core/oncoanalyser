@@ -2,7 +2,10 @@ process WISP {
     tag "${meta.id}"
     label 'process_low'
 
-    container 'docker.io/scwatts/wisp:1.2_beta.2--0'
+    conda "${moduleDir}/environment.yml"
+    container "${ workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container ?
+        'https://depot.galaxyproject.org/singularity/hmftools-wisp:1.2--hdfd78af_0' :
+        'biocontainers/hmftools-wisp:1.2--hdfd78af_0' }"
 
     input:
     tuple val(meta),
@@ -61,9 +64,9 @@ process WISP {
     # Run WISP
     mkdir -p wisp/
 
-    java \\
+    wisp \\
         -Xmx${Math.round(task.memory.bytes * 0.95)} \\
-        -cp /opt/wisp/wisp.jar com.hartwig.hmftools.wisp.purity.PurityEstimator \\
+        com.hartwig.hmftools.wisp.purity.PurityEstimator \\
         ${args} \\
         -patient_id ${meta.subject_id} \\
         -tumor_id ${meta.primary_id} \\
@@ -81,7 +84,7 @@ process WISP {
 
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":
-        wisp: \$(java -jar /opt/wisp/wisp.jar -version | sed 's/^.*version //')
+        wisp: \$(wisp -version | sed 's/^.* //')
     END_VERSIONS
     """
 

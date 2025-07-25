@@ -1,0 +1,7 @@
+name: wisp
+channels:
+  - conda-forge
+  - bioconda
+  - defaults
+dependencies:
+  - bioconda::hmftools-wisp=1.2
