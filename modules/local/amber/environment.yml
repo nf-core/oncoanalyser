@@ -4,4 +4,4 @@ channels:
   - bioconda
   - defaults
 dependencies:
-  - bioconda::hmftools-amber=4.1.1
+  - bioconda::hmftools-amber=4.2

@@ -4,8 +4,8 @@ process SAGE_GERMLINE {
 
     conda "${moduleDir}/environment.yml"
     container "${ workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container ?
-        'https://depot.galaxyproject.org/singularity/hmftools-sage:4.0--hdfd78af_0' :
-        'biocontainers/hmftools-sage:4.0--hdfd78af_0' }"
+        'https://depot.galaxyproject.org/singularity/hmftools-sage:4.1--hdfd78af_0' :
+        'biocontainers/hmftools-sage:4.1--hdfd78af_0' }"
 
     input:
     tuple val(meta), path(tumor_bam), path(normal_bam), path(tumor_bai), path(normal_bai), path(redux_tsvs)

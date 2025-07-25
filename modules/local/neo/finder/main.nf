@@ -4,8 +4,8 @@ process NEO_FINDER {
 
     conda "${moduleDir}/environment.yml"
     container "${ workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container ?
-        'https://depot.galaxyproject.org/singularity/hmftools-neo:1.2--hdfd78af_1' :
-        'biocontainers/hmftools-neo:1.2--hdfd78af_1' }"
+        'https://depot.galaxyproject.org/singularity/hmftools-neo:1.2.1--hdfd78af_0' :
+        'biocontainers/hmftools-neo:1.2.1--hdfd78af_0' }"
 
     input:
     tuple val(meta), path(purple_dir), path(linx_annotation_dir)

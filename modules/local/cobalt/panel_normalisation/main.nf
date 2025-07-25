@@ -3,8 +3,8 @@ process COBALT_PANEL_NORMALISATION {
 
     conda "${moduleDir}/environment.yml"
     container "${ workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container ?
-        'https://depot.galaxyproject.org/singularity/hmftools-cobalt:2.0--hdfd78af_0' :
-        'biocontainers/hmftools-cobalt:2.0--hdfd78af_0' }"
+        'https://depot.galaxyproject.org/singularity/hmftools-cobalt:2.1--hdfd78af_1' :
+        'biocontainers/hmftools-cobalt:2.1--hdfd78af_1' }"
 
     input:
     tuple path('amber_dir.*'), path('cobalt_dir.*')
