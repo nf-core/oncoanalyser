@@ -52,8 +52,6 @@ include { WISP_ANALYSIS      } from '../subworkflows/local/wisp_analysis'
 // Get absolute file paths
 samplesheet = Utils.getFileObject(params.input)
 
-purity_estimate_run_mode = Utils.getEnumFromString(params.purity_estimate_mode, Constants.RunMode)
-
 workflow PURITY_ESTIMATE {
     // Create channel for versions
     // channel: [ versions.yml ]
@@ -62,6 +60,9 @@ workflow PURITY_ESTIMATE {
     // Create input channel from parsed CSV
     // channel: [ meta ]
     ch_inputs = Channel.fromList(inputs)
+
+    // Get run mode of purity estimate mode
+    purity_estimate_run_mode = Utils.getEnumFromString(params.purity_estimate_mode, Constants.RunMode)
 
     // Set up reference data, assign more human readable variables
     prep_config = WorkflowMain.getPrepConfigForRun(run_config)

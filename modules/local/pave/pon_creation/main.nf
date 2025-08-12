@@ -50,4 +50,3 @@ process PAVE_PON_PANEL_CREATION {
     echo -e '${task.process}:\\n  stub: noversions\\n' > versions.yml
     """
 }
-

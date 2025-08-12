@@ -368,7 +368,7 @@ class WorkflowMain {
     {
         def ref_data_types = params.ref_data_types
             .tokenize(',')
-            .collect { 
+            .collect {
                 def ref_data_type_enum = Utils.getEnumFromString(it, Constants.RefDataType)
 
                 if(!ref_data_type_enum) {
@@ -406,10 +406,10 @@ class WorkflowMain {
         def require_fai = ref_data_types.contains(Constants.RefDataType.FAI)
         def require_dict = ref_data_types.contains(Constants.RefDataType.DICT)
         def require_img = ref_data_types.contains(Constants.RefDataType.IMG)
-        
+
         def require_bwamem2_index = ref_data_types.contains(Constants.RefDataType.BWAMEM2_INDEX) || ref_data_types.contains(Constants.RefDataType.DNA_ALIGNMENT)
         def require_star_index = ref_data_types.contains(Constants.RefDataType.STAR_INDEX) || ref_data_types.contains(Constants.RefDataType.RNA_ALIGNMENT)
-        
+
         def require_gridss_index = ref_data_types.contains(Constants.RefDataType.GRIDSS_INDEX)
         def require_hmftools_data = ref_data_types.contains(Constants.RefDataType.HMFTOOLS)
         def require_panel_data = ref_data_types.contains(Constants.RefDataType.PANEL)
@@ -434,7 +434,7 @@ class WorkflowMain {
 
             require_bwamem2_index: require_bwamem2_index,
             require_star_index: require_star_index,
-            
+
             require_gridss_index: require_gridss_index,
             require_hmftools_data: require_hmftools_data,
             require_panel_data: require_panel_data,

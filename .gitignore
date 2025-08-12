@@ -6,5 +6,4 @@ results/
 testing/
 testing*
 *.pyc
-lib/groovy-*
-.nf-test/*
+null/

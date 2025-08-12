@@ -159,12 +159,10 @@ _Picard MarkDuplicates is only run on RNA alignments_
 <summary>Output files</summary>
 
 - `<group_id>/sage/append/`
-
   - `<tumor_dna_id>.sage.append.vcf.gz`: Tumor DNA sample small variant VCF with RNA data appended.
   - `<normal_dna_id>.sage.append.vcf.gz`: Normal DNA sample small variant VCF with RNA data appended.
 
 - `<group_id>/sage/somatic/`
-
   - `<normal_dna_id>.sage.bqr.png`: Normal DNA sample base quality recalibration metrics plot.
   - `<normal_dna_id>.sage.bqr.tsv`: Normal DNA sample base quality recalibration metrics.
   - `<tumor_dna_id>.sage.bqr.png`: Tumor DNA sample base quality recalibration metrics plot.
@@ -214,7 +212,6 @@ information with regards to transcript and coding effects.
 <summary>Output files</summary>
 
 - `<group_id>/esvee/prep/`
-
   - `<tumor_dna_id>.esvee.prep.bam`: Tumor DNA sample BAM with candidate SV reads.
   - `<tumor_dna_id>.esvee.prep.bam.bai`: Tumor DNA sample BAM index.
   - `<tumor_dna_id>.esvee.prep.disc_stats.tsv`: Tumor DNA sample discordant reads stats.
@@ -224,7 +221,6 @@ information with regards to transcript and coding effects.
   - `<normal_dna_id>.esvee.prep.bam.bai`: Tumor DNA sample BAM index.
 
 - `<group_id>/esvee/assemble/`
-
   - `<tumor_dna_id>.esvee.assembly.tsv`: Tumor DNA sample breakend assemblies.
   - `<tumor_dna_id>.esvee.alignment.tsv`: Tumor DNA sample assemblies realigned to the reference genome.
   - `<tumor_dna_id>.esvee.breakend.tsv`: Tumor DNA sample breakends.
@@ -233,7 +229,6 @@ information with regards to transcript and coding effects.
   - `<tumor_dna_id>.esvee.raw.vcf.gz.tbi`: Tumor DNA sample VCF with candidate breakends.
 
 - `<group_id>/esvee/depth_annotation/`
-
   - `<tumor_dna_id>.esvee.ref_depth.vcf.gz`: Tumor DNA sample VCF annotated with normal sample read depths.
   - `<tumor_dna_id>.esvee.ref_depth.vcf.gz.tbi`: Tumor DNA sample VCF index.
 
@@ -335,7 +330,6 @@ purity/ploidy and annotates both small and structural variant calls with copy-nu
 <summary>Output files</summary>
 
 - `<group_id>/linx/germline_annotations/`
-
   - `linx.version`: LINX version file.
   - `<tumor_dna_id>.linx.germline.breakend.tsv`: Normal DNA sample breakend data.
   - `<tumor_dna_id>.linx.germline.clusters.tsv`: Normal DNA sample clustered events.
@@ -345,7 +339,6 @@ purity/ploidy and annotates both small and structural variant calls with copy-nu
   - `<tumor_dna_id>.linx.germline.svs.tsv`: Normal DNA sample structural variants.
 
 - `<group_id>/linx/somatic_annotations/`
-
   - `linx.version`: LINX version file.
   - `<tumor_dna_id>.linx.breakend.tsv`: Tumor DNA sample breakend data.
   - `<tumor_dna_id>.linx.clusters.tsv`: Tumor DNA sample clustered events.
@@ -479,11 +472,9 @@ for each of the IG and TCR loci including an abundance estimate.
 <summary>Output files</summary>
 
 - `<group_id>/neo/finder/`
-
   - `<tumor_dna_id>.neo_data.tsv`: Tumor sample neoepitope candidates.
 
 - `<group_id>/neo/annotated_fusions/`
-
   - `<tumor_dna_id>.isf.neoepitope.tsv`: Tumor sample annotated Isofox fusions.
 
 - `<group_id>/neo/scorer/`
@@ -577,14 +568,14 @@ pharmacogenomic context.
   - `<subject_id>_<longitudinal_id>.wisp.cn_plot_calcs.tsv`: Longitudinal sample copy number fit coefficients.
   - `<subject_id>_<longitudinal_id>.wisp.cn_segments.tsv`: Longitudinal sample copy number segments.
   - `<subject_id>_<longitudinal_id>.wisp.fragment_length.tsv`: Longitudinal sample fragment lengths stats.
-  - `<subject_id>_<longitudinal_id>.wisp.somatic_peak.tsv`: Longitudinal sample implied tumor fraction per somatic variant. 
+  - `<subject_id>_<longitudinal_id>.wisp.somatic_peak.tsv`: Longitudinal sample implied tumor fraction per somatic variant.
   - `<subject_id>_<longitudinal_id>.wisp.somatic_variants.tsv`: Longitudinal sample counts and filtering rules per variant used in the SNV tumor fraction estimate.
   - `<subject_id>_<longitudinal_id>.wisp.summary.tsv`: Longitudinal sample summary.
 
 </details>
 
-[WISP](https://github.com/hartwigmedical/hmftools/tree/master/wisp) estimates tumor fraction in 
-a given sample (typically ctDNA), guided by the biomarkers identified prior analysis of the same 
+[WISP](https://github.com/hartwigmedical/hmftools/tree/master/wisp) estimates tumor fraction in
+a given sample (typically ctDNA), guided by the biomarkers identified prior analysis of the same
 patient (typically a primary tissue biopsy).
 
 ### Report generation
@@ -625,7 +616,7 @@ hmftool components into a single static PDF report.
   - `<group_id>.<process_name>.command.out`: Standard output
   - `<group_id>.<process_name>.command.err`: Standard error
   - `<group_id>.<process_name>.command.log`: Combined standard output and error (may not exist for some executors)
-</details>
+  </details>
 
 The logs directory stores the `.command.*` files for each tool from the Nextflow work directory
 
