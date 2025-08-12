@@ -24,8 +24,8 @@
 
 ## How to start from CRAM?
 
-Simply specify a CRAM path instead of a BAM path in the sample sheet. See section [Input starting points: BAM /
-CRAM](./#bam-and-cram).
+Simply provide a CRAM path under filetype `cram` in the sample sheet. See section [Input starting points: CRAM](./#cram)
+for details.
 
 ## How to handle UMIs?
 
@@ -271,7 +271,7 @@ work/
 │       ├── .command.sh     # Bash script used to run the process *within the container*
 │       ├── .command.run    # Bash script used to run the process in the host machine
 │       ├── .command.begin
-│       ├── .command.log    # All log messages (combination of stdout and stderr)
+│       ├── .command.log    # All log messages (combination of stdout and stderr). Might not exist for some executors
 │       ├── .command.err    # stderr log messages
 │       ├── .command.out    # stdout log messages
 │       ├── .command.trace  # Compute resource usage stats
@@ -290,32 +290,6 @@ The `work/` directory can be hard to navigate due to the `<short_hash>/<long_has
 
 Otherwise, you can use a utility like [tree](<https://en.wikipedia.org/wiki/Tree_(command)>) to show the directory
 structure, which allows you to manually find the target process directory.
-
-## Saving logs from the `work/` directory
-
-To save logs to the final output directory (i.e. path provided to `--outdir`), we can provide the below
-[afterScript](https://www.nextflow.io/docs/latest/reference/process.html#afterscript) directive in a config file:
-
-```groovy
-// Adapted from this GitHub issue: https://github.com/nextflow-io/nextflow/issues/1166
-process.afterScript = {
-    // params.outdir: --outdir arg
-    // meta.key: sample_id from the sample sheet
-    log_dir = "${params.outdir}/${meta.key}/logs"
-
-    // task.process: name of the process
-    // meta.id: concatenation of the group_id and sample_id from the sample sheet
-    dest_file_prefix = "${log_dir}/${task.process}.${meta.id}"
-
-    // The value of afterScript is simply a bash command as a string
-    cmd =  "mkdir -p ${log_dir}; "
-    cmd += "for file in .command.{sh,log}; do cp \$file ${dest_file_prefix}\${file}; done"
-    cmd
-}
-```
-
-The above afterScript directive will copy `.sh` and `.log` files from the `work/` directory for every process. Each
-destination file will have the below example path:
 
 ```shell
 outdir/coloMini/logs/NFCORE_ONCOANALYSER:WGTS:REDUX_PROCESSING:REDUX.coloMini_coloMiniT.command.log

@@ -86,18 +86,18 @@ class WorkflowMain {
         if (run_mode === Constants.RunMode.TARGETED) {
 
             // When fastp UMI is enabled, REDUX UMI should be as well
-            if (params.fastp_umi && (!params.containsKey('redux_umi') || !params.redux_umi)) {
-                params.redux_umi = true
+            if (params.fastp_umi_enabled && (!params.containsKey('redux_umi_enabled') || !params.redux_umi_enabled)) {
+                params.redux_umi_enabled = true
             }
 
             // Set the REDUX UMI duplex delimiter to '_' when the following conditions are met:
             //   - both fastp and REDUX UMI processing enabled
             //   - fastp is using a duplex UMI location type (per_index or per_read)
             //   - no REDUX duplex delimiter has been set
-            def fastp_and_redux_umi = params.fastp_umi && params.redux_umi
+            def fastp_and_redux_umi_enabled = params.fastp_umi_enabled && params.redux_umi_enabled
             def fastp_duplex_location = params.containsKey('fastp_umi_location') && (params.fastp_umi_location == 'per_index' || params.fastp_umi_location == 'per_read')
             def no_umi_duplex_delim = !params.containsKey('redux_umi_duplex_delim') || !params.redux_umi_duplex_delim
-            if (fastp_and_redux_umi && fastp_duplex_location && no_umi_duplex_delim) {
+            if (fastp_and_redux_umi_enabled && fastp_duplex_location && no_umi_duplex_delim) {
                 params.redux_umi_duplex_delim = '_'
             }
 
@@ -295,17 +295,17 @@ class WorkflowMain {
         // UMI parameters
 
         def fastp_umi_args_set_any = params.fastp_umi_location || params.fastp_umi_length || params.fastp_umi_skip >= 0
-        if (fastp_umi_args_set_any && !params.fastp_umi) {
+        if (fastp_umi_args_set_any && !params.fastp_umi_enabled) {
             log.error "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n" +
                 "  Detected use of fastp UMI parameters but fastp UMI processing has not been enabled.\n" +
-                "  Please review your configuration and set the fastp_umi flag or otherwise adjust\n" +
-                "  accordingly.\n" +
+                "  Please review your configuration and set the fastp_umi_enabled flag or otherwise " +
+                "  adjust accordingly.\n" +
                 "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
             Nextflow.exit(1)
         }
 
         def fastp_umi_args_set_all = params.fastp_umi_location && params.fastp_umi_length && params.fastp_umi_skip >= 0
-        if (params.fastp_umi && !fastp_umi_args_set_all) {
+        if (params.fastp_umi_enabled && !fastp_umi_args_set_all) {
             log.error "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n" +
                 "  Refusing to run fastp UMI processing without having any UMI params configured.\n" +
                 "  Please review your configuration and appropriately set all fastp_umi_* parameters.\n" +
@@ -313,10 +313,10 @@ class WorkflowMain {
             Nextflow.exit(1)
         }
 
-        if (params.redux_umi_duplex_delim && params.redux_umi === false) {
+        if (params.redux_umi_duplex_delim && params.redux_umi_enabled === false) {
             log.error "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n" +
                 "  Detected use of REDUX UMI parameters but REDUX UMI processing has not been\n" +
-                "  enabled. Please review your configuration and set the redux_umi flag or\n" +
+                "  enabled. Please review your configuration and set the redux_umi_enabled flag or\n" +
                 "  otherwise adjust accordingly.\n" +
                 "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
             Nextflow.exit(1)
