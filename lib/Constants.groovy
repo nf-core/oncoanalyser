@@ -25,6 +25,7 @@ class Constants {
 
 
     static enum RunMode {
+        PANEL_RESOURCE_CREATION,
         PURITY_ESTIMATE,
         TARGETED,
         WGTS,

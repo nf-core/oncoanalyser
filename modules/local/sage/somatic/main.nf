@@ -46,6 +46,8 @@ process SAGE_SOMATIC {
 
     def ref_sample_count_arg = "-ref_sample_count ${reference_ids.size()}"
 
+    def coverage_bed_arg = sage_coverage_panel ? "-coverage_bed ${sage_coverage_panel}" : ''
+
     def run_mode = Utils.getEnumFromString(params.mode, Constants.RunMode)
     def effective_run_mode = run_mode === Constants.RunMode.PURITY_ESTIMATE
         ? Utils.getEnumFromString(params.purity_estimate_mode, Constants.RunMode)
@@ -69,7 +71,7 @@ process SAGE_SOMATIC {
         -ref_genome_version ${genome_ver} \\
         -hotspots ${sage_known_hotspots_somatic} \\
         -panel_bed ${sage_actionable_panel} \\
-        -coverage_bed ${sage_coverage_panel} \\
+        ${coverage_bed_arg} \\
         -high_confidence_bed ${sage_highconf_regions} \\
         -ensembl_data_dir ${ensembl_data_resources} \\
         ${high_depth_mode_arg} \\

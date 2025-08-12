@@ -16,7 +16,6 @@ class WorkflowMain {
         def default_invalid = false
 
         // Set defaults common to all run configuration
-
         if (!params.containsKey('genome_version')) {
             if (Constants.GENOMES_VERSION_37.contains(params.genome)) {
                 params.genome_version = '37'
@@ -200,7 +199,7 @@ class WorkflowMain {
                 def panels = Constants.PANELS_DEFINED.join('\n    - ')
                 log.error "\n~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n" +
                     "  A panel is required to be set using the --panel CLI argument or in a\n" +
-                    "  configuration file when running in targeted mode.\n" +
+                    "  configuration file when running in targeted mode or panel resource creation mode.\n" +
                     "  Currently, the available built-in panels are:\n" +
                     "    - ${panels}\n" +
                     "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"

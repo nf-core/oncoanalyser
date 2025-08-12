@@ -46,19 +46,15 @@ input:
       type: file
       description: AMBER heterozygous sites file
       pattern: "*.{vcf.gz}"
-  - target_region_bed:
+  - target_regions_bed:
       type: file
-      description: Target region BED file (optional)
+      description: Target regions BED file (optional)
       pattern: "*.{bed}"
 output:
-  - meta:
-      type: map
-      description: |
-        Groovy Map containing sample information
-        e.g. [id: 'sample_id', tumor_id: 'tumor_name', normal_id: 'normal_name']
-  - amber_dir:
-      type: directory
+  - cobalt_normalisation:
+      file: directory
       description: AMBER output directory
+      pattern: "versions.yml"
   - versions:
       type: file
       description: File containing software versions

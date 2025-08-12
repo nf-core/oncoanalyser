@@ -56,7 +56,7 @@ process COBALT {
 
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":
-        cobalt: \$(cobalt -version | sed -n '/^Cobalt version/ { s/^.* //p }')
+        cobalt_run: \$(cobalt -version | sed -n '/^Cobalt version/ { s/^.* //p }')
     END_VERSIONS
     """
 

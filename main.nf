@@ -58,9 +58,10 @@ if (workflow.stubRun && params.create_stub_placeholders) {
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 */
 
-include { PURITY_ESTIMATE } from './workflows/purity_estimate'
-include { TARGETED        } from './workflows/targeted'
-include { WGTS            } from './workflows/wgts'
+include { PANEL_RESOURCE_CREATION } from './workflows/panel_resource_creation'
+include { PURITY_ESTIMATE         } from './workflows/purity_estimate'
+include { TARGETED                } from './workflows/targeted'
+include { WGTS                    } from './workflows/wgts'
 
 /*
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -81,6 +82,8 @@ workflow NFCORE_ONCOANALYSER {
         TARGETED()
     } else if (run_mode === Constants.RunMode.PURITY_ESTIMATE) {
         PURITY_ESTIMATE()
+    } else if (run_mode === Constants.RunMode.PANEL_RESOURCE_CREATION) {
+        PANEL_RESOURCE_CREATION()
     } else {
         log.error("received bad run mode: ${run_mode}")
         Nextflow.exit(1)
