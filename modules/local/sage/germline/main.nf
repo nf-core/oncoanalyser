@@ -25,7 +25,11 @@ process SAGE_GERMLINE {
     path 'versions.yml'                                                                                  , emit: versions
 
     def run_mode = Utils.getEnumFromString(params.mode, Constants.RunMode)
-    def high_depth_mode_arg = (run_mode === Constants.RunMode.TARGETED) ? '-high_depth_mode' : ''
+    def effective_run_mode = run_mode === Constants.RunMode.PURITY_ESTIMATE
+        ? Utils.getEnumFromString(params.purity_estimate_mode, Constants.RunMode)
+        : run_mode
+
+    def high_depth_mode_arg = effective_run_mode === Constants.RunMode.TARGETED ? "-high_depth_mode" : ""
 
     when:
     task.ext.when == null || task.ext.when

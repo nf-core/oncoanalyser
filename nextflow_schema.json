@@ -48,7 +48,13 @@
                     "type": "string",
                     "description": "Workflow run mode.",
                     "fa_icon": "fas fa-diagram-project",
-                    "pattern": "^(wgts|targeted|panel_resource_creation)"
+                    "pattern": "^(wgts|targeted|purity_estimate|panel_resource_creation)"
+                },
+                "purity_estimate_mode": {
+                    "type": "string",
+                    "description": "Purity estimate workflow run mode.",
+                    "fa_icon": "fas fa-diagram-project",
+                    "pattern": "^(wgts|targeted)"
                 },
                 "panel": {
                     "type": "string",

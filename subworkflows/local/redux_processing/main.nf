@@ -90,10 +90,12 @@ workflow REDUX_PROCESSING {
         )
         .map { meta, meta_sample, sample_type, bams, bais ->
 
+            def sample_id = meta_sample.getOrDefault('longitudinal_sample_id', meta_sample['sample_id'])
+
             def meta_redux = [
                 key: meta.group_id,
-                id: "${meta.group_id}_${meta_sample.sample_id}",
-                sample_id: meta_sample.sample_id,
+                id: "${meta.group_id}_${sample_id}",
+                sample_id: sample_id,
                 sample_type: sample_type,
             ]
 
