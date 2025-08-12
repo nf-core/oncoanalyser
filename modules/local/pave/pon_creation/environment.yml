@@ -1,7 +1,7 @@
-name: cobalt
+name: pave_pon_creation
 channels:
   - conda-forge
   - bioconda
   - defaults
 dependencies:
-  - bioconda::hmftools-cobalt=2.0
+  - bioconda::hmftools-pave=1.7

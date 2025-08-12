@@ -5,7 +5,7 @@
 import Constants
 import Utils
 
-include { COBALT } from '../../../modules/local/cobalt/main'
+include { COBALT } from '../../../modules/local/cobalt/run/main'
 
 workflow COBALT_PROFILING {
     take:
