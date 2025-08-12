@@ -3,8 +3,8 @@ process COBALT_PANEL_NORMALISATION {
 
     conda "${moduleDir}/environment.yml"
     container "${ workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container ?
-        'https://depot.galaxyproject.org/singularity/hmftools-cobalt:2.0--hdfd78af_0' :
-        'biocontainers/hmftools-cobalt:2.0--hdfd78af_0' }"
+        'https://depot.galaxyproject.org/singularity/hmftools-cobalt:2.1--hdfd78af_1' :
+        'biocontainers/hmftools-cobalt:2.1--hdfd78af_1' }"
 
     input:
     tuple path('amber_dir.*'), path('cobalt_dir.*')
@@ -31,11 +31,11 @@ process COBALT_PANEL_NORMALISATION {
     done
 
     (
-        echo SampleId;
-        find -L inputs/ -type f -name '*.amber.baf.tsv.gz' | sed 's#inputs/##; s#\\.amber\\..*\$##; s#\\.cobalt\\..*\$##' | sort -V | uniq;
+        echo SampleId
+        basename -s .amber.baf.tsv.gz -a inputs/*.amber.baf.tsv.gz
     ) > sample_ids.txt
 
-    java -cp /usr/local/share/hmftools-cobalt-2.0-0/cobalt.jar \\
+    cobalt \\
         -Xmx${Math.round(task.memory.bytes * 0.95)} \\
         com.hartwig.hmftools.cobalt.norm.NormalisationFileBuilder \\
         ${args} \\

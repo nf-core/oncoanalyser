@@ -4,8 +4,8 @@ process NEO_ANNOTATE_FUSIONS {
 
     conda "${moduleDir}/environment.yml"
     container "${ workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container ?
-        'https://depot.galaxyproject.org/singularity/hmftools-isofox:1.7.1--hdfd78af_1' :
-        'biocontainers/hmftools-isofox:1.7.1--hdfd78af_1' }"
+        'https://depot.galaxyproject.org/singularity/hmftools-isofox:1.7.2--hdfd78af_1' :
+        'biocontainers/hmftools-isofox:1.7.2--hdfd78af_1' }"
 
     input:
     tuple val(meta), path(neo_finder_dir), path(bam), path(bai)
@@ -43,7 +43,8 @@ process NEO_ANNOTATE_FUSIONS {
         -ref_genome_version ${genome_ver} \\
         -ensembl_data_dir ${ensembl_data_resources} \\
         -threads ${task.cpus} \\
-        -output_dir ./
+        -output_dir ./ \\
+        -log_level ${params.module_log_level}
 
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":

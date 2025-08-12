@@ -156,7 +156,7 @@ workflow WGTS {
     ch_redux_dna_normal_out = Channel.empty()
     ch_redux_dna_donor_out = Channel.empty()
 
-    // channel: [ meta, dup_freq_tsv, jitter_tsv, ms_tsv, repeat_tsv ]
+    // channel: [ meta, dup_freq_tsv, jitter_tsv, ms_tsv ]
     ch_redux_dna_tumor_tsv_out = Channel.empty()
     ch_redux_dna_normal_tsv_out = Channel.empty()
     ch_redux_dna_donor_tsv_out = Channel.empty()
@@ -194,9 +194,9 @@ workflow WGTS {
         ch_redux_dna_normal_out = ch_inputs.map { meta -> [meta, [], []] }
         ch_redux_dna_donor_out = ch_inputs.map { meta -> [meta, [], []] }
 
-        ch_redux_dna_tumor_tsv_out = ch_inputs.map { meta -> [meta, [], [], [], []] }
-        ch_redux_dna_normal_tsv_out = ch_inputs.map { meta -> [meta, [], [], [], []] }
-        ch_redux_dna_donor_tsv_out = ch_inputs.map { meta -> [meta, [], [], [], []] }
+        ch_redux_dna_tumor_tsv_out = ch_inputs.map { meta -> [meta, [], [], []] }
+        ch_redux_dna_normal_tsv_out = ch_inputs.map { meta -> [meta, [], [], []] }
+        ch_redux_dna_donor_tsv_out = ch_inputs.map { meta -> [meta, [], [], []] }
 
     }
 
@@ -251,6 +251,7 @@ workflow WGTS {
             ref_data.genome_version,
             hmf_data.heterozygous_sites,
             [],  // target_region_bed
+            [],  // tumor_min_depth
         )
 
         ch_versions = ch_versions.mix(AMBER_PROFILING.out.versions)
@@ -277,6 +278,7 @@ workflow WGTS {
             hmf_data.gc_profile,
             hmf_data.diploid_bed,
             [],  // panel_target_region_normalisation
+            false,  // is_targeted_mode
         )
 
         ch_versions = ch_versions.mix(COBALT_PROFILING.out.versions)
@@ -306,13 +308,11 @@ workflow WGTS {
             ref_data.genome_fai,
             ref_data.genome_dict,
             ref_data.genome_img,
-            hmf_data.sv_prep_blocklist,
             hmf_data.known_fusions,
             hmf_data.gridss_pon_breakends,
             hmf_data.gridss_pon_breakpoints,
             hmf_data.repeatmasker_annotations,
-            hmf_data.decoy_sequences_image,
-            hmf_data.unmap_regions,
+            hmf_data.unmap_regions
         )
 
         ch_versions = ch_versions.mix(ESVEE_CALLING.out.versions)
@@ -350,15 +350,16 @@ workflow WGTS {
             ref_data.genome_version,
             ref_data.genome_fai,
             ref_data.genome_dict,
+            hmf_data.sage_pon,
             hmf_data.sage_known_hotspots_somatic,
             hmf_data.sage_known_hotspots_germline,
-            hmf_data.sage_actionable_panel,
-            hmf_data.sage_coverage_panel,
             hmf_data.sage_highconf_regions,
             hmf_data.segment_mappability,
             hmf_data.driver_gene_panel,
             hmf_data.ensembl_data_resources,
+            hmf_data.gnomad_resource,
             true,  // enable_germline
+            false, // is_targeted_mode
         )
 
         ch_versions = ch_versions.mix(SAGE_CALLING.out.versions)
@@ -392,8 +393,8 @@ workflow WGTS {
             ref_data.genome_fasta,
             ref_data.genome_version,
             ref_data.genome_fai,
-            hmf_data.sage_pon,
             [],  // sage_pon_artefacts
+            hmf_data.sage_pon,
             hmf_data.sage_blocklist_regions,
             hmf_data.sage_blocklist_sites,
             hmf_data.clinvar_annotations,
@@ -474,6 +475,7 @@ workflow WGTS {
             ref_data.genome_fai,
             ref_data.genome_dict,
             run_config.stages.orange,  // enable_germline [run for ORANGE but not Neo]
+            false, // is_targeted_mode
         )
 
         ch_versions = ch_versions.mix(SAGE_APPEND.out.versions)
@@ -555,6 +557,8 @@ workflow WGTS {
             ch_redux_dna_normal_out,
             ref_data.genome_fasta,
             ref_data.genome_version,
+            hmf_data.driver_gene_panel,
+            hmf_data.ensembl_data_resources,
         )
 
         ch_versions = ch_versions.mix(BAMTOOLS_METRICS.out.versions)
@@ -655,6 +659,7 @@ workflow WGTS {
             ref_data.genome_fai,
             hmf_data.lilac_resources,
             ref_data_hla_slice_bed,
+            false,  // is_targeted_mode
         )
 
         ch_versions = ch_versions.mix(LILAC_CALLING.out.versions)
@@ -706,7 +711,7 @@ workflow WGTS {
             hmf_data.virusbreakend_db,
             hmf_data.virus_taxonomy_db,
             hmf_data.virus_reporting_db,
-            hmf_data.virus_blacklist_db,
+            hmf_data.virus_blocklist_db,
             gridss_config,
         )
 

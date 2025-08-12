@@ -60,7 +60,8 @@ process CUPPA {
         ${isofox_dir_arg} \\
         ${ref_alt_sj_sites_arg} \\
         -ref_genome_version ${genome_ver} \\
-        -output_dir cuppa/
+        -output_dir cuppa/ \\
+        -log_level ${params.module_log_level}
 
     # Make predictions
     python -m cuppa.predict \\

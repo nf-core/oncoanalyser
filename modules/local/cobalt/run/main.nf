@@ -4,14 +4,15 @@ process COBALT {
 
     conda "${moduleDir}/environment.yml"
     container "${ workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container ?
-        'https://depot.galaxyproject.org/singularity/hmftools-cobalt:2.0--hdfd78af_0' :
-        'biocontainers/hmftools-cobalt:2.0--hdfd78af_0' }"
+        'https://depot.galaxyproject.org/singularity/hmftools-cobalt:2.1--hdfd78af_1' :
+        'biocontainers/hmftools-cobalt:2.1--hdfd78af_1' }"
 
     input:
     tuple val(meta), path(tumor_bam), path(normal_bam), path(tumor_bai), path(normal_bai)
     path gc_profile
     path diploid_regions
     path target_region_normalisation
+    val is_targeted_mode
 
     output:
     tuple val(meta), path('cobalt/'), emit: cobalt_dir
@@ -29,16 +30,15 @@ process COBALT {
     def reference_arg = meta.containsKey('normal_id') ? "-reference ${meta.normal_id}" : ''
     def reference_bam_arg = normal_bam ? "-reference_bam ${normal_bam}" : ''
 
-    def diploid_regions_arg = diploid_regions ? "-tumor_only_diploid_bed ${diploid_regions}" : ''
-    def target_region_arg = target_region_normalisation ? "-target_region ${target_region_normalisation}" : ''
+    def target_region_norm_file_arg = target_region_normalisation ? "-target_region_norm_file ${target_region_normalisation}" : ''
 
-    def run_mode = Utils.getEnumFromString(params.mode, Constants.RunMode)
-    def effective_run_mode = run_mode === Constants.RunMode.PURITY_ESTIMATE
-        ? Utils.getEnumFromString(params.purity_estimate_mode, Constants.RunMode)
-        : run_mode
+    def is_tumor_only_mode = !meta.containsKey('normal_id')
 
-    def pcf_gamma_arg = effective_run_mode === Constants.RunMode.TARGETED && !meta.containsKey('normal_id')
+    def pcf_gamma_arg = is_targeted_mode && is_tumor_only_mode
         ? "-pcf_gamma 50" : ""
+
+    def diploid_regions_arg = !is_targeted_mode && is_tumor_only_mode
+        ? "-tumor_only_diploid_bed ${diploid_regions}" : ""
 
     """
     cobalt \\
@@ -51,9 +51,10 @@ process COBALT {
         -threads ${task.cpus} \\
         -gc_profile ${gc_profile} \\
         ${diploid_regions_arg} \\
-        ${target_region_arg} \\
+        ${target_region_norm_file_arg} \\
         ${pcf_gamma_arg} \\
-        -output_dir cobalt/
+        -output_dir cobalt/ \\
+        -log_level ${params.module_log_level}
 
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":

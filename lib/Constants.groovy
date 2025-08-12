@@ -43,7 +43,7 @@ class Constants {
         FAI,
         DICT,
         IMG,
-        BWA_INDEX, DNA_ALIGNMENT,
+        BWAMEM2_INDEX, DNA_ALIGNMENT,
         GRIDSS_INDEX,
         STAR_INDEX, RNA_ALIGNMENT,
         HMFTOOLS,
@@ -75,14 +75,18 @@ class Constants {
         WISP,
     }
 
+    static List DEFAULT_EXCLUDED_PROCESSES = [] // For experimental tools
+
     static enum FileType {
         // Generic
         BAM,
         BAI,
+        CRAM,
+        CRAI,
         FASTQ,
         // Redux
         BAM_REDUX,
-        REDUX_DUP_FREQ_TSV,
+        CRAM_REDUX,
         REDUX_JITTER_TSV,
         REDUX_MS_TSV,
         // Process
@@ -191,12 +195,6 @@ class Constants {
             SequenceType.DNA,
         ],
 
-        REDUX_DUP_FREQ_TSV_TUMOR: [
-            FileType.REDUX_DUP_FREQ_TSV,
-            SampleType.TUMOR,
-            SequenceType.DNA,
-        ],
-
         REDUX_JITTER_TSV_TUMOR: [
             FileType.REDUX_JITTER_TSV,
             SampleType.TUMOR,
@@ -215,12 +213,6 @@ class Constants {
             SequenceType.DNA,
         ],
 
-        REDUX_DUP_FREQ_TSV_NORMAL: [
-            FileType.REDUX_DUP_FREQ_TSV,
-            SampleType.NORMAL,
-            SequenceType.DNA,
-        ],
-
         REDUX_JITTER_TSV_NORMAL: [
             FileType.REDUX_JITTER_TSV,
             SampleType.NORMAL,
@@ -235,12 +227,6 @@ class Constants {
 
         BAM_REDUX_DNA_DONOR: [
             FileType.BAM_REDUX,
-            SampleType.DONOR,
-            SequenceType.DNA,
-        ],
-
-        REDUX_DUP_FREQ_TSV_DONOR: [
-            FileType.REDUX_DUP_FREQ_TSV,
             SampleType.DONOR,
             SequenceType.DNA,
         ],

@@ -4,8 +4,8 @@ process ORANGE {
 
     conda "${moduleDir}/environment.yml"
     container "${ workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container ?
-        'https://depot.galaxyproject.org/singularity/hmftools-orange:3.8.1--hdfd78af_0' :
-        'biocontainers/hmftools-orange:3.8.1--hdfd78af_0' }"
+        'https://depot.galaxyproject.org/singularity/hmftools-orange:4.1--hdfd78af_0' :
+        'biocontainers/hmftools-orange:4.1--hdfd78af_0' }"
 
     input:
     tuple val(meta),
@@ -163,7 +163,8 @@ process ORANGE {
         -ensembl_data_dir ${ensembl_data_resources} \\
         ${isofox_gene_distribution_arg} \\
         ${isofox_alt_sj_arg} \\
-        -output_dir output/
+        -output_dir output/ \\
+        -log_level ${params.module_log_level}
 
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":

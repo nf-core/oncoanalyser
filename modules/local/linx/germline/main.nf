@@ -4,8 +4,8 @@ process LINX_GERMLINE {
 
     conda "${moduleDir}/environment.yml"
     container "${ workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container ?
-        'https://depot.galaxyproject.org/singularity/hmftools-linx:2.0.2--hdfd78af_0' :
-        'biocontainers/hmftools-linx:2.0.2--hdfd78af_0' }"
+        'https://depot.galaxyproject.org/singularity/hmftools-linx:2.1--hdfd78af_0' :
+        'biocontainers/hmftools-linx:2.1--hdfd78af_0' }"
 
     input:
     tuple val(meta), path(sv_vcf)
@@ -36,7 +36,8 @@ process LINX_GERMLINE {
         -ref_genome_version ${genome_ver} \\
         -ensembl_data_dir ${ensembl_data_resources} \\
         -driver_gene_panel ${driver_gene_panel} \\
-        -output_dir linx_germline/
+        -output_dir linx_germline/ \\
+        -log_level ${params.module_log_level}
 
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":

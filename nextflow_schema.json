@@ -74,18 +74,18 @@
                     "fa_icon": "fas fa-palette"
                 },
                 "processes_manual": {
-                    "type": "boolean",
-                    "description": "Run only processes manually provided in processes_include.",
+                    "type": "string",
+                    "description": "Manually run processes provided as a comma separated list.",
                     "fa_icon": "fas fa-diagram-project"
                 },
                 "processes_exclude": {
                     "type": "string",
-                    "description": "Pipeline processes to exclude.",
+                    "description": "Exclude processes provided as a comma separated list.",
                     "fa_icon": "fas fa-diagram-project"
                 },
                 "processes_include": {
                     "type": "string",
-                    "description": "Pipeline processes to include.",
+                    "description": "Include processes that are excluded by default, provided as a comma separated list.",
                     "fa_icon": "fas fa-diagram-project"
                 },
                 "ref_data_types": {
@@ -177,12 +177,19 @@
                 },
                 "driver_gene_panel": {
                     "type": "string",
-                    "description": "User defined driver gene panel used in panel resource creation.",
+                    "description": "User defined driver gene panel used in panel resource creation, or for overriding the default file located in ref_data_hmf_data_path",
                     "fa_icon": "fas fa-cog"
                 },
                 "target_regions_bed": {
                     "type": "string",
                     "description": "User defined target regions BED used in panel resource creation.",
+                    "fa_icon": "fas fa-cog"
+                },
+                "module_log_level": {
+                    "type": "string",
+                    "enum": ["ALL", "TRACE", "DEBUG", "INFO", "WARN", "ERROR", "FATAL", "OFF"],
+                    "description": "Log level filter for WiGiTS modules",
+                    "default": "DEBUG",
                     "fa_icon": "fas fa-cog"
                 }
             }

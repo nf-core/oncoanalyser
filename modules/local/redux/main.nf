@@ -4,8 +4,8 @@ process REDUX {
 
     conda "${moduleDir}/environment.yml"
     container "${ workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container ?
-        'https://depot.galaxyproject.org/singularity/hmftools-redux:1.1.2--hdfd78af_0' :
-        'biocontainers/hmftools-redux:1.1.2--hdfd78af_0' }"
+        'https://depot.galaxyproject.org/singularity/hmftools-redux:1.2--hdfd78af_0' :
+        'biocontainers/hmftools-redux:1.2--hdfd78af_0' }"
 
     input:
     tuple val(meta), path(bams), path(bais)
@@ -58,7 +58,7 @@ process REDUX {
         ${umi_args} \\
         -write_stats \\
         -threads ${task.cpus} \\
-        -log_level DEBUG
+        -log_level ${params.module_log_level}
 
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":

@@ -179,7 +179,7 @@ workflow NEO_PREDICTION {
             def meta_scorer = [
                 key: meta.group_id,
                 id: meta.group_id,
-                sample_id: Utils.getTumorDnaSampleName(meta),
+                sample_id: Utils.getTumorDnaSampleName(meta, primary: true),
                 cancer_type: meta[Constants.InfoField.CANCER_TYPE],
             ]
 
@@ -188,7 +188,7 @@ workflow NEO_PREDICTION {
                 meta_scorer.sample_rna_id = Utils.getTumorRnaSampleName(meta)
 
                 def sage_somatic_append_selected = Utils.selectCurrentOrExisting(sage_somatic_append, meta, Constants.INPUT.SAGE_APPEND_DIR_TUMOR)
-                sage_somatic_append_vcf = file(sage_somatic_append_selected).resolve("${meta.sample_id}.sage.append.vcf.gz")
+                sage_somatic_append_vcf = file(sage_somatic_append_selected).resolve("${meta_scorer.sample_id}.sage.append.vcf.gz")
             }
 
             def inputs = [

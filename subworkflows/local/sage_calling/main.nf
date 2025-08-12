@@ -26,15 +26,16 @@ workflow SAGE_CALLING {
     genome_version               // channel: [mandatory] genome version
     genome_fai                   // channel: [mandatory] /path/to/genome_fai
     genome_dict                  // channel: [mandatory] /path/to/genome_dict
+    sage_pon                     // channel: [mandatory] /path/to/sage_pon
     sage_known_hotspots_somatic  // channel: [mandatory] /path/to/sage_known_hotspots_somatic
     sage_known_hotspots_germline // channel: [optional]  /path/to/sage_known_hotspots_germline
-    sage_actionable_panel        // channel: [mandatory] /path/to/sage_actionable_panel
-    sage_coverage_panel          // channel: [mandatory] /path/to/sage_coverage_panel
     sage_highconf_regions        // channel: [mandatory] /path/to/sage_highconf_regions
     segment_mappability          // channel: [mandatory] /path/to/segment_mappability
     driver_gene_panel            // channel: [mandatory] /path/to/driver_gene_panel
     ensembl_data_resources       // channel: [mandatory] /path/to/ensembl_data_resources/
+    gnomad_resource              // channel: [mandatory] /path/to/gnomad_resource
     enable_germline              // boolean: [mandatory] Enable germline mode
+    is_targeted_mode             // boolean: [mandatory] Running in targeted/panel mode?
 
     main:
     // Channel for version.yml files
@@ -62,15 +63,12 @@ workflow SAGE_CALLING {
             donor_dup_freq_tsv,  donor_jitter_tsv,  donor_ms_tsv ->
 
             def redux_tsv_list = [
-                tumor_dup_freq_tsv  ?: Utils.getInput(meta, Constants.INPUT.REDUX_DUP_FREQ_TSV_TUMOR),
                 tumor_jitter_tsv    ?: Utils.getInput(meta, Constants.INPUT.REDUX_JITTER_TSV_TUMOR),
                 tumor_ms_tsv        ?: Utils.getInput(meta, Constants.INPUT.REDUX_MS_TSV_TUMOR),
 
-                normal_dup_freq_tsv ?: Utils.getInput(meta, Constants.INPUT.REDUX_DUP_FREQ_TSV_NORMAL),
                 normal_jitter_tsv   ?: Utils.getInput(meta, Constants.INPUT.REDUX_JITTER_TSV_NORMAL),
                 normal_ms_tsv       ?: Utils.getInput(meta, Constants.INPUT.REDUX_MS_TSV_NORMAL),
 
-                donor_dup_freq_tsv  ?: Utils.getInput(meta, Constants.INPUT.REDUX_DUP_FREQ_TSV_DONOR),
                 donor_jitter_tsv    ?: Utils.getInput(meta, Constants.INPUT.REDUX_JITTER_TSV_DONOR),
                 donor_ms_tsv        ?: Utils.getInput(meta, Constants.INPUT.REDUX_MS_TSV_DONOR),
             ]
@@ -137,10 +135,10 @@ workflow SAGE_CALLING {
         genome_fai,
         genome_dict,
         sage_known_hotspots_germline,
-        sage_actionable_panel,
-        sage_coverage_panel,
+        driver_gene_panel,
         sage_highconf_regions,
         ensembl_data_resources,
+        is_targeted_mode,
     )
 
     ch_versions = ch_versions.mix(SAGE_GERMLINE.out.versions)
@@ -192,11 +190,13 @@ workflow SAGE_CALLING {
         genome_version,
         genome_fai,
         genome_dict,
+        sage_pon,
         sage_known_hotspots_somatic,
-        sage_actionable_panel,
-        sage_coverage_panel,
+        driver_gene_panel,
         sage_highconf_regions,
         ensembl_data_resources,
+        gnomad_resource,
+        is_targeted_mode,
     )
 
     ch_versions = ch_versions.mix(SAGE_SOMATIC.out.versions)

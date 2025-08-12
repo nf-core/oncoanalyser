@@ -189,9 +189,9 @@ workflow TARGETED {
         ch_redux_dna_normal_out = ch_inputs.map { meta -> [meta, [], []] }
         ch_redux_dna_donor_out = ch_inputs.map { meta -> [meta, [], []] }
 
-        ch_redux_dna_tumor_tsv_out = ch_inputs.map { meta -> [meta, [], [], [], []] }
-        ch_redux_dna_normal_tsv_out = ch_inputs.map { meta -> [meta, [], [], [], []] }
-        ch_redux_dna_donor_tsv_out = ch_inputs.map { meta -> [meta, [], [], [], []] }
+        ch_redux_dna_tumor_tsv_out = ch_inputs.map { meta -> [meta, [], [], []] }
+        ch_redux_dna_normal_tsv_out = ch_inputs.map { meta -> [meta, [], [], []] }
+        ch_redux_dna_donor_tsv_out = ch_inputs.map { meta -> [meta, [], [], []] }
 
     }
 
@@ -249,6 +249,7 @@ workflow TARGETED {
             ref_data.genome_version,
             hmf_data.heterozygous_sites,
             panel_data.target_region_bed,
+            [],  // tumor_min_depth
         )
 
         ch_versions = ch_versions.mix(AMBER_PROFILING.out.versions)
@@ -275,6 +276,7 @@ workflow TARGETED {
             hmf_data.gc_profile,
             hmf_data.diploid_bed,
             panel_data.target_region_normalisation,
+            true,  // is_targeted_mode
         )
 
         ch_versions = ch_versions.mix(COBALT_PROFILING.out.versions)
@@ -304,12 +306,10 @@ workflow TARGETED {
             ref_data.genome_fai,
             ref_data.genome_dict,
             ref_data.genome_img,
-            hmf_data.sv_prep_blocklist,
             hmf_data.known_fusions,
             hmf_data.gridss_pon_breakends,
             hmf_data.gridss_pon_breakpoints,
             hmf_data.repeatmasker_annotations,
-            hmf_data.decoy_sequences_image,
             hmf_data.unmap_regions,
         )
 
@@ -348,15 +348,16 @@ workflow TARGETED {
             ref_data.genome_version,
             ref_data.genome_fai,
             ref_data.genome_dict,
+            hmf_data.sage_pon,
             hmf_data.sage_known_hotspots_somatic,
             hmf_data.sage_known_hotspots_germline,
-            panel_data.sage_actionable_panel,
-            panel_data.sage_coverage_panel,
             hmf_data.sage_highconf_regions,
             hmf_data.segment_mappability,
             panel_data.driver_gene_panel,
             hmf_data.ensembl_data_resources,
+            hmf_data.gnomad_resource,
             true,  // enable_germline
+            true,  // is_targeted_mode
         )
 
         ch_versions = ch_versions.mix(SAGE_CALLING.out.versions)
@@ -390,8 +391,8 @@ workflow TARGETED {
             ref_data.genome_fasta,
             ref_data.genome_version,
             ref_data.genome_fai,
-            hmf_data.sage_pon,
             panel_data.pon_artefacts,
+            hmf_data.sage_pon,
             hmf_data.sage_blocklist_regions,
             hmf_data.sage_blocklist_sites,
             hmf_data.clinvar_annotations,
@@ -472,6 +473,7 @@ workflow TARGETED {
             ref_data.genome_fai,
             ref_data.genome_dict,
             true,  // enable_germline
+            true,  // is_targeted_mode
         )
 
         ch_versions = ch_versions.mix(SAGE_APPEND.out.versions)
@@ -553,6 +555,8 @@ workflow TARGETED {
             ch_redux_dna_normal_out,
             ref_data.genome_fasta,
             ref_data.genome_version,
+            panel_data.driver_gene_panel,
+            hmf_data.ensembl_data_resources,
         )
 
         ch_versions = ch_versions.mix(BAMTOOLS_METRICS.out.versions)
@@ -605,6 +609,7 @@ workflow TARGETED {
             ref_data.genome_fai,
             hmf_data.lilac_resources,
             ref_data_hla_slice_bed,
+            true,  // is_targeted_mode
         )
 
         ch_versions = ch_versions.mix(LILAC_CALLING.out.versions)

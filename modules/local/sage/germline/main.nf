@@ -1,11 +1,11 @@
 process SAGE_GERMLINE {
     tag "${meta.id}"
-    label 'process_high'
+    label 'process_medium'
 
     conda "${moduleDir}/environment.yml"
     container "${ workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container ?
-        'https://depot.galaxyproject.org/singularity/hmftools-sage:4.0--hdfd78af_0' :
-        'biocontainers/hmftools-sage:4.0--hdfd78af_0' }"
+        'https://depot.galaxyproject.org/singularity/hmftools-sage:4.1--hdfd78af_0' :
+        'biocontainers/hmftools-sage:4.1--hdfd78af_0' }"
 
     input:
     tuple val(meta), path(tumor_bam), path(normal_bam), path(tumor_bai), path(normal_bai), path(redux_tsvs)
@@ -14,10 +14,10 @@ process SAGE_GERMLINE {
     path genome_fai
     path genome_dict
     path sage_known_hotspots_germline
-    path sage_actionable_panel
-    path sage_coverage_panel
+    path driver_gene_panel
     path sage_highconf_regions
     path ensembl_data_resources
+    val is_targeted_mode
 
     output:
     tuple val(meta), path('germline/*.sage.germline.vcf.gz'), path('germline/*.sage.germline.vcf.gz.tbi'), emit: vcf
@@ -25,26 +25,19 @@ process SAGE_GERMLINE {
     path 'versions.yml'                                                                                  , emit: versions
     path '.command.*'                                                                                    , emit: command_files
 
-    def run_mode = Utils.getEnumFromString(params.mode, Constants.RunMode)
-    def effective_run_mode = run_mode === Constants.RunMode.PURITY_ESTIMATE
-        ? Utils.getEnumFromString(params.purity_estimate_mode, Constants.RunMode)
-        : run_mode
-
-    def high_depth_mode_arg = effective_run_mode === Constants.RunMode.TARGETED ? "-high_depth_mode" : ""
-
     when:
     task.ext.when == null || task.ext.when
 
     script:
     def args = task.ext.args ?: ''
 
-    def xmx_mod = task.ext.xmx_mod ?: 0.95
+    def high_depth_mode_arg = is_targeted_mode ? "-high_depth_mode" : ""
 
     """
     mkdir -p germline/
 
     sage \\
-        -Xmx${Math.round(task.memory.bytes * xmx_mod)} \\
+        -Xmx${Math.round(task.memory.bytes * 0.95)} \\
         ${args} \\
         -tumor ${meta.normal_id} \\
         -tumor_bam ${normal_bam} \\
@@ -54,8 +47,7 @@ process SAGE_GERMLINE {
         -ref_genome ${genome_fasta} \\
         -ref_genome_version ${genome_ver} \\
         -hotspots ${sage_known_hotspots_germline} \\
-        -panel_bed ${sage_actionable_panel} \\
-        -coverage_bed ${sage_coverage_panel} \\
+        -driver_gene_panel ${driver_gene_panel} \\
         -high_confidence_bed ${sage_highconf_regions} \\
         -ensembl_data_dir ${ensembl_data_resources} \\
         -germline \\
@@ -64,11 +56,12 @@ process SAGE_GERMLINE {
         ${high_depth_mode_arg} \\
         -bqr_write_plot \\
         -threads ${task.cpus} \\
-        -output_vcf germline/${meta.tumor_id}.sage.germline.vcf.gz
+        -output_vcf germline/${meta.tumor_id}.sage.germline.vcf.gz \\
+        -log_level ${params.module_log_level}
 
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":
-        sage: \$(sage -version | sed -n '/^Sage version / { s/^.* //p }')
+        sage: \$(sage -version | sed 's/^.* //')
     END_VERSIONS
     """
 
