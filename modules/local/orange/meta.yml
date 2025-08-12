@@ -1,0 +1,128 @@
+name: orange
+description: Summarise key outputs of the HMF toolkit
+keywords:
+  - cancer report
+tools:
+  - orange:
+      description: Summarises key outputs of the HMF toolkit
+      homepage: https://github.com/hartwigmedical/hmftools/tree/master/orange
+      documentation: https://github.com/hartwigmedical/hmftools/tree/master/orange
+      licence: ["GPL v3"]
+input:
+  - meta:
+      type: map
+      description: |
+        Groovy Map containing sample information
+        e.g. [id: 'sample_id', tumor_id: 'tumor_name', normal_id: 'normal_name']
+  - bamtools_somatic_dir:
+      type: directory
+      description: BamTools somatic output directory
+  - bamtools_germline_dir:
+      type: directory
+      description: BamTools germline output directory
+  - sage_somatic_dir:
+      type: directory
+      description: SAGE somatic output directory
+  - sage_germline_dir:
+      type: directory
+      description: SAGE germline output directory (optional)
+  - smlv_somatic_vcf:
+      type: file
+      description: Small somatic variant VCF file (annotated with RNA data) (optional)
+  - smlv_germline_vcf:
+      type: file
+      description: Small germline variant VCF file (annotated with RNA data) (optional)
+  - purple_dir:
+      type: directory
+      description: PURPLE output directory
+  - linx_somatic_anno_dir:
+      type: directory
+      description: LINX somatic annotation output directory
+  - linx_somatic_plot_dir:
+      type: directory
+      description: LINX somatic plot output directory
+  - linx_germline_anno_dir:
+      type: directory
+      description: LINX germline annotation output directory (optional)
+  - virusinterpreter_dir:
+      type: directory
+      description: Virus Interpreter output directory (optional)
+  - chord_dir:
+      type: directory
+      description: CHORD output directory (optional)
+  - sigs_dir:
+      type: directory
+      description: Sigs output directory (optional)
+  - lilac_dir:
+      type: directory
+      description: LILAC output directory
+  - cuppa_dir:
+      type: directory
+      description: CUPPA output directory (optional)
+  - peach_dir:
+      type: directory
+      description: PEACH output directory (optional)
+  - isofox_dir:
+      type: directory
+      description: Isofox output directory (optional)
+  - genome_ver:
+      type: string
+      description: Reference genome version
+  - disease_ontology:
+      type: file
+      description: Disease ontology file
+      pattern: "*.{json}"
+  - cohort_mapping:
+      type: file
+      description: HMF cohort mapping file
+      pattern: "*.{tsv}"
+  - cohort_percentiles:
+      type: file
+      description: HMF cohort percentiles file
+      pattern: "*.{tsv}"
+  - known_fusion_data:
+      type: file
+      description: Known fusions data file
+      pattern: "*.{csv}"
+  - driver_gene_panel:
+      type: file
+      description: Driver gene panel file
+      pattern: "*.{tsv}"
+  - ensembl_data_resources:
+      type: directory
+      description: HMF ensembl data resources directory
+  - sigs_etiology:
+      type: file
+      description: Mutational signature etiologies file
+      pattern: "*.{tsv}"
+  - isofox_alt_sj:
+      type: file
+      description: Isofox cohort alternate slice junction file
+      pattern: "*.{csv}"
+  - isofox_gene_distribution:
+      type: file
+      description: Isofox cohort gene expression file
+      pattern: "*.{csv}"
+  - pipeline_version:
+      type: string
+      description: Pipeline version to display in report
+output:
+  - meta:
+      type: map
+      description: |
+        Groovy Map containing sample information
+        e.g. [id: 'sample_id']
+  - pdf:
+      type: file
+      description: PDF report file (optional)
+      pattern: "*.{pdf}"
+  - json:
+      type: file
+      description: Compiled JSON output file (optional)
+      pattern: "*.{json}"
+  - versions:
+      type: file
+      description: File containing software versions
+      pattern: "versions.yml"
+authors:
+  - "@scwatts"

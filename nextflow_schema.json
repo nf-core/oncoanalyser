@@ -28,7 +28,15 @@
                     "format": "directory-path",
                     "description": "The output directory where the results will be saved. You have to use absolute paths to storage on Cloud infrastructure.",
                     "fa_icon": "fas fa-folder-open"
-                },
+                }
+            }
+        },
+        "other_options": {
+            "title": "Other options",
+            "type": "object",
+            "fa_icon": "fas fa-book",
+            "description": "Other options specific to this pipeline.",
+            "properties": {
                 "email": {
                     "type": "string",
                     "description": "Email address for completion summary.",
@@ -36,40 +44,187 @@
                     "help_text": "Set this parameter to your e-mail address to get a summary e-mail with details of the run sent to you when the workflow exits. If set in your user config file (`~/.nextflow/config`) then you don't need to specify this on the command line for every run.",
                     "pattern": "^([a-zA-Z0-9_\\-\\.]+)@([a-zA-Z0-9_\\-\\.]+)\\.([a-zA-Z]{2,5})$"
                 },
-                "multiqc_title": {
+                "mode": {
                     "type": "string",
-                    "description": "MultiQC report title. Printed as page header, used for filename if not otherwise specified.",
-                    "fa_icon": "fas fa-file-signature"
+                    "description": "Workflow run mode.",
+                    "fa_icon": "fas fa-diagram-project",
+                    "pattern": "^(wgts|targeted|purity_estimate|panel_resource_creation|prepare_reference)"
+                },
+                "purity_estimate_mode": {
+                    "type": "string",
+                    "description": "Purity estimate workflow run mode.",
+                    "fa_icon": "fas fa-diagram-project",
+                    "pattern": "^(wgts|targeted)"
+                },
+                "panel": {
+                    "type": "string",
+                    "description": "Name of panel to use.",
+                    "fa_icon": "fas fa-book"
+                },
+                "force_genome": {
+                    "type": "boolean",
+                    "description": "Skip check for restricted genome.",
+                    "default": false,
+                    "fa_icon": "fas fa-palette"
+                },
+                "force_panel": {
+                    "type": "boolean",
+                    "description": "Skip check for known panels.",
+                    "default": false,
+                    "fa_icon": "fas fa-palette"
+                },
+                "processes_manual": {
+                    "type": "string",
+                    "description": "Manually run processes provided as a comma separated list.",
+                    "fa_icon": "fas fa-diagram-project"
+                },
+                "processes_exclude": {
+                    "type": "string",
+                    "description": "Exclude processes provided as a comma separated list.",
+                    "fa_icon": "fas fa-diagram-project"
+                },
+                "processes_include": {
+                    "type": "string",
+                    "description": "Include processes that are excluded by default, provided as a comma separated list.",
+                    "fa_icon": "fas fa-diagram-project"
+                },
+                "ref_data_types": {
+                    "type": "string",
+                    "description": "Which reference data types to download and extract.",
+                    "fa_icon": "fas fa-diagram-project"
+                },
+                "create_stub_placeholders": {
+                    "type": "boolean",
+                    "description": "Create placeholders for reference data during stub run.",
+                    "default": false,
+                    "fa_icon": "fas fa-diagram-project"
+                },
+                "max_fastq_records": {
+                    "type": "integer",
+                    "description": "When positive, will use fastp to split fastq files so that each resultant fastq file has no more than max_fastq_records records. When nonpositive, fastp is not used and the provided fastq files are passed as-is to the aligner.",
+                    "default": 10000000,
+                    "fa_icon": "fas fa-cog"
+                },
+                "fastp_umi_enabled": {
+                    "type": "boolean",
+                    "description": "Enable fastp UMI processing.",
+                    "default": false,
+                    "fa_icon": "fas fa-cog"
+                },
+                "fastp_umi_location": {
+                    "type": "string",
+                    "description": "fastp UMI location parameter (--umi_loc).",
+                    "fa_icon": "fas fa-cog"
+                },
+                "fastp_umi_length": {
+                    "type": "integer",
+                    "description": "fastp UMI length parameter (--umi_len)",
+                    "default": 0,
+                    "fa_icon": "fas fa-cog"
+                },
+                "fastp_umi_skip": {
+                    "type": "integer",
+                    "description": "fastp UMI skip parameter (--umi_skip)",
+                    "default": -1,
+                    "fa_icon": "fas fa-cog"
+                },
+                "redux_umi_enabled": {
+                    "type": "boolean",
+                    "description": "Enable REDUX UMI processing.",
+                    "default": false,
+                    "fa_icon": "fas fa-cog"
+                },
+                "redux_umi_duplex_delim": {
+                    "type": "string",
+                    "description": "UMI duplex delimiter as used by REDUX.",
+                    "fa_icon": "fas fa-cog"
+                },
+                "gridss_config": {
+                    "type": "string",
+                    "description": "Path to GRIDSS configuration file.",
+                    "fa_icon": "fas fa-cog"
+                },
+                "isofox_read_length": {
+                    "type": "integer",
+                    "description": "User defined RNA read length used for Isofox.",
+                    "fa_icon": "fas fa-cog"
+                },
+                "isofox_gc_ratios": {
+                    "type": "string",
+                    "description": "User defined Isofox expected GC ratios file.",
+                    "fa_icon": "fas fa-cog"
+                },
+                "isofox_counts": {
+                    "type": "string",
+                    "description": "User defined Isofox expected counts files (read length dependent).",
+                    "fa_icon": "fas fa-cog"
+                },
+                "isofox_tpm_norm": {
+                    "type": "string",
+                    "description": "User defined Isofox TPM normalisation file for panel data.",
+                    "fa_icon": "fas fa-cog"
+                },
+                "isofox_gene_ids": {
+                    "type": "string",
+                    "description": "User defined Isofox gene list file for panel data.",
+                    "fa_icon": "fas fa-cog"
+                },
+                "isofox_functions": {
+                    "type": "string",
+                    "description": "Semicolon-separated list of Isofox functions to run",
+                    "default": "TRANSCRIPT_COUNTS;ALT_SPLICE_JUNCTIONS;FUSIONS;RETAINED_INTRONS",
+                    "fa_icon": "fas fa-cog"
+                },
+                "driver_gene_panel": {
+                    "type": "string",
+                    "description": "User defined driver gene panel used in panel resource creation, or for overriding the default file located in ref_data_hmf_data_path",
+                    "fa_icon": "fas fa-cog"
+                },
+                "target_regions_bed": {
+                    "type": "string",
+                    "description": "User defined target regions BED used in panel resource creation.",
+                    "fa_icon": "fas fa-cog"
+                },
+                "module_log_level": {
+                    "type": "string",
+                    "enum": ["ALL", "TRACE", "DEBUG", "INFO", "WARN", "ERROR", "FATAL", "OFF"],
+                    "description": "Log level filter for WiGiTS modules",
+                    "default": "DEBUG",
+                    "fa_icon": "fas fa-cog"
                 }
             }
         },
-        "reference_genome_options": {
-            "title": "Reference genome options",
+        "reference_data_options": {
+            "title": "Reference data options",
             "type": "object",
             "fa_icon": "fas fa-dna",
-            "description": "Reference genome related files and options required for the workflow.",
+            "description": "Reference data files and options required for the workflow.",
             "properties": {
                 "genome": {
                     "type": "string",
-                    "description": "Name of iGenomes reference.",
-                    "fa_icon": "fas fa-book",
-                    "help_text": "If using a reference genome configured in the pipeline using iGenomes, use this parameter to give the ID for the reference. This is then used to build the full paths for all required reference genome files e.g. `--genome GRCh38`. \n\nSee the [nf-core website docs](https://nf-co.re/usage/reference_genomes) for more details."
+                    "description": "Name of genome reference.",
+                    "fa_icon": "fas fa-book"
                 },
-                "fasta": {
+                "genome_version": {
                     "type": "string",
-                    "format": "file-path",
-                    "exists": true,
-                    "mimetype": "text/plain",
-                    "pattern": "^\\S+\\.fn?a(sta)?(\\.gz)?$",
-                    "description": "Path to FASTA genome file.",
-                    "help_text": "This parameter is *mandatory* if `--genome` is not specified. If you don't have a BWA index available this will be generated for you automatically. Combine with `--save_reference` to save BWA index for future runs.",
-                    "fa_icon": "far fa-file-code"
+                    "description": "Version of reference genome.",
+                    "fa_icon": "far fa-file-code",
+                    "enum": ["37", "38", 37, 38],
+                    "hidden": true
+                },
+                "genome_type": {
+                    "type": "string",
+                    "description": "Type of reference genome.",
+                    "fa_icon": "far fa-file-code",
+                    "enum": ["alt", "no_alt"],
+                    "hidden": true
                 },
                 "igenomes_ignore": {
                     "type": "boolean",
                     "description": "Do not load the iGenomes reference config.",
                     "fa_icon": "fas fa-ban",
                     "hidden": true,
+                    "default": true,
                     "help_text": "Do not load `igenomes.config` when running the pipeline. You may choose this option if you observe clashes between custom parameters and those supplied in `igenomes.config`."
                 },
                 "igenomes_base": {
@@ -79,6 +234,71 @@
                     "fa_icon": "fas fa-ban",
                     "hidden": true,
                     "default": "s3://ngi-igenomes/igenomes/"
+                },
+                "hmf_genomes_base": {
+                    "type": "string",
+                    "format": "directory-path",
+                    "description": "The base path to the HMF genome reference files",
+                    "fa_icon": "fas fa-ban",
+                    "hidden": true,
+                    "default": "https://pub-cf6ba01919994c3cbd354659947f74d8.r2.dev/genomes"
+                },
+                "ref_data_hmf_data_path": {
+                    "type": "string",
+                    "description": "Path to HMF data.",
+                    "fa_icon": "far fa-folder-open"
+                },
+                "ref_data_panel_data_path": {
+                    "type": "string",
+                    "description": "Path to panel data.",
+                    "fa_icon": "far fa-folder-open"
+                },
+                "ref_data_genome_fasta": {
+                    "type": "string",
+                    "description": "Path to reference genome FASTA.",
+                    "fa_icon": "far fa-file-code"
+                },
+                "ref_data_genome_fai": {
+                    "type": "string",
+                    "description": "Path to reference genome FAI.",
+                    "fa_icon": "far fa-file-code"
+                },
+                "ref_data_genome_dict": {
+                    "type": "string",
+                    "description": "Path to reference genome dict.",
+                    "fa_icon": "far fa-file-code"
+                },
+                "ref_data_genome_bwamem2_index": {
+                    "type": "string",
+                    "description": "Path to reference genome bwa-mem2 index.",
+                    "fa_icon": "far fa-file-code"
+                },
+                "ref_data_genome_img": {
+                    "type": "string",
+                    "description": "Path to reference genome img.",
+                    "fa_icon": "far fa-file-code"
+                },
+                "ref_data_genome_gridss_index": {
+                    "type": "string",
+                    "description": "Path to reference genome GRIDSS index.",
+                    "fa_icon": "far fa-file-code"
+                },
+                "ref_data_genome_star_index": {
+                    "type": "string",
+                    "description": "Path to reference genome STAR index.",
+                    "fa_icon": "far fa-file-code"
+                },
+                "ref_data_genome_gtf": {
+                    "type": "string",
+                    "description": "Path to reference genome GTF.",
+                    "fa_icon": "far fa-file-code"
+                },
+                "ref_data_hla_slice_bed": {
+                    "type": "string",
+                    "format": "file-path",
+                    "pattern": "^\\S+\\.bed$",
+                    "description": "Path to HLA slice BED file.",
+                    "fa_icon": "far fa-file-code"
                 }
             }
         },
@@ -166,14 +386,6 @@
                     "fa_icon": "fas fa-remove-format",
                     "hidden": true
                 },
-                "max_multiqc_email_size": {
-                    "type": "string",
-                    "description": "File size limit when attaching MultiQC reports to summary emails.",
-                    "pattern": "^\\d+(\\.\\d+)?\\.?\\s*(K|M|G|T)?B$",
-                    "default": "25.MB",
-                    "fa_icon": "fas fa-file-upload",
-                    "hidden": true
-                },
                 "monochrome_logs": {
                     "type": "boolean",
                     "description": "Do not use coloured log outputs.",
@@ -187,24 +399,6 @@
                     "help_text": "Incoming hook URL for messaging service. Currently, MS Teams and Slack are supported.",
                     "hidden": true
                 },
-                "multiqc_config": {
-                    "type": "string",
-                    "format": "file-path",
-                    "description": "Custom config file to supply to MultiQC.",
-                    "fa_icon": "fas fa-cog",
-                    "hidden": true
-                },
-                "multiqc_logo": {
-                    "type": "string",
-                    "description": "Custom logo file to supply to MultiQC. File name must also be set in the MultiQC config file",
-                    "fa_icon": "fas fa-image",
-                    "hidden": true
-                },
-                "multiqc_methods_description": {
-                    "type": "string",
-                    "description": "Custom MultiQC yaml file containing HTML including a methods description.",
-                    "fa_icon": "fas fa-cog"
-                },
                 "validate_params": {
                     "type": "boolean",
                     "description": "Boolean whether to validate parameters against the schema at runtime",
@@ -216,7 +410,7 @@
                     "type": "string",
                     "fa_icon": "far fa-check-circle",
                     "description": "Base URL or local path to location of pipeline test dataset files",
-                    "default": "https://raw.githubusercontent.com/nf-core/test-datasets/",
+                    "default": "https://raw.githubusercontent.com/nf-core/test-datasets/oncoanalyser",
                     "hidden": true
                 },
                 "trace_report_suffix": {
@@ -233,10 +427,13 @@
             "$ref": "#/$defs/input_output_options"
         },
         {
-            "$ref": "#/$defs/reference_genome_options"
+            "$ref": "#/$defs/reference_data_options"
         },
         {
             "$ref": "#/$defs/institutional_config_options"
+        },
+        {
+            "$ref": "#/$defs/other_options"
         },
         {
             "$ref": "#/$defs/generic_options"

@@ -1,0 +1,65 @@
+name: teal
+description: TEAL measures telomere content, and estimates telomeric length based on WGS read data
+keywords:
+  - telomere
+  - telomere length
+  - rearrangements
+tools:
+  - teal:
+      description: TEAL measures telomere content, and estimates telomeric length based on WGS read data.
+      homepage: https://github.com/hartwigmedical/hmftools/tree/master/teal
+      documentation: https://github.com/hartwigmedical/hmftools/tree/master/teal
+      tool_dev_url: https://github.com/hartwigmedical/hmftools/tree/master/teal
+      licence: ["GPL v3"]
+input:
+  - meta:
+      type: map
+      description: |
+        Groovy Map containing sample information
+        e.g. [id: 'sample_id', tumor_id: 'tumor_name', normal_id: 'normal_name']
+  - tumor_bam:
+      type: file
+      description: Tumor BAM file (optional)
+      pattern: "*.{bam}"
+  - normal_bam:
+      type: file
+      description: Normal BAM file (optional)
+      pattern: "*.{bam}"
+  - tumor_bai:
+      type: file
+      description: Tumor BAI file (optional)
+      pattern: "*.{bai}"
+  - normal_bai:
+      type: file
+      description: Normal BAI file (optional)
+      pattern: "*.{bai}"
+  - tumor_wgs_metrics_dir:
+      type: directory
+      description: Tumor WGS metrics directory (optional)
+  - normal_wgs_metrics:
+      type: directory
+      description: Normal WGS metrics directory (optional)
+  - cobalt_dir:
+      type: directory
+      description: COBALT output directory
+  - purple_dir:
+      type: directory
+      description: PURPLE output directory (optional)
+  - genome_ver:
+      type: string
+      description: Reference genome version
+output:
+  - meta:
+      type: map
+      description: |
+        Groovy Map containing sample information
+        e.g. [id: 'sample_id', tumor_id: 'tumor_name', normal_id: 'normal_name']
+  - teal_dir:
+      type: directory
+      description: TEAL output directory
+  - versions:
+      type: file
+      description: File containing software versions
+      pattern: "versions.yml"
+authors:
+  - "@scwatts"

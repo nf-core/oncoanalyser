@@ -1,0 +1,51 @@
+name: bwa-mem2_mem
+description: The mem alignment algorithm of bwa-mem2
+keywords:
+  - bwa
+  - mem
+  - read alignment
+  - bwa-mem2
+tools:
+  - bwa-mem2:
+      description: Burrow-Wheeler Aligner for short-read alignment
+      homepage: https://github.com/bwa-mem2/bwa-mem2
+      documentation: https://github.com/bwa-mem2/bwa-mem2
+      licence: ["MIT"]
+input:
+  - meta:
+      type: map
+      description: |
+        Groovy Map containing sample information
+        e.g. [id: 'sample_id', tumor_id: 'tumor_name', normal_id: 'normal_name']
+  - reads_fwd:
+      type: file
+      description: Forward reads FASTQ file
+      pattern: "*.{fastq.gz}"
+  - reads_rev:
+      type: file
+      description: Reverse reads FASTQ file
+      pattern: "*.{fastq.gz}"
+  - genome_fasta:
+      type: file
+      description: Reference genome assembly FASTA file
+      pattern: "*.{fa,fasta}"
+  - genome_bwamem2_index:
+      type: directory
+      description: bwa-mem2 index directory
+output:
+  - meta:
+      type: map
+      description: |
+        Groovy Map containing sample information
+        e.g. [id: 'sample_id', tumor_id: 'tumor_name', normal_id: 'normal_name']
+  - bam:
+      type: list
+      description: BAM and BAI file
+      pattern: "*.{bam,bam.bai}"
+  - versions:
+      type: file
+      description: File containing software versions
+      pattern: "versions.yml"
+authors:
+  - "@scwatts"
+  - "@mkcmkc"
