@@ -34,7 +34,9 @@ process PEACH {
         -haplotypes_file ${haplotypes} \\
         -function_file ${haplotype_functions} \\
         -drugs_file ${drug_info} \\
-        -output_dir peach/
+        -output_dir peach/ \\
+        -log_level ${params.module_log_level}
+
 
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":

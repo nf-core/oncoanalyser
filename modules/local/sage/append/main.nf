@@ -4,8 +4,8 @@ process SAGE_APPEND {
 
     conda "${moduleDir}/environment.yml"
     container "${ workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container ?
-        'https://depot.galaxyproject.org/singularity/hmftools-sage:4.0--hdfd78af_0' :
-        'biocontainers/hmftools-sage:4.0--hdfd78af_0' }"
+        'https://depot.galaxyproject.org/singularity/hmftools-sage:4.1--hdfd78af_0' :
+        'biocontainers/hmftools-sage:4.1--hdfd78af_0' }"
 
     input:
     tuple val(meta), path(vcf), path(bams), path(bais), path(redux_tsvs)
@@ -13,6 +13,7 @@ process SAGE_APPEND {
     val genome_ver
     path genome_fai
     path genome_dict
+    val is_targeted_mode
 
     output:
     tuple val(meta), path('sage_append'), emit: sage_append_dir
@@ -26,12 +27,11 @@ process SAGE_APPEND {
 
     def xmx_mod = task.ext.xmx_mod ?: 0.75
 
-    def run_mode = Utils.getEnumFromString(params.mode, Constants.RunMode)
-    def effective_run_mode = run_mode === Constants.RunMode.PURITY_ESTIMATE
-        ? Utils.getEnumFromString(params.purity_estimate_mode, Constants.RunMode)
-        : run_mode
+    def skip_msi_jitter_arg  = ""
+    if(!redux_tsvs)
+        skip_msi_jitter_arg = "-skip_msi_jitter"
 
-    def high_depth_mode_arg = effective_run_mode === Constants.RunMode.TARGETED ? "-high_depth_mode" : ""
+    def high_depth_mode_arg = is_targeted_mode ? "-high_depth_mode" : ""
 
     """
     mkdir -p sage_append/
@@ -45,10 +45,12 @@ process SAGE_APPEND {
         -reference_bam ${bams.join(',')} \\
         -ref_genome ${genome_fasta} \\
         -ref_genome_version ${genome_ver} \\
+        -max_read_depth 100000 \\
         -write_frag_lengths \\
         ${high_depth_mode_arg} \\
+        ${skip_msi_jitter_arg} \\
         -threads ${task.cpus} \\
-        -output_vcf sage_append/${meta.sample_id}.sage.append.vcf.gz
+        -output_vcf sage_append/${meta.output_file_id}.sage.append.vcf.gz \\
         -log_level ${params.module_log_level}
 
     cat <<-END_VERSIONS > versions.yml

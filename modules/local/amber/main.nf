@@ -4,14 +4,15 @@ process AMBER {
 
     conda "${moduleDir}/environment.yml"
     container "${ workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container ?
-        'https://depot.galaxyproject.org/singularity/hmftools-amber:4.1.1--hdfd78af_0' :
-        'biocontainers/hmftools-amber:4.1.1--hdfd78af_0' }"
+        'https://depot.galaxyproject.org/singularity/hmftools-amber:4.2--hdfd78af_0' :
+        'biocontainers/hmftools-amber:4.2--hdfd78af_0' }"
 
     input:
     tuple val(meta), path(tumor_bam), path(normal_bam), path(donor_bam), path(tumor_bai), path(normal_bai), path(donor_bai)
     val genome_ver
     path heterozygous_sites
     path target_regions_bed
+    val tumor_min_depth
 
     output:
     tuple val(meta), path('amber/'), emit: amber_dir
@@ -37,10 +38,7 @@ process AMBER {
 
     def target_regions_bed_arg = target_regions_bed ? "-target_regions_bed ${target_regions_bed}" : ''
 
-    def run_mode = Utils.getEnumFromString(params.mode, Constants.RunMode)
-    def purity_estimate_mode = Utils.getEnumFromString(params.purity_estimate_mode, Constants.RunMode)
-    def tumor_min_depth_arg = run_mode === Constants.RunMode.PURITY_ESTIMATE && purity_estimate_mode === Constants.RunMode.WGTS
-        ? "-tumor_min_depth 1" : ""
+    def tumor_min_depth_arg = tumor_min_depth ? "-tumor_min_depth ${tumor_min_depth}" : ''
 
     """
     amber \\
@@ -55,7 +53,8 @@ process AMBER {
         -ref_genome_version ${genome_ver} \\
         -loci ${heterozygous_sites} \\
         -threads ${task.cpus} \\
-        -output_dir amber/
+        -output_dir amber/ \\
+        -log_level ${params.module_log_level}
 
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":

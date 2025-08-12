@@ -4,4 +4,4 @@ channels:
   - bioconda
   - defaults
 dependencies:
-  - bioconda::hmftools-chord=2.1.0
+  - bioconda::hmftools-chord=2.1.2

@@ -4,8 +4,8 @@ process NEO_SCORER {
 
     conda "${moduleDir}/environment.yml"
     container "${ workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container ?
-        'https://depot.galaxyproject.org/singularity/hmftools-neo:1.2--hdfd78af_1' :
-        'biocontainers/hmftools-neo:1.2--hdfd78af_1' }"
+        'https://depot.galaxyproject.org/singularity/hmftools-neo:1.2.1--hdfd78af_0' :
+        'biocontainers/hmftools-neo:1.2.1--hdfd78af_0' }"
 
     input:
     tuple val(meta), path(isofox_dir), path(purple_dir), path(sage_vcf), path(lilac_dir), path(neo_finder_dir), path(annotated_fusions)
@@ -58,8 +58,8 @@ process NEO_SCORER {
         -ensembl_data_dir ${ensembl_data_resources} \\
         -score_file_dir ${neo_resources} \\
         -cancer_tpm_medians_file ${cohort_tpm_medians} \\
-        -log_debug \\
-        -output_dir neo_scorer/
+        -output_dir neo_scorer/ \\
+        -log_level ${params.module_log_level}
 
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":

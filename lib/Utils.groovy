@@ -164,12 +164,12 @@ class Utils {
                         def index_enum
                         def index_str
 
-                        if (key === Constants.FileType.BAM) {
-                            index_enum = Constants.FileType.BAI
-                            index_str = (meta[sample_key][key].toString().endsWith('cram')) ? 'crai' : 'bai'
-                        } else if (key === Constants.FileType.BAM_REDUX) {
+                        if (key === Constants.FileType.BAM || key === Constants.FileType.BAM_REDUX) {
                             index_enum = Constants.FileType.BAI
                             index_str = 'bai'
+                        } else if (key === Constants.FileType.CRAM || key === Constants.FileType.CRAM_REDUX) {
+                            index_enum = Constants.FileType.CRAI
+                            index_str = 'crai'
                         } else if (key === Constants.FileType.ESVEE_VCF) {
                             index_enum = Constants.FileType.ESVEE_VCF_TBI
                             index_str = 'tbi'
@@ -204,15 +204,14 @@ class Utils {
                     def meta_sample = meta[sample_key]
 
                     if(meta_sample.containsKey(Constants.FileType.CRAM_REDUX))
-                        meta_sample[Constants.FileType.BAM_REDUX] = meta_sample[Constants.FileType.CRAM_REDUX]
+                        meta_sample[Constants.FileType.BAM_REDUX] = meta_sample.remove(Constants.FileType.CRAM_REDUX)
 
                     if(meta_sample.containsKey(Constants.FileType.CRAM))
-                        meta_sample[Constants.FileType.BAM] = meta_sample[Constants.FileType.CRAM]
+                        meta_sample[Constants.FileType.BAM] = meta_sample.remove(Constants.FileType.CRAM)
 
                     // The BAI key is used to store the index for both regular/REDUX CRAMs/BAMs
                     if(meta_sample.containsKey(Constants.FileType.CRAI))
-                        meta_sample[Constants.FileType.BAI] = meta_sample[Constants.FileType.CRAI]
-
+                        meta_sample[Constants.FileType.BAI] = meta_sample.remove(Constants.FileType.CRAI)
                 }
 
                 // Check that REDUX TSVs are present
@@ -225,11 +224,6 @@ class Utils {
 
                     if(!meta_sample.containsKey(Constants.FileType.BAM_REDUX))
                         return
-
-                    if(meta_sample.containsKey(Constants.FileType.BAM)) {
-                        log.error "${Constants.FileType.BAM} and ${Constants.FileType.BAM_REDUX} provided for sample ${sample_id}. Please only provide one or the other"
-                        Nextflow.exit(1)
-                    }
 
                     def bam_path = meta_sample[Constants.FileType.BAM_REDUX]
                     def bam_dir = bam_path.getParent().toUriString()
@@ -354,10 +348,12 @@ class Utils {
 
                 if (!meta[key].containsKey(Constants.FileType.BAM) &&
                     !meta[key].containsKey(Constants.FileType.BAM_REDUX) &&
+                    !meta[key].containsKey(Constants.FileType.CRAM) &&
+                    !meta[key].containsKey(Constants.FileType.CRAM_REDUX) &&
                     !meta[key].containsKey(Constants.FileType.FASTQ)) {
 
-                    log.error "no BAMs nor BAM_MARKDUPs nor FASTQs provided for ${meta.group_id} ${sample_type}/${sequence_type}\n\n" +
-                        "NB: BAMs or BAM_MARKDUPs or FASTQs are always required as they are the basis to determine input sample type."
+                    log.error "no BAM/CRAM nor BAM_REDUX/CRAM_REDUX nor FASTQ files provided for ${meta.group_id} ${sample_type}/${sequence_type}\n\n" +
+                        "NB: At least one of these files is required as they are the basis to determine input sample type."
                     Nextflow.exit(1)
                 }
 
@@ -375,8 +371,8 @@ class Utils {
 
                 // Do not allow donor DNA
                 if (Utils.hasDonorDna(meta)) {
-                    log.error "targeted mode is not compatible with the donor DNA BAM provided for ${meta.group_id}\n\n" +
-                        "The targeted workflow supports only tumor and normal DNA BAMs (and tumor RNA BAMs for TSO500)"
+                    log.error "targeted mode is not compatible with the donor DNA BAM/CRAM provided for ${meta.group_id}\n\n" +
+                        "The targeted workflow supports only tumor and normal DNA BAM/CRAMs (and tumor RNA BAM/CRAMs for TSO500)"
                     Nextflow.exit(1)
                 }
 

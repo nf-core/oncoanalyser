@@ -32,7 +32,8 @@ process SIGS {
         -sample ${meta.sample_id} \\
         -somatic_vcf_file ${smlv_vcf} \\
         -signatures_file ${signatures} \\
-        -output_dir sigs/
+        -output_dir sigs/ \\
+        -log_level ${params.module_log_level}
 
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":

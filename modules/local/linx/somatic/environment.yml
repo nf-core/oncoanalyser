@@ -4,4 +4,4 @@ channels:
   - bioconda
   - defaults
 dependencies:
-  - bioconda::hmftools-linx=2.0.2
+  - bioconda::hmftools-linx=2.1
