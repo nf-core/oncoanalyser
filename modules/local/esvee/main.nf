@@ -34,6 +34,8 @@ process ESVEE {
     script:
     def args = task.ext.args ?: ''
 
+    def log_level_arg = task.ext.log_level ? "-log_level ${task.ext.log_level}" : ''
+
     def reference_arg = meta.normal_id ? "-reference ${meta.normal_id}" : ""
     def tumor_bam_arg = "-tumor_bam ${tumor_prep_bam}"
 
@@ -65,10 +67,10 @@ process ESVEE {
         -unmap_regions ${unmap_regions} \\
         -bamtool \$(which sambamba) \\
         -write_types "PREP_JUNCTION;PREP_BAM;FRAGMENT_LENGTH_DIST;JUNC_ASSEMBLY;PHASED_ASSEMBLY;ALIGNMENT;BREAKEND;VCF" \\
+        -log_level ${log_level} \\
         -output_dir esvee/ \\
         -esvee_prep_dir esvee/ \\
-        -threads ${task.cpus} \\
-        -log_level ${params.module_log_level}
+        -threads ${task.cpus}
 
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":

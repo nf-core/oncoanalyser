@@ -21,6 +21,8 @@ process PAVE_PON_PANEL_CREATION {
     script:
     def args = task.ext.args ?: ''
 
+    def log_level_arg = task.ext.log_level ? "-log_level ${task.ext.log_level}" : ''
+
     """
     (
        echo SampleId
@@ -34,8 +36,8 @@ process PAVE_PON_PANEL_CREATION {
         -sample_id_file sample_ids.txt \\
         -vcf_path '*.sage.somatic.vcf.gz' \\
         -ref_genome_version ${genome_ver} \\
-        -output_pon_file pave.somatic_artefacts.${genome_ver}.tsv \\
-        -log_level ${params.module_log_level}
+        ${log_level_arg} \\
+        -output_pon_file pave.somatic_artefacts.${genome_ver}.tsv
 
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":

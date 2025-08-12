@@ -27,6 +27,8 @@ process AMBER {
 
     def xmx_mod = task.ext.xmx_mod ?: 0.75
 
+    def log_level_arg = task.ext.log_level ? "-log_level ${task.ext.log_level}" : ''
+
     def reference_ids = []
     if (meta.normal_id != null) reference_ids.add(meta.normal_id)
     if (meta.donor_id != null) reference_ids.add(meta.donor_id)
@@ -54,8 +56,8 @@ process AMBER {
         -ref_genome_version ${genome_ver} \\
         -loci ${heterozygous_sites} \\
         -threads ${task.cpus} \\
-        -output_dir amber/ \\
-        -log_level ${params.module_log_level}
+        ${log_level_arg} \\
+        -output_dir amber/
 
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":

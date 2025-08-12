@@ -29,6 +29,8 @@ process WISP {
     script:
     def args = task.ext.args ?: ''
 
+    def log_level_arg = task.ext.log_level ? "-log_level ${task.ext.log_level}" : ''
+
     def purity_estimate_mode = Utils.getEnumFromString(params.purity_estimate_mode, Constants.RunMode)
 
     def purity_methods
@@ -77,8 +79,8 @@ process WISP {
         ${cobalt_dir_arg} \\
         ${gc_ratio_min_arg} \\
         ${write_types_arg} \\
-        -output_dir wisp/ \\
-        -log_level ${params.module_log_level}
+        ${log_level_arg} \\
+        -output_dir wisp/
 
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":

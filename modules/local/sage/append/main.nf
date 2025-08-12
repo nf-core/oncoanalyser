@@ -28,6 +28,8 @@ process SAGE_APPEND {
 
     def xmx_mod = task.ext.xmx_mod ?: 0.75
 
+    def log_level_arg = task.ext.log_level ? "-log_level ${task.ext.log_level}" : ''
+
     def skip_msi_jitter_arg  = ""
     if(!redux_tsvs)
         skip_msi_jitter_arg = "-skip_msi_jitter"
@@ -51,8 +53,8 @@ process SAGE_APPEND {
         ${high_depth_mode_arg} \\
         ${skip_msi_jitter_arg} \\
         -threads ${task.cpus} \\
-        -output_vcf sage_append/${meta.output_file_id}.sage.append.vcf.gz \\
-        -log_level ${params.module_log_level}
+        ${log_level_arg} \\
+        -output_vcf sage_append/${meta.output_file_id}.sage.append.vcf.gz
 
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":

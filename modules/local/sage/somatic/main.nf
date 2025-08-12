@@ -35,6 +35,8 @@ process SAGE_SOMATIC {
     script:
     def args = task.ext.args ?: ''
 
+    def log_level_arg = task.ext.log_level ? "-log_level ${task.ext.log_level}" : ''
+
     // Sample IDs
     def reference_ids = []
     if (meta.normal_id != null) reference_ids.add(meta.normal_id)
@@ -97,8 +99,8 @@ process SAGE_SOMATIC {
         ${high_depth_mode_arg} \\
         -bqr_write_plot \\
         -threads ${task.cpus} \\
-        -output_vcf somatic/${meta.tumor_id}.sage.somatic.vcf.gz \\
-        -log_level ${params.module_log_level}
+        ${log_level_arg} \\
+        -output_vcf somatic/${meta.tumor_id}.sage.somatic.vcf.gz
 
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":

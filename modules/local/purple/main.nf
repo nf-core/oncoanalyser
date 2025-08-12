@@ -36,6 +36,8 @@ process PURPLE {
 
     def xmx_mod = task.ext.xmx_mod ?: 0.75
 
+    def log_level_arg = task.ext.log_level ? "-log_level ${task.ext.log_level}" : ''
+
     def reference_arg = meta.containsKey('normal_id') ? "-reference ${meta.normal_id}" : ''
 
     def sv_tumor_vcf_arg = sv_tumor_vcf ? "-somatic_sv_vcf ${sv_tumor_vcf}" : ''
@@ -76,8 +78,8 @@ process PURPLE {
         -gc_profile ${gc_profile} \\
         -circos \$(which circos) \\
         -threads ${task.cpus} \\
-        -output_dir purple/ \\
-        -log_level ${params.module_log_level}
+        ${log_level_arg} \\
+        -output_dir purple/
 
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":

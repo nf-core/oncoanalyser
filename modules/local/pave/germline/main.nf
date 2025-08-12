@@ -31,6 +31,8 @@ process PAVE_GERMLINE {
     script:
     def args = task.ext.args ?: ''
 
+    def log_level_arg = task.ext.log_level ? "-log_level ${task.ext.log_level}" : ''
+
     """
     pave \\
         -Xmx${Math.round(task.memory.bytes * 0.95)} \\
@@ -48,8 +50,8 @@ process PAVE_GERMLINE {
         -blacklist_vcf ${sage_blocklist_sites} \\
         -gnomad_no_filter \\
         -threads ${task.cpus} \\
-        -output_dir ./ \\
-        -log_level ${params.module_log_level}
+        ${log_level_arg} \\
+        -output_dir ./
 
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":

@@ -26,6 +26,8 @@ process PEACH {
 
     def xmx_mod = task.ext.xmx_mod ?: 0.75
 
+    def log_level_arg = task.ext.log_level ? "-log_level ${task.ext.log_level}" : ''
+
     """
     peach \\
         -Xmx${Math.round(task.memory.bytes * xmx_mod)} \\
@@ -35,8 +37,8 @@ process PEACH {
         -haplotypes_file ${haplotypes} \\
         -function_file ${haplotype_functions} \\
         -drugs_file ${drug_info} \\
-        -output_dir peach/ \\
-        -log_level ${params.module_log_level}
+        ${log_level_arg} \\
+        -output_dir peach/
 
 
     cat <<-END_VERSIONS > versions.yml

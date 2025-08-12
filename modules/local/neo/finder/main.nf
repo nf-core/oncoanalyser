@@ -27,6 +27,8 @@ process NEO_FINDER {
 
     def xmx_mod = task.ext.xmx_mod ?: 0.95
 
+    def log_level_arg = task.ext.log_level ? "-log_level ${task.ext.log_level}" : ''
+
     """
     mkdir -p neo_finder/
 
@@ -39,8 +41,8 @@ process NEO_FINDER {
         -ref_genome ${genome_fasta} \\
         -ref_genome_version ${genome_ver} \\
         -ensembl_data_dir ${ensembl_data_resources} \\
-        -output_dir neo_finder/ \\
-        -log_level ${params.module_log_level}
+        ${log_level_arg} \\
+        -output_dir neo_finder/
 
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":

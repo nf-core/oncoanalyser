@@ -27,6 +27,8 @@ process BAMTOOLS {
 
     def xmx_mod = task.ext.xmx_mod ?: 0.75
 
+    def log_level_arg = task.ext.log_level ? "-log_level ${task.ext.log_level}" : ''
+
     """
     mkdir -p ${meta.id}_bamtools/
 
@@ -41,8 +43,8 @@ process BAMTOOLS {
         -driver_gene_panel ${driver_gene_panel} \\
         -ensembl_data_dir ${ensembl_data_resources} \\
         -threads ${task.cpus} \\
-        -output_dir ${meta.id}_bamtools/ \\
-        -log_level ${params.module_log_level}
+        ${log_level_arg} \\
+        -output_dir ${meta.id}_bamtools/
 
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":

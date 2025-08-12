@@ -25,11 +25,10 @@ process TEAL_PREP {
 
     def xmx_mod = task.ext.xmx_mod ?: 0.95
 
-    def tumor_arg = ""
-    def tumor_bam_arg = ""
-    def tumor_bam_index_command = ""
-
-    if(tumor_bam) {
+    def tumor_arg = ''
+    def tumor_bam_arg = ''
+    def tumor_bam_index_command = ''
+    if (tumor_bam) {
         tumor_arg = "-tumor ${meta.tumor_id}"
         tumor_bam_arg = "-tumor_bam ${tumor_bam}"
         tumor_bam_index_command = "samtools index teal_bam/${meta.tumor_id}.teal.telbam.bam"

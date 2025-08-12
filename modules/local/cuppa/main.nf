@@ -28,6 +28,8 @@ process CUPPA {
 
     def xmx_mod = task.ext.xmx_mod ?: 0.75
 
+    def log_level_arg = task.ext.log_level ? "-log_level ${task.ext.log_level}" : ''
+
     def isofox_dir_name = categories == 'ALL' ? 'isofox_dir__prepared' : isofox_dir
     def isofox_dir_arg = isofox_dir ? "-isofox_dir ${isofox_dir_name}" : ''
     def ref_alt_sj_sites_arg = isofox_dir ? "-ref_alt_sj_sites ${cuppa_alt_sj}" : ''
@@ -60,8 +62,8 @@ process CUPPA {
         ${isofox_dir_arg} \\
         ${ref_alt_sj_sites_arg} \\
         -ref_genome_version ${genome_ver} \\
-        -output_dir cuppa/ \\
-        -log_level ${params.module_log_level}
+        ${log_level_arg} \\
+        -output_dir cuppa/
 
     # Make predictions
     python -m cuppa.predict \\

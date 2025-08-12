@@ -52,6 +52,8 @@ process ORANGE {
 
     def xmx_mod = task.ext.xmx_mod ?: 0.95
 
+    def log_level_arg = task.ext.log_level ? "-log_level ${task.ext.log_level}" : ''
+
     def pipeline_version_str = pipeline_version ?: 'not specified'
 
     def run_mode = Utils.getEnumFromString(params.mode, Constants.RunMode);
@@ -163,8 +165,8 @@ process ORANGE {
         -ensembl_data_dir ${ensembl_data_resources} \\
         ${isofox_gene_distribution_arg} \\
         ${isofox_alt_sj_arg} \\
-        -output_dir output/ \\
-        -log_level ${params.module_log_level}
+        ${log_level_arg} \\
+        -output_dir output/
 
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":

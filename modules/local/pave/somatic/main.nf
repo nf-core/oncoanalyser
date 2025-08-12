@@ -34,6 +34,8 @@ process PAVE_SOMATIC {
 
     def xmx_mod = task.ext.xmx_mod ?: 0.75
 
+    def log_level_arg = task.ext.log_level ? "-log_level ${task.ext.log_level}" : ''
+
     def gnomad_args
     if (genome_ver.toString() == '37') {
         gnomad_args = "-gnomad_freq_file ${gnomad_resource}"
@@ -63,8 +65,8 @@ process PAVE_SOMATIC {
         -mappability_bed ${segment_mappability} \\
         -ensembl_data_dir ${ensembl_data_resources} \\
         -threads ${task.cpus} \\
-        -output_dir ./ \\
-        -log_level ${params.module_log_level}
+        ${log_level_arg} \\
+        -output_dir ./
 
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":

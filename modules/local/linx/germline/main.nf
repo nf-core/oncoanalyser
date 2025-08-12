@@ -26,6 +26,8 @@ process LINX_GERMLINE {
 
     def xmx_mod = task.ext.xmx_mod ?: 0.75
 
+    def log_level_arg = task.ext.log_level ? "-log_level ${task.ext.log_level}" : ''
+
     """
     linx \\
         -Xmx${Math.round(task.memory.bytes * xmx_mod)} \\
@@ -36,8 +38,8 @@ process LINX_GERMLINE {
         -ref_genome_version ${genome_ver} \\
         -ensembl_data_dir ${ensembl_data_resources} \\
         -driver_gene_panel ${driver_gene_panel} \\
-        -output_dir linx_germline/ \\
-        -log_level ${params.module_log_level}
+        ${log_level_arg} \\
+        -output_dir linx_germline/
 
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":

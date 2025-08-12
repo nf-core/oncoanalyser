@@ -31,6 +31,8 @@ process SAGE_GERMLINE {
     script:
     def args = task.ext.args ?: ''
 
+    def log_level_arg = task.ext.log_level ? "-log_level ${task.ext.log_level}" : ''
+
     def high_depth_mode_arg = is_targeted_mode ? "-high_depth_mode" : ""
 
     """
@@ -56,8 +58,8 @@ process SAGE_GERMLINE {
         ${high_depth_mode_arg} \\
         -bqr_write_plot \\
         -threads ${task.cpus} \\
-        -output_vcf germline/${meta.tumor_id}.sage.germline.vcf.gz \\
-        -log_level ${params.module_log_level}
+        ${log_level_arg} \\
+        -output_vcf germline/${meta.tumor_id}.sage.germline.vcf.gz
 
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":

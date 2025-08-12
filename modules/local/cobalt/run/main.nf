@@ -27,6 +27,8 @@ process COBALT {
 
     def xmx_mod = task.ext.xmx_mod ?: 0.75
 
+    def log_level_arg = task.ext.log_level ? "-log_level ${task.ext.log_level}" : ''
+
     def reference_arg = meta.containsKey('normal_id') ? "-reference ${meta.normal_id}" : ''
     def reference_bam_arg = normal_bam ? "-reference_bam ${normal_bam}" : ''
 
@@ -53,8 +55,8 @@ process COBALT {
         ${diploid_regions_arg} \\
         ${target_region_norm_file_arg} \\
         ${pcf_gamma_arg} \\
-        -output_dir cobalt/ \\
-        -log_level ${params.module_log_level}
+        ${log_level_arg} \\
+        -output_dir cobalt/
 
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":
