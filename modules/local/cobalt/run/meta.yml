@@ -1,4 +1,4 @@
-name: cobalt
+name: cobalt_run
 description: Count bam lines determines the read depth ratios of the supplied tumor and reference genomes
 keywords:
   - cobalt

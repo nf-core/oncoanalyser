@@ -356,6 +356,7 @@ workflow TARGETED {
             hmf_data.segment_mappability,
             panel_data.driver_gene_panel,
             hmf_data.ensembl_data_resources,
+            true,  // enable_germline
         )
 
         ch_versions = ch_versions.mix(SAGE_CALLING.out.versions)
@@ -453,30 +454,30 @@ workflow TARGETED {
     }
 
     //
-    // SUBWORKFLOW: Append RNA data to SAGE VCF
+    // SUBWORKFLOW: Append read data to SAGE VCF
     //
     // channel: [ meta, sage_append_vcf ]
     ch_sage_somatic_append_out = Channel.empty()
     ch_sage_germline_append_out = Channel.empty()
     if (run_config.stages.orange) {
 
-        // NOTE(SW): currently used only for ORANGE but will also be used for Neo once implemented
-
         SAGE_APPEND(
             ch_inputs,
-            ch_align_rna_tumor_out,
             ch_purple_out,
+            ch_inputs.map { meta -> [meta, [], []] },      // ch_tumor_redux_bam
+            ch_inputs.map { meta -> [meta, [], [], []] },  // ch_tumor_redux_tsv
+            ch_align_rna_tumor_out,
             ref_data.genome_fasta,
             ref_data.genome_version,
             ref_data.genome_fai,
             ref_data.genome_dict,
-            true,  // run_germline
+            true,  // enable_germline
         )
 
         ch_versions = ch_versions.mix(SAGE_APPEND.out.versions)
 
-        ch_sage_somatic_append_out = ch_sage_somatic_append_out.mix(SAGE_APPEND.out.somatic_vcf)
-        ch_sage_germline_append_out = ch_sage_germline_append_out.mix(SAGE_APPEND.out.germline_vcf)
+        ch_sage_somatic_append_out = ch_sage_somatic_append_out.mix(SAGE_APPEND.out.somatic_dir)
+        ch_sage_germline_append_out = ch_sage_germline_append_out.mix(SAGE_APPEND.out.germline_dir)
 
     } else {
 

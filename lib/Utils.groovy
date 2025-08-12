@@ -28,43 +28,6 @@ class Utils {
                         meta.subject_id = it.subject_id
                     }
 
-                    // Sample type
-                    def sample_type_enum = Utils.getEnumFromString(it.sample_type, Constants.SampleType)
-                    if (!sample_type_enum) {
-                        def sample_type_str = Utils.getEnumNames(Constants.SampleType).join('\n  - ')
-                        log.error "received invalid sample type: '${it.sample_type}'. Valid options are:\n  - ${sample_type_str}"
-                        Nextflow.exit(1)
-                    }
-
-                    // Sequence type
-                    def sequence_type_enum = Utils.getEnumFromString(it.sequence_type, Constants.SequenceType)
-                    if (!sequence_type_enum) {
-                        def sequence_type_str = Utils.getEnumNames(Constants.SequenceType).join('\n  - ')
-                        log.error "received invalid sequence type: '${it.sequence_type}'. Valid options are:\n  - ${sequence_type_str}"
-                        Nextflow.exit(1)
-                    }
-
-                    // Filetype
-                    def filetype_enum = Utils.getEnumFromString(it.filetype, Constants.FileType)
-                    if (!filetype_enum) {
-                        def filetype_str = Utils.getEnumNames(Constants.FileType).join('\n  - ')
-                        log.error "received invalid file type: '${it.filetype}'. Valid options are:\n  - ${filetype_str}"
-                        Nextflow.exit(1)
-                    }
-
-                    def sample_key = [sample_type_enum, sequence_type_enum]
-                    def meta_sample = meta.get(sample_key, [sample_id: it.sample_id])
-
-                    if (meta_sample.sample_id != it.sample_id) {
-                        log.error "got unexpected sample name for ${group_id} ${sample_type_enum}/${sequence_type_enum}: ${it.sample_id}"
-                        Nextflow.exit(1)
-                    }
-
-                    if (meta_sample.containsKey(filetype_enum) & filetype_enum != Constants.FileType.FASTQ) {
-                        log.error "got duplicate file for ${group_id} ${sample_type_enum}/${sequence_type_enum}: ${filetype_enum}"
-                        Nextflow.exit(1)
-                    }
-
                     // Info data
                     def info_data = [:]
                     if (it.containsKey('info')) {
@@ -96,6 +59,63 @@ class Utils {
 
                     }
 
+                    // Sample type
+                    def sample_type_enum = Utils.getEnumFromString(it.sample_type, Constants.SampleType)
+                    if (!sample_type_enum) {
+                        def sample_type_str = Utils.getEnumNames(Constants.SampleType).join('\n  - ')
+                        log.error "received invalid sample type: '${it.sample_type}'. Valid options are:\n  - ${sample_type_str}"
+                        Nextflow.exit(1)
+                    }
+
+                    // Sequence type
+                    def sequence_type_enum = Utils.getEnumFromString(it.sequence_type, Constants.SequenceType)
+                    if (!sequence_type_enum) {
+                        def sequence_type_str = Utils.getEnumNames(Constants.SequenceType).join('\n  - ')
+                        log.error "received invalid sequence type: '${it.sequence_type}'. Valid options are:\n  - ${sequence_type_str}"
+                        Nextflow.exit(1)
+                    }
+
+                    // Filetype
+                    def filetype_enum = Utils.getEnumFromString(it.filetype, Constants.FileType)
+                    if (!filetype_enum) {
+                        def filetype_str = Utils.getEnumNames(Constants.FileType).join('\n  - ')
+                        log.error "received invalid file type: '${it.filetype}'. Valid options are:\n  - ${filetype_str}"
+                        Nextflow.exit(1)
+                    }
+
+                    def sample_key = [sample_type_enum, sequence_type_enum]
+                    def meta_sample = meta.get(sample_key, [sample_id: it.sample_id])
+
+
+                    // Sample ID; special case for longitudinal samples
+                    if (info_data.containsKey(Constants.InfoField.LONGITUDINAL_SAMPLE)) {
+                        if (meta_sample.containsKey('longitudinal_sample_id')) {
+
+                            if (meta_sample.longitudinal_sample_id != it.sample_id) {
+
+                                log.error "got unexpected longitudinal sample name for ${group_id} ${sample_type_enum}/${sequence_type_enum}: ${it.sample_id}"
+                                Nextflow.exit(1)
+
+                            }
+
+                        } else {
+
+                            meta_sample.longitudinal_sample_id = it.sample_id
+
+                        }
+
+                    } else if (meta_sample.sample_id != it.sample_id) {
+
+                        log.error "got unexpected sample name for ${group_id} ${sample_type_enum}/${sequence_type_enum}: ${it.sample_id}"
+                        Nextflow.exit(1)
+
+                    }
+
+                    // Filetype uniqueness
+                    if (meta_sample.containsKey(filetype_enum) & filetype_enum != Constants.FileType.FASTQ) {
+                        log.error "got duplicate file for ${group_id} ${sample_type_enum}/${sequence_type_enum}: ${filetype_enum}"
+                        Nextflow.exit(1)
+                    }
 
                     // Handle inputs appropriately
                     if (filetype_enum === Constants.FileType.FASTQ) {
@@ -174,8 +194,25 @@ class Utils {
                         }
 
                         meta[sample_key][index_enum] = index_fp
-
                     }
+                }
+
+                // CRAMs are passed to hmftools as if they were BAMs, e.g. `-bam_file /path/to/tumor.cram`
+                // We therefore set the BAM/BAI path to be the CRAM/CRAI path
+                sample_keys.each { sample_key ->
+
+                    def meta_sample = meta[sample_key]
+
+                    if(meta_sample.containsKey(Constants.FileType.CRAM_REDUX))
+                        meta_sample[Constants.FileType.BAM_REDUX] = meta_sample[Constants.FileType.CRAM_REDUX]
+
+                    if(meta_sample.containsKey(Constants.FileType.CRAM))
+                        meta_sample[Constants.FileType.BAM] = meta_sample[Constants.FileType.CRAM]
+
+                    // The BAI key is used to store the index for both regular/REDUX CRAMs/BAMs
+                    if(meta_sample.containsKey(Constants.FileType.CRAI))
+                        meta_sample[Constants.FileType.BAI] = meta_sample[Constants.FileType.CRAI]
+
                 }
 
                 // Check that REDUX TSVs are present
@@ -185,7 +222,6 @@ class Utils {
                         return
 
                     def meta_sample = meta[sample_key]
-                    def sample_id = meta_sample.sample_id
 
                     if(!meta_sample.containsKey(Constants.FileType.BAM_REDUX))
                         return
@@ -203,6 +239,7 @@ class Utils {
                     def ms_tsv       = meta_sample[Constants.FileType.REDUX_MS_TSV]
 
                     // If TSV paths not provided, default to TSV paths in the same dir as the BAM
+                    def sample_id = meta_sample.getOrDefault('longitudinal_sample_id', meta_sample['sample_id'])
                     jitter_tsv   = jitter_tsv   ?: "${bam_dir}/${sample_id}.jitter_params.tsv"
                     ms_tsv       = ms_tsv       ?: "${bam_dir}/${sample_id}.ms_table.tsv.gz"
 
@@ -233,6 +270,18 @@ class Utils {
                     // Set parsed REDUX TSV paths in metadata object
                     meta_sample[Constants.FileType.REDUX_JITTER_TSV] = jitter_tsv
                     meta_sample[Constants.FileType.REDUX_MS_TSV] = ms_tsv
+
+                }
+
+                // For purity estimation with WISP, require primary normal DNA BAM when an AMBER directory is provided
+                def meta_tumor_dna = meta.getOrDefault([Constants.SampleType.TUMOR, Constants.SequenceType.DNA], [:])
+                def is_longitudinal = meta_tumor_dna.containsKey('longitudinal_sample_id')
+                def has_amber_dir = meta_tumor_dna.containsKey(Constants.FileType.AMBER_DIR)
+                def has_normal_dna_bam = Utils.hasNormalDnaBam(meta) || Utils.hasNormalDnaReduxBam(meta)
+
+                if (is_longitudinal && has_amber_dir && ! has_normal_dna_bam) {
+                    log.error "AMBER input was provided without the required primary normal DNA BAM for ${meta.group_id}"
+                    Nextflow.exit(1)
                 }
 
                 return meta
@@ -408,6 +457,15 @@ class Utils {
             Nextflow.exit(1)
         }
 
+        // Require --isofox_gene_ids argument to be provided in PANEL_RESOURCE_CREATION when RNA inputs are present
+        if (run_config.mode === Constants.RunMode.PANEL_RESOURCE_CREATION && run_config.has_rna && !params.isofox_gene_ids) {
+            log.error "\n~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n" +
+                "  Running the panel resource creation workflow with RNA requires that the\n" +
+                "  --isofox_gene_ids argument is set with an appropriate input file.\n" +
+                "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
+            Nextflow.exit(1)
+        }
+
     }
 
     static public getEnumFromString(s, e) {
@@ -459,8 +517,21 @@ class Utils {
     }
 
     // Sample names
+    static public getTumorDnaSampleName(Map named_args, meta) {
+        def meta_sample = getTumorDnaSample(meta)
+        def sample_id
+
+        if (named_args.getOrDefault('primary', false)) {
+            sample_id = meta_sample['sample_id']
+        } else {
+            sample_id = meta_sample.getOrDefault('longitudinal_sample_id', meta_sample['sample_id'])
+        }
+
+        return sample_id
+    }
+
     static public getTumorDnaSampleName(meta) {
-        return getTumorDnaSample(meta)['sample_id']
+        getTumorDnaSampleName([:], meta)
     }
 
     static public getTumorRnaSampleName(meta) {

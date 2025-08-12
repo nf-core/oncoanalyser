@@ -58,10 +58,11 @@ if (workflow.stubRun && params.create_stub_placeholders) {
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 */
 
-include { TARGETED          } from './workflows/targeted'
-include { WGTS              } from './workflows/wgts'
-include { PREPARE_REFERENCE } from './subworkflows/local/prepare_reference'
-
+include { PANEL_RESOURCE_CREATION } from './workflows/panel_resource_creation'
+include { PREPARE_REFERENCE       } from './subworkflows/local/prepare_reference'
+include { PURITY_ESTIMATE         } from './workflows/purity_estimate'
+include { TARGETED                } from './workflows/targeted'
+include { WGTS                    } from './workflows/wgts'
 
 /*
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -75,13 +76,18 @@ include { PREPARE_REFERENCE } from './subworkflows/local/prepare_reference'
 run_mode = Utils.getRunMode(params.mode, log)
 
 workflow NFCORE_ONCOANALYSER {
-    if (run_mode === Constants.RunMode.PREPARE_REFERENCE)  {
-        prep_config = WorkflowMain.getPrepConfigForStagingOnly(params, log)
-        PREPARE_REFERENCE(prep_config)
-    } else if (run_mode === Constants.RunMode.WGTS) {
+
+    if (run_mode === Constants.RunMode.WGTS) {
         WGTS()
     } else if (run_mode === Constants.RunMode.TARGETED) {
         TARGETED()
+    } else if (run_mode === Constants.RunMode.PURITY_ESTIMATE) {
+        PURITY_ESTIMATE()
+    } else if (run_mode === Constants.RunMode.PANEL_RESOURCE_CREATION) {
+        PANEL_RESOURCE_CREATION()
+    } else if (run_mode === Constants.RunMode.PREPARE_REFERENCE)  {
+        prep_config = WorkflowMain.getPrepConfigForStagingOnly(params, log)
+        PREPARE_REFERENCE(prep_config)
     } else {
         log.error("received bad run mode: ${run_mode}")
         Nextflow.exit(1)

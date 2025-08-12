@@ -20,14 +20,15 @@ input:
       type: file
       description: VCF file
       pattern: "*.{vcf.gz}"
-  - bam:
-      type: file
-      description: BAM file
-      pattern: "*.{bam}"
-  - bai:
-      type: file
-      description: BAI file
-      pattern: "*.{bai}"
+  - bams:
+      type: list
+      description: BAM files
+  - bais:
+      type: list
+      description: BAI files
+  - redux_tsvs:
+      type: list
+      description: REDUX MS files
   - genome_fasta:
       type: file
       description: Reference genome assembly FASTA file

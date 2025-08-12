@@ -32,7 +32,11 @@ process COBALT {
     def target_region_arg = target_region_normalisation ? "-target_region ${target_region_normalisation}" : ''
 
     def run_mode = Utils.getEnumFromString(params.mode, Constants.RunMode)
-    def pcf_gamma_arg = run_mode === Constants.RunMode.TARGETED && !meta.containsKey('normal_id')
+    def effective_run_mode = run_mode === Constants.RunMode.PURITY_ESTIMATE
+        ? Utils.getEnumFromString(params.purity_estimate_mode, Constants.RunMode)
+        : run_mode
+
+    def pcf_gamma_arg = effective_run_mode === Constants.RunMode.TARGETED && !meta.containsKey('normal_id')
         ? "-pcf_gamma 50" : ""
 
     """
@@ -52,7 +56,7 @@ process COBALT {
 
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":
-        cobalt: \$(cobalt -version | sed -n '/^Cobalt version/ { s/^.* //p }')
+        cobalt_run: \$(cobalt -version | sed -n '/^Cobalt version/ { s/^.* //p }')
     END_VERSIONS
     """
 

@@ -5,7 +5,7 @@
 import Constants
 import Utils
 
-include { ISOFOX } from '../../../modules/local/isofox/main'
+include { ISOFOX } from '../../../modules/local/isofox/run/main'
 
 workflow ISOFOX_QUANTIFICATION {
     take:

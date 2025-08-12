@@ -66,10 +66,12 @@ workflow READ_ALIGNMENT_DNA {
                 .collect { key, fps ->
                     def (library_id, lane) = key
 
+                    def sample_id = meta_sample.getOrDefault('longitudinal_sample_id', meta_sample['sample_id'])
+
                     def meta_fastq = [
                         key: meta.group_id,
-                        id: "${meta.group_id}_${meta_sample.sample_id}",
-                        sample_id: meta_sample.sample_id,
+                        id: "${meta.group_id}_${sample_id}",
+                        sample_id: sample_id,
                         library_id: library_id,
                         lane: lane,
                         sample_type: sample_type,
