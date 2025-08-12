@@ -61,16 +61,29 @@ class WorkflowMain {
             return
         }
 
-        if (run_mode === Constants.RunMode.TARGETED) {
+        // Attempt to set default panel data path; make no assumption on valid 'panel' value
+        if(run_mode === Constants.RunMode.TARGETED || run_mode === Constants.RunMode.PREPARE_REFERENCE) {
 
-            // Attempt to set default panel data path; make no assumption on valid 'panel' value
             if (params.containsKey('panel')) {
-                if (params.panel == 'tso500' && params.genome_version.toString() == '37') {
-                    params.ref_data_panel_data_path = Constants.TSO500_PANEL_37_PATH
-                } else if (params.panel == 'tso500' && params.genome_version.toString() == '38') {
-                    params.ref_data_panel_data_path = Constants.TSO500_PANEL_38_PATH
+
+                if(params.panel == 'tso500') {
+                    if(params.genome_version.toString() == '37') {
+                        params.ref_data_panel_data_path = Constants.TSO500_PANEL_37_PATH
+                    } else if (params.genome_version.toString() == '38') {
+                        params.ref_data_panel_data_path = Constants.TSO500_PANEL_38_PATH
+                    }
                 }
+
+                // TODO(LN): Add support for other 'standard' panels
+                // if(params.panel == 'pm_haem') {
+                //
+                // }
             }
+
+        }
+
+
+        if (run_mode === Constants.RunMode.TARGETED) {
 
             // When fastp UMI is enabled, REDUX UMI should be as well
             if (params.fastp_umi && (!params.containsKey('redux_umi') || !params.redux_umi)) {
@@ -192,6 +205,18 @@ class WorkflowMain {
 
         def run_mode = Utils.getRunMode(params.mode, log)
 
+        if (run_mode === Constants.RunMode.PREPARE_REFERENCE && params.ref_data_types == null) {
+
+            def ref_data_types = Utils.getEnumNames(Constants.RefDataType).join('\n    - ')
+
+            log.error "\n~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n" +
+                "  CLI argument --ref_data_types is required for mode prepare_reference.\n" +
+                "  Please specify one or more of the below valid values (separated by commas)\n" +
+                "    - ${ref_data_types}\n" +
+                "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
+            Nextflow.exit(1)
+        }
+
         if (run_mode === Constants.RunMode.TARGETED) {
 
             if (!params.containsKey('panel') || params.panel === null) {
@@ -312,12 +337,107 @@ class WorkflowMain {
 
         return [
             mode: run_mode,
-            panel: run_mode === Constants.RunMode.TARGETED ? params.panel : null,
             stages: stages,
             has_dna: inputs.any { Utils.hasTumorDna(it) },
             has_rna: inputs.any { Utils.hasTumorRna(it) },
             has_rna_fastq: inputs.any { Utils.hasTumorRnaFastq(it) },
             has_dna_fastq: inputs.any { Utils.hasTumorDnaFastq(it) || Utils.hasNormalDnaFastq(it) },
+        ]
+    }
+
+    public static getPrepConfigForRun(run_config)
+    {
+        return [
+            prepare_ref_data_only: false,
+
+            require_fasta: true,
+            require_fai: true,
+            require_dict: true,
+            require_img: true,
+
+            require_bwa_index: run_config.has_dna_fastq && run_config.stages.alignment,
+            require_star_index: run_config.has_rna_fastq && run_config.stages.alignment,
+
+            require_gridss_index: run_config.has_dna && run_config.mode === Constants.RunMode.WGTS && run_config.stages.virusinterpreter,
+            require_hmftools_data: true,
+            require_panel_data: run_config.mode === Constants.RunMode.TARGETED,
+        ]
+    }
+
+    public static getPrepConfigForStagingOnly(params, log)
+    {
+        def ref_data_types = params.ref_data_types
+            .tokenize(',')
+            .collect { 
+                def ref_data_type_enum = Utils.getEnumFromString(it, Constants.RefDataType)
+
+                if(!ref_data_type_enum) {
+                    def ref_data_type_str = Utils.getEnumNames(Constants.RefDataType).join('\n  - ')
+                    log.error "received invalid ref data type: '${it}'. Valid options are:\n  - ${ref_data_type_str}"
+                    Nextflow.exit(1)
+                }
+
+                return ref_data_type_enum
+            }
+
+        if(
+            ref_data_types.contains(Constants.RefDataType.WGS) ||
+            ref_data_types.contains(Constants.RefDataType.WTS) ||
+            ref_data_types.contains(Constants.RefDataType.TARGETED)
+        ){
+            ref_data_types += [
+                Constants.RefDataType.FASTA,
+                Constants.RefDataType.FAI,
+                Constants.RefDataType.DICT,
+                Constants.RefDataType.IMG,
+                Constants.RefDataType.HMFTOOLS
+            ]
+        }
+
+        if (ref_data_types.contains(Constants.RefDataType.WGS)) {
+            ref_data_types += [Constants.RefDataType.GRIDSS_INDEX]
+        }
+
+        if (ref_data_types.contains(Constants.RefDataType.TARGETED)) {
+            ref_data_types += [Constants.RefDataType.PANEL]
+        }
+
+        def require_fasta = ref_data_types.contains(Constants.RefDataType.FASTA)
+        def require_fai = ref_data_types.contains(Constants.RefDataType.FAI)
+        def require_dict = ref_data_types.contains(Constants.RefDataType.DICT)
+        def require_img = ref_data_types.contains(Constants.RefDataType.IMG)
+        
+        def require_bwa_index = ref_data_types.contains(Constants.RefDataType.BWA_INDEX) || ref_data_types.contains(Constants.RefDataType.DNA_ALIGNMENT)
+        def require_star_index = ref_data_types.contains(Constants.RefDataType.STAR_INDEX) || ref_data_types.contains(Constants.RefDataType.RNA_ALIGNMENT)
+        
+        def require_gridss_index = ref_data_types.contains(Constants.RefDataType.GRIDSS_INDEX)
+        def require_hmftools_data = ref_data_types.contains(Constants.RefDataType.HMFTOOLS)
+        def require_panel_data = ref_data_types.contains(Constants.RefDataType.PANEL)
+
+        if(require_panel_data){
+            if(params.panel == null) {
+                require_panel_data = false
+                log.warn "Skipping preparing panel specific reference data as --panel CLI argument was not provided"
+            } else if(!Constants.PANELS_DEFINED.contains(params.panel)) {
+                require_panel_data = false
+                log.warn "Skipping preparing panel specific reference data for custom panel: ${params.panel}"
+            }
+        }
+
+        return [
+            prepare_ref_data_only: true,
+
+            require_fasta: require_fasta,
+            require_fai: require_fai,
+            require_dict: require_dict,
+            require_img: require_img,
+
+            require_bwa_index: require_bwa_index,
+            require_star_index: require_star_index,
+            
+            require_gridss_index: require_gridss_index,
+            require_hmftools_data: require_hmftools_data,
+            require_panel_data: require_panel_data,
         ]
     }
 }

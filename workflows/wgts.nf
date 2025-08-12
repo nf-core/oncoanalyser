@@ -91,8 +91,9 @@ workflow WGTS {
     ch_inputs = Channel.fromList(inputs)
 
     // Set up reference data, assign more human readable variables
+    prep_config = WorkflowMain.getPrepConfigForRun(run_config)
     PREPARE_REFERENCE(
-        run_config,
+        prep_config,
     )
     ref_data = PREPARE_REFERENCE.out
     hmf_data = PREPARE_REFERENCE.out.hmf_data
@@ -155,7 +156,7 @@ workflow WGTS {
     ch_redux_dna_normal_out = Channel.empty()
     ch_redux_dna_donor_out = Channel.empty()
 
-    // channel: [ meta, dup_freq_tsv, jitter_tsv, ms_tsv ]
+    // channel: [ meta, dup_freq_tsv, jitter_tsv, ms_tsv, repeat_tsv ]
     ch_redux_dna_tumor_tsv_out = Channel.empty()
     ch_redux_dna_normal_tsv_out = Channel.empty()
     ch_redux_dna_donor_tsv_out = Channel.empty()
@@ -705,7 +706,7 @@ workflow WGTS {
             hmf_data.virusbreakend_db,
             hmf_data.virus_taxonomy_db,
             hmf_data.virus_reporting_db,
-            hmf_data.virus_blocklist_db,
+            hmf_data.virus_blacklist_db,
             gridss_config,
         )
 
