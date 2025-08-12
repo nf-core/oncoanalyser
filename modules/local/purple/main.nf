@@ -26,6 +26,7 @@ process PURPLE {
     output:
     tuple val(meta), path('purple/'), emit: purple_dir
     path 'versions.yml'             , emit: versions
+    path '.command.*'               , emit: command_files
 
     when:
     task.ext.when == null || task.ext.when

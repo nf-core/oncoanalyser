@@ -21,6 +21,7 @@ process WISP {
     output:
     path 'wisp/'       , emit: wisp_dir
     path 'versions.yml', emit: versions
+    path '.command.*'  , emit: command_files
 
     when:
     task.ext.when == null || task.ext.when

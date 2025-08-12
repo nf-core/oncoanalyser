@@ -17,6 +17,7 @@ process TEAL_PIPELINE {
     output:
     tuple val(meta), path('teal/*.tsv*'), emit: teal_tsvs
     path 'versions.yml'                 , emit: versions
+    path '.command.*'                   , emit: command_files
 
     when:
     task.ext.when == null || task.ext.when

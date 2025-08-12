@@ -14,6 +14,7 @@ process SIGS {
     output:
     tuple val(meta), path('sigs/'), emit: sigs_dir
     path 'versions.yml'           , emit: versions
+    path '.command.*'             , emit: command_files
 
     when:
     task.ext.when == null || task.ext.when

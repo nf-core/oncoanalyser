@@ -16,6 +16,7 @@ process CHORD {
     output:
     tuple val(meta), path('chord/'), emit: chord_dir
     path 'versions.yml'            , emit: versions
+    path '.command.*'              , emit: command_files
 
     when:
     task.ext.when == null || task.ext.when

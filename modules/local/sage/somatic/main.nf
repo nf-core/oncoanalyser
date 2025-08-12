@@ -27,6 +27,7 @@ process SAGE_SOMATIC {
     tuple val(meta), path('somatic/*.sage.somatic.vcf.gz'), path('somatic/*.sage.somatic.vcf.gz.tbi'), emit: vcf
     tuple val(meta), path('somatic/')                                                                , emit: sage_dir
     path 'versions.yml'                                                                              , emit: versions
+    path '.command.*'                                                                                , emit: command_files
 
     when:
     task.ext.when == null || task.ext.when

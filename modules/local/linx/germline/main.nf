@@ -16,6 +16,7 @@ process LINX_GERMLINE {
     output:
     tuple val(meta), path('linx_germline/'), emit: annotation_dir
     path 'versions.yml'                    , emit: versions
+    path '.command.*'                      , emit: command_files
 
     when:
     task.ext.when == null || task.ext.when

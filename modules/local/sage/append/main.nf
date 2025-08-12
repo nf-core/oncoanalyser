@@ -18,6 +18,7 @@ process SAGE_APPEND {
     output:
     tuple val(meta), path('sage_append'), emit: sage_append_dir
     path 'versions.yml'                 , emit: versions
+    path '.command.*'                   , emit: command_files
 
     when:
     task.ext.when == null || task.ext.when

@@ -23,6 +23,7 @@ process SAGE_GERMLINE {
     tuple val(meta), path('germline/*.sage.germline.vcf.gz'), path('germline/*.sage.germline.vcf.gz.tbi'), emit: vcf
     tuple val(meta), path('germline/')                                                                   , emit: sage_dir
     path 'versions.yml'                                                                                  , emit: versions
+    path '.command.*'                                                                                    , emit: command_files
 
     when:
     task.ext.when == null || task.ext.when
