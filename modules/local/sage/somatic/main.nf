@@ -71,8 +71,11 @@ process SAGE_SOMATIC {
     }
 
     // NOTE(SW): use of ternary inexplicitly causes a 'variable already defined in scope error'
-    def high_depth_mode_arg
-    if (targeted_mode) { high_depth_mode_arg = '-high_depth_mode' }
+    if (targeted_mode) {
+        high_depth_mode_arg = '-high_depth_mode'
+    } else {
+        high_depth_mode_arg = ''
+    }
 
     """
     mkdir -p somatic/

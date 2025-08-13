@@ -13,9 +13,9 @@ process SAGE_GERMLINE {
     val genome_ver
     path genome_fai
     path genome_dict
-    path driver_gene_panel
     path sage_known_hotspots_germline
     path sage_highconf_regions
+    path driver_gene_panel
     path ensembl_data_resources
     val targeted_mode
 

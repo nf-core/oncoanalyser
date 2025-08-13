@@ -185,7 +185,7 @@ workflow SAGE_APPEND {
                 meta_append.reference_ids.add(Utils.getTumorDnaSampleName(meta))
                 bams.add(tumor_dna_bam)
                 bais.add(tumor_dna_bai)
-                redux_tsvs.add(tumor_dna_redux_tsv)
+                redux_tsvs = tumor_dna_redux_tsv
             }
 
             def purple_smlv_vcf = file(purple_dir).resolve("${tumor_dna_id}.purple.somatic.vcf.gz")
