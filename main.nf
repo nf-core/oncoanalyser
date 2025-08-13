@@ -73,18 +73,23 @@ include { WGTS                    } from './workflows/wgts'
 //
 // WORKFLOW: Run main analysis pipeline depending on type of input
 //
-run_mode = Utils.getRunMode(params.mode, log)
 
 workflow NFCORE_ONCOANALYSER {
 
+    inputs = Utils.parseInput(params.input, workflow.stubRun, log)
+    run_config = WorkflowMain.getRunConfig(params, inputs, log)
+    run_mode = Utils.getRunMode(params.mode, log)
+
+    Utils.validateInput(inputs, run_config, params, log)
+
     if (run_mode === Constants.RunMode.WGTS) {
-        WGTS()
+        WGTS(inputs, run_config)
     } else if (run_mode === Constants.RunMode.TARGETED) {
-        TARGETED()
+        TARGETED(inputs, run_config)
     } else if (run_mode === Constants.RunMode.PURITY_ESTIMATE) {
-        PURITY_ESTIMATE()
+        PURITY_ESTIMATE(inputs, run_config)
     } else if (run_mode === Constants.RunMode.PANEL_RESOURCE_CREATION) {
-        PANEL_RESOURCE_CREATION()
+        PANEL_RESOURCE_CREATION(inputs, run_config)
     } else if (run_mode === Constants.RunMode.PREPARE_REFERENCE)  {
         prep_config = WorkflowMain.getPrepConfigForStagingOnly(params, log)
         PREPARE_REFERENCE(prep_config)
