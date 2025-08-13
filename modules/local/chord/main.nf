@@ -40,20 +40,20 @@ process CHORD {
         -sample ${meta.sample_id} \\
         -snv_indel_vcf_file \$(realpath ${smlv_vcf}) \\
         -sv_vcf_file \$(realpath ${sv_vcf}) \\
+        -ref_genome ${genome_fasta} \\
         ${log_level_arg} \\
-        -output_dir \$(realpath chord/) \\
-        -ref_genome ${genome_fasta}
+        -output_dir \$(realpath chord/)
 
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":
         chord: \$(chord -version | sed -n '/^CHORD version/ { s/^.* //p }')
     END_VERSIONS
-
     """
 
     stub:
     """
     mkdir -p chord/
+
     touch chord/${meta.sample_id}.chord.mutation_contexts.tsv
     touch chord/${meta.sample_id}.chord.prediction.tsv
 

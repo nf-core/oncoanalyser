@@ -28,13 +28,12 @@ workflow TEAL_CHARACTERISATION {
     ch_versions = Channel.empty()
 
     //
-    // MODULE: Teal prep
+    // MODULE: TEAL prep
     //
-    // Make preliminary BAM to be used as input for the main Teal pipeline. This prep step takes 90% of Teal's runtime,
-    // so it is split from the main pipeline so that we don't have to wait for Purple to finish before we start
-    // running Teal
+    // Make preliminary BAM to be used as input for the main TEAL pipeline. This prep step takes 90% of TEAL's runtime,
+    // so it is split from the main pipeline so that we don't have to wait for PURPLE to finish before we start
+    // running TEAL
     //
-
     // Select input sources and sort
     // channel: runnable: [ meta, tumor_bam, tumor_bai, normal_bam, normal_bai ]
     // channel: skip: [ meta ]
@@ -83,7 +82,7 @@ workflow TEAL_CHARACTERISATION {
 
     // Flatten TEAL_PREP output
     // channel: [ meta, teal_bam, teal_bai ]
-    ch_tumor_teal_bam = WorkflowOncoanalyser.restoreMeta(TEAL_PREP.out.tumor_bam, ch_inputs)
+    ch_tumor_teal_bam = WorkflowOncoanalyser.restoreMeta(TEAL_PREP.out.tumor_teal_bam, ch_inputs)
         .map { meta, bam_bai -> [meta, *bam_bai] }
 
     ch_normal_teal_bam_placeholder = WorkflowOncoanalyser.restoreMeta(
@@ -93,14 +92,13 @@ workflow TEAL_CHARACTERISATION {
         ch_inputs
     )
 
-    ch_normal_teal_bam = WorkflowOncoanalyser.restoreMeta(TEAL_PREP.out.normal_bam, ch_inputs)
+    ch_normal_teal_bam = WorkflowOncoanalyser.restoreMeta(TEAL_PREP.out.normal_teal_bam, ch_inputs)
         .map { meta, bam_bai -> [meta, *bam_bai] }
         .mix(ch_normal_teal_bam_placeholder)
 
     //
-    // MODULE: Teal pipeline
+    // MODULE: TEAL pipeline
     //
-
     // Select input sources and sort
     // channel: runnable: [ meta, tumor_teal_bam, tumor_teal_bai, normal_teal_bam, normal_teal_bai, tumor_metrics_dir, normal_metrics_dir, cobalt_dir, purple_dir ]
     // channel: skip: [ meta ]
@@ -113,11 +111,12 @@ workflow TEAL_CHARACTERISATION {
         ch_purple_dir,
     )
         .map { meta, tumor_teal_bam, tumor_teal_bai, normal_teal_bam, normal_teal_bai, tumor_metrics_dir, normal_metrics_dir, cobalt_dir, purple_dir ->
-
             return [
                 meta,
-                tumor_teal_bam, tumor_teal_bai,
-                normal_teal_bam, normal_teal_bai,
+                tumor_teal_bam,
+                tumor_teal_bai,
+                normal_teal_bam,
+                normal_teal_bai,
                 Utils.selectCurrentOrExisting(tumor_metrics_dir, meta, Constants.INPUT.BAMTOOLS_DIR_TUMOR),
                 Utils.selectCurrentOrExisting(normal_metrics_dir, meta, Constants.INPUT.BAMTOOLS_DIR_NORMAL),
                 Utils.selectCurrentOrExisting(cobalt_dir, meta, Constants.INPUT.COBALT_DIR),
@@ -149,7 +148,7 @@ workflow TEAL_CHARACTERISATION {
             return [ meta_teal, tumor_teal_bam, tumor_teal_bai, normal_teal_bam, normal_teal_bai, tumor_metrics_dir, normal_metrics_dir, cobalt_dir, purple_dir ]
         }
 
-
+    // Run process
     TEAL_PIPELINE(
         ch_teal_pipeline_inputs,
         genome_version,
@@ -157,7 +156,6 @@ workflow TEAL_CHARACTERISATION {
 
     ch_versions = ch_versions.mix(TEAL_PIPELINE.out.versions)
 
-
     emit:
-    versions  = ch_versions // channel: [ versions.yml ]
+    versions = ch_versions // channel: [ versions.yml ]
 }

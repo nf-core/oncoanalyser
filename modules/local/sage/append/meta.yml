@@ -15,7 +15,7 @@ input:
       type: map
       description: |
         Groovy Map containing sample informatio
-        e.g. [id: 'sample_id', append_id: 'sample_id_append']
+        e.g. [id: 'sample_id']
   - vcf:
       type: file
       description: VCF file
@@ -44,19 +44,24 @@ input:
       type: file
       description: Reference genome assembly dict file
       pattern: "*.{dict}"
+  - targeted_mode:
+      type: boolean
+      description: Flag indicating whether targeted mode is set
 output:
   - meta:
       type: map
       description: |
         Groovy Map containing sample information
-        e.g. [id: 'sample_id', append_id: 'sample_id_append']
-  - vcf:
-      type: file
-      description: VCF file
-      pattern: "*.{vcf.gz}"
+        e.g. [id: 'sample_id']
+  - sage_append_dir:
+      type: directory
+      description: SAGE append output directory
   - versions:
       type: file
       description: File containing software versions
       pattern: "versions.yml"
+  - command_files:
+      type: list
+      description: List of command files
 authors:
   - "@scwatts"

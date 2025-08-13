@@ -205,7 +205,7 @@ workflow PANEL_RESOURCE_CREATION {
         hmf_data.gc_profile,
         hmf_data.diploid_bed,
         [],  // panel_target_region_normalisation
-        true,  // is_targeted_mode
+        true,  // targeted_mode
     )
 
     ch_versions = ch_versions.mix(COBALT_PROFILING.out.versions)
@@ -237,7 +237,7 @@ workflow PANEL_RESOURCE_CREATION {
         hmf_data.ensembl_data_resources,
         hmf_data.gnomad_resource,
         true,  // enable_germline
-        true,  // is_targeted_mode
+        true,  // targeted_mode
     )
 
     ch_versions = ch_versions.mix(SAGE_CALLING.out.versions)

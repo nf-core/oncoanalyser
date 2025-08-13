@@ -41,5 +41,5 @@ workflow ISOFOX_NORMALISATION {
     ch_versions = ch_versions.mix(ISOFOX_PANEL_NORMALISATION.out.versions)
 
     emit:
-    versions  = ch_versions // channel: [ versions.yml ]
+    versions = ch_versions // channel: [ versions.yml ]
 }

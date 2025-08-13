@@ -3,12 +3,12 @@ class Constants {
     // NOTE(SW): the HMF reference data files are incompatible with hg19 due to different contig naming
     static List GENOMES_VERSION_37 = ['GRCh37_hmf', 'GRCh37']
     static List GENOMES_VERSION_38 = ['GRCh38_hmf', 'GRCh38', 'hg38']
-    static List GENOMES_ALT        = ['GRCh38', 'hg38']
+    static List GENOMES_ALT = ['GRCh38', 'hg38']
 
-    static List GENOMES_SUPPORTED  = ['GRCh37_hmf', 'GRCh38_hmf']
-    static List GENOMES_DEFINED    = Constants.GENOMES_VERSION_37 + Constants.GENOMES_VERSION_38
+    static List GENOMES_SUPPORTED = ['GRCh37_hmf', 'GRCh38_hmf']
+    static List GENOMES_DEFINED = Constants.GENOMES_VERSION_37 + Constants.GENOMES_VERSION_38
 
-    static List PANELS_DEFINED     = ['tso500']
+    static List PANELS_DEFINED = ['tso500']
 
 
     static String HMF_DATA_37_PATH = 'https://pub-cf6ba01919994c3cbd354659947f74d8.r2.dev/hmf_reference_data/hmftools/hmf_pipeline_resources.37_v2.1.0--1.tar.gz'
@@ -34,20 +34,22 @@ class Constants {
 
     static enum RefDataType {
         // Compound types
+        TARGETED,
         WGS,
         WTS,
-        TARGETED,
 
         // Individual types
-        FASTA,
-        FAI,
+        BWAMEM2_INDEX,
         DICT,
-        IMG,
-        BWAMEM2_INDEX, DNA_ALIGNMENT,
+        DNA_ALIGNMENT,
+        FAI,
+        FASTA,
         GRIDSS_INDEX,
-        STAR_INDEX, RNA_ALIGNMENT,
         HMFTOOLS,
+        IMG,
         PANEL,
+        RNA_ALIGNMENT,
+        STAR_INDEX,
     }
 
     static enum Process {
@@ -79,16 +81,18 @@ class Constants {
 
     static enum FileType {
         // Generic
-        BAM,
         BAI,
-        CRAM,
+        BAM,
         CRAI,
+        CRAM,
         FASTQ,
-        // Redux
+
+        // REDUX
         BAM_REDUX,
         CRAM_REDUX,
         REDUX_JITTER_TSV,
         REDUX_MS_TSV,
+
         // Process
         AMBER_DIR,
         BAMTOOLS_DIR,
@@ -104,26 +108,27 @@ class Constants {
         SAGE_VCF_TBI,
         SAGE_APPEND_DIR,
         VIRUSINTERPRETER_DIR,
+
         // ORANGE specific
         CHORD_DIR,
-        SIGS_DIR,
         CUPPA_DIR,
         LINX_PLOT_DIR,
-        SAGE_DIR,
         PEACH_DIR,
+        SAGE_DIR,
+        SIGS_DIR,
     }
 
     static enum SampleType {
-        TUMOR,
-        NORMAL,
-        TUMOR_NORMAL,
         DONOR,
+        NORMAL,
+        TUMOR,
+        TUMOR_NORMAL,
     }
 
     static enum SequenceType {
         DNA,
-        RNA,
         DNA_RNA,
+        RNA,
     }
 
     static enum InfoField {

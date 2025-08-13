@@ -116,5 +116,5 @@ workflow ESVEE_CALLING {
     germline_vcf   = ch_germline_out   // channel: [ meta, vcf, tbi ]
     unfiltered_vcf = ch_unfiltered_out // channel: [ meta, vcf, tbi ]
 
-    versions = ch_versions // channel: [ versions.yml ]
+    versions       = ch_versions       // channel: [ versions.yml ]
 }

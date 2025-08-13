@@ -1,4 +1,4 @@
-name: teal
+name: teal_prep
 channels:
   - conda-forge
   - bioconda

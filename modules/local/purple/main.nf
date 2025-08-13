@@ -90,6 +90,7 @@ process PURPLE {
     stub:
     """
     mkdir purple/
+
     touch purple/${meta.tumor_id}.purple.cnv.gene.tsv
     touch purple/${meta.tumor_id}.purple.cnv.somatic.tsv
     touch purple/${meta.tumor_id}.purple.driver.catalog.germline.tsv

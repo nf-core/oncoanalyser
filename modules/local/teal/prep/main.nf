@@ -12,10 +12,10 @@ process TEAL_PREP {
     val genome_ver
 
     output:
-    tuple val(meta), path("teal_bam/${meta.tumor_id}.teal.telbam{.bam,.bam.bai}") , emit: tumor_bam
-    tuple val(meta), path("teal_bam/${meta.normal_id}.teal.telbam{.bam,.bam.bai}"), emit: normal_bam, optional: true
-    path 'versions.yml', emit: versions
-    path '.command.*'  , emit: command_files
+    tuple val(meta), path("teal_bam/${meta.tumor_id}.teal.telbam{.bam,.bam.bai}") , emit: tumor_teal_bam
+    tuple val(meta), path("teal_bam/${meta.normal_id}.teal.telbam{.bam,.bam.bai}"), emit: normal_teal_bam, optional: true
+    path 'versions.yml'                                                           , emit: versions
+    path '.command.*'                                                             , emit: command_files
 
     when:
     task.ext.when == null || task.ext.when
@@ -34,11 +34,10 @@ process TEAL_PREP {
         tumor_bam_index_command = "samtools index teal_bam/${meta.tumor_id}.teal.telbam.bam"
     }
 
-    def reference_arg = ""
-    def reference_bam_arg = ""
-    def reference_bam_index_command = ""
-
-    if(normal_bam) {
+    def reference_arg = ''
+    def reference_bam_arg = ''
+    def reference_bam_index_command = ''
+    if (normal_bam) {
         reference_arg = "-reference ${meta.normal_id}"
         reference_bam_arg = "-reference_bam ${normal_bam}"
         reference_bam_index_command = "samtools index teal_bam/${meta.normal_id}.teal.telbam.bam"

@@ -42,5 +42,5 @@ workflow PAVE_PON_CREATION {
     ch_versions = ch_versions.mix(PAVE_PON_PANEL_CREATION.out.versions)
 
     emit:
-    versions  = ch_versions // channel: [ versions.yml ]
+    versions = ch_versions // channel: [ versions.yml ]
 }

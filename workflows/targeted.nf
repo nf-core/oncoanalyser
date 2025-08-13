@@ -276,7 +276,7 @@ workflow TARGETED {
             hmf_data.gc_profile,
             hmf_data.diploid_bed,
             panel_data.target_region_normalisation,
-            true,  // is_targeted_mode
+            true,  // targeted_mode
         )
 
         ch_versions = ch_versions.mix(COBALT_PROFILING.out.versions)
@@ -357,7 +357,7 @@ workflow TARGETED {
             hmf_data.ensembl_data_resources,
             hmf_data.gnomad_resource,
             true,  // enable_germline
-            true,  // is_targeted_mode
+            true,  // targeted_mode
         )
 
         ch_versions = ch_versions.mix(SAGE_CALLING.out.versions)
@@ -473,7 +473,7 @@ workflow TARGETED {
             ref_data.genome_fai,
             ref_data.genome_dict,
             true,  // enable_germline
-            true,  // is_targeted_mode
+            true,  // targeted_mode
         )
 
         ch_versions = ch_versions.mix(SAGE_APPEND.out.versions)
@@ -609,7 +609,7 @@ workflow TARGETED {
             ref_data.genome_fai,
             hmf_data.lilac_resources,
             ref_data_hla_slice_bed,
-            true,  // is_targeted_mode
+            true,  // targeted_mode
         )
 
         ch_versions = ch_versions.mix(LILAC_CALLING.out.versions)

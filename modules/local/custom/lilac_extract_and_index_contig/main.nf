@@ -14,9 +14,10 @@ process CUSTOM_EXTRACTCONTIG {
     val run
 
     output:
-    path "*extracted.fa"  , emit: contig
-    path "*extracted.fa.*", emit: bwamem2_index
+    path '*extracted.fa'  , emit: contig
+    path '*extracted.fa.*', emit: bwamem2_index
     path 'versions.yml'   , emit: versions
+    path '.command.*'     , emit: command_files
 
     when:
     task.ext.when == null || task.ext.when

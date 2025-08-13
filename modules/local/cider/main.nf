@@ -34,11 +34,11 @@ process CIDER {
         ${args} \\
         -sample ${meta.sample_id} \\
         -bam ${bam} \\
+        -ref_genome_version ${genome_ver} \\
         -blast \$(which blastn | sed 's#/bin/blastn##') \\
         -blast_db ${human_blastdb} \\
-        -ref_genome_version ${genome_ver} \\
-        -threads ${task.cpus} \\
         -write_cider_bam \\
+        -threads ${task.cpus} \\
         ${log_level_arg} \\
         -output_dir cider/
 

@@ -205,7 +205,7 @@ workflow PURITY_ESTIMATE {
             hmf_data.gc_profile,
             hmf_data.diploid_bed,
             [],  // panel_target_region_normalisation
-            purity_estimate_run_mode === Constants.RunMode.TARGETED,  // is_targeted_mode
+            purity_estimate_run_mode === Constants.RunMode.TARGETED,  // targeted_mode
         )
 
         ch_versions = ch_versions.mix(COBALT_PROFILING.out.versions)
@@ -236,7 +236,7 @@ workflow PURITY_ESTIMATE {
             ref_data.genome_fai,
             ref_data.genome_dict,
             false,  // run_germline
-            purity_estimate_run_mode === Constants.RunMode.TARGETED,  // is_targeted_mode
+            purity_estimate_run_mode === Constants.RunMode.TARGETED,  // targeted_mode
         )
 
         ch_versions = ch_versions.mix(SAGE_APPEND.out.versions)
@@ -247,13 +247,6 @@ workflow PURITY_ESTIMATE {
         ch_sage_somatic_append_out = ch_inputs.map { meta -> [meta, []] }
 
     }
-
-
-
-
-    // TODO(SW): rework to accept multiple samples per grouping (patient/subject); currently achievable via multiple groups
-
-
 
     //
     // SUBWORKFLOW: Run WISP to estimate tumor purity
@@ -267,7 +260,7 @@ workflow PURITY_ESTIMATE {
             ch_sage_somatic_append_out,
             ref_data.genome_fasta,
             ref_data.genome_fai,
-            purity_estimate_run_mode === Constants.RunMode.TARGETED,  // is_targeted_mode
+            purity_estimate_run_mode === Constants.RunMode.TARGETED,  // targeted_mode
         )
 
         ch_versions = ch_versions.mix(WISP_ANALYSIS.out.versions)

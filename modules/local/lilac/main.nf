@@ -13,7 +13,7 @@ process LILAC {
     path genome_fai
     val genome_ver
     path lilac_resources, stageAs: 'lilac_resources'
-    val is_targeted_mode
+    val targeted_mode
 
     output:
     tuple val(meta), path('lilac/'), emit: lilac_dir
@@ -38,7 +38,7 @@ process LILAC {
 
     def purple_dir_arg = purple_dir ? "-purple_dir ${purple_dir}" : ''
 
-    def freq_score_penalty = is_targeted_mode ? "0.0018" : "0.0009"
+    def freq_score_penalty = targeted_mode ? '0.0018' : '0.0009'
 
     """
     lilac \\
@@ -66,6 +66,7 @@ process LILAC {
     stub:
     """
     mkdir -p lilac/
+
     touch lilac/placeholder
 
     echo -e '${task.process}:\\n  stub: noversions\\n' > versions.yml

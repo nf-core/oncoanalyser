@@ -3,7 +3,8 @@
 ## Introduction
 
 This document describes the output produced by the pipeline. The directories listed below will be created in the results
-directory after the pipeline has finished. All paths are relative to the top-level results directory.
+directory for a typical WGTS analysis after the pipeline has finished. All paths are relative to the top-level results
+directory.
 
 ```tree
 output/
@@ -29,8 +30,7 @@ output/
 │   ├── sigs/
 │   ├── teal/
 │   ├── virusbreakend/
-│   ├── virusinterpreter/
-│   └── wisp/ # Only with `--mode purity_estimate`
+│   └── virusinterpreter/
 │  
 ├── <group_id-2>/
 │   └── ...

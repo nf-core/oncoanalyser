@@ -62,22 +62,18 @@ class WorkflowMain {
         }
 
         // Attempt to set default panel data path; make no assumption on valid 'panel' value
-        if(run_mode === Constants.RunMode.TARGETED || run_mode === Constants.RunMode.PREPARE_REFERENCE) {
+        if (run_mode === Constants.RunMode.TARGETED || run_mode === Constants.RunMode.PREPARE_REFERENCE) {
 
             if (params.containsKey('panel')) {
 
-                if(params.panel == 'tso500') {
-                    if(params.genome_version.toString() == '37') {
+                if (params.panel == 'tso500') {
+                    if (params.genome_version.toString() == '37') {
                         params.ref_data_panel_data_path = Constants.TSO500_PANEL_37_PATH
                     } else if (params.genome_version.toString() == '38') {
                         params.ref_data_panel_data_path = Constants.TSO500_PANEL_38_PATH
                     }
                 }
 
-                // TODO(LN): Add support for other 'standard' panels
-                // if(params.panel == 'pm_haem') {
-                //
-                // }
             }
 
         }
@@ -256,7 +252,7 @@ class WorkflowMain {
                 ? null
                 : Utils.getEnumFromString(params.purity_estimate_mode, Constants.RunMode)
 
-            if(!purity_mode_enum || !purity_estimate_modes.contains(purity_mode_enum)) {
+            if (!purity_mode_enum || !purity_estimate_modes.contains(purity_mode_enum)) {
 
                 def purity_estimate_modes_str = purity_estimate_modes
                     .collect { e -> e.name().toLowerCase() }
@@ -371,7 +367,7 @@ class WorkflowMain {
             .collect {
                 def ref_data_type_enum = Utils.getEnumFromString(it, Constants.RefDataType)
 
-                if(!ref_data_type_enum) {
+                if (!ref_data_type_enum) {
                     def ref_data_type_str = Utils.getEnumNames(Constants.RefDataType).join('\n  - ')
                     log.error "received invalid ref data type: '${it}'. Valid options are:\n  - ${ref_data_type_str}"
                     Nextflow.exit(1)
@@ -380,11 +376,11 @@ class WorkflowMain {
                 return ref_data_type_enum
             }
 
-        if(
+        if (
             ref_data_types.contains(Constants.RefDataType.WGS) ||
             ref_data_types.contains(Constants.RefDataType.WTS) ||
             ref_data_types.contains(Constants.RefDataType.TARGETED)
-        ){
+        ) {
             ref_data_types += [
                 Constants.RefDataType.FASTA,
                 Constants.RefDataType.FAI,
@@ -414,11 +410,11 @@ class WorkflowMain {
         def require_hmftools_data = ref_data_types.contains(Constants.RefDataType.HMFTOOLS)
         def require_panel_data = ref_data_types.contains(Constants.RefDataType.PANEL)
 
-        if(require_panel_data){
-            if(params.panel == null) {
+        if (require_panel_data) {
+            if (params.panel == null) {
                 require_panel_data = false
                 log.warn "Skipping preparing panel specific reference data as --panel CLI argument was not provided"
-            } else if(!Constants.PANELS_DEFINED.contains(params.panel)) {
+            } else if (!Constants.PANELS_DEFINED.contains(params.panel)) {
                 require_panel_data = false
                 log.warn "Skipping preparing panel specific reference data for custom panel: ${params.panel}"
             }

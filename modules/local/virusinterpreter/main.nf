@@ -53,6 +53,7 @@ process VIRUSINTERPRETER {
     stub:
     """
     mkdir -p virusinterpreter/
+
     touch virusinterpreter/${meta.sample_id}.virus.annotated.tsv
 
     echo -e '${task.process}:\\n  stub: noversions\\n' > versions.yml

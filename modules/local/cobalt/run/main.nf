@@ -12,7 +12,7 @@ process COBALT {
     path gc_profile
     path diploid_regions
     path target_region_normalisation
-    val is_targeted_mode
+    val targeted_mode
 
     output:
     tuple val(meta), path('cobalt/'), emit: cobalt_dir
@@ -34,13 +34,11 @@ process COBALT {
 
     def target_region_norm_file_arg = target_region_normalisation ? "-target_region_norm_file ${target_region_normalisation}" : ''
 
-    def is_tumor_only_mode = !meta.containsKey('normal_id')
+    def tumor_only_mode = !meta.containsKey('normal_id')
 
-    def pcf_gamma_arg = is_targeted_mode && is_tumor_only_mode
-        ? "-pcf_gamma 50" : ""
+    def pcf_gamma_arg = targeted_mode && tumor_only_mode ? '-pcf_gamma 50' : ''
 
-    def diploid_regions_arg = !is_targeted_mode && is_tumor_only_mode
-        ? "-tumor_only_diploid_bed ${diploid_regions}" : ""
+    def diploid_regions_arg = !targeted_mode && tumor_only_mode ? "-tumor_only_diploid_bed ${diploid_regions}" : ''
 
     """
     cobalt \\
@@ -48,14 +46,14 @@ process COBALT {
         ${args} \\
         -tumor ${meta.tumor_id} \\
         -tumor_bam ${tumor_bam} \\
+        ${pcf_gamma_arg} \\
         ${reference_arg} \\
         ${reference_bam_arg} \\
-        -threads ${task.cpus} \\
         -gc_profile ${gc_profile} \\
         ${diploid_regions_arg} \\
         ${target_region_norm_file_arg} \\
-        ${pcf_gamma_arg} \\
         ${log_level_arg} \\
+        -threads ${task.cpus} \\
         -output_dir cobalt/
 
     cat <<-END_VERSIONS > versions.yml
@@ -67,6 +65,7 @@ process COBALT {
     stub:
     """
     mkdir -p cobalt/
+
     touch cobalt/placeholder
 
     echo -e '${task.process}:\\n  stub: noversions\\n' > versions.yml

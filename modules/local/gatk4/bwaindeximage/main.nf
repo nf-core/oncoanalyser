@@ -13,6 +13,7 @@ process GATK4_BWA_INDEX_IMAGE {
     output:
     path "${genome_fasta}.img", emit: img
     path 'versions.yml'       , emit: versions
+    path '.command.*'         , emit: command_files
 
     when:
     task.ext.when == null || task.ext.when

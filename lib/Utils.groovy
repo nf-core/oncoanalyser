@@ -203,48 +203,58 @@ class Utils {
 
                     def meta_sample = meta[sample_key]
 
-                    if(meta_sample.containsKey(Constants.FileType.CRAM_REDUX))
+                    if (meta_sample.containsKey(Constants.FileType.CRAM_REDUX)) {
                         meta_sample[Constants.FileType.BAM_REDUX] = meta_sample.remove(Constants.FileType.CRAM_REDUX)
+                    }
 
-                    if(meta_sample.containsKey(Constants.FileType.CRAM))
+                    if (meta_sample.containsKey(Constants.FileType.CRAM)) {
                         meta_sample[Constants.FileType.BAM] = meta_sample.remove(Constants.FileType.CRAM)
+                    }
 
                     // The BAI key is used to store the index for both regular/REDUX CRAMs/BAMs
-                    if(meta_sample.containsKey(Constants.FileType.CRAI))
+                    if (meta_sample.containsKey(Constants.FileType.CRAI)) {
                         meta_sample[Constants.FileType.BAI] = meta_sample.remove(Constants.FileType.CRAI)
+                    }
+
                 }
 
                 // Check that REDUX TSVs are present
                 sample_keys.each { sample_key ->
 
-                    if(stub_run)
+                    if (stub_run) {
                         return
+                    }
 
                     def meta_sample = meta[sample_key]
 
-                    if(!meta_sample.containsKey(Constants.FileType.BAM_REDUX))
+                    if (!meta_sample.containsKey(Constants.FileType.BAM_REDUX)) {
                         return
+                    }
 
                     def bam_path = meta_sample[Constants.FileType.BAM_REDUX]
                     def bam_dir = bam_path.getParent().toUriString()
 
                     // Get user specified TSV paths
-                    def jitter_tsv   = meta_sample[Constants.FileType.REDUX_JITTER_TSV]
-                    def ms_tsv       = meta_sample[Constants.FileType.REDUX_MS_TSV]
+                    def jitter_tsv = meta_sample[Constants.FileType.REDUX_JITTER_TSV]
+                    def ms_tsv = meta_sample[Constants.FileType.REDUX_MS_TSV]
 
                     // If TSV paths not provided, default to TSV paths in the same dir as the BAM
                     def sample_id = meta_sample.getOrDefault('longitudinal_sample_id', meta_sample['sample_id'])
-                    jitter_tsv   = jitter_tsv   ?: "${bam_dir}/${sample_id}.jitter_params.tsv"
-                    ms_tsv       = ms_tsv       ?: "${bam_dir}/${sample_id}.ms_table.tsv.gz"
+                    jitter_tsv = jitter_tsv ?: "${bam_dir}/${sample_id}.jitter_params.tsv"
+                    ms_tsv = ms_tsv ?: "${bam_dir}/${sample_id}.ms_table.tsv.gz"
 
-                    jitter_tsv   = nextflow.Nextflow.file(jitter_tsv)
-                    ms_tsv       = nextflow.Nextflow.file(ms_tsv)
+                    jitter_tsv = nextflow.Nextflow.file(jitter_tsv)
+                    ms_tsv = nextflow.Nextflow.file(ms_tsv)
 
                     def missing_tsvs = [:]
-                    if(!jitter_tsv.exists()) missing_tsvs[Constants.FileType.REDUX_JITTER_TSV] = jitter_tsv
-                    if(!ms_tsv.exists())     missing_tsvs[Constants.FileType.REDUX_MS_TSV] = ms_tsv
+                    if (!jitter_tsv.exists()) {
+                        missing_tsvs[Constants.FileType.REDUX_JITTER_TSV] = jitter_tsv
+                    }
+                    if (!ms_tsv.exists()) {
+                        missing_tsvs[Constants.FileType.REDUX_MS_TSV] = ms_tsv
+                    }
 
-                    if(missing_tsvs.size() > 0){
+                    if (missing_tsvs.size() > 0) {
 
                         def error_message = []
 
@@ -252,7 +262,8 @@ class Utils {
                         error_message.add("${bam_path.toUriString()} (${Constants.FileType.BAM_REDUX})")
                         missing_tsvs.each { error_message.add("${it.value} (missing expected ${it.key})") }
                         error_message.add("")
-                        error_message.add("Alternatively, provide the TSV paths in the sample sheet using filetype values: " +
+                        error_message.add(
+                            "Alternatively, provide the TSV paths in the sample sheet using filetype values: " +
                             "${Constants.FileType.REDUX_JITTER_TSV}, " +
                             "${Constants.FileType.REDUX_MS_TSV}"
                         )
@@ -269,11 +280,11 @@ class Utils {
 
                 // For purity estimation with WISP, require primary normal DNA BAM when an AMBER directory is provided
                 def meta_tumor_dna = meta.getOrDefault([Constants.SampleType.TUMOR, Constants.SequenceType.DNA], [:])
-                def is_longitudinal = meta_tumor_dna.containsKey('longitudinal_sample_id')
+                def longitudinal = meta_tumor_dna.containsKey('longitudinal_sample_id')
                 def has_amber_dir = meta_tumor_dna.containsKey(Constants.FileType.AMBER_DIR)
                 def has_normal_dna_bam = Utils.hasNormalDnaBam(meta) || Utils.hasNormalDnaReduxBam(meta)
 
-                if (is_longitudinal && has_amber_dir && ! has_normal_dna_bam) {
+                if (longitudinal && has_amber_dir && !has_normal_dna_bam) {
                     log.error "AMBER input was provided without the required primary normal DNA BAM for ${meta.group_id}"
                     Nextflow.exit(1)
                 }
@@ -302,7 +313,7 @@ class Utils {
                 fps << "${params.ref_data_hmf_data_path.replaceAll('/$', '')}/${v}"
             }
 
-        if(params.panel !== null) {
+        if (params.panel !== null) {
             params.panel_data_paths[params.panel][params.genome_version.toString()]
                 .each { k, v ->
                     fps << "${params.ref_data_panel_data_path.replaceAll('/$', '')}/${v}"
@@ -310,11 +321,15 @@ class Utils {
         }
 
         fps.each { fp_str ->
-            if (fp_str === null) return
+            if (fp_str === null) {
+                return
+            }
 
             def fp = Utils.getFileObject(fp_str)
 
-            if (!fp_str || fp.exists()) return
+            if (!fp_str || fp.exists()) {
+                return
+            }
 
             if (fp_str.endsWith('/')) {
                 fp.mkdirs()
@@ -346,11 +361,13 @@ class Utils {
 
                 def (sample_type, sequence_type) = key
 
-                if (!meta[key].containsKey(Constants.FileType.BAM) &&
+                if (
+                    !meta[key].containsKey(Constants.FileType.BAM) &&
                     !meta[key].containsKey(Constants.FileType.BAM_REDUX) &&
                     !meta[key].containsKey(Constants.FileType.CRAM) &&
                     !meta[key].containsKey(Constants.FileType.CRAM_REDUX) &&
-                    !meta[key].containsKey(Constants.FileType.FASTQ)) {
+                    !meta[key].containsKey(Constants.FileType.FASTQ)
+                ) {
 
                     log.error "no BAM/CRAM nor BAM_REDUX/CRAM_REDUX nor FASTQ files provided for ${meta.group_id} ${sample_type}/${sequence_type}\n\n" +
                         "NB: At least one of these files is required as they are the basis to determine input sample type."
@@ -360,7 +377,7 @@ class Utils {
             }
 
             // Do not allow donor sample without normal sample
-            if (Utils.hasDonorDna(meta) && ! Utils.hasNormalDna(meta)) {
+            if (Utils.hasDonorDna(meta) && !Utils.hasNormalDna(meta)) {
                 log.error "a donor sample but not normal sample was found for ${meta.group_id}\n\n" +
                     "Analysis with a donor sample requires a normal sample."
                 Nextflow.exit(1)

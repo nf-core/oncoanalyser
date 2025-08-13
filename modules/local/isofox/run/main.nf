@@ -51,9 +51,9 @@ process ISOFOX {
         -Xmx${Math.round(task.memory.bytes * xmx_mod)} \\
         ${args} \\
         -sample ${meta.sample_id} \\
-        -bam_file ${bam} \\
         ${functions_arg} \\
         -read_length ${read_length} \\
+        -bam_file ${bam} \\
         -ref_genome ${genome_fasta} \\
         -ref_genome_version ${genome_ver} \\
         -ensembl_data_dir ${ensembl_data_resources} \\
@@ -75,6 +75,7 @@ process ISOFOX {
     stub:
     """
     mkdir -p isofox/
+
     touch isofox/placeholder
 
     echo -e '${task.process}:\\n  stub: noversions\\n' > versions.yml

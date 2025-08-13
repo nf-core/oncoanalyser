@@ -42,8 +42,8 @@ process BAMTOOLS {
         -ref_genome_version ${genome_ver} \\
         -driver_gene_panel ${driver_gene_panel} \\
         -ensembl_data_dir ${ensembl_data_resources} \\
-        -threads ${task.cpus} \\
         ${log_level_arg} \\
+        -threads ${task.cpus} \\
         -output_dir ${meta.id}_bamtools/
 
     cat <<-END_VERSIONS > versions.yml

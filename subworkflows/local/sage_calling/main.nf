@@ -35,7 +35,7 @@ workflow SAGE_CALLING {
     ensembl_data_resources       // channel: [mandatory] /path/to/ensembl_data_resources/
     gnomad_resource              // channel: [mandatory] /path/to/gnomad_resource
     enable_germline              // boolean: [mandatory] Enable germline mode
-    is_targeted_mode             // boolean: [mandatory] Running in targeted/panel mode?
+    targeted_mode             // boolean: [mandatory] Running in targeted/panel mode?
 
     main:
     // Channel for version.yml files
@@ -63,14 +63,14 @@ workflow SAGE_CALLING {
             donor_dup_freq_tsv,  donor_jitter_tsv,  donor_ms_tsv ->
 
             def redux_tsv_list = [
-                tumor_jitter_tsv    ?: Utils.getInput(meta, Constants.INPUT.REDUX_JITTER_TSV_TUMOR),
-                tumor_ms_tsv        ?: Utils.getInput(meta, Constants.INPUT.REDUX_MS_TSV_TUMOR),
+                tumor_jitter_tsv ?: Utils.getInput(meta, Constants.INPUT.REDUX_JITTER_TSV_TUMOR),
+                tumor_ms_tsv ?: Utils.getInput(meta, Constants.INPUT.REDUX_MS_TSV_TUMOR),
 
-                normal_jitter_tsv   ?: Utils.getInput(meta, Constants.INPUT.REDUX_JITTER_TSV_NORMAL),
-                normal_ms_tsv       ?: Utils.getInput(meta, Constants.INPUT.REDUX_MS_TSV_NORMAL),
+                normal_jitter_tsv ?: Utils.getInput(meta, Constants.INPUT.REDUX_JITTER_TSV_NORMAL),
+                normal_ms_tsv ?: Utils.getInput(meta, Constants.INPUT.REDUX_MS_TSV_NORMAL),
 
-                donor_jitter_tsv    ?: Utils.getInput(meta, Constants.INPUT.REDUX_JITTER_TSV_DONOR),
-                donor_ms_tsv        ?: Utils.getInput(meta, Constants.INPUT.REDUX_MS_TSV_DONOR),
+                donor_jitter_tsv ?: Utils.getInput(meta, Constants.INPUT.REDUX_JITTER_TSV_DONOR),
+                donor_ms_tsv ?: Utils.getInput(meta, Constants.INPUT.REDUX_MS_TSV_DONOR),
             ]
 
             redux_tsv_list = redux_tsv_list.findAll{ it != [] }
@@ -135,10 +135,10 @@ workflow SAGE_CALLING {
         genome_fai,
         genome_dict,
         sage_known_hotspots_germline,
-        driver_gene_panel,
         sage_highconf_regions,
+        driver_gene_panel,
         ensembl_data_resources,
-        is_targeted_mode,
+        targeted_mode,
     )
 
     ch_versions = ch_versions.mix(SAGE_GERMLINE.out.versions)
@@ -192,11 +192,11 @@ workflow SAGE_CALLING {
         genome_dict,
         sage_pon,
         sage_known_hotspots_somatic,
-        driver_gene_panel,
         sage_highconf_regions,
+        driver_gene_panel,
         ensembl_data_resources,
         gnomad_resource,
-        is_targeted_mode,
+        targeted_mode,
     )
 
     ch_versions = ch_versions.mix(SAGE_SOMATIC.out.versions)

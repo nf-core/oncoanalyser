@@ -94,14 +94,13 @@ example, you would run `oncoanalyser` with the below command (assuming starting 
 
 ```bash
 nextflow run nf-core/oncoanalyser \
-  -revision 2.1.0 \
+  -revision 2.2.0 \
   -profile docker \
   --mode wgts \
+  --processes_manual alignment,redux,amber,cobalt,sage,pave,esvee,purple \
   --genome GRCh38_hmf \
-  --input samplesheet.neo_inputs.csv \
-  --outdir output/ \
-  --processes_manual \
-  --processes_include alignment,redux,amber,cobalt,sage,pave,esvee,purple
+  --input samplesheet.csv \
+  --outdir output/
 ```
 
 ## Why does `oncoanalyser` call too many / too few variants than another pipeline?
@@ -213,13 +212,13 @@ For example, the `oncoanalyser` arguments which start with `--` in this command:
 
 ```shell
 nextflow run nf-core/oncoanalyser \
-  -revision 2.1.0 \
-  -config refdata.config \
+  -revision 2.2.0 \
   -profile docker \
+  -config refdata.config \
   --mode wgts \
   --genome GRCh38_hmf \
-  --input /path/to/samplesheet.csv \
-  --outdir /path/to/outdir/
+  --input samplesheet.csv \
+  --outdir output/
 ```
 
 can be specified in a config file by stripping the `--` like so:
@@ -228,8 +227,8 @@ can be specified in a config file by stripping the `--` like so:
 params {
     mode   = "wgts"
     genome = "GRCh38_hmf"
-    input  = "/path/to/samplesheet.csv"
-    outdir = "/path/to/outdir/"
+    input  = "samplesheet.csv"
+    outdir = "outdir/"
 }
 ```
 
@@ -237,9 +236,9 @@ and provided as a config file when running `oncoanalyser`:
 
 ```shell
 nextflow run nf-core/oncoanalyser \
+  -revision 2.2.0 \
   -config refdata.config \
   -config params.config \
-  -revision 2.1.0 \
   -profile docker \
   <...>
 ```

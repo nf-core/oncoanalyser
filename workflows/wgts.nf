@@ -278,7 +278,7 @@ workflow WGTS {
             hmf_data.gc_profile,
             hmf_data.diploid_bed,
             [],  // panel_target_region_normalisation
-            false,  // is_targeted_mode
+            false,  // targeted_mode
         )
 
         ch_versions = ch_versions.mix(COBALT_PROFILING.out.versions)
@@ -359,7 +359,7 @@ workflow WGTS {
             hmf_data.ensembl_data_resources,
             hmf_data.gnomad_resource,
             true,  // enable_germline
-            false, // is_targeted_mode
+            false, // targeted_mode
         )
 
         ch_versions = ch_versions.mix(SAGE_CALLING.out.versions)
@@ -475,7 +475,7 @@ workflow WGTS {
             ref_data.genome_fai,
             ref_data.genome_dict,
             run_config.stages.orange,  // enable_germline [run for ORANGE but not Neo]
-            false, // is_targeted_mode
+            false, // targeted_mode
         )
 
         ch_versions = ch_versions.mix(SAGE_APPEND.out.versions)
@@ -659,7 +659,7 @@ workflow WGTS {
             ref_data.genome_fai,
             hmf_data.lilac_resources,
             ref_data_hla_slice_bed,
-            false,  // is_targeted_mode
+            false,  // targeted_mode
         )
 
         ch_versions = ch_versions.mix(LILAC_CALLING.out.versions)

@@ -13,11 +13,11 @@ process SAGE_GERMLINE {
     val genome_ver
     path genome_fai
     path genome_dict
-    path sage_known_hotspots_germline
     path driver_gene_panel
+    path sage_known_hotspots_germline
     path sage_highconf_regions
     path ensembl_data_resources
-    val is_targeted_mode
+    val targeted_mode
 
     output:
     tuple val(meta), path('germline/*.sage.germline.vcf.gz'), path('germline/*.sage.germline.vcf.gz.tbi'), emit: vcf
@@ -33,7 +33,7 @@ process SAGE_GERMLINE {
 
     def log_level_arg = task.ext.log_level ? "-log_level ${task.ext.log_level}" : ''
 
-    def high_depth_mode_arg = is_targeted_mode ? "-high_depth_mode" : ""
+    def high_depth_mode_arg = targeted_mode ? '-high_depth_mode' : ''
 
     """
     mkdir -p germline/
@@ -46,6 +46,7 @@ process SAGE_GERMLINE {
         -reference ${meta.tumor_id} \\
         -reference_bam ${tumor_bam} \\
         -jitter_param_dir ./ \\
+        -ref_sample_count 0 \\
         -ref_genome ${genome_fasta} \\
         -ref_genome_version ${genome_ver} \\
         -hotspots ${sage_known_hotspots_germline} \\
@@ -54,7 +55,6 @@ process SAGE_GERMLINE {
         -ensembl_data_dir ${ensembl_data_resources} \\
         -germline \\
         -panel_only \\
-        -ref_sample_count 0 \\
         ${high_depth_mode_arg} \\
         -bqr_write_plot \\
         -threads ${task.cpus} \\
@@ -70,6 +70,7 @@ process SAGE_GERMLINE {
     stub:
     """
     mkdir -p germline/
+
     touch germline/${meta.tumor_id}.sage.germline.vcf.gz
     touch germline/${meta.tumor_id}.sage.germline.vcf.gz.tbi
     touch germline/${meta.tumor_id}.sage.bqr.png

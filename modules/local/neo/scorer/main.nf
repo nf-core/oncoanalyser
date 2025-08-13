@@ -52,9 +52,9 @@ process NEO_SCORER {
         ${args} \\
         -sample ${meta.sample_id} \\
         ${cancer_type_arg} \\
+        -purple_dir ${purple_dir} \\
         ${rna_sample_arg} \\
         \${isofox_dir_arg} \\
-        -purple_dir ${purple_dir} \\
         ${rna_somatic_vcf_arg} \\
         -lilac_dir ${lilac_dir} \\
         -neo_dir ${neo_finder_dir} \\
@@ -73,6 +73,7 @@ process NEO_SCORER {
     stub:
     """
     mkdir -p neo_scorer/
+
     echo -e '${task.process}:\\n  stub: noversions\\n' > versions.yml
     """
 }

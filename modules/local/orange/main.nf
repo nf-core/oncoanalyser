@@ -177,6 +177,7 @@ process ORANGE {
     stub:
     """
     mkdir -p output/
+
     touch output/${meta.tumor_id}.orange.json
     touch output/${meta.tumor_id}.orange.pdf
 

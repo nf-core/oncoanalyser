@@ -60,8 +60,8 @@ process CUPPA {
         ${linx_dir_arg} \\
         ${virusinterpreter_dir_arg} \\
         ${isofox_dir_arg} \\
-        ${ref_alt_sj_sites_arg} \\
         -ref_genome_version ${genome_ver} \\
+        ${ref_alt_sj_sites_arg} \\
         ${log_level_arg} \\
         -output_dir cuppa/
 

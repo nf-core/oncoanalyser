@@ -14,7 +14,7 @@ input:
       type: map
       description: |
         Groovy Map containing sample information
-        e.g. [id: 'sample_id', tumor_id: 'tumor_name', normal_id: 'normal_name']
+        e.g. [id: 'sample_id']
   - tumor_bam:
       type: file
       description: Tumor BAM file
@@ -50,8 +50,16 @@ input:
       type: file
       description: Target regions BED file (optional)
       pattern: "*.{bed}"
+  - tumor_min_depth:
+      type: string
+      description: Minimum depth for a site to be considered
 output:
-  - cobalt_normalisation:
+  - meta:
+      type: map
+      description: |
+        Groovy Map containing sample information
+        e.g. [id: 'sample_id']
+  - amber_dir:
       file: directory
       description: AMBER output directory
       pattern: "versions.yml"
@@ -59,5 +67,8 @@ output:
       type: file
       description: File containing software versions
       pattern: "versions.yml"
+  - command_files:
+      type: list
+      description: List of command files
 authors:
   - "@scwatts"

@@ -9,9 +9,14 @@ process TEAL_PIPELINE {
 
     input:
     tuple val(meta),
-        path(tumor_teal_bam), path(tumor_teal_bai),
-        path(normal_teal_bam), path(normal_teal_bai),
-        path(tumor_metrics_dir), path(normal_metrics_dir), path(cobalt_dir), path(purple_dir)
+        path(tumor_teal_bam),
+        path(tumor_teal_bai),
+        path(normal_teal_bam),
+        path(normal_teal_bai),
+        path(tumor_metrics_dir),
+        path(normal_metrics_dir),
+        path(cobalt_dir),
+        path(purple_dir)
     val genome_ver
 
     output:
@@ -36,8 +41,13 @@ process TEAL_PIPELINE {
     def reference_bam_arg = normal_teal_bam ? "-reference_bam ${normal_teal_bam}" : ''
     def reference_wgs_metrics_arg = normal_metrics_dir ? "-reference_wgs_metrics ${normal_metrics_dir}/${meta.normal_id}.bam_metric.summary.tsv" : ''
 
-    if (tumor_arg && ! purple_arg) error "TEAL requires PURPLE inputs when analysing tumor data"
-    if (! tumor_arg && ! reference_arg) error "TEAL at least tumor or normal data for analyses"
+    if (tumor_arg && !purple_arg) {
+        error 'TEAL requires PURPLE inputs when analysing tumor data'
+    }
+
+    if (!tumor_arg && !reference_arg) {
+        error 'TEAL at least tumor or normal data for analyses'
+    }
 
     """
     teal \\

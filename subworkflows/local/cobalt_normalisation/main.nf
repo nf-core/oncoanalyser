@@ -50,5 +50,5 @@ workflow COBALT_NORMALISATION {
     ch_versions = ch_versions.mix(COBALT_PANEL_NORMALISATION.out.versions)
 
     emit:
-    versions  = ch_versions // channel: [ versions.yml ]
+    versions = ch_versions // channel: [ versions.yml ]
 }

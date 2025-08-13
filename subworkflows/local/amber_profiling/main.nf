@@ -52,9 +52,9 @@ workflow AMBER_PROFILING {
 
 
             // TODO(SW): must improve handling through separation of sample information in meta; currently unable to provide ccfDNA AMBER directory in samplesheet
-            def is_longitudinal_sample = Utils.getTumorDnaSample(meta).containsKey('longitudinal_sample_id')
+            def longitudinal_sample = Utils.getTumorDnaSample(meta).containsKey('longitudinal_sample_id')
 
-            runnable: tumor_bam && (!has_existing || is_longitudinal_sample)
+            runnable: tumor_bam && (!has_existing || longitudinal_sample)
 
 
             skip: true

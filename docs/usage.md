@@ -44,19 +44,19 @@ A typical command for running `oncoanalyser` is shown below:
 
 ```bash
 nextflow run nf-core/oncoanalyser \
-  -profile docker \
   -revision 2.2.0 \
+  -config reference_data.config \ # Optional but recommended
+  -profile docker \
   --mode wgts \
   --genome GRCh38_hmf \
   --input samplesheet.csv \
   --outdir output/ \
-  -config reference_data.config # Optional but recommended
 ```
 
 Below is a brief description of each argument:
 
 - `-profile`: [configuration presets](#-profile) for different compute environments
-- `-revision`: `oncoanalyser` version to run (can be a git [tag](https://github.com/nf-core/oncoanalyser/tags), [branch](https://github.com/nf-core/oncoanalyser/branches), or commit ID)
+- `-revision`: `oncoanalyser` version to run (can be a git [tag](https://github.com/nf-core/oncoanalyser/tags), [branch](https://github.com/nf-core/oncoanalyser/branches), or commit hash)
 - `--mode`: [run mode](#run-modes)
 - `--genome`: genome version, typically `GRCh38_hmf` or `GRCh37_hmf`
 - `--input`: the [samplesheet](#samplesheet) containing sample details and corresponding files to be analysed
@@ -468,8 +468,8 @@ Each index can then be created in by using `--mode prepare_reference` and `--ref
 ```bash
 nextflow run nf-core/oncoanalyser \
   -revision 2.2.0 \
-  -profile docker \
   -config genome.custom.config \
+  -profile docker \
   --mode prepare_reference \
   --ref_data_types wgs,bwamem2_index,gridss_index
   --genome CustomGenome \
@@ -535,13 +535,13 @@ _GRCh38 genome (Hartwig): `GRCh38_hmf`_
 
 ```bash
 nextflow run nf-core/oncoanalyser \
--profile docker \
--revision 2.2.0 \
--config reference_data.config \
---mode wgts \
---genome GRCh38_hmf \
---input samplesheet.csv \
---outdir output/
+  -revision 2.2.0 \
+  -config reference_data.config \
+  -profile docker \
+  --mode wgts \
+  --genome GRCh38_hmf \
+  --input samplesheet.csv \
+  --outdir output/
 ```
 
 ### Targeted sequencing
@@ -551,12 +551,12 @@ nextflow run nf-core/oncoanalyser \
 
 ```bash
 nextflow run nf-core/oncoanalyser \
-  -profile docker \
   -revision 2.2.0 \
   -config reference_data.config \
-  --genome GRCh38_hmf \
+  -profile docker \
   --mode targeted \
   --panel tso500 \
+  --genome GRCh38_hmf \
   --input samplesheet.csv \
   --outdir output/
 ```
@@ -608,17 +608,16 @@ to arguments `--driver_gene_panel`, `--target_regions_bed`, and `--isofox_gene_i
 
 ```bash
 nextflow run nf-core/oncoanalyser \
-  -profile docker \
   -revision 2.2.0 \
   -config reference_data.config \
-  --genome GRCh38_hmf \
+  -profile docker \
   --mode panel_resource_creation \
+  --genome GRCh38_hmf \
   --input samplesheet.panel_resource_creation.csv \
-  --outdir output/ \
-  \
   --driver_gene_panel DriverGenePanel.38.tsv \
   --target_regions_bed target_regions_definition.38.bed.gz \
-  --isofox_gene_ids rna_gene_ids.csv # Optional, only provide if panel supports RNA sequencing data
+  --isofox_gene_ids rna_gene_ids.csv \ # Optional, only provide if panel supports RNA sequencing data
+  --outdir output/
 ```
 
 Place the all the custom panel reference data files in a directory, and define the paths / file names in a configuration file:
@@ -664,9 +663,9 @@ nextflow run nf-core/oncoanalyser \
   -config reference_data.config \
   -config panel_data.config \
   -profile docker \
-  --genome GRCh38_hmf \
   --mode targeted \
   --panel my_custom_panel \
+  --genome GRCh38_hmf \
   --force_panel \
   --input samplesheet.csv \
   --outdir output/
@@ -690,9 +689,9 @@ A samplesheet with the paths to the primary and longitudinal sample data is then
 ```csv title="samplesheet.purity_estimate.csv"
 group_id,subject_id,sample_id,sample_type,sequence_type,filetype,info,filepath
 PATEINT1,PATIENT1,PATIENT1-L,tumor,dna,bam,longitudinal_sample,/path/to/PATIENT1-T.dna.longitudinal.bam
+PATIENT1,PATIENT1,PATIENT1-N,normal,dna,bam_redux,,/path/to/PATIENT1-N.dna.redux.bam
 PATEINT1,PATIENT1,PATIENT1-T,tumor,dna,amber_dir,,/path/to/PATIENT1-T/amber/
 PATEINT1,PATIENT1,PATIENT1-T,tumor,dna,purple_dir,,/path/to/PATIENT1-T/purple/
-PATIENT1,PATIENT1,PATIENT1-N,tumor,dna,bam_redux,,/path/to/PATIENT1-N.dna.redux.bam
 ```
 
 Then run `oncoanalyser` providing `--mode purity_estimate` and `--purity_estimate_mode <wgts|targeted>` (how the **longitudinal sample**
@@ -701,12 +700,13 @@ was sequenced):
 ```bash
 nextflow run nf-core/oncoanalyser \
   -revision 2.2.0 \
-  -profile docker \
   -config reference_data.config \
+  -profile docker \
+  --mode purity_estimate \
+  --purity_estimate_mode targeted \
   --genome GRCh38_hmf \
   --input samplesheet.purity_estimate.csv \
-  --mode purity_estimate \
-  --purity_estimate_mode targeted
+  --outdir output/
 ```
 
 :::note
@@ -744,10 +744,10 @@ nextflow run nf-core/oncoanalyser \
   -revision 2.2.0 \
   -profile docker \
   --mode wgts \
+  --processes_exclude virusinterpreter,orange \
   --genome GRCh38_hmf \
   --input samplesheet.csv \
-  --outdir output/ \
-  --processes_exclude virusinterpreter,orange
+  --outdir output/
 ```
 
 ### Manual process selection
@@ -760,10 +760,10 @@ nextflow run nf-core/oncoanalyser \
   -revision 2.2.0 \
   -profile docker \
   --mode wgts \
+  --processes_manual alignment,redux,sage,amber,cobalt,esvee,sage,pave,purple \
   --genome GRCh38_hmf \
   --input samplesheet.csv \
-  --outdir output/ \
-  --processes_manual alignment,redux,sage,amber,cobalt,esvee,sage,pave,purple
+  --outdir output/
 ```
 
 ### Starting from existing inputs
