@@ -37,7 +37,7 @@ process ESVEE {
     def log_level_arg = task.ext.log_level ? "-log_level ${task.ext.log_level}" : ''
 
     def reference_arg = meta.normal_id ? "-reference ${meta.normal_id}" : ''
-    def reference_bam_arg = meta.normal_id ? "-reference_bam ${normal_prep_bam}" : ''
+    def reference_bam_arg = meta.normal_id ? "-reference_bam ${normal_bam}" : ''
 
     """
     mkdir -p esvee/
@@ -46,7 +46,7 @@ process ESVEE {
         -Xmx${Math.round(task.memory.bytes * 0.95)} \\
         ${args} \\
         -tumor ${meta.tumor_id} \\
-        -tumor_bam ${tumor_prep_bam} \\
+        -tumor_bam ${tumor_bam} \\
         ${reference_arg} \\
         ${reference_bam_arg} \\
         -esvee_prep_dir esvee/ \\
@@ -60,7 +60,7 @@ process ESVEE {
         -bamtool \$(which sambamba) \\
         -write_types 'PREP_JUNCTION;PREP_BAM;FRAGMENT_LENGTH_DIST;JUNC_ASSEMBLY;PHASED_ASSEMBLY;ALIGNMENT;BREAKEND;VCF' \\
         -threads ${task.cpus} \\
-        -log_level ${log_level} \\
+        ${log_level_arg} \\
         -output_dir esvee/
 
     cat <<-END_VERSIONS > versions.yml
