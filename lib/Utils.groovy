@@ -8,6 +8,11 @@ class Utils {
 
     public static parseInput(input_fp_str, stub_run, log) {
 
+        if (!input_fp_str) {
+            log.error "Missing required --input argument"
+            Nextflow.exit(1)
+        }
+
         // NOTE(SW): using NF .splitCsv channel operator, hence should be easily interchangable with NF syntax
 
         def input_fp = Utils.getFileObject(input_fp_str)
