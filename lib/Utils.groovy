@@ -89,30 +89,25 @@ class Utils {
                     }
 
                     def sample_key = [sample_type_enum, sequence_type_enum]
-                    def meta_sample = meta.get(sample_key, [sample_id: it.sample_id])
+                    def meta_sample = meta.get(sample_key, [:])
 
-
-                    // Sample ID; special case for longitudinal samples
                     if (info_data.containsKey(Constants.InfoField.LONGITUDINAL_SAMPLE)) {
+
                         if (meta_sample.containsKey('longitudinal_sample_id')) {
-
-                            if (meta_sample.longitudinal_sample_id != it.sample_id) {
-
-                                log.error "got unexpected longitudinal sample name for ${group_id} ${sample_type_enum}/${sequence_type_enum}: ${it.sample_id}"
-                                Nextflow.exit(1)
-
-                            }
-
-                        } else {
-
-                            meta_sample.longitudinal_sample_id = it.sample_id
-
+                            log.error "got multiple longitudinal samples for ${group_id} ${sample_type_enum}/${sequence_type_enum}: ${it.sample_id}"
+                            Nextflow.exit(1)
                         }
 
-                    } else if (meta_sample.sample_id != it.sample_id) {
+                        meta_sample.longitudinal_sample_id = it.sample_id
+
+                    } else if (meta_sample.sample_id && meta_sample.sample_id != it.sample_id) {
 
                         log.error "got unexpected sample name for ${group_id} ${sample_type_enum}/${sequence_type_enum}: ${it.sample_id}"
                         Nextflow.exit(1)
+
+                    } else {
+
+                        meta_sample.sample_id = it.sample_id
 
                     }
 
@@ -135,7 +130,15 @@ class Utils {
                             Nextflow.exit(1)
                         }
 
-                        def (fwd, rev) = it.filepath.tokenize(';')
+                        def fastq_entries = it.filepath.tokenize(';')
+
+                        if (fastq_entries.size() != 2) {
+                            log.error "expected exactly 2 FASTQ files delimited by ';' (i.e. '<fwd>;<rev>') but found ${fastq_entries.size} " +
+                                " files for ${group_id} ${sample_type_enum}/${sequence_type_enum} but found ${fastq_entries.size} files"
+                            Nextflow.exit(1)
+                        }
+
+                        def (fwd, rev) = fastq_entries
                         def fastq_key = [info_data[Constants.InfoField.LIBRARY_ID], info_data[Constants.InfoField.LANE]]
 
                         if (meta_sample.containsKey(fastq_key)) {
@@ -147,7 +150,7 @@ class Utils {
                             meta_sample[filetype_enum] = [:]
                         }
 
-                        meta_sample[filetype_enum][fastq_key] = ['fwd': fwd, 'rev': rev]
+                        meta_sample[filetype_enum][fastq_key] = ['fwd': Utils.getFileObject(fwd), 'rev': Utils.getFileObject(rev)]
 
                     } else {
 
