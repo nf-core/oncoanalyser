@@ -59,6 +59,10 @@ input:
       type: file
       description: GRIDSS breakpoint PON file
       pattern: "*.{bedpe.gz}"
+  - decoy_sequences_image:
+      type: file
+      description: ESVEE decoy sequences images file
+      pattern: "*.{img}"
   - known_fusions:
       type: file
       description: HMF Known Fusions file

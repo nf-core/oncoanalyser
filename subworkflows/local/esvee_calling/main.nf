@@ -22,6 +22,7 @@ workflow ESVEE_CALLING {
     known_fusions            // channel: [mandatory] /path/to/known_fusions
     pon_breakends            // channel: [mandatory] /path/to/pon_sgl
     pon_breakpoints          // channel: [mandatory] /path/to/pon_sv
+    decoy_sequences_image    // channel: [mandatory] /path/to/decoy_sequences_image
     repeatmasker_annotations // channel: [mandatory] /path/to/repeatmasker_annotations
     unmap_regions            // channel: [mandatory] /path/to/unmap_regions
 
@@ -84,6 +85,7 @@ workflow ESVEE_CALLING {
         genome_version,
         pon_breakends,
         pon_breakpoints,
+        decoy_sequences_image,
         known_fusions,
         repeatmasker_annotations,
         unmap_regions

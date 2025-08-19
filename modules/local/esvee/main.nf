@@ -16,6 +16,7 @@ process ESVEE {
     val genome_ver
     path pon_breakends
     path pon_breakpoints
+    path decoy_sequences_image
     path known_fusions
     path repeatmasker_annotations
     path unmap_regions
