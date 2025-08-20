@@ -299,6 +299,12 @@
                     "pattern": "^\\S+\\.bed$",
                     "description": "Path to HLA slice BED file.",
                     "fa_icon": "far fa-file-code"
+                },
+                "prepare_reference_only": {
+                    "type": "boolean",
+                    "default": false,
+                    "fa_icon": "fas fa-cog",
+                    "hidden": true
                 }
             }
         },

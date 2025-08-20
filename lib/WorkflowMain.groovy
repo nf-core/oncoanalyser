@@ -341,8 +341,7 @@ class WorkflowMain {
         ]
     }
 
-    public static getPrepConfigForRun(run_config)
-    {
+    public static getPrepConfigFromSamplesheet(run_config) {
         return [
             prepare_ref_data_only: false,
 
@@ -360,8 +359,7 @@ class WorkflowMain {
         ]
     }
 
-    public static getPrepConfigForStagingOnly(params, log)
-    {
+    public static getPrepConfigFromCli(params, log) {
         def ref_data_types = params.ref_data_types
             .tokenize(',')
             .collect {

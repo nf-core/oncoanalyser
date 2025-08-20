@@ -80,7 +80,7 @@ workflow NFCORE_ONCOANALYSER {
     run_mode = Utils.getRunMode(params.mode, log)
 
     // Run selected workflow
-    // NOTE(SW): prepare reference is checked early so that params.input is not required
+    // NOTE(SW): prepare reference is checked early as params.input is not required
     if (run_mode === Constants.RunMode.PREPARE_REFERENCE)  {
         PREPARE_REFERENCE()
     } else {
