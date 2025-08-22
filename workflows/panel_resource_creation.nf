@@ -52,6 +52,11 @@ workflow PANEL_RESOURCE_CREATION {
 
     for (param in checkPathParamList) { if (param) { file(param, checkIfExists: true) } }
 
+    // Set input paths
+    target_regions_bed = params.target_regions_bed ? file(params.target_regions_bed) : []
+    driver_gene_panel = params.driver_gene_panel ? file(params.driver_gene_panel) : []
+    isofox_gene_ids = params.isofox_gene_ids ? file(params.isofox_gene_ids) : []
+
     // Create channel for versions
     // channel: [ versions.yml ]
     ch_versions = Channel.empty()
@@ -167,7 +172,7 @@ workflow PANEL_RESOURCE_CREATION {
         ch_inputs.map { meta -> [meta, [], []] },  // ch_donor_bam
         ref_data.genome_version,
         hmf_data.heterozygous_sites,
-        params.target_regions_bed,
+        target_regions_bed,
         2,   // tumor_min_depth
     )
 
@@ -214,7 +219,7 @@ workflow PANEL_RESOURCE_CREATION {
         hmf_data.sage_known_hotspots_germline,
         hmf_data.sage_highconf_regions,
         hmf_data.segment_mappability,
-        params.driver_gene_panel,
+        driver_gene_panel,
         hmf_data.ensembl_data_resources,
         hmf_data.gnomad_resource,
         true,  // enable_germline
@@ -229,8 +234,6 @@ workflow PANEL_RESOURCE_CREATION {
     //
     // SUBWORKFLOW: Run COBALT normalisation
     //
-    target_regions_bed = params.target_regions_bed ? file(params.target_regions_bed) : []
-
     COBALT_NORMALISATION(
         ch_amber_out,
         ch_cobalt_out,
@@ -254,8 +257,6 @@ workflow PANEL_RESOURCE_CREATION {
     //
     // SUBWORKFLOW: Run Isofox TPM normalisation
     //
-    isofox_gene_ids = params.isofox_gene_ids ? file(params.isofox_gene_ids) : []
-
     ISOFOX_NORMALISATION(
         ch_isofox_out,
         ref_data.genome_version,

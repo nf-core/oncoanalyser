@@ -178,17 +178,18 @@ workflow TARGETED {
     //
     // MODULE: Run Isofox to analyse RNA data
     //
+
+    isofox_counts = params.isofox_counts ? file(params.isofox_counts) : panel_data.isofox_counts
+    isofox_gc_ratios = params.isofox_gc_ratios ? file(params.isofox_gc_ratios) : panel_data.isofox_gc_ratios
+
+    isofox_gene_ids = params.isofox_gene_ids ? file(params.isofox_gene_ids) : panel_data.isofox_gene_ids
+    isofox_tpm_norm = params.isofox_tpm_norm ? file(params.isofox_tpm_norm) : panel_data.isofox_tpm_norm
+
+    isofox_read_length = params.isofox_read_length !== null ? params.isofox_read_length : Constants.DEFAULT_ISOFOX_READ_LENGTH_TARGETED
+
     // channel: [ meta, isofox_dir ]
     ch_isofox_out = Channel.empty()
     if (run_config.stages.isofox) {
-
-        isofox_counts = params.isofox_counts ? file(params.isofox_counts) : panel_data.isofox_counts
-        isofox_gc_ratios = params.isofox_gc_ratios ? file(params.isofox_gc_ratios) : panel_data.isofox_gc_ratios
-
-        isofox_gene_ids = params.isofox_gene_ids ? file(params.isofox_gene_ids) : panel_data.isofox_gene_ids
-        isofox_tpm_norm = params.isofox_tpm_norm ? file(params.isofox_tpm_norm) : panel_data.isofox_tpm_norm
-
-        isofox_read_length = params.isofox_read_length !== null ? params.isofox_read_length : Constants.DEFAULT_ISOFOX_READ_LENGTH_TARGETED
 
         ISOFOX_QUANTIFICATION(
             ch_inputs,

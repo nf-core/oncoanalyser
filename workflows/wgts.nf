@@ -184,13 +184,14 @@ workflow WGTS {
     //
     // MODULE: Run Isofox to analyse RNA data
     //
+
+    isofox_counts = params.isofox_counts ? file(params.isofox_counts) : hmf_data.isofox_counts
+    isofox_gc_ratios = params.isofox_gc_ratios ? file(params.isofox_gc_ratios) : hmf_data.isofox_gc_ratios
+    isofox_read_length = params.isofox_read_length !== null ? params.isofox_read_length : Constants.DEFAULT_ISOFOX_READ_LENGTH_WTS
+
     // channel: [ meta, isofox_dir ]
     ch_isofox_out = Channel.empty()
     if (run_config.stages.isofox) {
-
-        isofox_counts = params.isofox_counts ? file(params.isofox_counts) : hmf_data.isofox_counts
-        isofox_gc_ratios = params.isofox_gc_ratios ? file(params.isofox_gc_ratios) : hmf_data.isofox_gc_ratios
-        isofox_read_length = params.isofox_read_length !== null ? params.isofox_read_length : Constants.DEFAULT_ISOFOX_READ_LENGTH_WTS
 
         ISOFOX_QUANTIFICATION(
             ch_inputs,
