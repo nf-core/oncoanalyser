@@ -187,7 +187,7 @@
                 },
                 "hmftools_log_level": {
                     "type": "string",
-                    "enum": ["ALL", "TRACE", "DEBUG", "INFO", "WARN", "ERROR", "FATAL", "OFF"],
+                    "enum": ["ALL", "TRACE", "DEBUG", "INFO", "WARN", "ERROR", "FATAL"],
                     "description": "Log level filter for WiGiTS modules",
                     "default": "DEBUG",
                     "fa_icon": "fas fa-cog"
