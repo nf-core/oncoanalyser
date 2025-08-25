@@ -142,7 +142,7 @@ class Utils {
                             meta_sample[filetype_enum] = [:]
                         }
 
-                        meta_sample[filetype_enum][fastq_key] = ['fwd': fwd, 'rev': rev]
+                        meta_sample[filetype_enum][fastq_key] = ['fwd': Utils.getFileObject(fwd), 'rev': Utils.getFileObject(rev)]
 
                     } else {
 
