@@ -35,9 +35,6 @@ input:
       type: file
       description: Reference genome assembly dict file
       pattern: "*.{dict}"
-  - genome_ver:
-      type: string
-      description: Reference genome version
 output:
   - meta:
       type: map
@@ -51,5 +48,8 @@ output:
       type: file
       description: File containing software versions
       pattern: "versions.yml"
+  - command_files:
+      type: list
+      description: List of command files
 authors:
   - "@scwatts"

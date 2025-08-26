@@ -15,7 +15,7 @@ input:
       type: map
       description: |
         Groovy Map containing sample information
-        e.g. [id: 'sample_id', tumor_id: 'tumor_name', normal_id: 'normal_name']
+        e.g. [id: 'sample_id']
   - germline_vcf:
       type: file
       description: PURPLE germline small variant VCF file
@@ -37,7 +37,7 @@ output:
       type: map
       description: |
         Groovy Map containing sample information
-        e.g. [id: 'sample_id', tumor_id: 'tumor_name', normal_id: 'normal_name']
+        e.g. [id: 'sample_id']
   - peach_dir:
       type: directory
       description: PEACH output directory
@@ -45,5 +45,8 @@ output:
       type: file
       description: File containing software versions
       pattern: "versions.yml"
+  - command_files:
+      type: list
+      description: List of command files
 authors:
   - "@scwatts"

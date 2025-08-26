@@ -4,36 +4,9 @@ import Utils
 
 /*
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-    VALIDATE INPUTS
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-*/
-// Parse input samplesheet
-// NOTE(SW): this is done early and outside of gpars so that we can access synchronously and prior to pipeline execution
-inputs = Utils.parseInput(params.input, workflow.stubRun, log)
-
-// Get run config
-run_config = WorkflowMain.getRunConfig(params, inputs, log)
-
-// Validate inputs
-Utils.validateInput(inputs, run_config, params, log)
-
-// Check input path parameters to see if they exist
-def checkPathParamList = [
-]
-
-// TODO(SW): consider whether we should check for null entries here for errors to be more informative
-for (param in checkPathParamList) { if (param) { file(param, checkIfExists: true) } }
-
-// Check mandatory parameters
-if (params.input) { ch_input = file(params.input) } else { exit 1, 'Input samplesheet not specified!' }
-
-/*
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     IMPORT MODULES / SUBWORKFLOWS / FUNCTIONS
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 */
-
-include { softwareVersionsToYAML } from '../subworkflows/nf-core/utils_nfcore_pipeline'
 
 include { AMBER_PROFILING    } from '../subworkflows/local/amber_profiling'
 include { COBALT_PROFILING   } from '../subworkflows/local/cobalt_profiling'
@@ -43,16 +16,20 @@ include { REDUX_PROCESSING   } from '../subworkflows/local/redux_processing'
 include { SAGE_APPEND        } from '../subworkflows/local/sage_append'
 include { WISP_ANALYSIS      } from '../subworkflows/local/wisp_analysis'
 
+include { softwareVersionsToYAML } from '../subworkflows/nf-core/utils_nfcore_pipeline'
+
 /*
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     RUN MAIN WORKFLOW
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 */
 
-// Get absolute file paths
-samplesheet = Utils.getFileObject(params.input)
-
 workflow PURITY_ESTIMATE {
+    take:
+    inputs
+    run_config
+
+    main:
     // Create channel for versions
     // channel: [ versions.yml ]
     ch_versions = Channel.empty()
@@ -65,9 +42,10 @@ workflow PURITY_ESTIMATE {
     purity_estimate_run_mode = Utils.getEnumFromString(params.purity_estimate_mode, Constants.RunMode)
 
     // Set up reference data, assign more human readable variables
-    prep_config = WorkflowMain.getPrepConfigForRun(run_config)
+    prep_config = WorkflowMain.getPrepConfigFromSamplesheet(run_config)
     PREPARE_REFERENCE(
         prep_config,
+        run_config,
     )
     ref_data = PREPARE_REFERENCE.out
     hmf_data = PREPARE_REFERENCE.out.hmf_data
@@ -205,7 +183,7 @@ workflow PURITY_ESTIMATE {
             hmf_data.gc_profile,
             hmf_data.diploid_bed,
             [],  // panel_target_region_normalisation
-            purity_estimate_run_mode === Constants.RunMode.TARGETED,  // is_targeted_mode
+            purity_estimate_run_mode === Constants.RunMode.TARGETED,  // targeted_mode
         )
 
         ch_versions = ch_versions.mix(COBALT_PROFILING.out.versions)
@@ -236,7 +214,7 @@ workflow PURITY_ESTIMATE {
             ref_data.genome_fai,
             ref_data.genome_dict,
             false,  // run_germline
-            purity_estimate_run_mode === Constants.RunMode.TARGETED,  // is_targeted_mode
+            purity_estimate_run_mode === Constants.RunMode.TARGETED,  // targeted_mode
         )
 
         ch_versions = ch_versions.mix(SAGE_APPEND.out.versions)
@@ -247,13 +225,6 @@ workflow PURITY_ESTIMATE {
         ch_sage_somatic_append_out = ch_inputs.map { meta -> [meta, []] }
 
     }
-
-
-
-
-    // TODO(SW): rework to accept multiple samples per grouping (patient/subject); currently achievable via multiple groups
-
-
 
     //
     // SUBWORKFLOW: Run WISP to estimate tumor purity
@@ -267,7 +238,7 @@ workflow PURITY_ESTIMATE {
             ch_sage_somatic_append_out,
             ref_data.genome_fasta,
             ref_data.genome_fai,
-            purity_estimate_run_mode === Constants.RunMode.TARGETED,  // is_targeted_mode
+            purity_estimate_run_mode === Constants.RunMode.TARGETED,  // targeted_mode
         )
 
         ch_versions = ch_versions.mix(WISP_ANALYSIS.out.versions)

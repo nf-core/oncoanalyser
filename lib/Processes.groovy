@@ -10,10 +10,10 @@ class Processes {
 
         def processes
 
-        if(manual_select) {
+        if (manual_select) {
             processes = this.getProcessList(manual_select, log)
 
-            if(include || exclude){
+            if (include || exclude) {
                 log.warning "When manually selecting processes, including/excluding processes is ignored"
             }
 

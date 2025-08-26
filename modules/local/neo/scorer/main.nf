@@ -26,6 +26,8 @@ process NEO_SCORER {
 
     def xmx_mod = task.ext.xmx_mod ?: 0.95
 
+    def log_level_arg = task.ext.log_level ? "-log_level ${task.ext.log_level}" : ''
+
     def rna_sample_arg = meta.containsKey('sample_rna_id') ? "-rna_sample ${meta.sample_rna_id}" : ''
     def rna_somatic_vcf_arg = meta.containsKey('sample_rna_id') ? "-rna_somatic_vcf ${sage_vcf}" : ''
 
@@ -50,17 +52,17 @@ process NEO_SCORER {
         ${args} \\
         -sample ${meta.sample_id} \\
         ${cancer_type_arg} \\
+        -purple_dir ${purple_dir} \\
         ${rna_sample_arg} \\
         \${isofox_dir_arg} \\
-        -purple_dir ${purple_dir} \\
         ${rna_somatic_vcf_arg} \\
         -lilac_dir ${lilac_dir} \\
         -neo_dir ${neo_finder_dir} \\
         -ensembl_data_dir ${ensembl_data_resources} \\
         -score_file_dir ${neo_resources} \\
         -cancer_tpm_medians_file ${cohort_tpm_medians} \\
-        -output_dir neo_scorer/ \\
-        -log_level ${params.module_log_level}
+        ${log_level_arg} \\
+        -output_dir neo_scorer/
 
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":
@@ -71,6 +73,7 @@ process NEO_SCORER {
     stub:
     """
     mkdir -p neo_scorer/
+
     echo -e '${task.process}:\\n  stub: noversions\\n' > versions.yml
     """
 }

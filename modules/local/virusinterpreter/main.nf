@@ -26,6 +26,8 @@ process VIRUSINTERPRETER {
 
     def xmx_mod = task.ext.xmx_mod ?: 0.95
 
+    def log_level_arg = task.ext.log_level ? "-log_level ${task.ext.log_level}" : ''
+
     """
     mkdir -p virusinterpreter/
 
@@ -39,8 +41,8 @@ process VIRUSINTERPRETER {
         -taxonomy_db_tsv ${taxonomy_db} \\
         -virus_reporting_db_tsv ${reporting_db} \\
         -virus_blacklisting_db_tsv ${blocklist_db} \\
-        -output_dir virusinterpreter/ \\
-        -log_level ${params.module_log_level}
+        ${log_level_arg} \\
+        -output_dir virusinterpreter/
 
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":
@@ -51,6 +53,7 @@ process VIRUSINTERPRETER {
     stub:
     """
     mkdir -p virusinterpreter/
+
     touch virusinterpreter/${meta.sample_id}.virus.annotated.tsv
 
     echo -e '${task.process}:\\n  stub: noversions\\n' > versions.yml

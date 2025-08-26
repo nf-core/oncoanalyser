@@ -16,7 +16,7 @@ process WISP {
         path(sage_append_dir)
     path genome_fasta
     path genome_fai
-    val is_targeted_mode
+    val targeted_mode
 
     output:
     path 'wisp/'       , emit: wisp_dir
@@ -29,6 +29,8 @@ process WISP {
     script:
     def args = task.ext.args ?: ''
 
+    def log_level_arg = task.ext.log_level ? "-log_level ${task.ext.log_level}" : ''
+
     def purity_estimate_mode = Utils.getEnumFromString(params.purity_estimate_mode, Constants.RunMode)
 
     def purity_methods
@@ -37,18 +39,18 @@ process WISP {
     def gc_ratio_min_arg
     def write_types_arg
 
-    if(is_targeted_mode) {
-        purity_methods      = "SOMATIC_VARIANT"
-        amber_dir_arg       = ""
-        cobalt_dir_arg      = ""
-        gc_ratio_min_arg    = "-gc_ratio_min 0.4"
+    if (targeted_mode) {
+        purity_methods      = 'SOMATIC_VARIANT'
+        amber_dir_arg       = ''
+        cobalt_dir_arg      = ''
+        gc_ratio_min_arg    = '-gc_ratio_min 0.4'
         write_types_arg     = "-write_types 'SOMATIC_DATA;SOMATIC_PLOT'"
     } else {
         purity_methods      = "'SOMATIC_VARIANT;AMBER_LOH;COPY_NUMBER'"
-        amber_dir_arg       = "-amber_dir amber_dir__prepared/"
+        amber_dir_arg       = '-amber_dir amber_dir__prepared/'
         cobalt_dir_arg      = "-cobalt_dir ${cobalt_dir}"
-        gc_ratio_min_arg    = ""
-        write_types_arg     = "-write_types ALL"
+        gc_ratio_min_arg    = ''
+        write_types_arg     = '-write_types ALL'
     }
 
     """
@@ -69,16 +71,16 @@ process WISP {
         -patient_id ${meta.subject_id} \\
         -tumor_id ${meta.primary_id} \\
         -samples ${meta.longitudinal_id} \\
-        -ref_genome ${genome_fasta} \\
         -purity_methods ${purity_methods} \\
         -somatic_vcf ${sage_append_dir}/${meta.longitudinal_id}.sage.append.vcf.gz \\
         -purple_dir ${primary_purple_dir} \\
         ${amber_dir_arg} \\
         ${cobalt_dir_arg} \\
+        -ref_genome ${genome_fasta} \\
         ${gc_ratio_min_arg} \\
         ${write_types_arg} \\
-        -output_dir wisp/ \\
-        -log_level ${params.module_log_level}
+        ${log_level_arg} \\
+        -output_dir wisp/
 
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":
@@ -89,6 +91,7 @@ process WISP {
     stub:
     """
     mkdir -p wisp/
+
     touch wisp/${meta.subject_id}_${meta.longitudinal_id}.wisp.cn_plot_calcs.tsv
     touch wisp/${meta.subject_id}_${meta.longitudinal_id}.wisp.cn_segments.tsv
     touch wisp/${meta.subject_id}_${meta.longitudinal_id}.wisp.somatic_peak.tsv

@@ -31,6 +31,7 @@ include { WRITE_REFERENCE_DATA as WRITE_PANEL_DATA      } from '../../../modules
 workflow PREPARE_REFERENCE {
     take:
     prep_config // channel: [mandatory] configuration indicating which reference data is required
+    run_config
 
     main:
     // Channel for version.yml files
@@ -43,12 +44,12 @@ workflow PREPARE_REFERENCE {
     ch_genome_version = Channel.value(params.genome_version)
 
     ch_genome_fasta = Channel.empty()
-    if(prep_config.require_fasta) {
+    if (prep_config.require_fasta) {
         ch_genome_fasta = Channel.fromPath(params.ref_data_genome_fasta)
     }
 
     ch_genome_fai = Channel.empty()
-    if(prep_config.require_fai) {
+    if (prep_config.require_fai) {
 
         ch_genome_fai = getRefFileChannel('ref_data_genome_fai')
         if (!params.ref_data_genome_fai) {
@@ -59,7 +60,7 @@ workflow PREPARE_REFERENCE {
     }
 
     ch_genome_dict = Channel.empty()
-    if(prep_config.require_dict) {
+    if (prep_config.require_dict) {
 
         ch_genome_dict = getRefFileChannel('ref_data_genome_dict')
         if (!params.ref_data_genome_dict) {
@@ -70,7 +71,7 @@ workflow PREPARE_REFERENCE {
     }
 
     ch_genome_img = Channel.empty()
-    if(prep_config.require_img) {
+    if (prep_config.require_img) {
 
         ch_genome_img = getRefFileChannel('ref_data_genome_img')
         if (!params.ref_data_genome_img) {
@@ -182,7 +183,7 @@ workflow PREPARE_REFERENCE {
     // Set HMF reference data, unpack if required
     //
     ch_hmf_data = Channel.empty()
-    if(prep_config.require_hmftools_data) {
+    if (prep_config.require_hmftools_data) {
 
         hmf_data_paths = params.hmf_data_paths[params.genome_version.toString()]
 
@@ -207,11 +208,11 @@ workflow PREPARE_REFERENCE {
 
         }
 
-        if(params.driver_gene_panel) {
+        if (params.driver_gene_panel) {
 
             def run_mode = Utils.getEnumFromString(params.mode, Constants.RunMode)
 
-            if(run_mode !== Constants.RunMode.PANEL_RESOURCE_CREATION) {
+            if (run_mode !== Constants.RunMode.PANEL_RESOURCE_CREATION) {
                 log.info "Using custom driver gene panel: ${params.driver_gene_panel}"
             }
 
@@ -259,7 +260,7 @@ workflow PREPARE_REFERENCE {
     //
     // Write prepared reference data if requested
     //
-    if (prep_config.prepare_ref_data_only) {
+    if (prep_config.prepare_ref_data_only || params.prepare_reference_only) {
 
         WRITE_FASTA(ch_genome_fasta)
         WRITE_FAI(ch_genome_fai)
@@ -271,6 +272,10 @@ workflow PREPARE_REFERENCE {
 
         WRITE_HMF_DATA(ch_hmf_data.map { getDataBaseDirectory(it) })
         WRITE_PANEL_DATA(ch_panel_data.map { getDataBaseDirectory(it) })
+
+        // Clear all stages to prevent running any analysis when driving by samplesheet
+        run_config.stages = [:]
+
     }
 
     emit:

@@ -1,4 +1,4 @@
-name: teal
+name: teal_pipeline
 channels:
   - conda-forge
   - bioconda

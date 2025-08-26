@@ -27,6 +27,8 @@ process LINX_SOMATIC {
 
     def xmx_mod = task.ext.xmx_mod ?: 0.75
 
+    def log_level_arg = task.ext.log_level ? "-log_level ${task.ext.log_level}" : ''
+
     """
     linx \\
         -Xmx${Math.round(task.memory.bytes * xmx_mod)} \\
@@ -40,8 +42,8 @@ process LINX_SOMATIC {
         -driver_gene_panel ${driver_gene_panel} \\
         -write_vis_data \\
         -write_neo_epitopes \\
-        -output_dir linx_somatic/ \\
-        -log_level ${params.module_log_level}
+        ${log_level_arg} \\
+        -output_dir linx_somatic/
 
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":
@@ -52,6 +54,7 @@ process LINX_SOMATIC {
     stub:
     """
     mkdir linx_somatic/
+
     touch linx_somatic/placeholder
 
     echo -e '${task.process}:\\n  stub: noversions\\n' > versions.yml

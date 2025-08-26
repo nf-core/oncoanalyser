@@ -10,7 +10,7 @@
             "type": "object",
             "fa_icon": "fas fa-terminal",
             "description": "Define where the pipeline should find input data and save output data.",
-            "required": ["input", "outdir"],
+            "required": ["outdir"],
             "properties": {
                 "input": {
                     "type": "string",
@@ -185,9 +185,9 @@
                     "description": "User defined target regions BED used in panel resource creation.",
                     "fa_icon": "fas fa-cog"
                 },
-                "module_log_level": {
+                "hmftools_log_level": {
                     "type": "string",
-                    "enum": ["ALL", "TRACE", "DEBUG", "INFO", "WARN", "ERROR", "FATAL", "OFF"],
+                    "enum": ["ALL", "TRACE", "DEBUG", "INFO", "WARN", "ERROR", "FATAL"],
                     "description": "Log level filter for WiGiTS modules",
                     "default": "DEBUG",
                     "fa_icon": "fas fa-cog"
@@ -299,6 +299,12 @@
                     "pattern": "^\\S+\\.bed$",
                     "description": "Path to HLA slice BED file.",
                     "fa_icon": "far fa-file-code"
+                },
+                "prepare_reference_only": {
+                    "type": "boolean",
+                    "default": false,
+                    "fa_icon": "fas fa-cog",
+                    "hidden": true
                 }
             }
         },

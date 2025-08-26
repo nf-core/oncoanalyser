@@ -29,6 +29,13 @@ input:
   - genome_ver:
       type: string
       description: Reference genome version
+  - driver_gene_panel:
+      type: file
+      description: Driver gene panel file
+      pattern: "*.{tsv}"
+  - ensembl_data_resources:
+      type: directory
+      description: HMF ensembl data resources directory
 output:
   - meta:
       type: map
@@ -42,5 +49,8 @@ output:
       type: file
       description: File containing software versions
       pattern: "versions.yml"
+  - command_files:
+      type: list
+      description: List of command files
 authors:
   - "@scwatts"

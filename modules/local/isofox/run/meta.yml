@@ -76,5 +76,8 @@ output:
       type: file
       description: File containing software versions
       pattern: "versions.yml"
+  - command_files:
+      type: list
+      description: List of command files
 authors:
   - "@scwatts"

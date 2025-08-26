@@ -15,7 +15,7 @@ input:
       type: map
       description: |
         Groovy Map containing sample information
-        e.g. [id: 'sample_id', tumor_id: 'tumor_name', normal_id: 'normal_name']
+        e.g. [id: 'sample_id']
   - bams:
       type: list
       description: List BAM files
@@ -24,7 +24,7 @@ output:
       type: map
       description: |
         Groovy Map containing sample information
-        e.g. [id: 'sample_id', tumor_id: 'tumor_name', normal_id: 'normal_name']
+        e.g. [id: 'sample_id']
   - bam:
       type: file
       description: BAM file
@@ -33,6 +33,9 @@ output:
       type: file
       description: File containing software versions
       pattern: "versions.yml"
+  - command_files:
+      type: list
+      description: List of command files
 authors:
   - "@scwatts"
   - "@mkcmkc"

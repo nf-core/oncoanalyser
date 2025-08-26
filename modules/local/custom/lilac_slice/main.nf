@@ -12,8 +12,9 @@ process CUSTOM_SLICE {
     path bed
 
     output:
-    tuple val(meta), path("*sliced.bam"), path("*sliced.bam.bai"), emit: bam
+    tuple val(meta), path('*sliced.bam'), path('*sliced.bam.bai'), emit: bam
     path 'versions.yml'                                          , emit: versions
+    path '.command.*'                                            , emit: command_files
 
     when:
     task.ext.when == null || task.ext.when

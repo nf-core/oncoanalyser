@@ -13,7 +13,7 @@ process LILAC {
     path genome_fai
     val genome_ver
     path lilac_resources, stageAs: 'lilac_resources'
-    val is_targeted_mode
+    val targeted_mode
 
     output:
     tuple val(meta), path('lilac/'), emit: lilac_dir
@@ -28,6 +28,8 @@ process LILAC {
 
     def xmx_mod = task.ext.xmx_mod ?: 0.75
 
+    def log_level_arg = task.ext.log_level ? "-log_level ${task.ext.log_level}" : ''
+
     def sample_name = getSampleName(meta, tumor_dna_bam, normal_dna_bam)
 
     def normal_bam_arg = normal_dna_bam ? "-reference_bam ${normal_dna_bam}" : ''
@@ -36,7 +38,7 @@ process LILAC {
 
     def purple_dir_arg = purple_dir ? "-purple_dir ${purple_dir}" : ''
 
-    def freq_score_penalty = is_targeted_mode ? "0.0018" : "0.0009"
+    def freq_score_penalty = targeted_mode ? '0.0018' : '0.0009'
 
     """
     lilac \\
@@ -52,8 +54,8 @@ process LILAC {
         -resource_dir ${lilac_resources} \\
         -freq_score_penalty ${freq_score_penalty} \\
         -threads ${task.cpus} \\
-        -output_dir lilac/ \\
-        -log_level ${params.module_log_level}
+        ${log_level_arg} \\
+        -output_dir lilac/
 
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":
@@ -64,6 +66,7 @@ process LILAC {
     stub:
     """
     mkdir -p lilac/
+
     touch lilac/placeholder
 
     echo -e '${task.process}:\\n  stub: noversions\\n' > versions.yml

@@ -2,54 +2,11 @@ import Constants
 import Processes
 import Utils
 
-
-/*
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-    VALIDATE INPUTS
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-*/
-// Parse input samplesheet
-// NOTE(SW): this is done early and outside of gpars so that we can access synchronously and prior to pipeline execution
-inputs = Utils.parseInput(params.input, workflow.stubRun, log)
-
-// Get run config
-run_config = WorkflowMain.getRunConfig(params, inputs, log)
-
-// Validate inputs
-Utils.validateInput(inputs, run_config, params, log)
-
-// Check input path parameters to see if they exist
-def checkPathParamList = [
-    params.isofox_counts,
-    params.isofox_gc_ratios,
-    params.isofox_gene_ids,
-    params.isofox_tpm_norm,
-    params.driver_gene_panel,
-    params.target_regions_bed,
-]
-
-if (run_config.stages.lilac) {
-    if (params.genome_version.toString() == '38' && params.genome_type == 'alt' && params.containsKey('ref_data_hla_slice_bed')) {
-        checkPathParamList.add(params.ref_data_hla_slice_bed)
-    }
-}
-
-// TODO(SW): consider whether we should check for null entries here for errors to be more informative
-for (param in checkPathParamList) { if (param) { file(param, checkIfExists: true) } }
-
-// Check mandatory parameters
-if (params.input) { ch_input = file(params.input) } else { exit 1, 'Input samplesheet not specified!' }
-
-// Used in Isofox subworkflow only
-isofox_read_length = params.isofox_read_length !== null ? params.isofox_read_length : Constants.DEFAULT_ISOFOX_READ_LENGTH_TARGETED
-
 /*
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     IMPORT MODULES / SUBWORKFLOWS / FUNCTIONS
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 */
-
-include { softwareVersionsToYAML } from '../subworkflows/nf-core/utils_nfcore_pipeline'
 
 include { AMBER_PROFILING            } from '../subworkflows/local/amber_profiling'
 include { COBALT_NORMALISATION       } from '../subworkflows/local/cobalt_normalisation'
@@ -63,16 +20,43 @@ include { READ_ALIGNMENT_RNA         } from '../subworkflows/local/read_alignmen
 include { REDUX_PROCESSING           } from '../subworkflows/local/redux_processing'
 include { SAGE_CALLING               } from '../subworkflows/local/sage_calling'
 
+include { softwareVersionsToYAML } from '../subworkflows/nf-core/utils_nfcore_pipeline'
+
 /*
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     RUN MAIN WORKFLOW
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 */
 
-// Get absolute file paths
-samplesheet = Utils.getFileObject(params.input)
-
 workflow PANEL_RESOURCE_CREATION {
+    take:
+    inputs
+    run_config
+
+    main:
+    // Check input path parameters to see if they exist
+    def checkPathParamList = [
+        params.isofox_counts,
+        params.isofox_gc_ratios,
+        params.isofox_gene_ids,
+        params.isofox_tpm_norm,
+        params.driver_gene_panel,
+        params.target_regions_bed,
+    ]
+
+    if (run_config.stages.lilac) {
+        if (params.genome_version.toString() == '38' && params.genome_type == 'alt' && params.containsKey('ref_data_hla_slice_bed')) {
+            checkPathParamList.add(params.ref_data_hla_slice_bed)
+        }
+    }
+
+    for (param in checkPathParamList) { if (param) { file(param, checkIfExists: true) } }
+
+    // Set input paths
+    target_regions_bed = params.target_regions_bed ? file(params.target_regions_bed) : []
+    driver_gene_panel = params.driver_gene_panel ? file(params.driver_gene_panel) : []
+    isofox_gene_ids = params.isofox_gene_ids ? file(params.isofox_gene_ids) : []
+
     // Create channel for versions
     // channel: [ versions.yml ]
     ch_versions = Channel.empty()
@@ -82,9 +66,10 @@ workflow PANEL_RESOURCE_CREATION {
     ch_inputs = Channel.fromList(inputs)
 
     // Set up reference data, assign more human readable variables
-    prep_config = WorkflowMain.getPrepConfigForRun(run_config)
+    prep_config = WorkflowMain.getPrepConfigFromSamplesheet(run_config)
     PREPARE_REFERENCE(
         prep_config,
+        run_config,
     )
     ref_data = PREPARE_REFERENCE.out
     hmf_data = PREPARE_REFERENCE.out.hmf_data
@@ -154,6 +139,7 @@ workflow PANEL_RESOURCE_CREATION {
     //
     isofox_counts = params.isofox_counts ? file(params.isofox_counts) : hmf_data.isofox_counts
     isofox_gc_ratios = params.isofox_gc_ratios ? file(params.isofox_gc_ratios) : hmf_data.isofox_gc_ratios
+    isofox_read_length = params.isofox_read_length !== null ? params.isofox_read_length : Constants.DEFAULT_ISOFOX_READ_LENGTH_TARGETED
 
     ISOFOX_QUANTIFICATION(
         ch_inputs,
@@ -186,7 +172,7 @@ workflow PANEL_RESOURCE_CREATION {
         ch_inputs.map { meta -> [meta, [], []] },  // ch_donor_bam
         ref_data.genome_version,
         hmf_data.heterozygous_sites,
-        params.target_regions_bed,
+        target_regions_bed,
         2,   // tumor_min_depth
     )
 
@@ -205,7 +191,7 @@ workflow PANEL_RESOURCE_CREATION {
         hmf_data.gc_profile,
         hmf_data.diploid_bed,
         [],  // panel_target_region_normalisation
-        true,  // is_targeted_mode
+        true,  // targeted_mode
     )
 
     ch_versions = ch_versions.mix(COBALT_PROFILING.out.versions)
@@ -233,11 +219,11 @@ workflow PANEL_RESOURCE_CREATION {
         hmf_data.sage_known_hotspots_germline,
         hmf_data.sage_highconf_regions,
         hmf_data.segment_mappability,
-        params.driver_gene_panel,
+        driver_gene_panel,
         hmf_data.ensembl_data_resources,
         hmf_data.gnomad_resource,
         true,  // enable_germline
-        true,  // is_targeted_mode
+        true,  // targeted_mode
     )
 
     ch_versions = ch_versions.mix(SAGE_CALLING.out.versions)
@@ -248,8 +234,6 @@ workflow PANEL_RESOURCE_CREATION {
     //
     // SUBWORKFLOW: Run COBALT normalisation
     //
-    target_regions_bed = params.target_regions_bed ? file(params.target_regions_bed) : []
-
     COBALT_NORMALISATION(
         ch_amber_out,
         ch_cobalt_out,
@@ -273,8 +257,6 @@ workflow PANEL_RESOURCE_CREATION {
     //
     // SUBWORKFLOW: Run Isofox TPM normalisation
     //
-    isofox_gene_ids = params.isofox_gene_ids ? file(params.isofox_gene_ids) : []
-
     ISOFOX_NORMALISATION(
         ch_isofox_out,
         ref_data.genome_version,

@@ -26,6 +26,8 @@ process LINX_VISUALISER {
 
     def xmx_mod = task.ext.xmx_mod ?: 0.75
 
+    def log_level_arg = task.ext.log_level ? "-log_level ${task.ext.log_level}" : ''
+
     """
     # NOTE(SW): the output plot directories are always required for ORANGE, which is straightfoward to handle with POSIX
     # fs but more involved with FusionFS since it will not write empty directories to S3. A placeholder file can't be
@@ -55,9 +57,9 @@ process LINX_VISUALISER {
         -ensembl_data_dir ${ensembl_data_resources} \\
         -circos \$(which circos) \\
         -threads ${task.cpus} \\
+        ${log_level_arg} \\
         -plot_out plots/all/ \\
-        -data_out data/all/ \\
-        -log_level ${params.module_log_level}
+        -data_out data/all/
 
     # Rerun LINX to render only reportable cluster plots in a separate directory. While this is regenerating existing
     # cluster plots, the number of reportable plots is generally very small and I prefer to rely on the internal LINX
@@ -80,9 +82,9 @@ process LINX_VISUALISER {
         -circos \$(which circos) \\
         -plot_reportable \\
         -threads ${task.cpus} \\
+        ${log_level_arg} \\
         -plot_out plots/reportable/ \\
-        -data_out data/reportable/ \\
-        -log_level ${params.module_log_level}
+        -data_out data/reportable/
 
     # Create placeholders to force FusionFS to create parent plot directory on S3
     if [[ \$(ls plots/ | wc -l) -eq 0 ]]; then
@@ -98,6 +100,7 @@ process LINX_VISUALISER {
     stub:
     """
     mkdir -p plots/{all,reportable}/
+
     touch plots/{all,reportable}/placeholder
 
     echo -e '${task.process}:\n  stub: noversions\n' > versions.yml

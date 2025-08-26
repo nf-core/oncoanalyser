@@ -25,6 +25,8 @@ process CIDER {
 
     def xmx_mod = task.ext.xmx_mod ?: 0.75
 
+    def log_level_arg = task.ext.log_level ? "-log_level ${task.ext.log_level}" : ''
+
     """
     cider \\
         -Xmx${Math.round(task.memory.bytes * xmx_mod)} \\
@@ -32,13 +34,13 @@ process CIDER {
         ${args} \\
         -sample ${meta.sample_id} \\
         -bam ${bam} \\
+        -ref_genome_version ${genome_ver} \\
         -blast \$(which blastn | sed 's#/bin/blastn##') \\
         -blast_db ${human_blastdb} \\
-        -ref_genome_version ${genome_ver} \\
-        -threads ${task.cpus} \\
         -write_cider_bam \\
-        -output_dir cider/ \\
-        -log_level ${params.module_log_level}
+        -threads ${task.cpus} \\
+        ${log_level_arg} \\
+        -output_dir cider/
 
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":

@@ -21,8 +21,8 @@ process PAVE_SOMATIC {
     path gnomad_resource
 
     output:
-    tuple val(meta), path("*.vcf.gz")    , emit: vcf
-    tuple val(meta), path("*.vcf.gz.tbi"), emit: index
+    tuple val(meta), path('*.vcf.gz')    , emit: vcf
+    tuple val(meta), path('*.vcf.gz.tbi'), emit: index
     path 'versions.yml'                  , emit: versions
     path '.command.*'                    , emit: command_files
 
@@ -33,6 +33,8 @@ process PAVE_SOMATIC {
     def args = task.ext.args ?: ''
 
     def xmx_mod = task.ext.xmx_mod ?: 0.75
+
+    def log_level_arg = task.ext.log_level ? "-log_level ${task.ext.log_level}" : ''
 
     def gnomad_args
     if (genome_ver.toString() == '37') {
@@ -63,8 +65,8 @@ process PAVE_SOMATIC {
         -mappability_bed ${segment_mappability} \\
         -ensembl_data_dir ${ensembl_data_resources} \\
         -threads ${task.cpus} \\
-        -output_dir ./ \\
-        -log_level ${params.module_log_level}
+        ${log_level_arg} \\
+        -output_dir ./
 
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":

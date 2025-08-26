@@ -20,7 +20,7 @@ workflow WISP_ANALYSIS {
     genome_fai       // channel: [mandatory] /path/to/genome_fai
 
     // Params
-    is_targeted_mode // boolean: [mandatory] Running in targeted/panel mode?
+    targeted_mode // boolean: [mandatory] Running in targeted/panel mode?
 
     main:
     // Channel for version.yml files
@@ -38,13 +38,16 @@ workflow WISP_ANALYSIS {
         .branch { meta, amber_dir, cobalt_dir, sage_append_dir ->
 
             primary_purple_dir = Utils.getInput(meta, Constants.INPUT.PURPLE_DIR)
-            primary_amber_dir  = Utils.getInput(meta, Constants.INPUT.AMBER_DIR)
+            primary_amber_dir = Utils.getInput(meta, Constants.INPUT.AMBER_DIR)
 
             def purity_estimate_mode = Utils.getEnumFromString(params.purity_estimate_mode, Constants.RunMode)
 
-            def runnable = purity_estimate_mode === Constants.RunMode.WGTS
-                ? primary_purple_dir && primary_amber_dir && sage_append_dir && amber_dir && cobalt_dir
-                : primary_purple_dir                      && sage_append_dir
+            def runnable
+            if (purity_estimate_mode === Constants.RunMode.WGTS) {
+                runnable = primary_purple_dir && primary_amber_dir && sage_append_dir && amber_dir && cobalt_dir
+            } else {
+                runnable = primary_purple_dir && sage_append_dir
+            }
 
             runnable: runnable
                 return [meta, primary_purple_dir, primary_amber_dir, amber_dir, cobalt_dir, sage_append_dir]
@@ -59,10 +62,10 @@ workflow WISP_ANALYSIS {
         .map { meta, primary_purple_dir, primary_amber_dir, amber_dir, cobalt_dir, sage_append_dir ->
 
             def meta_wisp = [
-                key:             meta.group_id,
-                id:              meta.group_id,
-                subject_id:      meta.subject_id,
-                primary_id:      Utils.getTumorDnaSampleName(meta, primary: true),
+                key: meta.group_id,
+                id: meta.group_id,
+                subject_id: meta.subject_id,
+                primary_id: Utils.getTumorDnaSampleName(meta, primary: true),
                 longitudinal_id: Utils.getTumorDnaSampleName(meta, primary: false),
             ]
 
@@ -75,11 +78,11 @@ workflow WISP_ANALYSIS {
         ch_wisp_inputs,
         genome_fasta,
         genome_fai,
-        is_targeted_mode,
+        targeted_mode,
     )
 
     ch_versions = ch_versions.mix(WISP.out.versions)
 
     emit:
-    versions     = ch_versions     // channel: [ versions.yml ]
+    versions = ch_versions // channel: [ versions.yml ]
 }

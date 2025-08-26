@@ -25,7 +25,7 @@ workflow SAGE_APPEND {
 
     // Params
     enable_germline  // boolean: [mandatory] Enable germline
-    is_targeted_mode // boolean: [mandatory] Running with SAGE arguments for targeted/panel mode?
+    targeted_mode // boolean: [mandatory] Running with SAGE arguments for targeted/panel mode?
 
     main:
     // Channel for version.yml files
@@ -33,7 +33,7 @@ workflow SAGE_APPEND {
     ch_versions = Channel.empty()
 
     def run_mode = Utils.getEnumFromString(params.mode, Constants.RunMode)
-    def is_purity_estimate_mode = run_mode === Constants.RunMode.PURITY_ESTIMATE
+    def purity_estimate_mode = run_mode === Constants.RunMode.PURITY_ESTIMATE
 
     // Select input sources and sort
     // channel: runnable: [ meta, tumor_dna_bam, tumor_dna_bai, [tumor_dna_redux_tsv, ...], tumor_rna_bam, tumor_rna_bai, purple_dir ]
@@ -51,7 +51,7 @@ workflow SAGE_APPEND {
                 tumor_dna_ms_tsv ?: Utils.getInput(meta, Constants.INPUT.REDUX_MS_TSV_TUMOR),
             ]
 
-            tumor_dna_redux_tsv_list = tumor_dna_redux_tsv_list.findAll{ it != [] }
+            tumor_dna_redux_tsv_list = tumor_dna_redux_tsv_list.findAll { it != [] }
 
             return [
                 meta,
@@ -101,7 +101,7 @@ workflow SAGE_APPEND {
         .map { meta, tumor_dna_bam, tumor_dna_bai, tumor_dna_redux_tsv, tumor_rna_bam, tumor_rna_bai, purple_dir ->
 
             // NOTE(SW): explicit in expectation to always obtain the primary tumor DNA sample ID here
-            def tumor_dna_id   = Utils.getTumorDnaSampleName(meta, primary: true)
+            def tumor_dna_id = Utils.getTumorDnaSampleName(meta, primary: true)
             def output_file_id = Utils.getNormalDnaSampleName(meta)
 
             def meta_append = [
@@ -126,7 +126,7 @@ workflow SAGE_APPEND {
         genome_version,
         genome_fai,
         genome_dict,
-        is_targeted_mode,
+        targeted_mode,
     )
 
     ch_versions = ch_versions.mix(SAGE_APPEND_GERMLINE.out.versions)
@@ -146,8 +146,8 @@ workflow SAGE_APPEND {
             def has_tumor_dna = Utils.hasTumorDna(meta)
             def has_smlv_somatic = file(purple_dir).resolve("${tumor_dna_id}.purple.somatic.vcf.gz")
 
-            def should_append_rna_variants =         !is_purity_estimate_mode && has_tumor_rna && has_tumor_dna && has_smlv_somatic
-            def should_append_longitudinal_variants = is_purity_estimate_mode && has_tumor_dna                  && has_smlv_somatic
+            def should_append_rna_variants = !purity_estimate_mode && has_tumor_rna && has_tumor_dna && has_smlv_somatic
+            def should_append_longitudinal_variants = purity_estimate_mode && has_tumor_dna && has_smlv_somatic
 
             def has_existing = Utils.hasExistingInput(meta, Constants.INPUT.SAGE_APPEND_DIR_TUMOR)
 
@@ -162,10 +162,7 @@ workflow SAGE_APPEND {
         .map { meta, tumor_dna_bam, tumor_dna_bai, tumor_dna_redux_tsv, tumor_rna_bam, tumor_rna_bai, purple_dir ->
 
             def tumor_dna_id = Utils.getTumorDnaSampleName(meta, primary: true)
-
-            def output_file_id = is_purity_estimate_mode
-                ? Utils.getTumorDnaSampleName(meta, primary: false) // Longitudinal sample id
-                : tumor_dna_id
+            def output_file_id = purity_estimate_mode ? Utils.getTumorDnaSampleName(meta, primary: false) : tumor_dna_id
 
             def meta_append = [
                 key: meta.group_id,
@@ -178,17 +175,17 @@ workflow SAGE_APPEND {
             def bais = []
             def redux_tsvs = []
 
-            if (!is_purity_estimate_mode && tumor_rna_bam) {
+            if (!purity_estimate_mode && tumor_rna_bam) {
                 meta_append.reference_ids.add(Utils.getTumorRnaSampleName(meta))
                 bams.add(tumor_rna_bam)
                 bais.add(tumor_rna_bai)
             }
 
-            if (is_purity_estimate_mode && tumor_dna_bam) {
+            if (purity_estimate_mode && tumor_dna_bam) {
                 meta_append.reference_ids.add(Utils.getTumorDnaSampleName(meta))
                 bams.add(tumor_dna_bam)
                 bais.add(tumor_dna_bai)
-                redux_tsvs.add(tumor_dna_redux_tsv)
+                redux_tsvs = tumor_dna_redux_tsv
             }
 
             def purple_smlv_vcf = file(purple_dir).resolve("${tumor_dna_id}.purple.somatic.vcf.gz")
@@ -203,7 +200,7 @@ workflow SAGE_APPEND {
         genome_version,
         genome_fai,
         genome_dict,
-        is_targeted_mode,
+        targeted_mode,
     )
 
     ch_versions = ch_versions.mix(SAGE_APPEND_SOMATIC.out.versions)

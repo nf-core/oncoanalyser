@@ -23,6 +23,8 @@ process ISOFOX_PANEL_NORMALISATION {
     script:
     def args = task.ext.args ?: ''
 
+    def log_level_arg = task.ext.log_level ? "-log_level ${task.ext.log_level}" : ''
+
     """
     mkdir -p inputs/
     for fp in \$(find -L isofox_dirs.* -name '*.gene_data.csv'); do ln -sf ../\${fp} inputs/; done
@@ -41,8 +43,8 @@ process ISOFOX_PANEL_NORMALISATION {
         -analyses PANEL_TPM_NORMALISATION \\
         -gene_id_file ${gene_ids} \\
         -gene_distribution_file ${gene_distribution} \\
-        -output_dir ./ \\
-        -log_level ${params.module_log_level}
+        ${log_level_arg} \\
+        -output_dir ./
 
     mv isofox.panel_gene_normalisation.csv isofox.gene_normalisation.${genome_ver}.csv
 

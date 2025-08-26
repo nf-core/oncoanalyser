@@ -16,22 +16,22 @@ input:
       type: map
       description: |
         Groovy Map containing sample information
-        e.g. [id: 'sample_id', tumor_id: 'tumor_name', normal_id: 'normal_name']
-  - tumor_bam:
+        e.g. [id: 'sample_id']
+  - tumor_teal_bam:
       type: file
-      description: Tumor BAM file (optional)
+      description: Tumor TEAL BAM file (optional)
       pattern: "*.{bam}"
-  - normal_bam:
+  - tumor_teal_bai:
       type: file
-      description: Normal BAM file (optional)
-      pattern: "*.{bam}"
-  - tumor_bai:
-      type: file
-      description: Tumor BAI file (optional)
+      description: Tumor TEAL BAI file (optional)
       pattern: "*.{bai}"
-  - normal_bai:
+  - normal_teal_bam:
       type: file
-      description: Normal BAI file (optional)
+      description: Normal TEAL BAM file (optional)
+      pattern: "*.{bam}"
+  - normal_teal_bai:
+      type: file
+      description: Normal TEAL BAI file (optional)
       pattern: "*.{bai}"
   - tumor_wgs_metrics_dir:
       type: directory
@@ -53,13 +53,17 @@ output:
       type: map
       description: |
         Groovy Map containing sample information
-        e.g. [id: 'sample_id', tumor_id: 'tumor_name', normal_id: 'normal_name']
-  - teal_dir:
-      type: directory
+        e.g. [id: 'sample_id']
+  - teal_tsvs:
+      type: list
       description: TEAL output directory
+      pattern: "*.{tsv,tsv.*}"
   - versions:
       type: file
       description: File containing software versions
       pattern: "versions.yml"
+  - command_files:
+      type: list
+      description: List of command files
 authors:
   - "@scwatts"

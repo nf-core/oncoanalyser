@@ -17,8 +17,8 @@ process VIRUSBREAKEND {
     path gridss_config
 
     output:
-    tuple val(meta), path("*.summary.tsv"), emit: tsv
-    path "*.virusbreakend.vcf"            , emit: vcf
+    tuple val(meta), path('*.summary.tsv'), emit: tsv
+    path '*.virusbreakend.vcf'            , emit: vcf
     path 'versions.yml'                   , emit: versions
     path '.command.*'                     , emit: command_files
 

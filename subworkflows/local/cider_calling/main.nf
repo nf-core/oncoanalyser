@@ -84,5 +84,5 @@ workflow CIDER_CALLING {
     ch_versions = ch_versions.mix(CIDER.out.versions)
 
     emit:
-    versions  = ch_versions // channel: [ versions.yml ]
+    versions = ch_versions // channel: [ versions.yml ]
 }

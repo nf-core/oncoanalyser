@@ -13,7 +13,7 @@ process SAGE_APPEND {
     val genome_ver
     path genome_fai
     path genome_dict
-    val is_targeted_mode
+    val targeted_mode
 
     output:
     tuple val(meta), path('sage_append'), emit: sage_append_dir
@@ -28,11 +28,10 @@ process SAGE_APPEND {
 
     def xmx_mod = task.ext.xmx_mod ?: 0.75
 
-    def skip_msi_jitter_arg  = ""
-    if(!redux_tsvs)
-        skip_msi_jitter_arg = "-skip_msi_jitter"
+    def log_level_arg = task.ext.log_level ? "-log_level ${task.ext.log_level}" : ''
 
-    def high_depth_mode_arg = is_targeted_mode ? "-high_depth_mode" : ""
+    def skip_msi_jitter_arg = !redux_tsvs ? '-skip_msi_jitter' : ''
+    def high_depth_mode_arg = targeted_mode ? '-high_depth_mode' : ''
 
     """
     mkdir -p sage_append/
@@ -42,17 +41,17 @@ process SAGE_APPEND {
         com.hartwig.hmftools.sage.append.SageAppendApplication \\
         ${args} \\
         -input_vcf ${vcf} \\
+        -max_read_depth 100000 \\
         -reference ${meta.reference_ids.join(',')} \\
         -reference_bam ${bams.join(',')} \\
         -ref_genome ${genome_fasta} \\
         -ref_genome_version ${genome_ver} \\
-        -max_read_depth 100000 \\
         -write_frag_lengths \\
         ${high_depth_mode_arg} \\
         ${skip_msi_jitter_arg} \\
         -threads ${task.cpus} \\
-        -output_vcf sage_append/${meta.output_file_id}.sage.append.vcf.gz \\
-        -log_level ${params.module_log_level}
+        ${log_level_arg} \\
+        -output_vcf sage_append/${meta.output_file_id}.sage.append.vcf.gz
 
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":

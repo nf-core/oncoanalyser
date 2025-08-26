@@ -34,6 +34,8 @@ process REDUX {
 
     def xmx_mod = task.ext.xmx_mod ?: 0.95
 
+    def log_level_arg = task.ext.log_level ? "-log_level ${task.ext.log_level}" : ''
+
     def form_consensus_arg = umi_enable ? '' : '-form_consensus'
 
     def umi_args_list = []
@@ -46,19 +48,19 @@ process REDUX {
         -Xmx${Math.round(task.memory.bytes * xmx_mod)} \\
         ${args} \\
         -sample ${meta.sample_id} \\
+        ${form_consensus_arg} \\
+        ${umi_args} \\
         -input_bam ${bams.join(',')} \\
-        -output_dir ./ \\
         -output_bam ./${meta.sample_id}.redux.bam \\
         -ref_genome ${genome_fasta} \\
         -ref_genome_version ${genome_ver} \\
-        -unmap_regions ${unmap_regions} \\
         -ref_genome_msi_file ${msi_jitter_sites} \\
+        -unmap_regions ${unmap_regions} \\
         -bamtool \$(which samtools) \\
-        ${form_consensus_arg} \\
-        ${umi_args} \\
         -write_stats \\
         -threads ${task.cpus} \\
-        -log_level ${params.module_log_level}
+        ${log_level_arg} \\
+        -output_dir ./
 
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":

@@ -20,8 +20,8 @@ process PAVE_GERMLINE {
     path ensembl_data_resources
 
     output:
-    tuple val(meta), path("*.vcf.gz")    , emit: vcf
-    tuple val(meta), path("*.vcf.gz.tbi"), emit: index
+    tuple val(meta), path('*.vcf.gz')    , emit: vcf
+    tuple val(meta), path('*.vcf.gz.tbi'), emit: index
     path 'versions.yml'                  , emit: versions
     path '.command.*'                    , emit: command_files
 
@@ -30,6 +30,8 @@ process PAVE_GERMLINE {
 
     script:
     def args = task.ext.args ?: ''
+
+    def log_level_arg = task.ext.log_level ? "-log_level ${task.ext.log_level}" : ''
 
     """
     pave \\
@@ -48,8 +50,8 @@ process PAVE_GERMLINE {
         -blacklist_vcf ${sage_blocklist_sites} \\
         -gnomad_no_filter \\
         -threads ${task.cpus} \\
-        -output_dir ./ \\
-        -log_level ${params.module_log_level}
+        ${log_level_arg} \\
+        -output_dir ./
 
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":

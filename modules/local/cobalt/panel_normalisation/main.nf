@@ -23,6 +23,8 @@ process COBALT_PANEL_NORMALISATION {
     script:
     def args = task.ext.args ?: ''
 
+    def log_level_arg = task.ext.log_level ? "-log_level ${task.ext.log_level}" : ''
+
     """
     mkdir -p inputs/
 
@@ -45,8 +47,8 @@ process COBALT_PANEL_NORMALISATION {
         -ref_genome_version ${genome_ver} \\
         -gc_profile ${gc_profile} \\
         -target_regions_bed ${target_regions_bed} \\
-        -output_file cobalt.region_normalisation.${genome_ver}.tsv \\
-        -log_level ${params.module_log_level}
+        ${log_level_arg} \\
+        -output_file cobalt.region_normalisation.${genome_ver}.tsv
 
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":

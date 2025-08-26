@@ -26,6 +26,8 @@ process CHORD {
 
     def xmx_mod = task.ext.xmx_mod ?: 0.95
 
+    def log_level_arg = task.ext.log_level ? "-log_level ${task.ext.log_level}" : ''
+
     """
     ## NOTE(LN): The CHORD jar runs an embedded R script using 'com.hartwig.hmftools.common.utils.r.RExecutor' which requires absolute
     ## paths. Relative paths don't work because RExecutor executes from a tmp dir, and not the working dir of this nextflow process
@@ -38,20 +40,20 @@ process CHORD {
         -sample ${meta.sample_id} \\
         -snv_indel_vcf_file \$(realpath ${smlv_vcf}) \\
         -sv_vcf_file \$(realpath ${sv_vcf}) \\
-        -output_dir \$(realpath chord/) \\
         -ref_genome ${genome_fasta} \\
-        -log_level ${params.module_log_level}
+        ${log_level_arg} \\
+        -output_dir \$(realpath chord/)
 
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":
         chord: \$(chord -version | sed -n '/^CHORD version/ { s/^.* //p }')
     END_VERSIONS
-
     """
 
     stub:
     """
     mkdir -p chord/
+
     touch chord/${meta.sample_id}.chord.mutation_contexts.tsv
     touch chord/${meta.sample_id}.chord.prediction.tsv
 

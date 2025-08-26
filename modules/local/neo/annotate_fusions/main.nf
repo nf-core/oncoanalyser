@@ -28,6 +28,8 @@ process NEO_ANNOTATE_FUSIONS {
 
     def xmx_mod = task.ext.xmx_mod ?: 0.95
 
+    def log_level_arg = task.ext.log_level ? "-log_level ${task.ext.log_level}" : ''
+
     """
     mkdir -p isofox/
 
@@ -37,14 +39,14 @@ process NEO_ANNOTATE_FUSIONS {
         -sample ${meta.sample_id} \\
         -bam_file ${bam} \\
         -functions NEO_EPITOPES \\
-        -neo_dir ${neo_finder_dir} \\
         -read_length ${read_length} \\
+        -neo_dir ${neo_finder_dir} \\
         -ref_genome ${genome_fasta} \\
         -ref_genome_version ${genome_ver} \\
         -ensembl_data_dir ${ensembl_data_resources} \\
         -threads ${task.cpus} \\
-        -output_dir ./ \\
-        -log_level ${params.module_log_level}
+        ${log_level_arg} \\
+        -output_dir ./
 
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":
@@ -55,6 +57,7 @@ process NEO_ANNOTATE_FUSIONS {
     stub:
     """
     touch ${meta.sample_id}.isf.neoepitope.tsv
+
     echo -e '${task.process}:\\n  stub: noversions\\n' > versions.yml
     """
 }

@@ -34,6 +34,8 @@ process ISOFOX {
 
     def xmx_mod = task.ext.xmx_mod ?: 0.75
 
+    def log_level_arg = task.ext.log_level ? "-log_level ${task.ext.log_level}" : ''
+
     def functions_arg = functions ? "-functions \'${functions}\'" : ''
 
     def exp_counts_arg = exp_counts ? "-exp_counts_file ${exp_counts}" : ''
@@ -49,9 +51,9 @@ process ISOFOX {
         -Xmx${Math.round(task.memory.bytes * xmx_mod)} \\
         ${args} \\
         -sample ${meta.sample_id} \\
-        -bam_file ${bam} \\
         ${functions_arg} \\
         -read_length ${read_length} \\
+        -bam_file ${bam} \\
         -ref_genome ${genome_fasta} \\
         -ref_genome_version ${genome_ver} \\
         -ensembl_data_dir ${ensembl_data_resources} \\
@@ -61,8 +63,8 @@ process ISOFOX {
         ${gene_ids_arg} \\
         ${tpm_norm_arg} \\
         -threads ${task.cpus} \\
-        -output_dir isofox/ \\
-        -log_level ${params.module_log_level}
+        ${log_level_arg} \\
+        -output_dir isofox/
 
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":
@@ -73,6 +75,7 @@ process ISOFOX {
     stub:
     """
     mkdir -p isofox/
+
     touch isofox/placeholder
 
     echo -e '${task.process}:\\n  stub: noversions\\n' > versions.yml

@@ -17,11 +17,11 @@ process SAGE_SOMATIC {
     path genome_dict
     path sage_pon
     path sage_known_hotspots_somatic
-    path driver_gene_panel
     path sage_highconf_regions
+    path driver_gene_panel
     path ensembl_data_resources
     path gnomad_resource
-    val is_targeted_mode
+    val targeted_mode
 
     output:
     tuple val(meta), path('somatic/*.sage.somatic.vcf.gz'), path('somatic/*.sage.somatic.vcf.gz.tbi'), emit: vcf
@@ -35,29 +35,31 @@ process SAGE_SOMATIC {
     script:
     def args = task.ext.args ?: ''
 
+    def log_level_arg = task.ext.log_level ? "-log_level ${task.ext.log_level}" : ''
+
     // Sample IDs
     def reference_ids = []
-    if (meta.normal_id != null) reference_ids.add(meta.normal_id)
-    if (meta.donor_id != null) reference_ids.add(meta.donor_id)
+    if (meta.normal_id != null) { reference_ids.add(meta.normal_id) }
+    if (meta.donor_id != null) { reference_ids.add(meta.donor_id) }
     def reference_arg = reference_ids.size() > 0 ? "-reference ${String.join(',', reference_ids)}" : ''
     def ref_sample_count_arg = reference_ids.size() > 0 ? "-ref_sample_count ${reference_ids.size()}" : ''
 
     // BAMs
     def reference_bams = []
-    if (normal_bam) reference_bams.add(normal_bam.toString())
-    if (donor_bam) reference_bams.add(donor_bam.toString())
+    if (normal_bam) { reference_bams.add(normal_bam.toString()) }
+    if (donor_bam) { reference_bams.add(donor_bam.toString()) }
     def reference_bam_arg = reference_bams.size() > 0 ? "-reference_bam ${String.join(',', reference_bams)}" : ''
 
     // Tumor in normal contamination (TINC): only for WGS tumor/normal samples
-    def run_tinc_arg = ""
-    def write_fit_variants_arg = ""
-    def gnomad_arg = ""
-    def pon_file_arg = ""
+    def run_tinc_arg = ''
+    def write_fit_variants_arg = ''
+    def gnomad_arg = ''
+    def pon_file_arg = ''
 
-    if(!is_targeted_mode && tumor_bam && normal_bam){
-        run_tinc_arg =           "-run_tinc"
-        pon_file_arg =           "-pon_file ${sage_pon}"
-        write_fit_variants_arg = "-write_fit_variants"
+    if (!targeted_mode && tumor_bam && normal_bam) {
+        run_tinc_arg = '-run_tinc'
+        pon_file_arg = "-pon_file ${sage_pon}"
+        write_fit_variants_arg = '-write_fit_variants'
 
         if (genome_ver.toString() == '37') {
             gnomad_arg = "-gnomad_freq_file ${gnomad_resource}"
@@ -68,9 +70,12 @@ process SAGE_SOMATIC {
         }
     }
 
-    def high_depth_mode_arg = ""
-    if(is_targeted_mode)
-        high_depth_mode_arg = "-high_depth_mode"
+    // NOTE(SW): use of ternary inexplicitly causes a 'variable already defined in scope error'
+    if (targeted_mode) {
+        high_depth_mode_arg = '-high_depth_mode'
+    } else {
+        high_depth_mode_arg = ''
+    }
 
     """
     mkdir -p somatic/
@@ -90,15 +95,15 @@ process SAGE_SOMATIC {
         -driver_gene_panel ${driver_gene_panel} \\
         -high_confidence_bed ${sage_highconf_regions} \\
         -ensembl_data_dir ${ensembl_data_resources} \\
-        ${run_tinc_arg} \\
         ${pon_file_arg} \\
         ${gnomad_arg} \\
-        ${write_fit_variants_arg} \\
+        ${run_tinc_arg} \\
         ${high_depth_mode_arg} \\
         -bqr_write_plot \\
+        ${write_fit_variants_arg} \\
         -threads ${task.cpus} \\
-        -output_vcf somatic/${meta.tumor_id}.sage.somatic.vcf.gz \\
-        -log_level ${params.module_log_level}
+        ${log_level_arg} \\
+        -output_vcf somatic/${meta.tumor_id}.sage.somatic.vcf.gz
 
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":

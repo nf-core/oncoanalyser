@@ -16,7 +16,7 @@ input:
       type: map
       description: |
         Groovy Map containing sample informatio
-        e.g. [id: 'sample_id', tumor_id: 'tumor_name', normal_id: 'normal_name']
+        e.g. [id: 'sample_id']
   - tumor_bam:
       type: file
       description: Tumor BAM file
@@ -59,6 +59,10 @@ input:
       type: file
       description: Reference genome assembly dict file
       pattern: "*.{dict}"
+  - sage_pon:
+      type: file
+      description: SAGE PON file (optional)
+      pattern: "*.{tsv.gz}"
   - sage_known_hotspots_somatic:
       type: file
       description: SAGE somatic known hotspots file
@@ -67,15 +71,22 @@ input:
       type: file
       description: SAGE high confidence regions file
       pattern: "*.{bed.gz}"
+  - driver_gene_panel:
+      type: file
+      description: Driver gene panel file
+      pattern: "*.{tsv}"
   - ensembl_data_resources:
       type: directory
       description: HMF ensembl data resources directory
+  - targeted_mode:
+      type: boolean
+      description: Flag indicating whether targeted mode is set
 output:
   - meta:
       type: map
       description: |
         Groovy Map containing sample information
-        e.g. [id: 'sample_id', tumor_id: 'tumor_name', normal_id: 'normal_name']
+        e.g. [id: 'sample_id']
   - vcf:
       type: file
       description: SAGE VCF file
@@ -87,5 +98,8 @@ output:
       type: file
       description: File containing software versions
       pattern: "versions.yml"
+  - command_files:
+      type: list
+      description: List of command files
 authors:
   - "@scwatts"
