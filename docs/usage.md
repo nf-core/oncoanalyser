@@ -199,6 +199,25 @@ PATIENT1,PATIENT1,PATIENT1-T,tumor,dna,bai,/other/dir/PATIENT1-T.dna.bam.bai
 
 #### CRAM
 
+:::info
+
+To run analyses starting from CRAM, you must use the CRAM format version ≤3.0 with the reference fully embedded. An
+example command converting to the appropriate CRAM format is shown:
+
+```bash
+samtools view \
+  --cram \
+  --output-fmt-option version=3.0 \
+  --output-fmt-option embed_ref=1 \
+  --output-fmt-option reference=/path/to/reference.fasta \
+  --output sample.cram \
+  --threads 4 \
+  --write-index \
+  sample.bam
+```
+
+:::
+
 To run from CRAM, use `cram` and `crai` in the `filetype` field. `crai` only needs to be provided if the CRAM index is
 not in the same directory as the CRAM file:
 
