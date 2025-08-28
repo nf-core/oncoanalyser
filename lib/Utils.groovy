@@ -93,14 +93,14 @@ class Utils {
 
                     if (info_data.containsKey(Constants.InfoField.LONGITUDINAL_SAMPLE)) {
 
-                        if (meta_sample.containsKey('longitudinal_sample_id')) {
+                        if (meta_sample.containsKey('longitudinal_sample_id') && meta_sample.longitudinal_sample_id != it.sample_id) {
                             log.error "got multiple longitudinal samples for ${group_id} ${sample_type_enum}/${sequence_type_enum}: ${it.sample_id}"
                             Nextflow.exit(1)
                         }
 
                         meta_sample.longitudinal_sample_id = it.sample_id
 
-                    } else if (meta_sample.sample_id && meta_sample.sample_id != it.sample_id) {
+                    } else if (meta_sample.containsKey('sample_id') && meta_sample.sample_id != it.sample_id) {
 
                         log.error "got unexpected sample name for ${group_id} ${sample_type_enum}/${sequence_type_enum}: ${it.sample_id}"
                         Nextflow.exit(1)
