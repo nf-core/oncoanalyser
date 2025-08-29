@@ -18,6 +18,7 @@ concurrency:
 
 env:
   GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+  NFT_TAGS: "cicd"
   NFT_VER: "0.9.2"
   NFT_WORKDIR: "~"
   NXF_ANSI_LOG: false
@@ -51,6 +52,7 @@ jobs:
           NFT_VER: ${{ env.NFT_VER }}
         with:
           max_shards: 7
+          tags: ${{ env.NFT_TAGS }}
 
       - name: debug
         run: |
@@ -100,6 +102,7 @@ jobs:
           profile: ${{ matrix.profile }}
           shard: ${{ matrix.shard }}
           total_shards: ${{ env.TOTAL_SHARDS }}
+          tags: ${{ env.NFT_TAGS }}
 
       - name: Report test status
         if: ${{ always() }}
