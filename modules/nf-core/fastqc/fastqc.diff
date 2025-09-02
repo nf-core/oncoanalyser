@@ -1,0 +1,22 @@
+Changes in component 'nf-core/fastqc'
+'modules/nf-core/fastqc/meta.yml' is unchanged
+Changes in 'fastqc/main.nf':
+--- modules/nf-core/fastqc/main.nf
++++ modules/nf-core/fastqc/main.nf
+@@ -2,10 +2,7 @@
+     tag "${meta.id}"
+     label 'process_medium'
+ 
+-    conda "${moduleDir}/environment.yml"
+-    container "${ workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container ?
+-        'https://depot.galaxyproject.org/singularity/fastqc:0.12.1--hdfd78af_0' :
+-        'biocontainers/fastqc:0.12.1--hdfd78af_0' }"
++    container 'biocontainers/fastqc:0.12.1--hdfd78af_0'
+ 
+     input:
+     tuple val(meta), path(reads)
+
+'modules/nf-core/fastqc/tests/main.nf.test.snap' is unchanged
+'modules/nf-core/fastqc/tests/main.nf.test' is unchanged
+'modules/nf-core/fastqc/environment.yml' was removed
+************************************************************
