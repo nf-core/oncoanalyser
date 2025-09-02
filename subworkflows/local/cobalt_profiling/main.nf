@@ -5,7 +5,7 @@
 import Constants
 import Utils
 
-include { COBALT } from '../../../modules/local/cobalt/main'
+include { COBALT } from '../../../modules/local/cobalt/run/main'
 
 workflow COBALT_PROFILING {
     take:
@@ -18,6 +18,7 @@ workflow COBALT_PROFILING {
     gc_profile                  // channel: [mandatory] /path/to/gc_profile
     diploid_bed                 // channel: [optional]  /path/to/diploid_bed
     target_region_normalisation // channel: [optional]  /path/to/target_region_normalisation
+    targeted_mode            // boolean: [mandatory] Running COBALT with targeted mode args?
 
     main:
     // Channel for version.yml files
@@ -84,6 +85,7 @@ workflow COBALT_PROFILING {
         gc_profile,
         ch_cobalt_inputs.diploid_bed,
         target_region_normalisation,
+        targeted_mode,
     )
 
     ch_versions = ch_versions.mix(COBALT.out.versions)

@@ -14,7 +14,7 @@ input:
       type: map
       description: |
         Groovy Map containing sample information
-        e.g. [id: 'sample_id', tumor_id: 'tumor_name', normal_id: 'normal_name']
+        e.g. [id: 'sample_id']
   - tumor_bam:
       type: file
       description: Tumor BAM file
@@ -46,22 +46,29 @@ input:
       type: file
       description: AMBER heterozygous sites file
       pattern: "*.{vcf.gz}"
-  - target_region_bed:
+  - target_regions_bed:
       type: file
-      description: Target region BED file (optional)
+      description: Target regions BED file (optional)
       pattern: "*.{bed}"
+  - tumor_min_depth:
+      type: string
+      description: Minimum depth for a site to be considered
 output:
   - meta:
       type: map
       description: |
         Groovy Map containing sample information
-        e.g. [id: 'sample_id', tumor_id: 'tumor_name', normal_id: 'normal_name']
+        e.g. [id: 'sample_id']
   - amber_dir:
-      type: directory
+      file: directory
       description: AMBER output directory
+      pattern: "versions.yml"
   - versions:
       type: file
       description: File containing software versions
       pattern: "versions.yml"
+  - command_files:
+      type: list
+      description: List of command files
 authors:
   - "@scwatts"

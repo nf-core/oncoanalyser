@@ -4,8 +4,8 @@ process BWAMEM2_ALIGN {
 
     conda "${moduleDir}/environment.yml"
     container "${ workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container ?
-        'https://depot.galaxyproject.org/singularity/hmftools-bwa-plus:1.0.0--h077b44d_0' :
-        'biocontainers/hmftools-bwa-plus:1.0.0--h077b44d_0' }"
+        'https://depot.galaxyproject.org/singularity/mulled-v2-4dde50190ae599f2bb2027cb2c8763ea00fb5084:596c0d6a494faa218562f2be03af2714d454da4f-0' :
+        'biocontainers/mulled-v2-4dde50190ae599f2bb2027cb2c8763ea00fb5084:596c0d6a494faa218562f2be03af2714d454da4f-0' }"
 
     input:
     tuple val(meta), path(reads_fwd), path(reads_rev)
@@ -15,6 +15,7 @@ process BWAMEM2_ALIGN {
     output:
     tuple val(meta), path('*.bam'), path('*.bai'), emit: bam
     path 'versions.yml'                          , emit: versions
+    path '.command.*'                            , emit: command_files
 
     when:
     task.ext.when == null || task.ext.when
@@ -30,7 +31,7 @@ process BWAMEM2_ALIGN {
     """
     ln -fs \$(find -L ${genome_bwamem2_index} -type f) ./
 
-    bwa-plus mem \\
+    bwa-mem2 mem \\
         ${args} \\
         -Y \\
         -K 100000000 \\
@@ -54,9 +55,10 @@ process BWAMEM2_ALIGN {
             --out ${output_fn} \\
             /dev/stdin
 
+    # NOTE(SW): bwa-mem2 version hardcoded as 2.3 reports the wrong version, see https://github.com/bwa-mem2/bwa-mem2/issues/276
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":
-        bwa-plus: \$(bwa-plus version 2>/dev/null)
+        bwa-mem2: 2.3
         sambamba: \$(sambamba --version 2>&1 | sed -n '/^sambamba / { s/^.* //p }' | head -n1)
     END_VERSIONS
     """

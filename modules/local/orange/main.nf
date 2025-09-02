@@ -4,8 +4,8 @@ process ORANGE {
 
     conda "${moduleDir}/environment.yml"
     container "${ workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container ?
-        'https://depot.galaxyproject.org/singularity/hmftools-orange:3.8.1--hdfd78af_0' :
-        'biocontainers/hmftools-orange:3.8.1--hdfd78af_0' }"
+        'https://depot.galaxyproject.org/singularity/hmftools-orange:4.1--hdfd78af_0' :
+        'biocontainers/hmftools-orange:4.1--hdfd78af_0' }"
 
     input:
     tuple val(meta),
@@ -42,6 +42,7 @@ process ORANGE {
     tuple val(meta), path('output/*.orange.pdf') , emit: pdf, optional: true
     tuple val(meta), path('output/*.orange.json'), emit: json, optional: true
     path 'versions.yml'                          , emit: versions
+    path '.command.*'                            , emit: command_files
 
     when:
     task.ext.when == null || task.ext.when
@@ -50,6 +51,8 @@ process ORANGE {
     def args = task.ext.args ?: ''
 
     def xmx_mod = task.ext.xmx_mod ?: 0.95
+
+    def log_level_arg = task.ext.log_level ? "-log_level ${task.ext.log_level}" : ''
 
     def pipeline_version_str = pipeline_version ?: 'not specified'
 
@@ -162,6 +165,7 @@ process ORANGE {
         -ensembl_data_dir ${ensembl_data_resources} \\
         ${isofox_gene_distribution_arg} \\
         ${isofox_alt_sj_arg} \\
+        ${log_level_arg} \\
         -output_dir output/
 
     cat <<-END_VERSIONS > versions.yml
@@ -173,6 +177,7 @@ process ORANGE {
     stub:
     """
     mkdir -p output/
+
     touch output/${meta.tumor_id}.orange.json
     touch output/${meta.tumor_id}.orange.pdf
 

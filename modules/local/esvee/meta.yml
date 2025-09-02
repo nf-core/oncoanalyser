@@ -1,4 +1,4 @@
-name: esvee_call
+name: esvee
 description: Call somatic SVs with ESVEE
 keywords:
   - calling
@@ -8,28 +8,50 @@ tools:
       description: Structural variant (SV) calling
       homepage: https://github.com/hartwigmedical/hmftools/tree/master/esvee
       documentation: https://github.com/hartwigmedical/hmftools/tree/master/esvee
-      licence: ["GPL >=3"]
+      licence: ["GPL v3"]
 input:
+  - meta:
   - meta:
       type: map
       description: |
         Groovy Map containing sample information
         e.g. [id: 'sample_id']
-  - ref_depth_vcf:
+  - tumor_bam:
       type: file
-      description: ESVEE depth annotated VCF file
-      pattern: "*.{vcf.gz}"
-  - prep_dir:
-      type: directory
-      description: ESVEE prep output directory
+      description: Tumor BAM file
+      pattern: "*.{bam}"
+  - tumor_bai:
+      type: file
+      description: Tumor BAI file
+      pattern: "*.{bai}"
+  - normal_bam:
+      type: file
+      description: Normal BAM file
+      pattern: "*.{bam}"
+  - normal_bai:
+      type: file
+      description: Normal BAI file
+      pattern: "*.{bai}"
   - genome_fasta:
       type: file
       description: Reference genome assembly FASTA file
       pattern: "*.{fa,fasta}"
+  - genome_fai:
+      type: file
+      description: Reference genome assembly fai file
+      pattern: "*.{fai}"
+  - genome_dict:
+      type: file
+      description: Reference genome assembly dict file
+      pattern: "*.{dict}"
+  - genome_img:
+      type: file
+      description: Reference genome assembly img file
+      pattern: "*.{img}"
   - genome_ver:
       type: string
       description: Reference genome version
-  - pon_breakend:
+  - pon_breakends:
       type: file
       description: GRIDSS breakend PON file
       pattern: "*.{bed.gz}"
@@ -37,6 +59,10 @@ input:
       type: file
       description: GRIDSS breakpoint PON file
       pattern: "*.{bedpe.gz}"
+  - decoy_sequences_image:
+      type: file
+      description: ESVEE decoy sequences images file
+      pattern: "*.{img}"
   - known_fusions:
       type: file
       description: HMF Known Fusions file
@@ -44,15 +70,19 @@ input:
   - repeatmasker_annotations:
       type: file
       description: RepeatMasker annotations file
+  - unmap_regions:
+      type: file
+      description: Hartwig unmap regions file
+      pattern: "*.{tsv}"
 output:
   - meta:
       type: map
       description: |
         Groovy Map containing sample information
         e.g. [id: 'sample_id']
-  - caller_dir:
+  - esvee_dir:
       type: directory
-      description: ESVEE call output directory
+      description: ESVEE output directory
   - unfiltered_vcf:
       type: list
       description: Unfiltered VCF file
@@ -69,5 +99,8 @@ output:
       type: file
       description: File containing software versions
       pattern: "versions.yml"
+  - command_files:
+      type: list
+      description: List of command files
 authors:
   - "@scwatts"

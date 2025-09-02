@@ -16,6 +16,7 @@ process PEACH {
     output:
     tuple val(meta), path('peach/'), emit: peach_dir
     path 'versions.yml'            , emit: versions
+    path '.command.*'              , emit: command_files
 
     when:
     task.ext.when == null || task.ext.when
@@ -24,6 +25,8 @@ process PEACH {
     def args = task.ext.args ?: ''
 
     def xmx_mod = task.ext.xmx_mod ?: 0.75
+
+    def log_level_arg = task.ext.log_level ? "-log_level ${task.ext.log_level}" : ''
 
     """
     peach \\
@@ -34,7 +37,9 @@ process PEACH {
         -haplotypes_file ${haplotypes} \\
         -function_file ${haplotype_functions} \\
         -drugs_file ${drug_info} \\
+        ${log_level_arg} \\
         -output_dir peach/
+
 
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":

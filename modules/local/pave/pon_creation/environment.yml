@@ -1,7 +1,7 @@
-name: esvee_assemble
+name: pave_pon_creation
 channels:
   - conda-forge
   - bioconda
   - defaults
 dependencies:
-  - bioconda::hmftools-esvee=1.0.3
+  - bioconda::hmftools-pave=1.8

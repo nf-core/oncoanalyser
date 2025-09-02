@@ -14,6 +14,7 @@ process STAR_ALIGN {
     output:
     tuple val(meta), path('*bam'), emit: bam
     path 'versions.yml'          , emit: versions
+    path '.command.*'            , emit: command_files
 
     when:
     task.ext.when == null || task.ext.when

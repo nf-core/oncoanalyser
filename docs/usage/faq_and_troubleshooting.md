@@ -19,13 +19,12 @@
 - [Placing `oncoanalyser` CLI arguments into a configuration
   file](#placing-oncoanalyser-cli-arguments-into-a-configuration-file)
 - [Errors and navigating the `work/` directory](#errors-and-navigating-the-work-directory)
-- [Saving logs from the `work/` directory](#saving-logs-from-the-work-directory)
 - [Resuming runs in Google Batch](#resuming-runs-in-google-batch)
 
 ## How to start from CRAM?
 
-Simply specify a CRAM path instead of a BAM path in the sample sheet. See section [Input starting points: BAM /
-CRAM](./#bam-and-cram).
+Simply provide a CRAM path under filetype `cram` in the sample sheet. See section [Input starting points: CRAM](./#cram)
+for details.
 
 ## How to handle UMIs?
 
@@ -94,14 +93,13 @@ example, you would run `oncoanalyser` with the below command (assuming starting 
 
 ```bash
 nextflow run nf-core/oncoanalyser \
-  -revision 2.1.0 \
+  -revision 2.2.0 \
   -profile docker \
   --mode wgts \
+  --processes_manual alignment,redux,amber,cobalt,sage,pave,esvee,purple \
   --genome GRCh38_hmf \
-  --input samplesheet.neo_inputs.csv \
-  --outdir output/ \
-  --processes_manual \
-  --processes_include alignment,redux,amber,cobalt,sage,pave,esvee,purple
+  --input samplesheet.csv \
+  --outdir output/
 ```
 
 ## Why does `oncoanalyser` call too many / too few variants than another pipeline?
@@ -213,13 +211,13 @@ For example, the `oncoanalyser` arguments which start with `--` in this command:
 
 ```shell
 nextflow run nf-core/oncoanalyser \
-  -revision 2.1.0 \
-  -config refdata.config \
+  -revision 2.2.0 \
   -profile docker \
+  -config refdata.config \
   --mode wgts \
   --genome GRCh38_hmf \
-  --input /path/to/samplesheet.csv \
-  --outdir /path/to/outdir/
+  --input samplesheet.csv \
+  --outdir output/
 ```
 
 can be specified in a config file by stripping the `--` like so:
@@ -228,8 +226,8 @@ can be specified in a config file by stripping the `--` like so:
 params {
     mode   = "wgts"
     genome = "GRCh38_hmf"
-    input  = "/path/to/samplesheet.csv"
-    outdir = "/path/to/outdir/"
+    input  = "samplesheet.csv"
+    outdir = "outdir/"
 }
 ```
 
@@ -237,9 +235,9 @@ and provided as a config file when running `oncoanalyser`:
 
 ```shell
 nextflow run nf-core/oncoanalyser \
+  -revision 2.2.0 \
   -config refdata.config \
   -config params.config \
-  -revision 2.1.0 \
   -profile docker \
   <...>
 ```
@@ -271,7 +269,7 @@ work/
 │       ├── .command.sh     # Bash script used to run the process *within the container*
 │       ├── .command.run    # Bash script used to run the process in the host machine
 │       ├── .command.begin
-│       ├── .command.log    # All log messages (combination of stdout and stderr)
+│       ├── .command.log    # All log messages (combination of stdout and stderr). Might not exist for some executors
 │       ├── .command.err    # stderr log messages
 │       ├── .command.out    # stdout log messages
 │       ├── .command.trace  # Compute resource usage stats
@@ -290,32 +288,6 @@ The `work/` directory can be hard to navigate due to the `<short_hash>/<long_has
 
 Otherwise, you can use a utility like [tree](<https://en.wikipedia.org/wiki/Tree_(command)>) to show the directory
 structure, which allows you to manually find the target process directory.
-
-## Saving logs from the `work/` directory
-
-To save logs to the final output directory (i.e. path provided to `--outdir`), we can provide the below
-[afterScript](https://www.nextflow.io/docs/latest/reference/process.html#afterscript) directive in a config file:
-
-```groovy
-// Adapted from this GitHub issue: https://github.com/nextflow-io/nextflow/issues/1166
-process.afterScript = {
-    // params.outdir: --outdir arg
-    // meta.key: sample_id from the sample sheet
-    log_dir = "${params.outdir}/${meta.key}/logs"
-
-    // task.process: name of the process
-    // meta.id: concatenation of the group_id and sample_id from the sample sheet
-    dest_file_prefix = "${log_dir}/${task.process}.${meta.id}"
-
-    // The value of afterScript is simply a bash command as a string
-    cmd =  "mkdir -p ${log_dir}; "
-    cmd += "for file in .command.{sh,log}; do cp \$file ${dest_file_prefix}\${file}; done"
-    cmd
-}
-```
-
-The above afterScript directive will copy `.sh` and `.log` files from the `work/` directory for every process. Each
-destination file will have the below example path:
 
 ```shell
 outdir/coloMini/logs/NFCORE_ONCOANALYSER:WGTS:REDUX_PROCESSING:REDUX.coloMini_coloMiniT.command.log

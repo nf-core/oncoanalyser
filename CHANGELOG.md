@@ -3,6 +3,67 @@
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/) and this project mostly adheres to
 [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [[2.2.0](https://github.com/nf-core/oncoanalyser/releases/tag/2.2.0)] Royal Spoonbill - 2025-08-02
+
+- [241](https://github.com/nf-core/oncoanalyser/pull/241) - Apply minor fixes and updates
+  - Allow 'prepare reference' feature to be driven by samplesheet
+  - Set minimum stringr / stringi version for CUPPA environment
+  - Reintroduce decoy sequences for ESVEE with GRCh37 genomes
+  - Update WiGiTS reference data paths
+  - Improve FASTQ and longitudinal sample input handling
+  - Fix REDUX TSV collection in SAGE append subworkflow
+  - Update CHANGELOG.md
+- [235](https://github.com/nf-core/oncoanalyser/pull/235) - Publish selected command / log files
+- [234](https://github.com/nf-core/oncoanalyser/pull/234) - Update WiGiTS tools and reference data
+- [233](https://github.com/nf-core/oncoanalyser/pull/233) - Update documentation
+- [232](https://github.com/nf-core/oncoanalyser/pull/232) - Extend the 'prepare reference' functionality
+- [231](https://github.com/nf-core/oncoanalyser/pull/231) - Implement 'purity estimate' (WISP) workflow
+- [230](https://github.com/nf-core/oncoanalyser/pull/230) - Implement 'panel resource creation' workflow
+- [220](https://github.com/nf-core/oncoanalyser/pull/220) - Add reports to tower.yml
+- [222](https://github.com/nf-core/oncoanalyser/pull/222) - Post-release bump
+
+### Software dependencies
+
+| Dependency         | Old version | New version |
+| ------------------ | ----------- | ----------- |
+| `AMBER`            | 4.1.1       | 4.2         |
+| `BamTools`         | 1.3         | 1.4.2       |
+| `bwa-plus`         | 1.0.0       | -           |
+| `bwa-mem2`         | -           | 2.3         |
+| `CHORD`            | 2.1.0       | 2.1.2       |
+| `COBALT`           | 2.0         | 2.1         |
+| `ESVEE`            | 1.0.3       | 1.1.2       |
+| `ISOFOX`           | 1.7.1       | 1.7.2       |
+| `LILAC`            | 1.6         | 1.7.1       |
+| `LINX`             | 2.0.2       | 2.1         |
+| `NEO`              | 1.2         | 1.2.1       |
+| `ORANGE`           | 3.8.1       | 4.1         |
+| `PAVE`             | 1.7.1       | 1.8         |
+| `PURPLE`           | 4.1         | 4.2         |
+| `REDUX`            | 1.1.2       | 1.2         |
+| `SAGE`             | 4.0         | 4.1         |
+| `VirusInterpreter` | 1.7         | 1.7.1       |
+| `WISP`             | -           | 1.2         |
+
+### Reference data
+
+| Name                     | Old version | New version |
+| ------------------------ | ----------- | ----------- |
+| `HMF pipeline resources` | `2.1.0--1`  | `2.2.0--3`  |
+| `HMF TSO500 resources`   | `2.0.0--3`  | `2.2.0--3`  |
+
+### Parameters
+
+| Old name    | New name               |
+| ----------- | ---------------------- |
+| `fastp_umi` | `fastp_umi_enabled`    |
+| `redux_umi` | `redux_umi_enabled`    |
+| -           | `purity_estimate_mode` |
+| -           | `ref_data_types`       |
+| -           | `driver_gene_panel`    |
+| -           | `target_regions_bed`   |
+| -           | `hmftools_log_level`   |
+
 ## [[2.1.0](https://github.com/nf-core/oncoanalyser/releases/tag/2.1.0)] Peruvian Pelican - 2025-06-30
 
 - [219](https://github.com/nf-core/oncoanalyser/pull/219) - Add metromap-style diagram for pipeline overview

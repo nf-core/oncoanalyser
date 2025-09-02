@@ -4,17 +4,20 @@ process BAMTOOLS {
 
     conda "${moduleDir}/environment.yml"
     container "${ workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container ?
-        'https://depot.galaxyproject.org/singularity/hmftools-bam-tools:1.3--hdfd78af_0' :
-        'biocontainers/hmftools-bam-tools:1.3--hdfd78af_0' }"
+        'https://depot.galaxyproject.org/singularity/hmftools-bam-tools:1.4.2--hdfd78af_0' :
+        'biocontainers/hmftools-bam-tools:1.4.2--hdfd78af_0' }"
 
     input:
     tuple val(meta), path(bam), path(bai)
     path genome_fasta
     val genome_ver
+    path driver_gene_panel
+    path ensembl_data_resources
 
     output:
     tuple val(meta), path("${meta.id}_bamtools/"), emit: metrics_dir
     path 'versions.yml'                          , emit: versions
+    path '.command.*'                            , emit: command_files
 
     when:
     task.ext.when == null || task.ext.when
@@ -23,6 +26,8 @@ process BAMTOOLS {
     def args = task.ext.args ?: ''
 
     def xmx_mod = task.ext.xmx_mod ?: 0.75
+
+    def log_level_arg = task.ext.log_level ? "-log_level ${task.ext.log_level}" : ''
 
     """
     mkdir -p ${meta.id}_bamtools/
@@ -35,8 +40,10 @@ process BAMTOOLS {
         -bam_file ${bam} \\
         -ref_genome ${genome_fasta} \\
         -ref_genome_version ${genome_ver} \\
+        -driver_gene_panel ${driver_gene_panel} \\
+        -ensembl_data_dir ${ensembl_data_resources} \\
+        ${log_level_arg} \\
         -threads ${task.cpus} \\
-        -log_level INFO \\
         -output_dir ${meta.id}_bamtools/
 
     cat <<-END_VERSIONS > versions.yml

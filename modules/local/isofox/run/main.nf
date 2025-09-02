@@ -4,8 +4,8 @@ process ISOFOX {
 
     conda "${moduleDir}/environment.yml"
     container "${ workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container ?
-        'https://depot.galaxyproject.org/singularity/hmftools-isofox:1.7.1--hdfd78af_1' :
-        'biocontainers/hmftools-isofox:1.7.1--hdfd78af_1' }"
+        'https://depot.galaxyproject.org/singularity/hmftools-isofox:1.7.2--hdfd78af_1' :
+        'biocontainers/hmftools-isofox:1.7.2--hdfd78af_1' }"
 
     input:
     tuple val(meta), path(bam), path(bai)
@@ -24,6 +24,7 @@ process ISOFOX {
     output:
     tuple val(meta), path('isofox/'), emit: isofox_dir
     path 'versions.yml'             , emit: versions
+    path '.command.*'               , emit: command_files
 
     when:
     task.ext.when == null || task.ext.when
@@ -32,6 +33,8 @@ process ISOFOX {
     def args = task.ext.args ?: ''
 
     def xmx_mod = task.ext.xmx_mod ?: 0.75
+
+    def log_level_arg = task.ext.log_level ? "-log_level ${task.ext.log_level}" : ''
 
     def functions_arg = functions ? "-functions \'${functions}\'" : ''
 
@@ -48,9 +51,9 @@ process ISOFOX {
         -Xmx${Math.round(task.memory.bytes * xmx_mod)} \\
         ${args} \\
         -sample ${meta.sample_id} \\
-        -bam_file ${bam} \\
         ${functions_arg} \\
         -read_length ${read_length} \\
+        -bam_file ${bam} \\
         -ref_genome ${genome_fasta} \\
         -ref_genome_version ${genome_ver} \\
         -ensembl_data_dir ${ensembl_data_resources} \\
@@ -60,6 +63,7 @@ process ISOFOX {
         ${gene_ids_arg} \\
         ${tpm_norm_arg} \\
         -threads ${task.cpus} \\
+        ${log_level_arg} \\
         -output_dir isofox/
 
     cat <<-END_VERSIONS > versions.yml
@@ -71,6 +75,7 @@ process ISOFOX {
     stub:
     """
     mkdir -p isofox/
+
     touch isofox/placeholder
 
     echo -e '${task.process}:\\n  stub: noversions\\n' > versions.yml

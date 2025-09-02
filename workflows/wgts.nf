@@ -4,47 +4,9 @@ import Utils
 
 /*
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-    VALIDATE INPUTS
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-*/
-// Parse input samplesheet
-// NOTE(SW): this is done early and outside of gpars so that we can access synchronously and prior to pipeline execution
-inputs = Utils.parseInput(params.input, workflow.stubRun, log)
-
-// Get run config
-run_config = WorkflowMain.getRunConfig(params, inputs, log)
-
-// Validate inputs
-Utils.validateInput(inputs, run_config, params, log)
-
-// Check input path parameters to see if they exist
-def checkPathParamList = [
-    params.isofox_counts,
-    params.isofox_gc_ratios,
-]
-
-if (run_config.stages.lilac) {
-    if (params.genome_version.toString() == '38' && params.genome_type == 'alt' && params.containsKey('ref_data_hla_slice_bed')) {
-        checkPathParamList.add(params.ref_data_hla_slice_bed)
-    }
-}
-
-// TODO(SW): consider whether we should check for null entries here for errors to be more informative
-for (param in checkPathParamList) { if (param) { file(param, checkIfExists: true) } }
-
-// Check mandatory parameters
-if (params.input) { ch_input = file(params.input) } else { exit 1, 'Input samplesheet not specified!' }
-
-// Used in Isofox and Neo subworkflows
-isofox_read_length = params.isofox_read_length !== null ? params.isofox_read_length : Constants.DEFAULT_ISOFOX_READ_LENGTH_WTS
-
-/*
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     IMPORT MODULES / SUBWORKFLOWS / FUNCTIONS
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 */
-
-include { softwareVersionsToYAML } from '../subworkflows/nf-core/utils_nfcore_pipeline'
 
 include { AMBER_PROFILING       } from '../subworkflows/local/amber_profiling'
 include { BAMTOOLS_METRICS      } from '../subworkflows/local/bamtools_metrics'
@@ -72,16 +34,34 @@ include { SIGS_FITTING          } from '../subworkflows/local/sigs_fitting'
 include { TEAL_CHARACTERISATION } from '../subworkflows/local/teal_characterisation'
 include { VIRUSBREAKEND_CALLING } from '../subworkflows/local/virusbreakend_calling'
 
+include { softwareVersionsToYAML } from '../subworkflows/nf-core/utils_nfcore_pipeline'
+
 /*
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     RUN MAIN WORKFLOW
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 */
 
-// Get absolute file paths
-samplesheet = Utils.getFileObject(params.input)
-
 workflow WGTS {
+    take:
+    inputs
+    run_config
+
+    main:
+    // Check input path parameters to see if they exist
+    def checkPathParamList = [
+        params.isofox_counts,
+        params.isofox_gc_ratios,
+    ]
+
+    if (run_config.stages.lilac) {
+        if (params.genome_version.toString() == '38' && params.genome_type == 'alt' && params.containsKey('ref_data_hla_slice_bed')) {
+            checkPathParamList.add(params.ref_data_hla_slice_bed)
+        }
+    }
+
+    for (param in checkPathParamList) { if (param) { file(param, checkIfExists: true) } }
+
     // Create channel for versions
     // channel: [ versions.yml ]
     ch_versions = Channel.empty()
@@ -91,7 +71,9 @@ workflow WGTS {
     ch_inputs = Channel.fromList(inputs)
 
     // Set up reference data, assign more human readable variables
+    prep_config = WorkflowMain.getPrepConfigFromSamplesheet(run_config)
     PREPARE_REFERENCE(
+        prep_config,
         run_config,
     )
     ref_data = PREPARE_REFERENCE.out
@@ -193,21 +175,23 @@ workflow WGTS {
         ch_redux_dna_normal_out = ch_inputs.map { meta -> [meta, [], []] }
         ch_redux_dna_donor_out = ch_inputs.map { meta -> [meta, [], []] }
 
-        ch_redux_dna_tumor_tsv_out = ch_inputs.map { meta -> [meta, [], [], [], []] }
-        ch_redux_dna_normal_tsv_out = ch_inputs.map { meta -> [meta, [], [], [], []] }
-        ch_redux_dna_donor_tsv_out = ch_inputs.map { meta -> [meta, [], [], [], []] }
+        ch_redux_dna_tumor_tsv_out = ch_inputs.map { meta -> [meta, [], [], []] }
+        ch_redux_dna_normal_tsv_out = ch_inputs.map { meta -> [meta, [], [], []] }
+        ch_redux_dna_donor_tsv_out = ch_inputs.map { meta -> [meta, [], [], []] }
 
     }
 
     //
     // MODULE: Run Isofox to analyse RNA data
     //
+
+    isofox_counts = params.isofox_counts ? file(params.isofox_counts) : hmf_data.isofox_counts
+    isofox_gc_ratios = params.isofox_gc_ratios ? file(params.isofox_gc_ratios) : hmf_data.isofox_gc_ratios
+    isofox_read_length = params.isofox_read_length !== null ? params.isofox_read_length : Constants.DEFAULT_ISOFOX_READ_LENGTH_WTS
+
     // channel: [ meta, isofox_dir ]
     ch_isofox_out = Channel.empty()
     if (run_config.stages.isofox) {
-
-        isofox_counts = params.isofox_counts ? file(params.isofox_counts) : hmf_data.isofox_counts
-        isofox_gc_ratios = params.isofox_gc_ratios ? file(params.isofox_gc_ratios) : hmf_data.isofox_gc_ratios
 
         ISOFOX_QUANTIFICATION(
             ch_inputs,
@@ -250,6 +234,7 @@ workflow WGTS {
             ref_data.genome_version,
             hmf_data.heterozygous_sites,
             [],  // target_region_bed
+            [],  // tumor_min_depth
         )
 
         ch_versions = ch_versions.mix(AMBER_PROFILING.out.versions)
@@ -276,6 +261,7 @@ workflow WGTS {
             hmf_data.gc_profile,
             hmf_data.diploid_bed,
             [],  // panel_target_region_normalisation
+            false,  // targeted_mode
         )
 
         ch_versions = ch_versions.mix(COBALT_PROFILING.out.versions)
@@ -305,13 +291,12 @@ workflow WGTS {
             ref_data.genome_fai,
             ref_data.genome_dict,
             ref_data.genome_img,
-            hmf_data.sv_prep_blocklist,
             hmf_data.known_fusions,
             hmf_data.gridss_pon_breakends,
             hmf_data.gridss_pon_breakpoints,
-            hmf_data.repeatmasker_annotations,
             hmf_data.decoy_sequences_image,
-            hmf_data.unmap_regions,
+            hmf_data.repeatmasker_annotations,
+            hmf_data.unmap_regions
         )
 
         ch_versions = ch_versions.mix(ESVEE_CALLING.out.versions)
@@ -349,14 +334,16 @@ workflow WGTS {
             ref_data.genome_version,
             ref_data.genome_fai,
             ref_data.genome_dict,
+            hmf_data.sage_pon,
             hmf_data.sage_known_hotspots_somatic,
             hmf_data.sage_known_hotspots_germline,
-            hmf_data.sage_actionable_panel,
-            hmf_data.sage_coverage_panel,
             hmf_data.sage_highconf_regions,
             hmf_data.segment_mappability,
             hmf_data.driver_gene_panel,
             hmf_data.ensembl_data_resources,
+            hmf_data.gnomad_resource,
+            true,  // enable_germline
+            false, // targeted_mode
         )
 
         ch_versions = ch_versions.mix(SAGE_CALLING.out.versions)
@@ -390,8 +377,8 @@ workflow WGTS {
             ref_data.genome_fasta,
             ref_data.genome_version,
             ref_data.genome_fai,
-            hmf_data.sage_pon,
             [],  // sage_pon_artefacts
+            hmf_data.sage_pon,
             hmf_data.sage_blocklist_regions,
             hmf_data.sage_blocklist_sites,
             hmf_data.clinvar_annotations,
@@ -454,28 +441,31 @@ workflow WGTS {
     }
 
     //
-    // SUBWORKFLOW: Append RNA data to SAGE VCF
+    // SUBWORKFLOW: Append read data to SAGE VCF
     //
-    // channel: [ meta, sage_append_vcf ]
+    // channel: [ meta, sage_append_dir ]
     ch_sage_somatic_append_out = Channel.empty()
     ch_sage_germline_append_out = Channel.empty()
     if (run_config.stages.orange || run_config.stages.neo) {
 
         SAGE_APPEND(
             ch_inputs,
-            ch_align_rna_tumor_out,
             ch_purple_out,
+            ch_inputs.map { meta -> [meta, [], []] },      // ch_tumor_redux_bam
+            ch_inputs.map { meta -> [meta, [], [], []] },  // ch_tumor_redux_tsv
+            ch_align_rna_tumor_out,
             ref_data.genome_fasta,
             ref_data.genome_version,
             ref_data.genome_fai,
             ref_data.genome_dict,
-            run_config.stages.orange,  // run_germline [run for ORANGE but not Neo]
+            run_config.stages.orange,  // enable_germline [run for ORANGE but not Neo]
+            false, // targeted_mode
         )
 
         ch_versions = ch_versions.mix(SAGE_APPEND.out.versions)
 
-        ch_sage_somatic_append_out = ch_sage_somatic_append_out.mix(SAGE_APPEND.out.somatic_vcf)
-        ch_sage_germline_append_out = ch_sage_germline_append_out.mix(SAGE_APPEND.out.germline_vcf)
+        ch_sage_somatic_append_out = ch_sage_somatic_append_out.mix(SAGE_APPEND.out.somatic_dir)
+        ch_sage_germline_append_out = ch_sage_germline_append_out.mix(SAGE_APPEND.out.germline_dir)
 
     } else {
 
@@ -551,6 +541,8 @@ workflow WGTS {
             ch_redux_dna_normal_out,
             ref_data.genome_fasta,
             ref_data.genome_version,
+            hmf_data.driver_gene_panel,
+            hmf_data.ensembl_data_resources,
         )
 
         ch_versions = ch_versions.mix(BAMTOOLS_METRICS.out.versions)
@@ -651,6 +643,7 @@ workflow WGTS {
             ref_data.genome_fai,
             hmf_data.lilac_resources,
             ref_data_hla_slice_bed,
+            false,  // targeted_mode
         )
 
         ch_versions = ch_versions.mix(LILAC_CALLING.out.versions)

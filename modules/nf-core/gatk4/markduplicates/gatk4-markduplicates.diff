@@ -1,4 +1,4 @@
-Changes in module 'nf-core/gatk4/markduplicates'
+Changes in component 'nf-core/gatk4/markduplicates'
 'modules/nf-core/gatk4/markduplicates/meta.yml' is unchanged
 Changes in 'gatk4/markduplicates/main.nf':
 --- modules/nf-core/gatk4/markduplicates/main.nf
@@ -17,7 +17,14 @@ Changes in 'gatk4/markduplicates/main.nf':
  
      input:
      tuple val(meta), path(bam)
-@@ -25,7 +25,7 @@
+@@ -19,13 +19,14 @@
+     tuple val(meta), path("*.bai"),     emit: bai,   optional: true
+     tuple val(meta), path("*.metrics"), emit: metrics
+     path "versions.yml",                emit: versions
++    path '.command.{sh,log}',           emit: command_files
+ 
+     when:
+     task.ext.when == null || task.ext.when
  
      script:
      def args = task.ext.args ?: ''
@@ -26,7 +33,7 @@ Changes in 'gatk4/markduplicates/main.nf':
      def input_list = bam.collect{"--INPUT $it"}.join(' ')
      def reference = fasta ? "--REFERENCE_SEQUENCE ${fasta}" : ""
  
-@@ -38,20 +38,29 @@
+@@ -38,20 +39,29 @@
      """
      gatk --java-options "-Xmx${avail_mem}M" MarkDuplicates \\
          $input_list \\

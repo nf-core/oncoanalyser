@@ -19,8 +19,8 @@ workflow PAVE_ANNOTATION {
     genome_fasta           // channel: [mandatory] /path/to/genome_fasta
     genome_version         // channel: [mandatory] genome version
     genome_fai             // channel: [mandatory] /path/to/genome_fai
-    sage_pon               // channel: [mandatory] /path/to/sage_pon
     pon_artefacts          // channel: [optional]  /path/to/pon_artefacts
+    sage_pon               // channel: [mandatory] /path/to/sage_pon
     sage_blocklist_regions // channel: [mandatory] /path/to/sage_blocklist_regions
     sage_blocklist_sites   // channel: [mandatory] /path/to/sage_blocklist_sites
     clinvar_annotations    // channel: [mandatory] /path/to/clinvar_annotations
@@ -82,7 +82,6 @@ workflow PAVE_ANNOTATION {
         segment_mappability,
         driver_gene_panel,
         ensembl_data_resources,
-        gnomad_resource,
     )
 
     ch_versions = ch_versions.mix(PAVE_GERMLINE.out.versions)
@@ -130,8 +129,8 @@ workflow PAVE_ANNOTATION {
         genome_fasta,
         genome_version,
         genome_fai,
-        sage_pon,
         pon_artefacts,
+        sage_pon,
         clinvar_annotations,
         segment_mappability,
         driver_gene_panel,

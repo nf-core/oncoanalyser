@@ -1,7 +1,7 @@
-name: cobalt
+name: cobalt_run
 channels:
   - conda-forge
   - bioconda
   - defaults
 dependencies:
-  - bioconda::hmftools-cobalt=2.0
+  - bioconda::hmftools-cobalt=2.1

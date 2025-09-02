@@ -5,14 +5,14 @@
   </picture>
 </h1>
 
-[![GitHub Actions CI Status](https://github.com/nf-core/oncoanalyser/actions/workflows/ci.yml/badge.svg)](https://github.com/nf-core/oncoanalyser/actions/workflows/ci.yml)
+[![GitHub Actions CI Status](https://github.com/nf-core/oncoanalyser/actions/workflows/nf-test.yml/badge.svg)](https://github.com/nf-core/oncoanalyser/actions/workflows/nf-test.yml)
 [![GitHub Actions Linting Status](https://github.com/nf-core/oncoanalyser/actions/workflows/linting.yml/badge.svg)](https://github.com/nf-core/oncoanalyser/actions/workflows/linting.yml)
 [![AWS CI](https://img.shields.io/badge/CI%20tests-full%20size-FF9900?labelColor=000000&logo=Amazon%20AWS)](https://nf-co.re/oncoanalyser/results)
 [![Cite with Zenodo](http://img.shields.io/badge/DOI-10.5281/zenodo.15189386-1073c8?labelColor=000000)](https://doi.org/10.5281/zenodo.15189386)
 [![nf-test](https://img.shields.io/badge/unit_tests-nf--test-337ab7.svg)](https://www.nf-test.com)
 
-[![Nextflow](https://img.shields.io/badge/version-%E2%89%A524.04.2-green?style=flat&logo=nextflow&logoColor=white&color=%230DC09D&link=https%3A%2F%2Fnextflow.io)](https://www.nextflow.io/)
-[![nf-core template version](https://img.shields.io/badge/nf--core_template-3.3.1-green?style=flat&logo=nfcore&logoColor=white&color=%2324B064&link=https%3A%2F%2Fnf-co.re)](https://github.com/nf-core/tools/releases/tag/3.3.1)
+[![Nextflow](https://img.shields.io/badge/version-%E2%89%A524.10.5-green?style=flat&logo=nextflow&logoColor=white&color=%230DC09D&link=https%3A%2F%2Fnextflow.io)](https://www.nextflow.io/)
+[![nf-core template version](https://img.shields.io/badge/nf--core_template-3.3.2-green?style=flat&logo=nfcore&logoColor=white&color=%2324B064&link=https%3A%2F%2Fnf-co.re)](https://github.com/nf-core/tools/releases/tag/3.3.2)
 [![run with conda](http://img.shields.io/badge/run%20with-conda-3EB049?labelColor=000000&logo=anaconda)](https://docs.conda.io/en/latest/)
 [![run with docker](https://img.shields.io/badge/run%20with-docker-0db7ed?labelColor=000000&logo=docker)](https://www.docker.com/)
 [![run with singularity](https://img.shields.io/badge/run%20with-singularity-1d355c.svg?labelColor=000000)](https://sylabs.io/docs/)
@@ -25,27 +25,35 @@
 
 ## Introduction
 
-**nf-core/oncoanalyser** is a Nextflow pipeline for the comprehensive analysis of cancer genomes and transcriptomes
+**nf-core/oncoanalyser** is a Nextflow pipeline for the comprehensive analysis of cancer DNA and RNA sequencing data
 using the [WiGiTS](https://github.com/hartwigmedical/hmftools) toolkit from the Hartwig Medical Foundation. The pipeline
 supports a wide range of experimental setups:
 
-- FASTQ, BAM, or CRAM input files
-- WGS (whole genome sequencing), WTS (whole transcriptome sequencing), and targeted / panel sequencing (built-in support
-  for the [TSO500
-  panel](https://sapac.illumina.com/products/by-type/clinical-research-products/trusight-oncology-500.html) with other
-  panels and exome requiring [panel reference data
-  generation](https://github.com/hartwigmedical/hmftools/blob/master/pipeline/README_TARGETED.md))
-- Paired tumor / normal and tumor-only sample setups, donor sample support for further normal subtraction (e.g. for
-  patients with bone marrow transplants or other contaminants in the tumor)
+- FASTQ, BAM, and / or CRAM input files
+- WGS (whole genome sequencing), WTS (whole transcriptome sequencing), and targeted / panel sequencing<sup>1</sup>
+- Paired tumor / normal and tumor-only samples, and support for donor samples for further normal subtraction
+- Purity estimate for longitudinal samples using genomic features of the primary sample from the same patient<sup>2</sup>
 - UMI (unique molecular identifier) processing supported for DNA sequencing data
 - Most GRCh37 and GRCh38 reference genome builds
+
+<sub><sup>1</sup> built-in support for the [TSO500
+panel](https://www.illumina.com/products/by-type/clinical-research-products/trusight-oncology-500.html) with other
+panels and exomes requiring [creation of custom panel reference
+data](https://nf-co.re/oncoanalyser/usage#custom-panels)</sub>
+<br />
+<sub><sup>2</sup> for example a primary WGS tissue biospy and longitudinal low-pass WGS ccfDNA sample taken from the
+same patient</sub>
 
 ## Pipeline overview
 
 <p align="center"><img src="docs/images/oncoanalyser_pipeline.png"></p>
 
-The pipeline mainly uses tools from [WiGiTS](https://github.com/hartwigmedical/hmftools), as well as some external
-tools. Due to the limitations of panel data, certain tools (indicated with `*` below) do not run in `targeted` mode.
+The pipeline mainly uses tools from [WiGiTS](https://github.com/hartwigmedical/hmftools), as well as some other external
+tools. There are [several workflows available](https://nf-co.re/oncoanalyser/usage#introduction) in `oncoanalyser` and
+the tool information below primarily relates to the `wgts` and `targeted` analysis modes.
+
+> [!NOTE]
+> Due to the limitations of panel data, certain tools (indicated with `*` below) do not run in `targeted` mode.
 
 - Read alignment: [BWA-MEM2](https://github.com/bwa-mem2/bwa-mem2) (DNA), [STAR](https://github.com/alexdobin/STAR) (RNA)
 - Read post-processing: [REDUX](https://github.com/hartwigmedical/hmftools/tree/master/redux) (DNA), [Picard MarkDuplicates](https://gatk.broadinstitute.org/hc/en-us/articles/360037052812-MarkDuplicates-Picard) (RNA)
@@ -62,6 +70,10 @@ tools. Due to the limitations of panel data, certain tools (indicated with `*` b
 - Tissue of origin prediction: [CUPPA](https://github.com/hartwigmedical/hmftools/tree/master/cuppa)\*
 - Pharmacogenomics: [PEACH](https://github.com/hartwigmedical/hmftools/tree/master/peach)
 - Summary report: [ORANGE](https://github.com/hartwigmedical/hmftools/tree/master/orange), [linxreport](https://github.com/umccr/linxreport)
+
+For the `purity_estimate` mode, several of the above tools are run with adjusted configuration in addition to the following.
+
+- Tumor fraction estimation: [WISP](https://github.com/hartwigmedical/hmftools/tree/master/wisp)
 
 ## Usage
 
@@ -82,7 +94,7 @@ Launch `oncoanalyser`:
 ```bash
 nextflow run nf-core/oncoanalyser \
   -profile <docker/singularity/.../institute> \
-  -revision 2.1.0 \
+  -revision 2.2.0 \
   --mode <wgts/targeted> \
   --genome <GRCh37_hmf/GRCh38_hmf> \
   --input samplesheet.csv \

@@ -5,3 +5,5 @@ channels:
   - defaults
 dependencies:
   - bioconda::hmftools-cuppa=2.3.2
+  - conda-forge::r-stringr>=1.5
+  - conda-forge::r-stringi>=1.8

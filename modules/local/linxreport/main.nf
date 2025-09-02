@@ -13,6 +13,7 @@ process LINXREPORT {
     output:
     tuple val(meta), path('*_linx.html'), emit: html
     path 'versions.yml'                 , emit: versions
+    path '.command.*'                   , emit: command_files
 
     when:
     task.ext.when == null || task.ext.when

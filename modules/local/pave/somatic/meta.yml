@@ -38,13 +38,13 @@ input:
       type: file
       description: Reference genome assembly fai file
       pattern: "*.{fai}"
+  - pon_artefacts:
+      type: file
+      description: Taregeted sequencing PON artefacts file (optional)
   - sage_pon:
       type: file
       description: SAGE PON file
       pattern: "*.{tsv.gz}"
-  - pon_artefacts:
-      type: file
-      description: Taregeted sequencing PON artefacts file (optional)
   - clinvar_annotations:
       type: file
       description: ClinVar annotations VCF file
@@ -80,5 +80,8 @@ output:
       type: file
       description: File containing software versions
       pattern: "versions.yml"
+  - command_files:
+      type: list
+      description: List of command files
 authors:
   - "@scwatts"

@@ -16,50 +16,43 @@ input:
       type: map
       description: |
         Groovy Map containing sample information
-        e.g. [id: 'sample_id', tumor_id: 'tumor_name', normal_id: 'normal_name']
+        e.g. [id: 'sample_id']
   - tumor_bam:
       type: file
       description: Tumor BAM file (optional)
-      pattern: "*.{bam}"
-  - normal_bam:
-      type: file
-      description: Normal BAM file (optional)
       pattern: "*.{bam}"
   - tumor_bai:
       type: file
       description: Tumor BAI file (optional)
       pattern: "*.{bai}"
+  - normal_bam:
+      type: file
+      description: Normal BAM file (optional)
+      pattern: "*.{bam}"
   - normal_bai:
       type: file
       description: Normal BAI file (optional)
       pattern: "*.{bai}"
-  - tumor_wgs_metrics_dir:
-      type: directory
-      description: Tumor WGS metrics directory (optional)
-  - normal_wgs_metrics:
-      type: directory
-      description: Normal WGS metrics directory (optional)
-  - cobalt_dir:
-      type: directory
-      description: COBALT output directory
-  - purple_dir:
-      type: directory
-      description: PURPLE output directory (optional)
-  - genome_ver:
-      type: string
-      description: Reference genome version
 output:
   - meta:
       type: map
       description: |
         Groovy Map containing sample information
-        e.g. [id: 'sample_id', tumor_id: 'tumor_name', normal_id: 'normal_name']
-  - teal_dir:
-      type: directory
-      description: TEAL output directory
+        e.g. [id: 'sample_id']
+  - tumor_teal_bam:
+      type: list
+      description: Tumor TEAL BAM and BAI file
+      pattern: "*.{bam,bai}"
+  - normal_teal_bam:
+      type: list
+      description: Normal TEAL BAM and BAI file
+      pattern: "*.{bam,bai}"
   - versions:
       type: file
       description: File containing software versions
       pattern: "versions.yml"
+  - command_files:
+      type: list
+      description: List of command files
 authors:
   - "@scwatts"

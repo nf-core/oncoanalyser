@@ -4,8 +4,8 @@ process LINX_SOMATIC {
 
     conda "${moduleDir}/environment.yml"
     container "${ workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container ?
-        'https://depot.galaxyproject.org/singularity/hmftools-linx:2.0.2--hdfd78af_0' :
-        'biocontainers/hmftools-linx:2.0.2--hdfd78af_0' }"
+        'https://depot.galaxyproject.org/singularity/hmftools-linx:2.1--hdfd78af_0' :
+        'biocontainers/hmftools-linx:2.1--hdfd78af_0' }"
 
     input:
     tuple val(meta), path(purple_dir)
@@ -17,6 +17,7 @@ process LINX_SOMATIC {
     output:
     tuple val(meta), path('linx_somatic/'), emit: annotation_dir
     path 'versions.yml'                   , emit: versions
+    path '.command.*'                     , emit: command_files
 
     when:
     task.ext.when == null || task.ext.when
@@ -25,6 +26,8 @@ process LINX_SOMATIC {
     def args = task.ext.args ?: ''
 
     def xmx_mod = task.ext.xmx_mod ?: 0.75
+
+    def log_level_arg = task.ext.log_level ? "-log_level ${task.ext.log_level}" : ''
 
     """
     linx \\
@@ -39,6 +42,7 @@ process LINX_SOMATIC {
         -driver_gene_panel ${driver_gene_panel} \\
         -write_vis_data \\
         -write_neo_epitopes \\
+        ${log_level_arg} \\
         -output_dir linx_somatic/
 
     cat <<-END_VERSIONS > versions.yml
@@ -50,6 +54,7 @@ process LINX_SOMATIC {
     stub:
     """
     mkdir linx_somatic/
+
     touch linx_somatic/placeholder
 
     echo -e '${task.process}:\\n  stub: noversions\\n' > versions.yml
