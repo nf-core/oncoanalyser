@@ -3,12 +3,10 @@ nextflow_pipeline {
     name "Test pipeline"
     script "../main.nf"
     tag "pipeline"
-    tag "cicd"
 
-    profile "test_stub"
-    options "-stub"
+    profile "test"
 
-    test("-profile test_stub") {
+    test("-profile test") {
 
         when {
             params {

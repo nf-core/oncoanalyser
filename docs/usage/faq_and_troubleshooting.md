@@ -19,7 +19,6 @@
 - [Placing `oncoanalyser` CLI arguments into a configuration
   file](#placing-oncoanalyser-cli-arguments-into-a-configuration-file)
 - [Errors and navigating the `work/` directory](#errors-and-navigating-the-work-directory)
-- [Saving logs from the `work/` directory](#saving-logs-from-the-work-directory)
 - [Resuming runs in Google Batch](#resuming-runs-in-google-batch)
 
 ## How to start from CRAM?
