@@ -57,7 +57,7 @@ jobs:
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
-          pip install git+https://github.com/nf-core/tools.git@dev
+          pip install git+https://github.com/nf-core/tools.git@55b4607
 
       - name: Make a cache directory for the container images
         run: |
