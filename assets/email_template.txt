@@ -4,7 +4,7 @@
   |\\ | |__  __ /  ` /  \\ |__) |__         }  {
   | \\| |       \\__, \\__/ |  \\ |___     \\`-._,-`-,
                                         `._,._,'
-  nf-core/oncoanalyser v${version}
+  nf-core/oncoanalyser ${version}
 ----------------------------------------------------
 Run Name: $runName
 
