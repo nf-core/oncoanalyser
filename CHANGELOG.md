@@ -3,6 +3,10 @@
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/) and this project mostly adheres to
 [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [dev]
+
+- [246](https://github.com/nf-core/oncoanalyser/pull/246) - Post-release bump
+
 ## [[2.2.0](https://github.com/nf-core/oncoanalyser/releases/tag/2.2.0)] Royal Spoonbill - 2025-08-02
 
 - [241](https://github.com/nf-core/oncoanalyser/pull/241) - Apply minor fixes and updates
