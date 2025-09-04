@@ -136,6 +136,13 @@ class Constants {
         LANE,
         LIBRARY_ID,
         LONGITUDINAL_SAMPLE,
+        SEQUENCE_PLATFORM,
+    }
+
+    static enum SequencePlatform {
+        ILLUMINA,
+        ROCHE_SBX,
+        ULTIMA,
     }
 
     static Map PLACEHOLDER_META = [meta_placeholder: null]

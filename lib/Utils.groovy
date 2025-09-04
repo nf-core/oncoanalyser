@@ -62,7 +62,32 @@ class Utils {
                             meta[Constants.InfoField.CANCER_TYPE] = info_data[Constants.InfoField.CANCER_TYPE]
                         }
 
+                        if (info_data.containsKey(Constants.InfoField.SEQUENCE_PLATFORM)) {
+
+                            def sequence_platform = Utils.getEnumFromString(info_data[Constants.InfoField.SEQUENCE_PLATFORM], Constants.SequencePlatform)
+                            if (!sequence_platform) {
+                                def sequence_platform_str = Utils.getEnumNames(Constants.SequencePlatform).join('\n  - ')
+                                log.error "received invalid sequence platform: '${info_data[Constants.InfoField.SEQUENCE_PLATFORM]}'. Valid options are:\n  - ${sequence_platform_str}"
+                                Nextflow.exit(1)
+                            }
+
+                            if (meta.containsKey[Constants.InfoField.SEQUENCE_PLATFORM]) {
+                                if (meta[Constants.InfoField.SEQUENCE_PLATFORM] != sequence_platform) {
+                                    log.error "got multiple sequence platforms for ${group_id}: ${sequence_platform}"
+                                    Nextflow.exit(1)
+                                }
+                            } else {
+                                meta[Constants.InfoField.SEQUENCE_PLATFORM] = sequence_platform
+                            }
+
+                        }
+
                     }
+
+
+                    // NOTE(SW): further checks relating to sequence platform e.g. disallow FASTQ with Ultima
+                    // NOTE(SW): consider setting default sequence platform as Illumina to maintain UX
+
 
                     // Sample type
                     def sample_type_enum = Utils.getEnumFromString(it.sample_type, Constants.SampleType)
@@ -130,17 +155,7 @@ class Utils {
                             Nextflow.exit(1)
                         }
 
-                        def fastq_entries = it.filepath.tokenize(';')
-
-                        if (fastq_entries.size() != 2) {
-                            log.error "expected exactly 2 FASTQ files delimited by ';' (i.e. '<fwd>;<rev>') but found ${fastq_entries.size} " +
-                                " files for ${group_id} ${sample_type_enum}/${sequence_type_enum} but found ${fastq_entries.size} files"
-                            Nextflow.exit(1)
-                        }
-
-                        def (fwd, rev) = fastq_entries
                         def fastq_key = [info_data[Constants.InfoField.LIBRARY_ID], info_data[Constants.InfoField.LANE]]
-
                         if (meta_sample.containsKey(fastq_key)) {
                             log.error "got duplicate lane + library_id data for ${group_id} ${sample_type_enum}/${sequence_type_enum}: ${fastq_key}"
                             Nextflow.exit(1)
@@ -150,7 +165,30 @@ class Utils {
                             meta_sample[filetype_enum] = [:]
                         }
 
-                        meta_sample[filetype_enum][fastq_key] = ['fwd': Utils.getFileObject(fwd), 'rev': Utils.getFileObject(rev)]
+                        def fastq_entries = it.filepath.tokenize(';')
+
+                        if (meta[Constants.InfoField.SEQUENCE_PLATFORM] === Constants.InfoField.SEQUENCE_PLATFORM.ILLUMINA) {
+
+                          if (fastq_entries.size() != 2) {
+                              log.error "expected exactly 2 FASTQ files delimited by ';' (i.e. '<fwd>;<rev>') but found ${fastq_entries.size} " +
+                                  " files for ${group_id} ${sample_type_enum}/${sequence_type_enum}"
+                              Nextflow.exit(1)
+                          }
+
+                          def (fwd, rev) = fastq_entries
+                          meta_sample[filetype_enum][fastq_key] = ['fwd': Utils.getFileObject(fwd), 'rev': Utils.getFileObject(rev)]
+
+                        } else if (meta[Constants.InfoField.SEQUENCE_PLATFORM] === Constants.InfoField.SEQUENCE_PLATFORM.ROCHE_SBX) {
+
+                          if (fastq_entries.size() != 1) {
+                              log.error "expected exactly 1 FASTQ file delimited by but found ${fastq_entries.size} " +
+                                  " files for ${group_id} ${sample_type_enum}/${sequence_type_enum}"
+                              Nextflow.exit(1)
+                          }
+
+                          meta_sample[filetype_enum][fastq_key] = fastq_entries[0]
+
+                        }
 
                     } else {
 
