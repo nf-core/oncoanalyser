@@ -48,7 +48,9 @@ process REDUX {
         -Xmx${Math.round(task.memory.bytes * xmx_mod)} \\
         ${args} \\
         -sample ${meta.sample_id} \\
+        -sequence_platform ${meta.sequence_platform} \\
         ${form_consensus_arg} \\
+        ${umi_args} \\
         ${umi_args} \\
         -input_bam ${bams.join(',')} \\
         -output_bam ./${meta.sample_id}.redux.bam \\

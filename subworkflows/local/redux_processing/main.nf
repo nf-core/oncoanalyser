@@ -97,6 +97,7 @@ workflow REDUX_PROCESSING {
                 id: "${meta.group_id}_${sample_id}",
                 sample_id: sample_id,
                 sample_type: sample_type,
+                sequence_platform: meta.sequence_platform,
             ]
 
             return [meta_redux, bams, bais]
