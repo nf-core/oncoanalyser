@@ -134,7 +134,7 @@ class Utils {
 
                         if (fastq_entries.size() != 2) {
                             log.error "expected exactly 2 FASTQ files delimited by ';' (i.e. '<fwd>;<rev>') but found ${fastq_entries.size} " +
-                                " files for ${group_id} ${sample_type_enum}/${sequence_type_enum} but found ${fastq_entries.size} files"
+                                " files for ${group_id} ${sample_type_enum}/${sequence_type_enum}"
                             Nextflow.exit(1)
                         }
 
