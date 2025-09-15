@@ -4,8 +4,8 @@ process NEO_FINDER {
 
     conda "${moduleDir}/environment.yml"
     container "${ workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container ?
-        'https://depot.galaxyproject.org/singularity/hmftools-neo:1.2--hdfd78af_1' :
-        'biocontainers/hmftools-neo:1.2--hdfd78af_1' }"
+        'https://depot.galaxyproject.org/singularity/hmftools-neo:1.2.1--hdfd78af_0' :
+        'biocontainers/hmftools-neo:1.2.1--hdfd78af_0' }"
 
     input:
     tuple val(meta), path(purple_dir), path(linx_annotation_dir)
@@ -17,6 +17,7 @@ process NEO_FINDER {
     output:
     tuple val(meta), path('neo_finder/'), emit: neo_finder_dir
     path 'versions.yml'                 , emit: versions
+    path '.command.*'                   , emit: command_files
 
     when:
     task.ext.when == null || task.ext.when
@@ -25,6 +26,8 @@ process NEO_FINDER {
     def args = task.ext.args ?: ''
 
     def xmx_mod = task.ext.xmx_mod ?: 0.95
+
+    def log_level_arg = task.ext.log_level ? "-log_level ${task.ext.log_level}" : ''
 
     """
     mkdir -p neo_finder/
@@ -38,7 +41,7 @@ process NEO_FINDER {
         -ref_genome ${genome_fasta} \\
         -ref_genome_version ${genome_ver} \\
         -ensembl_data_dir ${ensembl_data_resources} \\
-        -log_debug \\
+        ${log_level_arg} \\
         -output_dir neo_finder/
 
     cat <<-END_VERSIONS > versions.yml
@@ -50,6 +53,7 @@ process NEO_FINDER {
     stub:
     """
     mkdir -p neo_finder/
+
     echo -e '${task.process}:\\n  stub: noversions\\n' > versions.yml
     """
 }

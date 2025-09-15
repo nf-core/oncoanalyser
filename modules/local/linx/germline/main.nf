@@ -4,8 +4,8 @@ process LINX_GERMLINE {
 
     conda "${moduleDir}/environment.yml"
     container "${ workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container ?
-        'https://depot.galaxyproject.org/singularity/hmftools-linx:2.0--hdfd78af_0' :
-        'biocontainers/hmftools-linx:2.0--hdfd78af_0' }"
+        'https://depot.galaxyproject.org/singularity/hmftools-linx:2.1--hdfd78af_0' :
+        'biocontainers/hmftools-linx:2.1--hdfd78af_0' }"
 
     input:
     tuple val(meta), path(sv_vcf)
@@ -16,6 +16,7 @@ process LINX_GERMLINE {
     output:
     tuple val(meta), path('linx_germline/'), emit: annotation_dir
     path 'versions.yml'                    , emit: versions
+    path '.command.*'                      , emit: command_files
 
     when:
     task.ext.when == null || task.ext.when
@@ -24,6 +25,8 @@ process LINX_GERMLINE {
     def args = task.ext.args ?: ''
 
     def xmx_mod = task.ext.xmx_mod ?: 0.75
+
+    def log_level_arg = task.ext.log_level ? "-log_level ${task.ext.log_level}" : ''
 
     """
     linx \\
@@ -35,6 +38,7 @@ process LINX_GERMLINE {
         -ref_genome_version ${genome_ver} \\
         -ensembl_data_dir ${ensembl_data_resources} \\
         -driver_gene_panel ${driver_gene_panel} \\
+        ${log_level_arg} \\
         -output_dir linx_germline/
 
     cat <<-END_VERSIONS > versions.yml
@@ -46,6 +50,7 @@ process LINX_GERMLINE {
     stub:
     """
     mkdir linx_germline/
+
     touch linx_germline/placeholder
 
     echo -e '${task.process}:\\n  stub: noversions\\n' > versions.yml

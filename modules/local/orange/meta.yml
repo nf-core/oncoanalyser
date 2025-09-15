@@ -13,7 +13,7 @@ input:
       type: map
       description: |
         Groovy Map containing sample information
-        e.g. [id: 'sample_id', tumor_id: 'tumor_name', normal_id: 'normal_name']
+        e.g. [id: 'sample_id']
   - bamtools_somatic_dir:
       type: directory
       description: BamTools somatic output directory
@@ -59,6 +59,9 @@ input:
   - cuppa_dir:
       type: directory
       description: CUPPA output directory (optional)
+  - peach_dir:
+      type: directory
+      description: PEACH output directory (optional)
   - isofox_dir:
       type: directory
       description: Isofox output directory (optional)
@@ -121,5 +124,8 @@ output:
       type: file
       description: File containing software versions
       pattern: "versions.yml"
+  - command_files:
+      type: list
+      description: List of command files
 authors:
   - "@scwatts"

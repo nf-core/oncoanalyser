@@ -4,8 +4,8 @@ process VIRUSINTERPRETER {
 
     conda "${moduleDir}/environment.yml"
     container "${ workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container ?
-        'https://depot.galaxyproject.org/singularity/hmftools-virus-interpreter:1.7--hdfd78af_0' :
-        'biocontainers/hmftools-virus-interpreter:1.7--hdfd78af_0' }"
+        'https://depot.galaxyproject.org/singularity/hmftools-virus-interpreter:1.7.1--hdfd78af_0' :
+        'biocontainers/hmftools-virus-interpreter:1.7.1--hdfd78af_0' }"
 
     input:
     tuple val(meta), path(virus_tsv), path(purple_dir), path(bamtools_somatic_dir)
@@ -16,6 +16,7 @@ process VIRUSINTERPRETER {
     output:
     tuple val(meta), path('virusinterpreter/'), emit: virusinterpreter_dir
     path 'versions.yml'                       , emit: versions
+    path '.command.*'                         , emit: command_files
 
     when:
     task.ext.when == null || task.ext.when
@@ -24,6 +25,8 @@ process VIRUSINTERPRETER {
     def args = task.ext.args ?: ''
 
     def xmx_mod = task.ext.xmx_mod ?: 0.95
+
+    def log_level_arg = task.ext.log_level ? "-log_level ${task.ext.log_level}" : ''
 
     """
     mkdir -p virusinterpreter/
@@ -38,6 +41,7 @@ process VIRUSINTERPRETER {
         -taxonomy_db_tsv ${taxonomy_db} \\
         -virus_reporting_db_tsv ${reporting_db} \\
         -virus_blacklisting_db_tsv ${blocklist_db} \\
+        ${log_level_arg} \\
         -output_dir virusinterpreter/
 
     cat <<-END_VERSIONS > versions.yml
@@ -49,6 +53,7 @@ process VIRUSINTERPRETER {
     stub:
     """
     mkdir -p virusinterpreter/
+
     touch virusinterpreter/${meta.sample_id}.virus.annotated.tsv
 
     echo -e '${task.process}:\\n  stub: noversions\\n' > versions.yml

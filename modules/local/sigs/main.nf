@@ -14,6 +14,7 @@ process SIGS {
     output:
     tuple val(meta), path('sigs/'), emit: sigs_dir
     path 'versions.yml'           , emit: versions
+    path '.command.*'             , emit: command_files
 
     when:
     task.ext.when == null || task.ext.when
@@ -22,6 +23,8 @@ process SIGS {
     def args = task.ext.args ?: ''
 
     def xmx_mod = task.ext.xmx_mod ?: 0.75
+
+    def log_level_arg = task.ext.log_level ? "-log_level ${task.ext.log_level}" : ''
 
     """
     mkdir -p sigs/
@@ -32,6 +35,7 @@ process SIGS {
         -sample ${meta.sample_id} \\
         -somatic_vcf_file ${smlv_vcf} \\
         -signatures_file ${signatures} \\
+        ${log_level_arg} \\
         -output_dir sigs/
 
     cat <<-END_VERSIONS > versions.yml
@@ -43,6 +47,7 @@ process SIGS {
     stub:
     """
     mkdir -p sigs/
+
     touch sigs/placeholder
 
     echo -e '${task.process}:\\n  stub: noversions\\n' > versions.yml

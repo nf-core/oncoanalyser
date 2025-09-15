@@ -4,8 +4,8 @@ process LILAC {
 
     conda "${moduleDir}/environment.yml"
     container "${ workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container ?
-        'https://depot.galaxyproject.org/singularity/hmftools-lilac:1.6--hdfd78af_1' :
-        'biocontainers/hmftools-lilac:1.6--hdfd78af_1' }"
+        'https://depot.galaxyproject.org/singularity/hmftools-lilac:1.7.1--hdfd78af_0' :
+        'biocontainers/hmftools-lilac:1.7.1--hdfd78af_0' }"
 
     input:
     tuple val(meta), path(normal_dna_bam), path(normal_dna_bai), path(tumor_dna_bam), path(tumor_dna_bai), path(tumor_rna_bam), path(tumor_rna_bai), path(purple_dir)
@@ -13,10 +13,12 @@ process LILAC {
     path genome_fai
     val genome_ver
     path lilac_resources, stageAs: 'lilac_resources'
+    val targeted_mode
 
     output:
     tuple val(meta), path('lilac/'), emit: lilac_dir
     path 'versions.yml'            , emit: versions
+    path '.command.*'              , emit: command_files
 
     when:
     task.ext.when == null || task.ext.when
@@ -26,6 +28,8 @@ process LILAC {
 
     def xmx_mod = task.ext.xmx_mod ?: 0.75
 
+    def log_level_arg = task.ext.log_level ? "-log_level ${task.ext.log_level}" : ''
+
     def sample_name = getSampleName(meta, tumor_dna_bam, normal_dna_bam)
 
     def normal_bam_arg = normal_dna_bam ? "-reference_bam ${normal_dna_bam}" : ''
@@ -33,6 +37,8 @@ process LILAC {
     def tumor_rna_bam_arg = tumor_rna_bam ? "-rna_bam ${tumor_rna_bam}" : ''
 
     def purple_dir_arg = purple_dir ? "-purple_dir ${purple_dir}" : ''
+
+    def freq_score_penalty = targeted_mode ? '0.0018' : '0.0009'
 
     """
     lilac \\
@@ -46,7 +52,9 @@ process LILAC {
         -ref_genome ${genome_fasta} \\
         -ref_genome_version ${genome_ver} \\
         -resource_dir ${lilac_resources} \\
+        -freq_score_penalty ${freq_score_penalty} \\
         -threads ${task.cpus} \\
+        ${log_level_arg} \\
         -output_dir lilac/
 
     cat <<-END_VERSIONS > versions.yml
@@ -58,6 +66,7 @@ process LILAC {
     stub:
     """
     mkdir -p lilac/
+
     touch lilac/placeholder
 
     echo -e '${task.process}:\\n  stub: noversions\\n' > versions.yml

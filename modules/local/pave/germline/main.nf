@@ -1,15 +1,11 @@
-// NOTE(SW): use of tumor sample name here is consistent with Pipeline5
-//  - https://github.com/hartwigmedical/pipeline5/blob/v5.33/cluster/src/main/java/com/hartwig/pipeline/tertiary/pave/PaveGermline.java#L36-L41
-//  - https://github.com/hartwigmedical/pipeline5/blob/v5.33/cluster/src/main/java/com/hartwig/pipeline/tertiary/pave/PaveArguments.java#L31-L43
-
 process PAVE_GERMLINE {
     tag "${meta.id}"
     label 'process_medium'
 
     conda "${moduleDir}/environment.yml"
     container "${ workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container ?
-        'https://depot.galaxyproject.org/singularity/hmftools-pave:1.7--hdfd78af_0' :
-        'biocontainers/hmftools-pave:1.7--hdfd78af_0' }"
+        'https://depot.galaxyproject.org/singularity/hmftools-pave:1.8--hdfd78af_1' :
+        'biocontainers/hmftools-pave:1.8--hdfd78af_1' }"
 
     input:
     tuple val(meta), path(sage_vcf), path(sage_tbi)
@@ -22,12 +18,12 @@ process PAVE_GERMLINE {
     path segment_mappability
     path driver_gene_panel
     path ensembl_data_resources
-    path gnomad_resource
 
     output:
-    tuple val(meta), path("*.vcf.gz")    , emit: vcf
-    tuple val(meta), path("*.vcf.gz.tbi"), emit: index
+    tuple val(meta), path('*.vcf.gz')    , emit: vcf
+    tuple val(meta), path('*.vcf.gz.tbi'), emit: index
     path 'versions.yml'                  , emit: versions
+    path '.command.*'                    , emit: command_files
 
     when:
     task.ext.when == null || task.ext.when
@@ -35,23 +31,15 @@ process PAVE_GERMLINE {
     script:
     def args = task.ext.args ?: ''
 
-    def xmx_mod = task.ext.xmx_mod ?: 0.75
-
-    def gnomad_args
-    if (genome_ver.toString() == '37') {
-        gnomad_args = "-gnomad_freq_file ${gnomad_resource}"
-    } else if (genome_ver.toString() == '38') {
-        gnomad_args = "-gnomad_freq_dir ${gnomad_resource}"
-    } else {
-        error "got bad genome version: ${genome_ver}"
-    }
+    def log_level_arg = task.ext.log_level ? "-log_level ${task.ext.log_level}" : ''
 
     """
     pave \\
-        -Xmx${Math.round(task.memory.bytes * xmx_mod)} \\
+        -Xmx${Math.round(task.memory.bytes * 0.95)} \\
         ${args} \\
         -sample ${meta.sample_id} \\
-        -vcf_file ${sage_vcf} \\
+        -input_vcf ${sage_vcf} \\
+        -output_vcf ${meta.sample_id}.pave.germline.vcf.gz \\
         -ref_genome ${genome_fasta} \\
         -ref_genome_version ${genome_ver} \\
         -clinvar_vcf ${clinvar_annotations} \\
@@ -60,21 +48,20 @@ process PAVE_GERMLINE {
         -ensembl_data_dir ${ensembl_data_resources} \\
         -blacklist_bed ${sage_blocklist_regions} \\
         -blacklist_vcf ${sage_blocklist_sites} \\
-        ${gnomad_args} \\
         -gnomad_no_filter \\
-        -read_pass_only \\
         -threads ${task.cpus} \\
+        ${log_level_arg} \\
         -output_dir ./
 
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":
-        pave: \$(pave -version | sed -n '/^Pave version / { s/^.* //p }')
+        pave: \$(pave -version | sed 's/^.* //')
     END_VERSIONS
     """
 
     stub:
     """
-    touch ${meta.sample_id}.sage.pave_germline.vcf.gz{,.tbi}
+    touch ${meta.sample_id}.pave.germline.vcf.gz{,.tbi}
 
     echo -e '${task.process}:\\n  stub: noversions\\n' > versions.yml
     """

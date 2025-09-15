@@ -17,11 +17,11 @@ input:
       type: map
       description: |
         Groovy Map containing sample information
-        e.g. [id: 'sample_id', tumor_id: 'tumor_name', normal_id: 'normal_name']
-  - amber:
+        e.g. [id: 'sample_id']
+  - amber_dir:
       type: directory
       description: AMBER output directory
-  - cobalt:
+  - cobalt_dir:
       type: directory
       description: COBALT output directory
   - sv_tumor_vcf:
@@ -103,7 +103,7 @@ output:
       type: map
       description: |
         Groovy Map containing sample information
-        e.g. [id: 'sample_id', tumor_id: 'tumor_name', normal_id: 'normal_name']
+        e.g. [id: 'sample_id']
   - purple_dir:
       type: directory
       description: PURPLE output directory
@@ -111,5 +111,8 @@ output:
       type: file
       description: File containing software versions
       pattern: "versions.yml"
+  - command_files:
+      type: list
+      description: List of command files
 authors:
   - "@scwatts"

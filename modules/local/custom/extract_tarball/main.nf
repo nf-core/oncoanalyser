@@ -11,6 +11,7 @@ process CUSTOM_EXTRACTTARBALL {
 
     output:
     path "${meta.id}/", emit: extracted_dir
+    path '.command.*' , emit: command_files
 
     when:
     task.ext.when == null || task.ext.when

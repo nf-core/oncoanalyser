@@ -3,7 +3,8 @@
 ## Introduction
 
 This document describes the output produced by the pipeline. The directories listed below will be created in the results
-directory after the pipeline has finished. All paths are relative to the top-level results directory.
+directory for a typical WGTS analysis after the pipeline has finished. All paths are relative to the top-level results
+directory.
 
 ```tree
 output/
@@ -13,17 +14,21 @@ output/
 │   ├── amber/
 │   ├── bamtools/
 │   ├── chord/
+│   ├── cider/
 │   ├── cobalt/
 │   ├── cuppa/
 │   ├── esvee/
 │   ├── isofox/
 │   ├── lilac/
 │   ├── linx/
+│   ├── logs/
 │   ├── orange/
 │   ├── pave/
+│   ├── peach/
 │   ├── purple/
 │   ├── sage/
 │   ├── sigs/
+│   ├── teal/
 │   ├── virusbreakend/
 │   └── virusinterpreter/
 │  
@@ -59,18 +64,26 @@ output/
 - [Oncoviral detection](#oncoviral-detection)
   - [VIRUSBreakend](#virusbreakend) - Viral content and integration calling
   - [VirusInterpreter](#virusinterpreter) - Oncoviral calling post-processing
+- [Telomere characterisation](#telomere-characterisation)
+  - [TEAL](#teal) - Telomere characterisation
 - [Immune analysis](#immune-analysis)
   - [LILAC](#lilac) - HLA typing
+  - [CIDER](#cider) - IG/TCR CDR3 identification
   - [NEO](#neo) - Neoepitope prediction
-- [HRD status prediction](#hrd-status-prediction)
-  - [CHORD](#chord) - HRD status prediction
 - [Mutational signature fitting](#mutational-signature-fitting)
   - [SIGS](#sigs) - Mutational signature fitting
+- [HRD status prediction](#hrd-status-prediction)
+  - [CHORD](#chord) - HRD status prediction
 - [Tissue of origin prediction](#tissue-of-origin-prediction)
   - [CUPPA](#cuppa) - Tissue of origin prediction
+- [Pharmacogenomics](#pharmacogenomics)
+  - [PEACH](#peach) - Pharmacogenomic assessment
+- [Tumor fraction estimate](#tumor-fraction-estimate)
+  - [WISP](#wisp) - Tumor fraction estimate for longitudinal samples
 - [Report generation](#report-generation)
   - [ORANGE](#orange) - Summary report
   - [linxreport](#linxreport) - Interactive LINX report
+- [Logs](#logs) - Run command and log files per tool/process
 - [Pipeline information](#pipeline-information) - Workflow execution metrics
 
 ### Read alignment
@@ -146,12 +159,10 @@ _Picard MarkDuplicates is only run on RNA alignments_
 <summary>Output files</summary>
 
 - `<group_id>/sage/append/`
-
   - `<tumor_dna_id>.sage.append.vcf.gz`: Tumor DNA sample small variant VCF with RNA data appended.
   - `<normal_dna_id>.sage.append.vcf.gz`: Normal DNA sample small variant VCF with RNA data appended.
 
 - `<group_id>/sage/somatic/`
-
   - `<normal_dna_id>.sage.bqr.png`: Normal DNA sample base quality recalibration metrics plot.
   - `<normal_dna_id>.sage.bqr.tsv`: Normal DNA sample base quality recalibration metrics.
   - `<tumor_dna_id>.sage.bqr.png`: Tumor DNA sample base quality recalibration metrics plot.
@@ -201,7 +212,6 @@ information with regards to transcript and coding effects.
 <summary>Output files</summary>
 
 - `<group_id>/esvee/prep/`
-
   - `<tumor_dna_id>.esvee.prep.bam`: Tumor DNA sample BAM with candidate SV reads.
   - `<tumor_dna_id>.esvee.prep.bam.bai`: Tumor DNA sample BAM index.
   - `<tumor_dna_id>.esvee.prep.disc_stats.tsv`: Tumor DNA sample discordant reads stats.
@@ -211,7 +221,6 @@ information with regards to transcript and coding effects.
   - `<normal_dna_id>.esvee.prep.bam.bai`: Tumor DNA sample BAM index.
 
 - `<group_id>/esvee/assemble/`
-
   - `<tumor_dna_id>.esvee.assembly.tsv`: Tumor DNA sample breakend assemblies.
   - `<tumor_dna_id>.esvee.alignment.tsv`: Tumor DNA sample assemblies realigned to the reference genome.
   - `<tumor_dna_id>.esvee.breakend.tsv`: Tumor DNA sample breakends.
@@ -220,7 +229,6 @@ information with regards to transcript and coding effects.
   - `<tumor_dna_id>.esvee.raw.vcf.gz.tbi`: Tumor DNA sample VCF with candidate breakends.
 
 - `<group_id>/esvee/depth_annotation/`
-
   - `<tumor_dna_id>.esvee.ref_depth.vcf.gz`: Tumor DNA sample VCF annotated with normal sample read depths.
   - `<tumor_dna_id>.esvee.ref_depth.vcf.gz.tbi`: Tumor DNA sample VCF index.
 
@@ -322,7 +330,6 @@ purity/ploidy and annotates both small and structural variant calls with copy-nu
 <summary>Output files</summary>
 
 - `<group_id>/linx/germline_annotations/`
-
   - `linx.version`: LINX version file.
   - `<tumor_dna_id>.linx.germline.breakend.tsv`: Normal DNA sample breakend data.
   - `<tumor_dna_id>.linx.germline.clusters.tsv`: Normal DNA sample clustered events.
@@ -332,7 +339,6 @@ purity/ploidy and annotates both small and structural variant calls with copy-nu
   - `<tumor_dna_id>.linx.germline.svs.tsv`: Normal DNA sample structural variants.
 
 - `<group_id>/linx/somatic_annotations/`
-
   - `linx.version`: LINX version file.
   - `<tumor_dna_id>.linx.breakend.tsv`: Tumor DNA sample breakend data.
   - `<tumor_dna_id>.linx.clusters.tsv`: Tumor DNA sample clustered events.
@@ -404,6 +410,27 @@ transcripts, identify novel splice junctions, and caller fusions.
 [VirusInterpreter](https://github.com/hartwigmedical/hmftools/tree/master/virus-interpreter) performs post-processing
 for VIRUSBreakend calls to provide higher-level interpretation of data.
 
+### Telomere characterisation
+
+#### TEAL
+
+<details markdown="1">
+<summary>Output files</summary>
+
+- `<group_id>/teal/`
+  - `<normal_dna_id>.teal.telbam.bam`: Normal DNA sample BAM with telomeric fragments.
+  - `<normal_dna_id>.teal.telbam.bam.bai`: Normal DNA sample BAM index.
+  - `<normal_dna_id>.teal.tellength.tsv`: Normal DNA sample telomeric content and length estimate.
+  - `<tumor_dna_id>.teal.breakend.tsv.gz`: Tumor DNA sample telomeric rearrangements.
+  - `<tumor_dna_id>.teal.telbam.bam`: Tumor DNA sample BAM with telomeric fragments.
+  - `<tumor_dna_id>.teal.telbam.bam.bai`: Tumor DNA sample BAM index.
+  - `<tumor_dna_id>.teal.tellength.tsv`: Tumor DNA sample telomeric content and length estimate.
+
+</details>
+
+[TEAL](https://github.com/hartwigmedical/hmftools/tree/master/teal) measures telomere content, and estimates telomeric
+length based on WGS BAM input.
+
 ### Immune analysis
 
 #### LILAC
@@ -422,17 +449,32 @@ for VIRUSBreakend calls to provide higher-level interpretation of data.
 (copy-number alterations, somatic mutations) in the tumor sample. Analysis can also incorporate RNA data as an indirect
 measurement of allele expression.
 
+#### CIDER
+
+<details markdown="1">
+<summary>Output files</summary>
+
+- `<group_id>/cider/`
+  - `<tumor_dna_id|tumor_rna_id>.cider.bam`: Tumor DNA or RNA read alignments overlapping anchor sites.
+  - `<tumor_dna_id|tumor_rna_id>.cider.blastn_match.tsv.gz`: Tumor DNA or RNA BLASTn hits of sequences.
+  - `<tumor_dna_id|tumor_rna_id>.cider.layout.gz`: Tumor DNA or RNA read layout of each locus.
+  - `<tumor_dna_id|tumor_rna_id>.cider.locus_stats.tsv`: Tumor DNA or RNA locus statistics and summary file.
+  - `<tumor_dna_id|tumor_rna_id>.cider.vdj.tsv.gz`: Tumor DNA or RNA annotated VDJ sequences.
+
+</details>
+
+[CIDER](https://github.com/hartwigmedical/hmftools/tree/master/cider) determines a comprehensive list of CDR3 sequences
+for each of the IG and TCR loci including an abundance estimate.
+
 #### NEO
 
 <details markdown="1">
 <summary>Output files</summary>
 
 - `<group_id>/neo/finder/`
-
   - `<tumor_dna_id>.neo_data.tsv`: Tumor sample neoepitope candidates.
 
 - `<group_id>/neo/annotated_fusions/`
-
   - `<tumor_dna_id>.isf.neoepitope.tsv`: Tumor sample annotated Isofox fusions.
 
 - `<group_id>/neo/scorer/`
@@ -494,6 +536,48 @@ signatures to tumor sample data.
 [CUPPA](https://github.com/hartwigmedical/hmftools/tree/master/cuppa) predicts tissue of origin for a given tumor sample
 using DNA and/or RNA features generated by upstream WiGiTS components.
 
+### Pharmacogenomics
+
+#### PEACH
+
+<details markdown="1">
+<summary>Output files</summary>
+
+- `<group_id>/peach/`
+  - `<normal_dna_id>.peach.events.tsv`: Normal DNA sample variant events.
+  - `<normal_dna_id>.peach.gene.events.tsv`: Normal DNA sample variant events (linked by gene).
+  - `<normal_dna_id>.peach.haplotypes.all.tsv`: Normal DNA sample all haplotypes.
+  - `<normal_dna_id>.peach.haplotypes.best.tsv`: Normal DNA sample best haplotypes.
+  - `<normal_dna_id>.peach.qc.tsv`: PEACH QC file.
+
+</details>
+
+[PEACH](https://github.com/hartwigmedical/hmftools/tree/master/peach) infers haplotypes for interpretation in a
+pharmacogenomic context.
+
+### Tumor fraction estimate
+
+#### WISP
+
+<details markdown="1">
+<summary>Output files</summary>
+
+- `<group_id>/wisp/`
+  - `<longitudinal_id>.cn_gc_ratio_fit.png`: Longitudinal sample copy number GC ratio fit.
+  - `<subject_id>_<longitudinal_id>.wisp.amber_loh.tsv`: Longitudinal sample LOH sites used for tumor fraction estimation.
+  - `<subject_id>_<longitudinal_id>.wisp.cn_plot_calcs.tsv`: Longitudinal sample copy number fit coefficients.
+  - `<subject_id>_<longitudinal_id>.wisp.cn_segments.tsv`: Longitudinal sample copy number segments.
+  - `<subject_id>_<longitudinal_id>.wisp.fragment_length.tsv`: Longitudinal sample fragment lengths stats.
+  - `<subject_id>_<longitudinal_id>.wisp.somatic_peak.tsv`: Longitudinal sample implied tumor fraction per somatic variant.
+  - `<subject_id>_<longitudinal_id>.wisp.somatic_variants.tsv`: Longitudinal sample counts and filtering rules per variant used in the SNV tumor fraction estimate.
+  - `<subject_id>_<longitudinal_id>.wisp.summary.tsv`: Longitudinal sample summary.
+
+</details>
+
+[WISP](https://github.com/hartwigmedical/hmftools/tree/master/wisp) estimates tumor fraction in
+a given sample (typically ctDNA), guided by the biomarkers identified prior analysis of the same
+patient (typically a primary tissue biopsy).
+
 ### Report generation
 
 #### ORANGE
@@ -521,6 +605,20 @@ hmftool components into a single static PDF report.
 </details>
 
 [linxreport](https://github.com/umccr/linxreport) generates an interactive report containing LINX annotations and plots.
+
+### Logs
+
+<details markdown="1">
+<summary>Output files</summary>
+
+- `<group_id>/logs/`
+  - `<group_id>.<process_name>.command.sh`: Run command with tool arguments
+  - `<group_id>.<process_name>.command.out`: Standard output
+  - `<group_id>.<process_name>.command.err`: Standard error
+  - `<group_id>.<process_name>.command.log`: Combined standard output and error (may not exist for some executors)
+  </details>
+
+The logs directory stores the `.command.*` files for each tool from the Nextflow work directory
 
 ### Pipeline information
 

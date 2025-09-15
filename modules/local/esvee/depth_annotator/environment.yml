@@ -1,7 +1,0 @@
-name: esvee_depth_annotator
-channels:
-  - conda-forge
-  - bioconda
-  - defaults
-dependencies:
-  - bioconda::hmftools-esvee=1.0.3

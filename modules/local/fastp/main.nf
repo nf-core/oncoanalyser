@@ -17,6 +17,7 @@ process FASTP {
     output:
     tuple val(meta), path('*_R1.fastp.fastq.gz'), path('*_R2.fastp.fastq.gz'), emit: fastq
     path 'versions.yml'                                                      , emit: versions
+    path '.command.*'                                                        , emit: command_files
 
     when:
     task.ext.when == null || task.ext.when
@@ -24,12 +25,12 @@ process FASTP {
     script:
     def args = task.ext.args ?: ''
 
-    def split_by_lines_arg = max_fastq_records > 0 ? "--split_by_lines ${4 * max_fastq_records}" : ''
+    def split_by_lines_arg = max_fastq_records > 0 ? "--split_by_lines ${4 * max_fastq_records.toLong()}" : ''
 
     def umi_args_list = []
-    if (umi_location) umi_args_list.add("--umi_loc ${umi_location}")
-    if (umi_length) umi_args_list.add("--umi_len ${umi_length}")
-    if (umi_skip >= 0) umi_args_list.add("--umi_skip ${umi_skip}")
+    if (umi_location) { umi_args_list.add("--umi_loc ${umi_location}") }
+    if (umi_length) { umi_args_list.add("--umi_len ${umi_length}") }
+    if (umi_skip >= 0) { umi_args_list.add("--umi_skip ${umi_skip}") }
     def umi_args = umi_args_list ? '--umi ' + umi_args_list.join(' ') : ''
 
     """

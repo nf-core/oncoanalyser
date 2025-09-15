@@ -4,8 +4,8 @@ process ORANGE {
 
     conda "${moduleDir}/environment.yml"
     container "${ workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container ?
-        'https://depot.galaxyproject.org/singularity/hmftools-orange:3.8.1--hdfd78af_0' :
-        'biocontainers/hmftools-orange:3.8.1--hdfd78af_0' }"
+        'https://depot.galaxyproject.org/singularity/hmftools-orange:4.1--hdfd78af_0' :
+        'biocontainers/hmftools-orange:4.1--hdfd78af_0' }"
 
     input:
     tuple val(meta),
@@ -24,6 +24,7 @@ process ORANGE {
         path(sigs_dir),
         path(lilac_dir),
         path(cuppa_dir),
+        path(peach_dir),
         path(isofox_dir)
     val genome_ver
     path disease_ontology
@@ -41,6 +42,7 @@ process ORANGE {
     tuple val(meta), path('output/*.orange.pdf') , emit: pdf, optional: true
     tuple val(meta), path('output/*.orange.json'), emit: json, optional: true
     path 'versions.yml'                          , emit: versions
+    path '.command.*'                            , emit: command_files
 
     when:
     task.ext.when == null || task.ext.when
@@ -49,6 +51,8 @@ process ORANGE {
     def args = task.ext.args ?: ''
 
     def xmx_mod = task.ext.xmx_mod ?: 0.95
+
+    def log_level_arg = task.ext.log_level ? "-log_level ${task.ext.log_level}" : ''
 
     def pipeline_version_str = pipeline_version ?: 'not specified'
 
@@ -68,6 +72,7 @@ process ORANGE {
     def chord_dir_arg = chord_dir ? "-chord_dir ${chord_dir}" : ''
     def sigs_dir_arg = sigs_dir ? "-sigs_dir ${sigs_dir}" : ''
     def cuppa_dir_arg = cuppa_dir ? "-cuppa_dir ${cuppa_dir}" : ''
+    def peach_dir_arg = peach_dir ? "-peach_dir ${peach_dir}" : ''
     def plot_dir = linx_somatic_plot_dir.resolve('reportable/').toUriString().replaceAll('/$', '')
 
     def tumor_metrics_arg = "-tumor_metrics_dir ${bamtools_somatic_dir}"
@@ -147,6 +152,7 @@ process ORANGE {
         ${chord_dir_arg} \\
         ${sigs_dir_arg} \\
         ${cuppa_dir_arg} \\
+        ${peach_dir_arg} \\
         \\
         ${normal_id_arg} \\
         ${normal_metrics_arg} \\
@@ -167,6 +173,7 @@ process ORANGE {
         -ensembl_data_dir ${ensembl_data_resources} \\
         ${isofox_gene_distribution_arg} \\
         ${isofox_alt_sj_arg} \\
+        ${log_level_arg} \\
         -output_dir output/
 
     cat <<-END_VERSIONS > versions.yml
@@ -178,6 +185,7 @@ process ORANGE {
     stub:
     """
     mkdir -p output/
+
     touch output/${meta.tumor_id}.orange.json
     touch output/${meta.tumor_id}.orange.pdf
 

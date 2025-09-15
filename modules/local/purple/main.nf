@@ -4,11 +4,11 @@ process PURPLE {
 
     conda "${moduleDir}/environment.yml"
     container "${ workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container ?
-        'https://depot.galaxyproject.org/singularity/hmftools-purple:4.1--hdfd78af_0' :
-        'biocontainers/hmftools-purple:4.1--hdfd78af_0' }"
+        'https://depot.galaxyproject.org/singularity/hmftools-purple:4.2--hdfd78af_0' :
+        'biocontainers/hmftools-purple:4.2--hdfd78af_0' }"
 
     input:
-    tuple val(meta), path(amber), path(cobalt), path(sv_tumor_vcf), path(sv_tumor_tbi), path(sv_normal_vcf), path(sv_normal_tbi), path(smlv_tumor_vcf), path(smlv_normal_vcf)
+    tuple val(meta), path(amber_dir), path(cobalt_dir), path(sv_tumor_vcf), path(sv_tumor_tbi), path(sv_normal_vcf), path(sv_normal_tbi), path(smlv_tumor_vcf), path(smlv_normal_vcf)
     path genome_fasta
     val genome_ver
     path genome_fai
@@ -26,6 +26,7 @@ process PURPLE {
     output:
     tuple val(meta), path('purple/'), emit: purple_dir
     path 'versions.yml'             , emit: versions
+    path '.command.*'               , emit: command_files
 
     when:
     task.ext.when == null || task.ext.when
@@ -34,6 +35,8 @@ process PURPLE {
     def args = task.ext.args ?: ''
 
     def xmx_mod = task.ext.xmx_mod ?: 0.75
+
+    def log_level_arg = task.ext.log_level ? "-log_level ${task.ext.log_level}" : ''
 
     def reference_arg = meta.containsKey('normal_id') ? "-reference ${meta.normal_id}" : ''
 
@@ -56,8 +59,8 @@ process PURPLE {
         ${args} \\
         -tumor ${meta.tumor_id} \\
         ${reference_arg} \\
-        -amber ${amber} \\
-        -cobalt ${cobalt} \\
+        -amber ${amber_dir} \\
+        -cobalt ${cobalt_dir} \\
         ${sv_tumor_vcf_arg} \\
         ${sv_normal_vcf_arg} \\
         ${smlv_tumor_vcf_arg} \\
@@ -75,6 +78,7 @@ process PURPLE {
         -gc_profile ${gc_profile} \\
         -circos \$(which circos) \\
         -threads ${task.cpus} \\
+        ${log_level_arg} \\
         -output_dir purple/
 
     cat <<-END_VERSIONS > versions.yml
@@ -86,6 +90,7 @@ process PURPLE {
     stub:
     """
     mkdir purple/
+
     touch purple/${meta.tumor_id}.purple.cnv.gene.tsv
     touch purple/${meta.tumor_id}.purple.cnv.somatic.tsv
     touch purple/${meta.tumor_id}.purple.driver.catalog.germline.tsv

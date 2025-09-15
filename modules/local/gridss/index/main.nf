@@ -17,6 +17,7 @@ process GRIDSS_INDEX {
     output:
     path 'gridss_index/', emit: index
     path 'versions.yml' , emit: versions
+    path '.command.*'   , emit: command_files
 
     when:
     task.ext.when == null || task.ext.when
@@ -26,7 +27,7 @@ process GRIDSS_INDEX {
 
     """
     # Symlink BWA indices next to assembly FASTA
-    ln -s \$(find -L ${genome_bwa_index} -type f) ./
+    ln -s \$(find -L ${genome_bwa_index}/${genome_fasta.name}.*) ./
 
     # Create indexes
     PrepareReference \\

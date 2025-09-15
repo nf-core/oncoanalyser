@@ -4,6 +4,6 @@ channels:
   - bioconda
   - defaults
 dependencies:
-  - bioconda::bwa-mem2=2.2.1
+  - bioconda::bwa-mem2=2.3
   - bioconda::samtools=1.21
   - bioconda::sambamba=1.0.1

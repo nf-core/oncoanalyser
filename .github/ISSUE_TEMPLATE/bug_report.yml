@@ -9,7 +9,6 @@ body:
 
         - [nf-core website: troubleshooting](https://nf-co.re/usage/troubleshooting)
         - [nf-core/oncoanalyser pipeline documentation](https://nf-co.re/oncoanalyser/usage)
-
   - type: textarea
     id: description
     attributes:

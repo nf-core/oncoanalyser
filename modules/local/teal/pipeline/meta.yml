@@ -1,0 +1,69 @@
+name: teal
+description: TEAL measures telomere content, and estimates telomeric length based on WGS read data
+keywords:
+  - telomere
+  - telomere length
+  - rearrangements
+tools:
+  - teal:
+      description: TEAL measures telomere content, and estimates telomeric length based on WGS read data.
+      homepage: https://github.com/hartwigmedical/hmftools/tree/master/teal
+      documentation: https://github.com/hartwigmedical/hmftools/tree/master/teal
+      tool_dev_url: https://github.com/hartwigmedical/hmftools/tree/master/teal
+      licence: ["GPL v3"]
+input:
+  - meta:
+      type: map
+      description: |
+        Groovy Map containing sample information
+        e.g. [id: 'sample_id']
+  - tumor_teal_bam:
+      type: file
+      description: Tumor TEAL BAM file (optional)
+      pattern: "*.{bam}"
+  - tumor_teal_bai:
+      type: file
+      description: Tumor TEAL BAI file (optional)
+      pattern: "*.{bai}"
+  - normal_teal_bam:
+      type: file
+      description: Normal TEAL BAM file (optional)
+      pattern: "*.{bam}"
+  - normal_teal_bai:
+      type: file
+      description: Normal TEAL BAI file (optional)
+      pattern: "*.{bai}"
+  - tumor_wgs_metrics_dir:
+      type: directory
+      description: Tumor WGS metrics directory (optional)
+  - normal_wgs_metrics:
+      type: directory
+      description: Normal WGS metrics directory (optional)
+  - cobalt_dir:
+      type: directory
+      description: COBALT output directory
+  - purple_dir:
+      type: directory
+      description: PURPLE output directory (optional)
+  - genome_ver:
+      type: string
+      description: Reference genome version
+output:
+  - meta:
+      type: map
+      description: |
+        Groovy Map containing sample information
+        e.g. [id: 'sample_id']
+  - teal_tsvs:
+      type: list
+      description: TEAL output directory
+      pattern: "*.{tsv,tsv.*}"
+  - versions:
+      type: file
+      description: File containing software versions
+      pattern: "versions.yml"
+  - command_files:
+      type: list
+      description: List of command files
+authors:
+  - "@scwatts"

@@ -1,0 +1,7 @@
+name: isofox_run
+channels:
+  - conda-forge
+  - bioconda
+  - defaults
+dependencies:
+  - bioconda::hmftools-isofox=1.7.2

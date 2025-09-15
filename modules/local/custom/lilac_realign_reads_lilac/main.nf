@@ -13,8 +13,9 @@ process CUSTOM_REALIGNREADS {
     path reference_indices
 
     output:
-    tuple val(meta), path("*realigned.bam"), path("*realigned.bam.bai"), emit: bam
+    tuple val(meta), path('*realigned.bam'), path('*realigned.bam.bai'), emit: bam
     path 'versions.yml'                                                , emit: versions
+    path '.command.*'                                                  , emit: command_files
 
     when:
     task.ext.when == null || task.ext.when

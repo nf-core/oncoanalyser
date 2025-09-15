@@ -8,7 +8,6 @@ process WRITE_REFERENCE_DATA {
 
     input:
     path fp
-    val workflow_version
 
     output:
     path fp, includeInputs: true

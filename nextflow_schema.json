@@ -10,7 +10,7 @@
             "type": "object",
             "fa_icon": "fas fa-terminal",
             "description": "Define where the pipeline should find input data and save output data.",
-            "required": ["input", "outdir"],
+            "required": ["outdir"],
             "properties": {
                 "input": {
                     "type": "string",
@@ -48,6 +48,12 @@
                     "type": "string",
                     "description": "Workflow run mode.",
                     "fa_icon": "fas fa-diagram-project",
+                    "pattern": "^(wgts|targeted|purity_estimate|panel_resource_creation|prepare_reference)"
+                },
+                "purity_estimate_mode": {
+                    "type": "string",
+                    "description": "Purity estimate workflow run mode.",
+                    "fa_icon": "fas fa-diagram-project",
                     "pattern": "^(wgts|targeted)"
                 },
                 "panel": {
@@ -68,24 +74,23 @@
                     "fa_icon": "fas fa-palette"
                 },
                 "processes_manual": {
-                    "type": "boolean",
-                    "description": "Run only processes manually provided in processes_include.",
+                    "type": "string",
+                    "description": "Manually run processes provided as a comma separated list.",
                     "fa_icon": "fas fa-diagram-project"
                 },
                 "processes_exclude": {
                     "type": "string",
-                    "description": "Pipeline processes to exclude.",
+                    "description": "Exclude processes provided as a comma separated list.",
                     "fa_icon": "fas fa-diagram-project"
                 },
                 "processes_include": {
                     "type": "string",
-                    "description": "Pipeline processes to include.",
+                    "description": "Include processes that are excluded by default, provided as a comma separated list.",
                     "fa_icon": "fas fa-diagram-project"
                 },
-                "prepare_reference_only": {
-                    "type": "boolean",
-                    "description": "Prepare and write reference output only.",
-                    "default": false,
+                "ref_data_types": {
+                    "type": "string",
+                    "description": "Which reference data types to download and extract.",
                     "fa_icon": "fas fa-diagram-project"
                 },
                 "create_stub_placeholders": {
@@ -100,7 +105,7 @@
                     "default": 10000000,
                     "fa_icon": "fas fa-cog"
                 },
-                "fastp_umi": {
+                "fastp_umi_enabled": {
                     "type": "boolean",
                     "description": "Enable fastp UMI processing.",
                     "default": false,
@@ -123,7 +128,7 @@
                     "default": -1,
                     "fa_icon": "fas fa-cog"
                 },
-                "redux_umi": {
+                "redux_umi_enabled": {
                     "type": "boolean",
                     "description": "Enable REDUX UMI processing.",
                     "default": false,
@@ -168,6 +173,23 @@
                     "type": "string",
                     "description": "Semicolon-separated list of Isofox functions to run",
                     "default": "TRANSCRIPT_COUNTS;ALT_SPLICE_JUNCTIONS;FUSIONS;RETAINED_INTRONS",
+                    "fa_icon": "fas fa-cog"
+                },
+                "driver_gene_panel": {
+                    "type": "string",
+                    "description": "User defined driver gene panel used in panel resource creation, or for overriding the default file located in ref_data_hmf_data_path",
+                    "fa_icon": "fas fa-cog"
+                },
+                "target_regions_bed": {
+                    "type": "string",
+                    "description": "User defined target regions BED used in panel resource creation.",
+                    "fa_icon": "fas fa-cog"
+                },
+                "hmftools_log_level": {
+                    "type": "string",
+                    "enum": ["ALL", "TRACE", "DEBUG", "INFO", "WARN", "ERROR", "FATAL"],
+                    "description": "Log level filter for WiGiTS modules",
+                    "default": "DEBUG",
                     "fa_icon": "fas fa-cog"
                 }
             }
@@ -277,6 +299,12 @@
                     "pattern": "^\\S+\\.bed$",
                     "description": "Path to HLA slice BED file.",
                     "fa_icon": "far fa-file-code"
+                },
+                "prepare_reference_only": {
+                    "type": "boolean",
+                    "default": false,
+                    "fa_icon": "fas fa-cog",
+                    "hidden": true
                 }
             }
         },
@@ -389,6 +417,12 @@
                     "fa_icon": "far fa-check-circle",
                     "description": "Base URL or local path to location of pipeline test dataset files",
                     "default": "https://raw.githubusercontent.com/nf-core/test-datasets/oncoanalyser",
+                    "hidden": true
+                },
+                "trace_report_suffix": {
+                    "type": "string",
+                    "fa_icon": "far calendar",
+                    "description": "Suffix to add to the trace report filename. Default is the date and time in the format yyyy-MM-dd_HH-mm-ss.",
                     "hidden": true
                 }
             }

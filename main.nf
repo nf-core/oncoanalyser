@@ -12,11 +12,9 @@ import Utils
 ----------------------------------------------------------------------------------------
 */
 
-nextflow.enable.dsl = 2
-
 /*
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-    IMPORT NF-CORE UTILITY FUNCTIONS / SUBWORKFLOWS
+    IMPORT FUNCTIONS / MODULES / SUBWORKFLOWS / WORKFLOWS
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 */
 
@@ -60,8 +58,11 @@ if (workflow.stubRun && params.create_stub_placeholders) {
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 */
 
-include { TARGETED } from './workflows/targeted'
-include { WGTS     } from './workflows/wgts'
+include { PANEL_RESOURCE_CREATION } from './workflows/panel_resource_creation'
+include { PREPARE_REFERENCE       } from './workflows/prepare_reference'
+include { PURITY_ESTIMATE         } from './workflows/purity_estimate'
+include { TARGETED                } from './workflows/targeted'
+include { WGTS                    } from './workflows/wgts'
 
 /*
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -72,17 +73,35 @@ include { WGTS     } from './workflows/wgts'
 //
 // WORKFLOW: Run main analysis pipeline depending on type of input
 //
-run_mode = Utils.getRunMode(params.mode, log)
 
 workflow NFCORE_ONCOANALYSER {
 
-    if (run_mode === Constants.RunMode.WGTS) {
-        WGTS()
-    } else if (run_mode === Constants.RunMode.TARGETED) {
-        TARGETED()
+    // Get run mode
+    run_mode = Utils.getRunMode(params.mode, log)
+
+    // Run selected workflow
+    // NOTE(SW): prepare reference is checked early as params.input is not required
+    if (run_mode === Constants.RunMode.PREPARE_REFERENCE)  {
+        PREPARE_REFERENCE()
     } else {
-        log.error("received bad run mode: ${run_mode}")
-        Nextflow.exit(1)
+        // Parse and validate inputs
+        inputs = Utils.parseInput(params.input, workflow.stubRun, log)
+        run_config = WorkflowMain.getRunConfig(params, inputs, log)
+        Utils.validateInput(inputs, run_config, params, log)
+
+        // Run requested workflow
+        if (run_mode === Constants.RunMode.WGTS) {
+            WGTS(inputs, run_config)
+        } else if (run_mode === Constants.RunMode.TARGETED) {
+            TARGETED(inputs, run_config)
+        } else if (run_mode === Constants.RunMode.PURITY_ESTIMATE) {
+            PURITY_ESTIMATE(inputs, run_config)
+        } else if (run_mode === Constants.RunMode.PANEL_RESOURCE_CREATION) {
+            PANEL_RESOURCE_CREATION(inputs, run_config)
+        } else {
+            log.error("received bad run mode: ${run_mode}")
+            Nextflow.exit(1)
+        }
     }
 
 }

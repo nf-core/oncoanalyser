@@ -16,7 +16,7 @@ workflow NEO_PREDICTION {
     ch_tumor_rna_bam       // channel: [mandatory] [ meta, bam, bai ]
     ch_isofox              // channel: [mandatory] [ meta, isofox_dir ]
     ch_purple              // channel: [mandatory] [ meta, purple_dir ]
-    ch_sage_somatic_append // channel: [mandatory] [ meta, sage_append_vcf ]
+    ch_sage_somatic_append // channel: [mandatory] [ meta, sage_append_dir ]
     ch_lilac               // channel: [mandatory] [ meta, lilac_dir ]
     ch_linx                // channel: [mandatory] [ meta, linx_annotation_dir ]
 
@@ -179,18 +179,22 @@ workflow NEO_PREDICTION {
             def meta_scorer = [
                 key: meta.group_id,
                 id: meta.group_id,
-                sample_id: Utils.getTumorDnaSampleName(meta),
+                sample_id: Utils.getTumorDnaSampleName(meta, primary: true),
                 cancer_type: meta[Constants.InfoField.CANCER_TYPE],
             ]
 
+            def sage_somatic_append_vcf = []
             if (Utils.hasTumorRna(meta)) {
                 meta_scorer.sample_rna_id = Utils.getTumorRnaSampleName(meta)
+
+                def sage_somatic_append_selected = Utils.selectCurrentOrExisting(sage_somatic_append, meta, Constants.INPUT.SAGE_APPEND_DIR_TUMOR)
+                sage_somatic_append_vcf = file(sage_somatic_append_selected).resolve("${meta_scorer.sample_id}.sage.append.vcf.gz")
             }
 
             def inputs = [
                 Utils.selectCurrentOrExisting(isofox_dir, meta, Constants.INPUT.ISOFOX_DIR),
                 Utils.selectCurrentOrExisting(purple_dir, meta, Constants.INPUT.PURPLE_DIR),
-                Utils.selectCurrentOrExisting(sage_somatic_append, meta, Constants.INPUT.SAGE_APPEND_VCF_TUMOR),
+                sage_somatic_append_vcf,
                 Utils.selectCurrentOrExisting(lilac_dir, meta, Constants.INPUT.LILAC_DIR),
                 neo_finder_dir,
                 annotated_fusions,

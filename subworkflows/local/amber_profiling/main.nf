@@ -18,7 +18,8 @@ workflow AMBER_PROFILING {
     // Reference data
     genome_version     // channel: [mandatory] genome version
     heterozygous_sites // channel: [optional]  /path/to/heterozygous_sites
-    target_region_bed  // channel: [optional]  /path/to/target_region_bed
+    target_regions_bed // channel: [optional]  /path/to/target_regions_bed
+    tumor_min_depth    // integer: [optional]  -tumor_min_depth argument value
 
     main:
     // Channel for version.yml files
@@ -48,7 +49,14 @@ workflow AMBER_PROFILING {
         }
         .branch { meta, tumor_bam, tumor_bai, normal_bam, normal_bai, donor_bam, donor_bai ->
             def has_existing = Utils.hasExistingInput(meta, Constants.INPUT.AMBER_DIR)
-            runnable: tumor_bam && !has_existing
+
+
+            // TODO(SW): must improve handling through separation of sample information in meta; currently unable to provide ccfDNA AMBER directory in samplesheet
+            def longitudinal_sample = Utils.getTumorDnaSample(meta).containsKey('longitudinal_sample_id')
+
+            runnable: tumor_bam && (!has_existing || longitudinal_sample)
+
+
             skip: true
                 return meta
         }
@@ -80,7 +88,8 @@ workflow AMBER_PROFILING {
         ch_amber_inputs,
         genome_version,
         heterozygous_sites,
-        target_region_bed,
+        target_regions_bed,
+        tumor_min_depth,
     )
 
     ch_versions = ch_versions.mix(AMBER.out.versions)

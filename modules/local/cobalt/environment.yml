@@ -1,7 +1,0 @@
-name: cobalt
-channels:
-  - conda-forge
-  - bioconda
-  - defaults
-dependencies:
-  - bioconda::hmftools-cobalt=2.0

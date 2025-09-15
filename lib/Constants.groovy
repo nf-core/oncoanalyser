@@ -3,20 +3,19 @@ class Constants {
     // NOTE(SW): the HMF reference data files are incompatible with hg19 due to different contig naming
     static List GENOMES_VERSION_37 = ['GRCh37_hmf', 'GRCh37']
     static List GENOMES_VERSION_38 = ['GRCh38_hmf', 'GRCh38', 'hg38']
-    static List GENOMES_ALT        = ['GRCh38', 'hg38']
+    static List GENOMES_ALT = ['GRCh38', 'hg38']
 
-    static List GENOMES_SUPPORTED  = ['GRCh37_hmf', 'GRCh38_hmf']
-    static List GENOMES_DEFINED    = Constants.GENOMES_VERSION_37 + Constants.GENOMES_VERSION_38
+    static List GENOMES_SUPPORTED = ['GRCh37_hmf', 'GRCh38_hmf']
+    static List GENOMES_DEFINED = Constants.GENOMES_VERSION_37 + Constants.GENOMES_VERSION_38
 
-    static List PANELS_DEFINED     = ['tso500']
+    static List PANELS_DEFINED = ['tso500']
 
 
-    // NOTE(SW): these public URLs are for the oncoanalyser dev bucket
-    static String HMF_DATA_37_PATH = 'https://pub-cf6ba01919994c3cbd354659947f74d8.r2.dev/hmf_reference_data/hmftools/hmf_pipeline_resources.37_v2.0.0--3.tar.gz'
-    static String HMF_DATA_38_PATH = 'https://pub-cf6ba01919994c3cbd354659947f74d8.r2.dev/hmf_reference_data/hmftools/hmf_pipeline_resources.38_v2.0.0--3.tar.gz'
+    static String HMF_DATA_37_PATH = 'https://pub-cf6ba01919994c3cbd354659947f74d8.r2.dev/hmf_reference_data/hmftools/hmf_pipeline_resources.37_v2.2.0--3.tar.gz'
+    static String HMF_DATA_38_PATH = 'https://pub-cf6ba01919994c3cbd354659947f74d8.r2.dev/hmf_reference_data/hmftools/hmf_pipeline_resources.38_v2.2.0--3.tar.gz'
 
-    static String TSO500_PANEL_37_PATH = 'https://pub-cf6ba01919994c3cbd354659947f74d8.r2.dev/hmf_reference_data/panels/hmf_panel_resources.tso500.37_v2.0.0--3.tar.gz'
-    static String TSO500_PANEL_38_PATH = 'https://pub-cf6ba01919994c3cbd354659947f74d8.r2.dev/hmf_reference_data/panels/hmf_panel_resources.tso500.38_v2.0.0--3.tar.gz'
+    static String TSO500_PANEL_37_PATH = 'https://pub-cf6ba01919994c3cbd354659947f74d8.r2.dev/hmf_reference_data/panels/hmf_panel_resources.tso500.37_v2.2.0--3.tar.gz'
+    static String TSO500_PANEL_38_PATH = 'https://pub-cf6ba01919994c3cbd354659947f74d8.r2.dev/hmf_reference_data/panels/hmf_panel_resources.tso500.38_v2.2.0--3.tar.gz'
 
     static String HLA_SLICE_BED_GRCH38_ALT_PATH = 'https://pub-cf6ba01919994c3cbd354659947f74d8.r2.dev/other/hla_slice/grch38_alt.plus_homologous.bed'
 
@@ -26,8 +25,31 @@ class Constants {
 
 
     static enum RunMode {
+        PANEL_RESOURCE_CREATION,
+        PREPARE_REFERENCE,
+        PURITY_ESTIMATE,
         TARGETED,
         WGTS,
+    }
+
+    static enum RefDataType {
+        // Compound types
+        TARGETED,
+        WGS,
+        WTS,
+
+        // Individual types
+        BWAMEM2_INDEX,
+        DICT,
+        DNA_ALIGNMENT,
+        FAI,
+        FASTA,
+        GRIDSS_INDEX,
+        HMFTOOLS,
+        IMG,
+        PANEL,
+        RNA_ALIGNMENT,
+        STAR_INDEX,
     }
 
     static enum Process {
@@ -35,6 +57,7 @@ class Constants {
         AMBER,
         BAMTOOLS,
         CHORD,
+        CIDER,
         COBALT,
         CUPPA,
         ESVEE,
@@ -44,23 +67,32 @@ class Constants {
         NEO,
         ORANGE,
         PAVE,
+        PEACH,
         PURPLE,
         REDUX,
         SAGE,
         SIGS,
+        TEAL,
         VIRUSINTERPRETER,
+        WISP,
     }
+
+    static List DEFAULT_EXCLUDED_PROCESSES = [] // For experimental tools
 
     static enum FileType {
         // Generic
-        BAM,
         BAI,
+        BAM,
+        CRAI,
+        CRAM,
         FASTQ,
-        // Redux
+
+        // REDUX
         BAM_REDUX,
-        REDUX_DUP_FREQ_TSV,
+        CRAM_REDUX,
         REDUX_JITTER_TSV,
         REDUX_MS_TSV,
+
         // Process
         AMBER_DIR,
         BAMTOOLS_DIR,
@@ -74,33 +106,36 @@ class Constants {
         PURPLE_DIR,
         SAGE_VCF,
         SAGE_VCF_TBI,
-        SAGE_APPEND_VCF,
+        SAGE_APPEND_DIR,
         VIRUSINTERPRETER_DIR,
+
         // ORANGE specific
         CHORD_DIR,
-        SIGS_DIR,
         CUPPA_DIR,
         LINX_PLOT_DIR,
+        PEACH_DIR,
         SAGE_DIR,
+        SIGS_DIR,
     }
 
     static enum SampleType {
-        TUMOR,
-        NORMAL,
-        TUMOR_NORMAL,
         DONOR,
+        NORMAL,
+        TUMOR,
+        TUMOR_NORMAL,
     }
 
     static enum SequenceType {
         DNA,
-        RNA,
         DNA_RNA,
+        RNA,
     }
 
     static enum InfoField {
         CANCER_TYPE,
         LANE,
         LIBRARY_ID,
+        LONGITUDINAL_SAMPLE,
     }
 
     static Map PLACEHOLDER_META = [meta_placeholder: null]
@@ -165,12 +200,6 @@ class Constants {
             SequenceType.DNA,
         ],
 
-        REDUX_DUP_FREQ_TSV_TUMOR: [
-            FileType.REDUX_DUP_FREQ_TSV,
-            SampleType.TUMOR,
-            SequenceType.DNA,
-        ],
-
         REDUX_JITTER_TSV_TUMOR: [
             FileType.REDUX_JITTER_TSV,
             SampleType.TUMOR,
@@ -189,12 +218,6 @@ class Constants {
             SequenceType.DNA,
         ],
 
-        REDUX_DUP_FREQ_TSV_NORMAL: [
-            FileType.REDUX_DUP_FREQ_TSV,
-            SampleType.NORMAL,
-            SequenceType.DNA,
-        ],
-
         REDUX_JITTER_TSV_NORMAL: [
             FileType.REDUX_JITTER_TSV,
             SampleType.NORMAL,
@@ -209,12 +232,6 @@ class Constants {
 
         BAM_REDUX_DNA_DONOR: [
             FileType.BAM_REDUX,
-            SampleType.DONOR,
-            SequenceType.DNA,
-        ],
-
-        REDUX_DUP_FREQ_TSV_DONOR: [
-            FileType.REDUX_DUP_FREQ_TSV,
             SampleType.DONOR,
             SequenceType.DNA,
         ],
@@ -291,13 +308,13 @@ class Constants {
             SampleType.NORMAL,
             SequenceType.DNA,
         ],
-        SAGE_APPEND_VCF_TUMOR: [
-            FileType.SAGE_APPEND_VCF,
+        SAGE_APPEND_DIR_TUMOR: [
+            FileType.SAGE_APPEND_DIR,
             SampleType.TUMOR,
             SequenceType.DNA_RNA,
         ],
-        SAGE_APPEND_VCF_NORMAL: [
-            FileType.SAGE_APPEND_VCF,
+        SAGE_APPEND_DIR_NORMAL: [
+            FileType.SAGE_APPEND_DIR,
             SampleType.NORMAL,
             SequenceType.DNA_RNA,
         ],
@@ -382,6 +399,12 @@ class Constants {
             FileType.CUPPA_DIR,
             SampleType.TUMOR,
             [SequenceType.DNA, SequenceType.RNA, SequenceType.DNA_RNA],
+        ],
+
+        PEACH_DIR: [
+            FileType.PEACH_DIR,
+            SampleType.NORMAL,
+            SequenceType.DNA,
         ],
 
     ]
