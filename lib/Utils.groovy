@@ -54,6 +54,11 @@ class Utils {
                                     Nextflow.exit(1)
                                 }
 
+                                if (!v) {
+                                    log.error "got empty value for ${group_id} ${sample_type_enum}/${sequence_type_enum} ${info_field_enum}"
+                                    Nextflow.exit(1)
+                                }
+
                                 info_data[info_field_enum] = v
                             }
 
