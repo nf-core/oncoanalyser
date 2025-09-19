@@ -513,6 +513,9 @@ workflow WGTS {
         LINX_PLOTTING(
             ch_inputs,
             ch_linx_somatic_out,
+            ch_inputs.map { meta -> [meta, []] }, // amber_dir
+            ch_inputs.map { meta -> [meta, []] }, // cobalt_dir
+            ch_inputs.map { meta -> [meta, []] }, // purple_dir
             ref_data.genome_version,
             hmf_data.ensembl_data_resources,
         )

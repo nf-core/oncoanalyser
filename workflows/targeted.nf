@@ -511,6 +511,9 @@ workflow TARGETED {
         LINX_PLOTTING(
             ch_inputs,
             ch_linx_somatic_out,
+            ch_amber_out,
+            ch_cobalt_out,
+            ch_purple_out,
             ref_data.genome_version,
             hmf_data.ensembl_data_resources,
         )

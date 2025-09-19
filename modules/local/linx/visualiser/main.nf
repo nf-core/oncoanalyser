@@ -8,7 +8,7 @@ process LINX_VISUALISER {
         'biocontainers/hmftools-linx:2.1--hdfd78af_0' }"
 
     input:
-    tuple val(meta), path(linx_annotation_dir)
+    tuple val(meta), path(linx_annotation_dir), path(amber_dir), path(cobalt_dir), path(purple_dir)
     val genome_ver
     path ensembl_data_resources
 
@@ -27,6 +27,11 @@ process LINX_VISUALISER {
     def xmx_mod = task.ext.xmx_mod ?: 0.75
 
     def log_level_arg = task.ext.log_level ? "-log_level ${task.ext.log_level}" : ''
+
+    // For copy number circos tracks
+    def amber_dir_arg = amber_dir ? "-amber_dir ${amber_dir}" : ''
+    def cobalt_dir_arg = cobalt_dir ? "-cobalt_dir ${cobalt_dir}" : ''
+    def purple_dir_arg = purple_dir ? "-purple_dir ${purple_dir}" : ''
 
     """
     # NOTE(SW): the output plot directories are always required for ORANGE, which is straightfoward to handle with POSIX
@@ -53,6 +58,9 @@ process LINX_VISUALISER {
         ${args} \\
         -sample ${meta.sample_id} \\
         -vis_file_dir ${linx_annotation_dir} \\
+        ${amber_dir_arg} \\
+        ${cobalt_dir_arg} \\
+        ${purple_dir_arg} \\
         -ref_genome_version ${genome_ver} \\
         -ensembl_data_dir ${ensembl_data_resources} \\
         -circos \$(which circos) \\
@@ -77,6 +85,9 @@ process LINX_VISUALISER {
         ${args2} \\
         -sample ${meta.sample_id} \\
         -vis_file_dir ${linx_annotation_dir} \\
+        ${amber_dir_arg} \\
+        ${cobalt_dir_arg} \\
+        ${purple_dir_arg} \\
         -ref_genome_version ${genome_ver} \\
         -ensembl_data_dir ${ensembl_data_resources} \\
         -circos \$(which circos) \\
