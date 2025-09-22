@@ -570,7 +570,7 @@ workflow WGTS {
             ch_redux_dna_tumor_out,
             ch_align_rna_tumor_out,
             ref_data.genome_version,
-            hmf_data.cider_blastdb,
+            // TODO: add cider args
         )
 
         ch_versions = ch_versions.mix(CIDER_CALLING.out.versions)
