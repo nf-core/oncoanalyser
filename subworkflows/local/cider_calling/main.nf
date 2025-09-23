@@ -16,7 +16,7 @@ workflow CIDER_CALLING {
 
     // Reference data
     genome_version // channel: [mandatory] genome version
-    annotation_ref_genome_version   // channel: [mandatory] v37 or v38
+    annotation_ref_genome_version   // channel: [mandatory] 37 or 38
     annotation_ref_genome_dict      // channel: [mandatory] /path/to/genome.fasta.dict
     annotation_bwa_index_image      // channel: [mandatory] /path/to/genome.fasta.img
 
