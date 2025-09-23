@@ -571,7 +571,7 @@ workflow WGTS {
             ch_align_rna_tumor_out,
             ref_data.genome_version,
             // TODO: add cider args
-            Channel.of(["37"]),
+            Channel.of("37"),
             Channel.fromPath("gs://hmf-oa-pipeline/resources/genome/37/Homo_sapiens.GRCh37.GATK.illumina.fasta.dict"),
             Channel.fromPath("gs://hmf-oa-pipeline/resources/genome/37/Homo_sapiens.GRCh37.GATK.illumina.fasta.img"),
         )
