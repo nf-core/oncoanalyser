@@ -572,8 +572,8 @@ workflow WGTS {
             ref_data.genome_version,
             // TODO: add cider args
             "37",
-            "gs://hmf-oa-pipeline/resources/genome/37/Homo_sapiens.GRCh37.GATK.illumina.fasta.dict",
-            "gs://hmf-oa-pipeline/resources/genome/37/Homo_sapiens.GRCh37.GATK.illumina.fasta.img",
+            file("gs://hmf-oa-pipeline/resources/genome/37/Homo_sapiens.GRCh37.GATK.illumina.fasta.dict"),
+            file("gs://hmf-oa-pipeline/resources/genome/37/Homo_sapiens.GRCh37.GATK.illumina.fasta.img"),
         )
 
         ch_versions = ch_versions.mix(CIDER_CALLING.out.versions)
