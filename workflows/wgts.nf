@@ -571,12 +571,12 @@ workflow WGTS {
             ch_align_rna_tumor_out,
             ref_data.genome_version,
             // TODO: add cider args
-            // "37",
-            "38",
-            // file("gs://hmf-oa-pipeline/resources/genome/37/Homo_sapiens.GRCh37.GATK.illumina.fasta.dict"),
-            file("gs://hmf-oa-pipeline/resources/genome/38/GRCh38_masked_exclusions_alts_hlas.fasta.dict"),
-            // file("gs://hmf-oa-pipeline/resources/genome/37/Homo_sapiens.GRCh37.GATK.illumina.fasta.img"),
-            file("gs://hmf-oa-pipeline/resources/genome/38/GRCh38_masked_exclusions_alts_hlas.fasta.img"),
+            "37",
+            // "38",
+            file("gs://hmf-oa-pipeline/resources/genome/37/Homo_sapiens.GRCh37.GATK.illumina.fasta.dict"),
+            // file("gs://hmf-oa-pipeline/resources/genome/38/GRCh38_masked_exclusions_alts_hlas.fasta.dict"),
+            file("gs://hmf-oa-pipeline/resources/genome/37/Homo_sapiens.GRCh37.GATK.illumina.fasta.img"),
+            // file("gs://hmf-oa-pipeline/resources/genome/38/GRCh38_masked_exclusions_alts_hlas.fasta.img"),
         )
 
         ch_versions = ch_versions.mix(CIDER_CALLING.out.versions)
