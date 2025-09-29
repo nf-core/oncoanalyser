@@ -16,7 +16,9 @@ workflow CIDER_CALLING {
 
     // Reference data
     genome_version // channel: [mandatory] genome version
-    human_blastdb  // channel: [mandatory] /path/to/human_blastdb
+    annotation_ref_genome_version   // channel: [mandatory] genome version for gene annotation
+    annotation_ref_genome_dict      // channel: [mandatory] genome .dict for gene annotation
+    annotation_bwa_index_image      // channel: [mandatory] genome .img for gene annotation
 
     main:
     // Channel for version.yml files
@@ -78,7 +80,9 @@ workflow CIDER_CALLING {
     CIDER(
         ch_cider_inputs,
         genome_version,
-        human_blastdb,
+        annotation_ref_genome_version,
+        annotation_ref_genome_dict,
+        annotation_bwa_index_image,
     )
 
     ch_versions = ch_versions.mix(CIDER.out.versions)

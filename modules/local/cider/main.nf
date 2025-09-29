@@ -10,7 +10,9 @@ process CIDER {
     input:
     tuple val(meta), path(bam), path(bai)
     val genome_ver
-    file human_blastdb
+    val annotation_ref_genome_version
+    file annotation_ref_genome_dict
+    file annotation_bwa_index_image
 
     output:
     tuple val(meta), path('cider/*'), emit: cider_dir
@@ -35,8 +37,9 @@ process CIDER {
         -sample ${meta.sample_id} \\
         -bam ${bam} \\
         -ref_genome_version ${genome_ver} \\
-        -blast \$(which blastn | sed 's#/bin/blastn##') \\
-        -blast_db ${human_blastdb} \\
+        -annotation_ref_genome_version ${annotation_ref_genome_version} \\
+        -annotation_ref_genome_dict ${annotation_ref_genome_dict} \\
+        -annotation_bwa_index_image ${annotation_bwa_index_image} \\
         -write_cider_bam \\
         -threads ${task.cpus} \\
         ${log_level_arg} \\
