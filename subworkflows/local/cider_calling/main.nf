@@ -15,10 +15,8 @@ workflow CIDER_CALLING {
     ch_tumor_rna_bam // channel: [mandatory] [ meta, bam, bai ]
 
     // Reference data
-    genome_version // channel: [mandatory] genome version
-    annotation_ref_genome_version   // channel: [mandatory] genome version for gene annotation
-    annotation_ref_genome_dict      // channel: [mandatory] genome .dict for gene annotation
-    annotation_bwa_index_image      // channel: [mandatory] genome .img for gene annotation
+    genome_version  // channel: [mandatory] ref genome version
+    genome_fasta    // channel: [mandatory] ref genome fasta
 
     main:
     // Channel for version.yml files
@@ -80,9 +78,7 @@ workflow CIDER_CALLING {
     CIDER(
         ch_cider_inputs,
         genome_version,
-        annotation_ref_genome_version,
-        annotation_ref_genome_dict,
-        annotation_bwa_index_image,
+        genome_fasta,
     )
 
     ch_versions = ch_versions.mix(CIDER.out.versions)

@@ -10,9 +10,7 @@ process CIDER {
     input:
     tuple val(meta), path(bam), path(bai)
     val genome_ver
-    val annotation_ref_genome_version
-    file annotation_ref_genome_dict
-    file annotation_bwa_index_image
+    file genome_fasta
 
     output:
     tuple val(meta), path('cider/*'), emit: cider_dir
@@ -37,9 +35,7 @@ process CIDER {
         -sample ${meta.sample_id} \\
         -bam ${bam} \\
         -ref_genome_version ${genome_ver} \\
-        -annotation_ref_genome_version ${annotation_ref_genome_version} \\
-        -annotation_ref_genome_dict ${annotation_ref_genome_dict} \\
-        -annotation_bwa_index_image ${annotation_bwa_index_image} \\
+        -ref_genome ${genome_fasta} \\
         -write_cider_bam \\
         -threads ${task.cpus} \\
         ${log_level_arg} \\
