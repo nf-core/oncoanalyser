@@ -544,6 +544,7 @@ workflow TARGETED {
             ref_data.genome_version,
             panel_data.driver_gene_panel,
             hmf_data.ensembl_data_resources,
+            panel_data.target_region_bed,
         )
 
         ch_versions = ch_versions.mix(BAMTOOLS_METRICS.out.versions)

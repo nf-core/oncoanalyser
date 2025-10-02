@@ -13,6 +13,7 @@ process BAMTOOLS {
     val genome_ver
     path driver_gene_panel
     path ensembl_data_resources
+    path target_region_bed
 
     output:
     tuple val(meta), path("${meta.id}_bamtools/"), emit: metrics_dir
@@ -29,6 +30,8 @@ process BAMTOOLS {
 
     def log_level_arg = task.ext.log_level ? "-log_level ${task.ext.log_level}" : ''
 
+    def target_region_bed_arg = target_region_bed ? "-regions_file ${target_region_bed}" : ''
+
     """
     mkdir -p ${meta.id}_bamtools/
 
@@ -42,6 +45,7 @@ process BAMTOOLS {
         -ref_genome_version ${genome_ver} \\
         -driver_gene_panel ${driver_gene_panel} \\
         -ensembl_data_dir ${ensembl_data_resources} \\
+        ${target_region_bed_arg} \\
         ${log_level_arg} \\
         -threads ${task.cpus} \\
         -output_dir ${meta.id}_bamtools/

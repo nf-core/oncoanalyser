@@ -546,6 +546,7 @@ workflow WGTS {
             ref_data.genome_version,
             hmf_data.driver_gene_panel,
             hmf_data.ensembl_data_resources,
+            [], // target_region_bed
         )
 
         ch_versions = ch_versions.mix(BAMTOOLS_METRICS.out.versions)

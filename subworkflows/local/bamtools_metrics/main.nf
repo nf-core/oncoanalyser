@@ -19,6 +19,7 @@ workflow BAMTOOLS_METRICS {
     genome_version         // channel: [mandatory] genome version
     driver_gene_panel      // channel: [mandatory] /path/to/driver_gene_panel
     ensembl_data_resources // channel: [mandatory] /path/to/ensembl_data_resources/
+    target_region_bed      // channel: [optional]  /path/to/target_region_bed
 
     main:
     // Channel for version.yml files
@@ -86,6 +87,7 @@ workflow BAMTOOLS_METRICS {
         genome_version,
         driver_gene_panel,
         ensembl_data_resources,
+        target_region_bed
     )
 
     ch_versions = ch_versions.mix(BAMTOOLS.out.versions)
