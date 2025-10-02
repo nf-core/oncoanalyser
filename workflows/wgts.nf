@@ -571,6 +571,8 @@ workflow WGTS {
             ch_align_rna_tumor_out,
             ref_data.genome_version,
             ref_data.genome_fasta,
+            ref_data.genome_dict,
+            ref_data.genome_img,
         )
 
         ch_versions = ch_versions.mix(CIDER_CALLING.out.versions)

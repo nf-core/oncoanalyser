@@ -11,6 +11,8 @@ process CIDER {
     tuple val(meta), path(bam), path(bai)
     val genome_ver
     file genome_fasta
+    file genome_dict
+    file genome_img
 
     output:
     tuple val(meta), path('cider/*'), emit: cider_dir
