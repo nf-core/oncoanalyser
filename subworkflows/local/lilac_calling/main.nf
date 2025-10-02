@@ -5,10 +5,7 @@
 import Constants
 import Utils
 
-include { CUSTOM_EXTRACTCONTIG as EXTRACTCONTIG } from '../../../modules/local/custom/lilac_extract_and_index_contig/main'
-include { CUSTOM_REALIGNREADS as REALIGNREADS   } from '../../../modules/local/custom/lilac_realign_reads_lilac/main'
-include { CUSTOM_SLICE as SLICEBAM              } from '../../../modules/local/custom/lilac_slice/main'
-include { LILAC                                 } from '../../../modules/local/lilac/main'
+include { LILAC } from '../../../modules/local/lilac/main'
 
 workflow LILAC_CALLING {
     take:
@@ -57,119 +54,13 @@ workflow LILAC_CALLING {
                 return meta
         }
 
-    // Realign reads mapping to HLA regions and homologus regions if using reference genome with ALT contigs
-    // NOTE(SW): the aim of this process is to take reads mapping to ALT contigs and align them to the three
-    // relevant HLA genes on chr6. All reads including those previously mapped to chr6 are realigned for
-    // consistency.
-    if (params.genome_type == 'alt') {
-
-        // Flatten into BAM/BAI pairs, select inputs that are eligible to run
-        // channel: runnable: [ meta_extra, bam, bai ]
-        // channel: skip: [ meta_extra ]
-        ch_realign_inputs_sorted = ch_dna_inputs_sorted.runnable
-            .flatMap { meta, tumor_bam, tumor_bai, normal_bam, normal_bai ->
-
-                def tumor_sample_id = Utils.hasTumorDna(meta) ? Utils.getTumorDnaSampleName(meta) : []
-                def normal_sample_id = Utils.hasNormalDna(meta) ? Utils.getNormalDnaSampleName(meta) : []
-
-                return [
-                    [[key: meta.group_id, *:meta, sample_id: tumor_sample_id, sample_type: 'tumor'], tumor_bam, tumor_bai],
-                    [[key: meta.group_id, *:meta, sample_id: normal_sample_id, sample_type: 'normal'], normal_bam, normal_bai],
-                ]
-            }
-            .branch { meta_extra, bam, bai ->
-                runnable: bam && bai
-                skip: true
-                    return meta_extra
-            }
-
-        //
-        // MODULE: Custom BAM slice (LILAC)
-        //
-        // Create process input channel
-        // channel: [ meta_realign, bam, bai ]
-        ch_slice_inputs = ch_realign_inputs_sorted.runnable
-            .map { meta_extra, bam, bai ->
-
-                def meta_realign = [
-                    key: meta_extra.group_id,
-                    id: "${meta_extra.group_id}__${meta_extra.sample_id}",
-                    sample_id: meta_extra.sample_id,
-                    sample_type: meta_extra.sample_type,
-                ]
-
-                return [meta_realign, bam, bai]
-            }
-
-        // Run process
-        SLICEBAM(
-            ch_slice_inputs,
-            hla_slice_bed,
-        )
-
-        ch_versions = ch_versions.mix(SLICEBAM.out.versions)
-
-        //
-        // MODULE: Custom extract contig (LILAC)
-        //
-        // Only run if we have runnable inputs, no blocking since operating only on input metas
-        ch_extract_contig_run = ch_realign_inputs_sorted.runnable
-            .toList()
-            .map { !it.isEmpty() }
-
-        EXTRACTCONTIG(
-            'chr6',
-            genome_fasta,
-            genome_fai,
-            ch_extract_contig_run,
-        )
-
-        ch_versions = ch_versions.mix(EXTRACTCONTIG.out.versions)
-
-        //
-        // MODULE: Custom realign reads (LILAC)
-        //
-        REALIGNREADS(
-            SLICEBAM.out.bam,
-            EXTRACTCONTIG.out.contig,
-            EXTRACTCONTIG.out.bwamem2_index,
-        )
-
-        ch_versions = ch_versions.mix(REALIGNREADS.out.versions)
-
-        // Separate all BAMs by sample type so they can be merged with desired order
-        // channel: [ < meta_extra OR meta_realign >, bam, bai ]
-        ch_slice_reunited_bams = Channel.empty()
-            .mix(
-                ch_realign_inputs_sorted.skip.map { meta_extra -> [meta_extra, [], []] },
-                REALIGNREADS.out.bam,
-            )
-            .branch { meta_ambiguous, bam, bai ->
-                tumor: meta_ambiguous.sample_type == 'tumor'
-                normal: meta_ambiguous.sample_type == 'normal'
-            }
-
-        // Restore meta, pair tumor and normal BAMs
-        // channel: [ meta, tumor_dna_bam, tumor_dna_bai, normal_dna_bam, normal_dna_bai ]
-        ch_dna_inputs_ready = WorkflowOncoanalyser.groupByMeta(
-            WorkflowOncoanalyser.restoreMeta(ch_slice_reunited_bams.tumor, ch_inputs),
-            WorkflowOncoanalyser.restoreMeta(ch_slice_reunited_bams.normal, ch_inputs),
-        )
-
-    } else {
-
-        // channel: [ meta, tumor_dna_bam, tumor_dna_bai, normal_dna_bam, normal_dna_bai ]
-        ch_dna_inputs_ready = ch_dna_inputs_sorted.runnable
-
-    }
-
     //
     // MODULE: LILAC
     //
     // Create process input channel
     // channel: [ meta_lilac, normal_dna_bam, normal_dna_bai, tumor_dna_bam, tumor_dna_bai, tumor_rna_bam, tumor_rna_bai, purple_dir ]
     ch_lilac_inputs = WorkflowOncoanalyser.groupByMeta(
-        ch_dna_inputs_ready,
+        ch_dna_inputs_sorted.runnable,
         ch_tumor_rna_bam,
         ch_purple,
     )
