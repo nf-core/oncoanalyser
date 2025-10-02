@@ -54,7 +54,7 @@ process CIDER {
     mkdir -p cider/
 
     touch cider/${meta.sample_id}.cider.bam
-    touch cider/${meta.sample_id}.cider.blastn_match.tsv.gz
+    touch cider/${meta.sample_id}.cider.alignment_match.tsv.gz
     touch cider/${meta.sample_id}.cider.layout.gz
     touch cider/${meta.sample_id}.cider.locus_stats.tsv
     touch cider/${meta.sample_id}.cider.vdj.tsv.gz
