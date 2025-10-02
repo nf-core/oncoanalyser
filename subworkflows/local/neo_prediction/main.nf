@@ -202,10 +202,15 @@ workflow NEO_PREDICTION {
 
             return [meta_scorer, *inputs]
         }
+        .branch { meta, isofox_dir, purple_dir, sage_somatic_append, lilac_dir, neo_finder_dir, annotated_fusions ->
+            runnable: purple_dir && neo_finder_dir && lilac_dir
+            skip: true
+                return meta
+        }
 
     // Run process
     NEO_SCORER(
-        ch_scorer_inputs,
+        ch_scorer_inputs.runnable,
         ensembl_data_resources,
         neo_resources,
         cohort_tpm_medians,
