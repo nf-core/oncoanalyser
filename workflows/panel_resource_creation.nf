@@ -188,6 +188,7 @@ workflow PANEL_RESOURCE_CREATION {
         ch_inputs,
         ch_redux_dna_tumor_out,
         ch_redux_dna_normal_out,
+        ref_data.genome_version,
         hmf_data.gc_profile,
         hmf_data.diploid_bed,
         [],  // panel_target_region_normalisation

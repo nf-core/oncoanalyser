@@ -15,10 +15,11 @@ workflow COBALT_PROFILING {
     ch_normal_bam               // channel: [mandatory] [ meta, bam, bai ]
 
     // Reference data
+    genome_version              // channel: [mandatory] genome version
     gc_profile                  // channel: [mandatory] /path/to/gc_profile
     diploid_bed                 // channel: [optional]  /path/to/diploid_bed
     target_region_normalisation // channel: [optional]  /path/to/target_region_normalisation
-    targeted_mode            // boolean: [mandatory] Running COBALT with targeted mode args?
+    targeted_mode               // boolean: [mandatory] Running COBALT with targeted mode args?
 
     main:
     // Channel for version.yml files
@@ -82,6 +83,7 @@ workflow COBALT_PROFILING {
     // Run process
     COBALT(
         ch_cobalt_inputs.sample_data,
+        genome_version,
         gc_profile,
         ch_cobalt_inputs.diploid_bed,
         target_region_normalisation,
