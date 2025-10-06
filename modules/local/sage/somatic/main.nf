@@ -100,6 +100,7 @@ process SAGE_SOMATIC {
         ${run_tinc_arg} \\
         ${high_depth_mode_arg} \\
         -bqr_write_plot \\
+        -include_mt \\
         ${write_fit_variants_arg} \\
         -threads ${task.cpus} \\
         ${log_level_arg} \\
