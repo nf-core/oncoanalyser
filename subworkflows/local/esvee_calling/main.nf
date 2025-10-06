@@ -25,6 +25,7 @@ workflow ESVEE_CALLING {
     decoy_sequences_image    // channel: [mandatory] /path/to/decoy_sequences_image
     repeatmasker_annotations // channel: [mandatory] /path/to/repeatmasker_annotations
     unmap_regions            // channel: [mandatory] /path/to/unmap_regions
+    target_region_bed        // channel: [optional]  /path/to/target_region_bed
 
     main:
     // Channel for version.yml files
@@ -88,7 +89,8 @@ workflow ESVEE_CALLING {
         decoy_sequences_image,
         known_fusions,
         repeatmasker_annotations,
-        unmap_regions
+        unmap_regions,
+        target_region_bed
     )
 
     ch_versions = ch_versions.mix(ESVEE.out.versions)
