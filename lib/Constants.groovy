@@ -135,6 +135,7 @@ class Constants {
         CANCER_TYPE,
         LANE,
         LIBRARY_ID,
+        FLOWCELL,
         LONGITUDINAL_SAMPLE,
     }
 
