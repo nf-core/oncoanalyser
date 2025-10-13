@@ -639,7 +639,7 @@ nextflow run nf-core/oncoanalyser \
   --outdir output/
 ```
 
-Place the all the custom panel reference data files in a directory, and define the paths / file names in a configuration file:
+Place all the custom panel reference data files in a directory, and define the paths / file names in a configuration file:
 
 ```groovy title="panel.config"
 params {
@@ -658,12 +658,14 @@ params {
                 target_region_normalisation = 'cobalt.region_normalisation.38.tsv'
                 target_region_ratios        = 'target_regions_ratios.38.tsv'
                 target_region_msi_indels    = 'target_regions_msi_indels.38.tsv'
-
-                // RNA. Optional, only provide if panel supports RNA data.
+              
+                // (Optional) RNA reference data
+                // Paths can be omitted (e.g. for panels without RNA) by providing an empty list:
+                // isofox_counts = []
+                isofox_counts               = 'read_151_exp_counts.38.csv'
+                isofox_gc_ratios            = 'read_100_exp_gc_ratios.38.csv'
                 isofox_gene_ids             = 'rna_gene_ids.csv'
                 isofox_tpm_norm             = 'isofox.gene_normalisation.38.csv'
-                isofox_counts               = 'read_151_exp_counts.37.csv'
-                isofox_gc_ratios            = 'read_100_exp_gc_ratios.37.csv'
             }
         }
     }
