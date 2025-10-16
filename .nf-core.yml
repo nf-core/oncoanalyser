@@ -13,7 +13,7 @@ lint:
         - params.fastp_umi_length
         - params.fastp_umi_skip
   nf_test_content: false
-nf_core_version: 3.3.2
+nf_core_version: 3.4.1
 repository_type: pipeline
 template:
   author: Stephen Watts
@@ -24,5 +24,6 @@ template:
   org: nf-core
   outdir: .
   skip_features:
+    - gpu
     - nf-test
-  version: 2.1.0
+  version: 2.2.0dev
