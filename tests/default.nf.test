@@ -1,14 +1,14 @@
 nextflow_pipeline {
 
-    name "Test pipeline"
+    name "Test pipeline (stub, wgts)"
     script "../main.nf"
     tag "pipeline"
     tag "cicd"
 
-    profile "test_stub"
+    profile "test_stub_wgts"
     options "-stub"
 
-    test("-profile test_stub") {
+    test("-profile test_stub_wgts") {
 
         when {
             params {
