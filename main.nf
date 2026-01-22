@@ -77,7 +77,7 @@ include { WGTS                    } from './workflows/wgts'
 workflow NFCORE_ONCOANALYSER {
 
     // Get run mode
-    run_mode = Utils.getEnumFromString(params.mode, Constants.RunMode, log)
+    run_mode = Utils.getValidatedEnumFromString(params.mode, Constants.RunMode, log)
 
     // Run selected workflow
     // NOTE(SW): prepare reference is checked early as params.input is not required

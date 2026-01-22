@@ -63,27 +63,27 @@ class Utils {
             *.toLowerCase()
     }
 
-    public static getEnumFromString(string, enum_class, log = null) {
-
-        def enum_value
-
+    public static getEnumFromString(string, enum_class) {
         try {
-            enum_value = enum_class.valueOf(string.toUpperCase())
+            return enum_class.valueOf(string.toUpperCase())
         } catch(IllegalArgumentException e) {
+            return null
+        }
+    }
 
+    public static getValidatedEnumFromString(string, enum_class, log){
+
+        def enum_value = getEnumFromString(string, enum_class)
+
+        if(enum_value !== null) {
+            return enum_value
+        } else {
             def enum_class_name = enum_class.getSimpleName()
             def enum_values_string = Utils.getEnumNames(enum_class).join('\n  - ')
-            def error_message = "Invalid ${enum_class_name}: '${string}'\n\nValid options are:\n  - ${enum_values_string}"
 
-            if(log !== null) {
-                log.error error_message
-                Nextflow.exit(1)
-            } else {
-                throw new IllegalArgumentException(error_message)
-            }
+            log.error "Invalid ${enum_class_name}: '${string}'\n\nValid options are:\n  - ${enum_values_string}"
+            Nextflow.exit(1)
         }
-
-        return enum_value
     }
 
     // Sample records

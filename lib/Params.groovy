@@ -49,7 +49,7 @@ class Params {
 
         def run_mode
         if (params.mode !== null) {
-            run_mode = Utils.getEnumFromString(params.mode, Constants.RunMode, log)
+            run_mode = Utils.getValidatedEnumFromString(params.mode, Constants.RunMode, log)
         } else {
             // Bad configuration, catch in validateParams
             return
@@ -176,7 +176,7 @@ class Params {
             Nextflow.exit(1)
         }
 
-        def run_mode = Utils.getEnumFromString(params.mode, Constants.RunMode, log)
+        def run_mode = Utils.getValidatedEnumFromString(params.mode, Constants.RunMode, log)
 
         if (run_mode === Constants.RunMode.PREPARE_REFERENCE && params.ref_data_types == null) {
 
@@ -345,7 +345,7 @@ class Params {
 
     public static getRunConfig(params, inputs, log) {
 
-        def run_mode = Utils.getEnumFromString(params.mode, Constants.RunMode, log)
+        def run_mode = Utils.getValidatedEnumFromString(params.mode, Constants.RunMode, log)
 
         def stages = Processes.getRunStages(
             params.processes_include,
@@ -385,7 +385,7 @@ class Params {
     public static getPrepConfigFromParams(params, log) {
         def ref_data_types = params.ref_data_types
             .tokenize(',')
-            .collect { Utils.getEnumFromString(it, Constants.RefDataType, log) }
+            .collect { Utils.getValidatedEnumFromString(it, Constants.RefDataType, log) }
 
         if (
             ref_data_types.contains(Constants.RefDataType.WGS) ||
