@@ -55,7 +55,7 @@ class WorkflowMain {
 
         def run_mode
         if (params.mode !== null) {
-            run_mode = Utils.getRunMode(params.mode, log)
+            run_mode = Utils.getEnumFromString(params.mode, Constants.RunMode, log)
         } else {
             // Bad configuration, catch in validateParams
             return
@@ -77,7 +77,6 @@ class WorkflowMain {
             }
 
         }
-
 
         if (run_mode === Constants.RunMode.TARGETED) {
 
@@ -192,7 +191,7 @@ class WorkflowMain {
             Nextflow.exit(1)
         }
 
-        def run_mode = Utils.getRunMode(params.mode, log)
+        def run_mode = Utils.getEnumFromString(params.mode, Constants.RunMode, log)
 
         if (run_mode === Constants.RunMode.PREPARE_REFERENCE && params.ref_data_types == null) {
 
@@ -315,7 +314,7 @@ class WorkflowMain {
 
     public static getRunConfig(params, inputs, log) {
 
-        def run_mode = Utils.getRunMode(params.mode, log)
+        def run_mode = Utils.getEnumFromString(params.mode, Constants.RunMode, log)
 
         def stages = Processes.getRunStages(
             params.processes_include,
@@ -355,17 +354,7 @@ class WorkflowMain {
     public static getPrepConfigFromCli(params, log) {
         def ref_data_types = params.ref_data_types
             .tokenize(',')
-            .collect {
-                def ref_data_type_enum = Utils.getEnumFromString(it, Constants.RefDataType)
-
-                if (!ref_data_type_enum) {
-                    def ref_data_type_str = Utils.getEnumNames(Constants.RefDataType).join('\n  - ')
-                    log.error "received invalid ref data type: '${it}'. Valid options are:\n  - ${ref_data_type_str}"
-                    Nextflow.exit(1)
-                }
-
-                return ref_data_type_enum
-            }
+            .collect { Utils.getEnumFromString(it, Constants.RefDataType, log) }
 
         if (
             ref_data_types.contains(Constants.RefDataType.WGS) ||

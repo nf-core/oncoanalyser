@@ -33,29 +33,9 @@ class Utils {
                         meta.subject_id = it.subject_id
                     }
 
-                    // Sample type
-                    def sample_type_enum = Utils.getEnumFromString(it.sample_type, Constants.SampleType)
-                    if (!sample_type_enum) {
-                        def sample_type_str = Utils.getEnumNames(Constants.SampleType).join('\n  - ')
-                        log.error "received invalid sample type: '${it.sample_type}'. Valid options are:\n  - ${sample_type_str}"
-                        Nextflow.exit(1)
-                    }
-
-                    // Sequence type
-                    def sequence_type_enum = Utils.getEnumFromString(it.sequence_type, Constants.SequenceType)
-                    if (!sequence_type_enum) {
-                        def sequence_type_str = Utils.getEnumNames(Constants.SequenceType).join('\n  - ')
-                        log.error "received invalid sequence type: '${it.sequence_type}'. Valid options are:\n  - ${sequence_type_str}"
-                        Nextflow.exit(1)
-                    }
-
-                    // Filetype
-                    def filetype_enum = Utils.getEnumFromString(it.filetype, Constants.FileType)
-                    if (!filetype_enum) {
-                        def filetype_str = Utils.getEnumNames(Constants.FileType).join('\n  - ')
-                        log.error "received invalid file type: '${it.filetype}'. Valid options are:\n  - ${filetype_str}"
-                        Nextflow.exit(1)
-                    }
+                    def sample_type_enum = Utils.getEnumFromString(it.sample_type, Constants.SampleType, log)
+                    def sequence_type_enum = Utils.getEnumFromString(it.sequence_type, Constants.SequenceType, log)
+                    def filetype_enum = Utils.getEnumFromString(it.filetype, Constants.FileType, log)
 
                     def sample_key = [sample_type_enum, sequence_type_enum]
                     def meta_sample = meta.get(sample_key, [:])
@@ -68,13 +48,7 @@ class Utils {
                             .tokenize(';')
                             .each { e ->
                                 def (k, v) = e.tokenize(':')
-                                def info_field_enum = Utils.getEnumFromString(k, Constants.InfoField)
-
-                                if (!info_field_enum) {
-                                    def info_field_str = Utils.getEnumNames(Constants.InfoField).join('\n  - ')
-                                    log.error "received invalid info field: '${k}'. Valid options are:\n  - ${info_field_str}"
-                                    Nextflow.exit(1)
-                                }
+                                def info_field_enum = Utils.getEnumFromString(k, Constants.InfoField, log)
 
                                 if (info_data.containsKey(info_field_enum)) {
                                     log.error "got duplicate info field for ${group_id} ${sample_type_enum}/${sequence_type_enum}: ${info_field_enum}"
@@ -494,36 +468,40 @@ class Utils {
 
     }
 
-    static public getEnumFromString(s, e) {
-        try {
-            return e.valueOf(s.toUpperCase())
-        } catch(java.lang.IllegalArgumentException err) {
-            return null
-        }
-    }
-
-    public static getEnumNames(e) {
-        e
+    // Enums
+    static getEnumNames(enum_class) {
+        enum_class
             .values()
             *.name()
             *.toLowerCase()
     }
 
+    static getEnumFromString(string, enum_class, log = null) {
+
+        def enum_value
+
+        try {
+            enum_value = enum_class.valueOf(string.toUpperCase())
+        } catch(IllegalArgumentException e) {
+
+            def enum_class_name = enum_class.getSimpleName()
+            def enum_values_string = Utils.getEnumNames(enum_class).join('\n  - ')
+            def error_message = "Invalid ${enum_class_name}: '${string}'\n\nValid options are:\n  - ${enum_values_string}"
+
+            if(log !== null) {
+                log.error error_message
+                Nextflow.exit(1)
+            } else {
+                throw new IllegalArgumentException(error_message)
+            }
+        }
+
+        return enum_value
+    }
 
     static public getFileObject(path) {
         return path ? nextflow.Nextflow.file(path) : []
     }
-
-    static public getRunMode(run_mode, log) {
-        def run_mode_enum = Utils.getEnumFromString(run_mode, Constants.RunMode)
-        if (!run_mode_enum) {
-            def run_modes_str = Utils.getEnumNames(Constants.RunMode).join('\n  - ')
-            log.error "received an invalid run mode: '${run_mode}'. Valid options are:\n  - ${run_modes_str}"
-            Nextflow.exit(1)
-        }
-        return run_mode_enum
-    }
-
 
     // Sample records
     static public getTumorDnaSample(meta) {
