@@ -469,14 +469,14 @@ class Utils {
     }
 
     // Enums
-    static getEnumNames(enum_class) {
+    public static getEnumNames(enum_class) {
         enum_class
             .values()
             *.name()
             *.toLowerCase()
     }
 
-    static getEnumFromString(string, enum_class, log = null) {
+    public static getEnumFromString(string, enum_class, log = null) {
 
         def enum_value
 
@@ -499,29 +499,29 @@ class Utils {
         return enum_value
     }
 
-    static public getFileObject(path) {
+    public static getFileObject(path) {
         return path ? nextflow.Nextflow.file(path) : []
     }
 
     // Sample records
-    static public getTumorDnaSample(meta) {
+    public static getTumorDnaSample(meta) {
         return meta.getOrDefault([Constants.SampleType.TUMOR, Constants.SequenceType.DNA], [:])
     }
 
-    static public getTumorRnaSample(meta) {
+    public static getTumorRnaSample(meta) {
         return meta.getOrDefault([Constants.SampleType.TUMOR, Constants.SequenceType.RNA], [:])
     }
 
-    static public getNormalDnaSample(meta) {
+    public static getNormalDnaSample(meta) {
         return meta.getOrDefault([Constants.SampleType.NORMAL, Constants.SequenceType.DNA], [:])
     }
 
-    static public getDonorDnaSample(meta) {
+    public static getDonorDnaSample(meta) {
         return meta.getOrDefault([Constants.SampleType.DONOR, Constants.SequenceType.DNA], [:])
     }
 
     // Sample names
-    static public getTumorDnaSampleName(Map named_args, meta) {
+    public static getTumorDnaSampleName(Map named_args, meta) {
         def meta_sample = getTumorDnaSample(meta)
         def sample_id
 
@@ -534,160 +534,160 @@ class Utils {
         return sample_id
     }
 
-    static public getTumorDnaSampleName(meta) {
+    public static getTumorDnaSampleName(meta) {
         getTumorDnaSampleName([:], meta)
     }
 
-    static public getTumorRnaSampleName(meta) {
+    public static getTumorRnaSampleName(meta) {
         return getTumorRnaSample(meta)['sample_id']
     }
 
-    static public getNormalDnaSampleName(meta) {
+    public static getNormalDnaSampleName(meta) {
         return getNormalDnaSample(meta)['sample_id']
     }
 
-    static public getDonorDnaSampleName(meta) {
+    public static getDonorDnaSampleName(meta) {
         return getDonorDnaSample(meta)['sample_id']
     }
 
 
     // Files - Tumor DNA
-    static public getTumorDnaFastq(meta) {
+    public static getTumorDnaFastq(meta) {
         return getTumorDnaSample(meta).getOrDefault(Constants.FileType.FASTQ, null)
     }
 
-    static public getTumorDnaBam(meta) {
+    public static getTumorDnaBam(meta) {
         return getTumorDnaSample(meta).getOrDefault(Constants.FileType.BAM, null)
     }
 
-    static public getTumorDnaReduxBam(meta) {
+    public static getTumorDnaReduxBam(meta) {
         return getTumorDnaSample(meta).getOrDefault(Constants.FileType.BAM_REDUX, null)
     }
 
-    static public getTumorDnaBai(meta) {
+    public static getTumorDnaBai(meta) {
         return getTumorDnaSample(meta).getOrDefault(Constants.FileType.BAI, null)
     }
 
 
-    static public hasTumorDnaFastq(meta) {
+    public static hasTumorDnaFastq(meta) {
         return getTumorDnaFastq(meta) !== null
     }
 
-    static public hasTumorDnaBam(meta) {
+    public static hasTumorDnaBam(meta) {
         return getTumorDnaBam(meta) !== null
     }
 
-    static public hasTumorDnaReduxBam(meta) {
+    public static hasTumorDnaReduxBam(meta) {
         return getTumorDnaReduxBam(meta) !== null
     }
 
 
     // Files - Normal DNA
-    static public getNormalDnaFastq(meta) {
+    public static getNormalDnaFastq(meta) {
         return getNormalDnaSample(meta).getOrDefault(Constants.FileType.FASTQ, null)
     }
 
-    static public getNormalDnaBam(meta) {
+    public static getNormalDnaBam(meta) {
         return getNormalDnaSample(meta).getOrDefault(Constants.FileType.BAM, null)
     }
 
-    static public getNormalDnaReduxBam(meta) {
+    public static getNormalDnaReduxBam(meta) {
         return getNormalDnaSample(meta).getOrDefault(Constants.FileType.BAM_REDUX, null)
     }
-    static public getNormalDnaBai(meta) {
+    public static getNormalDnaBai(meta) {
         return getNormalDnaSample(meta).getOrDefault(Constants.FileType.BAI, null)
     }
 
 
-    static public hasNormalDnaFastq(meta) {
+    public static hasNormalDnaFastq(meta) {
         return getNormalDnaFastq(meta) !== null
     }
 
-    static public hasNormalDnaBam(meta) {
+    public static hasNormalDnaBam(meta) {
         return getNormalDnaBam(meta) !== null
     }
 
-    static public hasNormalDnaReduxBam(meta) {
+    public static hasNormalDnaReduxBam(meta) {
         return getNormalDnaReduxBam(meta) !== null
     }
 
-    static public hasDnaFastq(meta) {
+    public static hasDnaFastq(meta) {
         return hasNormalDnaFastq(meta) || hasTumorDnaFastq(meta)
     }
 
-    static public hasDnaReduxBam(meta) {
+    public static hasDnaReduxBam(meta) {
         return hasNormalDnaReduxBam(meta) || hasTumorDnaReduxBam(meta)
     }
 
 
     // Files - Donor DNA
-    static public getDonorDnaFastq(meta) {
+    public static getDonorDnaFastq(meta) {
         return getDonorDnaSample(meta).getOrDefault(Constants.FileType.FASTQ, null)
     }
 
-    static public getDonorDnaBam(meta) {
+    public static getDonorDnaBam(meta) {
         return getDonorDnaSample(meta).getOrDefault(Constants.FileType.BAM, null)
     }
 
-    static public getDonorDnaReduxBam(meta) {
+    public static getDonorDnaReduxBam(meta) {
         return getDonorDnaSample(meta).getOrDefault(Constants.FileType.BAM_REDUX, null)
     }
 
-    static public getDonorDnaBai(meta) {
+    public static getDonorDnaBai(meta) {
         return getDonorDnaSample(meta).getOrDefault(Constants.FileType.BAI, null)
     }
 
 
-    static public hasDonorDnaFastq(meta) {
+    public static hasDonorDnaFastq(meta) {
         return getDonorDnaFastq(meta) !== null
     }
 
-    static public hasDonorDnaBam(meta) {
+    public static hasDonorDnaBam(meta) {
         return getDonorDnaBam(meta) !== null
     }
 
-    static public hasDonorDnaReduxBam(meta) {
+    public static hasDonorDnaReduxBam(meta) {
         return getDonorDnaReduxBam(meta) !== null
     }
 
 
     // Files - Tumor RNA
-    static public getTumorRnaFastq(meta) {
+    public static getTumorRnaFastq(meta) {
         return getTumorRnaSample(meta).getOrDefault(Constants.FileType.FASTQ, null)
     }
 
-    static public getTumorRnaBam(meta) {
+    public static getTumorRnaBam(meta) {
         return getTumorRnaSample(meta).getOrDefault(Constants.FileType.BAM, null)
     }
 
-    static public getTumorRnaBai(meta) {
+    public static getTumorRnaBai(meta) {
         return getTumorRnaSample(meta).getOrDefault(Constants.FileType.BAI, null)
     }
 
 
-    static public hasTumorRnaFastq(meta) {
+    public static hasTumorRnaFastq(meta) {
         return getTumorRnaFastq(meta) !== null
     }
 
-    static public hasTumorRnaBam(meta) {
+    public static hasTumorRnaBam(meta) {
         return getTumorRnaBam(meta) !== null
     }
 
 
     // Status
-    static public hasTumorDna(meta) {
+    public static hasTumorDna(meta) {
         return hasTumorDnaBam(meta) || hasTumorDnaReduxBam(meta) || hasTumorDnaFastq(meta)
     }
 
-    static public hasNormalDna(meta) {
+    public static hasNormalDna(meta) {
         return hasNormalDnaBam(meta) || hasNormalDnaReduxBam(meta) || hasNormalDnaFastq(meta)
     }
 
-    static public hasDonorDna(meta) {
+    public static hasDonorDna(meta) {
         return hasDonorDnaBam(meta) || hasDonorDnaReduxBam(meta) || hasDonorDnaFastq(meta)
     }
 
-    static public hasTumorRna(meta) {
+    public static hasTumorRna(meta) {
         return hasTumorRnaBam(meta) || hasTumorRnaFastq(meta)
     }
 

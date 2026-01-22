@@ -97,7 +97,7 @@ class WorkflowOncoanalyser {
         return getInput([:], ch, key)
     }
 
-    public static joinMeta(Map named_args, ch_a, ch_b) {
+    private static joinMeta(Map named_args, ch_a, ch_b) {
         // NOTE(SW): the cross operator is used to allow many-to-one relationship between ch_output
         // and ch_metas
         def key_a = named_args.getOrDefault('key_a', 'group_id')
@@ -114,7 +114,7 @@ class WorkflowOncoanalyser {
     }
 
     // NOTE(SW): function signature required to catch where no named arguments are passed
-    public static joinMeta(ch_output, ch_metas) {
+    private static joinMeta(ch_output, ch_metas) {
         joinMeta([:], ch_output, ch_metas)
     }
 
