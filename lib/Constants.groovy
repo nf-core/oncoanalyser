@@ -1,26 +1,23 @@
 class Constants {
 
     // NOTE(SW): the HMF reference data files are incompatible with hg19 due to different contig naming
-    static List GENOMES_VERSION_37 = ['GRCh37_hmf', 'GRCh37']
-    static List GENOMES_VERSION_38 = ['GRCh38_hmf', 'GRCh38', 'hg38']
-    static List GENOMES_ALT = ['GRCh38', 'hg38']
+    static final List GENOMES_VERSION_37 = ['GRCh37_hmf', 'GRCh37']
+    static final List GENOMES_VERSION_38 = ['GRCh38_hmf', 'GRCh38', 'hg38']
+    static final List GENOMES_ALT = ['GRCh38', 'hg38']
 
-    static List GENOMES_SUPPORTED = ['GRCh37_hmf', 'GRCh38_hmf']
-    static List GENOMES_DEFINED = Constants.GENOMES_VERSION_37 + Constants.GENOMES_VERSION_38
+    static final List GENOMES_SUPPORTED = ['GRCh37_hmf', 'GRCh38_hmf']
+    static final List GENOMES_DEFINED = Constants.GENOMES_VERSION_37 + Constants.GENOMES_VERSION_38
 
-    static List PANELS_DEFINED = ['tso500']
+    static final List PANELS_DEFINED = ['tso500']
 
+    static final String HMF_DATA_37_PATH = 'https://pub-cf6ba01919994c3cbd354659947f74d8.r2.dev/hmf_reference_data/hmftools/hmf_pipeline_resources.37_v2.3.0--2.tar.gz'
+    static final String HMF_DATA_38_PATH = 'https://pub-cf6ba01919994c3cbd354659947f74d8.r2.dev/hmf_reference_data/hmftools/hmf_pipeline_resources.38_v2.3.0--2.tar.gz'
 
-    static String HMF_DATA_37_PATH = 'https://pub-cf6ba01919994c3cbd354659947f74d8.r2.dev/hmf_reference_data/hmftools/hmf_pipeline_resources.37_v2.3.0--2.tar.gz'
-    static String HMF_DATA_38_PATH = 'https://pub-cf6ba01919994c3cbd354659947f74d8.r2.dev/hmf_reference_data/hmftools/hmf_pipeline_resources.38_v2.3.0--2.tar.gz'
+    static final String TSO500_PANEL_37_PATH = 'https://pub-cf6ba01919994c3cbd354659947f74d8.r2.dev/hmf_reference_data/panels/hmf_panel_resources.tso500.37_v2.3.0--2.tar.gz'
+    static final String TSO500_PANEL_38_PATH = 'https://pub-cf6ba01919994c3cbd354659947f74d8.r2.dev/hmf_reference_data/panels/hmf_panel_resources.tso500.38_v2.3.0--2.tar.gz'
 
-    static String TSO500_PANEL_37_PATH = 'https://pub-cf6ba01919994c3cbd354659947f74d8.r2.dev/hmf_reference_data/panels/hmf_panel_resources.tso500.37_v2.3.0--2.tar.gz'
-    static String TSO500_PANEL_38_PATH = 'https://pub-cf6ba01919994c3cbd354659947f74d8.r2.dev/hmf_reference_data/panels/hmf_panel_resources.tso500.38_v2.3.0--2.tar.gz'
-
-
-    static Integer DEFAULT_ISOFOX_READ_LENGTH_WTS = 151
-    static Integer DEFAULT_ISOFOX_READ_LENGTH_TARGETED = 93
-
+    static final Integer DEFAULT_ISOFOX_READ_LENGTH_WTS = 151
+    static final Integer DEFAULT_ISOFOX_READ_LENGTH_TARGETED = 93
 
     static enum RunMode {
         PANEL_RESOURCE_CREATION,
@@ -134,17 +131,17 @@ class Constants {
         RNA,
     }
 
-    static enum InfoField {
+    static final enum InfoField {
         CANCER_TYPE,
         LANE,
         LIBRARY_ID,
         LONGITUDINAL_SAMPLE,
     }
 
-    static Map PLACEHOLDER_META = [meta_placeholder: null]
-    static List PLACEHOLDER_OPTIONAL_CHANNEL = []
+    static final Map PLACEHOLDER_META = [meta_placeholder: null]
+    static final List PLACEHOLDER_OPTIONAL_CHANNEL = []
 
-    static Map INPUT = [
+    static final Map INPUT = [
 
         // Bams
         BAM_DNA_TUMOR: [
