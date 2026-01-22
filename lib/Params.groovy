@@ -56,20 +56,14 @@ class Params {
         }
 
         // Attempt to set default panel data path; make no assumption on valid 'panel' value
-        if (run_mode === Constants.RunMode.TARGETED || run_mode === Constants.RunMode.PREPARE_REFERENCE) {
-
-            if (params.containsKey('panel')) {
-
-                if (params.panel == 'tso500') {
-                    if (params.genome_version.toString() == '37') {
-                        params.ref_data_panel_data_path = Constants.TSO500_PANEL_37_PATH
-                    } else if (params.genome_version.toString() == '38') {
-                        params.ref_data_panel_data_path = Constants.TSO500_PANEL_38_PATH
-                    }
+        if ((run_mode === Constants.RunMode.TARGETED || run_mode === Constants.RunMode.PREPARE_REFERENCE) && params.containsKey('panel')) {
+            if (params.panel == 'tso500') {
+                if (params.genome_version.toString() == '37') {
+                    params.ref_data_panel_data_path = Constants.TSO500_PANEL_37_PATH
+                } else if (params.genome_version.toString() == '38') {
+                    params.ref_data_panel_data_path = Constants.TSO500_PANEL_38_PATH
                 }
-
             }
-
         }
 
         if (run_mode === Constants.RunMode.TARGETED) {
