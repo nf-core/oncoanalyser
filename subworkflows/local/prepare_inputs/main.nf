@@ -8,7 +8,7 @@
 // through running workflows/processes with 'setup'. Hence, this subworkflow
 // isn't used in the main pipeline and is only used for execution of tests.
 
-import Utils
+import SampleSheet
 
 workflow PREPARE_INPUTS {
     take:
@@ -16,7 +16,7 @@ workflow PREPARE_INPUTS {
 
     main:
     ch_inputs = Channel.fromList(
-        Utils.parseInput(input_fp_str, workflow.stubRun, log)
+        SampleSheet.parseInput(input_fp_str, workflow.stubRun, log)
     )
 
     emit:

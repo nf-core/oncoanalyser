@@ -37,8 +37,8 @@ params.ref_data_genome_bwamem2_index = getGenomeAttribute('bwamem2_index')
 params.ref_data_genome_gridss_index  = getGenomeAttribute('gridss_index')
 params.ref_data_genome_star_index    = getGenomeAttribute('star_index')
 
-WorkflowMain.setParamsDefaults(params, log)
-WorkflowMain.validateParams(params, log)
+Params.setParamsDefaults(params, log)
+Params.validateParams(params, log)
 
 /*
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -85,9 +85,11 @@ workflow NFCORE_ONCOANALYSER {
         PREPARE_REFERENCE()
     } else {
         // Parse and validate inputs
-        inputs = Utils.parseInput(params.input, workflow.stubRun, log)
-        run_config = WorkflowMain.getRunConfig(params, inputs, log)
-        Utils.validateInput(inputs, run_config, params, log)
+        inputs = SampleSheet.parseInput(params.input, workflow.stubRun, log)
+        run_config = Params.getRunConfig(params, inputs, log)
+
+        SampleSheet.validateInput(inputs, run_config, log)
+        Params.validateRunSpecificParams(params, run_config, log)
 
         // Run requested workflow
         if (run_mode === Constants.RunMode.WGTS) {

@@ -1,12 +1,6 @@
-//
-// This file holds several functions specific to the main.nf workflow in the nf-core/oncoanalyser pipeline
-//
-
 import nextflow.Nextflow
 
-import Utils
-
-class WorkflowMain {
+class Params {
 
     //
     // Set parameter defaults where required
@@ -119,9 +113,6 @@ class WorkflowMain {
 
     }
 
-    //
-    // Check and validate parameters
-    //
     public static void validateParams(params, log) {
 
         // Common parameters
@@ -312,6 +303,56 @@ class WorkflowMain {
 
     }
 
+    public static void validateRunSpecificParams(params, run_config, log) {
+
+        // NOTE(SW): the following final config checks are performed here since they require additional information
+        // regarding processes that are run
+
+        def has_alt_contigs = params.genome_type == 'alt'
+
+        // Ensure that custom genomes with ALT contigs that need indexes built have the required .alt file
+        def has_bwa_indexes = (params.ref_data_genome_bwamem2_index && params.ref_data_genome_gridss_index)
+        def has_alt_file = params.containsKey('ref_data_genome_alt') && params.ref_data_genome_alt
+        def run_bwa_or_gridss_index = run_config.stages.alignment && run_config.has_dna_fastq && !has_bwa_indexes
+
+        if (run_bwa_or_gridss_index && has_alt_contigs && !has_alt_file) {
+            log.error "\n~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n" +
+                    "  The genome .alt file is required when building bwa-mem2 or GRIDSS indexes\n" +
+                    "  for reference genomes containing ALT contigs\n" +
+                    "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
+            Nextflow.exit(1)
+        }
+
+        // Refuse to create STAR index for reference genome containing ALTs, refer to Slack channel
+        def run_star_index = run_config.stages.alignment && run_config.has_rna_fastq && !params.ref_data_genome_star_index
+
+        if (run_star_index && has_alt_contigs) {
+            log.error "\n~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n" +
+                    "  Refusing to create the STAR index for a reference genome with ALT contigs.\n" +
+                    "  Please review https://github.com/alexdobin/STAR docs or contact us on Slack.\n" +
+                    "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
+            Nextflow.exit(1)
+        }
+
+        // Require that an input GTF file is provided when creating STAR index
+        if (run_star_index && !params.ref_data_genome_gtf) {
+            log.error "\n~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n" +
+                    "  Creating a STAR index requires the appropriate genome transcript annotations\n" +
+                    "  as a GTF file. Please contact us on Slack for further information.\n" +
+                    "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
+            Nextflow.exit(1)
+        }
+
+        // Require --isofox_gene_ids argument to be provided in PANEL_RESOURCE_CREATION when RNA inputs are present
+        if (run_config.mode === Constants.RunMode.PANEL_RESOURCE_CREATION && run_config.has_rna && !params.isofox_gene_ids) {
+            log.error "\n~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n" +
+                    "  Running the panel resource creation workflow with RNA requires that the\n" +
+                    "  --isofox_gene_ids argument is set with an appropriate input file.\n" +
+                    "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
+            Nextflow.exit(1)
+        }
+    }
+
     public static getRunConfig(params, inputs, log) {
 
         def run_mode = Utils.getEnumFromString(params.mode, Constants.RunMode, log)
@@ -333,7 +374,7 @@ class WorkflowMain {
         ]
     }
 
-    public static getPrepConfigFromSamplesheet(run_config) {
+    public static getPrepConfigFromRunConfig(run_config) {
         return [
             prepare_ref_data_only: false,
 
@@ -351,7 +392,7 @@ class WorkflowMain {
         ]
     }
 
-    public static getPrepConfigFromCli(params, log) {
+    public static getPrepConfigFromParams(params, log) {
         def ref_data_types = params.ref_data_types
             .tokenize(',')
             .collect { Utils.getEnumFromString(it, Constants.RefDataType, log) }

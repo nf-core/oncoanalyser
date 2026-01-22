@@ -60,7 +60,7 @@ workflow PANEL_RESOURCE_CREATION {
     ch_inputs = Channel.fromList(inputs)
 
     // Set up reference data, assign more human readable variables
-    prep_config = WorkflowMain.getPrepConfigFromSamplesheet(run_config)
+    prep_config = Params.getPrepConfigFromRunConfig(run_config)
     PREPARE_REFERENCE(
         prep_config,
         run_config,

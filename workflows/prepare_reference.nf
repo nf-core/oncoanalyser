@@ -24,7 +24,7 @@ workflow PREPARE_REFERENCE {
     ch_versions = Channel.empty()
 
     // Stage in reference data as requested
-    prep_config = WorkflowMain.getPrepConfigFromCli(params, log)
+    prep_config = Params.getPrepConfigFromParams(params, log)
     STAGE_REFERENCE(
         prep_config,
         [:],
