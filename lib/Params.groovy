@@ -223,23 +223,19 @@ class Params {
 
         if (run_mode === Constants.RunMode.PURITY_ESTIMATE) {
 
-            def purity_estimate_modes = [Constants.RunMode.WGTS, Constants.RunMode.TARGETED]
-
             def purity_mode_enum = !params.purity_estimate_mode
                 ? null
-                : Utils.getEnumFromString(params.purity_estimate_mode, Constants.RunMode)
+                : Utils.getEnumFromString(params.purity_estimate_mode, Constants.PurityEstimateRunMode)
 
-            if (!purity_mode_enum || !purity_estimate_modes.contains(purity_mode_enum)) {
+            if (!purity_mode_enum) {
 
-                def purity_estimate_modes_str = purity_estimate_modes
-                    .collect { e -> e.name().toLowerCase() }
-                    .join('\n    - ')
+                def purity_estimate_modes = Utils.getEnumNames(Constants.PurityEstimateRunMode).join('\n    - ')
 
                 log.error "\n~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n" +
                     "  A valid purity estimate run mode must be set using the --purity_estimate_mode\n" +
                     "  CLI argument or in a configuration file.\n" +
                     "  Currently, the available run modes are:\n" +
-                    "    - ${purity_estimate_modes_str}\n"
+                    "    - ${purity_estimate_modes}\n" +
                     "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
                 Nextflow.exit(1)
             }

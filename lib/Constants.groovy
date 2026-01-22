@@ -30,6 +30,11 @@ class Constants {
         WGTS,
     }
 
+    static enum PurityEstimateRunMode {
+        TARGETED,
+        WGTS,
+    }
+
     static enum RefDataType {
         // Compound types
         TARGETED,
