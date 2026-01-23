@@ -31,8 +31,6 @@ process WISP {
 
     def log_level_arg = task.ext.log_level ? "-log_level ${task.ext.log_level}" : ''
 
-    def purity_estimate_mode = Utils.getEnumFromString(params.purity_estimate_mode, Constants.RunMode)
-
     def purity_methods
     def amber_dir_arg
     def cobalt_dir_arg
