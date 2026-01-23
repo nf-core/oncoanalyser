@@ -167,7 +167,7 @@ class Params {
 
         // Sequencing technology
 
-        Utils.validateEnumFromString(params.sequencing_type, Constants.SequencingType, log)
+        Utils.validateEnumFromString(params.sequencing_type, Constants.SequencingType, log, false)
 
         // UMI parameters
 

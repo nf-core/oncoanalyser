@@ -223,9 +223,9 @@
                     "type": "string",
                     "description": "Type of sequencing technology.",
                     "fa_icon": "far fa-file-code",
-                    "enum": ["illumina", "sbx", "ultima"],
+                    "enum": ["ILLUMINA", "SBX", "ULTIMA"],
                     "hidden": true,
-                    "default": "illumina"
+                    "default": "ILLUMINA"
                 },
                 "igenomes_ignore": {
                     "type": "boolean",
