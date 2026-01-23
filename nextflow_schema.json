@@ -219,6 +219,14 @@
                     "enum": ["alt", "no_alt"],
                     "hidden": true
                 },
+                "sequencing_type": {
+                    "type": "string",
+                    "description": "Type of sequencing technology.",
+                    "fa_icon": "far fa-file-code",
+                    "enum": ["illumina", "sbx", "ultima"],
+                    "hidden": true,
+                    "default": "illumina"
+                },
                 "igenomes_ignore": {
                     "type": "boolean",
                     "description": "Do not load the iGenomes reference config.",

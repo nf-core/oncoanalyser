@@ -32,6 +32,12 @@ class Constants {
         WGTS,
     }
 
+    static enum SequencingType {
+        ILLUMINA,
+        SBX,
+        ULTIMA,
+    }
+
     static enum RefDataType {
         // Compound types
         TARGETED,

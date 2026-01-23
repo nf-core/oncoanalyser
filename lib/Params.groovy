@@ -163,6 +163,9 @@ class Params {
             Nextflow.exit(1)
         }
 
+        // NOTE(LN): Only need to validate. No need to check if param.sequencing_type exists because it is assigned by default.
+        Utils.getValidatedEnumFromString(params.sequencing_type, Constants.SequencingType, log)
+
         // Run configuration specific parameters
 
         if (!params.mode) {
