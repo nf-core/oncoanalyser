@@ -56,6 +56,13 @@
                     "fa_icon": "fas fa-diagram-project",
                     "pattern": "^(wgts|targeted)"
                 },
+                "sequencing_type": {
+                    "type": "string",
+                    "description": "Type of sequencing technology.",
+                    "fa_icon": "far fa-file-code",
+                    "enum": ["ILLUMINA", "SBX", "ULTIMA"],
+                    "default": "ILLUMINA"
+                },
                 "panel": {
                     "type": "string",
                     "description": "Name of panel to use.",
@@ -218,14 +225,6 @@
                     "fa_icon": "far fa-file-code",
                     "enum": ["alt", "no_alt"],
                     "hidden": true
-                },
-                "sequencing_type": {
-                    "type": "string",
-                    "description": "Type of sequencing technology.",
-                    "fa_icon": "far fa-file-code",
-                    "enum": ["ILLUMINA", "SBX", "ULTIMA"],
-                    "hidden": true,
-                    "default": "ILLUMINA"
                 },
                 "igenomes_ignore": {
                     "type": "boolean",
