@@ -37,7 +37,7 @@ params.ref_data_genome_bwamem2_index = getGenomeAttribute('bwamem2_index')
 params.ref_data_genome_gridss_index  = getGenomeAttribute('gridss_index')
 params.ref_data_genome_star_index    = getGenomeAttribute('star_index')
 
-Params.setParamsDefaults(params, log)
+Params.setParamsDefaults(params)
 Params.validateParams(params, log)
 
 /*

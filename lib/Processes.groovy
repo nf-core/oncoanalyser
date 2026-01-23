@@ -6,7 +6,7 @@ import Utils
 
 class Processes {
 
-    static getRunStages(include, exclude, manual_select, log) {
+    public static getValidatedRunStages(include, exclude, manual_select, log) {
 
         def processes
 

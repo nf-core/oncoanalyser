@@ -5,7 +5,7 @@ class Params {
     //
     // Set parameter defaults where required
     //
-    public static void setParamsDefaults(params, log) {
+    public static void setParamsDefaults(params) {
 
         def default_invalid = false
 
@@ -47,11 +47,8 @@ class Params {
 
         // Set defaults specific to run configuration without attempting to validate
 
-        def run_mode
-        if (params.mode !== null) {
-            run_mode = Utils.getValidatedEnumFromString(params.mode, Constants.RunMode, log)
-        } else {
-            // Bad configuration, catch in validateParams
+        def run_mode = params.mode ? Utils.getEnumFromString(params.mode, Constants.RunMode) : null
+        if (!run_mode) {
             return
         }
 
@@ -86,13 +83,6 @@ class Params {
 
         }
 
-        def stages = Processes.getRunStages(
-            params.processes_include,
-            params.processes_exclude,
-            params.processes_manual,
-            log,
-        )
-
         // Final point to set any default to avoid access to undefined parameters during nf-validation
         if (!params.containsKey('panel')) params.panel = null
         if (!params.containsKey('ref_data_genome_alt')) params.ref_data_genome_alt = null
@@ -109,7 +99,19 @@ class Params {
 
     public static void validateParams(params, log) {
 
-        // Common parameters
+        if (!params.mode) {
+            def run_modes = Utils.getEnumNames(Constants.RunMode).join('\n    - ')
+            log.error "\n~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n" +
+                "  Run mode must be set using the --mode CLI argument or in a configuration file.\n" +
+                "  Currently, the available run modes are:\n" +
+                "    - ${run_modes}\n" +
+                "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
+            Nextflow.exit(1)
+        } else {
+            Utils.validateEnumFromString(params.mode, Constants.RunMode, log)
+        }
+
+        // Genome related
 
         if (!params.genome) {
             log.error "\n~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n" +
@@ -163,106 +165,9 @@ class Params {
             Nextflow.exit(1)
         }
 
-        // NOTE(LN): Only need to validate. No need to check if param.sequencing_type exists because it is assigned by default.
-        Utils.getValidatedEnumFromString(params.sequencing_type, Constants.SequencingType, log)
+        // Sequencing technology
 
-        // Run configuration specific parameters
-
-        if (!params.mode) {
-            def run_modes = Utils.getEnumNames(Constants.RunMode).join('\n    - ')
-            log.error "\n~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n" +
-                "  Run mode must be set using the --mode CLI argument or in a configuration  \n" +
-                "  file.\n" +
-                "  Currently, the available run modes are:\n" +
-                "    - ${run_modes}\n" +
-                "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
-            Nextflow.exit(1)
-        }
-
-        def run_mode = Utils.getValidatedEnumFromString(params.mode, Constants.RunMode, log)
-
-        if (run_mode === Constants.RunMode.PREPARE_REFERENCE && params.ref_data_types == null) {
-
-            def ref_data_types = Utils.getEnumNames(Constants.RefDataType).join('\n    - ')
-
-            log.error "\n~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n" +
-                "  CLI argument --ref_data_types is required for mode prepare_reference.\n" +
-                "  Please specify one or more of the below valid values (separated by commas)\n" +
-                "    - ${ref_data_types}\n" +
-                "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
-            Nextflow.exit(1)
-        }
-
-        if (run_mode === Constants.RunMode.TARGETED) {
-
-            if (!params.containsKey('panel') || params.panel === null) {
-
-                def panels = Constants.PANELS_DEFINED.join('\n    - ')
-                log.error "\n~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n" +
-                    "  A panel is required to be set using the --panel CLI argument or in a\n" +
-                    "  configuration file when running in targeted mode or panel resource creation mode.\n" +
-                    "  Currently, the available built-in panels are:\n" +
-                    "    - ${panels}\n" +
-                    "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
-                Nextflow.exit(1)
-
-            } else if (!Constants.PANELS_DEFINED.contains(params.panel)) {
-
-                if (params.containsKey('force_panel') && params.force_panel) {
-                    log.warn "provided panel ${params.panel} does not have built-in support but forcing to proceed"
-                } else {
-                    def panels = Constants.PANELS_DEFINED.join('\n    - ')
-                    log.error "\n~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n" +
-                        "  The ${params.panel} panel does not have built-in support. Currently, the\n" +
-                        "  available supported panels are:\n" +
-                        "    - ${panels}\n\n" +
-                        "  Please adjust the --panel argument or override with --force_panel.\n" +
-                        "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
-                    Nextflow.exit(1)
-                }
-
-            }
-        }
-
-        if (run_mode === Constants.RunMode.PURITY_ESTIMATE) {
-
-            def purity_mode_enum = !params.purity_estimate_mode
-                ? null
-                : Utils.getEnumFromString(params.purity_estimate_mode, Constants.PurityEstimateRunMode)
-
-            if (!purity_mode_enum) {
-
-                def purity_estimate_modes = Utils.getEnumNames(Constants.PurityEstimateRunMode).join('\n    - ')
-
-                log.error "\n~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n" +
-                    "  A valid purity estimate run mode must be set using the --purity_estimate_mode\n" +
-                    "  CLI argument or in a configuration file.\n" +
-                    "  Currently, the available run modes are:\n" +
-                    "    - ${purity_estimate_modes}\n" +
-                    "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
-                Nextflow.exit(1)
-            }
-        }
-
-        if (params.ref_data_genome_alt !== null) {
-            if (params.genome_type != 'alt') {
-                log.error "\n~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n" +
-                    "  Using a reference genome without ALT contigs but found an .alt file\n" +
-                    "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
-                Nextflow.exit(1)
-            }
-
-            def ref_data_genome_alt_fn = nextflow.Nextflow.file(params.ref_data_genome_alt).name
-            def ref_data_genome_fasta_fn = nextflow.Nextflow.file(params.ref_data_genome_fasta).name
-            if (ref_data_genome_alt_fn != "${ref_data_genome_fasta_fn}.alt") {
-                log.error "\n~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n" +
-                    "  Found .alt file with filename of ${ref_data_genome_alt_fn} but it is required to match\n" +
-                    "  reference genome FASTA filename stem: ${ref_data_genome_fasta_fn}.alt\n" +
-                    "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
-                Nextflow.exit(1)
-            }
-
-        }
+        Utils.validateEnumFromString(params.sequencing_type, Constants.SequencingType, log)
 
         // UMI parameters
 
@@ -293,64 +198,13 @@ class Params {
                 "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
             Nextflow.exit(1)
         }
-
-    }
-
-    public static void validateRunSpecificParams(params, run_config, log) {
-
-        // NOTE(SW): the following final config checks are performed here since they require additional information
-        // regarding processes that are run
-
-        def has_alt_contigs = params.genome_type == 'alt'
-
-        // Ensure that custom genomes with ALT contigs that need indexes built have the required .alt file
-        def has_bwa_indexes = (params.ref_data_genome_bwamem2_index && params.ref_data_genome_gridss_index)
-        def has_alt_file = params.containsKey('ref_data_genome_alt') && params.ref_data_genome_alt
-        def run_bwa_or_gridss_index = run_config.stages.alignment && run_config.has_dna_fastq && !has_bwa_indexes
-
-        if (run_bwa_or_gridss_index && has_alt_contigs && !has_alt_file) {
-            log.error "\n~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n" +
-                    "  The genome .alt file is required when building bwa-mem2 or GRIDSS indexes\n" +
-                    "  for reference genomes containing ALT contigs\n" +
-                    "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
-            Nextflow.exit(1)
-        }
-
-        // Refuse to create STAR index for reference genome containing ALTs, refer to Slack channel
-        def run_star_index = run_config.stages.alignment && run_config.has_rna_fastq && !params.ref_data_genome_star_index
-
-        if (run_star_index && has_alt_contigs) {
-            log.error "\n~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n" +
-                    "  Refusing to create the STAR index for a reference genome with ALT contigs.\n" +
-                    "  Please review https://github.com/alexdobin/STAR docs or contact us on Slack.\n" +
-                    "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
-            Nextflow.exit(1)
-        }
-
-        // Require that an input GTF file is provided when creating STAR index
-        if (run_star_index && !params.ref_data_genome_gtf) {
-            log.error "\n~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n" +
-                    "  Creating a STAR index requires the appropriate genome transcript annotations\n" +
-                    "  as a GTF file. Please contact us on Slack for further information.\n" +
-                    "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
-            Nextflow.exit(1)
-        }
-
-        // Require --isofox_gene_ids argument to be provided in PANEL_RESOURCE_CREATION when RNA inputs are present
-        if (run_config.mode === Constants.RunMode.PANEL_RESOURCE_CREATION && run_config.has_rna && !params.isofox_gene_ids) {
-            log.error "\n~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n" +
-                    "  Running the panel resource creation workflow with RNA requires that the\n" +
-                    "  --isofox_gene_ids argument is set with an appropriate input file.\n" +
-                    "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
-            Nextflow.exit(1)
-        }
     }
 
     public static getRunConfig(params, inputs, log) {
 
         def run_mode = Utils.getValidatedEnumFromString(params.mode, Constants.RunMode, log)
 
-        def stages = Processes.getRunStages(
+        def stages = Processes.getValidatedRunStages(
             params.processes_include,
             params.processes_exclude,
             params.processes_manual,
@@ -365,6 +219,135 @@ class Params {
             has_rna_fastq: inputs.any { Utils.hasTumorRnaFastq(it) },
             has_dna_fastq: inputs.any { Utils.hasTumorDnaFastq(it) || Utils.hasNormalDnaFastq(it) },
         ]
+    }
+
+    public static void validateRunSpecificParams(params, run_config, log) {
+
+        // Run mode specific parameters
+
+        if (run_config.run_mode === Constants.RunMode.PREPARE_REFERENCE && params.ref_data_types == null) {
+
+            def ref_data_types = Utils.getEnumNames(Constants.RefDataType).join('\n    - ')
+            log.error "\n~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n" +
+                "  CLI argument --ref_data_types is required for mode prepare_reference.\n" +
+                "  Please specify one or more of the below valid values (separated by commas)\n" +
+                "    - ${ref_data_types}\n" +
+                "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
+            Nextflow.exit(1)
+        }
+
+        if (run_config.run_mode === Constants.RunMode.TARGETED) {
+
+            if (!params.containsKey('panel') || params.panel === null) {
+
+                def panels = Constants.PANELS_DEFINED.join('\n    - ')
+                log.error "\n~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n" +
+                    "  A panel is required to be set using the --panel CLI argument or in a\n" +
+                    "  configuration file when running in targeted mode or panel resource creation mode.\n" +
+                    "  Currently, the available built-in panels are:\n" +
+                    "    - ${panels}\n" +
+                    "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
+                Nextflow.exit(1)
+
+            } else if (!Constants.PANELS_DEFINED.contains(params.panel)) {
+
+                if (params.containsKey('force_panel') && params.force_panel) {
+                    log.warn "provided panel ${params.panel} does not have built-in support but forcing to proceed"
+                } else {
+                    def panels = Constants.PANELS_DEFINED.join('\n    - ')
+                    log.error "\n~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n" +
+                        "  The ${params.panel} panel does not have built-in support. Currently, the\n" +
+                        "  available supported panels are:\n" +
+                        "    - ${panels}\n\n" +
+                        "  Please adjust the --panel argument or override with --force_panel.\n" +
+                        "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
+                    Nextflow.exit(1)
+                }
+            }
+        }
+
+        if (run_config.run_mode === Constants.RunMode.PURITY_ESTIMATE) {
+
+            if(!params.purity_estimate_mode) {
+                def purity_estimate_modes = Utils.getEnumNames(Constants.PurityEstimateRunMode).join('\n    - ')
+                log.error "\n~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n" +
+                    "  A valid purity estimate run mode must be set using the --purity_estimate_mode\n" +
+                    "  CLI argument or in a configuration file.\n" +
+                    "  Currently, the available run modes are:\n" +
+                    "    - ${purity_estimate_modes}\n" +
+                    "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
+                Nextflow.exit(1)
+            } else {
+                Utils.validateEnumFromString(params.purity_estimate_mode, Constants.PurityEstimateRunMode, log)
+            }
+        }
+
+        if (params.ref_data_genome_alt !== null) {
+            if (params.genome_type != 'alt') {
+                log.error "\n~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n" +
+                    "  Using a reference genome without ALT contigs but found an .alt file\n" +
+                    "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
+                Nextflow.exit(1)
+            }
+
+            def ref_data_genome_alt_fn = nextflow.Nextflow.file(params.ref_data_genome_alt).name
+            def ref_data_genome_fasta_fn = nextflow.Nextflow.file(params.ref_data_genome_fasta).name
+            if (ref_data_genome_alt_fn != "${ref_data_genome_fasta_fn}.alt") {
+                log.error "\n~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n" +
+                    "  Found .alt file with filename of ${ref_data_genome_alt_fn} but it is required to match\n" +
+                    "  reference genome FASTA filename stem: ${ref_data_genome_fasta_fn}.alt\n" +
+                    "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
+                Nextflow.exit(1)
+            }
+
+        }
+
+        // NOTE(SW): the following final config checks are performed here since they require additional information
+        // regarding processes that are run
+
+        def has_alt_contigs = params.genome_type == 'alt'
+
+        // Ensure that custom genomes with ALT contigs that need indexes built have the required .alt file
+        def has_bwa_indexes = (params.ref_data_genome_bwamem2_index && params.ref_data_genome_gridss_index)
+        def has_alt_file = params.containsKey('ref_data_genome_alt') && params.ref_data_genome_alt
+        def run_bwa_or_gridss_index = run_config.stages.alignment && run_config.has_dna_fastq && !has_bwa_indexes
+
+        if (run_bwa_or_gridss_index && has_alt_contigs && !has_alt_file) {
+            log.error "\n~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n" +
+                "  The genome .alt file is required when building bwa-mem2 or GRIDSS indexes\n" +
+                "  for reference genomes containing ALT contigs\n" +
+                "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
+            Nextflow.exit(1)
+        }
+
+        // Refuse to create STAR index for reference genome containing ALTs, refer to Slack channel
+        def run_star_index = run_config.stages.alignment && run_config.has_rna_fastq && !params.ref_data_genome_star_index
+
+        if (run_star_index && has_alt_contigs) {
+            log.error "\n~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n" +
+                "  Refusing to create the STAR index for a reference genome with ALT contigs.\n" +
+                "  Please review https://github.com/alexdobin/STAR docs or contact us on Slack.\n" +
+                "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
+            Nextflow.exit(1)
+        }
+
+        // Require that an input GTF file is provided when creating STAR index
+        if (run_star_index && !params.ref_data_genome_gtf) {
+            log.error "\n~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n" +
+                "  Creating a STAR index requires the appropriate genome transcript annotations\n" +
+                "  as a GTF file. Please contact us on Slack for further information.\n" +
+                "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
+            Nextflow.exit(1)
+        }
+
+        // Require --isofox_gene_ids argument to be provided in PANEL_RESOURCE_CREATION when RNA inputs are present
+        if (run_config.mode === Constants.RunMode.PANEL_RESOURCE_CREATION && run_config.has_rna && !params.isofox_gene_ids) {
+            log.error "\n~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n" +
+                "  Running the panel resource creation workflow with RNA requires that the\n" +
+                "  --isofox_gene_ids argument is set with an appropriate input file.\n" +
+                "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
+            Nextflow.exit(1)
+        }
     }
 
     public static getPrepConfigFromRunConfig(run_config) {

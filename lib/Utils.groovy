@@ -86,6 +86,11 @@ class Utils {
         }
     }
 
+    public static validateEnumFromString(string, enum_class, log){
+        // NOTE(LN): alias method for code clarity
+        getValidatedEnumFromString(string, enum_class, log)
+    }
+
     // Sample records
     public static getTumorDnaSample(meta) {
         return meta.getOrDefault([Constants.SampleType.TUMOR, Constants.SequenceType.DNA], [:])
