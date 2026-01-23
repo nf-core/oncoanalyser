@@ -114,8 +114,10 @@ workflow PANEL_RESOURCE_CREATION {
         ref_data.genome_dict,
         hmf_data.unmap_regions,
         hmf_data.msi_jitter_sites,
+        params.sequencing_type,
         params.redux_umi_enabled,
         params.redux_umi_duplex_delim,
+        true,  // targeted_mode
     )
 
     ch_versions = ch_versions.mix(REDUX_PROCESSING.out.versions)

@@ -15,8 +15,10 @@ process REDUX {
     path genome_dict
     path unmap_regions
     path msi_jitter_sites
+    val sequencing_type
     val umi_enable
     val umi_duplex_delim
+    val targeted_mode
 
     output:
     tuple val(meta), path('*.redux.bam'), path('*.redux.bam.bai'), emit: bam
@@ -36,20 +38,40 @@ process REDUX {
 
     def log_level_arg = task.ext.log_level ? "-log_level ${task.ext.log_level}" : ''
 
-    def form_consensus_arg = umi_enable ? '' : '-form_consensus'
+    def form_consensus_arg = ''
+    def umi_enable_arg = ''
+    def umi_duplex_arg = ''
+    def umi_duplex_delim_arg = ''
+    def skip_duplicate_marking_arg = ''
 
-    def umi_args_list = []
-    if (umi_enable) umi_args_list.add('-umi_enabled')
-    if (umi_duplex_delim) umi_args_list.add("-umi_duplex -umi_duplex_delim ${umi_duplex_delim}")
-    def umi_args = umi_args_list ? umi_args_list.join(' ') : ''
+    if(umi_enable) {
+        umi_enable_arg = '-umi_enabled'
+    } else {
+        form_consensus_arg = '-form_consensus'
+    }
+
+    if(umi_duplex_delim) {
+        umi_duplex_arg = '-umi_duplex'
+        umi_duplex_delim_arg = "-umi_duplex_delim ${umi_duplex_delim}"
+    }
+
+    def umi_args = [umi_enable_arg, umi_duplex_arg, umi_duplex_delim_arg]
+        .findAll { it != '' }
+        .join(' ')
+
+    sequencing_type_enum = Utils.getEnumFromString(sequencing_type, Constants.SequencingType)
+    if(sequencing_type_enum === Constants.SequencingType.ULTIMA) {
+        form_consensus_arg = ''
+        skip_duplicate_marking_arg = '-skip_duplicate_marking'
+    }
+
+    def bqr_use_all_regions_arg = targeted_mode ? '-bqr_use_all_regions' : ''
 
     """
     redux \\
         -Xmx${Math.round(task.memory.bytes * xmx_mod)} \\
         ${args} \\
         -sample ${meta.sample_id} \\
-        ${form_consensus_arg} \\
-        ${umi_args} \\
         -input_bam ${bams.join(',')} \\
         -output_bam ./${meta.sample_id}.redux.bam \\
         -ref_genome ${genome_fasta} \\
@@ -57,7 +79,10 @@ process REDUX {
         -ref_genome_msi_file ${msi_jitter_sites} \\
         -unmap_regions ${unmap_regions} \\
         -bamtool \$(which samtools) \\
-        -write_stats \\
+        -sequencing_type ${sequencing_type} \\
+        ${form_consensus_arg} \\
+        ${umi_args} \\
+        ${skip_duplicate_marking_arg} \\
         -threads ${task.cpus} \\
         ${log_level_arg} \\
         -output_dir ./

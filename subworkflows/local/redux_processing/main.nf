@@ -24,8 +24,10 @@ workflow REDUX_PROCESSING {
     msi_jitter_sites // channel: [mandatory] /path/to/msi_jitter_sites
 
     // Params
+    sequencing_type  // string:  [mandatory] sequencing type
     umi_enable       // boolean: [mandatory] enable UMI processing
     umi_duplex_delim // string:  [optional] UMI duplex delimiter
+    targeted_mode    // boolean: [mandatory] Set targeted mode
 
     main:
     // Channel for version.yml files
@@ -111,8 +113,10 @@ workflow REDUX_PROCESSING {
         genome_dict,
         unmap_regions,
         msi_jitter_sites,
+        sequencing_type,
         umi_enable,
         umi_duplex_delim,
+        targeted_mode,
     )
 
     ch_versions = ch_versions.mix(REDUX.out.versions)
