@@ -48,13 +48,13 @@
                     "type": "string",
                     "description": "Workflow run mode.",
                     "fa_icon": "fas fa-diagram-project",
-                    "pattern": "^(wgts|targeted|purity_estimate|panel_resource_creation|prepare_reference)"
+                    "enum": ["wgts", "targeted", "purity_estimate", "panel_resource_creation", "prepare_reference"]
                 },
                 "purity_estimate_mode": {
                     "type": "string",
                     "description": "Purity estimate workflow run mode.",
                     "fa_icon": "fas fa-diagram-project",
-                    "pattern": "^(wgts|targeted)"
+                    "enum": ["wgts", "targeted"]
                 },
                 "sequencing_type": {
                     "type": "string",
