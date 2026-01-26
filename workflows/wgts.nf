@@ -340,6 +340,7 @@ workflow WGTS {
             hmf_data.driver_gene_panel,
             hmf_data.ensembl_data_resources,
             hmf_data.gnomad_resource,
+            params.sequencing_type,
             true,  // enable_germline
             false, // targeted_mode
         )
@@ -456,6 +457,7 @@ workflow WGTS {
             ref_data.genome_version,
             ref_data.genome_fai,
             ref_data.genome_dict,
+            params.sequencing_type,
             run_config.stages.orange,  // enable_germline [run for ORANGE but not Neo]
             false,  // targeted_mode
         )

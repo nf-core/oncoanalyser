@@ -24,6 +24,7 @@ workflow SAGE_APPEND {
     genome_dict      // channel: [mandatory] /path/to/genome_dict
 
     // Params
+    sequencing_type  // string:  [mandatory] sequencing type
     enable_germline  // boolean: [mandatory] Enable germline
     targeted_mode    // boolean: [mandatory] Set targeted mode
 
@@ -126,6 +127,7 @@ workflow SAGE_APPEND {
         genome_version,
         genome_fai,
         genome_dict,
+        sequencing_type,
         targeted_mode,
     )
 
@@ -200,6 +202,7 @@ workflow SAGE_APPEND {
         genome_version,
         genome_fai,
         genome_dict,
+        sequencing_type,
         targeted_mode,
     )
 

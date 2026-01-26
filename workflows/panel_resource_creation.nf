@@ -219,6 +219,7 @@ workflow PANEL_RESOURCE_CREATION {
         driver_gene_panel,
         hmf_data.ensembl_data_resources,
         hmf_data.gnomad_resource,
+        params.sequencing_type,
         true,  // enable_germline
         true,  // targeted_mode
     )

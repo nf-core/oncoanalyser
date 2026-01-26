@@ -17,6 +17,7 @@ process SAGE_GERMLINE {
     path sage_highconf_regions
     path driver_gene_panel
     path ensembl_data_resources
+    val sequencing_type
     val targeted_mode
 
     output:
@@ -45,7 +46,6 @@ process SAGE_GERMLINE {
         -tumor_bam ${normal_bam} \\
         -reference ${meta.tumor_id} \\
         -reference_bam ${tumor_bam} \\
-        -jitter_param_dir ./ \\
         -ref_sample_count 0 \\
         -ref_genome ${genome_fasta} \\
         -ref_genome_version ${genome_ver} \\
@@ -53,10 +53,10 @@ process SAGE_GERMLINE {
         -driver_gene_panel ${driver_gene_panel} \\
         -high_confidence_bed ${sage_highconf_regions} \\
         -ensembl_data_dir ${ensembl_data_resources} \\
+        -sequencing_type ${sequencing_type} \\
         -germline \\
         -panel_only \\
         ${high_depth_mode_arg} \\
-        -bqr_write_plot \\
         -threads ${task.cpus} \\
         ${log_level_arg} \\
         -output_vcf germline/${meta.tumor_id}.sage.germline.vcf.gz

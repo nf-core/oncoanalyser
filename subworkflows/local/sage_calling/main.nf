@@ -34,6 +34,9 @@ workflow SAGE_CALLING {
     driver_gene_panel            // channel: [mandatory] /path/to/driver_gene_panel
     ensembl_data_resources       // channel: [mandatory] /path/to/ensembl_data_resources/
     gnomad_resource              // channel: [mandatory] /path/to/gnomad_resource
+
+    // Params
+    sequencing_type              // string:  [mandatory] sequencing type
     enable_germline              // boolean: [mandatory] Enable germline mode
     targeted_mode                // boolean: [mandatory] Set targeted mode
 
@@ -138,6 +141,7 @@ workflow SAGE_CALLING {
         sage_highconf_regions,
         driver_gene_panel,
         ensembl_data_resources,
+        sequencing_type,
         targeted_mode,
     )
 
@@ -196,6 +200,7 @@ workflow SAGE_CALLING {
         driver_gene_panel,
         ensembl_data_resources,
         gnomad_resource,
+        sequencing_type,
         targeted_mode,
     )
 

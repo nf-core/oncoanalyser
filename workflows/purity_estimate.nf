@@ -216,6 +216,7 @@ workflow PURITY_ESTIMATE {
             ref_data.genome_version,
             ref_data.genome_fai,
             ref_data.genome_dict,
+            params.sequencing_type,
             false,  // run_germline
             purity_estimate_run_mode === Constants.PurityEstimateRunMode.TARGETED,
         )

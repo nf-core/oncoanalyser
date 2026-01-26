@@ -21,6 +21,7 @@ process SAGE_SOMATIC {
     path driver_gene_panel
     path ensembl_data_resources
     path gnomad_resource
+    val sequencing_type
     val targeted_mode
 
     output:
@@ -88,19 +89,18 @@ process SAGE_SOMATIC {
         ${ref_sample_count_arg} \\
         -tumor ${meta.tumor_id} \\
         -tumor_bam ${tumor_bam} \\
-        -jitter_param_dir ./ \\
         -ref_genome ${genome_fasta} \\
         -ref_genome_version ${genome_ver} \\
         -hotspots ${sage_known_hotspots_somatic} \\
         -driver_gene_panel ${driver_gene_panel} \\
         -high_confidence_bed ${sage_highconf_regions} \\
         -ensembl_data_dir ${ensembl_data_resources} \\
+        -sequencing_type ${sequencing_type} \\
+        -include_mt \\
         ${pon_file_arg} \\
         ${gnomad_arg} \\
         ${run_tinc_arg} \\
         ${high_depth_mode_arg} \\
-        -bqr_write_plot \\
-        -include_mt \\
         ${write_fit_variants_arg} \\
         -threads ${task.cpus} \\
         ${log_level_arg} \\
