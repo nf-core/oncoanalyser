@@ -125,15 +125,16 @@ workflow REDUX_PROCESSING {
     // channel: [ meta_redux, bam, bai, dup_freq_tsv, jitter_tsv, ms_tsv ]
     ch_redux_out = WorkflowOncoanalyser.groupByMeta(
         REDUX.out.bam,
+        REDUX.out.bqr_tsv,
         REDUX.out.dup_freq_tsv,
         REDUX.out.jitter_tsv,
         REDUX.out.ms_tsv,
     )
 
     // Sort into a tumor and normal channel
-    // channel: [ meta_redux, bam, bai, dup_freq_tsv, jitter_tsv, ms_tsv ]
+    // channel: [ meta_redux, bam, bai, bqr_tsv, dup_freq_tsv, jitter_tsv, ms_tsv ]
     ch_redux_out_sorted = ch_redux_out
-        .branch { meta_redux, bam, bai, dup_freq_tsv, jitter_tsv, ms_tsv ->
+        .branch { meta_redux, bam, bai, bqr_tsv, dup_freq_tsv, jitter_tsv, ms_tsv ->
             assert ['tumor', 'normal', 'donor'].contains(meta_redux.sample_type)
             tumor: meta_redux.sample_type == 'tumor'
             normal: meta_redux.sample_type == 'normal'
@@ -146,31 +147,31 @@ workflow REDUX_PROCESSING {
     ch_redux_tumor_out = Channel.empty()
         .mix(
             WorkflowOncoanalyser.restoreMeta(ch_redux_out_sorted.tumor, ch_inputs),
-            ch_inputs_tumor_sorted.skip.map { meta -> [meta, [], [], [], [], []] },
+            ch_inputs_tumor_sorted.skip.map { meta -> [meta, [], [], [], [], [], []] },
         )
-        .multiMap { meta, bam, bai, dup_freq_tsv, jitter_tsv, ms_tsv ->
+        .multiMap { meta, bam, bai, bqr_tsv, dup_freq_tsv, jitter_tsv, ms_tsv ->
             bam: [meta, bam, bai]
-            tsv: [meta, dup_freq_tsv, jitter_tsv, ms_tsv]
+            tsv: [meta, bqr_tsv, dup_freq_tsv, jitter_tsv, ms_tsv]
         }
 
     ch_redux_normal_out = Channel.empty()
         .mix(
             WorkflowOncoanalyser.restoreMeta(ch_redux_out_sorted.normal, ch_inputs),
-            ch_inputs_normal_sorted.skip.map { meta -> [meta, [], [], [], [], []] },
+            ch_inputs_normal_sorted.skip.map { meta -> [meta, [], [], [], [], [], []] },
         )
-        .multiMap { meta, bam, bai, dup_freq_tsv, jitter_tsv, ms_tsv ->
+        .multiMap { meta, bam, bai, bqr_tsv, dup_freq_tsv, jitter_tsv, ms_tsv ->
             bam: [meta, bam, bai]
-            tsv: [meta, dup_freq_tsv, jitter_tsv, ms_tsv]
+            tsv: [meta, bqr_tsv, dup_freq_tsv, jitter_tsv, ms_tsv]
         }
 
     ch_redux_donor_out = Channel.empty()
         .mix(
             WorkflowOncoanalyser.restoreMeta(ch_redux_out_sorted.donor, ch_inputs),
-            ch_inputs_donor_sorted.skip.map { meta -> [meta, [], [], [], [], []] },
+            ch_inputs_donor_sorted.skip.map { meta -> [meta, [], [], [], [], [], []] },
         )
-        .multiMap { meta, bam, bai, dup_freq_tsv, jitter_tsv, ms_tsv ->
+        .multiMap { meta, bam, bai, bqr_tsv, dup_freq_tsv, jitter_tsv, ms_tsv ->
             bam: [meta, bam, bai]
-            tsv: [meta, dup_freq_tsv, jitter_tsv, ms_tsv]
+            tsv: [meta, bqr_tsv, dup_freq_tsv, jitter_tsv, ms_tsv]
         }
 
     emit:

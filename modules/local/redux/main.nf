@@ -22,9 +22,10 @@ process REDUX {
 
     output:
     tuple val(meta), path('*.redux.bam'), path('*.redux.bam.bai'), emit: bam
-    tuple val(meta), path('*.duplicate_freq.tsv')                , emit: dup_freq_tsv
-    tuple val(meta), path('*.jitter_params.tsv')                 , emit: jitter_tsv
-    tuple val(meta), path('*.ms_table.tsv.gz')                   , emit: ms_tsv
+    tuple val(meta), path('*.redux.bqr.tsv')                     , emit: bqr_tsv
+    tuple val(meta), path('*.redux.duplicate_freq.tsv')          , emit: dup_freq_tsv
+    tuple val(meta), path('*.redux.jitter_params.tsv')           , emit: jitter_tsv
+    tuple val(meta), path('*.redux.ms_table.tsv.gz')             , emit: ms_tsv
     path 'versions.yml'                                          , emit: versions
     path '.command.*'                                            , emit: command_files
 
@@ -98,10 +99,11 @@ process REDUX {
     """
     touch ${meta.sample_id}.redux.bam
     touch ${meta.sample_id}.redux.bam.bai
-    touch ${meta.sample_id}.duplicate_freq.tsv
-    touch ${meta.sample_id}.jitter_params.tsv
-    touch ${meta.sample_id}.ms_table.tsv.gz
-    touch ${meta.sample_id}.repeat.tsv.gz
+    touch ${meta.sample_id}.redux.bqr.tsv
+    touch ${meta.sample_id}.redux.duplicate_freq.tsv
+    touch ${meta.sample_id}.redux.jitter_params.tsv
+    touch ${meta.sample_id}.redux.ms_table.tsv.gz
+    touch ${meta.sample_id}.redux.repeat.tsv.gz
 
     if [[ -n "${umi_enable}" ]]; then
         touch ${meta.sample_id}.umi_coord_freq.tsv
