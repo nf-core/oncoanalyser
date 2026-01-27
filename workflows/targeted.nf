@@ -165,9 +165,9 @@ workflow TARGETED {
         ch_redux_dna_normal_out = ch_inputs.map { meta -> [meta, [], []] }
         ch_redux_dna_donor_out = ch_inputs.map { meta -> [meta, [], []] }
 
-        ch_redux_dna_tumor_tsv_out = ch_inputs.map { meta -> [meta, [], [], []] }
-        ch_redux_dna_normal_tsv_out = ch_inputs.map { meta -> [meta, [], [], []] }
-        ch_redux_dna_donor_tsv_out = ch_inputs.map { meta -> [meta, [], [], []] }
+        ch_redux_dna_tumor_tsv_out = ch_inputs.map { meta -> [meta, [], [], [], []] }
+        ch_redux_dna_normal_tsv_out = ch_inputs.map { meta -> [meta, [], [], [], []] }
+        ch_redux_dna_donor_tsv_out = ch_inputs.map { meta -> [meta, [], [], [], []] }
 
     }
 
@@ -449,7 +449,7 @@ workflow TARGETED {
             ch_inputs,
             ch_purple_out,
             ch_inputs.map { meta -> [meta, [], []] },      // ch_tumor_redux_bam
-            ch_inputs.map { meta -> [meta, [], [], []] },  // ch_tumor_redux_tsv
+            ch_inputs.map { meta -> [meta, [], [], [], []] },  // ch_tumor_redux_tsv
             ch_align_rna_tumor_out,
             ref_data.genome_fasta,
             ref_data.genome_version,
