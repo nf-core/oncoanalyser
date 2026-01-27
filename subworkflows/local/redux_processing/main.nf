@@ -104,6 +104,12 @@ workflow REDUX_PROCESSING {
             return [meta_redux, bams, bais]
         }
 
+    // Handle sequencing type
+    // NOTE(LN): Comparing enums here at the workflow level allows the REDUX process to resume
+    // by avoiding enum imports in the REDUX process that would lead to task serialisation issues
+    sequencing_type_enum = Utils.getEnumFromString(sequencing_type, Constants.SequencingType)
+    sequencing_type_ultima = sequencing_type_enum === Constants.SequencingType.ULTIMA
+
     // Run process
     REDUX(
         ch_redux_inputs,
@@ -114,6 +120,7 @@ workflow REDUX_PROCESSING {
         unmap_regions,
         msi_jitter_sites,
         sequencing_type,
+        sequencing_type_ultima,
         umi_enable,
         umi_duplex_delim,
         targeted_mode,

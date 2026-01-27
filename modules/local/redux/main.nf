@@ -16,6 +16,7 @@ process REDUX {
     path unmap_regions
     path msi_jitter_sites
     val sequencing_type
+    val sequencing_type_ultima
     val umi_enable
     val umi_duplex_delim
     val targeted_mode
@@ -60,8 +61,7 @@ process REDUX {
         .findAll { it != '' }
         .join(' ')
 
-    sequencing_type_enum = Utils.getEnumFromString(sequencing_type, Constants.SequencingType)
-    if(sequencing_type_enum === Constants.SequencingType.ULTIMA) {
+    if(sequencing_type_ultima) {
         form_consensus_arg = ''
         skip_duplicate_marking_arg = '-skip_duplicate_marking'
     }
