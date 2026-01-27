@@ -22,13 +22,16 @@ process REDUX {
     val targeted_mode
 
     output:
-    tuple val(meta), path('*.redux.bam'), path('*.redux.bam.bai'), emit: bam
-    tuple val(meta), path('*.redux.bqr.tsv')                     , emit: bqr_tsv
-    tuple val(meta), path('*.redux.duplicate_freq.tsv')          , emit: dup_freq_tsv
-    tuple val(meta), path('*.redux.jitter_params.tsv')           , emit: jitter_tsv
-    tuple val(meta), path('*.redux.ms_table.tsv.gz')             , emit: ms_tsv
-    path 'versions.yml'                                          , emit: versions
-    path '.command.*'                                            , emit: command_files
+    tuple val(meta),
+        path('*.redux.bam'),
+        path('*.redux.bam.bai')             , emit: bam
+    tuple val(meta),
+        path('*.redux.bqr.tsv'),
+        path('*.redux.duplicate_freq.tsv'),
+        path('*.redux.jitter_params.tsv'),
+        path('*.redux.ms_table.tsv.gz')     , emit: tsv
+    path 'versions.yml'                     , emit: versions
+    path '.command.*'                       , emit: command_files
 
     when:
     task.ext.when == null || task.ext.when
