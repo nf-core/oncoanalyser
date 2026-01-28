@@ -596,7 +596,8 @@ workflow TARGETED {
             ref_data.genome_version,
             ref_data.genome_fai,
             hmf_data.lilac_resources,
-            true,  // targeted_mode
+            true,  // targeted_mode,
+            params.sequencing_type,
         )
 
         ch_versions = ch_versions.mix(LILAC_CALLING.out.versions)

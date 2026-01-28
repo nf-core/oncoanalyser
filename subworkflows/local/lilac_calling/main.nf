@@ -23,6 +23,9 @@ workflow LILAC_CALLING {
     lilac_resource_dir // channel: [mandatory] /path/to/lilac_resource_dir/
     targeted_mode      // boolean: [mandatory] Set targeted mode
 
+    // Params
+    sequencing_type    // string:  [mandatory] sequencing type
+
     main:
     // Channel for version.yml files
     // channel: [ versions.yml ]
@@ -97,7 +100,8 @@ workflow LILAC_CALLING {
         genome_version,
         genome_fai,
         lilac_resource_dir,
-        targeted_mode
+        targeted_mode,
+        sequencing_type,
     )
 
     ch_versions = ch_versions.mix(LILAC.out.versions)

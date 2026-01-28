@@ -14,6 +14,7 @@ process LILAC {
     path genome_fai
     path lilac_resources, stageAs: 'lilac_resources'
     val targeted_mode
+    val sequencing_type
 
     output:
     tuple val(meta), path('lilac/'), emit: lilac_dir
@@ -53,6 +54,7 @@ process LILAC {
         -ref_genome_version ${genome_ver} \\
         -resource_dir ${lilac_resources} \\
         -freq_score_penalty ${freq_score_penalty} \\
+        -sequencing_type ${sequencing_type} \\
         -threads ${task.cpus} \\
         ${log_level_arg} \\
         -output_dir lilac/

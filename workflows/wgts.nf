@@ -646,7 +646,8 @@ workflow WGTS {
             ref_data.genome_version,
             ref_data.genome_fai,
             hmf_data.lilac_resources,
-            false,  // targeted_mode
+            false,  // targeted_mode,
+            params.sequencing_type,
         )
 
         ch_versions = ch_versions.mix(LILAC_CALLING.out.versions)
