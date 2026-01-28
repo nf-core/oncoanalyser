@@ -674,6 +674,7 @@ workflow WGTS {
             ch_cobalt_out,
             ch_purple_out,
             ref_data.genome_version,
+            params.sequencing_type,
         )
 
         ch_versions = ch_versions.mix(TEAL_CHARACTERISATION.out.versions)

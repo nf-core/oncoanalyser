@@ -22,6 +22,9 @@ workflow TEAL_CHARACTERISATION {
     // Reference data
     genome_version    // channel: [mandatory] genome version
 
+    // Params
+    sequencing_type  // string:  [mandatory] sequencing type
+
     main:
     // Channel for version.yml files
     // channel: [ versions.yml ]
@@ -76,6 +79,7 @@ workflow TEAL_CHARACTERISATION {
     TEAL_PREP(
         ch_teal_prep_inputs,
         genome_version,
+        sequencing_type,
     )
 
     ch_versions = ch_versions.mix(TEAL_PREP.out.versions)
@@ -152,6 +156,7 @@ workflow TEAL_CHARACTERISATION {
     TEAL_PIPELINE(
         ch_teal_pipeline_inputs,
         genome_version,
+        sequencing_type,
     )
 
     ch_versions = ch_versions.mix(TEAL_PIPELINE.out.versions)
