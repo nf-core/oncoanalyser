@@ -41,6 +41,9 @@ workflow ORANGE_REPORTING {
     isofox_alt_sj               // channel: [optional]  /path/to/isofox_alt_sj
     isofox_gene_distribution    // channel: [optional]  /path/to/isofox_gene_distribution
 
+    // Params
+    targeted_mode               // boolean: [mandatory] Set targeted mode
+
     main:
     // Channel for version.yml files
     // channel: [ versions.yml ]
@@ -256,6 +259,7 @@ workflow ORANGE_REPORTING {
         ch_orange_inputs.isofox_alt_sj,
         ch_orange_inputs.isofox_gene_distribution,
         '2.3.0 [oncoanalyser]',
+        targeted_mode,
     )
 
     ch_versions = ch_versions.mix(ORANGE.out.versions)

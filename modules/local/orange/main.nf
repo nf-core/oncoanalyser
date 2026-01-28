@@ -37,6 +37,7 @@ process ORANGE {
     path isofox_alt_sj
     path isofox_gene_distribution
     val pipeline_version
+    val targeted_mode
 
     output:
     tuple val(meta), path('output/*.orange.pdf') , emit: pdf, optional: true
@@ -55,9 +56,7 @@ process ORANGE {
     def log_level_arg = task.ext.log_level ? "-log_level ${task.ext.log_level}" : ''
 
     def pipeline_version_str = pipeline_version ?: 'not specified'
-
-    def run_mode = Utils.getEnumFromString(params.mode, Constants.RunMode);
-    def experiment_type = (run_mode === Constants.RunMode.WGTS) ? 'WGS' : 'PANEL'
+    def experiment_type = targeted_mode ? 'PANEL' : 'WGS'
 
     def virus_dir_arg = virusinterpreter_dir ? "-virus_dir ${virusinterpreter_dir}" : ''
     def lilac_dir_arg = lilac_dir ? "-lilac_dir ${lilac_dir}" : ''
