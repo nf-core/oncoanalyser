@@ -295,6 +295,7 @@ workflow WGTS {
             hmf_data.repeatmasker_annotations,
             hmf_data.unmap_regions,
             [],  // target_region_bed
+            params.sequencing_type,
         )
 
         ch_versions = ch_versions.mix(ESVEE_CALLING.out.versions)

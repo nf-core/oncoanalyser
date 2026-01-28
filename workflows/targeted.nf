@@ -293,6 +293,7 @@ workflow TARGETED {
             hmf_data.repeatmasker_annotations,
             hmf_data.unmap_regions,
             panel_data.target_region_bed,
+            params.sequencing_type,
         )
 
         ch_versions = ch_versions.mix(ESVEE_CALLING.out.versions)

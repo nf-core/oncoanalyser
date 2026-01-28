@@ -11,9 +11,13 @@ include { ESVEE } from '../../../modules/local/esvee/main'
 
 workflow ESVEE_CALLING {
     take:
+
+    // Sample data
     ch_inputs                // channel: [mandatory] [ meta ]
     ch_tumor_bam             // channel: [mandatory] [ meta, bam, bai ]
     ch_normal_bam            // channel: [mandatory] [ meta, bam, bai ]
+
+    // Reference data
     genome_fasta             // channel: [mandatory] /path/to/genome_fasta
     genome_version           // channel: [mandatory] genome version
     genome_fai               // channel: [mandatory] /path/to/genome_fai
@@ -26,6 +30,9 @@ workflow ESVEE_CALLING {
     repeatmasker_annotations // channel: [mandatory] /path/to/repeatmasker_annotations
     unmap_regions            // channel: [mandatory] /path/to/unmap_regions
     target_region_bed        // channel: [optional]  /path/to/target_region_bed
+
+    // Params
+    sequencing_type          // string:  [mandatory] sequencing type
 
     main:
     // Channel for version.yml files
@@ -91,6 +98,7 @@ workflow ESVEE_CALLING {
         repeatmasker_annotations,
         unmap_regions,
         target_region_bed,
+        sequencing_type,
     )
 
     ch_versions = ch_versions.mix(ESVEE.out.versions)
