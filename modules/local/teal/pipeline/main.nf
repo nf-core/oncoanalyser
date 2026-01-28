@@ -36,7 +36,7 @@ process TEAL_PIPELINE {
     def tumor_arg = tumor_teal_bam ? "-tumor ${meta.tumor_id}": ''
     def tumor_bam_arg = tumor_teal_bam ? "-tumor_bam ${tumor_teal_bam}": ''
     def tumor_wgs_metrics_arg = tumor_metrics_dir ? "-tumor_wgs_metrics ${tumor_metrics_dir}/${meta.tumor_id}.bam_metric.summary.tsv": ''
-    def purple_arg = purple_dir ? "-purple ${purple_dir}": ''
+    def purple_arg = purple_dir ? "-purple_dir ${purple_dir}" : ''
 
     def reference_arg = normal_teal_bam ? "-reference ${meta.normal_id}" : ''
     def reference_bam_arg = normal_teal_bam ? "-reference_bam ${normal_teal_bam}" : ''
@@ -59,7 +59,7 @@ process TEAL_PIPELINE {
         ${reference_bam_arg} \\
         ${tumor_arg} \\
         ${tumor_bam_arg} \\
-        -cobalt ${cobalt_dir} \\
+        -cobalt_dir ${cobalt_dir} \\
         ${purple_arg} \\
         ${reference_wgs_metrics_arg} \\
         ${tumor_wgs_metrics_arg} \\
