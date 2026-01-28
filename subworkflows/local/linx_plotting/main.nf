@@ -88,6 +88,9 @@ workflow LINX_PLOTTING {
     //
     // Create process input channel
     // channel: [ meta_gpgr, annotation_dir, visualiser_dir ]
+
+    // NOTE(LN): UMCCR linx report code needs to be updated
+    /*
     ch_gpgr_linx_inputs = WorkflowOncoanalyser.groupByMeta(
         ch_inputs_sorted.runnable,
         WorkflowOncoanalyser.restoreMeta(LINX_VISUALISER.out.plots, ch_inputs),
@@ -109,6 +112,7 @@ workflow LINX_PLOTTING {
     )
 
     ch_versions = ch_versions.mix(LINXREPORT.out.versions)
+    */
 
     // Set outputs, restoring original meta
     // channel: [ meta, visualiser_dir ]
