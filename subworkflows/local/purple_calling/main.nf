@@ -28,7 +28,7 @@ workflow PURPLE_CALLING {
     sage_known_hotspots_germline // channel: [optional]  /path/to/sage_known_hotspots_germline
     driver_gene_panel            // channel: [mandatory] /path/to/driver_gene_panel
     ensembl_data_resources       // channel: [mandatory] /path/to/ensembl_data_resources/
-    purple_germline_del          // channel: [optional]  /path/to/purple_germline_del
+    germline_amp_del_freq        // channel: [optional]  /path/to/germline_amp_del_freq
     target_region_bed            // channel: [optional]  /path/to/target_region_bed
     target_region_ratios         // channel: [optional]  /path/to/target_region_ratios
     target_region_msi_indels     // channel: [optional]  /path/to/target_region_msi_indels
@@ -118,7 +118,7 @@ workflow PURPLE_CALLING {
         sage_known_hotspots_germline,
         driver_gene_panel,
         ensembl_data_resources,
-        purple_germline_del,
+        germline_amp_del_freq,
         target_region_bed,
         target_region_ratios,
         target_region_msi_indels,

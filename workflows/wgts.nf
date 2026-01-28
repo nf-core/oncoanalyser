@@ -424,7 +424,7 @@ workflow WGTS {
             hmf_data.sage_known_hotspots_germline,
             hmf_data.driver_gene_panel,
             hmf_data.ensembl_data_resources,
-            hmf_data.purple_germline_del,
+            hmf_data.germline_amp_del_freq,
             [],  // target_region_bed
             [],  // target_region_ratios
             [],  // target_region_msi_indels

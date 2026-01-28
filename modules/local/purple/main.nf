@@ -18,7 +18,7 @@ process PURPLE {
     path sage_known_hotspots_germline
     path driver_gene_panel
     path ensembl_data_resources
-    path germline_del
+    path germline_amp_del_freq
     path target_region_bed
     path target_region_ratios
     path target_region_msi_indels
@@ -47,7 +47,7 @@ process PURPLE {
     def smlv_normal_vcf_arg = smlv_normal_vcf ? "-germline_vcf ${smlv_normal_vcf}" : ''
 
     def sage_known_hotspots_germline_arg = sage_known_hotspots_germline ? "-germline_hotspots ${sage_known_hotspots_germline}" : ''
-    def germline_del_arg = germline_del ? "-germline_del_freq_file ${germline_del}" : ''
+    def germline_amp_del_freq_file_arg = germline_amp_del_freq ? "-germline_amp_del_freq_file ${germline_amp_del_freq}" : ''
 
     def target_region_bed_arg = target_region_bed ? "-target_regions_bed ${target_region_bed}" : ''
     def target_region_ratios_arg = target_region_ratios ? "-target_regions_ratios ${target_region_ratios}" : ''
@@ -74,7 +74,7 @@ process PURPLE {
         ${target_region_bed_arg} \\
         ${target_region_ratios_arg} \\
         ${target_region_msi_indels_arg} \\
-        ${germline_del_arg} \\
+        ${germline_amp_del_freq_file_arg} \\
         -gc_profile ${gc_profile} \\
         -circos \$(which circos) \\
         -threads ${task.cpus} \\

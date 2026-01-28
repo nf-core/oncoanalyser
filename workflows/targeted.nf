@@ -422,7 +422,7 @@ workflow TARGETED {
             hmf_data.sage_known_hotspots_germline,
             panel_data.driver_gene_panel,
             hmf_data.ensembl_data_resources,
-            hmf_data.purple_germline_del,
+            hmf_data.germline_amp_del_freq,
             panel_data.target_region_bed,
             panel_data.target_region_ratios,
             panel_data.target_region_msi_indels,
