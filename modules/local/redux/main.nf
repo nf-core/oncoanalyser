@@ -22,16 +22,17 @@ process REDUX {
     val targeted_mode
 
     output:
-    tuple val(meta),
-        path('*.redux.bam'),
-        path('*.redux.bam.bai')             , emit: bam
-    tuple val(meta),
-        path('*.redux.bqr.tsv'),
-        path('*.redux.duplicate_freq.tsv'),
-        path('*.redux.jitter_params.tsv'),
-        path('*.redux.ms_table.tsv.gz')     , emit: tsv
-    path 'versions.yml'                     , emit: versions
-    path '.command.*'                       , emit: command_files
+    tuple val(meta), path('*.redux.bam'),
+                     path('*.redux.bam.bai')             , emit: bam
+
+    tuple val(meta), path('*.redux.bqr.tsv'),
+                     path('*.redux.duplicate_freq.tsv'),
+                     path('*.redux.jitter_params.tsv'),
+                     path('*.redux.ms_table.tsv.gz')     , emit: tsv
+
+    tuple val(meta), path('*.redux.bqr.png')             , emit: bqr_plot
+    path 'versions.yml'                                  , emit: versions
+    path '.command.*'                                    , emit: command_files
 
     when:
     task.ext.when == null || task.ext.when
@@ -84,6 +85,7 @@ process REDUX {
         -unmap_regions ${unmap_regions} \\
         -bamtool \$(which samtools) \\
         -sequencing_type ${sequencing_type} \\
+        -bqr_write_plot \\
         ${form_consensus_arg} \\
         ${umi_args} \\
         ${skip_duplicate_marking_arg} \\
