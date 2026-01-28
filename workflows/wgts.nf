@@ -127,11 +127,11 @@ workflow WGTS {
     // SUBWORKFLOW: Run REDUX for DNA BAMs
     //
     // channel: [ meta, bam, bai ]
-    ch_redux_dna_tumor_out = Channel.empty()
-    ch_redux_dna_normal_out = Channel.empty()
-    ch_redux_dna_donor_out = Channel.empty()
+    ch_redux_dna_tumor_bam_out = Channel.empty()
+    ch_redux_dna_normal_bam_out = Channel.empty()
+    ch_redux_dna_donor_bam_out = Channel.empty()
 
-    // channel: [ meta, dup_freq_tsv, jitter_tsv, ms_tsv ]
+    // channel: [ meta, bqr_tsv, dup_freq_tsv, jitter_tsv, ms_tsv ]
     ch_redux_dna_tumor_tsv_out = Channel.empty()
     ch_redux_dna_normal_tsv_out = Channel.empty()
     ch_redux_dna_donor_tsv_out = Channel.empty()
@@ -157,9 +157,9 @@ workflow WGTS {
 
         ch_versions = ch_versions.mix(REDUX_PROCESSING.out.versions)
 
-        ch_redux_dna_tumor_out = ch_redux_dna_tumor_out.mix(REDUX_PROCESSING.out.dna_tumor)
-        ch_redux_dna_normal_out = ch_redux_dna_normal_out.mix(REDUX_PROCESSING.out.dna_normal)
-        ch_redux_dna_donor_out = ch_redux_dna_donor_out.mix(REDUX_PROCESSING.out.dna_donor)
+        ch_redux_dna_tumor_bam_out = ch_redux_dna_tumor_bam_out.mix(REDUX_PROCESSING.out.dna_tumor_bam)
+        ch_redux_dna_normal_bam_out = ch_redux_dna_normal_bam_out.mix(REDUX_PROCESSING.out.dna_normal_bam)
+        ch_redux_dna_donor_bam_out = ch_redux_dna_donor_bam_out.mix(REDUX_PROCESSING.out.dna_donor_bam)
 
         ch_redux_dna_tumor_tsv_out = ch_redux_dna_tumor_tsv_out.mix(REDUX_PROCESSING.out.dna_tumor_tsv)
         ch_redux_dna_normal_tsv_out = ch_redux_dna_normal_tsv_out.mix(REDUX_PROCESSING.out.dna_normal_tsv)
@@ -167,9 +167,9 @@ workflow WGTS {
 
     } else {
 
-        ch_redux_dna_tumor_out = ch_inputs.map { meta -> [meta, [], []] }
-        ch_redux_dna_normal_out = ch_inputs.map { meta -> [meta, [], []] }
-        ch_redux_dna_donor_out = ch_inputs.map { meta -> [meta, [], []] }
+        ch_redux_dna_tumor_bam_out = ch_inputs.map { meta -> [meta, [], []] }
+        ch_redux_dna_normal_bam_out = ch_inputs.map { meta -> [meta, [], []] }
+        ch_redux_dna_donor_bam_out = ch_inputs.map { meta -> [meta, [], []] }
 
         ch_redux_dna_tumor_tsv_out = ch_inputs.map { meta -> [meta, [], [], [], []] }
         ch_redux_dna_normal_tsv_out = ch_inputs.map { meta -> [meta, [], [], [], []] }
@@ -224,9 +224,9 @@ workflow WGTS {
 
         AMBER_PROFILING(
             ch_inputs,
-            ch_redux_dna_tumor_out,
-            ch_redux_dna_normal_out,
-            ch_redux_dna_donor_out,
+            ch_redux_dna_tumor_bam_out,
+            ch_redux_dna_normal_bam_out,
+            ch_redux_dna_donor_bam_out,
             ref_data.genome_version,
             hmf_data.heterozygous_sites,
             [],  // target_region_bed
@@ -252,8 +252,8 @@ workflow WGTS {
 
         COBALT_PROFILING(
             ch_inputs,
-            ch_redux_dna_tumor_out,
-            ch_redux_dna_normal_out,
+            ch_redux_dna_tumor_bam_out,
+            ch_redux_dna_normal_bam_out,
             ref_data.genome_version,
             hmf_data.gc_profile,
             hmf_data.diploid_bed,
@@ -281,8 +281,8 @@ workflow WGTS {
 
         ESVEE_CALLING(
             ch_inputs,
-            ch_redux_dna_tumor_out,
-            ch_redux_dna_normal_out,
+            ch_redux_dna_tumor_bam_out,
+            ch_redux_dna_normal_bam_out,
             ref_data.genome_fasta,
             ref_data.genome_version,
             ref_data.genome_fai,
@@ -323,9 +323,9 @@ workflow WGTS {
 
         SAGE_CALLING(
             ch_inputs,
-            ch_redux_dna_tumor_out,
-            ch_redux_dna_normal_out,
-            ch_redux_dna_donor_out,
+            ch_redux_dna_tumor_bam_out,
+            ch_redux_dna_normal_bam_out,
+            ch_redux_dna_donor_bam_out,
             ch_redux_dna_tumor_tsv_out,
             ch_redux_dna_normal_tsv_out,
             ch_redux_dna_donor_tsv_out,
@@ -541,8 +541,8 @@ workflow WGTS {
 
         BAMTOOLS_METRICS(
             ch_inputs,
-            ch_redux_dna_tumor_out,
-            ch_redux_dna_normal_out,
+            ch_redux_dna_tumor_bam_out,
+            ch_redux_dna_normal_bam_out,
             ref_data.genome_fasta,
             ref_data.genome_version,
             hmf_data.driver_gene_panel,
@@ -569,7 +569,7 @@ workflow WGTS {
 
         CIDER_CALLING(
             ch_inputs,
-            ch_redux_dna_tumor_out,
+            ch_redux_dna_tumor_bam_out,
             ch_align_rna_tumor_out,
             ref_data.genome_fasta,
             ref_data.genome_version,
@@ -638,8 +638,8 @@ workflow WGTS {
 
         LILAC_CALLING(
             ch_inputs,
-            ch_redux_dna_tumor_out,
-            ch_redux_dna_normal_out,
+            ch_redux_dna_tumor_bam_out,
+            ch_redux_dna_normal_bam_out,
             ch_align_rna_tumor_out,
             ch_purple_out,
             ref_data.genome_fasta,
@@ -667,8 +667,8 @@ workflow WGTS {
 
         TEAL_CHARACTERISATION(
             ch_inputs,
-            ch_redux_dna_tumor_out,
-            ch_redux_dna_normal_out,
+            ch_redux_dna_tumor_bam_out,
+            ch_redux_dna_normal_bam_out,
             ch_bamtools_somatic_out,
             ch_bamtools_germline_out,
             ch_cobalt_out,
@@ -690,7 +690,7 @@ workflow WGTS {
 
         VIRUSBREAKEND_CALLING(
             ch_inputs,
-            ch_redux_dna_tumor_out,
+            ch_redux_dna_tumor_bam_out,
             ch_purple_out,
             ch_bamtools_somatic_out,
             ref_data.genome_fasta,
