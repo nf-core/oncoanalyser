@@ -9,6 +9,8 @@ process ORANGE {
 
     input:
     tuple val(meta),
+        path(redux_somatic_dir),
+        path(redux_germline_dir),
         path(bamtools_somatic_dir, stageAs: 'bamtools_somatic'),
         path(bamtools_germline_dir, stageAs: 'bamtools_germline'),
         path(sage_somatic_dir, stageAs: 'sage_somatic'),
@@ -64,7 +66,10 @@ process ORANGE {
     def sigs_dir_arg = sigs_dir ? "-sigs_dir ${sigs_dir}" : ''
     def cuppa_dir_arg = cuppa_dir ? "-cuppa_dir ${cuppa_dir}" : ''
     def peach_dir_arg = peach_dir ? "-peach_dir ${peach_dir}" : ''
-    def plot_dir = linx_somatic_plot_dir.resolve('reportable/').toUriString().replaceAll('/$', '')
+    def linx_plot_dir = linx_somatic_plot_dir.resolve('reportable/').toUriString().replaceAll('/$', '')
+
+    def tumor_redux_arg = "-tumor_redux_dir ${redux_somatic_dir}"
+    def normal_redux_arg = "-ref_redux_dir ${redux_germline_dir}"
 
     def tumor_metrics_arg = "-tumor_metrics_dir ${bamtools_somatic_dir}"
     def normal_metrics_arg = bamtools_germline_dir ? "-ref_metrics_dir ${bamtools_germline_dir}" : ''
@@ -117,8 +122,8 @@ process ORANGE {
     fi
 
     # Set input plot directory and create it doesn't exist. See the LINX visualiser module for further info.
-    if [[ ! -e ${plot_dir}/ ]]; then
-        mkdir -p ${plot_dir}/;
+    if [[ ! -e ${linx_plot_dir}/ ]]; then
+        mkdir -p ${linx_plot_dir}/;
     fi;
 
     mkdir -p output/
@@ -137,7 +142,7 @@ process ORANGE {
         -purple_dir \${purple_dir_local} \\
         -purple_plot_dir \${purple_dir_local}/plot/ \\
         -linx_dir ${linx_somatic_anno_dir} \\
-        -linx_plot_dir ${plot_dir}/ \\
+        -linx_plot_dir ${linx_plot_dir}/ \\
         ${virus_dir_arg} \\
         ${lilac_dir_arg} \\
         ${chord_dir_arg} \\
@@ -145,6 +150,8 @@ process ORANGE {
         ${cuppa_dir_arg} \\
         ${peach_dir_arg} \\
         \\
+        ${tumor_redux_arg} \\
+        ${normal_redux_arg} \\
         ${normal_id_arg} \\
         ${normal_metrics_arg} \\
         ${tumor_metrics_arg} \\

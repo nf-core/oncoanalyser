@@ -126,6 +126,11 @@ workflow WGTS {
     //
     // SUBWORKFLOW: Run REDUX for DNA BAMs
     //
+    // channel: [ meta, dir ]
+    ch_redux_dna_tumor_dir_out = Channel.empty()
+    ch_redux_dna_normal_dir_out = Channel.empty()
+    ch_redux_dna_donor_dir_out = Channel.empty()
+
     // channel: [ meta, bam, bai ]
     ch_redux_dna_tumor_bam_out = Channel.empty()
     ch_redux_dna_normal_bam_out = Channel.empty()
@@ -157,6 +162,10 @@ workflow WGTS {
 
         ch_versions = ch_versions.mix(REDUX_PROCESSING.out.versions)
 
+        ch_redux_dna_tumor_dir_out = ch_redux_dna_tumor_dir_out.mix(REDUX_PROCESSING.out.dna_tumor_dir)
+        ch_redux_dna_normal_dir_out = ch_redux_dna_normal_dir_out.mix(REDUX_PROCESSING.out.dna_normal_dir)
+        ch_redux_dna_donor_dir_out = ch_redux_dna_donor_dir_out.mix(REDUX_PROCESSING.out.dna_donor_dir)
+
         ch_redux_dna_tumor_bam_out = ch_redux_dna_tumor_bam_out.mix(REDUX_PROCESSING.out.dna_tumor_bam)
         ch_redux_dna_normal_bam_out = ch_redux_dna_normal_bam_out.mix(REDUX_PROCESSING.out.dna_normal_bam)
         ch_redux_dna_donor_bam_out = ch_redux_dna_donor_bam_out.mix(REDUX_PROCESSING.out.dna_donor_bam)
@@ -166,6 +175,10 @@ workflow WGTS {
         ch_redux_dna_donor_tsv_out = ch_redux_dna_donor_tsv_out.mix(REDUX_PROCESSING.out.dna_donor_tsv)
 
     } else {
+
+        ch_redux_dna_tumor_dir_out = ch_inputs.map { meta -> [meta, []] }
+        ch_redux_dna_normal_dir_out = ch_inputs.map { meta -> [meta, []] }
+        ch_redux_dna_donor_dir_out = ch_inputs.map { meta -> [meta, []] }
 
         ch_redux_dna_tumor_bam_out = ch_inputs.map { meta -> [meta, [], []] }
         ch_redux_dna_normal_bam_out = ch_inputs.map { meta -> [meta, [], []] }
@@ -800,6 +813,8 @@ workflow WGTS {
 
         ORANGE_REPORTING(
             ch_inputs,
+            ch_redux_dna_tumor_dir_out,
+            ch_redux_dna_normal_dir_out,
             ch_bamtools_somatic_out,
             ch_bamtools_germline_out,
             ch_sage_somatic_dir_out,

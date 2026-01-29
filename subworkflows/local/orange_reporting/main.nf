@@ -11,6 +11,8 @@ workflow ORANGE_REPORTING {
     take:
     // Sample data
     ch_inputs                   // channel: [mandatory] [ meta ]
+    ch_redux_somatic            // channel: [mandatory] [ meta, redux_dir ]
+    ch_redux_germline           // channel: [mandatory] [ meta, redux_dir ]
     ch_bamtools_somatic         // channel: [mandatory] [ meta, metrics_dir ]
     ch_bamtools_germline        // channel: [mandatory] [ meta, metrics_dir ]
     ch_sage_somatic             // channel: [mandatory] [ meta, sage_dir ]
@@ -49,35 +51,55 @@ workflow ORANGE_REPORTING {
     // channel: [ versions.yml ]
     ch_versions = Channel.empty()
 
-    // Set expected input ordering and size
-    input_expected_size = 17
+    // Refer to inputs by index to avoid needing to declare each variable when calling map, branch, etc
+    input_indexes = [
+        'redux_somatic'           : 0,
+        'redux_germline'          : 1,
+        'bamtools_somatic'        : 2,
+        'bamtools_germline'       : 3,
+        'sage_somatic'            : 4,
+        'sage_germline'           : 5,
+        'sage_somatic_append'     : 6,
+        'sage_germline_append'    : 7,
+        'purple_dir'              : 8,
+        'linx_somatic_annotation' : 9,
+        'linx_somatic_plot'       : 10,
+        'linx_germline_annotation': 11,
+        'virusinterpreter'        : 12,
+        'chord'                   : 13,
+        'sigs'                    : 14,
+        'lilac'                   : 15,
+        'cuppa'                   : 16,
+        'peach'                   : 17,
+        'isofox'                  : 18,
+    ]
 
     dna_tumor_input_indexes = [
-        0,   // bamtools_somatic
-        2,   // sage_somatic
-        6,   // purple_dir
-        7,   // linx_somatic_annotation
-        8,   // linx_somatic_plot_dir
+        input_indexes.redux_somatic,
+        input_indexes.bamtools_somatic,
+        input_indexes.sage_somatic,
+        input_indexes.purple_dir,
+        input_indexes.linx_somatic_annotation,
+        input_indexes.linx_somatic_plot,
     ]
 
     dna_normal_input_indexes = [
-        1,   // bamtools_germline
-        3,   // sage_germline
-        9,   // linx_germline_annotation
+        input_indexes.redux_germline,
+        input_indexes.bamtools_germline,
+        input_indexes.sage_germline,
+        input_indexes.linx_germline_annotation,
     ]
 
     rna_tumor_input_indexes = [
-        4,   // sage_somatic_append
-        16,  // isofox_dir
+        input_indexes.sage_somatic_append,
+        input_indexes.isofox,
     ]
-
-    sage_somatic_append_index = 4   // sage_somatic_append
-    sage_germline_append_index = 5  // sage_germline_append
-    cuppa_dir_index = 14            // cuppa_dir
 
     // Select input sources
     // channel: [ meta, tbt_metrics_dir, nbt_metrics_dir, tsage_dir, nsage_dir, tsage_append, nsage_append, purple_dir, tlinx_anno_dir, tlinx_plot_dir, nlinx_anno_dir, virusinterpreter_dir, chord_dir, sigs_dir, lilac_dir, cuppa_dir, ch_peach, isofox_dir ]
     ch_inputs_selected = WorkflowOncoanalyser.groupByMeta(
+        ch_redux_somatic,
+        ch_redux_germline,
         ch_bamtools_somatic,
         ch_bamtools_germline,
         ch_sage_somatic,
@@ -101,28 +123,28 @@ workflow ORANGE_REPORTING {
             def meta = d[0]
             def inputs = d[1..-1]
 
-            assert inputs.size() == input_expected_size
-
-            // NOTE(SW): avoiding further complexity with loops etc
+            assert inputs.size() == input_indexes.size()
 
             def inputs_selected = [
-                Utils.selectCurrentOrExisting(inputs[0], meta, Constants.INPUT.BAMTOOLS_DIR_TUMOR),
-                Utils.selectCurrentOrExisting(inputs[1], meta, Constants.INPUT.BAMTOOLS_DIR_NORMAL),
-                Utils.selectCurrentOrExisting(inputs[2], meta, Constants.INPUT.SAGE_DIR_TUMOR),
-                Utils.selectCurrentOrExisting(inputs[3], meta, Constants.INPUT.SAGE_DIR_NORMAL),
-                Utils.selectCurrentOrExisting(inputs[4], meta, Constants.INPUT.SAGE_APPEND_DIR_TUMOR),
-                Utils.selectCurrentOrExisting(inputs[5], meta, Constants.INPUT.SAGE_APPEND_DIR_NORMAL),
-                Utils.selectCurrentOrExisting(inputs[6], meta, Constants.INPUT.PURPLE_DIR),
-                Utils.selectCurrentOrExisting(inputs[7], meta, Constants.INPUT.LINX_ANNO_DIR_TUMOR),
-                Utils.selectCurrentOrExisting(inputs[8], meta, Constants.INPUT.LINX_PLOT_DIR_TUMOR),
-                Utils.selectCurrentOrExisting(inputs[9], meta, Constants.INPUT.LINX_ANNO_DIR_NORMAL),
-                Utils.selectCurrentOrExisting(inputs[10], meta, Constants.INPUT.VIRUSINTERPRETER_DIR),
-                Utils.selectCurrentOrExisting(inputs[11], meta, Constants.INPUT.CHORD_DIR),
-                Utils.selectCurrentOrExisting(inputs[12], meta, Constants.INPUT.SIGS_DIR),
-                Utils.selectCurrentOrExisting(inputs[13], meta, Constants.INPUT.LILAC_DIR),
-                Utils.selectCurrentOrExisting(inputs[14], meta, Constants.INPUT.CUPPA_DIR),
-                Utils.selectCurrentOrExisting(inputs[15], meta, Constants.INPUT.PEACH_DIR),
-                Utils.selectCurrentOrExisting(inputs[16], meta, Constants.INPUT.ISOFOX_DIR),
+                Utils.selectCurrentOrExisting(inputs[input_indexes.redux_somatic]           , meta, Constants.INPUT.REDUX_DIR_TUMOR),
+                Utils.selectCurrentOrExisting(inputs[input_indexes.redux_germline]          , meta, Constants.INPUT.REDUX_DIR_NORMAL),
+                Utils.selectCurrentOrExisting(inputs[input_indexes.bamtools_somatic]        , meta, Constants.INPUT.BAMTOOLS_DIR_TUMOR),
+                Utils.selectCurrentOrExisting(inputs[input_indexes.bamtools_germline]       , meta, Constants.INPUT.BAMTOOLS_DIR_NORMAL),
+                Utils.selectCurrentOrExisting(inputs[input_indexes.sage_somatic]            , meta, Constants.INPUT.SAGE_DIR_TUMOR),
+                Utils.selectCurrentOrExisting(inputs[input_indexes.sage_germline]           , meta, Constants.INPUT.SAGE_DIR_NORMAL),
+                Utils.selectCurrentOrExisting(inputs[input_indexes.sage_somatic_append]     , meta, Constants.INPUT.SAGE_APPEND_DIR_TUMOR),
+                Utils.selectCurrentOrExisting(inputs[input_indexes.sage_germline_append]    , meta, Constants.INPUT.SAGE_APPEND_DIR_NORMAL),
+                Utils.selectCurrentOrExisting(inputs[input_indexes.purple_dir]              , meta, Constants.INPUT.PURPLE_DIR),
+                Utils.selectCurrentOrExisting(inputs[input_indexes.linx_somatic_annotation] , meta, Constants.INPUT.LINX_ANNO_DIR_TUMOR),
+                Utils.selectCurrentOrExisting(inputs[input_indexes.linx_somatic_plot]       , meta, Constants.INPUT.LINX_PLOT_DIR_TUMOR),
+                Utils.selectCurrentOrExisting(inputs[input_indexes.linx_germline_annotation], meta, Constants.INPUT.LINX_ANNO_DIR_NORMAL),
+                Utils.selectCurrentOrExisting(inputs[input_indexes.virusinterpreter]        , meta, Constants.INPUT.VIRUSINTERPRETER_DIR),
+                Utils.selectCurrentOrExisting(inputs[input_indexes.chord]                   , meta, Constants.INPUT.CHORD_DIR),
+                Utils.selectCurrentOrExisting(inputs[input_indexes.sigs]                    , meta, Constants.INPUT.SIGS_DIR),
+                Utils.selectCurrentOrExisting(inputs[input_indexes.lilac]                   , meta, Constants.INPUT.LILAC_DIR),
+                Utils.selectCurrentOrExisting(inputs[input_indexes.cuppa]                   , meta, Constants.INPUT.CUPPA_DIR),
+                Utils.selectCurrentOrExisting(inputs[input_indexes.peach]                   , meta, Constants.INPUT.PEACH_DIR),
+                Utils.selectCurrentOrExisting(inputs[input_indexes.isofox]                  , meta, Constants.INPUT.ISOFOX_DIR),
             ]
 
             return [meta, *inputs_selected]
@@ -199,7 +221,7 @@ workflow ORANGE_REPORTING {
             // SAGE append germline is only required when normal DNA is present
             def rna_tumor_input_indexes_ready
             if (has_dna_normal) {
-                rna_tumor_input_indexes_ready = [*rna_tumor_input_indexes, sage_germline_append_index]
+                rna_tumor_input_indexes_ready = [*rna_tumor_input_indexes, input_indexes.sage_germline_append]
             } else {
                 rna_tumor_input_indexes_ready = rna_tumor_input_indexes.clone()
             }
@@ -216,29 +238,29 @@ workflow ORANGE_REPORTING {
 
             // ORANGE only accepts CUPPA with DNA; when providing DNA/RNA inputs but skipping Virus Interpreter CUPPA
             // will generate RNA only outputs and no visualisation, which triggers missing file error in ORANGE
-            if (inputs_selected[cuppa_dir_index]) {
-                def cuppa_vis_data_fp = inputs_selected[cuppa_dir_index].resolve("${meta_orange.tumor_id}.cuppa.vis_data.tsv")
+            if (inputs_selected[input_indexes.cuppa]) {
+                def cuppa_vis_data_fp = inputs_selected[input_indexes.cuppa].resolve("${meta_orange.tumor_id}.cuppa.vis_data.tsv")
                 if (!cuppa_vis_data_fp.exists()) {
-                    inputs_selected[cuppa_dir_index] = []
+                    inputs_selected[input_indexes.cuppa] = []
                 }
             }
 
             // Set SAGE append VCF input
             if (has_rna_tumor) {
                 // Somatic
-                def sage_somatic_append = inputs_selected[sage_somatic_append_index]
+                def sage_somatic_append = inputs_selected[input_indexes.sage_somatic_append]
                 if (sage_somatic_append) {
-                    inputs_selected[sage_somatic_append_index] = file(sage_somatic_append).resolve("${meta_orange.tumor_id}.sage.append.vcf.gz")
+                    inputs_selected[input_indexes.sage_somatic_append] = file(sage_somatic_append).resolve("${meta_orange.tumor_id}.sage.append.vcf.gz")
                 }
 
                 // Germline
-                def sage_germline_append = inputs_selected[sage_germline_append_index]
+                def sage_germline_append = inputs_selected[input_indexes.sage_germline_append]
                 if (sage_germline_append) {
-                    inputs_selected[sage_germline_append_index] = file(sage_germline_append).resolve("${meta_orange.normal_dna_id}.sage.append.vcf.gz")
+                    inputs_selected[input_indexes.sage_germline_append] = file(sage_germline_append).resolve("${meta_orange.normal_dna_id}.sage.append.vcf.gz")
                 }
             }
 
-            assert inputs_selected.size() == input_expected_size
+            assert inputs_selected.size() == input_indexes.size()
 
             sample_data: [meta_orange, *inputs_selected]
             isofox_alt_sj: isofox_alt_sj

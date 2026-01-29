@@ -117,6 +117,7 @@ class Constants {
         VIRUSINTERPRETER_DIR,
 
         // ORANGE specific
+        REDUX_DIR,
         CHORD_DIR,
         CUPPA_DIR,
         LINX_PLOT_DIR,
@@ -273,6 +274,16 @@ class Constants {
             SequenceType.DNA,
         ],
 
+        REDUX_DIR_TUMOR: [
+            FileType.REDUX_DIR,
+            SampleType.TUMOR,
+            SequenceType.DNA,
+        ],
+        REDUX_DIR_NORMAL: [
+            FileType.REDUX_DIR,
+            SampleType.NORMAL,
+            SequenceType.DNA,
+        ],
 
         // Other tools
         ISOFOX_DIR: [
