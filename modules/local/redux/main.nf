@@ -22,16 +22,18 @@ process REDUX {
     val targeted_mode
 
     output:
-    tuple val(meta), path("redux_${meta.sample_id}/${meta.sample_id}.redux.bam"),
-                     path("redux_${meta.sample_id}/${meta.sample_id}.redux.bam.bai")             , emit: bam
+    tuple val(meta),
+        path("redux_${meta.sample_id}/${meta.sample_id}.redux.bam"),
+        path("redux_${meta.sample_id}/${meta.sample_id}.redux.bam.bai"),              emit: bam
 
-    tuple val(meta), path("redux_${meta.sample_id}/${meta.sample_id}.redux.bqr.tsv"),
-                     path("redux_${meta.sample_id}/${meta.sample_id}.redux.duplicate_freq.tsv"),
-                     path("redux_${meta.sample_id}/${meta.sample_id}.redux.jitter_params.tsv"),
-                     path("redux_${meta.sample_id}/${meta.sample_id}.redux.ms_table.tsv.gz")     , emit: tsv
+    tuple val(meta),
+        path("redux_${meta.sample_id}/${meta.sample_id}.redux.bqr.tsv"),
+        path("redux_${meta.sample_id}/${meta.sample_id}.redux.duplicate_freq.tsv"),
+        path("redux_${meta.sample_id}/${meta.sample_id}.redux.jitter_params.tsv"),
+        path("redux_${meta.sample_id}/${meta.sample_id}.redux.ms_table.tsv.gz"),      emit: tsv
 
-    tuple val(meta), path("redux_${meta.sample_id}/${meta.sample_id}.redux.bqr.png")             , emit: bqr_plot
-    tuple val(meta), path("redux_${meta.sample_id}/")                                            , emit: redux_dir
+    tuple val(meta), path("redux_${meta.sample_id}/${meta.sample_id}.redux.bqr.png"), emit: bqr_plot
+    tuple val(meta), path("redux_${meta.sample_id}/"),                                emit: redux_dir
     path 'versions.yml', emit: versions
     path '.command.*'  , emit: command_files
 
@@ -114,6 +116,7 @@ process REDUX {
     touch redux_${meta.sample_id}/${meta.sample_id}.redux.bam
     touch redux_${meta.sample_id}/${meta.sample_id}.redux.bam.bai
     touch redux_${meta.sample_id}/${meta.sample_id}.redux.bqr.tsv
+    touch redux_${meta.sample_id}/${meta.sample_id}.redux.bqr.png
     touch redux_${meta.sample_id}/${meta.sample_id}.redux.duplicate_freq.tsv
     touch redux_${meta.sample_id}/${meta.sample_id}.redux.jitter_params.tsv
     touch redux_${meta.sample_id}/${meta.sample_id}.redux.ms_table.tsv.gz
