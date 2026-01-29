@@ -13,20 +13,22 @@ process GATK4_MARKDUPLICATES {
     path  fasta_fai
 
     output:
-    tuple val(meta), path("*cram"),     emit: cram,  optional: true
-    tuple val(meta), path("*bam"),      emit: bam,   optional: true
-    tuple val(meta), path("*.crai"),    emit: crai,  optional: true
-    tuple val(meta), path("*.bai"),     emit: bai,   optional: true
-    tuple val(meta), path("*.metrics"), emit: metrics
-    path "versions.yml",                emit: versions
-    path '.command.{sh,log}',           emit: command_files
+    tuple val(meta), path("*/*cram")    , emit: cram,  optional: true
+    tuple val(meta), path("*/*bam")     , emit: bam,   optional: true
+    tuple val(meta), path("*/*.crai")   , emit: crai,  optional: true
+    tuple val(meta), path("*/*.bai")    , emit: bai,   optional: true
+    tuple val(meta), path("*/*.metrics"), emit: metrics
+    path 'versions.yml'                 , emit: versions
+    path '.command.{sh,log}'            , emit: command_files
 
     when:
     task.ext.when == null || task.ext.when
 
     script:
     def args = task.ext.args ?: ''
+
     prefix = task.ext.prefix ?: "${meta.sample_id}"
+
     def input_list = bam.collect{"--INPUT $it"}.join(' ')
     def reference = fasta ? "--REFERENCE_SEQUENCE ${fasta}" : ""
 
@@ -37,16 +39,18 @@ process GATK4_MARKDUPLICATES {
         avail_mem = (task.memory.mega*0.8).intValue()
     }
     """
+    mkdir -p ${prefix}/
+
     gatk --java-options "-Xmx${avail_mem}M" MarkDuplicates \\
         $input_list \\
-        --OUTPUT ${prefix}.md.bam \\
-        --METRICS_FILE ${prefix}.md.metrics \\
+        --OUTPUT ${prefix}/${prefix}.md.bam \\
+        --METRICS_FILE ${prefix}/${prefix}.md.metrics \\
         --TMP_DIR . \\
         --CREATE_INDEX \\
         ${reference} \\
         $args
 
-    mv ${prefix}.md.bai ${prefix}.md.bam.bai
+    mv ${prefix}/${prefix}.md.bai ${prefix}/${prefix}.md.bam.bai
 
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":
@@ -58,9 +62,11 @@ process GATK4_MARKDUPLICATES {
     prefix = task.ext.prefix ?: "${meta.sample_id}"
 
     """
-    touch ${prefix}.md.bam
-    touch ${prefix}.md.bam.bai
-    touch ${prefix}.md.metrics
+    mkdir -p ${prefix}/
+
+    touch ${prefix}/${prefix}.md.bam
+    touch ${prefix}/${prefix}.md.bam.bai
+    touch ${prefix}/${prefix}.md.metrics
 
     echo -e '${task.process}:\\n  stub: noversions\\n' > versions.yml
     """
