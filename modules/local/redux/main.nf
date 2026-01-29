@@ -49,6 +49,7 @@ process REDUX {
     def umi_duplex_arg = ''
     def umi_duplex_delim_arg = ''
     def skip_duplicate_marking_arg = ''
+    def bqr_use_all_regions_arg = ''
 
     if(umi_enable) {
         umi_enable_arg = '-umi_enabled'
@@ -70,7 +71,9 @@ process REDUX {
         skip_duplicate_marking_arg = '-skip_duplicate_marking'
     }
 
-    def bqr_use_all_regions_arg = targeted_mode ? '-bqr_use_all_regions' : ''
+    if(targeted_mode) {
+        bqr_use_all_regions_arg = '-bqr_use_all_regions'
+    }
 
     """
     redux \\
@@ -78,7 +81,6 @@ process REDUX {
         ${args} \\
         -sample ${meta.sample_id} \\
         -input_bam ${bams.join(',')} \\
-        -output_bam ./${meta.sample_id}.redux.bam \\
         -ref_genome ${genome_fasta} \\
         -ref_genome_version ${genome_ver} \\
         -ref_genome_msi_file ${msi_jitter_sites} \\
@@ -89,8 +91,10 @@ process REDUX {
         ${form_consensus_arg} \\
         ${umi_args} \\
         ${skip_duplicate_marking_arg} \\
+        ${bqr_use_all_regions_arg} \\
         -threads ${task.cpus} \\
         ${log_level_arg} \\
+        -output_bam ./${meta.sample_id}.redux.bam \\
         -output_dir ./
 
     cat <<-END_VERSIONS > versions.yml
