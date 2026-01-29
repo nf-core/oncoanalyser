@@ -127,17 +127,18 @@ workflow REDUX_PROCESSING {
     ch_versions = ch_versions.mix(REDUX.out.versions)
 
     // Combine TSV outputs into single channel for processing
-    // channel: [ meta, [bam, bai], [bqr_tsv, dup_freq_tsv, jitter_tsv, ms_tsv] ]
+    // channel: [ meta, dir, [bam, bai], [bqr_tsv, dup_freq_tsv, jitter_tsv, ms_tsv] ]
     ch_redux_out = WorkflowOncoanalyser.groupByMeta(
         ["flatten": false],
+        REDUX.out.redux_dir,
         REDUX.out.bam,
         REDUX.out.tsv,
     )
 
     // Sort into a tumor and normal channel
-    // channel: [ meta, [bam, bai], [bqr_tsv, dup_freq_tsv, jitter_tsv, ms_tsv] ]
+    // channel: [ meta, dir, [bam, bai], [bqr_tsv, dup_freq_tsv, jitter_tsv, ms_tsv] ]
     ch_redux_out_sorted = ch_redux_out
-        .branch { meta, bam, tsv ->
+        .branch { meta, dir, bam, tsv ->
             assert ['tumor', 'normal', 'donor'].contains(meta.sample_type)
             tumor: meta.sample_type == 'tumor'
             normal: meta.sample_type == 'normal'
@@ -146,18 +147,20 @@ workflow REDUX_PROCESSING {
         }
 
     // Set outputs, restoring original meta, split into BAMs and TSVs
-    // channel: [ meta, bam, bai, bqr_tsv, dup_freq_tsv, jitter_tsv, ms_tsv ]
+    // channel: [ meta, dir, bam, bai, bqr_tsv, dup_freq_tsv, jitter_tsv, ms_tsv ]
     def createOutputChannels = { ch_sample_type_redux_out, ch_sample_type_skip ->
 
+        def empty_dir = [[]]
         def empty_bam = [[],[]]
         def empty_tsv = [[],[],[],[]]
 
         return Channel.empty()
             .mix(
                 WorkflowOncoanalyser.restoreMeta(ch_sample_type_redux_out, ch_inputs),
-                ch_sample_type_skip.map { meta -> [meta, empty_bam, empty_tsv] },
+                ch_sample_type_skip.map { meta -> [meta, empty_dir, empty_bam, empty_tsv] },
             )
-            .multiMap { meta, bam, tsv ->
+            .multiMap { meta, dir, bam, tsv ->
+                dir: [meta, *dir]
                 bam: [meta, *bam]
                 tsv: [meta, *tsv]
             }
@@ -168,6 +171,10 @@ workflow REDUX_PROCESSING {
     ch_redux_donor_out = createOutputChannels(ch_redux_out_sorted.donor, ch_inputs_donor.skip)
 
     emit:
+    dna_tumor_dir  = ch_redux_tumor_out.dir  // channel: [ meta, dir ]
+    dna_normal_dir = ch_redux_normal_out.dir // channel: [ meta, dir ]
+    dna_donor_dir  = ch_redux_donor_out.dir  // channel: [ meta, dir ]
+
     dna_tumor_bam  = ch_redux_tumor_out.bam  // channel: [ meta, bam, bai ]
     dna_normal_bam = ch_redux_normal_out.bam // channel: [ meta, bam, bai ]
     dna_donor_bam  = ch_redux_donor_out.bam  // channel: [ meta, bam, bai ]
