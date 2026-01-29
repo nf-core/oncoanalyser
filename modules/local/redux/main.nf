@@ -22,17 +22,18 @@ process REDUX {
     val targeted_mode
 
     output:
-    tuple val(meta), path('*.redux.bam'),
-                     path('*.redux.bam.bai')             , emit: bam
+    tuple val(meta), path("redux_${meta.sample_id}/${meta.sample_id}.redux.bam"),
+                     path("redux_${meta.sample_id}/${meta.sample_id}.redux.bam.bai")             , emit: bam
 
-    tuple val(meta), path('*.redux.bqr.tsv'),
-                     path('*.redux.duplicate_freq.tsv'),
-                     path('*.redux.jitter_params.tsv'),
-                     path('*.redux.ms_table.tsv.gz')     , emit: tsv
+    tuple val(meta), path("redux_${meta.sample_id}/${meta.sample_id}.redux.bqr.tsv"),
+                     path("redux_${meta.sample_id}/${meta.sample_id}.redux.duplicate_freq.tsv"),
+                     path("redux_${meta.sample_id}/${meta.sample_id}.redux.jitter_params.tsv"),
+                     path("redux_${meta.sample_id}/${meta.sample_id}.redux.ms_table.tsv.gz")     , emit: tsv
 
-    tuple val(meta), path('*.redux.bqr.png')             , emit: bqr_plot
-    path 'versions.yml'                                  , emit: versions
-    path '.command.*'                                    , emit: command_files
+    tuple val(meta), path("redux_${meta.sample_id}/${meta.sample_id}.redux.bqr.png")             , emit: bqr_plot
+    tuple val(meta), path("redux_${meta.sample_id}/")                                            , emit: redux_dir
+    path 'versions.yml', emit: versions
+    path '.command.*'  , emit: command_files
 
     when:
     task.ext.when == null || task.ext.when
@@ -76,6 +77,8 @@ process REDUX {
     }
 
     """
+    mkdir -p redux_${meta.sample_id}/
+
     redux \\
         -Xmx${Math.round(task.memory.bytes * xmx_mod)} \\
         ${args} \\
@@ -94,8 +97,8 @@ process REDUX {
         ${bqr_use_all_regions_arg} \\
         -threads ${task.cpus} \\
         ${log_level_arg} \\
-        -output_bam ./${meta.sample_id}.redux.bam \\
-        -output_dir ./
+        -output_bam redux_${meta.sample_id}/${meta.sample_id}.redux.bam \\
+        -output_dir redux_${meta.sample_id}/
 
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":
@@ -106,18 +109,20 @@ process REDUX {
 
     stub:
     """
-    touch ${meta.sample_id}.redux.bam
-    touch ${meta.sample_id}.redux.bam.bai
-    touch ${meta.sample_id}.redux.bqr.tsv
-    touch ${meta.sample_id}.redux.duplicate_freq.tsv
-    touch ${meta.sample_id}.redux.jitter_params.tsv
-    touch ${meta.sample_id}.redux.ms_table.tsv.gz
-    touch ${meta.sample_id}.redux.repeat.tsv.gz
+    mkdir -p redux_${meta.sample_id}/
+
+    touch redux_${meta.sample_id}/${meta.sample_id}.redux.bam
+    touch redux_${meta.sample_id}/${meta.sample_id}.redux.bam.bai
+    touch redux_${meta.sample_id}/${meta.sample_id}.redux.bqr.tsv
+    touch redux_${meta.sample_id}/${meta.sample_id}.redux.duplicate_freq.tsv
+    touch redux_${meta.sample_id}/${meta.sample_id}.redux.jitter_params.tsv
+    touch redux_${meta.sample_id}/${meta.sample_id}.redux.ms_table.tsv.gz
+    touch redux_${meta.sample_id}/${meta.sample_id}.redux.repeat.tsv.gz
 
     if [[ -n "${umi_enable}" ]]; then
-        touch ${meta.sample_id}.umi_coord_freq.tsv
-        touch ${meta.sample_id}.umi_edit_distance.tsv
-        touch ${meta.sample_id}.umi_nucleotide_freq.tsv
+        touch redux_${meta.sample_id}/${meta.sample_id}.umi_coord_freq.tsv
+        touch redux_${meta.sample_id}/${meta.sample_id}.umi_edit_distance.tsv
+        touch redux_${meta.sample_id}/${meta.sample_id}.umi_nucleotide_freq.tsv
     fi;
 
     echo -e '${task.process}:\\n  stub: noversions\\n' > versions.yml
