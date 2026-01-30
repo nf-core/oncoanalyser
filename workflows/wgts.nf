@@ -408,8 +408,8 @@ workflow WGTS {
 
     } else {
 
-        ch_pave_germline_out = ch_inputs.map { meta -> [meta, []] }
-        ch_pave_somatic_out = ch_inputs.map { meta -> [meta, []] }
+        ch_pave_germline_out = PlaceholderChannels.vcfTbi(ch_inputs)
+        ch_pave_somatic_out = PlaceholderChannels.vcfTbi(ch_inputs)
 
     }
 

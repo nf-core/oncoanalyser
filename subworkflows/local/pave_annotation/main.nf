@@ -145,18 +145,18 @@ workflow PAVE_ANNOTATION {
     ch_somatic_out = Channel.empty()
         .mix(
             WorkflowOncoanalyser.restoreMeta(PAVE_SOMATIC.out.vcf, ch_inputs),
-            ch_sage_somatic_inputs_sorted.skip.map { meta -> [meta, []] },
+            PlaceholderChannels.vcfTbi(ch_sage_somatic_inputs_sorted.skip),
         )
 
     ch_germline_out = Channel.empty()
         .mix(
             WorkflowOncoanalyser.restoreMeta(PAVE_GERMLINE.out.vcf, ch_inputs),
-            ch_sage_germline_inputs_sorted.skip.map { meta -> [meta, []] },
+            PlaceholderChannels.vcfTbi(ch_sage_germline_inputs_sorted.skip),
         )
 
     emit:
-    germline = ch_germline_out // channel: [ meta, pave_vcf ]
-    somatic  = ch_somatic_out  // channel: [ meta, pave_vcf ]
+    germline = ch_germline_out // channel: [ meta, vcf, tbi ]
+    somatic  = ch_somatic_out  // channel: [ meta, vcf, tbi ]
 
     versions = ch_versions     // channel: [ versions.yml ]
 }
