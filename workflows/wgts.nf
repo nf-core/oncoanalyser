@@ -669,7 +669,7 @@ workflow WGTS {
 
     } else {
 
-        ch_lilac_out = ch_inputs.map { meta -> [meta, []] }
+        ch_lilac_out = PlaceholderChannels.toolDir(ch_inputs)
 
     }
 

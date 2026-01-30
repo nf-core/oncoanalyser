@@ -111,7 +111,7 @@ workflow LILAC_CALLING {
     ch_outputs = Channel.empty()
         .mix(
             WorkflowOncoanalyser.restoreMeta(LILAC.out.lilac_dir, ch_inputs),
-            ch_dna_inputs_sorted.skip.map { meta -> [meta, []] },
+            PlaceholderChannels.toolDir(ch_dna_inputs_sorted.skip),
         )
 
     emit:
