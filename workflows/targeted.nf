@@ -653,10 +653,10 @@ workflow TARGETED {
     if (run_config.stages.orange) {
 
         // Create placeholder channels for empty remaining channels
-        ch_chord_out = ch_inputs.map { meta -> [meta, []] }
-        ch_cuppa_out = ch_inputs.map { meta -> [meta, []] }
-        ch_sigs_out = ch_inputs.map { meta -> [meta, []] }
-        ch_virusinterpreter_out = ch_inputs.map { meta -> [meta, []] }
+        ch_chord_out = PlaceholderChannels.toolDir(ch_inputs)
+        ch_cuppa_out = PlaceholderChannels.toolDir(ch_inputs)
+        ch_sigs_out = PlaceholderChannels.toolDir(ch_inputs)
+        ch_virusinterpreter_out = PlaceholderChannels.toolDir(ch_inputs)
 
         ORANGE_REPORTING(
             ch_inputs,
