@@ -802,7 +802,7 @@ workflow WGTS {
 
     } else {
 
-        ch_cuppa_out = ch_inputs.map { meta -> [meta, []] }
+        ch_cuppa_out = PlaceholderChannels.toolDir(ch_inputs)
 
     }
 
