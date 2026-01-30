@@ -316,8 +316,8 @@ workflow TARGETED {
 
     } else {
 
-        ch_esvee_germline_out = ch_inputs.map { meta -> [meta, []] }
-        ch_esvee_somatic_out = ch_inputs.map { meta -> [meta, []] }
+        ch_esvee_germline_out = PlaceholderChannels.vcfTbi(ch_inputs)
+        ch_esvee_somatic_out = PlaceholderChannels.vcfTbi(ch_inputs)
 
     }
 
