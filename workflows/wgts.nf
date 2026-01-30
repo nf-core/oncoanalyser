@@ -570,8 +570,8 @@ workflow WGTS {
 
     } else {
 
-        ch_bamtools_somatic_out = ch_inputs.map { meta -> [meta, []] }
-        ch_bamtools_germline_out = ch_inputs.map { meta -> [meta, []] }
+        ch_bamtools_somatic_out = PlaceholderChannels.toolDir(ch_inputs)
+        ch_bamtools_germline_out = PlaceholderChannels.toolDir(ch_inputs)
 
     }
 
