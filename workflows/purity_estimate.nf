@@ -208,10 +208,10 @@ workflow PURITY_ESTIMATE {
 
         SAGE_APPEND(
             ch_inputs,
-            ch_inputs.map { meta -> [meta, []] },  // ch_purple_dir
+            PlaceholderChannels.toolDir(ch_inputs),  // ch_purple_dir
             ch_redux_dna_tumor_bam_out,
             ch_redux_dna_tumor_tsv_out,
-            ch_inputs.map { meta -> [meta, [], []] },  // ch_tumor_rna_bam
+            PlaceholderChannels.bamBai(ch_inputs),  // ch_tumor_rna_bam
             ref_data.genome_fasta,
             ref_data.genome_version,
             ref_data.genome_fai,
@@ -226,7 +226,7 @@ workflow PURITY_ESTIMATE {
 
     } else {
 
-        ch_sage_somatic_append_out = ch_inputs.map { meta -> [meta, []] }
+        ch_sage_somatic_append_out = PlaceholderChannels.toolDir(ch_inputs)
 
     }
 

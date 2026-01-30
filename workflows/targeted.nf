@@ -462,8 +462,8 @@ workflow TARGETED {
         SAGE_APPEND(
             ch_inputs,
             ch_purple_out,
-            ch_inputs.map { meta -> [meta, [], []] },      // ch_tumor_redux_bam
-            ch_inputs.map { meta -> [meta, [], [], [], []] },  // ch_tumor_redux_tsv
+            PlaceholderChannels.bamBai(ch_inputs),  // ch_tumor_redux_bam
+            PlaceholderChannels.reduxTsvs(ch_inputs),  // ch_tumor_redux_tsv
             ch_align_rna_tumor_out,
             ref_data.genome_fasta,
             ref_data.genome_version,
@@ -481,8 +481,8 @@ workflow TARGETED {
 
     } else {
 
-        ch_sage_somatic_append_out = ch_inputs.map { meta -> [meta, []] }
-        ch_sage_germline_append_out = ch_inputs.map { meta -> [meta, []] }
+        ch_sage_somatic_append_out = PlaceholderChannels.toolDir(ch_inputs)
+        ch_sage_germline_append_out = PlaceholderChannels.toolDir(ch_inputs)
 
     }
 
