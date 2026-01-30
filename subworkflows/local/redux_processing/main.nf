@@ -148,16 +148,16 @@ workflow REDUX_PROCESSING {
 
     // Set outputs, restoring original meta, split into BAMs and TSVs
     // channel: [ meta, dir, bam, bai, bqr_tsv, dup_freq_tsv, jitter_tsv, ms_tsv ]
-    def createOutputChannels = { ch_sample_type_redux_out, ch_sample_type_skip ->
+    def createOutputChannels = { ch_sample_type_out, ch_sample_type_skip ->
 
-        def empty_dir = [[]]
-        def empty_bam = [[],[]]
-        def empty_tsv = [[],[],[],[]]
+        def placeholder_dir = [[]] * PlaceholderChannels.N_ITEMS_TOOL_DIR
+        def placeholder_bam = [[]] * PlaceholderChannels.N_ITEMS_BAM_BAI
+        def placeholder_tsv = [[]] * PlaceholderChannels.N_ITEMS_REDUX_TSVS
 
         return Channel.empty()
             .mix(
-                WorkflowOncoanalyser.restoreMeta(ch_sample_type_redux_out, ch_inputs),
-                ch_sample_type_skip.map { meta -> [meta, empty_dir, empty_bam, empty_tsv] },
+                WorkflowOncoanalyser.restoreMeta(ch_sample_type_out, ch_inputs),
+                ch_sample_type_skip.map { meta -> [meta, placeholder_dir, placeholder_bam, placeholder_tsv] },
             )
             .multiMap { meta, dir, bam, tsv ->
                 dir: [meta, *dir]
