@@ -644,7 +644,7 @@ workflow TARGETED {
 
     } else {
 
-        ch_peach_out = ch_inputs.map { meta -> [meta, []] }
+        ch_peach_out = PlaceholderChannels.toolDir(ch_inputs)
 
     }
 
