@@ -202,7 +202,7 @@ workflow READ_ALIGNMENT_RNA {
     ch_bam_out = Channel.empty()
         .mix(
             ch_bams_ready,
-            ch_inputs_sorted.skip.map { meta -> [meta, [], []] },
+            PlaceholderChannels.bamBai(ch_inputs_sorted.skip),
         )
 
     emit:

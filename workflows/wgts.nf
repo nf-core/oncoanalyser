@@ -116,10 +116,10 @@ workflow WGTS {
 
     } else {
 
-        ch_align_dna_tumor_out = ch_inputs.map { meta -> [meta, [], []] }
-        ch_align_dna_normal_out = ch_inputs.map { meta -> [meta, [], []] }
-        ch_align_dna_donor_out = ch_inputs.map { meta -> [meta, [], []] }
-        ch_align_rna_tumor_out = ch_inputs.map { meta -> [meta, [], []] }
+        ch_align_dna_tumor_out = PlaceholderChannels.bamBai(ch_inputs)
+        ch_align_dna_normal_out = PlaceholderChannels.bamBai(ch_inputs)
+        ch_align_dna_donor_out = PlaceholderChannels.bamBai(ch_inputs)
+        ch_align_rna_tumor_out = PlaceholderChannels.bamBai(ch_inputs)
 
     }
 
