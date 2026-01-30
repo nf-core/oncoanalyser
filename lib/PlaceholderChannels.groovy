@@ -1,7 +1,8 @@
 class PlaceholderChannels {
 
-    public static createPlaceholderChannel(ch, n_items) {
-        // Input channel should have the structure `[meta, item_1, item_2, ...]` or `meta`
+    private static createPlaceholderChannel(ch, n_items) {
+        // Given a channel containing metadata with the structure `[meta, ...]` or atomic: `meta`,
+        // Create a channel with the form e.g. `[meta, [], []]` if n_items=2
         return ch.map { d ->
             def meta = (d instanceof List) ? d[0] : d
 
