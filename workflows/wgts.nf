@@ -224,7 +224,7 @@ workflow WGTS {
 
     } else {
 
-        ch_isofox_out = ch_inputs.map { meta -> [meta, []] }
+        ch_isofox_out = PlaceholderChannels.toolDir(ch_inputs)
 
     }
 

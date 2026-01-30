@@ -88,7 +88,7 @@ workflow ISOFOX_QUANTIFICATION {
     ch_outputs = Channel.empty()
         .mix(
             WorkflowOncoanalyser.restoreMeta(ISOFOX.out.isofox_dir, ch_inputs),
-            ch_inputs_sorted.skip.map { meta -> [meta, []] },
+            PlaceholderChannels.toolDir(ch_inputs_sorted.skip),
         )
 
     emit:
