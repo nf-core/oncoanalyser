@@ -510,8 +510,8 @@ workflow TARGETED {
 
     } else {
 
-        ch_linx_somatic_out = ch_inputs.map { meta -> [meta, []] }
-        ch_linx_germline_out = ch_inputs.map { meta -> [meta, []] }
+        ch_linx_somatic_out = PlaceholderChannels.toolDir(ch_inputs)
+        ch_linx_germline_out = PlaceholderChannels.toolDir(ch_inputs)
 
     }
 

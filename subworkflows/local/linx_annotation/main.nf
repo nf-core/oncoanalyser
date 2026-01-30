@@ -137,15 +137,15 @@ workflow LINX_ANNOTATION {
     ch_somatic_out = Channel.empty()
         .mix(
             WorkflowOncoanalyser.restoreMeta(LINX_SOMATIC.out.annotation_dir, ch_inputs),
-            ch_inputs_somatic_sorted.skip.map { meta -> [meta, []] },
-            ch_inputs_sorted.skip.map { meta -> [meta, []] },
+            PlaceholderChannels.toolDir(ch_inputs_somatic_sorted.skip),
+            PlaceholderChannels.toolDir(ch_inputs_sorted.skip),
         )
 
     ch_germline_out = Channel.empty()
         .mix(
             WorkflowOncoanalyser.restoreMeta(LINX_GERMLINE.out.annotation_dir, ch_inputs),
-            ch_inputs_germline_sorted.skip.map { meta -> [meta, []] },
-            ch_inputs_sorted.skip.map { meta -> [meta, []] },
+            PlaceholderChannels.toolDir(ch_inputs_germline_sorted.skip),
+            PlaceholderChannels.toolDir(ch_inputs_sorted.skip),
         )
 
     emit:
