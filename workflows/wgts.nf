@@ -638,7 +638,7 @@ workflow WGTS {
 
     } else {
 
-        ch_chord_out = ch_inputs.map { meta -> [meta, []] }
+        ch_chord_out = PlaceholderChannels.toolDir(ch_inputs)
 
     }
 
