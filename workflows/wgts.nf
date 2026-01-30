@@ -368,10 +368,10 @@ workflow WGTS {
 
     } else {
 
-        ch_sage_germline_vcf_out = ch_inputs.map { meta -> [meta, [], []] }
-        ch_sage_somatic_vcf_out = ch_inputs.map { meta -> [meta, [], []] }
-        ch_sage_germline_dir_out = ch_inputs.map { meta -> [meta, []] }
-        ch_sage_somatic_dir_out = ch_inputs.map { meta -> [meta, []] }
+        ch_sage_germline_vcf_out = PlaceholderChannels.vcfTbi(ch_inputs)
+        ch_sage_somatic_vcf_out = PlaceholderChannels.vcfTbi(ch_inputs)
+        ch_sage_germline_dir_out = PlaceholderChannels.toolDir(ch_inputs)
+        ch_sage_somatic_dir_out = PlaceholderChannels.toolDir(ch_inputs)
 
     }
 

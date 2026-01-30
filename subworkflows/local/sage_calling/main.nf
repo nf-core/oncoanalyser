@@ -204,32 +204,32 @@ workflow SAGE_CALLING {
     ch_somatic_vcf_out = Channel.empty()
         .mix(
             WorkflowOncoanalyser.restoreMeta(SAGE_SOMATIC.out.vcf, ch_inputs),
-            ch_inputs_somatic_sorted.skip.map { meta -> [meta, [], []] },
-            ch_inputs_sorted.skip.map { meta -> [meta, [], []] },
+            PlaceholderChannels.vcfTbi(ch_inputs_somatic_sorted.skip),
+            PlaceholderChannels.vcfTbi(ch_inputs_sorted.skip),
         )
 
     // channel: [ meta, sage_vcf, sage_tbi ]
     ch_germline_vcf_out = Channel.empty()
         .mix(
             WorkflowOncoanalyser.restoreMeta(SAGE_GERMLINE.out.vcf, ch_inputs),
-            ch_inputs_germline_sorted.skip.map { meta -> [meta, [], []] },
-            ch_inputs_sorted.skip.map { meta -> [meta, [], []] },
+            PlaceholderChannels.vcfTbi(ch_inputs_germline_sorted.skip),
+            PlaceholderChannels.vcfTbi(ch_inputs_sorted.skip),
         )
 
     // channel: [ meta, sage_dir ]
     ch_somatic_dir = Channel.empty()
         .mix(
             WorkflowOncoanalyser.restoreMeta(SAGE_SOMATIC.out.sage_dir, ch_inputs),
-            ch_inputs_somatic_sorted.skip.map { meta -> [meta, []] },
-            ch_inputs_sorted.skip.map { meta -> [meta, []] },
+            PlaceholderChannels.toolDir(ch_inputs_somatic_sorted.skip),
+            PlaceholderChannels.toolDir(ch_inputs_sorted.skip),
         )
 
     // channel: [ meta, sage_dir ]
     ch_germline_dir = Channel.empty()
         .mix(
             WorkflowOncoanalyser.restoreMeta(SAGE_GERMLINE.out.sage_dir, ch_inputs),
-            ch_inputs_germline_sorted.skip.map { meta -> [meta, []] },
-            ch_inputs_sorted.skip.map { meta -> [meta, []] },
+            PlaceholderChannels.toolDir(ch_inputs_germline_sorted.skip),
+            PlaceholderChannels.toolDir(ch_inputs_sorted.skip),
         )
 
     emit:
