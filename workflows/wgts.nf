@@ -449,7 +449,7 @@ workflow WGTS {
 
     } else {
 
-        ch_purple_out = ch_inputs.map { meta -> [meta, []] }
+        ch_purple_out = PlaceholderChannels.toolDir(ch_inputs)
 
     }
 

@@ -131,7 +131,7 @@ workflow PURPLE_CALLING {
     ch_outputs = Channel.empty()
         .mix(
             WorkflowOncoanalyser.restoreMeta(PURPLE.out.purple_dir, ch_inputs),
-            ch_inputs_sorted.skip.map { meta -> [meta, []] },
+            PlaceholderChannels.toolDir(ch_inputs_sorted.skip),
         )
 
     emit:
