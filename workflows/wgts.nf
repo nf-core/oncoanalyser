@@ -723,7 +723,7 @@ workflow WGTS {
 
     } else {
 
-        ch_virusinterpreter_out = ch_inputs.map { meta -> [meta, []] }
+        ch_virusinterpreter_out = PlaceholderChannels.toolDir(ch_inputs)
 
     }
 
