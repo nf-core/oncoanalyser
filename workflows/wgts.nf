@@ -613,7 +613,7 @@ workflow WGTS {
 
     } else {
 
-        ch_sigs_out = ch_inputs.map { meta -> [meta, []] }
+        ch_sigs_out = PlaceholderChannels.toolDir(ch_inputs)
 
     }
 
