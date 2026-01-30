@@ -527,9 +527,9 @@ workflow WGTS {
         LINX_PLOTTING(
             ch_inputs,
             ch_linx_somatic_out,
-            ch_inputs.map { meta -> [meta, []] },  // ch_amber
-            ch_inputs.map { meta -> [meta, []] },  // ch_cobalt
-            ch_inputs.map { meta -> [meta, []] },  // ch_purple
+            PlaceholderChannels.toolDir(ch_inputs),  // ch_amber
+            PlaceholderChannels.toolDir(ch_inputs),  // ch_cobalt
+            PlaceholderChannels.toolDir(ch_inputs),  // ch_purple
             ref_data.genome_version,
             hmf_data.ensembl_data_resources,
         )
@@ -540,7 +540,7 @@ workflow WGTS {
 
     } else {
 
-        ch_linx_somatic_visualiser_dir_out = ch_inputs.map { meta -> [meta, []] }
+        ch_linx_somatic_visualiser_dir_out = PlaceholderChannels.toolDir(ch_inputs)
 
     }
 

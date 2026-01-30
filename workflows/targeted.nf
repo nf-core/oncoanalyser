@@ -538,7 +538,7 @@ workflow TARGETED {
 
     } else {
 
-        ch_linx_somatic_visualiser_dir_out = ch_inputs.map { meta -> [meta, []] }
+        ch_linx_somatic_visualiser_dir_out = PlaceholderChannels.toolDir(ch_inputs)
 
     }
 
