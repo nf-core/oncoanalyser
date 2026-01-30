@@ -165,7 +165,7 @@ workflow PANEL_RESOURCE_CREATION {
         ch_inputs,
         ch_redux_dna_tumor_bam_out,
         ch_redux_dna_normal_bam_out,
-        ch_inputs.map { meta -> [meta, [], []] },  // ch_donor_bam
+        PlaceholderChannels.bamBai(ch_inputs),  // ch_donor_bam
         ref_data.genome_version,
         hmf_data.heterozygous_sites,
         target_regions_bed,

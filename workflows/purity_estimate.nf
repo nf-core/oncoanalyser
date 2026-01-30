@@ -167,7 +167,7 @@ workflow PURITY_ESTIMATE {
 
     } else {
 
-        ch_amber_out = ch_inputs.map { meta -> [meta, []] }
+        ch_amber_out = PlaceholderChannels.toolDir(ch_inputs)
 
     }
 
