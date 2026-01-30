@@ -107,7 +107,7 @@ workflow PANEL_RESOURCE_CREATION {
         ch_inputs,
         ch_align_dna_tumor_out,
         ch_align_dna_normal_out,
-        ch_inputs.map { meta -> [meta, [], []] },  // ch_dna_donor
+        PlaceholderChannels.bamBai(ch_inputs),  // ch_dna_donor
         ref_data.genome_fasta,
         ref_data.genome_version,
         ref_data.genome_fai,

@@ -170,17 +170,17 @@ workflow TARGETED {
 
     } else {
 
-        ch_redux_dna_tumor_dir_out = ch_inputs.map { meta -> [meta, []] }
-        ch_redux_dna_normal_dir_out = ch_inputs.map { meta -> [meta, []] }
-        ch_redux_dna_donor_dir_out = ch_inputs.map { meta -> [meta, []] }
+        ch_redux_dna_tumor_dir_out = PlaceholderChannels.toolDir(ch_inputs)
+        ch_redux_dna_normal_dir_out = PlaceholderChannels.toolDir(ch_inputs)
+        ch_redux_dna_donor_dir_out = PlaceholderChannels.toolDir(ch_inputs)
 
-        ch_redux_dna_tumor_bam_out = ch_inputs.map { meta -> [meta, [], []] }
-        ch_redux_dna_normal_bam_out = ch_inputs.map { meta -> [meta, [], []] }
-        ch_redux_dna_donor_bam_out = ch_inputs.map { meta -> [meta, [], []] }
+        ch_redux_dna_tumor_bam_out = PlaceholderChannels.bamBai(ch_inputs)
+        ch_redux_dna_normal_bam_out = PlaceholderChannels.bamBai(ch_inputs)
+        ch_redux_dna_donor_bam_out = PlaceholderChannels.bamBai(ch_inputs)
 
-        ch_redux_dna_tumor_tsv_out = ch_inputs.map { meta -> [meta, [], [], [], []] }
-        ch_redux_dna_normal_tsv_out = ch_inputs.map { meta -> [meta, [], [], [], []] }
-        ch_redux_dna_donor_tsv_out = ch_inputs.map { meta -> [meta, [], [], [], []] }
+        ch_redux_dna_tumor_tsv_out = PlaceholderChannels.reduxTsvs(ch_inputs)
+        ch_redux_dna_normal_tsv_out = PlaceholderChannels.reduxTsvs(ch_inputs)
+        ch_redux_dna_donor_tsv_out = PlaceholderChannels.reduxTsvs(ch_inputs)
 
     }
 
