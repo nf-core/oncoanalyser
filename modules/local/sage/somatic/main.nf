@@ -38,18 +38,12 @@ process SAGE_SOMATIC {
 
     def log_level_arg = task.ext.log_level ? "-log_level ${task.ext.log_level}" : ''
 
-    // Sample IDs
-    def reference_ids = []
-    if (meta.normal_id != null) { reference_ids.add(meta.normal_id) }
-    if (meta.donor_id != null) { reference_ids.add(meta.donor_id) }
-    def reference_arg = reference_ids.size() > 0 ? "-reference ${String.join(',', reference_ids)}" : ''
-    def ref_sample_count_arg = reference_ids.size() > 0 ? "-ref_sample_count ${reference_ids.size()}" : ''
+    def reference_ids = [meta.normal_id, meta.donor_id].findAll { it }
+    def reference_bams = [normal_bam, donor_bam].findAll { it }.collect { it.toString() }
 
-    // BAMs
-    def reference_bams = []
-    if (normal_bam) { reference_bams.add(normal_bam.toString()) }
-    if (donor_bam) { reference_bams.add(donor_bam.toString()) }
-    def reference_bam_arg = reference_bams.size() > 0 ? "-reference_bam ${String.join(',', reference_bams)}" : ''
+    def reference_arg = reference_ids ? "-reference ${reference_ids.join(',')}" : ''
+    def reference_bam_arg = reference_bams ? "-reference_bam ${reference_bams.join(',')}" : ''
+    def ref_sample_count_arg = reference_ids ? "-ref_sample_count ${reference_ids.size()}" : ''
 
     // Tumor in normal contamination (TINC): only for WGS tumor/normal samples
     def run_tinc_arg = ''
