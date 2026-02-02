@@ -210,7 +210,7 @@ workflow PREPARE_REFERENCE {
 
         if (params.driver_gene_panel) {
 
-            def run_mode = Utils.getEnumFromString(params.mode, Constants.RunMode)
+            def run_mode = Enums.getEnumFromString(params.mode, Constants.RunMode)
 
             if (run_mode !== Constants.RunMode.PANEL_RESOURCE_CREATION) {
                 log.info "Using custom driver gene panel: ${params.driver_gene_panel}"

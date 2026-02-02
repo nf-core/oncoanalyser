@@ -47,7 +47,7 @@ class Params {
 
         // Set defaults specific to run configuration without attempting to validate
 
-        def run_mode = params.mode ? Utils.getEnumFromString(params.mode, Constants.RunMode) : null
+        def run_mode = params.mode ? Enums.getEnumFromString(params.mode, Constants.RunMode) : null
         if (!run_mode) {
             return
         }
@@ -100,7 +100,7 @@ class Params {
     public static void validateParams(params, log) {
 
         if (!params.mode) {
-            def run_modes = Utils.getEnumNames(Constants.RunMode).join('\n    - ')
+            def run_modes = Enums.getEnumNames(Constants.RunMode).join('\n    - ')
             log.error "\n~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n" +
                 "  Run mode must be set using the --mode CLI argument or in a configuration file.\n" +
                 "  Currently, the available run modes are:\n" +
@@ -108,7 +108,7 @@ class Params {
                 "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
             Nextflow.exit(1)
         } else {
-            Utils.validateEnumFromString(params.mode, Constants.RunMode, log)
+            Enums.validateEnumFromString(params.mode, Constants.RunMode, log)
         }
 
         // Genome related
@@ -167,7 +167,7 @@ class Params {
 
         // Sequencing technology
 
-        Utils.validateEnumFromString(params.sequencing_type, Constants.SequencingType, log, false)
+        Enums.validateEnumFromString(params.sequencing_type, Constants.SequencingType, log, false)
 
         // UMI parameters
 
@@ -202,7 +202,7 @@ class Params {
 
     public static getRunConfig(params, inputs, log) {
 
-        def run_mode = Utils.getValidatedEnumFromString(params.mode, Constants.RunMode, log)
+        def run_mode = Enums.getValidatedEnumFromString(params.mode, Constants.RunMode, log)
 
         def stages = Processes.getValidatedRunStages(
             params.processes_include,
@@ -227,7 +227,7 @@ class Params {
 
         if (run_config.run_mode === Constants.RunMode.PREPARE_REFERENCE && params.ref_data_types == null) {
 
-            def ref_data_types = Utils.getEnumNames(Constants.RefDataType).join('\n    - ')
+            def ref_data_types = Enums.getEnumNames(Constants.RefDataType).join('\n    - ')
             log.error "\n~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n" +
                 "  CLI argument --ref_data_types is required for mode prepare_reference.\n" +
                 "  Please specify one or more of the below valid values (separated by commas)\n" +
@@ -269,7 +269,7 @@ class Params {
         if (run_config.run_mode === Constants.RunMode.PURITY_ESTIMATE) {
 
             if(!params.purity_estimate_mode) {
-                def purity_estimate_modes = Utils.getEnumNames(Constants.PurityEstimateRunMode).join('\n    - ')
+                def purity_estimate_modes = Enums.getEnumNames(Constants.PurityEstimateRunMode).join('\n    - ')
                 log.error "\n~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n" +
                     "  A valid purity estimate run mode must be set using the --purity_estimate_mode\n" +
                     "  CLI argument or in a configuration file.\n" +
@@ -278,7 +278,7 @@ class Params {
                     "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
                 Nextflow.exit(1)
             } else {
-                Utils.validateEnumFromString(params.purity_estimate_mode, Constants.PurityEstimateRunMode, log)
+                Enums.validateEnumFromString(params.purity_estimate_mode, Constants.PurityEstimateRunMode, log)
             }
         }
 
@@ -371,7 +371,7 @@ class Params {
     public static getPrepConfigFromParams(params, log) {
         def ref_data_types = params.ref_data_types
             .tokenize(',')
-            .collect { Utils.getValidatedEnumFromString(it, Constants.RefDataType, log) }
+            .collect { Enums.getValidatedEnumFromString(it, Constants.RefDataType, log) }
 
         if (
             ref_data_types.contains(Constants.RefDataType.WGS) ||

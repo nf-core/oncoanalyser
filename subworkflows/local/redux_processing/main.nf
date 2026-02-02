@@ -105,7 +105,7 @@ workflow REDUX_PROCESSING {
     // Handle sequencing type
     // NOTE(LN): Comparing enums here at the workflow level allows the REDUX process to resume
     // by avoiding enum imports in the REDUX process that would lead to task serialisation issues
-    sequencing_type_enum = Utils.getEnumFromString(sequencing_type, Constants.SequencingType)
+    sequencing_type_enum = Enums.getEnumFromString(sequencing_type, Constants.SequencingType)
     sequencing_type_ultima = sequencing_type_enum === Constants.SequencingType.ULTIMA
 
     // Run process

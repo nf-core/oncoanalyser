@@ -33,7 +33,7 @@ workflow SAGE_APPEND {
     // channel: [ versions.yml ]
     ch_versions = Channel.empty()
 
-    def run_mode = Utils.getEnumFromString(params.mode, Constants.RunMode)
+    def run_mode = Enums.getEnumFromString(params.mode, Constants.RunMode)
     def purity_estimate_mode = run_mode === Constants.RunMode.PURITY_ESTIMATE
 
     // Select input sources and sort

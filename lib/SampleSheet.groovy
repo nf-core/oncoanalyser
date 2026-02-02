@@ -29,9 +29,9 @@ class SampleSheet {
                         meta.subject_id = it.subject_id
                     }
 
-                    def sample_type_enum = Utils.getValidatedEnumFromString(it.sample_type, Constants.SampleType, log)
-                    def sequence_type_enum = Utils.getValidatedEnumFromString(it.sequence_type, Constants.SequenceType, log)
-                    def filetype_enum = Utils.getValidatedEnumFromString(it.filetype, Constants.FileType, log)
+                    def sample_type_enum = Enums.getValidatedEnumFromString(it.sample_type, Constants.SampleType, log)
+                    def sequence_type_enum = Enums.getValidatedEnumFromString(it.sequence_type, Constants.SequenceType, log)
+                    def filetype_enum = Enums.getValidatedEnumFromString(it.filetype, Constants.FileType, log)
 
                     def sample_key = [sample_type_enum, sequence_type_enum]
                     def meta_sample = meta.get(sample_key, [:])
@@ -44,7 +44,7 @@ class SampleSheet {
                             .tokenize(';')
                             .each { e ->
                                 def (k, v) = e.tokenize(':')
-                                def info_field_enum = Utils.getValidatedEnumFromString(k, Constants.InfoField, log)
+                                def info_field_enum = Enums.getValidatedEnumFromString(k, Constants.InfoField, log)
 
                                 if (info_data.containsKey(info_field_enum)) {
                                     log.error "got duplicate info field for ${group_id} ${sample_type_enum}/${sequence_type_enum}: ${info_field_enum}"

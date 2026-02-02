@@ -40,7 +40,7 @@ workflow WISP_ANALYSIS {
             primary_purple_dir = Utils.getInput(meta, Constants.INPUT.PURPLE_DIR)
             primary_amber_dir = Utils.getInput(meta, Constants.INPUT.AMBER_DIR)
 
-            def purity_estimate_mode = Utils.getEnumFromString(params.purity_estimate_mode, Constants.RunMode)
+            def purity_estimate_mode = Enums.getEnumFromString(params.purity_estimate_mode, Constants.RunMode)
 
             def runnable
             if (purity_estimate_mode === Constants.RunMode.WGTS) {

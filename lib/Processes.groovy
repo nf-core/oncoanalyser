@@ -44,7 +44,7 @@ class Processes {
         }
         return process_str
             .tokenize(',')
-            .collect { return Utils.getValidatedEnumFromString(it, Constants.Process, log) }
+            .collect { return Enums.getValidatedEnumFromString(it, Constants.Process, log) }
             .unique()
     }
 
