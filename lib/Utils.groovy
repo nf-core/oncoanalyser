@@ -116,10 +116,6 @@ class Utils {
         return getTumorDnaSample(meta).getOrDefault(Constants.FileType.BAM_REDUX, null)
     }
 
-    public static getTumorDnaBai(meta) {
-        return getTumorDnaSample(meta).getOrDefault(Constants.FileType.BAI, null)
-    }
-
 
     public static hasTumorDnaFastq(meta) {
         return getTumorDnaFastq(meta) !== null
@@ -146,9 +142,6 @@ class Utils {
     public static getNormalDnaReduxBam(meta) {
         return getNormalDnaSample(meta).getOrDefault(Constants.FileType.BAM_REDUX, null)
     }
-    public static getNormalDnaBai(meta) {
-        return getNormalDnaSample(meta).getOrDefault(Constants.FileType.BAI, null)
-    }
 
 
     public static hasNormalDnaFastq(meta) {
@@ -163,15 +156,6 @@ class Utils {
         return getNormalDnaReduxBam(meta) !== null
     }
 
-    public static hasDnaFastq(meta) {
-        return hasNormalDnaFastq(meta) || hasTumorDnaFastq(meta)
-    }
-
-    public static hasDnaReduxBam(meta) {
-        return hasNormalDnaReduxBam(meta) || hasTumorDnaReduxBam(meta)
-    }
-
-
     // Files - Donor DNA
     public static getDonorDnaFastq(meta) {
         return getDonorDnaSample(meta).getOrDefault(Constants.FileType.FASTQ, null)
@@ -183,10 +167,6 @@ class Utils {
 
     public static getDonorDnaReduxBam(meta) {
         return getDonorDnaSample(meta).getOrDefault(Constants.FileType.BAM_REDUX, null)
-    }
-
-    public static getDonorDnaBai(meta) {
-        return getDonorDnaSample(meta).getOrDefault(Constants.FileType.BAI, null)
     }
 
 
@@ -211,11 +191,6 @@ class Utils {
     public static getTumorRnaBam(meta) {
         return getTumorRnaSample(meta).getOrDefault(Constants.FileType.BAM, null)
     }
-
-    public static getTumorRnaBai(meta) {
-        return getTumorRnaSample(meta).getOrDefault(Constants.FileType.BAI, null)
-    }
-
 
     public static hasTumorRnaFastq(meta) {
         return getTumorRnaFastq(meta) !== null
