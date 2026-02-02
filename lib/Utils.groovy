@@ -6,51 +6,6 @@ import nextflow.Nextflow
 
 class Utils {
 
-    public static void createStubPlaceholders(params) {
-
-        def fps = [
-            params.ref_data_genome_alt,
-            params.ref_data_genome_bwamem2_index,
-            params.ref_data_genome_dict,
-            params.ref_data_genome_fai,
-            params.ref_data_genome_fasta,
-            params.ref_data_genome_gridss_index,
-            params.ref_data_genome_gtf,
-            params.ref_data_genome_star_index,
-        ]
-
-        params.hmf_data_paths[params.genome_version.toString()]
-            .each { k, v ->
-                fps << "${params.ref_data_hmf_data_path.replaceAll('/$', '')}/${v}"
-            }
-
-        if (params.panel !== null) {
-            params.panel_data_paths[params.panel][params.genome_version.toString()]
-                .each { k, v ->
-                    fps << "${params.ref_data_panel_data_path.replaceAll('/$', '')}/${v}"
-                }
-        }
-
-        fps.each { fp_str ->
-            if (fp_str === null) {
-                return
-            }
-
-            def fp = getFileObject(fp_str)
-
-            if (!fp_str || fp.exists()) {
-                return
-            }
-
-            if (fp_str.endsWith('/')) {
-                fp.mkdirs()
-            } else {
-                fp.getParent().mkdirs()
-                fp.toFile().createNewFile()
-            }
-        }
-    }
-
     public static getFileObject(path) {
         return path ? nextflow.Nextflow.file(path) : []
     }

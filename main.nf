@@ -49,7 +49,7 @@ Params.validateParams(params, log)
 // NOTE(SW): required prior to workflow import
 
 if (workflow.stubRun && params.create_stub_placeholders) {
-    Utils.createStubPlaceholders(params)
+    Params.createStubPlaceholders(params)
 }
 
 /*
