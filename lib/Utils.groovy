@@ -6,10 +6,6 @@ import nextflow.Nextflow
 
 class Utils {
 
-    public static getFileObject(path) {
-        return path ? nextflow.Nextflow.file(path) : []
-    }
-
     // Sample records
     public static getTumorDnaSample(meta) {
         return meta.getOrDefault([Constants.SampleType.TUMOR, Constants.SequenceType.DNA], [:])

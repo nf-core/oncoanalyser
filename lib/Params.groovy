@@ -464,7 +464,7 @@ class Params {
                 return
             }
 
-            def fp = Utils.getFileObject(fp_str)
+            def fp = fp_str ? nextflow.Nextflow.file(fp_str) : []
 
             if (!fp_str || fp.exists()) {
                 return

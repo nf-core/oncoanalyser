@@ -11,7 +11,7 @@ class SampleSheet {
 
         // NOTE(SW): using NF .splitCsv channel operator, hence should be easily interchangable with NF syntax
 
-        def input_fp = Utils.getFileObject(input_fp_str)
+        def input_fp = getFileObject(input_fp_str)
         def inputs = nextflow.splitter.SplitterEx.splitCsv(input_fp, [header: true])
             .groupBy { it['group_id'] }
             .collect { group_id, entries ->
@@ -125,11 +125,11 @@ class SampleSheet {
                             Nextflow.exit(1)
                         }
 
-                        meta_sample[filetype_enum][fastq_key] = ['fwd': Utils.getFileObject(fwd), 'rev': Utils.getFileObject(rev)]
+                        meta_sample[filetype_enum][fastq_key] = ['fwd': getFileObject(fwd), 'rev': getFileObject(rev)]
 
                     } else {
 
-                        meta_sample[filetype_enum] = Utils.getFileObject(it.filepath)
+                        meta_sample[filetype_enum] = getFileObject(it.filepath)
 
                     }
 
@@ -367,5 +367,9 @@ class SampleSheet {
             }
 
         }
+    }
+
+    private static getFileObject(path) {
+        return path ? nextflow.Nextflow.file(path) : []
     }
 }
