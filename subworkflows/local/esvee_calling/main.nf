@@ -113,6 +113,7 @@ workflow ESVEE_CALLING {
     ch_germline_out = Channel.empty()
         .mix(
             WorkflowOncoanalyser.restoreMeta(ESVEE.out.germline_vcf, ch_inputs),
+            PlaceholderChannels.vcfTbi(ch_inputs_sorted.runnable_to),
             PlaceholderChannels.vcfTbi(ch_inputs_sorted.skip),
         )
 
