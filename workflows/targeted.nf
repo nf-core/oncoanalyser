@@ -689,7 +689,7 @@ workflow TARGETED {
             hmf_data.sigs_etiology,
             hmf_data.alt_sj_distribution,
             hmf_data.gene_exp_distribution,
-            false,  // targeted_mode
+            true,  // targeted_mode
         )
 
         ch_versions = ch_versions.mix(ORANGE_REPORTING.out.versions)
