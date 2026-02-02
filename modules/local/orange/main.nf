@@ -69,7 +69,7 @@ process ORANGE {
     def linx_plot_dir = linx_somatic_plot_dir.resolve('reportable/').toUriString().replaceAll('/$', '')
 
     def tumor_redux_arg = "-tumor_redux_dir ${redux_somatic_dir}"
-    def normal_redux_arg = "-ref_redux_dir ${redux_germline_dir}"
+    def normal_redux_arg = redux_germline_dir ? "-ref_redux_dir ${redux_germline_dir}" : ''
 
     def tumor_metrics_arg = "-tumor_metrics_dir ${bamtools_somatic_dir}"
     def normal_metrics_arg = bamtools_germline_dir ? "-ref_metrics_dir ${bamtools_germline_dir}" : ''
