@@ -70,33 +70,7 @@ class WorkflowOncoanalyser {
     public static groupByMeta(... channels) {
         return groupByMeta([:], *channels)
     }
-
-    public static getInput(Map named_args, meta, key) {
-
-        def result
-        def (key_filetype, key_filetypes, key_sequencetypes) = key
-
-        for (key_sample in [key_filetypes, key_sequencetypes].combinations()) {
-            if (meta.containsKey(key_sample) && meta[key_sample].containsKey(key_filetype)) {
-                // NOTE(SW): could return early here then false below
-                return meta[key_sample].getAt(key_filetype)
-                break
-            }
-        }
-
-        if (result) {
-            return result
-        } else {
-            return false
-        }
-
-    }
-
-    // NOTE(SW): function signature required to catch where no named arguments are passed
-    public static getInput(ch, key) {
-        return getInput([:], ch, key)
-    }
-
+    
     private static joinMeta(Map named_args, ch_a, ch_b) {
         // NOTE(SW): the cross operator is used to allow many-to-one relationship between ch_output
         // and ch_metas
