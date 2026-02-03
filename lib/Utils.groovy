@@ -2,8 +2,6 @@
 // This file holds several Groovy functions that could be useful for any Nextflow pipeline
 //
 
-import nextflow.Nextflow
-
 class Utils {
 
     // Sample records
@@ -169,6 +167,29 @@ class Utils {
         return hasTumorRnaBam(meta) || hasTumorRnaFastq(meta)
     }
 
+    // Files - Tool outputs
+    //
+    // NOTE(LN): We construct the output file paths based on the tool output dir. This so that the user can resume a run by providing
+    // for example purple_dir in the sample sheet.
+    //
+    // Processes in theory could emit these output files, and downstream processes could consume the output file channels. However,
+    // this would make resuming messy as multiple e.g. PURPLE output files would need to be provided in the sample sheet
+
+    public static getPurpleSomaticVcf(meta, purple_dir) {
+        return nextflow.Nextflow.file(purple_dir).resolve("${getTumorDnaSampleName(meta)}.purple.somatic.vcf.gz")
+    }
+
+    public static getPurpleGermlineVcf(meta, purple_dir) {
+        return nextflow.Nextflow.file(purple_dir).resolve("${getTumorDnaSampleName(meta)}.purple.germline.vcf.gz")
+    }
+
+    public static getPurpleSomaticSvVcf(meta, purple_dir) {
+        return nextflow.Nextflow.file(purple_dir).resolve("${getTumorDnaSampleName(meta)}.purple.sv.vcf.gz")
+    }
+
+    public static getPurpleGermlineSvVcf(meta, purple_dir) {
+        return nextflow.Nextflow.file(purple_dir).resolve("${getTumorDnaSampleName(meta)}.purple.sv.germline.vcf.gz")
+    }
 
     // Misc
     public static getInput(meta, key) {
