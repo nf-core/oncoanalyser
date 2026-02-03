@@ -84,12 +84,9 @@ workflow SAGE_APPEND {
     ch_inputs_germline_sorted = ch_inputs_sorted.runnable
         .branch { meta, tumor_dna_bam, tumor_dna_bai, tumor_dna_redux_tsv, tumor_rna_bam, tumor_rna_bai, purple_dir ->
 
-            // NOTE(SW): explicit in expectation to always obtain the primary tumor DNA sample ID here
-            def tumor_dna_id = Utils.getTumorDnaSampleName(meta, primary: true)
-
             def has_tumor_rna = Utils.hasTumorRna(meta)
             def has_normal_dna = Utils.hasNormalDna(meta)
-            def has_smlv_germline = file(purple_dir).resolve("${tumor_dna_id}.purple.germline.vcf.gz")
+            def has_smlv_germline = Utils.getPurpleGermlineVcf(meta, purple_dir)
 
             def should_append_rna_variants = has_tumor_rna && has_normal_dna && has_smlv_germline
 
@@ -119,7 +116,7 @@ workflow SAGE_APPEND {
             def bams = [tumor_rna_bam]
             def bais = [tumor_rna_bai]
 
-            def purple_smlv_vcf = file(purple_dir).resolve("${tumor_dna_id}.purple.germline.vcf.gz")
+            def purple_smlv_vcf = Utils.getPurpleGermlineVcf(meta, purple_dir)
 
             return [meta_append, purple_smlv_vcf, bams, bais, []]
         }
@@ -146,11 +143,9 @@ workflow SAGE_APPEND {
     ch_inputs_somatic_sorted = ch_inputs_sorted.runnable
         .branch { meta, tumor_dna_bam, tumor_dna_bai, tumor_dna_redux_tsv, tumor_rna_bam, tumor_rna_bai, purple_dir ->
 
-            def tumor_dna_id = Utils.getTumorDnaSampleName(meta, primary: true)
-
             def has_tumor_rna = Utils.hasTumorRna(meta)
             def has_tumor_dna = Utils.hasTumorDna(meta)
-            def has_smlv_somatic = file(purple_dir).resolve("${tumor_dna_id}.purple.somatic.vcf.gz")
+            def has_smlv_somatic = Utils.getPurpleSomaticVcf(meta, purple_dir)
 
             def should_append_rna_variants = !purity_estimate_mode && has_tumor_rna && has_tumor_dna && has_smlv_somatic
             def should_append_longitudinal_variants = purity_estimate_mode && has_tumor_dna && has_smlv_somatic
@@ -167,8 +162,9 @@ workflow SAGE_APPEND {
     ch_sage_append_somatic_inputs = ch_inputs_somatic_sorted.runnable
         .map { meta, tumor_dna_bam, tumor_dna_bai, tumor_dna_redux_tsv, tumor_rna_bam, tumor_rna_bai, purple_dir ->
 
-            def tumor_dna_id = Utils.getTumorDnaSampleName(meta, primary: true)
-            def output_file_id = purity_estimate_mode ? Utils.getTumorDnaSampleName(meta, primary: false) : tumor_dna_id
+            def output_file_id = purity_estimate_mode
+                ? Utils.getTumorDnaSampleName(meta, primary: false)
+                : Utils.getTumorDnaSampleName(meta, primary: true)
 
             def meta_append = [
                 key: meta.group_id,
@@ -194,7 +190,7 @@ workflow SAGE_APPEND {
                 redux_tsvs = tumor_dna_redux_tsv
             }
 
-            def purple_smlv_vcf = file(purple_dir).resolve("${tumor_dna_id}.purple.somatic.vcf.gz")
+            def purple_smlv_vcf = Utils.getPurpleSomaticVcf(meta, purple_dir)
 
             return [meta_append, purple_smlv_vcf, bams, bais, redux_tsvs]
         }

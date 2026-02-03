@@ -36,14 +36,12 @@ workflow CHORD_PREDICTION {
 
             def has_dna = Utils.hasTumorDna(meta)
 
-            def tumor_id
-            def has_smlv_vcf
-            def has_sv_vcf
+            def has_smlv_vcf = []
+            def has_sv_vcf = []
 
-            if (has_dna) {
-                tumor_id = Utils.getTumorDnaSampleName(meta)
-                has_smlv_vcf = purple_dir ? file(purple_dir).resolve("${tumor_id}.purple.somatic.vcf.gz") : []
-                has_sv_vcf = purple_dir ? file(purple_dir).resolve("${tumor_id}.purple.sv.vcf.gz") : []
+            if(has_dna) {
+                has_smlv_vcf = purple_dir ? Utils.getPurpleSomaticVcf(meta, purple_dir) : []
+                has_sv_vcf = purple_dir ? Utils.getPurpleSomaticSvVcf(meta, purple_dir) : []
             }
 
             def has_existing = Utils.hasExistingInput(meta, Constants.INPUT.CHORD_DIR)
@@ -66,8 +64,8 @@ workflow CHORD_PREDICTION {
                 sample_id: tumor_id,
             ]
 
-            def smlv_vcf = file(purple_dir).resolve("${tumor_id}.purple.somatic.vcf.gz")
-            def sv_vcf = file(purple_dir).resolve("${tumor_id}.purple.sv.vcf.gz")
+            def smlv_vcf = Utils.getPurpleSomaticVcf(meta, purple_dir)
+            def sv_vcf = Utils.getPurpleSomaticSvVcf(meta, purple_dir)
 
             return [meta_chord, smlv_vcf, sv_vcf]
         }

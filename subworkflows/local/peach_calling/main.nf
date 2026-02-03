@@ -54,7 +54,7 @@ workflow PEACH_CALLING {
                 sample_id: Utils.getNormalDnaSampleName(meta),
             ]
 
-            def purple_germline_smlv_vcf = file(purple_dir).resolve("${Utils.getTumorDnaSampleName(meta)}.purple.germline.vcf.gz")
+            def purple_germline_smlv_vcf = Utils.getPurpleGermlineVcf(meta, purple_dir)
 
             return [meta_peach, purple_germline_smlv_vcf]
         }

@@ -50,10 +50,8 @@ workflow LINX_ANNOTATION {
     ch_inputs_germline_sorted = ch_inputs_sorted.runnable
         .branch { meta, purple_dir ->
 
-            def tumor_id = Utils.getTumorDnaSampleName(meta)
-
             def has_tumor_normal = Utils.hasTumorDna(meta) && Utils.hasNormalDna(meta)
-            def has_sv_germline_vcf = file(purple_dir).resolve("${tumor_id}.purple.sv.germline.vcf.gz")
+            def has_sv_germline_vcf = Utils.getPurpleGermlineSvVcf(meta, purple_dir)
             def has_existing = Utils.hasExistingInput(meta, Constants.INPUT.LINX_ANNO_DIR_NORMAL)
 
             runnable: has_tumor_normal && has_sv_germline_vcf && !has_existing
@@ -74,7 +72,7 @@ workflow LINX_ANNOTATION {
                 sample_id: tumor_id,
             ]
 
-            def sv_vcf = file(purple_dir).resolve("${tumor_id}.purple.sv.germline.vcf.gz")
+            def sv_vcf = Utils.getPurpleGermlineSvVcf(meta, purple_dir)
 
             return [meta_linx, sv_vcf]
         }
