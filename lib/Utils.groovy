@@ -179,6 +179,10 @@ class Utils {
         return nextflow.Nextflow.file(purple_dir).resolve("${getTumorDnaSampleName(meta)}.purple.somatic.vcf.gz")
     }
 
+    public static getPurpleSomaticVcfTbi(meta, purple_dir) {
+        return nextflow.Nextflow.file(purple_dir).resolve("${getTumorDnaSampleName(meta)}.purple.somatic.vcf.gz.tbi")
+    }
+
     public static getPurpleGermlineVcf(meta, purple_dir) {
         return nextflow.Nextflow.file(purple_dir).resolve("${getTumorDnaSampleName(meta)}.purple.germline.vcf.gz")
     }
