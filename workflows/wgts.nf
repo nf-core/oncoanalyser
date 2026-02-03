@@ -30,6 +30,7 @@ include { READ_ALIGNMENT_RNA    } from '../subworkflows/local/read_alignment_rna
 include { REDUX_PROCESSING      } from '../subworkflows/local/redux_processing'
 include { SAGE_APPEND           } from '../subworkflows/local/sage_append'
 include { SAGE_CALLING          } from '../subworkflows/local/sage_calling'
+include { SAGE_PLOTTING         } from '../subworkflows/local/sage_plotting'
 include { SIGS_FITTING          } from '../subworkflows/local/sigs_fitting'
 include { TEAL_CHARACTERISATION } from '../subworkflows/local/teal_characterisation'
 include { VIRUSBREAKEND_CALLING } from '../subworkflows/local/virusbreakend_calling'
@@ -485,6 +486,34 @@ workflow WGTS {
 
         ch_sage_somatic_append_out = PlaceholderChannels.toolDir(ch_inputs)
         ch_sage_germline_append_out = PlaceholderChannels.toolDir(ch_inputs)
+
+    }
+
+    //
+    // SUBWORKFLOW: Visualise SAGE variants
+    //
+    if (run_config.stages.sage) {
+
+        SAGE_PLOTTING(
+            ch_inputs,
+            ch_redux_dna_tumor_bam_out,
+            ch_redux_dna_normal_bam_out,
+            ch_redux_dna_donor_bam_out,
+            ch_redux_dna_tumor_tsv_out,
+            ch_redux_dna_normal_tsv_out,
+            ch_redux_dna_donor_tsv_out,
+            ch_purple_out,
+            ref_data.genome_fasta,
+            ref_data.genome_version,
+            ref_data.genome_fai,
+            ref_data.genome_dict,
+            hmf_data.sage_pon,
+            hmf_data.sage_known_hotspots_somatic,
+            hmf_data.sage_highconf_regions,
+            hmf_data.ensembl_data_resources,
+        )
+
+        ch_versions = ch_versions.mix(SAGE_PLOTTING.out.versions)
 
     }
 
