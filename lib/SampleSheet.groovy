@@ -19,122 +19,8 @@ class SampleSheet {
                 def meta = [group_id: group_id]
                 def sample_keys = [] as Set
 
-                // Process each entry
-                entries.each {
-                    // Add subject id if absent or check if current matches existing
-                    if (meta.containsKey('subject_id') && meta.subject_id != it.subject_id) {
-                        log.error "got unexpected subject name for ${group_id} ${meta.subject_id}: ${it.subject_id}"
-                        Nextflow.exit(1)
-                    } else {
-                        meta.subject_id = it.subject_id
-                    }
-
-                    def sample_type_enum = Enums.getValidatedEnumFromString(it.sample_type, Constants.SampleType, log)
-                    def sequence_type_enum = Enums.getValidatedEnumFromString(it.sequence_type, Constants.SequenceType, log)
-                    def filetype_enum = Enums.getValidatedEnumFromString(it.filetype, Constants.FileType, log)
-
-                    def sample_key = [sample_type_enum, sequence_type_enum]
-                    def meta_sample = meta.get(sample_key, [:])
-
-                    // Info data
-                    def info_data = [:]
-                    if (it.containsKey('info')) {
-                        // Parse
-                        it.info
-                            .tokenize(';')
-                            .each { e ->
-                                def (k, v) = e.tokenize(':')
-                                def info_field_enum = Enums.getValidatedEnumFromString(k, Constants.InfoField, log)
-
-                                if (info_data.containsKey(info_field_enum)) {
-                                    log.error "got duplicate info field for ${group_id} ${sample_type_enum}/${sequence_type_enum}: ${info_field_enum}"
-                                    Nextflow.exit(1)
-                                }
-
-                                if (!v && info_field_enum !== Constants.InfoField.LONGITUDINAL_SAMPLE) {
-                                    log.error "got empty value for ${group_id} ${sample_type_enum}/${sequence_type_enum} ${info_field_enum}"
-                                    Nextflow.exit(1)
-                                }
-
-                                info_data[info_field_enum] = v
-                            }
-
-                        // Process
-                        if (info_data.containsKey(Constants.InfoField.CANCER_TYPE)) {
-                            meta[Constants.InfoField.CANCER_TYPE] = info_data[Constants.InfoField.CANCER_TYPE]
-                        }
-
-                    }
-
-                    if (info_data.containsKey(Constants.InfoField.LONGITUDINAL_SAMPLE)) {
-
-                        if (meta_sample.containsKey('longitudinal_sample_id') && meta_sample.longitudinal_sample_id != it.sample_id) {
-                            log.error "got multiple longitudinal samples for ${group_id} ${sample_type_enum}/${sequence_type_enum}: ${it.sample_id}"
-                            Nextflow.exit(1)
-                        }
-
-                        meta_sample.longitudinal_sample_id = it.sample_id
-
-                    } else if (meta_sample.containsKey('sample_id') && meta_sample.sample_id != it.sample_id) {
-
-                        log.error "got unexpected sample name for ${group_id} ${sample_type_enum}/${sequence_type_enum}: ${it.sample_id}"
-                        Nextflow.exit(1)
-
-                    } else {
-
-                        meta_sample.sample_id = it.sample_id
-
-                    }
-
-                    // Filetype uniqueness
-                    if (meta_sample.containsKey(filetype_enum) & filetype_enum != Constants.FileType.FASTQ) {
-                        log.error "got duplicate file for ${group_id} ${sample_type_enum}/${sequence_type_enum}: ${filetype_enum}"
-                        Nextflow.exit(1)
-                    }
-
-                    // Handle inputs appropriately
-                    if (filetype_enum === Constants.FileType.FASTQ) {
-
-                        if (!info_data.containsKey(Constants.InfoField.LIBRARY_ID)) {
-                            log.error "missing 'library_id' info field for ${group_id} ${sample_type_enum}/${sequence_type_enum}"
-                            Nextflow.exit(1)
-                        }
-
-                        if (!info_data.containsKey(Constants.InfoField.LANE)) {
-                            log.error "missing 'lane' info field for ${group_id} ${sample_type_enum}/${sequence_type_enum}"
-                            Nextflow.exit(1)
-                        }
-
-                        def fastq_entries = it.filepath.tokenize(';')
-
-                        if (fastq_entries.size() != 2) {
-                            log.error "expected exactly 2 FASTQ files delimited by ';' (i.e. '<fwd>;<rev>') but found ${fastq_entries.size} " +
-                                    " files for ${group_id} ${sample_type_enum}/${sequence_type_enum}"
-                            Nextflow.exit(1)
-                        }
-
-                        def (fwd, rev) = fastq_entries
-                        def fastq_key = [info_data[Constants.InfoField.LIBRARY_ID], info_data[Constants.InfoField.LANE]]
-
-                        if (!meta_sample.containsKey(filetype_enum)) {
-                            meta_sample[filetype_enum] = [:]
-                        }
-
-                        if (meta_sample[filetype_enum].containsKey(fastq_key)) {
-                            log.error "got duplicate lane + library_id data for ${group_id} ${sample_type_enum}/${sequence_type_enum}: ${fastq_key}"
-                            Nextflow.exit(1)
-                        }
-
-                        meta_sample[filetype_enum][fastq_key] = ['fwd': getFileObject(fwd), 'rev': getFileObject(rev)]
-
-                    } else {
-
-                        meta_sample[filetype_enum] = getFileObject(it.filepath)
-
-                    }
-
-                    // Record sample key to simplify iteration later on
-                    sample_keys << sample_key
+                entries.each { entry ->
+                    constructSampleMetaFromEntry(entry, meta, sample_keys, group_id, log)
                 }
 
                 // Check that required indexes are provided or are accessible
@@ -277,6 +163,124 @@ class SampleSheet {
 
         return inputs
     }
+
+    private static void constructSampleMetaFromEntry(entry, meta, sample_keys, group_id, log) {
+
+        // Add subject id if absent or check if current matches existing
+        if (meta.containsKey('subject_id') && meta.subject_id != entry.subject_id) {
+            log.error "got unexpected subject name for ${group_id} ${meta.subject_id}: ${entry.subject_id}"
+            Nextflow.exit(1)
+        } else {
+            meta.subject_id = entry.subject_id
+        }
+
+        def sample_type_enum = Enums.getValidatedEnumFromString(entry.sample_type, Constants.SampleType, log)
+        def sequence_type_enum = Enums.getValidatedEnumFromString(entry.sequence_type, Constants.SequenceType, log)
+        def filetype_enum = Enums.getValidatedEnumFromString(entry.filetype, Constants.FileType, log)
+
+        def sample_key = [sample_type_enum, sequence_type_enum]
+        sample_keys.add(sample_key) // Record sample key to simplify iteration later on
+
+        def meta_sample = meta.get(sample_key, [:])
+
+        // Info data
+        def info_data = [:]
+        if (entry.containsKey('info')) {
+            // Parse
+            entry.info
+                .tokenize(';')
+                .each { e ->
+                    def (k, v) = e.tokenize(':')
+                    def info_field_enum = Enums.getValidatedEnumFromString(k, Constants.InfoField, log)
+
+                    if (info_data.containsKey(info_field_enum)) {
+                        log.error "got duplicate info field for ${group_id} ${sample_type_enum}/${sequence_type_enum}: ${info_field_enum}"
+                        Nextflow.exit(1)
+                    }
+
+                    if (!v && info_field_enum !== Constants.InfoField.LONGITUDINAL_SAMPLE) {
+                        log.error "got empty value for ${group_id} ${sample_type_enum}/${sequence_type_enum} ${info_field_enum}"
+                        Nextflow.exit(1)
+                    }
+
+                    info_data[info_field_enum] = v
+                }
+
+            // Process
+            if (info_data.containsKey(Constants.InfoField.CANCER_TYPE)) {
+                meta[Constants.InfoField.CANCER_TYPE] = info_data[Constants.InfoField.CANCER_TYPE]
+            }
+
+        }
+
+        if (info_data.containsKey(Constants.InfoField.LONGITUDINAL_SAMPLE)) {
+
+            if (meta_sample.containsKey('longitudinal_sample_id') && meta_sample.longitudinal_sample_id != entry.sample_id) {
+                log.error "got multiple longitudinal samples for ${group_id} ${sample_type_enum}/${sequence_type_enum}: ${entry.sample_id}"
+                Nextflow.exit(1)
+            }
+
+            meta_sample.longitudinal_sample_id = entry.sample_id
+
+        } else if (meta_sample.containsKey('sample_id') && meta_sample.sample_id != entry.sample_id) {
+
+            log.error "got unexpected sample name for ${group_id} ${sample_type_enum}/${sequence_type_enum}: ${entry.sample_id}"
+            Nextflow.exit(1)
+
+        } else {
+
+            meta_sample.sample_id = entry.sample_id
+
+        }
+
+        // Filetype uniqueness
+        if (meta_sample.containsKey(filetype_enum) & filetype_enum != Constants.FileType.FASTQ) {
+            log.error "got duplicate file for ${group_id} ${sample_type_enum}/${sequence_type_enum}: ${filetype_enum}"
+            Nextflow.exit(1)
+        }
+
+        // Handle inputs appropriately
+        if (filetype_enum === Constants.FileType.FASTQ) {
+
+            if (!info_data.containsKey(Constants.InfoField.LIBRARY_ID)) {
+                log.error "missing 'library_id' info field for ${group_id} ${sample_type_enum}/${sequence_type_enum}"
+                Nextflow.exit(1)
+            }
+
+            if (!info_data.containsKey(Constants.InfoField.LANE)) {
+                log.error "missing 'lane' info field for ${group_id} ${sample_type_enum}/${sequence_type_enum}"
+                Nextflow.exit(1)
+            }
+
+            def fastq_entries = entry.filepath.tokenize(';')
+
+            if (fastq_entries.size() != 2) {
+                log.error "expected exactly 2 FASTQ files delimited by ';' (i.e. '<fwd>;<rev>') but found ${fastq_entries.size} " +
+                        " files for ${group_id} ${sample_type_enum}/${sequence_type_enum}"
+                Nextflow.exit(1)
+            }
+
+            def (fwd, rev) = fastq_entries
+            def fastq_key = [info_data[Constants.InfoField.LIBRARY_ID], info_data[Constants.InfoField.LANE]]
+
+            if (!meta_sample.containsKey(filetype_enum)) {
+                meta_sample[filetype_enum] = [:]
+            }
+
+            if (meta_sample[filetype_enum].containsKey(fastq_key)) {
+                log.error "got duplicate lane + library_id data for ${group_id} ${sample_type_enum}/${sequence_type_enum}: ${fastq_key}"
+                Nextflow.exit(1)
+            }
+
+            meta_sample[filetype_enum][fastq_key] = ['fwd': getFileObject(fwd), 'rev': getFileObject(rev)]
+
+        } else {
+
+            meta_sample[filetype_enum] = getFileObject(entry.filepath)
+
+        }
+    }
+
 
     public static void validateInput(inputs, run_config, log) {
 
