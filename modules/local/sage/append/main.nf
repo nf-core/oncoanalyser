@@ -31,7 +31,7 @@ process SAGE_APPEND {
 
     def log_level_arg = task.ext.log_level ? "-log_level ${task.ext.log_level}" : ''
 
-    def skip_msi_jitter_arg = !redux_tsvs ? '-skip_msi_jitter' : ''
+    def skip_args = !redux_tsvs ? '-skip_bqr -skip_msi_jitter' : ''
     def high_depth_mode_arg = targeted_mode ? '-high_depth_mode' : ''
 
     """
@@ -50,7 +50,7 @@ process SAGE_APPEND {
         -sequencing_type ${sequencing_type} \\
         -write_frag_lengths \\
         ${high_depth_mode_arg} \\
-        ${skip_msi_jitter_arg} \\
+        ${skip_args} \\
         -threads ${task.cpus} \\
         ${log_level_arg} \\
         -output_vcf sage_append/${meta.output_file_id}.sage.append.vcf.gz
