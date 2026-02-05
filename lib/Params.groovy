@@ -22,9 +22,9 @@ class Params {
 
         if (!params.containsKey('genome_type')) {
             if (Constants.GENOMES_ALT.contains(params.genome)) {
-                params.genome_type = 'alt'
+                params.genome_type = Constants.RefGenomeType.ALT.getName()
             } else if (Constants.GENOMES_DEFINED.contains(params.genome)) {
-                params.genome_type = 'no_alt'
+                params.genome_type = Constants.RefGenomeType.NO_ALT.getName()
             } else {
                 default_invalid = true
             }
@@ -283,7 +283,7 @@ class Params {
         }
 
         if (params.ref_data_genome_alt !== null) {
-            if (params.genome_type != 'alt') {
+            if (params.genome_type != Constants.RefGenomeType.ALT.getName()) {
                 log.error "\n~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n" +
                     "  Using a reference genome without ALT contigs but found an .alt file\n" +
                     "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
@@ -305,7 +305,7 @@ class Params {
         // NOTE(SW): the following final config checks are performed here since they require additional information
         // regarding processes that are run
 
-        def has_alt_contigs = params.genome_type == 'alt'
+        def has_alt_contigs = params.genome_type == Constants.RefGenomeType.ALT.getName()
 
         // Ensure that custom genomes with ALT contigs that need indexes built have the required .alt file
         def has_bwa_indexes = (params.ref_data_genome_bwamem2_index && params.ref_data_genome_gridss_index)

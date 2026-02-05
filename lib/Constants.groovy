@@ -32,6 +32,13 @@ class Constants {
         public String getName() { return this.name }
     }
 
+    static enum RefGenomeType {
+        ALT,
+        NO_ALT,
+
+        public String getName() { return this.toString().toLowerCase() }
+    }
+
     static enum RunMode {
         PANEL_RESOURCE_CREATION,
         PREPARE_REFERENCE,
