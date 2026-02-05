@@ -18,6 +18,7 @@ process PAVE_GERMLINE {
     path segment_mappability
     path driver_gene_panel
     path ensembl_data_resources
+    val sequencing_type
 
     output:
     tuple val(meta), path('*.vcf.gz')    , emit: vcf
@@ -49,6 +50,7 @@ process PAVE_GERMLINE {
         -blacklist_bed ${sage_blocklist_regions} \\
         -blacklist_vcf ${sage_blocklist_sites} \\
         -gnomad_no_filter \\
+        -sequencing_type ${sequencing_type} \\
         -threads ${task.cpus} \\
         ${log_level_arg} \\
         -output_dir ./

@@ -400,6 +400,7 @@ workflow WGTS {
             hmf_data.driver_gene_panel,
             hmf_data.ensembl_data_resources,
             hmf_data.gnomad_resource,
+            params.sequencing_type,
         )
 
         ch_versions = ch_versions.mix(PAVE_ANNOTATION.out.versions)
