@@ -63,7 +63,7 @@ process SAGE_VISUALISER {
         -include_mt \\
         -vis_purple_vcf ${purple_vcf} \\
         -vis_output_dir plots/ \\
-        -output_vcf sage_vis/${meta.tumor_id}.sage.somatic.vcf.gz \\
+        -output_vcf sage_vis/${meta.tumor_id}.sage.vis.vcf.gz \\
         -threads ${task.cpus} \\
         ${log_level_arg}
         
@@ -78,8 +78,8 @@ process SAGE_VISUALISER {
     mkdir -p sage_vis/plots
 
     touch sage_vis/plots/placeholder
-    touch sage_vis/${meta.tumor_id}.sage.somatic.vcf.gz
-    touch sage_vis/${meta.tumor_id}.sage.somatic.vcf.gz.tbi
+    touch sage_vis/${meta.tumor_id}.sage.vis.vcf.gz
+    touch sage_vis/${meta.tumor_id}.sage.vis.vcf.gz.tbi
 
     echo -e '${task.process}:\\n  stub: noversions\\n' > versions.yml
     """
