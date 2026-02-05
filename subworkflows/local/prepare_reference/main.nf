@@ -208,6 +208,19 @@ workflow PREPARE_REFERENCE {
 
         }
 
+        // Set PON paths
+        def sequencing_type = Enums.getEnumFromString(params.sequencing_type, Constants.SequencingType)
+
+        if(sequencing_type === Constants.SequencingType.SBX) {
+            ch_hmf_data = ch_hmf_data
+                .map { d ->
+                    d.esvee_pon_breakends = d.esvee_pon_breakends_sbx
+                    d.esvee_pon_breakpoints = d.esvee_pon_breakpoints_sbx
+                    return d
+                }
+        }
+
+        // Set custom driver gene panel
         if (params.driver_gene_panel) {
 
             def run_mode = Enums.getEnumFromString(params.mode, Constants.RunMode)
