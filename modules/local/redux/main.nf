@@ -16,7 +16,6 @@ process REDUX {
     path unmap_regions
     path msi_jitter_sites
     val sequencing_type
-    val sequencing_type_ultima
     val umi_enable
     val umi_duplex_delim
     val targeted_mode
@@ -69,7 +68,7 @@ process REDUX {
         .findAll { it != '' }
         .join(' ')
 
-    if(sequencing_type_ultima) {
+    if(sequencing_type == 'ULTIMA') {
         form_consensus_arg = ''
         skip_duplicate_marking_arg = '-skip_duplicate_marking'
     }
