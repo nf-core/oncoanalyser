@@ -12,9 +12,9 @@ class Params {
         // Set defaults common to all run configuration
         if (!params.containsKey('genome_version')) {
             if (Constants.GENOMES_VERSION_37.contains(params.genome)) {
-                params.genome_version = '37'
+                params.genome_version = Constants.RefGenomeVersion.V37.getName()
             } else if (Constants.GENOMES_VERSION_38.contains(params.genome)) {
-                params.genome_version = '38'
+                params.genome_version = Constants.RefGenomeVersion.V38.getName()
             } else {
                 default_invalid = true
             }
@@ -31,9 +31,9 @@ class Params {
         }
 
         if (!params.containsKey('ref_data_hmf_data_path')) {
-            if (params.genome_version.toString() == '37') {
+            if (params.genome_version == Constants.RefGenomeVersion.V37.getName()) {
                 params.ref_data_hmf_data_path = Constants.HMF_DATA_37_PATH
-            } else if (params.genome_version.toString() == '38') {
+            } else if (params.genome_version == Constants.RefGenomeVersion.V38.getName()) {
                 params.ref_data_hmf_data_path = Constants.HMF_DATA_38_PATH
             } else {
                 default_invalid = true
@@ -55,9 +55,9 @@ class Params {
         // Attempt to set default panel data path; make no assumption on valid 'panel' value
         if ((run_mode === Constants.RunMode.TARGETED || run_mode === Constants.RunMode.PREPARE_REFERENCE) && params.containsKey('panel')) {
             if (params.panel == 'tso500') {
-                if (params.genome_version.toString() == '37') {
+                if (params.genome_version == Constants.RefGenomeVersion.V37.getName()) {
                     params.ref_data_panel_data_path = Constants.TSO500_PANEL_37_PATH
-                } else if (params.genome_version.toString() == '38') {
+                } else if (params.genome_version.toString() == Constants.RefGenomeVersion.V38.getName()) {
                     params.ref_data_panel_data_path = Constants.TSO500_PANEL_38_PATH
                 }
             }

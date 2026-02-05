@@ -19,6 +19,19 @@ class Constants {
     static final Integer DEFAULT_ISOFOX_READ_LENGTH_WTS = 151
     static final Integer DEFAULT_ISOFOX_READ_LENGTH_TARGETED = 93
 
+    static enum RefGenomeVersion {
+        V37('37'),
+        V38('38'),
+
+        private final String name
+
+        RefGenomeVersion(String name) {
+            this.name = name
+        }
+
+        public String getName() { return this.name }
+    }
+
     static enum RunMode {
         PANEL_RESOURCE_CREATION,
         PREPARE_REFERENCE,
