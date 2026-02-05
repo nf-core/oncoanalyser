@@ -66,7 +66,6 @@ process ESVEE {
         ${target_region_bed_arg} \\
         -bamtool \$(which sambamba) \\
         -write_types 'PREP_JUNCTION;PREP_BAM;FRAGMENT_LENGTH_DIST;JUNC_ASSEMBLY;PHASED_ASSEMBLY;ALIGNMENT;BREAKEND;VCF' \\
-        -phase_process_limit 2500 \\
         -threads ${task.cpus} \\
         ${log_level_arg} \\
         -output_dir esvee/
