@@ -23,47 +23,8 @@ class SampleSheet {
                     constructSampleMetaFromEntry(entry, meta, sample_keys, group_id, log)
                 }
 
-                // Check that required indexes are provided or are accessible
                 sample_keys.each { sample_key ->
-
-                    meta[sample_key]*.key.each { key ->
-
-                        // NOTE(SW): I was going to use two maps but was unable to get an enum map to compile
-
-                        def index_enum
-                        def index_str
-
-                        if (key === Constants.FileType.BAM || key === Constants.FileType.BAM_REDUX) {
-                            index_enum = Constants.FileType.BAI
-                            index_str = 'bai'
-                        } else if (key === Constants.FileType.CRAM || key === Constants.FileType.CRAM_REDUX) {
-                            index_enum = Constants.FileType.CRAI
-                            index_str = 'crai'
-                        } else if (key === Constants.FileType.ESVEE_VCF) {
-                            index_enum = Constants.FileType.ESVEE_VCF_TBI
-                            index_str = 'tbi'
-                        } else if (key === Constants.FileType.SAGE_VCF) {
-                            index_enum = Constants.FileType.SAGE_VCF_TBI
-                            index_str = 'tbi'
-                        } else {
-                            return
-                        }
-
-                        if (meta[sample_key].containsKey(index_enum)) {
-                            return
-                        }
-
-                        def fp = meta[sample_key][key].toUriString()
-                        def index_fp = nextflow.Nextflow.file("${fp}.${index_str}")
-
-                        if (!index_fp.exists() && !stub_run) {
-                            def (sample_type, sequence_type) = sample_key
-                            log.error "no index provided or found for ${meta.group_id} ${sample_type}/${sequence_type}: ${key}: ${fp}"
-                            Nextflow.exit(1)
-                        }
-
-                        meta[sample_key][index_enum] = index_fp
-                    }
+                    checkFileIndexesExist(meta, sample_key)
                 }
 
                 // CRAMs are passed to hmftools as if they were BAMs, e.g. `-bam_file /path/to/tumor.cram`
@@ -278,6 +239,49 @@ class SampleSheet {
 
             meta_sample[filetype_enum] = getFileObject(entry.filepath)
 
+        }
+    }
+
+    private static void checkFileIndexesExist(meta, sample_key){
+
+        meta[sample_key].keySet().each { key ->
+
+            // NOTE(SW): I was going to use two maps but was unable to get an enum map to compile
+
+            def index_enum
+            def index_extension
+
+            if (key === Constants.FileType.BAM || key === Constants.FileType.BAM_REDUX) {
+                index_enum = Constants.FileType.BAI
+                index_extension = 'bai'
+            } else if (key === Constants.FileType.CRAM || key === Constants.FileType.CRAM_REDUX) {
+                index_enum = Constants.FileType.CRAI
+                index_extension = 'crai'
+            } else if (key === Constants.FileType.ESVEE_VCF) {
+                index_enum = Constants.FileType.ESVEE_VCF_TBI
+                index_extension = 'tbi'
+            } else if (key === Constants.FileType.SAGE_VCF) {
+                index_enum = Constants.FileType.SAGE_VCF_TBI
+                index_extension = 'tbi'
+            } else {
+                // Key not a file type, or not a file type that needs an index
+                return
+            }
+
+            def index_already_provided = meta[sample_key].containsKey(index_enum)
+            if (index_already_provided) {
+                return
+            }
+
+            def file_path = meta[sample_key][key].toUriString()
+            def index_path = nextflow.Nextflow.file("${file_path}.${index_extension}")
+
+            if (!index_path.exists() && !stub_run) {
+                log.error "no index provided or found for: ${file_path}"
+                Nextflow.exit(1)
+            }
+
+            meta[sample_key][index_enum] = index_path
         }
     }
 
