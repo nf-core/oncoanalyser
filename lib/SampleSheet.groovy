@@ -25,27 +25,7 @@ class SampleSheet {
 
                 sample_keys.each { sample_key ->
                     checkFileIndexesExist(meta, sample_key)
-                }
-
-                // CRAMs are passed to hmftools as if they were BAMs, e.g. `-bam_file /path/to/tumor.cram`
-                // We therefore set the BAM/BAI path to be the CRAM/CRAI path
-                sample_keys.each { sample_key ->
-
-                    def meta_sample = meta[sample_key]
-
-                    if (meta_sample.containsKey(Constants.FileType.CRAM_REDUX)) {
-                        meta_sample[Constants.FileType.BAM_REDUX] = meta_sample.remove(Constants.FileType.CRAM_REDUX)
-                    }
-
-                    if (meta_sample.containsKey(Constants.FileType.CRAM)) {
-                        meta_sample[Constants.FileType.BAM] = meta_sample.remove(Constants.FileType.CRAM)
-                    }
-
-                    // The BAI key is used to store the index for both regular/REDUX CRAMs/BAMs
-                    if (meta_sample.containsKey(Constants.FileType.CRAI)) {
-                        meta_sample[Constants.FileType.BAI] = meta_sample.remove(Constants.FileType.CRAI)
-                    }
-
+                    setCramPaths(meta, sample_key)
                 }
 
                 // Check that REDUX TSVs are present
@@ -283,6 +263,28 @@ class SampleSheet {
 
             meta[sample_key][index_enum] = index_path
         }
+    }
+
+    private static void setCramPaths(meta, sample_key) {
+
+        // CRAMs are passed to hmftools as if they were BAMs, e.g. `-bam_file /path/to/tumor.cram`
+        // We therefore set the BAM/BAI path to be the CRAM/CRAI path
+
+        def meta_sample = meta[sample_key]
+
+        if (meta_sample.containsKey(Constants.FileType.CRAM_REDUX)) {
+            meta_sample[Constants.FileType.BAM_REDUX] = meta_sample.remove(Constants.FileType.CRAM_REDUX)
+        }
+
+        if (meta_sample.containsKey(Constants.FileType.CRAM)) {
+            meta_sample[Constants.FileType.BAM] = meta_sample.remove(Constants.FileType.CRAM)
+        }
+
+        // The BAI key is used to store the index for both regular/REDUX CRAMs/BAMs
+        if (meta_sample.containsKey(Constants.FileType.CRAI)) {
+            meta_sample[Constants.FileType.BAI] = meta_sample.remove(Constants.FileType.CRAI)
+        }
+
     }
 
 
