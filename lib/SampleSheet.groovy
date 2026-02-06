@@ -24,67 +24,14 @@ class SampleSheet {
                 }
 
                 sample_keys.each { sample_key ->
+
                     checkFileIndexesExist(meta, sample_key)
+
                     setCramPaths(meta, sample_key)
-                }
 
-                // Check that REDUX TSVs are present
-                sample_keys.each { sample_key ->
-
-                    if (stub_run) {
-                        return
+                    if(!stub_run) {
+                        checkReduxTsvsExist(meta, sample_key)
                     }
-
-                    def meta_sample = meta[sample_key]
-
-                    if (!meta_sample.containsKey(Constants.FileType.BAM_REDUX)) {
-                        return
-                    }
-
-                    def bam_path = meta_sample[Constants.FileType.BAM_REDUX]
-                    def bam_dir = bam_path.getParent().toUriString()
-
-                    // Get user specified TSV paths
-                    def jitter_tsv = meta_sample[Constants.FileType.REDUX_JITTER_TSV]
-                    def ms_tsv = meta_sample[Constants.FileType.REDUX_MS_TSV]
-
-                    // If TSV paths not provided, default to TSV paths in the same dir as the BAM
-                    def sample_id = meta_sample.getOrDefault('longitudinal_sample_id', meta_sample['sample_id'])
-                    jitter_tsv = jitter_tsv ?: "${bam_dir}/${sample_id}.jitter_params.tsv"
-                    ms_tsv = ms_tsv ?: "${bam_dir}/${sample_id}.ms_table.tsv.gz"
-
-                    jitter_tsv = nextflow.Nextflow.file(jitter_tsv)
-                    ms_tsv = nextflow.Nextflow.file(ms_tsv)
-
-                    def missing_tsvs = [:]
-                    if (!jitter_tsv.exists()) {
-                        missing_tsvs[Constants.FileType.REDUX_JITTER_TSV] = jitter_tsv
-                    }
-                    if (!ms_tsv.exists()) {
-                        missing_tsvs[Constants.FileType.REDUX_MS_TSV] = ms_tsv
-                    }
-
-                    if (missing_tsvs.size() > 0) {
-
-                        def error_message = []
-
-                        error_message.add("When only specifying filetype ${Constants.FileType.BAM_REDUX} in the sample sheet, make sure the REDUX BAM and TSVs are in the same dir:")
-                        error_message.add("${bam_path.toUriString()} (${Constants.FileType.BAM_REDUX})")
-                        missing_tsvs.each { error_message.add("${it.value} (missing expected ${it.key})") }
-                        error_message.add("")
-                        error_message.add(
-                            "Alternatively, provide the TSV paths in the sample sheet using filetype values: " +
-                            "${Constants.FileType.REDUX_JITTER_TSV}, " +
-                            "${Constants.FileType.REDUX_MS_TSV}"
-                        )
-
-                        log.error error_message.join("\n")
-                        Nextflow.exit(1)
-                    }
-
-                    // Set parsed REDUX TSV paths in metadata object
-                    meta_sample[Constants.FileType.REDUX_JITTER_TSV] = jitter_tsv
-                    meta_sample[Constants.FileType.REDUX_MS_TSV] = ms_tsv
 
                 }
 
@@ -287,6 +234,59 @@ class SampleSheet {
 
     }
 
+    private static void checkReduxTsvsExist(meta, sample_key) {
+
+        def meta_sample = meta[sample_key]
+
+        if (!meta_sample.containsKey(Constants.FileType.BAM_REDUX)) {
+            return
+        }
+
+        def bam_path = meta_sample[Constants.FileType.BAM_REDUX]
+        def bam_dir = bam_path.getParent().toUriString()
+
+        // Get user specified TSV paths
+        def jitter_tsv = meta_sample[Constants.FileType.REDUX_JITTER_TSV]
+        def ms_tsv = meta_sample[Constants.FileType.REDUX_MS_TSV]
+
+        // If TSV paths not provided, default to TSV paths in the same dir as the BAM
+        def sample_id = meta_sample.getOrDefault('longitudinal_sample_id', meta_sample['sample_id'])
+        jitter_tsv = jitter_tsv ?: "${bam_dir}/${sample_id}.jitter_params.tsv"
+        ms_tsv = ms_tsv ?: "${bam_dir}/${sample_id}.ms_table.tsv.gz"
+
+        jitter_tsv = nextflow.Nextflow.file(jitter_tsv)
+        ms_tsv = nextflow.Nextflow.file(ms_tsv)
+
+        def missing_tsvs = [:]
+        if (!jitter_tsv.exists()) {
+            missing_tsvs[Constants.FileType.REDUX_JITTER_TSV] = jitter_tsv
+        }
+        if (!ms_tsv.exists()) {
+            missing_tsvs[Constants.FileType.REDUX_MS_TSV] = ms_tsv
+        }
+
+        if (missing_tsvs.size() > 0) {
+
+            def error_message = []
+
+            error_message.add("When only specifying filetype ${Constants.FileType.BAM_REDUX} in the sample sheet, make sure the REDUX BAM and TSVs are in the same dir:")
+            error_message.add("${bam_path.toUriString()} (${Constants.FileType.BAM_REDUX})")
+            missing_tsvs.each { error_message.add("${it.value} (missing expected ${it.key})") }
+            error_message.add("")
+            error_message.add(
+                "Alternatively, provide the TSV paths in the sample sheet using filetype values: " +
+                    "${Constants.FileType.REDUX_JITTER_TSV}, " +
+                    "${Constants.FileType.REDUX_MS_TSV}"
+            )
+
+            log.error error_message.join("\n")
+            Nextflow.exit(1)
+        }
+
+        // Set parsed REDUX TSV paths in metadata object
+        meta_sample[Constants.FileType.REDUX_JITTER_TSV] = jitter_tsv
+        meta_sample[Constants.FileType.REDUX_MS_TSV] = ms_tsv
+    }
 
     public static void validateInput(inputs, run_config, log) {
 
