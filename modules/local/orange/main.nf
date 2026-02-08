@@ -9,8 +9,8 @@ process ORANGE {
 
     input:
     tuple val(meta),
-        path(redux_somatic_dir),
-        path(redux_germline_dir),
+        path(redux_somatic_bqr_plot),
+        path(redux_germline_bqr_plot),
         path(bamtools_somatic_dir, stageAs: 'bamtools_somatic'),
         path(bamtools_germline_dir, stageAs: 'bamtools_germline'),
         path(sage_somatic_dir, stageAs: 'sage_somatic'),
@@ -68,8 +68,7 @@ process ORANGE {
     def peach_dir_arg = peach_dir ? "-peach_dir ${peach_dir}" : ''
     def linx_plot_dir = linx_somatic_plot_dir.resolve('reportable/').toUriString().replaceAll('/$', '')
 
-    def tumor_redux_arg = "-tumor_redux_dir ${redux_somatic_dir}"
-    def normal_redux_arg = redux_germline_dir ? "-ref_redux_dir ${redux_germline_dir}" : ''
+    def normal_redux_arg = redux_germline_bqr_plot ? "-ref_redux_dir ./" : ''
 
     def tumor_metrics_arg = "-tumor_metrics_dir ${bamtools_somatic_dir}"
     def normal_metrics_arg = bamtools_germline_dir ? "-ref_metrics_dir ${bamtools_germline_dir}" : ''
@@ -150,7 +149,7 @@ process ORANGE {
         ${cuppa_dir_arg} \\
         ${peach_dir_arg} \\
         \\
-        ${tumor_redux_arg} \\
+        -tumor_redux_dir ./ \\
         ${normal_redux_arg} \\
         ${normal_id_arg} \\
         ${normal_metrics_arg} \\

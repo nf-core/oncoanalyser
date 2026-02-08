@@ -96,7 +96,7 @@ workflow ORANGE_REPORTING {
     ]
 
     // Select input sources
-    // channel: [ meta, tbt_metrics_dir, nbt_metrics_dir, tsage_dir, nsage_dir, tsage_append, nsage_append, purple_dir, tlinx_anno_dir, tlinx_plot_dir, nlinx_anno_dir, virusinterpreter_dir, chord_dir, sigs_dir, lilac_dir, cuppa_dir, ch_peach, isofox_dir ]
+    // channel: [ meta, redux_somatic_dir, redux_germline_dir, ... ]
     ch_inputs_selected = WorkflowOncoanalyser.groupByMeta(
         ch_redux_somatic,
         ch_redux_germline,
@@ -151,7 +151,7 @@ workflow ORANGE_REPORTING {
         }
 
     // Sort inputs
-    // channel: runnable: [ meta, tbt_metrics_dir, nbt_metrics_dir, tsage_dir, nsage_dir, tsage_append, nsage_append, purple_dir, tlinx_anno_dir, tlinx_plot_dir, nlinx_anno_dir, virusinterpreter_dir, chord_dir, sigs_dir, lilac_dir, cuppa_dir, peach_dir, isofox_dir ]
+    // channel: runnable: [ meta, redux_somatic_dir, redux_germline_dir, ... ]
     // channel: skip: [ meta ]
     ch_inputs_sorted = ch_inputs_selected
         .branch { d ->
@@ -169,7 +169,7 @@ workflow ORANGE_REPORTING {
         }
 
     // Create process input channel
-    // channel: sample_data: [ meta, tbt_metrics_dir, nbt_metrics_dir, tsage_dir, nsage_dir, tsmlv_vcf, nsmlv_vcf, purple_dir, tlinx_anno_dir, tlinx_plot_dir, nlinx_anno_dir, virusinterpreter_dir, chord_dir, sigs_dir, lilac_dir, cuppa_dir, peach_dir, isofox_dir ]
+    // channel: sample_data: [ meta, redux_somatic_dir, redux_germline_dir, ... ]
     ch_orange_inputs = ch_inputs_sorted.runnable
         .map { d ->
 
@@ -213,6 +213,19 @@ workflow ORANGE_REPORTING {
                 meta_orange.tumor_rna_id = Utils.getTumorRnaSampleName(meta)
             } else {
                 rna_tumor_input_indexes.each { i -> inputs_selected[i] = [] }
+            }
+
+            // Only stage the REDUX BQR plots.
+            // If the REDUX dir were staged, the REDUX BAMs would thus be staged. On cloud environments, this means a
+            // VM were more disk space is required even though the BAMs are not used.
+            def redux_somatic_dir = inputs_selected[input_indexes.redux_somatic]
+            if (redux_somatic_dir) {
+                inputs_selected[input_indexes.redux_somatic] = redux_somatic_dir.resolve("${meta_orange.tumor_id}.redux.bqr.png")
+            }
+
+            def redux_germline_dir = inputs_selected[input_indexes.redux_germline]
+            if (redux_germline_dir) {
+                inputs_selected[input_indexes.redux_germline] = redux_germline_dir.resolve("${meta_orange.normal_dna_id}.redux.bqr.png")
             }
 
             // ORANGE only accepts CUPPA with DNA; when providing DNA/RNA inputs but skipping Virus Interpreter CUPPA
