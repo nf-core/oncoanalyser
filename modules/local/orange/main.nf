@@ -59,32 +59,32 @@ process ORANGE {
 
     def pipeline_version_str = pipeline_version ?: 'not specified'
     def experiment_type = targeted_mode ? 'PANEL' : 'WGS'
+    def doid_arg = meta.cancer_type ?: '162' // NOTE(SW): DOID label: 162 [cancer]; Hartwig cohort group: unknown
 
+    // Tumor sample
+    def linx_plot_dir = linx_somatic_plot_dir.resolve('reportable/').toUriString().replaceAll('/$', '')
+
+    // Normal sample
+    def normal_id_arg = meta.containsKey('normal_dna_id') ? "-reference_sample_id ${meta.normal_dna_id}" : ''
+    def normal_redux_arg = redux_germline_bqr_plot ? "-ref_redux_dir ./" : ''
+    def normal_metrics_arg = bamtools_germline_dir ? "-ref_metrics_dir ${bamtools_germline_dir}" : ''
+    def normal_sage_dir_arg = sage_germline_dir ? "-sage_germline_dir ${sage_germline_dir}" : ''
+    def normal_linx_arg = linx_germline_anno_dir ? "-linx_germline_dir ${linx_germline_anno_dir}" : ''
+
+    // Optional tools
     def virus_dir_arg = virusinterpreter_dir ? "-virus_dir ${virusinterpreter_dir}" : ''
     def lilac_dir_arg = lilac_dir ? "-lilac_dir ${lilac_dir}" : ''
     def chord_dir_arg = chord_dir ? "-chord_dir ${chord_dir}" : ''
     def sigs_dir_arg = sigs_dir ? "-sigs_dir ${sigs_dir}" : ''
     def cuppa_dir_arg = cuppa_dir ? "-cuppa_dir ${cuppa_dir}" : ''
     def peach_dir_arg = peach_dir ? "-peach_dir ${peach_dir}" : ''
-    def linx_plot_dir = linx_somatic_plot_dir.resolve('reportable/').toUriString().replaceAll('/$', '')
 
-    def normal_redux_arg = redux_germline_bqr_plot ? "-ref_redux_dir ./" : ''
-
-    def tumor_metrics_arg = "-tumor_metrics_dir ${bamtools_somatic_dir}"
-    def normal_metrics_arg = bamtools_germline_dir ? "-ref_metrics_dir ${bamtools_germline_dir}" : ''
-
-    def normal_id_arg = meta.containsKey('normal_dna_id') ? "-reference_sample_id ${meta.normal_dna_id}" : ''
-    def normal_sage_dir = sage_germline_dir ? "-sage_germline_dir ${sage_germline_dir}" : ''
-    def normal_linx_arg = linx_germline_anno_dir ? "-linx_germline_dir ${linx_germline_anno_dir}" : ''
-
+    // RNA sample
     def rna_id_arg = meta.containsKey('tumor_rna_id') ? "-rna_sample_id ${meta.tumor_rna_id}" : ''
     def isofox_dir_arg = isofox_dir ? '-isofox_dir isofox_dir__prepared/' : ''
 
     def isofox_gene_distribution_arg = isofox_gene_distribution ? "-isofox_gene_distribution ${isofox_gene_distribution}" : ''
     def isofox_alt_sj_arg = isofox_alt_sj ? "-isofox_alt_sj_cohort ${isofox_alt_sj}" : ''
-
-    // NOTE(SW): DOID label: 162 [cancer]; Hartwig cohort group: unknown
-    def doid_arg = meta.cancer_type ?: '162'
 
     """
     echo "${pipeline_version_str}" > pipeline_version.txt
@@ -134,28 +134,29 @@ process ORANGE {
         -add_disclaimer \\
         -pipeline_version_file pipeline_version.txt \\
         -experiment_type ${experiment_type} \\
+        -primary_tumor_doids ${doid_arg} \\
         \\
         -tumor_sample_id ${meta.tumor_id} \\
-        -primary_tumor_doids ${doid_arg} \\
+        -tumor_redux_dir ./ \\
+        -tumor_metrics_dir ${bamtools_somatic_dir} \\
         -sage_dir ${sage_somatic_dir} \\
         -purple_dir \${purple_dir_local} \\
         -purple_plot_dir \${purple_dir_local}/plot/ \\
         -linx_dir ${linx_somatic_anno_dir} \\
         -linx_plot_dir ${linx_plot_dir}/ \\
+        \\
+        ${normal_id_arg} \\
+        ${normal_redux_arg} \\
+        ${normal_metrics_arg} \\
+        ${normal_sage_dir_arg} \\
+        ${normal_linx_arg} \\
+        \\
         ${virus_dir_arg} \\
         ${lilac_dir_arg} \\
         ${chord_dir_arg} \\
         ${sigs_dir_arg} \\
         ${cuppa_dir_arg} \\
         ${peach_dir_arg} \\
-        \\
-        -tumor_redux_dir ./ \\
-        ${normal_redux_arg} \\
-        ${normal_id_arg} \\
-        ${normal_metrics_arg} \\
-        ${tumor_metrics_arg} \\
-        ${normal_sage_dir} \\
-        ${normal_linx_arg} \\
         \\
         ${rna_id_arg} \\
         ${isofox_dir_arg} \\
