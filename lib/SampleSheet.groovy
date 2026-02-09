@@ -33,7 +33,7 @@ class SampleSheet {
                     def meta_sample = meta[sample_key]
 
                     setCramPaths(meta_sample)
-                    checkFileIndexesExist(meta_sample, log)
+                    checkAndSetFileIndexes(meta_sample, log)
                     checkReduxTsvsExist(meta_sample, log)
                 }
 
@@ -184,7 +184,7 @@ class SampleSheet {
 
     }
 
-    private static void checkFileIndexesExist(meta_sample, log){
+    private static void checkAndSetFileIndexes(meta_sample, log) {
 
         meta_sample.keySet().each { key ->
 
