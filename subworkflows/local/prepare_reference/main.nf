@@ -215,9 +215,15 @@ workflow PREPARE_REFERENCE {
 
             ch_hmf_data = ch_hmf_data
                 .map { d ->
-                    d.sage_pon = d.sage_pon_ultima
-                    d.esvee_pon_breakends = d.esvee_pon_breakends_ultima
-                    d.esvee_pon_breakpoints = d.esvee_pon_breakpoints_ultima
+                    if (d.sage_pon_ultima)
+                        d.sage_pon = d.sage_pon_ultima
+
+                    if (d.esvee_pon_breakends_ultima)
+                        d.esvee_pon_breakends = d.esvee_pon_breakends_ultima
+
+                    if (d.esvee_pon_breakpoints_ultima)
+                        d.esvee_pon_breakpoints = d.esvee_pon_breakpoints_ultima
+
                     return d
                 }
 
@@ -225,9 +231,15 @@ workflow PREPARE_REFERENCE {
 
             ch_hmf_data = ch_hmf_data
                 .map { d ->
-                    d.sage_pon = d.sage_pon_sbx
-                    d.esvee_pon_breakends = d.esvee_pon_breakends_sbx
-                    d.esvee_pon_breakpoints = d.esvee_pon_breakpoints_sbx
+                    if (d.sage_pon_sbx)
+                        d.sage_pon = d.sage_pon_sbx
+
+                    if (d.esvee_pon_breakends_sbx)
+                        d.esvee_pon_breakends = d.esvee_pon_breakends_sbx
+
+                    if (d.esvee_pon_breakpoints_sbx)
+                        d.esvee_pon_breakpoints = d.esvee_pon_breakpoints_sbx
+
                     return d
                 }
 
