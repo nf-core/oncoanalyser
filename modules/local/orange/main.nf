@@ -81,10 +81,18 @@ process ORANGE {
 
     // RNA sample
     def rna_id_arg = meta.containsKey('tumor_rna_id') ? "-rna_sample_id ${meta.tumor_rna_id}" : ''
-    def isofox_dir_arg = isofox_dir ? '-isofox_dir isofox_dir__prepared/' : ''
 
-    def isofox_gene_distribution_arg = isofox_gene_distribution ? "-isofox_gene_distribution ${isofox_gene_distribution}" : ''
-    def isofox_alt_sj_arg = isofox_alt_sj ? "-isofox_alt_sj_cohort ${isofox_alt_sj}" : ''
+    def should_run_isofox = rna_id_arg
+
+    def isofox_dir_arg = ''
+    def isofox_gene_distribution_arg = ''
+    def isofox_alt_sj_arg = ''
+
+    if (should_run_isofox) {
+        isofox_dir_arg = '-isofox_dir isofox_dir__prepared/'
+        isofox_gene_distribution_arg = "-isofox_gene_distribution ${isofox_gene_distribution}"
+        isofox_alt_sj_arg = "-isofox_alt_sj_cohort ${isofox_alt_sj}"
+    }
 
     """
     echo "${pipeline_version_str}" > pipeline_version.txt
