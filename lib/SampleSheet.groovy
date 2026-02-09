@@ -23,6 +23,7 @@ class SampleSheet {
                     constructSampleMetaFromEntry(entry, meta, sample_keys, group_id, log)
                 }
 
+                // Checks per sample
                 sample_keys.each { sample_key ->
 
                     if(stub_run) {
@@ -36,6 +37,8 @@ class SampleSheet {
                     checkReduxTsvsExist(meta_sample, log)
                 }
 
+                // Checks per group
+                disallowDuplicateSampleIds(meta, sample_keys, log)
                 checkLongitudinalSampleInputs(meta, log)
 
                 return meta
@@ -276,6 +279,23 @@ class SampleSheet {
         meta_sample[Constants.FileType.REDUX_MS_TSV] = ms_tsv
     }
 
+    private static void disallowDuplicateSampleIds(meta, sample_keys, log) {
+
+        // Enforce unique samples names within groups
+        def sample_ids_duplicated = sample_keys
+            .groupBy { meta.getOrDefault(it, [:]).getOrDefault('sample_id', null) }
+            .findResults { k, v -> k !== null & v.size() > 1 ? [k, v] : null }
+
+        if (sample_ids_duplicated) {
+            def duplicate_message_strs = sample_ids_duplicated.collect { sample_id, keys ->
+                def key_strs = keys.collect { sample_type, sequence_type -> "${sample_type}/${sequence_type}" }
+                return "  * ${sample_id}: ${key_strs.join(", ")}"
+            }
+            log.error "duplicate sample names found for ${meta.group_id}:\n\n${duplicate_message_strs.join("\n")}"
+            Nextflow.exit(1)
+        }
+    }
+
     private static void checkLongitudinalSampleInputs(meta, log) {
 
         // For purity estimation with WISP, require primary normal DNA BAM when an AMBER directory is provided
@@ -362,20 +382,6 @@ class SampleSheet {
             // Do not allow CRAM RNA input
             if (Utils.hasTumorRnaBam(meta) && Utils.getTumorRnaBam(meta).toString().endsWith('cram')) {
                 log.error "found tumor RNA CRAM input for ${meta.group_id} but RNA CRAM input is not supported"
-                Nextflow.exit(1)
-            }
-
-            // Enforce unique samples names within groups
-            def sample_ids_duplicated = sample_keys
-                    .groupBy { meta.getOrDefault(it, [:]).getOrDefault('sample_id', null) }
-                    .findResults { k, v -> k !== null & v.size() > 1 ? [k, v] : null }
-
-            if (sample_ids_duplicated) {
-                def duplicate_message_strs = sample_ids_duplicated.collect { sample_id, keys ->
-                    def key_strs = keys.collect { sample_type, sequence_type -> "${sample_type}/${sequence_type}" }
-                    return "  * ${sample_id}: ${key_strs.join(", ")}"
-                }
-                log.error "duplicate sample names found for ${meta.group_id}:\n\n${duplicate_message_strs.join("\n")}"
                 Nextflow.exit(1)
             }
 
