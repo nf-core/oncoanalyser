@@ -36,16 +36,7 @@ class SampleSheet {
                     checkReduxTsvsExist(meta_sample, log)
                 }
 
-                // For purity estimation with WISP, require primary normal DNA BAM when an AMBER directory is provided
-                def meta_tumor_dna = meta.getOrDefault([Constants.SampleType.TUMOR, Constants.SequenceType.DNA], [:])
-                def longitudinal = meta_tumor_dna.containsKey('longitudinal_sample_id')
-                def has_amber_dir = meta_tumor_dna.containsKey(Constants.FileType.AMBER_DIR)
-                def has_normal_dna_bam = Utils.hasNormalDnaBam(meta) || Utils.hasNormalDnaReduxBam(meta)
-
-                if (longitudinal && has_amber_dir && !has_normal_dna_bam) {
-                    log.error "AMBER input was provided without the required primary normal DNA BAM for ${meta.group_id}"
-                    Nextflow.exit(1)
-                }
+                checkLongitudinalSampleInputs(meta, log)
 
                 return meta
             }
@@ -283,6 +274,21 @@ class SampleSheet {
         // Set parsed REDUX TSV paths in metadata object
         meta_sample[Constants.FileType.REDUX_JITTER_TSV] = jitter_tsv
         meta_sample[Constants.FileType.REDUX_MS_TSV] = ms_tsv
+    }
+
+    private static void checkLongitudinalSampleInputs(meta, log) {
+
+        // For purity estimation with WISP, require primary normal DNA BAM when an AMBER directory is provided
+        def meta_tumor_dna = meta.getOrDefault([Constants.SampleType.TUMOR, Constants.SequenceType.DNA], [:])
+        def longitudinal = meta_tumor_dna.containsKey('longitudinal_sample_id')
+        def has_amber_dir = meta_tumor_dna.containsKey(Constants.FileType.AMBER_DIR)
+        def has_normal_dna_bam = Utils.hasNormalDnaBam(meta) || Utils.hasNormalDnaReduxBam(meta)
+
+        if (longitudinal && has_amber_dir && !has_normal_dna_bam) {
+            log.error "AMBER input was provided without the required primary normal DNA BAM for ${meta.group_id}"
+            Nextflow.exit(1)
+        }
+
     }
 
     public static void validateInput(inputs, run_config, log) {
