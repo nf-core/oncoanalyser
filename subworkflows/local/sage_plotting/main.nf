@@ -13,9 +13,9 @@ workflow SAGE_PLOTTING {
     ch_tumor_bam                 // channel: [mandatory] [ meta, bam, bai ]
     ch_normal_bam                // channel: [mandatory] [ meta, bam, bai ]
     ch_donor_bam                 // channel: [mandatory] [ meta, bam, bai ]
-    ch_tumor_tsv                 // channel: [mandatory] [ meta, bqr_tsv, dup_freq_tsv, jitter_tsv, ms_tsv ]
-    ch_normal_tsv                // channel: [mandatory] [ meta, bqr_tsv, dup_freq_tsv, jitter_tsv, ms_tsv ]
-    ch_donor_tsv                 // channel: [mandatory] [ meta, bqr_tsv, dup_freq_tsv, jitter_tsv, ms_tsv ]
+    ch_tumor_tsv                 // channel: [mandatory] [ meta, bqr_tsv, jitter_tsv, ms_tsv ]
+    ch_normal_tsv                // channel: [mandatory] [ meta, bqr_tsv, jitter_tsv, ms_tsv ]
+    ch_donor_tsv                 // channel: [mandatory] [ meta, bqr_tsv, jitter_tsv, ms_tsv ]
     ch_purple                    // channel: [mandatory] [ meta, purple_dir ]
 
     // Reference data
@@ -44,9 +44,9 @@ workflow SAGE_PLOTTING {
         ch_purple,
     )
         .map { meta,
-            tumor_bam , tumor_bai , tumor_bqr_tsv , tumor_dup_freq_tsv , tumor_jitter_tsv , tumor_ms_tsv,
-            normal_bam, normal_bai, normal_bqr_tsv, normal_dup_freq_tsv, normal_jitter_tsv, normal_ms_tsv,
-            donor_bam , donor_bai , donor_bqr_tsv , donor_dup_freq_tsv , donor_jitter_tsv , donor_ms_tsv,
+            tumor_bam , tumor_bai , tumor_bqr_tsv , tumor_jitter_tsv , tumor_ms_tsv,
+            normal_bam, normal_bai, normal_bqr_tsv, normal_jitter_tsv, normal_ms_tsv,
+            donor_bam , donor_bai , donor_bqr_tsv , donor_jitter_tsv , donor_ms_tsv,
             purple_dir ->
 
             tumor_bam = Utils.selectCurrentOrExisting(tumor_bam, meta, Constants.INPUT.BAM_REDUX_DNA_TUMOR)

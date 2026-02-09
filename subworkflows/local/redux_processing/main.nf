@@ -120,18 +120,19 @@ workflow REDUX_PROCESSING {
     ch_versions = ch_versions.mix(REDUX.out.versions)
 
     // Combine TSV outputs into single channel for processing
-    // channel: [ meta, dir, [bam, bai], [bqr_tsv, dup_freq_tsv, jitter_tsv, ms_tsv] ]
+    // channel: [ meta, dir, bam, bai, bqr_tsv, jitter_tsv, ms_tsv ]
     ch_redux_out = WorkflowOncoanalyser.groupByMeta(
-        ["flatten": false],
         REDUX.out.redux_dir,
         REDUX.out.bam,
-        REDUX.out.tsv,
+        REDUX.out.bqr_tsv,
+        REDUX.out.jitter_tsv,
+        REDUX.out.ms_tsv,
     )
 
     // Sort into a tumor and normal channel
-    // channel: [ meta, dir, [bam, bai], [bqr_tsv, dup_freq_tsv, jitter_tsv, ms_tsv] ]
+    // channel: [ meta, dir, bam, bai, bqr_tsv, jitter_tsv, ms_tsv ]
     ch_redux_out_sorted = ch_redux_out
-        .branch { meta, dir, bam, tsv ->
+        .branch { meta, dir, bam, bai, bqr_tsv, jitter_tsv, ms_tsv ->
             assert ['tumor', 'normal', 'donor'].contains(meta.sample_type)
             tumor: meta.sample_type == 'tumor'
             normal: meta.sample_type == 'normal'
@@ -140,8 +141,8 @@ workflow REDUX_PROCESSING {
         }
 
     // Set outputs, restoring original meta, split into BAMs and TSVs
-    // channel: [ meta, dir, bam, bai, bqr_tsv, dup_freq_tsv, jitter_tsv, ms_tsv ]
-    def createOutputChannels = { ch_sample_type_out, ch_sample_type_skip ->
+    // channel: [ meta, dir, bam, bai, bqr_tsv, jitter_tsv, ms_tsv ]
+    def createOutputChannels = { ch_redux_out_sample_type, ch_sample_type_skip ->
 
         def placeholder_dir = [[]] * PlaceholderChannels.N_ITEMS_TOOL_DIR
         def placeholder_bam = [[]] * PlaceholderChannels.N_ITEMS_BAM_BAI
@@ -149,13 +150,13 @@ workflow REDUX_PROCESSING {
 
         return Channel.empty()
             .mix(
-                WorkflowOncoanalyser.restoreMeta(ch_sample_type_out, ch_inputs),
-                ch_sample_type_skip.map { meta -> [meta, placeholder_dir, placeholder_bam, placeholder_tsv] },
+                WorkflowOncoanalyser.restoreMeta(ch_redux_out_sample_type, ch_inputs),
+                ch_sample_type_skip.map { meta -> [meta, *placeholder_dir, *placeholder_bam, *placeholder_tsv] },
             )
-            .multiMap { meta, dir, bam, tsv ->
-                dir: [meta, *dir]
-                bam: [meta, *bam]
-                tsv: [meta, *tsv]
+            .multiMap { meta, dir, bam, bai, bqr_tsv, jitter_tsv, ms_tsv ->
+                dir: [meta, dir]
+                bam: [meta, bam, bai]
+                tsv: [meta, bqr_tsv, jitter_tsv, ms_tsv]
             }
     }
 
@@ -172,9 +173,9 @@ workflow REDUX_PROCESSING {
     dna_normal_bam = ch_redux_normal_out.bam // channel: [ meta, bam, bai ]
     dna_donor_bam  = ch_redux_donor_out.bam  // channel: [ meta, bam, bai ]
 
-    dna_tumor_tsv  = ch_redux_tumor_out.tsv  // channel: [ meta, bqr_tsv, dup_freq_tsv, jitter_tsv, ms_tsv ]
-    dna_normal_tsv = ch_redux_normal_out.tsv // channel: [ meta, bqr_tsv, dup_freq_tsv, jitter_tsv, ms_tsv ]
-    dna_donor_tsv  = ch_redux_donor_out.tsv  // channel: [ meta, bqr_tsv, dup_freq_tsv, jitter_tsv, ms_tsv ]
+    dna_tumor_tsv  = ch_redux_tumor_out.tsv  // channel: [ meta, bqr_tsv, jitter_tsv, ms_tsv ]
+    dna_normal_tsv = ch_redux_normal_out.tsv // channel: [ meta, bqr_tsv, jitter_tsv, ms_tsv ]
+    dna_donor_tsv  = ch_redux_donor_out.tsv  // channel: [ meta, bqr_tsv, jitter_tsv, ms_tsv ]
 
     versions       = ch_versions             // channel: [ versions.yml ]
 }

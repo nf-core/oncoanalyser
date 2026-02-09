@@ -95,7 +95,7 @@ workflow PURITY_ESTIMATE {
     ch_redux_dna_normal_bam_out = Channel.empty()
     ch_redux_dna_donor_bam_out = Channel.empty()
 
-    // channel: [ meta, bqr_tsv, dup_freq_tsv, jitter_tsv, ms_tsv ]
+    // channel: [ meta, bqr_tsv, jitter_tsv, ms_tsv ]
     ch_redux_dna_tumor_tsv_out = Channel.empty()
     ch_redux_dna_normal_tsv_out = Channel.empty()
     ch_redux_dna_donor_tsv_out = Channel.empty()

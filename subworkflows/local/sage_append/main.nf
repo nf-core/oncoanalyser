@@ -14,7 +14,7 @@ workflow SAGE_APPEND {
     ch_inputs         // channel: [mandatory] [ meta ]
     ch_purple_dir     // channel: [mandatory] [ meta, purple_dir ]
     ch_tumor_dna_bam  // channel: [mandatory] [ meta, bam, bai ]
-    ch_tumor_dna_tsv  // channel: [mandatory] [ meta, bqr_tsv, dup_freq_tsv, jitter_tsv, ms_tsv ]
+    ch_tumor_dna_tsv  // channel: [mandatory] [ meta, bqr_tsv, jitter_tsv, ms_tsv ]
     ch_tumor_rna_bam  // channel: [mandatory] [ meta, bam, bai ]
 
     // Reference data
@@ -47,7 +47,7 @@ workflow SAGE_APPEND {
     )
         .map { meta,
             tumor_dna_bam, tumor_dna_bai,
-            tumor_dna_bqr_tsv, tumor_dna_dup_freq_tsv, tumor_dna_jitter_tsv, tumor_dna_ms_tsv,
+            tumor_dna_bqr_tsv, tumor_dna_jitter_tsv, tumor_dna_ms_tsv,
             tumor_rna_bam, tumor_rna_bai,
             purple_dir ->
 

@@ -126,7 +126,7 @@ workflow PANEL_RESOURCE_CREATION {
     ch_redux_dna_tumor_bam_out = REDUX_PROCESSING.out.dna_tumor
     ch_redux_dna_normal_bam_out = REDUX_PROCESSING.out.dna_normal
 
-    // channel: [ meta, bqr_tsv, dup_freq_tsv, jitter_tsv, ms_tsv ]
+    // channel: [ meta, bqr_tsv, jitter_tsv, ms_tsv ]
     ch_redux_dna_tumor_tsv_out = REDUX_PROCESSING.out.dna_tumor_tsv
     ch_redux_dna_normal_tsv_out = REDUX_PROCESSING.out.dna_normal_tsv
 

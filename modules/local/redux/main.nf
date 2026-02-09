@@ -21,18 +21,17 @@ process REDUX {
     val targeted_mode
 
     output:
-    tuple val(meta),
-        path("redux_${meta.sample_id}/${meta.sample_id}.redux.bam"),
-        path("redux_${meta.sample_id}/${meta.sample_id}.redux.bam.bai"),              emit: bam
+    tuple val(meta), path("redux_${meta.sample_id}/")                                          , emit: redux_dir
 
-    tuple val(meta),
-        path("redux_${meta.sample_id}/${meta.sample_id}.redux.bqr.tsv"),
-        path("redux_${meta.sample_id}/${meta.sample_id}.redux.duplicate_freq.tsv"),
-        path("redux_${meta.sample_id}/${meta.sample_id}.redux.jitter_params.tsv"),
-        path("redux_${meta.sample_id}/${meta.sample_id}.redux.ms_table.tsv.gz"),      emit: tsv
+    tuple val(meta), path("redux_${meta.sample_id}/${meta.sample_id}.redux.bam"),
+                     path("redux_${meta.sample_id}/${meta.sample_id}.redux.bam.bai")           , emit: bam
 
-    tuple val(meta), path("redux_${meta.sample_id}/${meta.sample_id}.redux.bqr.png"), emit: bqr_plot
-    tuple val(meta), path("redux_${meta.sample_id}/"),                                emit: redux_dir
+    tuple val(meta), path("redux_${meta.sample_id}/${meta.sample_id}.redux.bqr.tsv")           , emit: bqr_tsv
+    tuple val(meta), path("redux_${meta.sample_id}/${meta.sample_id}.redux.bqr.png")           , emit: bqr_plot
+    tuple val(meta), path("redux_${meta.sample_id}/${meta.sample_id}.redux.duplicate_freq.tsv"), emit: dup_freq_tsv, optional: true
+    tuple val(meta), path("redux_${meta.sample_id}/${meta.sample_id}.redux.jitter_params.tsv") , emit: jitter_tsv
+    tuple val(meta), path("redux_${meta.sample_id}/${meta.sample_id}.redux.ms_table.tsv.gz")   , emit: ms_tsv
+
     path 'versions.yml', emit: versions
     path '.command.*'  , emit: command_files
 
