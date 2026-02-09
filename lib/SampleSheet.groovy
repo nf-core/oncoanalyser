@@ -29,10 +29,11 @@ class SampleSheet {
                         return
                     }
 
-                    setCramPaths(meta, sample_key)
-                    checkFileIndexesExist(meta, sample_key)
-                    checkReduxTsvsExist(meta, sample_key, log)
+                    def meta_sample = meta[sample_key]
 
+                    setCramPaths(meta_sample)
+                    checkFileIndexesExist(meta_sample, log)
+                    checkReduxTsvsExist(meta_sample, log)
                 }
 
                 // For purity estimation with WISP, require primary normal DNA BAM when an AMBER directory is provided
@@ -169,12 +170,10 @@ class SampleSheet {
         }
     }
 
-    private static void setCramPaths(meta, sample_key) {
+    private static void setCramPaths(meta_sample) {
 
         // CRAMs are passed to hmftools as if they were BAMs, e.g. `-bam_file /path/to/tumor.cram`
         // We therefore set the BAM/BAI path to be the CRAM/CRAI path
-
-        def meta_sample = meta[sample_key]
 
         if (meta_sample.containsKey(Constants.FileType.CRAM_REDUX)) {
             meta_sample[Constants.FileType.BAM_REDUX] = meta_sample.remove(Constants.FileType.CRAM_REDUX)
@@ -191,9 +190,9 @@ class SampleSheet {
 
     }
 
-    private static void checkFileIndexesExist(meta, sample_key){
+    private static void checkFileIndexesExist(meta_sample, log){
 
-        meta[sample_key].keySet().each { key ->
+        meta_sample.keySet().each { key ->
 
             // NOTE(SW): I was going to use two maps but was unable to get an enum map to compile
 
@@ -217,12 +216,12 @@ class SampleSheet {
                 return
             }
 
-            def index_already_provided = meta[sample_key].containsKey(index_enum)
+            def index_already_provided = meta_sample.containsKey(index_enum)
             if (index_already_provided) {
                 return
             }
 
-            def file_path = meta[sample_key][key].toUriString()
+            def file_path = meta_sample[key].toUriString()
             def index_path = nextflow.Nextflow.file("${file_path}.${index_extension}")
 
             if (!index_path.exists()) {
@@ -230,13 +229,11 @@ class SampleSheet {
                 Nextflow.exit(1)
             }
 
-            meta[sample_key][index_enum] = index_path
+            meta_sample[index_enum] = index_path
         }
     }
 
-    private static void checkReduxTsvsExist(meta, sample_key, log) {
-
-        def meta_sample = meta[sample_key]
+    private static void checkReduxTsvsExist(meta_sample, log) {
 
         if (!meta_sample.containsKey(Constants.FileType.BAM_REDUX)) {
             return
