@@ -11,8 +11,8 @@ workflow ORANGE_REPORTING {
     take:
     // Sample data
     ch_inputs                   // channel: [mandatory] [ meta ]
-    ch_redux_somatic            // channel: [mandatory] [ meta, redux_dir ]
-    ch_redux_germline           // channel: [mandatory] [ meta, redux_dir ]
+    ch_redux_somatic_plot       // channel: [mandatory] [ meta, redux_bqr_plot ]
+    ch_redux_germline_plot      // channel: [mandatory] [ meta, redux_bqr_plot ]
     ch_bamtools_somatic         // channel: [mandatory] [ meta, metrics_dir ]
     ch_bamtools_germline        // channel: [mandatory] [ meta, metrics_dir ]
     ch_sage_somatic             // channel: [mandatory] [ meta, sage_dir ]
@@ -53,8 +53,8 @@ workflow ORANGE_REPORTING {
 
     // Refer to inputs by index to avoid needing to declare each variable when calling map, branch, etc
     input_indexes = [
-        'redux_somatic'           : 0,
-        'redux_germline'          : 1,
+        'redux_somatic_plot'      : 0,
+        'redux_germline_plot'     : 1,
         'bamtools_somatic'        : 2,
         'bamtools_germline'       : 3,
         'sage_somatic'            : 4,
@@ -75,7 +75,7 @@ workflow ORANGE_REPORTING {
     ]
 
     dna_tumor_input_indexes = [
-        input_indexes.redux_somatic,
+        input_indexes.redux_somatic_plot,
         input_indexes.bamtools_somatic,
         input_indexes.sage_somatic,
         input_indexes.purple_dir,
@@ -84,7 +84,7 @@ workflow ORANGE_REPORTING {
     ]
 
     dna_normal_input_indexes = [
-        input_indexes.redux_germline,
+        input_indexes.redux_germline_plot,
         input_indexes.bamtools_germline,
         input_indexes.sage_germline,
         input_indexes.linx_germline_annotation,
@@ -96,10 +96,10 @@ workflow ORANGE_REPORTING {
     ]
 
     // Select input sources
-    // channel: [ meta, redux_somatic_dir, redux_germline_dir, ... ]
+    // channel: [ meta, redux_somatic_plot, redux_germline_plot, ... ]
     ch_inputs_selected = WorkflowOncoanalyser.groupByMeta(
-        ch_redux_somatic,
-        ch_redux_germline,
+        ch_redux_somatic_plot,
+        ch_redux_germline_plot,
         ch_bamtools_somatic,
         ch_bamtools_germline,
         ch_sage_somatic,
@@ -126,8 +126,8 @@ workflow ORANGE_REPORTING {
             assert inputs.size() == input_indexes.size()
 
             def inputs_selected = [
-                Utils.selectCurrentOrExisting(inputs[input_indexes.redux_somatic]           , meta, Constants.INPUT.REDUX_DIR_TUMOR),
-                Utils.selectCurrentOrExisting(inputs[input_indexes.redux_germline]          , meta, Constants.INPUT.REDUX_DIR_NORMAL),
+                Utils.selectCurrentOrExisting(inputs[input_indexes.redux_somatic_plot]      , meta, Constants.INPUT.REDUX_BQR_PLOT_TUMOR),
+                Utils.selectCurrentOrExisting(inputs[input_indexes.redux_germline_plot]     , meta, Constants.INPUT.REDUX_BQR_PLOT_NORMAL),
                 Utils.selectCurrentOrExisting(inputs[input_indexes.bamtools_somatic]        , meta, Constants.INPUT.BAMTOOLS_DIR_TUMOR),
                 Utils.selectCurrentOrExisting(inputs[input_indexes.bamtools_germline]       , meta, Constants.INPUT.BAMTOOLS_DIR_NORMAL),
                 Utils.selectCurrentOrExisting(inputs[input_indexes.sage_somatic]            , meta, Constants.INPUT.SAGE_DIR_TUMOR),
@@ -151,7 +151,7 @@ workflow ORANGE_REPORTING {
         }
 
     // Sort inputs
-    // channel: runnable: [ meta, redux_somatic_dir, redux_germline_dir, ... ]
+    // channel: runnable: [ meta, redux_somatic_plot, redux_germline_plot, ... ]
     // channel: skip: [ meta ]
     ch_inputs_sorted = ch_inputs_selected
         .branch { d ->
@@ -169,7 +169,7 @@ workflow ORANGE_REPORTING {
         }
 
     // Create process input channel
-    // channel: sample_data: [ meta, redux_somatic_dir, redux_germline_dir, ... ]
+    // channel: sample_data: [ meta, redux_somatic_plot, redux_germline_plot, ... ]
     ch_orange_inputs = ch_inputs_sorted.runnable
         .map { d ->
 
@@ -213,19 +213,6 @@ workflow ORANGE_REPORTING {
                 meta_orange.tumor_rna_id = Utils.getTumorRnaSampleName(meta)
             } else {
                 rna_tumor_input_indexes.each { i -> inputs_selected[i] = [] }
-            }
-
-            // Only stage the REDUX BQR plots.
-            // If the REDUX dir were staged, the REDUX BAMs would thus be staged. On cloud environments, this means a
-            // VM were more disk space is required even though the BAMs are not used.
-            def redux_somatic_dir = inputs_selected[input_indexes.redux_somatic]
-            if (redux_somatic_dir) {
-                inputs_selected[input_indexes.redux_somatic] = redux_somatic_dir.resolve("${meta_orange.tumor_id}.redux.bqr.png")
-            }
-
-            def redux_germline_dir = inputs_selected[input_indexes.redux_germline]
-            if (redux_germline_dir) {
-                inputs_selected[input_indexes.redux_germline] = redux_germline_dir.resolve("${meta_orange.normal_dna_id}.redux.bqr.png")
             }
 
             // ORANGE only accepts CUPPA with DNA; when providing DNA/RNA inputs but skipping Virus Interpreter CUPPA

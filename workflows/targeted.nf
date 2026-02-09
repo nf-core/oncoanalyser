@@ -121,11 +121,6 @@ workflow TARGETED {
     //
     // SUBWORKFLOW: Run REDUX for DNA BAMs
     //
-    // channel: [ meta, dir ]
-    ch_redux_dna_tumor_dir_out = Channel.empty()
-    ch_redux_dna_normal_dir_out = Channel.empty()
-    ch_redux_dna_donor_dir_out = Channel.empty()
-
     // channel: [ meta, bam, bai ]
     ch_redux_dna_tumor_bam_out = Channel.empty()
     ch_redux_dna_normal_bam_out = Channel.empty()
@@ -135,6 +130,10 @@ workflow TARGETED {
     ch_redux_dna_tumor_tsv_out = Channel.empty()
     ch_redux_dna_normal_tsv_out = Channel.empty()
     ch_redux_dna_donor_tsv_out = Channel.empty()
+
+    // channel: [ meta, bqr_plot ]
+    ch_redux_dna_tumor_plot_out = Channel.empty()
+    ch_redux_dna_normal_plot_out = Channel.empty()
 
     if (run_config.stages.redux) {
 
@@ -157,10 +156,6 @@ workflow TARGETED {
 
         ch_versions = ch_versions.mix(REDUX_PROCESSING.out.versions)
 
-        ch_redux_dna_tumor_dir_out = ch_redux_dna_tumor_dir_out.mix(REDUX_PROCESSING.out.dna_tumor_dir)
-        ch_redux_dna_normal_dir_out = ch_redux_dna_normal_dir_out.mix(REDUX_PROCESSING.out.dna_normal_dir)
-        ch_redux_dna_donor_dir_out = ch_redux_dna_donor_dir_out.mix(REDUX_PROCESSING.out.dna_donor_dir)
-
         ch_redux_dna_tumor_bam_out = ch_redux_dna_tumor_bam_out.mix(REDUX_PROCESSING.out.dna_tumor_bam)
         ch_redux_dna_normal_bam_out = ch_redux_dna_normal_bam_out.mix(REDUX_PROCESSING.out.dna_normal_bam)
         ch_redux_dna_donor_bam_out = ch_redux_dna_donor_bam_out.mix(REDUX_PROCESSING.out.dna_donor_bam)
@@ -169,11 +164,10 @@ workflow TARGETED {
         ch_redux_dna_normal_tsv_out = ch_redux_dna_normal_tsv_out.mix(REDUX_PROCESSING.out.dna_normal_tsv)
         ch_redux_dna_donor_tsv_out = ch_redux_dna_donor_tsv_out.mix(REDUX_PROCESSING.out.dna_donor_tsv)
 
-    } else {
+        ch_redux_dna_tumor_plot_out = ch_redux_dna_tumor_plot_out.mix(REDUX_PROCESSING.out.dna_tumor_plot)
+        ch_redux_dna_normal_plot_out = ch_redux_dna_normal_plot_out.mix(REDUX_PROCESSING.out.dna_normal_plot)
 
-        ch_redux_dna_tumor_dir_out = PlaceholderChannels.toolDir(ch_inputs)
-        ch_redux_dna_normal_dir_out = PlaceholderChannels.toolDir(ch_inputs)
-        ch_redux_dna_donor_dir_out = PlaceholderChannels.toolDir(ch_inputs)
+    } else {
 
         ch_redux_dna_tumor_bam_out = PlaceholderChannels.bamBai(ch_inputs)
         ch_redux_dna_normal_bam_out = PlaceholderChannels.bamBai(ch_inputs)
@@ -182,6 +176,9 @@ workflow TARGETED {
         ch_redux_dna_tumor_tsv_out = PlaceholderChannels.reduxTsvs(ch_inputs)
         ch_redux_dna_normal_tsv_out = PlaceholderChannels.reduxTsvs(ch_inputs)
         ch_redux_dna_donor_tsv_out = PlaceholderChannels.reduxTsvs(ch_inputs)
+
+        ch_redux_dna_tumor_plot_out = PlaceholderChannels.reduxPlots(ch_inputs)
+        ch_redux_dna_normal_plot_out = PlaceholderChannels.reduxPlots(ch_inputs)
 
     }
 
@@ -690,8 +687,8 @@ workflow TARGETED {
 
         ORANGE_REPORTING(
             ch_inputs,
-            ch_redux_dna_tumor_dir_out,
-            ch_redux_dna_normal_dir_out,
+            ch_redux_dna_tumor_plot_out,
+            ch_redux_dna_normal_plot_out,
             ch_bamtools_somatic_out,
             ch_bamtools_germline_out,
             ch_sage_somatic_dir_out,

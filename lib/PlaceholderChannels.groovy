@@ -17,6 +17,7 @@ class PlaceholderChannels {
     public static final N_ITEMS_BAM_BAI = 2    // [ meta, bam, bai ]
     public static final N_ITEMS_VCF_TBI = 2    // [ meta, vcf, tbi ]
     public static final N_ITEMS_REDUX_TSVS = 3 // [ meta, bqr_tsv, jitter_tsv, ms_tsv ]
+    public static final N_ITEMS_REDUX_PLOTS = 1 // [ meta, bqr_plot ]
 
     public static toolDir(ch) {
         return createPlaceholderChannel(ch, N_ITEMS_TOOL_DIR)
@@ -32,5 +33,9 @@ class PlaceholderChannels {
 
     public static reduxTsvs(ch) {
         return createPlaceholderChannel(ch, N_ITEMS_REDUX_TSVS)
+    }
+
+    public static reduxPlots(ch) {
+        return createPlaceholderChannel(ch, N_ITEMS_REDUX_PLOTS)
     }
 }

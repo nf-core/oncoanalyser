@@ -119,6 +119,7 @@ class Constants {
         REDUX_BQR_TSV,
         REDUX_JITTER_TSV,
         REDUX_MS_TSV,
+        REDUX_BQR_PLOT,
 
         // Process
         AMBER_DIR,
@@ -137,7 +138,6 @@ class Constants {
         VIRUSINTERPRETER_DIR,
 
         // ORANGE specific
-        REDUX_DIR,
         CHORD_DIR,
         CUPPA_DIR,
         LINX_PLOT_DIR,
@@ -258,6 +258,18 @@ class Constants {
             SequenceType.DNA,
         ],
 
+        REDUX_BQR_PLOT_TUMOR: [
+            FileType.REDUX_BQR_PLOT,
+            SampleType.TUMOR,
+            SequenceType.DNA,
+        ],
+
+        REDUX_BQR_PLOT_NORMAL: [
+            FileType.REDUX_BQR_PLOT,
+            SampleType.NORMAL,
+            SequenceType.DNA,
+        ],
+
         REDUX_JITTER_TSV_TUMOR: [
             FileType.REDUX_JITTER_TSV,
             SampleType.TUMOR,
@@ -291,18 +303,6 @@ class Constants {
         REDUX_MS_TSV_DONOR: [
             FileType.REDUX_MS_TSV,
             SampleType.DONOR,
-            SequenceType.DNA,
-        ],
-
-        REDUX_DIR_TUMOR: [
-            FileType.REDUX_DIR,
-            SampleType.TUMOR,
-            SequenceType.DNA,
-        ],
-
-        REDUX_DIR_NORMAL: [
-            FileType.REDUX_DIR,
-            SampleType.NORMAL,
             SequenceType.DNA,
         ],
 
