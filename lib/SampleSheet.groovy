@@ -2,7 +2,7 @@ import nextflow.Nextflow
 
 class SampleSheet {
 
-    public static parseInput(input_fp_str, stub_run, log) {
+    public static parseInput(input_fp_str, stub_run, run_mode, log) {
 
         if (!input_fp_str) {
             log.error "Missing required --input argument"
@@ -40,6 +40,7 @@ class SampleSheet {
 
                 // Checks per group
                 disallowDuplicateSampleIds(meta, sample_keys, log)
+                disallowInvalidSampleCombinations(meta, run_mode, log)
                 checkLongitudinalSampleInputs(meta, log)
 
                 return meta
@@ -163,6 +164,10 @@ class SampleSheet {
             meta_sample[filetype_enum] = getFileObject(entry.filepath)
 
         }
+    }
+
+    private static getFileObject(path) {
+        return path ? nextflow.Nextflow.file(path) : []
     }
 
     private static void setCramPaths(meta_sample) {
@@ -314,6 +319,47 @@ class SampleSheet {
         }
     }
 
+    private static void disallowInvalidSampleCombinations(meta, run_mode, log) {
+
+        // Do not allow normal DNA only
+        if (Utils.hasNormalDna(meta) && !Utils.hasTumorDna(meta)) {
+            log.error "found only normal DNA input for ${meta.group_id} but germline only analysis is not supported"
+            Nextflow.exit(1)
+        }
+
+        // Do not allow CRAM RNA input
+        if (Utils.hasTumorRnaBam(meta) && Utils.getTumorRnaBam(meta).toString().endsWith('cram')) {
+            log.error "found tumor RNA CRAM input for ${meta.group_id} but RNA CRAM input is not supported"
+            Nextflow.exit(1)
+        }
+
+        // Do not allow donor sample without normal sample
+        if (Utils.hasDonorDna(meta) && !Utils.hasNormalDna(meta)) {
+            log.error "a donor sample but not normal sample was found for ${meta.group_id}\n\n" +
+                "Analysis with a donor sample requires a normal sample."
+            Nextflow.exit(1)
+        }
+
+        // Apply some required restrictions to targeted mode
+        if (run_mode === Constants.RunMode.TARGETED) {
+
+            // Do not allow donor DNA
+            if (Utils.hasDonorDna(meta)) {
+                log.error "targeted mode is not compatible with the donor DNA BAM/CRAM provided for ${meta.group_id}\n\n" +
+                    "The targeted workflow supports only tumor and normal DNA BAM/CRAMs (and tumor RNA BAM/CRAMs for TSO500)"
+                Nextflow.exit(1)
+            }
+
+            // Do not allow only tumor RNA
+            if (Utils.hasTumorRna(meta) && !Utils.hasTumorDna(meta)) {
+                log.error "targeted mode is not compatible with only tumor RNA provided for ${meta.group_id}\n\n" +
+                    "The targeted workflow requires tumor DNA and can optionally take tumor RNA, depending on " +
+                    "the configured panel."
+                Nextflow.exit(1)
+            }
+        }
+    }
+
     private static void checkLongitudinalSampleInputs(meta, log) {
 
         // For purity estimation with WISP, require primary normal DNA BAM when an AMBER directory is provided
@@ -327,55 +373,5 @@ class SampleSheet {
             Nextflow.exit(1)
         }
 
-    }
-
-    public static void validateInput(inputs, run_config, log) {
-
-        inputs.each { meta ->
-
-            // Do not allow donor sample without normal sample
-            if (Utils.hasDonorDna(meta) && !Utils.hasNormalDna(meta)) {
-                log.error "a donor sample but not normal sample was found for ${meta.group_id}\n\n" +
-                        "Analysis with a donor sample requires a normal sample."
-                Nextflow.exit(1)
-            }
-
-            // Apply some required restrictions to targeted mode
-            if (run_config.mode === Constants.RunMode.TARGETED) {
-
-                // Do not allow donor DNA
-                if (Utils.hasDonorDna(meta)) {
-                    log.error "targeted mode is not compatible with the donor DNA BAM/CRAM provided for ${meta.group_id}\n\n" +
-                            "The targeted workflow supports only tumor and normal DNA BAM/CRAMs (and tumor RNA BAM/CRAMs for TSO500)"
-                    Nextflow.exit(1)
-                }
-
-                // Do not allow only tumor RNA
-                if (Utils.hasTumorRna(meta) && !Utils.hasTumorDna(meta)) {
-                    log.error "targeted mode is not compatible with only tumor RNA provided for ${meta.group_id}\n\n" +
-                            "The targeted workflow requires tumor DNA and can optionally take tumor RNA, depending on " +
-                            "the configured panel."
-                    Nextflow.exit(1)
-                }
-
-            }
-
-            // Do not allow normal DNA only
-            if (Utils.hasNormalDna(meta) && !Utils.hasTumorDna(meta)) {
-                log.error "found only normal DNA input for ${meta.group_id} but germline only analysis is not supported"
-                Nextflow.exit(1)
-            }
-
-            // Do not allow CRAM RNA input
-            if (Utils.hasTumorRnaBam(meta) && Utils.getTumorRnaBam(meta).toString().endsWith('cram')) {
-                log.error "found tumor RNA CRAM input for ${meta.group_id} but RNA CRAM input is not supported"
-                Nextflow.exit(1)
-            }
-
-        }
-    }
-
-    private static getFileObject(path) {
-        return path ? nextflow.Nextflow.file(path) : []
     }
 }
