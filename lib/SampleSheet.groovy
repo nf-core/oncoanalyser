@@ -33,8 +33,9 @@ class SampleSheet {
                     def meta_sample = meta[sample_key]
 
                     setCramPaths(meta_sample)
-                    checkAndSetFileIndexes(meta_sample, log)
+                    checkRawReadDataExists(meta_sample, group_id, log)
                     checkReduxTsvsExist(meta_sample, log)
+                    checkAndSetFileIndexes(meta_sample, log)
                 }
 
                 // Checks per group
@@ -227,6 +228,23 @@ class SampleSheet {
         }
     }
 
+    private static void checkRawReadDataExists(meta_sample, group_id, log) {
+
+        def missing_any_raw_read_data =
+            !meta_sample.containsKey(Constants.FileType.BAM) &&
+            !meta_sample.containsKey(Constants.FileType.BAM_REDUX) &&
+            !meta_sample.containsKey(Constants.FileType.CRAM) &&
+            !meta_sample.containsKey(Constants.FileType.CRAM_REDUX) &&
+            !meta_sample.containsKey(Constants.FileType.FASTQ)
+
+        if (missing_any_raw_read_data) {
+
+            log.error "no BAM/CRAM nor BAM_REDUX/CRAM_REDUX nor FASTQ files provided for ${group_id} ${meta_sample.sample_id}\n\n" +
+                    "NB: At least one of these files is required as they are the basis to determine input sample type."
+            Nextflow.exit(1)
+        }
+    }
+
     private static void checkReduxTsvsExist(meta_sample, log) {
 
         if (!meta_sample.containsKey(Constants.FileType.BAM_REDUX)) {
@@ -313,38 +331,7 @@ class SampleSheet {
 
     public static void validateInput(inputs, run_config, log) {
 
-        def sample_keys = [
-            [Constants.SampleType.TUMOR, Constants.SequenceType.DNA],
-            [Constants.SampleType.TUMOR, Constants.SequenceType.RNA],
-            [Constants.SampleType.NORMAL, Constants.SequenceType.DNA],
-        ]
-
         inputs.each { meta ->
-
-            // Require BAMs or BAM_MARKDUPs or FASTQs for each defined sample type
-            // NOTE(SW): repeating key pairs above to avoid having to duplicate error messages
-            sample_keys.each { key ->
-
-                if (!meta.containsKey(key)) {
-                    return
-                }
-
-                def (sample_type, sequence_type) = key
-
-                if (
-                    !meta[key].containsKey(Constants.FileType.BAM) &&
-                    !meta[key].containsKey(Constants.FileType.BAM_REDUX) &&
-                    !meta[key].containsKey(Constants.FileType.CRAM) &&
-                    !meta[key].containsKey(Constants.FileType.CRAM_REDUX) &&
-                    !meta[key].containsKey(Constants.FileType.FASTQ)
-                ) {
-
-                    log.error "no BAM/CRAM nor BAM_REDUX/CRAM_REDUX nor FASTQ files provided for ${meta.group_id} ${sample_type}/${sequence_type}\n\n" +
-                            "NB: At least one of these files is required as they are the basis to determine input sample type."
-                    Nextflow.exit(1)
-                }
-
-            }
 
             // Do not allow donor sample without normal sample
             if (Utils.hasDonorDna(meta) && !Utils.hasNormalDna(meta)) {
