@@ -25,13 +25,13 @@ class SampleSheet {
 
                 sample_keys.each { sample_key ->
 
-                    checkFileIndexesExist(meta, sample_key)
+                    if(stub_run) {
+                        return
+                    }
 
                     setCramPaths(meta, sample_key)
-
-                    if(!stub_run) {
-                        checkReduxTsvsExist(meta, sample_key)
-                    }
+                    checkFileIndexesExist(meta, sample_key)
+                    checkReduxTsvsExist(meta, sample_key, log)
 
                 }
 
@@ -169,6 +169,28 @@ class SampleSheet {
         }
     }
 
+    private static void setCramPaths(meta, sample_key) {
+
+        // CRAMs are passed to hmftools as if they were BAMs, e.g. `-bam_file /path/to/tumor.cram`
+        // We therefore set the BAM/BAI path to be the CRAM/CRAI path
+
+        def meta_sample = meta[sample_key]
+
+        if (meta_sample.containsKey(Constants.FileType.CRAM_REDUX)) {
+            meta_sample[Constants.FileType.BAM_REDUX] = meta_sample.remove(Constants.FileType.CRAM_REDUX)
+        }
+
+        if (meta_sample.containsKey(Constants.FileType.CRAM)) {
+            meta_sample[Constants.FileType.BAM] = meta_sample.remove(Constants.FileType.CRAM)
+        }
+
+        // The BAI key is used to store the index for both regular/REDUX CRAMs/BAMs
+        if (meta_sample.containsKey(Constants.FileType.CRAI)) {
+            meta_sample[Constants.FileType.BAI] = meta_sample.remove(Constants.FileType.CRAI)
+        }
+
+    }
+
     private static void checkFileIndexesExist(meta, sample_key){
 
         meta[sample_key].keySet().each { key ->
@@ -203,7 +225,7 @@ class SampleSheet {
             def file_path = meta[sample_key][key].toUriString()
             def index_path = nextflow.Nextflow.file("${file_path}.${index_extension}")
 
-            if (!index_path.exists() && !stub_run) {
+            if (!index_path.exists()) {
                 log.error "no index provided or found for: ${file_path}"
                 Nextflow.exit(1)
             }
@@ -212,29 +234,7 @@ class SampleSheet {
         }
     }
 
-    private static void setCramPaths(meta, sample_key) {
-
-        // CRAMs are passed to hmftools as if they were BAMs, e.g. `-bam_file /path/to/tumor.cram`
-        // We therefore set the BAM/BAI path to be the CRAM/CRAI path
-
-        def meta_sample = meta[sample_key]
-
-        if (meta_sample.containsKey(Constants.FileType.CRAM_REDUX)) {
-            meta_sample[Constants.FileType.BAM_REDUX] = meta_sample.remove(Constants.FileType.CRAM_REDUX)
-        }
-
-        if (meta_sample.containsKey(Constants.FileType.CRAM)) {
-            meta_sample[Constants.FileType.BAM] = meta_sample.remove(Constants.FileType.CRAM)
-        }
-
-        // The BAI key is used to store the index for both regular/REDUX CRAMs/BAMs
-        if (meta_sample.containsKey(Constants.FileType.CRAI)) {
-            meta_sample[Constants.FileType.BAI] = meta_sample.remove(Constants.FileType.CRAI)
-        }
-
-    }
-
-    private static void checkReduxTsvsExist(meta, sample_key) {
+    private static void checkReduxTsvsExist(meta, sample_key, log) {
 
         def meta_sample = meta[sample_key]
 
