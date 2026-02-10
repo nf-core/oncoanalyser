@@ -26,6 +26,9 @@ class Utils {
         def meta_sample = getTumorDnaSample(meta)
         def sample_id
 
+        // NOTE(LN): Sample type is a string (and not a boolean) so that it is obvious what sample type is being
+        // retrieved when this method is called. This wouldn't be necessary if Nextflow had IDE support, where
+        // the argument name would be displayed as an overlay
         if(sample_type == 'primary') {
             sample_id = meta_sample['sample_id']
         } else if (sample_type == 'longitudinal') {
@@ -182,7 +185,7 @@ class Utils {
     }
 
     public static getPurpleSomaticVcf(meta, purple_dir) {
-        return nextflow.Nextflow.file(purple_dir).resolve("${getTumorDnaSampleName(meta, 'primary')}.purple.somatic.vcf.gz")
+        return getPurpleSomaticVcf(meta, purple_dir, 'primary')
     }
 
     public static getPurpleSomaticVcfTbi(meta, purple_dir) {
