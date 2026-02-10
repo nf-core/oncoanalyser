@@ -257,7 +257,7 @@ workflow ORANGE_REPORTING {
         ensembl_data_resources,
         isofox_alt_sj,
         isofox_gene_distribution,
-        '2.3.0 [oncoanalyser]',
+        '3.0.0 [oncoanalyser]',
         targeted_mode,
     )
 
