@@ -40,6 +40,8 @@ workflow PURITY_ESTIMATE {
 
     // Get run mode of purity estimate mode
     purity_estimate_run_mode = Enums.getEnumFromString(params.purity_estimate_mode, Constants.PurityEstimateRunMode)
+    targeted_mode = purity_estimate_run_mode === Constants.PurityEstimateRunMode.TARGETED
+    wgts_mode = purity_estimate_run_mode === Constants.PurityEstimateRunMode.WGTS // NOTE(LN): Redundant variable, but makes the if clauses clearer
 
     // Set up reference data, assign more human readable variables
     prep_config = Params.getPrepConfigFromRunConfig(run_config)
@@ -116,7 +118,7 @@ workflow PURITY_ESTIMATE {
             params.sequencing_type,
             params.redux_umi_enabled,
             params.redux_umi_duplex_delim,
-            purity_estimate_run_mode === Constants.PurityEstimateRunMode.TARGETED,
+            targeted_mode,
         )
 
         ch_versions = ch_versions.mix(REDUX_PROCESSING.out.versions)
@@ -146,9 +148,9 @@ workflow PURITY_ESTIMATE {
     //
     // channel: [ meta, amber_dir ]
     ch_amber_out = Channel.empty()
-    if (run_config.stages.amber && purity_estimate_run_mode === Constants.PurityEstimateRunMode.WGTS) {
+    if (run_config.stages.amber && wgts_mode) {
 
-        tumor_min_depth = purity_estimate_run_mode === Constants.PurityEstimateRunMode.WGTS ? 1 : []
+        tumor_min_depth = wgts_mode ? 1 : []
 
         AMBER_PROFILING(
             ch_inputs,
@@ -176,7 +178,7 @@ workflow PURITY_ESTIMATE {
     //
     // channel: [ meta, cobalt_dir ]
     ch_cobalt_out = Channel.empty()
-    if (run_config.stages.cobalt && purity_estimate_run_mode === Constants.PurityEstimateRunMode.WGTS) {
+    if (run_config.stages.cobalt && wgts_mode) {
 
         COBALT_PROFILING(
             ch_inputs,
@@ -186,7 +188,7 @@ workflow PURITY_ESTIMATE {
             hmf_data.gc_profile,
             hmf_data.diploid_bed,
             [],  // panel_target_region_normalisation
-            purity_estimate_run_mode === Constants.PurityEstimateRunMode.TARGETED,
+            targeted_mode,
         )
 
         ch_versions = ch_versions.mix(COBALT_PROFILING.out.versions)
@@ -218,7 +220,7 @@ workflow PURITY_ESTIMATE {
             ref_data.genome_dict,
             params.sequencing_type,
             false,  // run_germline
-            purity_estimate_run_mode === Constants.PurityEstimateRunMode.TARGETED,
+            targeted_mode,
         )
 
         ch_versions = ch_versions.mix(SAGE_APPEND.out.versions)
@@ -242,7 +244,7 @@ workflow PURITY_ESTIMATE {
             ch_sage_somatic_append_out,
             ref_data.genome_fasta,
             ref_data.genome_fai,
-            purity_estimate_run_mode === Constants.PurityEstimateRunMode.TARGETED,
+            targeted_mode,
         )
 
         ch_versions = ch_versions.mix(WISP_ANALYSIS.out.versions)
