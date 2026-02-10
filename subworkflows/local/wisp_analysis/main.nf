@@ -65,8 +65,8 @@ workflow WISP_ANALYSIS {
                 key: meta.group_id,
                 id: meta.group_id,
                 subject_id: meta.subject_id,
-                primary_id: Utils.getTumorDnaSampleName(meta, primary: true),
-                longitudinal_id: Utils.getTumorDnaSampleName(meta, primary: false),
+                primary_id: Utils.getTumorDnaSampleName(meta, 'primary'),
+                longitudinal_id: Utils.getTumorDnaSampleName(meta, 'longitudinal'),
             ]
 
             return [meta_wisp, primary_purple_dir, primary_amber_dir, amber_dir, cobalt_dir, sage_append_dir]

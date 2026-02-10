@@ -22,21 +22,23 @@ class Utils {
     }
 
     // Sample names
-    public static getTumorDnaSampleName(Map named_args, meta) {
+    public static getTumorDnaSampleName(meta, sample_type) {
         def meta_sample = getTumorDnaSample(meta)
         def sample_id
 
-        if (named_args.getOrDefault('primary', false)) {
+        if(sample_type == 'primary') {
             sample_id = meta_sample['sample_id']
+        } else if (sample_type == 'longitudinal') {
+            sample_id = meta_sample['longitudinal_sample_id']
         } else {
-            sample_id = meta_sample.getOrDefault('longitudinal_sample_id', meta_sample['sample_id'])
+            throw new IllegalArgumentException("`sample_type` must be 'primary' or 'longitudinal'")
         }
 
         return sample_id
     }
 
     public static getTumorDnaSampleName(meta) {
-        getTumorDnaSampleName([:], meta)
+        return getTumorDnaSampleName(meta, 'primary')
     }
 
     public static getTumorRnaSampleName(meta) {

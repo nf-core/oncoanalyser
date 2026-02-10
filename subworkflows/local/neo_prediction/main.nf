@@ -179,7 +179,7 @@ workflow NEO_PREDICTION {
             def meta_scorer = [
                 key: meta.group_id,
                 id: meta.group_id,
-                sample_id: Utils.getTumorDnaSampleName(meta, primary: true),
+                sample_id: Utils.getTumorDnaSampleName(meta, 'primary'),
                 cancer_type: meta[Constants.InfoField.CANCER_TYPE],
             ]
 
