@@ -184,13 +184,13 @@ workflow SAGE_APPEND {
             }
 
             if (purity_estimate_mode && tumor_dna_bam) {
-                meta_append.reference_ids.add(Utils.getTumorDnaSampleName(meta))
+                meta_append.reference_ids.add(Utils.getTumorDnaSampleName(meta, 'longitudinal'))
                 bams.add(tumor_dna_bam)
                 bais.add(tumor_dna_bai)
                 redux_tsvs = tumor_dna_redux_tsv
             }
 
-            def purple_smlv_vcf = Utils.getPurpleSomaticVcf(meta, purple_dir)
+            def purple_smlv_vcf = Utils.getPurpleSomaticVcf(meta, purple_dir, 'primary')
 
             return [meta_append, purple_smlv_vcf, bams, bais, redux_tsvs]
         }

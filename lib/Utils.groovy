@@ -177,8 +177,12 @@ class Utils {
     // Processes in theory could emit these output files, and downstream processes could consume the output file channels. However,
     // this would make resuming messy as multiple e.g. PURPLE output files would need to be provided in the sample sheet
 
+    public static getPurpleSomaticVcf(meta, purple_dir, sample_type) {
+        return nextflow.Nextflow.file(purple_dir).resolve("${getTumorDnaSampleName(meta, sample_type)}.purple.somatic.vcf.gz")
+    }
+
     public static getPurpleSomaticVcf(meta, purple_dir) {
-        return nextflow.Nextflow.file(purple_dir).resolve("${getTumorDnaSampleName(meta)}.purple.somatic.vcf.gz")
+        return nextflow.Nextflow.file(purple_dir).resolve("${getTumorDnaSampleName(meta, 'primary')}.purple.somatic.vcf.gz")
     }
 
     public static getPurpleSomaticVcfTbi(meta, purple_dir) {
