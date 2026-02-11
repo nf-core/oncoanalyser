@@ -31,13 +31,9 @@ process ORANGE {
     val genome_ver
     path disease_ontology
     path cohort_mapping
-    path cohort_percentiles
-    path known_fusion_data
     path driver_gene_panel
     path ensembl_data_resources
     path sigs_etiology
-    path isofox_alt_sj
-    path isofox_gene_distribution
     val pipeline_version
     val targeted_mode
 
@@ -81,18 +77,7 @@ process ORANGE {
 
     // RNA sample
     def rna_id_arg = meta.containsKey('tumor_rna_id') ? "-rna_sample_id ${meta.tumor_rna_id}" : ''
-
-    def should_run_isofox = rna_id_arg
-
-    def isofox_dir_arg = ''
-    def isofox_gene_distribution_arg = ''
-    def isofox_alt_sj_arg = ''
-
-    if (should_run_isofox) {
-        isofox_dir_arg = '-isofox_dir isofox_dir__prepared/'
-        isofox_gene_distribution_arg = "-isofox_gene_distribution ${isofox_gene_distribution}"
-        isofox_alt_sj_arg = "-isofox_alt_sj_cohort ${isofox_alt_sj}"
-    }
+    def isofox_dir_arg = isofox_dir ? '-isofox_dir isofox_dir__prepared/' : ''
 
     """
     echo "${pipeline_version_str}" > pipeline_version.txt
@@ -172,13 +157,9 @@ process ORANGE {
         -ref_genome_version ${genome_ver} \\
         -doid_json ${disease_ontology} \\
         -cohort_mapping_tsv ${cohort_mapping} \\
-        -cohort_percentiles_tsv ${cohort_percentiles} \\
-        -known_fusion_file ${known_fusion_data} \\
         -driver_gene_panel ${driver_gene_panel} \\
         -signatures_etiology_tsv ${sigs_etiology} \\
         -ensembl_data_dir ${ensembl_data_resources} \\
-        ${isofox_gene_distribution_arg} \\
-        ${isofox_alt_sj_arg} \\
         ${log_level_arg} \\
         -output_dir output/
 

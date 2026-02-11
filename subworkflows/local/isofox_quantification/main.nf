@@ -10,19 +10,21 @@ include { ISOFOX } from '../../../modules/local/isofox/run/main'
 workflow ISOFOX_QUANTIFICATION {
     take:
     // Sample data
-    ch_inputs              // channel: [mandatory] [ meta ]
-    ch_tumor_rna_bam       // channel: [mandatory] [ meta, bam, bai ]
+    ch_inputs                  // channel: [mandatory] [ meta ]
+    ch_tumor_rna_bam           // channel: [mandatory] [ meta, bam, bai ]
 
     // Reference data
-    genome_fasta           // channel: [mandatory] /path/to/genome_fasta
-    genome_version         // channel: [mandatory] genome version
-    genome_fai             // channel: [mandatory] /path/to/genome_fai
-    ensembl_data_resources // channel: [mandatory] /path/to/ensembl_data_resources/
-    known_fusion_data      // channel: [mandatory] /path/to/known_fusion_data
-    isofox_counts          // channel: [mandatory] /path/to/isofox_counts
-    isofox_gc_ratios       // channel: [mandatory] /path/to/isofox_gc_ratios
-    isofox_gene_ids        // channel: [optional]  /path/to/gene_ids
-    isofox_tpm_norm        // channel: [optional]  /path/to/tpm_norm
+    genome_fasta               // channel: [mandatory] /path/to/genome_fasta
+    genome_version             // channel: [mandatory] genome version
+    genome_fai                 // channel: [mandatory] /path/to/genome_fai
+    ensembl_data_resources     // channel: [mandatory] /path/to/ensembl_data_resources/
+    known_fusion_data          // channel: [mandatory] /path/to/known_fusion_data
+    isofox_gene_distribution   // channel: [mandatory] /path/to/isofox_gene_distribution
+    isofox_alt_sj_distribution // channel: [mandatory] /path/to/isofox_alt_sj_distribution
+    isofox_counts              // channel: [mandatory] /path/to/isofox_counts
+    isofox_gc_ratios           // channel: [mandatory] /path/to/isofox_gc_ratios
+    isofox_gene_ids            // channel: [optional]  /path/to/isofox_gene_ids
+    isofox_tpm_norm            // channel: [optional]  /path/to/isofox_tpm_norm
 
     // Params
     isofox_functions       //  string: [optional]  Isofox functions
@@ -75,6 +77,8 @@ workflow ISOFOX_QUANTIFICATION {
         genome_fai,
         ensembl_data_resources,
         known_fusion_data,
+        isofox_gene_distribution,
+        isofox_alt_sj_distribution,
         isofox_counts,
         isofox_gc_ratios,
         isofox_gene_ids,

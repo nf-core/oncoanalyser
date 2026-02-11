@@ -95,14 +95,6 @@ input:
       type: file
       description: Mutational signature etiologies file
       pattern: "*.{tsv}"
-  - isofox_alt_sj:
-      type: file
-      description: Isofox cohort alternate slice junction file
-      pattern: "*.{csv}"
-  - isofox_gene_distribution:
-      type: file
-      description: Isofox cohort gene expression file
-      pattern: "*.{csv}"
   - pipeline_version:
       type: string
       description: Pipeline version to display in report

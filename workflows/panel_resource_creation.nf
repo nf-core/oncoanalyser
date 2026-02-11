@@ -259,7 +259,7 @@ workflow PANEL_RESOURCE_CREATION {
         ch_isofox_out,
         ref_data.genome_version,
         isofox_gene_ids,
-        hmf_data.gene_exp_distribution,
+        hmf_data.isofox_gene_distribution,
     )
 
     ch_versions = ch_versions.mix(ISOFOX_NORMALISATION.out.versions)

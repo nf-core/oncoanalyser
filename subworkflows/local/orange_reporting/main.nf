@@ -35,13 +35,9 @@ workflow ORANGE_REPORTING {
     genome_version              // channel: [mandatory] genome version
     disease_ontology            // channel: [mandatory] /path/to/disease_ontology
     cohort_mapping              // channel: [mandatory] /path/to/cohort_mapping
-    cohort_percentiles          // channel: [mandatory] /path/to/cohort_percentiles
-    known_fusion_data           // channel: [mandatory] /path/to/known_fusion_data
     driver_gene_panel           // channel: [mandatory] /path/to/driver_gene_panel
     sigs_etiology               // channel: [mandatory] /path/to/sigs_etiology
     ensembl_data_resources      // channel: [mandatory] /path/to/ensembl_data_resources/
-    isofox_alt_sj               // channel: [optional]  /path/to/isofox_alt_sj
-    isofox_gene_distribution    // channel: [optional]  /path/to/isofox_gene_distribution
 
     // Params
     targeted_mode               // boolean: [mandatory] Set targeted mode
@@ -250,13 +246,9 @@ workflow ORANGE_REPORTING {
         genome_version,
         disease_ontology,
         cohort_mapping,
-        cohort_percentiles,
-        known_fusion_data,
         driver_gene_panel,
         sigs_etiology,
         ensembl_data_resources,
-        isofox_alt_sj,
-        isofox_gene_distribution,
         '3.0.0 [oncoanalyser]',
         targeted_mode,
     )

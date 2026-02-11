@@ -208,6 +208,8 @@ workflow WGTS {
             ref_data.genome_fai,
             hmf_data.ensembl_data_resources,
             hmf_data.known_fusion_data,
+            hmf_data.isofox_gene_distribution,
+            hmf_data.isofox_alt_sj_distribution,
             isofox_counts,
             isofox_gc_ratios,
             [],  // isofox_gene_ids
@@ -862,13 +864,9 @@ workflow WGTS {
             ref_data.genome_version,
             hmf_data.disease_ontology,
             hmf_data.cohort_mapping,
-            hmf_data.cohort_percentiles,
-            hmf_data.known_fusion_data,
             hmf_data.driver_gene_panel,
             hmf_data.ensembl_data_resources,
             hmf_data.sigs_etiology,
-            hmf_data.alt_sj_distribution,
-            hmf_data.gene_exp_distribution,
             false,  // targeted_mode
         )
 

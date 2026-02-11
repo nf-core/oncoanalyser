@@ -16,6 +16,8 @@ process ISOFOX {
     path genome_fai
     path ensembl_data_resources
     path known_fusion_data
+    path gene_distribution
+    path alt_sj_distribution
     path exp_counts
     path exp_gc_ratios
     path gene_ids
@@ -58,6 +60,8 @@ process ISOFOX {
         -ref_genome_version ${genome_ver} \\
         -ensembl_data_dir ${ensembl_data_resources} \\
         -known_fusion_file ${known_fusion_data} \\
+        -gene_distribution_file ${gene_distribution} \\
+        -alt_sj_cohort_file ${alt_sj_distribution} \\
         ${exp_counts_arg} \\
         ${exp_gc_ratios_arg} \\
         ${gene_ids_arg} \\
