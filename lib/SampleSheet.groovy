@@ -54,34 +54,10 @@ class SampleSheet {
         def sample_key = [sample_type, sequence_type]
         def meta_sample = meta.get(sample_key, [:])
 
-        // Info data
-        def info_data = [:]
-        if (entry.containsKey('info')) {
-            // Parse
-            entry.info
-                .tokenize(';')
-                .each { e ->
-                    def (k, v) = e.tokenize(':')
-                    def info_field_enum = Enums.getValidatedEnumFromString(k, Constants.InfoField, log)
+        def info_data = parseInfoField(entry, log_sample_id, log)
 
-                    if (info_data.containsKey(info_field_enum)) {
-                        log.error "got duplicate info field for ${log_sample_id}: ${info_field_enum}"
-                        Nextflow.exit(1)
-                    }
-
-                    if (!v && info_field_enum !== Constants.InfoField.LONGITUDINAL_SAMPLE) {
-                        log.error "got empty value for ${log_sample_id} ${info_field_enum}"
-                        Nextflow.exit(1)
-                    }
-
-                    info_data[info_field_enum] = v
-                }
-
-            // Process
-            if (info_data.containsKey(Constants.InfoField.CANCER_TYPE)) {
-                meta[Constants.InfoField.CANCER_TYPE] = info_data[Constants.InfoField.CANCER_TYPE]
-            }
-
+        if (info_data.containsKey(Constants.InfoField.CANCER_TYPE)) {
+            meta[Constants.InfoField.CANCER_TYPE] = info_data[Constants.InfoField.CANCER_TYPE]
         }
 
         if (meta_sample.containsKey(file_type) & file_type != Constants.FileType.FASTQ) {
@@ -104,6 +80,35 @@ class SampleSheet {
         checkReduxTsvsExist(meta_sample, log)
 
         checkAndSetFileIndexes(meta_sample, log)
+    }
+
+    private static Map parseInfoField(entry, log_sample_id, log) {
+        def info_data = [:]
+
+        if (!entry.containsKey('info')) {
+            return info_data
+        }
+
+        entry.info
+            .tokenize(';')
+            .each { e ->
+                def (k, v) = e.tokenize(':')
+                def info_field_enum = Enums.getValidatedEnumFromString(k, Constants.InfoField, log)
+
+                if (info_data.containsKey(info_field_enum)) {
+                    log.error "got duplicate info field for ${log_sample_id}: ${info_field_enum}"
+                    Nextflow.exit(1)
+                }
+
+                if (!v && info_field_enum !== Constants.InfoField.LONGITUDINAL_SAMPLE) {
+                    log.error "got empty value for ${log_sample_id} ${info_field_enum}"
+                    Nextflow.exit(1)
+                }
+
+                info_data[info_field_enum] = v
+            }
+
+        return info_data
     }
 
     private static getFileObject(path) {
