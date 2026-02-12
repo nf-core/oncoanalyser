@@ -17,12 +17,30 @@ class SampleSheet {
             .collect { group_id, entries ->
 
                 def meta = [group_id: group_id]
+                def sample_keys = [] as Set
 
                 entries.each { entry ->
-                    createOrUpdateSampleMeta(entry, meta, log)
+                    createOrUpdateSampleMeta(entry, meta, sample_keys, log)
                 }
 
-                // Checks per group
+                // Per sample checks once meta_sample objects are fully constructed
+                sample_keys.each { sample_key ->
+
+                    if(stub_run) {
+                        // NOTE(LN): TODO: not sure if this skip is required
+                        return
+                    }
+
+                    def meta_sample = meta[sample_key]
+
+                    setCramPaths(meta_sample)
+                    checkRawReadDataExists(meta_sample, group_id, log)
+                    checkReduxTsvsExist(meta_sample, log)
+                    checkAndSetFileIndexes(meta_sample, log)
+
+                }
+
+                // Per group checks
                 disallowDuplicateSampleIds(meta, log)
                 disallowInvalidSampleCombinations(meta, run_mode, log)
                 checkLongitudinalSampleInputs(meta, log)
@@ -33,7 +51,7 @@ class SampleSheet {
         return inputs
     }
 
-    private static void createOrUpdateSampleMeta(entry, meta, log) {
+    private static void createOrUpdateSampleMeta(entry, meta, sample_keys, log) {
 
         def group_id = meta.group_id
 
@@ -47,6 +65,8 @@ class SampleSheet {
         setAndCheckSubjectId(meta, entry, log_group_id, log)
 
         def sample_key = [sample_type, sequence_type]
+        sample_keys.add(sample_key) // Store to iterate over later
+
         def meta_sample = meta.get(sample_key, [:])
 
         // Handle info field
@@ -55,6 +75,8 @@ class SampleSheet {
         if (info_data.containsKey(Constants.InfoField.CANCER_TYPE)) {
             meta[Constants.InfoField.CANCER_TYPE] = info_data[Constants.InfoField.CANCER_TYPE]
         }
+
+        setSampleIds(meta_sample, entry, info_data, log_group_id, log)
 
         // Set file paths
         if (meta_sample.containsKey(file_type) & file_type != Constants.FileType.FASTQ) {
@@ -67,17 +89,6 @@ class SampleSheet {
         } else {
             meta_sample[file_type] = getFileObject(entry.filepath)
         }
-
-        setCramPaths(meta_sample)
-
-        // Other checks
-        setSampleIds(meta_sample, entry, info_data, log_group_id, log)
-
-        checkRawReadDataExists(meta_sample, log_group_id, log)
-
-        checkReduxTsvsExist(meta_sample, log)
-
-        checkAndSetFileIndexes(meta_sample, log)
     }
 
     private static void setAndCheckSubjectId(meta, entry, log_group_id, log) {
