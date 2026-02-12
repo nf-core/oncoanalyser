@@ -20,7 +20,7 @@ class SampleSheet {
                 def sample_keys = [] as Set
 
                 entries.each { entry ->
-                    constructSampleMetaFromEntry(entry, meta, sample_keys, group_id, log)
+                    constructSampleMetaFromEntry(entry, meta, sample_keys, log)
                 }
 
                 // Checks per sample
@@ -49,7 +49,9 @@ class SampleSheet {
         return inputs
     }
 
-    private static void constructSampleMetaFromEntry(entry, meta, sample_keys, group_id, log) {
+    private static void constructSampleMetaFromEntry(entry, meta, sample_keys, log) {
+
+        def group_id = meta.group_id
 
         // Add subject id if absent or check if current matches existing
         if (meta.containsKey('subject_id') && meta.subject_id != entry.subject_id) {
