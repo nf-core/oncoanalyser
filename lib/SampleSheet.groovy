@@ -17,25 +17,9 @@ class SampleSheet {
             .collect { group_id, entries ->
 
                 def meta = [group_id: group_id]
-                def sample_keys = [] as Set
 
                 entries.each { entry ->
-                    constructSampleMetaFromEntry(entry, meta, sample_keys, log)
-                }
-
-                // Checks per sample
-                sample_keys.each { sample_key ->
-
-                    if(stub_run) {
-                        return
-                    }
-
-                    def meta_sample = meta[sample_key]
-
-                    setCramPaths(meta_sample)
-                    checkRawReadDataExists(meta_sample, group_id, log)
-                    checkReduxTsvsExist(meta_sample, log)
-                    checkAndSetFileIndexes(meta_sample, log)
+                    constructSampleMetaFromEntry(entry, meta, log)
                 }
 
                 // Checks per group
@@ -49,7 +33,7 @@ class SampleSheet {
         return inputs
     }
 
-    private static void constructSampleMetaFromEntry(entry, meta, sample_keys, log) {
+    private static void constructSampleMetaFromEntry(entry, meta, log) {
 
         def group_id = meta.group_id
 
@@ -68,8 +52,6 @@ class SampleSheet {
         def log_sample_id = "${group_id} ${sample_type}/${sequence_type}"
 
         def sample_key = [sample_type, sequence_type]
-        sample_keys.add(sample_key) // Record sample key to simplify iteration later on
-
         def meta_sample = meta.get(sample_key, [:])
 
         // Info data
@@ -102,9 +84,6 @@ class SampleSheet {
 
         }
 
-        setSampleIds(meta_sample, entry, info_data, log_sample_id, log)
-
-        // Set file paths
         if (meta_sample.containsKey(file_type) & file_type != Constants.FileType.FASTQ) {
             log.error "got duplicate file for ${log_sample_id}: ${file_type}"
             Nextflow.exit(1)
@@ -115,6 +94,16 @@ class SampleSheet {
         } else {
             meta_sample[file_type] = getFileObject(entry.filepath)
         }
+
+        setCramPaths(meta_sample)
+
+        setSampleIds(meta_sample, entry, info_data, log_sample_id, log)
+
+        checkRawReadDataExists(meta_sample, group_id, log)
+
+        checkReduxTsvsExist(meta_sample, log)
+
+        checkAndSetFileIndexes(meta_sample, log)
     }
 
     private static getFileObject(path) {
@@ -202,7 +191,8 @@ class SampleSheet {
 
     private static void checkAndSetFileIndexes(meta_sample, log) {
 
-        meta_sample.keySet().each { key ->
+        // NOTE(LN): Cast keys to list to avoid ConcurrentModificationException
+        meta_sample.keySet().toList().each { key ->
 
             // NOTE(SW): I was going to use two maps but was unable to get an enum map to compile
 
