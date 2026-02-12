@@ -712,7 +712,6 @@ workflow TARGETED {
             hmf_data.disease_ontology,
             hmf_data.cohort_mapping,
             panel_data.driver_gene_panel,
-            hmf_data.ensembl_data_resources,
             hmf_data.sigs_etiology,
             true,  // targeted_mode
         )

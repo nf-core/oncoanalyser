@@ -37,7 +37,6 @@ workflow ORANGE_REPORTING {
     cohort_mapping              // channel: [mandatory] /path/to/cohort_mapping
     driver_gene_panel           // channel: [mandatory] /path/to/driver_gene_panel
     sigs_etiology               // channel: [mandatory] /path/to/sigs_etiology
-    ensembl_data_resources      // channel: [mandatory] /path/to/ensembl_data_resources/
 
     // Params
     targeted_mode               // boolean: [mandatory] Set targeted mode
@@ -248,7 +247,6 @@ workflow ORANGE_REPORTING {
         cohort_mapping,
         driver_gene_panel,
         sigs_etiology,
-        ensembl_data_resources,
         '3.0.0 [oncoanalyser]',
         targeted_mode,
     )

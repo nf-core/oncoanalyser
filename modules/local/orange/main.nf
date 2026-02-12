@@ -32,7 +32,6 @@ process ORANGE {
     path disease_ontology
     path cohort_mapping
     path driver_gene_panel
-    path ensembl_data_resources
     path sigs_etiology
     val pipeline_version
     val targeted_mode
@@ -159,7 +158,6 @@ process ORANGE {
         -cohort_mapping_tsv ${cohort_mapping} \\
         -driver_gene_panel ${driver_gene_panel} \\
         -signatures_etiology_tsv ${sigs_etiology} \\
-        -ensembl_data_dir ${ensembl_data_resources} \\
         ${log_level_arg} \\
         -output_dir output/
 

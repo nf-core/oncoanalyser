@@ -865,7 +865,6 @@ workflow WGTS {
             hmf_data.disease_ontology,
             hmf_data.cohort_mapping,
             hmf_data.driver_gene_panel,
-            hmf_data.ensembl_data_resources,
             hmf_data.sigs_etiology,
             false,  // targeted_mode
         )
