@@ -38,11 +38,13 @@ class SampleSheet {
         def group_id = meta.group_id
 
         // Add subject id if absent or check if current matches existing
-        if (meta.containsKey('subject_id') && meta.subject_id != entry.subject_id) {
-            log.error "got unexpected subject name for ${group_id} ${meta.subject_id}: ${entry.subject_id}"
-            Nextflow.exit(1)
-        } else {
+        if(!meta.containsKey('subject_id')) {
             meta.subject_id = entry.subject_id
+        }
+
+        if (meta.subject_id != entry.subject_id) {
+            log.error "group_id(${group_id}): expected subject_id(${meta.subject_id}) but got subject_id(${meta.subject_id})"
+            Nextflow.exit(1)
         }
 
         def sample_type = Enums.getValidatedEnumFromString(entry.sample_type, Constants.SampleType, log)
