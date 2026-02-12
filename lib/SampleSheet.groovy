@@ -39,7 +39,7 @@ class SampleSheet {
                 }
 
                 // Checks per group
-                disallowDuplicateSampleIds(meta, sample_keys, log)
+                disallowDuplicateSampleIds(meta, log)
                 disallowInvalidSampleCombinations(meta, run_mode, log)
                 checkLongitudinalSampleInputs(meta, log)
 
@@ -311,19 +311,30 @@ class SampleSheet {
         meta_sample[Constants.FileType.REDUX_MS_TSV] = ms_tsv
     }
 
-    private static void disallowDuplicateSampleIds(meta, sample_keys, log) {
+    private static void disallowDuplicateSampleIds(meta, log) {
 
-        // Enforce unique samples names within groups
-        def sample_ids_duplicated = sample_keys
-            .groupBy { meta.getOrDefault(it, [:]).getOrDefault('sample_id', null) }
-            .findResults { k, v -> k !== null & v.size() > 1 ? [k, v] : null }
+        def sample_ids_seen = [] as Set
+        def sample_ids_duplicated = [] as Set
+
+        meta.each { key, maybe_meta_sample ->
+
+            def is_meta_sample = (maybe_meta_sample instanceof Map) && maybe_meta_sample.containsKey('sample_id')
+
+            if(!is_meta_sample) {
+                return
+            }
+
+            def sample_id = maybe_meta_sample.sample_id
+
+            if(sample_ids_seen.contains(sample_id)) {
+                sample_ids_duplicated.add(sample_id)
+            }
+
+            sample_ids_seen.add(sample_id)
+        }
 
         if (sample_ids_duplicated) {
-            def duplicate_message_strs = sample_ids_duplicated.collect { sample_id, keys ->
-                def key_strs = keys.collect { sample_type, sequence_type -> "${sample_type}/${sequence_type}" }
-                return "  * ${sample_id}: ${key_strs.join(", ")}"
-            }
-            log.error "duplicate sample names found for ${meta.group_id}:\n\n${duplicate_message_strs.join("\n")}"
+            log.error "duplicate sample id(s) found for group_id(${meta.group_id}): ${sample_ids_duplicated.join(', ')}"
             Nextflow.exit(1)
         }
     }
