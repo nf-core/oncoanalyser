@@ -97,6 +97,7 @@ class Constants {
         PURPLE,
         REDUX,
         SAGE,
+        SAGE_VIS,
         SIGS,
         TEAL,
         VIRUSINTERPRETER,

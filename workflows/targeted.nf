@@ -489,7 +489,7 @@ workflow TARGETED {
     //
     // SUBWORKFLOW: Visualise SAGE variants
     //
-    if (run_config.stages.sage) {
+    if (run_config.stages.sage_vis) {
 
         SAGE_PLOTTING(
             ch_inputs,
