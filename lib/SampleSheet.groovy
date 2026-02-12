@@ -44,15 +44,7 @@ class SampleSheet {
         def log_sample_id = "group_id(${group_id}) sample_id(${sample_type})"
         def log_group_id = "group_id(${group_id})"
 
-        // Add subject id if absent or check if current matches existing
-        if(!meta.containsKey('subject_id')) {
-            meta.subject_id = entry.subject_id
-        }
-
-        if (meta.subject_id != entry.subject_id) {
-            log.error "${log_group_id}: expected subject_id(${meta.subject_id}) but got subject_id(${meta.subject_id})"
-            Nextflow.exit(1)
-        }
+        setAndCheckSubjectId(meta, entry, log_group_id, log)
 
         def sample_key = [sample_type, sequence_type]
         def meta_sample = meta.get(sample_key, [:])
@@ -86,6 +78,20 @@ class SampleSheet {
         checkReduxTsvsExist(meta_sample, log)
 
         checkAndSetFileIndexes(meta_sample, log)
+    }
+
+    private static void setAndCheckSubjectId(meta, entry, log_group_id, log) {
+
+        if(!meta.containsKey('subject_id')) {
+            meta.subject_id = entry.subject_id
+        }
+
+        if (meta.subject_id != entry.subject_id) {
+            log.error "got unexpected subject_id(${entry.subject_id}) for ${log_group_id}. " +
+                "All samples within a group must have the same subject_id"
+
+            Nextflow.exit(1)
+        }
     }
 
     private static Map parseInfoField(entry, log_sample_id, log) {
