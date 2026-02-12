@@ -100,6 +100,27 @@ class SampleSheet {
 
         }
 
+        setSampleIds(meta_sample, entry, info_data, log_sample_id, log)
+
+        // Set file paths
+        if (meta_sample.containsKey(file_type) & file_type != Constants.FileType.FASTQ) {
+            log.error "got duplicate file for ${log_sample_id}: ${file_type}"
+            Nextflow.exit(1)
+        }
+
+        if (file_type === Constants.FileType.FASTQ) {
+            setFastqPaths(meta_sample, entry, info_data, log_sample_id, log)
+        } else {
+            meta_sample[file_type] = getFileObject(entry.filepath)
+        }
+    }
+
+    private static getFileObject(path) {
+        return path ? nextflow.Nextflow.file(path) : []
+    }
+
+    private static void setSampleIds(meta_sample, entry, info_data, log_sample_id, log) {
+
         if (info_data.containsKey(Constants.InfoField.LONGITUDINAL_SAMPLE)) {
 
             if (meta_sample.containsKey('longitudinal_sample_id') && meta_sample.longitudinal_sample_id != entry.sample_id) {
@@ -119,57 +140,42 @@ class SampleSheet {
             meta_sample.sample_id = entry.sample_id
 
         }
+    }
 
-        // Filetype uniqueness
-        if (meta_sample.containsKey(file_type) & file_type != Constants.FileType.FASTQ) {
-            log.error "got duplicate file for ${log_sample_id}: ${file_type}"
+    private static void setFastqPaths(meta_sample, entry, info_data, log_sample_id, log) {
+
+        if (!info_data.containsKey(Constants.InfoField.LIBRARY_ID)) {
+            log.error "missing 'library_id' info field for ${log_sample_id}"
             Nextflow.exit(1)
         }
 
-        // Handle inputs appropriately
-        if (file_type === Constants.FileType.FASTQ) {
-
-            if (!info_data.containsKey(Constants.InfoField.LIBRARY_ID)) {
-                log.error "missing 'library_id' info field for ${log_sample_id}"
-                Nextflow.exit(1)
-            }
-
-            if (!info_data.containsKey(Constants.InfoField.LANE)) {
-                log.error "missing 'lane' info field for ${log_sample_id}"
-                Nextflow.exit(1)
-            }
-
-            def fastq_entries = entry.filepath.tokenize(';')
-
-            if (fastq_entries.size() != 2) {
-                log.error "expected exactly 2 FASTQ files delimited by ';' (i.e. '<fwd>;<rev>') but found ${fastq_entries.size} " +
-                        " files for ${log_sample_id}"
-                Nextflow.exit(1)
-            }
-
-            def (fwd, rev) = fastq_entries
-            def fastq_key = [info_data[Constants.InfoField.LIBRARY_ID], info_data[Constants.InfoField.LANE]]
-
-            if (!meta_sample.containsKey(file_type)) {
-                meta_sample[file_type] = [:]
-            }
-
-            if (meta_sample[file_type].containsKey(fastq_key)) {
-                log.error "got duplicate lane + library_id data for ${log_sample_id}: ${fastq_key}"
-                Nextflow.exit(1)
-            }
-
-            meta_sample[file_type][fastq_key] = ['fwd': getFileObject(fwd), 'rev': getFileObject(rev)]
-
-        } else {
-
-            meta_sample[file_type] = getFileObject(entry.filepath)
-
+        if (!info_data.containsKey(Constants.InfoField.LANE)) {
+            log.error "missing 'lane' info field for ${log_sample_id}"
+            Nextflow.exit(1)
         }
-    }
 
-    private static getFileObject(path) {
-        return path ? nextflow.Nextflow.file(path) : []
+        def fastq_entries = entry.filepath.tokenize(';')
+
+        if (fastq_entries.size() != 2) {
+            log.error "expected exactly 2 FASTQ files delimited by ';' (i.e. '<fwd>;<rev>') but found ${fastq_entries.size} " +
+                " files for ${log_sample_id}"
+            Nextflow.exit(1)
+        }
+
+        def (fwd, rev) = fastq_entries
+        def fastq_key = [info_data[Constants.InfoField.LIBRARY_ID], info_data[Constants.InfoField.LANE]]
+
+        if (!meta_sample.containsKey(Constants.FileType.FASTQ)) {
+            meta_sample[Constants.FileType.FASTQ] = [:]
+        }
+
+        if (meta_sample[Constants.FileType.FASTQ].containsKey(fastq_key)) {
+            log.error "got duplicate lane + library_id data for ${log_sample_id}: ${fastq_key}"
+            Nextflow.exit(1)
+        }
+
+        meta_sample[Constants.FileType.FASTQ][fastq_key] = ['fwd': getFileObject(fwd), 'rev': getFileObject(rev)]
+
     }
 
     private static void setCramPaths(meta_sample) {
