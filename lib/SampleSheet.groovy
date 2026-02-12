@@ -37,33 +37,36 @@ class SampleSheet {
 
         def group_id = meta.group_id
 
+        def sample_type = Enums.getValidatedEnumFromString(entry.sample_type, Constants.SampleType, log)
+        def sequence_type = Enums.getValidatedEnumFromString(entry.sequence_type, Constants.SequenceType, log)
+        def file_type = Enums.getValidatedEnumFromString(entry.filetype, Constants.FileType, log)
+
+        def log_sample_id = "group_id(${group_id}) sample_id(${sample_type})"
+        def log_group_id = "group_id(${group_id})"
+
         // Add subject id if absent or check if current matches existing
         if(!meta.containsKey('subject_id')) {
             meta.subject_id = entry.subject_id
         }
 
         if (meta.subject_id != entry.subject_id) {
-            log.error "group_id(${group_id}): expected subject_id(${meta.subject_id}) but got subject_id(${meta.subject_id})"
+            log.error "${log_group_id}: expected subject_id(${meta.subject_id}) but got subject_id(${meta.subject_id})"
             Nextflow.exit(1)
         }
-
-        def sample_type = Enums.getValidatedEnumFromString(entry.sample_type, Constants.SampleType, log)
-        def sequence_type = Enums.getValidatedEnumFromString(entry.sequence_type, Constants.SequenceType, log)
-        def file_type = Enums.getValidatedEnumFromString(entry.filetype, Constants.FileType, log)
-
-        def log_sample_id = "${group_id} ${sample_type}/${sequence_type}"
 
         def sample_key = [sample_type, sequence_type]
         def meta_sample = meta.get(sample_key, [:])
 
+        // Handle info field
         def info_data = parseInfoField(entry, log_sample_id, log)
 
         if (info_data.containsKey(Constants.InfoField.CANCER_TYPE)) {
             meta[Constants.InfoField.CANCER_TYPE] = info_data[Constants.InfoField.CANCER_TYPE]
         }
 
+        // Set file paths
         if (meta_sample.containsKey(file_type) & file_type != Constants.FileType.FASTQ) {
-            log.error "got duplicate file for ${log_sample_id}: ${file_type}"
+            log.error "got duplicate filetype(${file_type}) for ${log_sample_id}"
             Nextflow.exit(1)
         }
 
@@ -75,9 +78,10 @@ class SampleSheet {
 
         setCramPaths(meta_sample)
 
-        setSampleIds(meta_sample, entry, info_data, log_sample_id, log)
+        // Other checks
+        setSampleIds(meta_sample, entry, info_data, log_group_id, log)
 
-        checkRawReadDataExists(meta_sample, group_id, log)
+        checkRawReadDataExists(meta_sample, log_group_id, log)
 
         checkReduxTsvsExist(meta_sample, log)
 
@@ -98,12 +102,12 @@ class SampleSheet {
                 def info_field_enum = Enums.getValidatedEnumFromString(k, Constants.InfoField, log)
 
                 if (info_data.containsKey(info_field_enum)) {
-                    log.error "got duplicate info field for ${log_sample_id}: ${info_field_enum}"
+                    log.error "got duplicate info field(${info_field_enum}) for ${log_sample_id}"
                     Nextflow.exit(1)
                 }
 
                 if (!v && info_field_enum !== Constants.InfoField.LONGITUDINAL_SAMPLE) {
-                    log.error "got empty value for ${log_sample_id} ${info_field_enum}"
+                    log.error "got empty value for info field(${info_field_enum}) for ${log_sample_id}"
                     Nextflow.exit(1)
                 }
 
@@ -117,12 +121,12 @@ class SampleSheet {
         return path ? nextflow.Nextflow.file(path) : []
     }
 
-    private static void setSampleIds(meta_sample, entry, info_data, log_sample_id, log) {
+    private static void setSampleIds(meta_sample, entry, info_data, log_group_id, log) {
 
         if (info_data.containsKey(Constants.InfoField.LONGITUDINAL_SAMPLE)) {
 
             if (meta_sample.containsKey('longitudinal_sample_id') && meta_sample.longitudinal_sample_id != entry.sample_id) {
-                log.error "got multiple longitudinal samples for ${log_sample_id}: ${entry.sample_id}"
+                log.error "got multiple longitudinal samples for ${log_group_id}: ${entry.sample_id}"
                 Nextflow.exit(1)
             }
 
@@ -130,7 +134,7 @@ class SampleSheet {
 
         } else if (meta_sample.containsKey('sample_id') && meta_sample.sample_id != entry.sample_id) {
 
-            log.error "got unexpected sample name for ${log_sample_id}: ${entry.sample_id}"
+            log.error "got unexpected sample name for ${log_group_id}: ${entry.sample_id}"
             Nextflow.exit(1)
 
         } else {
@@ -240,7 +244,7 @@ class SampleSheet {
         }
     }
 
-    private static void checkRawReadDataExists(meta_sample, group_id, log) {
+    private static void checkRawReadDataExists(meta_sample, log_group_id, log) {
 
         def missing_any_raw_read_data =
             !meta_sample.containsKey(Constants.FileType.BAM) &&
@@ -251,7 +255,7 @@ class SampleSheet {
 
         if (missing_any_raw_read_data) {
 
-            log.error "no BAM/CRAM nor BAM_REDUX/CRAM_REDUX nor FASTQ files provided for ${group_id} ${meta_sample.sample_id}\n\n" +
+            log.error "no BAM/CRAM nor BAM_REDUX/CRAM_REDUX nor FASTQ files provided for ${log_group_id}\n\n" +
                     "NB: At least one of these files is required as they are the basis to determine input sample type."
             Nextflow.exit(1)
         }
