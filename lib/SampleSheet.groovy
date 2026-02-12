@@ -19,6 +19,21 @@ class SampleSheet {
                 def meta = [group_id: group_id]
                 def sample_keys = [] as Set
 
+                /*
+                // Example typical structure of `meta` once fully constructed
+                // Contains the run metadata for every sample within the same group_id
+
+                [
+                    group_id:<string>,
+                    subject_id:<string>,
+
+                    // `meta_sample` (multiple entries shown)
+                    [TUMOR, DNA]:[sample_id:<string>, BAM:<path_as_string>, BAI:<path_as_string>],
+                    [NORMAL, DNA]:[sample_id:<string>, BAM:<path_as_string>, BAI:<path_as_string>],
+                    [TUMOR, RNA]:[sample_id:<string>, FASTQ:[[S1, 001]:[fwd:<path_as_string>, rev:<path_as_string>]]]
+                ]
+                */
+
                 entries.each { entry ->
                     createOrUpdateSampleMeta(entry, meta, sample_keys, log)
                 }
