@@ -19,7 +19,7 @@ class SampleSheet {
                 def meta = [group_id: group_id]
 
                 entries.each { entry ->
-                    constructSampleMetaFromEntry(entry, meta, log)
+                    createOrUpdateSampleMeta(entry, meta, log)
                 }
 
                 // Checks per group
@@ -33,7 +33,7 @@ class SampleSheet {
         return inputs
     }
 
-    private static void constructSampleMetaFromEntry(entry, meta, log) {
+    private static void createOrUpdateSampleMeta(entry, meta, log) {
 
         def group_id = meta.group_id
 
