@@ -70,7 +70,6 @@ workflow ORANGE_REPORTING {
     ]
 
     dna_tumor_input_indexes = [
-        input_indexes.redux_somatic_plot,
         input_indexes.bamtools_somatic,
         input_indexes.sage_somatic,
         input_indexes.purple_dir,
@@ -79,7 +78,6 @@ workflow ORANGE_REPORTING {
     ]
 
     dna_normal_input_indexes = [
-        input_indexes.redux_germline_plot,
         input_indexes.bamtools_germline,
         input_indexes.sage_germline,
         input_indexes.linx_germline_annotation,
