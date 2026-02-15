@@ -27,7 +27,7 @@ workflow PREPARE_REFERENCE {
     prep_config = Params.getPrepConfigFromParams(params, log)
     STAGE_REFERENCE(
         prep_config,
-        [:],
+        true, // prepare_reference_only
     )
 
     ch_versions = ch_versions.mix(STAGE_REFERENCE.out.versions)

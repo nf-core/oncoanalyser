@@ -30,8 +30,8 @@ include { WRITE_REFERENCE_DATA as WRITE_PANEL_DATA      } from '../../../modules
 
 workflow PREPARE_REFERENCE {
     take:
-    prep_config // channel: [mandatory] configuration indicating which reference data is required
-    run_config
+    prep_config            // channel: [mandatory] configuration indicating which reference data is required
+    prepare_reference_only // boolean: [mandatory] Prepare reference only, do not run pipeline
 
     main:
     // Channel for version.yml files
@@ -298,7 +298,7 @@ workflow PREPARE_REFERENCE {
     //
     // Write prepared reference data if requested
     //
-    if (prep_config.prepare_ref_data_only || params.prepare_reference_only) {
+    if (prepare_reference_only) {
 
         WRITE_FASTA(ch_genome_fasta)
         WRITE_FAI(ch_genome_fai)
@@ -310,9 +310,6 @@ workflow PREPARE_REFERENCE {
 
         WRITE_HMF_DATA(ch_hmf_data.map { getDataBaseDirectory(it) })
         WRITE_PANEL_DATA(ch_panel_data.map { getDataBaseDirectory(it) })
-
-        // Clear all stages to prevent running any analysis when driving by samplesheet
-        run_config.stages = [:]
 
     }
 

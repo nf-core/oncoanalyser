@@ -69,7 +69,7 @@ workflow WGTS {
     prep_config = Params.getPrepConfigFromRunConfig(run_config)
     PREPARE_REFERENCE(
         prep_config,
-        run_config,
+        false, // prepare_reference_only
     )
     ref_data = PREPARE_REFERENCE.out
     hmf_data = PREPARE_REFERENCE.out.hmf_data

@@ -352,8 +352,6 @@ class Params {
 
     public static getPrepConfigFromRunConfig(run_config) {
         return [
-            prepare_ref_data_only: false,
-
             require_fasta: true,
             require_fai: true,
             require_dict: true,
@@ -418,8 +416,6 @@ class Params {
         }
 
         return [
-            prepare_ref_data_only: true,
-
             require_fasta: require_fasta,
             require_fai: require_fai,
             require_dict: require_dict,
