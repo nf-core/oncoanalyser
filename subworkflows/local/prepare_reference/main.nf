@@ -30,13 +30,21 @@ include { WRITE_REFERENCE_DATA as WRITE_PANEL_DATA      } from '../../../modules
 
 workflow PREPARE_REFERENCE {
     take:
-    prep_config            // channel: [mandatory] configuration indicating which reference data is required
-    prepare_reference_only // boolean: [mandatory] Prepare reference only, do not run pipeline
+    prepare_reference_only // boolean: [mandatory] prepare reference only, do not run pipeline
+    run_config             // map:     [optional]  pipeline run configuration
+    inputs                 // map:     [optional]  sample metadata
 
     main:
     // Channel for version.yml files
     // channel: [ versions.yml ]
     ch_versions = Channel.empty()
+
+    //
+    // Determine which resources need to be prepared
+    //
+    prep_config = prepare_reference_only
+        ? getConfigForPrepRefOnly(params, log)
+        : getConfigForPipelineRun(inputs, run_config)
 
     //
     // Set .fasta and main genome indexes, create if required
@@ -327,6 +335,92 @@ workflow PREPARE_REFERENCE {
     panel_data           = ch_panel_data                   // map:  Panel data paths
 
     versions             = ch_versions                     // channel: [ versions.yml ]
+}
+
+def getConfigForPipelineRun(inputs, run_config) {
+
+    def has_dna = inputs.any { Utils.hasTumorDna(it) }
+    def has_rna_fastq = inputs.any { Utils.hasTumorRnaFastq(it) }
+    def has_dna_fastq = inputs.any { Utils.hasTumorDnaFastq(it) || Utils.hasNormalDnaFastq(it) }
+
+    return [
+        require_fasta: true,
+        require_fai: true,
+        require_dict: true,
+        require_img: true,
+
+        require_bwamem2_index: has_dna_fastq && run_config.stages.alignment,
+        require_star_index: has_rna_fastq && run_config.stages.alignment,
+
+        require_gridss_index: has_dna && run_config.mode === Constants.RunMode.WGTS && run_config.stages.virusinterpreter,
+        require_hmftools_data: true,
+        require_panel_data: run_config.mode === Constants.RunMode.TARGETED,
+    ]
+}
+
+def getConfigForPrepRefOnly(params, log) {
+
+    def ref_data_types = params.ref_data_types
+        .tokenize(',')
+        .collect { Enums.getValidatedEnumFromString(it, Constants.RefDataType, log) }
+
+    if (
+        ref_data_types.contains(Constants.RefDataType.WGS) ||
+        ref_data_types.contains(Constants.RefDataType.WTS) ||
+        ref_data_types.contains(Constants.RefDataType.TARGETED)
+    ) {
+        ref_data_types += [
+            Constants.RefDataType.FASTA,
+            Constants.RefDataType.FAI,
+            Constants.RefDataType.DICT,
+            Constants.RefDataType.IMG,
+            Constants.RefDataType.HMFTOOLS
+        ]
+    }
+
+    if (ref_data_types.contains(Constants.RefDataType.WGS)) {
+        ref_data_types += [Constants.RefDataType.GRIDSS_INDEX]
+    }
+
+    if (ref_data_types.contains(Constants.RefDataType.TARGETED)) {
+        ref_data_types += [Constants.RefDataType.PANEL]
+    }
+
+    def require_fasta = ref_data_types.contains(Constants.RefDataType.FASTA)
+    def require_fai = ref_data_types.contains(Constants.RefDataType.FAI)
+    def require_dict = ref_data_types.contains(Constants.RefDataType.DICT)
+    def require_img = ref_data_types.contains(Constants.RefDataType.IMG)
+
+    def require_bwamem2_index = ref_data_types.contains(Constants.RefDataType.BWAMEM2_INDEX) || ref_data_types.contains(Constants.RefDataType.DNA_ALIGNMENT)
+    def require_star_index = ref_data_types.contains(Constants.RefDataType.STAR_INDEX) || ref_data_types.contains(Constants.RefDataType.RNA_ALIGNMENT)
+
+    def require_gridss_index = ref_data_types.contains(Constants.RefDataType.GRIDSS_INDEX)
+    def require_hmftools_data = ref_data_types.contains(Constants.RefDataType.HMFTOOLS)
+    def require_panel_data = ref_data_types.contains(Constants.RefDataType.PANEL)
+
+    if (require_panel_data) {
+        if (params.panel == null) {
+            require_panel_data = false
+            log.warn "Skipping preparing panel specific reference data as --panel CLI argument was not provided"
+        } else if (!Constants.PANELS_DEFINED.contains(params.panel)) {
+            require_panel_data = false
+            log.warn "Skipping preparing panel specific reference data for custom panel: ${params.panel}"
+        }
+    }
+
+    return [
+        require_fasta: require_fasta,
+        require_fai: require_fai,
+        require_dict: require_dict,
+        require_img: require_img,
+
+        require_bwamem2_index: require_bwamem2_index,
+        require_star_index: require_star_index,
+
+        require_gridss_index: require_gridss_index,
+        require_hmftools_data: require_hmftools_data,
+        require_panel_data: require_panel_data,
+    ]
 }
 
 def getRefFileChannel(key) {

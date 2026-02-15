@@ -24,10 +24,10 @@ workflow PREPARE_REFERENCE {
     ch_versions = Channel.empty()
 
     // Stage in reference data as requested
-    prep_config = Params.getPrepConfigFromParams(params, log)
     STAGE_REFERENCE(
-        prep_config,
         true, // prepare_reference_only
+        [:],  // run_config
+        [:],  // inputs (sample metadata)
     )
 
     ch_versions = ch_versions.mix(STAGE_REFERENCE.out.versions)

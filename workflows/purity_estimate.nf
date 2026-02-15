@@ -44,10 +44,10 @@ workflow PURITY_ESTIMATE {
     wgts_mode = purity_estimate_run_mode === Constants.PurityEstimateRunMode.WGTS // NOTE(LN): Redundant variable, but makes the if clauses clearer
 
     // Set up reference data, assign more human readable variables
-    prep_config = Params.getPrepConfigFromRunConfig(run_config)
     PREPARE_REFERENCE(
-        prep_config,
         false, // prepare_reference_only
+        run_config,
+        inputs,
     )
     ref_data = PREPARE_REFERENCE.out
     hmf_data = PREPARE_REFERENCE.out.hmf_data

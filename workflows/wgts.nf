@@ -66,10 +66,10 @@ workflow WGTS {
     ch_inputs = Channel.fromList(inputs)
 
     // Set up reference data, assign more human readable variables
-    prep_config = Params.getPrepConfigFromRunConfig(run_config)
     PREPARE_REFERENCE(
-        prep_config,
         false, // prepare_reference_only
+        run_config,
+        inputs,
     )
     ref_data = PREPARE_REFERENCE.out
     hmf_data = PREPARE_REFERENCE.out.hmf_data

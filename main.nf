@@ -88,7 +88,7 @@ workflow NFCORE_ONCOANALYSER {
 
         inputs = SampleSheet.parseInput(params.input, workflow.stubRun, run_mode, log)
 
-        run_config = Params.getRunConfig(params, inputs, log)
+        run_config = Params.getRunConfig(params, log)
         Params.validateRunSpecificParams(params, run_config, log)
 
         // Run requested workflow
