@@ -61,6 +61,19 @@ runs:
       env:
         NFT_WORKDIR: ${{ env.NFT_WORKDIR }}
       run: |
+        echo "=== Debug: reference_data structure ==="
+        if [ -d "reference_data" ]; then
+          echo "Total size:"
+          du -sh reference_data 2>/dev/null
+          echo "Directory structure:"
+          find reference_data -maxdepth 4 -type d 2>/dev/null
+          echo "Index directories:"
+          find reference_data -type d -name "*bwa-mem2*" -o -type d -name "*star_index*" -o -type d -name "*gridss*" 2>/dev/null
+        else
+          echo "reference_data does not exist"
+        fi
+        echo "=== End debug ==="
+
         nf-test test \
           --profile=+${{ inputs.profile }} \
           $(if [ -n "${{ inputs.tags }}" ]; then echo "--tag ${{ inputs.tags }}"; fi) \

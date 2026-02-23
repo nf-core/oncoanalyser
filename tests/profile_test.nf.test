@@ -20,11 +20,14 @@ nextflow_pipeline {
             def stable_name = getAllFilesFromDir(params.outdir, relative: true, includeDir: true, ignore: ['pipeline_info/*.{html,json,txt}'])
             // stable_path: All files in ${params.outdir}/ with stable content
             def stable_path = getAllFilesFromDir(params.outdir, ignoreFile: 'tests/.nftignore')
+            // Task count depends on config: when NXF_REF_DATA_PATH is set, reference data is cached (no DECOMP tasks)
+            def refDataCached = System.getenv('NXF_REF_DATA_PATH') != null
+            def expectedTaskCount = refDataCached ? 39 : 43
+            def actualTaskCount = workflow.trace.succeeded().size()
             assertAll(
-                { assert workflow.success},
+                { assert workflow.success },
+                { assert actualTaskCount == expectedTaskCount : "Expected ${expectedTaskCount} tasks (ref data cached: ${refDataCached}), got ${actualTaskCount}" },
                 { assert snapshot(
-                    // Number of successful tasks
-                    workflow.trace.succeeded().size(),
                     // All stable path name, with a relative path
                     stable_name,
                 ).match() }
