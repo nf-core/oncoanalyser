@@ -34,19 +34,19 @@ workflow CHORD_PREDICTION {
     ch_inputs_sorted = ch_inputs_selected
         .branch { meta, purple_dir ->
 
-            def has_dna = Utils.hasTumorDna(meta)
+            def has_tumor_normal_dna = Utils.hasTumorDna(meta) && Utils.hasNormalDna(meta)
 
             def has_smlv_vcf = []
             def has_sv_vcf = []
 
-            if(has_dna) {
+            if(has_tumor_normal_dna) {
                 has_smlv_vcf = purple_dir ? Utils.getPurpleSomaticVcf(meta, purple_dir) : []
                 has_sv_vcf = purple_dir ? Utils.getPurpleSomaticSvVcf(meta, purple_dir) : []
             }
 
             def has_existing = Utils.hasExistingInput(meta, Constants.INPUT.CHORD_DIR)
 
-            runnable: has_dna && purple_dir && has_smlv_vcf && has_sv_vcf && !has_existing
+            runnable: has_tumor_normal_dna && purple_dir && has_smlv_vcf && has_sv_vcf && !has_existing
             skip: true
                 return meta
         }
