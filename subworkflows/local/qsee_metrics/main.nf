@@ -26,7 +26,7 @@ workflow QSEE_METRICS {
     ch_versions = Channel.empty()
 
     // Select and route inputs
-    // channel: [ meta, redux_tumor_tsv, redux_normal_tsv, bamtools_tumor_dir, bamtools_normal_dir, cobalt_dir, esvee_dir, purple_dir ]
+    // channel: { meta, redux_tumor_tsv, redux_normal_tsv, bamtools_tumor_dir, bamtools_normal_dir, cobalt_dir, esvee_dir, purple_dir }
     ch_inputs_sorted = WorkflowOncoanalyser.groupByMeta(
         ch_redux_tumor_tsv,
         ch_redux_normal_tsv,
@@ -44,51 +44,54 @@ workflow QSEE_METRICS {
             esvee_dir,
             purple_dir ->
 
-            redux_tumor_tsv = [
-                tumor_bqr_tsv ?: Utils.getInput(meta, Constants.INPUT.REDUX_BQR_TSV_TUMOR),
-                tumor_dup_freq_tsv ?: Utils.getInput(meta, Constants.INPUT.REDUX_DUP_FREQ_TSV_TUMOR),
-                tumor_ms_tsv ?: Utils.getInput(meta, Constants.INPUT.REDUX_MS_TSV_TUMOR),
-            ]
-            redux_tumor_tsv = redux_tumor_tsv.findAll { it != [] }
+            def inputs = [:]
 
-            redux_normal_tsv = [
-                normal_bqr_tsv ?: Utils.getInput(meta, Constants.INPUT.REDUX_BQR_TSV_NORMAL),
-                normal_dup_freq_tsv ?: Utils.getInput(meta, Constants.INPUT.REDUX_DUP_FREQ_TSV_NORMAL),
-                normal_ms_tsv ?: Utils.getInput(meta, Constants.INPUT.REDUX_MS_TSV_NORMAL),
-            ]
-            redux_normal_tsv = redux_normal_tsv.findAll { it != [] }
+            inputs.meta = meta
 
-            bamtools_tumor_dir = Utils.selectCurrentOrExisting(bamtools_tumor_dir, meta, Constants.INPUT.BAMTOOLS_DIR_TUMOR)
-            bamtools_normal_dir = Utils.selectCurrentOrExisting(bamtools_normal_dir, meta, Constants.INPUT.BAMTOOLS_DIR_NORMAL)
+            inputs.redux_tumor_tsv = [
+                Utils.selectCurrentOrExisting(tumor_bqr_tsv, meta, Constants.INPUT.REDUX_BQR_TSV_TUMOR),
+                Utils.selectCurrentOrExisting(tumor_dup_freq_tsv, meta, Constants.INPUT.REDUX_DUP_FREQ_TSV_TUMOR),
+                Utils.selectCurrentOrExisting(tumor_ms_tsv, meta, Constants.INPUT.REDUX_MS_TSV_TUMOR),
+            ].findAll { it != [] }
 
-            cobalt_dir = Utils.selectCurrentOrExisting(cobalt_dir, meta, Constants.INPUT.COBALT_DIR)
-            esvee_dir = Utils.selectCurrentOrExisting(esvee_dir, meta, Constants.INPUT.ESVEE_DIR)
-            purple_dir = Utils.selectCurrentOrExisting(purple_dir, meta, Constants.INPUT.PURPLE_DIR)
+            inputs.redux_normal_tsv = [
+                Utils.selectCurrentOrExisting(normal_bqr_tsv, meta, Constants.INPUT.REDUX_BQR_TSV_NORMAL),
+                Utils.selectCurrentOrExisting(normal_dup_freq_tsv, meta, Constants.INPUT.REDUX_DUP_FREQ_TSV_NORMAL),
+                Utils.selectCurrentOrExisting(normal_ms_tsv, meta, Constants.INPUT.REDUX_MS_TSV_NORMAL),
+            ].findAll { it != [] }
 
-            return [ meta, redux_tumor_tsv, redux_normal_tsv, bamtools_tumor_dir, bamtools_normal_dir, cobalt_dir, esvee_dir, purple_dir ]
+            inputs.bamtools_tumor_dir = Utils.selectCurrentOrExisting(bamtools_tumor_dir, meta, Constants.INPUT.BAMTOOLS_DIR_TUMOR)
+            inputs.bamtools_normal_dir = Utils.selectCurrentOrExisting(bamtools_normal_dir, meta, Constants.INPUT.BAMTOOLS_DIR_NORMAL)
+            inputs.cobalt_dir = Utils.selectCurrentOrExisting(cobalt_dir, meta, Constants.INPUT.COBALT_DIR)
+            inputs.esvee_dir = Utils.selectCurrentOrExisting(esvee_dir, meta, Constants.INPUT.ESVEE_DIR)
+            inputs.purple_dir = Utils.selectCurrentOrExisting(purple_dir, meta, Constants.INPUT.PURPLE_DIR)
+
+            return inputs
         }
-        .branch { meta, redux_tumor_tsv, redux_normal_tsv, bamtools_tumor_dir, bamtools_normal_dir, cobalt_dir, esvee_dir, purple_dir ->
-            runnable: bamtools_tumor_dir && purple_dir
+        .branch { inputs ->
+            runnable: inputs.bamtools_tumor_dir && inputs.purple_dir
+                return inputs
             skip: true
-                return meta
+                return inputs.meta
         }
 
-    // Create process input channel
+    // Create process input channel; form metadata
     // channel: [ meta, redux_tumor_tsv, redux_normal_tsv, bamtools_tumor_dir, bamtools_normal_dir, cobalt_dir, esvee_dir, purple_dir ]
     ch_qsee_inputs = ch_inputs_sorted.runnable
-        .map { meta, redux_tumor_tsv, redux_normal_tsv, bamtools_tumor_dir, bamtools_normal_dir, cobalt_dir, esvee_dir, purple_dir ->
+        .map { inputs ->
 
-            def tumor_id = Utils.getTumorDnaSampleName(meta)
-            def normal_id = Utils.getNormalDnaSampleName(meta)
+            def meta = inputs.meta
 
             def meta_qsee = [
                 key: meta.group_id,
                 id: meta.group_id,
-                tumor_id: tumor_id,
-                normal_id: tumor_id,
+                tumor_id: Utils.getTumorDnaSampleName(meta),
+                normal_id: Utils.getNormalDnaSampleName(meta),
             ]
 
-            return [ meta_qsee, redux_tumor_tsv, redux_normal_tsv, bamtools_tumor_dir, bamtools_normal_dir, cobalt_dir, esvee_dir, purple_dir ]
+            inputs.meta = meta_qsee
+
+            return inputs.values()
         }
 
     // Run process
