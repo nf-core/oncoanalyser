@@ -37,8 +37,8 @@ workflow QSEE_METRICS {
         ch_purple,
     )
         .map { meta,
-            tumor_bqr_tsv , tumor_jitter_tsv , tumor_ms_tsv,
-            normal_bqr_tsv, normal_jitter_tsv, normal_ms_tsv,
+            tumor_bqr_tsv , tumor_dup_freq_tsv , tumor_jitter_tsv , tumor_ms_tsv,
+            normal_bqr_tsv, normal_dup_freq_tsv, normal_jitter_tsv, normal_ms_tsv,
             bamtools_tumor_dir, bamtools_normal_dir,
             cobalt_dir,
             esvee_dir,

@@ -55,9 +55,9 @@ workflow SAGE_CALLING {
         ch_donor_bam, ch_donor_tsv,
     )
         .map { meta,
-            tumor_bam , tumor_bai , tumor_bqr_tsv , tumor_jitter_tsv , tumor_ms_tsv,
-            normal_bam, normal_bai, normal_bqr_tsv, normal_jitter_tsv, normal_ms_tsv,
-            donor_bam , donor_bai , donor_bqr_tsv , donor_jitter_tsv , donor_ms_tsv ->
+            tumor_bam , tumor_bai , tumor_bqr_tsv , tumor_dup_freq_tsv , tumor_jitter_tsv , tumor_ms_tsv,
+            normal_bam, normal_bai, normal_bqr_tsv, normal_dup_freq_tsv, normal_jitter_tsv, normal_ms_tsv,
+            donor_bam , donor_bai , donor_bqr_tsv , donor_dup_freq_tsv , donor_jitter_tsv , donor_ms_tsv ->
 
             tumor_bam = Utils.selectCurrentOrExisting(tumor_bam, meta, Constants.INPUT.BAM_REDUX_DNA_TUMOR)
             tumor_bai = tumor_bai ?: Utils.getInput(meta, Constants.INPUT.BAI_DNA_TUMOR)

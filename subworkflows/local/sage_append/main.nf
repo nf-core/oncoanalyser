@@ -47,7 +47,7 @@ workflow SAGE_APPEND {
     )
         .map { meta,
             tumor_dna_bam, tumor_dna_bai,
-            tumor_dna_bqr_tsv, tumor_dna_jitter_tsv, tumor_dna_ms_tsv,
+            tumor_dna_bqr_tsv, tumor_dna_dup_freq_tsv, tumor_dna_jitter_tsv, tumor_dna_ms_tsv,
             tumor_rna_bam, tumor_rna_bai,
             purple_dir ->
 

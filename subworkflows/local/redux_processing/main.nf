@@ -124,15 +124,16 @@ workflow REDUX_PROCESSING {
     ch_redux_out = WorkflowOncoanalyser.groupByMeta(
         REDUX.out.bam,
         REDUX.out.bqr_tsv,
+        REDUX.out.dup_freq_tsv,
         REDUX.out.jitter_tsv,
         REDUX.out.ms_tsv,
         REDUX.out.bqr_plot,
     )
 
     // Sort into a tumor and normal channel
-    // channel: [ meta, bam, bai, bqr_tsv, jitter_tsv, ms_tsv, bqr_plot ]
+    // channel: [ meta, bam, bai, bqr_tsv, dup_freq_tsv, jitter_tsv, ms_tsv, bqr_plot ]
     ch_redux_out_sorted = ch_redux_out
-        .branch { meta, bam, bai, bqr_tsv, jitter_tsv, ms_tsv, bqr_plot ->
+        .branch { meta, bam, bai, bqr_tsv, dup_freq_tsv, jitter_tsv, ms_tsv, bqr_plot ->
             assert ['tumor', 'normal', 'donor'].contains(meta.sample_type)
             tumor: meta.sample_type == 'tumor'
             normal: meta.sample_type == 'normal'
@@ -141,7 +142,7 @@ workflow REDUX_PROCESSING {
         }
 
     // Set outputs, restoring original meta, split by file type
-    // channel: [ meta, bam, bai, bqr_tsv, jitter_tsv, ms_tsv, bqr_plot ]
+    // channel: [ meta, bam, bai, bqr_tsv, dup_freq_tsv, jitter_tsv, ms_tsv, bqr_plot ]
     def createOutputChannels = { ch_redux_out_sample_type, ch_sample_type_skip ->
 
         def placeholder_bam = [[]] * PlaceholderChannels.N_ITEMS_BAM_BAI
@@ -154,9 +155,9 @@ workflow REDUX_PROCESSING {
                 WorkflowOncoanalyser.restoreMeta(ch_redux_out_sample_type, ch_inputs),
                 ch_sample_type_skip.map { meta -> [meta, *placeholders] },
             )
-            .multiMap { meta, bam, bai, bqr_tsv, jitter_tsv, ms_tsv, bqr_plot ->
+            .multiMap { meta, bam, bai, bqr_tsv, dup_freq_tsv, jitter_tsv, ms_tsv, bqr_plot ->
                 bam: [meta, bam, bai]
-                tsv: [meta, bqr_tsv, jitter_tsv, ms_tsv]
+                tsv: [meta, bqr_tsv, dup_freq_tsv, jitter_tsv, ms_tsv]
                 plot: [meta, bqr_plot]
             }
     }
