@@ -25,7 +25,7 @@ workflow QSEE_METRICS {
     // channel: [ versions.yml ]
     ch_versions = Channel.empty()
 
-    // Select and sort inputs
+    // Select and route inputs
     // channel: [ meta, redux_tumor_tsv, redux_normal_tsv, bamtools_tumor_dir, bamtools_normal_dir, cobalt_dir, esvee_dir, purple_dir ]
     ch_inputs_sorted = WorkflowOncoanalyser.groupByMeta(
         ch_redux_tumor_tsv,
@@ -88,7 +88,7 @@ workflow QSEE_METRICS {
                 normal_id: tumor_id,
             ]
 
-            return [ meta, redux_tumor_tsv, redux_normal_tsv, bamtools_tumor_dir, bamtools_normal_dir, cobalt_dir, esvee_dir, purple_dir ]
+            return [ meta_qsee, redux_tumor_tsv, redux_normal_tsv, bamtools_tumor_dir, bamtools_normal_dir, cobalt_dir, esvee_dir, purple_dir ]
         }
 
     // Run process

@@ -95,6 +95,7 @@ class Constants {
         PAVE,
         PEACH,
         PURPLE,
+        QSEE,
         REDUX,
         SAGE,
         SAGE_VIS,

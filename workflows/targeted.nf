@@ -183,6 +183,37 @@ workflow TARGETED {
     }
 
     //
+    // SUBWORKFLOW: Run Bam Tools to generate stats required for downstream processes
+    //
+    // channel: [ meta, metrics ]
+    ch_bamtools_somatic_out = Channel.empty()
+    ch_bamtools_germline_out = Channel.empty()
+    if (run_config.stages.bamtools) {
+
+        BAMTOOLS_METRICS(
+            ch_inputs,
+            ch_redux_dna_tumor_bam_out,
+            ch_redux_dna_normal_bam_out,
+            ref_data.genome_fasta,
+            ref_data.genome_version,
+            panel_data.driver_gene_panel,
+            hmf_data.ensembl_data_resources,
+            panel_data.target_region_bed,
+        )
+
+        ch_versions = ch_versions.mix(BAMTOOLS_METRICS.out.versions)
+
+        ch_bamtools_somatic_out = ch_bamtools_somatic_out.mix(BAMTOOLS_METRICS.out.somatic)
+        ch_bamtools_germline_out = ch_bamtools_germline_out.mix(BAMTOOLS_METRICS.out.germline)
+
+    } else {
+
+        ch_bamtools_somatic_out = PlaceholderChannels.toolDir(ch_inputs)
+        ch_bamtools_germline_out = PlaceholderChannels.toolDir(ch_inputs)
+
+    }
+
+    //
     // MODULE: Run Isofox to analyse RNA data
     //
 
@@ -563,37 +594,6 @@ workflow TARGETED {
     } else {
 
         ch_linx_somatic_visualiser_dir_out = PlaceholderChannels.toolDir(ch_inputs)
-
-    }
-
-    //
-    // SUBWORKFLOW: Run Bam Tools to generate stats required for downstream processes
-    //
-    // channel: [ meta, metrics ]
-    ch_bamtools_somatic_out = Channel.empty()
-    ch_bamtools_germline_out = Channel.empty()
-    if (run_config.stages.bamtools) {
-
-        BAMTOOLS_METRICS(
-            ch_inputs,
-            ch_redux_dna_tumor_bam_out,
-            ch_redux_dna_normal_bam_out,
-            ref_data.genome_fasta,
-            ref_data.genome_version,
-            panel_data.driver_gene_panel,
-            hmf_data.ensembl_data_resources,
-            panel_data.target_region_bed,
-        )
-
-        ch_versions = ch_versions.mix(BAMTOOLS_METRICS.out.versions)
-
-        ch_bamtools_somatic_out = ch_bamtools_somatic_out.mix(BAMTOOLS_METRICS.out.somatic)
-        ch_bamtools_germline_out = ch_bamtools_germline_out.mix(BAMTOOLS_METRICS.out.germline)
-
-    } else {
-
-        ch_bamtools_somatic_out = PlaceholderChannels.toolDir(ch_inputs)
-        ch_bamtools_germline_out = PlaceholderChannels.toolDir(ch_inputs)
 
     }
 

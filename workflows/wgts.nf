@@ -25,6 +25,7 @@ include { PAVE_ANNOTATION       } from '../subworkflows/local/pave_annotation'
 include { PEACH_CALLING         } from '../subworkflows/local/peach_calling'
 include { PREPARE_REFERENCE     } from '../subworkflows/local/prepare_reference'
 include { PURPLE_CALLING        } from '../subworkflows/local/purple_calling'
+include { QSEE_METRICS          } from '../subworkflows/local/qsee_metrics'
 include { READ_ALIGNMENT_DNA    } from '../subworkflows/local/read_alignment_dna'
 include { READ_ALIGNMENT_RNA    } from '../subworkflows/local/read_alignment_rna'
 include { REDUX_PROCESSING      } from '../subworkflows/local/redux_processing'
@@ -185,6 +186,37 @@ workflow WGTS {
 
         ch_redux_dna_tumor_plot_out = PlaceholderChannels.reduxPlots(ch_inputs)
         ch_redux_dna_normal_plot_out = PlaceholderChannels.reduxPlots(ch_inputs)
+
+    }
+
+    //
+    // SUBWORKFLOW: Run Bam Tools to generate stats required for downstream processes
+    //
+    // channel: [ meta, metrics_dir ]
+    ch_bamtools_somatic_out = Channel.empty()
+    ch_bamtools_germline_out = Channel.empty()
+    if (run_config.stages.bamtools) {
+
+        BAMTOOLS_METRICS(
+            ch_inputs,
+            ch_redux_dna_tumor_bam_out,
+            ch_redux_dna_normal_bam_out,
+            ref_data.genome_fasta,
+            ref_data.genome_version,
+            hmf_data.driver_gene_panel,
+            hmf_data.ensembl_data_resources,
+            [], // target_region_bed
+        )
+
+        ch_versions = ch_versions.mix(BAMTOOLS_METRICS.out.versions)
+
+        ch_bamtools_somatic_out = ch_bamtools_somatic_out.mix(BAMTOOLS_METRICS.out.somatic)
+        ch_bamtools_germline_out = ch_bamtools_germline_out.mix(BAMTOOLS_METRICS.out.germline)
+
+    } else {
+
+        ch_bamtools_somatic_out = PlaceholderChannels.toolDir(ch_inputs)
+        ch_bamtools_germline_out = PlaceholderChannels.toolDir(ch_inputs)
 
     }
 
@@ -451,6 +483,36 @@ workflow WGTS {
     }
 
     //
+    // SUBWORKFLOW: Call CNVs, infer purity and ploidy, and recover low quality SVs with PURPLE
+    //
+    // channel: [ meta, qsee_dir ]
+    ch_qsee_out = Channel.empty()
+    if (run_config.stages.qsee) {
+
+        QSEE_METRICS(
+            ch_inputs,
+            ch_redux_dna_tumor_tsv_out,
+            ch_redux_dna_normal_tsv_out,
+            ch_bamtools_somatic_out,
+            ch_bamtools_germline_out,
+            ch_cobalt_out,
+            ch_esvee_out,
+            ch_purple_out,
+            hmf_data.driver_gene_panel,
+            hmf_data.qsee_cohort_percentiles,
+        )
+
+        ch_versions = ch_versions.mix(QSEE_METRICS.out.versions)
+
+        ch_qsee_out = ch_purple_out.mix(QSEE_METRICS.out.qsee_dir)
+
+    } else {
+
+        ch_qsee_out = PlaceholderChannels.toolDir(ch_inputs)
+
+    }
+
+    //
     // SUBWORKFLOW: Append read data to SAGE VCF
     //
     // channel: [ meta, sage_append_dir ]
@@ -566,37 +628,6 @@ workflow WGTS {
     } else {
 
         ch_linx_somatic_visualiser_dir_out = PlaceholderChannels.toolDir(ch_inputs)
-
-    }
-
-    //
-    // SUBWORKFLOW: Run Bam Tools to generate stats required for downstream processes
-    //
-    // channel: [ meta, metrics_dir ]
-    ch_bamtools_somatic_out = Channel.empty()
-    ch_bamtools_germline_out = Channel.empty()
-    if (run_config.stages.bamtools) {
-
-        BAMTOOLS_METRICS(
-            ch_inputs,
-            ch_redux_dna_tumor_bam_out,
-            ch_redux_dna_normal_bam_out,
-            ref_data.genome_fasta,
-            ref_data.genome_version,
-            hmf_data.driver_gene_panel,
-            hmf_data.ensembl_data_resources,
-            [], // target_region_bed
-        )
-
-        ch_versions = ch_versions.mix(BAMTOOLS_METRICS.out.versions)
-
-        ch_bamtools_somatic_out = ch_bamtools_somatic_out.mix(BAMTOOLS_METRICS.out.somatic)
-        ch_bamtools_germline_out = ch_bamtools_germline_out.mix(BAMTOOLS_METRICS.out.germline)
-
-    } else {
-
-        ch_bamtools_somatic_out = PlaceholderChannels.toolDir(ch_inputs)
-        ch_bamtools_germline_out = PlaceholderChannels.toolDir(ch_inputs)
 
     }
 
