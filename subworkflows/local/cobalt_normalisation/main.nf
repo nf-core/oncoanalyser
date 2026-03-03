@@ -31,8 +31,8 @@ workflow COBALT_NORMALISATION {
     )
         .map { meta, amber_dir, cobalt_dir ->
             return [
-                Utils.selectCurrentOrExisting(amber_dir, meta, Constants.INPUT.AMBER_DIR),
-                Utils.selectCurrentOrExisting(cobalt_dir, meta, Constants.INPUT.COBALT_DIR),
+                Utils.overrideWithExistingInput(amber_dir, meta, Constants.INPUT.AMBER_DIR),
+                Utils.overrideWithExistingInput(cobalt_dir, meta, Constants.INPUT.COBALT_DIR),
             ]
         }
         .collect(flat: false)

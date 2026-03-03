@@ -41,8 +41,8 @@ workflow VIRUSBREAKEND_CALLING {
         .map { meta, tumor_bam, tumor_bai ->
             return [
                 meta,
-                Utils.selectCurrentOrExisting(tumor_bam, meta, Constants.INPUT.BAM_REDUX_DNA_TUMOR),
-                Utils.selectCurrentOrExisting(tumor_bai, meta, Constants.INPUT.BAI_DNA_TUMOR),
+                Utils.overrideWithExistingInput(tumor_bam, meta, Constants.INPUT.BAM_REDUX_DNA_TUMOR),
+                Utils.overrideWithExistingInput(tumor_bai, meta, Constants.INPUT.BAI_DNA_TUMOR),
             ]
         }
         .branch { meta, tumor_bam, tumor_bai ->
@@ -96,8 +96,8 @@ workflow VIRUSBREAKEND_CALLING {
 
             def inputs = [
                 virus_tsv,
-                Utils.selectCurrentOrExisting(purple_dir, meta, Constants.INPUT.PURPLE_DIR),
-                Utils.selectCurrentOrExisting(somatic_metrics, meta, Constants.INPUT.BAMTOOLS_DIR_TUMOR),
+                Utils.overrideWithExistingInput(purple_dir, meta, Constants.INPUT.PURPLE_DIR),
+                Utils.overrideWithExistingInput(somatic_metrics, meta, Constants.INPUT.BAMTOOLS_DIR_TUMOR),
             ]
 
             return [meta, *inputs]

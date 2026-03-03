@@ -53,11 +53,11 @@ workflow PURPLE_CALLING {
             // NOTE(SW): avoiding further complexity with loops etc
 
             def inputs = [
-                Utils.selectCurrentOrExisting(d[1], meta, Constants.INPUT.AMBER_DIR),
-                Utils.selectCurrentOrExisting(d[2], meta, Constants.INPUT.COBALT_DIR),
-                Utils.selectCurrentOrExisting(d[3], meta, Constants.INPUT.PAVE_DIR_TUMOR),
-                Utils.selectCurrentOrExisting(d[4], meta, Constants.INPUT.PAVE_DIR_NORMAL),
-                Utils.selectCurrentOrExisting(d[5], meta, Constants.INPUT.ESVEE_DIR),
+                Utils.overrideWithExistingInput(d[1], meta, Constants.INPUT.AMBER_DIR),
+                Utils.overrideWithExistingInput(d[2], meta, Constants.INPUT.COBALT_DIR),
+                Utils.overrideWithExistingInput(d[3], meta, Constants.INPUT.PAVE_DIR_TUMOR),
+                Utils.overrideWithExistingInput(d[4], meta, Constants.INPUT.PAVE_DIR_NORMAL),
+                Utils.overrideWithExistingInput(d[5], meta, Constants.INPUT.ESVEE_DIR),
             ]
 
             return [meta, *inputs]

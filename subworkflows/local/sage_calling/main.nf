@@ -59,13 +59,13 @@ workflow SAGE_CALLING {
             normal_bam, normal_bai, normal_bqr_tsv, normal_dup_freq_tsv, normal_jitter_tsv, normal_ms_tsv,
             donor_bam , donor_bai , donor_bqr_tsv , donor_dup_freq_tsv , donor_jitter_tsv , donor_ms_tsv ->
 
-            tumor_bam = Utils.selectCurrentOrExisting(tumor_bam, meta, Constants.INPUT.BAM_REDUX_DNA_TUMOR)
+            tumor_bam = Utils.overrideWithExistingInput(tumor_bam, meta, Constants.INPUT.BAM_REDUX_DNA_TUMOR)
             tumor_bai = tumor_bai ?: Utils.getInput(meta, Constants.INPUT.BAI_DNA_TUMOR)
 
-            normal_bam = Utils.selectCurrentOrExisting(normal_bam, meta, Constants.INPUT.BAM_REDUX_DNA_NORMAL)
+            normal_bam = Utils.overrideWithExistingInput(normal_bam, meta, Constants.INPUT.BAM_REDUX_DNA_NORMAL)
             normal_bai = normal_bai ?: Utils.getInput(meta, Constants.INPUT.BAI_DNA_NORMAL)
 
-            donor_bam = Utils.selectCurrentOrExisting(donor_bam, meta, Constants.INPUT.BAM_REDUX_DNA_DONOR)
+            donor_bam = Utils.overrideWithExistingInput(donor_bam, meta, Constants.INPUT.BAM_REDUX_DNA_DONOR)
             donor_bai = donor_bai ?: Utils.getInput(meta, Constants.INPUT.BAI_DNA_DONOR)
 
             def redux_tsvs = [

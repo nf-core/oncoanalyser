@@ -25,7 +25,7 @@ workflow CHORD_PREDICTION {
     // channel: [ meta, purple_dir ]
     ch_inputs_selected = ch_purple
         .map { meta, purple_dir ->
-            return [meta, Utils.selectCurrentOrExisting(purple_dir, meta, Constants.INPUT.PURPLE_DIR)]
+            return [meta, Utils.overrideWithExistingInput(purple_dir, meta, Constants.INPUT.PURPLE_DIR)]
         }
 
     // Sort inputs

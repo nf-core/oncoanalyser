@@ -48,9 +48,9 @@ workflow TEAL_CHARACTERISATION {
 
             return [
                 meta,
-                Utils.selectCurrentOrExisting(tumor_bam, meta, Constants.INPUT.BAM_REDUX_DNA_TUMOR),
+                Utils.overrideWithExistingInput(tumor_bam, meta, Constants.INPUT.BAM_REDUX_DNA_TUMOR),
                 tumor_bai ?: Utils.getInput(meta, Constants.INPUT.BAI_DNA_TUMOR),
-                Utils.selectCurrentOrExisting(normal_bam, meta, Constants.INPUT.BAM_REDUX_DNA_NORMAL),
+                Utils.overrideWithExistingInput(normal_bam, meta, Constants.INPUT.BAM_REDUX_DNA_NORMAL),
                 normal_bai ?: Utils.getInput(meta, Constants.INPUT.BAI_DNA_NORMAL),
             ]
         }
@@ -121,10 +121,10 @@ workflow TEAL_CHARACTERISATION {
                 tumor_teal_bai,
                 normal_teal_bam,
                 normal_teal_bai,
-                Utils.selectCurrentOrExisting(tumor_metrics_dir, meta, Constants.INPUT.BAMTOOLS_DIR_TUMOR),
-                Utils.selectCurrentOrExisting(normal_metrics_dir, meta, Constants.INPUT.BAMTOOLS_DIR_NORMAL),
-                Utils.selectCurrentOrExisting(cobalt_dir, meta, Constants.INPUT.COBALT_DIR),
-                Utils.selectCurrentOrExisting(purple_dir, meta, Constants.INPUT.PURPLE_DIR),
+                Utils.overrideWithExistingInput(tumor_metrics_dir, meta, Constants.INPUT.BAMTOOLS_DIR_TUMOR),
+                Utils.overrideWithExistingInput(normal_metrics_dir, meta, Constants.INPUT.BAMTOOLS_DIR_NORMAL),
+                Utils.overrideWithExistingInput(cobalt_dir, meta, Constants.INPUT.COBALT_DIR),
+                Utils.overrideWithExistingInput(purple_dir, meta, Constants.INPUT.PURPLE_DIR),
             ]
         }
         .branch { meta, tumor_teal_bam, tumor_teal_bai, normal_teal_bam, normal_teal_bai, tumor_metrics_dir, normal_metrics_dir, cobalt_dir, purple_dir ->

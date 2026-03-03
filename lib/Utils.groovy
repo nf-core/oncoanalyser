@@ -223,12 +223,12 @@ class Utils {
         return getInput(meta, key) != []
     }
 
-    public static selectCurrentOrExisting(val, meta, key) {
+    public static overrideWithExistingInput(val, meta, key) {
+        // Prefer files specified in the sample sheet over those created from the pipeline
         if (hasExistingInput(meta, key)) {
             return getInput(meta, key)
         } else {
             return val
         }
     }
-
 }

@@ -49,22 +49,22 @@ workflow QSEE_METRICS {
             inputs.meta = meta
 
             inputs.redux_tumor_tsv = [
-                Utils.selectCurrentOrExisting(tumor_bqr_tsv, meta, Constants.INPUT.REDUX_BQR_TSV_TUMOR),
-                Utils.selectCurrentOrExisting(tumor_dup_freq_tsv, meta, Constants.INPUT.REDUX_DUP_FREQ_TSV_TUMOR),
-                Utils.selectCurrentOrExisting(tumor_ms_tsv, meta, Constants.INPUT.REDUX_MS_TSV_TUMOR),
+                Utils.overrideWithExistingInput(tumor_bqr_tsv, meta, Constants.INPUT.REDUX_BQR_TSV_TUMOR),
+                Utils.overrideWithExistingInput(tumor_dup_freq_tsv, meta, Constants.INPUT.REDUX_DUP_FREQ_TSV_TUMOR),
+                Utils.overrideWithExistingInput(tumor_ms_tsv, meta, Constants.INPUT.REDUX_MS_TSV_TUMOR),
             ].findAll { it != [] }
 
             inputs.redux_normal_tsv = [
-                Utils.selectCurrentOrExisting(normal_bqr_tsv, meta, Constants.INPUT.REDUX_BQR_TSV_NORMAL),
-                Utils.selectCurrentOrExisting(normal_dup_freq_tsv, meta, Constants.INPUT.REDUX_DUP_FREQ_TSV_NORMAL),
-                Utils.selectCurrentOrExisting(normal_ms_tsv, meta, Constants.INPUT.REDUX_MS_TSV_NORMAL),
+                Utils.overrideWithExistingInput(normal_bqr_tsv, meta, Constants.INPUT.REDUX_BQR_TSV_NORMAL),
+                Utils.overrideWithExistingInput(normal_dup_freq_tsv, meta, Constants.INPUT.REDUX_DUP_FREQ_TSV_NORMAL),
+                Utils.overrideWithExistingInput(normal_ms_tsv, meta, Constants.INPUT.REDUX_MS_TSV_NORMAL),
             ].findAll { it != [] }
 
-            inputs.bamtools_tumor_dir = Utils.selectCurrentOrExisting(bamtools_tumor_dir, meta, Constants.INPUT.BAMTOOLS_DIR_TUMOR)
-            inputs.bamtools_normal_dir = Utils.selectCurrentOrExisting(bamtools_normal_dir, meta, Constants.INPUT.BAMTOOLS_DIR_NORMAL)
-            inputs.cobalt_dir = Utils.selectCurrentOrExisting(cobalt_dir, meta, Constants.INPUT.COBALT_DIR)
-            inputs.esvee_dir = Utils.selectCurrentOrExisting(esvee_dir, meta, Constants.INPUT.ESVEE_DIR)
-            inputs.purple_dir = Utils.selectCurrentOrExisting(purple_dir, meta, Constants.INPUT.PURPLE_DIR)
+            inputs.bamtools_tumor_dir = Utils.overrideWithExistingInput(bamtools_tumor_dir, meta, Constants.INPUT.BAMTOOLS_DIR_TUMOR)
+            inputs.bamtools_normal_dir = Utils.overrideWithExistingInput(bamtools_normal_dir, meta, Constants.INPUT.BAMTOOLS_DIR_NORMAL)
+            inputs.cobalt_dir = Utils.overrideWithExistingInput(cobalt_dir, meta, Constants.INPUT.COBALT_DIR)
+            inputs.esvee_dir = Utils.overrideWithExistingInput(esvee_dir, meta, Constants.INPUT.ESVEE_DIR)
+            inputs.purple_dir = Utils.overrideWithExistingInput(purple_dir, meta, Constants.INPUT.PURPLE_DIR)
 
             return inputs
         }

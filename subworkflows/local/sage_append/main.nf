@@ -51,10 +51,10 @@ workflow SAGE_APPEND {
             tumor_rna_bam, tumor_rna_bai,
             purple_dir ->
 
-            tumor_dna_bam = Utils.selectCurrentOrExisting(tumor_dna_bam, meta, Constants.INPUT.BAM_REDUX_DNA_TUMOR)
+            tumor_dna_bam = Utils.overrideWithExistingInput(tumor_dna_bam, meta, Constants.INPUT.BAM_REDUX_DNA_TUMOR)
             tumor_dna_bai = tumor_dna_bai ?: Utils.getInput(meta, Constants.INPUT.BAI_DNA_TUMOR)
 
-            tumor_rna_bam = Utils.selectCurrentOrExisting(tumor_rna_bam, meta, Constants.INPUT.BAM_RNA_TUMOR)
+            tumor_rna_bam = Utils.overrideWithExistingInput(tumor_rna_bam, meta, Constants.INPUT.BAM_RNA_TUMOR)
             tumor_rna_bai = tumor_rna_bai ?: Utils.getInput(meta, Constants.INPUT.BAI_RNA_TUMOR)
 
             def tumor_dna_redux_tsv = [
@@ -64,7 +64,7 @@ workflow SAGE_APPEND {
             ]
             tumor_dna_redux_tsv = tumor_dna_redux_tsv.findAll { it != [] }
 
-            purple_dir = Utils.selectCurrentOrExisting(purple_dir, meta, Constants.INPUT.PURPLE_DIR)
+            purple_dir = Utils.overrideWithExistingInput(purple_dir, meta, Constants.INPUT.PURPLE_DIR)
 
             return [meta, tumor_dna_bam, tumor_dna_bai, tumor_dna_redux_tsv, tumor_rna_bam, tumor_rna_bai, purple_dir]
         }

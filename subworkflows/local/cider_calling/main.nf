@@ -32,7 +32,7 @@ workflow CIDER_CALLING {
         .map { meta, bam, bai ->
             return [
                 meta,
-                Utils.selectCurrentOrExisting(bam, meta, Constants.INPUT.BAM_REDUX_DNA_TUMOR),
+                Utils.overrideWithExistingInput(bam, meta, Constants.INPUT.BAM_REDUX_DNA_TUMOR),
                 bai ?: Utils.getInput(meta, Constants.INPUT.BAI_DNA_TUMOR),
             ]
         }
@@ -48,7 +48,7 @@ workflow CIDER_CALLING {
         .map { meta, bam, bai ->
             return [
                 meta,
-                Utils.selectCurrentOrExisting(bam, meta, Constants.INPUT.BAM_RNA_TUMOR),
+                Utils.overrideWithExistingInput(bam, meta, Constants.INPUT.BAM_RNA_TUMOR),
                 bai ?: Utils.getInput(meta, Constants.INPUT.BAI_RNA_TUMOR),
             ]
         }
