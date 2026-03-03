@@ -299,21 +299,26 @@ class SampleSheet {
         def bam_path = meta_sample[Constants.FileType.BAM_REDUX]
         def bam_dir = bam_path.getParent().toUriString()
 
-        def jitter_tsv = meta_sample[Constants.FileType.REDUX_JITTER_TSV]
-        def ms_tsv = meta_sample[Constants.FileType.REDUX_MS_TSV]
-        def bqr_tsv = meta_sample[Constants.FileType.REDUX_BQR_TSV]
-
         // If TSV paths not provided, default to TSV paths in the same dir as the BAM
         def sample_id = meta_sample.getOrDefault('longitudinal_sample_id', meta_sample['sample_id'])
 
+        def bqr_tsv = meta_sample[Constants.FileType.REDUX_BQR_TSV]
+        def dup_freq_tsv = meta_sample[Constants.FileType.REDUX_DUP_FREQ_TSV]
+        def jitter_tsv = meta_sample[Constants.FileType.REDUX_JITTER_TSV]
+        def ms_tsv = meta_sample[Constants.FileType.REDUX_MS_TSV]
+
+        bqr_tsv = bqr_tsv ?: nextflow.Nextflow.file("${bam_dir}/${sample_id}.redux.bqr.tsv")
+        dup_freq_tsv = dup_freq_tsv ?: nextflow.Nextflow.file("${bam_dir}/${sample_id}.redux.duplicate_freq.tsv")
         jitter_tsv = jitter_tsv ?: nextflow.Nextflow.file("${bam_dir}/${sample_id}.redux.jitter_params.tsv")
         ms_tsv = ms_tsv ?: nextflow.Nextflow.file("${bam_dir}/${sample_id}.redux.ms_table.tsv.gz")
-        bqr_tsv = bqr_tsv ?: nextflow.Nextflow.file("${bam_dir}/${sample_id}.redux.bqr.tsv")
 
         // Check for missing TSV files
         def missing_tsvs = [:]
         if (!bqr_tsv.exists()) {
             missing_tsvs[Constants.FileType.REDUX_BQR_TSV] = bqr_tsv
+        }
+        if (!dup_freq_tsv.exists()) {
+            missing_tsvs[Constants.FileType.REDUX_DUP_FREQ_TSV] = dup_freq_tsv
         }
         if (!jitter_tsv.exists()) {
             missing_tsvs[Constants.FileType.REDUX_JITTER_TSV] = jitter_tsv
@@ -337,6 +342,7 @@ class SampleSheet {
 
         // Set parsed REDUX TSV paths in metadata object
         meta_sample[Constants.FileType.REDUX_BQR_TSV] = bqr_tsv
+        meta_sample[Constants.FileType.REDUX_DUP_FREQ_TSV] = bqr_tsv
         meta_sample[Constants.FileType.REDUX_JITTER_TSV] = jitter_tsv
         meta_sample[Constants.FileType.REDUX_MS_TSV] = ms_tsv
     }

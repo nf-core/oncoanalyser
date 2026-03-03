@@ -118,6 +118,7 @@ class Constants {
         BAM_REDUX,
         CRAM_REDUX,
         REDUX_BQR_TSV,
+        REDUX_DUP_FREQ_TSV,
         REDUX_JITTER_TSV,
         REDUX_MS_TSV,
         REDUX_BQR_PLOT,
@@ -267,6 +268,24 @@ class Constants {
         REDUX_BQR_PLOT_NORMAL: [
             FileType.REDUX_BQR_PLOT,
             SampleType.NORMAL,
+            SequenceType.DNA,
+        ],
+
+        REDUX_DUP_FREQ_TSV_TUMOR: [
+            FileType.REDUX_DUP_FREQ_TSV,
+            SampleType.TUMOR,
+            SequenceType.DNA,
+        ],
+
+        REDUX_DUP_FREQ_TSV_NORMAL: [
+            FileType.REDUX_DUP_FREQ_TSV,
+            SampleType.NORMAL,
+            SequenceType.DNA,
+        ],
+
+        REDUX_DUP_FREQ_TSV_DONOR: [
+            FileType.REDUX_DUP_FREQ_TSV,
+            SampleType.DONOR,
             SequenceType.DNA,
         ],
 
