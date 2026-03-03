@@ -2,8 +2,6 @@
 // SAGE is a precise and highly sensitive somatic SNV, MNV and small INDEL caller
 //
 
-import java.nio.channels.Channel
-
 include { SAGE_VISUALISER } from '../../../modules/local/sage/visualiser/main'
 
 workflow SAGE_PLOTTING {

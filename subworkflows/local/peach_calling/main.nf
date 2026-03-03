@@ -2,9 +2,6 @@
 // PEACH infers germline haplotypes and reports relevant pharmacogenomics
 //
 
-import Constants
-import Inputs
-
 include { PEACH } from '../../../modules/local/peach/main'
 
 workflow PEACH_CALLING {

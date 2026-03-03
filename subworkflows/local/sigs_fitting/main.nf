@@ -2,9 +2,6 @@
 // Sigs fits trinucleotide signature definitions with sample SNV counts
 //
 
-import Constants
-import Inputs
-
 include { SIGS } from '../../../modules/local/sigs/main'
 
 workflow SIGS_FITTING {

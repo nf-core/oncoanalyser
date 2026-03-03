@@ -2,9 +2,6 @@
 // LINX plotting visualises clusters structural variants
 //
 
-import Constants
-import Inputs
-
 include { LINXREPORT      } from '../../../modules/local/linxreport/main'
 include { LINX_VISUALISER } from '../../../modules/local/linx/visualiser/main'
 

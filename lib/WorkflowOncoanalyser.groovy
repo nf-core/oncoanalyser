@@ -7,9 +7,6 @@ import static groovy.io.FileType.FILES
 import nextflow.Channel
 import nextflow.Nextflow
 
-import Constants
-import Processes
-
 class WorkflowOncoanalyser {
 
     public static groupByMeta(Map named_args, ... channels) {

@@ -2,9 +2,6 @@
 // TEAL performs characterisation of telomeric features and rearrangements
 //
 
-import Constants
-import Inputs
-
 include { TEAL_PREP     } from '../../../modules/local/teal/prep/main'
 include { TEAL_PIPELINE } from '../../../modules/local/teal/pipeline/main'
 

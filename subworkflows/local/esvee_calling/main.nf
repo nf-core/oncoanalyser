@@ -2,11 +2,6 @@
 // ESVEE detects structural variants, and reports breakends and breakpoints.
 //
 
-import Constants
-import Inputs
-
-import java.nio.channels.Channel
-
 include { ESVEE } from '../../../modules/local/esvee/main'
 
 workflow ESVEE_CALLING {

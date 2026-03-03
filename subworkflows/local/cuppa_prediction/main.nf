@@ -2,9 +2,6 @@
 // CUPPA predicts tissue of origin from molecular profiles
 //
 
-import Constants
-import Inputs
-
 include { CUPPA } from '../../../modules/local/cuppa/main'
 
 workflow CUPPA_PREDICTION {

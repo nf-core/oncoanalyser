@@ -2,9 +2,6 @@
 // PURPLE is a CNV caller that infers purity/ploidy and recovers low-confidence SVs
 //
 
-import Constants
-import Inputs
-
 include { PURPLE } from '../../../modules/local/purple/main'
 
 workflow PURPLE_CALLING {

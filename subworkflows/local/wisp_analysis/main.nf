@@ -2,9 +2,6 @@
 // WISP estimates tumor purity in longitudinal samples using WGS data of the primary
 //
 
-import Constants
-import Inputs
-
 include { WISP } from '../../../modules/local/wisp/main'
 
 workflow WISP_ANALYSIS {

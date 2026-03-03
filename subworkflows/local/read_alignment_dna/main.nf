@@ -2,9 +2,6 @@
 // Align DNA reads
 //
 
-import Constants
-import Inputs
-
 include { BWAMEM2_ALIGN  } from '../../../modules/local/bwa-mem2/mem/main'
 include { FASTP          } from '../../../modules/local/fastp/main'
 

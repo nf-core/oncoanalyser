@@ -2,9 +2,6 @@
 // CHORD predicts HR status for tumor samples
 //
 
-import Constants
-import Inputs
-
 include { CHORD } from '../../../modules/local/chord/main'
 
 workflow CHORD_PREDICTION {

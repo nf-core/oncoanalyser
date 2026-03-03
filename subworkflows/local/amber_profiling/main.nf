@@ -2,9 +2,6 @@
 // AMBER determines b-allele frequencies at predetermined positions
 //
 
-import Constants
-import Inputs
-
 include { AMBER } from '../../../modules/local/amber/main'
 
 workflow AMBER_PROFILING {

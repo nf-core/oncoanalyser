@@ -2,9 +2,6 @@
 // Bam Tools calculates summary statistics for BAMs
 //
 
-import Constants
-import Inputs
-
 include { BAMTOOLS } from '../../../modules/local/bamtools/main'
 
 workflow BAMTOOLS_METRICS {

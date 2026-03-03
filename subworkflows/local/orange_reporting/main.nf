@@ -2,9 +2,6 @@
 // ORANGE collates outputs of hmftools into a static PDF report
 //
 
-import Constants
-import Inputs
-
 include { ORANGE } from '../../../modules/local/orange/main'
 
 workflow ORANGE_REPORTING {

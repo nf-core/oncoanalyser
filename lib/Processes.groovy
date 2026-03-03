@@ -1,9 +1,5 @@
 import nextflow.Nextflow
 
-import Constants
-import Inputs
-
-
 class Processes {
 
     public static getValidatedRunStages(include, exclude, manual_select, log) {

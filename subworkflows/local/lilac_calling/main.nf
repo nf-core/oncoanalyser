@@ -2,9 +2,6 @@
 // LILAC is a WGS tool for HLA typing and somatic CNV and SNV calling
 //
 
-import Constants
-import Inputs
-
 include { LILAC } from '../../../modules/local/lilac/main'
 
 workflow LILAC_CALLING {

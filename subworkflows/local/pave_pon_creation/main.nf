@@ -2,9 +2,6 @@
 // PAVE PON creation prepares the panel-specific small variant artefact resource
 //
 
-import Constants
-import Inputs
-
 include { PAVE_PON_PANEL_CREATION } from '../../../modules/local/pave/pon_creation/main'
 
 

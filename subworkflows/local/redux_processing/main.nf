@@ -2,9 +2,6 @@
 // Apply post-alignment processing
 //
 
-import Constants
-import Inputs
-
 include { REDUX } from '../../../modules/local/redux/main'
 
 workflow REDUX_PROCESSING {

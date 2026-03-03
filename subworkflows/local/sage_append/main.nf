@@ -2,9 +2,6 @@
 // SAGE append adds additional sample data to an existing SAGE VCF
 //
 
-import Constants
-import Inputs
-
 include { SAGE_APPEND as SAGE_APPEND_SOMATIC  } from '../../../modules/local/sage/append/main'
 include { SAGE_APPEND as SAGE_APPEND_GERMLINE } from '../../../modules/local/sage/append/main'
 

@@ -2,9 +2,6 @@
 // COBALT calculates read ratios between tumor and normal samples
 //
 
-import Constants
-import Inputs
-
 include { COBALT } from '../../../modules/local/cobalt/run/main'
 
 workflow COBALT_PROFILING {

@@ -2,9 +2,6 @@
 // COBALT normalisation prepares the panel-specific target region normalisation resource
 //
 
-import Constants
-import Inputs
-
 include { COBALT_PANEL_NORMALISATION } from '../../../modules/local/cobalt/panel_normalisation/main'
 
 workflow COBALT_NORMALISATION {
