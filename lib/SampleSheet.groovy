@@ -299,52 +299,39 @@ class SampleSheet {
         def bam_path = meta_sample[Constants.FileType.BAM_REDUX]
         def bam_dir = bam_path.getParent().toUriString()
 
-        // If TSV paths not provided, default to TSV paths in the same dir as the BAM
         def sample_id = meta_sample.getOrDefault('longitudinal_sample_id', meta_sample['sample_id'])
+        def default_tsv_paths = [
+            (Constants.FileType.REDUX_BQR_TSV)     : "${bam_dir}/${sample_id}.redux.bqr.tsv",
+            (Constants.FileType.REDUX_DUP_FREQ_TSV): "${bam_dir}/${sample_id}.redux.duplicate_freq.tsv",
+            (Constants.FileType.REDUX_JITTER_TSV)  : "${bam_dir}/${sample_id}.redux.jitter_params.tsv",
+            (Constants.FileType.REDUX_MS_TSV)      : "${bam_dir}/${sample_id}.redux.ms_table.tsv.gz",
+        ]
 
-        def bqr_tsv = meta_sample[Constants.FileType.REDUX_BQR_TSV]
-        def dup_freq_tsv = meta_sample[Constants.FileType.REDUX_DUP_FREQ_TSV]
-        def jitter_tsv = meta_sample[Constants.FileType.REDUX_JITTER_TSV]
-        def ms_tsv = meta_sample[Constants.FileType.REDUX_MS_TSV]
+        default_tsv_paths.keySet().each { file_type ->
 
-        bqr_tsv = bqr_tsv ?: nextflow.Nextflow.file("${bam_dir}/${sample_id}.redux.bqr.tsv")
-        dup_freq_tsv = dup_freq_tsv ?: nextflow.Nextflow.file("${bam_dir}/${sample_id}.redux.duplicate_freq.tsv")
-        jitter_tsv = jitter_tsv ?: nextflow.Nextflow.file("${bam_dir}/${sample_id}.redux.jitter_params.tsv")
-        ms_tsv = ms_tsv ?: nextflow.Nextflow.file("${bam_dir}/${sample_id}.redux.ms_table.tsv.gz")
+            def default_tsv_path = default_tsv_paths[file_type]
+            def provided_tsv_path = meta_sample[file_type]
 
-        // Check for missing TSV files
-        def missing_tsvs = [:]
-        if (!bqr_tsv.exists()) {
-            missing_tsvs[Constants.FileType.REDUX_BQR_TSV] = bqr_tsv
+            def tsv_path = provided_tsv_path ? provided_tsv_path : default_tsv_path
+            tsv_path = nextflow.Nextflow.file(tsv_path)
+
+            if (!tsv_path.exists()) {
+
+                def message = "Missing filetype(${file_type}) path(${tsv_path}).\n" +
+                        "Make sure the REDUX BAM and TSV are in the same dir, or provide the TSV path explicitly in the sample sheet"
+
+                if(file_type === Constants.FileType.REDUX_DUP_FREQ_TSV) {
+                    // Not required for core pipeline functionality (e.g. variant calling)
+                    log.warn message
+                    return
+                } else {
+                    log.error message
+                    Nextflow.exit(1)
+                }
+            }
+
+            meta_sample[file_type] = tsv_path
         }
-        if (!dup_freq_tsv.exists()) {
-            missing_tsvs[Constants.FileType.REDUX_DUP_FREQ_TSV] = dup_freq_tsv
-        }
-        if (!jitter_tsv.exists()) {
-            missing_tsvs[Constants.FileType.REDUX_JITTER_TSV] = jitter_tsv
-        }
-        if (!ms_tsv.exists()) {
-            missing_tsvs[Constants.FileType.REDUX_MS_TSV] = ms_tsv
-        }
-
-        if (missing_tsvs.size() > 0) {
-
-            def error_message = []
-
-            missing_tsvs.each { error_message.add("Missing ${it.key}: ${it.value}") }
-            error_message.add("")
-            error_message.add("Make sure the REDUX BAM and TSVs are in the same dir, or explicitly provide")
-            error_message.add("the TSV paths in the sample sheet using filetype values: ${missing_tsvs.keySet().join(", ")}")
-
-            log.error error_message.join("\n")
-            Nextflow.exit(1)
-        }
-
-        // Set parsed REDUX TSV paths in metadata object
-        meta_sample[Constants.FileType.REDUX_BQR_TSV] = bqr_tsv
-        meta_sample[Constants.FileType.REDUX_DUP_FREQ_TSV] = bqr_tsv
-        meta_sample[Constants.FileType.REDUX_JITTER_TSV] = jitter_tsv
-        meta_sample[Constants.FileType.REDUX_MS_TSV] = ms_tsv
     }
 
     private static void disallowDuplicateSampleIds(meta, log) {
