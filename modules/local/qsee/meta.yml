@@ -1,0 +1,66 @@
+name: qsee
+description: Summarise key outputs of the HMF toolkit
+keywords:
+  - QC
+tools:
+  - orange:
+      description: Calculates and visualises QC metrics
+      homepage: https://github.com/hartwigmedical/hmftools/tree/master/qsee
+      documentation: https://github.com/hartwigmedical/hmftools/tree/master/qsee
+      licence: ["GPL v3"]
+input:
+  - meta:
+      type: map
+      description: |
+        Groovy Map containing sample information
+        e.g. [tumor_id: 'tumor_id', normal_id: 'normal_id']
+  - redux_somatic_dir:
+      type: directory
+      description: REDUX somatic output directory
+  - redux_germline_dir:
+      type: directory
+      description: REDUX germline output directory
+  - bamtools_somatic_dir:
+      type: directory
+      description: BamTools somatic output directory
+  - bamtools_germline_dir:
+      type: directory
+      description: BamTools germline output directory
+  - cobalt_dir:
+      type: directory
+      description: COBALT output directory
+  - esvee_dir:
+    type: directory
+    description: ESVEE output directory
+  - purple_dir:
+      type: directory
+      description: PURPLE output directory
+  - driver_gene_panel:
+      type: file
+      description: Driver gene panel file
+      pattern: "*.{tsv}"
+  - cohort_percentiles_file:
+      type: file
+      description: HMF cohort percentiles file
+      pattern: "*.{tsv}"
+  - pipeline_version:
+      type: string
+      description: Pipeline version to display in report
+output:
+  - meta:
+      type: map
+      description: |
+        Groovy Map containing sample information
+        e.g. [tumor_id: 'tumor_id', normal_id: 'normal_id']
+  - qsee_dir:
+      type: directory
+      description: Qsee output directory
+  - versions:
+      type: file
+      description: File containing software versions
+      pattern: "versions.yml"
+  - command_files:
+      type: list
+      description: List of command files
+authors:
+  - "@luan-n-nguyen"
