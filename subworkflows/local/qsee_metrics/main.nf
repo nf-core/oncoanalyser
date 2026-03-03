@@ -49,15 +49,15 @@ workflow QSEE_METRICS {
             inputs.meta = meta
 
             inputs.redux_tumor_tsv = [
-                Utils.overrideWithExistingInput(tumor_bqr_tsv, meta, Constants.INPUT.REDUX_BQR_TSV_TUMOR),
-                Utils.overrideWithExistingInput(tumor_dup_freq_tsv, meta, Constants.INPUT.REDUX_DUP_FREQ_TSV_TUMOR),
-                Utils.overrideWithExistingInput(tumor_ms_tsv, meta, Constants.INPUT.REDUX_MS_TSV_TUMOR),
+                Utils.fallbackToExistingInput(tumor_bqr_tsv, meta, Constants.INPUT.REDUX_BQR_TSV_TUMOR),
+                Utils.fallbackToExistingInput(tumor_dup_freq_tsv, meta, Constants.INPUT.REDUX_DUP_FREQ_TSV_TUMOR),
+                Utils.fallbackToExistingInput(tumor_ms_tsv, meta, Constants.INPUT.REDUX_MS_TSV_TUMOR),
             ].findAll { it != [] }
 
             inputs.redux_normal_tsv = [
-                Utils.overrideWithExistingInput(normal_bqr_tsv, meta, Constants.INPUT.REDUX_BQR_TSV_NORMAL),
-                Utils.overrideWithExistingInput(normal_dup_freq_tsv, meta, Constants.INPUT.REDUX_DUP_FREQ_TSV_NORMAL),
-                Utils.overrideWithExistingInput(normal_ms_tsv, meta, Constants.INPUT.REDUX_MS_TSV_NORMAL),
+                Utils.fallbackToExistingInput(normal_bqr_tsv, meta, Constants.INPUT.REDUX_BQR_TSV_NORMAL),
+                Utils.fallbackToExistingInput(normal_dup_freq_tsv, meta, Constants.INPUT.REDUX_DUP_FREQ_TSV_NORMAL),
+                Utils.fallbackToExistingInput(normal_ms_tsv, meta, Constants.INPUT.REDUX_MS_TSV_NORMAL),
             ].findAll { it != [] }
 
             inputs.bamtools_tumor_dir = Utils.overrideWithExistingInput(bamtools_tumor_dir, meta, Constants.INPUT.BAMTOOLS_DIR_TUMOR)
