@@ -50,26 +50,26 @@ workflow SAGE_PLOTTING {
             purple_dir ->
 
             tumor_bam = Utils.overrideWithExistingInput(tumor_bam, meta, Constants.INPUT.BAM_REDUX_DNA_TUMOR)
-            tumor_bai = tumor_bai ?: Utils.getInput(meta, Constants.INPUT.BAI_DNA_TUMOR)
+            tumor_bai = Utils.fallbackToExistingInput(tumor_bai, meta, Constants.INPUT.BAI_DNA_TUMOR)
 
             normal_bam = Utils.overrideWithExistingInput(normal_bam, meta, Constants.INPUT.BAM_REDUX_DNA_NORMAL)
-            normal_bai = normal_bai ?: Utils.getInput(meta, Constants.INPUT.BAI_DNA_NORMAL)
+            normal_bai = Utils.fallbackToExistingInput(normal_bai, meta, Constants.INPUT.BAI_DNA_NORMAL)
 
             donor_bam = Utils.overrideWithExistingInput(donor_bam, meta, Constants.INPUT.BAM_REDUX_DNA_DONOR)
-            donor_bai = donor_bai ?: Utils.getInput(meta, Constants.INPUT.BAI_DNA_DONOR)
+            donor_bai = Utils.fallbackToExistingInput(donor_bai, meta, Constants.INPUT.BAI_DNA_DONOR)
 
             def redux_tsvs = [
-                tumor_bqr_tsv ?: Utils.getInput(meta, Constants.INPUT.REDUX_BQR_TSV_TUMOR),
-                tumor_jitter_tsv ?: Utils.getInput(meta, Constants.INPUT.REDUX_JITTER_TSV_TUMOR),
-                tumor_ms_tsv ?: Utils.getInput(meta, Constants.INPUT.REDUX_MS_TSV_TUMOR),
+                Utils.fallbackToExistingInput(tumor_bqr_tsv, meta, Constants.INPUT.REDUX_BQR_TSV_TUMOR),
+                Utils.fallbackToExistingInput(tumor_jitter_tsv, meta, Constants.INPUT.REDUX_JITTER_TSV_TUMOR),
+                Utils.fallbackToExistingInput(tumor_ms_tsv, meta, Constants.INPUT.REDUX_MS_TSV_TUMOR),
 
-                normal_bqr_tsv ?: Utils.getInput(meta, Constants.INPUT.REDUX_BQR_TSV_NORMAL),
-                normal_jitter_tsv ?: Utils.getInput(meta, Constants.INPUT.REDUX_JITTER_TSV_NORMAL),
-                normal_ms_tsv ?: Utils.getInput(meta, Constants.INPUT.REDUX_MS_TSV_NORMAL),
+                Utils.fallbackToExistingInput(normal_bqr_tsv, meta, Constants.INPUT.REDUX_BQR_TSV_NORMAL),
+                Utils.fallbackToExistingInput(normal_jitter_tsv, meta, Constants.INPUT.REDUX_JITTER_TSV_NORMAL),
+                Utils.fallbackToExistingInput(normal_ms_tsv, meta, Constants.INPUT.REDUX_MS_TSV_NORMAL),
 
-                donor_bqr_tsv ?: Utils.getInput(meta, Constants.INPUT.REDUX_BQR_TSV_DONOR),
-                donor_jitter_tsv ?: Utils.getInput(meta, Constants.INPUT.REDUX_JITTER_TSV_DONOR),
-                donor_ms_tsv ?: Utils.getInput(meta, Constants.INPUT.REDUX_MS_TSV_DONOR),
+                Utils.fallbackToExistingInput(donor_bqr_tsv, meta, Constants.INPUT.REDUX_BQR_TSV_DONOR),
+                Utils.fallbackToExistingInput(donor_jitter_tsv, meta, Constants.INPUT.REDUX_JITTER_TSV_DONOR),
+                Utils.fallbackToExistingInput(donor_ms_tsv, meta, Constants.INPUT.REDUX_MS_TSV_DONOR),
             ]
 
             redux_tsvs = redux_tsvs.findAll { it != [] }

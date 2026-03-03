@@ -34,7 +34,7 @@ workflow BAMTOOLS_METRICS {
             return [
                 meta,
                 Utils.overrideWithExistingInput(bam, meta, Constants.INPUT.BAM_REDUX_DNA_TUMOR),
-                bai ?: Utils.getInput(meta, Constants.INPUT.BAI_DNA_TUMOR),
+                Utils.fallbackToExistingInput(bai, meta, Constants.INPUT.BAI_DNA_TUMOR),
             ]
         }
         .branch { meta, bam, bai ->
@@ -51,7 +51,7 @@ workflow BAMTOOLS_METRICS {
             return [
                 meta,
                 Utils.overrideWithExistingInput(bam, meta, Constants.INPUT.BAM_REDUX_DNA_NORMAL),
-                bai ?: Utils.getInput(meta, Constants.INPUT.BAI_DNA_NORMAL),
+                Utils.fallbackToExistingInput(bai, meta, Constants.INPUT.BAI_DNA_NORMAL),
             ]
         }
         .branch { meta, bam, bai ->

@@ -52,15 +52,15 @@ workflow SAGE_APPEND {
             purple_dir ->
 
             tumor_dna_bam = Utils.overrideWithExistingInput(tumor_dna_bam, meta, Constants.INPUT.BAM_REDUX_DNA_TUMOR)
-            tumor_dna_bai = tumor_dna_bai ?: Utils.getInput(meta, Constants.INPUT.BAI_DNA_TUMOR)
+            tumor_dna_bai = Utils.fallbackToExistingInput(tumor_dna_bai, meta, Constants.INPUT.BAI_DNA_TUMOR)
 
             tumor_rna_bam = Utils.overrideWithExistingInput(tumor_rna_bam, meta, Constants.INPUT.BAM_RNA_TUMOR)
-            tumor_rna_bai = tumor_rna_bai ?: Utils.getInput(meta, Constants.INPUT.BAI_RNA_TUMOR)
+            tumor_rna_bai = Utils.fallbackToExistingInput(tumor_rna_bai, meta, Constants.INPUT.BAI_RNA_TUMOR)
 
             def tumor_dna_redux_tsv = [
-                tumor_dna_bqr_tsv ?: Utils.getInput(meta, Constants.INPUT.REDUX_BQR_TSV_TUMOR),
-                tumor_dna_jitter_tsv ?: Utils.getInput(meta, Constants.INPUT.REDUX_JITTER_TSV_TUMOR),
-                tumor_dna_ms_tsv ?: Utils.getInput(meta, Constants.INPUT.REDUX_MS_TSV_TUMOR),
+                Utils.fallbackToExistingInput(tumor_dna_bqr_tsv, meta, Constants.INPUT.REDUX_BQR_TSV_TUMOR),
+                Utils.fallbackToExistingInput(tumor_dna_jitter_tsv, meta, Constants.INPUT.REDUX_JITTER_TSV_TUMOR),
+                Utils.fallbackToExistingInput(tumor_dna_ms_tsv, meta, Constants.INPUT.REDUX_MS_TSV_TUMOR),
             ]
             tumor_dna_redux_tsv = tumor_dna_redux_tsv.findAll { it != [] }
 

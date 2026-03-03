@@ -38,13 +38,13 @@ workflow AMBER_PROFILING {
             return [
                 meta,
                 Utils.overrideWithExistingInput(tumor_bam, meta, Constants.INPUT.BAM_REDUX_DNA_TUMOR),
-                tumor_bai ?: Utils.getInput(meta, Constants.INPUT.BAI_DNA_TUMOR),
+                Utils.fallbackToExistingInput(tumor_bai, meta, Constants.INPUT.BAI_DNA_TUMOR),
 
                 Utils.overrideWithExistingInput(normal_bam, meta, Constants.INPUT.BAM_REDUX_DNA_NORMAL),
-                normal_bai ?: Utils.getInput(meta, Constants.INPUT.BAI_DNA_NORMAL),
+                Utils.fallbackToExistingInput(normal_bai, meta, Constants.INPUT.BAI_DNA_NORMAL),
 
                 Utils.overrideWithExistingInput(donor_bam, meta, Constants.INPUT.BAM_REDUX_DNA_DONOR),
-                donor_bai ?: Utils.getInput(meta, Constants.INPUT.BAI_DNA_DONOR),
+                Utils.fallbackToExistingInput(donor_bai, meta, Constants.INPUT.BAI_DNA_DONOR),
             ]
         }
         .branch { meta, tumor_bam, tumor_bai, normal_bam, normal_bai, donor_bam, donor_bai ->

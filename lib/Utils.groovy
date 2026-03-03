@@ -231,4 +231,9 @@ class Utils {
             return val
         }
     }
+
+    public static fallbackToExistingInput(val, meta, key) {
+        // Prefer files created from the pipeline over those specified in the sample sheet
+        return val ?: getInput(meta, key)
+    }
 }
