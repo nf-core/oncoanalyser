@@ -13,9 +13,9 @@ workflow SAGE_PLOTTING {
     ch_tumor_bam                 // channel: [mandatory] [ meta, bam, bai ]
     ch_normal_bam                // channel: [mandatory] [ meta, bam, bai ]
     ch_donor_bam                 // channel: [mandatory] [ meta, bam, bai ]
-    ch_tumor_tsv                 // channel: [mandatory] [ meta, bqr_tsv, jitter_tsv, ms_tsv ]
-    ch_normal_tsv                // channel: [mandatory] [ meta, bqr_tsv, jitter_tsv, ms_tsv ]
-    ch_donor_tsv                 // channel: [mandatory] [ meta, bqr_tsv, jitter_tsv, ms_tsv ]
+    ch_tumor_tsv                 // channel: [mandatory] [ meta, redux_tsv, ... ]
+    ch_normal_tsv                // channel: [mandatory] [ meta, redux_tsv, ... ]
+    ch_donor_tsv                 // channel: [mandatory] [ meta, redux_tsv, ... ]
     ch_purple                    // channel: [mandatory] [ meta, purple_dir ]
 
     // Reference data

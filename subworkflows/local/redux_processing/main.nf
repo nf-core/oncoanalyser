@@ -170,9 +170,9 @@ workflow REDUX_PROCESSING {
     dna_normal_bam = ch_redux_normal_out.bam // channel: [ meta, bam, bai ]
     dna_donor_bam  = ch_redux_donor_out.bam  // channel: [ meta, bam, bai ]
 
-    dna_tumor_tsv  = ch_redux_tumor_out.tsv  // channel: [ meta, bqr_tsv, jitter_tsv, ms_tsv ]
-    dna_normal_tsv = ch_redux_normal_out.tsv // channel: [ meta, bqr_tsv, jitter_tsv, ms_tsv ]
-    dna_donor_tsv  = ch_redux_donor_out.tsv  // channel: [ meta, bqr_tsv, jitter_tsv, ms_tsv ]
+    dna_tumor_tsv  = ch_redux_tumor_out.tsv  // channel: [ meta, redux_tsv, ... ]
+    dna_normal_tsv = ch_redux_normal_out.tsv // channel: [ meta, redux_tsv, ... ]
+    dna_donor_tsv  = ch_redux_donor_out.tsv  // channel: [ meta, redux_tsv, ... ]
 
     dna_tumor_plot  = ch_redux_tumor_out.plot  // channel: [ meta, bqr_plot ]
     dna_normal_plot = ch_redux_normal_out.plot // channel: [ meta, bqr_plot ]
