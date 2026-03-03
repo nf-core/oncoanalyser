@@ -13,10 +13,9 @@ workflow PURPLE_CALLING {
     ch_inputs                    // channel: [mandatory] [ meta ]
     ch_amber                     // channel: [mandatory] [ meta, amber_dir ]
     ch_cobalt                    // channel: [mandatory] [ meta, cobalt_dir ]
-    ch_smlv_somatic              // channel: [mandatory] [ meta, pave_vcf ]
-    ch_smlv_germline             // channel: [mandatory] [ meta, pave_vcf ]
-    ch_sv_somatic                // channel: [mandatory] [ meta, esvee_vcf, esvee_tbi ]
-    ch_sv_germline               // channel: [mandatory] [ meta, esvee_vcf, esvee_tbi ]
+    ch_pave_somatic              // channel: [mandatory] [ meta, pave_dir ]
+    ch_pave_germline             // channel: [mandatory] [ meta, pave_dir ]
+    ch_esvee                     // channel: [mandatory] [ meta, esvee_dir ]
 
     // Reference data
     genome_fasta                 // channel: [mandatory] /path/to/genome_fasta
@@ -39,14 +38,13 @@ workflow PURPLE_CALLING {
     ch_versions = Channel.empty()
 
     // Select input sources
-    // channel: [ meta, amber_dir, cobalt_dir, sv_somatic_vcf, sv_somatic_tbi, sv_germline_vcf, sv_germline_tbi, smlv_somatic_vcf, smlv_germline_vcf ]
+    // channel: [ meta, amber_dir, cobalt_dir, pave_somatic_dir, pave_germline_dir, esvee_dir ]
     ch_inputs_selected = WorkflowOncoanalyser.groupByMeta(
         ch_amber,
         ch_cobalt,
-        ch_sv_somatic,
-        ch_sv_germline,
-        ch_smlv_somatic,
-        ch_smlv_germline,
+        ch_pave_somatic,
+        ch_pave_germline,
+        ch_esvee,
     )
         .map { d ->
 
@@ -57,19 +55,16 @@ workflow PURPLE_CALLING {
             def inputs = [
                 Utils.selectCurrentOrExisting(d[1], meta, Constants.INPUT.AMBER_DIR),
                 Utils.selectCurrentOrExisting(d[2], meta, Constants.INPUT.COBALT_DIR),
-                Utils.selectCurrentOrExisting(d[3], meta, Constants.INPUT.ESVEE_VCF_TUMOR),
-                Utils.selectCurrentOrExisting(d[4], meta, Constants.INPUT.ESVEE_VCF_TUMOR_TBI),
-                Utils.selectCurrentOrExisting(d[5], meta, Constants.INPUT.ESVEE_VCF_NORMAL),
-                Utils.selectCurrentOrExisting(d[6], meta, Constants.INPUT.ESVEE_VCF_NORMAL_TBI),
-                Utils.selectCurrentOrExisting(d[7], meta, Constants.INPUT.PAVE_VCF_TUMOR),
-                Utils.selectCurrentOrExisting(d[8], meta, Constants.INPUT.PAVE_VCF_NORMAL),
+                Utils.selectCurrentOrExisting(d[3], meta, Constants.INPUT.PAVE_DIR_TUMOR),
+                Utils.selectCurrentOrExisting(d[4], meta, Constants.INPUT.PAVE_DIR_NORMAL),
+                Utils.selectCurrentOrExisting(d[5], meta, Constants.INPUT.ESVEE_DIR),
             ]
 
             return [meta, *inputs]
         }
 
     // Sort inputs
-    // channel: runnable: [ meta, amber_dir, cobalt_dir, sv_somatic_vcf, sv_somatic_tbi, sv_germline_vcf, sv_germline_tbi, smlv_somatic_vcf, smlv_germline_vcf ]
+    // channel: runnable: [ meta, amber_dir, cobalt_dir, pave_somatic_dir, pave_germline_dir, esvee_dir ]
     // channel: skip: [ meta ]
     ch_inputs_sorted = ch_inputs_selected
         .branch { d ->
@@ -85,7 +80,7 @@ workflow PURPLE_CALLING {
         }
 
     // Create process input channel
-    // channel: [ meta_purple, amber_dir, cobalt_dir, sv_somatic_vcf, sv_somatic_tbi, sv_germline_vcf, sv_germline_tbi, smlv_somatic_vcf, smlv_germline_vcf ]
+    // channel: [ meta_purple, amber_dir, cobalt_dir, pave_somatic_dir, pave_germline_dir, esvee_dir ]
     ch_purple_inputs = ch_inputs_sorted.runnable
         .map { d ->
 

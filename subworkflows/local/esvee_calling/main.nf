@@ -53,7 +53,7 @@ workflow ESVEE_CALLING {
             ]
         }
         .branch { meta, tumor_bam, tumor_bai, normal_bam, normal_bai ->
-            def has_existing = Utils.hasExistingInput(meta, Constants.INPUT.ESVEE_VCF_TUMOR)
+            def has_existing = Utils.hasExistingInput(meta, Constants.INPUT.ESVEE_DIR)
 
             runnable_tn: tumor_bam && normal_bam && !has_existing
             runnable_to: tumor_bam && !has_existing
@@ -104,29 +104,14 @@ workflow ESVEE_CALLING {
     ch_versions = ch_versions.mix(ESVEE.out.versions)
 
     // Set outputs, restoring original meta
-    ch_somatic_out = Channel.empty()
+    ch_esvee_out = Channel.empty()
         .mix(
-            WorkflowOncoanalyser.restoreMeta(ESVEE.out.somatic_vcf, ch_inputs),
-            PlaceholderChannels.vcfTbi(ch_inputs_sorted.skip),
-        )
-
-    ch_germline_out = Channel.empty()
-        .mix(
-            WorkflowOncoanalyser.restoreMeta(ESVEE.out.germline_vcf, ch_inputs),
-            PlaceholderChannels.vcfTbi(ch_inputs_sorted.runnable_to),
-            PlaceholderChannels.vcfTbi(ch_inputs_sorted.skip),
-        )
-
-    ch_unfiltered_out = Channel.empty()
-        .mix(
-            WorkflowOncoanalyser.restoreMeta(ESVEE.out.unfiltered_vcf, ch_inputs),
-            PlaceholderChannels.vcfTbi(ch_inputs_sorted.skip),
+            WorkflowOncoanalyser.restoreMeta(ESVEE.out.esvee_dir, ch_inputs),
+            PlaceholderChannels.toolDir(ch_inputs_sorted.skip),
         )
 
     emit:
-    somatic_vcf    = ch_somatic_out    // channel: [ meta, vcf, tbi ]
-    germline_vcf   = ch_germline_out   // channel: [ meta, vcf, tbi ]
-    unfiltered_vcf = ch_unfiltered_out // channel: [ meta, vcf, tbi ]
+    esvee_dir      = ch_esvee_out      // channel: [ meta, dir ]
 
     versions       = ch_versions       // channel: [ versions.yml ]
 }

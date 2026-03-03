@@ -126,12 +126,11 @@ class Constants {
         AMBER_DIR,
         BAMTOOLS_DIR,
         COBALT_DIR,
-        ESVEE_VCF,
-        ESVEE_VCF_TBI,
+        ESVEE_DIR,
         ISOFOX_DIR,
         LILAC_DIR,
         LINX_ANNO_DIR,
-        PAVE_VCF,
+        PAVE_DIR,
         PURPLE_DIR,
         SAGE_VCF,
         SAGE_VCF_TBI,
@@ -377,35 +376,20 @@ class Constants {
             SequenceType.DNA_RNA,
         ],
 
-        PAVE_VCF_TUMOR: [
-            FileType.PAVE_VCF,
+        PAVE_DIR_TUMOR: [
+            FileType.PAVE_DIR,
             SampleType.TUMOR,
             SequenceType.DNA,
         ],
-        PAVE_VCF_NORMAL: [
-            FileType.PAVE_VCF,
+        PAVE_DIR_NORMAL: [
+            FileType.PAVE_DIR,
             SampleType.NORMAL,
             SequenceType.DNA,
         ],
 
-        ESVEE_VCF_TUMOR: [
-            FileType.ESVEE_VCF,
+        ESVEE_DIR: [
+            FileType.ESVEE_DIR,
             [SampleType.TUMOR, SampleType.TUMOR_NORMAL],
-            SequenceType.DNA,
-        ],
-        ESVEE_VCF_TUMOR_TBI: [
-            FileType.ESVEE_VCF_TBI,
-            [SampleType.TUMOR, SampleType.TUMOR_NORMAL],
-            SequenceType.DNA,
-        ],
-        ESVEE_VCF_NORMAL: [
-            FileType.ESVEE_VCF,
-            SampleType.NORMAL,
-            SequenceType.DNA,
-        ],
-        ESVEE_VCF_NORMAL_TBI: [
-            FileType.ESVEE_VCF_TBI,
-            SampleType.NORMAL,
             SequenceType.DNA,
         ],
 

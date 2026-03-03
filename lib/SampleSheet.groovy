@@ -248,9 +248,6 @@ class SampleSheet {
             } else if (key === Constants.FileType.CRAM || key === Constants.FileType.CRAM_REDUX) {
                 index_enum = Constants.FileType.CRAI
                 index_extension = 'crai'
-            } else if (key === Constants.FileType.ESVEE_VCF) {
-                index_enum = Constants.FileType.ESVEE_VCF_TBI
-                index_extension = 'tbi'
             } else if (key === Constants.FileType.SAGE_VCF) {
                 index_enum = Constants.FileType.SAGE_VCF_TBI
                 index_extension = 'tbi'

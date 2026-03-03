@@ -52,7 +52,7 @@ workflow PAVE_ANNOTATION {
         }
         .branch { meta, sage_vcf, sage_tbi ->
 
-            def has_existing = Utils.hasExistingInput(meta, Constants.INPUT.PAVE_VCF_NORMAL)
+            def has_existing = Utils.hasExistingInput(meta, Constants.INPUT.PAVE_DIR_NORMAL)
 
             runnable: Utils.hasTumorDna(meta) && Utils.hasNormalDna(meta) && sage_vcf && !has_existing
             skip: true
@@ -106,7 +106,7 @@ workflow PAVE_ANNOTATION {
         }
         .branch { meta, sage_vcf, sage_tbi ->
 
-            def has_existing = Utils.hasExistingInput(meta, Constants.INPUT.PAVE_VCF_TUMOR)
+            def has_existing = Utils.hasExistingInput(meta, Constants.INPUT.PAVE_DIR_TUMOR)
 
             runnable: Utils.hasTumorDna(meta) && sage_vcf && !has_existing
             skip: true
@@ -146,22 +146,22 @@ workflow PAVE_ANNOTATION {
     ch_versions = ch_versions.mix(PAVE_SOMATIC.out.versions)
 
     // Set outputs, restoring original meta
-    // channel: [ meta, pave_vcf ]
+    // channel: [ meta, pave_dir ]
     ch_somatic_out = Channel.empty()
         .mix(
-            WorkflowOncoanalyser.restoreMeta(PAVE_SOMATIC.out.vcf, ch_inputs),
-            PlaceholderChannels.vcfTbi(ch_sage_somatic_inputs_sorted.skip),
+            WorkflowOncoanalyser.restoreMeta(PAVE_SOMATIC.out.pave_dir, ch_inputs),
+            PlaceholderChannels.toolDir(ch_sage_somatic_inputs_sorted.skip),
         )
 
     ch_germline_out = Channel.empty()
         .mix(
-            WorkflowOncoanalyser.restoreMeta(PAVE_GERMLINE.out.vcf, ch_inputs),
-            PlaceholderChannels.vcfTbi(ch_sage_germline_inputs_sorted.skip),
+            WorkflowOncoanalyser.restoreMeta(PAVE_GERMLINE.out.pave_dir, ch_inputs),
+            PlaceholderChannels.toolDir(ch_sage_germline_inputs_sorted.skip),
         )
 
     emit:
-    germline = ch_germline_out // channel: [ meta, vcf, tbi ]
-    somatic  = ch_somatic_out  // channel: [ meta, vcf, tbi ]
+    germline = ch_germline_out // channel: [ meta, pave_dir ]
+    somatic  = ch_somatic_out  // channel: [ meta, pave_dir ]
 
     versions = ch_versions     // channel: [ versions.yml ]
 }

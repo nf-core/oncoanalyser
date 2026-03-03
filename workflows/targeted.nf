@@ -284,9 +284,8 @@ workflow TARGETED {
     //
     // SUBWORKFLOW: Call structural variants with ESVEE
     //
-    // channel: [ meta, esvee_vcf ]
-    ch_esvee_germline_out = Channel.empty()
-    ch_esvee_somatic_out = Channel.empty()
+    // channel: [ meta, esvee_dir ]
+    ch_esvee_out = Channel.empty()
     if (run_config.stages.esvee) {
 
         ESVEE_CALLING(
@@ -310,13 +309,11 @@ workflow TARGETED {
 
         ch_versions = ch_versions.mix(ESVEE_CALLING.out.versions)
 
-        ch_esvee_germline_out = ch_esvee_germline_out.mix(ESVEE_CALLING.out.germline_vcf)
-        ch_esvee_somatic_out = ch_esvee_somatic_out.mix(ESVEE_CALLING.out.somatic_vcf)
+        ch_esvee_out = ch_esvee_out.mix(ESVEE_CALLING.out.esvee_dir)
 
     } else {
 
-        ch_esvee_germline_out = PlaceholderChannels.vcfTbi(ch_inputs)
-        ch_esvee_somatic_out = PlaceholderChannels.vcfTbi(ch_inputs)
+        ch_esvee_out = PlaceholderChannels.toolDir(ch_inputs)
 
     }
 
@@ -375,7 +372,7 @@ workflow TARGETED {
     //
     // SUBWORKFLOW: Annotate variants with PAVE
     //
-    // channel: [ meta, pave_vcf ]
+    // channel: [ meta, pave_dir ]
     ch_pave_germline_out = Channel.empty()
     ch_pave_somatic_out = Channel.empty()
     if (run_config.stages.pave) {
@@ -406,8 +403,8 @@ workflow TARGETED {
 
     } else {
 
-        ch_pave_germline_out = PlaceholderChannels.vcfTbi(ch_inputs)
-        ch_pave_somatic_out = PlaceholderChannels.vcfTbi(ch_inputs)
+        ch_pave_germline_out = PlaceholderChannels.toolDir(ch_inputs)
+        ch_pave_somatic_out = PlaceholderChannels.toolDir(ch_inputs)
 
     }
 
@@ -424,8 +421,7 @@ workflow TARGETED {
             ch_cobalt_out,
             ch_pave_somatic_out,
             ch_pave_germline_out,
-            ch_esvee_somatic_out,
-            ch_esvee_germline_out,
+            ch_esvee_out,
             ref_data.genome_fasta,
             ref_data.genome_version,
             ref_data.genome_fai,

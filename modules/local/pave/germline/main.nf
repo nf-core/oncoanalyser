@@ -21,10 +21,9 @@ process PAVE_GERMLINE {
     val sequencing_type
 
     output:
-    tuple val(meta), path('*.vcf.gz')    , emit: vcf
-    tuple val(meta), path('*.vcf.gz.tbi'), emit: index
-    path 'versions.yml'                  , emit: versions
-    path '.command.*'                    , emit: command_files
+    tuple val(meta), path('germline/'), emit: pave_dir
+    path 'versions.yml'               , emit: versions
+    path '.command.*'                 , emit: command_files
 
     when:
     task.ext.when == null || task.ext.when
@@ -35,12 +34,13 @@ process PAVE_GERMLINE {
     def log_level_arg = task.ext.log_level ? "-log_level ${task.ext.log_level}" : ''
 
     """
+    mkdir -p germline/
+
     pave \\
         -Xmx${Math.round(task.memory.bytes * 0.95)} \\
         ${args} \\
         -sample ${meta.sample_id} \\
         -input_vcf ${sage_vcf} \\
-        -output_vcf ${meta.sample_id}.pave.germline.vcf.gz \\
         -ref_genome ${genome_fasta} \\
         -ref_genome_version ${genome_ver} \\
         -clinvar_vcf ${clinvar_annotations} \\
@@ -53,7 +53,8 @@ process PAVE_GERMLINE {
         -sequencing_type ${sequencing_type} \\
         -threads ${task.cpus} \\
         ${log_level_arg} \\
-        -output_dir ./
+        -output_dir germline/ \\
+        -output_vcf germline/${meta.sample_id}.pave.germline.vcf.gz
 
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":
@@ -63,7 +64,9 @@ process PAVE_GERMLINE {
 
     stub:
     """
-    touch ${meta.sample_id}.pave.germline.vcf.gz{,.tbi}
+    mkdir -p germline/
+
+    touch germline/${meta.sample_id}.pave.germline.vcf.gz{,.tbi}
 
     echo -e '${task.process}:\\n  stub: noversions\\n' > versions.yml
     """
