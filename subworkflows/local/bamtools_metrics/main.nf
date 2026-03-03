@@ -3,7 +3,7 @@
 //
 
 import Constants
-import Utils
+import Inputs
 
 include { BAMTOOLS } from '../../../modules/local/bamtools/main'
 
@@ -33,12 +33,12 @@ workflow BAMTOOLS_METRICS {
         .map { meta, bam, bai ->
             return [
                 meta,
-                Utils.overrideWithExistingInput(bam, meta, Constants.INPUT.BAM_REDUX_DNA_TUMOR),
-                Utils.fallbackToExistingInput(bai, meta, Constants.INPUT.BAI_DNA_TUMOR),
+                Inputs.overrideWithExistingInput(bam, meta, Constants.INPUT.BAM_REDUX_DNA_TUMOR),
+                Inputs.fallbackToExistingInput(bai, meta, Constants.INPUT.BAI_DNA_TUMOR),
             ]
         }
         .branch { meta, bam, bai ->
-            def has_existing = Utils.hasExistingInput(meta, Constants.INPUT.BAMTOOLS_DIR_TUMOR)
+            def has_existing = Inputs.hasExistingInput(meta, Constants.INPUT.BAMTOOLS_DIR_TUMOR)
             runnable: bam && !has_existing
             skip: true
                 return meta
@@ -50,12 +50,12 @@ workflow BAMTOOLS_METRICS {
         .map { meta, bam, bai ->
             return [
                 meta,
-                Utils.overrideWithExistingInput(bam, meta, Constants.INPUT.BAM_REDUX_DNA_NORMAL),
-                Utils.fallbackToExistingInput(bai, meta, Constants.INPUT.BAI_DNA_NORMAL),
+                Inputs.overrideWithExistingInput(bam, meta, Constants.INPUT.BAM_REDUX_DNA_NORMAL),
+                Inputs.fallbackToExistingInput(bai, meta, Constants.INPUT.BAI_DNA_NORMAL),
             ]
         }
         .branch { meta, bam, bai ->
-            def has_existing = Utils.hasExistingInput(meta, Constants.INPUT.BAMTOOLS_DIR_NORMAL)
+            def has_existing = Inputs.hasExistingInput(meta, Constants.INPUT.BAMTOOLS_DIR_NORMAL)
             runnable: bam && !has_existing
             skip: true
                 return meta
@@ -65,8 +65,8 @@ workflow BAMTOOLS_METRICS {
     // channel: [ meta_bamtools, bam, bai ]
     ch_bamtools_inputs = Channel.empty()
         .mix(
-            ch_inputs_tumor_sorted.runnable.map { meta, bam, bai -> [meta, Utils.getTumorDnaSample(meta), 'tumor', bam, bai] },
-            ch_inputs_normal_sorted.runnable.map { meta, bam, bai -> [meta, Utils.getNormalDnaSample(meta), 'normal', bam, bai] },
+            ch_inputs_tumor_sorted.runnable.map { meta, bam, bai -> [meta, Inputs.getTumorDnaSample(meta), 'tumor', bam, bai] },
+            ch_inputs_normal_sorted.runnable.map { meta, bam, bai -> [meta, Inputs.getNormalDnaSample(meta), 'normal', bam, bai] },
         )
         .map { meta, meta_sample, sample_type, bam, bai ->
 

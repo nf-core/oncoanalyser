@@ -3,7 +3,7 @@
 //
 
 import Constants
-import Utils
+import Inputs
 
 include { TEAL_PREP     } from '../../../modules/local/teal/prep/main'
 include { TEAL_PIPELINE } from '../../../modules/local/teal/pipeline/main'
@@ -48,10 +48,10 @@ workflow TEAL_CHARACTERISATION {
 
             return [
                 meta,
-                Utils.overrideWithExistingInput(tumor_bam, meta, Constants.INPUT.BAM_REDUX_DNA_TUMOR),
-                Utils.fallbackToExistingInput(tumor_bai, meta, Constants.INPUT.BAI_DNA_TUMOR),
-                Utils.overrideWithExistingInput(normal_bam, meta, Constants.INPUT.BAM_REDUX_DNA_NORMAL),
-                Utils.fallbackToExistingInput(normal_bai, meta, Constants.INPUT.BAI_DNA_NORMAL),
+                Inputs.overrideWithExistingInput(tumor_bam, meta, Constants.INPUT.BAM_REDUX_DNA_TUMOR),
+                Inputs.fallbackToExistingInput(tumor_bai, meta, Constants.INPUT.BAI_DNA_TUMOR),
+                Inputs.overrideWithExistingInput(normal_bam, meta, Constants.INPUT.BAM_REDUX_DNA_NORMAL),
+                Inputs.fallbackToExistingInput(normal_bai, meta, Constants.INPUT.BAI_DNA_NORMAL),
             ]
         }
         .branch { meta, tumor_bam, tumor_bai, normal_bam, normal_bai ->
@@ -68,8 +68,8 @@ workflow TEAL_CHARACTERISATION {
             def meta_teal = [
                 key: meta.group_id,
                 id: meta.group_id,
-                tumor_id: tumor_bam ? Utils.getTumorDnaSampleName(meta) : null,
-                normal_id: normal_bam ? Utils.getNormalDnaSampleName(meta) : null,
+                tumor_id: tumor_bam ? Inputs.getTumorDnaSampleName(meta) : null,
+                normal_id: normal_bam ? Inputs.getNormalDnaSampleName(meta) : null,
             ]
 
             return [meta_teal, tumor_bam, tumor_bai, normal_bam, normal_bai]
@@ -121,10 +121,10 @@ workflow TEAL_CHARACTERISATION {
                 tumor_teal_bai,
                 normal_teal_bam,
                 normal_teal_bai,
-                Utils.overrideWithExistingInput(tumor_metrics_dir, meta, Constants.INPUT.BAMTOOLS_DIR_TUMOR),
-                Utils.overrideWithExistingInput(normal_metrics_dir, meta, Constants.INPUT.BAMTOOLS_DIR_NORMAL),
-                Utils.overrideWithExistingInput(cobalt_dir, meta, Constants.INPUT.COBALT_DIR),
-                Utils.overrideWithExistingInput(purple_dir, meta, Constants.INPUT.PURPLE_DIR),
+                Inputs.overrideWithExistingInput(tumor_metrics_dir, meta, Constants.INPUT.BAMTOOLS_DIR_TUMOR),
+                Inputs.overrideWithExistingInput(normal_metrics_dir, meta, Constants.INPUT.BAMTOOLS_DIR_NORMAL),
+                Inputs.overrideWithExistingInput(cobalt_dir, meta, Constants.INPUT.COBALT_DIR),
+                Inputs.overrideWithExistingInput(purple_dir, meta, Constants.INPUT.PURPLE_DIR),
             ]
         }
         .branch { meta, tumor_teal_bam, tumor_teal_bai, normal_teal_bam, normal_teal_bai, tumor_metrics_dir, normal_metrics_dir, cobalt_dir, purple_dir ->
@@ -145,8 +145,8 @@ workflow TEAL_CHARACTERISATION {
             def meta_teal = [
                 key: meta.group_id,
                 id: meta.group_id,
-                tumor_id: tumor_teal_bam ? Utils.getTumorDnaSampleName(meta) : null,
-                normal_id: normal_teal_bam ? Utils.getNormalDnaSampleName(meta) : null,
+                tumor_id: tumor_teal_bam ? Inputs.getTumorDnaSampleName(meta) : null,
+                normal_id: normal_teal_bam ? Inputs.getNormalDnaSampleName(meta) : null,
             ]
 
             return [ meta_teal, tumor_teal_bam, tumor_teal_bai, normal_teal_bam, normal_teal_bai, tumor_metrics_dir, normal_metrics_dir, cobalt_dir, purple_dir ]

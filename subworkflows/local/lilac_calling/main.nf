@@ -3,7 +3,7 @@
 //
 
 import Constants
-import Utils
+import Inputs
 
 include { LILAC } from '../../../modules/local/lilac/main'
 
@@ -41,15 +41,15 @@ workflow LILAC_CALLING {
         .map { meta, tumor_bam, tumor_bai, normal_bam, normal_bai ->
             return [
                 meta,
-                Utils.overrideWithExistingInput(tumor_bam, meta, Constants.INPUT.BAM_REDUX_DNA_TUMOR),
-                Utils.fallbackToExistingInput(tumor_bai, meta, Constants.INPUT.BAI_DNA_TUMOR),
-                Utils.overrideWithExistingInput(normal_bam, meta, Constants.INPUT.BAM_REDUX_DNA_NORMAL),
-                Utils.fallbackToExistingInput(normal_bai, meta, Constants.INPUT.BAI_DNA_NORMAL),
+                Inputs.overrideWithExistingInput(tumor_bam, meta, Constants.INPUT.BAM_REDUX_DNA_TUMOR),
+                Inputs.fallbackToExistingInput(tumor_bai, meta, Constants.INPUT.BAI_DNA_TUMOR),
+                Inputs.overrideWithExistingInput(normal_bam, meta, Constants.INPUT.BAM_REDUX_DNA_NORMAL),
+                Inputs.fallbackToExistingInput(normal_bai, meta, Constants.INPUT.BAI_DNA_NORMAL),
             ]
         }
         .branch { meta, tumor_bam, tumor_bai, normal_bam, normal_bai ->
 
-            def has_existing = Utils.hasExistingInput(meta, Constants.INPUT.LILAC_DIR)
+            def has_existing = Inputs.hasExistingInput(meta, Constants.INPUT.LILAC_DIR)
 
             runnable: (tumor_bam || normal_bam) && !has_existing
             skip: true
@@ -73,12 +73,12 @@ workflow LILAC_CALLING {
                 id: meta.group_id,
             ]
 
-            if (Utils.hasTumorDna(meta)) {
-                meta_lilac.tumor_id = Utils.getTumorDnaSampleName(meta)
+            if (Inputs.hasTumorDna(meta)) {
+                meta_lilac.tumor_id = Inputs.getTumorDnaSampleName(meta)
             }
 
-            if (Utils.hasNormalDna(meta)) {
-                meta_lilac.normal_id = Utils.getNormalDnaSampleName(meta)
+            if (Inputs.hasNormalDna(meta)) {
+                meta_lilac.normal_id = Inputs.getNormalDnaSampleName(meta)
             }
 
             return [
@@ -87,9 +87,9 @@ workflow LILAC_CALLING {
                 nbai_dna,
                 tbam_dna,
                 tbai_dna,
-                Utils.overrideWithExistingInput(tbam_rna, meta, Constants.INPUT.BAM_RNA_TUMOR),
-                Utils.overrideWithExistingInput(tbai_rna, meta, Constants.INPUT.BAI_RNA_TUMOR),
-                Utils.overrideWithExistingInput(purple_dir, meta, Constants.INPUT.PURPLE_DIR),
+                Inputs.overrideWithExistingInput(tbam_rna, meta, Constants.INPUT.BAM_RNA_TUMOR),
+                Inputs.overrideWithExistingInput(tbai_rna, meta, Constants.INPUT.BAI_RNA_TUMOR),
+                Inputs.overrideWithExistingInput(purple_dir, meta, Constants.INPUT.PURPLE_DIR),
             ]
         }
 

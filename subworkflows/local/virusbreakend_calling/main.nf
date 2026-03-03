@@ -3,7 +3,7 @@
 //
 
 import Constants
-import Utils
+import Inputs
 
 include { VIRUSBREAKEND    } from '../../../modules/local/virusbreakend/main'
 include { VIRUSINTERPRETER } from '../../../modules/local/virusinterpreter/main'
@@ -41,12 +41,12 @@ workflow VIRUSBREAKEND_CALLING {
         .map { meta, tumor_bam, tumor_bai ->
             return [
                 meta,
-                Utils.overrideWithExistingInput(tumor_bam, meta, Constants.INPUT.BAM_REDUX_DNA_TUMOR),
-                Utils.overrideWithExistingInput(tumor_bai, meta, Constants.INPUT.BAI_DNA_TUMOR),
+                Inputs.overrideWithExistingInput(tumor_bam, meta, Constants.INPUT.BAM_REDUX_DNA_TUMOR),
+                Inputs.overrideWithExistingInput(tumor_bai, meta, Constants.INPUT.BAI_DNA_TUMOR),
             ]
         }
         .branch { meta, tumor_bam, tumor_bai ->
-            def has_existing = Utils.hasExistingInput(meta, Constants.INPUT.VIRUSINTERPRETER_DIR)
+            def has_existing = Inputs.hasExistingInput(meta, Constants.INPUT.VIRUSINTERPRETER_DIR)
             runnable: tumor_bam && !has_existing
             skip: true
                 return meta
@@ -63,7 +63,7 @@ workflow VIRUSBREAKEND_CALLING {
             def meta_virus = [
                 key: meta.group_id,
                 id: meta.group_id,
-                sample_id: Utils.getTumorDnaSampleName(meta),
+                sample_id: Inputs.getTumorDnaSampleName(meta),
             ]
 
             return [meta_virus, tumor_bam]
@@ -96,8 +96,8 @@ workflow VIRUSBREAKEND_CALLING {
 
             def inputs = [
                 virus_tsv,
-                Utils.overrideWithExistingInput(purple_dir, meta, Constants.INPUT.PURPLE_DIR),
-                Utils.overrideWithExistingInput(somatic_metrics, meta, Constants.INPUT.BAMTOOLS_DIR_TUMOR),
+                Inputs.overrideWithExistingInput(purple_dir, meta, Constants.INPUT.PURPLE_DIR),
+                Inputs.overrideWithExistingInput(somatic_metrics, meta, Constants.INPUT.BAMTOOLS_DIR_TUMOR),
             ]
 
             return [meta, *inputs]
@@ -124,7 +124,7 @@ workflow VIRUSBREAKEND_CALLING {
             def meta_virus = [
                 key: meta.group_id,
                 id: meta.group_id,
-                sample_id: Utils.getTumorDnaSampleName(meta),
+                sample_id: Inputs.getTumorDnaSampleName(meta),
             ]
 
             return [meta_virus, *inputs]

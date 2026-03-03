@@ -49,32 +49,32 @@ workflow SAGE_PLOTTING {
             donor_bam , donor_bai , donor_bqr_tsv , donor_dup_freq_tsv , donor_jitter_tsv , donor_ms_tsv,
             purple_dir ->
 
-            tumor_bam = Utils.overrideWithExistingInput(tumor_bam, meta, Constants.INPUT.BAM_REDUX_DNA_TUMOR)
-            tumor_bai = Utils.fallbackToExistingInput(tumor_bai, meta, Constants.INPUT.BAI_DNA_TUMOR)
+            tumor_bam = Inputs.overrideWithExistingInput(tumor_bam, meta, Constants.INPUT.BAM_REDUX_DNA_TUMOR)
+            tumor_bai = Inputs.fallbackToExistingInput(tumor_bai, meta, Constants.INPUT.BAI_DNA_TUMOR)
 
-            normal_bam = Utils.overrideWithExistingInput(normal_bam, meta, Constants.INPUT.BAM_REDUX_DNA_NORMAL)
-            normal_bai = Utils.fallbackToExistingInput(normal_bai, meta, Constants.INPUT.BAI_DNA_NORMAL)
+            normal_bam = Inputs.overrideWithExistingInput(normal_bam, meta, Constants.INPUT.BAM_REDUX_DNA_NORMAL)
+            normal_bai = Inputs.fallbackToExistingInput(normal_bai, meta, Constants.INPUT.BAI_DNA_NORMAL)
 
-            donor_bam = Utils.overrideWithExistingInput(donor_bam, meta, Constants.INPUT.BAM_REDUX_DNA_DONOR)
-            donor_bai = Utils.fallbackToExistingInput(donor_bai, meta, Constants.INPUT.BAI_DNA_DONOR)
+            donor_bam = Inputs.overrideWithExistingInput(donor_bam, meta, Constants.INPUT.BAM_REDUX_DNA_DONOR)
+            donor_bai = Inputs.fallbackToExistingInput(donor_bai, meta, Constants.INPUT.BAI_DNA_DONOR)
 
             def redux_tsvs = [
-                Utils.fallbackToExistingInput(tumor_bqr_tsv, meta, Constants.INPUT.REDUX_BQR_TSV_TUMOR),
-                Utils.fallbackToExistingInput(tumor_jitter_tsv, meta, Constants.INPUT.REDUX_JITTER_TSV_TUMOR),
-                Utils.fallbackToExistingInput(tumor_ms_tsv, meta, Constants.INPUT.REDUX_MS_TSV_TUMOR),
+                Inputs.fallbackToExistingInput(tumor_bqr_tsv, meta, Constants.INPUT.REDUX_BQR_TSV_TUMOR),
+                Inputs.fallbackToExistingInput(tumor_jitter_tsv, meta, Constants.INPUT.REDUX_JITTER_TSV_TUMOR),
+                Inputs.fallbackToExistingInput(tumor_ms_tsv, meta, Constants.INPUT.REDUX_MS_TSV_TUMOR),
 
-                Utils.fallbackToExistingInput(normal_bqr_tsv, meta, Constants.INPUT.REDUX_BQR_TSV_NORMAL),
-                Utils.fallbackToExistingInput(normal_jitter_tsv, meta, Constants.INPUT.REDUX_JITTER_TSV_NORMAL),
-                Utils.fallbackToExistingInput(normal_ms_tsv, meta, Constants.INPUT.REDUX_MS_TSV_NORMAL),
+                Inputs.fallbackToExistingInput(normal_bqr_tsv, meta, Constants.INPUT.REDUX_BQR_TSV_NORMAL),
+                Inputs.fallbackToExistingInput(normal_jitter_tsv, meta, Constants.INPUT.REDUX_JITTER_TSV_NORMAL),
+                Inputs.fallbackToExistingInput(normal_ms_tsv, meta, Constants.INPUT.REDUX_MS_TSV_NORMAL),
 
-                Utils.fallbackToExistingInput(donor_bqr_tsv, meta, Constants.INPUT.REDUX_BQR_TSV_DONOR),
-                Utils.fallbackToExistingInput(donor_jitter_tsv, meta, Constants.INPUT.REDUX_JITTER_TSV_DONOR),
-                Utils.fallbackToExistingInput(donor_ms_tsv, meta, Constants.INPUT.REDUX_MS_TSV_DONOR),
+                Inputs.fallbackToExistingInput(donor_bqr_tsv, meta, Constants.INPUT.REDUX_BQR_TSV_DONOR),
+                Inputs.fallbackToExistingInput(donor_jitter_tsv, meta, Constants.INPUT.REDUX_JITTER_TSV_DONOR),
+                Inputs.fallbackToExistingInput(donor_ms_tsv, meta, Constants.INPUT.REDUX_MS_TSV_DONOR),
             ]
 
             redux_tsvs = redux_tsvs.findAll { it != [] }
 
-            purple_dir = Utils.overrideWithExistingInput(purple_dir, meta, Constants.INPUT.PURPLE_DIR)
+            purple_dir = Inputs.overrideWithExistingInput(purple_dir, meta, Constants.INPUT.PURPLE_DIR)
 
             return [ meta, tumor_bam, tumor_bai, normal_bam, normal_bai, donor_bam, donor_bai, redux_tsvs, purple_dir ]
         }
@@ -92,13 +92,13 @@ workflow SAGE_PLOTTING {
             def meta_sage = [
                 key: meta.group_id,
                 id: meta.group_id,
-                tumor_id: Utils.getTumorDnaSampleName(meta),
-                normal_id: normal_bam ? Utils.getNormalDnaSampleName(meta) : null,
-                donor_id: donor_bam ? Utils.getDonorDnaSampleName(meta) : null,
+                tumor_id: Inputs.getTumorDnaSampleName(meta),
+                normal_id: normal_bam ? Inputs.getNormalDnaSampleName(meta) : null,
+                donor_id: donor_bam ? Inputs.getDonorDnaSampleName(meta) : null,
             ]
 
-            def purple_smlv_vcf = Utils.getPurpleSomaticVcf(meta, purple_dir)
-            def purple_smlv_vcf_tbi = Utils.getPurpleSomaticVcfTbi(meta, purple_dir)
+            def purple_smlv_vcf = Inputs.getPurpleSomaticVcf(meta, purple_dir)
+            def purple_smlv_vcf_tbi = Inputs.getPurpleSomaticVcfTbi(meta, purple_dir)
 
             return [meta_sage, tumor_bam, normal_bam, donor_bam, tumor_bai, normal_bai, donor_bai, redux_tsvs, purple_smlv_vcf, purple_smlv_vcf_tbi]
         }

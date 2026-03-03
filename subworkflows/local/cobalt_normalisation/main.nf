@@ -3,7 +3,7 @@
 //
 
 import Constants
-import Utils
+import Inputs
 
 include { COBALT_PANEL_NORMALISATION } from '../../../modules/local/cobalt/panel_normalisation/main'
 
@@ -31,8 +31,8 @@ workflow COBALT_NORMALISATION {
     )
         .map { meta, amber_dir, cobalt_dir ->
             return [
-                Utils.overrideWithExistingInput(amber_dir, meta, Constants.INPUT.AMBER_DIR),
-                Utils.overrideWithExistingInput(cobalt_dir, meta, Constants.INPUT.COBALT_DIR),
+                Inputs.overrideWithExistingInput(amber_dir, meta, Constants.INPUT.AMBER_DIR),
+                Inputs.overrideWithExistingInput(cobalt_dir, meta, Constants.INPUT.COBALT_DIR),
             ]
         }
         .collect(flat: false)

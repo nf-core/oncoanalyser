@@ -1,6 +1,6 @@
 #!/usr/bin/env nextflow
 import Constants
-import Utils
+import Inputs
 
 /*
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~

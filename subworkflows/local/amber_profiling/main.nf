@@ -3,7 +3,7 @@
 //
 
 import Constants
-import Utils
+import Inputs
 
 include { AMBER } from '../../../modules/local/amber/main'
 
@@ -37,22 +37,22 @@ workflow AMBER_PROFILING {
         .map { meta, tumor_bam, tumor_bai, normal_bam, normal_bai, donor_bam, donor_bai ->
             return [
                 meta,
-                Utils.overrideWithExistingInput(tumor_bam, meta, Constants.INPUT.BAM_REDUX_DNA_TUMOR),
-                Utils.fallbackToExistingInput(tumor_bai, meta, Constants.INPUT.BAI_DNA_TUMOR),
+                Inputs.overrideWithExistingInput(tumor_bam, meta, Constants.INPUT.BAM_REDUX_DNA_TUMOR),
+                Inputs.fallbackToExistingInput(tumor_bai, meta, Constants.INPUT.BAI_DNA_TUMOR),
 
-                Utils.overrideWithExistingInput(normal_bam, meta, Constants.INPUT.BAM_REDUX_DNA_NORMAL),
-                Utils.fallbackToExistingInput(normal_bai, meta, Constants.INPUT.BAI_DNA_NORMAL),
+                Inputs.overrideWithExistingInput(normal_bam, meta, Constants.INPUT.BAM_REDUX_DNA_NORMAL),
+                Inputs.fallbackToExistingInput(normal_bai, meta, Constants.INPUT.BAI_DNA_NORMAL),
 
-                Utils.overrideWithExistingInput(donor_bam, meta, Constants.INPUT.BAM_REDUX_DNA_DONOR),
-                Utils.fallbackToExistingInput(donor_bai, meta, Constants.INPUT.BAI_DNA_DONOR),
+                Inputs.overrideWithExistingInput(donor_bam, meta, Constants.INPUT.BAM_REDUX_DNA_DONOR),
+                Inputs.fallbackToExistingInput(donor_bai, meta, Constants.INPUT.BAI_DNA_DONOR),
             ]
         }
         .branch { meta, tumor_bam, tumor_bai, normal_bam, normal_bai, donor_bam, donor_bai ->
-            def has_existing = Utils.hasExistingInput(meta, Constants.INPUT.AMBER_DIR)
+            def has_existing = Inputs.hasExistingInput(meta, Constants.INPUT.AMBER_DIR)
 
 
             // TODO(SW): must improve handling through separation of sample information in meta; currently unable to provide ccfDNA AMBER directory in samplesheet
-            def longitudinal_sample = Utils.getTumorDnaSample(meta).containsKey('longitudinal_sample_id')
+            def longitudinal_sample = Inputs.getTumorDnaSample(meta).containsKey('longitudinal_sample_id')
 
             runnable: tumor_bam && (!has_existing || longitudinal_sample)
 
@@ -69,15 +69,15 @@ workflow AMBER_PROFILING {
             def meta_amber = [
                 key: meta.group_id,
                 id: meta.group_id,
-                tumor_id: Utils.getTumorDnaSampleName(meta),
+                tumor_id: Inputs.getTumorDnaSampleName(meta),
             ]
 
             if (normal_bam) {
-                meta_amber.normal_id = Utils.getNormalDnaSampleName(meta)
+                meta_amber.normal_id = Inputs.getNormalDnaSampleName(meta)
             }
 
             if (donor_bam) {
-                meta_amber.donor_id = Utils.getDonorDnaSampleName(meta)
+                meta_amber.donor_id = Inputs.getDonorDnaSampleName(meta)
             }
 
             [meta_amber, tumor_bam, normal_bam, donor_bam, tumor_bai, normal_bai, donor_bai]

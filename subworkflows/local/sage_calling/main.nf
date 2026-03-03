@@ -3,7 +3,7 @@
 //
 
 import Constants
-import Utils
+import Inputs
 
 import java.nio.channels.Channel
 
@@ -59,27 +59,27 @@ workflow SAGE_CALLING {
             normal_bam, normal_bai, normal_bqr_tsv, normal_dup_freq_tsv, normal_jitter_tsv, normal_ms_tsv,
             donor_bam , donor_bai , donor_bqr_tsv , donor_dup_freq_tsv , donor_jitter_tsv , donor_ms_tsv ->
 
-            tumor_bam = Utils.overrideWithExistingInput(tumor_bam, meta, Constants.INPUT.BAM_REDUX_DNA_TUMOR)
-            tumor_bai = Utils.fallbackToExistingInput(tumor_bai, meta, Constants.INPUT.BAI_DNA_TUMOR)
+            tumor_bam = Inputs.overrideWithExistingInput(tumor_bam, meta, Constants.INPUT.BAM_REDUX_DNA_TUMOR)
+            tumor_bai = Inputs.fallbackToExistingInput(tumor_bai, meta, Constants.INPUT.BAI_DNA_TUMOR)
 
-            normal_bam = Utils.overrideWithExistingInput(normal_bam, meta, Constants.INPUT.BAM_REDUX_DNA_NORMAL)
-            normal_bai = Utils.fallbackToExistingInput(normal_bai, meta, Constants.INPUT.BAI_DNA_NORMAL)
+            normal_bam = Inputs.overrideWithExistingInput(normal_bam, meta, Constants.INPUT.BAM_REDUX_DNA_NORMAL)
+            normal_bai = Inputs.fallbackToExistingInput(normal_bai, meta, Constants.INPUT.BAI_DNA_NORMAL)
 
-            donor_bam = Utils.overrideWithExistingInput(donor_bam, meta, Constants.INPUT.BAM_REDUX_DNA_DONOR)
-            donor_bai = Utils.fallbackToExistingInput(donor_bai, meta, Constants.INPUT.BAI_DNA_DONOR)
+            donor_bam = Inputs.overrideWithExistingInput(donor_bam, meta, Constants.INPUT.BAM_REDUX_DNA_DONOR)
+            donor_bai = Inputs.fallbackToExistingInput(donor_bai, meta, Constants.INPUT.BAI_DNA_DONOR)
 
             def redux_tsvs = [
-                Utils.fallbackToExistingInput(tumor_bqr_tsv, meta, Constants.INPUT.REDUX_BQR_TSV_TUMOR),
-                Utils.fallbackToExistingInput(tumor_jitter_tsv, meta, Constants.INPUT.REDUX_JITTER_TSV_TUMOR),
-                Utils.fallbackToExistingInput(tumor_ms_tsv, meta, Constants.INPUT.REDUX_MS_TSV_TUMOR),
+                Inputs.fallbackToExistingInput(tumor_bqr_tsv, meta, Constants.INPUT.REDUX_BQR_TSV_TUMOR),
+                Inputs.fallbackToExistingInput(tumor_jitter_tsv, meta, Constants.INPUT.REDUX_JITTER_TSV_TUMOR),
+                Inputs.fallbackToExistingInput(tumor_ms_tsv, meta, Constants.INPUT.REDUX_MS_TSV_TUMOR),
 
-                Utils.fallbackToExistingInput(normal_bqr_tsv, meta, Constants.INPUT.REDUX_BQR_TSV_NORMAL),
-                Utils.fallbackToExistingInput(normal_jitter_tsv, meta, Constants.INPUT.REDUX_JITTER_TSV_NORMAL),
-                Utils.fallbackToExistingInput(normal_ms_tsv, meta, Constants.INPUT.REDUX_MS_TSV_NORMAL),
+                Inputs.fallbackToExistingInput(normal_bqr_tsv, meta, Constants.INPUT.REDUX_BQR_TSV_NORMAL),
+                Inputs.fallbackToExistingInput(normal_jitter_tsv, meta, Constants.INPUT.REDUX_JITTER_TSV_NORMAL),
+                Inputs.fallbackToExistingInput(normal_ms_tsv, meta, Constants.INPUT.REDUX_MS_TSV_NORMAL),
 
-                Utils.fallbackToExistingInput(donor_bqr_tsv, meta, Constants.INPUT.REDUX_BQR_TSV_DONOR),
-                Utils.fallbackToExistingInput(donor_jitter_tsv, meta, Constants.INPUT.REDUX_JITTER_TSV_DONOR),
-                Utils.fallbackToExistingInput(donor_ms_tsv, meta, Constants.INPUT.REDUX_MS_TSV_DONOR),
+                Inputs.fallbackToExistingInput(donor_bqr_tsv, meta, Constants.INPUT.REDUX_BQR_TSV_DONOR),
+                Inputs.fallbackToExistingInput(donor_jitter_tsv, meta, Constants.INPUT.REDUX_JITTER_TSV_DONOR),
+                Inputs.fallbackToExistingInput(donor_ms_tsv, meta, Constants.INPUT.REDUX_MS_TSV_DONOR),
             ]
 
             redux_tsvs = redux_tsvs.findAll { it != [] }
@@ -101,7 +101,7 @@ workflow SAGE_CALLING {
     ch_inputs_germline_sorted = ch_inputs_sorted.runnable
         .branch { meta, tumor_bam, tumor_bai, normal_bam, normal_bai, donor_bam, donor_bai, redux_tsvs ->
             def has_tumor_normal = tumor_bam && normal_bam
-            def has_existing = Utils.hasExistingInput(meta, Constants.INPUT.SAGE_VCF_NORMAL)
+            def has_existing = Inputs.hasExistingInput(meta, Constants.INPUT.SAGE_VCF_NORMAL)
 
             runnable: has_tumor_normal && !has_existing && enable_germline
             skip: true
@@ -116,8 +116,8 @@ workflow SAGE_CALLING {
             def meta_sage = [
                 key: meta.group_id,
                 id: meta.group_id,
-                tumor_id: Utils.getTumorDnaSampleName(meta),
-                normal_id: Utils.getNormalDnaSampleName(meta),
+                tumor_id: Inputs.getTumorDnaSampleName(meta),
+                normal_id: Inputs.getNormalDnaSampleName(meta),
             ]
 
             return [meta_sage, tumor_bam, normal_bam, tumor_bai, normal_bai, redux_tsvs]
@@ -149,7 +149,7 @@ workflow SAGE_CALLING {
     ch_inputs_somatic_sorted = ch_inputs_sorted.runnable
         .branch { meta, tumor_bam, tumor_bai, normal_bam, normal_bai, donor_bam, donor_bai, redux_tsvs ->
             def has_tumor = tumor_bam
-            def has_existing = Utils.hasExistingInput(meta, Constants.INPUT.SAGE_VCF_TUMOR)
+            def has_existing = Inputs.hasExistingInput(meta, Constants.INPUT.SAGE_VCF_TUMOR)
 
             runnable: has_tumor && !has_existing
             skip: true
@@ -165,16 +165,16 @@ workflow SAGE_CALLING {
             def meta_sage = [
                 key: meta.group_id,
                 id: meta.group_id,
-                tumor_id: Utils.getTumorDnaSampleName(meta),
-                donor_id: Utils.getDonorDnaSampleName(meta),
+                tumor_id: Inputs.getTumorDnaSampleName(meta),
+                donor_id: Inputs.getDonorDnaSampleName(meta),
             ]
 
             if (normal_bam) {
-                meta_sage.normal_id = Utils.getNormalDnaSampleName(meta)
+                meta_sage.normal_id = Inputs.getNormalDnaSampleName(meta)
             }
 
             if (donor_bam) {
-                meta_sage.donor_id = Utils.getDonorDnaSampleName(meta)
+                meta_sage.donor_id = Inputs.getDonorDnaSampleName(meta)
             }
 
             return [meta_sage, tumor_bam, normal_bam, donor_bam, tumor_bai, normal_bai, donor_bai, redux_tsvs]

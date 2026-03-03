@@ -3,7 +3,7 @@
 //
 
 import Constants
-import Utils
+import Inputs
 
 include { ORANGE } from '../../../modules/local/orange/main'
 
@@ -119,25 +119,25 @@ workflow ORANGE_REPORTING {
             assert inputs.size() == input_indexes.size()
 
             def inputs_selected = [
-                Utils.overrideWithExistingInput(inputs[input_indexes.redux_somatic_plot]      , meta, Constants.INPUT.REDUX_BQR_PLOT_TUMOR),
-                Utils.overrideWithExistingInput(inputs[input_indexes.redux_germline_plot]     , meta, Constants.INPUT.REDUX_BQR_PLOT_NORMAL),
-                Utils.overrideWithExistingInput(inputs[input_indexes.bamtools_somatic]        , meta, Constants.INPUT.BAMTOOLS_DIR_TUMOR),
-                Utils.overrideWithExistingInput(inputs[input_indexes.bamtools_germline]       , meta, Constants.INPUT.BAMTOOLS_DIR_NORMAL),
-                Utils.overrideWithExistingInput(inputs[input_indexes.sage_somatic]            , meta, Constants.INPUT.SAGE_DIR_TUMOR),
-                Utils.overrideWithExistingInput(inputs[input_indexes.sage_germline]           , meta, Constants.INPUT.SAGE_DIR_NORMAL),
-                Utils.overrideWithExistingInput(inputs[input_indexes.sage_somatic_append]     , meta, Constants.INPUT.SAGE_APPEND_DIR_TUMOR),
-                Utils.overrideWithExistingInput(inputs[input_indexes.sage_germline_append]    , meta, Constants.INPUT.SAGE_APPEND_DIR_NORMAL),
-                Utils.overrideWithExistingInput(inputs[input_indexes.purple_dir]              , meta, Constants.INPUT.PURPLE_DIR),
-                Utils.overrideWithExistingInput(inputs[input_indexes.linx_somatic_annotation] , meta, Constants.INPUT.LINX_ANNO_DIR_TUMOR),
-                Utils.overrideWithExistingInput(inputs[input_indexes.linx_somatic_plot]       , meta, Constants.INPUT.LINX_PLOT_DIR_TUMOR),
-                Utils.overrideWithExistingInput(inputs[input_indexes.linx_germline_annotation], meta, Constants.INPUT.LINX_ANNO_DIR_NORMAL),
-                Utils.overrideWithExistingInput(inputs[input_indexes.virusinterpreter]        , meta, Constants.INPUT.VIRUSINTERPRETER_DIR),
-                Utils.overrideWithExistingInput(inputs[input_indexes.chord]                   , meta, Constants.INPUT.CHORD_DIR),
-                Utils.overrideWithExistingInput(inputs[input_indexes.sigs]                    , meta, Constants.INPUT.SIGS_DIR),
-                Utils.overrideWithExistingInput(inputs[input_indexes.lilac]                   , meta, Constants.INPUT.LILAC_DIR),
-                Utils.overrideWithExistingInput(inputs[input_indexes.cuppa]                   , meta, Constants.INPUT.CUPPA_DIR),
-                Utils.overrideWithExistingInput(inputs[input_indexes.peach]                   , meta, Constants.INPUT.PEACH_DIR),
-                Utils.overrideWithExistingInput(inputs[input_indexes.isofox]                  , meta, Constants.INPUT.ISOFOX_DIR),
+                Inputs.overrideWithExistingInput(inputs[input_indexes.redux_somatic_plot]      , meta, Constants.INPUT.REDUX_BQR_PLOT_TUMOR),
+                Inputs.overrideWithExistingInput(inputs[input_indexes.redux_germline_plot]     , meta, Constants.INPUT.REDUX_BQR_PLOT_NORMAL),
+                Inputs.overrideWithExistingInput(inputs[input_indexes.bamtools_somatic]        , meta, Constants.INPUT.BAMTOOLS_DIR_TUMOR),
+                Inputs.overrideWithExistingInput(inputs[input_indexes.bamtools_germline]       , meta, Constants.INPUT.BAMTOOLS_DIR_NORMAL),
+                Inputs.overrideWithExistingInput(inputs[input_indexes.sage_somatic]            , meta, Constants.INPUT.SAGE_DIR_TUMOR),
+                Inputs.overrideWithExistingInput(inputs[input_indexes.sage_germline]           , meta, Constants.INPUT.SAGE_DIR_NORMAL),
+                Inputs.overrideWithExistingInput(inputs[input_indexes.sage_somatic_append]     , meta, Constants.INPUT.SAGE_APPEND_DIR_TUMOR),
+                Inputs.overrideWithExistingInput(inputs[input_indexes.sage_germline_append]    , meta, Constants.INPUT.SAGE_APPEND_DIR_NORMAL),
+                Inputs.overrideWithExistingInput(inputs[input_indexes.purple_dir]              , meta, Constants.INPUT.PURPLE_DIR),
+                Inputs.overrideWithExistingInput(inputs[input_indexes.linx_somatic_annotation] , meta, Constants.INPUT.LINX_ANNO_DIR_TUMOR),
+                Inputs.overrideWithExistingInput(inputs[input_indexes.linx_somatic_plot]       , meta, Constants.INPUT.LINX_PLOT_DIR_TUMOR),
+                Inputs.overrideWithExistingInput(inputs[input_indexes.linx_germline_annotation], meta, Constants.INPUT.LINX_ANNO_DIR_NORMAL),
+                Inputs.overrideWithExistingInput(inputs[input_indexes.virusinterpreter]        , meta, Constants.INPUT.VIRUSINTERPRETER_DIR),
+                Inputs.overrideWithExistingInput(inputs[input_indexes.chord]                   , meta, Constants.INPUT.CHORD_DIR),
+                Inputs.overrideWithExistingInput(inputs[input_indexes.sigs]                    , meta, Constants.INPUT.SIGS_DIR),
+                Inputs.overrideWithExistingInput(inputs[input_indexes.lilac]                   , meta, Constants.INPUT.LILAC_DIR),
+                Inputs.overrideWithExistingInput(inputs[input_indexes.cuppa]                   , meta, Constants.INPUT.CUPPA_DIR),
+                Inputs.overrideWithExistingInput(inputs[input_indexes.peach]                   , meta, Constants.INPUT.PEACH_DIR),
+                Inputs.overrideWithExistingInput(inputs[input_indexes.isofox]                  , meta, Constants.INPUT.ISOFOX_DIR),
             ]
 
             return [meta, *inputs_selected]
@@ -172,7 +172,7 @@ workflow ORANGE_REPORTING {
             def meta_orange = [
                 key: meta.group_id,
                 id: meta.group_id,
-                tumor_id: Utils.getTumorDnaSampleName(meta),
+                tumor_id: Inputs.getTumorDnaSampleName(meta),
                 cancer_type: meta[Constants.InfoField.CANCER_TYPE],
             ]
 
@@ -184,7 +184,7 @@ workflow ORANGE_REPORTING {
                 .every()
 
             if (has_dna_normal) {
-                meta_orange.normal_dna_id = Utils.getNormalDnaSampleName(meta)
+                meta_orange.normal_dna_id = Inputs.getNormalDnaSampleName(meta)
             } else {
                 dna_normal_input_indexes.each { i -> inputs_selected[i] = [] }
             }
@@ -203,7 +203,7 @@ workflow ORANGE_REPORTING {
                 .every()
 
             if (has_rna_tumor) {
-                meta_orange.tumor_rna_id = Utils.getTumorRnaSampleName(meta)
+                meta_orange.tumor_rna_id = Inputs.getTumorRnaSampleName(meta)
             } else {
                 rna_tumor_input_indexes.each { i -> inputs_selected[i] = [] }
             }

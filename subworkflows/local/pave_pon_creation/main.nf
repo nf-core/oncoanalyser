@@ -3,7 +3,7 @@
 //
 
 import Constants
-import Utils
+import Inputs
 
 include { PAVE_PON_PANEL_CREATION } from '../../../modules/local/pave/pon_creation/main'
 
@@ -26,8 +26,8 @@ workflow PAVE_PON_CREATION {
     ch_pave_inputs = ch_sage_somatic_vcf
         .map { meta, sage_vcf, sage_tbi ->
             return [
-                Utils.overrideWithExistingInput(sage_vcf, meta, Constants.INPUT.SAGE_VCF_TUMOR),
-                Utils.overrideWithExistingInput(sage_tbi, meta, Constants.INPUT.SAGE_VCF_TBI_TUMOR),
+                Inputs.overrideWithExistingInput(sage_vcf, meta, Constants.INPUT.SAGE_VCF_TUMOR),
+                Inputs.overrideWithExistingInput(sage_tbi, meta, Constants.INPUT.SAGE_VCF_TBI_TUMOR),
             ]
         }
         .collect(flat: false)

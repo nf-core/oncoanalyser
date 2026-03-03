@@ -3,7 +3,7 @@
 //
 
 import Constants
-import Utils
+import Inputs
 
 include { COBALT } from '../../../modules/local/cobalt/run/main'
 
@@ -37,14 +37,14 @@ workflow COBALT_PROFILING {
         .map { meta, tumor_bam, tumor_bai, normal_bam, normal_bai ->
             return [
                 meta,
-                Utils.overrideWithExistingInput(tumor_bam, meta, Constants.INPUT.BAM_REDUX_DNA_TUMOR),
-                Utils.fallbackToExistingInput(tumor_bai, meta, Constants.INPUT.BAI_DNA_TUMOR),
-                Utils.overrideWithExistingInput(normal_bam, meta, Constants.INPUT.BAM_REDUX_DNA_NORMAL),
-                Utils.fallbackToExistingInput(normal_bai, meta, Constants.INPUT.BAI_DNA_NORMAL),
+                Inputs.overrideWithExistingInput(tumor_bam, meta, Constants.INPUT.BAM_REDUX_DNA_TUMOR),
+                Inputs.fallbackToExistingInput(tumor_bai, meta, Constants.INPUT.BAI_DNA_TUMOR),
+                Inputs.overrideWithExistingInput(normal_bam, meta, Constants.INPUT.BAM_REDUX_DNA_NORMAL),
+                Inputs.fallbackToExistingInput(normal_bai, meta, Constants.INPUT.BAI_DNA_NORMAL),
             ]
         }
         .branch { meta, tumor_bam, tumor_bai, normal_bam, normal_bai ->
-            def has_existing = Utils.hasExistingInput(meta, Constants.INPUT.COBALT_DIR)
+            def has_existing = Inputs.hasExistingInput(meta, Constants.INPUT.COBALT_DIR)
             runnable_tn: tumor_bam && normal_bam && !has_existing
             runnable_to: tumor_bam && !has_existing
             skip: true
@@ -69,11 +69,11 @@ workflow COBALT_PROFILING {
             def meta_cobalt = [
                 key: meta.group_id,
                 id: meta.group_id,
-                tumor_id: Utils.getTumorDnaSampleName(meta),
+                tumor_id: Inputs.getTumorDnaSampleName(meta),
             ]
 
             if (normal_bam) {
-                meta_cobalt.normal_id = Utils.getNormalDnaSampleName(meta)
+                meta_cobalt.normal_id = Inputs.getNormalDnaSampleName(meta)
             }
 
             sample_data: [meta_cobalt, tumor_bam, normal_bam, tumor_bai, normal_bai]

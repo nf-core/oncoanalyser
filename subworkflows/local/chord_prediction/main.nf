@@ -3,7 +3,7 @@
 //
 
 import Constants
-import Utils
+import Inputs
 
 include { CHORD } from '../../../modules/local/chord/main'
 
@@ -25,7 +25,7 @@ workflow CHORD_PREDICTION {
     // channel: [ meta, purple_dir ]
     ch_inputs_selected = ch_purple
         .map { meta, purple_dir ->
-            return [meta, Utils.overrideWithExistingInput(purple_dir, meta, Constants.INPUT.PURPLE_DIR)]
+            return [meta, Inputs.overrideWithExistingInput(purple_dir, meta, Constants.INPUT.PURPLE_DIR)]
         }
 
     // Sort inputs
@@ -34,17 +34,17 @@ workflow CHORD_PREDICTION {
     ch_inputs_sorted = ch_inputs_selected
         .branch { meta, purple_dir ->
 
-            def has_tumor_normal_dna = Utils.hasTumorDna(meta) && Utils.hasNormalDna(meta)
+            def has_tumor_normal_dna = Inputs.hasTumorDna(meta) && Inputs.hasNormalDna(meta)
 
             def has_smlv_vcf = []
             def has_sv_vcf = []
 
             if(has_tumor_normal_dna) {
-                has_smlv_vcf = purple_dir ? Utils.getPurpleSomaticVcf(meta, purple_dir) : []
-                has_sv_vcf = purple_dir ? Utils.getPurpleSomaticSvVcf(meta, purple_dir) : []
+                has_smlv_vcf = purple_dir ? Inputs.getPurpleSomaticVcf(meta, purple_dir) : []
+                has_sv_vcf = purple_dir ? Inputs.getPurpleSomaticSvVcf(meta, purple_dir) : []
             }
 
-            def has_existing = Utils.hasExistingInput(meta, Constants.INPUT.CHORD_DIR)
+            def has_existing = Inputs.hasExistingInput(meta, Constants.INPUT.CHORD_DIR)
 
             runnable: has_tumor_normal_dna && purple_dir && has_smlv_vcf && has_sv_vcf && !has_existing
             skip: true
@@ -56,7 +56,7 @@ workflow CHORD_PREDICTION {
     ch_chord_inputs = ch_inputs_sorted.runnable
         .map { meta, purple_dir ->
 
-            def tumor_id = Utils.getTumorDnaSampleName(meta)
+            def tumor_id = Inputs.getTumorDnaSampleName(meta)
 
             def meta_chord = [
                 key: meta.group_id,
@@ -64,8 +64,8 @@ workflow CHORD_PREDICTION {
                 sample_id: tumor_id,
             ]
 
-            def smlv_vcf = Utils.getPurpleSomaticVcf(meta, purple_dir)
-            def sv_vcf = Utils.getPurpleSomaticSvVcf(meta, purple_dir)
+            def smlv_vcf = Inputs.getPurpleSomaticVcf(meta, purple_dir)
+            def sv_vcf = Inputs.getPurpleSomaticSvVcf(meta, purple_dir)
 
             return [meta_chord, smlv_vcf, sv_vcf]
         }

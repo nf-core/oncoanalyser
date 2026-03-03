@@ -3,7 +3,7 @@
 //
 
 import Constants
-import Utils
+import Inputs
 
 include { ISOFOX_PANEL_NORMALISATION } from '../../../modules/local/isofox/panel_normalisation/main'
 
@@ -26,7 +26,7 @@ workflow ISOFOX_NORMALISATION {
     // channel: [ [isofox_dir, ...] ]
     ch_isofox_inputs = ch_isofox
         .map { meta, isofox_dir ->
-            return Utils.selectExistingElseCurrent(isofox_dir, meta, Constants.INPUT.ISOFOX_DIR)
+            return Inputs.selectExistingElseCurrent(isofox_dir, meta, Constants.INPUT.ISOFOX_DIR)
         }
         .collect()
 

@@ -3,7 +3,7 @@
 //
 
 import Constants
-import Utils
+import Inputs
 
 include { WISP } from '../../../modules/local/wisp/main'
 
@@ -37,8 +37,8 @@ workflow WISP_ANALYSIS {
     )
         .branch { meta, amber_dir, cobalt_dir, sage_append_dir ->
 
-            primary_purple_dir = Utils.getInput(meta, Constants.INPUT.PURPLE_DIR)
-            primary_amber_dir = Utils.getInput(meta, Constants.INPUT.AMBER_DIR)
+            primary_purple_dir = Inputs.getInput(meta, Constants.INPUT.PURPLE_DIR)
+            primary_amber_dir = Inputs.getInput(meta, Constants.INPUT.AMBER_DIR)
 
             def purity_estimate_mode = Enums.getEnumFromString(params.purity_estimate_mode, Constants.RunMode)
 
@@ -65,8 +65,8 @@ workflow WISP_ANALYSIS {
                 key: meta.group_id,
                 id: meta.group_id,
                 subject_id: meta.subject_id,
-                primary_id: Utils.getTumorDnaSampleName(meta, 'primary'),
-                longitudinal_id: Utils.getTumorDnaSampleName(meta, 'longitudinal'),
+                primary_id: Inputs.getTumorDnaSampleName(meta, 'primary'),
+                longitudinal_id: Inputs.getTumorDnaSampleName(meta, 'longitudinal'),
             ]
 
             return [meta_wisp, primary_purple_dir, primary_amber_dir, amber_dir, cobalt_dir, sage_append_dir]

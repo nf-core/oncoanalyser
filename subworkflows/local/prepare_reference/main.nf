@@ -339,9 +339,9 @@ workflow PREPARE_REFERENCE {
 
 def getConfigForPipelineRun(inputs, run_config) {
 
-    def has_dna = inputs.any { Utils.hasTumorDna(it) }
-    def has_rna_fastq = inputs.any { Utils.hasTumorRnaFastq(it) }
-    def has_dna_fastq = inputs.any { Utils.hasTumorDnaFastq(it) || Utils.hasNormalDnaFastq(it) }
+    def has_dna = inputs.any { Inputs.hasTumorDna(it) }
+    def has_rna_fastq = inputs.any { Inputs.hasTumorRnaFastq(it) }
+    def has_dna_fastq = inputs.any { Inputs.hasTumorDnaFastq(it) || Inputs.hasNormalDnaFastq(it) }
 
     return [
         require_fasta: true,

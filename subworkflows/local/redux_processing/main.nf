@@ -3,7 +3,7 @@
 //
 
 import Constants
-import Utils
+import Inputs
 
 include { REDUX } from '../../../modules/local/redux/main'
 
@@ -41,18 +41,18 @@ workflow REDUX_PROCESSING {
     def selectBamInputs = { ch_dna, bam_type, bai_type, bam_redux_type ->
         return ch_dna.map { meta, bams, bais ->
 
-            bams = Utils.hasExistingInput(meta, bam_type)
-                ? [Utils.getInput(meta, bam_type)]
+            bams = Inputs.hasExistingInput(meta, bam_type)
+                ? [Inputs.getInput(meta, bam_type)]
                 : bams
 
-            bais = Utils.hasExistingInput(meta, bai_type)
-                ? [Utils.getInput(meta, bai_type)]
+            bais = Inputs.hasExistingInput(meta, bai_type)
+                ? [Inputs.getInput(meta, bai_type)]
                 : bais
 
             return [meta, bams, bais]
         }
         .branch { meta, bams, bais ->
-            def has_existing = Utils.hasExistingInput(meta, bam_redux_type)
+            def has_existing = Inputs.hasExistingInput(meta, bam_redux_type)
             runnable: bams && !has_existing
             skip: true
                 return meta
@@ -84,9 +84,9 @@ workflow REDUX_PROCESSING {
     // channel: [ meta_redux, [bam, ...], [bai, ...] ]
     ch_redux_inputs = Channel.empty()
         .mix(
-            ch_inputs_tumor.runnable.map { meta, bams, bais -> [meta, Utils.getTumorDnaSample(meta), 'tumor', bams, bais] },
-            ch_inputs_normal.runnable.map { meta, bams, bais -> [meta, Utils.getNormalDnaSample(meta), 'normal', bams, bais] },
-            ch_inputs_donor.runnable.map { meta, bams, bais -> [meta, Utils.getDonorDnaSample(meta), 'donor', bams, bais] },
+            ch_inputs_tumor.runnable.map { meta, bams, bais -> [meta, Inputs.getTumorDnaSample(meta), 'tumor', bams, bais] },
+            ch_inputs_normal.runnable.map { meta, bams, bais -> [meta, Inputs.getNormalDnaSample(meta), 'normal', bams, bais] },
+            ch_inputs_donor.runnable.map { meta, bams, bais -> [meta, Inputs.getDonorDnaSample(meta), 'donor', bams, bais] },
         )
         .map { meta, meta_sample, sample_type, bams, bais ->
 

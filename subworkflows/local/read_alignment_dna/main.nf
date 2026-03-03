@@ -3,7 +3,7 @@
 //
 
 import Constants
-import Utils
+import Inputs
 
 include { BWAMEM2_ALIGN  } from '../../../modules/local/bwa-mem2/mem/main'
 include { FASTP          } from '../../../modules/local/fastp/main'
@@ -33,22 +33,22 @@ workflow READ_ALIGNMENT_DNA {
     // channel: [ meta ]
     ch_inputs_tumor_sorted = ch_inputs
         .branch { meta ->
-            def has_existing = Utils.hasExistingInput(meta, Constants.INPUT.BAM_DNA_TUMOR)
-            runnable: Utils.hasTumorDnaFastq(meta) && !has_existing
+            def has_existing = Inputs.hasExistingInput(meta, Constants.INPUT.BAM_DNA_TUMOR)
+            runnable: Inputs.hasTumorDnaFastq(meta) && !has_existing
             skip: true
         }
 
     ch_inputs_normal_sorted = ch_inputs
         .branch { meta ->
-            def has_existing = Utils.hasExistingInput(meta, Constants.INPUT.BAM_DNA_NORMAL)
-            runnable: Utils.hasNormalDnaFastq(meta) && !has_existing
+            def has_existing = Inputs.hasExistingInput(meta, Constants.INPUT.BAM_DNA_NORMAL)
+            runnable: Inputs.hasNormalDnaFastq(meta) && !has_existing
             skip: true
         }
 
     ch_inputs_donor_sorted = ch_inputs
         .branch { meta ->
-            def has_existing = Utils.hasExistingInput(meta, Constants.INPUT.BAM_DNA_DONOR)
-            runnable: Utils.hasDonorDnaFastq(meta) && !has_existing
+            def has_existing = Inputs.hasExistingInput(meta, Constants.INPUT.BAM_DNA_DONOR)
+            runnable: Inputs.hasDonorDnaFastq(meta) && !has_existing
             skip: true
         }
 
@@ -56,9 +56,9 @@ workflow READ_ALIGNMENT_DNA {
     // channel: [ meta_fastq, fastq_fwd, fastq_rev ]
     ch_fastq_inputs = Channel.empty()
         .mix(
-            ch_inputs_tumor_sorted.runnable.map { meta -> [meta, Utils.getTumorDnaSample(meta), 'tumor'] },
-            ch_inputs_normal_sorted.runnable.map { meta -> [meta, Utils.getNormalDnaSample(meta), 'normal'] },
-            ch_inputs_donor_sorted.runnable.map { meta -> [meta, Utils.getDonorDnaSample(meta), 'donor'] },
+            ch_inputs_tumor_sorted.runnable.map { meta -> [meta, Inputs.getTumorDnaSample(meta), 'tumor'] },
+            ch_inputs_normal_sorted.runnable.map { meta -> [meta, Inputs.getNormalDnaSample(meta), 'normal'] },
+            ch_inputs_donor_sorted.runnable.map { meta -> [meta, Inputs.getDonorDnaSample(meta), 'donor'] },
         )
         .flatMap { meta, meta_sample, sample_type ->
             meta_sample

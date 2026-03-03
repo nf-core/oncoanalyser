@@ -3,7 +3,7 @@
 //
 
 import Constants
-import Utils
+import Inputs
 
 include { CIDER } from '../../../modules/local/cider/main'
 
@@ -32,8 +32,8 @@ workflow CIDER_CALLING {
         .map { meta, bam, bai ->
             return [
                 meta,
-                Utils.overrideWithExistingInput(bam, meta, Constants.INPUT.BAM_REDUX_DNA_TUMOR),
-                Utils.fallbackToExistingInput(bai, meta, Constants.INPUT.BAI_DNA_TUMOR),
+                Inputs.overrideWithExistingInput(bam, meta, Constants.INPUT.BAM_REDUX_DNA_TUMOR),
+                Inputs.fallbackToExistingInput(bai, meta, Constants.INPUT.BAI_DNA_TUMOR),
             ]
         }
         .branch { meta, bam, bai ->
@@ -48,8 +48,8 @@ workflow CIDER_CALLING {
         .map { meta, bam, bai ->
             return [
                 meta,
-                Utils.overrideWithExistingInput(bam, meta, Constants.INPUT.BAM_RNA_TUMOR),
-                Utils.fallbackToExistingInput(bai, meta, Constants.INPUT.BAI_RNA_TUMOR),
+                Inputs.overrideWithExistingInput(bam, meta, Constants.INPUT.BAM_RNA_TUMOR),
+                Inputs.fallbackToExistingInput(bai, meta, Constants.INPUT.BAI_RNA_TUMOR),
             ]
         }
         .branch { meta, bam, bai ->
@@ -62,8 +62,8 @@ workflow CIDER_CALLING {
     // channel: [ meta_cider, bam, bai ]
     ch_cider_inputs = Channel.empty()
         .mix(
-            ch_inputs_tumor_dna_sorted.runnable.map { meta, bam, bai -> [meta, Utils.getTumorDnaSample(meta), bam, bai] },
-            ch_inputs_tumor_rna_sorted.runnable.map { meta, bam, bai -> [meta, Utils.getTumorRnaSample(meta), bam, bai] },
+            ch_inputs_tumor_dna_sorted.runnable.map { meta, bam, bai -> [meta, Inputs.getTumorDnaSample(meta), bam, bai] },
+            ch_inputs_tumor_rna_sorted.runnable.map { meta, bam, bai -> [meta, Inputs.getTumorRnaSample(meta), bam, bai] },
         )
         .map { meta, meta_sample, bam, bai ->
 

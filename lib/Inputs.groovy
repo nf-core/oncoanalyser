@@ -1,8 +1,4 @@
-//
-// This file holds several Groovy functions that could be useful for any Nextflow pipeline
-//
-
-class Utils {
+class Inputs {
 
     // Sample records
     public static getTumorDnaSample(meta) {

@@ -9,7 +9,6 @@ import nextflow.Nextflow
 
 import Constants
 import Processes
-import Utils
 
 class WorkflowOncoanalyser {
 

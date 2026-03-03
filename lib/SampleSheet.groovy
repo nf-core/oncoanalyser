@@ -365,19 +365,19 @@ class SampleSheet {
     private static void disallowInvalidSampleCombinations(meta, run_mode, log) {
 
         // Do not allow normal DNA only
-        if (Utils.hasNormalDna(meta) && !Utils.hasTumorDna(meta)) {
+        if (Inputs.hasNormalDna(meta) && !Inputs.hasTumorDna(meta)) {
             log.error "found only normal DNA input for ${meta.group_id} but germline only analysis is not supported"
             Nextflow.exit(1)
         }
 
         // Do not allow CRAM RNA input
-        if (Utils.hasTumorRnaBam(meta) && Utils.getTumorRnaBam(meta).toString().endsWith('cram')) {
+        if (Inputs.hasTumorRnaBam(meta) && Inputs.getTumorRnaBam(meta).toString().endsWith('cram')) {
             log.error "found tumor RNA CRAM input for ${meta.group_id} but RNA CRAM input is not supported"
             Nextflow.exit(1)
         }
 
         // Do not allow donor sample without normal sample
-        if (Utils.hasDonorDna(meta) && !Utils.hasNormalDna(meta)) {
+        if (Inputs.hasDonorDna(meta) && !Inputs.hasNormalDna(meta)) {
             log.error "a donor sample but not normal sample was found for ${meta.group_id}\n\n" +
                 "Analysis with a donor sample requires a normal sample."
             Nextflow.exit(1)
@@ -387,14 +387,14 @@ class SampleSheet {
         if (run_mode === Constants.RunMode.TARGETED) {
 
             // Do not allow donor DNA
-            if (Utils.hasDonorDna(meta)) {
+            if (Inputs.hasDonorDna(meta)) {
                 log.error "targeted mode is not compatible with the donor DNA BAM/CRAM provided for ${meta.group_id}\n\n" +
                     "The targeted workflow supports only tumor and normal DNA BAM/CRAMs (and tumor RNA BAM/CRAMs for TSO500)"
                 Nextflow.exit(1)
             }
 
             // Do not allow only tumor RNA
-            if (Utils.hasTumorRna(meta) && !Utils.hasTumorDna(meta)) {
+            if (Inputs.hasTumorRna(meta) && !Inputs.hasTumorDna(meta)) {
                 log.error "targeted mode is not compatible with only tumor RNA provided for ${meta.group_id}\n\n" +
                     "The targeted workflow requires tumor DNA and can optionally take tumor RNA, depending on " +
                     "the configured panel."
@@ -409,7 +409,7 @@ class SampleSheet {
         def meta_tumor_dna = meta.getOrDefault([Constants.SampleType.TUMOR, Constants.SequenceType.DNA], [:])
         def longitudinal = meta_tumor_dna.containsKey('longitudinal_sample_id')
         def has_amber_dir = meta_tumor_dna.containsKey(Constants.FileType.AMBER_DIR)
-        def has_normal_dna_bam = Utils.hasNormalDnaBam(meta) || Utils.hasNormalDnaReduxBam(meta)
+        def has_normal_dna_bam = Inputs.hasNormalDnaBam(meta) || Inputs.hasNormalDnaReduxBam(meta)
 
         if (longitudinal && has_amber_dir && !has_normal_dna_bam) {
             log.error "AMBER input was provided without the required primary normal DNA BAM for ${meta.group_id}"

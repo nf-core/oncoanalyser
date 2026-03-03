@@ -3,7 +3,7 @@
 //
 
 import Constants
-import Utils
+import Inputs
 
 include { PURPLE } from '../../../modules/local/purple/main'
 
@@ -53,11 +53,11 @@ workflow PURPLE_CALLING {
             // NOTE(SW): avoiding further complexity with loops etc
 
             def inputs = [
-                Utils.overrideWithExistingInput(d[1], meta, Constants.INPUT.AMBER_DIR),
-                Utils.overrideWithExistingInput(d[2], meta, Constants.INPUT.COBALT_DIR),
-                Utils.overrideWithExistingInput(d[3], meta, Constants.INPUT.PAVE_DIR_TUMOR),
-                Utils.overrideWithExistingInput(d[4], meta, Constants.INPUT.PAVE_DIR_NORMAL),
-                Utils.overrideWithExistingInput(d[5], meta, Constants.INPUT.ESVEE_DIR),
+                Inputs.overrideWithExistingInput(d[1], meta, Constants.INPUT.AMBER_DIR),
+                Inputs.overrideWithExistingInput(d[2], meta, Constants.INPUT.COBALT_DIR),
+                Inputs.overrideWithExistingInput(d[3], meta, Constants.INPUT.PAVE_DIR_TUMOR),
+                Inputs.overrideWithExistingInput(d[4], meta, Constants.INPUT.PAVE_DIR_NORMAL),
+                Inputs.overrideWithExistingInput(d[5], meta, Constants.INPUT.ESVEE_DIR),
             ]
 
             return [meta, *inputs]
@@ -72,7 +72,7 @@ workflow PURPLE_CALLING {
             def amber_dir = d[1]
             def cobalt_dir = d[2]
 
-            def has_existing = Utils.hasExistingInput(meta, Constants.INPUT.PURPLE_DIR)
+            def has_existing = Inputs.hasExistingInput(meta, Constants.INPUT.PURPLE_DIR)
 
             runnable: amber_dir && cobalt_dir && !has_existing
             skip: true
@@ -90,11 +90,11 @@ workflow PURPLE_CALLING {
             def meta_purple = [
                 key: meta.group_id,
                 id: meta.group_id,
-                tumor_id: Utils.getTumorDnaSampleName(meta),
+                tumor_id: Inputs.getTumorDnaSampleName(meta),
             ]
 
-            if (Utils.hasNormalDna(meta)) {
-                meta_purple.normal_id = Utils.getNormalDnaSampleName(meta)
+            if (Inputs.hasNormalDna(meta)) {
+                meta_purple.normal_id = Inputs.getNormalDnaSampleName(meta)
             }
 
             return [meta_purple, *inputs]

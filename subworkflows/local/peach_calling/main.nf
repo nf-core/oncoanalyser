@@ -3,7 +3,7 @@
 //
 
 import Constants
-import Utils
+import Inputs
 
 include { PEACH } from '../../../modules/local/peach/main'
 
@@ -30,13 +30,13 @@ workflow PEACH_CALLING {
         .map { meta, purple_dir ->
             return [
                 meta,
-                Utils.overrideWithExistingInput(purple_dir, meta, Constants.INPUT.PURPLE_DIR),
+                Inputs.overrideWithExistingInput(purple_dir, meta, Constants.INPUT.PURPLE_DIR),
             ]
         }
         .branch { meta, purple_dir ->
 
-            def has_normal = Utils.hasNormalDna(meta)
-            def has_existing = Utils.hasExistingInput(meta, Constants.INPUT.PEACH_DIR)
+            def has_normal = Inputs.hasNormalDna(meta)
+            def has_existing = Inputs.hasExistingInput(meta, Constants.INPUT.PEACH_DIR)
 
             runnable: purple_dir && has_normal && !has_existing
             skip: true
@@ -51,10 +51,10 @@ workflow PEACH_CALLING {
             def meta_peach = [
                 key: meta.group_id,
                 id: meta.group_id,
-                sample_id: Utils.getNormalDnaSampleName(meta),
+                sample_id: Inputs.getNormalDnaSampleName(meta),
             ]
 
-            def purple_germline_smlv_vcf = Utils.getPurpleGermlineVcf(meta, purple_dir)
+            def purple_germline_smlv_vcf = Inputs.getPurpleGermlineVcf(meta, purple_dir)
 
             return [meta_peach, purple_germline_smlv_vcf]
         }

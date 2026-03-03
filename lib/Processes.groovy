@@ -1,7 +1,7 @@
 import nextflow.Nextflow
 
 import Constants
-import Utils
+import Inputs
 
 
 class Processes {

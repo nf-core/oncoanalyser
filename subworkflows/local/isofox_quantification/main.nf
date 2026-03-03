@@ -3,7 +3,7 @@
 //
 
 import Constants
-import Utils
+import Inputs
 
 include { ISOFOX } from '../../../modules/local/isofox/run/main'
 
@@ -42,12 +42,12 @@ workflow ISOFOX_QUANTIFICATION {
         .map { meta, tumor_bam, tumor_bai ->
             return [
                 meta,
-                Utils.overrideWithExistingInput(tumor_bam, meta, Constants.INPUT.BAM_RNA_TUMOR),
-                Utils.overrideWithExistingInput(tumor_bai, meta, Constants.INPUT.BAI_RNA_TUMOR),
+                Inputs.overrideWithExistingInput(tumor_bam, meta, Constants.INPUT.BAM_RNA_TUMOR),
+                Inputs.overrideWithExistingInput(tumor_bai, meta, Constants.INPUT.BAI_RNA_TUMOR),
             ]
         }
         .branch { meta, tumor_bam, tumor_bai ->
-            def has_existing = Utils.hasExistingInput(meta, Constants.INPUT.ISOFOX_DIR)
+            def has_existing = Inputs.hasExistingInput(meta, Constants.INPUT.ISOFOX_DIR)
             runnable: tumor_bam && !has_existing
             skip: true
                 return meta
@@ -61,7 +61,7 @@ workflow ISOFOX_QUANTIFICATION {
             def meta_isofox = [
                 key: meta.group_id,
                 id: meta.group_id,
-                sample_id: Utils.getTumorRnaSampleName(meta),
+                sample_id: Inputs.getTumorRnaSampleName(meta),
             ]
 
             return [meta_isofox, tumor_bam, tumor_bai]

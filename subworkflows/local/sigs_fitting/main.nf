@@ -3,7 +3,7 @@
 //
 
 import Constants
-import Utils
+import Inputs
 
 include { SIGS } from '../../../modules/local/sigs/main'
 
@@ -25,7 +25,7 @@ workflow SIGS_FITTING {
     // channel: [ meta, purple_dir ]
     ch_inputs_selected = ch_purple
         .map { meta, purple_dir ->
-            return [meta, Utils.overrideWithExistingInput(purple_dir, meta, Constants.INPUT.PURPLE_DIR)]
+            return [meta, Inputs.overrideWithExistingInput(purple_dir, meta, Constants.INPUT.PURPLE_DIR)]
         }
 
     // Sort inputs
@@ -34,14 +34,14 @@ workflow SIGS_FITTING {
     ch_inputs_sorted = ch_inputs_selected
         .branch { meta, purple_dir ->
 
-            def has_tumor_normal_dna = Utils.hasTumorDna(meta) && Utils.hasNormalDna(meta)
+            def has_tumor_normal_dna = Inputs.hasTumorDna(meta) && Inputs.hasNormalDna(meta)
 
             def has_smlv_vcf = []
             if (has_tumor_normal_dna) {
-                has_smlv_vcf = purple_dir ? Utils.getPurpleSomaticVcf(meta, purple_dir) : []
+                has_smlv_vcf = purple_dir ? Inputs.getPurpleSomaticVcf(meta, purple_dir) : []
             }
 
-            def has_existing = Utils.hasExistingInput(meta, Constants.INPUT.SIGS_DIR)
+            def has_existing = Inputs.hasExistingInput(meta, Constants.INPUT.SIGS_DIR)
 
             runnable: has_tumor_normal_dna && purple_dir && has_smlv_vcf && !has_existing
             skip: true
@@ -53,7 +53,7 @@ workflow SIGS_FITTING {
     ch_sigs_inputs = ch_inputs_sorted.runnable
         .map { meta, purple_dir ->
 
-            def tumor_id = Utils.getTumorDnaSampleName(meta)
+            def tumor_id = Inputs.getTumorDnaSampleName(meta)
 
             def meta_sigs = [
                 key: meta.group_id,
@@ -61,7 +61,7 @@ workflow SIGS_FITTING {
                 sample_id: tumor_id,
             ]
 
-            def smlv_vcf = Utils.getPurpleSomaticVcf(meta, purple_dir)
+            def smlv_vcf = Inputs.getPurpleSomaticVcf(meta, purple_dir)
 
             return [meta_sigs, smlv_vcf]
         }

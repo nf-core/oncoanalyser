@@ -49,22 +49,22 @@ workflow QSEE_METRICS {
             inputs.meta = meta
 
             inputs.redux_tumor_tsv = [
-                Utils.fallbackToExistingInput(tumor_bqr_tsv, meta, Constants.INPUT.REDUX_BQR_TSV_TUMOR),
-                Utils.fallbackToExistingInput(tumor_dup_freq_tsv, meta, Constants.INPUT.REDUX_DUP_FREQ_TSV_TUMOR),
-                Utils.fallbackToExistingInput(tumor_ms_tsv, meta, Constants.INPUT.REDUX_MS_TSV_TUMOR),
+                Inputs.fallbackToExistingInput(tumor_bqr_tsv, meta, Constants.INPUT.REDUX_BQR_TSV_TUMOR),
+                Inputs.fallbackToExistingInput(tumor_dup_freq_tsv, meta, Constants.INPUT.REDUX_DUP_FREQ_TSV_TUMOR),
+                Inputs.fallbackToExistingInput(tumor_ms_tsv, meta, Constants.INPUT.REDUX_MS_TSV_TUMOR),
             ].findAll { it != [] }
 
             inputs.redux_normal_tsv = [
-                Utils.fallbackToExistingInput(normal_bqr_tsv, meta, Constants.INPUT.REDUX_BQR_TSV_NORMAL),
-                Utils.fallbackToExistingInput(normal_dup_freq_tsv, meta, Constants.INPUT.REDUX_DUP_FREQ_TSV_NORMAL),
-                Utils.fallbackToExistingInput(normal_ms_tsv, meta, Constants.INPUT.REDUX_MS_TSV_NORMAL),
+                Inputs.fallbackToExistingInput(normal_bqr_tsv, meta, Constants.INPUT.REDUX_BQR_TSV_NORMAL),
+                Inputs.fallbackToExistingInput(normal_dup_freq_tsv, meta, Constants.INPUT.REDUX_DUP_FREQ_TSV_NORMAL),
+                Inputs.fallbackToExistingInput(normal_ms_tsv, meta, Constants.INPUT.REDUX_MS_TSV_NORMAL),
             ].findAll { it != [] }
 
-            inputs.bamtools_tumor_dir = Utils.overrideWithExistingInput(bamtools_tumor_dir, meta, Constants.INPUT.BAMTOOLS_DIR_TUMOR)
-            inputs.bamtools_normal_dir = Utils.overrideWithExistingInput(bamtools_normal_dir, meta, Constants.INPUT.BAMTOOLS_DIR_NORMAL)
-            inputs.cobalt_dir = Utils.overrideWithExistingInput(cobalt_dir, meta, Constants.INPUT.COBALT_DIR)
-            inputs.esvee_dir = Utils.overrideWithExistingInput(esvee_dir, meta, Constants.INPUT.ESVEE_DIR)
-            inputs.purple_dir = Utils.overrideWithExistingInput(purple_dir, meta, Constants.INPUT.PURPLE_DIR)
+            inputs.bamtools_tumor_dir = Inputs.overrideWithExistingInput(bamtools_tumor_dir, meta, Constants.INPUT.BAMTOOLS_DIR_TUMOR)
+            inputs.bamtools_normal_dir = Inputs.overrideWithExistingInput(bamtools_normal_dir, meta, Constants.INPUT.BAMTOOLS_DIR_NORMAL)
+            inputs.cobalt_dir = Inputs.overrideWithExistingInput(cobalt_dir, meta, Constants.INPUT.COBALT_DIR)
+            inputs.esvee_dir = Inputs.overrideWithExistingInput(esvee_dir, meta, Constants.INPUT.ESVEE_DIR)
+            inputs.purple_dir = Inputs.overrideWithExistingInput(purple_dir, meta, Constants.INPUT.PURPLE_DIR)
 
             return inputs
         }
@@ -85,8 +85,8 @@ workflow QSEE_METRICS {
             def meta_qsee = [
                 key: meta.group_id,
                 id: meta.group_id,
-                tumor_id: Utils.getTumorDnaSampleName(meta),
-                normal_id: Utils.getNormalDnaSampleName(meta),
+                tumor_id: Inputs.getTumorDnaSampleName(meta),
+                normal_id: Inputs.getNormalDnaSampleName(meta),
             ]
 
             inputs.meta = meta_qsee

@@ -3,7 +3,7 @@
 //
 
 import Constants
-import Utils
+import Inputs
 
 include { LINXREPORT      } from '../../../modules/local/linxreport/main'
 include { LINX_VISUALISER } from '../../../modules/local/linx/visualiser/main'
@@ -42,15 +42,15 @@ workflow LINX_PLOTTING {
 
             return [
                 meta,
-                Utils.overrideWithExistingInput(annotation_dir, meta, Constants.INPUT.LINX_ANNO_DIR_TUMOR),
-                Utils.overrideWithExistingInput(amber_dir, meta, Constants.INPUT.AMBER_DIR),
-                Utils.overrideWithExistingInput(cobalt_dir, meta, Constants.INPUT.COBALT_DIR),
-                Utils.overrideWithExistingInput(purple_dir, meta, Constants.INPUT.PURPLE_DIR),
+                Inputs.overrideWithExistingInput(annotation_dir, meta, Constants.INPUT.LINX_ANNO_DIR_TUMOR),
+                Inputs.overrideWithExistingInput(amber_dir, meta, Constants.INPUT.AMBER_DIR),
+                Inputs.overrideWithExistingInput(cobalt_dir, meta, Constants.INPUT.COBALT_DIR),
+                Inputs.overrideWithExistingInput(purple_dir, meta, Constants.INPUT.PURPLE_DIR),
             ]
         }
         .branch { meta, annotation_dir, amber_dir, cobalt_dir, purple_dir ->
 
-            def has_existing = Utils.hasExistingInput(meta, Constants.INPUT.LINX_PLOT_DIR_TUMOR)
+            def has_existing = Inputs.hasExistingInput(meta, Constants.INPUT.LINX_PLOT_DIR_TUMOR)
 
             runnable: annotation_dir && !has_existing
             skip: true
@@ -68,7 +68,7 @@ workflow LINX_PLOTTING {
             def meta_linx = [
                 key: meta.group_id,
                 id: meta.group_id,
-                sample_id: Utils.getTumorDnaSampleName(meta),
+                sample_id: Inputs.getTumorDnaSampleName(meta),
             ]
 
             return [meta_linx, annotation_dir, amber_dir, cobalt_dir, purple_dir]
@@ -100,7 +100,7 @@ workflow LINX_PLOTTING {
             def meta_gpgr_linx = [
                 key: meta.group_id,
                 id: meta.group_id,
-                sample_id: Utils.getTumorDnaSampleName(meta),
+                sample_id: Inputs.getTumorDnaSampleName(meta),
             ]
 
             return [meta_gpgr_linx, annotation_dir, visualiser_dir]

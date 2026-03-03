@@ -3,7 +3,7 @@
 //
 
 import Constants
-import Utils
+import Inputs
 
 include { NEO_ANNOTATE_FUSIONS } from '../../../modules/local/neo/annotate_fusions/main'
 include { NEO_FINDER           } from '../../../modules/local/neo/finder/main'
@@ -48,8 +48,8 @@ workflow NEO_PREDICTION {
         .map { meta, purple_dir, linx_annotation_dir ->
 
             def inputs = [
-                Utils.overrideWithExistingInput(purple_dir, meta, Constants.INPUT.PURPLE_DIR),
-                Utils.overrideWithExistingInput(linx_annotation_dir, meta, Constants.INPUT.LINX_ANNO_DIR_TUMOR),
+                Inputs.overrideWithExistingInput(purple_dir, meta, Constants.INPUT.PURPLE_DIR),
+                Inputs.overrideWithExistingInput(linx_annotation_dir, meta, Constants.INPUT.LINX_ANNO_DIR_TUMOR),
             ]
 
             return [meta, *inputs]
@@ -61,7 +61,7 @@ workflow NEO_PREDICTION {
     ch_finder_inputs_sorted = ch_finder_inputs_selected
         .branch { meta, purple_dir, linx_annotation_dir ->
 
-            def has_normal_dna = Utils.hasNormalDna(meta)
+            def has_normal_dna = Inputs.hasNormalDna(meta)
 
             def has_runnable_inputs = purple_dir && linx_annotation_dir && has_normal_dna
 
@@ -78,7 +78,7 @@ workflow NEO_PREDICTION {
             def meta_finder = [
                 key: meta.group_id,
                 id: meta.group_id,
-                sample_id: Utils.getTumorDnaSampleName(meta),
+                sample_id: Inputs.getTumorDnaSampleName(meta),
             ]
 
             return [meta_finder, purple_dir, linx_annotation_dir]
@@ -115,12 +115,12 @@ workflow NEO_PREDICTION {
             return [
                 meta,
                 neo_finder_dir,
-                Utils.overrideWithExistingInput(tumor_bam, meta, Constants.INPUT.BAM_RNA_TUMOR),
-                Utils.overrideWithExistingInput(tumor_bai, meta, Constants.INPUT.BAI_RNA_TUMOR),
+                Inputs.overrideWithExistingInput(tumor_bam, meta, Constants.INPUT.BAM_RNA_TUMOR),
+                Inputs.overrideWithExistingInput(tumor_bai, meta, Constants.INPUT.BAI_RNA_TUMOR),
             ]
         }
         .branch { meta, neo_finder_dir, tumor_bam, tumor_bai ->
-            runnable: Utils.hasTumorRna(meta)
+            runnable: Inputs.hasTumorRna(meta)
                 return [meta, neo_finder_dir, tumor_bam, tumor_bai]
             skip: true
                 return meta
@@ -134,7 +134,7 @@ workflow NEO_PREDICTION {
             def meta_isofox = [
                 key: meta.group_id,
                 id: meta.group_id,
-                sample_id: Utils.getTumorDnaSampleName(meta),
+                sample_id: Inputs.getTumorDnaSampleName(meta),
             ]
 
             return [meta_isofox, neo_finder_dir, tumor_bam_rna, tumor_bai_rna]
@@ -179,23 +179,23 @@ workflow NEO_PREDICTION {
             def meta_scorer = [
                 key: meta.group_id,
                 id: meta.group_id,
-                sample_id: Utils.getTumorDnaSampleName(meta, 'primary'),
+                sample_id: Inputs.getTumorDnaSampleName(meta, 'primary'),
                 cancer_type: meta[Constants.InfoField.CANCER_TYPE],
             ]
 
             def sage_somatic_append_vcf = []
-            if (Utils.hasTumorRna(meta)) {
-                meta_scorer.sample_rna_id = Utils.getTumorRnaSampleName(meta)
+            if (Inputs.hasTumorRna(meta)) {
+                meta_scorer.sample_rna_id = Inputs.getTumorRnaSampleName(meta)
 
-                def sage_somatic_append_selected = Utils.overrideWithExistingInput(sage_somatic_append, meta, Constants.INPUT.SAGE_APPEND_DIR_TUMOR)
+                def sage_somatic_append_selected = Inputs.overrideWithExistingInput(sage_somatic_append, meta, Constants.INPUT.SAGE_APPEND_DIR_TUMOR)
                 sage_somatic_append_vcf = file(sage_somatic_append_selected).resolve("${meta_scorer.sample_id}.sage.append.vcf.gz")
             }
 
             def inputs = [
-                Utils.overrideWithExistingInput(isofox_dir, meta, Constants.INPUT.ISOFOX_DIR),
-                Utils.overrideWithExistingInput(purple_dir, meta, Constants.INPUT.PURPLE_DIR),
+                Inputs.overrideWithExistingInput(isofox_dir, meta, Constants.INPUT.ISOFOX_DIR),
+                Inputs.overrideWithExistingInput(purple_dir, meta, Constants.INPUT.PURPLE_DIR),
                 sage_somatic_append_vcf,
-                Utils.overrideWithExistingInput(lilac_dir, meta, Constants.INPUT.LILAC_DIR),
+                Inputs.overrideWithExistingInput(lilac_dir, meta, Constants.INPUT.LILAC_DIR),
                 neo_finder_dir,
                 annotated_fusions,
             ]

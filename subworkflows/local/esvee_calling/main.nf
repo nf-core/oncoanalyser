@@ -3,7 +3,7 @@
 //
 
 import Constants
-import Utils
+import Inputs
 
 import java.nio.channels.Channel
 
@@ -46,14 +46,14 @@ workflow ESVEE_CALLING {
         .map { meta, tumor_bam, tumor_bai, normal_bam, normal_bai ->
             return [
                 meta,
-                Utils.overrideWithExistingInput(tumor_bam, meta, Constants.INPUT.BAM_REDUX_DNA_TUMOR),
-                Utils.fallbackToExistingInput(tumor_bai, meta, Constants.INPUT.BAI_DNA_TUMOR),
-                Utils.overrideWithExistingInput(normal_bam, meta, Constants.INPUT.BAM_REDUX_DNA_NORMAL),
-                Utils.fallbackToExistingInput(normal_bai, meta, Constants.INPUT.BAI_DNA_NORMAL),
+                Inputs.overrideWithExistingInput(tumor_bam, meta, Constants.INPUT.BAM_REDUX_DNA_TUMOR),
+                Inputs.fallbackToExistingInput(tumor_bai, meta, Constants.INPUT.BAI_DNA_TUMOR),
+                Inputs.overrideWithExistingInput(normal_bam, meta, Constants.INPUT.BAM_REDUX_DNA_NORMAL),
+                Inputs.fallbackToExistingInput(normal_bai, meta, Constants.INPUT.BAI_DNA_NORMAL),
             ]
         }
         .branch { meta, tumor_bam, tumor_bai, normal_bam, normal_bai ->
-            def has_existing = Utils.hasExistingInput(meta, Constants.INPUT.ESVEE_DIR)
+            def has_existing = Inputs.hasExistingInput(meta, Constants.INPUT.ESVEE_DIR)
 
             runnable_tn: tumor_bam && normal_bam && !has_existing
             runnable_to: tumor_bam && !has_existing
@@ -73,11 +73,11 @@ workflow ESVEE_CALLING {
             def meta_esvee = [
                 key: meta.group_id,
                 id: meta.group_id,
-                tumor_id: Utils.getTumorDnaSampleName(meta),
+                tumor_id: Inputs.getTumorDnaSampleName(meta),
             ]
 
             if (normal_bam) {
-                meta_esvee.normal_id = Utils.getNormalDnaSampleName(meta)
+                meta_esvee.normal_id = Inputs.getNormalDnaSampleName(meta)
             }
 
             return [meta_esvee, tumor_bam, tumor_bai, normal_bam, normal_bai]

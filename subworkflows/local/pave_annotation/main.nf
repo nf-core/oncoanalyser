@@ -3,7 +3,7 @@
 //
 
 import Constants
-import Utils
+import Inputs
 
 include { PAVE_GERMLINE } from '../../../modules/local/pave/germline/main'
 include { PAVE_SOMATIC  } from '../../../modules/local/pave/somatic/main'
@@ -46,15 +46,15 @@ workflow PAVE_ANNOTATION {
         .map { meta, sage_vcf, sage_tbi ->
             return [
                 meta,
-                Utils.overrideWithExistingInput(sage_vcf, meta, Constants.INPUT.SAGE_VCF_NORMAL),
-                Utils.overrideWithExistingInput(sage_tbi, meta, Constants.INPUT.SAGE_VCF_TBI_NORMAL),
+                Inputs.overrideWithExistingInput(sage_vcf, meta, Constants.INPUT.SAGE_VCF_NORMAL),
+                Inputs.overrideWithExistingInput(sage_tbi, meta, Constants.INPUT.SAGE_VCF_TBI_NORMAL),
             ]
         }
         .branch { meta, sage_vcf, sage_tbi ->
 
-            def has_existing = Utils.hasExistingInput(meta, Constants.INPUT.PAVE_DIR_NORMAL)
+            def has_existing = Inputs.hasExistingInput(meta, Constants.INPUT.PAVE_DIR_NORMAL)
 
-            runnable: Utils.hasTumorDna(meta) && Utils.hasNormalDna(meta) && sage_vcf && !has_existing
+            runnable: Inputs.hasTumorDna(meta) && Inputs.hasNormalDna(meta) && sage_vcf && !has_existing
             skip: true
                 return meta
         }
@@ -67,7 +67,7 @@ workflow PAVE_ANNOTATION {
             def meta_pave = [
                 key: meta.group_id,
                 id: meta.group_id,
-                sample_id: Utils.getTumorDnaSampleName(meta),
+                sample_id: Inputs.getTumorDnaSampleName(meta),
             ]
 
             return [meta_pave, sage_vcf, sage_tbi]
@@ -100,15 +100,15 @@ workflow PAVE_ANNOTATION {
         .map { meta, sage_vcf, sage_tbi ->
             return [
                 meta,
-                Utils.overrideWithExistingInput(sage_vcf, meta, Constants.INPUT.SAGE_VCF_TUMOR),
-                Utils.overrideWithExistingInput(sage_tbi, meta, Constants.INPUT.SAGE_VCF_TBI_TUMOR),
+                Inputs.overrideWithExistingInput(sage_vcf, meta, Constants.INPUT.SAGE_VCF_TUMOR),
+                Inputs.overrideWithExistingInput(sage_tbi, meta, Constants.INPUT.SAGE_VCF_TBI_TUMOR),
             ]
         }
         .branch { meta, sage_vcf, sage_tbi ->
 
-            def has_existing = Utils.hasExistingInput(meta, Constants.INPUT.PAVE_DIR_TUMOR)
+            def has_existing = Inputs.hasExistingInput(meta, Constants.INPUT.PAVE_DIR_TUMOR)
 
-            runnable: Utils.hasTumorDna(meta) && sage_vcf && !has_existing
+            runnable: Inputs.hasTumorDna(meta) && sage_vcf && !has_existing
             skip: true
                 return meta
         }
@@ -121,7 +121,7 @@ workflow PAVE_ANNOTATION {
             def meta_pave = [
                 key: meta.group_id,
                 id: meta.group_id,
-                sample_id: Utils.getTumorDnaSampleName(meta),
+                sample_id: Inputs.getTumorDnaSampleName(meta),
             ]
 
             return [meta_pave, sage_vcf, sage_tbi]
