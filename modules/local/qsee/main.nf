@@ -9,8 +9,8 @@ process QSEE {
 
     input:
     tuple val(meta),
-        path(redux_somatic_dir, stageAs: 'redux_somatic'),
-        path(redux_germline_dir, stageAs: 'redux_germline'),
+        path(redux_somatic_tsv, stageAs: { "redux_somatic/${it.name}" }),
+        path(redux_germline_tsv, stageAs: { "redux_germline/${it.name}" }),
         path(bamtools_somatic_dir, stageAs: 'bamtools_somatic'),
         path(bamtools_germline_dir, stageAs: 'bamtools_germline'),
         path(cobalt_dir),
@@ -45,22 +45,22 @@ process QSEE {
     mkdir -p qsee/
 
     qsee \\
-    -Xmx${Math.round(task.memory.bytes * xmx_mod)} \\
-    ${args} \\
-    -tumor ${meta.tumor_id} \\
-    ${reference_arg} \\
-    -redux_tumor_dir ${redux_somatic_dir} \\
-    ${redux_ref_dir_arg} \\
-    -tumor_metrics_dir ${bamtools_somatic_dir} \\
-    ${bamtools_ref_dir_arg} \\
-    ${cobalt_dir_arg} \\
-    ${esvee_dir_arg} \\
-    -purple_dir ${purple_dir} \\
-    -driver_gene_panel ${driver_gene_panel} \\
-    -cohort_percentiles_file ${cohort_percentiles} \\
-    -allow_missing_input \\
-    ${log_level_arg} \\
-    -output_dir \$(realpath qsee/)
+        -Xmx${Math.round(task.memory.bytes * xmx_mod)} \\
+        ${args} \\
+        -tumor ${meta.tumor_id} \\
+        ${reference_arg} \\
+        -redux_tumor_dir ${redux_somatic_dir} \\
+        ${redux_ref_dir_arg} \\
+        -tumor_metrics_dir ${bamtools_somatic_dir} \\
+        ${bamtools_ref_dir_arg} \\
+        ${cobalt_dir_arg} \\
+        ${esvee_dir_arg} \\
+        -purple_dir ${purple_dir} \\
+        -driver_gene_panel ${driver_gene_panel} \\
+        -cohort_percentiles_file ${cohort_percentiles} \\
+        -allow_missing_input \\
+        ${log_level_arg} \\
+        -output_dir \$(realpath qsee/)
 
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":
