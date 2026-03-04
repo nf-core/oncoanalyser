@@ -66,31 +66,21 @@ class WorkflowOncoanalyser {
     public static groupByMeta(... channels) {
         return groupByMeta([:], *channels)
     }
-    
-    private static joinMeta(Map named_args, ch_a, ch_b) {
-        // NOTE(SW): the cross operator is used to allow many-to-one relationship between ch_output
-        // and ch_metas
-        def key_a = named_args.getOrDefault('key_a', 'group_id')
-        def key_b = named_args.getOrDefault('key_b', 'key')
-        def ch_ready_a = ch_a.map { [it[0].getAt(key_b), it[1..-1]] }
-        def ch_ready_b = ch_b.map { meta -> [meta.getAt(key_a), meta] }
+
+    public static restoreMeta(ch_output, ch_metas) {
+        // NOTE(SW): ch_output must contain a Map in the first position with a key named 'key' that
+        // contains the corresponding meta.id value, for example: [val(meta_process), *process_outputs]
+
+        def ch_ready_a = ch_output.map { [it[0].getAt('key'), it[1..-1]] }
+        def ch_ready_b = ch_metas.map { meta -> [meta.getAt('group_id'), meta] }
         return ch_ready_b
+            // NOTE(SW): the cross operator is used to allow many-to-one relationship between ch_output
+            // and ch_metas
             .cross(ch_ready_a)
             .map { b, a ->
                 def (ka, values) = a
                 def (kb, meta) = b
                 return [meta, *values]
             }
-    }
-
-    // NOTE(SW): function signature required to catch where no named arguments are passed
-    private static joinMeta(ch_output, ch_metas) {
-        joinMeta([:], ch_output, ch_metas)
-    }
-
-    public static restoreMeta(ch_output, ch_metas) {
-        // NOTE(SW): ch_output must contain a Map in the first position with a key named 'key' that
-        // contains the corresponding meta.id value, for example: [val(meta_process), *process_outputs]
-        joinMeta([:], ch_output, ch_metas)
     }
 }
