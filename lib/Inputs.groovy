@@ -204,11 +204,11 @@ class Inputs {
     public static getInput(meta, key) {
 
         def result = []
-        def (key_filetype, key_filetypes, key_sequencetypes) = key
+        def (file_type, sample_types, sequence_type) = key
 
-        for (key_sample in [key_filetypes, key_sequencetypes].combinations()) {
-            if (meta.containsKey(key_sample) && meta[key_sample].containsKey(key_filetype)) {
-                result = meta[key_sample].get(key_filetype)
+        for (key_sample in [sample_types, sequence_type].combinations()) {
+            if (meta.containsKey(key_sample) && meta[key_sample].containsKey(file_type)) {
+                result = meta[key_sample].get(file_type)
                 break
             }
         }
