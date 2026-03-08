@@ -60,11 +60,11 @@ workflow QSEE_METRICS {
                 Inputs.fallbackToExistingInput(normal_ms_tsv, meta, Constants.INPUT.REDUX_MS_TSV_NORMAL),
             ].findAll { it != [] }
 
-            inputs.bamtools_tumor_dir = Inputs.overrideWithExistingInput(bamtools_tumor_dir, meta, Constants.INPUT.BAMTOOLS_DIR_TUMOR)
-            inputs.bamtools_normal_dir = Inputs.overrideWithExistingInput(bamtools_normal_dir, meta, Constants.INPUT.BAMTOOLS_DIR_NORMAL)
-            inputs.cobalt_dir = Inputs.overrideWithExistingInput(cobalt_dir, meta, Constants.INPUT.COBALT_DIR)
-            inputs.esvee_dir = Inputs.overrideWithExistingInput(esvee_dir, meta, Constants.INPUT.ESVEE_DIR)
-            inputs.purple_dir = Inputs.overrideWithExistingInput(purple_dir, meta, Constants.INPUT.PURPLE_DIR)
+            inputs.bamtools_tumor_dir = Inputs.preferUserProvidedInput(bamtools_tumor_dir, meta, Constants.INPUT.BAMTOOLS_DIR_TUMOR)
+            inputs.bamtools_normal_dir = Inputs.preferUserProvidedInput(bamtools_normal_dir, meta, Constants.INPUT.BAMTOOLS_DIR_NORMAL)
+            inputs.cobalt_dir = Inputs.preferUserProvidedInput(cobalt_dir, meta, Constants.INPUT.COBALT_DIR)
+            inputs.esvee_dir = Inputs.preferUserProvidedInput(esvee_dir, meta, Constants.INPUT.ESVEE_DIR)
+            inputs.purple_dir = Inputs.preferUserProvidedInput(purple_dir, meta, Constants.INPUT.PURPLE_DIR)
 
             return inputs
         }

@@ -39,10 +39,10 @@ workflow LINX_PLOTTING {
 
             return [
                 meta,
-                Inputs.overrideWithExistingInput(annotation_dir, meta, Constants.INPUT.LINX_ANNO_DIR_TUMOR),
-                Inputs.overrideWithExistingInput(amber_dir, meta, Constants.INPUT.AMBER_DIR),
-                Inputs.overrideWithExistingInput(cobalt_dir, meta, Constants.INPUT.COBALT_DIR),
-                Inputs.overrideWithExistingInput(purple_dir, meta, Constants.INPUT.PURPLE_DIR),
+                Inputs.preferUserProvidedInput(annotation_dir, meta, Constants.INPUT.LINX_ANNO_DIR_TUMOR),
+                Inputs.preferUserProvidedInput(amber_dir, meta, Constants.INPUT.AMBER_DIR),
+                Inputs.preferUserProvidedInput(cobalt_dir, meta, Constants.INPUT.COBALT_DIR),
+                Inputs.preferUserProvidedInput(purple_dir, meta, Constants.INPUT.PURPLE_DIR),
             ]
         }
         .branch { meta, annotation_dir, amber_dir, cobalt_dir, purple_dir ->

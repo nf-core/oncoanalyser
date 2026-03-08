@@ -219,13 +219,10 @@ class Inputs {
         return getInput(meta, key) != []
     }
 
-    public static overrideWithExistingInput(val, meta, key) {
-        // Prefer files specified in the sample sheet over those created from the pipeline
-        if (hasExistingInput(meta, key)) {
-            return getInput(meta, key)
-        } else {
-            return val
-        }
+    public static preferUserProvidedInput(pipeline_path, meta, key) {
+        // Allows the pipeline to start from downstream steps, e.g. running ORANGE from existing pipeline outputs
+        def user_provided_path = getInput(meta, key)
+        return user_provided_path ?: pipeline_path
     }
 
     public static fallbackToExistingInput(val, meta, key) {

@@ -2,6 +2,9 @@
 // TEAL performs characterisation of telomeric features and rearrangements
 //
 
+import Constants
+import Utils
+
 include { TEAL_PREP     } from '../../../modules/local/teal/prep/main'
 include { TEAL_PIPELINE } from '../../../modules/local/teal/pipeline/main'
 
@@ -45,9 +48,9 @@ workflow TEAL_CHARACTERISATION {
 
             return [
                 meta,
-                Inputs.overrideWithExistingInput(tumor_bam, meta, Constants.INPUT.BAM_REDUX_DNA_TUMOR),
+                Inputs.preferUserProvidedInput(tumor_bam, meta, Constants.INPUT.BAM_REDUX_DNA_TUMOR),
                 Inputs.fallbackToExistingInput(tumor_bai, meta, Constants.INPUT.BAI_DNA_TUMOR),
-                Inputs.overrideWithExistingInput(normal_bam, meta, Constants.INPUT.BAM_REDUX_DNA_NORMAL),
+                Inputs.preferUserProvidedInput(normal_bam, meta, Constants.INPUT.BAM_REDUX_DNA_NORMAL),
                 Inputs.fallbackToExistingInput(normal_bai, meta, Constants.INPUT.BAI_DNA_NORMAL),
             ]
         }
@@ -118,10 +121,10 @@ workflow TEAL_CHARACTERISATION {
                 tumor_teal_bai,
                 normal_teal_bam,
                 normal_teal_bai,
-                Inputs.overrideWithExistingInput(tumor_metrics_dir, meta, Constants.INPUT.BAMTOOLS_DIR_TUMOR),
-                Inputs.overrideWithExistingInput(normal_metrics_dir, meta, Constants.INPUT.BAMTOOLS_DIR_NORMAL),
-                Inputs.overrideWithExistingInput(cobalt_dir, meta, Constants.INPUT.COBALT_DIR),
-                Inputs.overrideWithExistingInput(purple_dir, meta, Constants.INPUT.PURPLE_DIR),
+                Inputs.preferUserProvidedInput(tumor_metrics_dir, meta, Constants.INPUT.BAMTOOLS_DIR_TUMOR),
+                Inputs.preferUserProvidedInput(normal_metrics_dir, meta, Constants.INPUT.BAMTOOLS_DIR_NORMAL),
+                Inputs.preferUserProvidedInput(cobalt_dir, meta, Constants.INPUT.COBALT_DIR),
+                Inputs.preferUserProvidedInput(purple_dir, meta, Constants.INPUT.PURPLE_DIR),
             ]
         }
         .branch { meta, tumor_teal_bam, tumor_teal_bai, normal_teal_bam, normal_teal_bai, tumor_metrics_dir, normal_metrics_dir, cobalt_dir, purple_dir ->

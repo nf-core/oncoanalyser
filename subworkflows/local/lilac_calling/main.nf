@@ -38,9 +38,9 @@ workflow LILAC_CALLING {
         .map { meta, tumor_bam, tumor_bai, normal_bam, normal_bai ->
             return [
                 meta,
-                Inputs.overrideWithExistingInput(tumor_bam, meta, Constants.INPUT.BAM_REDUX_DNA_TUMOR),
+                Inputs.preferUserProvidedInput(tumor_bam, meta, Constants.INPUT.BAM_REDUX_DNA_TUMOR),
                 Inputs.fallbackToExistingInput(tumor_bai, meta, Constants.INPUT.BAI_DNA_TUMOR),
-                Inputs.overrideWithExistingInput(normal_bam, meta, Constants.INPUT.BAM_REDUX_DNA_NORMAL),
+                Inputs.preferUserProvidedInput(normal_bam, meta, Constants.INPUT.BAM_REDUX_DNA_NORMAL),
                 Inputs.fallbackToExistingInput(normal_bai, meta, Constants.INPUT.BAI_DNA_NORMAL),
             ]
         }
@@ -84,9 +84,9 @@ workflow LILAC_CALLING {
                 nbai_dna,
                 tbam_dna,
                 tbai_dna,
-                Inputs.overrideWithExistingInput(tbam_rna, meta, Constants.INPUT.BAM_RNA_TUMOR),
-                Inputs.overrideWithExistingInput(tbai_rna, meta, Constants.INPUT.BAI_RNA_TUMOR),
-                Inputs.overrideWithExistingInput(purple_dir, meta, Constants.INPUT.PURPLE_DIR),
+                Inputs.preferUserProvidedInput(tbam_rna, meta, Constants.INPUT.BAM_RNA_TUMOR),
+                Inputs.preferUserProvidedInput(tbai_rna, meta, Constants.INPUT.BAI_RNA_TUMOR),
+                Inputs.preferUserProvidedInput(purple_dir, meta, Constants.INPUT.PURPLE_DIR),
             ]
         }
 

@@ -29,7 +29,7 @@ workflow LINX_ANNOTATION {
         .map { meta, purple_dir ->
             return [
                 meta,
-                Inputs.overrideWithExistingInput(purple_dir, meta, Constants.INPUT.PURPLE_DIR),
+                Inputs.preferUserProvidedInput(purple_dir, meta, Constants.INPUT.PURPLE_DIR),
             ]
         }
         .branch { meta, purple_dir ->

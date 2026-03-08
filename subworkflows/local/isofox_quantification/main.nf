@@ -39,8 +39,8 @@ workflow ISOFOX_QUANTIFICATION {
         .map { meta, tumor_bam, tumor_bai ->
             return [
                 meta,
-                Inputs.overrideWithExistingInput(tumor_bam, meta, Constants.INPUT.BAM_RNA_TUMOR),
-                Inputs.overrideWithExistingInput(tumor_bai, meta, Constants.INPUT.BAI_RNA_TUMOR),
+                Inputs.preferUserProvidedInput(tumor_bam, meta, Constants.INPUT.BAM_RNA_TUMOR),
+                Inputs.preferUserProvidedInput(tumor_bai, meta, Constants.INPUT.BAI_RNA_TUMOR),
             ]
         }
         .branch { meta, tumor_bam, tumor_bai ->

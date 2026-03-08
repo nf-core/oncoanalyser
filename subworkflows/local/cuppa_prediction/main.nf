@@ -34,10 +34,10 @@ workflow CUPPA_PREDICTION {
         .map { meta, isofox_dir, purple_dir, linx_annotation_dir, virusinterpreter_dir ->
 
             def inputs = [
-                Inputs.overrideWithExistingInput(isofox_dir, meta, Constants.INPUT.ISOFOX_DIR),
-                Inputs.overrideWithExistingInput(purple_dir, meta, Constants.INPUT.PURPLE_DIR),
-                Inputs.overrideWithExistingInput(linx_annotation_dir, meta, Constants.INPUT.LINX_ANNO_DIR_TUMOR),
-                Inputs.overrideWithExistingInput(virusinterpreter_dir, meta, Constants.INPUT.VIRUSINTERPRETER_DIR),
+                Inputs.preferUserProvidedInput(isofox_dir, meta, Constants.INPUT.ISOFOX_DIR),
+                Inputs.preferUserProvidedInput(purple_dir, meta, Constants.INPUT.PURPLE_DIR),
+                Inputs.preferUserProvidedInput(linx_annotation_dir, meta, Constants.INPUT.LINX_ANNO_DIR_TUMOR),
+                Inputs.preferUserProvidedInput(virusinterpreter_dir, meta, Constants.INPUT.VIRUSINTERPRETER_DIR),
             ]
 
             return [meta, *inputs]

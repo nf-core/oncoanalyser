@@ -47,13 +47,13 @@ workflow SAGE_PLOTTING {
             donor_bam , donor_bai , donor_bqr_tsv , donor_dup_freq_tsv , donor_jitter_tsv , donor_ms_tsv,
             purple_dir ->
 
-            tumor_bam = Inputs.overrideWithExistingInput(tumor_bam, meta, Constants.INPUT.BAM_REDUX_DNA_TUMOR)
+            tumor_bam = Inputs.preferUserProvidedInput(tumor_bam, meta, Constants.INPUT.BAM_REDUX_DNA_TUMOR)
             tumor_bai = Inputs.fallbackToExistingInput(tumor_bai, meta, Constants.INPUT.BAI_DNA_TUMOR)
 
-            normal_bam = Inputs.overrideWithExistingInput(normal_bam, meta, Constants.INPUT.BAM_REDUX_DNA_NORMAL)
+            normal_bam = Inputs.preferUserProvidedInput(normal_bam, meta, Constants.INPUT.BAM_REDUX_DNA_NORMAL)
             normal_bai = Inputs.fallbackToExistingInput(normal_bai, meta, Constants.INPUT.BAI_DNA_NORMAL)
 
-            donor_bam = Inputs.overrideWithExistingInput(donor_bam, meta, Constants.INPUT.BAM_REDUX_DNA_DONOR)
+            donor_bam = Inputs.preferUserProvidedInput(donor_bam, meta, Constants.INPUT.BAM_REDUX_DNA_DONOR)
             donor_bai = Inputs.fallbackToExistingInput(donor_bai, meta, Constants.INPUT.BAI_DNA_DONOR)
 
             def redux_tsvs = [
@@ -72,7 +72,7 @@ workflow SAGE_PLOTTING {
 
             redux_tsvs = redux_tsvs.findAll { it != [] }
 
-            purple_dir = Inputs.overrideWithExistingInput(purple_dir, meta, Constants.INPUT.PURPLE_DIR)
+            purple_dir = Inputs.preferUserProvidedInput(purple_dir, meta, Constants.INPUT.PURPLE_DIR)
 
             return [ meta, tumor_bam, tumor_bai, normal_bam, normal_bai, donor_bam, donor_bai, redux_tsvs, purple_dir ]
         }
