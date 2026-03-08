@@ -30,7 +30,7 @@ workflow CIDER_CALLING {
             return [
                 meta,
                 Inputs.preferUserProvidedInput(bam, meta, Constants.INPUT.BAM_REDUX_DNA_TUMOR),
-                Inputs.fallbackToExistingInput(bai, meta, Constants.INPUT.BAI_DNA_TUMOR),
+                Inputs.preferPipelineOutput(bai, meta, Constants.INPUT.BAI_DNA_TUMOR),
             ]
         }
         .branch { meta, bam, bai ->
@@ -46,7 +46,7 @@ workflow CIDER_CALLING {
             return [
                 meta,
                 Inputs.preferUserProvidedInput(bam, meta, Constants.INPUT.BAM_RNA_TUMOR),
-                Inputs.fallbackToExistingInput(bai, meta, Constants.INPUT.BAI_RNA_TUMOR),
+                Inputs.preferPipelineOutput(bai, meta, Constants.INPUT.BAI_RNA_TUMOR),
             ]
         }
         .branch { meta, bam, bai ->

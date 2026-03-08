@@ -48,26 +48,26 @@ workflow SAGE_PLOTTING {
             purple_dir ->
 
             tumor_bam = Inputs.preferUserProvidedInput(tumor_bam, meta, Constants.INPUT.BAM_REDUX_DNA_TUMOR)
-            tumor_bai = Inputs.fallbackToExistingInput(tumor_bai, meta, Constants.INPUT.BAI_DNA_TUMOR)
+            tumor_bai = Inputs.preferPipelineOutput(tumor_bai, meta, Constants.INPUT.BAI_DNA_TUMOR)
 
             normal_bam = Inputs.preferUserProvidedInput(normal_bam, meta, Constants.INPUT.BAM_REDUX_DNA_NORMAL)
-            normal_bai = Inputs.fallbackToExistingInput(normal_bai, meta, Constants.INPUT.BAI_DNA_NORMAL)
+            normal_bai = Inputs.preferPipelineOutput(normal_bai, meta, Constants.INPUT.BAI_DNA_NORMAL)
 
             donor_bam = Inputs.preferUserProvidedInput(donor_bam, meta, Constants.INPUT.BAM_REDUX_DNA_DONOR)
-            donor_bai = Inputs.fallbackToExistingInput(donor_bai, meta, Constants.INPUT.BAI_DNA_DONOR)
+            donor_bai = Inputs.preferPipelineOutput(donor_bai, meta, Constants.INPUT.BAI_DNA_DONOR)
 
             def redux_tsvs = [
-                Inputs.fallbackToExistingInput(tumor_bqr_tsv, meta, Constants.INPUT.REDUX_BQR_TSV_TUMOR),
-                Inputs.fallbackToExistingInput(tumor_jitter_tsv, meta, Constants.INPUT.REDUX_JITTER_TSV_TUMOR),
-                Inputs.fallbackToExistingInput(tumor_ms_tsv, meta, Constants.INPUT.REDUX_MS_TSV_TUMOR),
+                Inputs.preferPipelineOutput(tumor_bqr_tsv, meta, Constants.INPUT.REDUX_BQR_TSV_TUMOR),
+                Inputs.preferPipelineOutput(tumor_jitter_tsv, meta, Constants.INPUT.REDUX_JITTER_TSV_TUMOR),
+                Inputs.preferPipelineOutput(tumor_ms_tsv, meta, Constants.INPUT.REDUX_MS_TSV_TUMOR),
 
-                Inputs.fallbackToExistingInput(normal_bqr_tsv, meta, Constants.INPUT.REDUX_BQR_TSV_NORMAL),
-                Inputs.fallbackToExistingInput(normal_jitter_tsv, meta, Constants.INPUT.REDUX_JITTER_TSV_NORMAL),
-                Inputs.fallbackToExistingInput(normal_ms_tsv, meta, Constants.INPUT.REDUX_MS_TSV_NORMAL),
+                Inputs.preferPipelineOutput(normal_bqr_tsv, meta, Constants.INPUT.REDUX_BQR_TSV_NORMAL),
+                Inputs.preferPipelineOutput(normal_jitter_tsv, meta, Constants.INPUT.REDUX_JITTER_TSV_NORMAL),
+                Inputs.preferPipelineOutput(normal_ms_tsv, meta, Constants.INPUT.REDUX_MS_TSV_NORMAL),
 
-                Inputs.fallbackToExistingInput(donor_bqr_tsv, meta, Constants.INPUT.REDUX_BQR_TSV_DONOR),
-                Inputs.fallbackToExistingInput(donor_jitter_tsv, meta, Constants.INPUT.REDUX_JITTER_TSV_DONOR),
-                Inputs.fallbackToExistingInput(donor_ms_tsv, meta, Constants.INPUT.REDUX_MS_TSV_DONOR),
+                Inputs.preferPipelineOutput(donor_bqr_tsv, meta, Constants.INPUT.REDUX_BQR_TSV_DONOR),
+                Inputs.preferPipelineOutput(donor_jitter_tsv, meta, Constants.INPUT.REDUX_JITTER_TSV_DONOR),
+                Inputs.preferPipelineOutput(donor_ms_tsv, meta, Constants.INPUT.REDUX_MS_TSV_DONOR),
             ]
 
             redux_tsvs = redux_tsvs.findAll { it != [] }

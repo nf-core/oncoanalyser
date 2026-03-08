@@ -2,9 +2,6 @@
 // TEAL performs characterisation of telomeric features and rearrangements
 //
 
-import Constants
-import Utils
-
 include { TEAL_PREP     } from '../../../modules/local/teal/prep/main'
 include { TEAL_PIPELINE } from '../../../modules/local/teal/pipeline/main'
 
@@ -49,9 +46,9 @@ workflow TEAL_CHARACTERISATION {
             return [
                 meta,
                 Inputs.preferUserProvidedInput(tumor_bam, meta, Constants.INPUT.BAM_REDUX_DNA_TUMOR),
-                Inputs.fallbackToExistingInput(tumor_bai, meta, Constants.INPUT.BAI_DNA_TUMOR),
+                Inputs.preferPipelineOutput(tumor_bai, meta, Constants.INPUT.BAI_DNA_TUMOR),
                 Inputs.preferUserProvidedInput(normal_bam, meta, Constants.INPUT.BAM_REDUX_DNA_NORMAL),
-                Inputs.fallbackToExistingInput(normal_bai, meta, Constants.INPUT.BAI_DNA_NORMAL),
+                Inputs.preferPipelineOutput(normal_bai, meta, Constants.INPUT.BAI_DNA_NORMAL),
             ]
         }
         .branch { meta, tumor_bam, tumor_bai, normal_bam, normal_bai ->

@@ -49,15 +49,15 @@ workflow SAGE_APPEND {
             purple_dir ->
 
             tumor_dna_bam = Inputs.preferUserProvidedInput(tumor_dna_bam, meta, Constants.INPUT.BAM_REDUX_DNA_TUMOR)
-            tumor_dna_bai = Inputs.fallbackToExistingInput(tumor_dna_bai, meta, Constants.INPUT.BAI_DNA_TUMOR)
+            tumor_dna_bai = Inputs.preferPipelineOutput(tumor_dna_bai, meta, Constants.INPUT.BAI_DNA_TUMOR)
 
             tumor_rna_bam = Inputs.preferUserProvidedInput(tumor_rna_bam, meta, Constants.INPUT.BAM_RNA_TUMOR)
-            tumor_rna_bai = Inputs.fallbackToExistingInput(tumor_rna_bai, meta, Constants.INPUT.BAI_RNA_TUMOR)
+            tumor_rna_bai = Inputs.preferPipelineOutput(tumor_rna_bai, meta, Constants.INPUT.BAI_RNA_TUMOR)
 
             def tumor_dna_redux_tsv = [
-                Inputs.fallbackToExistingInput(tumor_dna_bqr_tsv, meta, Constants.INPUT.REDUX_BQR_TSV_TUMOR),
-                Inputs.fallbackToExistingInput(tumor_dna_jitter_tsv, meta, Constants.INPUT.REDUX_JITTER_TSV_TUMOR),
-                Inputs.fallbackToExistingInput(tumor_dna_ms_tsv, meta, Constants.INPUT.REDUX_MS_TSV_TUMOR),
+                Inputs.preferPipelineOutput(tumor_dna_bqr_tsv, meta, Constants.INPUT.REDUX_BQR_TSV_TUMOR),
+                Inputs.preferPipelineOutput(tumor_dna_jitter_tsv, meta, Constants.INPUT.REDUX_JITTER_TSV_TUMOR),
+                Inputs.preferPipelineOutput(tumor_dna_ms_tsv, meta, Constants.INPUT.REDUX_MS_TSV_TUMOR),
             ]
             tumor_dna_redux_tsv = tumor_dna_redux_tsv.findAll { it != [] }
 

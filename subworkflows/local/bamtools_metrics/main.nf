@@ -31,7 +31,7 @@ workflow BAMTOOLS_METRICS {
             return [
                 meta,
                 Inputs.preferUserProvidedInput(bam, meta, Constants.INPUT.BAM_REDUX_DNA_TUMOR),
-                Inputs.fallbackToExistingInput(bai, meta, Constants.INPUT.BAI_DNA_TUMOR),
+                Inputs.preferPipelineOutput(bai, meta, Constants.INPUT.BAI_DNA_TUMOR),
             ]
         }
         .branch { meta, bam, bai ->
@@ -48,7 +48,7 @@ workflow BAMTOOLS_METRICS {
             return [
                 meta,
                 Inputs.preferUserProvidedInput(bam, meta, Constants.INPUT.BAM_REDUX_DNA_NORMAL),
-                Inputs.fallbackToExistingInput(bai, meta, Constants.INPUT.BAI_DNA_NORMAL),
+                Inputs.preferPipelineOutput(bai, meta, Constants.INPUT.BAI_DNA_NORMAL),
             ]
         }
         .branch { meta, bam, bai ->

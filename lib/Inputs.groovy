@@ -225,8 +225,8 @@ class Inputs {
         return user_provided_path ?: pipeline_path
     }
 
-    public static fallbackToExistingInput(val, meta, key) {
-        // Prefer files created from the pipeline over those specified in the sample sheet
-        return val ?: getInput(meta, key)
+    public static preferPipelineOutput(pipeline_path, meta, key) {
+        def user_provided_path = getInput(meta, key)
+        return pipeline_path ?: user_provided_path
     }
 }

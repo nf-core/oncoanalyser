@@ -35,13 +35,13 @@ workflow AMBER_PROFILING {
             return [
                 meta,
                 Inputs.preferUserProvidedInput(tumor_bam, meta, Constants.INPUT.BAM_REDUX_DNA_TUMOR),
-                Inputs.fallbackToExistingInput(tumor_bai, meta, Constants.INPUT.BAI_DNA_TUMOR),
+                Inputs.preferPipelineOutput(tumor_bai, meta, Constants.INPUT.BAI_DNA_TUMOR),
 
                 Inputs.preferUserProvidedInput(normal_bam, meta, Constants.INPUT.BAM_REDUX_DNA_NORMAL),
-                Inputs.fallbackToExistingInput(normal_bai, meta, Constants.INPUT.BAI_DNA_NORMAL),
+                Inputs.preferPipelineOutput(normal_bai, meta, Constants.INPUT.BAI_DNA_NORMAL),
 
                 Inputs.preferUserProvidedInput(donor_bam, meta, Constants.INPUT.BAM_REDUX_DNA_DONOR),
-                Inputs.fallbackToExistingInput(donor_bai, meta, Constants.INPUT.BAI_DNA_DONOR),
+                Inputs.preferPipelineOutput(donor_bai, meta, Constants.INPUT.BAI_DNA_DONOR),
             ]
         }
         .branch { meta, tumor_bam, tumor_bai, normal_bam, normal_bai, donor_bam, donor_bai ->
