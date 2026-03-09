@@ -54,7 +54,7 @@ process ORANGE {
 
     def pipeline_version_str = pipeline_version ?: 'not specified'
     def experiment_type = targeted_mode ? 'PANEL' : 'WGS'
-    def primary_tumor_doids_arg = meta.cancer_type ? "-primary_tumor_doids ${meta.cancer_type}" : ''
+    def doid_arg = meta.cancer_type ?: '162' // NOTE(SW): DOID label: 162 [cancer]; Hartwig cohort group: unknown
 
     // Tumor sample
     def linx_plot_dir = linx_somatic_plot_dir.resolve('reportable/').toUriString().replaceAll('/$', '')
@@ -126,7 +126,7 @@ process ORANGE {
         -add_disclaimer \\
         -pipeline_version_file pipeline_version.txt \\
         -experiment_type ${experiment_type} \\
-        ${primary_tumor_doids_arg} \\
+        -primary_tumor_doids ${doid_arg} \\
         \\
         -tumor_sample_id ${meta.tumor_id} \\
         -tumor_redux_dir ./ \\
