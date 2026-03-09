@@ -32,7 +32,7 @@ workflow SAGE_PLOTTING {
     ch_versions = Channel.empty()
 
     // Select input sources. Route inputs
-    // channel: runnable: [ meta, tumor_bam, tumor_bai, normal_bam, normal_bai, donor_bam, donor_bai, [redux_tsv, ...], purple_dir ]
+    // channel: runnable: { meta, tumor_bam, tumor_bai, normal_bam, normal_bai, donor_bam, donor_bai, [redux_tsv, ...], purple_dir }
     // channel: skip: [ meta ]
     ch_inputs_sorted = WorkflowOncoanalyser.groupByMeta(
         flatten_mode: 'singletons_only',
@@ -53,31 +53,57 @@ workflow SAGE_PLOTTING {
 
             purple_dir = Inputs.preferUserProvidedInput(purple_dir, meta, Constants.INPUT.PURPLE_DIR)
 
-            return [ meta, tumor_bam, tumor_bai, normal_bam, normal_bai, donor_bam, donor_bai, redux_tsvs, purple_dir ]
+            def inputs = [
+                meta: meta,
+                tumor_bam: tumor_bam,
+                tumor_bai: tumor_bai,
+                normal_bam: normal_bam,
+                normal_bai: normal_bai,
+                donor_bam: donor_bam,
+                donor_bai: donor_bai,
+                redux_tsvs: redux_tsvs,
+                purple_dir: purple_dir,
+            ]
+
+            return inputs
         }
-        .branch { meta, tumor_bam, tumor_bai, normal_bam, normal_bai, donor_bam, donor_bai, redux_tsvs, purple_dir ->
-            runnable: tumor_bam && purple_dir
+        .branch { inputs ->
+            runnable: inputs.tumor_bam && inputs.purple_dir
+                return inputs
             skip: true
-                return meta
+                return inputs.meta
         }
 
     // Create process input channel
     // channel: [ meta, tumor_bam, tumor_bai, normal_bam, normal_bai, donor_bam, donor_bai, [redux_tsv, ...], purple_smlv_vcf ]
     ch_sage_plotting_inputs = ch_inputs_sorted.runnable
-        .map { meta, tumor_bam, tumor_bai, normal_bam, normal_bai, donor_bam, donor_bai, redux_tsvs, purple_dir ->
+        .map { inputs ->
+
+            def meta = inputs.meta
 
             def meta_sage = [
                 key: meta.group_id,
                 id: meta.group_id,
                 tumor_id: Inputs.getTumorDnaSampleName(meta),
-                normal_id: normal_bam ? Inputs.getNormalDnaSampleName(meta) : null,
-                donor_id: donor_bam ? Inputs.getDonorDnaSampleName(meta) : null,
+                normal_id: inputs.normal_bam ? Inputs.getNormalDnaSampleName(meta) : null,
+                donor_id: inputs.donor_bam ? Inputs.getDonorDnaSampleName(meta) : null,
             ]
 
-            def purple_smlv_vcf = Inputs.getPurpleSomaticVcf(meta, purple_dir)
-            def purple_smlv_vcf_tbi = Inputs.getPurpleSomaticVcfTbi(meta, purple_dir)
+            def purple_smlv_vcf = Inputs.getPurpleSomaticVcf(meta, inputs.purple_dir)
+            def purple_smlv_vcf_tbi = Inputs.getPurpleSomaticVcfTbi(meta, inputs.purple_dir)
 
-            return [meta_sage, tumor_bam, normal_bam, donor_bam, tumor_bai, normal_bai, donor_bai, redux_tsvs, purple_smlv_vcf, purple_smlv_vcf_tbi]
+            return [
+                meta_sage,
+                inputs.tumor_bam,
+                inputs.normal_bam,
+                inputs.donor_bam,
+                inputs.tumor_bai,
+                inputs.normal_bai,
+                inputs.donor_bai,
+                inputs.redux_tsvs,
+                purple_smlv_vcf,
+                purple_smlv_vcf_tbi
+            ]
         }
 
     // Run process
