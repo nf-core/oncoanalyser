@@ -35,7 +35,6 @@ workflow SAGE_PLOTTING {
     // channel: runnable: [ meta, tumor_bam, tumor_bai, normal_bam, normal_bai, donor_bam, donor_bai, [redux_tsv, ...], purple_dir ]
     // channel: skip: [ meta ]
     ch_inputs_sorted = WorkflowOncoanalyser.groupByMeta(
-        flatten: true,
         flatten_mode: 'singletons_only',
         ch_tumor_bam, ch_normal_bam, ch_donor_bam,
         ch_tumor_tsvs, ch_normal_tsvs, ch_donor_tsvs,

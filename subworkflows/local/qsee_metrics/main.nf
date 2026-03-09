@@ -28,7 +28,7 @@ workflow QSEE_METRICS {
     // Select and route inputs
     // channel: { meta, redux_tsvs_tumor, redux_tsvs_normal, bamtools_tumor_dir, bamtools_normal_dir, cobalt_dir, esvee_dir, purple_dir }
     ch_inputs_sorted = WorkflowOncoanalyser.groupByMeta(
-        flatten: false,
+        flatten_mode: 'none',
         ch_redux_tsvs_tumor, ch_redux_tsvs_normal,
         ch_bamtools_tumor, ch_bamtools_normal,
         ch_cobalt,

@@ -43,7 +43,7 @@ workflow SAGE_CALLING {
     // Select input sources. Route inputs
     // channel: [ meta, tumor_bam, tumor_bai, normal_bam, normal_bai, donor_bam, donor_bai, [redux_tsv, ...] ]
     ch_inputs_sorted = WorkflowOncoanalyser.groupByMeta(
-        flatten: false,
+        flatten_mode: 'none',
         ch_tumor_bam, ch_normal_bam, ch_donor_bam,
         ch_tumor_tsvs, ch_normal_tsvs, ch_donor_tsvs,
     )

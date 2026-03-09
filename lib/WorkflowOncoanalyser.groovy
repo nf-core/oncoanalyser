@@ -43,30 +43,27 @@ class WorkflowOncoanalyser {
                 return [meta, *values_list]
             }
 
-        if (named_args.getOrDefault('flatten', true)) {
-            def flatten_mode = named_args.getOrDefault('flatten_mode', 'nonrecursive')
-            if (flatten_mode == 'recursive') {
-                r = r.map { it.flatten() }
-            } else if (flatten_mode == 'nonrecursive') {
-                r = r.map { data ->
-                    def meta = data[0]
-                    def inputs = data[1..-1].collectMany { it }
-                    return [meta, *inputs]
-                }
-            } else if(flatten_mode == 'singletons_only') {
-                r = r.map { data ->
-                    return data.collect {
-                        def is_singleton = it instanceof List && it.size() == 1
-                        return is_singleton ? it[0] : it
-                    }
-                }
-            } else {
-                System.err.println "ERROR: got bad flatten_mode: ${flatten_mode}"
-                Nextflow.exit(1)
+        def flatten_mode = named_args.getOrDefault('flatten_mode', 'non_recursive')
+        if (flatten_mode == 'recursive') {
+            return r.map { it.flatten() }
+        } else if (flatten_mode == 'non_recursive') {
+            return r.map { data ->
+                def meta = data[0]
+                def inputs = data[1..-1].collectMany { it }
+                return [meta, *inputs]
             }
+        } else if(flatten_mode == 'singletons_only') {
+            return r.map { data ->
+                return data.collect {
+                    def is_singleton = it instanceof List && it.size() == 1
+                    return is_singleton ? it[0] : it
+                }
+            }
+        } else if(flatten_mode == 'none') {
+            return r
+        } else {
+            throw new IllegalArgumentException("`flatten_mode` must be one of: 'recursive', 'non_recursive', 'singletons_only', 'none'")
         }
-
-        return r
     }
 
     // NOTE(SW): function signature required to catch where no named arguments are passed
