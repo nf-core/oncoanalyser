@@ -201,6 +201,35 @@ class Inputs {
     }
 
     // Files - REDUX
+    public static resolveReduxBamBai(redux_bam_bai, meta, sample_type) {
+
+        def key_map = [
+            (Constants.SampleType.TUMOR): [
+                bam: Constants.INPUT.BAM_REDUX_DNA_TUMOR,
+                bai: Constants.INPUT.BAI_DNA_TUMOR,
+            ],
+
+            (Constants.SampleType.NORMAL): [
+                bam: Constants.INPUT.BAM_REDUX_DNA_NORMAL,
+                bai: Constants.INPUT.BAI_DNA_NORMAL,
+            ],
+
+            (Constants.SampleType.DONOR): [
+                bam: Constants.INPUT.BAM_REDUX_DNA_DONOR,
+                bai: Constants.INPUT.BAI_DNA_DONOR,
+            ],
+        ]
+
+        def keys = key_map[sample_type]
+
+        def (bam, bai) = redux_bam_bai
+
+        return [
+            preferUserProvidedInput(bam, meta, keys.bam),
+            preferPipelineOutput(bai, meta, keys.bai),
+        ]
+    }
+
     public static resolveReduxTsvFiles(redux_tsvs, meta, sample_type) {
 
         def key_map = [
