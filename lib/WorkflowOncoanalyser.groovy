@@ -53,6 +53,13 @@ class WorkflowOncoanalyser {
                     def inputs = data[1..-1].collectMany { it }
                     return [meta, *inputs]
                 }
+            } else if(flatten_mode == 'singletons_only') {
+                r = r.map { data ->
+                    return data.collect {
+                        def is_singleton = it instanceof List && it.size() == 1
+                        return is_singleton ? it[0] : it
+                    }
+                }
             } else {
                 System.err.println "ERROR: got bad flatten_mode: ${flatten_mode}"
                 Nextflow.exit(1)
