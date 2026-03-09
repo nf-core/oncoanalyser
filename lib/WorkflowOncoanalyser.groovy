@@ -28,9 +28,6 @@ class WorkflowOncoanalyser {
 
         r = Channel.empty().mix(*r)
 
-        // NOTE(SW): As of Nextflow 22.10.6, groupTuple requires a matching meta /and/ an additional element to complete without error, these placeholders are filtered in the groupByMeta function
-        r = r.filter { it[0] != Constants.PLACEHOLDER_META }
-
         r = r
             .groupTuple(size: channels.size())
             .map { data ->

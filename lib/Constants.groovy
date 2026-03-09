@@ -168,9 +168,6 @@ class Constants {
         LONGITUDINAL_SAMPLE,
     }
 
-    static final Map PLACEHOLDER_META = [meta_placeholder: null]
-    static final List PLACEHOLDER_OPTIONAL_CHANNEL = []
-
     static final Map INPUT = [
 
         // Bams
