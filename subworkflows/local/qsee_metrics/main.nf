@@ -8,8 +8,8 @@ workflow QSEE_METRICS {
     take:
     // Sample data
     ch_inputs                // channel: [mandatory] [ meta ]
-    ch_redux_tumor_tsv       // channel: [mandatory] [ meta, redux_tsv, ... ]
-    ch_redux_normal_tsv      // channel: [mandatory] [ meta, redux_tsv, ... ]
+    ch_redux_tsvs_tumor      // channel: [mandatory] [ meta, redux_tsv, ... ]
+    ch_redux_tsvs_normal     // channel: [mandatory] [ meta, redux_tsv, ... ]
     ch_bamtools_tumor        // channel: [mandatory] [ meta, metrics_dir ]
     ch_bamtools_normal       // channel: [optional]  [ meta, metrics_dir ]
     ch_cobalt                // channel: [optional]  [ meta, cobalt_dir ]
@@ -26,19 +26,17 @@ workflow QSEE_METRICS {
     ch_versions = Channel.empty()
 
     // Select and route inputs
-    // channel: { meta, redux_tumor_tsv, redux_normal_tsv, bamtools_tumor_dir, bamtools_normal_dir, cobalt_dir, esvee_dir, purple_dir }
+    // channel: { meta, redux_tsvs_tumor, redux_tsvs_normal, bamtools_tumor_dir, bamtools_normal_dir, cobalt_dir, esvee_dir, purple_dir }
     ch_inputs_sorted = WorkflowOncoanalyser.groupByMeta(
-        ch_redux_tumor_tsv,
-        ch_redux_normal_tsv,
-        ch_bamtools_tumor,
-        ch_bamtools_normal,
+        flatten: false,
+        ch_redux_tsvs_tumor, ch_redux_tsvs_normal,
+        ch_bamtools_tumor, ch_bamtools_normal,
         ch_cobalt,
         ch_esvee,
         ch_purple,
     )
         .map { meta,
-            tumor_bqr_tsv , tumor_dup_freq_tsv , tumor_jitter_tsv , tumor_ms_tsv,
-            normal_bqr_tsv, normal_dup_freq_tsv, normal_jitter_tsv, normal_ms_tsv,
+            redux_tsvs_tumor, redux_tsvs_normal,
             bamtools_tumor_dir, bamtools_normal_dir,
             cobalt_dir,
             esvee_dir,
@@ -48,20 +46,12 @@ workflow QSEE_METRICS {
 
             inputs.meta = meta
 
-            inputs.redux_tumor_tsv = [
-                Inputs.preferPipelineOutput(tumor_bqr_tsv, meta, Constants.INPUT.REDUX_BQR_TSV_TUMOR),
-                Inputs.preferPipelineOutput(tumor_dup_freq_tsv, meta, Constants.INPUT.REDUX_DUP_FREQ_TSV_TUMOR),
-                Inputs.preferPipelineOutput(tumor_ms_tsv, meta, Constants.INPUT.REDUX_MS_TSV_TUMOR),
-            ].findAll { it != [] }
-
-            inputs.redux_normal_tsv = [
-                Inputs.preferPipelineOutput(normal_bqr_tsv, meta, Constants.INPUT.REDUX_BQR_TSV_NORMAL),
-                Inputs.preferPipelineOutput(normal_dup_freq_tsv, meta, Constants.INPUT.REDUX_DUP_FREQ_TSV_NORMAL),
-                Inputs.preferPipelineOutput(normal_ms_tsv, meta, Constants.INPUT.REDUX_MS_TSV_NORMAL),
-            ].findAll { it != [] }
+            inputs.redux_tsvs_tumor = Inputs.resolveReduxTsvFiles(redux_tsvs_tumor, meta, Constants.SampleType.TUMOR)
+            inputs.redux_tsvs_normal = Inputs.resolveReduxTsvFiles(redux_tsvs_normal, meta, Constants.SampleType.NORMAL)
 
             inputs.bamtools_tumor_dir = Inputs.preferUserProvidedInput(bamtools_tumor_dir, meta, Constants.INPUT.BAMTOOLS_DIR_TUMOR)
             inputs.bamtools_normal_dir = Inputs.preferUserProvidedInput(bamtools_normal_dir, meta, Constants.INPUT.BAMTOOLS_DIR_NORMAL)
+
             inputs.cobalt_dir = Inputs.preferUserProvidedInput(cobalt_dir, meta, Constants.INPUT.COBALT_DIR)
             inputs.esvee_dir = Inputs.preferUserProvidedInput(esvee_dir, meta, Constants.INPUT.ESVEE_DIR)
             inputs.purple_dir = Inputs.preferUserProvidedInput(purple_dir, meta, Constants.INPUT.PURPLE_DIR)
@@ -76,7 +66,7 @@ workflow QSEE_METRICS {
         }
 
     // Create process input channel; form metadata
-    // channel: [ meta, redux_tumor_tsv, redux_normal_tsv, bamtools_tumor_dir, bamtools_normal_dir, cobalt_dir, esvee_dir, purple_dir ]
+    // channel: [ meta, redux_tsvs_tumor, redux_tsvs_normal, bamtools_tumor_dir, bamtools_normal_dir, cobalt_dir, esvee_dir, purple_dir ]
     ch_qsee_inputs = ch_inputs_sorted.runnable
         .map { inputs ->
 
