@@ -35,7 +35,7 @@ workflow PURPLE_CALLING {
     ch_versions = Channel.empty()
 
     // Select input sources
-    // channel: [ meta, amber_dir, cobalt_dir, pave_somatic_dir, pave_germline_dir, esvee_dir ]
+    // channel: { meta, amber_dir, cobalt_dir, pave_somatic_dir, pave_germline_dir, esvee_dir }
     ch_inputs_selected = WorkflowOncoanalyser.groupByMeta(
         ch_amber,
         ch_cobalt,
@@ -43,35 +43,30 @@ workflow PURPLE_CALLING {
         ch_pave_germline,
         ch_esvee,
     )
-        .map { d ->
+        .map { meta, amber_dir, cobalt_dir, pave_somatic_dir, pave_germline_dir, esvee_dir ->
 
-            def meta = d[0]
+            def inputs = [:]
 
-            // NOTE(SW): avoiding further complexity with loops etc
+            inputs.meta              = meta
+            inputs.amber_dir         = Inputs.preferUserProvidedInput(amber_dir, meta, Constants.INPUT.AMBER_DIR)
+            inputs.cobalt_dir        = Inputs.preferUserProvidedInput(cobalt_dir, meta, Constants.INPUT.COBALT_DIR)
+            inputs.pave_somatic_dir  = Inputs.preferUserProvidedInput(pave_somatic_dir, meta, Constants.INPUT.PAVE_DIR_TUMOR)
+            inputs.pave_germline_dir = Inputs.preferUserProvidedInput(pave_germline_dir, meta, Constants.INPUT.PAVE_DIR_NORMAL)
+            inputs.esvee_dir         = Inputs.preferUserProvidedInput(esvee_dir, meta, Constants.INPUT.ESVEE_DIR)
 
-            def inputs = [
-                Inputs.preferUserProvidedInput(d[1], meta, Constants.INPUT.AMBER_DIR),
-                Inputs.preferUserProvidedInput(d[2], meta, Constants.INPUT.COBALT_DIR),
-                Inputs.preferUserProvidedInput(d[3], meta, Constants.INPUT.PAVE_DIR_TUMOR),
-                Inputs.preferUserProvidedInput(d[4], meta, Constants.INPUT.PAVE_DIR_NORMAL),
-                Inputs.preferUserProvidedInput(d[5], meta, Constants.INPUT.ESVEE_DIR),
-            ]
-
-            return [meta, *inputs]
+            return inputs
         }
 
     // Sort inputs
-    // channel: runnable: [ meta, amber_dir, cobalt_dir, pave_somatic_dir, pave_germline_dir, esvee_dir ]
+    // channel: runnable: { meta, amber_dir, cobalt_dir, pave_somatic_dir, pave_germline_dir, esvee_dir }
     // channel: skip: [ meta ]
     ch_inputs_sorted = ch_inputs_selected
-        .branch { d ->
-            def meta = d[0]
-            def amber_dir = d[1]
-            def cobalt_dir = d[2]
+        .branch { inputs ->
 
-            def has_existing = Inputs.hasExistingInput(meta, Constants.INPUT.PURPLE_DIR)
+            def has_existing = Inputs.hasExistingInput(inputs.meta, Constants.INPUT.PURPLE_DIR)
 
-            runnable: amber_dir && cobalt_dir && !has_existing
+            runnable: inputs.amber_dir && inputs.cobalt_dir && !has_existing
+                return inputs
             skip: true
                 return meta
         }
@@ -79,10 +74,9 @@ workflow PURPLE_CALLING {
     // Create process input channel
     // channel: [ meta_purple, amber_dir, cobalt_dir, pave_somatic_dir, pave_germline_dir, esvee_dir ]
     ch_purple_inputs = ch_inputs_sorted.runnable
-        .map { d ->
+        .map { inputs ->
 
-            def meta = d[0]
-            def inputs = d[1..-1]
+            def meta = inputs.meta
 
             def meta_purple = [
                 key: meta.group_id,
@@ -94,8 +88,9 @@ workflow PURPLE_CALLING {
                 meta_purple.normal_id = Inputs.getNormalDnaSampleName(meta)
             }
 
-            return [meta_purple, *inputs]
+            inputs.meta = meta_purple
 
+            return inputs
         }
 
     // Run process
