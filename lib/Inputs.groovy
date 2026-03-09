@@ -168,10 +168,10 @@ class Inputs {
         return hasTumorRnaBam(meta) || hasTumorRnaFastq(meta)
     }
 
-    // Files - Tool outputs
+    // Files - PURPLE
     //
     // NOTE(LN): We construct the output file paths based on the tool output dir. This so that the user can resume a run by providing
-    // for example purple_dir in the sample sheet.
+    // purple_dir in the sample sheet.
     //
     // Processes in theory could emit these output files, and downstream processes could consume the output file channels. However,
     // this would make resuming messy as multiple e.g. PURPLE output files would need to be provided in the sample sheet
@@ -198,6 +198,44 @@ class Inputs {
 
     public static getPurpleGermlineSvVcf(meta, purple_dir) {
         return nextflow.Nextflow.file(purple_dir).resolve("${getTumorDnaSampleName(meta)}.purple.sv.germline.vcf.gz")
+    }
+
+    // Files - REDUX
+    public static resolveReduxTsvFiles(redux_tsvs, meta, sample_type) {
+
+        def key_map = [
+            (Constants.SampleType.TUMOR): [
+                bqr_tsv: Constants.INPUT.REDUX_BQR_TSV_TUMOR,
+                dup_freq_tsv: Constants.INPUT.REDUX_DUP_FREQ_TSV_TUMOR,
+                jitter_tsv: Constants.INPUT.REDUX_JITTER_TSV_TUMOR,
+                ms_tsv: Constants.INPUT.REDUX_MS_TSV_TUMOR,
+            ],
+
+            (Constants.SampleType.NORMAL): [
+                bqr_tsv: Constants.INPUT.REDUX_BQR_TSV_NORMAL,
+                dup_freq_tsv: Constants.INPUT.REDUX_DUP_FREQ_TSV_NORMAL,
+                jitter_tsv: Constants.INPUT.REDUX_JITTER_TSV_NORMAL,
+                ms_tsv: Constants.INPUT.REDUX_MS_TSV_NORMAL,
+            ],
+
+            (Constants.SampleType.DONOR): [
+                bqr_tsv: Constants.INPUT.REDUX_BQR_TSV_DONOR,
+                dup_freq_tsv: Constants.INPUT.REDUX_DUP_FREQ_TSV_DONOR,
+                jitter_tsv: Constants.INPUT.REDUX_JITTER_TSV_DONOR,
+                ms_tsv: Constants.INPUT.REDUX_MS_TSV_DONOR,
+            ],
+        ]
+
+        def keys = key_map[sample_type]
+
+        def (bqr_tsv, dup_freq_tsv, jitter_tsv, ms_tsv) = redux_tsvs
+
+        return [
+            preferPipelineOutput(bqr_tsv, meta, keys.bqr_tsv),
+            preferPipelineOutput(dup_freq_tsv, meta, keys.dup_freq_tsv),
+            preferPipelineOutput(jitter_tsv, meta, keys.jitter_tsv),
+            preferPipelineOutput(ms_tsv, meta, keys.ms_tsv),
+        ].findAll { it != [] }
     }
 
     // Misc
