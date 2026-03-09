@@ -12,9 +12,9 @@ workflow SAGE_CALLING {
     ch_tumor_bam                 // channel: [mandatory] [ meta, bam, bai ]
     ch_normal_bam                // channel: [mandatory] [ meta, bam, bai ]
     ch_donor_bam                 // channel: [mandatory] [ meta, bam, bai ]
-    ch_tumor_tsv                 // channel: [mandatory] [ meta, redux_tsv, ... ]
-    ch_normal_tsv                // channel: [mandatory] [ meta, redux_tsv, ... ]
-    ch_donor_tsv                 // channel: [mandatory] [ meta, redux_tsv, ... ]
+    ch_tumor_tsvs                // channel: [mandatory] [ meta, redux_tsv, ... ]
+    ch_normal_tsvs               // channel: [mandatory] [ meta, redux_tsv, ... ]
+    ch_donor_tsvs                // channel: [mandatory] [ meta, redux_tsv, ... ]
 
     // Reference data
     genome_fasta                 // channel: [mandatory] /path/to/genome_fasta
@@ -40,44 +40,24 @@ workflow SAGE_CALLING {
     // channel: [ versions.yml ]
     ch_versions = Channel.empty()
 
-    // Sort inputs
-    // channel: runnable: [ meta, tumor_bam, tumor_bai, normal_bam, normal_bai, donor_bam, donor_bai, [redux_tsv, ...] ]
-    // channel: skip: [ meta ]
-
+    // Select input sources. Route inputs
+    // channel: [ meta, tumor_bam, tumor_bai, normal_bam, normal_bai, donor_bam, donor_bai, [redux_tsv, ...] ]
     ch_inputs_sorted = WorkflowOncoanalyser.groupByMeta(
-        ch_tumor_bam, ch_tumor_tsv,
-        ch_normal_bam, ch_normal_tsv,
-        ch_donor_bam, ch_donor_tsv,
+        flatten: false,
+        ch_tumor_bam, ch_normal_bam, ch_donor_bam,
+        ch_tumor_tsvs, ch_normal_tsvs, ch_donor_tsvs,
     )
-        .map { meta,
-            tumor_bam , tumor_bai , tumor_bqr_tsv , tumor_dup_freq_tsv , tumor_jitter_tsv , tumor_ms_tsv,
-            normal_bam, normal_bai, normal_bqr_tsv, normal_dup_freq_tsv, normal_jitter_tsv, normal_ms_tsv,
-            donor_bam , donor_bai , donor_bqr_tsv , donor_dup_freq_tsv , donor_jitter_tsv , donor_ms_tsv ->
+        .map { meta, tumor_bam_bai, normal_bam_bai, donor_bam_bai, tumor_tsvs, normal_tsvs, donor_tsvs ->
 
-            tumor_bam = Inputs.preferUserProvidedInput(tumor_bam, meta, Constants.INPUT.BAM_REDUX_DNA_TUMOR)
-            tumor_bai = Inputs.preferPipelineOutput(tumor_bai, meta, Constants.INPUT.BAI_DNA_TUMOR)
+            def (tumor_bam, tumor_bai) = Inputs.resolveReduxBamBai(tumor_bam_bai, meta, Constants.SampleType.TUMOR)
+            def (normal_bam, normal_bai) = Inputs.resolveReduxBamBai(normal_bam_bai, meta, Constants.SampleType.NORMAL)
+            def (donor_bam, donor_bai) = Inputs.resolveReduxBamBai(donor_bam_bai, meta, Constants.SampleType.DONOR)
 
-            normal_bam = Inputs.preferUserProvidedInput(normal_bam, meta, Constants.INPUT.BAM_REDUX_DNA_NORMAL)
-            normal_bai = Inputs.preferPipelineOutput(normal_bai, meta, Constants.INPUT.BAI_DNA_NORMAL)
+            tumor_tsvs = Inputs.resolveReduxTsvFiles(tumor_tsvs, meta, Constants.SampleType.TUMOR)
+            normal_tsvs = Inputs.resolveReduxTsvFiles(normal_tsvs, meta, Constants.SampleType.NORMAL)
+            donor_tsvs = Inputs.resolveReduxTsvFiles(donor_tsvs, meta, Constants.SampleType.DONOR)
 
-            donor_bam = Inputs.preferUserProvidedInput(donor_bam, meta, Constants.INPUT.BAM_REDUX_DNA_DONOR)
-            donor_bai = Inputs.preferPipelineOutput(donor_bai, meta, Constants.INPUT.BAI_DNA_DONOR)
-
-            def redux_tsvs = [
-                Inputs.preferPipelineOutput(tumor_bqr_tsv, meta, Constants.INPUT.REDUX_BQR_TSV_TUMOR),
-                Inputs.preferPipelineOutput(tumor_jitter_tsv, meta, Constants.INPUT.REDUX_JITTER_TSV_TUMOR),
-                Inputs.preferPipelineOutput(tumor_ms_tsv, meta, Constants.INPUT.REDUX_MS_TSV_TUMOR),
-
-                Inputs.preferPipelineOutput(normal_bqr_tsv, meta, Constants.INPUT.REDUX_BQR_TSV_NORMAL),
-                Inputs.preferPipelineOutput(normal_jitter_tsv, meta, Constants.INPUT.REDUX_JITTER_TSV_NORMAL),
-                Inputs.preferPipelineOutput(normal_ms_tsv, meta, Constants.INPUT.REDUX_MS_TSV_NORMAL),
-
-                Inputs.preferPipelineOutput(donor_bqr_tsv, meta, Constants.INPUT.REDUX_BQR_TSV_DONOR),
-                Inputs.preferPipelineOutput(donor_jitter_tsv, meta, Constants.INPUT.REDUX_JITTER_TSV_DONOR),
-                Inputs.preferPipelineOutput(donor_ms_tsv, meta, Constants.INPUT.REDUX_MS_TSV_DONOR),
-            ]
-
-            redux_tsvs = redux_tsvs.findAll { it != [] }
+            def redux_tsvs = [ *tumor_tsvs, *normal_tsvs, *donor_tsvs ]
 
             return [ meta, tumor_bam, tumor_bai, normal_bam, normal_bai, donor_bam, donor_bai, redux_tsvs ]
         }
