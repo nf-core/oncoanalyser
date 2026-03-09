@@ -59,7 +59,7 @@ workflow SAGE_CALLING {
 
             def redux_tsvs = [ *tumor_tsvs, *normal_tsvs, *donor_tsvs ]
 
-            return [
+            def inputs = [
                 meta: meta,
                 tumor_bam: tumor_bam,
                 tumor_bai: tumor_bai,
@@ -69,6 +69,8 @@ workflow SAGE_CALLING {
                 donor_bai: donor_bai,
                 redux_tsvs: redux_tsvs
             ]
+
+            return inputs
         }
         .branch { inputs ->
             runnable: inputs.tumor_bam
@@ -95,7 +97,7 @@ workflow SAGE_CALLING {
         }
 
     // Create process input channel
-    // channel: { meta_sage, tumor_bam, normal_bam, tumor_bai, normal_bai, [redux_tsv, ...] }
+    // channel: [ meta_sage, tumor_bam, tumor_bai, normal_bam, normal_bai, [redux_tsv, ...] ]
     ch_sage_germline_inputs = ch_inputs_germline_sorted.runnable
         .map { inputs ->
 
@@ -110,8 +112,8 @@ workflow SAGE_CALLING {
             return [
                 meta_sage,
                 inputs.tumor_bam,
-                inputs.normal_bam,
                 inputs.tumor_bai,
+                inputs.normal_bam,
                 inputs.normal_bai,
                 inputs.redux_tsvs
             ]
@@ -152,8 +154,8 @@ workflow SAGE_CALLING {
         }
 
     // Create process input channel
-    // channel: tumor/normal: { meta_sage, tumor_bam, normal_bam, donor_bam, tumor_bai, normal_bai, donor_bai, [redux_tsv, ...] }
-    // channel: tumor only: { meta_sage, tumor_bam, [], tumor_bai, [], [redux_tsv, ...] }
+    // channel: tumor/normal: [ meta_sage, tumor_bam, tumor_bai, normal_bam, normal_bai, donor_bam, donor_bai, [redux_tsv, ...] ]
+    // channel: tumor only: [ meta_sage, tumor_bam, tumor_bai, [], [], [], [], [redux_tsv, ...] ]
     ch_sage_somatic_inputs = ch_inputs_somatic_sorted.runnable
         .map { inputs ->
 
@@ -174,10 +176,10 @@ workflow SAGE_CALLING {
             return [
                 meta_sage,
                 inputs.tumor_bam,
-                inputs.normal_bam,
-                inputs.donor_bam,
                 inputs.tumor_bai,
+                inputs.normal_bam,
                 inputs.normal_bai,
+                inputs.donor_bam,
                 inputs.donor_bai,
                 inputs.redux_tsvs
             ]

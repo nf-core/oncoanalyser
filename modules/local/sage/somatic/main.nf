@@ -10,7 +10,7 @@ process SAGE_SOMATIC {
         'biocontainers/hmftools-sage:4.2--hdfd78af_0' }"
 
     input:
-    tuple val(meta), path(tumor_bam), path(normal_bam), path(donor_bam), path(tumor_bai), path(normal_bai), path(donor_bai), path(redux_tsvs)
+    tuple val(meta), path(tumor_bam), path(tumor_bai), path(normal_bam), path(normal_bai), path(donor_bam), path(donor_bai), path(redux_tsvs)
     path genome_fasta
     val genome_ver
     path genome_fai
