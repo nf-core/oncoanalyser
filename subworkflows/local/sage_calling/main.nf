@@ -41,7 +41,7 @@ workflow SAGE_CALLING {
     ch_versions = Channel.empty()
 
     // Select input sources. Route inputs
-    // channel: [ meta, tumor_bam, tumor_bai, normal_bam, normal_bai, donor_bam, donor_bai, [redux_tsv, ...] ]
+    // channel: { meta, tumor_bam, tumor_bai, normal_bam, normal_bai, donor_bam, donor_bai, [redux_tsv, ...] }
     ch_inputs_sorted = WorkflowOncoanalyser.groupByMeta(
         flatten_mode: 'none',
         ch_tumor_bam, ch_normal_bam, ch_donor_bam,
@@ -59,35 +59,47 @@ workflow SAGE_CALLING {
 
             def redux_tsvs = [ *tumor_tsvs, *normal_tsvs, *donor_tsvs ]
 
-            return [ meta, tumor_bam, tumor_bai, normal_bam, normal_bai, donor_bam, donor_bai, redux_tsvs ]
+            return [
+                meta: meta,
+                tumor_bam: tumor_bam,
+                tumor_bai: tumor_bai,
+                normal_bam: normal_bam,
+                normal_bai: normal_bai,
+                donor_bam: donor_bam,
+                donor_bai: donor_bai,
+                redux_tsvs: redux_tsvs
+            ]
         }
-        .branch { meta, tumor_bam, tumor_bai, normal_bam, normal_bai, donor_bam, donor_bai, redux_tsvs ->
-            runnable: tumor_bam
+        .branch { inputs ->
+            runnable: inputs.tumor_bam
+                return inputs
             skip: true
-                return meta
+                return inputs.meta
         }
 
     //
     // MODULE: SAGE germline
     //
     // Select inputs that are eligible to run
-    // channel: runnable: [ meta, tumor_bam, tumor_bai, normal_bam, normal_bai, donor_bam, donor_bai, [redux_tsv, ...] ]
+    // channel: runnable: { meta, tumor_bam, tumor_bai, normal_bam, normal_bai, donor_bam, donor_bai, [redux_tsv, ...] }
     // channel: skip: [ meta ]
     ch_inputs_germline_sorted = ch_inputs_sorted.runnable
-        .branch { meta, tumor_bam, tumor_bai, normal_bam, normal_bai, donor_bam, donor_bai, redux_tsvs ->
-            def has_tumor_normal = tumor_bam && normal_bam
-            def has_existing = Inputs.hasExistingInput(meta, Constants.INPUT.SAGE_VCF_NORMAL)
+        .branch { inputs ->
+            def has_tumor_normal = inputs.tumor_bam && inputs.normal_bam
+            def has_existing = Inputs.hasExistingInput(inputs.meta, Constants.INPUT.SAGE_VCF_NORMAL)
 
             runnable: has_tumor_normal && !has_existing && enable_germline
+                return inputs
             skip: true
-                return meta
+                return inputs.meta
         }
 
     // Create process input channel
-    // channel: [ meta_sage, tumor_bam, normal_bam, tumor_bai, normal_bai, [redux_tsv, ...] ]
+    // channel: { meta_sage, tumor_bam, normal_bam, tumor_bai, normal_bai, [redux_tsv, ...] }
     ch_sage_germline_inputs = ch_inputs_germline_sorted.runnable
-        .map { meta, tumor_bam, tumor_bai, normal_bam, normal_bai, donor_bam, donor_bai, redux_tsvs ->
+        .map { inputs ->
 
+            def meta = inputs.meta
             def meta_sage = [
                 key: meta.group_id,
                 id: meta.group_id,
@@ -95,8 +107,15 @@ workflow SAGE_CALLING {
                 normal_id: Inputs.getNormalDnaSampleName(meta),
             ]
 
-            return [meta_sage, tumor_bam, normal_bam, tumor_bai, normal_bai, redux_tsvs]
-        }
+            return [
+                meta_sage,
+                inputs.tumor_bam,
+                inputs.normal_bam,
+                inputs.tumor_bai,
+                inputs.normal_bai,
+                inputs.redux_tsvs
+            ]
+    }
 
     // Run process
     SAGE_GERMLINE(
@@ -119,40 +138,49 @@ workflow SAGE_CALLING {
     // MODULE: SAGE somatic
     //
     // Select inputs that are eligible to run
-    // channel: runnable: [ meta, tumor_bam, tumor_bai, normal_bam, normal_bai, donor_bam, donor_bai, [redux_tsv, ...] ]
+    // channel: runnable: { meta, tumor_bam, tumor_bai, normal_bam, normal_bai, donor_bam, donor_bai, [redux_tsv, ...] }
     // channel: skip: [ meta ]
     ch_inputs_somatic_sorted = ch_inputs_sorted.runnable
-        .branch { meta, tumor_bam, tumor_bai, normal_bam, normal_bai, donor_bam, donor_bai, redux_tsvs ->
-            def has_tumor = tumor_bam
-            def has_existing = Inputs.hasExistingInput(meta, Constants.INPUT.SAGE_VCF_TUMOR)
+        .branch { inputs ->
+            def has_tumor = inputs.tumor_bam
+            def has_existing = Inputs.hasExistingInput(inputs.meta, Constants.INPUT.SAGE_VCF_TUMOR)
 
             runnable: has_tumor && !has_existing
+                return inputs
             skip: true
-                return meta
+                return inputs.meta
         }
 
     // Create process input channel
-    // channel: tumor/normal: [ meta_sage, tumor_bam, normal_bam, donor_bam, tumor_bai, normal_bai, donor_bai, [redux_tsv, ...] ]
-    // channel: tumor only: [ meta_sage, tumor_bam, [], tumor_bai, [], [redux_tsv, ...] ]
+    // channel: tumor/normal: { meta_sage, tumor_bam, normal_bam, donor_bam, tumor_bai, normal_bai, donor_bai, [redux_tsv, ...] }
+    // channel: tumor only: { meta_sage, tumor_bam, [], tumor_bai, [], [redux_tsv, ...] }
     ch_sage_somatic_inputs = ch_inputs_somatic_sorted.runnable
-        .map { meta, tumor_bam, tumor_bai, normal_bam, normal_bai, donor_bam, donor_bai, redux_tsvs ->
+        .map { inputs ->
+
+            def meta = inputs.meta
+
+            def tumor_id = Inputs.getTumorDnaSampleName(meta)
+            def normal_id = inputs.normal_bam ? Inputs.getNormalDnaSampleName(meta) : null
+            def donor_id = inputs.donor_bam ? Inputs.getDonorDnaSampleName(meta) : null
 
             def meta_sage = [
                 key: meta.group_id,
                 id: meta.group_id,
-                tumor_id: Inputs.getTumorDnaSampleName(meta),
-                donor_id: Inputs.getDonorDnaSampleName(meta),
+                tumor_id: tumor_id,
+                normal_id: normal_id,
+                donor_id: donor_id,
             ]
 
-            if (normal_bam) {
-                meta_sage.normal_id = Inputs.getNormalDnaSampleName(meta)
-            }
-
-            if (donor_bam) {
-                meta_sage.donor_id = Inputs.getDonorDnaSampleName(meta)
-            }
-
-            return [meta_sage, tumor_bam, normal_bam, donor_bam, tumor_bai, normal_bai, donor_bai, redux_tsvs]
+            return [
+                meta_sage,
+                inputs.tumor_bam,
+                inputs.normal_bam,
+                inputs.donor_bam,
+                inputs.tumor_bai,
+                inputs.normal_bai,
+                inputs.donor_bai,
+                inputs.redux_tsvs
+            ]
         }
 
     // Run process
