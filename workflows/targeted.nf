@@ -18,6 +18,7 @@ include { PAVE_ANNOTATION       } from '../subworkflows/local/pave_annotation'
 include { PEACH_CALLING         } from '../subworkflows/local/peach_calling'
 include { PREPARE_REFERENCE     } from '../subworkflows/local/prepare_reference'
 include { PURPLE_CALLING        } from '../subworkflows/local/purple_calling'
+include { QSEE_METRICS          } from '../subworkflows/local/qsee_metrics'
 include { READ_ALIGNMENT_DNA    } from '../subworkflows/local/read_alignment_dna'
 include { READ_ALIGNMENT_RNA    } from '../subworkflows/local/read_alignment_rna'
 include { REDUX_PROCESSING      } from '../subworkflows/local/redux_processing'
@@ -471,6 +472,37 @@ workflow TARGETED {
     } else {
 
         ch_purple_out = PlaceholderChannels.toolDir(ch_inputs)
+
+    }
+
+    //
+    // SUBWORKFLOW: QC metrics
+    //
+    // channel: [ meta, qsee_dir ]
+    ch_qsee_out = Channel.empty()
+    if (run_config.stages.qsee) {
+
+        QSEE_METRICS(
+            ch_inputs,
+            ch_redux_dna_tumor_tsv_out,
+            ch_redux_dna_normal_tsv_out,
+            ch_bamtools_somatic_out,
+            ch_bamtools_germline_out,
+            ch_cobalt_out,
+            ch_esvee_out,
+            ch_purple_out,
+            hmf_data.driver_gene_panel,
+            hmf_data.qsee_cohort_percentiles,
+            true,  // targeted_mode
+        )
+
+        ch_versions = ch_versions.mix(QSEE_METRICS.out.versions)
+
+        ch_qsee_out = ch_purple_out.mix(QSEE_METRICS.out.qsee_dir)
+
+    } else {
+
+        ch_qsee_out = PlaceholderChannels.toolDir(ch_inputs)
 
     }
 

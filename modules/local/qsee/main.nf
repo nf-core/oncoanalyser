@@ -18,6 +18,7 @@ process QSEE {
         path(purple_dir)
     path driver_gene_panel
     path cohort_percentiles
+    val targeted_mode
 
     output:
     tuple val(meta), path('qsee/'), emit: qsee_dir
@@ -41,6 +42,8 @@ process QSEE {
     def cobalt_dir_arg = cobalt_dir ? "-cobalt_dir ${cobalt_dir}" : ''
     def esvee_dir_arg = esvee_dir ? "-esvee_dir ${esvee_dir}" : ''
 
+    def cohort_percentiles_arg = !targeted_mode ? "-cohort_percentiles_file ${cohort_percentiles}" : ''
+
     """
     mkdir -p qsee/
 
@@ -57,7 +60,7 @@ process QSEE {
         ${esvee_dir_arg} \\
         -purple_dir ${purple_dir} \\
         -driver_gene_panel ${driver_gene_panel} \\
-        -cohort_percentiles_file ${cohort_percentiles} \\
+        ${cohort_percentiles_arg} \\
         -allow_missing_input \\
         ${log_level_arg} \\
         -output_dir \$(realpath qsee/)

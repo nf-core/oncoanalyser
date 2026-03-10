@@ -479,7 +479,7 @@ workflow WGTS {
     }
 
     //
-    // SUBWORKFLOW: Call CNVs, infer purity and ploidy, and recover low quality SVs with PURPLE
+    // SUBWORKFLOW: QC metrics
     //
     // channel: [ meta, qsee_dir ]
     ch_qsee_out = Channel.empty()
@@ -496,6 +496,7 @@ workflow WGTS {
             ch_purple_out,
             hmf_data.driver_gene_panel,
             hmf_data.qsee_cohort_percentiles,
+            false,  // targeted_mode
         )
 
         ch_versions = ch_versions.mix(QSEE_METRICS.out.versions)

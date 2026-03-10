@@ -20,6 +20,9 @@ workflow QSEE_METRICS {
     driver_gene_panel        // channel: [mandatory] /path/to/driver_gene_panel
     qsee_cohort_percentiles  // channel: [mandatory] /path/to/cohort_percentiles
 
+    // Params
+    targeted_mode            // boolean: [mandatory] Set targeted mode
+
     main:
     // Channel for version.yml files
     // channel: [ versions.yml ]
@@ -89,6 +92,7 @@ workflow QSEE_METRICS {
         ch_qsee_inputs,
         driver_gene_panel,
         qsee_cohort_percentiles,
+        targeted_mode,
     )
 
     ch_versions = ch_versions.mix(QSEE.out.versions)
