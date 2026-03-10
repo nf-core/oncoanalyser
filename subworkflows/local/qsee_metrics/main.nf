@@ -31,7 +31,7 @@ workflow QSEE_METRICS {
     // Select and route inputs
     // channel: { meta, redux_tsvs_tumor, redux_tsvs_normal, bamtools_tumor_dir, bamtools_normal_dir, cobalt_dir, esvee_dir, purple_dir }
     ch_inputs_sorted = WorkflowOncoanalyser.groupByMeta(
-        flatten_mode: 'none',
+        flatten_mode: 'singletons_only',
         ch_redux_tsvs_tumor, ch_redux_tsvs_normal,
         ch_bamtools_tumor, ch_bamtools_normal,
         ch_cobalt,
@@ -75,11 +75,13 @@ workflow QSEE_METRICS {
 
             def meta = inputs.meta
 
+            def has_normal_dna = inputs.redux_tsvs_normal || inputs.bamtools_normal_dir
+
             def meta_qsee = [
                 key: meta.group_id,
                 id: meta.group_id,
                 tumor_id: Inputs.getTumorDnaSampleName(meta),
-                normal_id: Inputs.getNormalDnaSampleName(meta),
+                normal_id: has_normal_dna ? Inputs.getNormalDnaSampleName(meta) : null,
             ]
 
             inputs.meta = meta_qsee
