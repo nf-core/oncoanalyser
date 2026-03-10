@@ -96,9 +96,13 @@ workflow ORANGE_REPORTING {
             return inputs_map
         }
 
-    dna_tumor_input_keys  = ['bamtools_somatic', 'sage_somatic', 'purple_dir', 'linx_somatic_annotation', 'linx_somatic_plot']
-    dna_normal_input_keys = ['bamtools_germline', 'sage_germline', 'linx_germline_annotation' ]
-    rna_tumor_input_keys  = ['sage_somatic_append', 'isofox']
+    def has_required_inputs = { inputs, keys ->
+        return keys.every { key -> inputs[key] }
+    }
+
+    def clear_inputs = { inputs, keys ->
+        keys.each { key -> inputs[key] = [] }
+    }
 
     // Sort inputs
     // channel: runnable: { meta, redux_somatic_plot, redux_germline_plot, ... }
@@ -106,9 +110,8 @@ workflow ORANGE_REPORTING {
     ch_inputs_sorted = ch_inputs_selected
         .branch { inputs ->
 
-            def has_dna_tumor = dna_tumor_input_keys
-                .collect { key -> inputs[key] }
-                .every()
+            def dna_tumor_input_keys = ['bamtools_somatic', 'sage_somatic', 'purple_dir', 'linx_somatic_annotation', 'linx_somatic_plot']
+            def has_dna_tumor = has_required_inputs(inputs, dna_tumor_input_keys)
 
             runnable: has_dna_tumor
                 return inputs
@@ -131,14 +134,13 @@ workflow ORANGE_REPORTING {
             ]
 
             // Require all normal DNA inputs to be present else clear them
-            def has_dna_normal = dna_normal_input_keys
-                .collect { keys -> inputs[keys] }
-                .every()
+            def dna_normal_input_keys = ['bamtools_germline', 'sage_germline', 'linx_germline_annotation' ]
+            def has_dna_normal = has_required_inputs(inputs, dna_normal_input_keys)
 
             if (has_dna_normal) {
                 meta_orange.normal_dna_id = Inputs.getNormalDnaSampleName(meta)
             } else {
-                dna_normal_input_keys.each { key -> inputs[key] = [] }
+                clear_inputs(inputs, dna_normal_input_keys)
             }
 
             // ORANGE only accepts CUPPA with DNA; when providing DNA/RNA inputs but skipping Virus Interpreter CUPPA
@@ -152,18 +154,16 @@ workflow ORANGE_REPORTING {
 
             // Require all tumor RNA inputs to be present else clear them
             // SAGE append germline is only required when normal DNA is present
-            if (has_dna_normal) {
-                rna_tumor_input_keys.add('sage_germline_append')
-            }
+            def rna_tumor_input_keys = has_dna_normal
+                ? ['isofox', 'sage_somatic_append', 'sage_germline_append']
+                : ['isofox', 'sage_somatic_append']
 
-            def has_rna_tumor = rna_tumor_input_keys
-                .collect { key -> inputs[key] }
-                .every()
+            def has_rna_tumor = has_required_inputs(inputs, rna_tumor_input_keys)
 
             if (has_rna_tumor) {
                 meta_orange.tumor_rna_id = Inputs.getTumorRnaSampleName(meta)
             } else {
-                rna_tumor_input_keys.each { key -> inputs[key] = [] }
+                clear_inputs(inputs, rna_tumor_input_keys)
             }
 
             // Set SAGE append VCF input
