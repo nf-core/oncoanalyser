@@ -32,9 +32,9 @@ class Params {
 
         if (!params.containsKey('ref_data_hmf_data_path')) {
             if (params.genome_version == RefGenome.Version.V37.getName()) {
-                params.ref_data_hmf_data_path = Constants.HMF_DATA_37_PATH
+                params.ref_data_hmf_data_path = RefData.HMF_DATA_37_PATH
             } else if (params.genome_version == RefGenome.Version.V38.getName()) {
-                params.ref_data_hmf_data_path = Constants.HMF_DATA_38_PATH
+                params.ref_data_hmf_data_path = RefData.HMF_DATA_38_PATH
             } else {
                 default_invalid = true
             }
@@ -56,9 +56,9 @@ class Params {
         if ((run_mode === Constants.RunMode.TARGETED || run_mode === Constants.RunMode.PREPARE_REFERENCE) && params.containsKey('panel')) {
             if (params.panel == 'tso500') {
                 if (params.genome_version == RefGenome.Version.V37.getName()) {
-                    params.ref_data_panel_data_path = Constants.TSO500_PANEL_37_PATH
+                    params.ref_data_panel_data_path = RefData.TSO500_PANEL_37_PATH
                 } else if (params.genome_version.toString() == RefGenome.Version.V38.getName()) {
-                    params.ref_data_panel_data_path = Constants.TSO500_PANEL_38_PATH
+                    params.ref_data_panel_data_path = RefData.TSO500_PANEL_38_PATH
                 }
             }
         }
@@ -223,7 +223,7 @@ class Params {
 
         if (run_config.run_mode === Constants.RunMode.PREPARE_REFERENCE && params.ref_data_types == null) {
 
-            def ref_data_types = Enums.getEnumNames(Constants.RefDataType).join('\n    - ')
+            def ref_data_types = Enums.getEnumNames(RefData.Type).join('\n    - ')
             log.error "\n~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n" +
                 "  CLI argument --ref_data_types is required for mode prepare_reference.\n" +
                 "  Please specify one or more of the below valid values (separated by commas)\n" +
@@ -236,7 +236,7 @@ class Params {
 
             if (!params.containsKey('panel') || params.panel === null) {
 
-                def panels = Constants.PANELS_DEFINED.join('\n    - ')
+                def panels = RefData.PANELS_DEFINED.join('\n    - ')
                 log.error "\n~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n" +
                     "  A panel is required to be set using the --panel CLI argument or in a\n" +
                     "  configuration file when running in targeted mode or panel resource creation mode.\n" +
@@ -245,12 +245,12 @@ class Params {
                     "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
                 Nextflow.exit(1)
 
-            } else if (!Constants.PANELS_DEFINED.contains(params.panel)) {
+            } else if (!RefData.PANELS_DEFINED.contains(params.panel)) {
 
                 if (params.containsKey('force_panel') && params.force_panel) {
                     log.warn "provided panel ${params.panel} does not have built-in support but forcing to proceed"
                 } else {
-                    def panels = Constants.PANELS_DEFINED.join('\n    - ')
+                    def panels = RefData.PANELS_DEFINED.join('\n    - ')
                     log.error "\n~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n" +
                         "  The ${params.panel} panel does not have built-in support. Currently, the\n" +
                         "  available supported panels are:\n" +
