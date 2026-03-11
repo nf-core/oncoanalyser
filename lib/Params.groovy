@@ -11,29 +11,29 @@ class Params {
 
         // Set defaults common to all run configuration
         if (!params.containsKey('genome_version')) {
-            if (Constants.GENOMES_VERSION_37.contains(params.genome)) {
-                params.genome_version = Constants.RefGenomeVersion.V37.getName()
-            } else if (Constants.GENOMES_VERSION_38.contains(params.genome)) {
-                params.genome_version = Constants.RefGenomeVersion.V38.getName()
+            if (RefGenome.GENOMES_VERSION_37.contains(params.genome)) {
+                params.genome_version = RefGenome.Version.V37.getName()
+            } else if (RefGenome.GENOMES_VERSION_38.contains(params.genome)) {
+                params.genome_version = RefGenome.Version.V38.getName()
             } else {
                 default_invalid = true
             }
         }
 
         if (!params.containsKey('genome_type')) {
-            if (Constants.GENOMES_ALT.contains(params.genome)) {
-                params.genome_type = Constants.RefGenomeType.ALT.getName()
-            } else if (Constants.GENOMES_DEFINED.contains(params.genome)) {
-                params.genome_type = Constants.RefGenomeType.NO_ALT.getName()
+            if (RefGenome.GENOMES_ALT.contains(params.genome)) {
+                params.genome_type = RefGenome.Type.ALT.getName()
+            } else if (RefGenome.GENOMES_DEFINED.contains(params.genome)) {
+                params.genome_type = RefGenome.Type.NO_ALT.getName()
             } else {
                 default_invalid = true
             }
         }
 
         if (!params.containsKey('ref_data_hmf_data_path')) {
-            if (params.genome_version == Constants.RefGenomeVersion.V37.getName()) {
+            if (params.genome_version == RefGenome.Version.V37.getName()) {
                 params.ref_data_hmf_data_path = Constants.HMF_DATA_37_PATH
-            } else if (params.genome_version == Constants.RefGenomeVersion.V38.getName()) {
+            } else if (params.genome_version == RefGenome.Version.V38.getName()) {
                 params.ref_data_hmf_data_path = Constants.HMF_DATA_38_PATH
             } else {
                 default_invalid = true
@@ -55,9 +55,9 @@ class Params {
         // Attempt to set default panel data path; make no assumption on valid 'panel' value
         if ((run_mode === Constants.RunMode.TARGETED || run_mode === Constants.RunMode.PREPARE_REFERENCE) && params.containsKey('panel')) {
             if (params.panel == 'tso500') {
-                if (params.genome_version == Constants.RefGenomeVersion.V37.getName()) {
+                if (params.genome_version == RefGenome.Version.V37.getName()) {
                     params.ref_data_panel_data_path = Constants.TSO500_PANEL_37_PATH
-                } else if (params.genome_version.toString() == Constants.RefGenomeVersion.V38.getName()) {
+                } else if (params.genome_version.toString() == RefGenome.Version.V38.getName()) {
                     params.ref_data_panel_data_path = Constants.TSO500_PANEL_38_PATH
                 }
             }
@@ -129,7 +129,7 @@ class Params {
             Nextflow.exit(1)
         }
 
-        if (!Constants.GENOMES_SUPPORTED.contains(params.genome)) {
+        if (!RefGenome.GENOMES_SUPPORTED.contains(params.genome)) {
             if (!params.force_genome) {
                 log.error "currently only the GRCh37_hmf and GRCh38_hmf genomes are supported but got ${params.genome}" +
                     ", please adjust the --genome argument accordingly or override with --force_genome."
@@ -145,7 +145,7 @@ class Params {
                 "  Genome version wasn't provided and genome '${params.genome}' is not defined in   \n" +
                 "  genome version list.\n" +
                 "  Currently, the list of genomes in the version list include:\n" +
-                "  ${Constants.GENOMES_DEFINED.join(", ")}\n" +
+                "  ${RefGenome.GENOMES_DEFINED.join(", ")}\n" +
                 "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
             Nextflow.exit(1)
         }
@@ -155,7 +155,7 @@ class Params {
                 "  Genome type wasn't provided and genome '${params.genome}' is not defined in      \n" +
                 "  genome type list.\n" +
                 "  Currently, the list of genomes in the type list include:\n" +
-                "  ${Constants.GENOMES_DEFINED.join(", ")}\n" +
+                "  ${RefGenome.GENOMES_DEFINED.join(", ")}\n" +
                 "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
             Nextflow.exit(1)
         }
@@ -279,7 +279,7 @@ class Params {
         }
 
         if (params.ref_data_genome_alt !== null) {
-            if (params.genome_type != Constants.RefGenomeType.ALT.getName()) {
+            if (params.genome_type != RefGenome.Type.ALT.getName()) {
                 log.error "\n~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n" +
                     "  Using a reference genome without ALT contigs but found an .alt file\n" +
                     "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
@@ -301,7 +301,7 @@ class Params {
         // NOTE(SW): the following final config checks are performed here since they require additional information
         // regarding processes that are run
 
-        def has_alt_contigs = params.genome_type == Constants.RefGenomeType.ALT.getName()
+        def has_alt_contigs = params.genome_type == RefGenome.Type.ALT.getName()
 
         // Ensure that custom genomes with ALT contigs that need indexes built have the required .alt file
         def has_bwa_indexes = (params.ref_data_genome_bwamem2_index && params.ref_data_genome_gridss_index)

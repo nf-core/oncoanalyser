@@ -1,13 +1,5 @@
 class Constants {
 
-    // NOTE(SW): the HMF reference data files are incompatible with hg19 due to different contig naming
-    static final List GENOMES_VERSION_37 = ['GRCh37_hmf', 'GRCh37']
-    static final List GENOMES_VERSION_38 = ['GRCh38_hmf', 'GRCh38', 'hg38']
-    static final List GENOMES_ALT = ['GRCh38', 'hg38']
-
-    static final List GENOMES_SUPPORTED = ['GRCh37_hmf', 'GRCh38_hmf']
-    static final List GENOMES_DEFINED = Constants.GENOMES_VERSION_37 + Constants.GENOMES_VERSION_38
-
     static final List PANELS_DEFINED = ['tso500']
 
     static final String HMF_DATA_37_PATH = 'https://pub-cf6ba01919994c3cbd354659947f74d8.r2.dev/hmf_reference_data/hmftools/hmf_pipeline_resources.37_v2.3.0--2.tar.gz'
@@ -18,26 +10,6 @@ class Constants {
 
     static final Integer DEFAULT_ISOFOX_READ_LENGTH_WTS = 151
     static final Integer DEFAULT_ISOFOX_READ_LENGTH_TARGETED = 93
-
-    static enum RefGenomeVersion {
-        V37('37'),
-        V38('38'),
-
-        private final String name
-
-        RefGenomeVersion(String name) {
-            this.name = name
-        }
-
-        public String getName() { return this.name }
-    }
-
-    static enum RefGenomeType {
-        ALT,
-        NO_ALT,
-
-        public String getName() { return this.toString().toLowerCase() }
-    }
 
     static enum RunMode {
         PANEL_RESOURCE_CREATION,
