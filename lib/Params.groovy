@@ -5,18 +5,19 @@ class Params {
     //
     // Set parameter defaults where required
     //
-    public static void setParamsDefaults(params) {
+    public static void setDefaults(params) {
+        setGenomeVersionDefaults(params)
+        setUmiDefaults(params)
+        setOtherDefaults(params)
+    }
 
-        def default_invalid = false
+    private static void setGenomeVersionDefaults(params) {
 
-        // Set defaults common to all run configuration
         if (!params.containsKey('genome_version')) {
             if (RefGenome.GENOMES_VERSION_37.contains(params.genome)) {
                 params.genome_version = RefGenome.Version.V37.getName()
             } else if (RefGenome.GENOMES_VERSION_38.contains(params.genome)) {
                 params.genome_version = RefGenome.Version.V38.getName()
-            } else {
-                default_invalid = true
             }
         }
 
@@ -25,8 +26,6 @@ class Params {
                 params.genome_type = RefGenome.Type.ALT.getName()
             } else if (RefGenome.GENOMES_DEFINED.contains(params.genome)) {
                 params.genome_type = RefGenome.Type.NO_ALT.getName()
-            } else {
-                default_invalid = true
             }
         }
 
@@ -35,24 +34,11 @@ class Params {
                 params.ref_data_hmf_data_path = RefData.HMF_DATA_37_PATH
             } else if (params.genome_version == RefGenome.Version.V38.getName()) {
                 params.ref_data_hmf_data_path = RefData.HMF_DATA_38_PATH
-            } else {
-                default_invalid = true
             }
         }
 
-        // Bad configuration, catch in validateParams
-        if (default_invalid) {
-            return
-        }
-
-        // Set defaults specific to run configuration without attempting to validate
-
-        def run_mode = params.mode ? Enums.getEnumFromString(params.mode, Constants.RunMode) : null
-        if (!run_mode) {
-            return
-        }
-
         // Attempt to set default panel data path; make no assumption on valid 'panel' value
+        def run_mode = Enums.getEnumFromString(params.mode, Constants.RunMode)
         if ((run_mode === Constants.RunMode.TARGETED || run_mode === Constants.RunMode.PREPARE_REFERENCE) && params.containsKey('panel')) {
             if (params.panel == 'tso500') {
                 if (params.genome_version == RefGenome.Version.V37.getName()) {
@@ -62,6 +48,11 @@ class Params {
                 }
             }
         }
+    }
+
+    private static void setUmiDefaults(params) {
+
+        def run_mode = Enums.getEnumFromString(params.mode, Constants.RunMode)
 
         if (run_mode === Constants.RunMode.TARGETED) {
 
@@ -80,21 +71,21 @@ class Params {
             if (fastp_and_redux_umi_enabled && fastp_duplex_location && no_umi_duplex_delim) {
                 params.redux_umi_duplex_delim = '_'
             }
-
         }
-
-        // Final point to set any default to avoid access to undefined parameters during nf-validation
-        if (!params.containsKey('panel')) params.panel = null
-        if (!params.containsKey('ref_data_genome_alt')) params.ref_data_genome_alt = null
-        if (!params.containsKey('ref_data_genome_gtf')) params.ref_data_genome_gtf = null
-        if (!params.containsKey('ref_data_panel_data_path')) params.ref_data_panel_data_path = null
 
         // Additionally set selected parameters with false-ish truthy values to avoid passing null values as inputs
         if (!params.containsKey('fastp_umi_location')) params.fastp_umi_location = ''
         if (!params.containsKey('fastp_umi_length')) params.fastp_umi_length = 0
         if (!params.containsKey('fastp_umi_skip')) params.fastp_umi_skip = -1
         if (!params.containsKey('redux_umi_duplex_delim')) params.redux_umi_duplex_delim = ''
+    }
 
+    private static void setOtherDefaults(params) {
+        // Final point to set any default to avoid access to undefined parameters during nf-validation
+        if (!params.containsKey('panel')) params.panel = null
+        if (!params.containsKey('ref_data_genome_alt')) params.ref_data_genome_alt = null
+        if (!params.containsKey('ref_data_genome_gtf')) params.ref_data_genome_gtf = null
+        if (!params.containsKey('ref_data_panel_data_path')) params.ref_data_panel_data_path = null
     }
 
     public static void validateParams(params, log) {
