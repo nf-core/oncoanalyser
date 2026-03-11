@@ -204,7 +204,7 @@ class Params {
 
         def run_mode = Enums.getValidatedEnumFromString(params.mode, Constants.RunMode, log)
 
-        def stages = Processes.getValidatedRunStages(
+        def stages = RunStage.getValidatedRunStages(
             params.processes_include,
             params.processes_exclude,
             params.processes_manual,

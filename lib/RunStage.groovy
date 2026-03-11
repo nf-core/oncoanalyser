@@ -1,8 +1,35 @@
 import nextflow.Nextflow
 
-class Processes {
+public enum RunStage {
 
-    public static getValidatedRunStages(include, exclude, manual_select, log) {
+    ALIGNMENT,
+    AMBER,
+    BAMTOOLS,
+    CHORD,
+    CIDER,
+    COBALT,
+    CUPPA,
+    ESVEE,
+    ISOFOX,
+    LILAC,
+    LINX,
+    NEO,
+    ORANGE,
+    PAVE,
+    PEACH,
+    PURPLE,
+    QSEE,
+    REDUX,
+    SAGE,
+    SAGE_VIS,
+    SIGS,
+    TEAL,
+    VIRUSINTERPRETER,
+    WISP;
+
+    private static List<RunStage> DEFAULT_EXCLUDED_PROCESSES = [] // For experimental tools
+
+    public static Map<String, Boolean> getValidatedRunStages(String include, String exclude, String manual_select, log) {
 
         def processes
 
@@ -16,10 +43,10 @@ class Processes {
         } else {
 
             // Get default processes
-            processes = Constants.Process.values().toList()
+            processes = values().toList()
 
             // NOTE(LN): Disable some processes from running by default
-            Constants.DEFAULT_EXCLUDED_PROCESSES.each {it -> processes.remove(it) }
+            DEFAULT_EXCLUDED_PROCESSES.each {it -> processes.remove(it) }
 
             def include_list = getProcessList(include, log)
             def exclude_list = getProcessList(exclude, log)
@@ -29,22 +56,20 @@ class Processes {
             processes.removeAll(exclude_list)
         }
 
-        return Constants.Process
-            .values()
-            .collectEntries { p -> [p.name().toLowerCase(), p in processes] }
+        return values().collectEntries { p -> [p.name().toLowerCase(), p in processes] }
     }
 
-    private static getProcessList(process_str, log) {
+    private static List<RunStage> getProcessList(String process_str, log) {
         if (!process_str) {
             return []
         }
         return process_str
             .tokenize(',')
-            .collect { return Enums.getValidatedEnumFromString(it, Constants.Process, log) }
+            .collect { return Enums.getValidatedEnumFromString(it, RunStage, log) }
             .unique()
     }
 
-    private static checkIncludeExcludeList(include_list, exclude_list, log) {
+    private static void checkIncludeExcludeList(List<RunStage> include_list, List<RunStage> exclude_list, log) {
         def processes_shared = [*include_list, *exclude_list]
             .countBy { it }
             .findAll { k, v -> v > 1 }

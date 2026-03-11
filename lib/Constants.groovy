@@ -78,35 +78,6 @@ class Constants {
         STAR_INDEX,
     }
 
-    static enum Process {
-        ALIGNMENT,
-        AMBER,
-        BAMTOOLS,
-        CHORD,
-        CIDER,
-        COBALT,
-        CUPPA,
-        ESVEE,
-        ISOFOX,
-        LILAC,
-        LINX,
-        NEO,
-        ORANGE,
-        PAVE,
-        PEACH,
-        PURPLE,
-        QSEE,
-        REDUX,
-        SAGE,
-        SAGE_VIS,
-        SIGS,
-        TEAL,
-        VIRUSINTERPRETER,
-        WISP,
-    }
-
-    static List DEFAULT_EXCLUDED_PROCESSES = [] // For experimental tools
-
     static enum FileType {
         // Generic
         BAI,
