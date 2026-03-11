@@ -30,8 +30,8 @@ workflow SAGE_APPEND {
     // channel: [ versions.yml ]
     ch_versions = Channel.empty()
 
-    def run_mode = Enums.getEnumFromString(params.mode, Constants.RunMode)
-    def purity_estimate_mode = run_mode === Constants.RunMode.PURITY_ESTIMATE
+    def run_mode = Enums.getEnumFromString(params.mode, RunModes.Main)
+    def purity_estimate_mode = run_mode === RunModes.Main.PURITY_ESTIMATE
 
     // Select input sources and sort
     // channel: runnable: { meta, tumor_dna_bam, tumor_dna_bai, [tumor_dna_redux_tsv, ...], tumor_rna_bam, tumor_rna_bai, purple_dir }

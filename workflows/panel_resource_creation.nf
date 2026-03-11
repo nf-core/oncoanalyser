@@ -131,7 +131,7 @@ workflow PANEL_RESOURCE_CREATION {
     //
     isofox_counts = params.isofox_counts ? file(params.isofox_counts) : hmf_data.isofox_counts
     isofox_gc_ratios = params.isofox_gc_ratios ? file(params.isofox_gc_ratios) : hmf_data.isofox_gc_ratios
-    isofox_read_length = params.isofox_read_length !== null ? params.isofox_read_length : Constants.DEFAULT_ISOFOX_READ_LENGTH_TARGETED
+    isofox_read_length = params.isofox_read_length !== null ? params.isofox_read_length : RunModes.DEFAULT_ISOFOX_READ_LENGTH_TARGETED
 
     ISOFOX_QUANTIFICATION(
         ch_inputs,

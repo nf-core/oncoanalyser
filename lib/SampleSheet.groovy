@@ -384,7 +384,7 @@ class SampleSheet {
         }
 
         // Apply some required restrictions to targeted mode
-        if (run_mode === Constants.RunMode.TARGETED) {
+        if (run_mode === RunModes.Main.TARGETED) {
 
             // Do not allow donor DNA
             if (Inputs.hasDonorDna(meta)) {

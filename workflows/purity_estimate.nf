@@ -35,9 +35,9 @@ workflow PURITY_ESTIMATE {
     ch_inputs = Channel.fromList(inputs)
 
     // Get run mode of purity estimate mode
-    purity_estimate_run_mode = Enums.getEnumFromString(params.purity_estimate_mode, Constants.PurityEstimateRunMode)
-    targeted_mode = purity_estimate_run_mode === Constants.PurityEstimateRunMode.TARGETED
-    wgts_mode = purity_estimate_run_mode === Constants.PurityEstimateRunMode.WGTS // NOTE(LN): Redundant variable, but makes the if clauses clearer
+    purity_estimate_run_mode = Enums.getEnumFromString(params.purity_estimate_mode, RunModes.PurityEstimate)
+    targeted_mode = purity_estimate_run_mode === RunModes.PurityEstimate.TARGETED
+    wgts_mode = purity_estimate_run_mode === RunModes.PurityEstimate.WGTS // NOTE(LN): Redundant variable, but makes the if clauses clearer
 
     // Set up reference data, assign more human readable variables
     PREPARE_REFERENCE(

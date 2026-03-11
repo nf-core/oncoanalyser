@@ -215,9 +215,9 @@ workflow PREPARE_REFERENCE {
         }
 
         // Set PON paths
-        def sequencing_type = Enums.getEnumFromString(params.sequencing_type, Constants.SequencingType)
+        def sequencing_type = Enums.getEnumFromString(params.sequencing_type, RunModes.SequencingType)
 
-        if(sequencing_type === Constants.SequencingType.ULTIMA) {
+        if(sequencing_type === RunModes.SequencingType.ULTIMA) {
 
             ch_hmf_data = ch_hmf_data
                 .map { d ->
@@ -233,7 +233,7 @@ workflow PREPARE_REFERENCE {
                     return d
                 }
 
-        } else if(sequencing_type === Constants.SequencingType.SBX) {
+        } else if(sequencing_type === RunModes.SequencingType.SBX) {
 
             ch_hmf_data = ch_hmf_data
                 .map { d ->
@@ -254,9 +254,9 @@ workflow PREPARE_REFERENCE {
         // Set custom driver gene panel
         if (params.driver_gene_panel) {
 
-            def run_mode = Enums.getEnumFromString(params.mode, Constants.RunMode)
+            def run_mode = Enums.getEnumFromString(params.mode, RunModes.Main)
 
-            if (run_mode !== Constants.RunMode.PANEL_RESOURCE_CREATION) {
+            if (run_mode !== RunModes.Main.PANEL_RESOURCE_CREATION) {
                 log.info "Using custom driver gene panel: ${params.driver_gene_panel}"
             }
 
@@ -350,9 +350,9 @@ def getConfigForPipelineRun(inputs, run_config) {
         require_bwamem2_index: has_dna_fastq && run_config.stages.alignment,
         require_star_index: has_rna_fastq && run_config.stages.alignment,
 
-        require_gridss_index: has_dna && run_config.mode === Constants.RunMode.WGTS && run_config.stages.virusinterpreter,
+        require_gridss_index: has_dna && run_config.mode === RunModes.Main.WGTS && run_config.stages.virusinterpreter,
         require_hmftools_data: true,
-        require_panel_data: run_config.mode === Constants.RunMode.TARGETED,
+        require_panel_data: run_config.mode === RunModes.Main.TARGETED,
     ]
 }
 

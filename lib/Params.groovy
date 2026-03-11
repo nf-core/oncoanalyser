@@ -38,8 +38,8 @@ class Params {
         }
 
         // Attempt to set default panel data path; make no assumption on valid 'panel' value
-        def run_mode = Enums.getEnumFromString(params.mode, Constants.RunMode)
-        if ((run_mode === Constants.RunMode.TARGETED || run_mode === Constants.RunMode.PREPARE_REFERENCE) && params.containsKey('panel')) {
+        def run_mode = Enums.getEnumFromString(params.mode, RunModes.Main)
+        if ((run_mode === RunModes.Main.TARGETED || run_mode === RunModes.Main.PREPARE_REFERENCE) && params.containsKey('panel')) {
             if (params.panel == 'tso500') {
                 if (params.genome_version == RefGenome.Version.V37.getName()) {
                     params.ref_data_panel_data_path = RefData.TSO500_PANEL_37_PATH
@@ -52,9 +52,9 @@ class Params {
 
     private static void setUmiDefaults(params) {
 
-        def run_mode = Enums.getEnumFromString(params.mode, Constants.RunMode)
+        def run_mode = Enums.getEnumFromString(params.mode, RunModes.Main)
 
-        if (run_mode === Constants.RunMode.TARGETED) {
+        if (run_mode === RunModes.Main.TARGETED) {
 
             // When fastp UMI is enabled, REDUX UMI should be as well
             if (params.fastp_umi_enabled && (!params.containsKey('redux_umi_enabled') || !params.redux_umi_enabled)) {
@@ -91,7 +91,7 @@ class Params {
     public static void validateParams(params, log) {
 
         if (!params.mode) {
-            def run_modes = Enums.getEnumNames(Constants.RunMode).join('\n    - ')
+            def run_modes = Enums.getEnumNames(RunModes.Main).join('\n    - ')
             log.error "\n~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n" +
                 "  Run mode must be set using the --mode CLI argument or in a configuration file.\n" +
                 "  Currently, the available run modes are:\n" +
@@ -99,7 +99,7 @@ class Params {
                 "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
             Nextflow.exit(1)
         } else {
-            Enums.validateEnumFromString(params.mode, Constants.RunMode, log)
+            Enums.validateEnumFromString(params.mode, RunModes.Main, log)
         }
 
         // Genome related
@@ -158,7 +158,7 @@ class Params {
 
         // Sequencing technology
 
-        Enums.validateEnumFromString(params.sequencing_type, Constants.SequencingType, log, false)
+        Enums.validateEnumFromString(params.sequencing_type, RunModes.SequencingType, log, false)
 
         // UMI parameters
 
@@ -193,7 +193,7 @@ class Params {
 
     public static getRunConfig(params, log) {
 
-        def run_mode = Enums.getValidatedEnumFromString(params.mode, Constants.RunMode, log)
+        def run_mode = Enums.getValidatedEnumFromString(params.mode, RunModes.Main, log)
 
         def stages = RunStage.getValidatedRunStages(
             params.processes_include,
@@ -212,7 +212,7 @@ class Params {
 
         // Run mode specific parameters
 
-        if (run_config.run_mode === Constants.RunMode.PREPARE_REFERENCE && params.ref_data_types == null) {
+        if (run_config.run_mode === RunModes.Main.PREPARE_REFERENCE && params.ref_data_types == null) {
 
             def ref_data_types = Enums.getEnumNames(RefData.Type).join('\n    - ')
             log.error "\n~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n" +
@@ -223,7 +223,7 @@ class Params {
             Nextflow.exit(1)
         }
 
-        if (run_config.run_mode === Constants.RunMode.TARGETED) {
+        if (run_config.run_mode === RunModes.Main.TARGETED) {
 
             if (!params.containsKey('panel') || params.panel === null) {
 
@@ -253,10 +253,10 @@ class Params {
             }
         }
 
-        if (run_config.run_mode === Constants.RunMode.PURITY_ESTIMATE) {
+        if (run_config.run_mode === RunModes.Main.PURITY_ESTIMATE) {
 
             if(!params.purity_estimate_mode) {
-                def purity_estimate_modes = Enums.getEnumNames(Constants.PurityEstimateRunMode).join('\n    - ')
+                def purity_estimate_modes = Enums.getEnumNames(RunModes.PurityEstimate).join('\n    - ')
                 log.error "\n~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n" +
                     "  A valid purity estimate run mode must be set using the --purity_estimate_mode\n" +
                     "  CLI argument or in a configuration file.\n" +
@@ -265,7 +265,7 @@ class Params {
                     "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
                 Nextflow.exit(1)
             } else {
-                Enums.validateEnumFromString(params.purity_estimate_mode, Constants.PurityEstimateRunMode, log)
+                Enums.validateEnumFromString(params.purity_estimate_mode, RunModes.PurityEstimate, log)
             }
         }
 
@@ -328,7 +328,7 @@ class Params {
         }
 
         // Require --isofox_gene_ids argument to be provided in PANEL_RESOURCE_CREATION when RNA inputs are present
-        if (run_config.mode === Constants.RunMode.PANEL_RESOURCE_CREATION && run_config.has_rna && !params.isofox_gene_ids) {
+        if (run_config.mode === RunModes.Main.PANEL_RESOURCE_CREATION && run_config.has_rna && !params.isofox_gene_ids) {
             log.error "\n~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n" +
                 "  Running the panel resource creation workflow with RNA requires that the\n" +
                 "  --isofox_gene_ids argument is set with an appropriate input file.\n" +

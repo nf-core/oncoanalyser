@@ -1,27 +1,5 @@
 class Constants {
 
-    static final Integer DEFAULT_ISOFOX_READ_LENGTH_WTS = 151
-    static final Integer DEFAULT_ISOFOX_READ_LENGTH_TARGETED = 93
-
-    static enum RunMode {
-        PANEL_RESOURCE_CREATION,
-        PREPARE_REFERENCE,
-        PURITY_ESTIMATE,
-        TARGETED,
-        WGTS,
-    }
-
-    static enum PurityEstimateRunMode {
-        TARGETED,
-        WGTS,
-    }
-
-    static enum SequencingType {
-        ILLUMINA,
-        SBX,
-        ULTIMA,
-    }
-
     static enum FileType {
         // Generic
         BAI,
