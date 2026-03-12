@@ -68,7 +68,7 @@ workflow PURPLE_CALLING {
             runnable: inputs.amber_dir && inputs.cobalt_dir && !has_existing
                 return inputs
             skip: true
-                return meta
+                return inputs.meta
         }
 
     // Create process input channel
