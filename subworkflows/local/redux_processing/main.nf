@@ -58,23 +58,23 @@ workflow REDUX_PROCESSING {
 
     ch_inputs_tumor = selectBamInputs(
         ch_dna_tumor,
-        Constants.INPUT.BAM_DNA_TUMOR,
-        Constants.INPUT.BAI_DNA_TUMOR,
-        Constants.INPUT.BAM_REDUX_DNA_TUMOR
+        SampleMeta.INPUT.BAM_DNA_TUMOR,
+        SampleMeta.INPUT.BAI_DNA_TUMOR,
+        SampleMeta.INPUT.BAM_REDUX_DNA_TUMOR
     )
 
     ch_inputs_normal = selectBamInputs(
         ch_dna_normal,
-        Constants.INPUT.BAM_DNA_NORMAL,
-        Constants.INPUT.BAI_DNA_NORMAL,
-        Constants.INPUT.BAM_REDUX_DNA_NORMAL
+        SampleMeta.INPUT.BAM_DNA_NORMAL,
+        SampleMeta.INPUT.BAI_DNA_NORMAL,
+        SampleMeta.INPUT.BAM_REDUX_DNA_NORMAL
     )
 
     ch_inputs_donor = selectBamInputs(
         ch_dna_donor,
-        Constants.INPUT.BAM_DNA_DONOR,
-        Constants.INPUT.BAI_DNA_DONOR,
-        Constants.INPUT.BAM_REDUX_DNA_DONOR
+        SampleMeta.INPUT.BAM_DNA_DONOR,
+        SampleMeta.INPUT.BAI_DNA_DONOR,
+        SampleMeta.INPUT.BAM_REDUX_DNA_DONOR
     )
 
     // Create process input channel

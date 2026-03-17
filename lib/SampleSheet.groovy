@@ -70,9 +70,9 @@ class SampleSheet {
 
         def group_id = meta.group_id
 
-        def sample_type = Enums.getValidatedEnumFromString(entry.sample_type, Constants.SampleType, log)
-        def sequence_type = Enums.getValidatedEnumFromString(entry.sequence_type, Constants.SequenceType, log)
-        def file_type = Enums.getValidatedEnumFromString(entry.filetype, Constants.FileType, log)
+        def sample_type = Enums.getValidatedEnumFromString(entry.sample_type, SampleMeta.SampleType, log)
+        def sequence_type = Enums.getValidatedEnumFromString(entry.sequence_type, SampleMeta.SequenceType, log)
+        def file_type = Enums.getValidatedEnumFromString(entry.filetype, SampleMeta.FileType, log)
 
         def log_sample_id = "group_id(${group_id}) sample_id(${sample_type})"
         def log_group_id = "group_id(${group_id})"
@@ -87,19 +87,19 @@ class SampleSheet {
         // Handle info field
         def info_data = parseInfoField(entry, log_sample_id, log)
 
-        if (info_data.containsKey(Constants.InfoField.CANCER_TYPE)) {
-            meta[Constants.InfoField.CANCER_TYPE] = info_data[Constants.InfoField.CANCER_TYPE]
+        if (info_data.containsKey(SampleMeta.InfoField.CANCER_TYPE)) {
+            meta[SampleMeta.InfoField.CANCER_TYPE] = info_data[SampleMeta.InfoField.CANCER_TYPE]
         }
 
         setSampleIds(meta_sample, entry, info_data, log_group_id, log)
 
         // Set file paths
-        if (meta_sample.containsKey(file_type) & file_type != Constants.FileType.FASTQ) {
+        if (meta_sample.containsKey(file_type) & file_type != SampleMeta.FileType.FASTQ) {
             log.error "got duplicate filetype(${file_type}) for ${log_sample_id}"
             Nextflow.exit(1)
         }
 
-        if (file_type === Constants.FileType.FASTQ) {
+        if (file_type === SampleMeta.FileType.FASTQ) {
             setFastqPaths(meta_sample, entry, info_data, log_sample_id, log)
         } else {
             meta_sample[file_type] = getFileObject(entry.filepath)
@@ -131,14 +131,14 @@ class SampleSheet {
             .tokenize(';')
             .each { e ->
                 def (k, v) = e.tokenize(':')
-                def info_field_enum = Enums.getValidatedEnumFromString(k, Constants.InfoField, log)
+                def info_field_enum = Enums.getValidatedEnumFromString(k, SampleMeta.InfoField, log)
 
                 if (info_data.containsKey(info_field_enum)) {
                     log.error "got duplicate info field(${info_field_enum}) for ${log_sample_id}"
                     Nextflow.exit(1)
                 }
 
-                if (!v && info_field_enum !== Constants.InfoField.LONGITUDINAL_SAMPLE) {
+                if (!v && info_field_enum !== SampleMeta.InfoField.LONGITUDINAL_SAMPLE) {
                     log.error "got empty value for info field(${info_field_enum}) for ${log_sample_id}"
                     Nextflow.exit(1)
                 }
@@ -155,7 +155,7 @@ class SampleSheet {
 
     private static void setSampleIds(meta_sample, entry, info_data, log_group_id, log) {
 
-        if (info_data.containsKey(Constants.InfoField.LONGITUDINAL_SAMPLE)) {
+        if (info_data.containsKey(SampleMeta.InfoField.LONGITUDINAL_SAMPLE)) {
 
             if (meta_sample.containsKey('longitudinal_sample_id') && meta_sample.longitudinal_sample_id != entry.sample_id) {
                 log.error "got multiple longitudinal samples for ${log_group_id}: ${entry.sample_id}"
@@ -178,12 +178,12 @@ class SampleSheet {
 
     private static void setFastqPaths(meta_sample, entry, info_data, log_sample_id, log) {
 
-        if (!info_data.containsKey(Constants.InfoField.LIBRARY_ID)) {
+        if (!info_data.containsKey(SampleMeta.InfoField.LIBRARY_ID)) {
             log.error "missing 'library_id' info field for ${log_sample_id}"
             Nextflow.exit(1)
         }
 
-        if (!info_data.containsKey(Constants.InfoField.LANE)) {
+        if (!info_data.containsKey(SampleMeta.InfoField.LANE)) {
             log.error "missing 'lane' info field for ${log_sample_id}"
             Nextflow.exit(1)
         }
@@ -197,18 +197,18 @@ class SampleSheet {
         }
 
         def (fwd, rev) = fastq_entries
-        def fastq_key = [info_data[Constants.InfoField.LIBRARY_ID], info_data[Constants.InfoField.LANE]]
+        def fastq_key = [info_data[SampleMeta.InfoField.LIBRARY_ID], info_data[SampleMeta.InfoField.LANE]]
 
-        if (!meta_sample.containsKey(Constants.FileType.FASTQ)) {
-            meta_sample[Constants.FileType.FASTQ] = [:]
+        if (!meta_sample.containsKey(SampleMeta.FileType.FASTQ)) {
+            meta_sample[SampleMeta.FileType.FASTQ] = [:]
         }
 
-        if (meta_sample[Constants.FileType.FASTQ].containsKey(fastq_key)) {
+        if (meta_sample[SampleMeta.FileType.FASTQ].containsKey(fastq_key)) {
             log.error "got duplicate lane + library_id data for ${log_sample_id}: ${fastq_key}"
             Nextflow.exit(1)
         }
 
-        meta_sample[Constants.FileType.FASTQ][fastq_key] = ['fwd': getFileObject(fwd), 'rev': getFileObject(rev)]
+        meta_sample[SampleMeta.FileType.FASTQ][fastq_key] = ['fwd': getFileObject(fwd), 'rev': getFileObject(rev)]
 
     }
 
@@ -217,17 +217,17 @@ class SampleSheet {
         // CRAMs are passed to hmftools as if they were BAMs, e.g. `-bam_file /path/to/tumor.cram`
         // We therefore set the BAM/BAI path to be the CRAM/CRAI path
 
-        if (meta_sample.containsKey(Constants.FileType.CRAM_REDUX)) {
-            meta_sample[Constants.FileType.BAM_REDUX] = meta_sample.remove(Constants.FileType.CRAM_REDUX)
+        if (meta_sample.containsKey(SampleMeta.FileType.CRAM_REDUX)) {
+            meta_sample[SampleMeta.FileType.BAM_REDUX] = meta_sample.remove(SampleMeta.FileType.CRAM_REDUX)
         }
 
-        if (meta_sample.containsKey(Constants.FileType.CRAM)) {
-            meta_sample[Constants.FileType.BAM] = meta_sample.remove(Constants.FileType.CRAM)
+        if (meta_sample.containsKey(SampleMeta.FileType.CRAM)) {
+            meta_sample[SampleMeta.FileType.BAM] = meta_sample.remove(SampleMeta.FileType.CRAM)
         }
 
         // The BAI key is used to store the index for both regular/REDUX CRAMs/BAMs
-        if (meta_sample.containsKey(Constants.FileType.CRAI)) {
-            meta_sample[Constants.FileType.BAI] = meta_sample.remove(Constants.FileType.CRAI)
+        if (meta_sample.containsKey(SampleMeta.FileType.CRAI)) {
+            meta_sample[SampleMeta.FileType.BAI] = meta_sample.remove(SampleMeta.FileType.CRAI)
         }
 
     }
@@ -242,14 +242,14 @@ class SampleSheet {
             def index_enum
             def index_extension
 
-            if (key === Constants.FileType.BAM || key === Constants.FileType.BAM_REDUX) {
-                index_enum = Constants.FileType.BAI
+            if (key === SampleMeta.FileType.BAM || key === SampleMeta.FileType.BAM_REDUX) {
+                index_enum = SampleMeta.FileType.BAI
                 index_extension = 'bai'
-            } else if (key === Constants.FileType.CRAM || key === Constants.FileType.CRAM_REDUX) {
-                index_enum = Constants.FileType.CRAI
+            } else if (key === SampleMeta.FileType.CRAM || key === SampleMeta.FileType.CRAM_REDUX) {
+                index_enum = SampleMeta.FileType.CRAI
                 index_extension = 'crai'
-            } else if (key === Constants.FileType.SAGE_VCF) {
-                index_enum = Constants.FileType.SAGE_VCF_TBI
+            } else if (key === SampleMeta.FileType.SAGE_VCF) {
+                index_enum = SampleMeta.FileType.SAGE_VCF_TBI
                 index_extension = 'tbi'
             } else {
                 // Key not a file type, or not a file type that needs an index
@@ -276,11 +276,11 @@ class SampleSheet {
     private static void checkRawReadDataExists(meta_sample, log_group_id, log) {
 
         def missing_any_raw_read_data =
-            !meta_sample.containsKey(Constants.FileType.BAM) &&
-            !meta_sample.containsKey(Constants.FileType.BAM_REDUX) &&
-            !meta_sample.containsKey(Constants.FileType.CRAM) &&
-            !meta_sample.containsKey(Constants.FileType.CRAM_REDUX) &&
-            !meta_sample.containsKey(Constants.FileType.FASTQ)
+            !meta_sample.containsKey(SampleMeta.FileType.BAM) &&
+            !meta_sample.containsKey(SampleMeta.FileType.BAM_REDUX) &&
+            !meta_sample.containsKey(SampleMeta.FileType.CRAM) &&
+            !meta_sample.containsKey(SampleMeta.FileType.CRAM_REDUX) &&
+            !meta_sample.containsKey(SampleMeta.FileType.FASTQ)
 
         if (missing_any_raw_read_data) {
 
@@ -292,19 +292,19 @@ class SampleSheet {
 
     private static void checkReduxTsvsExist(meta_sample, log) {
 
-        if (!meta_sample.containsKey(Constants.FileType.BAM_REDUX)) {
+        if (!meta_sample.containsKey(SampleMeta.FileType.BAM_REDUX)) {
             return
         }
 
-        def bam_path = meta_sample[Constants.FileType.BAM_REDUX]
+        def bam_path = meta_sample[SampleMeta.FileType.BAM_REDUX]
         def bam_dir = bam_path.getParent().toUriString()
 
         def sample_id = meta_sample.getOrDefault('longitudinal_sample_id', meta_sample['sample_id'])
         def default_tsv_paths = [
-            (Constants.FileType.REDUX_BQR_TSV)     : "${bam_dir}/${sample_id}.redux.bqr.tsv",
-            (Constants.FileType.REDUX_DUP_FREQ_TSV): "${bam_dir}/${sample_id}.redux.duplicate_freq.tsv",
-            (Constants.FileType.REDUX_JITTER_TSV)  : "${bam_dir}/${sample_id}.redux.jitter_params.tsv",
-            (Constants.FileType.REDUX_MS_TSV)      : "${bam_dir}/${sample_id}.redux.ms_table.tsv.gz",
+            (SampleMeta.FileType.REDUX_BQR_TSV)     : "${bam_dir}/${sample_id}.redux.bqr.tsv",
+            (SampleMeta.FileType.REDUX_DUP_FREQ_TSV): "${bam_dir}/${sample_id}.redux.duplicate_freq.tsv",
+            (SampleMeta.FileType.REDUX_JITTER_TSV)  : "${bam_dir}/${sample_id}.redux.jitter_params.tsv",
+            (SampleMeta.FileType.REDUX_MS_TSV)      : "${bam_dir}/${sample_id}.redux.ms_table.tsv.gz",
         ]
 
         default_tsv_paths.keySet().each { file_type ->
@@ -320,7 +320,7 @@ class SampleSheet {
                 def message = "Missing filetype(${file_type}) path(${tsv_path}).\n" +
                         "Make sure the REDUX BAM and TSV are in the same dir, or provide the TSV path explicitly in the sample sheet"
 
-                if(file_type === Constants.FileType.REDUX_DUP_FREQ_TSV) {
+                if(file_type === SampleMeta.FileType.REDUX_DUP_FREQ_TSV) {
                     // Not required for core pipeline functionality (e.g. variant calling)
                     log.warn message
                     return
@@ -406,9 +406,9 @@ class SampleSheet {
     private static void checkLongitudinalSampleInputs(meta, log) {
 
         // For purity estimation with WISP, require primary normal DNA BAM when an AMBER directory is provided
-        def meta_tumor_dna = meta.getOrDefault([Constants.SampleType.TUMOR, Constants.SequenceType.DNA], [:])
+        def meta_tumor_dna = meta.getOrDefault([SampleMeta.SampleType.TUMOR, SampleMeta.SequenceType.DNA], [:])
         def longitudinal = meta_tumor_dna.containsKey('longitudinal_sample_id')
-        def has_amber_dir = meta_tumor_dna.containsKey(Constants.FileType.AMBER_DIR)
+        def has_amber_dir = meta_tumor_dna.containsKey(SampleMeta.FileType.AMBER_DIR)
         def has_normal_dna_bam = Inputs.hasNormalDnaBam(meta) || Inputs.hasNormalDnaReduxBam(meta)
 
         if (longitudinal && has_amber_dir && !has_normal_dna_bam) {

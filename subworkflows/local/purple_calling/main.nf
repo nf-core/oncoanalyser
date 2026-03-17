@@ -48,11 +48,11 @@ workflow PURPLE_CALLING {
             def inputs = [:]
 
             inputs.meta              = meta
-            inputs.amber_dir         = Inputs.preferUserProvidedInput(amber_dir, meta, Constants.INPUT.AMBER_DIR)
-            inputs.cobalt_dir        = Inputs.preferUserProvidedInput(cobalt_dir, meta, Constants.INPUT.COBALT_DIR)
-            inputs.pave_somatic_dir  = Inputs.preferUserProvidedInput(pave_somatic_dir, meta, Constants.INPUT.PAVE_DIR_TUMOR)
-            inputs.pave_germline_dir = Inputs.preferUserProvidedInput(pave_germline_dir, meta, Constants.INPUT.PAVE_DIR_NORMAL)
-            inputs.esvee_dir         = Inputs.preferUserProvidedInput(esvee_dir, meta, Constants.INPUT.ESVEE_DIR)
+            inputs.amber_dir         = Inputs.preferUserProvidedInput(amber_dir, meta, SampleMeta.INPUT.AMBER_DIR)
+            inputs.cobalt_dir        = Inputs.preferUserProvidedInput(cobalt_dir, meta, SampleMeta.INPUT.COBALT_DIR)
+            inputs.pave_somatic_dir  = Inputs.preferUserProvidedInput(pave_somatic_dir, meta, SampleMeta.INPUT.PAVE_DIR_TUMOR)
+            inputs.pave_germline_dir = Inputs.preferUserProvidedInput(pave_germline_dir, meta, SampleMeta.INPUT.PAVE_DIR_NORMAL)
+            inputs.esvee_dir         = Inputs.preferUserProvidedInput(esvee_dir, meta, SampleMeta.INPUT.ESVEE_DIR)
 
             return inputs
         }
@@ -63,7 +63,7 @@ workflow PURPLE_CALLING {
     ch_inputs_sorted = ch_inputs_selected
         .branch { inputs ->
 
-            def has_existing = Inputs.hasExistingInput(inputs.meta, Constants.INPUT.PURPLE_DIR)
+            def has_existing = Inputs.hasExistingInput(inputs.meta, SampleMeta.INPUT.PURPLE_DIR)
 
             runnable: inputs.amber_dir && inputs.cobalt_dir && !has_existing
                 return inputs

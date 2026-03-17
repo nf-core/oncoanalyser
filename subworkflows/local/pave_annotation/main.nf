@@ -43,13 +43,13 @@ workflow PAVE_ANNOTATION {
         .map { meta, sage_vcf, sage_tbi ->
             return [
                 meta,
-                Inputs.preferUserProvidedInput(sage_vcf, meta, Constants.INPUT.SAGE_VCF_NORMAL),
-                Inputs.preferUserProvidedInput(sage_tbi, meta, Constants.INPUT.SAGE_VCF_TBI_NORMAL),
+                Inputs.preferUserProvidedInput(sage_vcf, meta, SampleMeta.INPUT.SAGE_VCF_NORMAL),
+                Inputs.preferUserProvidedInput(sage_tbi, meta, SampleMeta.INPUT.SAGE_VCF_TBI_NORMAL),
             ]
         }
         .branch { meta, sage_vcf, sage_tbi ->
 
-            def has_existing = Inputs.hasExistingInput(meta, Constants.INPUT.PAVE_DIR_NORMAL)
+            def has_existing = Inputs.hasExistingInput(meta, SampleMeta.INPUT.PAVE_DIR_NORMAL)
 
             runnable: Inputs.hasTumorDna(meta) && Inputs.hasNormalDna(meta) && sage_vcf && !has_existing
             skip: true
@@ -97,13 +97,13 @@ workflow PAVE_ANNOTATION {
         .map { meta, sage_vcf, sage_tbi ->
             return [
                 meta,
-                Inputs.preferUserProvidedInput(sage_vcf, meta, Constants.INPUT.SAGE_VCF_TUMOR),
-                Inputs.preferUserProvidedInput(sage_tbi, meta, Constants.INPUT.SAGE_VCF_TBI_TUMOR),
+                Inputs.preferUserProvidedInput(sage_vcf, meta, SampleMeta.INPUT.SAGE_VCF_TUMOR),
+                Inputs.preferUserProvidedInput(sage_tbi, meta, SampleMeta.INPUT.SAGE_VCF_TBI_TUMOR),
             ]
         }
         .branch { meta, sage_vcf, sage_tbi ->
 
-            def has_existing = Inputs.hasExistingInput(meta, Constants.INPUT.PAVE_DIR_TUMOR)
+            def has_existing = Inputs.hasExistingInput(meta, SampleMeta.INPUT.PAVE_DIR_TUMOR)
 
             runnable: Inputs.hasTumorDna(meta) && sage_vcf && !has_existing
             skip: true

@@ -2,19 +2,19 @@ class Inputs {
 
     // Sample records
     public static getTumorDnaSample(meta) {
-        return meta.getOrDefault([Constants.SampleType.TUMOR, Constants.SequenceType.DNA], [:])
+        return meta.getOrDefault([SampleMeta.SampleType.TUMOR, SampleMeta.SequenceType.DNA], [:])
     }
 
     public static getTumorRnaSample(meta) {
-        return meta.getOrDefault([Constants.SampleType.TUMOR, Constants.SequenceType.RNA], [:])
+        return meta.getOrDefault([SampleMeta.SampleType.TUMOR, SampleMeta.SequenceType.RNA], [:])
     }
 
     public static getNormalDnaSample(meta) {
-        return meta.getOrDefault([Constants.SampleType.NORMAL, Constants.SequenceType.DNA], [:])
+        return meta.getOrDefault([SampleMeta.SampleType.NORMAL, SampleMeta.SequenceType.DNA], [:])
     }
 
     public static getDonorDnaSample(meta) {
-        return meta.getOrDefault([Constants.SampleType.DONOR, Constants.SequenceType.DNA], [:])
+        return meta.getOrDefault([SampleMeta.SampleType.DONOR, SampleMeta.SequenceType.DNA], [:])
     }
 
     // Sample names
@@ -55,15 +55,15 @@ class Inputs {
 
     // Files - Tumor DNA
     public static getTumorDnaFastq(meta) {
-        return getTumorDnaSample(meta).getOrDefault(Constants.FileType.FASTQ, null)
+        return getTumorDnaSample(meta).getOrDefault(SampleMeta.FileType.FASTQ, null)
     }
 
     public static getTumorDnaBam(meta) {
-        return getTumorDnaSample(meta).getOrDefault(Constants.FileType.BAM, null)
+        return getTumorDnaSample(meta).getOrDefault(SampleMeta.FileType.BAM, null)
     }
 
     public static getTumorDnaReduxBam(meta) {
-        return getTumorDnaSample(meta).getOrDefault(Constants.FileType.BAM_REDUX, null)
+        return getTumorDnaSample(meta).getOrDefault(SampleMeta.FileType.BAM_REDUX, null)
     }
 
 
@@ -82,15 +82,15 @@ class Inputs {
 
     // Files - Normal DNA
     public static getNormalDnaFastq(meta) {
-        return getNormalDnaSample(meta).getOrDefault(Constants.FileType.FASTQ, null)
+        return getNormalDnaSample(meta).getOrDefault(SampleMeta.FileType.FASTQ, null)
     }
 
     public static getNormalDnaBam(meta) {
-        return getNormalDnaSample(meta).getOrDefault(Constants.FileType.BAM, null)
+        return getNormalDnaSample(meta).getOrDefault(SampleMeta.FileType.BAM, null)
     }
 
     public static getNormalDnaReduxBam(meta) {
-        return getNormalDnaSample(meta).getOrDefault(Constants.FileType.BAM_REDUX, null)
+        return getNormalDnaSample(meta).getOrDefault(SampleMeta.FileType.BAM_REDUX, null)
     }
 
 
@@ -108,15 +108,15 @@ class Inputs {
 
     // Files - Donor DNA
     public static getDonorDnaFastq(meta) {
-        return getDonorDnaSample(meta).getOrDefault(Constants.FileType.FASTQ, null)
+        return getDonorDnaSample(meta).getOrDefault(SampleMeta.FileType.FASTQ, null)
     }
 
     public static getDonorDnaBam(meta) {
-        return getDonorDnaSample(meta).getOrDefault(Constants.FileType.BAM, null)
+        return getDonorDnaSample(meta).getOrDefault(SampleMeta.FileType.BAM, null)
     }
 
     public static getDonorDnaReduxBam(meta) {
-        return getDonorDnaSample(meta).getOrDefault(Constants.FileType.BAM_REDUX, null)
+        return getDonorDnaSample(meta).getOrDefault(SampleMeta.FileType.BAM_REDUX, null)
     }
 
 
@@ -135,11 +135,11 @@ class Inputs {
 
     // Files - Tumor RNA
     public static getTumorRnaFastq(meta) {
-        return getTumorRnaSample(meta).getOrDefault(Constants.FileType.FASTQ, null)
+        return getTumorRnaSample(meta).getOrDefault(SampleMeta.FileType.FASTQ, null)
     }
 
     public static getTumorRnaBam(meta) {
-        return getTumorRnaSample(meta).getOrDefault(Constants.FileType.BAM, null)
+        return getTumorRnaSample(meta).getOrDefault(SampleMeta.FileType.BAM, null)
     }
 
     public static hasTumorRnaFastq(meta) {
@@ -204,19 +204,19 @@ class Inputs {
     public static resolveReduxBamBai(redux_bam_bai, meta, sample_type) {
 
         def key_map = [
-            (Constants.SampleType.TUMOR): [
-                bam: Constants.INPUT.BAM_REDUX_DNA_TUMOR,
-                bai: Constants.INPUT.BAI_DNA_TUMOR,
+            (SampleMeta.SampleType.TUMOR): [
+                bam: SampleMeta.INPUT.BAM_REDUX_DNA_TUMOR,
+                bai: SampleMeta.INPUT.BAI_DNA_TUMOR,
             ],
 
-            (Constants.SampleType.NORMAL): [
-                bam: Constants.INPUT.BAM_REDUX_DNA_NORMAL,
-                bai: Constants.INPUT.BAI_DNA_NORMAL,
+            (SampleMeta.SampleType.NORMAL): [
+                bam: SampleMeta.INPUT.BAM_REDUX_DNA_NORMAL,
+                bai: SampleMeta.INPUT.BAI_DNA_NORMAL,
             ],
 
-            (Constants.SampleType.DONOR): [
-                bam: Constants.INPUT.BAM_REDUX_DNA_DONOR,
-                bai: Constants.INPUT.BAI_DNA_DONOR,
+            (SampleMeta.SampleType.DONOR): [
+                bam: SampleMeta.INPUT.BAM_REDUX_DNA_DONOR,
+                bai: SampleMeta.INPUT.BAI_DNA_DONOR,
             ],
         ]
 
@@ -233,25 +233,25 @@ class Inputs {
     public static resolveReduxTsvFiles(redux_tsvs, meta, sample_type) {
 
         def key_map = [
-            (Constants.SampleType.TUMOR): [
-                bqr_tsv: Constants.INPUT.REDUX_BQR_TSV_TUMOR,
-                dup_freq_tsv: Constants.INPUT.REDUX_DUP_FREQ_TSV_TUMOR,
-                jitter_tsv: Constants.INPUT.REDUX_JITTER_TSV_TUMOR,
-                ms_tsv: Constants.INPUT.REDUX_MS_TSV_TUMOR,
+            (SampleMeta.SampleType.TUMOR): [
+                bqr_tsv: SampleMeta.INPUT.REDUX_BQR_TSV_TUMOR,
+                dup_freq_tsv: SampleMeta.INPUT.REDUX_DUP_FREQ_TSV_TUMOR,
+                jitter_tsv: SampleMeta.INPUT.REDUX_JITTER_TSV_TUMOR,
+                ms_tsv: SampleMeta.INPUT.REDUX_MS_TSV_TUMOR,
             ],
 
-            (Constants.SampleType.NORMAL): [
-                bqr_tsv: Constants.INPUT.REDUX_BQR_TSV_NORMAL,
-                dup_freq_tsv: Constants.INPUT.REDUX_DUP_FREQ_TSV_NORMAL,
-                jitter_tsv: Constants.INPUT.REDUX_JITTER_TSV_NORMAL,
-                ms_tsv: Constants.INPUT.REDUX_MS_TSV_NORMAL,
+            (SampleMeta.SampleType.NORMAL): [
+                bqr_tsv: SampleMeta.INPUT.REDUX_BQR_TSV_NORMAL,
+                dup_freq_tsv: SampleMeta.INPUT.REDUX_DUP_FREQ_TSV_NORMAL,
+                jitter_tsv: SampleMeta.INPUT.REDUX_JITTER_TSV_NORMAL,
+                ms_tsv: SampleMeta.INPUT.REDUX_MS_TSV_NORMAL,
             ],
 
-            (Constants.SampleType.DONOR): [
-                bqr_tsv: Constants.INPUT.REDUX_BQR_TSV_DONOR,
-                dup_freq_tsv: Constants.INPUT.REDUX_DUP_FREQ_TSV_DONOR,
-                jitter_tsv: Constants.INPUT.REDUX_JITTER_TSV_DONOR,
-                ms_tsv: Constants.INPUT.REDUX_MS_TSV_DONOR,
+            (SampleMeta.SampleType.DONOR): [
+                bqr_tsv: SampleMeta.INPUT.REDUX_BQR_TSV_DONOR,
+                dup_freq_tsv: SampleMeta.INPUT.REDUX_DUP_FREQ_TSV_DONOR,
+                jitter_tsv: SampleMeta.INPUT.REDUX_JITTER_TSV_DONOR,
+                ms_tsv: SampleMeta.INPUT.REDUX_MS_TSV_DONOR,
             ],
         ]
 

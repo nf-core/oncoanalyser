@@ -42,16 +42,16 @@ workflow SAGE_PLOTTING {
     )
         .map { meta, tumor_bam_bai, normal_bam_bai, donor_bam_bai, tumor_tsvs, normal_tsvs, donor_tsvs, purple_dir ->
 
-            def (tumor_bam, tumor_bai) = Inputs.resolveReduxBamBai(tumor_bam_bai, meta, Constants.SampleType.TUMOR)
-            def (normal_bam, normal_bai) = Inputs.resolveReduxBamBai(normal_bam_bai, meta, Constants.SampleType.NORMAL)
-            def (donor_bam, donor_bai) = Inputs.resolveReduxBamBai(donor_bam_bai, meta, Constants.SampleType.DONOR)
+            def (tumor_bam, tumor_bai) = Inputs.resolveReduxBamBai(tumor_bam_bai, meta, SampleMeta.SampleType.TUMOR)
+            def (normal_bam, normal_bai) = Inputs.resolveReduxBamBai(normal_bam_bai, meta, SampleMeta.SampleType.NORMAL)
+            def (donor_bam, donor_bai) = Inputs.resolveReduxBamBai(donor_bam_bai, meta, SampleMeta.SampleType.DONOR)
 
-            tumor_tsvs = Inputs.resolveReduxTsvFiles(tumor_tsvs, meta, Constants.SampleType.TUMOR)
-            normal_tsvs = Inputs.resolveReduxTsvFiles(normal_tsvs, meta, Constants.SampleType.NORMAL)
-            donor_tsvs = Inputs.resolveReduxTsvFiles(donor_tsvs, meta, Constants.SampleType.DONOR)
+            tumor_tsvs = Inputs.resolveReduxTsvFiles(tumor_tsvs, meta, SampleMeta.SampleType.TUMOR)
+            normal_tsvs = Inputs.resolveReduxTsvFiles(normal_tsvs, meta, SampleMeta.SampleType.NORMAL)
+            donor_tsvs = Inputs.resolveReduxTsvFiles(donor_tsvs, meta, SampleMeta.SampleType.DONOR)
             def redux_tsvs = [ *tumor_tsvs, *normal_tsvs, *donor_tsvs ]
 
-            purple_dir = Inputs.preferUserProvidedInput(purple_dir, meta, Constants.INPUT.PURPLE_DIR)
+            purple_dir = Inputs.preferUserProvidedInput(purple_dir, meta, SampleMeta.INPUT.PURPLE_DIR)
 
             def inputs = [
                 meta: meta,

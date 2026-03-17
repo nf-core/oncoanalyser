@@ -34,8 +34,8 @@ workflow WISP_ANALYSIS {
     )
         .branch { meta, amber_dir, cobalt_dir, sage_append_dir ->
 
-            primary_purple_dir = Inputs.getInput(meta, Constants.INPUT.PURPLE_DIR)
-            primary_amber_dir = Inputs.getInput(meta, Constants.INPUT.AMBER_DIR)
+            primary_purple_dir = Inputs.getInput(meta, SampleMeta.INPUT.PURPLE_DIR)
+            primary_amber_dir = Inputs.getInput(meta, SampleMeta.INPUT.AMBER_DIR)
 
             def purity_estimate_mode = Enums.getEnumFromString(params.purity_estimate_mode, RunModes.Main)
 

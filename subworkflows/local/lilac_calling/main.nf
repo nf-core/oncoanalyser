@@ -38,15 +38,15 @@ workflow LILAC_CALLING {
         .map { meta, tumor_bam, tumor_bai, normal_bam, normal_bai ->
             return [
                 meta,
-                Inputs.preferUserProvidedInput(tumor_bam, meta, Constants.INPUT.BAM_REDUX_DNA_TUMOR),
-                Inputs.preferPipelineOutput(tumor_bai, meta, Constants.INPUT.BAI_DNA_TUMOR),
-                Inputs.preferUserProvidedInput(normal_bam, meta, Constants.INPUT.BAM_REDUX_DNA_NORMAL),
-                Inputs.preferPipelineOutput(normal_bai, meta, Constants.INPUT.BAI_DNA_NORMAL),
+                Inputs.preferUserProvidedInput(tumor_bam, meta, SampleMeta.INPUT.BAM_REDUX_DNA_TUMOR),
+                Inputs.preferPipelineOutput(tumor_bai, meta, SampleMeta.INPUT.BAI_DNA_TUMOR),
+                Inputs.preferUserProvidedInput(normal_bam, meta, SampleMeta.INPUT.BAM_REDUX_DNA_NORMAL),
+                Inputs.preferPipelineOutput(normal_bai, meta, SampleMeta.INPUT.BAI_DNA_NORMAL),
             ]
         }
         .branch { meta, tumor_bam, tumor_bai, normal_bam, normal_bai ->
 
-            def has_existing = Inputs.hasExistingInput(meta, Constants.INPUT.LILAC_DIR)
+            def has_existing = Inputs.hasExistingInput(meta, SampleMeta.INPUT.LILAC_DIR)
 
             runnable: (tumor_bam || normal_bam) && !has_existing
             skip: true
@@ -84,9 +84,9 @@ workflow LILAC_CALLING {
                 nbai_dna,
                 tbam_dna,
                 tbai_dna,
-                Inputs.preferUserProvidedInput(tbam_rna, meta, Constants.INPUT.BAM_RNA_TUMOR),
-                Inputs.preferUserProvidedInput(tbai_rna, meta, Constants.INPUT.BAI_RNA_TUMOR),
-                Inputs.preferUserProvidedInput(purple_dir, meta, Constants.INPUT.PURPLE_DIR),
+                Inputs.preferUserProvidedInput(tbam_rna, meta, SampleMeta.INPUT.BAM_RNA_TUMOR),
+                Inputs.preferUserProvidedInput(tbai_rna, meta, SampleMeta.INPUT.BAI_RNA_TUMOR),
+                Inputs.preferUserProvidedInput(purple_dir, meta, SampleMeta.INPUT.PURPLE_DIR),
             ]
         }
 

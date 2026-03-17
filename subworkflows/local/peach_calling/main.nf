@@ -27,13 +27,13 @@ workflow PEACH_CALLING {
         .map { meta, purple_dir ->
             return [
                 meta,
-                Inputs.preferUserProvidedInput(purple_dir, meta, Constants.INPUT.PURPLE_DIR),
+                Inputs.preferUserProvidedInput(purple_dir, meta, SampleMeta.INPUT.PURPLE_DIR),
             ]
         }
         .branch { meta, purple_dir ->
 
             def has_normal = Inputs.hasNormalDna(meta)
-            def has_existing = Inputs.hasExistingInput(meta, Constants.INPUT.PEACH_DIR)
+            def has_existing = Inputs.hasExistingInput(meta, SampleMeta.INPUT.PEACH_DIR)
 
             runnable: purple_dir && has_normal && !has_existing
             skip: true

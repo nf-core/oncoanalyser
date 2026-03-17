@@ -23,8 +23,8 @@ workflow PAVE_PON_CREATION {
     ch_pave_inputs = ch_sage_somatic_vcf
         .map { meta, sage_vcf, sage_tbi ->
             return [
-                Inputs.preferUserProvidedInput(sage_vcf, meta, Constants.INPUT.SAGE_VCF_TUMOR),
-                Inputs.preferUserProvidedInput(sage_tbi, meta, Constants.INPUT.SAGE_VCF_TBI_TUMOR),
+                Inputs.preferUserProvidedInput(sage_vcf, meta, SampleMeta.INPUT.SAGE_VCF_TUMOR),
+                Inputs.preferUserProvidedInput(sage_tbi, meta, SampleMeta.INPUT.SAGE_VCF_TBI_TUMOR),
             ]
         }
         .collect(flat: false)

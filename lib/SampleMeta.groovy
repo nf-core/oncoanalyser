@@ -1,6 +1,6 @@
-class Constants {
+class SampleMeta {
 
-    static enum FileType {
+    public static enum FileType {
         // Generic
         BAI,
         BAM,
@@ -41,27 +41,27 @@ class Constants {
         SIGS_DIR,
     }
 
-    static enum SampleType {
+    public static enum SampleType {
         DONOR,
         NORMAL,
         TUMOR,
         TUMOR_NORMAL,
     }
 
-    static enum SequenceType {
+    public static enum SequenceType {
         DNA,
         DNA_RNA,
         RNA,
     }
 
-    static final enum InfoField {
+    public static final enum InfoField {
         CANCER_TYPE,
         LANE,
         LIBRARY_ID,
         LONGITUDINAL_SAMPLE,
     }
 
-    static final Map INPUT = [
+    public static final Map INPUT = [
 
         // Bams
         BAM_DNA_TUMOR: [

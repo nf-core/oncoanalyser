@@ -45,8 +45,8 @@ workflow NEO_PREDICTION {
         .map { meta, purple_dir, linx_annotation_dir ->
 
             def inputs = [
-                Inputs.preferUserProvidedInput(purple_dir, meta, Constants.INPUT.PURPLE_DIR),
-                Inputs.preferUserProvidedInput(linx_annotation_dir, meta, Constants.INPUT.LINX_ANNO_DIR_TUMOR),
+                Inputs.preferUserProvidedInput(purple_dir, meta, SampleMeta.INPUT.PURPLE_DIR),
+                Inputs.preferUserProvidedInput(linx_annotation_dir, meta, SampleMeta.INPUT.LINX_ANNO_DIR_TUMOR),
             ]
 
             return [meta, *inputs]
@@ -112,8 +112,8 @@ workflow NEO_PREDICTION {
             return [
                 meta,
                 neo_finder_dir,
-                Inputs.preferUserProvidedInput(tumor_bam, meta, Constants.INPUT.BAM_RNA_TUMOR),
-                Inputs.preferUserProvidedInput(tumor_bai, meta, Constants.INPUT.BAI_RNA_TUMOR),
+                Inputs.preferUserProvidedInput(tumor_bam, meta, SampleMeta.INPUT.BAM_RNA_TUMOR),
+                Inputs.preferUserProvidedInput(tumor_bai, meta, SampleMeta.INPUT.BAI_RNA_TUMOR),
             ]
         }
         .branch { meta, neo_finder_dir, tumor_bam, tumor_bai ->
@@ -177,22 +177,22 @@ workflow NEO_PREDICTION {
                 key: meta.group_id,
                 id: meta.group_id,
                 sample_id: Inputs.getTumorDnaSampleName(meta, 'primary'),
-                cancer_type: meta[Constants.InfoField.CANCER_TYPE],
+                cancer_type: meta[SampleMeta.InfoField.CANCER_TYPE],
             ]
 
             def sage_somatic_append_vcf = []
             if (Inputs.hasTumorRna(meta)) {
                 meta_scorer.sample_rna_id = Inputs.getTumorRnaSampleName(meta)
 
-                def sage_somatic_append_selected = Inputs.preferUserProvidedInput(sage_somatic_append, meta, Constants.INPUT.SAGE_APPEND_DIR_TUMOR)
+                def sage_somatic_append_selected = Inputs.preferUserProvidedInput(sage_somatic_append, meta, SampleMeta.INPUT.SAGE_APPEND_DIR_TUMOR)
                 sage_somatic_append_vcf = file(sage_somatic_append_selected).resolve("${meta_scorer.sample_id}.sage.append.vcf.gz")
             }
 
             def inputs = [
-                Inputs.preferUserProvidedInput(isofox_dir, meta, Constants.INPUT.ISOFOX_DIR),
-                Inputs.preferUserProvidedInput(purple_dir, meta, Constants.INPUT.PURPLE_DIR),
+                Inputs.preferUserProvidedInput(isofox_dir, meta, SampleMeta.INPUT.ISOFOX_DIR),
+                Inputs.preferUserProvidedInput(purple_dir, meta, SampleMeta.INPUT.PURPLE_DIR),
                 sage_somatic_append_vcf,
-                Inputs.preferUserProvidedInput(lilac_dir, meta, Constants.INPUT.LILAC_DIR),
+                Inputs.preferUserProvidedInput(lilac_dir, meta, SampleMeta.INPUT.LILAC_DIR),
                 neo_finder_dir,
                 annotated_fusions,
             ]
