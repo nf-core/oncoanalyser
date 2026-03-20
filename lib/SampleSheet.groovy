@@ -48,10 +48,11 @@ class SampleSheet {
 
                     def meta_sample = meta[sample_key]
 
+                    // NOTE(LN): The order in which these methods are executed is important
+                    checkAndSetFileIndexes(meta_sample, log)
                     setCramPaths(meta_sample)
                     checkRawReadDataExists(meta_sample, group_id, log)
                     checkReduxTsvsExist(meta_sample, log)
-                    checkAndSetFileIndexes(meta_sample, log)
 
                 }
 
@@ -265,7 +266,7 @@ class SampleSheet {
             def index_path = nextflow.Nextflow.file("${file_path}.${index_extension}")
 
             if (!index_path.exists()) {
-                log.error "no index provided or found for: ${file_path}"
+                log.error "Could not find index(${index_path}) for file(${file_path})"
                 Nextflow.exit(1)
             }
 
