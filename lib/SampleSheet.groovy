@@ -371,12 +371,6 @@ class SampleSheet {
             Nextflow.exit(1)
         }
 
-        // Do not allow CRAM RNA input
-        if (Inputs.hasTumorRnaBam(meta) && Inputs.getTumorRnaBam(meta).toString().endsWith('cram')) {
-            log.error "found tumor RNA CRAM input for ${meta.group_id} but RNA CRAM input is not supported"
-            Nextflow.exit(1)
-        }
-
         // Do not allow donor sample without normal sample
         if (Inputs.hasDonorDna(meta) && !Inputs.hasNormalDna(meta)) {
             log.error "a donor sample but not normal sample was found for ${meta.group_id}\n\n" +
