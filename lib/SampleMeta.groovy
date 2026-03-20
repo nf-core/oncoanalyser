@@ -54,7 +54,7 @@ class SampleMeta {
         RNA,
     }
 
-    public static final enum InfoField {
+    public static enum InfoField {
         CANCER_TYPE,
         LANE,
         LIBRARY_ID,

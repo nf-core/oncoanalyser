@@ -23,7 +23,7 @@ class RefGenome {
 
     public static enum Type {
         ALT,
-        NO_ALT,
+        NO_ALT;
 
         public String getName() { return this.toString().toLowerCase() }
     }
