@@ -9,13 +9,12 @@ process ORANGE {
 
     input:
     tuple val(meta),
-        path(bamtools_somatic_dir, stageAs: 'bamtools_somatic'),
-        path(bamtools_germline_dir, stageAs: 'bamtools_germline'),
         path(sage_somatic_dir, stageAs: 'sage_somatic'),
         path(sage_germline_dir, stageAs: 'sage_germline'),
         path(smlv_somatic_vcf),
         path(smlv_germline_vcf),
         path(purple_dir),
+        path(qsee_dir),
         path(linx_somatic_anno_dir),
         path(linx_somatic_plot_dir),
         path(linx_germline_anno_dir),
@@ -52,14 +51,13 @@ process ORANGE {
 
     def pipeline_version_str = pipeline_version ?: 'not specified'
     def experiment_type = targeted_mode ? 'PANEL' : 'WGS'
-    def doid_arg = meta.cancer_type ?: '162' // NOTE(SW): DOID label: 162 [cancer]; Hartwig cohort group: unknown
+    def cancer_type_arg = meta.cancer_type ? "-primary_tumor_location ${meta.cancer_type}" : ''
 
     // Tumor sample
     def linx_plot_dir = linx_somatic_plot_dir.resolve('reportable/').toUriString().replaceAll('/$', '')
 
     // Normal sample
     def normal_id_arg = meta.containsKey('normal_dna_id') ? "-reference_sample_id ${meta.normal_dna_id}" : ''
-    def normal_metrics_arg = bamtools_germline_dir ? "-ref_metrics_dir ${bamtools_germline_dir}" : ''
     def normal_sage_dir_arg = sage_germline_dir ? "-sage_germline_dir ${sage_germline_dir}" : ''
     def normal_linx_arg = linx_germline_anno_dir ? "-linx_germline_dir ${linx_germline_anno_dir}" : ''
 
@@ -123,18 +121,17 @@ process ORANGE {
         -add_disclaimer \\
         -pipeline_version_file pipeline_version.txt \\
         -experiment_type ${experiment_type} \\
-        -primary_tumor_doids ${doid_arg} \\
+        ${cancer_type_arg} \\
         \\
         -tumor_sample_id ${meta.tumor_id} \\
-        -tumor_metrics_dir ${bamtools_somatic_dir} \\
         -sage_dir ${sage_somatic_dir} \\
         -purple_dir \${purple_dir_local} \\
         -purple_plot_dir \${purple_dir_local}/plot/ \\
+        -qsee_dir ${qsee_dir} \\
         -linx_dir ${linx_somatic_anno_dir} \\
         -linx_plot_dir ${linx_plot_dir}/ \\
         \\
         ${normal_id_arg} \\
-        ${normal_metrics_arg} \\
         ${normal_sage_dir_arg} \\
         ${normal_linx_arg} \\
         \\

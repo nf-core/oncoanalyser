@@ -37,6 +37,7 @@ class SampleMeta {
         CUPPA_DIR,
         LINX_PLOT_DIR,
         PEACH_DIR,
+        QSEE_DIR,
         SAGE_DIR,
         SIGS_DIR,
     }
@@ -125,6 +126,8 @@ class SampleMeta {
         ESVEE_DIR: [FileType.ESVEE_DIR, [SampleType.TUMOR, SampleType.TUMOR_NORMAL], SequenceType.DNA],
 
         PURPLE_DIR: [FileType.PURPLE_DIR, [SampleType.TUMOR, SampleType.TUMOR_NORMAL], SequenceType.DNA],
+
+        QSEE_DIR: [FileType.QSEE_DIR, [SampleType.TUMOR, SampleType.TUMOR_NORMAL], SequenceType.DNA],
 
         LINX_PLOT_DIR_TUMOR:  [FileType.LINX_PLOT_DIR, SampleType.TUMOR, SequenceType.DNA],
         LINX_ANNO_DIR_TUMOR:  [FileType.LINX_ANNO_DIR, SampleType.TUMOR, SequenceType.DNA],

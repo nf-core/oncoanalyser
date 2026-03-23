@@ -859,13 +859,12 @@ workflow WGTS {
 
         ORANGE_REPORTING(
             ch_inputs,
-            ch_bamtools_somatic_out,
-            ch_bamtools_germline_out,
             ch_sage_somatic_dir_out,
             ch_sage_germline_dir_out,
             ch_sage_somatic_append_out,
             ch_sage_germline_append_out,
             ch_purple_out,
+            ch_qsee_out,
             ch_linx_somatic_out,
             ch_linx_somatic_visualiser_dir_out,
             ch_linx_germline_out,
