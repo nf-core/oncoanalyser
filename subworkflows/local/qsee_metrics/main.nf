@@ -21,6 +21,7 @@ workflow QSEE_METRICS {
     qsee_cohort_percentiles  // channel: [mandatory] /path/to/cohort_percentiles
 
     // Params
+    sequencing_type          // string:  [mandatory] sequencing type
     targeted_mode            // boolean: [mandatory] Set targeted mode
 
     main:
@@ -94,6 +95,7 @@ workflow QSEE_METRICS {
         ch_qsee_inputs,
         driver_gene_panel,
         qsee_cohort_percentiles,
+        sequencing_type,
         targeted_mode,
     )
 

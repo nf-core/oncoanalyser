@@ -485,6 +485,7 @@ workflow TARGETED {
             ch_purple_out,
             hmf_data.driver_gene_panel,
             hmf_data.qsee_cohort_percentiles,
+            params.sequencing_type,
             true,  // targeted_mode
         )
 
