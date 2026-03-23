@@ -14,8 +14,8 @@ class SampleMeta {
         REDUX_BQR_TSV,
         REDUX_DUP_FREQ_TSV,
         REDUX_JITTER_TSV,
-        REDUX_MS_TSV,
-        REDUX_BQR_PLOT,
+        REDUX_MS_TABLE_TSV,
+        REDUX_MSI_TSV,
 
         // Process
         AMBER_DIR,
@@ -83,9 +83,6 @@ class SampleMeta {
         REDUX_BQR_TSV_NORMAL: [FileType.REDUX_BQR_TSV, SampleType.NORMAL, SequenceType.DNA],
         REDUX_BQR_TSV_DONOR:  [FileType.REDUX_BQR_TSV, SampleType.DONOR, SequenceType.DNA],
 
-        REDUX_BQR_PLOT_TUMOR:  [FileType.REDUX_BQR_PLOT, SampleType.TUMOR, SequenceType.DNA],
-        REDUX_BQR_PLOT_NORMAL: [FileType.REDUX_BQR_PLOT, SampleType.NORMAL, SequenceType.DNA],
-
         REDUX_DUP_FREQ_TSV_TUMOR:  [FileType.REDUX_DUP_FREQ_TSV, SampleType.TUMOR, SequenceType.DNA],
         REDUX_DUP_FREQ_TSV_NORMAL: [FileType.REDUX_DUP_FREQ_TSV, SampleType.NORMAL, SequenceType.DNA],
         REDUX_DUP_FREQ_TSV_DONOR:  [FileType.REDUX_DUP_FREQ_TSV, SampleType.DONOR, SequenceType.DNA],
@@ -94,9 +91,13 @@ class SampleMeta {
         REDUX_JITTER_TSV_NORMAL: [FileType.REDUX_JITTER_TSV, SampleType.NORMAL, SequenceType.DNA],
         REDUX_JITTER_TSV_DONOR:  [FileType.REDUX_JITTER_TSV, SampleType.DONOR, SequenceType.DNA],
 
-        REDUX_MS_TSV_TUMOR:  [FileType.REDUX_MS_TSV, SampleType.TUMOR, SequenceType.DNA],
-        REDUX_MS_TSV_NORMAL: [FileType.REDUX_MS_TSV, SampleType.NORMAL, SequenceType.DNA],
-        REDUX_MS_TSV_DONOR:  [FileType.REDUX_MS_TSV, SampleType.DONOR, SequenceType.DNA],
+        REDUX_MS_TABLE_TSV_TUMOR:  [FileType.REDUX_MS_TABLE_TSV, SampleType.TUMOR, SequenceType.DNA],
+        REDUX_MS_TABLE_TSV_NORMAL: [FileType.REDUX_MS_TABLE_TSV, SampleType.NORMAL, SequenceType.DNA],
+        REDUX_MS_TABLE_TSV_DONOR:  [FileType.REDUX_MS_TABLE_TSV, SampleType.DONOR, SequenceType.DNA],
+
+        REDUX_MSI_TSV_TUMOR:  [FileType.REDUX_MSI_TSV, SampleType.TUMOR, SequenceType.DNA],
+        REDUX_MSI_TSV_NORMAL: [FileType.REDUX_MSI_TSV, SampleType.NORMAL, SequenceType.DNA],
+        REDUX_MSI_TSV_DONOR:  [FileType.REDUX_MSI_TSV, SampleType.DONOR, SequenceType.DNA],
 
         // Other tools
         ISOFOX_DIR: [FileType.ISOFOX_DIR, SampleType.TUMOR, SequenceType.RNA],

@@ -9,8 +9,6 @@ process ORANGE {
 
     input:
     tuple val(meta),
-        path(redux_somatic_bqr_plot),
-        path(redux_germline_bqr_plot),
         path(bamtools_somatic_dir, stageAs: 'bamtools_somatic'),
         path(bamtools_germline_dir, stageAs: 'bamtools_germline'),
         path(sage_somatic_dir, stageAs: 'sage_somatic'),
@@ -61,7 +59,6 @@ process ORANGE {
 
     // Normal sample
     def normal_id_arg = meta.containsKey('normal_dna_id') ? "-reference_sample_id ${meta.normal_dna_id}" : ''
-    def normal_redux_arg = redux_germline_bqr_plot ? "-ref_redux_dir ./" : ''
     def normal_metrics_arg = bamtools_germline_dir ? "-ref_metrics_dir ${bamtools_germline_dir}" : ''
     def normal_sage_dir_arg = sage_germline_dir ? "-sage_germline_dir ${sage_germline_dir}" : ''
     def normal_linx_arg = linx_germline_anno_dir ? "-linx_germline_dir ${linx_germline_anno_dir}" : ''
@@ -129,7 +126,6 @@ process ORANGE {
         -primary_tumor_doids ${doid_arg} \\
         \\
         -tumor_sample_id ${meta.tumor_id} \\
-        -tumor_redux_dir ./ \\
         -tumor_metrics_dir ${bamtools_somatic_dir} \\
         -sage_dir ${sage_somatic_dir} \\
         -purple_dir \${purple_dir_local} \\
@@ -138,7 +134,6 @@ process ORANGE {
         -linx_plot_dir ${linx_plot_dir}/ \\
         \\
         ${normal_id_arg} \\
-        ${normal_redux_arg} \\
         ${normal_metrics_arg} \\
         ${normal_sage_dir_arg} \\
         ${normal_linx_arg} \\

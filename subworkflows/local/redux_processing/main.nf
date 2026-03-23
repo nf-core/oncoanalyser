@@ -7,24 +7,26 @@ include { REDUX } from '../../../modules/local/redux/main'
 workflow REDUX_PROCESSING {
     take:
     // Sample data
-    ch_inputs        // channel: [mandatory] [ meta ]
-    ch_dna_tumor     // channel: [mandatory] [ meta, [bam, ...], [bai, ...] ]
-    ch_dna_normal    // channel: [mandatory] [ meta, [bam, ...], [bai, ...] ]
-    ch_dna_donor     // channel: [mandatory] [ meta, [bam, ...], [bai, ...] ]
+    ch_inputs              // channel: [mandatory] [ meta ]
+    ch_dna_tumor           // channel: [mandatory] [ meta, [bam, ...], [bai, ...] ]
+    ch_dna_normal          // channel: [mandatory] [ meta, [bam, ...], [bai, ...] ]
+    ch_dna_donor           // channel: [mandatory] [ meta, [bam, ...], [bai, ...] ]
 
     // Reference data
-    genome_fasta     // channel: [mandatory] /path/to/genome_fasta
-    genome_ver       // channel: [mandatory] genome version
-    genome_fai       // channel: [mandatory] /path/to/genome_fai
-    genome_dict      // channel: [mandatory] /path/to/genome_dict
-    unmap_regions    // channel: [mandatory] /path/to/unmap_regions
-    msi_jitter_sites // channel: [mandatory] /path/to/msi_jitter_sites
+    genome_fasta           // channel: [mandatory] /path/to/genome_fasta
+    genome_ver             // channel: [mandatory] genome version
+    genome_fai             // channel: [mandatory] /path/to/genome_fai
+    genome_dict            // channel: [mandatory] /path/to/genome_dict
+    unmap_regions          // channel: [mandatory] /path/to/unmap_regions
+    msi_jitter_sites       // channel: [mandatory] /path/to/msi_jitter_sites
+    msi_model_coefficients // channel: [mandatory] /path/to/msi_model_coefficients
+    msi_model_error_rates  // channel: [mandatory] /path/to/msi_model_error_rates
 
     // Params
-    sequencing_type  // string:  [mandatory] sequencing type
-    umi_enable       // boolean: [mandatory] enable UMI processing
-    umi_duplex_delim // string:  [optional] UMI duplex delimiter
-    targeted_mode    // boolean: [mandatory] Set targeted mode
+    sequencing_type        // string:  [mandatory] sequencing type
+    umi_enable             // boolean: [mandatory] enable UMI processing
+    umi_duplex_delim       // string:  [optional] UMI duplex delimiter
+    targeted_mode          // boolean: [mandatory] Set targeted mode
 
     main:
     // Channel for version.yml files
@@ -108,6 +110,8 @@ workflow REDUX_PROCESSING {
         genome_dict,
         unmap_regions,
         msi_jitter_sites,
+        msi_model_coefficients,
+        msi_model_error_rates,
         sequencing_type,
         umi_enable,
         umi_duplex_delim,
@@ -117,20 +121,20 @@ workflow REDUX_PROCESSING {
     ch_versions = ch_versions.mix(REDUX.out.versions)
 
     // Combine TSV outputs into single channel for processing
-    // channel: [ meta, bam, bai, bqr_tsv, jitter_tsv, ms_tsv, bqr_plot ]
+    // channel: [ meta, bam, bai, redux_tsv, ... ]
     ch_redux_out = WorkflowOncoanalyser.groupByMeta(
         REDUX.out.bam,
         REDUX.out.bqr_tsv,
         REDUX.out.dup_freq_tsv,
         REDUX.out.jitter_tsv,
-        REDUX.out.ms_tsv,
-        REDUX.out.bqr_plot,
+        REDUX.out.ms_table_tsv,
+        REDUX.out.msi_tsv,
     )
 
     // Sort into a tumor and normal channel
-    // channel: [ meta, bam, bai, bqr_tsv, dup_freq_tsv, jitter_tsv, ms_tsv, bqr_plot ]
+    // channel: [ meta, bam, bai, redux_tsv, ... ]
     ch_redux_out_sorted = ch_redux_out
-        .branch { meta, bam, bai, bqr_tsv, dup_freq_tsv, jitter_tsv, ms_tsv, bqr_plot ->
+        .branch { meta, bam, bai, bqr_tsv, dup_freq_tsv, jitter_tsv, ms_table, msi_tsv ->
             assert ['tumor', 'normal', 'donor'].contains(meta.sample_type)
             tumor: meta.sample_type == 'tumor'
             normal: meta.sample_type == 'normal'
@@ -139,23 +143,21 @@ workflow REDUX_PROCESSING {
         }
 
     // Set outputs, restoring original meta, split by file type
-    // channel: [ meta, bam, bai, bqr_tsv, dup_freq_tsv, jitter_tsv, ms_tsv, bqr_plot ]
+    // channel: [ meta, bam, bai, redux_tsv, ... ]
     def createOutputChannels = { ch_redux_out_sample_type, ch_sample_type_skip ->
 
         def placeholder_bam = [[]] * PlaceholderChannels.N_ITEMS_BAM_BAI
         def placeholder_tsv = [[]] * PlaceholderChannels.N_ITEMS_REDUX_TSVS
-        def placeholder_plot = [[]] * PlaceholderChannels.N_ITEMS_REDUX_PLOTS
-        def placeholders = [*placeholder_bam, *placeholder_tsv, *placeholder_plot]
+        def placeholders = [*placeholder_bam, *placeholder_tsv]
 
         return Channel.empty()
             .mix(
                 WorkflowOncoanalyser.restoreMeta(ch_redux_out_sample_type, ch_inputs),
                 ch_sample_type_skip.map { meta -> [meta, *placeholders] },
             )
-            .multiMap { meta, bam, bai, bqr_tsv, dup_freq_tsv, jitter_tsv, ms_tsv, bqr_plot ->
+            .multiMap { meta, bam, bai, bqr_tsv, dup_freq_tsv, jitter_tsv, ms_table_tsv, msi_tsv ->
                 bam: [meta, bam, bai]
-                tsv: [meta, bqr_tsv, dup_freq_tsv, jitter_tsv, ms_tsv]
-                plot: [meta, bqr_plot]
+                tsv: [meta, bqr_tsv, dup_freq_tsv, jitter_tsv, ms_table_tsv, msi_tsv]
             }
     }
 
@@ -171,10 +173,6 @@ workflow REDUX_PROCESSING {
     dna_tumor_tsv  = ch_redux_tumor_out.tsv  // channel: [ meta, redux_tsv, ... ]
     dna_normal_tsv = ch_redux_normal_out.tsv // channel: [ meta, redux_tsv, ... ]
     dna_donor_tsv  = ch_redux_donor_out.tsv  // channel: [ meta, redux_tsv, ... ]
-
-    dna_tumor_plot  = ch_redux_tumor_out.plot  // channel: [ meta, bqr_plot ]
-    dna_normal_plot = ch_redux_normal_out.plot // channel: [ meta, bqr_plot ]
-    dna_donor_plot  = ch_redux_donor_out.plot  // channel: [ meta, bqr_plot ]
 
     versions       = ch_versions             // channel: [ versions.yml ]
 }

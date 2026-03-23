@@ -280,7 +280,7 @@ group_id,subject_id,sample_id,sample_type,sequence_type,filetype,filepath
 PATIENT1,PATIENT1,PATIENT1-T,tumor,dna,bam_redux,gs://bucket/PATIENT1-T.dna.redux.bam
 PATIENT1,PATIENT1,PATIENT1-T,tumor,dna,bai,gs://bucket/PATIENT1-T.dna.redux.bam.bai
 PATIENT1,PATIENT1,PATIENT1-T,tumor,dna,redux_jitter_tsv,gs://bucket/PATIENT1-T.dna.jitter_params.tsv
-PATIENT1,PATIENT1,PATIENT1-T,tumor,dna,redux_ms_tsv,gs://bucket/PATIENT1-T.dna.ms_table.tsv.gz
+PATIENT1,PATIENT1,PATIENT1-T,tumor,dna,redux_ms_table_tsv,gs://bucket/PATIENT1-T.dna.ms_table.tsv.gz
 ```
 
 :::info

@@ -237,33 +237,38 @@ class Inputs {
                 bqr_tsv: SampleMeta.INPUT.REDUX_BQR_TSV_TUMOR,
                 dup_freq_tsv: SampleMeta.INPUT.REDUX_DUP_FREQ_TSV_TUMOR,
                 jitter_tsv: SampleMeta.INPUT.REDUX_JITTER_TSV_TUMOR,
-                ms_tsv: SampleMeta.INPUT.REDUX_MS_TSV_TUMOR,
+                ms_table_tsv: SampleMeta.INPUT.REDUX_MS_TABLE_TSV_TUMOR,
+                msi_tsv: SampleMeta.INPUT.REDUX_MSI_TSV_TUMOR,
             ],
 
             (SampleMeta.SampleType.NORMAL): [
                 bqr_tsv: SampleMeta.INPUT.REDUX_BQR_TSV_NORMAL,
                 dup_freq_tsv: SampleMeta.INPUT.REDUX_DUP_FREQ_TSV_NORMAL,
                 jitter_tsv: SampleMeta.INPUT.REDUX_JITTER_TSV_NORMAL,
-                ms_tsv: SampleMeta.INPUT.REDUX_MS_TSV_NORMAL,
+                ms_table_tsv: SampleMeta.INPUT.REDUX_MS_TABLE_TSV_NORMAL,
+                msi_tsv: null
+
             ],
 
             (SampleMeta.SampleType.DONOR): [
                 bqr_tsv: SampleMeta.INPUT.REDUX_BQR_TSV_DONOR,
                 dup_freq_tsv: SampleMeta.INPUT.REDUX_DUP_FREQ_TSV_DONOR,
                 jitter_tsv: SampleMeta.INPUT.REDUX_JITTER_TSV_DONOR,
-                ms_tsv: SampleMeta.INPUT.REDUX_MS_TSV_DONOR,
+                ms_table_tsv: SampleMeta.INPUT.REDUX_MS_TABLE_TSV_DONOR,
+                msi_tsv: null
             ],
         ]
 
         def keys = key_map[sample_type]
 
-        def (bqr_tsv, dup_freq_tsv, jitter_tsv, ms_tsv) = redux_tsvs
+        def (bqr_tsv, dup_freq_tsv, jitter_tsv, ms_table_tsv, msi_tsv) = redux_tsvs
 
         return [
             preferPipelineOutput(bqr_tsv, meta, keys.bqr_tsv),
             preferPipelineOutput(dup_freq_tsv, meta, keys.dup_freq_tsv),
             preferPipelineOutput(jitter_tsv, meta, keys.jitter_tsv),
-            preferPipelineOutput(ms_tsv, meta, keys.ms_tsv),
+            preferPipelineOutput(ms_table_tsv, meta, keys.ms_table_tsv),
+            keys.msi_tsv ? preferPipelineOutput(msi_tsv, meta, keys.msi_tsv) : [],
         ].findAll { it != [] }
     }
 

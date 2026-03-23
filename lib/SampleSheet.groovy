@@ -305,7 +305,7 @@ class SampleSheet {
             (SampleMeta.FileType.REDUX_BQR_TSV)     : "${bam_dir}/${sample_id}.redux.bqr.tsv",
             (SampleMeta.FileType.REDUX_DUP_FREQ_TSV): "${bam_dir}/${sample_id}.redux.duplicate_freq.tsv",
             (SampleMeta.FileType.REDUX_JITTER_TSV)  : "${bam_dir}/${sample_id}.redux.jitter_params.tsv",
-            (SampleMeta.FileType.REDUX_MS_TSV)      : "${bam_dir}/${sample_id}.redux.ms_table.tsv.gz",
+            (SampleMeta.FileType.REDUX_MS_TABLE_TSV): "${bam_dir}/${sample_id}.redux.ms_table.tsv.gz",
         ]
 
         default_tsv_paths.keySet().each { file_type ->

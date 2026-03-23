@@ -110,6 +110,8 @@ workflow PANEL_RESOURCE_CREATION {
         ref_data.genome_dict,
         hmf_data.unmap_regions,
         hmf_data.msi_jitter_sites,
+        hmf_data.msi_model_coefficients,
+        panel_data.msi_model_error_rates,
         params.sequencing_type,
         params.redux_umi_enabled,
         params.redux_umi_duplex_delim,

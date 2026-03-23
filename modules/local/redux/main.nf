@@ -15,6 +15,8 @@ process REDUX {
     path genome_dict
     path unmap_regions
     path msi_jitter_sites
+    path msi_model_coefficients
+    path msi_model_error_rates
     val sequencing_type
     val umi_enable
     val umi_duplex_delim
@@ -26,11 +28,12 @@ process REDUX {
     tuple val(meta), path("redux_${meta.sample_id}/${meta.sample_id}.redux.bam"),
                      path("redux_${meta.sample_id}/${meta.sample_id}.redux.bam.bai")           , emit: bam
 
+    // NOTE(LN): REDUX TSV paths are in separate channels so that they can be provided explicitly from the sample sheet
     tuple val(meta), path("redux_${meta.sample_id}/${meta.sample_id}.redux.bqr.tsv")           , emit: bqr_tsv
-    tuple val(meta), path("redux_${meta.sample_id}/${meta.sample_id}.redux.bqr.png")           , emit: bqr_plot
     tuple val(meta), path("redux_${meta.sample_id}/${meta.sample_id}.redux.duplicate_freq.tsv"), emit: dup_freq_tsv, optional: true
     tuple val(meta), path("redux_${meta.sample_id}/${meta.sample_id}.redux.jitter_params.tsv") , emit: jitter_tsv
-    tuple val(meta), path("redux_${meta.sample_id}/${meta.sample_id}.redux.ms_table.tsv.gz")   , emit: ms_tsv
+    tuple val(meta), path("redux_${meta.sample_id}/${meta.sample_id}.redux.ms_table.tsv.gz")   , emit: ms_table_tsv
+    tuple val(meta), path("redux_${meta.sample_id}/${meta.sample_id}.redux.msi_prediction.tsv"), emit: msi_tsv, optional: true
 
     path 'versions.yml', emit: versions
     path '.command.*'  , emit: command_files
@@ -51,6 +54,9 @@ process REDUX {
     def umi_duplex_delim_arg = ''
     def skip_duplicate_marking_arg = ''
     def bqr_use_all_regions_arg = ''
+
+    def msi_model_coefficients_arg = ''
+    def msi_model_error_rates_arg = ''
 
     if(umi_enable) {
         umi_enable_arg = '-umi_enabled'
@@ -76,6 +82,11 @@ process REDUX {
         bqr_use_all_regions_arg = '-bqr_use_all_regions'
     }
 
+    if(targeted_mode && meta.sample_type == 'tumor') {
+        msi_model_coefficients_arg = "-msi_model_coefficients ${msi_model_coefficients}"
+        msi_model_error_rates_arg = "-msi_model_error_rates ${msi_model_error_rates}"
+    }
+
     """
     mkdir -p redux_${meta.sample_id}/
 
@@ -91,6 +102,8 @@ process REDUX {
         -bamtool \$(which samtools) \\
         -sequencing_type ${sequencing_type} \\
         -bqr_write_plot \\
+        ${msi_model_coefficients_arg} \\
+        ${msi_model_error_rates_arg} \\
         ${form_consensus_arg} \\
         ${umi_args} \\
         ${skip_duplicate_marking_arg} \\
@@ -113,10 +126,12 @@ process REDUX {
 
     touch redux_${meta.sample_id}/${meta.sample_id}.redux.bam
     touch redux_${meta.sample_id}/${meta.sample_id}.redux.bam.bai
+
     touch redux_${meta.sample_id}/${meta.sample_id}.redux.bqr.tsv
     touch redux_${meta.sample_id}/${meta.sample_id}.redux.bqr.png
     touch redux_${meta.sample_id}/${meta.sample_id}.redux.duplicate_freq.tsv
     touch redux_${meta.sample_id}/${meta.sample_id}.redux.jitter_params.tsv
+    touch redux_${meta.sample_id}/${meta.sample_id}.redux.msi_prediction.tsv
     touch redux_${meta.sample_id}/${meta.sample_id}.redux.ms_table.tsv.gz
     touch redux_${meta.sample_id}/${meta.sample_id}.redux.repeat.tsv.gz
 

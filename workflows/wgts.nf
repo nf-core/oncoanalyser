@@ -134,10 +134,6 @@ workflow WGTS {
     ch_redux_dna_normal_tsv_out = Channel.empty()
     ch_redux_dna_donor_tsv_out = Channel.empty()
 
-    // channel: [ meta, bqr_plot ]
-    ch_redux_dna_tumor_plot_out = Channel.empty()
-    ch_redux_dna_normal_plot_out = Channel.empty()
-
     if (run_config.stages.redux) {
 
         REDUX_PROCESSING(
@@ -151,6 +147,8 @@ workflow WGTS {
             ref_data.genome_dict,
             hmf_data.unmap_regions,
             hmf_data.msi_jitter_sites,
+            [],  // msi_model_coefficients
+            [],  // msi_model_error_rates
             params.sequencing_type,
             false,  // umi_enable
             '',  // umi_duplex_delim
@@ -167,9 +165,6 @@ workflow WGTS {
         ch_redux_dna_normal_tsv_out = ch_redux_dna_normal_tsv_out.mix(REDUX_PROCESSING.out.dna_normal_tsv)
         ch_redux_dna_donor_tsv_out = ch_redux_dna_donor_tsv_out.mix(REDUX_PROCESSING.out.dna_donor_tsv)
 
-        ch_redux_dna_tumor_plot_out = ch_redux_dna_tumor_plot_out.mix(REDUX_PROCESSING.out.dna_tumor_plot)
-        ch_redux_dna_normal_plot_out = ch_redux_dna_normal_plot_out.mix(REDUX_PROCESSING.out.dna_normal_plot)
-
     } else {
 
         ch_redux_dna_tumor_bam_out = PlaceholderChannels.bamBai(ch_inputs)
@@ -179,9 +174,6 @@ workflow WGTS {
         ch_redux_dna_tumor_tsv_out = PlaceholderChannels.reduxTsvs(ch_inputs)
         ch_redux_dna_normal_tsv_out = PlaceholderChannels.reduxTsvs(ch_inputs)
         ch_redux_dna_donor_tsv_out = PlaceholderChannels.reduxTsvs(ch_inputs)
-
-        ch_redux_dna_tumor_plot_out = PlaceholderChannels.reduxPlots(ch_inputs)
-        ch_redux_dna_normal_plot_out = PlaceholderChannels.reduxPlots(ch_inputs)
 
     }
 
@@ -866,8 +858,6 @@ workflow WGTS {
 
         ORANGE_REPORTING(
             ch_inputs,
-            ch_redux_dna_tumor_plot_out,
-            ch_redux_dna_normal_plot_out,
             ch_bamtools_somatic_out,
             ch_bamtools_germline_out,
             ch_sage_somatic_dir_out,

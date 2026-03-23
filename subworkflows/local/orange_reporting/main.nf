@@ -8,8 +8,6 @@ workflow ORANGE_REPORTING {
     take:
     // Sample data
     ch_inputs                   // channel: [mandatory] [ meta ]
-    ch_redux_somatic_plot       // channel: [mandatory] [ meta, redux_bqr_plot ]
-    ch_redux_germline_plot      // channel: [mandatory] [ meta, redux_bqr_plot ]
     ch_bamtools_somatic         // channel: [mandatory] [ meta, metrics_dir ]
     ch_bamtools_germline        // channel: [mandatory] [ meta, metrics_dir ]
     ch_sage_somatic             // channel: [mandatory] [ meta, sage_dir ]
@@ -44,10 +42,8 @@ workflow ORANGE_REPORTING {
     ch_versions = Channel.empty()
 
     // Select input sources
-    // channel: { meta, redux_somatic_plot, redux_germline_plot, ... }
+    // channel: { meta, ... }
     ch_inputs_selected = WorkflowOncoanalyser.groupByMeta(
-        ch_redux_somatic_plot,
-        ch_redux_germline_plot,
         ch_bamtools_somatic,
         ch_bamtools_germline,
         ch_sage_somatic,
@@ -73,25 +69,23 @@ workflow ORANGE_REPORTING {
             def meta = inputs_list[0]
             inputs_map.meta = meta
 
-            inputs_map.redux_somatic_plot       = Inputs.preferUserProvidedInput(inputs_list[1], meta, SampleMeta.INPUT.REDUX_BQR_PLOT_TUMOR)
-            inputs_map.redux_germline_plot      = Inputs.preferUserProvidedInput(inputs_list[2], meta, SampleMeta.INPUT.REDUX_BQR_PLOT_NORMAL)
-            inputs_map.bamtools_somatic         = Inputs.preferUserProvidedInput(inputs_list[3], meta, SampleMeta.INPUT.BAMTOOLS_DIR_TUMOR)
-            inputs_map.bamtools_germline        = Inputs.preferUserProvidedInput(inputs_list[4], meta, SampleMeta.INPUT.BAMTOOLS_DIR_NORMAL)
-            inputs_map.sage_somatic             = Inputs.preferUserProvidedInput(inputs_list[5], meta, SampleMeta.INPUT.SAGE_DIR_TUMOR)
-            inputs_map.sage_germline            = Inputs.preferUserProvidedInput(inputs_list[6], meta, SampleMeta.INPUT.SAGE_DIR_NORMAL)
-            inputs_map.sage_somatic_append      = Inputs.preferUserProvidedInput(inputs_list[7], meta, SampleMeta.INPUT.SAGE_APPEND_DIR_TUMOR)
-            inputs_map.sage_germline_append     = Inputs.preferUserProvidedInput(inputs_list[8], meta, SampleMeta.INPUT.SAGE_APPEND_DIR_NORMAL)
-            inputs_map.purple_dir               = Inputs.preferUserProvidedInput(inputs_list[9], meta, SampleMeta.INPUT.PURPLE_DIR)
-            inputs_map.linx_somatic_annotation  = Inputs.preferUserProvidedInput(inputs_list[10], meta, SampleMeta.INPUT.LINX_ANNO_DIR_TUMOR)
-            inputs_map.linx_somatic_plot        = Inputs.preferUserProvidedInput(inputs_list[11], meta, SampleMeta.INPUT.LINX_PLOT_DIR_TUMOR)
-            inputs_map.linx_germline_annotation = Inputs.preferUserProvidedInput(inputs_list[12], meta, SampleMeta.INPUT.LINX_ANNO_DIR_NORMAL)
-            inputs_map.virusinterpreter         = Inputs.preferUserProvidedInput(inputs_list[13], meta, SampleMeta.INPUT.VIRUSINTERPRETER_DIR)
-            inputs_map.chord                    = Inputs.preferUserProvidedInput(inputs_list[14], meta, SampleMeta.INPUT.CHORD_DIR)
-            inputs_map.sigs                     = Inputs.preferUserProvidedInput(inputs_list[15], meta, SampleMeta.INPUT.SIGS_DIR)
-            inputs_map.lilac                    = Inputs.preferUserProvidedInput(inputs_list[16], meta, SampleMeta.INPUT.LILAC_DIR)
-            inputs_map.cuppa                    = Inputs.preferUserProvidedInput(inputs_list[17], meta, SampleMeta.INPUT.CUPPA_DIR)
-            inputs_map.peach                    = Inputs.preferUserProvidedInput(inputs_list[18], meta, SampleMeta.INPUT.PEACH_DIR)
-            inputs_map.isofox                   = Inputs.preferUserProvidedInput(inputs_list[19], meta, SampleMeta.INPUT.ISOFOX_DIR)
+            inputs_map.bamtools_somatic         = Inputs.preferUserProvidedInput(inputs_list[1], meta, SampleMeta.INPUT.BAMTOOLS_DIR_TUMOR)
+            inputs_map.bamtools_germline        = Inputs.preferUserProvidedInput(inputs_list[2], meta, SampleMeta.INPUT.BAMTOOLS_DIR_NORMAL)
+            inputs_map.sage_somatic             = Inputs.preferUserProvidedInput(inputs_list[3], meta, SampleMeta.INPUT.SAGE_DIR_TUMOR)
+            inputs_map.sage_germline            = Inputs.preferUserProvidedInput(inputs_list[4], meta, SampleMeta.INPUT.SAGE_DIR_NORMAL)
+            inputs_map.sage_somatic_append      = Inputs.preferUserProvidedInput(inputs_list[5], meta, SampleMeta.INPUT.SAGE_APPEND_DIR_TUMOR)
+            inputs_map.sage_germline_append     = Inputs.preferUserProvidedInput(inputs_list[6], meta, SampleMeta.INPUT.SAGE_APPEND_DIR_NORMAL)
+            inputs_map.purple_dir               = Inputs.preferUserProvidedInput(inputs_list[7], meta, SampleMeta.INPUT.PURPLE_DIR)
+            inputs_map.linx_somatic_annotation  = Inputs.preferUserProvidedInput(inputs_list[8], meta, SampleMeta.INPUT.LINX_ANNO_DIR_TUMOR)
+            inputs_map.linx_somatic_plot        = Inputs.preferUserProvidedInput(inputs_list[9], meta, SampleMeta.INPUT.LINX_PLOT_DIR_TUMOR)
+            inputs_map.linx_germline_annotation = Inputs.preferUserProvidedInput(inputs_list[10], meta, SampleMeta.INPUT.LINX_ANNO_DIR_NORMAL)
+            inputs_map.virusinterpreter         = Inputs.preferUserProvidedInput(inputs_list[11], meta, SampleMeta.INPUT.VIRUSINTERPRETER_DIR)
+            inputs_map.chord                    = Inputs.preferUserProvidedInput(inputs_list[12], meta, SampleMeta.INPUT.CHORD_DIR)
+            inputs_map.sigs                     = Inputs.preferUserProvidedInput(inputs_list[13], meta, SampleMeta.INPUT.SIGS_DIR)
+            inputs_map.lilac                    = Inputs.preferUserProvidedInput(inputs_list[14], meta, SampleMeta.INPUT.LILAC_DIR)
+            inputs_map.cuppa                    = Inputs.preferUserProvidedInput(inputs_list[15], meta, SampleMeta.INPUT.CUPPA_DIR)
+            inputs_map.peach                    = Inputs.preferUserProvidedInput(inputs_list[16], meta, SampleMeta.INPUT.PEACH_DIR)
+            inputs_map.isofox                   = Inputs.preferUserProvidedInput(inputs_list[17], meta, SampleMeta.INPUT.ISOFOX_DIR)
 
             return inputs_map
         }
@@ -105,7 +99,7 @@ workflow ORANGE_REPORTING {
     }
 
     // Sort inputs
-    // channel: runnable: { meta, redux_somatic_plot, redux_germline_plot, ... }
+    // channel: runnable: { meta, ... }
     // channel: skip: [ meta ]
     ch_inputs_sorted = ch_inputs_selected
         .branch { inputs ->
@@ -120,7 +114,7 @@ workflow ORANGE_REPORTING {
         }
 
     // Create process input channel
-    // channel: sample_data: [ meta, redux_somatic_plot, redux_germline_plot, ... ]
+    // channel: sample_data: [ meta, ... ]
     ch_orange_inputs = ch_inputs_sorted.runnable
         .map { inputs ->
 
