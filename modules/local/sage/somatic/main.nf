@@ -10,7 +10,7 @@ process SAGE_SOMATIC {
         'biocontainers/hmftools-sage:4.2--hdfd78af_0' }"
 
     input:
-    tuple val(meta), path(tumor_bam), path(normal_bam), path(donor_bam), path(tumor_bai), path(normal_bai), path(donor_bai), path(redux_tsvs)
+    tuple val(meta), path(tumor_bam), path(tumor_bai), path(normal_bam), path(normal_bai), path(donor_bam), path(donor_bai), path(redux_tsvs)
     path genome_fasta
     val genome_ver
     path genome_fai
@@ -21,6 +21,7 @@ process SAGE_SOMATIC {
     path driver_gene_panel
     path ensembl_data_resources
     path gnomad_resource
+    val sequencing_type
     val targeted_mode
 
     output:
@@ -37,37 +38,33 @@ process SAGE_SOMATIC {
 
     def log_level_arg = task.ext.log_level ? "-log_level ${task.ext.log_level}" : ''
 
-    // Sample IDs
-    def reference_ids = []
-    if (meta.normal_id != null) { reference_ids.add(meta.normal_id) }
-    if (meta.donor_id != null) { reference_ids.add(meta.donor_id) }
-    def reference_arg = reference_ids.size() > 0 ? "-reference ${String.join(',', reference_ids)}" : ''
-    def ref_sample_count_arg = reference_ids.size() > 0 ? "-ref_sample_count ${reference_ids.size()}" : ''
+    def reference_ids = [meta.normal_id, meta.donor_id].findAll { it }
+    def reference_bams = [normal_bam, donor_bam].findAll { it }.collect { it.toString() }
 
-    // BAMs
-    def reference_bams = []
-    if (normal_bam) { reference_bams.add(normal_bam.toString()) }
-    if (donor_bam) { reference_bams.add(donor_bam.toString()) }
-    def reference_bam_arg = reference_bams.size() > 0 ? "-reference_bam ${String.join(',', reference_bams)}" : ''
+    def reference_arg = reference_ids ? "-reference ${reference_ids.join(',')}" : ''
+    def reference_bam_arg = reference_bams ? "-reference_bam ${reference_bams.join(',')}" : ''
+    def ref_sample_count_arg = reference_ids ? "-ref_sample_count ${reference_ids.size()}" : ''
 
-    // Tumor in normal contamination (TINC): only for WGS tumor/normal samples
-    def run_tinc_arg = ''
-    def write_fit_variants_arg = ''
-    def gnomad_arg = ''
-    def pon_file_arg = ''
+    def include_mt_arg = targeted_mode ? '' : '-include_mt'
 
-    if (!targeted_mode && tumor_bam && normal_bam) {
-        run_tinc_arg = '-run_tinc'
-        pon_file_arg = "-pon_file ${sage_pon}"
-        write_fit_variants_arg = '-write_fit_variants'
+    // Tumor in normal contamination (TINC)
+    def tinc_args = ''
 
-        if (genome_ver.toString() == '37') {
-            gnomad_arg = "-gnomad_freq_file ${gnomad_resource}"
-        } else if (genome_ver.toString() == '38') {
-            gnomad_arg = "-gnomad_freq_dir ${gnomad_resource}"
-        } else {
-            error "got bad genome version: ${genome_ver}"
-        }
+    def should_run_tinc_wgs = !targeted_mode && tumor_bam && normal_bam
+    def should_run_tinc_seq_type = sequencing_type == 'ILLUMINA' // NOTE(LN): Skip TINC for SBX and Ultima for now
+    def should_run_tinc = should_run_tinc_wgs && should_run_tinc_seq_type
+
+    if (should_run_tinc) {
+
+        def run_tinc_arg = '-run_tinc'
+        def write_fit_variants_arg = '-write_fit_variants'
+        def pon_file_arg = "-pon_file ${sage_pon}"
+
+        def gnomad_arg = genome_ver == '38'
+            ? "-gnomad_freq_dir ${gnomad_resource}"
+            : "-gnomad_freq_file ${gnomad_resource}"
+
+        tinc_args = "${run_tinc_arg} ${write_fit_variants_arg} ${pon_file_arg} ${gnomad_arg}"
     }
 
     // NOTE(SW): use of ternary inexplicitly causes a 'variable already defined in scope error'
@@ -88,20 +85,16 @@ process SAGE_SOMATIC {
         ${ref_sample_count_arg} \\
         -tumor ${meta.tumor_id} \\
         -tumor_bam ${tumor_bam} \\
-        -jitter_param_dir ./ \\
         -ref_genome ${genome_fasta} \\
         -ref_genome_version ${genome_ver} \\
         -hotspots ${sage_known_hotspots_somatic} \\
         -driver_gene_panel ${driver_gene_panel} \\
         -high_confidence_bed ${sage_highconf_regions} \\
         -ensembl_data_dir ${ensembl_data_resources} \\
-        ${pon_file_arg} \\
-        ${gnomad_arg} \\
-        ${run_tinc_arg} \\
+        -sequencing_type ${sequencing_type} \\
+        ${include_mt_arg} \\
+        ${tinc_args} \\
         ${high_depth_mode_arg} \\
-        -bqr_write_plot \\
-        -include_mt \\
-        ${write_fit_variants_arg} \\
         -threads ${task.cpus} \\
         ${log_level_arg} \\
         -output_vcf somatic/${meta.tumor_id}.sage.somatic.vcf.gz

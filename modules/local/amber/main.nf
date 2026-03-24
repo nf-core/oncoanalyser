@@ -13,6 +13,7 @@ process AMBER {
     path heterozygous_sites
     path target_regions_bed
     val tumor_min_depth
+    val sequencing_type
 
     output:
     tuple val(meta), path('amber/'), emit: amber_dir
@@ -29,15 +30,11 @@ process AMBER {
 
     def log_level_arg = task.ext.log_level ? "-log_level ${task.ext.log_level}" : ''
 
-    def reference_ids = []
-    if (meta.normal_id != null) { reference_ids.add(meta.normal_id) }
-    if (meta.donor_id != null) { reference_ids.add(meta.donor_id) }
-    def reference_arg = reference_ids.size() > 0 ? "-reference ${String.join(",", reference_ids)}" : ''
+    def reference_ids = [meta.normal_id, meta.donor_id].findAll { it }
+    def reference_bams = [normal_bam, donor_bam].findAll { it }.collect { it.toString() }
 
-    def reference_bams = []
-    if (normal_bam) { reference_bams.add(normal_bam.toString()) }
-    if (donor_bam) { reference_bams.add(donor_bam.toString()) }
-    def reference_bam_arg = reference_bams.size() > 0 ? "-reference_bam ${String.join(",", reference_bams)}" : ''
+    def reference_arg = reference_ids ? "-reference ${reference_ids.join(',')}" : ''
+    def reference_bam_arg = reference_bams ? "-reference_bam ${reference_bams.join(',')}" : ''
 
     def target_regions_bed_arg = target_regions_bed ? "-target_regions_bed ${target_regions_bed}" : ''
 
@@ -52,6 +49,7 @@ process AMBER {
         ${reference_arg} \\
         ${reference_bam_arg} \\
         -ref_genome_version ${genome_ver} \\
+        -sequencing_type ${sequencing_type} \\
         ${target_regions_bed_arg} \\
         -loci ${heterozygous_sites} \\
         ${tumor_min_depth_arg} \\

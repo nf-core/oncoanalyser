@@ -34,7 +34,7 @@ process STAR_ALIGN {
         --alignSplicedMateMapLminOverLmate 0.33 \\
         --chimJunctionOverhangMin 10 \\
         --chimOutType WithinBAM SoftClip \\
-        --chimScoreDropMax 30 \\
+        --chimScoreDropMax 70 \\
         --chimScoreJunctionNonGTAG 0 \\
         --chimScoreMin 1 \\
         --chimScoreSeparation 1 \\
@@ -51,6 +51,7 @@ process STAR_ALIGN {
         --outSAMattrRGline ID:${meta.read_group} SM:${meta.sample_id} \\
         --outSAMtype BAM Unsorted \\
         --outSAMunmapped Within \\
+        --peOverlapNbasesMin 10 \\
         --runRNGseed 0
 
     cat <<-END_VERSIONS > versions.yml

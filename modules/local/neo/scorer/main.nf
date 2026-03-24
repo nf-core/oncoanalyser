@@ -33,15 +33,13 @@ process NEO_SCORER {
 
     def cancer_type_arg = meta.containsKey('cancer_type') ? "-cancer_type ${meta.cancer_type}" : ''
 
+    def isofox_dir_local = 'isofox__prepared/'
+    def isofox_dir_arg = isofox_dir ? "-isofox_dir ${isofox_dir_local}" : ''
+
     """
-    isofox_dir_arg=''
     if [[ -n "${isofox_dir}" ]]; then
-        isofox_dir_local=isofox__prepared/;
-
-        cp -rL ${isofox_dir} \${isofox_dir_local}/;
-        cp -r ${annotated_fusions} \${isofox_dir_local}/;
-
-        isofox_dir_arg="-isofox_dir \${isofox_dir_local}";
+        cp -rL ${isofox_dir} ${isofox_dir_local}
+        cp -r ${annotated_fusions} ${isofox_dir_local}
     fi;
 
     mkdir -p neo_scorer/
@@ -54,7 +52,7 @@ process NEO_SCORER {
         ${cancer_type_arg} \\
         -purple_dir ${purple_dir} \\
         ${rna_sample_arg} \\
-        \${isofox_dir_arg} \\
+        ${isofox_dir_arg} \\
         ${rna_somatic_vcf_arg} \\
         -lilac_dir ${lilac_dir} \\
         -neo_dir ${neo_finder_dir} \\

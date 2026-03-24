@@ -15,10 +15,13 @@ process ISOFOX {
     val genome_ver
     path genome_fai
     path ensembl_data_resources
+    path driver_gene_panel
     path known_fusion_data
+    path isofox_excluded_regions
+    path gene_distribution
+    path alt_sj_distribution
     path exp_counts
     path exp_gc_ratios
-    path gene_ids
     path tpm_norm
 
     output:
@@ -41,7 +44,6 @@ process ISOFOX {
     def exp_counts_arg = exp_counts ? "-exp_counts_file ${exp_counts}" : ''
     def exp_gc_ratios_arg = exp_gc_ratios ? "-exp_gc_ratios_file ${exp_gc_ratios}" : ''
 
-    def gene_ids_arg = gene_ids ? "-gene_id_file ${gene_ids}" : ''
     def tpm_norm_arg = tpm_norm ? "-panel_tpm_norm_file ${tpm_norm}" : ''
 
     """
@@ -57,10 +59,13 @@ process ISOFOX {
         -ref_genome ${genome_fasta} \\
         -ref_genome_version ${genome_ver} \\
         -ensembl_data_dir ${ensembl_data_resources} \\
+        -driver_gene_panel ${driver_gene_panel} \\
         -known_fusion_file ${known_fusion_data} \\
+        -excluded_regions ${isofox_excluded_regions} \\
+        -gene_distribution_file ${gene_distribution} \\
+        -alt_sj_cohort_file ${alt_sj_distribution} \\
         ${exp_counts_arg} \\
         ${exp_gc_ratios_arg} \\
-        ${gene_ids_arg} \\
         ${tpm_norm_arg} \\
         -threads ${task.cpus} \\
         ${log_level_arg} \\

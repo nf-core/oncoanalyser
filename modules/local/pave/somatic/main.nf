@@ -19,12 +19,12 @@ process PAVE_SOMATIC {
     path driver_gene_panel
     path ensembl_data_resources
     path gnomad_resource
+    val sequencing_type
 
     output:
-    tuple val(meta), path('*.vcf.gz')    , emit: vcf
-    tuple val(meta), path('*.vcf.gz.tbi'), emit: index
-    path 'versions.yml'                  , emit: versions
-    path '.command.*'                    , emit: command_files
+    tuple val(meta), path('somatic/'), emit: pave_dir
+    path 'versions.yml'              , emit: versions
+    path '.command.*'                , emit: command_files
 
     when:
     task.ext.when == null || task.ext.when
@@ -36,37 +36,35 @@ process PAVE_SOMATIC {
 
     def log_level_arg = task.ext.log_level ? "-log_level ${task.ext.log_level}" : ''
 
-    def gnomad_args
-    if (genome_ver.toString() == '37') {
-        gnomad_args = "-gnomad_freq_file ${gnomad_resource}"
-    } else if (genome_ver.toString() == '38') {
-        gnomad_args = "-gnomad_freq_dir ${gnomad_resource}"
-    } else {
-        error "got bad genome version: ${genome_ver}"
-    }
+    def gnomad_arg = genome_ver == '38'
+        ? "-gnomad_freq_dir ${gnomad_resource}"
+        : "-gnomad_freq_file ${gnomad_resource}"
 
     // Targeted mode
     def pon_artefact_arg = pon_artefacts ? "-pon_artefact_file ${pon_artefacts}" : ''
 
     """
+    mkdir -p somatic/
+
     pave \\
         -Xmx${Math.round(task.memory.bytes * xmx_mod)} \\
         ${args} \\
         -sample ${meta.sample_id} \\
         -input_vcf ${sage_vcf} \\
-        -output_vcf ${meta.sample_id}.pave.somatic.vcf.gz \\
         -ref_genome ${genome_fasta} \\
         -ref_genome_version ${genome_ver} \\
         ${pon_artefact_arg} \\
         -pon_file ${sage_pon} \\
-        ${gnomad_args} \\
+        ${gnomad_arg} \\
         -clinvar_vcf ${clinvar_annotations} \\
         -driver_gene_panel ${driver_gene_panel} \\
         -mappability_bed ${segment_mappability} \\
         -ensembl_data_dir ${ensembl_data_resources} \\
+        -sequencing_type ${sequencing_type} \\
         -threads ${task.cpus} \\
         ${log_level_arg} \\
-        -output_dir ./
+        -output_dir somatic/ \\
+        -output_vcf somatic/${meta.sample_id}.pave.somatic.vcf.gz
 
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":
@@ -76,7 +74,9 @@ process PAVE_SOMATIC {
 
     stub:
     """
-    touch ${meta.sample_id}.pave.somatic.vcf.gz{,.tbi}
+    mkdir -p somatic/
+
+    touch somatic/${meta.sample_id}.pave.somatic.vcf.gz{,.tbi}
 
     echo -e '${task.process}:\\n  stub: noversions\\n' > versions.yml
     """
