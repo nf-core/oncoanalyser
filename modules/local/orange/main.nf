@@ -27,9 +27,7 @@ process ORANGE {
         path(isofox_dir)
     val genome_ver
     path disease_ontology
-    path cohort_mapping
     path driver_gene_panel
-    path sigs_etiology
     val pipeline_version
     val targeted_mode
 
@@ -57,7 +55,7 @@ process ORANGE {
     def linx_plot_dir = linx_somatic_plot_dir.resolve('reportable/').toUriString().replaceAll('/$', '')
 
     // Normal sample
-    def normal_id_arg = meta.containsKey('normal_dna_id') ? "-reference_sample_id ${meta.normal_dna_id}" : ''
+    def normal_id_arg = meta.containsKey('normal_dna_id') ? "-reference ${meta.normal_dna_id}" : ''
     def normal_sage_dir_arg = sage_germline_dir ? "-sage_germline_dir ${sage_germline_dir}" : ''
     def normal_linx_arg = linx_germline_anno_dir ? "-linx_germline_dir ${linx_germline_anno_dir}" : ''
 
@@ -123,7 +121,7 @@ process ORANGE {
         -experiment_type ${experiment_type} \\
         ${cancer_type_arg} \\
         \\
-        -tumor_sample_id ${meta.tumor_id} \\
+        -tumor ${meta.tumor_id} \\
         -sage_dir ${sage_somatic_dir} \\
         -purple_dir \${purple_dir_local} \\
         -purple_plot_dir \${purple_dir_local}/plot/ \\
@@ -147,9 +145,7 @@ process ORANGE {
         \\
         -ref_genome_version ${genome_ver} \\
         -doid_json ${disease_ontology} \\
-        -cohort_mapping_tsv ${cohort_mapping} \\
         -driver_gene_panel ${driver_gene_panel} \\
-        -signatures_etiology_tsv ${sigs_etiology} \\
         ${log_level_arg} \\
         -output_dir output/
 

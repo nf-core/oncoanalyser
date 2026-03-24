@@ -72,14 +72,6 @@ input:
       type: file
       description: Disease ontology file
       pattern: "*.{json}"
-  - cohort_mapping:
-      type: file
-      description: HMF cohort mapping file
-      pattern: "*.{tsv}"
-  - cohort_percentiles:
-      type: file
-      description: HMF cohort percentiles file
-      pattern: "*.{tsv}"
   - known_fusion_data:
       type: file
       description: Known fusions data file
@@ -91,10 +83,6 @@ input:
   - ensembl_data_resources:
       type: directory
       description: HMF ensembl data resources directory
-  - sigs_etiology:
-      type: file
-      description: Mutational signature etiologies file
-      pattern: "*.{tsv}"
   - pipeline_version:
       type: string
       description: Pipeline version to display in report
