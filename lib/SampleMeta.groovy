@@ -13,27 +13,25 @@ class SampleMeta {
         CRAM_REDUX,
         REDUX_TSV_DIR,
 
-        // Process
+        // Other tools
         AMBER_DIR,
         BAMTOOLS_DIR,
+        CHORD_DIR,
         COBALT_DIR,
+        CUPPA_DIR,
         ESVEE_DIR,
         ISOFOX_DIR,
         LILAC_DIR,
         LINX_ANNO_DIR,
+        LINX_PLOT_DIR,
         PAVE_DIR,
+        PEACH_DIR,
         PURPLE_DIR,
+        QSEE_DIR,
         SAGE_DIR,
         SAGE_APPEND_DIR,
-        VIRUSINTERPRETER_DIR,
-
-        // ORANGE specific
-        CHORD_DIR,
-        CUPPA_DIR,
-        LINX_PLOT_DIR,
-        PEACH_DIR,
-        QSEE_DIR,
         SIGS_DIR,
+        VIRUSINTERPRETER_DIR,
     }
 
     public static enum SampleType {
@@ -79,37 +77,20 @@ class SampleMeta {
         REDUX_TSV_DIR_DONOR:  [FileType.REDUX_TSV_DIR, SampleType.DONOR, SequenceType.DNA],
 
         // Other tools
-        ISOFOX_DIR: [FileType.ISOFOX_DIR, SampleType.TUMOR, SequenceType.RNA],
-
         AMBER_DIR: [FileType.AMBER_DIR, [SampleType.TUMOR, SampleType.TUMOR_NORMAL], SequenceType.DNA],
-
-        COBALT_DIR: [FileType.COBALT_DIR, [SampleType.TUMOR, SampleType.TUMOR_NORMAL], SequenceType.DNA],
 
         BAMTOOLS_DIR_TUMOR: [FileType.BAMTOOLS_DIR, SampleType.TUMOR, SequenceType.DNA],
         BAMTOOLS_DIR_NORMAL: [FileType.BAMTOOLS_DIR, SampleType.NORMAL, SequenceType.DNA],
 
-        SAGE_DIR_TUMOR:      [FileType.SAGE_DIR, SampleType.TUMOR, SequenceType.DNA],
-        SAGE_DIR_NORMAL:     [FileType.SAGE_DIR, SampleType.NORMAL, SequenceType.DNA],
+        CHORD_DIR: [FileType.CHORD_DIR, SampleType.TUMOR, SequenceType.DNA],
 
-        SAGE_APPEND_DIR_TUMOR:  [FileType.SAGE_APPEND_DIR, SampleType.TUMOR, SequenceType.DNA_RNA],
-        SAGE_APPEND_DIR_NORMAL: [FileType.SAGE_APPEND_DIR, SampleType.NORMAL, SequenceType.DNA_RNA],
+        COBALT_DIR: [FileType.COBALT_DIR, [SampleType.TUMOR, SampleType.TUMOR_NORMAL], SequenceType.DNA],
 
-        PAVE_DIR_TUMOR:  [FileType.PAVE_DIR, SampleType.TUMOR, SequenceType.DNA],
-        PAVE_DIR_NORMAL: [FileType.PAVE_DIR, SampleType.NORMAL, SequenceType.DNA],
+        CUPPA_DIR: [FileType.CUPPA_DIR, SampleType.TUMOR, [SequenceType.DNA, SequenceType.RNA, SequenceType.DNA_RNA]],
 
         ESVEE_DIR: [FileType.ESVEE_DIR, [SampleType.TUMOR, SampleType.TUMOR_NORMAL], SequenceType.DNA],
 
-        PURPLE_DIR: [FileType.PURPLE_DIR, [SampleType.TUMOR, SampleType.TUMOR_NORMAL], SequenceType.DNA],
-
-        QSEE_DIR: [FileType.QSEE_DIR, [SampleType.TUMOR, SampleType.TUMOR_NORMAL], SequenceType.DNA],
-
-        LINX_PLOT_DIR_TUMOR:  [FileType.LINX_PLOT_DIR, SampleType.TUMOR, SequenceType.DNA],
-        LINX_ANNO_DIR_TUMOR:  [FileType.LINX_ANNO_DIR, SampleType.TUMOR, SequenceType.DNA],
-        LINX_ANNO_DIR_NORMAL: [FileType.LINX_ANNO_DIR, SampleType.NORMAL, SequenceType.DNA],
-
-        CHORD_DIR: [FileType.CHORD_DIR, SampleType.TUMOR, SequenceType.DNA],
-
-        SIGS_DIR: [FileType.SIGS_DIR, SampleType.TUMOR, SequenceType.DNA],
+        ISOFOX_DIR: [FileType.ISOFOX_DIR, SampleType.TUMOR, SequenceType.RNA],
 
         LILAC_DIR: [
             FileType.LILAC_DIR,
@@ -117,10 +98,27 @@ class SampleMeta {
             [SequenceType.DNA, SequenceType.DNA_RNA],
         ],
 
-        VIRUSINTERPRETER_DIR: [FileType.VIRUSINTERPRETER_DIR, SampleType.TUMOR, SequenceType.DNA],
+        LINX_PLOT_DIR_TUMOR:  [FileType.LINX_PLOT_DIR, SampleType.TUMOR, SequenceType.DNA],
+        LINX_ANNO_DIR_TUMOR:  [FileType.LINX_ANNO_DIR, SampleType.TUMOR, SequenceType.DNA],
+        LINX_ANNO_DIR_NORMAL: [FileType.LINX_ANNO_DIR, SampleType.NORMAL, SequenceType.DNA],
 
-        CUPPA_DIR: [FileType.CUPPA_DIR, SampleType.TUMOR, [SequenceType.DNA, SequenceType.RNA, SequenceType.DNA_RNA]],
+        SAGE_APPEND_DIR_TUMOR:  [FileType.SAGE_APPEND_DIR, SampleType.TUMOR, SequenceType.DNA_RNA],
+        SAGE_APPEND_DIR_NORMAL: [FileType.SAGE_APPEND_DIR, SampleType.NORMAL, SequenceType.DNA_RNA],
+
+        SAGE_DIR_TUMOR:  [FileType.SAGE_DIR, SampleType.TUMOR, SequenceType.DNA],
+        SAGE_DIR_NORMAL: [FileType.SAGE_DIR, SampleType.NORMAL, SequenceType.DNA],
+
+        PAVE_DIR_TUMOR:  [FileType.PAVE_DIR, SampleType.TUMOR, SequenceType.DNA],
+        PAVE_DIR_NORMAL: [FileType.PAVE_DIR, SampleType.NORMAL, SequenceType.DNA],
 
         PEACH_DIR: [FileType.PEACH_DIR, SampleType.NORMAL, SequenceType.DNA],
+
+        PURPLE_DIR: [FileType.PURPLE_DIR, [SampleType.TUMOR, SampleType.TUMOR_NORMAL], SequenceType.DNA],
+
+        QSEE_DIR: [FileType.QSEE_DIR, [SampleType.TUMOR, SampleType.TUMOR_NORMAL], SequenceType.DNA],
+
+        SIGS_DIR: [FileType.SIGS_DIR, SampleType.TUMOR, SequenceType.DNA],
+
+        VIRUSINTERPRETER_DIR: [FileType.VIRUSINTERPRETER_DIR, SampleType.TUMOR, SequenceType.DNA],
     ]
 }
