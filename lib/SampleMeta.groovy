@@ -23,8 +23,7 @@ class SampleMeta {
         LINX_ANNO_DIR,
         PAVE_DIR,
         PURPLE_DIR,
-        SAGE_VCF,
-        SAGE_VCF_TBI,
+        SAGE_DIR,
         SAGE_APPEND_DIR,
         VIRUSINTERPRETER_DIR,
 
@@ -34,7 +33,6 @@ class SampleMeta {
         LINX_PLOT_DIR,
         PEACH_DIR,
         QSEE_DIR,
-        SAGE_DIR,
         SIGS_DIR,
     }
 
@@ -90,10 +88,6 @@ class SampleMeta {
         BAMTOOLS_DIR_TUMOR: [FileType.BAMTOOLS_DIR, SampleType.TUMOR, SequenceType.DNA],
         BAMTOOLS_DIR_NORMAL: [FileType.BAMTOOLS_DIR, SampleType.NORMAL, SequenceType.DNA],
 
-        SAGE_VCF_TUMOR:      [FileType.SAGE_VCF, SampleType.TUMOR, SequenceType.DNA],
-        SAGE_VCF_NORMAL:     [FileType.SAGE_VCF, SampleType.NORMAL, SequenceType.DNA],
-        SAGE_VCF_TBI_TUMOR:  [FileType.SAGE_VCF_TBI, SampleType.TUMOR, SequenceType.DNA],
-        SAGE_VCF_TBI_NORMAL: [FileType.SAGE_VCF_TBI, SampleType.NORMAL, SequenceType.DNA],
         SAGE_DIR_TUMOR:      [FileType.SAGE_DIR, SampleType.TUMOR, SequenceType.DNA],
         SAGE_DIR_NORMAL:     [FileType.SAGE_DIR, SampleType.NORMAL, SequenceType.DNA],
 

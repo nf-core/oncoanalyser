@@ -249,9 +249,6 @@ class SampleSheet {
             } else if (key === SampleMeta.FileType.CRAM || key === SampleMeta.FileType.CRAM_REDUX) {
                 index_enum = SampleMeta.FileType.CRAI
                 index_extension = 'crai'
-            } else if (key === SampleMeta.FileType.SAGE_VCF) {
-                index_enum = SampleMeta.FileType.SAGE_VCF_TBI
-                index_extension = 'tbi'
             } else {
                 // Key not a file type, or not a file type that needs an index
                 return

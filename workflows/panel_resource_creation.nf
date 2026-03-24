@@ -225,7 +225,7 @@ workflow PANEL_RESOURCE_CREATION {
     ch_versions = ch_versions.mix(SAGE_CALLING.out.versions)
 
     // channel: [ meta, sage_vcf, sage_tbi ]
-    ch_sage_somatic_vcf_out = SAGE_CALLING.out.somatic_vcf
+    ch_sage_somatic_dir_out = SAGE_CALLING.out.somatic_dir
 
     //
     // SUBWORKFLOW: Run COBALT normalisation
@@ -244,7 +244,7 @@ workflow PANEL_RESOURCE_CREATION {
     // SUBWORKFLOW: Run PAVE panel of normals creation
     //
     PAVE_PON_CREATION(
-        ch_sage_somatic_vcf_out,
+        ch_sage_somatic_dir_out,
         ref_data.genome_version,
     )
 

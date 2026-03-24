@@ -88,7 +88,7 @@ workflow SAGE_CALLING {
     ch_inputs_germline_sorted = ch_inputs_sorted.runnable
         .branch { inputs ->
             def has_tumor_normal = inputs.tumor_bam && inputs.normal_bam
-            def has_existing = Inputs.hasExistingInput(inputs.meta, SampleMeta.INPUT.SAGE_VCF_NORMAL)
+            def has_existing = Inputs.hasExistingInput(inputs.meta, SampleMeta.INPUT.SAGE_DIR_NORMAL)
 
             runnable: has_tumor_normal && !has_existing && enable_germline
                 return inputs
@@ -145,7 +145,7 @@ workflow SAGE_CALLING {
     ch_inputs_somatic_sorted = ch_inputs_sorted.runnable
         .branch { inputs ->
             def has_tumor = inputs.tumor_bam
-            def has_existing = Inputs.hasExistingInput(inputs.meta, SampleMeta.INPUT.SAGE_VCF_TUMOR)
+            def has_existing = Inputs.hasExistingInput(inputs.meta, SampleMeta.INPUT.SAGE_DIR_TUMOR)
 
             runnable: has_tumor && !has_existing
                 return inputs

@@ -343,9 +343,6 @@ workflow WGTS {
     //
     // SUBWORKFLOW: Call SNV, MNV, and small INDELS with SAGE
     //
-    // channel: [ meta, sage_vcf, sage_tbi ]
-    ch_sage_germline_vcf_out = Channel.empty()
-    ch_sage_somatic_vcf_out = Channel.empty()
     // channel: [ meta, sage_dir ]
     ch_sage_germline_dir_out = Channel.empty()
     ch_sage_somatic_dir_out = Channel.empty()
@@ -378,15 +375,11 @@ workflow WGTS {
 
         ch_versions = ch_versions.mix(SAGE_CALLING.out.versions)
 
-        ch_sage_germline_vcf_out = ch_sage_germline_vcf_out.mix(SAGE_CALLING.out.germline_vcf)
-        ch_sage_somatic_vcf_out = ch_sage_somatic_vcf_out.mix(SAGE_CALLING.out.somatic_vcf)
         ch_sage_germline_dir_out = ch_sage_germline_dir_out.mix(SAGE_CALLING.out.germline_dir)
         ch_sage_somatic_dir_out = ch_sage_somatic_dir_out.mix(SAGE_CALLING.out.somatic_dir)
 
     } else {
 
-        ch_sage_germline_vcf_out = PlaceholderChannels.vcfTbi(ch_inputs)
-        ch_sage_somatic_vcf_out = PlaceholderChannels.vcfTbi(ch_inputs)
         ch_sage_germline_dir_out = PlaceholderChannels.toolDir(ch_inputs)
         ch_sage_somatic_dir_out = PlaceholderChannels.toolDir(ch_inputs)
 
@@ -402,8 +395,8 @@ workflow WGTS {
 
         PAVE_ANNOTATION(
             ch_inputs,
-            ch_sage_germline_vcf_out,
-            ch_sage_somatic_vcf_out,
+            ch_sage_germline_dir_out,
+            ch_sage_somatic_dir_out,
             ref_data.genome_fasta,
             ref_data.genome_version,
             ref_data.genome_fai,

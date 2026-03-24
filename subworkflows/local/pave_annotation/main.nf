@@ -9,8 +9,8 @@ workflow PAVE_ANNOTATION {
     take:
     // Sample data
     ch_inputs              // channel: [mandatory] [ meta ]
-    ch_sage_germline_vcf   // channel: [mandatory] [ meta, sage_germline_vcf, sage_somatic_tbi ]
-    ch_sage_somatic_vcf    // channel: [mandatory] [ meta, sage_somatic_vcf, sage_somatic_tbi ]
+    ch_sage_dir_germline   // channel: [mandatory] [ meta, sage_dir ]
+    ch_sage_dir_somatic    // channel: [mandatory] [ meta, sage_dir ]
 
     // Reference data
     genome_fasta           // channel: [mandatory] /path/to/genome_fasta
@@ -37,15 +37,14 @@ workflow PAVE_ANNOTATION {
     // MODULE: PAVE germline
     //
     // Select input sources and sort
-    // channel: runnable: [ meta, sage_vcf, sage_tbi ]
+    // channel: runnable: [ meta, vcf, tbi ]
     // channel: skip: [ meta ]
-    ch_sage_germline_inputs_sorted = ch_sage_germline_vcf
-        .map { meta, sage_vcf, sage_tbi ->
-            return [
-                meta,
-                Inputs.preferUserProvidedInput(sage_vcf, meta, SampleMeta.INPUT.SAGE_VCF_NORMAL),
-                Inputs.preferUserProvidedInput(sage_tbi, meta, SampleMeta.INPUT.SAGE_VCF_TBI_NORMAL),
-            ]
+    ch_sage_germline_inputs_sorted = ch_sage_dir_germline
+        .map { meta, sage_dir ->
+
+            def (sage_vcf, sage_tbi) = Inputs.resolveSageVcfWithTbi(sage_dir, meta, SampleMeta.SampleType.NORMAL)
+
+            return [ meta, sage_vcf, sage_tbi ]
         }
         .branch { meta, sage_vcf, sage_tbi ->
 
@@ -93,13 +92,12 @@ workflow PAVE_ANNOTATION {
     // Select input sources and sort
     // channel: runnable: [ meta, sage_vcf, sage_tbi ]
     // channel: skip: [ meta ]
-    ch_sage_somatic_inputs_sorted = ch_sage_somatic_vcf
-        .map { meta, sage_vcf, sage_tbi ->
-            return [
-                meta,
-                Inputs.preferUserProvidedInput(sage_vcf, meta, SampleMeta.INPUT.SAGE_VCF_TUMOR),
-                Inputs.preferUserProvidedInput(sage_tbi, meta, SampleMeta.INPUT.SAGE_VCF_TBI_TUMOR),
-            ]
+    ch_sage_somatic_inputs_sorted = ch_sage_dir_somatic
+        .map { meta, sage_dir ->
+
+            def (sage_vcf, sage_tbi) = Inputs.resolveSageVcfWithTbi(sage_dir, meta, SampleMeta.SampleType.TUMOR)
+
+            return [ meta, sage_vcf, sage_tbi ]
         }
         .branch { meta, sage_vcf, sage_tbi ->
 

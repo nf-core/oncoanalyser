@@ -8,7 +8,7 @@ include { PAVE_PON_PANEL_CREATION } from '../../../modules/local/pave/pon_creati
 workflow PAVE_PON_CREATION {
     take:
     // Sample data
-    ch_sage_somatic_vcf // channel: [mandatory] [ meta, sage_somatic_vcf, sage_somatic_tbi ]
+    ch_sage_dir_somatic // channel: [mandatory] [ meta, sage_dir ]
 
     // Reference data
     genome_version      // channel: [mandatory] genome version
@@ -20,12 +20,12 @@ workflow PAVE_PON_CREATION {
 
     // Create process input channel
     // channel: [ [sage_vcf, ...], [sage_tbi, ...] ]
-    ch_pave_inputs = ch_sage_somatic_vcf
-        .map { meta, sage_vcf, sage_tbi ->
-            return [
-                Inputs.preferUserProvidedInput(sage_vcf, meta, SampleMeta.INPUT.SAGE_VCF_TUMOR),
-                Inputs.preferUserProvidedInput(sage_tbi, meta, SampleMeta.INPUT.SAGE_VCF_TBI_TUMOR),
-            ]
+    ch_pave_inputs = ch_sage_dir_somatic
+        .map { meta, sage_dir ->
+
+            def (sage_vcf, sage_tbi) = Inputs.resolveSageVcfWithTbi(sage_dir, meta, SampleMeta.SampleType.TUMOR)
+
+            return [ sage_vcf, sage_tbi ]
         }
         .collect(flat: false)
         .map { d -> d.transpose() }

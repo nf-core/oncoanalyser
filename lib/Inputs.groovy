@@ -260,6 +260,31 @@ class Inputs {
         return redux_tsvs
     }
 
+    // Files - SAGE
+    private static List resolveSageVcfWithTbi(sage_dir, meta, sample_type) {
+
+        def file_key_map = [
+            (SampleMeta.SampleType.TUMOR): SampleMeta.INPUT.SAGE_DIR_TUMOR,
+            (SampleMeta.SampleType.NORMAL): SampleMeta.INPUT.SAGE_DIR_NORMAL,
+        ]
+
+        def file_key = file_key_map[sample_type]
+        def selected_sage_dir = preferUserProvidedInput(sage_dir, meta, file_key)
+        if(!selected_sage_dir)
+            return []
+
+        def sample_id = getTumorDnaSampleName(meta)
+        def file_name_map = [
+            (SampleMeta.SampleType.TUMOR): "${sample_id}.sage.somatic.vcf.gz",
+            (SampleMeta.SampleType.NORMAL): "${sample_id}.sage.germline.vcf.gz",
+        ]
+
+        def vcf_name = file_name_map[sample_type]
+        def sage_dir_path = nextflow.Nextflow.file(selected_sage_dir)
+
+        return [ sage_dir_path.resolve(vcf_name), sage_dir_path.resolve("${vcf_name}.tbi") ]
+    }
+
     // Files - PURPLE
     //
     // NOTE(LN): We construct the output file paths based on the tool output dir. This so that the user can resume a run by providing
