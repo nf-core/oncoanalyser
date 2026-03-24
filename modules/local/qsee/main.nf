@@ -38,7 +38,7 @@ process QSEE {
 
     def reference_arg = meta.normal_id ? "-reference ${meta.normal_id}" : ''
     def redux_ref_dir_arg = redux_germline_tsv ? "-redux_ref_dir redux_germline/" : ''
-    def bamtools_ref_dir_arg = bamtools_germline_dir ? "-ref_metrics_dir ${bamtools_germline_dir}" : ''
+    def bamtools_ref_dir_arg = bamtools_germline_dir ? "-bam_metrics_ref_dir ${bamtools_germline_dir}" : ''
 
     def cobalt_dir_arg = cobalt_dir ? "-cobalt_dir ${cobalt_dir}" : ''
     def esvee_dir_arg = esvee_dir ? "-esvee_dir ${esvee_dir}" : ''
@@ -62,7 +62,7 @@ process QSEE {
         ${reference_arg} \\
         -redux_tumor_dir redux_somatic/ \\
         ${redux_ref_dir_arg} \\
-        -tumor_metrics_dir ${bamtools_somatic_dir} \\
+        -bam_metrics_tumor_dir ${bamtools_somatic_dir} \\
         ${bamtools_ref_dir_arg} \\
         ${cobalt_dir_arg} \\
         ${esvee_dir_arg} \\
