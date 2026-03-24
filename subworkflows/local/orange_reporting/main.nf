@@ -7,7 +7,6 @@ include { ORANGE } from '../../../modules/local/orange/main'
 workflow ORANGE_REPORTING {
     take:
     // Sample data
-    ch_inputs                   // channel: [mandatory] [ meta ]
     ch_sage_somatic             // channel: [mandatory] [ meta, sage_dir ]
     ch_sage_germline            // channel: [mandatory] [ meta, sage_dir ]
     ch_sage_somatic_append      // channel: [mandatory] [ meta, sage_append_dir ]
@@ -46,6 +45,7 @@ workflow ORANGE_REPORTING {
         ch_sage_somatic_append,
         ch_sage_germline_append,
         ch_purple,
+        ch_qsee,
         ch_linx_somatic_annotation,
         ch_linx_somatic_plot,
         ch_linx_germline_annotation,

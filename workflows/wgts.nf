@@ -494,7 +494,7 @@ workflow WGTS {
 
         ch_versions = ch_versions.mix(QSEE_METRICS.out.versions)
 
-        ch_qsee_out = ch_purple_out.mix(QSEE_METRICS.out.qsee_dir)
+        ch_qsee_out = ch_qsee_out.mix(QSEE_METRICS.out.qsee_dir)
 
     } else {
 
@@ -858,7 +858,6 @@ workflow WGTS {
     if (run_config.stages.orange) {
 
         ORANGE_REPORTING(
-            ch_inputs,
             ch_sage_somatic_dir_out,
             ch_sage_germline_dir_out,
             ch_sage_somatic_append_out,
