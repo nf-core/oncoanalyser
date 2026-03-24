@@ -20,7 +20,6 @@ workflow ISOFOX_QUANTIFICATION {
     isofox_alt_sj_distribution // channel: [mandatory] /path/to/isofox_alt_sj_distribution
     isofox_counts              // channel: [mandatory] /path/to/isofox_counts
     isofox_gc_ratios           // channel: [mandatory] /path/to/isofox_gc_ratios
-    isofox_gene_ids            // channel: [optional]  /path/to/isofox_gene_ids
     isofox_tpm_norm            // channel: [optional]  /path/to/isofox_tpm_norm
 
     // Params
@@ -78,7 +77,6 @@ workflow ISOFOX_QUANTIFICATION {
         isofox_alt_sj_distribution,
         isofox_counts,
         isofox_gc_ratios,
-        isofox_gene_ids,
         isofox_tpm_norm,
     )
 

@@ -20,7 +20,6 @@ process ISOFOX {
     path alt_sj_distribution
     path exp_counts
     path exp_gc_ratios
-    path gene_ids
     path tpm_norm
 
     output:
@@ -43,7 +42,6 @@ process ISOFOX {
     def exp_counts_arg = exp_counts ? "-exp_counts_file ${exp_counts}" : ''
     def exp_gc_ratios_arg = exp_gc_ratios ? "-exp_gc_ratios_file ${exp_gc_ratios}" : ''
 
-    def gene_ids_arg = gene_ids ? "-gene_id_file ${gene_ids}" : ''
     def tpm_norm_arg = tpm_norm ? "-panel_tpm_norm_file ${tpm_norm}" : ''
 
     """
@@ -64,7 +62,6 @@ process ISOFOX {
         -alt_sj_cohort_file ${alt_sj_distribution} \\
         ${exp_counts_arg} \\
         ${exp_gc_ratios_arg} \\
-        ${gene_ids_arg} \\
         ${tpm_norm_arg} \\
         -threads ${task.cpus} \\
         ${log_level_arg} \\

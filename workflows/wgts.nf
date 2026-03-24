@@ -232,7 +232,6 @@ workflow WGTS {
             hmf_data.isofox_alt_sj_distribution,
             isofox_counts,
             isofox_gc_ratios,
-            [],  // isofox_gene_ids
             [],  // isofox_tpm_norm
             params.isofox_functions,
             isofox_read_length,
