@@ -168,36 +168,34 @@ class Inputs {
         return hasTumorRnaBam(meta) || hasTumorRnaFastq(meta)
     }
 
-    // Files - PURPLE
-    //
-    // NOTE(LN): We construct the output file paths based on the tool output dir. This so that the user can resume a run by providing
-    // purple_dir in the sample sheet.
-    //
-    // Processes in theory could emit these output files, and downstream processes could consume the output file channels. However,
-    // this would make resuming messy as multiple e.g. PURPLE output files would need to be provided in the sample sheet
+    // Files - common
+    public static getInput(meta, key) {
 
-    public static getPurpleSomaticVcf(meta, purple_dir, sample_type) {
-        return nextflow.Nextflow.file(purple_dir).resolve("${getTumorDnaSampleName(meta, sample_type)}.purple.somatic.vcf.gz")
+        def result = []
+        def (file_type, sample_types, sequence_type) = key
+
+        for (sample_key in [sample_types, sequence_type].combinations()) {
+            if (meta.containsKey(sample_key) && meta[sample_key].containsKey(file_type)) {
+                result = meta[sample_key].get(file_type)
+                break
+            }
+        }
+        return result
     }
 
-    public static getPurpleSomaticVcf(meta, purple_dir) {
-        return getPurpleSomaticVcf(meta, purple_dir, 'primary')
+    public static hasExistingInput(meta, key) {
+        return getInput(meta, key) != []
     }
 
-    public static getPurpleSomaticVcfTbi(meta, purple_dir) {
-        return nextflow.Nextflow.file(purple_dir).resolve("${getTumorDnaSampleName(meta)}.purple.somatic.vcf.gz.tbi")
+    public static preferUserProvidedInput(pipeline_path, meta, key) {
+        // Allows the pipeline to start from downstream steps, e.g. running ORANGE from existing pipeline outputs
+        def user_provided_path = getInput(meta, key)
+        return user_provided_path ?: pipeline_path
     }
 
-    public static getPurpleGermlineVcf(meta, purple_dir) {
-        return nextflow.Nextflow.file(purple_dir).resolve("${getTumorDnaSampleName(meta)}.purple.germline.vcf.gz")
-    }
-
-    public static getPurpleSomaticSvVcf(meta, purple_dir) {
-        return nextflow.Nextflow.file(purple_dir).resolve("${getTumorDnaSampleName(meta)}.purple.sv.vcf.gz")
-    }
-
-    public static getPurpleGermlineSvVcf(meta, purple_dir) {
-        return nextflow.Nextflow.file(purple_dir).resolve("${getTumorDnaSampleName(meta)}.purple.sv.germline.vcf.gz")
+    public static preferPipelineOutput(pipeline_path, meta, key) {
+        def user_provided_path = getInput(meta, key)
+        return pipeline_path ?: user_provided_path
     }
 
     // Files - REDUX
@@ -262,33 +260,35 @@ class Inputs {
         return redux_tsvs
     }
 
-    // Misc
-    public static getInput(meta, key) {
+    // Files - PURPLE
+    //
+    // NOTE(LN): We construct the output file paths based on the tool output dir. This so that the user can resume a run by providing
+    // purple_dir in the sample sheet.
+    //
+    // Processes in theory could emit these output files, and downstream processes could consume the output file channels. However,
+    // this would make resuming messy as multiple e.g. PURPLE output files would need to be provided in the sample sheet
 
-        def result = []
-        def (file_type, sample_types, sequence_type) = key
-
-        for (sample_key in [sample_types, sequence_type].combinations()) {
-            if (meta.containsKey(sample_key) && meta[sample_key].containsKey(file_type)) {
-                result = meta[sample_key].get(file_type)
-                break
-            }
-        }
-        return result
+    public static getPurpleSomaticVcf(meta, purple_dir, sample_type) {
+        return nextflow.Nextflow.file(purple_dir).resolve("${getTumorDnaSampleName(meta, sample_type)}.purple.somatic.vcf.gz")
     }
 
-    public static hasExistingInput(meta, key) {
-        return getInput(meta, key) != []
+    public static getPurpleSomaticVcf(meta, purple_dir) {
+        return getPurpleSomaticVcf(meta, purple_dir, 'primary')
     }
 
-    public static preferUserProvidedInput(pipeline_path, meta, key) {
-        // Allows the pipeline to start from downstream steps, e.g. running ORANGE from existing pipeline outputs
-        def user_provided_path = getInput(meta, key)
-        return user_provided_path ?: pipeline_path
+    public static getPurpleSomaticVcfTbi(meta, purple_dir) {
+        return nextflow.Nextflow.file(purple_dir).resolve("${getTumorDnaSampleName(meta)}.purple.somatic.vcf.gz.tbi")
     }
 
-    public static preferPipelineOutput(pipeline_path, meta, key) {
-        def user_provided_path = getInput(meta, key)
-        return pipeline_path ?: user_provided_path
+    public static getPurpleGermlineVcf(meta, purple_dir) {
+        return nextflow.Nextflow.file(purple_dir).resolve("${getTumorDnaSampleName(meta)}.purple.germline.vcf.gz")
+    }
+
+    public static getPurpleSomaticSvVcf(meta, purple_dir) {
+        return nextflow.Nextflow.file(purple_dir).resolve("${getTumorDnaSampleName(meta)}.purple.sv.vcf.gz")
+    }
+
+    public static getPurpleGermlineSvVcf(meta, purple_dir) {
+        return nextflow.Nextflow.file(purple_dir).resolve("${getTumorDnaSampleName(meta)}.purple.sv.germline.vcf.gz")
     }
 }
