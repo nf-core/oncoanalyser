@@ -12,9 +12,9 @@ workflow SAGE_CALLING {
     ch_tumor_bam                 // channel: [mandatory] [ meta, bam, bai ]
     ch_normal_bam                // channel: [mandatory] [ meta, bam, bai ]
     ch_donor_bam                 // channel: [mandatory] [ meta, bam, bai ]
-    ch_tumor_tsvs                // channel: [mandatory] [ meta, redux_tsv, ... ]
-    ch_normal_tsvs               // channel: [mandatory] [ meta, redux_tsv, ... ]
-    ch_donor_tsvs                // channel: [mandatory] [ meta, redux_tsv, ... ]
+    ch_tumor_dir                 // channel: [mandatory] [ meta, redux_dir ]
+    ch_normal_dir                // channel: [mandatory] [ meta, redux_dir ]
+    ch_donor_dir                 // channel: [mandatory] [ meta, redux_dir ]
 
     // Reference data
     genome_fasta                 // channel: [mandatory] /path/to/genome_fasta
@@ -45,17 +45,17 @@ workflow SAGE_CALLING {
     ch_inputs_sorted = WorkflowOncoanalyser.groupByMeta(
         flatten_mode: 'none',
         ch_tumor_bam, ch_normal_bam, ch_donor_bam,
-        ch_tumor_tsvs, ch_normal_tsvs, ch_donor_tsvs,
+        ch_tumor_dir, ch_normal_dir, ch_donor_dir,
     )
-        .map { meta, tumor_bam_bai, normal_bam_bai, donor_bam_bai, tumor_tsvs, normal_tsvs, donor_tsvs ->
+        .map { meta, tumor_bam_bai, normal_bam_bai, donor_bam_bai, tumor_dir, normal_dir, donor_dir ->
 
             def (tumor_bam, tumor_bai) = Inputs.resolveReduxBamBai(tumor_bam_bai, meta, SampleMeta.SampleType.TUMOR)
             def (normal_bam, normal_bai) = Inputs.resolveReduxBamBai(normal_bam_bai, meta, SampleMeta.SampleType.NORMAL)
             def (donor_bam, donor_bai) = Inputs.resolveReduxBamBai(donor_bam_bai, meta, SampleMeta.SampleType.DONOR)
 
-            tumor_tsvs = Inputs.resolveReduxTsvFiles(tumor_tsvs, meta, SampleMeta.SampleType.TUMOR)
-            normal_tsvs = Inputs.resolveReduxTsvFiles(normal_tsvs, meta, SampleMeta.SampleType.NORMAL)
-            donor_tsvs = Inputs.resolveReduxTsvFiles(donor_tsvs, meta, SampleMeta.SampleType.DONOR)
+            def tumor_tsvs = Inputs.resolveReduxTsvFiles(tumor_dir, meta, SampleMeta.SampleType.TUMOR)
+            def normal_tsvs = Inputs.resolveReduxTsvFiles(normal_dir, meta, SampleMeta.SampleType.NORMAL)
+            def donor_tsvs = Inputs.resolveReduxTsvFiles(donor_dir, meta, SampleMeta.SampleType.DONOR)
 
             def redux_tsvs = [ *tumor_tsvs, *normal_tsvs, *donor_tsvs ]
 

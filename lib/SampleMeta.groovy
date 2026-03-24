@@ -11,11 +11,7 @@ class SampleMeta {
         // REDUX
         BAM_REDUX,
         CRAM_REDUX,
-        REDUX_BQR_TSV,
-        REDUX_DUP_FREQ_TSV,
-        REDUX_JITTER_TSV,
-        REDUX_MS_TABLE_TSV,
-        REDUX_MSI_TSV,
+        REDUX_TSV_DIR,
 
         // Process
         AMBER_DIR,
@@ -80,25 +76,9 @@ class SampleMeta {
         BAM_REDUX_DNA_NORMAL: [FileType.BAM_REDUX, SampleType.NORMAL, SequenceType.DNA],
         BAM_REDUX_DNA_DONOR:  [FileType.BAM_REDUX, SampleType.DONOR, SequenceType.DNA],
 
-        REDUX_BQR_TSV_TUMOR:  [FileType.REDUX_BQR_TSV, SampleType.TUMOR, SequenceType.DNA],
-        REDUX_BQR_TSV_NORMAL: [FileType.REDUX_BQR_TSV, SampleType.NORMAL, SequenceType.DNA],
-        REDUX_BQR_TSV_DONOR:  [FileType.REDUX_BQR_TSV, SampleType.DONOR, SequenceType.DNA],
-
-        REDUX_DUP_FREQ_TSV_TUMOR:  [FileType.REDUX_DUP_FREQ_TSV, SampleType.TUMOR, SequenceType.DNA],
-        REDUX_DUP_FREQ_TSV_NORMAL: [FileType.REDUX_DUP_FREQ_TSV, SampleType.NORMAL, SequenceType.DNA],
-        REDUX_DUP_FREQ_TSV_DONOR:  [FileType.REDUX_DUP_FREQ_TSV, SampleType.DONOR, SequenceType.DNA],
-
-        REDUX_JITTER_TSV_TUMOR:  [FileType.REDUX_JITTER_TSV, SampleType.TUMOR, SequenceType.DNA],
-        REDUX_JITTER_TSV_NORMAL: [FileType.REDUX_JITTER_TSV, SampleType.NORMAL, SequenceType.DNA],
-        REDUX_JITTER_TSV_DONOR:  [FileType.REDUX_JITTER_TSV, SampleType.DONOR, SequenceType.DNA],
-
-        REDUX_MS_TABLE_TSV_TUMOR:  [FileType.REDUX_MS_TABLE_TSV, SampleType.TUMOR, SequenceType.DNA],
-        REDUX_MS_TABLE_TSV_NORMAL: [FileType.REDUX_MS_TABLE_TSV, SampleType.NORMAL, SequenceType.DNA],
-        REDUX_MS_TABLE_TSV_DONOR:  [FileType.REDUX_MS_TABLE_TSV, SampleType.DONOR, SequenceType.DNA],
-
-        REDUX_MSI_TSV_TUMOR:  [FileType.REDUX_MSI_TSV, SampleType.TUMOR, SequenceType.DNA],
-        REDUX_MSI_TSV_NORMAL: [FileType.REDUX_MSI_TSV, SampleType.NORMAL, SequenceType.DNA],
-        REDUX_MSI_TSV_DONOR:  [FileType.REDUX_MSI_TSV, SampleType.DONOR, SequenceType.DNA],
+        REDUX_TSV_DIR_TUMOR:  [FileType.REDUX_TSV_DIR, SampleType.TUMOR, SequenceType.DNA],
+        REDUX_TSV_DIR_NORMAL: [FileType.REDUX_TSV_DIR, SampleType.NORMAL, SequenceType.DNA],
+        REDUX_TSV_DIR_DONOR:  [FileType.REDUX_TSV_DIR, SampleType.DONOR, SequenceType.DNA],
 
         // Other tools
         ISOFOX_DIR: [FileType.ISOFOX_DIR, SampleType.TUMOR, SequenceType.RNA],

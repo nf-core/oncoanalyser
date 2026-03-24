@@ -52,7 +52,7 @@ class SampleSheet {
                     checkAndSetFileIndexes(meta_sample, log)
                     setCramPaths(meta_sample)
                     checkRawReadDataExists(meta_sample, group_id, log)
-                    checkReduxTsvsExist(meta_sample, log)
+                    setReduxTsvDirIfUnset(meta_sample)
 
                 }
 
@@ -291,48 +291,20 @@ class SampleSheet {
         }
     }
 
-    private static void checkReduxTsvsExist(meta_sample, log) {
+    private static void setReduxTsvDirIfUnset(meta_sample) {
 
         if (!meta_sample.containsKey(SampleMeta.FileType.BAM_REDUX)) {
+            return
+        }
+
+        if(meta_sample.containsKey(SampleMeta.FileType.REDUX_TSV_DIR)) {
             return
         }
 
         def bam_path = meta_sample[SampleMeta.FileType.BAM_REDUX]
         def bam_dir = bam_path.getParent().toUriString()
 
-        def sample_id = meta_sample.getOrDefault('longitudinal_sample_id', meta_sample['sample_id'])
-        def default_tsv_paths = [
-            (SampleMeta.FileType.REDUX_BQR_TSV)     : "${bam_dir}/${sample_id}.redux.bqr.tsv",
-            (SampleMeta.FileType.REDUX_DUP_FREQ_TSV): "${bam_dir}/${sample_id}.redux.duplicate_freq.tsv",
-            (SampleMeta.FileType.REDUX_JITTER_TSV)  : "${bam_dir}/${sample_id}.redux.jitter_params.tsv",
-            (SampleMeta.FileType.REDUX_MS_TABLE_TSV): "${bam_dir}/${sample_id}.redux.ms_table.tsv.gz",
-        ]
-
-        default_tsv_paths.keySet().each { file_type ->
-
-            def default_tsv_path = default_tsv_paths[file_type]
-            def provided_tsv_path = meta_sample[file_type]
-
-            def tsv_path = provided_tsv_path ? provided_tsv_path : default_tsv_path
-            tsv_path = nextflow.Nextflow.file(tsv_path)
-
-            if (!tsv_path.exists()) {
-
-                def message = "Missing filetype(${file_type}) path(${tsv_path}).\n" +
-                        "Make sure the REDUX BAM and TSV are in the same dir, or provide the TSV path explicitly in the sample sheet"
-
-                if(file_type === SampleMeta.FileType.REDUX_DUP_FREQ_TSV) {
-                    // Not required for core pipeline functionality (e.g. variant calling)
-                    log.warn message
-                    return
-                } else {
-                    log.error message
-                    Nextflow.exit(1)
-                }
-            }
-
-            meta_sample[file_type] = tsv_path
-        }
+        meta_sample[SampleMeta.FileType.REDUX_TSV_DIR] = bam_dir
     }
 
     private static void disallowDuplicateSampleIds(meta, log) {

@@ -8,13 +8,13 @@ workflow QSEE_METRICS {
     take:
     // Sample data
     ch_inputs                // channel: [mandatory] [ meta ]
-    ch_redux_tsvs_tumor      // channel: [mandatory] [ meta, redux_tsv, ... ]
-    ch_redux_tsvs_normal     // channel: [mandatory] [ meta, redux_tsv, ... ]
-    ch_bamtools_tumor        // channel: [mandatory] [ meta, metrics_dir ]
-    ch_bamtools_normal       // channel: [optional]  [ meta, metrics_dir ]
-    ch_cobalt                // channel: [optional]  [ meta, cobalt_dir ]
-    ch_esvee                 // channel: [optional]  [ meta, esvee_dir ]
-    ch_purple                // channel: [mandatory] [ meta, purple_dir ]
+    ch_redux_dir_tumor       // channel: [mandatory] [ meta, redux_dir ]
+    ch_redux_dir_normal      // channel: [mandatory] [ meta, redux_dir ]
+    ch_bamtools_dir_tumor    // channel: [mandatory] [ meta, metrics_dir ]
+    ch_bamtools_dir_normal   // channel: [optional]  [ meta, metrics_dir ]
+    ch_cobalt_dir            // channel: [optional]  [ meta, cobalt_dir ]
+    ch_esvee_dir             // channel: [optional]  [ meta, esvee_dir ]
+    ch_purple_dir            // channel: [mandatory] [ meta, purple_dir ]
 
     // Reference data
     driver_gene_panel        // channel: [mandatory] /path/to/driver_gene_panel
@@ -30,14 +30,16 @@ workflow QSEE_METRICS {
     ch_versions = Channel.empty()
 
     // Select and route inputs
-    // channel: { meta, redux_tsvs_tumor, redux_tsvs_normal, bamtools_tumor_dir, bamtools_normal_dir, cobalt_dir, esvee_dir, purple_dir }
+    // channel: { meta, redux_dir_tumor, redux_dir_normal, bamtools_tumor_dir, bamtools_normal_dir, cobalt_dir, esvee_dir, purple_dir }
     ch_inputs_sorted = WorkflowOncoanalyser.groupByMeta(
         flatten_mode: 'singletons_only',
-        ch_redux_tsvs_tumor, ch_redux_tsvs_normal,
-        ch_bamtools_tumor, ch_bamtools_normal,
-        ch_cobalt,
-        ch_esvee,
-        ch_purple,
+        ch_redux_dir_tumor,
+        ch_redux_dir_normal,
+        ch_bamtools_dir_tumor,
+        ch_bamtools_dir_normal,
+        ch_cobalt_dir,
+        ch_esvee_dir,
+        ch_purple_dir,
     )
         .map { meta,
             redux_tsvs_tumor, redux_tsvs_normal,

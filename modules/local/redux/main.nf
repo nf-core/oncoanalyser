@@ -23,17 +23,12 @@ process REDUX {
     val targeted_mode
 
     output:
-    tuple val(meta), path("redux_${meta.sample_id}/")                                          , emit: redux_dir
+    tuple val(meta), path("redux_${meta.sample_id}/")                                             , emit: dir
 
     tuple val(meta), path("redux_${meta.sample_id}/${meta.sample_id}.redux.bam"),
-                     path("redux_${meta.sample_id}/${meta.sample_id}.redux.bam.bai")           , emit: bam
+                     path("redux_${meta.sample_id}/${meta.sample_id}.redux.bam.bai")              , emit: bam
 
-    // NOTE(LN): REDUX TSV paths are in separate channels so that they can be provided explicitly from the sample sheet
-    tuple val(meta), path("redux_${meta.sample_id}/${meta.sample_id}.redux.bqr.tsv")           , emit: bqr_tsv
-    tuple val(meta), path("redux_${meta.sample_id}/${meta.sample_id}.redux.duplicate_freq.tsv"), emit: dup_freq_tsv, optional: true
-    tuple val(meta), path("redux_${meta.sample_id}/${meta.sample_id}.redux.jitter_params.tsv") , emit: jitter_tsv
-    tuple val(meta), path("redux_${meta.sample_id}/${meta.sample_id}.redux.ms_table.tsv.gz")   , emit: ms_table_tsv
-    tuple val(meta), path("redux_${meta.sample_id}/${meta.sample_id}.redux.msi_prediction.tsv"), emit: msi_tsv, optional: true
+    //tuple val(meta), path("redux_${meta.sample_id}/${meta.sample_id}.redux.*.tsv*", arity: '0..*'), emit: tsv
 
     path 'versions.yml', emit: versions
     path '.command.*'  , emit: command_files

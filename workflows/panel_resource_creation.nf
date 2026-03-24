@@ -125,8 +125,8 @@ workflow PANEL_RESOURCE_CREATION {
     ch_redux_dna_normal_bam_out = REDUX_PROCESSING.out.dna_normal
 
     // channel: [ meta, redux_tsv, ... ]
-    ch_redux_dna_tumor_tsv_out = REDUX_PROCESSING.out.dna_tumor_tsv
-    ch_redux_dna_normal_tsv_out = REDUX_PROCESSING.out.dna_normal_tsv
+    ch_redux_dna_tumor_dir_out = REDUX_PROCESSING.out.dna_tumor_dir
+    ch_redux_dna_normal_dir_out = REDUX_PROCESSING.out.dna_normal_dir
 
     //
     // MODULE: Run Isofox to analyse RNA data
@@ -202,8 +202,8 @@ workflow PANEL_RESOURCE_CREATION {
         ch_redux_dna_tumor_bam_out,
         ch_redux_dna_normal_bam_out,
         PlaceholderChannels.bamBai(ch_inputs),  // ch_donor_bam
-        ch_redux_dna_tumor_tsv_out,
-        ch_redux_dna_normal_tsv_out,
+        ch_redux_dna_tumor_dir_out,
+        ch_redux_dna_normal_dir_out,
         PlaceholderChannels.reduxTsvs(ch_inputs),  // ch_donor_tsv
         ref_data.genome_fasta,
         ref_data.genome_version,

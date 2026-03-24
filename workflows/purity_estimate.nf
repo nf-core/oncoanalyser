@@ -93,10 +93,10 @@ workflow PURITY_ESTIMATE {
     ch_redux_dna_normal_bam_out = Channel.empty()
     ch_redux_dna_donor_bam_out = Channel.empty()
 
-    // channel: [ meta, redux_tsv, ... ]
-    ch_redux_dna_tumor_tsv_out = Channel.empty()
-    ch_redux_dna_normal_tsv_out = Channel.empty()
-    ch_redux_dna_donor_tsv_out = Channel.empty()
+    // channel: [ meta, dir ]
+    ch_redux_dna_tumor_dir_out = Channel.empty()
+    ch_redux_dna_normal_dir_out = Channel.empty()
+    ch_redux_dna_donor_dir_out = Channel.empty()
 
     if (run_config.stages.redux) {
 
@@ -125,9 +125,9 @@ workflow PURITY_ESTIMATE {
         ch_redux_dna_normal_bam_out = ch_redux_dna_normal_bam_out.mix(REDUX_PROCESSING.out.dna_normal_bam)
         ch_redux_dna_donor_bam_out = ch_redux_dna_donor_bam_out.mix(REDUX_PROCESSING.out.dna_donor_bam)
 
-        ch_redux_dna_tumor_tsv_out = ch_redux_dna_tumor_tsv_out.mix(REDUX_PROCESSING.out.dna_tumor_tsv)
-        ch_redux_dna_normal_tsv_out = ch_redux_dna_normal_tsv_out.mix(REDUX_PROCESSING.out.dna_normal_tsv)
-        ch_redux_dna_donor_tsv_out = ch_redux_dna_donor_tsv_out.mix(REDUX_PROCESSING.out.dna_donor_tsv)
+        ch_redux_dna_tumor_dir_out = ch_redux_dna_tumor_dir_out.mix(REDUX_PROCESSING.out.dna_tumor_dir)
+        ch_redux_dna_normal_dir_out = ch_redux_dna_normal_dir_out.mix(REDUX_PROCESSING.out.dna_normal_dir)
+        ch_redux_dna_donor_dir_out = ch_redux_dna_donor_dir_out.mix(REDUX_PROCESSING.out.dna_donor_dir)
 
     } else {
 
@@ -135,9 +135,9 @@ workflow PURITY_ESTIMATE {
         ch_redux_dna_normal_bam_out = PlaceholderChannels.bamBai(ch_inputs)
         ch_redux_dna_donor_bam_out = PlaceholderChannels.bamBai(ch_inputs)
 
-        ch_redux_dna_tumor_tsv_out = PlaceholderChannels.reduxTsvs(ch_inputs)
-        ch_redux_dna_normal_tsv_out = PlaceholderChannels.reduxTsvs(ch_inputs)
-        ch_redux_dna_donor_tsv_out = PlaceholderChannels.reduxTsvs(ch_inputs)
+        ch_redux_dna_tumor_dir_out = PlaceholderChannels.reduxTsvs(ch_inputs)
+        ch_redux_dna_normal_dir_out = PlaceholderChannels.reduxTsvs(ch_inputs)
+        ch_redux_dna_donor_dir_out = PlaceholderChannels.reduxTsvs(ch_inputs)
 
     }
 
@@ -210,7 +210,7 @@ workflow PURITY_ESTIMATE {
             ch_inputs,
             PlaceholderChannels.toolDir(ch_inputs),  // ch_purple_dir
             ch_redux_dna_tumor_bam_out,
-            ch_redux_dna_tumor_tsv_out,
+            ch_redux_dna_tumor_dir_out,
             PlaceholderChannels.bamBai(ch_inputs),  // ch_tumor_rna_bam
             ref_data.genome_fasta,
             ref_data.genome_version,

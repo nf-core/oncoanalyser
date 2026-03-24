@@ -120,21 +120,17 @@ workflow REDUX_PROCESSING {
 
     ch_versions = ch_versions.mix(REDUX.out.versions)
 
-    // Combine TSV outputs into single channel for processing
-    // channel: [ meta, bam, bai, redux_tsv, ... ]
+    // Combine outputs into single channel for processing
+    // channel: [ meta, bam, bai, dir ]
     ch_redux_out = WorkflowOncoanalyser.groupByMeta(
         REDUX.out.bam,
-        REDUX.out.bqr_tsv,
-        REDUX.out.dup_freq_tsv,
-        REDUX.out.jitter_tsv,
-        REDUX.out.ms_table_tsv,
-        REDUX.out.msi_tsv,
+        REDUX.out.dir,
     )
 
-    // Sort into a tumor and normal channel
-    // channel: [ meta, bam, bai, redux_tsv, ... ]
+    // Split into sample type channels
+    // channel: [ meta, bam, bai, dir ]
     ch_redux_out_sorted = ch_redux_out
-        .branch { meta, bam, bai, bqr_tsv, dup_freq_tsv, jitter_tsv, ms_table, msi_tsv ->
+        .branch { meta, bam, bai, dir ->
             assert ['tumor', 'normal', 'donor'].contains(meta.sample_type)
             tumor: meta.sample_type == 'tumor'
             normal: meta.sample_type == 'normal'
@@ -142,22 +138,23 @@ workflow REDUX_PROCESSING {
             placeholder: true
         }
 
-    // Set outputs, restoring original meta, split by file type
-    // channel: [ meta, bam, bai, redux_tsv, ... ]
+    // Restore original meta, add placeholder channels for skipped samples, split by file type
+    // channel: bam: [ meta, bam, bai ]
+    // channel: dir: [ meta, dir ]
     def createOutputChannels = { ch_redux_out_sample_type, ch_sample_type_skip ->
 
-        def placeholder_bam = [[]] * PlaceholderChannels.N_ITEMS_BAM_BAI
-        def placeholder_tsv = [[]] * PlaceholderChannels.N_ITEMS_REDUX_TSVS
-        def placeholders = [*placeholder_bam, *placeholder_tsv]
+        def placeholder_bam_bai = [[]] * PlaceholderChannels.N_ITEMS_BAM_BAI
+        def placeholder_dir = [[]] * PlaceholderChannels.N_ITEMS_TOOL_DIR
+        def ch_output_skip = ch_sample_type_skip.map { meta -> [meta, *placeholder_bam_bai, *placeholder_dir] }
 
         return Channel.empty()
             .mix(
                 WorkflowOncoanalyser.restoreMeta(ch_redux_out_sample_type, ch_inputs),
-                ch_sample_type_skip.map { meta -> [meta, *placeholders] },
+                ch_output_skip,
             )
-            .multiMap { meta, bam, bai, bqr_tsv, dup_freq_tsv, jitter_tsv, ms_table_tsv, msi_tsv ->
+            .multiMap { meta, bam, bai, dir ->
                 bam: [meta, bam, bai]
-                tsv: [meta, bqr_tsv, dup_freq_tsv, jitter_tsv, ms_table_tsv, msi_tsv]
+                dir: [meta, dir]
             }
     }
 
@@ -170,9 +167,9 @@ workflow REDUX_PROCESSING {
     dna_normal_bam = ch_redux_normal_out.bam // channel: [ meta, bam, bai ]
     dna_donor_bam  = ch_redux_donor_out.bam  // channel: [ meta, bam, bai ]
 
-    dna_tumor_tsv  = ch_redux_tumor_out.tsv  // channel: [ meta, redux_tsv, ... ]
-    dna_normal_tsv = ch_redux_normal_out.tsv // channel: [ meta, redux_tsv, ... ]
-    dna_donor_tsv  = ch_redux_donor_out.tsv  // channel: [ meta, redux_tsv, ... ]
+    dna_tumor_dir  = ch_redux_tumor_out.dir  // channel: [ meta, dir ]
+    dna_normal_dir = ch_redux_normal_out.dir // channel: [ meta, dir ]
+    dna_donor_dir  = ch_redux_donor_out.dir  // channel: [ meta, dir ]
 
     versions       = ch_versions             // channel: [ versions.yml ]
 }

@@ -201,9 +201,9 @@ class Inputs {
     }
 
     // Files - REDUX
-    public static resolveReduxBamBai(redux_bam_bai, meta, sample_type) {
+    public static List resolveReduxBamBai(redux_bam_bai, meta, sample_type) {
 
-        def key_map = [
+        def file_key_map = [
             (SampleMeta.SampleType.TUMOR): [
                 bam: SampleMeta.INPUT.BAM_REDUX_DNA_TUMOR,
                 bai: SampleMeta.INPUT.BAI_DNA_TUMOR,
@@ -220,56 +220,46 @@ class Inputs {
             ],
         ]
 
-        def keys = key_map[sample_type]
+        def file_keys = file_key_map[sample_type]
 
         def (bam, bai) = redux_bam_bai
 
         return [
-            preferUserProvidedInput(bam, meta, keys.bam),
-            preferPipelineOutput(bai, meta, keys.bai),
+            preferUserProvidedInput(bam, meta, file_keys.bam),
+            preferPipelineOutput(bai, meta, file_keys.bai),
         ]
     }
 
-    public static resolveReduxTsvFiles(redux_tsvs, meta, sample_type) {
+    public static List resolveReduxTsvFiles(redux_dir, meta, sample_type) {
 
-        def key_map = [
-            (SampleMeta.SampleType.TUMOR): [
-                bqr_tsv: SampleMeta.INPUT.REDUX_BQR_TSV_TUMOR,
-                dup_freq_tsv: SampleMeta.INPUT.REDUX_DUP_FREQ_TSV_TUMOR,
-                jitter_tsv: SampleMeta.INPUT.REDUX_JITTER_TSV_TUMOR,
-                ms_table_tsv: SampleMeta.INPUT.REDUX_MS_TABLE_TSV_TUMOR,
-                msi_tsv: SampleMeta.INPUT.REDUX_MSI_TSV_TUMOR,
-            ],
+        // NOTE(LN): Get the REDUX TSV files as a glob
+        //
+        // This avoids passing REDUX dir (containing the BAM and TSV files) to downstream processes because in
+        // cloud environments, this would mean the BAMs are copied to the VM running that downstream process.
+        // When the BAMs are not needed as input, this would result in the VM requiring more disk space than necessary.
 
-            (SampleMeta.SampleType.NORMAL): [
-                bqr_tsv: SampleMeta.INPUT.REDUX_BQR_TSV_NORMAL,
-                dup_freq_tsv: SampleMeta.INPUT.REDUX_DUP_FREQ_TSV_NORMAL,
-                jitter_tsv: SampleMeta.INPUT.REDUX_JITTER_TSV_NORMAL,
-                ms_table_tsv: SampleMeta.INPUT.REDUX_MS_TABLE_TSV_NORMAL,
-                msi_tsv: null
-
-            ],
-
-            (SampleMeta.SampleType.DONOR): [
-                bqr_tsv: SampleMeta.INPUT.REDUX_BQR_TSV_DONOR,
-                dup_freq_tsv: SampleMeta.INPUT.REDUX_DUP_FREQ_TSV_DONOR,
-                jitter_tsv: SampleMeta.INPUT.REDUX_JITTER_TSV_DONOR,
-                ms_table_tsv: SampleMeta.INPUT.REDUX_MS_TABLE_TSV_DONOR,
-                msi_tsv: null
-            ],
+        def file_key_map = [
+            (SampleMeta.SampleType.TUMOR): SampleMeta.INPUT.REDUX_TSV_DIR_TUMOR,
+            (SampleMeta.SampleType.NORMAL): SampleMeta.INPUT.REDUX_TSV_DIR_NORMAL,
+            (SampleMeta.SampleType.DONOR): SampleMeta.INPUT.REDUX_TSV_DIR_DONOR,
         ]
 
-        def keys = key_map[sample_type]
+        def file_key = file_key_map[sample_type]
 
-        def (bqr_tsv, dup_freq_tsv, jitter_tsv, ms_table_tsv, msi_tsv) = redux_tsvs
+        def unwrapped_redux_dir = (redux_dir instanceof List && redux_dir.size() == 1) ? redux_dir[0] : redux_dir
 
-        return [
-            preferPipelineOutput(bqr_tsv, meta, keys.bqr_tsv),
-            preferPipelineOutput(dup_freq_tsv, meta, keys.dup_freq_tsv),
-            preferPipelineOutput(jitter_tsv, meta, keys.jitter_tsv),
-            preferPipelineOutput(ms_table_tsv, meta, keys.ms_table_tsv),
-            keys.msi_tsv ? preferPipelineOutput(msi_tsv, meta, keys.msi_tsv) : [],
-        ].findAll { it != [] }
+        def selected_redux_dir = preferPipelineOutput(unwrapped_redux_dir, meta, file_key)
+        if (!selected_redux_dir)
+            return []
+
+        def meta_sample = meta.getOrDefault([sample_type, SampleMeta.SequenceType.DNA], [:])
+        def sample_id = meta_sample.getOrDefault('longitudinal_sample_id', meta_sample['sample_id'])
+
+        def redux_tsvs = nextflow.Nextflow.files("${selected_redux_dir}/${sample_id}.redux.*.tsv*")
+        if (!redux_tsvs)
+            return []
+
+        return redux_tsvs
     }
 
     // Misc
@@ -278,9 +268,9 @@ class Inputs {
         def result = []
         def (file_type, sample_types, sequence_type) = key
 
-        for (key_sample in [sample_types, sequence_type].combinations()) {
-            if (meta.containsKey(key_sample) && meta[key_sample].containsKey(file_type)) {
-                result = meta[key_sample].get(file_type)
+        for (sample_key in [sample_types, sequence_type].combinations()) {
+            if (meta.containsKey(sample_key) && meta[sample_key].containsKey(file_type)) {
+                result = meta[sample_key].get(file_type)
                 break
             }
         }

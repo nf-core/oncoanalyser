@@ -13,10 +13,10 @@ class PlaceholderChannels {
         }
     }
 
-    public static final N_ITEMS_TOOL_DIR = 1   // [ meta, dir ]
-    public static final N_ITEMS_BAM_BAI = 2    // [ meta, bam, bai ]
-    public static final N_ITEMS_VCF_TBI = 2    // [ meta, vcf, tbi ]
-    public static final N_ITEMS_REDUX_TSVS = 5 // [ meta, bqr_tsv, dup_freq_tsv, jitter_tsv, ms_table_tsv, msi_tsv ]
+    public static final N_ITEMS_TOOL_DIR = 1 // [ meta, dir ]
+    public static final N_ITEMS_BAM_BAI = 2 // [ meta, bam, bai ]
+    public static final N_ITEMS_VCF_TBI = 2 // [ meta, vcf, tbi ]
+    public static final N_ITEMS_REDUX_TSV_LIST = 1 // [ meta, [redux_tsv, ...] ]
 
     public static toolDir(ch) {
         return createPlaceholderChannel(ch, N_ITEMS_TOOL_DIR)
@@ -31,6 +31,6 @@ class PlaceholderChannels {
     }
 
     public static reduxTsvs(ch) {
-        return createPlaceholderChannel(ch, N_ITEMS_REDUX_TSVS)
+        return createPlaceholderChannel(ch, N_ITEMS_REDUX_TSV_LIST)
     }
 }
