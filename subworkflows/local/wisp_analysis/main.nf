@@ -34,17 +34,12 @@ workflow WISP_ANALYSIS {
     )
         .branch { meta, amber_dir, cobalt_dir, sage_append_dir ->
 
-            primary_purple_dir = Inputs.getInput(meta, SampleMeta.INPUT.PURPLE_DIR)
-            primary_amber_dir = Inputs.getInput(meta, SampleMeta.INPUT.AMBER_DIR)
+            def primary_purple_dir = Inputs.getInput(meta, SampleMeta.INPUT.PURPLE_DIR)
+            def primary_amber_dir = Inputs.getInput(meta, SampleMeta.INPUT.AMBER_DIR)
 
-            def purity_estimate_mode = RunModes.PurityEstimate.fromString(params.purity_estimate_mode)
-
-            def runnable
-            if (purity_estimate_mode === RunModes.PurityEstimate.WGTS) {
-                runnable = primary_purple_dir && primary_amber_dir && sage_append_dir && amber_dir && cobalt_dir
-            } else {
-                runnable = primary_purple_dir && sage_append_dir
-            }
+            def runnable = targeted_mode
+                ? primary_purple_dir && sage_append_dir
+                : primary_purple_dir && primary_amber_dir && sage_append_dir && amber_dir && cobalt_dir
 
             runnable: runnable
                 return [meta, primary_purple_dir, primary_amber_dir, amber_dir, cobalt_dir, sage_append_dir]
