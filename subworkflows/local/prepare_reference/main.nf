@@ -254,9 +254,9 @@ workflow PREPARE_REFERENCE {
         // Set custom driver gene panel
         if (params.driver_gene_panel) {
 
-            def run_mode = RunModes.Main.fromString(params.mode)
+            def run_mode = RunModes.Pipeline.fromString(params.mode)
 
-            if (run_mode !== RunModes.Main.PANEL_RESOURCE_CREATION) {
+            if (run_mode !== RunModes.Pipeline.PANEL_RESOURCE_CREATION) {
                 log.info "Using custom driver gene panel: ${params.driver_gene_panel}"
             }
 
@@ -350,9 +350,9 @@ def getConfigForPipelineRun(inputs, run_config) {
         require_bwamem2_index: has_dna_fastq && run_config.stages.alignment,
         require_star_index: has_rna_fastq && run_config.stages.alignment,
 
-        require_gridss_index: has_dna && run_config.mode === RunModes.Main.WGTS && run_config.stages.virusinterpreter,
+        require_gridss_index: has_dna && run_config.mode === RunModes.Pipeline.WGTS && run_config.stages.virusinterpreter,
         require_hmftools_data: true,
-        require_panel_data: run_config.mode === RunModes.Main.TARGETED,
+        require_panel_data: run_config.mode === RunModes.Pipeline.TARGETED,
     ]
 }
 

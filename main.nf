@@ -75,11 +75,11 @@ include { WGTS                    } from './workflows/wgts'
 workflow NFCORE_ONCOANALYSER {
 
     // Get run mode
-    run_mode = RunModes.Main.fromString(params.mode)
+    run_mode = RunModes.Pipeline.fromString(params.mode)
 
     // Run selected workflow
     // NOTE(SW): prepare reference is checked early as params.input is not required
-    if (run_mode === RunModes.Main.PREPARE_REFERENCE)  {
+    if (run_mode === RunModes.Pipeline.PREPARE_REFERENCE)  {
         PREPARE_REFERENCE()
     } else {
         // Parse and validate inputs
@@ -90,13 +90,13 @@ workflow NFCORE_ONCOANALYSER {
         Params.validateRunSpecificParams(params, run_config, log)
 
         // Run requested workflow
-        if (run_mode === RunModes.Main.WGTS) {
+        if (run_mode === RunModes.Pipeline.WGTS) {
             WGTS(inputs, run_config)
-        } else if (run_mode === RunModes.Main.TARGETED) {
+        } else if (run_mode === RunModes.Pipeline.TARGETED) {
             TARGETED(inputs, run_config)
-        } else if (run_mode === RunModes.Main.PURITY_ESTIMATE) {
+        } else if (run_mode === RunModes.Pipeline.PURITY_ESTIMATE) {
             PURITY_ESTIMATE(inputs, run_config)
-        } else if (run_mode === RunModes.Main.PANEL_RESOURCE_CREATION) {
+        } else if (run_mode === RunModes.Pipeline.PANEL_RESOURCE_CREATION) {
             PANEL_RESOURCE_CREATION(inputs, run_config)
         } else {
             log.error("received bad run mode: ${run_mode}")
