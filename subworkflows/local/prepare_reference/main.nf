@@ -44,6 +44,9 @@ workflow PREPARE_REFERENCE {
         ? getConfigForPrepRefOnly(params, log)
         : getConfigForPipelineRun(inputs, run_config)
 
+    def has_alt_contigs = params.genome_type == RefGenome.Type.ALT.getName()
+    def has_alt_file = params.containsKey('ref_data_genome_alt') && params.ref_data_genome_alt
+
     //
     // Set .fasta and main genome indexes, create if required
     //
@@ -95,6 +98,9 @@ workflow PREPARE_REFERENCE {
 
         if (!params.ref_data_genome_bwamem2_index) {
 
+            if(has_alt_contigs && !has_alt_file)
+                error "For ref genomes with ALT contigs, an .alt file is required when building bwa-mem2 indexes"
+
             BWAMEM2_INDEX(
                 ch_genome_fasta,
                 params.ref_data_genome_alt ? file(params.ref_data_genome_alt) : [],
@@ -124,6 +130,9 @@ workflow PREPARE_REFERENCE {
     if (prep_config.require_gridss_index) {
 
         if (!params.ref_data_genome_gridss_index) {
+
+            if(has_alt_contigs && !has_alt_file)
+                error "For ref genomes with ALT contigs, an .alt file is required when building GRIDSS indexes"
 
             BWA_INDEX(
                 ch_genome_fasta,
@@ -162,6 +171,12 @@ workflow PREPARE_REFERENCE {
     if (prep_config.require_star_index) {
 
         if (!params.ref_data_genome_star_index) {
+
+            if(has_alt_contigs)
+                error "Refusing to create the STAR index for a ref genome with ALT contigs. Please review https://github.com/alexdobin/STAR docs or contact us on Slack."
+
+            if(!params.ref_data_genome_gtf)
+                error "Creating a STAR index requires the appropriate genome transcript annotations as a GTF file. Please contact us on Slack for further information."
 
             STAR_GENOMEGENERATE(
                 ch_genome_fasta,
