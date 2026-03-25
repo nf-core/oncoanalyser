@@ -22,8 +22,8 @@ workflow PREPARE_REFERENCE {
     // Stage in reference data as requested
     STAGE_REFERENCE(
         true, // prepare_reference_only
-        [:],  // run_config
         [:],  // inputs (sample metadata)
+        [:],  // stages
     )
 
     ch_versions = ch_versions.mix(STAGE_REFERENCE.out.versions)

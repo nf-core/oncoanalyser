@@ -288,23 +288,6 @@ class Params {
         }
     }
 
-    public static getRunConfig(params, log) {
-
-        def run_mode = RunModes.Pipeline.fromString(params.mode)
-
-        def stages = RunStage.getValidatedRunStages(
-            params.processes_include,
-            params.processes_exclude,
-            params.processes_manual,
-            log,
-        )
-
-        return [
-            mode: run_mode,
-            stages: stages,
-        ]
-    }
-
     public static void createStubPlaceholders(params) {
 
         def fps = [

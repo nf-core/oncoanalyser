@@ -29,8 +29,8 @@ include { WRITE_REFERENCE_DATA as WRITE_PANEL_DATA      } from '../../../modules
 workflow PREPARE_REFERENCE {
     take:
     prepare_reference_only // boolean: [mandatory] prepare reference only, do not run pipeline
-    run_config             // map:     [optional]  pipeline run configuration
     inputs                 // map:     [optional]  sample metadata
+    stages                 // map:     [optional]  processes to run
 
     main:
     // Channel for version.yml files
@@ -40,9 +40,11 @@ workflow PREPARE_REFERENCE {
     //
     // Determine which resources need to be prepared
     //
-    prep_config = prepare_reference_only
+    def pipeline_mode = RunModes.Pipeline.fromString(params.mode)
+
+    def prep_config = prepare_reference_only
         ? getConfigForPrepRefOnly(params, log)
-        : getConfigForPipelineRun(inputs, run_config)
+        : getConfigForPipelineRun(inputs, pipeline_mode, stages)
 
     def has_alt_contigs = params.genome_type == RefGenome.Type.ALT.getName()
     def has_alt_file = params.containsKey('ref_data_genome_alt') && params.ref_data_genome_alt
@@ -269,9 +271,7 @@ workflow PREPARE_REFERENCE {
         // Set custom driver gene panel
         if (params.driver_gene_panel) {
 
-            def run_mode = RunModes.Pipeline.fromString(params.mode)
-
-            if (run_mode !== RunModes.Pipeline.PANEL_RESOURCE_CREATION) {
+            if (pipeline_mode !== RunModes.Pipeline.PANEL_RESOURCE_CREATION) {
                 log.info "Using custom driver gene panel: ${params.driver_gene_panel}"
             }
 
@@ -350,7 +350,7 @@ workflow PREPARE_REFERENCE {
     versions             = ch_versions                     // channel: [ versions.yml ]
 }
 
-def getConfigForPipelineRun(inputs, run_config) {
+def getConfigForPipelineRun(inputs, pipeline_mode, stages) {
 
     def has_dna = inputs.any { Inputs.hasTumorDna(it) }
     def has_rna_fastq = inputs.any { Inputs.hasTumorRnaFastq(it) }
@@ -362,12 +362,12 @@ def getConfigForPipelineRun(inputs, run_config) {
         require_dict: true,
         require_img: true,
 
-        require_bwamem2_index: has_dna_fastq && run_config.stages.alignment,
-        require_star_index: has_rna_fastq && run_config.stages.alignment,
+        require_bwamem2_index: has_dna_fastq && stages.alignment,
+        require_star_index: has_rna_fastq && stages.alignment,
 
-        require_gridss_index: has_dna && run_config.mode === RunModes.Pipeline.WGTS && run_config.stages.virusinterpreter,
+        require_gridss_index: has_dna && pipeline_mode === RunModes.Pipeline.WGTS && stages.virusinterpreter,
         require_hmftools_data: true,
-        require_panel_data: run_config.mode === RunModes.Pipeline.TARGETED,
+        require_panel_data: pipeline_mode === RunModes.Pipeline.TARGETED,
     ]
 }
 

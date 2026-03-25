@@ -27,7 +27,6 @@ include { softwareVersionsToYAML } from '../subworkflows/nf-core/utils_nfcore_pi
 workflow PANEL_RESOURCE_CREATION {
     take:
     inputs
-    run_config
 
     main:
     // Check input path parameters to see if they exist

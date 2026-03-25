@@ -73,31 +73,34 @@ include { WGTS                    } from './workflows/wgts'
 
 workflow NFCORE_ONCOANALYSER {
 
-    // Get run mode
-    run_mode = RunModes.Pipeline.fromString(params.mode)
+    def pipeline_mode = RunModes.Pipeline.fromString(params.mode)
 
     // Run selected workflow
     // NOTE(SW): prepare reference is checked early as params.input is not required
-    if (run_mode === RunModes.Pipeline.PREPARE_REFERENCE)  {
+    if (pipeline_mode === RunModes.Pipeline.PREPARE_REFERENCE)  {
         PREPARE_REFERENCE()
     } else {
-        // Parse and validate inputs
 
-        inputs = SampleSheet.parseInput(params.input, workflow.stubRun, run_mode, log)
+        def inputs = SampleSheet.parseInput(params.input, workflow.stubRun, pipeline_mode, log)
 
-        run_config = Params.getRunConfig(params, log)
+        def stages = RunStage.getValidatedRunStages(
+           params.processes_include,
+           params.processes_exclude,
+           params.processes_manual,
+           log,
+        )
 
         // Run requested workflow
-        if (run_mode === RunModes.Pipeline.WGTS) {
-            WGTS(inputs, run_config)
-        } else if (run_mode === RunModes.Pipeline.TARGETED) {
-            TARGETED(inputs, run_config)
-        } else if (run_mode === RunModes.Pipeline.PURITY_ESTIMATE) {
-            PURITY_ESTIMATE(inputs, run_config)
-        } else if (run_mode === RunModes.Pipeline.PANEL_RESOURCE_CREATION) {
-            PANEL_RESOURCE_CREATION(inputs, run_config)
+        if (pipeline_mode === RunModes.Pipeline.WGTS) {
+            WGTS(inputs, stages)
+        } else if (pipeline_mode === RunModes.Pipeline.TARGETED) {
+            TARGETED(inputs, stages)
+        } else if (pipeline_mode === RunModes.Pipeline.PURITY_ESTIMATE) {
+            PURITY_ESTIMATE(inputs, stages)
+        } else if (pipeline_mode === RunModes.Pipeline.PANEL_RESOURCE_CREATION) {
+            PANEL_RESOURCE_CREATION(inputs)
         } else {
-            log.error("received bad run mode: ${run_mode}")
+            log.error("received bad pipeline mode: ${pipeline_mode}")
             Nextflow.exit(1)
         }
     }

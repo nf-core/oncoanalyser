@@ -23,7 +23,7 @@ include { softwareVersionsToYAML } from '../subworkflows/nf-core/utils_nfcore_pi
 workflow PURITY_ESTIMATE {
     take:
     inputs
-    run_config
+    stages
 
     main:
     // Create channel for versions
@@ -35,15 +35,15 @@ workflow PURITY_ESTIMATE {
     ch_inputs = Channel.fromList(inputs)
 
     // Get run mode of purity estimate mode
-    purity_estimate_run_mode = RunModes.PurityEstimate.fromString(params.purity_estimate_mode)
-    targeted_mode = purity_estimate_run_mode === RunModes.PurityEstimate.TARGETED
-    wgts_mode = purity_estimate_run_mode === RunModes.PurityEstimate.WGTS // NOTE(LN): Redundant variable, but makes the if clauses clearer
+    def purity_estimate_run_mode = RunModes.PurityEstimate.fromString(params.purity_estimate_mode)
+    def targeted_mode = purity_estimate_run_mode === RunModes.PurityEstimate.TARGETED
+    def wgts_mode = purity_estimate_run_mode === RunModes.PurityEstimate.WGTS // NOTE(LN): Redundant variable, but makes the if clauses clearer
 
     // Set up reference data, assign more human readable variables
     PREPARE_REFERENCE(
         false, // prepare_reference_only
-        run_config,
         inputs,
+        stages,
     )
     ref_data = PREPARE_REFERENCE.out
     hmf_data = PREPARE_REFERENCE.out.hmf_data
@@ -58,7 +58,7 @@ workflow PURITY_ESTIMATE {
     ch_align_dna_normal_out = Channel.empty()
     ch_align_dna_donor_out = Channel.empty()
     ch_align_rna_tumor_out = Channel.empty()
-    if (run_config.stages.alignment) {
+    if (stages.alignment) {
 
         READ_ALIGNMENT_DNA(
             ch_inputs,
@@ -98,7 +98,7 @@ workflow PURITY_ESTIMATE {
     ch_redux_dna_normal_dir_out = Channel.empty()
     ch_redux_dna_donor_dir_out = Channel.empty()
 
-    if (run_config.stages.redux) {
+    if (stages.redux) {
 
         REDUX_PROCESSING(
             ch_inputs,
@@ -146,7 +146,7 @@ workflow PURITY_ESTIMATE {
     //
     // channel: [ meta, amber_dir ]
     ch_amber_out = Channel.empty()
-    if (run_config.stages.amber && wgts_mode) {
+    if (stages.amber && wgts_mode) {
 
         tumor_min_depth = wgts_mode ? 1 : []
 
@@ -176,7 +176,7 @@ workflow PURITY_ESTIMATE {
     //
     // channel: [ meta, cobalt_dir ]
     ch_cobalt_out = Channel.empty()
-    if (run_config.stages.cobalt && wgts_mode) {
+    if (stages.cobalt && wgts_mode) {
 
         COBALT_PROFILING(
             ch_inputs,
@@ -204,7 +204,7 @@ workflow PURITY_ESTIMATE {
     //
     // channel: [ meta, sage_append_dir ]
     ch_sage_somatic_append_out = Channel.empty()
-    if (run_config.stages.orange) {
+    if (stages.orange) {
 
         SAGE_APPEND(
             ch_inputs,
@@ -233,7 +233,7 @@ workflow PURITY_ESTIMATE {
     //
     // SUBWORKFLOW: Run WISP to estimate tumor purity
     //
-    if (run_config.stages.wisp) {
+    if (stages.wisp) {
 
         WISP_ANALYSIS(
             ch_inputs,

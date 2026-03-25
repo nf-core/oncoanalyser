@@ -37,7 +37,7 @@ include { softwareVersionsToYAML } from '../subworkflows/nf-core/utils_nfcore_pi
 workflow TARGETED {
     take:
     inputs
-    run_config
+    stages
 
     main:
     // Check input path parameters to see if they exist
@@ -60,8 +60,8 @@ workflow TARGETED {
     // Set up reference data, assign more human readable variables
     PREPARE_REFERENCE(
         false, // prepare_reference_only
-        run_config,
         inputs,
+        stages,
     )
     ref_data = PREPARE_REFERENCE.out
     hmf_data = PREPARE_REFERENCE.out.hmf_data
@@ -77,7 +77,7 @@ workflow TARGETED {
     ch_align_dna_normal_out = Channel.empty()
     ch_align_dna_donor_out = Channel.empty()
     ch_align_rna_tumor_out = Channel.empty()
-    if (run_config.stages.alignment) {
+    if (stages.alignment) {
 
         READ_ALIGNMENT_DNA(
             ch_inputs,
@@ -127,7 +127,7 @@ workflow TARGETED {
     ch_redux_dna_normal_dir_out = Channel.empty()
     ch_redux_dna_donor_dir_out = Channel.empty()
 
-    if (run_config.stages.redux) {
+    if (stages.redux) {
 
         REDUX_PROCESSING(
             ch_inputs,
@@ -176,7 +176,7 @@ workflow TARGETED {
     // channel: [ meta, metrics ]
     ch_bamtools_somatic_out = Channel.empty()
     ch_bamtools_germline_out = Channel.empty()
-    if (run_config.stages.bamtools) {
+    if (stages.bamtools) {
 
         BAMTOOLS_METRICS(
             ch_inputs,
@@ -214,7 +214,7 @@ workflow TARGETED {
 
     // channel: [ meta, isofox_dir ]
     ch_isofox_out = Channel.empty()
-    if (run_config.stages.isofox) {
+    if (stages.isofox) {
 
         ISOFOX_QUANTIFICATION(
             ch_inputs,
@@ -248,7 +248,7 @@ workflow TARGETED {
     //
     // channel: [ meta, amber_dir ]
     ch_amber_out = Channel.empty()
-    if (run_config.stages.amber) {
+    if (stages.amber) {
 
         AMBER_PROFILING(
             ch_inputs,
@@ -275,7 +275,7 @@ workflow TARGETED {
     //
     // channel: [ meta, cobalt_dir ]
     ch_cobalt_out = Channel.empty()
-    if (run_config.stages.cobalt) {
+    if (stages.cobalt) {
 
         COBALT_PROFILING(
             ch_inputs,
@@ -303,7 +303,7 @@ workflow TARGETED {
     //
     // channel: [ meta, esvee_dir ]
     ch_esvee_out = Channel.empty()
-    if (run_config.stages.esvee) {
+    if (stages.esvee) {
 
         ESVEE_CALLING(
             ch_inputs,
@@ -340,7 +340,7 @@ workflow TARGETED {
     // channel: [ meta, sage_dir ]
     ch_sage_germline_dir_out = Channel.empty()
     ch_sage_somatic_dir_out = Channel.empty()
-    if (run_config.stages.sage) {
+    if (stages.sage) {
 
         SAGE_CALLING(
             ch_inputs,
@@ -385,7 +385,7 @@ workflow TARGETED {
     // channel: [ meta, pave_dir ]
     ch_pave_germline_out = Channel.empty()
     ch_pave_somatic_out = Channel.empty()
-    if (run_config.stages.pave) {
+    if (stages.pave) {
 
         PAVE_ANNOTATION(
             ch_inputs,
@@ -423,7 +423,7 @@ workflow TARGETED {
     //
     // channel: [ meta, purple_dir ]
     ch_purple_out = Channel.empty()
-    if (run_config.stages.purple) {
+    if (stages.purple) {
 
         PURPLE_CALLING(
             ch_inputs,
@@ -462,7 +462,7 @@ workflow TARGETED {
     //
     // channel: [ meta, qsee_dir ]
     ch_qsee_out = Channel.empty()
-    if (run_config.stages.qsee) {
+    if (stages.qsee) {
 
         QSEE_METRICS(
             ch_inputs,
@@ -495,7 +495,7 @@ workflow TARGETED {
     // channel: [ meta, sage_append_vcf ]
     ch_sage_somatic_append_out = Channel.empty()
     ch_sage_germline_append_out = Channel.empty()
-    if (run_config.stages.orange) {
+    if (stages.orange) {
 
         SAGE_APPEND(
             ch_inputs,
@@ -527,7 +527,7 @@ workflow TARGETED {
     //
     // SUBWORKFLOW: Visualise SAGE variants
     //
-    if (run_config.stages.sage_vis) {
+    if (stages.sage_vis) {
 
         SAGE_PLOTTING(
             ch_inputs,
@@ -558,7 +558,7 @@ workflow TARGETED {
     // channel: [ meta, linx_annotation_dir ]
     ch_linx_somatic_out = Channel.empty()
     ch_linx_germline_out = Channel.empty()
-    if (run_config.stages.linx) {
+    if (stages.linx) {
 
         LINX_ANNOTATION(
             ch_inputs,
@@ -586,7 +586,7 @@ workflow TARGETED {
     //
     // channel: [ meta, linx_visualiser_dir ]
     ch_linx_somatic_visualiser_dir_out = Channel.empty()
-    if (run_config.stages.linx) {
+    if (stages.linx) {
 
         LINX_PLOTTING(
             ch_inputs,
@@ -611,7 +611,7 @@ workflow TARGETED {
     //
     // SUBWORKFLOW: Run CIDER to identify and annotate CDR3 sequences of IG and TCR loci
     //
-    if (run_config.stages.cider) {
+    if (stages.cider) {
 
         CIDER_CALLING(
             ch_inputs,
@@ -632,7 +632,7 @@ workflow TARGETED {
     //
     // channel: [ meta, lilac_dir ]
     ch_lilac_out = Channel.empty()
-    if (run_config.stages.lilac) {
+    if (stages.lilac) {
 
         LILAC_CALLING(
             ch_inputs,
@@ -663,7 +663,7 @@ workflow TARGETED {
     //
     // channel: [ meta, peach_dir ]
     ch_peach_out = Channel.empty()
-    if (run_config.stages.peach) {
+    if (stages.peach) {
 
         PEACH_CALLING(
             ch_inputs,
@@ -686,7 +686,7 @@ workflow TARGETED {
     //
     // SUBWORKFLOW: Run ORANGE to generate static PDF report
     //
-    if (run_config.stages.orange) {
+    if (stages.orange) {
 
         // Create placeholder channels for empty remaining channels
         ch_chord_out = PlaceholderChannels.toolDir(ch_inputs)
