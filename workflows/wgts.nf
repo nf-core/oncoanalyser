@@ -434,9 +434,10 @@ workflow WGTS {
             ch_inputs,
             ch_amber_out,
             ch_cobalt_out,
+            ch_esvee_out,
             ch_pave_somatic_out,
             ch_pave_germline_out,
-            ch_esvee_out,
+            [],  // redux_dir_tumor
             ref_data.genome_fasta,
             ref_data.genome_version,
             ref_data.genome_fai,
@@ -449,7 +450,6 @@ workflow WGTS {
             hmf_data.germline_amp_del_freq,
             [],  // target_region_bed
             [],  // target_region_ratios
-            [],  // target_region_msi_indels
         )
 
         ch_versions = ch_versions.mix(PURPLE_CALLING.out.versions)

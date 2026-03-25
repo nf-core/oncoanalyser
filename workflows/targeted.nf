@@ -429,9 +429,10 @@ workflow TARGETED {
             ch_inputs,
             ch_amber_out,
             ch_cobalt_out,
+            ch_esvee_out,
             ch_pave_somatic_out,
             ch_pave_germline_out,
-            ch_esvee_out,
+            ch_redux_dna_tumor_dir_out,
             ref_data.genome_fasta,
             ref_data.genome_version,
             ref_data.genome_fai,
@@ -444,7 +445,6 @@ workflow TARGETED {
             hmf_data.germline_amp_del_freq,
             panel_data.target_region_bed,
             panel_data.target_region_ratios,
-            panel_data.target_region_msi_indels,
         )
 
         ch_versions = ch_versions.mix(PURPLE_CALLING.out.versions)

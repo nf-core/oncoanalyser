@@ -8,11 +8,12 @@ workflow PURPLE_CALLING {
     take:
     // Sample data
     ch_inputs                    // channel: [mandatory] [ meta ]
-    ch_amber                     // channel: [mandatory] [ meta, amber_dir ]
-    ch_cobalt                    // channel: [mandatory] [ meta, cobalt_dir ]
-    ch_pave_somatic              // channel: [mandatory] [ meta, pave_dir ]
-    ch_pave_germline             // channel: [mandatory] [ meta, pave_dir ]
-    ch_esvee                     // channel: [mandatory] [ meta, esvee_dir ]
+    ch_amber_dir                 // channel: [mandatory] [ meta, amber_dir ]
+    ch_cobalt_dir                // channel: [mandatory] [ meta, cobalt_dir ]
+    ch_esvee_dir                 // channel: [mandatory] [ meta, esvee_dir ]
+    ch_pave_somatic_dir          // channel: [mandatory] [ meta, pave_dir ]
+    ch_pave_germline_dir         // channel: [mandatory] [ meta, pave_dir ]
+    ch_redux_tumor_dir           // channel: [optional]  [ meta, redux_dir ]
 
     // Reference data
     genome_fasta                 // channel: [mandatory] /path/to/genome_fasta
@@ -27,7 +28,6 @@ workflow PURPLE_CALLING {
     germline_amp_del_freq        // channel: [optional]  /path/to/germline_amp_del_freq
     target_region_bed            // channel: [optional]  /path/to/target_region_bed
     target_region_ratios         // channel: [optional]  /path/to/target_region_ratios
-    target_region_msi_indels     // channel: [optional]  /path/to/target_region_msi_indels
 
     main:
     // Channel for version.yml files
@@ -35,30 +35,33 @@ workflow PURPLE_CALLING {
     ch_versions = Channel.empty()
 
     // Select input sources
-    // channel: { meta, amber_dir, cobalt_dir, pave_somatic_dir, pave_germline_dir, esvee_dir }
+    // channel: { meta, amber_dir, cobalt_dir, esvee_dir, pave_somatic_dir, pave_germline_dir, redux_tumor_dir }
     ch_inputs_selected = WorkflowOncoanalyser.groupByMeta(
-        ch_amber,
-        ch_cobalt,
-        ch_pave_somatic,
-        ch_pave_germline,
-        ch_esvee,
+        flatten_mode: 'singletons_only',
+        ch_amber_dir,
+        ch_cobalt_dir,
+        ch_esvee_dir,
+        ch_pave_somatic_dir,
+        ch_pave_germline_dir,
+        ch_redux_tumor_dir,
     )
-        .map { meta, amber_dir, cobalt_dir, pave_somatic_dir, pave_germline_dir, esvee_dir ->
+        .map { meta, amber_dir, cobalt_dir, esvee_dir, pave_somatic_dir, pave_germline_dir, redux_tumor_dir ->
 
             def inputs = [:]
 
             inputs.meta              = meta
             inputs.amber_dir         = Inputs.preferUserProvidedInput(amber_dir, meta, SampleMeta.INPUT.AMBER_DIR)
             inputs.cobalt_dir        = Inputs.preferUserProvidedInput(cobalt_dir, meta, SampleMeta.INPUT.COBALT_DIR)
+            inputs.esvee_dir         = Inputs.preferUserProvidedInput(esvee_dir, meta, SampleMeta.INPUT.ESVEE_DIR)
             inputs.pave_somatic_dir  = Inputs.preferUserProvidedInput(pave_somatic_dir, meta, SampleMeta.INPUT.PAVE_DIR_TUMOR)
             inputs.pave_germline_dir = Inputs.preferUserProvidedInput(pave_germline_dir, meta, SampleMeta.INPUT.PAVE_DIR_NORMAL)
-            inputs.esvee_dir         = Inputs.preferUserProvidedInput(esvee_dir, meta, SampleMeta.INPUT.ESVEE_DIR)
+            inputs.redux_tumor_tsvs  = Inputs.resolveReduxTsvFiles(redux_tumor_dir, meta, SampleMeta.SampleType.TUMOR)
 
             return inputs
         }
 
     // Sort inputs
-    // channel: runnable: { meta, amber_dir, cobalt_dir, pave_somatic_dir, pave_germline_dir, esvee_dir }
+    // channel: runnable: { meta, amber_dir, cobalt_dir, esvee_dir, pave_somatic_dir, pave_germline_dir, [redux_tumor_tsv, ...] }
     // channel: skip: [ meta ]
     ch_inputs_sorted = ch_inputs_selected
         .branch { inputs ->
@@ -72,7 +75,7 @@ workflow PURPLE_CALLING {
         }
 
     // Create process input channel
-    // channel: [ meta_purple, amber_dir, cobalt_dir, pave_somatic_dir, pave_germline_dir, esvee_dir ]
+    // channel: [ meta_purple, amber_dir, cobalt_dir, esvee_dir, pave_somatic_dir, pave_germline_dir, [redux_tumor_tsv, ...] ]
     ch_purple_inputs = ch_inputs_sorted.runnable
         .map { inputs ->
 
@@ -90,7 +93,7 @@ workflow PURPLE_CALLING {
 
             inputs.meta = meta_purple
 
-            return inputs
+            return inputs.values()
         }
 
     // Run process
@@ -108,7 +111,6 @@ workflow PURPLE_CALLING {
         germline_amp_del_freq,
         target_region_bed,
         target_region_ratios,
-        target_region_msi_indels,
     )
 
     ch_versions = ch_versions.mix(PURPLE.out.versions)

@@ -11,9 +11,10 @@ process PURPLE {
     tuple val(meta),
         path(amber_dir),
         path(cobalt_dir),
+        path(esvee_dir),
         path(pave_somatic_dir, stageAs: 'pave_somatic'),
         path(pave_germline_dir, stageAs: 'pave_germline'),
-        path(esvee_dir)
+        path(redux_tumor_tsvs, stageAs: "redux_tumor/*")
     path genome_fasta
     val genome_ver
     path genome_fai
@@ -26,7 +27,6 @@ process PURPLE {
     path germline_amp_del_freq
     path target_region_bed
     path target_region_ratios
-    path target_region_msi_indels
 
     output:
     tuple val(meta), path('purple/'), emit: purple_dir
@@ -45,30 +45,29 @@ process PURPLE {
 
     def reference_arg = meta.containsKey('normal_id') ? "-reference ${meta.normal_id}" : ''
 
+    def esvee_dir_arg = esvee_dir ? "-esvee_dir ${esvee_dir}" : ''
+    def pave_somatic_dir_arg = pave_somatic_dir ? "-pave_somatic_dir ${pave_somatic_dir}" : ''
+    def pave_germline_dir_arg = pave_germline_dir ? "-pave_germline_dir ${pave_germline_dir}" : ''
+    def redux_tumor_dir_arg = redux_tumor_tsvs ? "-redux_tumor_dir redux_tumor/" : ''
+
     def sage_known_hotspots_germline_arg = sage_known_hotspots_germline ? "-germline_hotspots ${sage_known_hotspots_germline}" : ''
     def germline_amp_del_freq_file_arg = germline_amp_del_freq ? "-germline_amp_del_freq_file ${germline_amp_del_freq}" : ''
 
     def target_region_bed_arg = target_region_bed ? "-target_regions_bed ${target_region_bed}" : ''
     def target_region_ratios_arg = target_region_ratios ? "-target_regions_ratios ${target_region_ratios}" : ''
-    def target_region_msi_indels_arg = target_region_msi_indels ? "-target_regions_msi_indels ${target_region_msi_indels}" : ''
-
-    def pave_dir_local = 'pave/'
 
     """
-    mkdir -p ${pave_dir_local}
-
-    cp -L ${pave_somatic_dir}/* ${pave_dir_local}
-
-    if [[ -n "${pave_germline_dir}" ]]; then
-        cp -L ${pave_germline_dir}/* ${pave_dir_local}
-    fi
-
     purple \\
         -Xmx${Math.round(task.memory.bytes * xmx_mod)} \\
         ${args} \\
         -tumor ${meta.tumor_id} \\
         ${reference_arg} \\
-        -sample_dir ./ \\
+        -amber ${amber_dir} \\
+        -cobalt ${cobalt_dir} \\
+        ${esvee_dir_arg} \\
+        ${pave_somatic_dir_arg} \\
+        ${pave_germline_dir_arg} \\
+        ${redux_tumor_dir_arg} \\
         -ref_genome ${genome_fasta} \\
         -ref_genome_version ${genome_ver} \\
         -driver_gene_panel ${driver_gene_panel} \\
@@ -77,7 +76,6 @@ process PURPLE {
         ${sage_known_hotspots_germline_arg} \\
         ${target_region_bed_arg} \\
         ${target_region_ratios_arg} \\
-        ${target_region_msi_indels_arg} \\
         ${germline_amp_del_freq_file_arg} \\
         -gc_profile ${gc_profile} \\
         -circos \$(which circos) \\
@@ -99,7 +97,6 @@ process PURPLE {
     touch purple/${meta.tumor_id}.purple.cnv.somatic.tsv
     touch purple/${meta.tumor_id}.purple.driver.catalog.germline.tsv
     touch purple/${meta.tumor_id}.purple.driver.catalog.somatic.tsv
-    touch purple/${meta.tumor_id}.purple.germline.vcf.gz
     touch purple/${meta.tumor_id}.purple.germline.vcf.gz
     touch purple/${meta.tumor_id}.purple.purity.tsv
     touch purple/${meta.tumor_id}.purple.qc
