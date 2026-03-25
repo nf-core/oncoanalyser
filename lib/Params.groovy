@@ -1,5 +1,3 @@
-import nextflow.Nextflow
-
 class Params {
 
     public static void parseParams(params) {
@@ -15,18 +13,35 @@ class Params {
         validateUmiParams(params)
     }
 
+    private static void error(String... message){
+
+        def message_string = ""
+        message_string += "\n~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n"
+        message_string += message.join('\n')
+        message_string += "\n~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
+
+        throw new RuntimeException(message_string)
+    }
+
+    private static String createBulletedList(List<String> items) {
+        def bulleted_items = []
+
+        for (item in items) {
+            bulleted_items.add(" - ${item}")
+        }
+
+        return bulleted_items.join('\n')
+    }
+
     private static void validateRunModes(params) {
 
         // Pipeline mode
         if (!params.mode) {
-
-            def pipeline_modes = Enums.getEnumNames(RunModes.Pipeline).join('\n    - ')
-            throw new IllegalStateException(
-                "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n" +
-                "  Pipeline mode must be set using the --mode CLI argument or in a configuration file.\n" +
-                "  Currently, the available pipeline modes are:\n" +
-                "    - ${pipeline_modes}\n" +
-                "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
+            error(
+                "Pipeline mode must be set using the --mode CLI argument or in a configuration file.",
+                "",
+                "Currently, the available pipeline modes are:",
+                createBulletedList(Enums.getEnumNames(RunModes.Pipeline)),
             )
         }
 
@@ -36,14 +51,12 @@ class Params {
         if (pipeline_mode === RunModes.Pipeline.PURITY_ESTIMATE) {
 
             if(!params.purity_estimate_mode){
-                def purity_estimate_modes = Enums.getEnumNames(RunModes.PurityEstimate).join('\n    - ')
-                throw new IllegalStateException(
-                    "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n" +
-                    "  A valid purity estimate run mode must be set using the --purity_estimate_mode\n" +
-                    "  CLI argument or in a configuration file.\n" +
-                    "  Currently, the available run modes are:\n" +
-                    "    - ${purity_estimate_modes}\n" +
-                    "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
+                error(
+                    "A valid purity estimate run mode must be set using the --purity_estimate_mode",
+                    "CLI argument or in a configuration file.",
+                    "",
+                    "Currently, the available modes are:",
+                    createBulletedList(Enums.getEnumNames(RunModes.PurityEstimate)),
                 )
             }
 
@@ -52,20 +65,15 @@ class Params {
 
         // Prepare reference
         if (pipeline_mode === RunModes.Pipeline.PREPARE_REFERENCE && params.ref_data_types == null) {
-
-            def ref_data_types = Enums.getEnumNames(RefData.Type).join('\n    - ')
-            throw new IllegalStateException(
-                "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n" +
-                "  CLI argument --ref_data_types is required for mode prepare_reference.\n" +
-                "  Please specify one or more of the below valid values (separated by commas)\n" +
-                "    - ${ref_data_types}\n" +
-                "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
+            error(
+                "CLI argument --ref_data_types is required for mode prepare_reference.",
+                "Please specify one or more of the below valid values (separated by commas)",
+                createBulletedList(Enums.getEnumNames(RefData.Type)),
             )
         }
 
         // Sequencing type
         Enums.validateEnumFromString(params.sequencing_type, RunModes.SequencingType, false)
-
     }
 
     private static void setGenomeVersionDefaults(params) {
@@ -110,73 +118,54 @@ class Params {
     private static void validateGenomeParams(params) {
 
         if (!params.ref_data_hmf_data_path) {
-            throw new IllegalArgumentException("CLI argument --ref_data_hmf_data_path must be provided")
+            error("CLI argument --ref_data_hmf_data_path must be provided")
         }
 
-        //
         if (!params.genome) {
-            throw new IllegalStateException(
-                "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n" +
-                "  Genome must be set using the --genome CLI argument or in a configuration file.\n" +
-                "  Currently, the available genome are:\n" +
-                "  ${params.genomes.keySet().join(", ")}\n" +
-                "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
-            )
-
-        } else if (!params.genomes.containsKey(params.genome)) {
-            throw new IllegalStateException(
-                "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n" +
-                "  Genome '${params.genome}' not found in any config files provided to the pipeline.\n" +
-                "  Currently, the available genome are:\n" +
-                "  ${params.genomes.keySet().join(", ")}\n" +
-                "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
+            error(
+                "Genome must be set using the --genome CLI argument or in a configuration file.",
+                "Currently, the supported genomes are: ${params.genomes.keySet().join(", ")}"
             )
         }
 
         if (!RefGenome.GENOMES_SUPPORTED.contains(params.genome) && !params.force_genome) {
-            throw new IllegalStateException(
-                "currently only the GRCh37_hmf and GRCh38_hmf genomes are supported but got ${params.genome}" +
-                ", please adjust the --genome argument accordingly or override with --force_genome."
+            error(
+                "Got unsupported genome: ${params.genome}",
+                "",
+                "Provide argument --force_genome if you are using a custom genome,",
+                "or adjust the --genome argument to one of the genomes configured ",
+                "in the pipeline: ${RefGenome.GENOMES_SUPPORTED.join(", ")}"
             )
         }
 
         if (!params.genome_version) {
-            throw new IllegalStateException(
-                "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n" +
-                "  Genome version wasn't provided and genome '${params.genome}' is not defined in   \n" +
-                "  genome version list.\n" +
-                "  Currently, the list of genomes in the version list include:\n" +
-                "  ${RefGenome.GENOMES_DEFINED.join(", ")}\n" +
-                "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
+            error(
+                "Genome version wasn't provided and genome '${params.genome}' is not defined in",
+                "genome version list. Currently, the list of genomes in the version list include:",
+                "${RefGenome.GENOMES_DEFINED.join(", ")}",
             )
         }
 
-        // Alt genomes
         if (!params.genome_type) {
-            throw new IllegalStateException(
-                "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n" +
-                "  Genome type wasn't provided and genome '${params.genome}' is not defined in\n" +
-                "  genome type list.\n" +
-                "  Currently, the list of genomes in the type list include:\n" +
-                "  ${RefGenome.GENOMES_DEFINED.join(", ")}\n" +
-                "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
+            error(
+                "Genome type wasn't provided and genome '${params.genome}' is not defined in",
+                "genome type list. Currently, the list of genomes in the type list include:",
+                "${RefGenome.GENOMES_DEFINED.join(", ")}",
             )
         }
 
         if (params.containsKey('ref_data_genome_alt') && params.ref_data_genome_alt !== null) {
 
             if (params.genome_type != RefGenome.Type.ALT.getName()) {
-                throw new IllegalStateException("Using a reference genome without ALT contigs but found an .alt file")
+                error("Using a reference genome without ALT contigs but found an .alt file")
             }
 
             def ref_data_genome_alt_fn = nextflow.Nextflow.file(params.ref_data_genome_alt).name
             def ref_data_genome_fasta_fn = nextflow.Nextflow.file(params.ref_data_genome_fasta).name
             if (ref_data_genome_alt_fn != "${ref_data_genome_fasta_fn}.alt") {
-                throw new IllegalStateException(
-                    "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n" +
-                    "  Found .alt file with filename of ${ref_data_genome_alt_fn} but it is required to match\n" +
-                    "  reference genome FASTA filename stem: ${ref_data_genome_fasta_fn}.alt\n" +
-                    "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
+                error(
+                    "Found .alt file with filename of ${ref_data_genome_alt_fn} but it is required to match",
+                    "reference genome FASTA filename stem: ${ref_data_genome_fasta_fn}.alt"
                 )
             }
         }
@@ -195,29 +184,28 @@ class Params {
             return
         }
 
-        def panels_string = RefData.PANELS_DEFINED.join('\n    - ')
+        def panels_string = createBulletedList(RefData.PANELS_DEFINED)
 
         if (!params.containsKey('panel') || params.panel === null) {
 
-            throw new IllegalStateException(
-                "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n" +
-                "  A panel is required to be set using the --panel CLI argument or in a\n" +
-                "  configuration file when running in targeted mode or panel resource creation mode.\n" +
-                "  Currently, the available built-in panels are:\n" +
-                "    - ${panels_string}\n" +
-                "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
+            error(
+                "A panel is required to be set using the --panel CLI argument or in a ",
+                "configuration file when running in targeted mode or panel resource creation mode.",
+                "",
+                "Currently, the supported panels are:",
+                panels_string
             )
         }
 
         if (!RefData.PANELS_DEFINED.contains(params.panel) && (!params.containsKey('force_panel') || !params.force_panel)) {
 
-            throw new IllegalStateException(
-                "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n" +
-                "  The ${params.panel} panel does not have built-in support. Currently, the\n" +
-                "  available supported panels are:\n" +
-                "    - ${panels_string}\n\n" +
-                "  Please adjust the --panel argument or override with --force_panel.\n" +
-                "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
+            error(
+                "Got unsupported panel: ${params.panel} ",
+                "",
+                "Provide argument --force_panel if you have a custom panel,",
+                "or adjust the --panel argument to one of the panels configured ",
+                "in the pipeline:",
+                panels_string
             )
         }
     }
@@ -257,33 +245,27 @@ class Params {
         def fastp_umi_args_set_any = params.fastp_umi_location || params.fastp_umi_length || params.fastp_umi_skip >= 0
 
         if (fastp_umi_args_set_any && !params.fastp_umi_enabled) {
-            throw new IllegalStateException(
-                "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n" +
-                "  Detected use of fastp UMI parameters but fastp UMI processing has not been enabled.\n" +
-                "  Please review your configuration and set the fastp_umi_enabled flag or otherwise " +
-                "  adjust accordingly.\n" +
-                "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
+            error(
+                "Detected use of fastp UMI parameters but fastp UMI processing has not been enabled.",
+                "Please review your configuration and set the fastp_umi_enabled flag or otherwise ",
+                "adjust accordingly."
             )
         }
 
         def fastp_umi_args_set_all = params.fastp_umi_location && params.fastp_umi_length && params.fastp_umi_skip >= 0
 
         if (params.fastp_umi_enabled && !fastp_umi_args_set_all) {
-            throw new IllegalStateException(
-                "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n" +
-                "  Refusing to run fastp UMI processing without having any UMI params configured.\n" +
-                "  Please review your configuration and appropriately set all fastp_umi_* parameters.\n" +
-                "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
+            error(
+                "Refusing to run fastp UMI processing without having any UMI params configured.",
+                "Please review your configuration and appropriately set all fastp_umi_* parameters.",
             )
         }
 
         if (params.redux_umi_duplex_delim && params.redux_umi_enabled === false) {
-            throw new IllegalStateException(
-                "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n" +
-                "  Detected use of REDUX UMI parameters but REDUX UMI processing has not been\n" +
-                "  enabled. Please review your configuration and set the redux_umi_enabled flag or\n" +
-                "  otherwise adjust accordingly.\n" +
-                "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
+            error(
+                "Detected use of REDUX UMI parameters but REDUX UMI processing has not been",
+                "enabled. Please review your configuration and set the redux_umi_enabled flag or",
+                "otherwise adjust accordingly."
             )
         }
     }
