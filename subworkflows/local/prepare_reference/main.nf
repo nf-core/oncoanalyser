@@ -215,7 +215,7 @@ workflow PREPARE_REFERENCE {
         }
 
         // Set PON paths
-        def sequencing_type = Enums.getEnumFromString(params.sequencing_type, RunModes.SequencingType)
+        def sequencing_type = RunModes.SequencingType.fromString(params.sequencing_type)
 
         if(sequencing_type === RunModes.SequencingType.ULTIMA) {
 
@@ -254,7 +254,7 @@ workflow PREPARE_REFERENCE {
         // Set custom driver gene panel
         if (params.driver_gene_panel) {
 
-            def run_mode = Enums.getEnumFromString(params.mode, RunModes.Main)
+            def run_mode = RunModes.Main.fromString(params.mode)
 
             if (run_mode !== RunModes.Main.PANEL_RESOURCE_CREATION) {
                 log.info "Using custom driver gene panel: ${params.driver_gene_panel}"
@@ -360,7 +360,7 @@ def getConfigForPrepRefOnly(params, log) {
 
     def ref_data_types = params.ref_data_types
         .tokenize(',')
-        .collect { Enums.getValidatedEnumFromString(it, RefData.Type, log) }
+        .collect { Enums.getValidatedEnumFromString(it, RefData.Type) }
 
     if (
         ref_data_types.contains(RefData.Type.WGS) ||

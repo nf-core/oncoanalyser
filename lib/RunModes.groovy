@@ -8,17 +8,29 @@ class RunModes {
         PREPARE_REFERENCE,
         PURITY_ESTIMATE,
         TARGETED,
-        WGTS,
+        WGTS;
+
+        public static Main fromString(String string) {
+            return Enums.getValidatedEnumFromString(string, Main)
+        }
     }
 
     public static enum PurityEstimate {
         TARGETED,
-        WGTS,
+        WGTS;
+
+        public static PurityEstimate fromString(String string) {
+            return Enums.getValidatedEnumFromString(string, PurityEstimate)
+        }
     }
 
     public static enum SequencingType {
         ILLUMINA,
         SBX,
-        ULTIMA,
+        ULTIMA;
+
+        public static SequencingType fromString(String string) {
+            return Enums.getValidatedEnumFromString(string, SequencingType, false)
+        }
     }
 }

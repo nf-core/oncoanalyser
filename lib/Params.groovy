@@ -38,7 +38,7 @@ class Params {
         }
 
         // Attempt to set default panel data path; make no assumption on valid 'panel' value
-        def run_mode = Enums.getEnumFromString(params.mode, RunModes.Main)
+        def run_mode = RunModes.Main.fromString(params.mode)
         if ((run_mode === RunModes.Main.TARGETED || run_mode === RunModes.Main.PREPARE_REFERENCE) && params.containsKey('panel')) {
             if (params.panel == 'tso500') {
                 if (params.genome_version == RefGenome.Version.V37.getName()) {
@@ -52,7 +52,7 @@ class Params {
 
     private static void setUmiDefaults(params) {
 
-        def run_mode = Enums.getEnumFromString(params.mode, RunModes.Main)
+        def run_mode = RunModes.Main.fromString(params.mode)
 
         if (run_mode === RunModes.Main.TARGETED) {
 
@@ -99,7 +99,7 @@ class Params {
                 "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
             Nextflow.exit(1)
         } else {
-            Enums.validateEnumFromString(params.mode, RunModes.Main, log)
+            Enums.validateEnumFromString(params.mode, RunModes.Main)
         }
 
         // Genome related
@@ -158,7 +158,7 @@ class Params {
 
         // Sequencing technology
 
-        Enums.validateEnumFromString(params.sequencing_type, RunModes.SequencingType, log, false)
+        Enums.validateEnumFromString(params.sequencing_type, RunModes.SequencingType, false)
 
         // UMI parameters
 
@@ -193,7 +193,7 @@ class Params {
 
     public static getRunConfig(params, log) {
 
-        def run_mode = Enums.getValidatedEnumFromString(params.mode, RunModes.Main, log)
+        def run_mode = RunModes.Main.fromString(params.mode)
 
         def stages = RunStage.getValidatedRunStages(
             params.processes_include,
@@ -265,7 +265,7 @@ class Params {
                     "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
                 Nextflow.exit(1)
             } else {
-                Enums.validateEnumFromString(params.purity_estimate_mode, RunModes.PurityEstimate, log)
+                Enums.validateEnumFromString(params.purity_estimate_mode, RunModes.PurityEstimate)
             }
         }
 

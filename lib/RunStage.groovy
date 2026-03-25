@@ -1,5 +1,3 @@
-import nextflow.Nextflow
-
 public enum RunStage {
 
     ALIGNMENT,
@@ -34,7 +32,7 @@ public enum RunStage {
         def processes
 
         if (manual_select) {
-            processes = getProcessList(manual_select, log)
+            processes = getProcessList(manual_select)
 
             if (include || exclude) {
                 log.warning "When manually selecting processes, including/excluding processes is ignored"
@@ -48,8 +46,8 @@ public enum RunStage {
             // NOTE(LN): Disable some processes from running by default
             DEFAULT_EXCLUDED_PROCESSES.each {it -> processes.remove(it) }
 
-            def include_list = getProcessList(include, log)
-            def exclude_list = getProcessList(exclude, log)
+            def include_list = getProcessList(include)
+            def exclude_list = getProcessList(exclude)
             checkIncludeExcludeList(include_list, exclude_list, log)
 
             processes.addAll(include_list)
@@ -59,13 +57,13 @@ public enum RunStage {
         return values().collectEntries { p -> [p.name().toLowerCase(), p in processes] }
     }
 
-    private static List<RunStage> getProcessList(String process_str, log) {
+    private static List<RunStage> getProcessList(String process_str) {
         if (!process_str) {
             return []
         }
         return process_str
             .tokenize(',')
-            .collect { return Enums.getValidatedEnumFromString(it, RunStage, log) }
+            .collect { return Enums.getValidatedEnumFromString(it, RunStage) }
             .unique()
     }
 
@@ -76,10 +74,9 @@ public enum RunStage {
             .keySet()
 
         if (processes_shared) {
-            def processes_shared_str = processes_shared.join('\n  - ')
             def message_base = 'the following processes was found in the include and the exclude list'
-            log.error "${message_base}:\n  - ${processes_shared_str}"
-            Nextflow.exit(1)
+            def processes_shared_str = processes_shared.join('\n  - ')
+            throw new IllegalArgumentException("${message_base}:\n  - ${processes_shared_str}")
         }
     }
 }

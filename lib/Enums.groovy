@@ -1,45 +1,34 @@
-import nextflow.Nextflow
-
 class Enums {
 
-    public static getEnumNames(enum_class, ignore_case = true) {
+    public static <T extends Enum<T>> List<String> getEnumNames(Class<T> enum_class) {
 
-        def strings = enum_class.values()*.name()
-
-        if(ignore_case) {
-            strings = strings*.toLowerCase()
-        }
-
-        return strings
+        return enum_class.getEnumConstants()*.name()
     }
 
-    public static getEnumFromString(string, enum_class, ignore_case = true) {
+    public static <T extends Enum<T>> T getValidatedEnumFromString(String string, Class<T> enum_class, boolean ignore_case = true) {
+
         try {
-            def searchString = ignore_case ? string.toUpperCase() : string
-            return enum_class.valueOf(searchString)
-        } catch(IllegalArgumentException e) {
-            return null
-        }
-    }
 
-    public static getValidatedEnumFromString(string, enum_class, log, ignore_case = true) {
+            def search_string = ignore_case
+                ? string.toUpperCase()
+                : string
 
-        def enum_value = getEnumFromString(string, enum_class, ignore_case)
+            return Enum.valueOf(enum_class, search_string)
 
-        if(enum_value !== null) {
-            return enum_value
-        } else {
+        } catch (IllegalArgumentException e) {
+
             def enum_class_name = enum_class.getSimpleName()
-            def enum_values_string = getEnumNames(enum_class, ignore_case).join('\n  - ')
+            def case_sensitive_string = ignore_case ? "(not case sensitive)" : "(case sensitive)"
+            def enum_values_string = getEnumNames(enum_class).join('\n  - ')
 
-            log.error "Invalid ${enum_class_name}: '${string}'\n\nValid options are:\n  - ${enum_values_string}"
-            Nextflow.exit(1)
+            def error_message = "Invalid ${enum_class_name} '${string}'.\n\nValid options ${case_sensitive_string}:\n  - ${enum_values_string}"
+
+            throw new IllegalArgumentException(error_message)
         }
     }
 
-    public static validateEnumFromString(string, enum_class, log, ignore_case = true){
+    public static <T extends Enum<T>> T validateEnumFromString(String string, Class<T> enum_class, boolean ignore_case = true) {
         // NOTE(LN): alias method for code clarity
-        getValidatedEnumFromString(string, enum_class, log, ignore_case)
+        return getValidatedEnumFromString(string, enum_class, ignore_case)
     }
-
 }
