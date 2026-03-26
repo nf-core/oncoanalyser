@@ -208,7 +208,7 @@ workflow PREPARE_REFERENCE {
     ch_hmf_data = Channel.empty()
     if (prep_config.require_hmftools_data) {
 
-        hmf_data_paths = params.hmf_data_paths[params.genome_version.toString()]
+        hmf_data_paths = params.hmf_data_paths[params.genome_version]
 
         if (params.ref_data_hmf_data_path.endsWith('tar.gz')) {
 
@@ -292,7 +292,7 @@ workflow PREPARE_REFERENCE {
     if (prep_config.require_panel_data) {
 
         panel_data_paths_versions = params.panel_data_paths[params.panel]
-        panel_data_paths = panel_data_paths_versions[params.genome_version.toString()]
+        panel_data_paths = panel_data_paths_versions[params.genome_version]
 
         if (params.ref_data_panel_data_path.endsWith('tar.gz')) {
 

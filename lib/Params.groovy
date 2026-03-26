@@ -3,6 +3,7 @@ class Params {
     public static void parseParams(Map params) {
 
         validateRunModes(params)
+        validateSequencingType(params)
 
         validateGenomeAndSetDefaults(params)
 
@@ -71,12 +72,10 @@ class Params {
                 createBulletedList(Enums.getEnumNames(RefData.Type)),
             )
         }
-
-        // Sequencing type
-        Enums.validateEnumFromString((String) params.sequencing_type, RunModes.SequencingType, false)
     }
 
-    private static void validateGenomeAndSetDefaults(Map params) {
+    private static void validateGenomeAndSetDefaults(Map params){
+
         if (!params.genome) {
             error(
                 "Genome must be set using the --genome CLI argument or in a configuration file.",
@@ -135,6 +134,10 @@ class Params {
         if (!params.containsKey('ref_data_genome_gtf')) params.ref_data_genome_gtf = null
     }
 
+    private static void validateSequencingType(Map params) {
+        Enums.validateEnumFromString((String) params.sequencing_type, RunModes.SequencingType, false)
+    }
+
     private static void setDefaultHmfData(Map params) {
 
         if(params.ref_data_hmf_data_path)
@@ -157,28 +160,37 @@ class Params {
                 "A panel is required to be set using the --panel CLI argument or in a ",
                 "configuration file when running in targeted mode or panel resource creation mode.",
                 "",
-                "Currently, the supported panels are:",
+                "Currently, panels with built-in support are:",
                 createBulletedList(RefData.SupportedPanel.getNames())
             )
         }
 
         def supported_panel = RefData.SupportedPanel.fromString((String) params.panel)
 
-        if (supported_panel && !params.containsKey('ref_data_panel_data_path')) {
-            def ref_genome_version = RefGenome.Version.fromNumericName((String) params.genome_version)
-            params.ref_data_panel_data_path = RefData.getDefaultPanelDataPath(supported_panel, ref_genome_version)
-        }
+        if (!supported_panel) {
 
-        if (!supported_panel && !params.force_panel) {
+            if (params.force_panel)
+                return
 
             error(
-                "Got unsupported panel: ${params.panel} ",
+                "No built-in supported for panel: ${params.panel} ",
                 "",
                 "Provide argument --force_panel if you have a custom panel,",
                 "or adjust the --panel argument to one of the panels configured ",
                 "in the pipeline:",
                 createBulletedList(RefData.SupportedPanel.getNames())
             )
+        }
+
+        def genome_version = RefGenome.Version.fromNumericName((String) params.genome_version)
+        if (!supported_panel.hasConfiguredVersion(params, genome_version))
+        {
+            error("panel(${params.panel}) has no built-in support for refGenomeVersion(${params.genome_version})")
+        }
+
+        if (!params.containsKey('ref_data_panel_data_path')) {
+            def ref_genome_version = RefGenome.Version.fromNumericName((String) params.genome_version)
+            params.ref_data_panel_data_path = RefData.getDefaultPanelDataPath(supported_panel, ref_genome_version)
         }
     }
 
