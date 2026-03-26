@@ -46,7 +46,7 @@ workflow PREPARE_REFERENCE {
         ? getConfigForPrepRefOnly(params, log)
         : getConfigForPipelineRun(inputs, pipeline_mode, stages)
 
-    def has_alt_contigs = params.genome_type == RefGenome.Type.ALT.getName()
+    def has_alt_contigs = params.genome_type == RefGenome.Type.ALT
     def has_alt_file = params.containsKey('ref_data_genome_alt') && params.ref_data_genome_alt
 
     //

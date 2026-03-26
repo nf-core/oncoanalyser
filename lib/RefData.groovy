@@ -1,13 +1,5 @@
 class RefData {
 
-    public static final String HMF_DATA_37_PATH = 'https://pub-cf6ba01919994c3cbd354659947f74d8.r2.dev/hmf_reference_data/hmftools/hmf_pipeline_resources.37_v2.3.0--2.tar.gz'
-    public static final String HMF_DATA_38_PATH = 'https://pub-cf6ba01919994c3cbd354659947f74d8.r2.dev/hmf_reference_data/hmftools/hmf_pipeline_resources.38_v2.3.0--2.tar.gz'
-
-    public static final String TSO500_PANEL_37_PATH = 'https://pub-cf6ba01919994c3cbd354659947f74d8.r2.dev/hmf_reference_data/panels/hmf_panel_resources.tso500.37_v2.3.0--2.tar.gz'
-    public static final String TSO500_PANEL_38_PATH = 'https://pub-cf6ba01919994c3cbd354659947f74d8.r2.dev/hmf_reference_data/panels/hmf_panel_resources.tso500.38_v2.3.0--2.tar.gz'
-
-    public static final List<String> PANELS_DEFINED = ['tso500', 'msk', 'oncopanel', 'pm_haem']
-
     public static enum Type {
         // Compound types
         TARGETED,
@@ -26,5 +18,48 @@ class RefData {
         PANEL,
         RNA_ALIGNMENT,
         STAR_INDEX,
+    }
+
+    public static String getDefaultHmfDataPath(RefGenome.Version refGenomeVersion) {
+
+        return switch (refGenomeVersion) {
+            case RefGenome.Version.V37 -> 'https://pub-cf6ba01919994c3cbd354659947f74d8.r2.dev/hmf_reference_data/hmftools/hmf_pipeline_resources.37_v2.3.0--2.tar.gz'
+            case RefGenome.Version.V38 -> 'https://pub-cf6ba01919994c3cbd354659947f74d8.r2.dev/hmf_reference_data/hmftools/hmf_pipeline_resources.38_v2.3.0--2.tar.gz'
+            default -> throw new IllegalArgumentException("Invalid ref genome version: ${refGenomeVersion}")
+        }
+    }
+
+    public static enum SupportedPanel {
+        tso500,
+        msk,
+        oncopanel,
+        pm_haem;
+
+        public static SupportedPanel fromString(String string) {
+            try {
+                return valueOf(string)
+            } catch (IllegalArgumentException e){
+                return null
+            }
+        }
+
+        public static List<String> getNames() {
+            return values().collect{ panel -> panel.toString() }
+        }
+    }
+
+    public static String getDefaultPanelDataPath(SupportedPanel panel, RefGenome.Version refGenomeVersion){
+
+        def path_map = [
+            [(SupportedPanel.tso500), (RefGenome.Version.V37)]: 'https://pub-cf6ba01919994c3cbd354659947f74d8.r2.dev/hmf_reference_data/panels/hmf_panel_resources.tso500.37_v2.3.0--2.tar.gz',
+            [(SupportedPanel.tso500), (RefGenome.Version.V38)]: 'https://pub-cf6ba01919994c3cbd354659947f74d8.r2.dev/hmf_reference_data/panels/hmf_panel_resources.tso500.38_v2.3.0--2.tar.gz',
+        ]
+
+        def panel_key = [panel, refGenomeVersion]
+
+        if (!path_map.containsKey(panel_key))
+            throw new NoSuchElementException("No default panel data path defined for panel(${panel}) refGenomeVersion(${refGenomeVersion.getNumericName()})")
+
+        return path_map[panel_key]
     }
 }

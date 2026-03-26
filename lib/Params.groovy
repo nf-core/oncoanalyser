@@ -4,10 +4,10 @@ class Params {
 
         validateRunModes(params)
 
-        setGenomeVersionDefaults(params)
-        validateGenomeParams(params)
+        validateGenomeAndSetDefaults(params)
 
-        validatePanelParams(params)
+        setDefaultHmfData(params)
+        validatePanelDataAndSetDefaults(params)
 
         setUmiDefaults(params)
         validateUmiParams(params)
@@ -76,51 +76,7 @@ class Params {
         Enums.validateEnumFromString(params.sequencing_type, RunModes.SequencingType, false)
     }
 
-    private static void setGenomeVersionDefaults(params) {
-
-        if (!params.containsKey('genome_version')) {
-            if (RefGenome.GENOMES_VERSION_37.contains(params.genome)) {
-                params.genome_version = RefGenome.Version.V37.getNumericName()
-            } else if (RefGenome.GENOMES_VERSION_38.contains(params.genome)) {
-                params.genome_version = RefGenome.Version.V38.getNumericName()
-            }
-        }
-
-        if (!params.containsKey('genome_type')) {
-            if (RefGenome.GENOMES_ALT.contains(params.genome)) {
-                params.genome_type = RefGenome.Type.ALT.getName()
-            } else if (RefGenome.GENOMES_DEFINED.contains(params.genome)) {
-                params.genome_type = RefGenome.Type.NO_ALT.getName()
-            }
-        }
-
-        if (!params.containsKey('ref_data_hmf_data_path')) {
-            if (params.genome_version == RefGenome.Version.V37.getNumericName()) {
-                params.ref_data_hmf_data_path = RefData.HMF_DATA_37_PATH
-            } else if (params.genome_version == RefGenome.Version.V38.getNumericName()) {
-                params.ref_data_hmf_data_path = RefData.HMF_DATA_38_PATH
-            }
-        }
-
-        // Attempt to set default panel data path; make no assumption on valid 'panel' value
-        def run_mode = RunModes.Pipeline.fromString(params.mode)
-        if ((run_mode === RunModes.Pipeline.TARGETED || run_mode === RunModes.Pipeline.PREPARE_REFERENCE) && params.containsKey('panel')) {
-            if (params.panel == 'tso500') {
-                if (params.genome_version == RefGenome.Version.V37.getNumericName()) {
-                    params.ref_data_panel_data_path = RefData.TSO500_PANEL_37_PATH
-                } else if (params.genome_version.toString() == RefGenome.Version.V38.getNumericName()) {
-                    params.ref_data_panel_data_path = RefData.TSO500_PANEL_38_PATH
-                }
-            }
-        }
-    }
-
-    private static void validateGenomeParams(params) {
-
-        if (!params.ref_data_hmf_data_path) {
-            error("CLI argument --ref_data_hmf_data_path must be provided")
-        }
-
+    private static void validateGenomeAndSetDefaults(params) {
         if (!params.genome) {
             error(
                 "Genome must be set using the --genome CLI argument or in a configuration file.",
@@ -128,35 +84,40 @@ class Params {
             )
         }
 
-        if (!RefGenome.GENOMES_SUPPORTED.contains(params.genome) && !params.force_genome) {
+        def supported_genome = RefGenome.SupportedGenome.fromString(params.genome)
+        params.genome_version = (supported_genome != null) ? supported_genome.getVersion().getNumericName() : null
+        params.genome_type    = (supported_genome != null) ? supported_genome.getType() : null
+
+        if(supported_genome)
+            return
+
+        if (!params.force_genome) {
             error(
                 "Got unsupported genome: ${params.genome}",
                 "",
                 "Provide argument --force_genome if you are using a custom genome,",
-                "or adjust the --genome argument to one of the genomes configured ",
-                "in the pipeline: ${RefGenome.GENOMES_SUPPORTED.join(", ")}"
+                "or adjust the --genome argument to one of the supported genomes:",
+                createBulletedList(RefGenome.SupportedGenome.getNames())
             )
         }
 
         if (!params.genome_version) {
             error(
-                "Genome version wasn't provided and genome '${params.genome}' is not defined in",
-                "genome version list. Currently, the list of genomes in the version list include:",
-                "${RefGenome.GENOMES_DEFINED.join(", ")}",
+                "For custom genomes, please provide one of the following values to arg --genome_version:",
+                createBulletedList(RefGenome.Version.getNumericNames())
             )
         }
 
         if (!params.genome_type) {
             error(
-                "Genome type wasn't provided and genome '${params.genome}' is not defined in",
-                "genome type list. Currently, the list of genomes in the type list include:",
-                "${RefGenome.GENOMES_DEFINED.join(", ")}",
+                "For custom genomes, please provide of the following values to arg --genome_type:",
+                createBulletedList(RefGenome.Type.getNames())
             )
         }
 
-        if (params.containsKey('ref_data_genome_alt') && params.ref_data_genome_alt !== null) {
+        if (params.containsKey('ref_data_genome_alt') && params.ref_data_genome_alt != null) {
 
-            if (params.genome_type != RefGenome.Type.ALT.getName()) {
+            if (params.genome_type != RefGenome.Type.ALT) {
                 error("Using a reference genome without ALT contigs but found an .alt file")
             }
 
@@ -174,30 +135,41 @@ class Params {
         if (!params.containsKey('ref_data_genome_gtf')) params.ref_data_genome_gtf = null
     }
 
-    private static void validatePanelParams(params) {
+    private static void setDefaultHmfData(params) {
+
+        if(params.ref_data_hmf_data_path)
+            return
+
+        def genome_version = RefGenome.Version.fromNumericName(params.genome_version)
+        params.ref_data_hmf_data_path = RefData.getDefaultHmfDataPath(genome_version)
+    }
+
+    private static void validatePanelDataAndSetDefaults(params){
 
         def pipeline_mode = RunModes.Pipeline.fromString(params.mode)
 
-        if (pipeline_mode !== RunModes.Pipeline.TARGETED){
-            params.panel = null
-            params.ref_data_panel_data_path = null
+        if (pipeline_mode != RunModes.Pipeline.TARGETED && pipeline_mode != RunModes.Pipeline.PREPARE_REFERENCE)
             return
-        }
 
-        def panels_string = createBulletedList(RefData.PANELS_DEFINED)
-
-        if (!params.containsKey('panel') || params.panel === null) {
+        if (params.panel == null) {
 
             error(
                 "A panel is required to be set using the --panel CLI argument or in a ",
                 "configuration file when running in targeted mode or panel resource creation mode.",
                 "",
                 "Currently, the supported panels are:",
-                panels_string
+                createBulletedList(RefData.SupportedPanel.getNames())
             )
         }
 
-        if (!RefData.PANELS_DEFINED.contains(params.panel) && (!params.containsKey('force_panel') || !params.force_panel)) {
+        def supported_panel = RefData.SupportedPanel.fromString(params.panel)
+
+        if (supported_panel && !params.containsKey('ref_data_panel_data_path')) {
+            def ref_genome_version = RefGenome.Version.fromNumericName(params.genome_version)
+            params.ref_data_panel_data_path = RefData.getDefaultPanelDataPath(supported_panel, ref_genome_version)
+        }
+
+        if (!supported_panel && !params.force_panel) {
 
             error(
                 "Got unsupported panel: ${params.panel} ",
@@ -205,7 +177,7 @@ class Params {
                 "Provide argument --force_panel if you have a custom panel,",
                 "or adjust the --panel argument to one of the panels configured ",
                 "in the pipeline:",
-                panels_string
+                createBulletedList(RefData.SupportedPanel.getNames())
             )
         }
     }
