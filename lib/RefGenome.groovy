@@ -12,13 +12,13 @@ class RefGenome {
         V37('37'),
         V38('38');
 
-        private final String name
+        private final String numericName
 
         Version(String name) {
-            this.name = name
+            this.numericName = name
         }
 
-        public String getName() { return this.name }
+        public String getNumericName() { return this.numericName }
     }
 
     public static enum Type {

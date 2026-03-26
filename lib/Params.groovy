@@ -80,9 +80,9 @@ class Params {
 
         if (!params.containsKey('genome_version')) {
             if (RefGenome.GENOMES_VERSION_37.contains(params.genome)) {
-                params.genome_version = RefGenome.Version.V37.getName()
+                params.genome_version = RefGenome.Version.V37.getNumericName()
             } else if (RefGenome.GENOMES_VERSION_38.contains(params.genome)) {
-                params.genome_version = RefGenome.Version.V38.getName()
+                params.genome_version = RefGenome.Version.V38.getNumericName()
             }
         }
 
@@ -95,9 +95,9 @@ class Params {
         }
 
         if (!params.containsKey('ref_data_hmf_data_path')) {
-            if (params.genome_version == RefGenome.Version.V37.getName()) {
+            if (params.genome_version == RefGenome.Version.V37.getNumericName()) {
                 params.ref_data_hmf_data_path = RefData.HMF_DATA_37_PATH
-            } else if (params.genome_version == RefGenome.Version.V38.getName()) {
+            } else if (params.genome_version == RefGenome.Version.V38.getNumericName()) {
                 params.ref_data_hmf_data_path = RefData.HMF_DATA_38_PATH
             }
         }
@@ -106,9 +106,9 @@ class Params {
         def run_mode = RunModes.Pipeline.fromString(params.mode)
         if ((run_mode === RunModes.Pipeline.TARGETED || run_mode === RunModes.Pipeline.PREPARE_REFERENCE) && params.containsKey('panel')) {
             if (params.panel == 'tso500') {
-                if (params.genome_version == RefGenome.Version.V37.getName()) {
+                if (params.genome_version == RefGenome.Version.V37.getNumericName()) {
                     params.ref_data_panel_data_path = RefData.TSO500_PANEL_37_PATH
-                } else if (params.genome_version.toString() == RefGenome.Version.V38.getName()) {
+                } else if (params.genome_version.toString() == RefGenome.Version.V38.getNumericName()) {
                     params.ref_data_panel_data_path = RefData.TSO500_PANEL_38_PATH
                 }
             }
@@ -160,8 +160,8 @@ class Params {
                 error("Using a reference genome without ALT contigs but found an .alt file")
             }
 
-            def ref_data_genome_alt_fn = nextflow.Nextflow.file(params.ref_data_genome_alt).name
-            def ref_data_genome_fasta_fn = nextflow.Nextflow.file(params.ref_data_genome_fasta).name
+            def ref_data_genome_alt_fn = nextflow.Nextflow.file(params.ref_data_genome_alt).getNumericName
+            def ref_data_genome_fasta_fn = nextflow.Nextflow.file(params.ref_data_genome_fasta).getNumericName
             if (ref_data_genome_alt_fn != "${ref_data_genome_fasta_fn}.alt") {
                 error(
                     "Found .alt file with filename of ${ref_data_genome_alt_fn} but it is required to match",
