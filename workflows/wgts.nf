@@ -438,7 +438,7 @@ workflow WGTS {
             ch_esvee_out,
             ch_pave_somatic_out,
             ch_pave_germline_out,
-            [],  // redux_dir_tumor
+            PlaceholderChannels.toolDir(ch_inputs), // redux_dir_tumor
             ref_data.genome_fasta,
             ref_data.genome_version,
             ref_data.genome_fai,
