@@ -1,6 +1,6 @@
 class Params {
 
-    public static void parseParams(params) {
+    public static void parseParams(Map params) {
 
         validateRunModes(params)
 
@@ -33,7 +33,7 @@ class Params {
         return bulleted_items.join('\n')
     }
 
-    private static void validateRunModes(params) {
+    private static void validateRunModes(Map params) {
 
         // Pipeline mode
         if (!params.mode) {
@@ -45,7 +45,7 @@ class Params {
             )
         }
 
-        def pipeline_mode = RunModes.Pipeline.fromString(params.mode)
+        def pipeline_mode = RunModes.Pipeline.fromString((String) params.mode)
 
         // Purity estimate mode
         if (pipeline_mode === RunModes.Pipeline.PURITY_ESTIMATE) {
@@ -60,7 +60,7 @@ class Params {
                 )
             }
 
-            Enums.validateEnumFromString(params.purity_estimate_mode, RunModes.PurityEstimate)
+            Enums.validateEnumFromString((String) params.purity_estimate_mode, RunModes.PurityEstimate)
         }
 
         // Prepare reference
@@ -73,10 +73,10 @@ class Params {
         }
 
         // Sequencing type
-        Enums.validateEnumFromString(params.sequencing_type, RunModes.SequencingType, false)
+        Enums.validateEnumFromString((String) params.sequencing_type, RunModes.SequencingType, false)
     }
 
-    private static void validateGenomeAndSetDefaults(params) {
+    private static void validateGenomeAndSetDefaults(Map params) {
         if (!params.genome) {
             error(
                 "Genome must be set using the --genome CLI argument or in a configuration file.",
@@ -84,7 +84,7 @@ class Params {
             )
         }
 
-        def supported_genome = RefGenome.SupportedGenome.fromString(params.genome)
+        def supported_genome = RefGenome.SupportedGenome.fromString((String) params.genome)
         params.genome_version = (supported_genome != null) ? supported_genome.getVersion().getNumericName() : null
         params.genome_type    = (supported_genome != null) ? supported_genome.getType() : null
 
@@ -135,18 +135,18 @@ class Params {
         if (!params.containsKey('ref_data_genome_gtf')) params.ref_data_genome_gtf = null
     }
 
-    private static void setDefaultHmfData(params) {
+    private static void setDefaultHmfData(Map params) {
 
         if(params.ref_data_hmf_data_path)
             return
 
-        def genome_version = RefGenome.Version.fromNumericName(params.genome_version)
+        def genome_version = RefGenome.Version.fromNumericName((String) params.genome_version)
         params.ref_data_hmf_data_path = RefData.getDefaultHmfDataPath(genome_version)
     }
 
-    private static void validatePanelDataAndSetDefaults(params){
+    private static void validatePanelDataAndSetDefaults(Map params){
 
-        def pipeline_mode = RunModes.Pipeline.fromString(params.mode)
+        def pipeline_mode = RunModes.Pipeline.fromString((String) params.mode)
 
         if (pipeline_mode != RunModes.Pipeline.TARGETED && pipeline_mode != RunModes.Pipeline.PREPARE_REFERENCE)
             return
@@ -162,10 +162,10 @@ class Params {
             )
         }
 
-        def supported_panel = RefData.SupportedPanel.fromString(params.panel)
+        def supported_panel = RefData.SupportedPanel.fromString((String) params.panel)
 
         if (supported_panel && !params.containsKey('ref_data_panel_data_path')) {
-            def ref_genome_version = RefGenome.Version.fromNumericName(params.genome_version)
+            def ref_genome_version = RefGenome.Version.fromNumericName((String) params.genome_version)
             params.ref_data_panel_data_path = RefData.getDefaultPanelDataPath(supported_panel, ref_genome_version)
         }
 
@@ -182,9 +182,9 @@ class Params {
         }
     }
 
-    private static void setUmiDefaults(params) {
+    private static void setUmiDefaults(Map params) {
 
-        def pipeline_mode = RunModes.Pipeline.fromString(params.mode)
+        def pipeline_mode = RunModes.Pipeline.fromString((String) params.mode)
 
         if (pipeline_mode === RunModes.Pipeline.TARGETED) {
 
@@ -212,7 +212,7 @@ class Params {
         if (!params.containsKey('redux_umi_duplex_delim')) params.redux_umi_duplex_delim = ''
     }
 
-    private static void validateUmiParams(params) {
+    private static void validateUmiParams(Map params) {
 
         def fastp_umi_args_set_any = params.fastp_umi_location || params.fastp_umi_length || params.fastp_umi_skip >= 0
 
@@ -242,7 +242,7 @@ class Params {
         }
     }
 
-    public static void createStubPlaceholders(params) {
+    public static void createStubPlaceholders(Map params) {
 
         def fps = [
             params.ref_data_genome_alt,
@@ -255,13 +255,13 @@ class Params {
             params.ref_data_genome_star_index,
         ]
 
-        params.hmf_data_paths[params.genome_version.toString()]
+        params.hmf_data_paths[(String) params.genome_version]
             .each { k, v ->
                 fps << "${params.ref_data_hmf_data_path.replaceAll('/$', '')}/${v}"
             }
 
         if (params.panel !== null) {
-            params.panel_data_paths[params.panel][params.genome_version.toString()]
+            params.panel_data_paths[(String) params.panel][(String) params.genome_version]
                 .each { k, v ->
                     fps << "${params.ref_data_panel_data_path.replaceAll('/$', '')}/${v}"
                 }
