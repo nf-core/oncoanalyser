@@ -141,6 +141,7 @@ workflow PANEL_RESOURCE_CREATION {
         ref_data.genome_version,
         ref_data.genome_fai,
         hmf_data.ensembl_data_resources,
+        hmf_data.driver_gene_panel,
         hmf_data.known_fusion_data,
         isofox_counts,
         isofox_gc_ratios,

@@ -15,6 +15,7 @@ process ISOFOX {
     val genome_ver
     path genome_fai
     path ensembl_data_resources
+    path driver_gene_panel
     path known_fusion_data
     path gene_distribution
     path alt_sj_distribution
@@ -57,6 +58,7 @@ process ISOFOX {
         -ref_genome ${genome_fasta} \\
         -ref_genome_version ${genome_ver} \\
         -ensembl_data_dir ${ensembl_data_resources} \\
+        -driver_gene_panel ${driver_gene_panel} \\
         -known_fusion_file ${known_fusion_data} \\
         -gene_distribution_file ${gene_distribution} \\
         -alt_sj_cohort_file ${alt_sj_distribution} \\
