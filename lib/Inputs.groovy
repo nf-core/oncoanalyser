@@ -201,24 +201,12 @@ class Inputs {
     // Files - REDUX
     public static List resolveReduxBamBai(redux_bam_bai, meta, sample_type) {
 
-        def file_key_map = [
-            (SampleMeta.SampleType.TUMOR): [
-                bam: SampleMeta.INPUT.BAM_REDUX_DNA_TUMOR,
-                bai: SampleMeta.INPUT.BAI_DNA_TUMOR,
-            ],
-
-            (SampleMeta.SampleType.NORMAL): [
-                bam: SampleMeta.INPUT.BAM_REDUX_DNA_NORMAL,
-                bai: SampleMeta.INPUT.BAI_DNA_NORMAL,
-            ],
-
-            (SampleMeta.SampleType.DONOR): [
-                bam: SampleMeta.INPUT.BAM_REDUX_DNA_DONOR,
-                bai: SampleMeta.INPUT.BAI_DNA_DONOR,
-            ],
-        ]
-
-        def file_keys = file_key_map[sample_type]
+        def file_keys = switch (sample_type) {
+            case SampleMeta.SampleType.TUMOR -> [bam: SampleMeta.INPUT.BAM_REDUX_DNA_TUMOR, bai: SampleMeta.INPUT.BAI_DNA_TUMOR]
+            case SampleMeta.SampleType.NORMAL -> [bam: SampleMeta.INPUT.BAM_REDUX_DNA_NORMAL, bai: SampleMeta.INPUT.BAI_DNA_NORMAL]
+            case SampleMeta.SampleType.DONOR -> [bam: SampleMeta.INPUT.BAM_REDUX_DNA_DONOR, bai: SampleMeta.INPUT.BAI_DNA_DONOR]
+            default -> throw new IllegalArgumentException("Invalid sample type: ${sample_type}")
+        }
 
         def (bam, bai) = redux_bam_bai
 
@@ -236,13 +224,12 @@ class Inputs {
         // cloud environments, this would mean the BAMs are copied to the VM running that downstream process.
         // When the BAMs are not needed as input, this would result in the VM requiring more disk space than necessary.
 
-        def file_key_map = [
-            (SampleMeta.SampleType.TUMOR): SampleMeta.INPUT.REDUX_TSV_DIR_TUMOR,
-            (SampleMeta.SampleType.NORMAL): SampleMeta.INPUT.REDUX_TSV_DIR_NORMAL,
-            (SampleMeta.SampleType.DONOR): SampleMeta.INPUT.REDUX_TSV_DIR_DONOR,
-        ]
-
-        def file_key = file_key_map[sample_type]
+        def file_key = switch (sample_type) {
+            case SampleMeta.SampleType.TUMOR -> SampleMeta.INPUT.REDUX_TSV_DIR_TUMOR
+            case SampleMeta.SampleType.NORMAL -> SampleMeta.INPUT.REDUX_TSV_DIR_NORMAL
+            case SampleMeta.SampleType.DONOR -> SampleMeta.INPUT.REDUX_TSV_DIR_DONOR
+            default -> throw new IllegalArgumentException("Invalid sample type: ${sample_type}")
+        }
 
         def unwrapped_redux_dir = (redux_dir instanceof List && redux_dir.size() == 1) ? redux_dir[0] : redux_dir
 
@@ -263,24 +250,25 @@ class Inputs {
     // Files - SAGE
     private static List resolveSageVcfWithTbi(sage_dir, meta, sample_type) {
 
-        def file_key_map = [
-            (SampleMeta.SampleType.TUMOR): SampleMeta.INPUT.SAGE_DIR_TUMOR,
-            (SampleMeta.SampleType.NORMAL): SampleMeta.INPUT.SAGE_DIR_NORMAL,
-        ]
+        def file_key = switch (sample_type) {
+            case SampleMeta.SampleType.TUMOR -> SampleMeta.INPUT.SAGE_DIR_TUMOR
+            case SampleMeta.SampleType.NORMAL -> SampleMeta.INPUT.SAGE_DIR_NORMAL
+            default -> throw new IllegalArgumentException("Unsupported sample type: ${sample_type}")
+        }
 
-        def file_key = file_key_map[sample_type]
         def selected_sage_dir = preferUserProvidedInput(sage_dir, meta, file_key)
         if(!selected_sage_dir)
             return []
 
-        def sample_id = getTumorDnaSampleName(meta)
-        def file_name_map = [
-            (SampleMeta.SampleType.TUMOR): "${sample_id}.sage.somatic.vcf.gz",
-            (SampleMeta.SampleType.NORMAL): "${sample_id}.sage.germline.vcf.gz",
-        ]
-
-        def vcf_name = file_name_map[sample_type]
         def sage_dir_path = nextflow.Nextflow.file(selected_sage_dir)
+
+        def sample_id = getTumorDnaSampleName(meta)
+
+        def vcf_name = switch (sample_type) {
+            case SampleMeta.SampleType.TUMOR -> "${sample_id}.sage.somatic.vcf.gz"
+            case SampleMeta.SampleType.NORMAL -> "${sample_id}.sage.germline.vcf.gz"
+            default -> throw new IllegalArgumentException("Unsupported sample type: ${sample_type}")
+        }
 
         return [ sage_dir_path.resolve(vcf_name), sage_dir_path.resolve("${vcf_name}.tbi") ]
     }
