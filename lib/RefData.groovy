@@ -6,7 +6,7 @@ class RefData {
     public static final String TSO500_PANEL_37_PATH = 'https://pub-cf6ba01919994c3cbd354659947f74d8.r2.dev/hmf_reference_data/panels/hmf_panel_resources.tso500.37_v2.3.0--2.tar.gz'
     public static final String TSO500_PANEL_38_PATH = 'https://pub-cf6ba01919994c3cbd354659947f74d8.r2.dev/hmf_reference_data/panels/hmf_panel_resources.tso500.38_v2.3.0--2.tar.gz'
 
-    public static final List<String> PANELS_DEFINED = ['tso500', 'pm_haem']
+    public static final List<String> PANELS_DEFINED = ['tso500', 'msk', 'oncopanel', 'pm_haem']
 
     public static enum Type {
         // Compound types
