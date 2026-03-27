@@ -49,7 +49,7 @@ class Params {
         def pipeline_mode = RunModes.Pipeline.fromString((String) params.mode)
 
         // Purity estimate mode
-        if (pipeline_mode === RunModes.Pipeline.PURITY_ESTIMATE) {
+        if (pipeline_mode == RunModes.Pipeline.PURITY_ESTIMATE) {
 
             if(!params.purity_estimate_mode){
                 error(
@@ -65,7 +65,7 @@ class Params {
         }
 
         // Prepare reference
-        if (pipeline_mode === RunModes.Pipeline.PREPARE_REFERENCE && params.ref_data_types == null) {
+        if (pipeline_mode == RunModes.Pipeline.PREPARE_REFERENCE && params.ref_data_types == null) {
             error(
                 "CLI argument --ref_data_types is required for mode prepare_reference.",
                 "Please specify one or more of the below valid values (separated by commas)",
@@ -198,7 +198,7 @@ class Params {
 
         def pipeline_mode = RunModes.Pipeline.fromString((String) params.mode)
 
-        if (pipeline_mode === RunModes.Pipeline.TARGETED) {
+        if (pipeline_mode == RunModes.Pipeline.TARGETED) {
 
             // When fastp UMI is enabled, REDUX UMI should be as well
             if (params.fastp_umi_enabled && (!params.containsKey('redux_umi_enabled') || !params.redux_umi_enabled)) {
@@ -245,7 +245,7 @@ class Params {
             )
         }
 
-        if (params.redux_umi_duplex_delim && params.redux_umi_enabled === false) {
+        if (params.redux_umi_duplex_delim && params.redux_umi_enabled == false) {
             error(
                 "Detected use of REDUX UMI parameters but REDUX UMI processing has not been",
                 "enabled. Please review your configuration and set the redux_umi_enabled flag or",
@@ -272,7 +272,7 @@ class Params {
                 fps << "${params.ref_data_hmf_data_path.replaceAll('/$', '')}/${v}"
             }
 
-        if (params.panel !== null) {
+        if (params.panel != null) {
             params.panel_data_paths[(String) params.panel][(String) params.genome_version]
                 .each { k, v ->
                     fps << "${params.ref_data_panel_data_path.replaceAll('/$', '')}/${v}"
@@ -280,7 +280,7 @@ class Params {
         }
 
         fps.each { fp_str ->
-            if (fp_str === null) {
+            if (fp_str == null) {
                 return
             }
 
