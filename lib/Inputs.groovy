@@ -240,9 +240,8 @@ class Inputs {
         def meta_sample = meta.getOrDefault([sample_type, SampleMeta.SequenceType.DNA], [:])
         def sample_id = meta_sample.getOrDefault('longitudinal_sample_id', meta_sample['sample_id'])
 
-        def redux_tsvs = nextflow.Nextflow.file("${selected_redux_dir}/${sample_id}.redux.*.tsv*")
-        if (!redux_tsvs)
-            return []
+        // NOTE(LN): toUriString() needs to be called, otherwise nextflow will fail to resolve cloud paths
+        def redux_tsvs = nextflow.Nextflow.file("${selected_redux_dir.toUriString()}/${sample_id}.redux.*.tsv*")
 
         return redux_tsvs
     }
@@ -260,8 +259,6 @@ class Inputs {
         if(!selected_sage_dir)
             return []
 
-        def sage_dir_path = nextflow.Nextflow.file(selected_sage_dir)
-
         def sample_id = getTumorDnaSampleName(meta)
 
         def vcf_name = switch (sample_type) {
@@ -270,7 +267,10 @@ class Inputs {
             default -> throw new IllegalArgumentException("Unsupported sample type: ${sample_type}")
         }
 
-        return [ sage_dir_path.resolve(vcf_name), sage_dir_path.resolve("${vcf_name}.tbi") ]
+        return [
+            nextflow.Nextflow.file("${selected_sage_dir.toUriString()}/${vcf_name}"),
+            nextflow.Nextflow.file("${selected_sage_dir.toUriString()}/${vcf_name}.tbi"),
+        ]
     }
 
     // Files - PURPLE
