@@ -5,8 +5,8 @@ process CIDER {
 
     conda "${moduleDir}/environment.yml"
     container "${ workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container ?
-        'https://depot.galaxyproject.org/singularity/hmftools-cider:1.1--hdfd78af_0' :
-        'biocontainers/hmftools-cider:1.1--hdfd78af_0' }"
+        'https://depot.galaxyproject.org/singularity/hmftools-cider:1.2--hdfd78af_0' :
+        'biocontainers/hmftools-cider:1.2--hdfd78af_0' }"
 
     input:
     tuple val(meta), path(bam), path(bai)

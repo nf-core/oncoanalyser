@@ -4,8 +4,8 @@ process PURPLE {
 
     conda "${moduleDir}/environment.yml"
     container "${ workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container ?
-        'https://depot.galaxyproject.org/singularity/hmftools-purple:4.3--hdfd78af_0' :
-        'biocontainers/hmftools-purple:4.3--hdfd78af_0' }"
+        'https://depot.galaxyproject.org/singularity/hmftools-purple:4.4--hdfd78af_0' :
+        'biocontainers/hmftools-purple:4.4--hdfd78af_0' }"
 
     input:
     tuple val(meta),
