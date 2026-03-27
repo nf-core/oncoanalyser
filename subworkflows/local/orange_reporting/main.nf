@@ -27,7 +27,6 @@ workflow ORANGE_REPORTING {
     // Reference data
     genome_version              // channel: [mandatory] genome version
     disease_ontology            // channel: [mandatory] /path/to/disease_ontology
-    driver_gene_panel           // channel: [mandatory] /path/to/driver_gene_panel
 
     // Params
     targeted_mode               // boolean: [mandatory] Set targeted mode
@@ -177,7 +176,6 @@ workflow ORANGE_REPORTING {
         ch_orange_inputs,
         genome_version,
         disease_ontology,
-        driver_gene_panel,
         '3.0.0 [oncoanalyser]',
         targeted_mode,
     )

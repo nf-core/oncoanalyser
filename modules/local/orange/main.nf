@@ -27,7 +27,6 @@ process ORANGE {
         path(isofox_dir)
     val genome_ver
     path disease_ontology
-    path driver_gene_panel
     val pipeline_version
     val targeted_mode
 
@@ -145,7 +144,6 @@ process ORANGE {
         \\
         -ref_genome_version ${genome_ver} \\
         -doid_json ${disease_ontology} \\
-        -driver_gene_panel ${driver_gene_panel} \\
         ${log_level_arg} \\
         -output_dir output/
 
