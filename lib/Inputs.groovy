@@ -240,7 +240,7 @@ class Inputs {
         def meta_sample = meta.getOrDefault([sample_type, SampleMeta.SequenceType.DNA], [:])
         def sample_id = meta_sample.getOrDefault('longitudinal_sample_id', meta_sample['sample_id'])
 
-        def redux_tsvs = nextflow.Nextflow.files("${selected_redux_dir}/${sample_id}.redux.*.tsv*")
+        def redux_tsvs = nextflow.Nextflow.file("${selected_redux_dir}/${sample_id}.redux.*.tsv*")
         if (!redux_tsvs)
             return []
 
