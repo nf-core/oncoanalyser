@@ -87,6 +87,7 @@ workflow NFCORE_ONCOANALYSER {
            params.processes_include,
            params.processes_exclude,
            params.processes_manual,
+           inputs,
            log,
         )
 

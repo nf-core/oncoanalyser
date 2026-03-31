@@ -204,7 +204,7 @@ workflow PURITY_ESTIMATE {
     //
     // channel: [ meta, sage_append_dir ]
     ch_sage_somatic_append_out = Channel.empty()
-    if (stages.orange) {
+    if (stages.sage_append || stages.orange) {
 
         SAGE_APPEND(
             ch_inputs,
