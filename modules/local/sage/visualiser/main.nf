@@ -66,7 +66,7 @@ process SAGE_VISUALISER {
         -output_vcf sage_vis/${meta.tumor_id}.sage.vis.vcf.gz \\
         -threads ${task.cpus} \\
         ${log_level_arg}
-        
+
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":
         sage: \$(sage -version | sed 's/^.* //')
