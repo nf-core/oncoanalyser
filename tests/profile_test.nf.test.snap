@@ -1,7 +1,6 @@
 {
     "-profile test": {
         "content": [
-            43,
             [
                 "pipeline_info",
                 "pipeline_info/software_versions.yml",
@@ -432,9 +431,9 @@
             ]
         ],
         "meta": {
-            "nf-test": "0.9.3",
+            "nf-test": "0.9.2",
             "nextflow": "25.10.2"
         },
-        "timestamp": "2025-12-03T05:13:51.245667357"
+        "timestamp": "2026-01-08T12:38:40.441795159"
     }
 }

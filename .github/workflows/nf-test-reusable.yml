@@ -18,6 +18,14 @@ on:
         description: "RunsOn runner instance volume"
         type: string
         required: true
+      use_reference_cache:
+        description: "Whether to restore and use cached HMF reference data for tests"
+        type: boolean
+        required: true
+      hmf_ref_version:
+        description: "HMF reference data version string for cache key"
+        type: string
+        required: true
 
 env:
   GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -26,6 +34,7 @@ env:
   NXF_ANSI_LOG: false
   NXF_SINGULARITY_CACHEDIR: ${{ github.workspace }}/.singularity
   NXF_SINGULARITY_LIBRARYDIR: ${{ github.workspace }}/.singularity
+  HMF_REF_VERSION: ${{ inputs.hmf_ref_version }}
 
 jobs:
   nf-test-changes:
@@ -69,6 +78,7 @@ jobs:
       - runs-on=${{ github.run_id }}-nf-test
       - runner=${{ inputs.runson_instance_type }}
       - volume=${{ inputs.runson_volume_size }}
+      - extras=s3-cache
     strategy:
       fail-fast: false
       matrix:
@@ -93,6 +103,40 @@ jobs:
       - uses: actions/checkout@93cb6efe18208431cddfb8368fd83d5badbf9bfd # v5
         with:
           fetch-depth: 0
+
+      - uses: runs-on/action@v2
+
+      - name: Restore HMF reference cache
+        if: ${{ inputs.use_reference_cache }}
+        uses: actions/cache@v4
+        with:
+          path: reference_data/
+          key: hmf-reference-${{ env.HMF_REF_VERSION }}-${{ hashFiles('nextflow.config', 'conf/hmf_data.config', 'conf/hmf_genomes.config') }}
+
+      - name: Set reference data paths
+        if: ${{ inputs.use_reference_cache }}
+        run: |
+          # Find the versioned subdirectory containing the reference FASTA and convert to absolute path
+          REF_DIR=$(find reference_data -type f -name "GRCh38_masked_exclusions_alts_hlas.fasta" -printf '%h\n' 2>/dev/null | head -1)
+          if [ -n "$REF_DIR" ]; then
+            # Convert to absolute path
+            REF_DIR_ABS=$(cd "$REF_DIR" && pwd)
+            echo "NXF_REF_DATA_PATH=$REF_DIR_ABS" >> $GITHUB_ENV
+            echo "Found reference data at: $REF_DIR_ABS"
+
+            # Find index directories using pattern matching (already absolute since REF_DIR_ABS is absolute)
+            BWAMEM2_INDEX=$(find "$REF_DIR_ABS" -maxdepth 1 -type d -name "bwa-mem2_index*" 2>/dev/null | head -1)
+            GRIDSS_INDEX=$(find "$REF_DIR_ABS" -maxdepth 1 -type d -name "gridss_index*" 2>/dev/null | head -1)
+            STAR_INDEX=$(find "$REF_DIR_ABS" -maxdepth 1 -type d -name "star_index*" 2>/dev/null | head -1)
+            HMF_DATA=$(find "$REF_DIR_ABS" -maxdepth 1 -type d -name "hmf_pipeline_resources*" 2>/dev/null | head -1)
+
+            [ -n "$BWAMEM2_INDEX" ] && echo "NXF_REF_BWAMEM2_INDEX=$BWAMEM2_INDEX" >> $GITHUB_ENV
+            [ -n "$GRIDSS_INDEX" ] && echo "NXF_REF_GRIDSS_INDEX=$GRIDSS_INDEX" >> $GITHUB_ENV
+            [ -n "$STAR_INDEX" ] && echo "NXF_REF_STAR_INDEX=$STAR_INDEX" >> $GITHUB_ENV
+            [ -n "$HMF_DATA" ] && echo "NXF_REF_HMF_DATA=$HMF_DATA" >> $GITHUB_ENV
+          else
+            echo "No cached reference data found"
+          fi
 
       - name: Run nf-test
         id: run_nf_test
