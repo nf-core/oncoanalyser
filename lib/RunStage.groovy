@@ -19,6 +19,7 @@ public enum RunStage {
     QSEE,
     REDUX,
     SAGE,
+    SAGE_APPEND,
     SAGE_VIS,
     SIGS,
     TEAL,

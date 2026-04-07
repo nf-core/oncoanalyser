@@ -496,7 +496,7 @@ workflow TARGETED {
     // channel: [ meta, sage_append_vcf ]
     ch_sage_somatic_append_out = Channel.empty()
     ch_sage_germline_append_out = Channel.empty()
-    if (stages.orange) {
+    if (stages.sage_append) {
 
         SAGE_APPEND(
             ch_inputs,
