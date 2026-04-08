@@ -1,4 +1,4 @@
-class SampleMeta {
+class SampleSheetFields {
 
     public static enum FileType {
         // Generic
@@ -137,4 +137,5 @@ class SampleMeta {
 
         VIRUSINTERPRETER_DIR: [FileType.VIRUSINTERPRETER_DIR, SampleType.TUMOR, SequenceType.DNA],
     ]
+
 }

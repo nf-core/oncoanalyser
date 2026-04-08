@@ -45,14 +45,14 @@ workflow SAGE_APPEND {
     )
         .map { meta, tumor_dna_bam_bai, tumor_dna_tsvs, tumor_rna_bam_bai, purple_dir ->
 
-            def (tumor_dna_bam, tumor_dna_bai) = Inputs.resolveReduxBamBai(tumor_dna_bam_bai, meta, SampleMeta.SampleType.TUMOR)
-            def tumor_dna_redux_tsvs = Inputs.resolveReduxTsvFiles(tumor_dna_tsvs, meta, SampleMeta.SampleType.TUMOR)
+            def (tumor_dna_bam, tumor_dna_bai) = Inputs.resolveReduxBamBai(tumor_dna_bam_bai, meta, SampleSheetFields.SampleType.TUMOR)
+            def tumor_dna_redux_tsvs = Inputs.resolveReduxTsvFiles(tumor_dna_tsvs, meta, SampleSheetFields.SampleType.TUMOR)
 
             def (tumor_rna_bam, tumor_rna_bai) = tumor_rna_bam_bai
-            tumor_rna_bam = Inputs.preferUserProvidedInput(tumor_rna_bam, meta, SampleMeta.INPUT.BAM_RNA_TUMOR)
-            tumor_rna_bai = Inputs.preferPipelineOutput(tumor_rna_bai, meta, SampleMeta.INPUT.BAI_RNA_TUMOR)
+            tumor_rna_bam = Inputs.preferUserProvidedInput(tumor_rna_bam, meta, SampleSheetFields.INPUT.BAM_RNA_TUMOR)
+            tumor_rna_bai = Inputs.preferPipelineOutput(tumor_rna_bai, meta, SampleSheetFields.INPUT.BAI_RNA_TUMOR)
 
-            purple_dir = Inputs.preferUserProvidedInput(purple_dir, meta, SampleMeta.INPUT.PURPLE_DIR)
+            purple_dir = Inputs.preferUserProvidedInput(purple_dir, meta, SampleSheetFields.INPUT.PURPLE_DIR)
 
             def inputs = [
                 meta: meta,
@@ -89,7 +89,7 @@ workflow SAGE_APPEND {
 
             def should_append_rna_variants = has_tumor_rna && has_normal_dna && has_smlv_germline
 
-            def has_existing = Inputs.hasExistingInput(meta, SampleMeta.INPUT.SAGE_APPEND_DIR_NORMAL)
+            def has_existing = Inputs.hasExistingInput(meta, SampleSheetFields.INPUT.SAGE_APPEND_DIR_NORMAL)
 
             runnable: should_append_rna_variants && !has_existing && enable_germline
                 return inputs
@@ -154,7 +154,7 @@ workflow SAGE_APPEND {
             def should_append_rna_variants = !purity_estimate_mode && has_tumor_rna && has_tumor_dna && has_smlv_somatic
             def should_append_longitudinal_variants = purity_estimate_mode && has_tumor_dna && has_smlv_somatic
 
-            def has_existing = Inputs.hasExistingInput(meta, SampleMeta.INPUT.SAGE_APPEND_DIR_TUMOR)
+            def has_existing = Inputs.hasExistingInput(meta, SampleSheetFields.INPUT.SAGE_APPEND_DIR_TUMOR)
 
             runnable: (should_append_rna_variants || should_append_longitudinal_variants) && !has_existing
                 return inputs

@@ -22,7 +22,7 @@ workflow CHORD_PREDICTION {
     // channel: [ meta, purple_dir ]
     ch_inputs_selected = ch_purple
         .map { meta, purple_dir ->
-            return [meta, Inputs.preferUserProvidedInput(purple_dir, meta, SampleMeta.INPUT.PURPLE_DIR)]
+            return [meta, Inputs.preferUserProvidedInput(purple_dir, meta, SampleSheetFields.INPUT.PURPLE_DIR)]
         }
 
     // Sort inputs
@@ -41,7 +41,7 @@ workflow CHORD_PREDICTION {
                 has_sv_vcf = purple_dir ? Inputs.getPurpleSomaticSvVcf(meta, purple_dir) : []
             }
 
-            def has_existing = Inputs.hasExistingInput(meta, SampleMeta.INPUT.CHORD_DIR)
+            def has_existing = Inputs.hasExistingInput(meta, SampleSheetFields.INPUT.CHORD_DIR)
 
             runnable: has_tumor_normal_dna && purple_dir && has_smlv_vcf && has_sv_vcf && !has_existing
             skip: true

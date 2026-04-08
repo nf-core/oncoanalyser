@@ -34,10 +34,10 @@ workflow CUPPA_PREDICTION {
         .map { meta, isofox_dir, purple_dir, linx_annotation_dir, virusinterpreter_dir ->
 
             def inputs = [
-                Inputs.preferUserProvidedInput(isofox_dir, meta, SampleMeta.INPUT.ISOFOX_DIR),
-                Inputs.preferUserProvidedInput(purple_dir, meta, SampleMeta.INPUT.PURPLE_DIR),
-                Inputs.preferUserProvidedInput(linx_annotation_dir, meta, SampleMeta.INPUT.LINX_ANNO_DIR_TUMOR),
-                Inputs.preferUserProvidedInput(virusinterpreter_dir, meta, SampleMeta.INPUT.VIRUSINTERPRETER_DIR),
+                Inputs.preferUserProvidedInput(isofox_dir, meta, SampleSheetFields.INPUT.ISOFOX_DIR),
+                Inputs.preferUserProvidedInput(purple_dir, meta, SampleSheetFields.INPUT.PURPLE_DIR),
+                Inputs.preferUserProvidedInput(linx_annotation_dir, meta, SampleSheetFields.INPUT.LINX_ANNO_DIR_TUMOR),
+                Inputs.preferUserProvidedInput(virusinterpreter_dir, meta, SampleSheetFields.INPUT.VIRUSINTERPRETER_DIR),
             ]
 
             return [meta, *inputs]
@@ -60,7 +60,7 @@ workflow CUPPA_PREDICTION {
             //
             // (run exclusions currently done basis for presence of normal DNA)
 
-            def has_existing = Inputs.hasExistingInput(meta, SampleMeta.INPUT.CUPPA_DIR)
+            def has_existing = Inputs.hasExistingInput(meta, SampleSheetFields.INPUT.CUPPA_DIR)
             def has_normal_dna = Inputs.hasNormalDna(meta)
 
             def has_runnable_inputs = isofox_dir || (purple_dir && linx_annotation_dir && virusinterpreter_dir && has_normal_dna)

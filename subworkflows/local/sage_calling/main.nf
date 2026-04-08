@@ -49,13 +49,13 @@ workflow SAGE_CALLING {
     )
         .map { meta, tumor_bam_bai, normal_bam_bai, donor_bam_bai, tumor_dir, normal_dir, donor_dir ->
 
-            def (tumor_bam, tumor_bai) = Inputs.resolveReduxBamBai(tumor_bam_bai, meta, SampleMeta.SampleType.TUMOR)
-            def (normal_bam, normal_bai) = Inputs.resolveReduxBamBai(normal_bam_bai, meta, SampleMeta.SampleType.NORMAL)
-            def (donor_bam, donor_bai) = Inputs.resolveReduxBamBai(donor_bam_bai, meta, SampleMeta.SampleType.DONOR)
+            def (tumor_bam, tumor_bai) = Inputs.resolveReduxBamBai(tumor_bam_bai, meta, SampleSheetFields.SampleType.TUMOR)
+            def (normal_bam, normal_bai) = Inputs.resolveReduxBamBai(normal_bam_bai, meta, SampleSheetFields.SampleType.NORMAL)
+            def (donor_bam, donor_bai) = Inputs.resolveReduxBamBai(donor_bam_bai, meta, SampleSheetFields.SampleType.DONOR)
 
-            def tumor_tsvs = Inputs.resolveReduxTsvFiles(tumor_dir, meta, SampleMeta.SampleType.TUMOR)
-            def normal_tsvs = Inputs.resolveReduxTsvFiles(normal_dir, meta, SampleMeta.SampleType.NORMAL)
-            def donor_tsvs = Inputs.resolveReduxTsvFiles(donor_dir, meta, SampleMeta.SampleType.DONOR)
+            def tumor_tsvs = Inputs.resolveReduxTsvFiles(tumor_dir, meta, SampleSheetFields.SampleType.TUMOR)
+            def normal_tsvs = Inputs.resolveReduxTsvFiles(normal_dir, meta, SampleSheetFields.SampleType.NORMAL)
+            def donor_tsvs = Inputs.resolveReduxTsvFiles(donor_dir, meta, SampleSheetFields.SampleType.DONOR)
 
             def redux_tsvs = [ *tumor_tsvs, *normal_tsvs, *donor_tsvs ]
 
@@ -88,7 +88,7 @@ workflow SAGE_CALLING {
     ch_inputs_germline_sorted = ch_inputs_sorted.runnable
         .branch { inputs ->
             def has_tumor_normal = inputs.tumor_bam && inputs.normal_bam
-            def has_existing = Inputs.hasExistingInput(inputs.meta, SampleMeta.INPUT.SAGE_DIR_NORMAL)
+            def has_existing = Inputs.hasExistingInput(inputs.meta, SampleSheetFields.INPUT.SAGE_DIR_NORMAL)
 
             runnable: has_tumor_normal && !has_existing && enable_germline
                 return inputs
@@ -145,7 +145,7 @@ workflow SAGE_CALLING {
     ch_inputs_somatic_sorted = ch_inputs_sorted.runnable
         .branch { inputs ->
             def has_tumor = inputs.tumor_bam
-            def has_existing = Inputs.hasExistingInput(inputs.meta, SampleMeta.INPUT.SAGE_DIR_TUMOR)
+            def has_existing = Inputs.hasExistingInput(inputs.meta, SampleSheetFields.INPUT.SAGE_DIR_TUMOR)
 
             runnable: has_tumor && !has_existing
                 return inputs

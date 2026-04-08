@@ -42,13 +42,13 @@ workflow PAVE_ANNOTATION {
     ch_sage_germline_inputs_sorted = ch_sage_dir_germline
         .map { meta, sage_dir ->
 
-            def (sage_vcf, sage_tbi) = Inputs.resolveSageVcfWithTbi(sage_dir, meta, SampleMeta.SampleType.NORMAL)
+            def (sage_vcf, sage_tbi) = Inputs.resolveSageVcfWithTbi(sage_dir, meta, SampleSheetFields.SampleType.NORMAL)
 
             return [ meta, sage_vcf, sage_tbi ]
         }
         .branch { meta, sage_vcf, sage_tbi ->
 
-            def has_existing = Inputs.hasExistingInput(meta, SampleMeta.INPUT.PAVE_DIR_NORMAL)
+            def has_existing = Inputs.hasExistingInput(meta, SampleSheetFields.INPUT.PAVE_DIR_NORMAL)
 
             runnable: Inputs.hasTumorDna(meta) && Inputs.hasNormalDna(meta) && sage_vcf && !has_existing
             skip: true
@@ -95,13 +95,13 @@ workflow PAVE_ANNOTATION {
     ch_sage_somatic_inputs_sorted = ch_sage_dir_somatic
         .map { meta, sage_dir ->
 
-            def (sage_vcf, sage_tbi) = Inputs.resolveSageVcfWithTbi(sage_dir, meta, SampleMeta.SampleType.TUMOR)
+            def (sage_vcf, sage_tbi) = Inputs.resolveSageVcfWithTbi(sage_dir, meta, SampleSheetFields.SampleType.TUMOR)
 
             return [ meta, sage_vcf, sage_tbi ]
         }
         .branch { meta, sage_vcf, sage_tbi ->
 
-            def has_existing = Inputs.hasExistingInput(meta, SampleMeta.INPUT.PAVE_DIR_TUMOR)
+            def has_existing = Inputs.hasExistingInput(meta, SampleSheetFields.INPUT.PAVE_DIR_TUMOR)
 
             runnable: Inputs.hasTumorDna(meta) && sage_vcf && !has_existing
             skip: true

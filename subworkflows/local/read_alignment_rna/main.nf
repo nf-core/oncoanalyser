@@ -24,7 +24,7 @@ workflow READ_ALIGNMENT_RNA {
     // channel: [ meta ]
     ch_inputs_sorted = ch_inputs
         .branch { meta ->
-            def has_existing = Inputs.hasExistingInput(meta, SampleMeta.INPUT.BAM_RNA_TUMOR)
+            def has_existing = Inputs.hasExistingInput(meta, SampleSheetFields.INPUT.BAM_RNA_TUMOR)
             runnable: Inputs.hasTumorRnaFastq(meta) && !has_existing
             skip: true
         }
@@ -35,7 +35,7 @@ workflow READ_ALIGNMENT_RNA {
         .flatMap { meta ->
             def meta_sample = Inputs.getTumorRnaSample(meta)
             meta_sample
-                .getAt(SampleMeta.FileType.FASTQ)
+                .getAt(SampleSheetFields.FileType.FASTQ)
                 .collect { key, fps ->
                     def (library_id, lane) = key
 

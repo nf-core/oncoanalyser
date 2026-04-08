@@ -63,22 +63,22 @@ workflow ORANGE_REPORTING {
             def meta = inputs_list[0]
             inputs_map.meta = meta
 
-            inputs_map.sage_somatic             = Inputs.preferUserProvidedInput(inputs_list[1], meta, SampleMeta.INPUT.SAGE_DIR_TUMOR)
-            inputs_map.sage_germline            = Inputs.preferUserProvidedInput(inputs_list[2], meta, SampleMeta.INPUT.SAGE_DIR_NORMAL)
-            inputs_map.sage_somatic_append      = Inputs.preferUserProvidedInput(inputs_list[3], meta, SampleMeta.INPUT.SAGE_APPEND_DIR_TUMOR)
-            inputs_map.sage_germline_append     = Inputs.preferUserProvidedInput(inputs_list[4], meta, SampleMeta.INPUT.SAGE_APPEND_DIR_NORMAL)
-            inputs_map.purple_dir               = Inputs.preferUserProvidedInput(inputs_list[5], meta, SampleMeta.INPUT.PURPLE_DIR)
-            inputs_map.qsee_dir                 = Inputs.preferUserProvidedInput(inputs_list[6], meta, SampleMeta.INPUT.QSEE_DIR)
-            inputs_map.linx_somatic_annotation  = Inputs.preferUserProvidedInput(inputs_list[7], meta, SampleMeta.INPUT.LINX_ANNO_DIR_TUMOR)
-            inputs_map.linx_somatic_plot        = Inputs.preferUserProvidedInput(inputs_list[8], meta, SampleMeta.INPUT.LINX_PLOT_DIR_TUMOR)
-            inputs_map.linx_germline_annotation = Inputs.preferUserProvidedInput(inputs_list[9], meta, SampleMeta.INPUT.LINX_ANNO_DIR_NORMAL)
-            inputs_map.virusinterpreter         = Inputs.preferUserProvidedInput(inputs_list[10], meta, SampleMeta.INPUT.VIRUSINTERPRETER_DIR)
-            inputs_map.chord                    = Inputs.preferUserProvidedInput(inputs_list[11], meta, SampleMeta.INPUT.CHORD_DIR)
-            inputs_map.sigs                     = Inputs.preferUserProvidedInput(inputs_list[12], meta, SampleMeta.INPUT.SIGS_DIR)
-            inputs_map.lilac                    = Inputs.preferUserProvidedInput(inputs_list[13], meta, SampleMeta.INPUT.LILAC_DIR)
-            inputs_map.cuppa                    = Inputs.preferUserProvidedInput(inputs_list[14], meta, SampleMeta.INPUT.CUPPA_DIR)
-            inputs_map.peach                    = Inputs.preferUserProvidedInput(inputs_list[15], meta, SampleMeta.INPUT.PEACH_DIR)
-            inputs_map.isofox                   = Inputs.preferUserProvidedInput(inputs_list[16], meta, SampleMeta.INPUT.ISOFOX_DIR)
+            inputs_map.sage_somatic             = Inputs.preferUserProvidedInput(inputs_list[1], meta, SampleSheetFields.INPUT.SAGE_DIR_TUMOR)
+            inputs_map.sage_germline            = Inputs.preferUserProvidedInput(inputs_list[2], meta, SampleSheetFields.INPUT.SAGE_DIR_NORMAL)
+            inputs_map.sage_somatic_append      = Inputs.preferUserProvidedInput(inputs_list[3], meta, SampleSheetFields.INPUT.SAGE_APPEND_DIR_TUMOR)
+            inputs_map.sage_germline_append     = Inputs.preferUserProvidedInput(inputs_list[4], meta, SampleSheetFields.INPUT.SAGE_APPEND_DIR_NORMAL)
+            inputs_map.purple_dir               = Inputs.preferUserProvidedInput(inputs_list[5], meta, SampleSheetFields.INPUT.PURPLE_DIR)
+            inputs_map.qsee_dir                 = Inputs.preferUserProvidedInput(inputs_list[6], meta, SampleSheetFields.INPUT.QSEE_DIR)
+            inputs_map.linx_somatic_annotation  = Inputs.preferUserProvidedInput(inputs_list[7], meta, SampleSheetFields.INPUT.LINX_ANNO_DIR_TUMOR)
+            inputs_map.linx_somatic_plot        = Inputs.preferUserProvidedInput(inputs_list[8], meta, SampleSheetFields.INPUT.LINX_PLOT_DIR_TUMOR)
+            inputs_map.linx_germline_annotation = Inputs.preferUserProvidedInput(inputs_list[9], meta, SampleSheetFields.INPUT.LINX_ANNO_DIR_NORMAL)
+            inputs_map.virusinterpreter         = Inputs.preferUserProvidedInput(inputs_list[10], meta, SampleSheetFields.INPUT.VIRUSINTERPRETER_DIR)
+            inputs_map.chord                    = Inputs.preferUserProvidedInput(inputs_list[11], meta, SampleSheetFields.INPUT.CHORD_DIR)
+            inputs_map.sigs                     = Inputs.preferUserProvidedInput(inputs_list[12], meta, SampleSheetFields.INPUT.SIGS_DIR)
+            inputs_map.lilac                    = Inputs.preferUserProvidedInput(inputs_list[13], meta, SampleSheetFields.INPUT.LILAC_DIR)
+            inputs_map.cuppa                    = Inputs.preferUserProvidedInput(inputs_list[14], meta, SampleSheetFields.INPUT.CUPPA_DIR)
+            inputs_map.peach                    = Inputs.preferUserProvidedInput(inputs_list[15], meta, SampleSheetFields.INPUT.PEACH_DIR)
+            inputs_map.isofox                   = Inputs.preferUserProvidedInput(inputs_list[16], meta, SampleSheetFields.INPUT.ISOFOX_DIR)
 
             return inputs_map
         }
@@ -117,7 +117,7 @@ workflow ORANGE_REPORTING {
                 key: meta.group_id,
                 id: meta.group_id,
                 tumor_id: Inputs.getTumorDnaSampleName(meta),
-                cancer_type: meta[SampleMeta.InfoField.CANCER_TYPE],
+                cancer_type: meta[SampleSheetFields.InfoField.CANCER_TYPE],
             ]
 
             // Require all normal DNA inputs to be present else clear them

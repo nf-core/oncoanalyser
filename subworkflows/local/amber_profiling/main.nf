@@ -34,18 +34,18 @@ workflow AMBER_PROFILING {
         .map { meta, tumor_bam, tumor_bai, normal_bam, normal_bai, donor_bam, donor_bai ->
             return [
                 meta,
-                Inputs.preferUserProvidedInput(tumor_bam, meta, SampleMeta.INPUT.BAM_REDUX_DNA_TUMOR),
-                Inputs.preferPipelineOutput(tumor_bai, meta, SampleMeta.INPUT.BAI_DNA_TUMOR),
+                Inputs.preferUserProvidedInput(tumor_bam, meta, SampleSheetFields.INPUT.BAM_REDUX_DNA_TUMOR),
+                Inputs.preferPipelineOutput(tumor_bai, meta, SampleSheetFields.INPUT.BAI_DNA_TUMOR),
 
-                Inputs.preferUserProvidedInput(normal_bam, meta, SampleMeta.INPUT.BAM_REDUX_DNA_NORMAL),
-                Inputs.preferPipelineOutput(normal_bai, meta, SampleMeta.INPUT.BAI_DNA_NORMAL),
+                Inputs.preferUserProvidedInput(normal_bam, meta, SampleSheetFields.INPUT.BAM_REDUX_DNA_NORMAL),
+                Inputs.preferPipelineOutput(normal_bai, meta, SampleSheetFields.INPUT.BAI_DNA_NORMAL),
 
-                Inputs.preferUserProvidedInput(donor_bam, meta, SampleMeta.INPUT.BAM_REDUX_DNA_DONOR),
-                Inputs.preferPipelineOutput(donor_bai, meta, SampleMeta.INPUT.BAI_DNA_DONOR),
+                Inputs.preferUserProvidedInput(donor_bam, meta, SampleSheetFields.INPUT.BAM_REDUX_DNA_DONOR),
+                Inputs.preferPipelineOutput(donor_bai, meta, SampleSheetFields.INPUT.BAI_DNA_DONOR),
             ]
         }
         .branch { meta, tumor_bam, tumor_bai, normal_bam, normal_bai, donor_bam, donor_bai ->
-            def has_existing = Inputs.hasExistingInput(meta, SampleMeta.INPUT.AMBER_DIR)
+            def has_existing = Inputs.hasExistingInput(meta, SampleSheetFields.INPUT.AMBER_DIR)
 
 
             // TODO(SW): must improve handling through separation of sample information in meta; currently unable to provide ccfDNA AMBER directory in samplesheet

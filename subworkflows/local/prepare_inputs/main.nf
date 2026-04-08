@@ -4,7 +4,7 @@
 
 // NOTE(SW): inputs for the pipeline are prepared outside of NF
 // workflow/channels to allow higher-level conditionals, however nf-test
-// well-formed meta (including SampleMeta) that can only be made available
+// well-formed meta (including SampleSheetFields) that can only be made available
 // through running workflows/processes with 'setup'. Hence, this subworkflow
 // isn't used in the main pipeline and is only used for execution of tests.
 

@@ -1,20 +1,24 @@
+import SampleSheetFields.FileType
+import SampleSheetFields.SampleType
+import SampleSheetFields.SequenceType
+
 class Inputs {
 
     // Sample records
     public static getTumorDnaSample(meta) {
-        return meta.getOrDefault([SampleMeta.SampleType.TUMOR, SampleMeta.SequenceType.DNA], [:])
+        return meta.getOrDefault([SampleType.TUMOR, SequenceType.DNA], [:])
     }
 
     public static getTumorRnaSample(meta) {
-        return meta.getOrDefault([SampleMeta.SampleType.TUMOR, SampleMeta.SequenceType.RNA], [:])
+        return meta.getOrDefault([SampleType.TUMOR, SequenceType.RNA], [:])
     }
 
     public static getNormalDnaSample(meta) {
-        return meta.getOrDefault([SampleMeta.SampleType.NORMAL, SampleMeta.SequenceType.DNA], [:])
+        return meta.getOrDefault([SampleType.NORMAL, SequenceType.DNA], [:])
     }
 
     public static getDonorDnaSample(meta) {
-        return meta.getOrDefault([SampleMeta.SampleType.DONOR, SampleMeta.SequenceType.DNA], [:])
+        return meta.getOrDefault([SampleType.DONOR, SequenceType.DNA], [:])
     }
 
     // Sample names
@@ -55,15 +59,15 @@ class Inputs {
 
     // Files - Tumor DNA
     public static getTumorDnaFastq(meta) {
-        return getTumorDnaSample(meta).getOrDefault(SampleMeta.FileType.FASTQ, null)
+        return getTumorDnaSample(meta).getOrDefault(FileType.FASTQ, null)
     }
 
     public static getTumorDnaBam(meta) {
-        return getTumorDnaSample(meta).getOrDefault(SampleMeta.FileType.BAM, null)
+        return getTumorDnaSample(meta).getOrDefault(FileType.BAM, null)
     }
 
     public static getTumorDnaReduxBam(meta) {
-        return getTumorDnaSample(meta).getOrDefault(SampleMeta.FileType.BAM_REDUX, null)
+        return getTumorDnaSample(meta).getOrDefault(FileType.BAM_REDUX, null)
     }
 
 
@@ -82,15 +86,15 @@ class Inputs {
 
     // Files - Normal DNA
     public static getNormalDnaFastq(meta) {
-        return getNormalDnaSample(meta).getOrDefault(SampleMeta.FileType.FASTQ, null)
+        return getNormalDnaSample(meta).getOrDefault(FileType.FASTQ, null)
     }
 
     public static getNormalDnaBam(meta) {
-        return getNormalDnaSample(meta).getOrDefault(SampleMeta.FileType.BAM, null)
+        return getNormalDnaSample(meta).getOrDefault(FileType.BAM, null)
     }
 
     public static getNormalDnaReduxBam(meta) {
-        return getNormalDnaSample(meta).getOrDefault(SampleMeta.FileType.BAM_REDUX, null)
+        return getNormalDnaSample(meta).getOrDefault(FileType.BAM_REDUX, null)
     }
 
 
@@ -108,15 +112,15 @@ class Inputs {
 
     // Files - Donor DNA
     public static getDonorDnaFastq(meta) {
-        return getDonorDnaSample(meta).getOrDefault(SampleMeta.FileType.FASTQ, null)
+        return getDonorDnaSample(meta).getOrDefault(FileType.FASTQ, null)
     }
 
     public static getDonorDnaBam(meta) {
-        return getDonorDnaSample(meta).getOrDefault(SampleMeta.FileType.BAM, null)
+        return getDonorDnaSample(meta).getOrDefault(FileType.BAM, null)
     }
 
     public static getDonorDnaReduxBam(meta) {
-        return getDonorDnaSample(meta).getOrDefault(SampleMeta.FileType.BAM_REDUX, null)
+        return getDonorDnaSample(meta).getOrDefault(FileType.BAM_REDUX, null)
     }
 
 
@@ -135,11 +139,11 @@ class Inputs {
 
     // Files - Tumor RNA
     public static getTumorRnaFastq(meta) {
-        return getTumorRnaSample(meta).getOrDefault(SampleMeta.FileType.FASTQ, null)
+        return getTumorRnaSample(meta).getOrDefault(FileType.FASTQ, null)
     }
 
     public static getTumorRnaBam(meta) {
-        return getTumorRnaSample(meta).getOrDefault(SampleMeta.FileType.BAM, null)
+        return getTumorRnaSample(meta).getOrDefault(FileType.BAM, null)
     }
 
     public static hasTumorRnaFastq(meta) {
@@ -202,9 +206,9 @@ class Inputs {
     public static List resolveReduxBamBai(redux_bam_bai, meta, sample_type) {
 
         def file_keys = switch (sample_type) {
-            case SampleMeta.SampleType.TUMOR -> [bam: SampleMeta.INPUT.BAM_REDUX_DNA_TUMOR, bai: SampleMeta.INPUT.BAI_DNA_TUMOR]
-            case SampleMeta.SampleType.NORMAL -> [bam: SampleMeta.INPUT.BAM_REDUX_DNA_NORMAL, bai: SampleMeta.INPUT.BAI_DNA_NORMAL]
-            case SampleMeta.SampleType.DONOR -> [bam: SampleMeta.INPUT.BAM_REDUX_DNA_DONOR, bai: SampleMeta.INPUT.BAI_DNA_DONOR]
+            case SampleType.TUMOR -> [bam: SampleSheetFields.INPUT.BAM_REDUX_DNA_TUMOR, bai: SampleSheetFields.INPUT.BAI_DNA_TUMOR]
+            case SampleType.NORMAL -> [bam: SampleSheetFields.INPUT.BAM_REDUX_DNA_NORMAL, bai: SampleSheetFields.INPUT.BAI_DNA_NORMAL]
+            case SampleType.DONOR -> [bam: SampleSheetFields.INPUT.BAM_REDUX_DNA_DONOR, bai: SampleSheetFields.INPUT.BAI_DNA_DONOR]
             default -> throw new IllegalArgumentException("Invalid sample type: ${sample_type}")
         }
 
@@ -225,9 +229,9 @@ class Inputs {
         // When the BAMs are not needed as input, this would result in the VM requiring more disk space than necessary.
 
         def file_key = switch (sample_type) {
-            case SampleMeta.SampleType.TUMOR -> SampleMeta.INPUT.REDUX_TSV_DIR_TUMOR
-            case SampleMeta.SampleType.NORMAL -> SampleMeta.INPUT.REDUX_TSV_DIR_NORMAL
-            case SampleMeta.SampleType.DONOR -> SampleMeta.INPUT.REDUX_TSV_DIR_DONOR
+            case SampleType.TUMOR -> SampleSheetFields.INPUT.REDUX_TSV_DIR_TUMOR
+            case SampleType.NORMAL -> SampleSheetFields.INPUT.REDUX_TSV_DIR_NORMAL
+            case SampleType.DONOR -> SampleSheetFields.INPUT.REDUX_TSV_DIR_DONOR
             default -> throw new IllegalArgumentException("Invalid sample type: ${sample_type}")
         }
 
@@ -237,7 +241,7 @@ class Inputs {
         if (!selected_redux_dir)
             return []
 
-        def meta_sample = meta.getOrDefault([sample_type, SampleMeta.SequenceType.DNA], [:])
+        def meta_sample = meta.getOrDefault([sample_type, SequenceType.DNA], [:])
         def sample_id = meta_sample.getOrDefault('longitudinal_sample_id', meta_sample['sample_id'])
 
         // NOTE(LN): toUriString() needs to be called, otherwise nextflow will fail to resolve cloud paths
@@ -250,8 +254,8 @@ class Inputs {
     private static List resolveSageVcfWithTbi(sage_dir, meta, sample_type) {
 
         def file_key = switch (sample_type) {
-            case SampleMeta.SampleType.TUMOR -> SampleMeta.INPUT.SAGE_DIR_TUMOR
-            case SampleMeta.SampleType.NORMAL -> SampleMeta.INPUT.SAGE_DIR_NORMAL
+            case SampleType.TUMOR -> SampleSheetFields.INPUT.SAGE_DIR_TUMOR
+            case SampleType.NORMAL -> SampleSheetFields.INPUT.SAGE_DIR_NORMAL
             default -> throw new IllegalArgumentException("Unsupported sample type: ${sample_type}")
         }
 
@@ -262,8 +266,8 @@ class Inputs {
         def sample_id = getTumorDnaSampleName(meta)
 
         def vcf_name = switch (sample_type) {
-            case SampleMeta.SampleType.TUMOR -> "${sample_id}.sage.somatic.vcf.gz"
-            case SampleMeta.SampleType.NORMAL -> "${sample_id}.sage.germline.vcf.gz"
+            case SampleType.TUMOR -> "${sample_id}.sage.somatic.vcf.gz"
+            case SampleType.NORMAL -> "${sample_id}.sage.germline.vcf.gz"
             default -> throw new IllegalArgumentException("Unsupported sample type: ${sample_type}")
         }
 

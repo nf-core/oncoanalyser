@@ -30,12 +30,12 @@ workflow BAMTOOLS_METRICS {
         .map { meta, bam, bai ->
             return [
                 meta,
-                Inputs.preferUserProvidedInput(bam, meta, SampleMeta.INPUT.BAM_REDUX_DNA_TUMOR),
-                Inputs.preferPipelineOutput(bai, meta, SampleMeta.INPUT.BAI_DNA_TUMOR),
+                Inputs.preferUserProvidedInput(bam, meta, SampleSheetFields.INPUT.BAM_REDUX_DNA_TUMOR),
+                Inputs.preferPipelineOutput(bai, meta, SampleSheetFields.INPUT.BAI_DNA_TUMOR),
             ]
         }
         .branch { meta, bam, bai ->
-            def has_existing = Inputs.hasExistingInput(meta, SampleMeta.INPUT.BAMTOOLS_DIR_TUMOR)
+            def has_existing = Inputs.hasExistingInput(meta, SampleSheetFields.INPUT.BAMTOOLS_DIR_TUMOR)
             runnable: bam && !has_existing
             skip: true
                 return meta
@@ -47,12 +47,12 @@ workflow BAMTOOLS_METRICS {
         .map { meta, bam, bai ->
             return [
                 meta,
-                Inputs.preferUserProvidedInput(bam, meta, SampleMeta.INPUT.BAM_REDUX_DNA_NORMAL),
-                Inputs.preferPipelineOutput(bai, meta, SampleMeta.INPUT.BAI_DNA_NORMAL),
+                Inputs.preferUserProvidedInput(bam, meta, SampleSheetFields.INPUT.BAM_REDUX_DNA_NORMAL),
+                Inputs.preferPipelineOutput(bai, meta, SampleSheetFields.INPUT.BAI_DNA_NORMAL),
             ]
         }
         .branch { meta, bam, bai ->
-            def has_existing = Inputs.hasExistingInput(meta, SampleMeta.INPUT.BAMTOOLS_DIR_NORMAL)
+            def has_existing = Inputs.hasExistingInput(meta, SampleSheetFields.INPUT.BAMTOOLS_DIR_NORMAL)
             runnable: bam && !has_existing
             skip: true
                 return meta
