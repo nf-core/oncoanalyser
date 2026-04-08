@@ -193,21 +193,10 @@ class Inputs {
 
 
     // Sample records
-    public static getTumorDnaSample(meta) {
-        return meta.getOrDefault([SampleType.TUMOR, SequenceType.DNA], [:])
-    }
-
-    public static getTumorRnaSample(meta) {
-        return meta.getOrDefault([SampleType.TUMOR, SequenceType.RNA], [:])
-    }
-
-    public static getNormalDnaSample(meta) {
-        return meta.getOrDefault([SampleType.NORMAL, SequenceType.DNA], [:])
-    }
-
-    public static getDonorDnaSample(meta) {
-        return meta.getOrDefault([SampleType.DONOR, SequenceType.DNA], [:])
-    }
+    public static getTumorDnaSample(meta) { return meta.getOrDefault([SampleType.TUMOR, SequenceType.DNA], [:]) }
+    public static getTumorRnaSample(meta) { return meta.getOrDefault([SampleType.TUMOR, SequenceType.RNA], [:]) }
+    public static getNormalDnaSample(meta) { return meta.getOrDefault([SampleType.NORMAL, SequenceType.DNA], [:]) }
+    public static getDonorDnaSample(meta) { return meta.getOrDefault([SampleType.DONOR, SequenceType.DNA], [:]) }
 
     // Sample names
     public static getTumorDnaSampleName(meta, sample_type) {
@@ -228,135 +217,33 @@ class Inputs {
         return sample_id
     }
 
-    public static getTumorDnaSampleName(meta) {
-        return getTumorDnaSampleName(meta, 'primary')
-    }
+    public static getTumorDnaSampleName(meta) { return getTumorDnaSampleName(meta, 'primary') }
 
-    public static getTumorRnaSampleName(meta) {
-        return getTumorRnaSample(meta)['sample_id']
-    }
-
-    public static getNormalDnaSampleName(meta) {
-        return getNormalDnaSample(meta)['sample_id']
-    }
-
-    public static getDonorDnaSampleName(meta) {
-        return getDonorDnaSample(meta)['sample_id']
-    }
+    public static getTumorRnaSampleName(meta) { return getTumorRnaSample(meta)['sample_id'] }
+    public static getNormalDnaSampleName(meta) { return getNormalDnaSample(meta)['sample_id'] }
+    public static getDonorDnaSampleName(meta) { return getDonorDnaSample(meta)['sample_id'] }
 
 
-    // Files - Tumor DNA
-    public static getTumorDnaFastq(meta) {
-        return getTumorDnaSample(meta).getOrDefault(FileType.FASTQ, null)
-    }
+    // Files - Reads/alignments
+    public static hasTumorDnaFastq(meta) { return getTumorDnaSample(meta).containsKey(FileType.FASTQ) }
+    public static hasTumorDnaBam(meta) { return getTumorDnaSample(meta).containsKey(FileType.BAM) }
+    public static hasTumorDnaReduxBam(meta) { return getTumorDnaSample(meta).containsKey(FileType.BAM_REDUX) }
 
-    public static getTumorDnaBam(meta) {
-        return getTumorDnaSample(meta).getOrDefault(FileType.BAM, null)
-    }
+    public static hasNormalDnaFastq(meta) { return getNormalDnaSample(meta).containsKey(FileType.FASTQ) }
+    public static hasNormalDnaBam(meta) { return getNormalDnaSample(meta).containsKey(FileType.BAM) }
+    public static hasNormalDnaReduxBam(meta) { return getNormalDnaSample(meta).containsKey(FileType.BAM_REDUX) }
 
-    public static getTumorDnaReduxBam(meta) {
-        return getTumorDnaSample(meta).getOrDefault(FileType.BAM_REDUX, null)
-    }
+    public static hasDonorDnaFastq(meta) { return getDonorDnaSample(meta).containsKey(FileType.FASTQ) }
+    public static hasDonorDnaBam(meta) { return getDonorDnaSample(meta).containsKey(FileType.BAM) }
+    public static hasDonorDnaReduxBam(meta) { return getDonorDnaSample(meta).containsKey(FileType.BAM_REDUX) }
 
-
-    public static hasTumorDnaFastq(meta) {
-        return getTumorDnaFastq(meta) !== null
-    }
-
-    public static hasTumorDnaBam(meta) {
-        return getTumorDnaBam(meta) !== null
-    }
-
-    public static hasTumorDnaReduxBam(meta) {
-        return getTumorDnaReduxBam(meta) !== null
-    }
-
-
-    // Files - Normal DNA
-    public static getNormalDnaFastq(meta) {
-        return getNormalDnaSample(meta).getOrDefault(FileType.FASTQ, null)
-    }
-
-    public static getNormalDnaBam(meta) {
-        return getNormalDnaSample(meta).getOrDefault(FileType.BAM, null)
-    }
-
-    public static getNormalDnaReduxBam(meta) {
-        return getNormalDnaSample(meta).getOrDefault(FileType.BAM_REDUX, null)
-    }
-
-
-    public static hasNormalDnaFastq(meta) {
-        return getNormalDnaFastq(meta) !== null
-    }
-
-    public static hasNormalDnaBam(meta) {
-        return getNormalDnaBam(meta) !== null
-    }
-
-    public static hasNormalDnaReduxBam(meta) {
-        return getNormalDnaReduxBam(meta) !== null
-    }
-
-    // Files - Donor DNA
-    public static getDonorDnaFastq(meta) {
-        return getDonorDnaSample(meta).getOrDefault(FileType.FASTQ, null)
-    }
-
-    public static getDonorDnaBam(meta) {
-        return getDonorDnaSample(meta).getOrDefault(FileType.BAM, null)
-    }
-
-    public static getDonorDnaReduxBam(meta) {
-        return getDonorDnaSample(meta).getOrDefault(FileType.BAM_REDUX, null)
-    }
-
-
-    public static hasDonorDnaFastq(meta) {
-        return getDonorDnaFastq(meta) !== null
-    }
-
-    public static hasDonorDnaBam(meta) {
-        return getDonorDnaBam(meta) !== null
-    }
-
-    public static hasDonorDnaReduxBam(meta) {
-        return getDonorDnaReduxBam(meta) !== null
-    }
-
-
-    // Files - Tumor RNA
-    public static getTumorRnaFastq(meta) {
-        return getTumorRnaSample(meta).getOrDefault(FileType.FASTQ, null)
-    }
-
-    public static getTumorRnaBam(meta) {
-        return getTumorRnaSample(meta).getOrDefault(FileType.BAM, null)
-    }
-
-    public static hasTumorRnaFastq(meta) {
-        return getTumorRnaFastq(meta) !== null
-    }
-
-    public static hasTumorRnaBam(meta) {
-        return getTumorRnaBam(meta) !== null
-    }
+    public static hasTumorRnaFastq(meta) { return getTumorRnaSample(meta).containsKey(FileType.FASTQ) }
+    public static hasTumorRnaBam(meta) { return getTumorRnaSample(meta).containsKey(FileType.BAM) }
 
 
     // Status
-    public static hasTumorDna(meta) {
-        return hasTumorDnaBam(meta) || hasTumorDnaReduxBam(meta) || hasTumorDnaFastq(meta)
-    }
-
-    public static hasNormalDna(meta) {
-        return hasNormalDnaBam(meta) || hasNormalDnaReduxBam(meta) || hasNormalDnaFastq(meta)
-    }
-
-    public static hasDonorDna(meta) {
-        return hasDonorDnaBam(meta) || hasDonorDnaReduxBam(meta) || hasDonorDnaFastq(meta)
-    }
-
-    public static hasTumorRna(meta) {
-        return hasTumorRnaBam(meta) || hasTumorRnaFastq(meta)
-    }
+    public static hasTumorDna(meta) { return hasTumorDnaBam(meta) || hasTumorDnaReduxBam(meta) || hasTumorDnaFastq(meta) }
+    public static hasNormalDna(meta) { return hasNormalDnaBam(meta) || hasNormalDnaReduxBam(meta) || hasNormalDnaFastq(meta) }
+    public static hasDonorDna(meta) { return hasDonorDnaBam(meta) || hasDonorDnaReduxBam(meta) || hasDonorDnaFastq(meta) }
+    public static hasTumorRna(meta) { return hasTumorRnaBam(meta) || hasTumorRnaFastq(meta) }
 }
