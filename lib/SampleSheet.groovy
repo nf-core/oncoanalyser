@@ -2,16 +2,16 @@ import nextflow.Nextflow
 
 class SampleSheet {
 
-    public static parseInput(input_fp_str, stub_run, run_mode) {
+    public static List<Map> parseInput(String sample_sheet_path, boolean stub_run, RunModes.Pipeline pipeline_mode) {
 
-        if (!input_fp_str) {
+        if (!sample_sheet_path) {
             throw new IllegalStateException("Missing required --input argument")
         }
 
         // NOTE(SW): using NF .splitCsv channel operator, hence should be easily interchangable with NF syntax
 
-        def input_fp = getFileObject(input_fp_str)
-        def inputs = nextflow.splitter.SplitterEx.splitCsv(input_fp, [header: true])
+        def sample_sheet_file = getFileObject(sample_sheet_path)
+        def inputs = nextflow.splitter.SplitterEx.splitCsv(sample_sheet_file, [header: true])
             .groupBy { it['group_id'] }
             .collect { group_id, entries ->
 
@@ -56,7 +56,7 @@ class SampleSheet {
                 }
 
                 // Per group checks after per sample checks
-                disallowInvalidSampleCombinations(meta, run_mode)
+                disallowInvalidSampleCombinations(meta, pipeline_mode)
                 checkLongitudinalSampleInputs(meta)
 
                 return meta
@@ -65,7 +65,7 @@ class SampleSheet {
         return inputs
     }
 
-    private static void disallowDuplicateSampleIds(entries) {
+    private static void disallowDuplicateSampleIds(List<Map<String, String>> entries) {
 
         def entries_by_sample_id = entries.groupBy { it.sample_id }
 
@@ -82,7 +82,7 @@ class SampleSheet {
         }
     }
 
-    private static void createOrUpdateSampleMeta(entry, meta, sample_keys) {
+    private static void createOrUpdateSampleMeta(Map<String, String> entry, Map meta, Set<List> sample_keys) {
 
         def sample_type = SampleMeta.SampleType.fromString(entry.sample_type)
         def sequence_type = SampleMeta.SequenceType.fromString(entry.sequence_type)
@@ -130,7 +130,7 @@ class SampleSheet {
         }
     }
 
-    private static Map parseInfoField(entry) {
+    private static Map parseInfoField(Map<String, String> entry) {
         def info_data = [:]
 
         if (!entry.containsKey('info')) {
@@ -157,11 +157,11 @@ class SampleSheet {
         return info_data
     }
 
-    private static getFileObject(path) {
+    private static getFileObject(String path) {
         return path ? nextflow.Nextflow.file(path) : []
     }
 
-    private static void setSampleIds(meta_sample, entry, info_data) {
+    private static void setSampleIds(Map meta_sample, Map<String, String> entry, Map<SampleMeta.InfoField, String> info_data) {
 
         if (info_data.containsKey(SampleMeta.InfoField.LONGITUDINAL_SAMPLE)) {
 
@@ -182,7 +182,7 @@ class SampleSheet {
         }
     }
 
-    private static void setFastqPaths(meta_sample, entry, info_data) {
+    private static void setFastqPaths(Map meta_sample, Map<String, String> entry, Map<SampleMeta.InfoField, String> info_data) {
 
         if (!info_data.containsKey(SampleMeta.InfoField.LIBRARY_ID)) {
             throw new IllegalStateException("Missing info field(library_id) for group_id(${entry.group_id}) sample_id(${entry.sample_id})")
@@ -216,7 +216,7 @@ class SampleSheet {
 
     }
 
-    private static void setCramPaths(meta_sample) {
+    private static void setCramPaths(Map meta_sample) {
 
         // CRAMs are passed to hmftools as if they were BAMs, e.g. `-bam_file /path/to/tumor.cram`
         // We therefore set the BAM/BAI path to be the CRAM/CRAI path
@@ -236,7 +236,7 @@ class SampleSheet {
 
     }
 
-    private static void checkAndSetFileIndexes(meta_sample) {
+    private static void checkAndSetFileIndexes(Map meta_sample) {
 
         // NOTE(LN): Cast keys to list to avoid ConcurrentModificationException
         meta_sample.keySet().toList().each { key ->
@@ -273,7 +273,7 @@ class SampleSheet {
         }
     }
 
-    private static void checkRawReadDataExists(meta_sample, group_id) {
+    private static void checkRawReadDataExists(Map meta_sample, String group_id) {
 
         def missing_any_raw_read_data =
             !meta_sample.containsKey(SampleMeta.FileType.BAM) &&
@@ -290,7 +290,7 @@ class SampleSheet {
         }
     }
 
-    private static void setReduxTsvDirIfUnset(meta_sample) {
+    private static void setReduxTsvDirIfUnset(Map meta_sample) {
 
         if (!meta_sample.containsKey(SampleMeta.FileType.BAM_REDUX)) {
             return
@@ -306,7 +306,7 @@ class SampleSheet {
         meta_sample[SampleMeta.FileType.REDUX_TSV_DIR] = bam_dir
     }
 
-    private static void disallowInvalidSampleCombinations(meta, run_mode) {
+    private static void disallowInvalidSampleCombinations(Map meta, RunModes.Pipeline pipeline_mode) {
 
         // Do not allow normal DNA only
         if (Inputs.hasNormalDna(meta) && !Inputs.hasTumorDna(meta)) {
@@ -319,7 +319,7 @@ class SampleSheet {
         }
 
         // Apply some required restrictions to targeted mode
-        if (run_mode === RunModes.Pipeline.TARGETED) {
+        if (pipeline_mode === RunModes.Pipeline.TARGETED) {
 
             // Do not allow donor DNA
             if (Inputs.hasDonorDna(meta)) {
@@ -338,7 +338,7 @@ class SampleSheet {
         }
     }
 
-    private static void checkLongitudinalSampleInputs(meta) {
+    private static void checkLongitudinalSampleInputs(Map meta) {
 
         // For purity estimation with WISP, require primary normal DNA BAM when an AMBER directory is provided
         def meta_tumor_dna = meta.getOrDefault([SampleMeta.SampleType.TUMOR, SampleMeta.SequenceType.DNA], [:])
