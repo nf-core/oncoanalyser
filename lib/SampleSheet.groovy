@@ -81,9 +81,9 @@ class SampleSheet {
 
     private static void createOrUpdateSampleMeta(entry, meta, sample_keys) {
 
-        def sample_type = Enums.getValidatedEnumFromString(entry.sample_type, SampleMeta.SampleType)
-        def sequence_type = Enums.getValidatedEnumFromString(entry.sequence_type, SampleMeta.SequenceType)
-        def file_type = Enums.getValidatedEnumFromString(entry.filetype, SampleMeta.FileType)
+        def sample_type = SampleMeta.SampleType.fromString(entry.sample_type)
+        def sequence_type = SampleMeta.SequenceType.fromString(entry.sequence_type)
+        def file_type = SampleMeta.FileType.fromString(entry.filetype)
 
         setAndCheckSubjectId(meta, entry)
 
@@ -136,19 +136,19 @@ class SampleSheet {
 
         entry.info
             .tokenize(';')
-            .each { e ->
-                def (k, v) = e.tokenize(':')
-                def info_field_enum = Enums.getValidatedEnumFromString(k, SampleMeta.InfoField)
+            .each { info_item ->
+                def (info_key, info_value) = info_item.tokenize(':')
+                def info_field = SampleMeta.InfoField.fromString(info_key)
 
-                if (info_data.containsKey(info_field_enum)) {
-                    throw new IllegalStateException("Got duplicate info field(${info_field_enum}) for group_id(${entry.group_id}) sample_id(${entry.sample_id})")
+                if (info_data.containsKey(info_field)) {
+                    throw new IllegalStateException("Got duplicate info field(${info_field}) for group_id(${entry.group_id}) sample_id(${entry.sample_id})")
                 }
 
-                if (!v && info_field_enum !== SampleMeta.InfoField.LONGITUDINAL_SAMPLE) {
-                    throw new IllegalStateException("Got empty value for info field(${info_field_enum}) for group_id(${entry.group_id}) sample_id(${entry.sample_id})")
+                if (!info_value && info_field !== SampleMeta.InfoField.LONGITUDINAL_SAMPLE) {
+                    throw new IllegalStateException("Got empty value for info field(${info_field}) for group_id(${entry.group_id}) sample_id(${entry.sample_id})")
                 }
 
-                info_data[info_field_enum] = v
+                info_data[info_field] = info_value
             }
 
         return info_data

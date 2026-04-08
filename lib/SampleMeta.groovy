@@ -31,27 +31,43 @@ class SampleMeta {
         SAGE_DIR,
         SAGE_APPEND_DIR,
         SIGS_DIR,
-        VIRUSINTERPRETER_DIR,
+        VIRUSINTERPRETER_DIR;
+
+        public static FileType fromString(String string) {
+            return Enums.getValidatedEnumFromString(string, FileType)
+        }
     }
 
     public static enum SampleType {
         DONOR,
         NORMAL,
         TUMOR,
-        TUMOR_NORMAL,
+        TUMOR_NORMAL;
+
+        public static SampleType fromString(String string) {
+            return Enums.getValidatedEnumFromString(string, SampleType)
+        }
     }
 
     public static enum SequenceType {
         DNA,
         DNA_RNA,
-        RNA,
+        RNA;
+
+        public static SequenceType fromString(String string) {
+            return Enums.getValidatedEnumFromString(string, SequenceType)
+        }
     }
 
     public static enum InfoField {
         CANCER_TYPE,
         LANE,
         LIBRARY_ID,
-        LONGITUDINAL_SAMPLE,
+        LONGITUDINAL_SAMPLE;
+
+        public static InfoField fromString(String string) {
+            return Enums.getValidatedEnumFromString(string, InfoField)
+        }
     }
 
     public static final Map INPUT = [
