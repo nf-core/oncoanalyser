@@ -81,7 +81,7 @@ workflow NFCORE_ONCOANALYSER {
         PREPARE_REFERENCE()
     } else {
 
-        def inputs = SampleSheet.parseInput(params.input, workflow.stubRun, pipeline_mode, log)
+        def inputs = SampleSheet.parseInput(params.input, workflow.stubRun, pipeline_mode)
 
         def stages = RunStage.getValidatedRunStages(
            params.processes_include,
