@@ -33,6 +33,8 @@ class SampleSheet {
                 ]
                 */
 
+                disallowDuplicateSampleIds(entries)
+
                 entries.each { entry -> createOrUpdateSampleMeta(entry, meta, sample_keys) }
 
                 // Per sample checks once meta_sample objects are fully constructed
@@ -53,8 +55,7 @@ class SampleSheet {
 
                 }
 
-                // Per group checks
-                disallowDuplicateSampleIds(meta)
+                // Per group checks after per sample checks
                 disallowInvalidSampleCombinations(meta, run_mode)
                 checkLongitudinalSampleInputs(meta)
 
@@ -62,6 +63,20 @@ class SampleSheet {
             }
 
         return inputs
+    }
+
+    private static void disallowDuplicateSampleIds(entries) {
+
+        def sample_ids_seen = [] as Set
+
+        entries.each { entry ->
+
+            if(sample_ids_seen.contains(entry.sample_id)) {
+                throw new IllegalStateException("Duplicate sample_id(${entry.sample_id}) found for group_id(${entry.group_id})")
+            }
+
+            sample_ids_seen.add(entry.sample_id)
+        }
     }
 
     private static void createOrUpdateSampleMeta(entry, meta, sample_keys) {
@@ -286,33 +301,6 @@ class SampleSheet {
         def bam_dir = bam_path.getParent().toUriString()
 
         meta_sample[SampleMeta.FileType.REDUX_TSV_DIR] = bam_dir
-    }
-
-    private static void disallowDuplicateSampleIds(meta) {
-
-        def sample_ids_seen = [] as Set
-        def sample_ids_duplicated = [] as Set
-
-        meta.each { key, maybe_meta_sample ->
-
-            def is_meta_sample = (maybe_meta_sample instanceof Map) && maybe_meta_sample.containsKey('sample_id')
-
-            if(!is_meta_sample) {
-                return
-            }
-
-            def sample_id = maybe_meta_sample.sample_id
-
-            if(sample_ids_seen.contains(sample_id)) {
-                sample_ids_duplicated.add(sample_id)
-            }
-
-            sample_ids_seen.add(sample_id)
-        }
-
-        if (sample_ids_duplicated) {
-            throw new IllegalStateException("Duplicate sample id(s) found for group_id(${meta.group_id}): ${sample_ids_duplicated.join(', ')}")
-        }
     }
 
     private static void disallowInvalidSampleCombinations(meta, run_mode) {
