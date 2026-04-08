@@ -67,15 +67,18 @@ class SampleSheet {
 
     private static void disallowDuplicateSampleIds(entries) {
 
-        def sample_ids_seen = [] as Set
+        def entries_by_sample_id = entries.groupBy { it.sample_id }
 
-        entries.each { entry ->
+        entries_by_sample_id.each { sample_id, sample_entries ->
 
-            if(sample_ids_seen.contains(entry.sample_id)) {
-                throw new IllegalStateException("Duplicate sample_id(${entry.sample_id}) found for group_id(${entry.group_id})")
+            // Allow multiple FASTQ entries with the same sample_id (e.g., different lanes)
+            def all_fastq = sample_entries.every {
+                SampleMeta.FileType.fromString(it.filetype) == SampleMeta.FileType.FASTQ
             }
 
-            sample_ids_seen.add(entry.sample_id)
+            if (!all_fastq && sample_entries.size() > 1) {
+                throw new IllegalStateException("Duplicate sample_id(${sample_id}) found for group_id(${sample_entries[0].group_id})")
+            }
         }
     }
 
