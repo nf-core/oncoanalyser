@@ -28,8 +28,8 @@ workflow COBALT_NORMALISATION {
     )
         .map { meta, amber_dir, cobalt_dir ->
             return [
-                Inputs.preferUserProvidedInput(amber_dir, meta, SampleSheetFields.INPUT.AMBER_DIR),
-                Inputs.preferUserProvidedInput(cobalt_dir, meta, SampleSheetFields.INPUT.COBALT_DIR),
+                Inputs.preferUserProvidedInput(amber_dir, meta, Inputs.KEY.AMBER_DIR),
+                Inputs.preferUserProvidedInput(cobalt_dir, meta, Inputs.KEY.COBALT_DIR),
             ]
         }
         .collect(flat: false)

@@ -51,7 +51,7 @@ workflow SAGE_PLOTTING {
             def donor_tsvs = Inputs.resolveReduxTsvFiles(donor_dir, meta, SampleSheetFields.SampleType.DONOR)
             def redux_tsvs = [ *tumor_tsvs, *normal_tsvs, *donor_tsvs ]
 
-            purple_dir = Inputs.preferUserProvidedInput(purple_dir, meta, SampleSheetFields.INPUT.PURPLE_DIR)
+            purple_dir = Inputs.preferUserProvidedInput(purple_dir, meta, Inputs.KEY.PURPLE_DIR)
 
             def inputs = [
                 meta: meta,

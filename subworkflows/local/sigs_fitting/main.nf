@@ -22,7 +22,7 @@ workflow SIGS_FITTING {
     // channel: [ meta, purple_dir ]
     ch_inputs_selected = ch_purple
         .map { meta, purple_dir ->
-            return [meta, Inputs.preferUserProvidedInput(purple_dir, meta, SampleSheetFields.INPUT.PURPLE_DIR)]
+            return [meta, Inputs.preferUserProvidedInput(purple_dir, meta, Inputs.KEY.PURPLE_DIR)]
         }
 
     // Sort inputs
@@ -38,7 +38,7 @@ workflow SIGS_FITTING {
                 has_smlv_vcf = purple_dir ? Inputs.getPurpleSomaticVcf(meta, purple_dir) : []
             }
 
-            def has_existing = Inputs.hasExistingInput(meta, SampleSheetFields.INPUT.SIGS_DIR)
+            def has_existing = Inputs.hasExistingInput(meta, Inputs.KEY.SIGS_DIR)
 
             runnable: has_tumor_normal_dna && purple_dir && has_smlv_vcf && !has_existing
             skip: true

@@ -23,7 +23,7 @@ workflow ISOFOX_NORMALISATION {
     // channel: [ [isofox_dir, ...] ]
     ch_isofox_inputs = ch_isofox
         .map { meta, isofox_dir ->
-            return Inputs.selectExistingElseCurrent(isofox_dir, meta, SampleSheetFields.INPUT.ISOFOX_DIR)
+            return Inputs.selectExistingElseCurrent(isofox_dir, meta, Inputs.KEY.ISOFOX_DIR)
         }
         .collect()
 

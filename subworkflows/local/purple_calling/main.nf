@@ -50,11 +50,11 @@ workflow PURPLE_CALLING {
             def inputs = [:]
 
             inputs.meta              = meta
-            inputs.amber_dir         = Inputs.preferUserProvidedInput(amber_dir, meta, SampleSheetFields.INPUT.AMBER_DIR)
-            inputs.cobalt_dir        = Inputs.preferUserProvidedInput(cobalt_dir, meta, SampleSheetFields.INPUT.COBALT_DIR)
-            inputs.esvee_dir         = Inputs.preferUserProvidedInput(esvee_dir, meta, SampleSheetFields.INPUT.ESVEE_DIR)
-            inputs.pave_somatic_dir  = Inputs.preferUserProvidedInput(pave_somatic_dir, meta, SampleSheetFields.INPUT.PAVE_DIR_TUMOR)
-            inputs.pave_germline_dir = Inputs.preferUserProvidedInput(pave_germline_dir, meta, SampleSheetFields.INPUT.PAVE_DIR_NORMAL)
+            inputs.amber_dir         = Inputs.preferUserProvidedInput(amber_dir, meta, Inputs.KEY.AMBER_DIR)
+            inputs.cobalt_dir        = Inputs.preferUserProvidedInput(cobalt_dir, meta, Inputs.KEY.COBALT_DIR)
+            inputs.esvee_dir         = Inputs.preferUserProvidedInput(esvee_dir, meta, Inputs.KEY.ESVEE_DIR)
+            inputs.pave_somatic_dir  = Inputs.preferUserProvidedInput(pave_somatic_dir, meta, Inputs.KEY.PAVE_DIR_TUMOR)
+            inputs.pave_germline_dir = Inputs.preferUserProvidedInput(pave_germline_dir, meta, Inputs.KEY.PAVE_DIR_NORMAL)
             inputs.redux_tumor_tsvs  = Inputs.resolveReduxTsvFiles(redux_tumor_dir, meta, SampleSheetFields.SampleType.TUMOR)
 
             return inputs
@@ -66,7 +66,7 @@ workflow PURPLE_CALLING {
     ch_inputs_sorted = ch_inputs_selected
         .branch { inputs ->
 
-            def has_existing = Inputs.hasExistingInput(inputs.meta, SampleSheetFields.INPUT.PURPLE_DIR)
+            def has_existing = Inputs.hasExistingInput(inputs.meta, Inputs.KEY.PURPLE_DIR)
 
             runnable: inputs.amber_dir && inputs.cobalt_dir && !has_existing
                 return inputs

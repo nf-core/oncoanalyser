@@ -29,8 +29,8 @@ workflow CIDER_CALLING {
         .map { meta, bam, bai ->
             return [
                 meta,
-                Inputs.preferUserProvidedInput(bam, meta, SampleSheetFields.INPUT.BAM_REDUX_DNA_TUMOR),
-                Inputs.preferPipelineOutput(bai, meta, SampleSheetFields.INPUT.BAI_DNA_TUMOR),
+                Inputs.preferUserProvidedInput(bam, meta, Inputs.KEY.BAM_REDUX_DNA_TUMOR),
+                Inputs.preferPipelineOutput(bai, meta, Inputs.KEY.BAI_DNA_TUMOR),
             ]
         }
         .branch { meta, bam, bai ->
@@ -45,8 +45,8 @@ workflow CIDER_CALLING {
         .map { meta, bam, bai ->
             return [
                 meta,
-                Inputs.preferUserProvidedInput(bam, meta, SampleSheetFields.INPUT.BAM_RNA_TUMOR),
-                Inputs.preferPipelineOutput(bai, meta, SampleSheetFields.INPUT.BAI_RNA_TUMOR),
+                Inputs.preferUserProvidedInput(bam, meta, Inputs.KEY.BAM_RNA_TUMOR),
+                Inputs.preferPipelineOutput(bai, meta, Inputs.KEY.BAI_RNA_TUMOR),
             ]
         }
         .branch { meta, bam, bai ->

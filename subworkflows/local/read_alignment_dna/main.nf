@@ -30,21 +30,21 @@ workflow READ_ALIGNMENT_DNA {
     // channel: [ meta ]
     ch_inputs_tumor_sorted = ch_inputs
         .branch { meta ->
-            def has_existing = Inputs.hasExistingInput(meta, SampleSheetFields.INPUT.BAM_DNA_TUMOR)
+            def has_existing = Inputs.hasExistingInput(meta, Inputs.KEY.BAM_DNA_TUMOR)
             runnable: Inputs.hasTumorDnaFastq(meta) && !has_existing
             skip: true
         }
 
     ch_inputs_normal_sorted = ch_inputs
         .branch { meta ->
-            def has_existing = Inputs.hasExistingInput(meta, SampleSheetFields.INPUT.BAM_DNA_NORMAL)
+            def has_existing = Inputs.hasExistingInput(meta, Inputs.KEY.BAM_DNA_NORMAL)
             runnable: Inputs.hasNormalDnaFastq(meta) && !has_existing
             skip: true
         }
 
     ch_inputs_donor_sorted = ch_inputs
         .branch { meta ->
-            def has_existing = Inputs.hasExistingInput(meta, SampleSheetFields.INPUT.BAM_DNA_DONOR)
+            def has_existing = Inputs.hasExistingInput(meta, Inputs.KEY.BAM_DNA_DONOR)
             runnable: Inputs.hasDonorDnaFastq(meta) && !has_existing
             skip: true
         }

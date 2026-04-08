@@ -55,12 +55,12 @@ workflow QSEE_METRICS {
             inputs.redux_tsvs_tumor = Inputs.resolveReduxTsvFiles(redux_tsvs_tumor, meta, SampleSheetFields.SampleType.TUMOR)
             inputs.redux_tsvs_normal = Inputs.resolveReduxTsvFiles(redux_tsvs_normal, meta, SampleSheetFields.SampleType.NORMAL)
 
-            inputs.bamtools_tumor_dir = Inputs.preferUserProvidedInput(bamtools_tumor_dir, meta, SampleSheetFields.INPUT.BAMTOOLS_DIR_TUMOR)
-            inputs.bamtools_normal_dir = Inputs.preferUserProvidedInput(bamtools_normal_dir, meta, SampleSheetFields.INPUT.BAMTOOLS_DIR_NORMAL)
+            inputs.bamtools_tumor_dir = Inputs.preferUserProvidedInput(bamtools_tumor_dir, meta, Inputs.KEY.BAMTOOLS_DIR_TUMOR)
+            inputs.bamtools_normal_dir = Inputs.preferUserProvidedInput(bamtools_normal_dir, meta, Inputs.KEY.BAMTOOLS_DIR_NORMAL)
 
-            inputs.cobalt_dir = Inputs.preferUserProvidedInput(cobalt_dir, meta, SampleSheetFields.INPUT.COBALT_DIR)
-            inputs.esvee_dir = Inputs.preferUserProvidedInput(esvee_dir, meta, SampleSheetFields.INPUT.ESVEE_DIR)
-            inputs.purple_dir = Inputs.preferUserProvidedInput(purple_dir, meta, SampleSheetFields.INPUT.PURPLE_DIR)
+            inputs.cobalt_dir = Inputs.preferUserProvidedInput(cobalt_dir, meta, Inputs.KEY.COBALT_DIR)
+            inputs.esvee_dir = Inputs.preferUserProvidedInput(esvee_dir, meta, Inputs.KEY.ESVEE_DIR)
+            inputs.purple_dir = Inputs.preferUserProvidedInput(purple_dir, meta, Inputs.KEY.PURPLE_DIR)
 
             return inputs
         }

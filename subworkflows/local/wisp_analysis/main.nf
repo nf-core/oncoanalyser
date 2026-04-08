@@ -34,8 +34,8 @@ workflow WISP_ANALYSIS {
     )
         .branch { meta, amber_dir, cobalt_dir, sage_append_dir ->
 
-            def primary_purple_dir = Inputs.getInput(meta, SampleSheetFields.INPUT.PURPLE_DIR)
-            def primary_amber_dir = Inputs.getInput(meta, SampleSheetFields.INPUT.AMBER_DIR)
+            def primary_purple_dir = Inputs.getInput(meta, Inputs.KEY.PURPLE_DIR)
+            def primary_amber_dir = Inputs.getInput(meta, Inputs.KEY.AMBER_DIR)
 
             def runnable = targeted_mode
                 ? primary_purple_dir && sage_append_dir
