@@ -1,13 +1,9 @@
-//
-// This file holds several functions specific to the workflow/oncoanalyser.nf in the nf-core/oncoanalyser pipeline
-//
-
 import static groovy.io.FileType.FILES
 
 import nextflow.Channel
 import nextflow.Nextflow
 
-class WorkflowOncoanalyser {
+class WorkflowChannels {
 
     public static groupByMeta(Map named_args, ... channels) {
         // This method takes multiple channels with the same meta:

@@ -42,7 +42,7 @@ workflow SAGE_CALLING {
 
     // Select input sources. Route inputs
     // channel: { meta, tumor_bam, tumor_bai, normal_bam, normal_bai, donor_bam, donor_bai, [redux_tsv, ...] }
-    ch_inputs_sorted = WorkflowOncoanalyser.groupByMeta(
+    ch_inputs_sorted = WorkflowChannels.groupByMeta(
         flatten_mode: 'none',
         ch_tumor_bam, ch_normal_bam, ch_donor_bam,
         ch_tumor_dir, ch_normal_dir, ch_donor_dir,
@@ -208,7 +208,7 @@ workflow SAGE_CALLING {
     // channel: [ meta, sage_vcf, sage_tbi ]
     ch_somatic_vcf_out = Channel.empty()
         .mix(
-            WorkflowOncoanalyser.restoreMeta(SAGE_SOMATIC.out.vcf, ch_inputs),
+            WorkflowChannels.restoreMeta(SAGE_SOMATIC.out.vcf, ch_inputs),
             PlaceholderChannels.vcfTbi(ch_inputs_somatic_sorted.skip),
             PlaceholderChannels.vcfTbi(ch_inputs_sorted.skip),
         )
@@ -216,7 +216,7 @@ workflow SAGE_CALLING {
     // channel: [ meta, sage_vcf, sage_tbi ]
     ch_germline_vcf_out = Channel.empty()
         .mix(
-            WorkflowOncoanalyser.restoreMeta(SAGE_GERMLINE.out.vcf, ch_inputs),
+            WorkflowChannels.restoreMeta(SAGE_GERMLINE.out.vcf, ch_inputs),
             PlaceholderChannels.vcfTbi(ch_inputs_germline_sorted.skip),
             PlaceholderChannels.vcfTbi(ch_inputs_sorted.skip),
         )
@@ -224,7 +224,7 @@ workflow SAGE_CALLING {
     // channel: [ meta, sage_dir ]
     ch_somatic_dir = Channel.empty()
         .mix(
-            WorkflowOncoanalyser.restoreMeta(SAGE_SOMATIC.out.sage_dir, ch_inputs),
+            WorkflowChannels.restoreMeta(SAGE_SOMATIC.out.sage_dir, ch_inputs),
             PlaceholderChannels.toolDir(ch_inputs_somatic_sorted.skip),
             PlaceholderChannels.toolDir(ch_inputs_sorted.skip),
         )
@@ -232,7 +232,7 @@ workflow SAGE_CALLING {
     // channel: [ meta, sage_dir ]
     ch_germline_dir = Channel.empty()
         .mix(
-            WorkflowOncoanalyser.restoreMeta(SAGE_GERMLINE.out.sage_dir, ch_inputs),
+            WorkflowChannels.restoreMeta(SAGE_GERMLINE.out.sage_dir, ch_inputs),
             PlaceholderChannels.toolDir(ch_inputs_germline_sorted.skip),
             PlaceholderChannels.toolDir(ch_inputs_sorted.skip),
         )

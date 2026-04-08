@@ -38,7 +38,7 @@ workflow NEO_PREDICTION {
     //
     // Select input sources
     // channel: [ meta, purple_dir, linx_annotation_dir ]
-    ch_finder_inputs_selected = WorkflowOncoanalyser.groupByMeta(
+    ch_finder_inputs_selected = WorkflowChannels.groupByMeta(
         ch_purple,
         ch_linx,
     )
@@ -94,7 +94,7 @@ workflow NEO_PREDICTION {
 
     // Set outputs, restoring original meta
     // channel: [ meta, neo_finder_dir ]
-    ch_finder_out = WorkflowOncoanalyser.restoreMeta(NEO_FINDER.out.neo_finder_dir, ch_inputs)
+    ch_finder_out = WorkflowChannels.restoreMeta(NEO_FINDER.out.neo_finder_dir, ch_inputs)
 
     //
     // MODULE: Fusion annotation (Isofox)
@@ -104,7 +104,7 @@ workflow NEO_PREDICTION {
     // Select input sources and sort
     // channel: runnable: [ meta, neo_finder_dir, tumor_bam_rna, tumor_bai_rna ]
     // channel: skip: [ meta ]
-    ch_isofox_inputs_sorted = WorkflowOncoanalyser.groupByMeta(
+    ch_isofox_inputs_sorted = WorkflowChannels.groupByMeta(
         ch_finder_out,
         ch_tumor_rna_bam,
     )
@@ -153,7 +153,7 @@ workflow NEO_PREDICTION {
     // channel: [ meta, annotated_fusions ]
     ch_annotate_fusions_out = Channel.empty()
         .mix(
-            WorkflowOncoanalyser.restoreMeta(NEO_ANNOTATE_FUSIONS.out.annotated_fusions, ch_inputs),
+            WorkflowChannels.restoreMeta(NEO_ANNOTATE_FUSIONS.out.annotated_fusions, ch_inputs),
             PlaceholderChannels.toolDir(ch_isofox_inputs_sorted.skip),
         )
 
@@ -163,7 +163,7 @@ workflow NEO_PREDICTION {
     //
     // Select input sources and prepare input channel
     // channel: [ meta_scorer, isofox_dir, purple_dir, sage_somatic_append, lilac_dir, neo_finder_dir, annotated_fusions ]
-    ch_scorer_inputs = WorkflowOncoanalyser.groupByMeta(
+    ch_scorer_inputs = WorkflowChannels.groupByMeta(
         ch_isofox,
         ch_purple,
         ch_sage_somatic_append,

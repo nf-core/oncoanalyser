@@ -142,7 +142,7 @@ workflow READ_ALIGNMENT_RNA {
 
     // Create process input channel
     // channel: [ meta_merge, [bams, ...] ]
-    ch_merge_inputs = WorkflowOncoanalyser.restoreMeta(ch_bams_united_sorted.runnable, ch_inputs)
+    ch_merge_inputs = WorkflowChannels.restoreMeta(ch_bams_united_sorted.runnable, ch_inputs)
         .map { meta, bams ->
             def meta_merge = [
                 key: meta.group_id,
@@ -166,8 +166,8 @@ workflow READ_ALIGNMENT_RNA {
     // channel: [ meta_markdups, bam ]
     ch_markdups_inputs = Channel.empty()
         .mix(
-            WorkflowOncoanalyser.restoreMeta(SAMBAMBA_MERGE.out.bam, ch_inputs),
-            WorkflowOncoanalyser.restoreMeta(ch_bams_united_sorted.skip, ch_inputs),
+            WorkflowChannels.restoreMeta(SAMBAMBA_MERGE.out.bam, ch_inputs),
+            WorkflowChannels.restoreMeta(ch_bams_united_sorted.skip, ch_inputs),
         )
         .map { meta, bam ->
             def meta_markdups = [
@@ -189,9 +189,9 @@ workflow READ_ALIGNMENT_RNA {
 
     // Combine BAMs and BAIs
     // channel: [ meta, bam, bai ]
-    ch_bams_ready = WorkflowOncoanalyser.groupByMeta(
-        WorkflowOncoanalyser.restoreMeta(GATK4_MARKDUPLICATES.out.bam, ch_inputs),
-        WorkflowOncoanalyser.restoreMeta(GATK4_MARKDUPLICATES.out.bai, ch_inputs),
+    ch_bams_ready = WorkflowChannels.groupByMeta(
+        WorkflowChannels.restoreMeta(GATK4_MARKDUPLICATES.out.bam, ch_inputs),
+        WorkflowChannels.restoreMeta(GATK4_MARKDUPLICATES.out.bai, ch_inputs),
     )
 
     // Set outputs

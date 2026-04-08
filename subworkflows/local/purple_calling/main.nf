@@ -36,7 +36,7 @@ workflow PURPLE_CALLING {
 
     // Select input sources
     // channel: { meta, amber_dir, cobalt_dir, esvee_dir, pave_somatic_dir, pave_germline_dir, redux_tumor_dir }
-    ch_inputs_selected = WorkflowOncoanalyser.groupByMeta(
+    ch_inputs_selected = WorkflowChannels.groupByMeta(
         flatten_mode: 'singletons_only',
         ch_amber_dir,
         ch_cobalt_dir,
@@ -119,7 +119,7 @@ workflow PURPLE_CALLING {
     // channel: [ meta, purple_dir ]
     ch_outputs = Channel.empty()
         .mix(
-            WorkflowOncoanalyser.restoreMeta(PURPLE.out.purple_dir, ch_inputs),
+            WorkflowChannels.restoreMeta(PURPLE.out.purple_dir, ch_inputs),
             PlaceholderChannels.toolDir(ch_inputs_sorted.skip),
         )
 

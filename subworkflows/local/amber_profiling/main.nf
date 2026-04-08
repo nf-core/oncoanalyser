@@ -26,7 +26,7 @@ workflow AMBER_PROFILING {
     // Select input sources and sort
     // channel: runnable: [ meta, tumor_bam, tumor_bai, normal_bam, normal_bai]
     // channel: skip: [ meta ]
-    ch_inputs_sorted = WorkflowOncoanalyser.groupByMeta(
+    ch_inputs_sorted = WorkflowChannels.groupByMeta(
         ch_tumor_bam,
         ch_normal_bam,
         ch_donor_bam,
@@ -95,7 +95,7 @@ workflow AMBER_PROFILING {
     // channel: [ meta, amber_dir ]
     ch_outputs = Channel.empty()
         .mix(
-            WorkflowOncoanalyser.restoreMeta(AMBER.out.amber_dir, ch_inputs),
+            WorkflowChannels.restoreMeta(AMBER.out.amber_dir, ch_inputs),
             PlaceholderChannels.toolDir(ch_inputs_sorted.skip),
         )
 

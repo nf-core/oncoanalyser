@@ -70,7 +70,7 @@ workflow PEACH_CALLING {
     // channel: [ meta, peach_dir ]
     ch_outputs = Channel.empty()
         .mix(
-            WorkflowOncoanalyser.restoreMeta(PEACH.out.peach_dir, ch_inputs),
+            WorkflowChannels.restoreMeta(PEACH.out.peach_dir, ch_inputs),
             PlaceholderChannels.toolDir(ch_inputs_sorted.skip),
         )
 

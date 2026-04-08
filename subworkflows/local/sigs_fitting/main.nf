@@ -75,7 +75,7 @@ workflow SIGS_FITTING {
     // channel: [ meta, sigs_dir ]
     ch_outputs = Channel.empty()
         .mix(
-            WorkflowOncoanalyser.restoreMeta(SIGS.out.sigs_dir, ch_inputs),
+            WorkflowChannels.restoreMeta(SIGS.out.sigs_dir, ch_inputs),
             PlaceholderChannels.toolDir(ch_inputs_sorted.skip),
         )
 

@@ -144,13 +144,13 @@ workflow PAVE_ANNOTATION {
     // channel: [ meta, pave_dir ]
     ch_somatic_out = Channel.empty()
         .mix(
-            WorkflowOncoanalyser.restoreMeta(PAVE_SOMATIC.out.pave_dir, ch_inputs),
+            WorkflowChannels.restoreMeta(PAVE_SOMATIC.out.pave_dir, ch_inputs),
             PlaceholderChannels.toolDir(ch_sage_somatic_inputs_sorted.skip),
         )
 
     ch_germline_out = Channel.empty()
         .mix(
-            WorkflowOncoanalyser.restoreMeta(PAVE_GERMLINE.out.pave_dir, ch_inputs),
+            WorkflowChannels.restoreMeta(PAVE_GERMLINE.out.pave_dir, ch_inputs),
             PlaceholderChannels.toolDir(ch_sage_germline_inputs_sorted.skip),
         )
 

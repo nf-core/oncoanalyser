@@ -217,19 +217,19 @@ workflow READ_ALIGNMENT_DNA {
     // channel: [ meta, [bam, ...], [bai, ...] ]
     ch_bam_tumor_out = Channel.empty()
         .mix(
-            WorkflowOncoanalyser.restoreMeta(ch_bams_united.tumor, ch_inputs),
+            WorkflowChannels.restoreMeta(ch_bams_united.tumor, ch_inputs),
             PlaceholderChannels.bamBai(ch_inputs_tumor_sorted.skip),
         )
 
     ch_bam_normal_out = Channel.empty()
         .mix(
-            WorkflowOncoanalyser.restoreMeta(ch_bams_united.normal, ch_inputs),
+            WorkflowChannels.restoreMeta(ch_bams_united.normal, ch_inputs),
             PlaceholderChannels.bamBai(ch_inputs_normal_sorted.skip),
         )
 
     ch_bam_donor_out = Channel.empty()
         .mix(
-            WorkflowOncoanalyser.restoreMeta(ch_bams_united.donor, ch_inputs),
+            WorkflowChannels.restoreMeta(ch_bams_united.donor, ch_inputs),
             PlaceholderChannels.bamBai(ch_inputs_donor_sorted.skip),
         )
 

@@ -122,7 +122,7 @@ workflow REDUX_PROCESSING {
 
     // Combine outputs into single channel for processing
     // channel: [ meta, bam, bai, dir ]
-    ch_redux_out = WorkflowOncoanalyser.groupByMeta(
+    ch_redux_out = WorkflowChannels.groupByMeta(
         REDUX.out.bam,
         REDUX.out.dir,
     )
@@ -149,7 +149,7 @@ workflow REDUX_PROCESSING {
 
         return Channel.empty()
             .mix(
-                WorkflowOncoanalyser.restoreMeta(ch_redux_out_sample_type, ch_inputs),
+                WorkflowChannels.restoreMeta(ch_redux_out_sample_type, ch_inputs),
                 ch_output_skip,
             )
             .multiMap { meta, bam, bai, dir ->

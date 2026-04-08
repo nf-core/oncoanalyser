@@ -18,7 +18,7 @@ lint:
     - .github/workflows/nf-test.yml
     - lib/Utils.groovy
     - lib/WorkflowMain.groovy
-    - lib/WorkflowOncoanalyser.groovy
+    - lib/WorkflowChannels.groovy
   files_unchanged:
     - assets/nf-core-oncoanalyser_logo_light.png
     - docs/images/nf-core-oncoanalyser_logo_dark.png

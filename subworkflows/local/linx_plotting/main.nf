@@ -29,7 +29,7 @@ workflow LINX_PLOTTING {
     // channel: runnable: [ meta, annotation_dir, amber_dir, cobalt_dir, purple_dir ]
     // channel: skip: [ meta ]
 
-    ch_inputs_sorted = WorkflowOncoanalyser.groupByMeta(
+    ch_inputs_sorted = WorkflowChannels.groupByMeta(
         ch_annotations,
         ch_amber,
         ch_cobalt,
@@ -88,9 +88,9 @@ workflow LINX_PLOTTING {
 
     // NOTE(LN): UMCCR linx report code needs to be updated
     /*
-    ch_gpgr_linx_inputs = WorkflowOncoanalyser.groupByMeta(
+    ch_gpgr_linx_inputs = WorkflowChannels.groupByMeta(
         ch_inputs_sorted.runnable,
-        WorkflowOncoanalyser.restoreMeta(LINX_VISUALISER.out.plots, ch_inputs),
+        WorkflowChannels.restoreMeta(LINX_VISUALISER.out.plots, ch_inputs),
     )
         .map { meta, annotation_dir, amber_dir, cobalt_dir, purple_dir, visualiser_dir ->
 
@@ -115,7 +115,7 @@ workflow LINX_PLOTTING {
     // channel: [ meta, visualiser_dir ]
     ch_visualiser_dir_out = Channel.empty()
         .mix(
-            WorkflowOncoanalyser.restoreMeta(LINX_VISUALISER.out.plots, ch_inputs),
+            WorkflowChannels.restoreMeta(LINX_VISUALISER.out.plots, ch_inputs),
             PlaceholderChannels.toolDir(ch_inputs_sorted.skip),
         )
 

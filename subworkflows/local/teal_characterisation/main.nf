@@ -37,7 +37,7 @@ workflow TEAL_CHARACTERISATION {
     // Select input sources and sort
     // channel: runnable: [ meta, tumor_bam, tumor_bai, normal_bam, normal_bai ]
     // channel: skip: [ meta ]
-    ch_teal_prep_inputs_sorted = WorkflowOncoanalyser.groupByMeta(
+    ch_teal_prep_inputs_sorted = WorkflowChannels.groupByMeta(
         ch_tumor_bam,
         ch_normal_bam,
     )
@@ -83,17 +83,17 @@ workflow TEAL_CHARACTERISATION {
 
     // Flatten TEAL_PREP output
     // channel: [ meta, teal_bam, teal_bai ]
-    ch_tumor_teal_bam = WorkflowOncoanalyser.restoreMeta(TEAL_PREP.out.tumor_teal_bam, ch_inputs)
+    ch_tumor_teal_bam = WorkflowChannels.restoreMeta(TEAL_PREP.out.tumor_teal_bam, ch_inputs)
         .map { meta, bam_bai -> [meta, *bam_bai] }
 
-    ch_normal_teal_bam_placeholder = WorkflowOncoanalyser.restoreMeta(
+    ch_normal_teal_bam_placeholder = WorkflowChannels.restoreMeta(
         ch_teal_prep_inputs
             .filter { it[0].normal_id == null } // Only populate placeholder channel if normal sample is missing
             .map { [ it[0], [], [] ] },
         ch_inputs
     )
 
-    ch_normal_teal_bam = WorkflowOncoanalyser.restoreMeta(TEAL_PREP.out.normal_teal_bam, ch_inputs)
+    ch_normal_teal_bam = WorkflowChannels.restoreMeta(TEAL_PREP.out.normal_teal_bam, ch_inputs)
         .map { meta, bam_bai -> [meta, *bam_bai] }
         .mix(ch_normal_teal_bam_placeholder)
 
@@ -103,7 +103,7 @@ workflow TEAL_CHARACTERISATION {
     // Select input sources and sort
     // channel: runnable: [ meta, tumor_teal_bam, tumor_teal_bai, normal_teal_bam, normal_teal_bai, tumor_metrics_dir, normal_metrics_dir, cobalt_dir, purple_dir ]
     // channel: skip: [ meta ]
-    ch_teal_pipeline_inputs_sorted = WorkflowOncoanalyser.groupByMeta(
+    ch_teal_pipeline_inputs_sorted = WorkflowChannels.groupByMeta(
         ch_tumor_teal_bam,
         ch_normal_teal_bam,
         ch_tumor_metrics,

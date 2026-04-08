@@ -25,7 +25,7 @@ workflow CUPPA_PREDICTION {
 
     // Select input sources
     // channel: [ meta, isofox_dir, purple_dir, linx_annotation_dir, virusinterpreter_dir ]
-    ch_inputs_selected = WorkflowOncoanalyser.groupByMeta(
+    ch_inputs_selected = WorkflowChannels.groupByMeta(
         ch_isofox,
         ch_purple,
         ch_linx,
@@ -130,7 +130,7 @@ workflow CUPPA_PREDICTION {
     // channel: [ meta, cuppa_dir ]
     ch_outputs = Channel.empty()
         .mix(
-            WorkflowOncoanalyser.restoreMeta(CUPPA.out.cuppa_dir, ch_inputs),
+            WorkflowChannels.restoreMeta(CUPPA.out.cuppa_dir, ch_inputs),
             PlaceholderChannels.toolDir(ch_inputs_sorted.skip),
         )
 

@@ -27,7 +27,7 @@ workflow COBALT_PROFILING {
     // NOTE(SW): germline mode is not currently supported
     // channel: runnable: [ meta, tumor_bam, tumor_bai, normal_bam, normal_bai]
     // channel: skip: [ meta ]
-    ch_inputs_sorted = WorkflowOncoanalyser.groupByMeta(
+    ch_inputs_sorted = WorkflowChannels.groupByMeta(
         ch_tumor_bam,
         ch_normal_bam,
     )
@@ -93,7 +93,7 @@ workflow COBALT_PROFILING {
     // channel: [ meta, cobalt_dir ]
     ch_outputs = Channel.empty()
         .mix(
-            WorkflowOncoanalyser.restoreMeta(COBALT.out.cobalt_dir, ch_inputs),
+            WorkflowChannels.restoreMeta(COBALT.out.cobalt_dir, ch_inputs),
             PlaceholderChannels.toolDir(ch_inputs_sorted.skip),
         )
 

@@ -34,7 +34,7 @@ workflow ESVEE_CALLING {
     ch_versions = Channel.empty()
 
     // Select input sources and sort
-    ch_inputs_sorted = WorkflowOncoanalyser.groupByMeta(
+    ch_inputs_sorted = WorkflowChannels.groupByMeta(
         ch_tumor_bam,
         ch_normal_bam,
     )
@@ -101,7 +101,7 @@ workflow ESVEE_CALLING {
     // Set outputs, restoring original meta
     ch_esvee_out = Channel.empty()
         .mix(
-            WorkflowOncoanalyser.restoreMeta(ESVEE.out.esvee_dir, ch_inputs),
+            WorkflowChannels.restoreMeta(ESVEE.out.esvee_dir, ch_inputs),
             PlaceholderChannels.toolDir(ch_inputs_sorted.skip),
         )
 

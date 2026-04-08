@@ -38,7 +38,7 @@ workflow ORANGE_REPORTING {
 
     // Select input sources
     // channel: { meta, ... }
-    ch_inputs_selected = WorkflowOncoanalyser.groupByMeta(
+    ch_inputs_selected = WorkflowChannels.groupByMeta(
         ch_sage_somatic,
         ch_sage_germline,
         ch_sage_somatic_append,

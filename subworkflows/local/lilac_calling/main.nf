@@ -31,7 +31,7 @@ workflow LILAC_CALLING {
     // Select input sources and sort for DNA BAMs
     // channel: runnable: [ meta, tumor_dna_bam, tumor_dna_bai, normal_dna_bam, normal_dna_bai ]
     // channel: skip: [ meta ]
-    ch_dna_inputs_sorted = WorkflowOncoanalyser.groupByMeta(
+    ch_dna_inputs_sorted = WorkflowChannels.groupByMeta(
         ch_tumor_bam,
         ch_normal_bam,
     )
@@ -58,7 +58,7 @@ workflow LILAC_CALLING {
     //
     // Create process input channel
     // channel: [ meta_lilac, normal_dna_bam, normal_dna_bai, tumor_dna_bam, tumor_dna_bai, tumor_rna_bam, tumor_rna_bai, purple_dir ]
-    ch_lilac_inputs = WorkflowOncoanalyser.groupByMeta(
+    ch_lilac_inputs = WorkflowChannels.groupByMeta(
         ch_dna_inputs_sorted.runnable,
         ch_tumor_rna_bam,
         ch_purple,
@@ -107,7 +107,7 @@ workflow LILAC_CALLING {
     // channel: [ meta, amber_dir ]
     ch_outputs = Channel.empty()
         .mix(
-            WorkflowOncoanalyser.restoreMeta(LILAC.out.lilac_dir, ch_inputs),
+            WorkflowChannels.restoreMeta(LILAC.out.lilac_dir, ch_inputs),
             PlaceholderChannels.toolDir(ch_dna_inputs_sorted.skip),
         )
 
