@@ -102,8 +102,8 @@ class Inputs {
         def (bam, bai) = redux_bam_bai
 
         return [
-                preferUserProvidedInput(bam, meta, file_keys.bam),
-                preferPipelineOutput(bai, meta, file_keys.bai),
+            preferUserProvidedInput(bam, meta, file_keys.bam),
+            preferPipelineOutput(bai, meta, file_keys.bai),
         ]
     }
 
@@ -167,27 +167,27 @@ class Inputs {
 
 
     // Files - PURPLE
-    public static getPurpleSomaticVcf(meta, purple_dir, sample_type) {
+    public static resolvePurpleSomaticVcf(purple_dir, meta, sample_type) {
         return nextflow.Nextflow.file(purple_dir).resolve("${getTumorDnaSampleName(meta, sample_type)}.purple.somatic.vcf.gz")
     }
 
-    public static getPurpleSomaticVcf(meta, purple_dir) {
-        return getPurpleSomaticVcf(meta, purple_dir, 'primary')
+    public static resolvePurpleSomaticVcf(purple_dir, meta) {
+        return resolvePurpleSomaticVcf(purple_dir, meta, 'primary')
     }
 
-    public static getPurpleSomaticVcfTbi(meta, purple_dir) {
+    public static resolvePurpleSomaticVcfTbi(purple_dir, meta) {
         return nextflow.Nextflow.file(purple_dir).resolve("${getTumorDnaSampleName(meta)}.purple.somatic.vcf.gz.tbi")
     }
 
-    public static getPurpleGermlineVcf(meta, purple_dir) {
+    public static resolvePurpleGermlineVcf(purple_dir, meta) {
         return nextflow.Nextflow.file(purple_dir).resolve("${getTumorDnaSampleName(meta)}.purple.germline.vcf.gz")
     }
 
-    public static getPurpleSomaticSvVcf(meta, purple_dir) {
+    public static resolvePurpleSomaticSvVcf(purple_dir, meta) {
         return nextflow.Nextflow.file(purple_dir).resolve("${getTumorDnaSampleName(meta)}.purple.sv.vcf.gz")
     }
 
-    public static getPurpleGermlineSvVcf(meta, purple_dir) {
+    public static resolvePurpleGermlineSvVcf(purple_dir, meta) {
         return nextflow.Nextflow.file(purple_dir).resolve("${getTumorDnaSampleName(meta)}.purple.sv.germline.vcf.gz")
     }
 

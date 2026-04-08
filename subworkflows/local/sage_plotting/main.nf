@@ -89,8 +89,8 @@ workflow SAGE_PLOTTING {
                 donor_id: inputs.donor_bam ? Inputs.getDonorDnaSampleName(meta) : null,
             ]
 
-            def purple_smlv_vcf = Inputs.getPurpleSomaticVcf(meta, inputs.purple_dir)
-            def purple_smlv_vcf_tbi = Inputs.getPurpleSomaticVcfTbi(meta, inputs.purple_dir)
+            def purple_smlv_vcf = Inputs.resolvePurpleSomaticVcf(inputs.purple_dir, meta)
+            def purple_smlv_vcf_tbi = Inputs.resolvePurpleSomaticVcfTbi(inputs.purple_dir, meta)
 
             return [
                 meta_sage,

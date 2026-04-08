@@ -85,7 +85,7 @@ workflow SAGE_APPEND {
 
             def has_tumor_rna = Inputs.hasTumorRna(meta)
             def has_normal_dna = Inputs.hasNormalDna(meta)
-            def has_smlv_germline = Inputs.getPurpleGermlineVcf(meta, inputs.purple_dir)
+            def has_smlv_germline = Inputs.resolvePurpleGermlineVcf(inputs.purple_dir, meta)
 
             def should_append_rna_variants = has_tumor_rna && has_normal_dna && has_smlv_germline
 
@@ -118,7 +118,7 @@ workflow SAGE_APPEND {
             def bams = [inputs.tumor_rna_bam]
             def bais = [inputs.tumor_rna_bai]
 
-            def purple_smlv_vcf = Inputs.getPurpleGermlineVcf(meta, inputs.purple_dir)
+            def purple_smlv_vcf = Inputs.resolvePurpleGermlineVcf(inputs.purple_dir, meta)
 
             return [meta_append, purple_smlv_vcf, bams, bais, []]
         }
@@ -149,7 +149,7 @@ workflow SAGE_APPEND {
 
             def has_tumor_rna = Inputs.hasTumorRna(meta)
             def has_tumor_dna = Inputs.hasTumorDna(meta)
-            def has_smlv_somatic = Inputs.getPurpleSomaticVcf(meta, inputs.purple_dir)
+            def has_smlv_somatic = Inputs.resolvePurpleSomaticVcf(inputs.purple_dir, meta)
 
             def should_append_rna_variants = !purity_estimate_mode && has_tumor_rna && has_tumor_dna && has_smlv_somatic
             def should_append_longitudinal_variants = purity_estimate_mode && has_tumor_dna && has_smlv_somatic
@@ -197,7 +197,7 @@ workflow SAGE_APPEND {
                 redux_tsvs = inputs.tumor_dna_redux_tsvs
             }
 
-            def purple_smlv_vcf = Inputs.getPurpleSomaticVcf(meta, inputs.purple_dir, 'primary')
+            def purple_smlv_vcf = Inputs.resolvePurpleSomaticVcf(inputs.purple_dir, meta, 'primary')
 
             return [meta_append, purple_smlv_vcf, bams, bais, redux_tsvs]
         }

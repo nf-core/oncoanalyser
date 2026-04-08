@@ -35,7 +35,7 @@ workflow SIGS_FITTING {
 
             def has_smlv_vcf = []
             if (has_tumor_normal_dna) {
-                has_smlv_vcf = purple_dir ? Inputs.getPurpleSomaticVcf(meta, purple_dir) : []
+                has_smlv_vcf = purple_dir ? Inputs.resolvePurpleSomaticVcf(purple_dir, meta) : []
             }
 
             def has_existing = Inputs.hasExistingInput(meta, Inputs.KEY.SIGS_DIR)
@@ -58,7 +58,7 @@ workflow SIGS_FITTING {
                 sample_id: tumor_id,
             ]
 
-            def smlv_vcf = Inputs.getPurpleSomaticVcf(meta, purple_dir)
+            def smlv_vcf = Inputs.resolvePurpleSomaticVcf(purple_dir, meta)
 
             return [meta_sigs, smlv_vcf]
         }

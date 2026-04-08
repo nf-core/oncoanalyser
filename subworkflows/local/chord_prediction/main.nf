@@ -37,8 +37,8 @@ workflow CHORD_PREDICTION {
             def has_sv_vcf = []
 
             if(has_tumor_normal_dna) {
-                has_smlv_vcf = purple_dir ? Inputs.getPurpleSomaticVcf(meta, purple_dir) : []
-                has_sv_vcf = purple_dir ? Inputs.getPurpleSomaticSvVcf(meta, purple_dir) : []
+                has_smlv_vcf = purple_dir ? Inputs.resolvePurpleSomaticVcf(purple_dir, meta) : []
+                has_sv_vcf = purple_dir ? Inputs.resolvePurpleSomaticSvVcf(purple_dir, meta) : []
             }
 
             def has_existing = Inputs.hasExistingInput(meta, Inputs.KEY.CHORD_DIR)
@@ -61,8 +61,8 @@ workflow CHORD_PREDICTION {
                 sample_id: tumor_id,
             ]
 
-            def smlv_vcf = Inputs.getPurpleSomaticVcf(meta, purple_dir)
-            def sv_vcf = Inputs.getPurpleSomaticSvVcf(meta, purple_dir)
+            def smlv_vcf = Inputs.resolvePurpleSomaticVcf(purple_dir, meta)
+            def sv_vcf = Inputs.resolvePurpleSomaticSvVcf(purple_dir, meta)
 
             return [meta_chord, smlv_vcf, sv_vcf]
         }
