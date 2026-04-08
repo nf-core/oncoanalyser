@@ -66,16 +66,11 @@ class SampleSheet {
 
     private static void createOrUpdateSampleMeta(entry, meta, sample_keys) {
 
-        def group_id = meta.group_id
-
         def sample_type = Enums.getValidatedEnumFromString(entry.sample_type, SampleMeta.SampleType)
         def sequence_type = Enums.getValidatedEnumFromString(entry.sequence_type, SampleMeta.SequenceType)
         def file_type = Enums.getValidatedEnumFromString(entry.filetype, SampleMeta.FileType)
 
-        def log_sample_id = "group_id(${group_id}) sample_id(${sample_type})"
-        def log_group_id = "group_id(${group_id})"
-
-        setAndCheckSubjectId(meta, entry, log_group_id)
+        setAndCheckSubjectId(meta, entry)
 
         def sample_key = [sample_type, sequence_type]
         sample_keys.add(sample_key) // Store to iterate over later
@@ -83,38 +78,41 @@ class SampleSheet {
         def meta_sample = meta.get(sample_key, [:])
 
         // Handle info field
-        def info_data = parseInfoField(entry, log_sample_id)
+        def info_data = parseInfoField(entry)
 
         if (info_data.containsKey(SampleMeta.InfoField.CANCER_TYPE)) {
             meta[SampleMeta.InfoField.CANCER_TYPE] = info_data[SampleMeta.InfoField.CANCER_TYPE]
         }
 
-        setSampleIds(meta_sample, entry, info_data, log_group_id)
+        setSampleIds(meta_sample, entry, info_data)
 
         // Set file paths
         if (meta_sample.containsKey(file_type) & file_type != SampleMeta.FileType.FASTQ) {
-            throw new IllegalStateException("got duplicate filetype(${file_type}) for ${log_sample_id}")
+            throw new IllegalStateException("Got duplicate filetype(${file_type}) for group_id(${entry.group_id}) sample_id(${entry.sample_id}")
         }
 
         if (file_type === SampleMeta.FileType.FASTQ) {
-            setFastqPaths(meta_sample, entry, info_data, log_sample_id)
+            setFastqPaths(meta_sample, entry, info_data)
         } else {
             meta_sample[file_type] = getFileObject(entry.filepath)
         }
     }
 
-    private static void setAndCheckSubjectId(meta, entry, log_group_id) {
+    private static void setAndCheckSubjectId(meta, entry) {
 
         if(!meta.containsKey('subject_id')) {
             meta.subject_id = entry.subject_id
         }
 
         if (meta.subject_id != entry.subject_id) {
-            throw new IllegalStateException("got unexpected subject_id(${entry.subject_id}) for ${log_group_id}. All samples within a group must have the same subject_id")
+            throw new IllegalStateException(
+                "Got unexpected subject_id(${entry.subject_id}) for group_id(${entry.group_id}). " +
+                "All samples within a group must have the same subject_id"
+            )
         }
     }
 
-    private static Map parseInfoField(entry, log_sample_id) {
+    private static Map parseInfoField(entry) {
         def info_data = [:]
 
         if (!entry.containsKey('info')) {
@@ -128,11 +126,11 @@ class SampleSheet {
                 def info_field_enum = Enums.getValidatedEnumFromString(k, SampleMeta.InfoField)
 
                 if (info_data.containsKey(info_field_enum)) {
-                    throw new IllegalStateException("got duplicate info field(${info_field_enum}) for ${log_sample_id}")
+                    throw new IllegalStateException("Got duplicate info field(${info_field_enum}) for group_id(${entry.group_id}) sample_id(${entry.sample_id})")
                 }
 
                 if (!v && info_field_enum !== SampleMeta.InfoField.LONGITUDINAL_SAMPLE) {
-                    throw new IllegalStateException("got empty value for info field(${info_field_enum}) for ${log_sample_id}")
+                    throw new IllegalStateException("Got empty value for info field(${info_field_enum}) for group_id(${entry.group_id}) sample_id(${entry.sample_id})")
                 }
 
                 info_data[info_field_enum] = v
@@ -145,19 +143,19 @@ class SampleSheet {
         return path ? nextflow.Nextflow.file(path) : []
     }
 
-    private static void setSampleIds(meta_sample, entry, info_data, log_group_id) {
+    private static void setSampleIds(meta_sample, entry, info_data) {
 
         if (info_data.containsKey(SampleMeta.InfoField.LONGITUDINAL_SAMPLE)) {
 
             if (meta_sample.containsKey('longitudinal_sample_id') && meta_sample.longitudinal_sample_id != entry.sample_id) {
-                throw new IllegalStateException("got multiple longitudinal samples for ${log_group_id}: ${entry.sample_id}")
+                throw new IllegalStateException("Got multiple longitudinal samples for group_id(${entry.group_id}) - this is currently unsupported")
             }
 
             meta_sample.longitudinal_sample_id = entry.sample_id
 
         } else if (meta_sample.containsKey('sample_id') && meta_sample.sample_id != entry.sample_id) {
 
-            throw new IllegalStateException("got unexpected sample name for ${log_group_id}: ${entry.sample_id}")
+            throw new IllegalStateException("Got unexpected sample_id(${entry.sample_id}) for group_id(${entry.group_id})")
 
         } else {
 
@@ -166,20 +164,23 @@ class SampleSheet {
         }
     }
 
-    private static void setFastqPaths(meta_sample, entry, info_data, log_sample_id) {
+    private static void setFastqPaths(meta_sample, entry, info_data) {
 
         if (!info_data.containsKey(SampleMeta.InfoField.LIBRARY_ID)) {
-            throw new IllegalStateException("missing 'library_id' info field for ${log_sample_id}")
+            throw new IllegalStateException("Missing info field(library_id) for group_id(${entry.group_id}) sample_id(${entry.sample_id})")
         }
 
         if (!info_data.containsKey(SampleMeta.InfoField.LANE)) {
-            throw new IllegalStateException("missing 'lane' info field for ${log_sample_id}")
+            throw new IllegalStateException("Missing 'lane' info field for group_id(${entry.group_id}) sample_id(${entry.sample_id})")
         }
 
         def fastq_entries = entry.filepath.tokenize(';')
 
         if (fastq_entries.size() != 2) {
-            throw new IllegalStateException("expected exactly 2 FASTQ files delimited by ';' (i.e. '<fwd>;<rev>') but found ${fastq_entries.size} files for ${log_sample_id}")
+            throw new IllegalStateException(
+                "Expected exactly 2 FASTQ files delimited by ';' (i.e. '<fwd>;<rev>') but found " +
+                "${fastq_entries.size} files for group_id(${entry.group_id}) sample_id(${entry.sample_id})"
+            )
         }
 
         def (fwd, rev) = fastq_entries
@@ -190,7 +191,7 @@ class SampleSheet {
         }
 
         if (meta_sample[SampleMeta.FileType.FASTQ].containsKey(fastq_key)) {
-            throw new IllegalStateException("got duplicate lane + library_id data for ${log_sample_id}: ${fastq_key}")
+            throw new IllegalStateException("Got duplicate lane + library_id data for group_id(${entry.group_id}) sample_id(${entry.sample_id}): ${fastq_key}")
         }
 
         meta_sample[SampleMeta.FileType.FASTQ][fastq_key] = ['fwd': getFileObject(fwd), 'rev': getFileObject(rev)]
@@ -254,7 +255,7 @@ class SampleSheet {
         }
     }
 
-    private static void checkRawReadDataExists(meta_sample, log_group_id) {
+    private static void checkRawReadDataExists(meta_sample, group_id) {
 
         def missing_any_raw_read_data =
             !meta_sample.containsKey(SampleMeta.FileType.BAM) &&
@@ -264,10 +265,9 @@ class SampleSheet {
             !meta_sample.containsKey(SampleMeta.FileType.FASTQ)
 
         if (missing_any_raw_read_data) {
-
             throw new IllegalStateException(
-                    "no BAM/CRAM nor BAM_REDUX/CRAM_REDUX nor FASTQ files provided for ${log_group_id}\n\n" +
-                    "NB: At least one of these files is required as they are the basis to determine input sample type."
+                "No BAM/CRAM nor BAM_REDUX/CRAM_REDUX nor FASTQ files provided for group_id(${group_id})\n\n" +
+                "NB: At least one of these files is required as they are the basis to determine input sample type."
             )
         }
     }
@@ -311,7 +311,7 @@ class SampleSheet {
         }
 
         if (sample_ids_duplicated) {
-            throw new IllegalStateException("duplicate sample id(s) found for group_id(${meta.group_id}): ${sample_ids_duplicated.join(', ')}")
+            throw new IllegalStateException("Duplicate sample id(s) found for group_id(${meta.group_id}): ${sample_ids_duplicated.join(', ')}")
         }
     }
 
@@ -319,12 +319,12 @@ class SampleSheet {
 
         // Do not allow normal DNA only
         if (Inputs.hasNormalDna(meta) && !Inputs.hasTumorDna(meta)) {
-            throw new IllegalStateException("found only normal DNA input for ${meta.group_id} but germline only analysis is not supported")
+            throw new IllegalStateException("Found only normal DNA input for group_id(${meta.group_id}) but germline only analysis is not supported")
         }
 
         // Do not allow donor sample without normal sample
         if (Inputs.hasDonorDna(meta) && !Inputs.hasNormalDna(meta)) {
-            throw new IllegalStateException("a donor sample but not normal sample was found for ${meta.group_id}. Analysis with a donor sample requires a normal sample.")
+            throw new IllegalStateException("Donor sample provided without normal sample for group_id(${meta.group_id}).")
         }
 
         // Apply some required restrictions to targeted mode
@@ -332,19 +332,16 @@ class SampleSheet {
 
             // Do not allow donor DNA
             if (Inputs.hasDonorDna(meta)) {
-                throw new IllegalStateException(
-                        "targeted mode is not compatible with the donor DNA BAM/CRAM provided for ${meta.group_id}\n\n" +
-                        "The targeted workflow supports only tumor and normal DNA BAM/CRAMs (and tumor RNA BAM/CRAMs for TSO500)"
-                )
+                throw new IllegalStateException("Targeted mode is not compatible with the donor DNA BAM/CRAM provided for group_id(${meta.group_id})")
             }
 
             // Do not allow only tumor RNA
             if (Inputs.hasTumorRna(meta) && !Inputs.hasTumorDna(meta)) {
 
                 throw new IllegalStateException(
-                        "targeted mode is not compatible with only tumor RNA provided for ${meta.group_id}\n\n" +
-                        "The targeted workflow requires tumor DNA and can optionally take tumor RNA, depending on " +
-                        "the configured panel."
+                    "Targeted mode is not compatible with only tumor RNA provided for group_id(${meta.group_id})\n\n" +
+                    "The targeted workflow requires tumor DNA and can optionally take tumor RNA, depending on " +
+                    "the configured panel."
                 )
             }
         }
@@ -359,7 +356,7 @@ class SampleSheet {
         def has_normal_dna_bam = Inputs.hasNormalDnaBam(meta) || Inputs.hasNormalDnaReduxBam(meta)
 
         if (longitudinal && has_amber_dir && !has_normal_dna_bam) {
-            throw new IllegalStateException("AMBER input was provided without the required primary normal DNA BAM for ${meta.group_id}")
+            throw new IllegalStateException("AMBER input was provided without the required primary normal DNA BAM for group_id(${meta.group_id})")
         }
 
     }
