@@ -2,6 +2,8 @@ import SampleSheetFields.FileType
 import SampleSheetFields.SampleType
 import SampleSheetFields.SequenceType
 
+import java.nio.file.Path
+
 class Inputs {
 
     // Files - common
@@ -59,7 +61,7 @@ class Inputs {
         VIRUSINTERPRETER_DIR: [FileType.VIRUSINTERPRETER_DIR, SampleType.TUMOR, SequenceType.DNA],
     ]
 
-    public static getInput(meta, key) {
+    public static Object getInput(Map meta, List<Object> key) {
 
         def result = []
         def (file_type, sample_types, sequence_type) = key
@@ -73,24 +75,24 @@ class Inputs {
         return result
     }
 
-    public static hasExistingInput(meta, key) {
+    public static boolean hasExistingInput(Map meta, List<Object> key) {
         return getInput(meta, key) != []
     }
 
-    public static preferUserProvidedInput(pipeline_path, meta, key) {
+    public static Object preferUserProvidedInput(Object pipeline_path, Map meta, List<Object> key) {
         // Allows the pipeline to start from downstream steps, e.g. running ORANGE from existing pipeline outputs
         def user_provided_path = getInput(meta, key)
         return user_provided_path ?: pipeline_path
     }
 
-    public static preferPipelineOutput(pipeline_path, meta, key) {
+    public static Object preferPipelineOutput(Object pipeline_path, meta, key) {
         def user_provided_path = getInput(meta, key)
         return pipeline_path ?: user_provided_path
     }
 
 
     // Files - REDUX
-    public static List resolveReduxBamBai(redux_bam_bai, meta, sample_type) {
+    public static List<Object> resolveReduxBamBai(List<Object> redux_bam_bai, Map meta, SampleType sample_type) {
 
         def file_keys = switch (sample_type) {
             case SampleType.TUMOR -> [bam: KEY.BAM_REDUX_DNA_TUMOR, bai: KEY.BAI_DNA_TUMOR]
@@ -107,7 +109,7 @@ class Inputs {
         ]
     }
 
-    public static List resolveReduxTsvFiles(redux_dir, meta, sample_type) {
+    public static List<Path> resolveReduxTsvFiles(Object redux_dir, Map meta, SampleType sample_type) {
 
         // NOTE(LN): Get the REDUX TSV files as a glob
         //
@@ -139,7 +141,7 @@ class Inputs {
 
 
     // Files - SAGE
-    private static List resolveSageVcfWithTbi(sage_dir, meta, sample_type) {
+    private static List<Path> resolveSageVcfWithTbi(Object sage_dir, Map meta, SampleType sample_type) {
 
         def file_key = switch (sample_type) {
             case SampleType.TUMOR -> KEY.SAGE_DIR_TUMOR
@@ -167,39 +169,39 @@ class Inputs {
 
 
     // Files - PURPLE
-    public static resolvePurpleSomaticVcf(purple_dir, meta, sample_type) {
+    public static Path resolvePurpleSomaticVcf(Path purple_dir, Map meta, String sample_type) {
         return nextflow.Nextflow.file(purple_dir).resolve("${getTumorDnaSampleName(meta, sample_type)}.purple.somatic.vcf.gz")
     }
 
-    public static resolvePurpleSomaticVcf(purple_dir, meta) {
+    public static Path resolvePurpleSomaticVcf(Path purple_dir, Map meta) {
         return resolvePurpleSomaticVcf(purple_dir, meta, 'primary')
     }
 
-    public static resolvePurpleSomaticVcfTbi(purple_dir, meta) {
+    public static Path resolvePurpleSomaticVcfTbi(Path purple_dir, Map meta) {
         return nextflow.Nextflow.file(purple_dir).resolve("${getTumorDnaSampleName(meta)}.purple.somatic.vcf.gz.tbi")
     }
 
-    public static resolvePurpleGermlineVcf(purple_dir, meta) {
+    public static Path resolvePurpleGermlineVcf(Path purple_dir, Map meta) {
         return nextflow.Nextflow.file(purple_dir).resolve("${getTumorDnaSampleName(meta)}.purple.germline.vcf.gz")
     }
 
-    public static resolvePurpleSomaticSvVcf(purple_dir, meta) {
+    public static Path resolvePurpleSomaticSvVcf(Path purple_dir, Map meta) {
         return nextflow.Nextflow.file(purple_dir).resolve("${getTumorDnaSampleName(meta)}.purple.sv.vcf.gz")
     }
 
-    public static resolvePurpleGermlineSvVcf(purple_dir, meta) {
+    public static Path resolvePurpleGermlineSvVcf(Path purple_dir, Map meta) {
         return nextflow.Nextflow.file(purple_dir).resolve("${getTumorDnaSampleName(meta)}.purple.sv.germline.vcf.gz")
     }
 
 
     // Sample records
-    public static getTumorDnaSample(meta) { return meta.getOrDefault([SampleType.TUMOR, SequenceType.DNA], [:]) }
-    public static getTumorRnaSample(meta) { return meta.getOrDefault([SampleType.TUMOR, SequenceType.RNA], [:]) }
-    public static getNormalDnaSample(meta) { return meta.getOrDefault([SampleType.NORMAL, SequenceType.DNA], [:]) }
-    public static getDonorDnaSample(meta) { return meta.getOrDefault([SampleType.DONOR, SequenceType.DNA], [:]) }
+    public static Map getTumorDnaSample(Map meta) { return meta.getOrDefault([SampleType.TUMOR, SequenceType.DNA], [:]) }
+    public static Map getTumorRnaSample(Map meta) { return meta.getOrDefault([SampleType.TUMOR, SequenceType.RNA], [:]) }
+    public static Map getNormalDnaSample(Map meta) { return meta.getOrDefault([SampleType.NORMAL, SequenceType.DNA], [:]) }
+    public static Map getDonorDnaSample(Map meta) { return meta.getOrDefault([SampleType.DONOR, SequenceType.DNA], [:]) }
 
     // Sample names
-    public static getTumorDnaSampleName(meta, sample_type) {
+    public static String getTumorDnaSampleName(Map meta, String sample_type) {
         def meta_sample = getTumorDnaSample(meta)
         def sample_id
 
@@ -217,33 +219,33 @@ class Inputs {
         return sample_id
     }
 
-    public static getTumorDnaSampleName(meta) { return getTumorDnaSampleName(meta, 'primary') }
+    public static String getTumorDnaSampleName(Map meta) { return getTumorDnaSampleName(meta, 'primary') }
 
-    public static getTumorRnaSampleName(meta) { return getTumorRnaSample(meta)['sample_id'] }
-    public static getNormalDnaSampleName(meta) { return getNormalDnaSample(meta)['sample_id'] }
-    public static getDonorDnaSampleName(meta) { return getDonorDnaSample(meta)['sample_id'] }
+    public static String getTumorRnaSampleName(Map meta) { return getTumorRnaSample(meta)['sample_id'] }
+    public static String getNormalDnaSampleName(Map meta) { return getNormalDnaSample(meta)['sample_id'] }
+    public static String getDonorDnaSampleName(Map meta) { return getDonorDnaSample(meta)['sample_id'] }
 
 
     // Files - Reads/alignments
-    public static hasTumorDnaFastq(meta) { return getTumorDnaSample(meta).containsKey(FileType.FASTQ) }
-    public static hasTumorDnaBam(meta) { return getTumorDnaSample(meta).containsKey(FileType.BAM) }
-    public static hasTumorDnaReduxBam(meta) { return getTumorDnaSample(meta).containsKey(FileType.BAM_REDUX) }
+    public static boolean hasTumorDnaFastq(Map meta) { return getTumorDnaSample(meta).containsKey(FileType.FASTQ) }
+    public static boolean hasTumorDnaBam(Map meta) { return getTumorDnaSample(meta).containsKey(FileType.BAM) }
+    public static boolean hasTumorDnaReduxBam(Map meta) { return getTumorDnaSample(meta).containsKey(FileType.BAM_REDUX) }
 
-    public static hasNormalDnaFastq(meta) { return getNormalDnaSample(meta).containsKey(FileType.FASTQ) }
-    public static hasNormalDnaBam(meta) { return getNormalDnaSample(meta).containsKey(FileType.BAM) }
-    public static hasNormalDnaReduxBam(meta) { return getNormalDnaSample(meta).containsKey(FileType.BAM_REDUX) }
+    public static boolean hasNormalDnaFastq(Map meta) { return getNormalDnaSample(meta).containsKey(FileType.FASTQ) }
+    public static boolean hasNormalDnaBam(Map meta) { return getNormalDnaSample(meta).containsKey(FileType.BAM) }
+    public static boolean hasNormalDnaReduxBam(Map meta) { return getNormalDnaSample(meta).containsKey(FileType.BAM_REDUX) }
 
-    public static hasDonorDnaFastq(meta) { return getDonorDnaSample(meta).containsKey(FileType.FASTQ) }
-    public static hasDonorDnaBam(meta) { return getDonorDnaSample(meta).containsKey(FileType.BAM) }
-    public static hasDonorDnaReduxBam(meta) { return getDonorDnaSample(meta).containsKey(FileType.BAM_REDUX) }
+    public static boolean hasDonorDnaFastq(Map meta) { return getDonorDnaSample(meta).containsKey(FileType.FASTQ) }
+    public static boolean hasDonorDnaBam(Map meta) { return getDonorDnaSample(meta).containsKey(FileType.BAM) }
+    public static boolean hasDonorDnaReduxBam(Map meta) { return getDonorDnaSample(meta).containsKey(FileType.BAM_REDUX) }
 
-    public static hasTumorRnaFastq(meta) { return getTumorRnaSample(meta).containsKey(FileType.FASTQ) }
-    public static hasTumorRnaBam(meta) { return getTumorRnaSample(meta).containsKey(FileType.BAM) }
+    public static boolean hasTumorRnaFastq(Map meta) { return getTumorRnaSample(meta).containsKey(FileType.FASTQ) }
+    public static boolean hasTumorRnaBam(Map meta) { return getTumorRnaSample(meta).containsKey(FileType.BAM) }
 
 
     // Status
-    public static hasTumorDna(meta) { return hasTumorDnaBam(meta) || hasTumorDnaReduxBam(meta) || hasTumorDnaFastq(meta) }
-    public static hasNormalDna(meta) { return hasNormalDnaBam(meta) || hasNormalDnaReduxBam(meta) || hasNormalDnaFastq(meta) }
-    public static hasDonorDna(meta) { return hasDonorDnaBam(meta) || hasDonorDnaReduxBam(meta) || hasDonorDnaFastq(meta) }
-    public static hasTumorRna(meta) { return hasTumorRnaBam(meta) || hasTumorRnaFastq(meta) }
+    public static boolean hasTumorDna(Map meta) { return hasTumorDnaBam(meta) || hasTumorDnaReduxBam(meta) || hasTumorDnaFastq(meta) }
+    public static boolean hasNormalDna(Map meta) { return hasNormalDnaBam(meta) || hasNormalDnaReduxBam(meta) || hasNormalDnaFastq(meta) }
+    public static boolean hasDonorDna(Map meta) { return hasDonorDnaBam(meta) || hasDonorDnaReduxBam(meta) || hasDonorDnaFastq(meta) }
+    public static boolean hasTumorRna(Map meta) { return hasTumorRnaBam(meta) || hasTumorRnaFastq(meta) }
 }
