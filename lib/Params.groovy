@@ -195,22 +195,22 @@ class Params {
 
     private static void setUmiDefaults(Map params) {
 
-        def umi_tech
+        def umi_settings
         if (params.containsKey('panel')) {
             def maybe_supported_panel = RefData.SupportedPanel.fromString((String) params.panel)
-            umi_tech = UmiTech.fromSupportedPanel(maybe_supported_panel)
+            umi_settings = UmiSettings.fromSupportedPanel(maybe_supported_panel)
         } else {
-            umi_tech = UmiTech.NONE
+            umi_settings = UmiSettings.NONE
         }
 
         // Set defaults if params not set by user
-        params.putIfAbsent('fastp_umi_enabled', umi_tech.fastpParams().requireUmiStripping())
-        params.putIfAbsent('fastp_umi_location', umi_tech.fastpParams().umiLocation())
-        params.putIfAbsent('fastp_umi_length', umi_tech.fastpParams().umiLength())
-        params.putIfAbsent('fastp_umi_skip', umi_tech.fastpParams().umiSkip())
+        params.putIfAbsent('fastp_umi_enabled', umi_settings.fastpArgs().requireUmiStripping())
+        params.putIfAbsent('fastp_umi_location', umi_settings.fastpArgs().umiLocation())
+        params.putIfAbsent('fastp_umi_length', umi_settings.fastpArgs().umiLength())
+        params.putIfAbsent('fastp_umi_skip', umi_settings.fastpArgs().umiSkip())
 
-        params.putIfAbsent('redux_umi_enabled', umi_tech.reduxParams().enableUmiProcessing())
-        params.putIfAbsent('redux_umi_duplex_delim', umi_tech.reduxParams().duplexUmiDelim())
+        params.putIfAbsent('redux_umi_enabled', umi_settings.reduxArgs().enableUmiProcessing())
+        params.putIfAbsent('redux_umi_duplex_delim', umi_settings.reduxArgs().duplexUmiDelim())
 
         // When fastp UMI is enabled, REDUX UMI should be as well
         params.redux_umi_enabled = params.fastp_umi_enabled
