@@ -1,5 +1,3 @@
-import nextflow.Nextflow
-
 class SampleSheet {
 
     public static List<Map> parseInput(String sample_sheet_path, boolean stub_run, RunModes.Pipeline pipeline_mode) {
@@ -33,8 +31,6 @@ class SampleSheet {
                 ]
                 */
 
-                disallowDuplicateSampleIds(entries)
-
                 entries.each { entry -> createOrUpdateSampleSheetFields(entry, meta, sample_keys) }
 
                 // Per sample checks once meta_sample objects are fully constructed
@@ -55,7 +51,8 @@ class SampleSheet {
 
                 }
 
-                // Per group checks after per sample checks
+                // Per group checks
+                disallowDuplicateSampleIdsWithinSampleGroup(meta)
                 disallowInvalidSampleCombinations(meta, pipeline_mode)
                 checkLongitudinalSampleInputs(meta)
 
@@ -63,23 +60,6 @@ class SampleSheet {
             }
 
         return inputs
-    }
-
-    private static void disallowDuplicateSampleIds(List<Map<String, String>> entries) {
-
-        def entries_by_sample_id = entries.groupBy { it.sample_id }
-
-        entries_by_sample_id.each { sample_id, sample_entries ->
-
-            // Allow multiple FASTQ entries with the same sample_id (e.g., different lanes)
-            def all_fastq = sample_entries.every {
-                SampleSheetFields.FileType.fromString(it.filetype) == SampleSheetFields.FileType.FASTQ
-            }
-
-            if (!all_fastq && sample_entries.size() > 1) {
-                throw new IllegalStateException("Duplicate sample_id(${sample_id}) found for group_id(${sample_entries[0].group_id})")
-            }
-        }
     }
 
     private static void createOrUpdateSampleSheetFields(Map<String, String> entry, Map meta, Set<List> sample_keys) {
@@ -106,7 +86,7 @@ class SampleSheet {
 
         // Set file paths
         if (meta_sample.containsKey(file_type) & file_type != SampleSheetFields.FileType.FASTQ) {
-            throw new IllegalStateException("Got duplicate filetype(${file_type}) for group_id(${entry.group_id}) sample_id(${entry.sample_id}")
+            throw new IllegalStateException("Got duplicate filetype(${file_type}) for group_id(${entry.group_id}) sample_id(${entry.sample_id})")
         }
 
         if (file_type === SampleSheetFields.FileType.FASTQ) {
@@ -304,6 +284,26 @@ class SampleSheet {
         def bam_dir = bam_path.getParent().toUriString()
 
         meta_sample[SampleSheetFields.FileType.REDUX_TSV_DIR] = bam_dir
+    }
+
+    private static void disallowDuplicateSampleIdsWithinSampleGroup(Map meta) {
+
+        def sample_ids_seen = [] as Set
+
+        for (maybe_meta_sample in meta.values()) {
+
+            def is_meta_sample = (maybe_meta_sample instanceof Map) && maybe_meta_sample.containsKey('sample_id')
+            if(!is_meta_sample)
+                continue
+
+            def sample_id = maybe_meta_sample.sample_id
+
+            if(sample_ids_seen.contains(sample_id)) {
+                throw new IllegalStateException("Duplicate sample_id(${sample_id}) found for group_id(${meta.group_id})")
+            }
+
+            sample_ids_seen.add(sample_id)
+        }
     }
 
     private static void disallowInvalidSampleCombinations(Map meta, RunModes.Pipeline pipeline_mode) {
