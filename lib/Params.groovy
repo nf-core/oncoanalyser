@@ -196,32 +196,25 @@ class Params {
 
     private static void setUmiDefaults(Map params) {
 
-        def pipeline_mode = RunModes.Pipeline.fromString((String) params.mode)
-
-        if (pipeline_mode == RunModes.Pipeline.TARGETED) {
-
-            // When fastp UMI is enabled, REDUX UMI should be as well
-            if (params.fastp_umi_enabled && (!params.containsKey('redux_umi_enabled') || !params.redux_umi_enabled)) {
-                params.redux_umi_enabled = true
-            }
-
-            // Set the REDUX UMI duplex delimiter to '_' when the following conditions are met:
-            //   - both fastp and REDUX UMI processing enabled
-            //   - fastp is using a duplex UMI location type (per_index or per_read)
-            //   - no REDUX duplex delimiter has been set
-            def fastp_and_redux_umi_enabled = params.fastp_umi_enabled && params.redux_umi_enabled
-            def fastp_duplex_location = params.containsKey('fastp_umi_location') && (params.fastp_umi_location == 'per_index' || params.fastp_umi_location == 'per_read')
-            def no_umi_duplex_delim = !params.containsKey('redux_umi_duplex_delim') || !params.redux_umi_duplex_delim
-            if (fastp_and_redux_umi_enabled && fastp_duplex_location && no_umi_duplex_delim) {
-                params.redux_umi_duplex_delim = '_'
-            }
+        def umi_tech
+        if (params.containsKey('panel')) {
+            def maybe_supported_panel = RefData.SupportedPanel.fromString((String) params.panel)
+            umi_tech = UmiTech.fromSupportedPanel(maybe_supported_panel)
+        } else {
+            umi_tech = UmiTech.NONE
         }
 
-        // Additionally set selected parameters with false-ish truthy values to avoid passing null values as inputs
-        if (!params.containsKey('fastp_umi_location')) params.fastp_umi_location = ''
-        if (!params.containsKey('fastp_umi_length')) params.fastp_umi_length = 0
-        if (!params.containsKey('fastp_umi_skip')) params.fastp_umi_skip = -1
-        if (!params.containsKey('redux_umi_duplex_delim')) params.redux_umi_duplex_delim = ''
+        // Set defaults if params not set by user
+        params.putIfAbsent('fastp_umi_enabled', umi_tech.fastpParams().requireUmiStripping())
+        params.putIfAbsent('fastp_umi_location', umi_tech.fastpParams().umiLocation())
+        params.putIfAbsent('fastp_umi_length', umi_tech.fastpParams().umiLength())
+        params.putIfAbsent('fastp_umi_skip', umi_tech.fastpParams().umiSkip())
+
+        params.putIfAbsent('redux_umi_enabled', umi_tech.reduxParams().enableUmiProcessing())
+        params.putIfAbsent('redux_umi_duplex_delim', umi_tech.reduxParams().duplexUmiDelim())
+
+        // When fastp UMI is enabled, REDUX UMI should be as well
+        params.redux_umi_enabled = params.fastp_umi_enabled
     }
 
     private static void validateUmiParams(Map params) {
