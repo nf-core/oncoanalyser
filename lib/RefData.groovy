@@ -30,10 +30,10 @@ class RefData {
     }
 
     public static enum SupportedPanel {
-        tso500,
-        msk,
-        oncopanel,
-        pm_haem;
+        TSO500,
+        MSK,
+        ONCOPANEL,
+        PM_HAEM;
 
         public boolean hasConfiguredVersion(Map params, RefGenome.Version version) {
 
@@ -60,8 +60,8 @@ class RefData {
     public static String getDefaultPanelDataPath(SupportedPanel panel, RefGenome.Version version){
 
         def path_map = [
-            [(SupportedPanel.tso500), (RefGenome.Version.V37)]: 'https://pub-cf6ba01919994c3cbd354659947f74d8.r2.dev/hmf_reference_data/panels/hmf_panel_resources.tso500.37_v2.3.0--2.tar.gz',
-            [(SupportedPanel.tso500), (RefGenome.Version.V38)]: 'https://pub-cf6ba01919994c3cbd354659947f74d8.r2.dev/hmf_reference_data/panels/hmf_panel_resources.tso500.38_v2.3.0--2.tar.gz',
+            [(SupportedPanel.TSO500), (RefGenome.Version.V37)]: 'https://pub-cf6ba01919994c3cbd354659947f74d8.r2.dev/hmf_reference_data/panels/hmf_panel_resources.tso500.37_v2.3.0--2.tar.gz',
+            [(SupportedPanel.TSO500), (RefGenome.Version.V38)]: 'https://pub-cf6ba01919994c3cbd354659947f74d8.r2.dev/hmf_reference_data/panels/hmf_panel_resources.tso500.38_v2.3.0--2.tar.gz',
         ]
 
         def panel_key = [panel, version]

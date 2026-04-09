@@ -28,8 +28,8 @@ public enum UmiTech {
 
     public static UmiTech fromSupportedPanel(RefData.SupportedPanel supportedPanel) {
         return switch (supportedPanel) {
-            case RefData.SupportedPanel.tso500 -> TSO500
-            case RefData.SupportedPanel.pm_haem -> TWIST
+            case RefData.SupportedPanel.TSO500 -> TSO500
+            case RefData.SupportedPanel.PM_HAEM -> TWIST
             default -> NONE
         }
     }

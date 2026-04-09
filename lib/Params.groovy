@@ -175,9 +175,8 @@ class Params {
             error(
                 "No built-in supported for panel: ${params.panel} ",
                 "",
-                "Provide argument --force_panel if you have a custom panel,",
-                "or adjust the --panel argument to one of the panels configured ",
-                "in the pipeline:",
+                "Provide argument --force_panel if you have a custom panel, or adjust the --panel",
+                "argument to one of the panels configured in the pipeline (case-sensitive):",
                 createBulletedList(RefData.SupportedPanel.getNames())
             )
         }
