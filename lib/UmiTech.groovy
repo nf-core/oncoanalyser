@@ -1,7 +1,7 @@
 public enum UmiTech {
 
     TSO500(
-        new FastpParams(false, "per_read", 15, -1),
+        new FastpParams(true, "per_read", 15, 0),
         new ReduxParams(true, "+")
     ),
 
