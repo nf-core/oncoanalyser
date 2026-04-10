@@ -28,10 +28,10 @@ public enum UmiSettings {
     public FastpArgs fastpArgs(){ return this.fastpArgs }
     public ReduxArgs reduxArgs(){ return this.reduxArgs }
 
-    public static UmiSettings fromSupportedPanel(RefData.SupportedPanel supportedPanel) {
+    public static UmiSettings fromSupportedPanel(SupportedPanel supportedPanel) {
         return switch (supportedPanel) {
-            case RefData.SupportedPanel.TSO500 -> TSO500
-            case RefData.SupportedPanel.PM_HAEM -> TWIST
+            case SupportedPanel.TSO500 -> TSO500
+            case SupportedPanel.PM_HAEM -> TWIST
             default -> NONE
         }
     }

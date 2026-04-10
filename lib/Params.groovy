@@ -3,6 +3,7 @@ import pipeline.PurityEstimateMode
 import pipeline.SequencingType
 import pipeline.UmiSettings
 import refdata.RefDataType
+import pipeline.SupportedPanel
 import refgenome.RefGenomeType
 import refgenome.RefGenomeVersion
 import refgenome.SupportedGenome
@@ -171,11 +172,11 @@ class Params {
                 "configuration file when running in targeted mode or panel resource creation mode.",
                 "",
                 "Currently, panels with built-in support are:",
-                createBulletedList(RefData.SupportedPanel.getNames())
+                createBulletedList(SupportedPanel.getNames())
             )
         }
 
-        def supported_panel = RefData.SupportedPanel.fromString((String) params.panel)
+        def supported_panel = SupportedPanel.fromString((String) params.panel)
 
         if (!supported_panel) {
 
@@ -187,7 +188,7 @@ class Params {
                 "",
                 "Provide argument --force_panel if you have a custom panel, or adjust the --panel",
                 "argument to one of the panels configured in the pipeline (case-sensitive):",
-                createBulletedList(RefData.SupportedPanel.getNames())
+                createBulletedList(SupportedPanel.getNames())
             )
         }
 
@@ -207,7 +208,7 @@ class Params {
 
         def umi_settings
         if (params.containsKey('panel')) {
-            def maybe_supported_panel = RefData.SupportedPanel.fromString((String) params.panel)
+            def maybe_supported_panel = SupportedPanel.fromString((String) params.panel)
             umi_settings = UmiSettings.fromSupportedPanel(maybe_supported_panel)
         } else {
             umi_settings = UmiSettings.NONE
