@@ -1,13 +1,11 @@
+package samplesheet
+
 import pipeline.PipelineMode
 import sample.Inputs
-import samplesheet.FileType
-import samplesheet.InfoField
-import samplesheet.SampleType
-import samplesheet.SequenceType
 
 class SampleSheet {
 
-    public static List<Map> parseInput(String sample_sheet_path, boolean stub_run, PipelineMode pipeline_mode) {
+    public static List<Map> parse(String sample_sheet_path, boolean stub_run, PipelineMode pipeline_mode) {
 
         if (!sample_sheet_path) {
             throw new IllegalStateException("Missing required --input argument")
