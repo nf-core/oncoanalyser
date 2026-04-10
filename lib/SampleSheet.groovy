@@ -31,7 +31,7 @@ class SampleSheet {
                 ]
                 */
 
-                entries.each { entry -> createOrUpdateSampleSheetFields(entry, meta, sample_keys) }
+                entries.each { entry -> createOrUpdateSampleMeta(entry, meta, sample_keys) }
 
                 // Per sample checks once meta_sample objects are fully constructed
                 sample_keys.each { sample_key ->
@@ -62,7 +62,7 @@ class SampleSheet {
         return inputs
     }
 
-    private static void createOrUpdateSampleSheetFields(Map<String, String> entry, Map meta, Set<List> sample_keys) {
+    private static void createOrUpdateSampleMeta(Map<String, String> entry, Map meta, Set<List> sample_keys) {
 
         def sample_type = SampleSheetFields.SampleType.fromString(entry.sample_type)
         def sequence_type = SampleSheetFields.SequenceType.fromString(entry.sequence_type)
