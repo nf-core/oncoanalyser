@@ -83,7 +83,7 @@ workflow NFCORE_ONCOANALYSER {
 
         def inputs = SampleSheet.parseInput(params.input, workflow.stubRun, pipeline_mode)
 
-        def stages = RunStage.getValidatedRunStages(
+        def stages = pipeline.RunStage.getValidatedRunStages(
            params.processes_include,
            params.processes_exclude,
            params.processes_manual,
