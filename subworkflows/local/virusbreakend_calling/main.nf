@@ -38,12 +38,12 @@ workflow VIRUSBREAKEND_CALLING {
         .map { meta, tumor_bam, tumor_bai ->
             return [
                 meta,
-                Inputs.preferUserProvidedInput(tumor_bam, meta, Inputs.KEY.BAM_REDUX_DNA_TUMOR),
-                Inputs.preferUserProvidedInput(tumor_bai, meta, Inputs.KEY.BAI_DNA_TUMOR),
+                Inputs.preferUserProvidedInput(tumor_bam, meta, sample.FileKey.BAM_REDUX_DNA_TUMOR),
+                Inputs.preferUserProvidedInput(tumor_bai, meta, sample.FileKey.BAI_DNA_TUMOR),
             ]
         }
         .branch { meta, tumor_bam, tumor_bai ->
-            def has_existing = Inputs.hasExistingInput(meta, Inputs.KEY.VIRUSINTERPRETER_DIR)
+            def has_existing = Inputs.hasExistingInput(meta, sample.FileKey.VIRUSINTERPRETER_DIR)
             runnable: tumor_bam && !has_existing
             skip: true
                 return meta
@@ -93,8 +93,8 @@ workflow VIRUSBREAKEND_CALLING {
 
             def inputs = [
                 virus_tsv,
-                Inputs.preferUserProvidedInput(purple_dir, meta, Inputs.KEY.PURPLE_DIR),
-                Inputs.preferUserProvidedInput(somatic_metrics, meta, Inputs.KEY.BAMTOOLS_DIR_TUMOR),
+                Inputs.preferUserProvidedInput(purple_dir, meta, sample.FileKey.PURPLE_DIR),
+                Inputs.preferUserProvidedInput(somatic_metrics, meta, sample.FileKey.BAMTOOLS_DIR_TUMOR),
             ]
 
             return [meta, *inputs]

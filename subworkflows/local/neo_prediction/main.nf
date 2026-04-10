@@ -45,8 +45,8 @@ workflow NEO_PREDICTION {
         .map { meta, purple_dir, linx_annotation_dir ->
 
             def inputs = [
-                Inputs.preferUserProvidedInput(purple_dir, meta, Inputs.KEY.PURPLE_DIR),
-                Inputs.preferUserProvidedInput(linx_annotation_dir, meta, Inputs.KEY.LINX_ANNO_DIR_TUMOR),
+                Inputs.preferUserProvidedInput(purple_dir, meta, sample.FileKey.PURPLE_DIR),
+                Inputs.preferUserProvidedInput(linx_annotation_dir, meta, sample.FileKey.LINX_ANNO_DIR_TUMOR),
             ]
 
             return [meta, *inputs]
@@ -112,8 +112,8 @@ workflow NEO_PREDICTION {
             return [
                 meta,
                 neo_finder_dir,
-                Inputs.preferUserProvidedInput(tumor_bam, meta, Inputs.KEY.BAM_RNA_TUMOR),
-                Inputs.preferUserProvidedInput(tumor_bai, meta, Inputs.KEY.BAI_RNA_TUMOR),
+                Inputs.preferUserProvidedInput(tumor_bam, meta, sample.FileKey.BAM_RNA_TUMOR),
+                Inputs.preferUserProvidedInput(tumor_bai, meta, sample.FileKey.BAI_RNA_TUMOR),
             ]
         }
         .branch { meta, neo_finder_dir, tumor_bam, tumor_bai ->
@@ -184,15 +184,15 @@ workflow NEO_PREDICTION {
             if (Inputs.hasTumorRna(meta)) {
                 meta_scorer.sample_rna_id = Inputs.getTumorRnaSampleName(meta)
 
-                def sage_somatic_append_selected = Inputs.preferUserProvidedInput(sage_somatic_append, meta, Inputs.KEY.SAGE_APPEND_DIR_TUMOR)
+                def sage_somatic_append_selected = Inputs.preferUserProvidedInput(sage_somatic_append, meta, sample.FileKey.SAGE_APPEND_DIR_TUMOR)
                 sage_somatic_append_vcf = file(sage_somatic_append_selected).resolve("${meta_scorer.sample_id}.sage.append.vcf.gz")
             }
 
             def inputs = [
-                Inputs.preferUserProvidedInput(isofox_dir, meta, Inputs.KEY.ISOFOX_DIR),
-                Inputs.preferUserProvidedInput(purple_dir, meta, Inputs.KEY.PURPLE_DIR),
+                Inputs.preferUserProvidedInput(isofox_dir, meta, sample.FileKey.ISOFOX_DIR),
+                Inputs.preferUserProvidedInput(purple_dir, meta, sample.FileKey.PURPLE_DIR),
                 sage_somatic_append_vcf,
-                Inputs.preferUserProvidedInput(lilac_dir, meta, Inputs.KEY.LILAC_DIR),
+                Inputs.preferUserProvidedInput(lilac_dir, meta, sample.FileKey.LILAC_DIR),
                 neo_finder_dir,
                 annotated_fusions,
             ]

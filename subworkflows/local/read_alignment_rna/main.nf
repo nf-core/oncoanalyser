@@ -24,7 +24,7 @@ workflow READ_ALIGNMENT_RNA {
     // channel: [ meta ]
     ch_inputs_sorted = ch_inputs
         .branch { meta ->
-            def has_existing = Inputs.hasExistingInput(meta, Inputs.KEY.BAM_RNA_TUMOR)
+            def has_existing = Inputs.hasExistingInput(meta, sample.FileKey.BAM_RNA_TUMOR)
             runnable: Inputs.hasTumorRnaFastq(meta) && !has_existing
             skip: true
         }

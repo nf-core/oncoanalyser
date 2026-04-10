@@ -1,3 +1,4 @@
+import sample.FileKey
 import samplesheet.FileType
 import samplesheet.SampleType
 import samplesheet.SequenceType
@@ -6,67 +7,17 @@ import java.nio.file.Path
 
 class Inputs {
 
-    // Files - common
-    public static final Map KEY = [
-
-        // Bams
-        BAM_DNA_TUMOR:  [FileType.BAM, SampleType.TUMOR, SequenceType.DNA],
-        BAM_DNA_NORMAL: [FileType.BAM, SampleType.NORMAL, SequenceType.DNA],
-        BAM_DNA_DONOR:  [FileType.BAM, SampleType.DONOR, SequenceType.DNA],
-        BAM_RNA_TUMOR:  [FileType.BAM, SampleType.TUMOR, SequenceType.RNA],
-
-        BAI_DNA_TUMOR:  [FileType.BAI, SampleType.TUMOR, SequenceType.DNA],
-        BAI_DNA_NORMAL: [FileType.BAI, SampleType.NORMAL, SequenceType.DNA],
-        BAI_DNA_DONOR:  [FileType.BAI, SampleType.DONOR, SequenceType.DNA],
-        BAI_RNA_TUMOR:  [FileType.BAI, SampleType.TUMOR, SequenceType.RNA],
-
-        // REDUX
-        BAM_REDUX_DNA_TUMOR:  [FileType.BAM_REDUX, SampleType.TUMOR, SequenceType.DNA],
-        BAM_REDUX_DNA_NORMAL: [FileType.BAM_REDUX, SampleType.NORMAL, SequenceType.DNA],
-        BAM_REDUX_DNA_DONOR:  [FileType.BAM_REDUX, SampleType.DONOR, SequenceType.DNA],
-
-        REDUX_TSV_DIR_TUMOR:  [FileType.REDUX_TSV_DIR, SampleType.TUMOR, SequenceType.DNA],
-        REDUX_TSV_DIR_NORMAL: [FileType.REDUX_TSV_DIR, SampleType.NORMAL, SequenceType.DNA],
-        REDUX_TSV_DIR_DONOR:  [FileType.REDUX_TSV_DIR, SampleType.DONOR, SequenceType.DNA],
-
-        // Other tools
-        AMBER_DIR: [FileType.AMBER_DIR, [SampleType.TUMOR, SampleType.TUMOR_NORMAL], SequenceType.DNA],
-
-        BAMTOOLS_DIR_TUMOR: [FileType.BAMTOOLS_DIR, SampleType.TUMOR, SequenceType.DNA],
-        BAMTOOLS_DIR_NORMAL: [FileType.BAMTOOLS_DIR, SampleType.NORMAL, SequenceType.DNA],
-
-        CHORD_DIR: [FileType.CHORD_DIR, SampleType.TUMOR, SequenceType.DNA],
-        COBALT_DIR: [FileType.COBALT_DIR, [SampleType.TUMOR, SampleType.TUMOR_NORMAL], SequenceType.DNA],
-        CUPPA_DIR: [FileType.CUPPA_DIR, SampleType.TUMOR, [SequenceType.DNA, SequenceType.RNA, SequenceType.DNA_RNA]],
-        ESVEE_DIR: [FileType.ESVEE_DIR, [SampleType.TUMOR, SampleType.TUMOR_NORMAL], SequenceType.DNA],
-        ISOFOX_DIR: [FileType.ISOFOX_DIR, SampleType.TUMOR, SequenceType.RNA],
-        LILAC_DIR: [FileType.LILAC_DIR, [SampleType.TUMOR, SampleType.NORMAL, SampleType.TUMOR_NORMAL], [SequenceType.DNA, SequenceType.DNA_RNA]],
-
-        LINX_PLOT_DIR_TUMOR:  [FileType.LINX_PLOT_DIR, SampleType.TUMOR, SequenceType.DNA],
-        LINX_ANNO_DIR_TUMOR:  [FileType.LINX_ANNO_DIR, SampleType.TUMOR, SequenceType.DNA],
-        LINX_ANNO_DIR_NORMAL: [FileType.LINX_ANNO_DIR, SampleType.NORMAL, SequenceType.DNA],
-
-        SAGE_APPEND_DIR_TUMOR:  [FileType.SAGE_APPEND_DIR, SampleType.TUMOR, SequenceType.DNA_RNA],
-        SAGE_APPEND_DIR_NORMAL: [FileType.SAGE_APPEND_DIR, SampleType.NORMAL, SequenceType.DNA_RNA],
-        SAGE_DIR_TUMOR:  [FileType.SAGE_DIR, SampleType.TUMOR, SequenceType.DNA],
-        SAGE_DIR_NORMAL: [FileType.SAGE_DIR, SampleType.NORMAL, SequenceType.DNA],
-
-        PAVE_DIR_TUMOR:  [FileType.PAVE_DIR, SampleType.TUMOR, SequenceType.DNA],
-        PAVE_DIR_NORMAL: [FileType.PAVE_DIR, SampleType.NORMAL, SequenceType.DNA],
-
-        PEACH_DIR: [FileType.PEACH_DIR, SampleType.NORMAL, SequenceType.DNA],
-        PURPLE_DIR: [FileType.PURPLE_DIR, [SampleType.TUMOR, SampleType.TUMOR_NORMAL], SequenceType.DNA],
-        QSEE_DIR: [FileType.QSEE_DIR, [SampleType.TUMOR, SampleType.TUMOR_NORMAL], SequenceType.DNA],
-        SIGS_DIR: [FileType.SIGS_DIR, SampleType.TUMOR, SequenceType.DNA],
-        VIRUSINTERPRETER_DIR: [FileType.VIRUSINTERPRETER_DIR, SampleType.TUMOR, SequenceType.DNA],
-    ]
-
-    public static Object getInput(Map meta, List<Object> key) {
+    public static Object getInput(Map meta, FileKey key) {
 
         def result = []
-        def (file_type, sample_types, sequence_type) = key
 
-        for (sample_key in [sample_types, sequence_type].combinations()) {
+        def file_type = key.fileType
+        def sample_types = key.sampleTypes
+        def sequence_types = key.sequenceTypes
+
+        def sample_sequence_type_combinations = [sample_types, sequence_types].combinations()
+
+        for (sample_key in sample_sequence_type_combinations) {
             if (meta.containsKey(sample_key) && meta[sample_key].containsKey(file_type)) {
                 result = meta[sample_key].get(file_type)
                 break
@@ -75,17 +26,17 @@ class Inputs {
         return result
     }
 
-    public static boolean hasExistingInput(Map meta, List<Object> key) {
+    public static boolean hasExistingInput(Map meta, FileKey key) {
         return getInput(meta, key) != []
     }
 
-    public static Object preferUserProvidedInput(Object pipeline_path, Map meta, List<Object> key) {
+    public static Object preferUserProvidedInput(Object pipeline_path, Map meta, FileKey key) {
         // Allows the pipeline to start from downstream steps, e.g. running ORANGE from existing pipeline outputs
         def user_provided_path = getInput(meta, key)
         return user_provided_path ?: pipeline_path
     }
 
-    public static Object preferPipelineOutput(Object pipeline_path, meta, key) {
+    public static Object preferPipelineOutput(Object pipeline_path, Map meta, FileKey key) {
         def user_provided_path = getInput(meta, key)
         return pipeline_path ?: user_provided_path
     }
@@ -95,9 +46,9 @@ class Inputs {
     public static List<Object> resolveReduxBamBai(List<Object> redux_bam_bai, Map meta, SampleType sample_type) {
 
         def file_keys = switch (sample_type) {
-            case SampleType.TUMOR -> [bam: KEY.BAM_REDUX_DNA_TUMOR, bai: KEY.BAI_DNA_TUMOR]
-            case SampleType.NORMAL -> [bam: KEY.BAM_REDUX_DNA_NORMAL, bai: KEY.BAI_DNA_NORMAL]
-            case SampleType.DONOR -> [bam: KEY.BAM_REDUX_DNA_DONOR, bai: KEY.BAI_DNA_DONOR]
+            case SampleType.TUMOR -> [bam: FileKey.BAM_REDUX_DNA_TUMOR, bai: FileKey.BAI_DNA_TUMOR]
+            case SampleType.NORMAL -> [bam: FileKey.BAM_REDUX_DNA_NORMAL, bai: FileKey.BAI_DNA_NORMAL]
+            case SampleType.DONOR -> [bam: FileKey.BAM_REDUX_DNA_DONOR, bai: FileKey.BAI_DNA_DONOR]
             default -> throw new IllegalArgumentException("Invalid sample type: ${sample_type}")
         }
 
@@ -118,9 +69,9 @@ class Inputs {
         // When the BAMs are not needed as input, this would result in the VM requiring more disk space than necessary.
 
         def file_key = switch (sample_type) {
-            case SampleType.TUMOR -> KEY.REDUX_TSV_DIR_TUMOR
-            case SampleType.NORMAL -> KEY.REDUX_TSV_DIR_NORMAL
-            case SampleType.DONOR -> KEY.REDUX_TSV_DIR_DONOR
+            case SampleType.TUMOR -> FileKey.REDUX_TSV_DIR_TUMOR
+            case SampleType.NORMAL -> FileKey.REDUX_TSV_DIR_NORMAL
+            case SampleType.DONOR -> FileKey.REDUX_TSV_DIR_DONOR
             default -> throw new IllegalArgumentException("Invalid sample type: ${sample_type}")
         }
 
@@ -144,8 +95,8 @@ class Inputs {
     private static List<Path> resolveSageVcfWithTbi(Object sage_dir, Map meta, SampleType sample_type) {
 
         def file_key = switch (sample_type) {
-            case SampleType.TUMOR -> KEY.SAGE_DIR_TUMOR
-            case SampleType.NORMAL -> KEY.SAGE_DIR_NORMAL
+            case SampleType.TUMOR -> FileKey.SAGE_DIR_TUMOR
+            case SampleType.NORMAL -> FileKey.SAGE_DIR_NORMAL
             default -> throw new IllegalArgumentException("Unsupported sample type: ${sample_type}")
         }
 

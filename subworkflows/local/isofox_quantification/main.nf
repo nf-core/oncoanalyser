@@ -39,12 +39,12 @@ workflow ISOFOX_QUANTIFICATION {
         .map { meta, tumor_bam, tumor_bai ->
             return [
                 meta,
-                Inputs.preferUserProvidedInput(tumor_bam, meta, Inputs.KEY.BAM_RNA_TUMOR),
-                Inputs.preferUserProvidedInput(tumor_bai, meta, Inputs.KEY.BAI_RNA_TUMOR),
+                Inputs.preferUserProvidedInput(tumor_bam, meta, sample.FileKey.BAM_RNA_TUMOR),
+                Inputs.preferUserProvidedInput(tumor_bai, meta, sample.FileKey.BAI_RNA_TUMOR),
             ]
         }
         .branch { meta, tumor_bam, tumor_bai ->
-            def has_existing = Inputs.hasExistingInput(meta, Inputs.KEY.ISOFOX_DIR)
+            def has_existing = Inputs.hasExistingInput(meta, sample.FileKey.ISOFOX_DIR)
             runnable: tumor_bam && !has_existing
             skip: true
                 return meta

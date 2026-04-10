@@ -60,23 +60,23 @@ workflow REDUX_PROCESSING {
 
     ch_inputs_tumor = selectBamInputs(
         ch_dna_tumor,
-        Inputs.KEY.BAM_DNA_TUMOR,
-        Inputs.KEY.BAI_DNA_TUMOR,
-        Inputs.KEY.BAM_REDUX_DNA_TUMOR
+        sample.FileKey.BAM_DNA_TUMOR,
+        sample.FileKey.BAI_DNA_TUMOR,
+        sample.FileKey.BAM_REDUX_DNA_TUMOR
     )
 
     ch_inputs_normal = selectBamInputs(
         ch_dna_normal,
-        Inputs.KEY.BAM_DNA_NORMAL,
-        Inputs.KEY.BAI_DNA_NORMAL,
-        Inputs.KEY.BAM_REDUX_DNA_NORMAL
+        sample.FileKey.BAM_DNA_NORMAL,
+        sample.FileKey.BAI_DNA_NORMAL,
+        sample.FileKey.BAM_REDUX_DNA_NORMAL
     )
 
     ch_inputs_donor = selectBamInputs(
         ch_dna_donor,
-        Inputs.KEY.BAM_DNA_DONOR,
-        Inputs.KEY.BAI_DNA_DONOR,
-        Inputs.KEY.BAM_REDUX_DNA_DONOR
+        sample.FileKey.BAM_DNA_DONOR,
+        sample.FileKey.BAI_DNA_DONOR,
+        sample.FileKey.BAM_REDUX_DNA_DONOR
     )
 
     // Create process input channel

@@ -39,15 +39,15 @@ workflow LINX_PLOTTING {
 
             return [
                 meta,
-                Inputs.preferUserProvidedInput(annotation_dir, meta, Inputs.KEY.LINX_ANNO_DIR_TUMOR),
-                Inputs.preferUserProvidedInput(amber_dir, meta, Inputs.KEY.AMBER_DIR),
-                Inputs.preferUserProvidedInput(cobalt_dir, meta, Inputs.KEY.COBALT_DIR),
-                Inputs.preferUserProvidedInput(purple_dir, meta, Inputs.KEY.PURPLE_DIR),
+                Inputs.preferUserProvidedInput(annotation_dir, meta, sample.FileKey.LINX_ANNO_DIR_TUMOR),
+                Inputs.preferUserProvidedInput(amber_dir, meta, sample.FileKey.AMBER_DIR),
+                Inputs.preferUserProvidedInput(cobalt_dir, meta, sample.FileKey.COBALT_DIR),
+                Inputs.preferUserProvidedInput(purple_dir, meta, sample.FileKey.PURPLE_DIR),
             ]
         }
         .branch { meta, annotation_dir, amber_dir, cobalt_dir, purple_dir ->
 
-            def has_existing = Inputs.hasExistingInput(meta, Inputs.KEY.LINX_PLOT_DIR_TUMOR)
+            def has_existing = Inputs.hasExistingInput(meta, sample.FileKey.LINX_PLOT_DIR_TUMOR)
 
             runnable: annotation_dir && !has_existing
             skip: true

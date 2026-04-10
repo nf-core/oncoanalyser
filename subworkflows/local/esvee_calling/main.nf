@@ -41,14 +41,14 @@ workflow ESVEE_CALLING {
         .map { meta, tumor_bam, tumor_bai, normal_bam, normal_bai ->
             return [
                 meta,
-                Inputs.preferUserProvidedInput(tumor_bam, meta, Inputs.KEY.BAM_REDUX_DNA_TUMOR),
-                Inputs.preferPipelineOutput(tumor_bai, meta, Inputs.KEY.BAI_DNA_TUMOR),
-                Inputs.preferUserProvidedInput(normal_bam, meta, Inputs.KEY.BAM_REDUX_DNA_NORMAL),
-                Inputs.preferPipelineOutput(normal_bai, meta, Inputs.KEY.BAI_DNA_NORMAL),
+                Inputs.preferUserProvidedInput(tumor_bam, meta, sample.FileKey.BAM_REDUX_DNA_TUMOR),
+                Inputs.preferPipelineOutput(tumor_bai, meta, sample.FileKey.BAI_DNA_TUMOR),
+                Inputs.preferUserProvidedInput(normal_bam, meta, sample.FileKey.BAM_REDUX_DNA_NORMAL),
+                Inputs.preferPipelineOutput(normal_bai, meta, sample.FileKey.BAI_DNA_NORMAL),
             ]
         }
         .branch { meta, tumor_bam, tumor_bai, normal_bam, normal_bai ->
-            def has_existing = Inputs.hasExistingInput(meta, Inputs.KEY.ESVEE_DIR)
+            def has_existing = Inputs.hasExistingInput(meta, sample.FileKey.ESVEE_DIR)
 
             runnable_tn: tumor_bam && normal_bam && !has_existing
             runnable_to: tumor_bam && !has_existing

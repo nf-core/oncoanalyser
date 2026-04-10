@@ -38,15 +38,15 @@ workflow LILAC_CALLING {
         .map { meta, tumor_bam, tumor_bai, normal_bam, normal_bai ->
             return [
                 meta,
-                Inputs.preferUserProvidedInput(tumor_bam, meta, Inputs.KEY.BAM_REDUX_DNA_TUMOR),
-                Inputs.preferPipelineOutput(tumor_bai, meta, Inputs.KEY.BAI_DNA_TUMOR),
-                Inputs.preferUserProvidedInput(normal_bam, meta, Inputs.KEY.BAM_REDUX_DNA_NORMAL),
-                Inputs.preferPipelineOutput(normal_bai, meta, Inputs.KEY.BAI_DNA_NORMAL),
+                Inputs.preferUserProvidedInput(tumor_bam, meta, sample.FileKey.BAM_REDUX_DNA_TUMOR),
+                Inputs.preferPipelineOutput(tumor_bai, meta, sample.FileKey.BAI_DNA_TUMOR),
+                Inputs.preferUserProvidedInput(normal_bam, meta, sample.FileKey.BAM_REDUX_DNA_NORMAL),
+                Inputs.preferPipelineOutput(normal_bai, meta, sample.FileKey.BAI_DNA_NORMAL),
             ]
         }
         .branch { meta, tumor_bam, tumor_bai, normal_bam, normal_bai ->
 
-            def has_existing = Inputs.hasExistingInput(meta, Inputs.KEY.LILAC_DIR)
+            def has_existing = Inputs.hasExistingInput(meta, sample.FileKey.LILAC_DIR)
 
             runnable: (tumor_bam || normal_bam) && !has_existing
             skip: true
@@ -84,9 +84,9 @@ workflow LILAC_CALLING {
                 nbai_dna,
                 tbam_dna,
                 tbai_dna,
-                Inputs.preferUserProvidedInput(tbam_rna, meta, Inputs.KEY.BAM_RNA_TUMOR),
-                Inputs.preferUserProvidedInput(tbai_rna, meta, Inputs.KEY.BAI_RNA_TUMOR),
-                Inputs.preferUserProvidedInput(purple_dir, meta, Inputs.KEY.PURPLE_DIR),
+                Inputs.preferUserProvidedInput(tbam_rna, meta, sample.FileKey.BAM_RNA_TUMOR),
+                Inputs.preferUserProvidedInput(tbai_rna, meta, sample.FileKey.BAI_RNA_TUMOR),
+                Inputs.preferUserProvidedInput(purple_dir, meta, sample.FileKey.PURPLE_DIR),
             ]
         }
 

@@ -30,12 +30,12 @@ workflow BAMTOOLS_METRICS {
         .map { meta, bam, bai ->
             return [
                 meta,
-                Inputs.preferUserProvidedInput(bam, meta, Inputs.KEY.BAM_REDUX_DNA_TUMOR),
-                Inputs.preferPipelineOutput(bai, meta, Inputs.KEY.BAI_DNA_TUMOR),
+                Inputs.preferUserProvidedInput(bam, meta, sample.FileKey.BAM_REDUX_DNA_TUMOR),
+                Inputs.preferPipelineOutput(bai, meta, sample.FileKey.BAI_DNA_TUMOR),
             ]
         }
         .branch { meta, bam, bai ->
-            def has_existing = Inputs.hasExistingInput(meta, Inputs.KEY.BAMTOOLS_DIR_TUMOR)
+            def has_existing = Inputs.hasExistingInput(meta, sample.FileKey.BAMTOOLS_DIR_TUMOR)
             runnable: bam && !has_existing
             skip: true
                 return meta
@@ -47,12 +47,12 @@ workflow BAMTOOLS_METRICS {
         .map { meta, bam, bai ->
             return [
                 meta,
-                Inputs.preferUserProvidedInput(bam, meta, Inputs.KEY.BAM_REDUX_DNA_NORMAL),
-                Inputs.preferPipelineOutput(bai, meta, Inputs.KEY.BAI_DNA_NORMAL),
+                Inputs.preferUserProvidedInput(bam, meta, sample.FileKey.BAM_REDUX_DNA_NORMAL),
+                Inputs.preferPipelineOutput(bai, meta, sample.FileKey.BAI_DNA_NORMAL),
             ]
         }
         .branch { meta, bam, bai ->
-            def has_existing = Inputs.hasExistingInput(meta, Inputs.KEY.BAMTOOLS_DIR_NORMAL)
+            def has_existing = Inputs.hasExistingInput(meta, sample.FileKey.BAMTOOLS_DIR_NORMAL)
             runnable: bam && !has_existing
             skip: true
                 return meta

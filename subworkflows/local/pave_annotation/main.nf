@@ -48,7 +48,7 @@ workflow PAVE_ANNOTATION {
         }
         .branch { meta, sage_vcf, sage_tbi ->
 
-            def has_existing = Inputs.hasExistingInput(meta, Inputs.KEY.PAVE_DIR_NORMAL)
+            def has_existing = Inputs.hasExistingInput(meta, sample.FileKey.PAVE_DIR_NORMAL)
 
             runnable: Inputs.hasTumorDna(meta) && Inputs.hasNormalDna(meta) && sage_vcf && !has_existing
             skip: true
@@ -101,7 +101,7 @@ workflow PAVE_ANNOTATION {
         }
         .branch { meta, sage_vcf, sage_tbi ->
 
-            def has_existing = Inputs.hasExistingInput(meta, Inputs.KEY.PAVE_DIR_TUMOR)
+            def has_existing = Inputs.hasExistingInput(meta, sample.FileKey.PAVE_DIR_TUMOR)
 
             runnable: Inputs.hasTumorDna(meta) && sage_vcf && !has_existing
             skip: true
