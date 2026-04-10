@@ -59,7 +59,7 @@ workflow READ_ALIGNMENT_DNA {
         )
         .flatMap { meta, meta_sample, sample_type ->
             meta_sample
-                .getAt(SampleSheetFields.FileType.FASTQ)
+                .getAt(samplesheet.FileType.FASTQ)
                 .collect { key, fps ->
                     def (library_id, lane) = key
 

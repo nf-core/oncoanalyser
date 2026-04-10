@@ -55,7 +55,7 @@ workflow PURPLE_CALLING {
             inputs.esvee_dir         = Inputs.preferUserProvidedInput(esvee_dir, meta, Inputs.KEY.ESVEE_DIR)
             inputs.pave_somatic_dir  = Inputs.preferUserProvidedInput(pave_somatic_dir, meta, Inputs.KEY.PAVE_DIR_TUMOR)
             inputs.pave_germline_dir = Inputs.preferUserProvidedInput(pave_germline_dir, meta, Inputs.KEY.PAVE_DIR_NORMAL)
-            inputs.redux_tumor_tsvs  = Inputs.resolveReduxTsvFiles(redux_tumor_dir, meta, SampleSheetFields.SampleType.TUMOR)
+            inputs.redux_tumor_tsvs  = Inputs.resolveReduxTsvFiles(redux_tumor_dir, meta, samplesheet.SampleType.TUMOR)
 
             return inputs
         }

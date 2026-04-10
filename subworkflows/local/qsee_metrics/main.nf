@@ -52,8 +52,8 @@ workflow QSEE_METRICS {
 
             inputs.meta = meta
 
-            inputs.redux_tsvs_tumor = Inputs.resolveReduxTsvFiles(redux_tsvs_tumor, meta, SampleSheetFields.SampleType.TUMOR)
-            inputs.redux_tsvs_normal = Inputs.resolveReduxTsvFiles(redux_tsvs_normal, meta, SampleSheetFields.SampleType.NORMAL)
+            inputs.redux_tsvs_tumor = Inputs.resolveReduxTsvFiles(redux_tsvs_tumor, meta, samplesheet.SampleType.TUMOR)
+            inputs.redux_tsvs_normal = Inputs.resolveReduxTsvFiles(redux_tsvs_normal, meta, samplesheet.SampleType.NORMAL)
 
             inputs.bamtools_tumor_dir = Inputs.preferUserProvidedInput(bamtools_tumor_dir, meta, Inputs.KEY.BAMTOOLS_DIR_TUMOR)
             inputs.bamtools_normal_dir = Inputs.preferUserProvidedInput(bamtools_normal_dir, meta, Inputs.KEY.BAMTOOLS_DIR_NORMAL)

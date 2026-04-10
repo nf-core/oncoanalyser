@@ -177,7 +177,7 @@ workflow NEO_PREDICTION {
                 key: meta.group_id,
                 id: meta.group_id,
                 sample_id: Inputs.getTumorDnaSampleName(meta, 'primary'),
-                cancer_type: meta[SampleSheetFields.InfoField.CANCER_TYPE],
+                cancer_type: meta[samplesheet.InfoField.CANCER_TYPE],
             ]
 
             def sage_somatic_append_vcf = []

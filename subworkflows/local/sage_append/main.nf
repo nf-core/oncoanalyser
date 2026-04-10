@@ -45,8 +45,8 @@ workflow SAGE_APPEND {
     )
         .map { meta, tumor_dna_bam_bai, tumor_dna_tsvs, tumor_rna_bam_bai, purple_dir ->
 
-            def (tumor_dna_bam, tumor_dna_bai) = Inputs.resolveReduxBamBai(tumor_dna_bam_bai, meta, SampleSheetFields.SampleType.TUMOR)
-            def tumor_dna_redux_tsvs = Inputs.resolveReduxTsvFiles(tumor_dna_tsvs, meta, SampleSheetFields.SampleType.TUMOR)
+            def (tumor_dna_bam, tumor_dna_bai) = Inputs.resolveReduxBamBai(tumor_dna_bam_bai, meta, samplesheet.SampleType.TUMOR)
+            def tumor_dna_redux_tsvs = Inputs.resolveReduxTsvFiles(tumor_dna_tsvs, meta, samplesheet.SampleType.TUMOR)
 
             def (tumor_rna_bam, tumor_rna_bai) = tumor_rna_bam_bai
             tumor_rna_bam = Inputs.preferUserProvidedInput(tumor_rna_bam, meta, Inputs.KEY.BAM_RNA_TUMOR)

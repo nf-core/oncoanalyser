@@ -1,3 +1,8 @@
+import samplesheet.FileType
+import samplesheet.InfoField
+import samplesheet.SampleType
+import samplesheet.SequenceType
+
 class SampleSheet {
 
     public static List<Map> parseInput(String sample_sheet_path, boolean stub_run, RunModes.Pipeline pipeline_mode) {
@@ -64,9 +69,9 @@ class SampleSheet {
 
     private static void createOrUpdateSampleMeta(Map<String, String> entry, Map meta, Set<List> sample_keys) {
 
-        def sample_type = SampleSheetFields.SampleType.fromString(entry.sample_type)
-        def sequence_type = SampleSheetFields.SequenceType.fromString(entry.sequence_type)
-        def file_type = SampleSheetFields.FileType.fromString(entry.filetype)
+        def sample_type = SampleType.fromString(entry.sample_type)
+        def sequence_type = SequenceType.fromString(entry.sequence_type)
+        def file_type = FileType.fromString(entry.filetype)
 
         setAndCheckSubjectId(meta, entry)
 
@@ -78,18 +83,18 @@ class SampleSheet {
         // Handle info field
         def info_data = parseInfoField(entry)
 
-        if (info_data.containsKey(SampleSheetFields.InfoField.CANCER_TYPE)) {
-            meta[SampleSheetFields.InfoField.CANCER_TYPE] = info_data[SampleSheetFields.InfoField.CANCER_TYPE]
+        if (info_data.containsKey(InfoField.CANCER_TYPE)) {
+            meta[InfoField.CANCER_TYPE] = info_data[InfoField.CANCER_TYPE]
         }
 
         setSampleIds(meta_sample, entry, info_data)
 
         // Set file paths
-        if (meta_sample.containsKey(file_type) & file_type != SampleSheetFields.FileType.FASTQ) {
+        if (meta_sample.containsKey(file_type) & file_type != FileType.FASTQ) {
             throw new IllegalStateException("Got duplicate filetype(${file_type}) for group_id(${entry.group_id}) sample_id(${entry.sample_id})")
         }
 
-        if (file_type === SampleSheetFields.FileType.FASTQ) {
+        if (file_type === FileType.FASTQ) {
             setFastqPaths(meta_sample, entry, info_data)
         } else {
             meta_sample[file_type] = getFileObject(entry.filepath)
@@ -121,13 +126,13 @@ class SampleSheet {
             .tokenize(';')
             .each { info_item ->
                 def (info_key, info_value) = info_item.tokenize(':')
-                def info_field = SampleSheetFields.InfoField.fromString(info_key)
+                def info_field = InfoField.fromString(info_key)
 
                 if (info_data.containsKey(info_field)) {
                     throw new IllegalStateException("Got duplicate info field(${info_field}) for group_id(${entry.group_id}) sample_id(${entry.sample_id})")
                 }
 
-                if (!info_value && info_field !== SampleSheetFields.InfoField.LONGITUDINAL_SAMPLE) {
+                if (!info_value && info_field !== InfoField.LONGITUDINAL_SAMPLE) {
                     throw new IllegalStateException("Got empty value for info field(${info_field}) for group_id(${entry.group_id}) sample_id(${entry.sample_id})")
                 }
 
@@ -141,9 +146,9 @@ class SampleSheet {
         return path ? nextflow.Nextflow.file(path) : []
     }
 
-    private static void setSampleIds(Map meta_sample, Map<String, String> entry, Map<SampleSheetFields.InfoField, String> info_data) {
+    private static void setSampleIds(Map meta_sample, Map<String, String> entry, Map<InfoField, String> info_data) {
 
-        if (info_data.containsKey(SampleSheetFields.InfoField.LONGITUDINAL_SAMPLE)) {
+        if (info_data.containsKey(InfoField.LONGITUDINAL_SAMPLE)) {
 
             if (meta_sample.containsKey('longitudinal_sample_id') && meta_sample.longitudinal_sample_id != entry.sample_id) {
                 throw new IllegalStateException("Got multiple longitudinal samples for group_id(${entry.group_id}) - this is currently unsupported")
@@ -162,13 +167,13 @@ class SampleSheet {
         }
     }
 
-    private static void setFastqPaths(Map meta_sample, Map<String, String> entry, Map<SampleSheetFields.InfoField, String> info_data) {
+    private static void setFastqPaths(Map meta_sample, Map<String, String> entry, Map<InfoField, String> info_data) {
 
-        if (!info_data.containsKey(SampleSheetFields.InfoField.LIBRARY_ID)) {
+        if (!info_data.containsKey(InfoField.LIBRARY_ID)) {
             throw new IllegalStateException("Missing info field(library_id) for group_id(${entry.group_id}) sample_id(${entry.sample_id})")
         }
 
-        if (!info_data.containsKey(SampleSheetFields.InfoField.LANE)) {
+        if (!info_data.containsKey(InfoField.LANE)) {
             throw new IllegalStateException("Missing 'lane' info field for group_id(${entry.group_id}) sample_id(${entry.sample_id})")
         }
 
@@ -182,17 +187,17 @@ class SampleSheet {
         }
 
         def (fwd, rev) = fastq_entries
-        def fastq_key = [info_data[SampleSheetFields.InfoField.LIBRARY_ID], info_data[SampleSheetFields.InfoField.LANE]]
+        def fastq_key = [info_data[InfoField.LIBRARY_ID], info_data[InfoField.LANE]]
 
-        if (!meta_sample.containsKey(SampleSheetFields.FileType.FASTQ)) {
-            meta_sample[SampleSheetFields.FileType.FASTQ] = [:]
+        if (!meta_sample.containsKey(FileType.FASTQ)) {
+            meta_sample[FileType.FASTQ] = [:]
         }
 
-        if (meta_sample[SampleSheetFields.FileType.FASTQ].containsKey(fastq_key)) {
+        if (meta_sample[FileType.FASTQ].containsKey(fastq_key)) {
             throw new IllegalStateException("Got duplicate lane + library_id data for group_id(${entry.group_id}) sample_id(${entry.sample_id}): ${fastq_key}")
         }
 
-        meta_sample[SampleSheetFields.FileType.FASTQ][fastq_key] = ['fwd': getFileObject(fwd), 'rev': getFileObject(rev)]
+        meta_sample[FileType.FASTQ][fastq_key] = ['fwd': getFileObject(fwd), 'rev': getFileObject(rev)]
 
     }
 
@@ -201,17 +206,17 @@ class SampleSheet {
         // CRAMs are passed to hmftools as if they were BAMs, e.g. `-bam_file /path/to/tumor.cram`
         // We therefore set the BAM/BAI path to be the CRAM/CRAI path
 
-        if (meta_sample.containsKey(SampleSheetFields.FileType.CRAM_REDUX)) {
-            meta_sample[SampleSheetFields.FileType.BAM_REDUX] = meta_sample.remove(SampleSheetFields.FileType.CRAM_REDUX)
+        if (meta_sample.containsKey(FileType.CRAM_REDUX)) {
+            meta_sample[FileType.BAM_REDUX] = meta_sample.remove(FileType.CRAM_REDUX)
         }
 
-        if (meta_sample.containsKey(SampleSheetFields.FileType.CRAM)) {
-            meta_sample[SampleSheetFields.FileType.BAM] = meta_sample.remove(SampleSheetFields.FileType.CRAM)
+        if (meta_sample.containsKey(FileType.CRAM)) {
+            meta_sample[FileType.BAM] = meta_sample.remove(FileType.CRAM)
         }
 
         // The BAI key is used to store the index for both regular/REDUX CRAMs/BAMs
-        if (meta_sample.containsKey(SampleSheetFields.FileType.CRAI)) {
-            meta_sample[SampleSheetFields.FileType.BAI] = meta_sample.remove(SampleSheetFields.FileType.CRAI)
+        if (meta_sample.containsKey(FileType.CRAI)) {
+            meta_sample[FileType.BAI] = meta_sample.remove(FileType.CRAI)
         }
 
     }
@@ -226,11 +231,11 @@ class SampleSheet {
             def index_enum
             def index_extension
 
-            if (key === SampleSheetFields.FileType.BAM || key === SampleSheetFields.FileType.BAM_REDUX) {
-                index_enum = SampleSheetFields.FileType.BAI
+            if (key === FileType.BAM || key === FileType.BAM_REDUX) {
+                index_enum = FileType.BAI
                 index_extension = 'bai'
-            } else if (key === SampleSheetFields.FileType.CRAM || key === SampleSheetFields.FileType.CRAM_REDUX) {
-                index_enum = SampleSheetFields.FileType.CRAI
+            } else if (key === FileType.CRAM || key === FileType.CRAM_REDUX) {
+                index_enum = FileType.CRAI
                 index_extension = 'crai'
             } else {
                 // Key not a file type, or not a file type that needs an index
@@ -256,11 +261,11 @@ class SampleSheet {
     private static void checkRawReadDataExists(Map meta_sample, String group_id) {
 
         def missing_any_raw_read_data =
-            !meta_sample.containsKey(SampleSheetFields.FileType.BAM) &&
-            !meta_sample.containsKey(SampleSheetFields.FileType.BAM_REDUX) &&
-            !meta_sample.containsKey(SampleSheetFields.FileType.CRAM) &&
-            !meta_sample.containsKey(SampleSheetFields.FileType.CRAM_REDUX) &&
-            !meta_sample.containsKey(SampleSheetFields.FileType.FASTQ)
+            !meta_sample.containsKey(FileType.BAM) &&
+            !meta_sample.containsKey(FileType.BAM_REDUX) &&
+            !meta_sample.containsKey(FileType.CRAM) &&
+            !meta_sample.containsKey(FileType.CRAM_REDUX) &&
+            !meta_sample.containsKey(FileType.FASTQ)
 
         if (missing_any_raw_read_data) {
             throw new IllegalStateException(
@@ -272,18 +277,18 @@ class SampleSheet {
 
     private static void setReduxTsvDirIfUnset(Map meta_sample) {
 
-        if (!meta_sample.containsKey(SampleSheetFields.FileType.BAM_REDUX)) {
+        if (!meta_sample.containsKey(FileType.BAM_REDUX)) {
             return
         }
 
-        if(meta_sample.containsKey(SampleSheetFields.FileType.REDUX_TSV_DIR)) {
+        if(meta_sample.containsKey(FileType.REDUX_TSV_DIR)) {
             return
         }
 
-        def bam_path = meta_sample[SampleSheetFields.FileType.BAM_REDUX]
+        def bam_path = meta_sample[FileType.BAM_REDUX]
         def bam_dir = bam_path.getParent().toUriString()
 
-        meta_sample[SampleSheetFields.FileType.REDUX_TSV_DIR] = bam_dir
+        meta_sample[FileType.REDUX_TSV_DIR] = bam_dir
     }
 
     private static void disallowDuplicateSampleIdsWithinSampleGroup(Map meta) {
@@ -341,9 +346,9 @@ class SampleSheet {
     private static void checkLongitudinalSampleInputs(Map meta) {
 
         // For purity estimation with WISP, require primary normal DNA BAM when an AMBER directory is provided
-        def meta_tumor_dna = meta.getOrDefault([SampleSheetFields.SampleType.TUMOR, SampleSheetFields.SequenceType.DNA], [:])
+        def meta_tumor_dna = meta.getOrDefault([SampleType.TUMOR, SequenceType.DNA], [:])
         def longitudinal = meta_tumor_dna.containsKey('longitudinal_sample_id')
-        def has_amber_dir = meta_tumor_dna.containsKey(SampleSheetFields.FileType.AMBER_DIR)
+        def has_amber_dir = meta_tumor_dna.containsKey(FileType.AMBER_DIR)
         def has_normal_dna_bam = Inputs.hasNormalDnaBam(meta) || Inputs.hasNormalDnaReduxBam(meta)
 
         if (longitudinal && has_amber_dir && !has_normal_dna_bam) {

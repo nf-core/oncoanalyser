@@ -35,7 +35,7 @@ workflow READ_ALIGNMENT_RNA {
         .flatMap { meta ->
             def meta_sample = Inputs.getTumorRnaSample(meta)
             meta_sample
-                .getAt(SampleSheetFields.FileType.FASTQ)
+                .getAt(samplesheet.FileType.FASTQ)
                 .collect { key, fps ->
                     def (library_id, lane) = key
 

@@ -42,7 +42,7 @@ workflow PAVE_ANNOTATION {
     ch_sage_germline_inputs_sorted = ch_sage_dir_germline
         .map { meta, sage_dir ->
 
-            def (sage_vcf, sage_tbi) = Inputs.resolveSageVcfWithTbi(sage_dir, meta, SampleSheetFields.SampleType.NORMAL)
+            def (sage_vcf, sage_tbi) = Inputs.resolveSageVcfWithTbi(sage_dir, meta, samplesheet.SampleType.NORMAL)
 
             return [ meta, sage_vcf, sage_tbi ]
         }
@@ -95,7 +95,7 @@ workflow PAVE_ANNOTATION {
     ch_sage_somatic_inputs_sorted = ch_sage_dir_somatic
         .map { meta, sage_dir ->
 
-            def (sage_vcf, sage_tbi) = Inputs.resolveSageVcfWithTbi(sage_dir, meta, SampleSheetFields.SampleType.TUMOR)
+            def (sage_vcf, sage_tbi) = Inputs.resolveSageVcfWithTbi(sage_dir, meta, samplesheet.SampleType.TUMOR)
 
             return [ meta, sage_vcf, sage_tbi ]
         }

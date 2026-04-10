@@ -1,6 +1,6 @@
-import SampleSheetFields.FileType
-import SampleSheetFields.SampleType
-import SampleSheetFields.SequenceType
+import samplesheet.FileType
+import samplesheet.SampleType
+import samplesheet.SequenceType
 
 import java.nio.file.Path
 

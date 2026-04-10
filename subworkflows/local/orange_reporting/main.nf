@@ -117,7 +117,7 @@ workflow ORANGE_REPORTING {
                 key: meta.group_id,
                 id: meta.group_id,
                 tumor_id: Inputs.getTumorDnaSampleName(meta),
-                cancer_type: meta[SampleSheetFields.InfoField.CANCER_TYPE],
+                cancer_type: meta[samplesheet.InfoField.CANCER_TYPE],
             ]
 
             // Require all normal DNA inputs to be present else clear them
