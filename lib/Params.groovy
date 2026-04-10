@@ -1,6 +1,7 @@
 import pipeline.PipelineMode
 import pipeline.PurityEstimateMode
 import pipeline.SequencingType
+import pipeline.UmiSettings
 import refgenome.RefGenomeType
 import refgenome.RefGenomeVersion
 import refgenome.SupportedGenome

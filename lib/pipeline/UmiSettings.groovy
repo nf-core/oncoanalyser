@@ -1,3 +1,5 @@
+package pipeline
+
 public enum UmiSettings {
 
     TSO500(
