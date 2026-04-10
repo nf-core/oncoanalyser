@@ -42,16 +42,16 @@ workflow SAGE_PLOTTING {
     )
         .map { meta, tumor_bam_bai, normal_bam_bai, donor_bam_bai, tumor_dir, normal_dir, donor_dir, purple_dir ->
 
-            def (tumor_bam, tumor_bai) = Inputs.resolveReduxBamBai(tumor_bam_bai, meta, samplesheet.SampleType.TUMOR)
-            def (normal_bam, normal_bai) = Inputs.resolveReduxBamBai(normal_bam_bai, meta, samplesheet.SampleType.NORMAL)
-            def (donor_bam, donor_bai) = Inputs.resolveReduxBamBai(donor_bam_bai, meta, samplesheet.SampleType.DONOR)
+            def (tumor_bam, tumor_bai) = sample.Inputs.resolveReduxBamBai(tumor_bam_bai, meta, samplesheet.SampleType.TUMOR)
+            def (normal_bam, normal_bai) = sample.Inputs.resolveReduxBamBai(normal_bam_bai, meta, samplesheet.SampleType.NORMAL)
+            def (donor_bam, donor_bai) = sample.Inputs.resolveReduxBamBai(donor_bam_bai, meta, samplesheet.SampleType.DONOR)
 
-            def tumor_tsvs = Inputs.resolveReduxTsvFiles(tumor_dir, meta, samplesheet.SampleType.TUMOR)
-            def normal_tsvs = Inputs.resolveReduxTsvFiles(normal_dir, meta, samplesheet.SampleType.NORMAL)
-            def donor_tsvs = Inputs.resolveReduxTsvFiles(donor_dir, meta, samplesheet.SampleType.DONOR)
+            def tumor_tsvs = sample.Inputs.resolveReduxTsvFiles(tumor_dir, meta, samplesheet.SampleType.TUMOR)
+            def normal_tsvs = sample.Inputs.resolveReduxTsvFiles(normal_dir, meta, samplesheet.SampleType.NORMAL)
+            def donor_tsvs = sample.Inputs.resolveReduxTsvFiles(donor_dir, meta, samplesheet.SampleType.DONOR)
             def redux_tsvs = [ *tumor_tsvs, *normal_tsvs, *donor_tsvs ]
 
-            purple_dir = Inputs.preferUserProvidedInput(purple_dir, meta, sample.FileKey.PURPLE_DIR)
+            purple_dir = sample.Inputs.preferUserProvidedInput(purple_dir, meta, sample.FileKey.PURPLE_DIR)
 
             def inputs = [
                 meta: meta,
@@ -84,13 +84,13 @@ workflow SAGE_PLOTTING {
             def meta_sage = [
                 key: meta.group_id,
                 id: meta.group_id,
-                tumor_id: Inputs.getTumorDnaSampleName(meta),
-                normal_id: inputs.normal_bam ? Inputs.getNormalDnaSampleName(meta) : null,
-                donor_id: inputs.donor_bam ? Inputs.getDonorDnaSampleName(meta) : null,
+                tumor_id: sample.Inputs.getTumorDnaSampleName(meta),
+                normal_id: inputs.normal_bam ? sample.Inputs.getNormalDnaSampleName(meta) : null,
+                donor_id: inputs.donor_bam ? sample.Inputs.getDonorDnaSampleName(meta) : null,
             ]
 
-            def purple_smlv_vcf = Inputs.resolvePurpleSomaticVcf(inputs.purple_dir, meta)
-            def purple_smlv_vcf_tbi = Inputs.resolvePurpleSomaticVcfTbi(inputs.purple_dir, meta)
+            def purple_smlv_vcf = sample.Inputs.resolvePurpleSomaticVcf(inputs.purple_dir, meta)
+            def purple_smlv_vcf_tbi = sample.Inputs.resolvePurpleSomaticVcfTbi(inputs.purple_dir, meta)
 
             return [
                 meta_sage,

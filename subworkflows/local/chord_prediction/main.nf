@@ -22,7 +22,7 @@ workflow CHORD_PREDICTION {
     // channel: [ meta, purple_dir ]
     ch_inputs_selected = ch_purple
         .map { meta, purple_dir ->
-            return [meta, Inputs.preferUserProvidedInput(purple_dir, meta, sample.FileKey.PURPLE_DIR)]
+            return [meta, sample.Inputs.preferUserProvidedInput(purple_dir, meta, sample.FileKey.PURPLE_DIR)]
         }
 
     // Sort inputs
@@ -31,17 +31,17 @@ workflow CHORD_PREDICTION {
     ch_inputs_sorted = ch_inputs_selected
         .branch { meta, purple_dir ->
 
-            def has_tumor_normal_dna = Inputs.hasTumorDna(meta) && Inputs.hasNormalDna(meta)
+            def has_tumor_normal_dna = sample.Inputs.hasTumorDna(meta) && sample.Inputs.hasNormalDna(meta)
 
             def has_smlv_vcf = []
             def has_sv_vcf = []
 
             if(has_tumor_normal_dna) {
-                has_smlv_vcf = purple_dir ? Inputs.resolvePurpleSomaticVcf(purple_dir, meta) : []
-                has_sv_vcf = purple_dir ? Inputs.resolvePurpleSomaticSvVcf(purple_dir, meta) : []
+                has_smlv_vcf = purple_dir ? sample.Inputs.resolvePurpleSomaticVcf(purple_dir, meta) : []
+                has_sv_vcf = purple_dir ? sample.Inputs.resolvePurpleSomaticSvVcf(purple_dir, meta) : []
             }
 
-            def has_existing = Inputs.hasExistingInput(meta, sample.FileKey.CHORD_DIR)
+            def has_existing = sample.Inputs.hasExisting(meta, sample.FileKey.CHORD_DIR)
 
             runnable: has_tumor_normal_dna && purple_dir && has_smlv_vcf && has_sv_vcf && !has_existing
             skip: true
@@ -53,7 +53,7 @@ workflow CHORD_PREDICTION {
     ch_chord_inputs = ch_inputs_sorted.runnable
         .map { meta, purple_dir ->
 
-            def tumor_id = Inputs.getTumorDnaSampleName(meta)
+            def tumor_id = sample.Inputs.getTumorDnaSampleName(meta)
 
             def meta_chord = [
                 key: meta.group_id,
@@ -61,8 +61,8 @@ workflow CHORD_PREDICTION {
                 sample_id: tumor_id,
             ]
 
-            def smlv_vcf = Inputs.resolvePurpleSomaticVcf(purple_dir, meta)
-            def sv_vcf = Inputs.resolvePurpleSomaticSvVcf(purple_dir, meta)
+            def smlv_vcf = sample.Inputs.resolvePurpleSomaticVcf(purple_dir, meta)
+            def sv_vcf = sample.Inputs.resolvePurpleSomaticSvVcf(purple_dir, meta)
 
             return [meta_chord, smlv_vcf, sv_vcf]
         }

@@ -41,14 +41,14 @@ workflow ESVEE_CALLING {
         .map { meta, tumor_bam, tumor_bai, normal_bam, normal_bai ->
             return [
                 meta,
-                Inputs.preferUserProvidedInput(tumor_bam, meta, sample.FileKey.BAM_REDUX_DNA_TUMOR),
-                Inputs.preferPipelineOutput(tumor_bai, meta, sample.FileKey.BAI_DNA_TUMOR),
-                Inputs.preferUserProvidedInput(normal_bam, meta, sample.FileKey.BAM_REDUX_DNA_NORMAL),
-                Inputs.preferPipelineOutput(normal_bai, meta, sample.FileKey.BAI_DNA_NORMAL),
+                sample.Inputs.preferUserProvidedInput(tumor_bam, meta, sample.FileKey.BAM_REDUX_DNA_TUMOR),
+                sample.Inputs.preferPipelineOutput(tumor_bai, meta, sample.FileKey.BAI_DNA_TUMOR),
+                sample.Inputs.preferUserProvidedInput(normal_bam, meta, sample.FileKey.BAM_REDUX_DNA_NORMAL),
+                sample.Inputs.preferPipelineOutput(normal_bai, meta, sample.FileKey.BAI_DNA_NORMAL),
             ]
         }
         .branch { meta, tumor_bam, tumor_bai, normal_bam, normal_bai ->
-            def has_existing = Inputs.hasExistingInput(meta, sample.FileKey.ESVEE_DIR)
+            def has_existing = sample.Inputs.hasExisting(meta, sample.FileKey.ESVEE_DIR)
 
             runnable_tn: tumor_bam && normal_bam && !has_existing
             runnable_to: tumor_bam && !has_existing
@@ -68,11 +68,11 @@ workflow ESVEE_CALLING {
             def meta_esvee = [
                 key: meta.group_id,
                 id: meta.group_id,
-                tumor_id: Inputs.getTumorDnaSampleName(meta),
+                tumor_id: sample.Inputs.getTumorDnaSampleName(meta),
             ]
 
             if (normal_bam) {
-                meta_esvee.normal_id = Inputs.getNormalDnaSampleName(meta)
+                meta_esvee.normal_id = sample.Inputs.getNormalDnaSampleName(meta)
             }
 
             return [meta_esvee, tumor_bam, tumor_bai, normal_bam, normal_bai]

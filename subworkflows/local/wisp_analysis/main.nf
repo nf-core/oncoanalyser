@@ -34,8 +34,8 @@ workflow WISP_ANALYSIS {
     )
         .branch { meta, amber_dir, cobalt_dir, sage_append_dir ->
 
-            def primary_purple_dir = Inputs.getInput(meta, sample.FileKey.PURPLE_DIR)
-            def primary_amber_dir = Inputs.getInput(meta, sample.FileKey.AMBER_DIR)
+            def primary_purple_dir = sample.Inputs.get(meta, sample.FileKey.PURPLE_DIR)
+            def primary_amber_dir = sample.Inputs.get(meta, sample.FileKey.AMBER_DIR)
 
             def runnable = targeted_mode
                 ? primary_purple_dir && sage_append_dir
@@ -57,8 +57,8 @@ workflow WISP_ANALYSIS {
                 key: meta.group_id,
                 id: meta.group_id,
                 subject_id: meta.subject_id,
-                primary_id: Inputs.getTumorDnaSampleName(meta, 'primary'),
-                longitudinal_id: Inputs.getTumorDnaSampleName(meta, 'longitudinal'),
+                primary_id: sample.Inputs.getTumorDnaSampleName(meta, 'primary'),
+                longitudinal_id: sample.Inputs.getTumorDnaSampleName(meta, 'longitudinal'),
             ]
 
             return [meta_wisp, primary_purple_dir, primary_amber_dir, amber_dir, cobalt_dir, sage_append_dir]

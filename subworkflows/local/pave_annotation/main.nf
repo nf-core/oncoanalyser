@@ -42,15 +42,15 @@ workflow PAVE_ANNOTATION {
     ch_sage_germline_inputs_sorted = ch_sage_dir_germline
         .map { meta, sage_dir ->
 
-            def (sage_vcf, sage_tbi) = Inputs.resolveSageVcfWithTbi(sage_dir, meta, samplesheet.SampleType.NORMAL)
+            def (sage_vcf, sage_tbi) = sample.Inputs.resolveSageVcfWithTbi(sage_dir, meta, samplesheet.SampleType.NORMAL)
 
             return [ meta, sage_vcf, sage_tbi ]
         }
         .branch { meta, sage_vcf, sage_tbi ->
 
-            def has_existing = Inputs.hasExistingInput(meta, sample.FileKey.PAVE_DIR_NORMAL)
+            def has_existing = sample.Inputs.hasExisting(meta, sample.FileKey.PAVE_DIR_NORMAL)
 
-            runnable: Inputs.hasTumorDna(meta) && Inputs.hasNormalDna(meta) && sage_vcf && !has_existing
+            runnable: sample.Inputs.hasTumorDna(meta) && sample.Inputs.hasNormalDna(meta) && sage_vcf && !has_existing
             skip: true
                 return meta
         }
@@ -63,7 +63,7 @@ workflow PAVE_ANNOTATION {
             def meta_pave = [
                 key: meta.group_id,
                 id: meta.group_id,
-                sample_id: Inputs.getTumorDnaSampleName(meta),
+                sample_id: sample.Inputs.getTumorDnaSampleName(meta),
             ]
 
             return [meta_pave, sage_vcf, sage_tbi]
@@ -95,15 +95,15 @@ workflow PAVE_ANNOTATION {
     ch_sage_somatic_inputs_sorted = ch_sage_dir_somatic
         .map { meta, sage_dir ->
 
-            def (sage_vcf, sage_tbi) = Inputs.resolveSageVcfWithTbi(sage_dir, meta, samplesheet.SampleType.TUMOR)
+            def (sage_vcf, sage_tbi) = sample.Inputs.resolveSageVcfWithTbi(sage_dir, meta, samplesheet.SampleType.TUMOR)
 
             return [ meta, sage_vcf, sage_tbi ]
         }
         .branch { meta, sage_vcf, sage_tbi ->
 
-            def has_existing = Inputs.hasExistingInput(meta, sample.FileKey.PAVE_DIR_TUMOR)
+            def has_existing = sample.Inputs.hasExisting(meta, sample.FileKey.PAVE_DIR_TUMOR)
 
-            runnable: Inputs.hasTumorDna(meta) && sage_vcf && !has_existing
+            runnable: sample.Inputs.hasTumorDna(meta) && sage_vcf && !has_existing
             skip: true
                 return meta
         }
@@ -116,7 +116,7 @@ workflow PAVE_ANNOTATION {
             def meta_pave = [
                 key: meta.group_id,
                 id: meta.group_id,
-                sample_id: Inputs.getTumorDnaSampleName(meta),
+                sample_id: sample.Inputs.getTumorDnaSampleName(meta),
             ]
 
             return [meta_pave, sage_vcf, sage_tbi]

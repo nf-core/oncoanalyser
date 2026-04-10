@@ -45,10 +45,10 @@ workflow TEAL_CHARACTERISATION {
 
             return [
                 meta,
-                Inputs.preferUserProvidedInput(tumor_bam, meta, sample.FileKey.BAM_REDUX_DNA_TUMOR),
-                Inputs.preferPipelineOutput(tumor_bai, meta, sample.FileKey.BAI_DNA_TUMOR),
-                Inputs.preferUserProvidedInput(normal_bam, meta, sample.FileKey.BAM_REDUX_DNA_NORMAL),
-                Inputs.preferPipelineOutput(normal_bai, meta, sample.FileKey.BAI_DNA_NORMAL),
+                sample.Inputs.preferUserProvidedInput(tumor_bam, meta, sample.FileKey.BAM_REDUX_DNA_TUMOR),
+                sample.Inputs.preferPipelineOutput(tumor_bai, meta, sample.FileKey.BAI_DNA_TUMOR),
+                sample.Inputs.preferUserProvidedInput(normal_bam, meta, sample.FileKey.BAM_REDUX_DNA_NORMAL),
+                sample.Inputs.preferPipelineOutput(normal_bai, meta, sample.FileKey.BAI_DNA_NORMAL),
             ]
         }
         .branch { meta, tumor_bam, tumor_bai, normal_bam, normal_bai ->
@@ -65,8 +65,8 @@ workflow TEAL_CHARACTERISATION {
             def meta_teal = [
                 key: meta.group_id,
                 id: meta.group_id,
-                tumor_id: tumor_bam ? Inputs.getTumorDnaSampleName(meta) : null,
-                normal_id: normal_bam ? Inputs.getNormalDnaSampleName(meta) : null,
+                tumor_id: tumor_bam ? sample.Inputs.getTumorDnaSampleName(meta) : null,
+                normal_id: normal_bam ? sample.Inputs.getNormalDnaSampleName(meta) : null,
             ]
 
             return [meta_teal, tumor_bam, tumor_bai, normal_bam, normal_bai]
@@ -118,10 +118,10 @@ workflow TEAL_CHARACTERISATION {
                 tumor_teal_bai,
                 normal_teal_bam,
                 normal_teal_bai,
-                Inputs.preferUserProvidedInput(tumor_metrics_dir, meta, sample.FileKey.BAMTOOLS_DIR_TUMOR),
-                Inputs.preferUserProvidedInput(normal_metrics_dir, meta, sample.FileKey.BAMTOOLS_DIR_NORMAL),
-                Inputs.preferUserProvidedInput(cobalt_dir, meta, sample.FileKey.COBALT_DIR),
-                Inputs.preferUserProvidedInput(purple_dir, meta, sample.FileKey.PURPLE_DIR),
+                sample.Inputs.preferUserProvidedInput(tumor_metrics_dir, meta, sample.FileKey.BAMTOOLS_DIR_TUMOR),
+                sample.Inputs.preferUserProvidedInput(normal_metrics_dir, meta, sample.FileKey.BAMTOOLS_DIR_NORMAL),
+                sample.Inputs.preferUserProvidedInput(cobalt_dir, meta, sample.FileKey.COBALT_DIR),
+                sample.Inputs.preferUserProvidedInput(purple_dir, meta, sample.FileKey.PURPLE_DIR),
             ]
         }
         .branch { meta, tumor_teal_bam, tumor_teal_bai, normal_teal_bam, normal_teal_bai, tumor_metrics_dir, normal_metrics_dir, cobalt_dir, purple_dir ->
@@ -142,8 +142,8 @@ workflow TEAL_CHARACTERISATION {
             def meta_teal = [
                 key: meta.group_id,
                 id: meta.group_id,
-                tumor_id: tumor_teal_bam ? Inputs.getTumorDnaSampleName(meta) : null,
-                normal_id: normal_teal_bam ? Inputs.getNormalDnaSampleName(meta) : null,
+                tumor_id: tumor_teal_bam ? sample.Inputs.getTumorDnaSampleName(meta) : null,
+                normal_id: normal_teal_bam ? sample.Inputs.getNormalDnaSampleName(meta) : null,
             ]
 
             return [ meta_teal, tumor_teal_bam, tumor_teal_bai, normal_teal_bam, normal_teal_bai, tumor_metrics_dir, normal_metrics_dir, cobalt_dir, purple_dir ]

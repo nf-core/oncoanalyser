@@ -38,12 +38,12 @@ workflow VIRUSBREAKEND_CALLING {
         .map { meta, tumor_bam, tumor_bai ->
             return [
                 meta,
-                Inputs.preferUserProvidedInput(tumor_bam, meta, sample.FileKey.BAM_REDUX_DNA_TUMOR),
-                Inputs.preferUserProvidedInput(tumor_bai, meta, sample.FileKey.BAI_DNA_TUMOR),
+                sample.Inputs.preferUserProvidedInput(tumor_bam, meta, sample.FileKey.BAM_REDUX_DNA_TUMOR),
+                sample.Inputs.preferUserProvidedInput(tumor_bai, meta, sample.FileKey.BAI_DNA_TUMOR),
             ]
         }
         .branch { meta, tumor_bam, tumor_bai ->
-            def has_existing = Inputs.hasExistingInput(meta, sample.FileKey.VIRUSINTERPRETER_DIR)
+            def has_existing = sample.Inputs.hasExisting(meta, sample.FileKey.VIRUSINTERPRETER_DIR)
             runnable: tumor_bam && !has_existing
             skip: true
                 return meta
@@ -60,7 +60,7 @@ workflow VIRUSBREAKEND_CALLING {
             def meta_virus = [
                 key: meta.group_id,
                 id: meta.group_id,
-                sample_id: Inputs.getTumorDnaSampleName(meta),
+                sample_id: sample.Inputs.getTumorDnaSampleName(meta),
             ]
 
             return [meta_virus, tumor_bam]
@@ -93,8 +93,8 @@ workflow VIRUSBREAKEND_CALLING {
 
             def inputs = [
                 virus_tsv,
-                Inputs.preferUserProvidedInput(purple_dir, meta, sample.FileKey.PURPLE_DIR),
-                Inputs.preferUserProvidedInput(somatic_metrics, meta, sample.FileKey.BAMTOOLS_DIR_TUMOR),
+                sample.Inputs.preferUserProvidedInput(purple_dir, meta, sample.FileKey.PURPLE_DIR),
+                sample.Inputs.preferUserProvidedInput(somatic_metrics, meta, sample.FileKey.BAMTOOLS_DIR_TUMOR),
             ]
 
             return [meta, *inputs]
@@ -121,7 +121,7 @@ workflow VIRUSBREAKEND_CALLING {
             def meta_virus = [
                 key: meta.group_id,
                 id: meta.group_id,
-                sample_id: Inputs.getTumorDnaSampleName(meta),
+                sample_id: sample.Inputs.getTumorDnaSampleName(meta),
             ]
 
             return [meta_virus, *inputs]

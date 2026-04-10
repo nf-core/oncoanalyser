@@ -34,14 +34,14 @@ workflow COBALT_PROFILING {
         .map { meta, tumor_bam, tumor_bai, normal_bam, normal_bai ->
             return [
                 meta,
-                Inputs.preferUserProvidedInput(tumor_bam, meta, sample.FileKey.BAM_REDUX_DNA_TUMOR),
-                Inputs.preferPipelineOutput(tumor_bai, meta, sample.FileKey.BAI_DNA_TUMOR),
-                Inputs.preferUserProvidedInput(normal_bam, meta, sample.FileKey.BAM_REDUX_DNA_NORMAL),
-                Inputs.preferPipelineOutput(normal_bai, meta, sample.FileKey.BAI_DNA_NORMAL),
+                sample.Inputs.preferUserProvidedInput(tumor_bam, meta, sample.FileKey.BAM_REDUX_DNA_TUMOR),
+                sample.Inputs.preferPipelineOutput(tumor_bai, meta, sample.FileKey.BAI_DNA_TUMOR),
+                sample.Inputs.preferUserProvidedInput(normal_bam, meta, sample.FileKey.BAM_REDUX_DNA_NORMAL),
+                sample.Inputs.preferPipelineOutput(normal_bai, meta, sample.FileKey.BAI_DNA_NORMAL),
             ]
         }
         .branch { meta, tumor_bam, tumor_bai, normal_bam, normal_bai ->
-            def has_existing = Inputs.hasExistingInput(meta, sample.FileKey.COBALT_DIR)
+            def has_existing = sample.Inputs.hasExisting(meta, sample.FileKey.COBALT_DIR)
             runnable_tn: tumor_bam && normal_bam && !has_existing
             runnable_to: tumor_bam && !has_existing
             skip: true
@@ -66,11 +66,11 @@ workflow COBALT_PROFILING {
             def meta_cobalt = [
                 key: meta.group_id,
                 id: meta.group_id,
-                tumor_id: Inputs.getTumorDnaSampleName(meta),
+                tumor_id: sample.Inputs.getTumorDnaSampleName(meta),
             ]
 
             if (normal_bam) {
-                meta_cobalt.normal_id = Inputs.getNormalDnaSampleName(meta)
+                meta_cobalt.normal_id = sample.Inputs.getNormalDnaSampleName(meta)
             }
 
             sample_data: [meta_cobalt, tumor_bam, normal_bam, tumor_bai, normal_bai]

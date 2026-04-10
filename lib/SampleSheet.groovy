@@ -1,4 +1,5 @@
 import pipeline.PipelineMode
+import sample.Inputs
 import samplesheet.FileType
 import samplesheet.InfoField
 import samplesheet.SampleType

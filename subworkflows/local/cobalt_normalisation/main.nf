@@ -28,8 +28,8 @@ workflow COBALT_NORMALISATION {
     )
         .map { meta, amber_dir, cobalt_dir ->
             return [
-                Inputs.preferUserProvidedInput(amber_dir, meta, sample.FileKey.AMBER_DIR),
-                Inputs.preferUserProvidedInput(cobalt_dir, meta, sample.FileKey.COBALT_DIR),
+                sample.Inputs.preferUserProvidedInput(amber_dir, meta, sample.FileKey.AMBER_DIR),
+                sample.Inputs.preferUserProvidedInput(cobalt_dir, meta, sample.FileKey.COBALT_DIR),
             ]
         }
         .collect(flat: false)

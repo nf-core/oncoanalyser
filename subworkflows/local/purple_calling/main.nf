@@ -50,12 +50,12 @@ workflow PURPLE_CALLING {
             def inputs = [:]
 
             inputs.meta              = meta
-            inputs.amber_dir         = Inputs.preferUserProvidedInput(amber_dir, meta, sample.FileKey.AMBER_DIR)
-            inputs.cobalt_dir        = Inputs.preferUserProvidedInput(cobalt_dir, meta, sample.FileKey.COBALT_DIR)
-            inputs.esvee_dir         = Inputs.preferUserProvidedInput(esvee_dir, meta, sample.FileKey.ESVEE_DIR)
-            inputs.pave_somatic_dir  = Inputs.preferUserProvidedInput(pave_somatic_dir, meta, sample.FileKey.PAVE_DIR_TUMOR)
-            inputs.pave_germline_dir = Inputs.preferUserProvidedInput(pave_germline_dir, meta, sample.FileKey.PAVE_DIR_NORMAL)
-            inputs.redux_tumor_tsvs  = Inputs.resolveReduxTsvFiles(redux_tumor_dir, meta, samplesheet.SampleType.TUMOR)
+            inputs.amber_dir         = sample.Inputs.preferUserProvidedInput(amber_dir, meta, sample.FileKey.AMBER_DIR)
+            inputs.cobalt_dir        = sample.Inputs.preferUserProvidedInput(cobalt_dir, meta, sample.FileKey.COBALT_DIR)
+            inputs.esvee_dir         = sample.Inputs.preferUserProvidedInput(esvee_dir, meta, sample.FileKey.ESVEE_DIR)
+            inputs.pave_somatic_dir  = sample.Inputs.preferUserProvidedInput(pave_somatic_dir, meta, sample.FileKey.PAVE_DIR_TUMOR)
+            inputs.pave_germline_dir = sample.Inputs.preferUserProvidedInput(pave_germline_dir, meta, sample.FileKey.PAVE_DIR_NORMAL)
+            inputs.redux_tumor_tsvs  = sample.Inputs.resolveReduxTsvFiles(redux_tumor_dir, meta, samplesheet.SampleType.TUMOR)
 
             return inputs
         }
@@ -66,7 +66,7 @@ workflow PURPLE_CALLING {
     ch_inputs_sorted = ch_inputs_selected
         .branch { inputs ->
 
-            def has_existing = Inputs.hasExistingInput(inputs.meta, sample.FileKey.PURPLE_DIR)
+            def has_existing = sample.Inputs.hasExisting(inputs.meta, sample.FileKey.PURPLE_DIR)
 
             runnable: inputs.amber_dir && inputs.cobalt_dir && !has_existing
                 return inputs
@@ -84,11 +84,11 @@ workflow PURPLE_CALLING {
             def meta_purple = [
                 key: meta.group_id,
                 id: meta.group_id,
-                tumor_id: Inputs.getTumorDnaSampleName(meta),
+                tumor_id: sample.Inputs.getTumorDnaSampleName(meta),
             ]
 
-            if (Inputs.hasNormalDna(meta)) {
-                meta_purple.normal_id = Inputs.getNormalDnaSampleName(meta)
+            if (sample.Inputs.hasNormalDna(meta)) {
+                meta_purple.normal_id = sample.Inputs.getNormalDnaSampleName(meta)
             }
 
             inputs.meta = meta_purple

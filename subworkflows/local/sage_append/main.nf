@@ -45,14 +45,14 @@ workflow SAGE_APPEND {
     )
         .map { meta, tumor_dna_bam_bai, tumor_dna_tsvs, tumor_rna_bam_bai, purple_dir ->
 
-            def (tumor_dna_bam, tumor_dna_bai) = Inputs.resolveReduxBamBai(tumor_dna_bam_bai, meta, samplesheet.SampleType.TUMOR)
-            def tumor_dna_redux_tsvs = Inputs.resolveReduxTsvFiles(tumor_dna_tsvs, meta, samplesheet.SampleType.TUMOR)
+            def (tumor_dna_bam, tumor_dna_bai) = sample.Inputs.resolveReduxBamBai(tumor_dna_bam_bai, meta, samplesheet.SampleType.TUMOR)
+            def tumor_dna_redux_tsvs = sample.Inputs.resolveReduxTsvFiles(tumor_dna_tsvs, meta, samplesheet.SampleType.TUMOR)
 
             def (tumor_rna_bam, tumor_rna_bai) = tumor_rna_bam_bai
-            tumor_rna_bam = Inputs.preferUserProvidedInput(tumor_rna_bam, meta, sample.FileKey.BAM_RNA_TUMOR)
-            tumor_rna_bai = Inputs.preferPipelineOutput(tumor_rna_bai, meta, sample.FileKey.BAI_RNA_TUMOR)
+            tumor_rna_bam = sample.Inputs.preferUserProvidedInput(tumor_rna_bam, meta, sample.FileKey.BAM_RNA_TUMOR)
+            tumor_rna_bai = sample.Inputs.preferPipelineOutput(tumor_rna_bai, meta, sample.FileKey.BAI_RNA_TUMOR)
 
-            purple_dir = Inputs.preferUserProvidedInput(purple_dir, meta, sample.FileKey.PURPLE_DIR)
+            purple_dir = sample.Inputs.preferUserProvidedInput(purple_dir, meta, sample.FileKey.PURPLE_DIR)
 
             def inputs = [
                 meta: meta,
@@ -83,13 +83,13 @@ workflow SAGE_APPEND {
 
             def meta = inputs.meta
 
-            def has_tumor_rna = Inputs.hasTumorRna(meta)
-            def has_normal_dna = Inputs.hasNormalDna(meta)
-            def has_smlv_germline = Inputs.resolvePurpleGermlineVcf(inputs.purple_dir, meta)
+            def has_tumor_rna = sample.Inputs.hasTumorRna(meta)
+            def has_normal_dna = sample.Inputs.hasNormalDna(meta)
+            def has_smlv_germline = sample.Inputs.resolvePurpleGermlineVcf(inputs.purple_dir, meta)
 
             def should_append_rna_variants = has_tumor_rna && has_normal_dna && has_smlv_germline
 
-            def has_existing = Inputs.hasExistingInput(meta, sample.FileKey.SAGE_APPEND_DIR_NORMAL)
+            def has_existing = sample.Inputs.hasExisting(meta, sample.FileKey.SAGE_APPEND_DIR_NORMAL)
 
             runnable: should_append_rna_variants && !has_existing && enable_germline
                 return inputs
@@ -105,20 +105,20 @@ workflow SAGE_APPEND {
             def meta = inputs.meta
 
             // NOTE(SW): explicit in expectation to always obtain the primary tumor DNA sample ID here
-            def tumor_dna_id = Inputs.getTumorDnaSampleName(meta, 'primary')
-            def output_file_id = Inputs.getNormalDnaSampleName(meta)
+            def tumor_dna_id = sample.Inputs.getTumorDnaSampleName(meta, 'primary')
+            def output_file_id = sample.Inputs.getNormalDnaSampleName(meta)
 
             def meta_append = [
                 key: meta.group_id,
                 id: meta.group_id,
                 output_file_id: output_file_id,
-                reference_ids: [Inputs.getTumorRnaSampleName(meta)],
+                reference_ids: [sample.Inputs.getTumorRnaSampleName(meta)],
             ]
 
             def bams = [inputs.tumor_rna_bam]
             def bais = [inputs.tumor_rna_bai]
 
-            def purple_smlv_vcf = Inputs.resolvePurpleGermlineVcf(inputs.purple_dir, meta)
+            def purple_smlv_vcf = sample.Inputs.resolvePurpleGermlineVcf(inputs.purple_dir, meta)
 
             return [meta_append, purple_smlv_vcf, bams, bais, []]
         }
@@ -147,14 +147,14 @@ workflow SAGE_APPEND {
 
             def meta = inputs.meta
 
-            def has_tumor_rna = Inputs.hasTumorRna(meta)
-            def has_tumor_dna = Inputs.hasTumorDna(meta)
-            def has_smlv_somatic = Inputs.resolvePurpleSomaticVcf(inputs.purple_dir, meta)
+            def has_tumor_rna = sample.Inputs.hasTumorRna(meta)
+            def has_tumor_dna = sample.Inputs.hasTumorDna(meta)
+            def has_smlv_somatic = sample.Inputs.resolvePurpleSomaticVcf(inputs.purple_dir, meta)
 
             def should_append_rna_variants = !purity_estimate_mode && has_tumor_rna && has_tumor_dna && has_smlv_somatic
             def should_append_longitudinal_variants = purity_estimate_mode && has_tumor_dna && has_smlv_somatic
 
-            def has_existing = Inputs.hasExistingInput(meta, sample.FileKey.SAGE_APPEND_DIR_TUMOR)
+            def has_existing = sample.Inputs.hasExisting(meta, sample.FileKey.SAGE_APPEND_DIR_TUMOR)
 
             runnable: (should_append_rna_variants || should_append_longitudinal_variants) && !has_existing
                 return inputs
@@ -170,8 +170,8 @@ workflow SAGE_APPEND {
             def meta = inputs.meta
 
             def output_file_id = purity_estimate_mode
-                ? Inputs.getTumorDnaSampleName(meta, 'longitudinal')
-                : Inputs.getTumorDnaSampleName(meta, 'primary')
+                ? sample.Inputs.getTumorDnaSampleName(meta, 'longitudinal')
+                : sample.Inputs.getTumorDnaSampleName(meta, 'primary')
 
             def meta_append = [
                 key: meta.group_id,
@@ -185,19 +185,19 @@ workflow SAGE_APPEND {
             def redux_tsvs = []
 
             if (!purity_estimate_mode && inputs.tumor_rna_bam) {
-                meta_append.reference_ids.add(Inputs.getTumorRnaSampleName(meta))
+                meta_append.reference_ids.add(sample.Inputs.getTumorRnaSampleName(meta))
                 bams.add(inputs.tumor_rna_bam)
                 bais.add(inputs.tumor_rna_bai)
             }
 
             if (purity_estimate_mode && inputs.tumor_dna_bam) {
-                meta_append.reference_ids.add(Inputs.getTumorDnaSampleName(meta, 'longitudinal'))
+                meta_append.reference_ids.add(sample.Inputs.getTumorDnaSampleName(meta, 'longitudinal'))
                 bams.add(inputs.tumor_dna_bam)
                 bais.add(inputs.tumor_dna_bai)
                 redux_tsvs = inputs.tumor_dna_redux_tsvs
             }
 
-            def purple_smlv_vcf = Inputs.resolvePurpleSomaticVcf(inputs.purple_dir, meta, 'primary')
+            def purple_smlv_vcf = sample.Inputs.resolvePurpleSomaticVcf(inputs.purple_dir, meta, 'primary')
 
             return [meta_append, purple_smlv_vcf, bams, bais, redux_tsvs]
         }

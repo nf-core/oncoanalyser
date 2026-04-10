@@ -45,8 +45,8 @@ workflow NEO_PREDICTION {
         .map { meta, purple_dir, linx_annotation_dir ->
 
             def inputs = [
-                Inputs.preferUserProvidedInput(purple_dir, meta, sample.FileKey.PURPLE_DIR),
-                Inputs.preferUserProvidedInput(linx_annotation_dir, meta, sample.FileKey.LINX_ANNO_DIR_TUMOR),
+                sample.Inputs.preferUserProvidedInput(purple_dir, meta, sample.FileKey.PURPLE_DIR),
+                sample.Inputs.preferUserProvidedInput(linx_annotation_dir, meta, sample.FileKey.LINX_ANNO_DIR_TUMOR),
             ]
 
             return [meta, *inputs]
@@ -58,7 +58,7 @@ workflow NEO_PREDICTION {
     ch_finder_inputs_sorted = ch_finder_inputs_selected
         .branch { meta, purple_dir, linx_annotation_dir ->
 
-            def has_normal_dna = Inputs.hasNormalDna(meta)
+            def has_normal_dna = sample.Inputs.hasNormalDna(meta)
 
             def has_runnable_inputs = purple_dir && linx_annotation_dir && has_normal_dna
 
@@ -75,7 +75,7 @@ workflow NEO_PREDICTION {
             def meta_finder = [
                 key: meta.group_id,
                 id: meta.group_id,
-                sample_id: Inputs.getTumorDnaSampleName(meta),
+                sample_id: sample.Inputs.getTumorDnaSampleName(meta),
             ]
 
             return [meta_finder, purple_dir, linx_annotation_dir]
@@ -112,12 +112,12 @@ workflow NEO_PREDICTION {
             return [
                 meta,
                 neo_finder_dir,
-                Inputs.preferUserProvidedInput(tumor_bam, meta, sample.FileKey.BAM_RNA_TUMOR),
-                Inputs.preferUserProvidedInput(tumor_bai, meta, sample.FileKey.BAI_RNA_TUMOR),
+                sample.Inputs.preferUserProvidedInput(tumor_bam, meta, sample.FileKey.BAM_RNA_TUMOR),
+                sample.Inputs.preferUserProvidedInput(tumor_bai, meta, sample.FileKey.BAI_RNA_TUMOR),
             ]
         }
         .branch { meta, neo_finder_dir, tumor_bam, tumor_bai ->
-            runnable: Inputs.hasTumorRna(meta)
+            runnable: sample.Inputs.hasTumorRna(meta)
                 return [meta, neo_finder_dir, tumor_bam, tumor_bai]
             skip: true
                 return meta
@@ -131,7 +131,7 @@ workflow NEO_PREDICTION {
             def meta_isofox = [
                 key: meta.group_id,
                 id: meta.group_id,
-                sample_id: Inputs.getTumorDnaSampleName(meta),
+                sample_id: sample.Inputs.getTumorDnaSampleName(meta),
             ]
 
             return [meta_isofox, neo_finder_dir, tumor_bam_rna, tumor_bai_rna]
@@ -176,23 +176,23 @@ workflow NEO_PREDICTION {
             def meta_scorer = [
                 key: meta.group_id,
                 id: meta.group_id,
-                sample_id: Inputs.getTumorDnaSampleName(meta, 'primary'),
+                sample_id: sample.Inputs.getTumorDnaSampleName(meta, 'primary'),
                 cancer_type: meta[samplesheet.InfoField.CANCER_TYPE],
             ]
 
             def sage_somatic_append_vcf = []
-            if (Inputs.hasTumorRna(meta)) {
-                meta_scorer.sample_rna_id = Inputs.getTumorRnaSampleName(meta)
+            if (sample.Inputs.hasTumorRna(meta)) {
+                meta_scorer.sample_rna_id = sample.Inputs.getTumorRnaSampleName(meta)
 
-                def sage_somatic_append_selected = Inputs.preferUserProvidedInput(sage_somatic_append, meta, sample.FileKey.SAGE_APPEND_DIR_TUMOR)
+                def sage_somatic_append_selected = sample.Inputs.preferUserProvidedInput(sage_somatic_append, meta, sample.FileKey.SAGE_APPEND_DIR_TUMOR)
                 sage_somatic_append_vcf = file(sage_somatic_append_selected).resolve("${meta_scorer.sample_id}.sage.append.vcf.gz")
             }
 
             def inputs = [
-                Inputs.preferUserProvidedInput(isofox_dir, meta, sample.FileKey.ISOFOX_DIR),
-                Inputs.preferUserProvidedInput(purple_dir, meta, sample.FileKey.PURPLE_DIR),
+                sample.Inputs.preferUserProvidedInput(isofox_dir, meta, sample.FileKey.ISOFOX_DIR),
+                sample.Inputs.preferUserProvidedInput(purple_dir, meta, sample.FileKey.PURPLE_DIR),
                 sage_somatic_append_vcf,
-                Inputs.preferUserProvidedInput(lilac_dir, meta, sample.FileKey.LILAC_DIR),
+                sample.Inputs.preferUserProvidedInput(lilac_dir, meta, sample.FileKey.LILAC_DIR),
                 neo_finder_dir,
                 annotated_fusions,
             ]

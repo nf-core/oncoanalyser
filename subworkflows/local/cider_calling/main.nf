@@ -29,8 +29,8 @@ workflow CIDER_CALLING {
         .map { meta, bam, bai ->
             return [
                 meta,
-                Inputs.preferUserProvidedInput(bam, meta, sample.FileKey.BAM_REDUX_DNA_TUMOR),
-                Inputs.preferPipelineOutput(bai, meta, sample.FileKey.BAI_DNA_TUMOR),
+                sample.Inputs.preferUserProvidedInput(bam, meta, sample.FileKey.BAM_REDUX_DNA_TUMOR),
+                sample.Inputs.preferPipelineOutput(bai, meta, sample.FileKey.BAI_DNA_TUMOR),
             ]
         }
         .branch { meta, bam, bai ->
@@ -45,8 +45,8 @@ workflow CIDER_CALLING {
         .map { meta, bam, bai ->
             return [
                 meta,
-                Inputs.preferUserProvidedInput(bam, meta, sample.FileKey.BAM_RNA_TUMOR),
-                Inputs.preferPipelineOutput(bai, meta, sample.FileKey.BAI_RNA_TUMOR),
+                sample.Inputs.preferUserProvidedInput(bam, meta, sample.FileKey.BAM_RNA_TUMOR),
+                sample.Inputs.preferPipelineOutput(bai, meta, sample.FileKey.BAI_RNA_TUMOR),
             ]
         }
         .branch { meta, bam, bai ->
@@ -59,8 +59,8 @@ workflow CIDER_CALLING {
     // channel: [ meta_cider, bam, bai ]
     ch_cider_inputs = Channel.empty()
         .mix(
-            ch_inputs_tumor_dna_sorted.runnable.map { meta, bam, bai -> [meta, Inputs.getTumorDnaSample(meta), bam, bai] },
-            ch_inputs_tumor_rna_sorted.runnable.map { meta, bam, bai -> [meta, Inputs.getTumorRnaSample(meta), bam, bai] },
+            ch_inputs_tumor_dna_sorted.runnable.map { meta, bam, bai -> [meta, sample.Inputs.getTumorDnaSample(meta), bam, bai] },
+            ch_inputs_tumor_rna_sorted.runnable.map { meta, bam, bai -> [meta, sample.Inputs.getTumorRnaSample(meta), bam, bai] },
         )
         .map { meta, meta_sample, bam, bai ->
 

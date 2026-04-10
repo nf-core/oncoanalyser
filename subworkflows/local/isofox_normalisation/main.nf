@@ -23,7 +23,7 @@ workflow ISOFOX_NORMALISATION {
     // channel: [ [isofox_dir, ...] ]
     ch_isofox_inputs = ch_isofox
         .map { meta, isofox_dir ->
-            return Inputs.selectExistingElseCurrent(isofox_dir, meta, sample.FileKey.ISOFOX_DIR)
+            return sample.Inputs.selectExistingElseCurrent(isofox_dir, meta, sample.FileKey.ISOFOX_DIR)
         }
         .collect()
 

@@ -52,15 +52,15 @@ workflow QSEE_METRICS {
 
             inputs.meta = meta
 
-            inputs.redux_tsvs_tumor = Inputs.resolveReduxTsvFiles(redux_tsvs_tumor, meta, samplesheet.SampleType.TUMOR)
-            inputs.redux_tsvs_normal = Inputs.resolveReduxTsvFiles(redux_tsvs_normal, meta, samplesheet.SampleType.NORMAL)
+            inputs.redux_tsvs_tumor = sample.Inputs.resolveReduxTsvFiles(redux_tsvs_tumor, meta, samplesheet.SampleType.TUMOR)
+            inputs.redux_tsvs_normal = sample.Inputs.resolveReduxTsvFiles(redux_tsvs_normal, meta, samplesheet.SampleType.NORMAL)
 
-            inputs.bamtools_tumor_dir = Inputs.preferUserProvidedInput(bamtools_tumor_dir, meta, sample.FileKey.BAMTOOLS_DIR_TUMOR)
-            inputs.bamtools_normal_dir = Inputs.preferUserProvidedInput(bamtools_normal_dir, meta, sample.FileKey.BAMTOOLS_DIR_NORMAL)
+            inputs.bamtools_tumor_dir = sample.Inputs.preferUserProvidedInput(bamtools_tumor_dir, meta, sample.FileKey.BAMTOOLS_DIR_TUMOR)
+            inputs.bamtools_normal_dir = sample.Inputs.preferUserProvidedInput(bamtools_normal_dir, meta, sample.FileKey.BAMTOOLS_DIR_NORMAL)
 
-            inputs.cobalt_dir = Inputs.preferUserProvidedInput(cobalt_dir, meta, sample.FileKey.COBALT_DIR)
-            inputs.esvee_dir = Inputs.preferUserProvidedInput(esvee_dir, meta, sample.FileKey.ESVEE_DIR)
-            inputs.purple_dir = Inputs.preferUserProvidedInput(purple_dir, meta, sample.FileKey.PURPLE_DIR)
+            inputs.cobalt_dir = sample.Inputs.preferUserProvidedInput(cobalt_dir, meta, sample.FileKey.COBALT_DIR)
+            inputs.esvee_dir = sample.Inputs.preferUserProvidedInput(esvee_dir, meta, sample.FileKey.ESVEE_DIR)
+            inputs.purple_dir = sample.Inputs.preferUserProvidedInput(purple_dir, meta, sample.FileKey.PURPLE_DIR)
 
             return inputs
         }
@@ -83,8 +83,8 @@ workflow QSEE_METRICS {
             def meta_qsee = [
                 key: meta.group_id,
                 id: meta.group_id,
-                tumor_id: Inputs.getTumorDnaSampleName(meta),
-                normal_id: has_normal_dna ? Inputs.getNormalDnaSampleName(meta) : null,
+                tumor_id: sample.Inputs.getTumorDnaSampleName(meta),
+                normal_id: has_normal_dna ? sample.Inputs.getNormalDnaSampleName(meta) : null,
             ]
 
             inputs.meta = meta_qsee

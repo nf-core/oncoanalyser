@@ -40,18 +40,18 @@ workflow REDUX_PROCESSING {
     def selectBamInputs = { ch_dna, bam_type, bai_type, bam_redux_type ->
         return ch_dna.map { meta, bams, bais ->
 
-            bams = Inputs.hasExistingInput(meta, bam_type)
-                ? [Inputs.getInput(meta, bam_type)]
+            bams = sample.Inputs.hasExisting(meta, bam_type)
+                ? [sample.Inputs.get(meta, bam_type)]
                 : bams
 
-            bais = Inputs.hasExistingInput(meta, bai_type)
-                ? [Inputs.getInput(meta, bai_type)]
+            bais = sample.Inputs.hasExisting(meta, bai_type)
+                ? [sample.Inputs.get(meta, bai_type)]
                 : bais
 
             return [meta, bams, bais]
         }
         .branch { meta, bams, bais ->
-            def has_existing = Inputs.hasExistingInput(meta, bam_redux_type)
+            def has_existing = sample.Inputs.hasExisting(meta, bam_redux_type)
             runnable: bams && !has_existing
             skip: true
                 return meta
@@ -83,9 +83,9 @@ workflow REDUX_PROCESSING {
     // channel: [ meta_redux, [bam, ...], [bai, ...] ]
     ch_redux_inputs = Channel.empty()
         .mix(
-            ch_inputs_tumor.runnable.map { meta, bams, bais -> [meta, Inputs.getTumorDnaSample(meta), 'tumor', bams, bais] },
-            ch_inputs_normal.runnable.map { meta, bams, bais -> [meta, Inputs.getNormalDnaSample(meta), 'normal', bams, bais] },
-            ch_inputs_donor.runnable.map { meta, bams, bais -> [meta, Inputs.getDonorDnaSample(meta), 'donor', bams, bais] },
+            ch_inputs_tumor.runnable.map { meta, bams, bais -> [meta, sample.Inputs.getTumorDnaSample(meta), 'tumor', bams, bais] },
+            ch_inputs_normal.runnable.map { meta, bams, bais -> [meta, sample.Inputs.getNormalDnaSample(meta), 'normal', bams, bais] },
+            ch_inputs_donor.runnable.map { meta, bams, bais -> [meta, sample.Inputs.getDonorDnaSample(meta), 'donor', bams, bais] },
         )
         .map { meta, meta_sample, sample_type, bams, bais ->
 

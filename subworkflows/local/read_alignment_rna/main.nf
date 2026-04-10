@@ -24,8 +24,8 @@ workflow READ_ALIGNMENT_RNA {
     // channel: [ meta ]
     ch_inputs_sorted = ch_inputs
         .branch { meta ->
-            def has_existing = Inputs.hasExistingInput(meta, sample.FileKey.BAM_RNA_TUMOR)
-            runnable: Inputs.hasTumorRnaFastq(meta) && !has_existing
+            def has_existing = sample.Inputs.hasExisting(meta, sample.FileKey.BAM_RNA_TUMOR)
+            runnable: sample.Inputs.hasTumorRnaFastq(meta) && !has_existing
             skip: true
         }
 
@@ -33,7 +33,7 @@ workflow READ_ALIGNMENT_RNA {
     // channel: [ meta_fastq, fastq_fwd, fastq_rev ]
     ch_fastq_inputs = ch_inputs_sorted.runnable
         .flatMap { meta ->
-            def meta_sample = Inputs.getTumorRnaSample(meta)
+            def meta_sample = sample.Inputs.getTumorRnaSample(meta)
             meta_sample
                 .getAt(samplesheet.FileType.FASTQ)
                 .collect { key, fps ->
@@ -147,7 +147,7 @@ workflow READ_ALIGNMENT_RNA {
             def meta_merge = [
                 key: meta.group_id,
                 id: meta.group_id,
-                sample_id: Inputs.getTumorRnaSampleName(meta),
+                sample_id: sample.Inputs.getTumorRnaSampleName(meta),
             ]
             return [meta_merge, bams]
         }
@@ -173,7 +173,7 @@ workflow READ_ALIGNMENT_RNA {
             def meta_markdups = [
                 key: meta.group_id,
                 id: meta.group_id,
-                sample_id: Inputs.getTumorRnaSampleName(meta),
+                sample_id: sample.Inputs.getTumorRnaSampleName(meta),
             ]
             return [meta_markdups, bam]
         }

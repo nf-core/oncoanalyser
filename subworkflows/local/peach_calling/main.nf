@@ -27,13 +27,13 @@ workflow PEACH_CALLING {
         .map { meta, purple_dir ->
             return [
                 meta,
-                Inputs.preferUserProvidedInput(purple_dir, meta, sample.FileKey.PURPLE_DIR),
+                sample.Inputs.preferUserProvidedInput(purple_dir, meta, sample.FileKey.PURPLE_DIR),
             ]
         }
         .branch { meta, purple_dir ->
 
-            def has_normal = Inputs.hasNormalDna(meta)
-            def has_existing = Inputs.hasExistingInput(meta, sample.FileKey.PEACH_DIR)
+            def has_normal = sample.Inputs.hasNormalDna(meta)
+            def has_existing = sample.Inputs.hasExisting(meta, sample.FileKey.PEACH_DIR)
 
             runnable: purple_dir && has_normal && !has_existing
             skip: true
@@ -48,10 +48,10 @@ workflow PEACH_CALLING {
             def meta_peach = [
                 key: meta.group_id,
                 id: meta.group_id,
-                sample_id: Inputs.getNormalDnaSampleName(meta),
+                sample_id: sample.Inputs.getNormalDnaSampleName(meta),
             ]
 
-            def purple_germline_smlv_vcf = Inputs.resolvePurpleGermlineVcf(purple_dir, meta)
+            def purple_germline_smlv_vcf = sample.Inputs.resolvePurpleGermlineVcf(purple_dir, meta)
 
             return [meta_peach, purple_germline_smlv_vcf]
         }

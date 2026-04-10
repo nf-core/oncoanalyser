@@ -1,4 +1,5 @@
-import sample.FileKey
+package sample
+
 import samplesheet.FileType
 import samplesheet.SampleType
 import samplesheet.SequenceType
@@ -7,7 +8,7 @@ import java.nio.file.Path
 
 class Inputs {
 
-    public static Object getInput(Map meta, FileKey key) {
+    public static Object get(Map meta, FileKey key) {
 
         def result = []
 
@@ -26,18 +27,18 @@ class Inputs {
         return result
     }
 
-    public static boolean hasExistingInput(Map meta, FileKey key) {
-        return getInput(meta, key) != []
+    public static boolean hasExisting(Map meta, FileKey key) {
+        return get(meta, key) != []
     }
 
     public static Object preferUserProvidedInput(Object pipeline_path, Map meta, FileKey key) {
         // Allows the pipeline to start from downstream steps, e.g. running ORANGE from existing pipeline outputs
-        def user_provided_path = getInput(meta, key)
+        def user_provided_path = get(meta, key)
         return user_provided_path ?: pipeline_path
     }
 
     public static Object preferPipelineOutput(Object pipeline_path, Map meta, FileKey key) {
-        def user_provided_path = getInput(meta, key)
+        def user_provided_path = get(meta, key)
         return pipeline_path ?: user_provided_path
     }
 

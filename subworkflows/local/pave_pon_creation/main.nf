@@ -23,7 +23,7 @@ workflow PAVE_PON_CREATION {
     ch_pave_inputs = ch_sage_dir_somatic
         .map { meta, sage_dir ->
 
-            def (sage_vcf, sage_tbi) = Inputs.resolveSageVcfWithTbi(sage_dir, meta, samplesheet.SampleType.TUMOR)
+            def (sage_vcf, sage_tbi) = sample.Inputs.resolveSageVcfWithTbi(sage_dir, meta, samplesheet.SampleType.TUMOR)
 
             return [ sage_vcf, sage_tbi ]
         }

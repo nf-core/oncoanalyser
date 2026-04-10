@@ -34,10 +34,10 @@ workflow CUPPA_PREDICTION {
         .map { meta, isofox_dir, purple_dir, linx_annotation_dir, virusinterpreter_dir ->
 
             def inputs = [
-                Inputs.preferUserProvidedInput(isofox_dir, meta, sample.FileKey.ISOFOX_DIR),
-                Inputs.preferUserProvidedInput(purple_dir, meta, sample.FileKey.PURPLE_DIR),
-                Inputs.preferUserProvidedInput(linx_annotation_dir, meta, sample.FileKey.LINX_ANNO_DIR_TUMOR),
-                Inputs.preferUserProvidedInput(virusinterpreter_dir, meta, sample.FileKey.VIRUSINTERPRETER_DIR),
+                sample.Inputs.preferUserProvidedInput(isofox_dir, meta, sample.FileKey.ISOFOX_DIR),
+                sample.Inputs.preferUserProvidedInput(purple_dir, meta, sample.FileKey.PURPLE_DIR),
+                sample.Inputs.preferUserProvidedInput(linx_annotation_dir, meta, sample.FileKey.LINX_ANNO_DIR_TUMOR),
+                sample.Inputs.preferUserProvidedInput(virusinterpreter_dir, meta, sample.FileKey.VIRUSINTERPRETER_DIR),
             ]
 
             return [meta, *inputs]
@@ -60,8 +60,8 @@ workflow CUPPA_PREDICTION {
             //
             // (run exclusions currently done basis for presence of normal DNA)
 
-            def has_existing = Inputs.hasExistingInput(meta, sample.FileKey.CUPPA_DIR)
-            def has_normal_dna = Inputs.hasNormalDna(meta)
+            def has_existing = sample.Inputs.hasExisting(meta, sample.FileKey.CUPPA_DIR)
+            def has_normal_dna = sample.Inputs.hasNormalDna(meta)
 
             def has_runnable_inputs = isofox_dir || (purple_dir && linx_annotation_dir && virusinterpreter_dir && has_normal_dna)
 
@@ -76,9 +76,9 @@ workflow CUPPA_PREDICTION {
     ch_cuppa_inputs = ch_inputs_sorted.runnable
         .multiMap{ meta, isofox_dir, purple_dir, linx_annotation_dir, virusinterpreter_dir ->
 
-            def has_tumor_dna = Inputs.hasTumorDna(meta)
-            def has_normal_dna = Inputs.hasNormalDna(meta)
-            def has_tumor_rna = Inputs.hasTumorRna(meta)
+            def has_tumor_dna = sample.Inputs.hasTumorDna(meta)
+            def has_normal_dna = sample.Inputs.hasNormalDna(meta)
+            def has_tumor_rna = sample.Inputs.hasTumorRna(meta)
 
             def has_dna_inputs = (purple_dir && linx_annotation_dir && virusinterpreter_dir)
             def has_rna_inputs = isofox_dir
@@ -92,11 +92,11 @@ workflow CUPPA_PREDICTION {
             ]
 
             if(run_dna) {
-                meta_cuppa.sample_id = Inputs.getTumorDnaSampleName(meta)
+                meta_cuppa.sample_id = sample.Inputs.getTumorDnaSampleName(meta)
             }
 
             if(run_rna) {
-                meta_cuppa.sample_rna_id = Inputs.getTumorRnaSampleName(meta)
+                meta_cuppa.sample_rna_id = sample.Inputs.getTumorRnaSampleName(meta)
             }
 
             def categories
