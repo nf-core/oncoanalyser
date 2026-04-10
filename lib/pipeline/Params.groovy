@@ -1,10 +1,7 @@
-import pipeline.PipelineMode
-import pipeline.PurityEstimateMode
-import pipeline.SequencingType
-import pipeline.UmiSettings
+package pipeline
+
 import refdata.RefDataDefaultPaths
 import refdata.RefDataType
-import pipeline.SupportedPanel
 import refgenome.RefGenomeType
 import refgenome.RefGenomeVersion
 import refgenome.SupportedGenome
@@ -12,7 +9,7 @@ import util.Enums
 
 class Params {
 
-    public static void parseParams(Map params) {
+    public static void parse(Map params) {
 
         validateRunModes(params)
         validateSequencingType(params)

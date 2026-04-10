@@ -35,7 +35,7 @@ params.ref_data_genome_bwamem2_index = getGenomeAttribute('bwamem2_index')
 params.ref_data_genome_gridss_index  = getGenomeAttribute('gridss_index')
 params.ref_data_genome_star_index    = getGenomeAttribute('star_index')
 
-Params.parseParams(params)
+pipeline.Params.parse(params)
 
 /*
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -46,7 +46,7 @@ Params.parseParams(params)
 // NOTE(SW): required prior to workflow import
 
 if (workflow.stubRun && params.create_stub_placeholders) {
-    Params.createStubPlaceholders(params)
+    pipeline.Params.createStubPlaceholders(params)
 }
 
 /*
