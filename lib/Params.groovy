@@ -1,3 +1,6 @@
+import refgenome.RefGenomeType
+import refgenome.RefGenomeVersion
+import refgenome.SupportedGenome
 import util.Enums
 
 class Params {
@@ -85,7 +88,7 @@ class Params {
             )
         }
 
-        def supported_genome = RefGenome.SupportedGenome.fromString((String) params.genome)
+        def supported_genome = SupportedGenome.fromString((String) params.genome)
         params.genome_version = (supported_genome != null) ? supported_genome.getVersion().getNumericName() : null
         params.genome_type    = (supported_genome != null) ? supported_genome.getType() : null
 
@@ -98,27 +101,27 @@ class Params {
                 "",
                 "Provide argument --force_genome if you are using a custom genome,",
                 "or adjust the --genome argument to one of the supported genomes:",
-                createBulletedList(RefGenome.SupportedGenome.getNames())
+                createBulletedList(SupportedGenome.getNames())
             )
         }
 
         if (!params.genome_version) {
             error(
                 "For custom genomes, please provide one of the following values to arg --genome_version:",
-                createBulletedList(RefGenome.Version.getNumericNames())
+                createBulletedList(RefGenomeVersion.getNumericNames())
             )
         }
 
         if (!params.genome_type) {
             error(
                 "For custom genomes, please provide of the following values to arg --genome_type:",
-                createBulletedList(RefGenome.Type.getNames())
+                createBulletedList(RefGenomeType.getNames())
             )
         }
 
         if (params.containsKey('ref_data_genome_alt') && params.ref_data_genome_alt != null) {
 
-            if (params.genome_type != RefGenome.Type.ALT) {
+            if (params.genome_type != RefGenomeType.ALT) {
                 error("Using a reference genome without ALT contigs but found an .alt file")
             }
 
@@ -145,7 +148,7 @@ class Params {
         if(params.ref_data_hmf_data_path)
             return
 
-        def genome_version = RefGenome.Version.fromNumericName((String) params.genome_version)
+        def genome_version = RefGenomeVersion.fromNumericName((String) params.genome_version)
         params.ref_data_hmf_data_path = RefData.getDefaultHmfDataPath(genome_version)
     }
 
@@ -183,14 +186,14 @@ class Params {
             )
         }
 
-        def genome_version = RefGenome.Version.fromNumericName((String) params.genome_version)
+        def genome_version = RefGenomeVersion.fromNumericName((String) params.genome_version)
         if (!supported_panel.hasConfiguredVersion(params, genome_version))
         {
             error("panel(${params.panel}) has no built-in support for refGenomeVersion(${params.genome_version})")
         }
 
         if (!params.containsKey('ref_data_panel_data_path')) {
-            def ref_genome_version = RefGenome.Version.fromNumericName((String) params.genome_version)
+            def ref_genome_version = RefGenomeVersion.fromNumericName((String) params.genome_version)
             params.ref_data_panel_data_path = RefData.getDefaultPanelDataPath(supported_panel, ref_genome_version)
         }
     }
