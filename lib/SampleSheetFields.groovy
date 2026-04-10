@@ -1,3 +1,5 @@
+import util.Enums
+
 class SampleSheetFields {
 
     public static enum FileType {

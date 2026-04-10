@@ -1,3 +1,5 @@
+import util.Enums
+
 class Params {
 
     public static void parseParams(Map params) {

@@ -1,3 +1,5 @@
+import util.Enums
+
 class RunModes {
 
     public static final Integer DEFAULT_ISOFOX_READ_LENGTH_WTS = 151

@@ -1,3 +1,5 @@
+import util.Enums
+
 public enum RunStage {
 
     ALIGNMENT,

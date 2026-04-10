@@ -1,3 +1,5 @@
+package util
+
 class Enums {
 
     public static <T extends Enum<T>> List<String> getEnumNames(Class<T> enum_class) {

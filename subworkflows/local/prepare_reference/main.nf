@@ -375,7 +375,7 @@ def getConfigForPrepRefOnly(params, log) {
 
     def ref_data_types = params.ref_data_types
         .tokenize(',')
-        .collect { Enums.getValidatedEnumFromString(it, RefData.Type) }
+        .collect { util.Enums.getValidatedEnumFromString(it, RefData.Type) }
 
     if (
         ref_data_types.contains(RefData.Type.WGS) ||
