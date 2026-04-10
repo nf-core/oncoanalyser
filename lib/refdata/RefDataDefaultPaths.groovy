@@ -1,10 +1,11 @@
+package refdata
+
 import pipeline.SupportedPanel
 import refgenome.RefGenomeVersion
 
-class RefData {
+class RefDataDefaultPaths {
 
-
-    public static String getDefaultHmfDataPath(RefGenomeVersion version) {
+    public static String hmfData(RefGenomeVersion version) {
 
         return switch (version) {
             case RefGenomeVersion.V37 -> 'https://pub-cf6ba01919994c3cbd354659947f74d8.r2.dev/hmf_reference_data/hmftools/hmf_pipeline_resources.37_v2.3.0--2.tar.gz'
@@ -13,8 +14,7 @@ class RefData {
         }
     }
 
-
-    public static String getDefaultPanelDataPath(SupportedPanel panel, RefGenomeVersion version){
+    public static String panelData(SupportedPanel panel, RefGenomeVersion version){
 
         def path_map = [
             [(SupportedPanel.TSO500), (RefGenomeVersion.V37)]: 'https://pub-cf6ba01919994c3cbd354659947f74d8.r2.dev/hmf_reference_data/panels/hmf_panel_resources.tso500.37_v2.3.0--2.tar.gz',

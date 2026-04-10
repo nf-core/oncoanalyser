@@ -2,6 +2,7 @@ import pipeline.PipelineMode
 import pipeline.PurityEstimateMode
 import pipeline.SequencingType
 import pipeline.UmiSettings
+import refdata.RefDataDefaultPaths
 import refdata.RefDataType
 import pipeline.SupportedPanel
 import refgenome.RefGenomeType
@@ -155,7 +156,7 @@ class Params {
             return
 
         def genome_version = RefGenomeVersion.fromNumericName((String) params.genome_version)
-        params.ref_data_hmf_data_path = RefData.getDefaultHmfDataPath(genome_version)
+        params.ref_data_hmf_data_path = RefDataDefaultPaths.hmfData(genome_version)
     }
 
     private static void validatePanelDataAndSetDefaults(Map params){
@@ -200,7 +201,7 @@ class Params {
 
         if (!params.containsKey('ref_data_panel_data_path')) {
             def ref_genome_version = RefGenomeVersion.fromNumericName((String) params.genome_version)
-            params.ref_data_panel_data_path = RefData.getDefaultPanelDataPath(supported_panel, ref_genome_version)
+            params.ref_data_panel_data_path = RefDataDefaultPaths.panelData(supported_panel, ref_genome_version)
         }
     }
 
