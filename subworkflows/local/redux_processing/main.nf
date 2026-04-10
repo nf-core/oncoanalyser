@@ -143,8 +143,8 @@ workflow REDUX_PROCESSING {
     // channel: dir: [ meta, dir ]
     def createOutputChannels = { ch_redux_out_sample_type, ch_sample_type_skip ->
 
-        def placeholder_bam_bai = [[]] * PlaceholderChannels.N_ITEMS_BAM_BAI
-        def placeholder_dir = [[]] * PlaceholderChannels.N_ITEMS_TOOL_DIR
+        def placeholder_bam_bai = [[]] * channels.PlaceholderChannels.N_ITEMS_BAM_BAI
+        def placeholder_dir = [[]] * channels.PlaceholderChannels.N_ITEMS_TOOL_DIR
         def ch_output_skip = ch_sample_type_skip.map { meta -> [meta, *placeholder_bam_bai, *placeholder_dir] }
 
         return Channel.empty()

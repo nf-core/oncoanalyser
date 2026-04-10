@@ -142,8 +142,8 @@ workflow VIRUSBREAKEND_CALLING {
     ch_outputs = Channel.empty()
         .mix(
             WorkflowChannels.restoreMeta(VIRUSINTERPRETER.out.virusinterpreter_dir, ch_inputs),
-            PlaceholderChannels.toolDir(ch_virusinterpreter_inputs_sorted.skip),
-            PlaceholderChannels.toolDir(ch_inputs_sorted.skip),
+            channels.PlaceholderChannels.toolDir(ch_virusinterpreter_inputs_sorted.skip),
+            channels.PlaceholderChannels.toolDir(ch_inputs_sorted.skip),
         )
 
     emit:

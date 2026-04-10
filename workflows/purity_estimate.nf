@@ -79,9 +79,9 @@ workflow PURITY_ESTIMATE {
 
     } else {
 
-        ch_align_dna_tumor_out = PlaceholderChannels.bamBai(ch_inputs)
-        ch_align_dna_normal_out = PlaceholderChannels.bamBai(ch_inputs)
-        ch_align_dna_donor_out = PlaceholderChannels.bamBai(ch_inputs)
+        ch_align_dna_tumor_out = channels.PlaceholderChannels.bamBai(ch_inputs)
+        ch_align_dna_normal_out = channels.PlaceholderChannels.bamBai(ch_inputs)
+        ch_align_dna_donor_out = channels.PlaceholderChannels.bamBai(ch_inputs)
 
     }
 
@@ -131,13 +131,13 @@ workflow PURITY_ESTIMATE {
 
     } else {
 
-        ch_redux_dna_tumor_bam_out = PlaceholderChannels.bamBai(ch_inputs)
-        ch_redux_dna_normal_bam_out = PlaceholderChannels.bamBai(ch_inputs)
-        ch_redux_dna_donor_bam_out = PlaceholderChannels.bamBai(ch_inputs)
+        ch_redux_dna_tumor_bam_out = channels.PlaceholderChannels.bamBai(ch_inputs)
+        ch_redux_dna_normal_bam_out = channels.PlaceholderChannels.bamBai(ch_inputs)
+        ch_redux_dna_donor_bam_out = channels.PlaceholderChannels.bamBai(ch_inputs)
 
-        ch_redux_dna_tumor_dir_out = PlaceholderChannels.reduxTsvs(ch_inputs)
-        ch_redux_dna_normal_dir_out = PlaceholderChannels.reduxTsvs(ch_inputs)
-        ch_redux_dna_donor_dir_out = PlaceholderChannels.reduxTsvs(ch_inputs)
+        ch_redux_dna_tumor_dir_out = channels.PlaceholderChannels.reduxTsvs(ch_inputs)
+        ch_redux_dna_normal_dir_out = channels.PlaceholderChannels.reduxTsvs(ch_inputs)
+        ch_redux_dna_donor_dir_out = channels.PlaceholderChannels.reduxTsvs(ch_inputs)
 
     }
 
@@ -167,7 +167,7 @@ workflow PURITY_ESTIMATE {
 
     } else {
 
-        ch_amber_out = PlaceholderChannels.toolDir(ch_inputs)
+        ch_amber_out = channels.PlaceholderChannels.toolDir(ch_inputs)
 
     }
 
@@ -195,7 +195,7 @@ workflow PURITY_ESTIMATE {
 
     } else {
 
-        ch_cobalt_out = PlaceholderChannels.toolDir(ch_inputs)
+        ch_cobalt_out = channels.PlaceholderChannels.toolDir(ch_inputs)
 
     }
 
@@ -208,10 +208,10 @@ workflow PURITY_ESTIMATE {
 
         SAGE_APPEND(
             ch_inputs,
-            PlaceholderChannels.toolDir(ch_inputs),  // ch_purple_dir
+            channels.PlaceholderChannels.toolDir(ch_inputs),  // ch_purple_dir
             ch_redux_dna_tumor_bam_out,
             ch_redux_dna_tumor_dir_out,
-            PlaceholderChannels.bamBai(ch_inputs),  // ch_tumor_rna_bam
+            channels.PlaceholderChannels.bamBai(ch_inputs),  // ch_tumor_rna_bam
             ref_data.genome_fasta,
             ref_data.genome_version,
             ref_data.genome_fai,
@@ -226,7 +226,7 @@ workflow PURITY_ESTIMATE {
 
     } else {
 
-        ch_sage_somatic_append_out = PlaceholderChannels.toolDir(ch_inputs)
+        ch_sage_somatic_append_out = channels.PlaceholderChannels.toolDir(ch_inputs)
 
     }
 

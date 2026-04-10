@@ -1,3 +1,5 @@
+package channels
+
 class PlaceholderChannels {
 
     private static createPlaceholderChannel(ch, n_items) {

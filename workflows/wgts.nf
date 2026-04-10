@@ -114,10 +114,10 @@ workflow WGTS {
 
     } else {
 
-        ch_align_dna_tumor_out = PlaceholderChannels.bamBai(ch_inputs)
-        ch_align_dna_normal_out = PlaceholderChannels.bamBai(ch_inputs)
-        ch_align_dna_donor_out = PlaceholderChannels.bamBai(ch_inputs)
-        ch_align_rna_tumor_out = PlaceholderChannels.bamBai(ch_inputs)
+        ch_align_dna_tumor_out = channels.PlaceholderChannels.bamBai(ch_inputs)
+        ch_align_dna_normal_out = channels.PlaceholderChannels.bamBai(ch_inputs)
+        ch_align_dna_donor_out = channels.PlaceholderChannels.bamBai(ch_inputs)
+        ch_align_rna_tumor_out = channels.PlaceholderChannels.bamBai(ch_inputs)
 
     }
 
@@ -167,13 +167,13 @@ workflow WGTS {
 
     } else {
 
-        ch_redux_dna_tumor_bam_out = PlaceholderChannels.bamBai(ch_inputs)
-        ch_redux_dna_normal_bam_out = PlaceholderChannels.bamBai(ch_inputs)
-        ch_redux_dna_donor_bam_out = PlaceholderChannels.bamBai(ch_inputs)
+        ch_redux_dna_tumor_bam_out = channels.PlaceholderChannels.bamBai(ch_inputs)
+        ch_redux_dna_normal_bam_out = channels.PlaceholderChannels.bamBai(ch_inputs)
+        ch_redux_dna_donor_bam_out = channels.PlaceholderChannels.bamBai(ch_inputs)
 
-        ch_redux_dna_tumor_dir_out = PlaceholderChannels.reduxTsvs(ch_inputs)
-        ch_redux_dna_normal_dir_out = PlaceholderChannels.reduxTsvs(ch_inputs)
-        ch_redux_dna_donor_dir_out = PlaceholderChannels.reduxTsvs(ch_inputs)
+        ch_redux_dna_tumor_dir_out = channels.PlaceholderChannels.reduxTsvs(ch_inputs)
+        ch_redux_dna_normal_dir_out = channels.PlaceholderChannels.reduxTsvs(ch_inputs)
+        ch_redux_dna_donor_dir_out = channels.PlaceholderChannels.reduxTsvs(ch_inputs)
 
     }
 
@@ -203,8 +203,8 @@ workflow WGTS {
 
     } else {
 
-        ch_bamtools_somatic_out = PlaceholderChannels.toolDir(ch_inputs)
-        ch_bamtools_germline_out = PlaceholderChannels.toolDir(ch_inputs)
+        ch_bamtools_somatic_out = channels.PlaceholderChannels.toolDir(ch_inputs)
+        ch_bamtools_germline_out = channels.PlaceholderChannels.toolDir(ch_inputs)
 
     }
 
@@ -244,7 +244,7 @@ workflow WGTS {
 
     } else {
 
-        ch_isofox_out = PlaceholderChannels.toolDir(ch_inputs)
+        ch_isofox_out = channels.PlaceholderChannels.toolDir(ch_inputs)
 
     }
 
@@ -272,7 +272,7 @@ workflow WGTS {
 
     } else {
 
-        ch_amber_out = PlaceholderChannels.toolDir(ch_inputs)
+        ch_amber_out = channels.PlaceholderChannels.toolDir(ch_inputs)
 
     }
 
@@ -300,7 +300,7 @@ workflow WGTS {
 
     } else {
 
-        ch_cobalt_out = PlaceholderChannels.toolDir(ch_inputs)
+        ch_cobalt_out = channels.PlaceholderChannels.toolDir(ch_inputs)
 
     }
 
@@ -336,7 +336,7 @@ workflow WGTS {
 
     } else {
 
-        ch_esvee_out = PlaceholderChannels.toolDir(ch_inputs)
+        ch_esvee_out = channels.PlaceholderChannels.toolDir(ch_inputs)
 
     }
 
@@ -380,8 +380,8 @@ workflow WGTS {
 
     } else {
 
-        ch_sage_germline_dir_out = PlaceholderChannels.toolDir(ch_inputs)
-        ch_sage_somatic_dir_out = PlaceholderChannels.toolDir(ch_inputs)
+        ch_sage_germline_dir_out = channels.PlaceholderChannels.toolDir(ch_inputs)
+        ch_sage_somatic_dir_out = channels.PlaceholderChannels.toolDir(ch_inputs)
 
     }
 
@@ -419,8 +419,8 @@ workflow WGTS {
 
     } else {
 
-        ch_pave_germline_out = PlaceholderChannels.toolDir(ch_inputs)
-        ch_pave_somatic_out = PlaceholderChannels.toolDir(ch_inputs)
+        ch_pave_germline_out = channels.PlaceholderChannels.toolDir(ch_inputs)
+        ch_pave_somatic_out = channels.PlaceholderChannels.toolDir(ch_inputs)
 
     }
 
@@ -438,7 +438,7 @@ workflow WGTS {
             ch_esvee_out,
             ch_pave_somatic_out,
             ch_pave_germline_out,
-            PlaceholderChannels.toolDir(ch_inputs), // redux_dir_tumor
+            channels.PlaceholderChannels.toolDir(ch_inputs), // redux_dir_tumor
             ref_data.genome_fasta,
             ref_data.genome_version,
             ref_data.genome_fai,
@@ -459,7 +459,7 @@ workflow WGTS {
 
     } else {
 
-        ch_purple_out = PlaceholderChannels.toolDir(ch_inputs)
+        ch_purple_out = channels.PlaceholderChannels.toolDir(ch_inputs)
 
     }
 
@@ -491,7 +491,7 @@ workflow WGTS {
 
     } else {
 
-        ch_qsee_out = PlaceholderChannels.toolDir(ch_inputs)
+        ch_qsee_out = channels.PlaceholderChannels.toolDir(ch_inputs)
 
     }
 
@@ -506,8 +506,8 @@ workflow WGTS {
         SAGE_APPEND(
             ch_inputs,
             ch_purple_out,
-            PlaceholderChannels.bamBai(ch_inputs),  // ch_tumor_redux_bam
-            PlaceholderChannels.reduxTsvs(ch_inputs),  // ch_tumor_redux_tsv
+            channels.PlaceholderChannels.bamBai(ch_inputs),  // ch_tumor_redux_bam
+            channels.PlaceholderChannels.reduxTsvs(ch_inputs),  // ch_tumor_redux_tsv
             ch_align_rna_tumor_out,
             ref_data.genome_fasta,
             ref_data.genome_version,
@@ -525,8 +525,8 @@ workflow WGTS {
 
     } else {
 
-        ch_sage_somatic_append_out = PlaceholderChannels.toolDir(ch_inputs)
-        ch_sage_germline_append_out = PlaceholderChannels.toolDir(ch_inputs)
+        ch_sage_somatic_append_out = channels.PlaceholderChannels.toolDir(ch_inputs)
+        ch_sage_germline_append_out = channels.PlaceholderChannels.toolDir(ch_inputs)
 
     }
 
@@ -582,8 +582,8 @@ workflow WGTS {
 
     } else {
 
-        ch_linx_somatic_out = PlaceholderChannels.toolDir(ch_inputs)
-        ch_linx_germline_out = PlaceholderChannels.toolDir(ch_inputs)
+        ch_linx_somatic_out = channels.PlaceholderChannels.toolDir(ch_inputs)
+        ch_linx_germline_out = channels.PlaceholderChannels.toolDir(ch_inputs)
 
     }
 
@@ -597,9 +597,9 @@ workflow WGTS {
         LINX_PLOTTING(
             ch_inputs,
             ch_linx_somatic_out,
-            PlaceholderChannels.toolDir(ch_inputs),  // ch_amber
-            PlaceholderChannels.toolDir(ch_inputs),  // ch_cobalt
-            PlaceholderChannels.toolDir(ch_inputs),  // ch_purple
+            channels.PlaceholderChannels.toolDir(ch_inputs),  // ch_amber
+            channels.PlaceholderChannels.toolDir(ch_inputs),  // ch_cobalt
+            channels.PlaceholderChannels.toolDir(ch_inputs),  // ch_purple
             ref_data.genome_version,
             hmf_data.ensembl_data_resources,
         )
@@ -610,7 +610,7 @@ workflow WGTS {
 
     } else {
 
-        ch_linx_somatic_visualiser_dir_out = PlaceholderChannels.toolDir(ch_inputs)
+        ch_linx_somatic_visualiser_dir_out = channels.PlaceholderChannels.toolDir(ch_inputs)
 
     }
 
@@ -652,7 +652,7 @@ workflow WGTS {
 
     } else {
 
-        ch_sigs_out = PlaceholderChannels.toolDir(ch_inputs)
+        ch_sigs_out = channels.PlaceholderChannels.toolDir(ch_inputs)
 
     }
 
@@ -677,7 +677,7 @@ workflow WGTS {
 
     } else {
 
-        ch_chord_out = PlaceholderChannels.toolDir(ch_inputs)
+        ch_chord_out = channels.PlaceholderChannels.toolDir(ch_inputs)
 
     }
 
@@ -708,7 +708,7 @@ workflow WGTS {
 
     } else {
 
-        ch_lilac_out = PlaceholderChannels.toolDir(ch_inputs)
+        ch_lilac_out = channels.PlaceholderChannels.toolDir(ch_inputs)
 
     }
 
@@ -762,7 +762,7 @@ workflow WGTS {
 
     } else {
 
-        ch_virusinterpreter_out = PlaceholderChannels.toolDir(ch_inputs)
+        ch_virusinterpreter_out = channels.PlaceholderChannels.toolDir(ch_inputs)
 
     }
 
@@ -787,7 +787,7 @@ workflow WGTS {
 
     } else {
 
-        ch_peach_out = PlaceholderChannels.toolDir(ch_inputs)
+        ch_peach_out = channels.PlaceholderChannels.toolDir(ch_inputs)
 
     }
 
@@ -841,7 +841,7 @@ workflow WGTS {
 
     } else {
 
-        ch_cuppa_out = PlaceholderChannels.toolDir(ch_inputs)
+        ch_cuppa_out = channels.PlaceholderChannels.toolDir(ch_inputs)
 
     }
 

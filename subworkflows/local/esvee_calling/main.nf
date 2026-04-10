@@ -102,7 +102,7 @@ workflow ESVEE_CALLING {
     ch_esvee_out = Channel.empty()
         .mix(
             WorkflowChannels.restoreMeta(ESVEE.out.esvee_dir, ch_inputs),
-            PlaceholderChannels.toolDir(ch_inputs_sorted.skip),
+            channels.PlaceholderChannels.toolDir(ch_inputs_sorted.skip),
         )
 
     emit:

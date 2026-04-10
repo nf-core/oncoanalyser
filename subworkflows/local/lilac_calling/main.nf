@@ -108,7 +108,7 @@ workflow LILAC_CALLING {
     ch_outputs = Channel.empty()
         .mix(
             WorkflowChannels.restoreMeta(LILAC.out.lilac_dir, ch_inputs),
-            PlaceholderChannels.toolDir(ch_dna_inputs_sorted.skip),
+            channels.PlaceholderChannels.toolDir(ch_dna_inputs_sorted.skip),
         )
 
     emit:

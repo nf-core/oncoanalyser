@@ -131,7 +131,7 @@ workflow CUPPA_PREDICTION {
     ch_outputs = Channel.empty()
         .mix(
             WorkflowChannels.restoreMeta(CUPPA.out.cuppa_dir, ch_inputs),
-            PlaceholderChannels.toolDir(ch_inputs_sorted.skip),
+            channels.PlaceholderChannels.toolDir(ch_inputs_sorted.skip),
         )
 
     emit:

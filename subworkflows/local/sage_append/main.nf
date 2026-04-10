@@ -220,15 +220,15 @@ workflow SAGE_APPEND {
     ch_somatic_dir = Channel.empty()
         .mix(
             WorkflowChannels.restoreMeta(SAGE_APPEND_SOMATIC.out.sage_append_dir, ch_inputs),
-            PlaceholderChannels.toolDir(ch_inputs_somatic_sorted.skip),
-            PlaceholderChannels.toolDir(ch_inputs_sorted.skip),
+            channels.PlaceholderChannels.toolDir(ch_inputs_somatic_sorted.skip),
+            channels.PlaceholderChannels.toolDir(ch_inputs_sorted.skip),
         )
 
     ch_germline_dir = Channel.empty()
         .mix(
             WorkflowChannels.restoreMeta(SAGE_APPEND_GERMLINE.out.sage_append_dir, ch_inputs),
-            PlaceholderChannels.toolDir(ch_inputs_germline_sorted.skip),
-            PlaceholderChannels.toolDir(ch_inputs_sorted.skip),
+            channels.PlaceholderChannels.toolDir(ch_inputs_germline_sorted.skip),
+            channels.PlaceholderChannels.toolDir(ch_inputs_sorted.skip),
         )
 
     emit:

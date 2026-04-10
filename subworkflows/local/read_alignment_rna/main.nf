@@ -199,7 +199,7 @@ workflow READ_ALIGNMENT_RNA {
     ch_bam_out = Channel.empty()
         .mix(
             ch_bams_ready,
-            PlaceholderChannels.bamBai(ch_inputs_sorted.skip),
+            channels.PlaceholderChannels.bamBai(ch_inputs_sorted.skip),
         )
 
     emit:

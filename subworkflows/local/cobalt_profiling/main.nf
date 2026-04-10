@@ -94,7 +94,7 @@ workflow COBALT_PROFILING {
     ch_outputs = Channel.empty()
         .mix(
             WorkflowChannels.restoreMeta(COBALT.out.cobalt_dir, ch_inputs),
-            PlaceholderChannels.toolDir(ch_inputs_sorted.skip),
+            channels.PlaceholderChannels.toolDir(ch_inputs_sorted.skip),
         )
 
     emit:

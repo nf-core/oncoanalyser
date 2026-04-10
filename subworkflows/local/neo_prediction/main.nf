@@ -154,7 +154,7 @@ workflow NEO_PREDICTION {
     ch_annotate_fusions_out = Channel.empty()
         .mix(
             WorkflowChannels.restoreMeta(NEO_ANNOTATE_FUSIONS.out.annotated_fusions, ch_inputs),
-            PlaceholderChannels.toolDir(ch_isofox_inputs_sorted.skip),
+            channels.PlaceholderChannels.toolDir(ch_isofox_inputs_sorted.skip),
         )
 
 

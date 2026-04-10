@@ -102,7 +102,7 @@ workflow PANEL_RESOURCE_CREATION {
         ch_inputs,
         ch_align_dna_tumor_out,
         ch_align_dna_normal_out,
-        PlaceholderChannels.bamBai(ch_inputs),  // ch_dna_donor
+        channels.PlaceholderChannels.bamBai(ch_inputs),  // ch_dna_donor
         ref_data.genome_fasta,
         ref_data.genome_version,
         ref_data.genome_fai,
@@ -163,7 +163,7 @@ workflow PANEL_RESOURCE_CREATION {
         ch_inputs,
         ch_redux_dna_tumor_bam_out,
         ch_redux_dna_normal_bam_out,
-        PlaceholderChannels.bamBai(ch_inputs),  // ch_donor_bam
+        channels.PlaceholderChannels.bamBai(ch_inputs),  // ch_donor_bam
         ref_data.genome_version,
         hmf_data.heterozygous_sites,
         target_regions_bed,
@@ -201,10 +201,10 @@ workflow PANEL_RESOURCE_CREATION {
         ch_inputs,
         ch_redux_dna_tumor_bam_out,
         ch_redux_dna_normal_bam_out,
-        PlaceholderChannels.bamBai(ch_inputs),  // ch_donor_bam
+        channels.PlaceholderChannels.bamBai(ch_inputs),  // ch_donor_bam
         ch_redux_dna_tumor_dir_out,
         ch_redux_dna_normal_dir_out,
-        PlaceholderChannels.reduxTsvs(ch_inputs),  // ch_donor_tsv
+        channels.PlaceholderChannels.reduxTsvs(ch_inputs),  // ch_donor_tsv
         ref_data.genome_fasta,
         ref_data.genome_version,
         ref_data.genome_fai,

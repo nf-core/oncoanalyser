@@ -71,7 +71,7 @@ workflow PEACH_CALLING {
     ch_outputs = Channel.empty()
         .mix(
             WorkflowChannels.restoreMeta(PEACH.out.peach_dir, ch_inputs),
-            PlaceholderChannels.toolDir(ch_inputs_sorted.skip),
+            channels.PlaceholderChannels.toolDir(ch_inputs_sorted.skip),
         )
 
     emit:

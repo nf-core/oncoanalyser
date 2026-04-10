@@ -108,7 +108,7 @@ workflow QSEE_METRICS {
     ch_outputs = Channel.empty()
         .mix(
             WorkflowChannels.restoreMeta(QSEE.out.qsee_dir, ch_inputs),
-            PlaceholderChannels.toolDir(ch_inputs_sorted.skip),
+            channels.PlaceholderChannels.toolDir(ch_inputs_sorted.skip),
         )
 
     emit:

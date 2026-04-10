@@ -116,7 +116,7 @@ workflow LINX_PLOTTING {
     ch_visualiser_dir_out = Channel.empty()
         .mix(
             WorkflowChannels.restoreMeta(LINX_VISUALISER.out.plots, ch_inputs),
-            PlaceholderChannels.toolDir(ch_inputs_sorted.skip),
+            channels.PlaceholderChannels.toolDir(ch_inputs_sorted.skip),
         )
 
     emit:

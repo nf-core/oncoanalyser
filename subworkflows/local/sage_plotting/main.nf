@@ -126,7 +126,7 @@ workflow SAGE_PLOTTING {
     ch_visualiser_dir_out = Channel.empty()
         .mix(
             WorkflowChannels.restoreMeta(SAGE_VISUALISER.out.sage_vis_dir, ch_inputs),
-            PlaceholderChannels.toolDir(ch_inputs_sorted.skip),
+            channels.PlaceholderChannels.toolDir(ch_inputs_sorted.skip),
         )
 
     emit:
