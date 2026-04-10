@@ -2,25 +2,6 @@ import refgenome.RefGenomeVersion
 
 class RefData {
 
-    public static enum Type {
-        // Compound types
-        TARGETED,
-        WGS,
-        WTS,
-
-        // Individual types
-        BWAMEM2_INDEX,
-        DICT,
-        DNA_ALIGNMENT,
-        FAI,
-        FASTA,
-        GRIDSS_INDEX,
-        HMFTOOLS,
-        IMG,
-        PANEL,
-        RNA_ALIGNMENT,
-        STAR_INDEX,
-    }
 
     public static String getDefaultHmfDataPath(RefGenomeVersion version) {
 

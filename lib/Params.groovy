@@ -2,6 +2,7 @@ import pipeline.PipelineMode
 import pipeline.PurityEstimateMode
 import pipeline.SequencingType
 import pipeline.UmiSettings
+import refdata.RefDataType
 import refgenome.RefGenomeType
 import refgenome.RefGenomeVersion
 import refgenome.SupportedGenome
@@ -78,7 +79,7 @@ class Params {
             error(
                 "CLI argument --ref_data_types is required for mode prepare_reference.",
                 "Please specify one or more of the below valid values (separated by commas)",
-                createBulletedList(Enums.getEnumNames(RefData.Type)),
+                createBulletedList(Enums.getEnumNames(RefDataType)),
             )
         }
     }

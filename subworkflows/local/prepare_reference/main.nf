@@ -375,41 +375,41 @@ def getConfigForPrepRefOnly(params, log) {
 
     def ref_data_types = params.ref_data_types
         .tokenize(',')
-        .collect { util.Enums.getValidatedEnumFromString(it, RefData.Type) }
+        .collect { util.Enums.getValidatedEnumFromString(it, refdata.RefDataType) }
 
     if (
-        ref_data_types.contains(RefData.Type.WGS) ||
-        ref_data_types.contains(RefData.Type.WTS) ||
-        ref_data_types.contains(RefData.Type.TARGETED)
+        ref_data_types.contains(refdata.RefDataType.WGS) ||
+        ref_data_types.contains(refdata.RefDataType.WTS) ||
+        ref_data_types.contains(refdata.RefDataType.TARGETED)
     ) {
         ref_data_types += [
-            RefData.Type.FASTA,
-            RefData.Type.FAI,
-            RefData.Type.DICT,
-            RefData.Type.IMG,
-            RefData.Type.HMFTOOLS
+            refdata.RefDataType.FASTA,
+            refdata.RefDataType.FAI,
+            refdata.RefDataType.DICT,
+            refdata.RefDataType.IMG,
+            refdata.RefDataType.HMFTOOLS
         ]
     }
 
-    if (ref_data_types.contains(RefData.Type.WGS)) {
-        ref_data_types += [RefData.Type.GRIDSS_INDEX]
+    if (ref_data_types.contains(refdata.RefDataType.WGS)) {
+        ref_data_types += [refdata.RefDataType.GRIDSS_INDEX]
     }
 
-    if (ref_data_types.contains(RefData.Type.TARGETED)) {
-        ref_data_types += [RefData.Type.PANEL]
+    if (ref_data_types.contains(refdata.RefDataType.TARGETED)) {
+        ref_data_types += [refdata.RefDataType.PANEL]
     }
 
-    def require_fasta = ref_data_types.contains(RefData.Type.FASTA)
-    def require_fai = ref_data_types.contains(RefData.Type.FAI)
-    def require_dict = ref_data_types.contains(RefData.Type.DICT)
-    def require_img = ref_data_types.contains(RefData.Type.IMG)
+    def require_fasta = ref_data_types.contains(refdata.RefDataType.FASTA)
+    def require_fai = ref_data_types.contains(refdata.RefDataType.FAI)
+    def require_dict = ref_data_types.contains(refdata.RefDataType.DICT)
+    def require_img = ref_data_types.contains(refdata.RefDataType.IMG)
 
-    def require_bwamem2_index = ref_data_types.contains(RefData.Type.BWAMEM2_INDEX) || ref_data_types.contains(RefData.Type.DNA_ALIGNMENT)
-    def require_star_index = ref_data_types.contains(RefData.Type.STAR_INDEX) || ref_data_types.contains(RefData.Type.RNA_ALIGNMENT)
+    def require_bwamem2_index = ref_data_types.contains(refdata.RefDataType.BWAMEM2_INDEX) || ref_data_types.contains(refdata.RefDataType.DNA_ALIGNMENT)
+    def require_star_index = ref_data_types.contains(refdata.RefDataType.STAR_INDEX) || ref_data_types.contains(refdata.RefDataType.RNA_ALIGNMENT)
 
-    def require_gridss_index = ref_data_types.contains(RefData.Type.GRIDSS_INDEX)
-    def require_hmftools_data = ref_data_types.contains(RefData.Type.HMFTOOLS)
-    def require_panel_data = ref_data_types.contains(RefData.Type.PANEL)
+    def require_gridss_index = ref_data_types.contains(refdata.RefDataType.GRIDSS_INDEX)
+    def require_hmftools_data = ref_data_types.contains(refdata.RefDataType.HMFTOOLS)
+    def require_panel_data = ref_data_types.contains(refdata.RefDataType.PANEL)
 
     if (require_panel_data) {
         if (params.panel == null) {
