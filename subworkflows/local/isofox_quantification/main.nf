@@ -88,7 +88,7 @@ workflow ISOFOX_QUANTIFICATION {
     // channel: [ meta, isofox_dir ]
     ch_outputs = Channel.empty()
         .mix(
-            WorkflowChannels.restoreMeta(ISOFOX.out.isofox_dir, ch_inputs),
+            channels.WorkflowChannels.restoreMeta(ISOFOX.out.isofox_dir, ch_inputs),
             channels.PlaceholderChannels.toolDir(ch_inputs_sorted.skip),
         )
 

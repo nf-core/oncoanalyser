@@ -102,13 +102,13 @@ workflow BAMTOOLS_METRICS {
     // channel: [ meta, metrics_dir ]
     ch_somatic_metrics_dir = Channel.empty()
         .mix(
-            WorkflowChannels.restoreMeta(ch_bamtools_out.tumor, ch_inputs),
+            channels.WorkflowChannels.restoreMeta(ch_bamtools_out.tumor, ch_inputs),
             channels.PlaceholderChannels.toolDir(ch_inputs_tumor_sorted.skip),
         )
 
     ch_germline_metrics_dir = Channel.empty()
         .mix(
-            WorkflowChannels.restoreMeta(ch_bamtools_out.normal, ch_inputs),
+            channels.WorkflowChannels.restoreMeta(ch_bamtools_out.normal, ch_inputs),
             channels.PlaceholderChannels.toolDir(ch_inputs_normal_sorted.skip),
         )
 

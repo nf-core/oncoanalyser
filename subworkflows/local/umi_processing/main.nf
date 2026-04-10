@@ -2,22 +2,18 @@
 // Align DNA reads
 //
 
-include { BWAMEM2_ALIGN  } from '../../../modules/local/bwa-mem2/mem/main'
-include { FASTP          } from '../../../modules/local/fastp/main'
+include { FASTQ_TOOLS } from '../../../modules/local/fastq-tools/main'
 
-workflow READ_ALIGNMENT_DNA {
+workflow UMI_PROCESSING {
     take:
     // Sample data
     ch_inputs            // channel: [mandatory] [ meta ]
 
     // Reference data
-    genome_fasta         // channel: [mandatory] /path/to/genome_fasta
-    genome_bwamem2_index // channel: [mandatory] /path/to/genome_bwa-mem2_index_dir/
+    known_umis           // channel: [mandatory] /path/to/known_umis_file/
 
     // Params
-    max_fastq_records    // numeric: [optional]  max number of FASTQ records per split
-    umi_enable           // boolean: [mandatory] enable UMI processing
-    umi_location         //  string: [optional]  fastp UMI location argument (--umi_loc)
+    umi_location         // string:  [optional]  fastp UMI location argument (--umi_loc)
     umi_length           // numeric: [optional]  fastp UMI length argument (--umi_len)
     umi_skip             // numeric: [optional]  fastp UMI skip argument (--umi_skip)
 
@@ -25,6 +21,23 @@ workflow READ_ALIGNMENT_DNA {
     // Channel for version.yml files
     // channel: [ versions.yml ]
     ch_versions = Channel.empty()
+
+    ch_inputs.map { meta ->
+
+        def meta_sample_entries = [
+            tumor: Inputs.getTumorDnaSample(meta),
+            normal: Inputs.getNormalDnaSample(meta),
+            donor: Inputs.getDonorDnaSample(meta),
+            rna: Inputs.getTumorRnaSample(meta),
+        ]
+
+        meta_sample_entries.collect { sample_type, meta_sample ->
+            if(meta_sample.containsKey(samplesheet.FileType.BAM){}
+
+        }
+    }
+
+
 
     // Sort inputs, separate by tumor and normal
     // channel: [ meta ]
@@ -49,6 +62,13 @@ workflow READ_ALIGNMENT_DNA {
             skip: true
         }
 
+    ch_inputs_rna_sorted = ch_inputs
+        .branch { meta ->
+            def has_existing = Inputs.hasExistingInput(meta, Inputs.KEY.BAM_RNA_TUMOR)
+            runnable: Inputs.hasTumorRnaFastq(meta) && !has_existing
+            skip: true
+        }
+
     // Create FASTQ input channel
     // channel: [ meta_fastq, fastq_fwd, fastq_rev ]
     ch_fastq_inputs = Channel.empty()
@@ -56,6 +76,7 @@ workflow READ_ALIGNMENT_DNA {
             ch_inputs_tumor_sorted.runnable.map { meta -> [meta, Inputs.getTumorDnaSample(meta), 'tumor'] },
             ch_inputs_normal_sorted.runnable.map { meta -> [meta, Inputs.getNormalDnaSample(meta), 'normal'] },
             ch_inputs_donor_sorted.runnable.map { meta -> [meta, Inputs.getDonorDnaSample(meta), 'donor'] },
+            ch_inputs_rna_sorted.runnable.map { meta -> [meta, Inputs.getTumorRnaSample(meta), 'rna'] },
         )
         .flatMap { meta, meta_sample, sample_type ->
             meta_sample
@@ -79,30 +100,58 @@ workflow READ_ALIGNMENT_DNA {
         }
 
     //
+    // MODULE: fastp, fastq-tools
+    //
+    // UMI processing
+    ch_fastq_umi_processed = Channel.empty()
+    if(umi_enable) {
+
+        def maybe_supported_panel = RefData.SupportedPanel.fromString(params.panel)
+
+        if (maybe_supported_panel == RefData.SupportedPanel.MSK) {
+            FASTQ_TOOLS_UMI_PROCESSING(
+                ch_fastq_inputs,
+                known_umis,
+            )
+
+            ch_fastq_umi_processed = FASTQ_TOOLS_UMI_PROCESSING.out.fastq
+            ch_versions = ch_versions.mix(FASTQ_TOOLS_UMI_PROCESSING.out.versions)
+
+        } else {
+            FASTP_UMI_PROCESSING(
+                ch_fastq_inputs,
+                -1 // max_fastq_records
+                umi_location,
+                umi_length,
+                umi_skip,
+            )
+
+            ch_fastq_umi_processed = FASTP_UMI_PROCESSING.out.fastq
+            ch_versions = ch_versions.mix(FASTP_UMI_PROCESSING.out.versions)
+        }
+
+    } else {
+        ch_fastq_umi_processed = ch_fastq_inputs
+    }
+
+    //
     // MODULE: fastp
     //
     // Split FASTQ into chunks if requested for distributed processing
-    // channel: [ meta_fastq_ready, fastq_fwd, fastq_fwd ]
     ch_fastqs_ready = Channel.empty()
-    if (max_fastq_records > 0 || umi_enable) {
-
-        // Run process
-        FASTP(
-            ch_fastq_inputs,
-            max_fastq_records,
-            umi_location,
-            umi_length,
-            umi_skip,
-        )
-
-        ch_versions = ch_versions.mix(FASTP.out.versions)
-
-    }
-
-    // Now prepare according to FASTQs splitting
     if (max_fastq_records > 0) {
 
-        ch_fastqs_ready = FASTP.out.fastq
+        FASTP_FASTQ_SPLITTING(
+            ch_fastq_umi_processed,
+            max_fastq_records,
+            "",
+            0,
+            -1,
+        )
+
+        ch_versions = ch_versions.mix(FASTP_UMI_PROCESSING.out.versions)
+
+        ch_fastqs_ready = FASTP_FASTQ_SPLITTING.out.fastq
             .flatMap { meta_fastq, reads_fwd, reads_rev ->
 
                 def data = [reads_fwd, reads_rev]
@@ -128,9 +177,8 @@ workflow READ_ALIGNMENT_DNA {
             }
 
     } else {
-
         // Select appropriate source
-        ch_fastq_source = umi_enable ? FASTP.out.fastq : ch_fastq_inputs
+        ch_fastq_source = umi_enable ? FASTP_FASTQ_SPLITTING.out.fastq : ch_fastq_inputs
 
         ch_fastqs_ready = ch_fastq_source
             .map { meta_fastq, fastq_fwd, fastq_rev ->
@@ -143,7 +191,56 @@ workflow READ_ALIGNMENT_DNA {
                 return [meta_fastq_ready, fastq_fwd, fastq_rev]
             }
 
+        ch_fastqs_ready = ch_fastq_umi_processed
     }
+
+//     // Now prepare according to FASTQs splitting
+//     // channel: [ meta_fastq_ready, fastq_fwd, fastq_fwd ]
+//     ch_fastqs_ready = Channel.empty()
+//     if (max_fastq_records > 0) {
+//
+//         ch_fastqs_ready = FASTP_FASTQ_SPLITTING.out.fastq
+//             .flatMap { meta_fastq, reads_fwd, reads_rev ->
+//
+//                 def data = [reads_fwd, reads_rev]
+//                     .transpose()
+//                     .collect { fwd, rev ->
+//
+//                         def split_fwd = fwd.name.replaceAll('\\..+$', '')
+//                         def split_rev = rev.name.replaceAll('\\..+$', '')
+//
+//                         assert split_fwd == split_rev
+//
+//                         // NOTE(SW): split allows meta_fastq_ready to be unique, which is required during reunite below
+//                         def meta_fastq_ready = [
+//                             *:meta_fastq,
+//                             id: "${meta_fastq.id}_${split_fwd}",
+//                             split: split_fwd,
+//                         ]
+//
+//                         return [meta_fastq_ready, fwd, rev]
+//                     }
+//
+//                 return data
+//             }
+//
+//     } else {
+//
+//         // Select appropriate source
+//         ch_fastq_source = umi_enable ? FASTP_FASTQ_SPLITTING.out.fastq : ch_fastq_inputs
+//
+//         ch_fastqs_ready = ch_fastq_source
+//             .map { meta_fastq, fastq_fwd, fastq_rev ->
+//
+//                 def meta_fastq_ready = [
+//                     *:meta_fastq,
+//                     split: null,
+//                 ]
+//
+//                 return [meta_fastq_ready, fastq_fwd, fastq_rev]
+//             }
+//
+//     }
 
     //
     // MODULE: BWA-MEM2

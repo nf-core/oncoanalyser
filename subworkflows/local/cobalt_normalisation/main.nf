@@ -22,7 +22,7 @@ workflow COBALT_NORMALISATION {
 
     // Create process input channel
     // channel: [ [amber_dir, ...], [cobalt_dir, ...] ]
-    ch_cobalt_inputs = WorkflowChannels.groupByMeta(
+    ch_cobalt_inputs = channels.WorkflowChannels.groupByMeta(
         ch_amber,
         ch_cobalt,
     )

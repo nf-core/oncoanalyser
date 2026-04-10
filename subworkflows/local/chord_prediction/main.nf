@@ -81,7 +81,7 @@ workflow CHORD_PREDICTION {
     // channel: [ meta, chord_dir ]
     ch_outputs = Channel.empty()
         .mix(
-            WorkflowChannels.restoreMeta(CHORD.out.chord_dir, ch_inputs),
+            channels.WorkflowChannels.restoreMeta(CHORD.out.chord_dir, ch_inputs),
             channels.PlaceholderChannels.toolDir(ch_inputs_sorted.skip),
         )
 

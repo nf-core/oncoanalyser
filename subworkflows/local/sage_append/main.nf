@@ -36,7 +36,7 @@ workflow SAGE_APPEND {
     // Select input sources and sort
     // channel: runnable: { meta, tumor_dna_bam, tumor_dna_bai, [tumor_dna_redux_tsv, ...], tumor_rna_bam, tumor_rna_bai, purple_dir }
     // channel: skip: [ meta ]
-    ch_inputs_sorted = WorkflowChannels.groupByMeta(
+    ch_inputs_sorted = channels.WorkflowChannels.groupByMeta(
         flatten_mode: 'singletons_only',
         ch_tumor_dna_bam,
         ch_tumor_dna_tsv,
@@ -219,14 +219,14 @@ workflow SAGE_APPEND {
     // channel: [ meta, sage_append_dir ]
     ch_somatic_dir = Channel.empty()
         .mix(
-            WorkflowChannels.restoreMeta(SAGE_APPEND_SOMATIC.out.sage_append_dir, ch_inputs),
+            channels.WorkflowChannels.restoreMeta(SAGE_APPEND_SOMATIC.out.sage_append_dir, ch_inputs),
             channels.PlaceholderChannels.toolDir(ch_inputs_somatic_sorted.skip),
             channels.PlaceholderChannels.toolDir(ch_inputs_sorted.skip),
         )
 
     ch_germline_dir = Channel.empty()
         .mix(
-            WorkflowChannels.restoreMeta(SAGE_APPEND_GERMLINE.out.sage_append_dir, ch_inputs),
+            channels.WorkflowChannels.restoreMeta(SAGE_APPEND_GERMLINE.out.sage_append_dir, ch_inputs),
             channels.PlaceholderChannels.toolDir(ch_inputs_germline_sorted.skip),
             channels.PlaceholderChannels.toolDir(ch_inputs_sorted.skip),
         )

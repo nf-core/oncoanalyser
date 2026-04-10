@@ -27,7 +27,7 @@ workflow WISP_ANALYSIS {
     // Select input sources and sort
     // channel: runnable: [ meta, ... ]
     // channel: skip: [ meta ]
-    ch_inputs_sorted = WorkflowChannels.groupByMeta(
+    ch_inputs_sorted = channels.WorkflowChannels.groupByMeta(
         ch_amber_out,
         ch_cobalt_out,
         ch_sage_somatic_append_out,

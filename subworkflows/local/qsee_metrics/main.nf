@@ -31,7 +31,7 @@ workflow QSEE_METRICS {
 
     // Select and route inputs
     // channel: { meta, redux_dir_tumor, redux_dir_normal, bamtools_tumor_dir, bamtools_normal_dir, cobalt_dir, esvee_dir, purple_dir }
-    ch_inputs_sorted = WorkflowChannels.groupByMeta(
+    ch_inputs_sorted = channels.WorkflowChannels.groupByMeta(
         flatten_mode: 'singletons_only',
         ch_redux_dir_tumor,
         ch_redux_dir_normal,
@@ -107,7 +107,7 @@ workflow QSEE_METRICS {
     // channel: [ meta, chord_dir ]
     ch_outputs = Channel.empty()
         .mix(
-            WorkflowChannels.restoreMeta(QSEE.out.qsee_dir, ch_inputs),
+            channels.WorkflowChannels.restoreMeta(QSEE.out.qsee_dir, ch_inputs),
             channels.PlaceholderChannels.toolDir(ch_inputs_sorted.skip),
         )
 

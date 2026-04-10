@@ -84,8 +84,8 @@ workflow VIRUSBREAKEND_CALLING {
     //
     // Select input sources
     // channel: [ meta, virus_tsv, purple_dir, metrics ]
-    ch_virusinterpreter_inputs_selected = WorkflowChannels.groupByMeta(
-        WorkflowChannels.restoreMeta(VIRUSBREAKEND.out.tsv, ch_inputs),
+    ch_virusinterpreter_inputs_selected = channels.WorkflowChannels.groupByMeta(
+        channels.WorkflowChannels.restoreMeta(VIRUSBREAKEND.out.tsv, ch_inputs),
         ch_purple,
         ch_bamtools_somatic,
     )
@@ -141,7 +141,7 @@ workflow VIRUSBREAKEND_CALLING {
     // channel: [ meta, virusinterpreter_dir ]
     ch_outputs = Channel.empty()
         .mix(
-            WorkflowChannels.restoreMeta(VIRUSINTERPRETER.out.virusinterpreter_dir, ch_inputs),
+            channels.WorkflowChannels.restoreMeta(VIRUSINTERPRETER.out.virusinterpreter_dir, ch_inputs),
             channels.PlaceholderChannels.toolDir(ch_virusinterpreter_inputs_sorted.skip),
             channels.PlaceholderChannels.toolDir(ch_inputs_sorted.skip),
         )

@@ -1,7 +1,7 @@
-import static groovy.io.FileType.FILES
+package channels
+
 
 import nextflow.Channel
-import nextflow.Nextflow
 
 class WorkflowChannels {
 

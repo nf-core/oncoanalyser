@@ -34,7 +34,7 @@ workflow SAGE_PLOTTING {
     // Select input sources. Route inputs
     // channel: runnable: { meta, tumor_bam, tumor_bai, normal_bam, normal_bai, donor_bam, donor_bai, [redux_tsv, ...], purple_dir }
     // channel: skip: [ meta ]
-    ch_inputs_sorted = WorkflowChannels.groupByMeta(
+    ch_inputs_sorted = channels.WorkflowChannels.groupByMeta(
         flatten_mode: 'singletons_only',
         ch_tumor_bam, ch_normal_bam, ch_donor_bam,
         ch_tumor_dir, ch_normal_dir, ch_donor_dir,
@@ -125,7 +125,7 @@ workflow SAGE_PLOTTING {
     // channel: [ meta, sage_dir ]
     ch_visualiser_dir_out = Channel.empty()
         .mix(
-            WorkflowChannels.restoreMeta(SAGE_VISUALISER.out.sage_vis_dir, ch_inputs),
+            channels.WorkflowChannels.restoreMeta(SAGE_VISUALISER.out.sage_vis_dir, ch_inputs),
             channels.PlaceholderChannels.toolDir(ch_inputs_sorted.skip),
         )
 
