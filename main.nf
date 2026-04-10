@@ -73,11 +73,11 @@ include { WGTS                    } from './workflows/wgts'
 
 workflow NFCORE_ONCOANALYSER {
 
-    def pipeline_mode = RunModes.Pipeline.fromString(params.mode)
+    def pipeline_mode = pipeline.PipelineMode.fromString(params.mode)
 
     // Run selected workflow
     // NOTE(SW): prepare reference is checked early as params.input is not required
-    if (pipeline_mode === RunModes.Pipeline.PREPARE_REFERENCE)  {
+    if (pipeline_mode === pipeline.PipelineMode.PREPARE_REFERENCE)  {
         PREPARE_REFERENCE()
     } else {
 
@@ -91,13 +91,13 @@ workflow NFCORE_ONCOANALYSER {
         )
 
         // Run requested workflow
-        if (pipeline_mode === RunModes.Pipeline.WGTS) {
+        if (pipeline_mode === pipeline.PipelineMode.WGTS) {
             WGTS(inputs, stages)
-        } else if (pipeline_mode === RunModes.Pipeline.TARGETED) {
+        } else if (pipeline_mode === pipeline.PipelineMode.TARGETED) {
             TARGETED(inputs, stages)
-        } else if (pipeline_mode === RunModes.Pipeline.PURITY_ESTIMATE) {
+        } else if (pipeline_mode === pipeline.PipelineMode.PURITY_ESTIMATE) {
             PURITY_ESTIMATE(inputs, stages)
-        } else if (pipeline_mode === RunModes.Pipeline.PANEL_RESOURCE_CREATION) {
+        } else if (pipeline_mode === pipeline.PipelineMode.PANEL_RESOURCE_CREATION) {
             PANEL_RESOURCE_CREATION(inputs)
         } else {
             log.error("received bad pipeline mode: ${pipeline_mode}")

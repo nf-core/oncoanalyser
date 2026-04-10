@@ -35,9 +35,9 @@ workflow PURITY_ESTIMATE {
     ch_inputs = Channel.fromList(inputs)
 
     // Get run mode of purity estimate mode
-    def purity_estimate_run_mode = RunModes.PurityEstimate.fromString(params.purity_estimate_mode)
-    def targeted_mode = purity_estimate_run_mode === RunModes.PurityEstimate.TARGETED
-    def wgts_mode = purity_estimate_run_mode === RunModes.PurityEstimate.WGTS // NOTE(LN): Redundant variable, but makes the if clauses clearer
+    def purity_estimate_run_mode = pipeline.PurityEstimateMode.fromString(params.purity_estimate_mode)
+    def targeted_mode = purity_estimate_run_mode === pipeline.PurityEstimateMode.TARGETED
+    def wgts_mode = purity_estimate_run_mode === pipeline.PurityEstimateMode.WGTS // NOTE(LN): Redundant variable, but makes the if clauses clearer
 
     // Set up reference data, assign more human readable variables
     PREPARE_REFERENCE(

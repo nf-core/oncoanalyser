@@ -210,7 +210,7 @@ workflow TARGETED {
 
     isofox_tpm_norm = params.isofox_tpm_norm ? file(params.isofox_tpm_norm) : panel_data.isofox_tpm_norm
 
-    isofox_read_length = params.isofox_read_length !== null ? params.isofox_read_length : RunModes.DEFAULT_ISOFOX_READ_LENGTH_TARGETED
+    isofox_read_length = params.isofox_read_length !== null ? params.isofox_read_length : pipeline.Constants.DEFAULT_ISOFOX_READ_LENGTH_TARGETED
 
     // channel: [ meta, isofox_dir ]
     ch_isofox_out = Channel.empty()

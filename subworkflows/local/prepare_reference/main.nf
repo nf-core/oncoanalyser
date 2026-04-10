@@ -40,7 +40,7 @@ workflow PREPARE_REFERENCE {
     //
     // Determine which resources need to be prepared
     //
-    def pipeline_mode = RunModes.Pipeline.fromString(params.mode)
+    def pipeline_mode = pipeline.PipelineMode.fromString(params.mode)
 
     def prep_config = prepare_reference_only
         ? getConfigForPrepRefOnly(params, log)
@@ -232,9 +232,9 @@ workflow PREPARE_REFERENCE {
         }
 
         // Set PON paths
-        def sequencing_type = RunModes.SequencingType.fromString(params.sequencing_type)
+        def sequencing_type = pipeline.SequencingType.fromString(params.sequencing_type)
 
-        if(sequencing_type === RunModes.SequencingType.ULTIMA) {
+        if(sequencing_type === pipeline.SequencingType.ULTIMA) {
 
             ch_hmf_data = ch_hmf_data
                 .map { d ->
@@ -250,7 +250,7 @@ workflow PREPARE_REFERENCE {
                     return d
                 }
 
-        } else if(sequencing_type === RunModes.SequencingType.SBX) {
+        } else if(sequencing_type === pipeline.SequencingType.SBX) {
 
             ch_hmf_data = ch_hmf_data
                 .map { d ->
@@ -271,7 +271,7 @@ workflow PREPARE_REFERENCE {
         // Set custom driver gene panel
         if (params.driver_gene_panel) {
 
-            if (pipeline_mode !== RunModes.Pipeline.PANEL_RESOURCE_CREATION) {
+            if (pipeline_mode !== pipeline.PipelineMode.PANEL_RESOURCE_CREATION) {
                 log.info "Using custom driver gene panel: ${params.driver_gene_panel}"
             }
 
@@ -365,9 +365,9 @@ def getConfigForPipelineRun(inputs, pipeline_mode, stages) {
         require_bwamem2_index: has_dna_fastq && stages.alignment,
         require_star_index: has_rna_fastq && stages.alignment,
 
-        require_gridss_index: has_dna && pipeline_mode === RunModes.Pipeline.WGTS && stages.virusinterpreter,
+        require_gridss_index: has_dna && pipeline_mode === pipeline.PipelineMode.WGTS && stages.virusinterpreter,
         require_hmftools_data: true,
-        require_panel_data: pipeline_mode === RunModes.Pipeline.TARGETED,
+        require_panel_data: pipeline_mode === pipeline.PipelineMode.TARGETED,
     ]
 }
 

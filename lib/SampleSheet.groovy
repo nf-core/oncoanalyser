@@ -1,3 +1,4 @@
+import pipeline.PipelineMode
 import samplesheet.FileType
 import samplesheet.InfoField
 import samplesheet.SampleType
@@ -5,7 +6,7 @@ import samplesheet.SequenceType
 
 class SampleSheet {
 
-    public static List<Map> parseInput(String sample_sheet_path, boolean stub_run, RunModes.Pipeline pipeline_mode) {
+    public static List<Map> parseInput(String sample_sheet_path, boolean stub_run, PipelineMode pipeline_mode) {
 
         if (!sample_sheet_path) {
             throw new IllegalStateException("Missing required --input argument")
@@ -311,7 +312,7 @@ class SampleSheet {
         }
     }
 
-    private static void disallowInvalidSampleCombinations(Map meta, RunModes.Pipeline pipeline_mode) {
+    private static void disallowInvalidSampleCombinations(Map meta, PipelineMode pipeline_mode) {
 
         // Do not allow normal DNA only
         if (Inputs.hasNormalDna(meta) && !Inputs.hasTumorDna(meta)) {
@@ -324,7 +325,7 @@ class SampleSheet {
         }
 
         // Apply some required restrictions to targeted mode
-        if (pipeline_mode === RunModes.Pipeline.TARGETED) {
+        if (pipeline_mode === PipelineMode.TARGETED) {
 
             // Do not allow donor DNA
             if (Inputs.hasDonorDna(meta)) {

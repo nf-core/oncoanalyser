@@ -1,3 +1,6 @@
+import pipeline.PipelineMode
+import pipeline.PurityEstimateMode
+import pipeline.SequencingType
 import refgenome.RefGenomeType
 import refgenome.RefGenomeVersion
 import refgenome.SupportedGenome
@@ -47,14 +50,14 @@ class Params {
                 "Pipeline mode must be set using the --mode CLI argument or in a configuration file.",
                 "",
                 "Currently, the available pipeline modes are:",
-                createBulletedList(Enums.getEnumNames(RunModes.Pipeline)),
+                createBulletedList(Enums.getEnumNames(PipelineMode)),
             )
         }
 
-        def pipeline_mode = RunModes.Pipeline.fromString((String) params.mode)
+        def pipeline_mode = PipelineMode.fromString((String) params.mode)
 
         // Purity estimate mode
-        if (pipeline_mode == RunModes.Pipeline.PURITY_ESTIMATE) {
+        if (pipeline_mode == PipelineMode.PURITY_ESTIMATE) {
 
             if(!params.purity_estimate_mode){
                 error(
@@ -62,15 +65,15 @@ class Params {
                     "CLI argument or in a configuration file.",
                     "",
                     "Currently, the available modes are:",
-                    createBulletedList(Enums.getEnumNames(RunModes.PurityEstimate)),
+                    createBulletedList(Enums.getEnumNames(PurityEstimateMode)),
                 )
             }
 
-            Enums.validateEnumFromString((String) params.purity_estimate_mode, RunModes.PurityEstimate)
+            Enums.validateEnumFromString((String) params.purity_estimate_mode, PurityEstimateMode)
         }
 
         // Prepare reference
-        if (pipeline_mode == RunModes.Pipeline.PREPARE_REFERENCE && params.ref_data_types == null) {
+        if (pipeline_mode == PipelineMode.PREPARE_REFERENCE && params.ref_data_types == null) {
             error(
                 "CLI argument --ref_data_types is required for mode prepare_reference.",
                 "Please specify one or more of the below valid values (separated by commas)",
@@ -140,7 +143,7 @@ class Params {
     }
 
     private static void validateSequencingType(Map params) {
-        Enums.validateEnumFromString((String) params.sequencing_type, RunModes.SequencingType, false)
+        Enums.validateEnumFromString((String) params.sequencing_type, SequencingType, false)
     }
 
     private static void setDefaultHmfData(Map params) {
@@ -154,9 +157,9 @@ class Params {
 
     private static void validatePanelDataAndSetDefaults(Map params){
 
-        def pipeline_mode = RunModes.Pipeline.fromString((String) params.mode)
+        def pipeline_mode = PipelineMode.fromString((String) params.mode)
 
-        if (pipeline_mode != RunModes.Pipeline.TARGETED && pipeline_mode != RunModes.Pipeline.PREPARE_REFERENCE)
+        if (pipeline_mode != PipelineMode.TARGETED && pipeline_mode != PipelineMode.PREPARE_REFERENCE)
             return
 
         if (params.panel == null) {
