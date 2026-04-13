@@ -49,9 +49,9 @@ public enum UmiSettings {
         }
     }
 
-    public static record FastpArgs(boolean requireUmiStripping, String umiLocation, int umiLength, int umiSkip) {}
-    public static record FastqToolsArgs(boolean requireUmiStripping, String umiDelim) {}
-    public static record ReduxArgs(boolean enableUmiProcessing, String duplexUmiDelim) {}
+    public static record FastpArgs(boolean umiProcessingEnabled, String umiLocation, int umiLength, int umiSkip) {}
+    public static record FastqToolsArgs(boolean umiProcessingEnabled, String umiDelim) {}
+    public static record ReduxArgs(boolean umiProcessingEnabled, String duplexUmiDelim) {}
 
     private static final String NO_UMI_LOCATION = ""
     private static final int NO_UMI_LENGTH = 0

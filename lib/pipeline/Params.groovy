@@ -213,15 +213,15 @@ class Params {
         }
 
         // Set defaults if params not set by user
-        params.putIfAbsent('fastp_umi_enabled', umi_settings.fastpArgs().requireUmiStripping())
+        params.putIfAbsent('fastp_umi_enabled', umi_settings.fastpArgs().umiProcessingEnabled())
         params.putIfAbsent('fastp_umi_location', umi_settings.fastpArgs().umiLocation())
         params.putIfAbsent('fastp_umi_length', umi_settings.fastpArgs().umiLength())
         params.putIfAbsent('fastp_umi_skip', umi_settings.fastpArgs().umiSkip())
 
-        params.putIfAbsent('fastq_tools_umi_enabled', umi_settings.fastqToolsArgs().requireUmiStripping())
+        params.putIfAbsent('fastq_tools_umi_enabled', umi_settings.fastqToolsArgs().umiProcessingEnabled())
         params.putIfAbsent('fastq_tools_umi_delim', umi_settings.fastqToolsArgs().umiDelim())
 
-        params.putIfAbsent('redux_umi_enabled', umi_settings.reduxArgs().enableUmiProcessing())
+        params.putIfAbsent('redux_umi_enabled', umi_settings.reduxArgs().umiProcessingEnabled())
         params.putIfAbsent('redux_umi_duplex_delim', umi_settings.reduxArgs().duplexUmiDelim())
 
         // When fastp UMI is enabled, REDUX UMI should be as well
