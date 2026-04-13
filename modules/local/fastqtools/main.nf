@@ -32,6 +32,8 @@ process FASTQ_TOOLS {
 
     def xmx_mod = task.ext.xmx_mod ?: 0.75
 
+    def common_fastp_args = '--disable_quality_filtering --disable_length_filtering --disable_adapter_trimming --disable_trim_poly_g'
+
     //
     // UMI processing
     //
@@ -71,7 +73,7 @@ process FASTQ_TOOLS {
 
         cmd_umi_processing = """
         fastp \\
-            ${args} \\
+            ${common_fastp_args} \\
             --in1 ${reads_fwd} \\
             --in2 ${reads_rev} \\
             ${umi_args} \\
@@ -99,7 +101,7 @@ process FASTQ_TOOLS {
 
         cmd_fastq_split = """
         fastp \\
-            ${args} \\
+            ${common_fastp_args} \\
             --in1 ${reads_fwd_umi} \\
             --in2 ${reads_rev_umi} \\
             --split_by_lines ${4 * max_fastq_records.toLong()} \\

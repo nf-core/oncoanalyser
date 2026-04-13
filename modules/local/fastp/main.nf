@@ -36,6 +36,7 @@ process FASTP {
     """
     fastp \\
         ${args} \\
+        --disable_quality_filtering --disable_length_filtering --disable_adapter_trimming --disable_trim_poly_g \\
         --in1 ${reads_fwd} \\
         --in2 ${reads_rev} \\
         ${umi_args} \\
