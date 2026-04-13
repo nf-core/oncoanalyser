@@ -26,7 +26,6 @@ process PURPLE {
     path ensembl_data_resources
     path germline_amp_del_freq
     path target_region_bed
-    path target_region_ratios
 
     output:
     tuple val(meta), path('purple/'), emit: purple_dir
@@ -54,7 +53,6 @@ process PURPLE {
     def germline_amp_del_freq_file_arg = germline_amp_del_freq ? "-germline_amp_del_freq_file ${germline_amp_del_freq}" : ''
 
     def target_region_bed_arg = target_region_bed ? "-target_regions_bed ${target_region_bed}" : ''
-    def target_region_ratios_arg = target_region_ratios ? "-target_regions_ratios ${target_region_ratios}" : ''
 
     """
     purple \\
@@ -75,7 +73,6 @@ process PURPLE {
         -somatic_hotspots ${sage_known_hotspots_somatic} \\
         ${sage_known_hotspots_germline_arg} \\
         ${target_region_bed_arg} \\
-        ${target_region_ratios_arg} \\
         ${germline_amp_del_freq_file_arg} \\
         -gc_profile ${gc_profile} \\
         -circos \$(which circos) \\

@@ -453,7 +453,6 @@ workflow WGTS {
             hmf_data.ensembl_data_resources,
             hmf_data.germline_amp_del_freq,
             [],  // target_region_bed
-            [],  // target_region_ratios
         )
 
         ch_versions = ch_versions.mix(PURPLE_CALLING.out.versions)

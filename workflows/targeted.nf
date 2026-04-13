@@ -448,7 +448,6 @@ workflow TARGETED {
             hmf_data.ensembl_data_resources,
             hmf_data.germline_amp_del_freq,
             panel_data.target_region_bed,
-            panel_data.target_region_ratios,
         )
 
         ch_versions = ch_versions.mix(PURPLE_CALLING.out.versions)

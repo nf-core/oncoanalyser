@@ -27,7 +27,6 @@ workflow PURPLE_CALLING {
     ensembl_data_resources       // channel: [mandatory] /path/to/ensembl_data_resources/
     germline_amp_del_freq        // channel: [optional]  /path/to/germline_amp_del_freq
     target_region_bed            // channel: [optional]  /path/to/target_region_bed
-    target_region_ratios         // channel: [optional]  /path/to/target_region_ratios
 
     main:
     // Channel for version.yml files
@@ -110,7 +109,6 @@ workflow PURPLE_CALLING {
         ensembl_data_resources,
         germline_amp_del_freq,
         target_region_bed,
-        target_region_ratios,
     )
 
     ch_versions = ch_versions.mix(PURPLE.out.versions)
