@@ -3,27 +3,27 @@ package pipeline
 public enum UmiSettings {
 
     TSO500(
-        new FastpArgs(false, NO_UMI_LOCATION, NO_UMI_LENGTH, NO_UMI_SKIP),
-        new FastqToolsArgs(false, NO_DUPLEX_UMI_DELIM),
+        fastpUmiDisabled(),
+        fastqToolsUmiDisabled(),
         new ReduxArgs(true, "+")
     ),
 
     TWIST(
         new FastpArgs(true, "per_read", 7, 0),
-        new FastqToolsArgs(false, NO_DUPLEX_UMI_DELIM),
+        fastqToolsUmiDisabled(),
         new ReduxArgs(true, "_")
     ),
 
     MSK(
-        new FastpArgs(false, NO_UMI_LOCATION, NO_UMI_LENGTH, NO_UMI_SKIP),
+        fastpUmiDisabled(),
         new FastqToolsArgs(true, "+"),
         new ReduxArgs(true, NO_DUPLEX_UMI_DELIM)
     ),
 
     NONE(
-        new FastpArgs(false, NO_UMI_LOCATION, NO_UMI_LENGTH, NO_UMI_SKIP),
-        new FastqToolsArgs(false, NO_DUPLEX_UMI_DELIM),
-        new ReduxArgs(false, NO_DUPLEX_UMI_DELIM)
+        fastpUmiDisabled(),
+        fastqToolsUmiDisabled(),
+        reduxUmiDisabled()
     );
 
     private final FastpArgs fastpArgs
@@ -56,5 +56,11 @@ public enum UmiSettings {
     private static final String NO_UMI_LOCATION = ""
     private static final int NO_UMI_LENGTH = 0
     private static final int NO_UMI_SKIP = -1
+    private static final String NO_UMI_DELIM = ""
     private static final String NO_DUPLEX_UMI_DELIM = ""
+
+    private static FastpArgs fastpUmiDisabled() { return new FastpArgs(false, NO_UMI_LOCATION, NO_UMI_LENGTH, NO_UMI_SKIP) }
+    private static FastqToolsArgs fastqToolsUmiDisabled() { return new FastqToolsArgs(false, NO_UMI_DELIM) }
+    private static ReduxArgs reduxUmiDisabled() { return new ReduxArgs(false, NO_DUPLEX_UMI_DELIM) }
+
 }
