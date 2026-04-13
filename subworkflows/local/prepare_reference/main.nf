@@ -41,10 +41,13 @@ workflow PREPARE_REFERENCE {
     // Determine which resources need to be prepared
     //
     def pipeline_mode = pipeline.PipelineMode.fromString(params.mode)
+    def purity_estimate_mode = pipeline_mode == pipeline.PipelineMode.PURITY_ESTIMATE
+        ? pipeline.PurityEstimateMode.fromString(params.purity_estimate_mode)
+        : null
 
     def prep_config = prepare_reference_only
         ? refdata.PrepareReferenceConfig.forPrepRefOnly(params, log)
-        : refdata.PrepareReferenceConfig.forPipelineRun(inputs, pipeline_mode, stages)
+        : refdata.PrepareReferenceConfig.forPipelineRun(inputs, pipeline_mode, purity_estimate_mode, stages)
 
     def has_alt_contigs = params.genome_type == refgenome.RefGenomeType.ALT
     def has_alt_file = params.containsKey('ref_data_genome_alt') && params.ref_data_genome_alt

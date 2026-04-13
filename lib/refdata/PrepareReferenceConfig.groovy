@@ -1,17 +1,20 @@
 package refdata
 
 import pipeline.PipelineMode
+import pipeline.PurityEstimateMode
 import pipeline.SupportedPanel
 import util.Enums
 import sample.Inputs
 
 class PrepareReferenceConfig {
 
-    public static Map<String, Boolean> forPipelineRun(List<Map> inputs, PipelineMode pipeline_mode, Map<String, Boolean> stages) {
+    public static Map<String, Boolean> forPipelineRun(List<Map> inputs, PipelineMode pipeline_mode, PurityEstimateMode purity_estimate_mode, Map<String, Boolean> stages) {
 
         def has_dna = inputs.any { Inputs.hasTumorDna(it) }
         def has_rna_fastq = inputs.any { Inputs.hasTumorRnaFastq(it) }
         def has_dna_fastq = inputs.any { Inputs.hasTumorDnaFastq(it) || Inputs.hasNormalDnaFastq(it) }
+
+        def targeted_purity_estimate = pipeline_mode == PipelineMode.PURITY_ESTIMATE && purity_estimate_mode == PurityEstimateMode.TARGETED
 
         return [
             require_fasta: true,
@@ -24,7 +27,7 @@ class PrepareReferenceConfig {
 
             require_gridss_index: has_dna && pipeline_mode == PipelineMode.WGTS && stages.virusinterpreter,
             require_hmftools_data: true,
-            require_panel_data: pipeline_mode == PipelineMode.TARGETED,
+            require_panel_data: pipeline_mode == PipelineMode.TARGETED || targeted_purity_estimate,
         ]
     }
 

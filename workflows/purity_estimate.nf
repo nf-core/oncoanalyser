@@ -47,6 +47,7 @@ workflow PURITY_ESTIMATE {
     )
     ref_data = PREPARE_REFERENCE.out
     hmf_data = PREPARE_REFERENCE.out.hmf_data
+    panel_data = PREPARE_REFERENCE.out.panel_data
 
     ch_versions = ch_versions.mix(PREPARE_REFERENCE.out.versions)
 
@@ -64,7 +65,7 @@ workflow PURITY_ESTIMATE {
             ch_inputs,
             ref_data.genome_fasta,
             ref_data.genome_bwamem2_index,
-            panel_data.known_umis,
+            targeted_mode ? panel_data.known_umis : [],
             params.max_fastq_records,
             params.fastp_umi_enabled,
             params.fastp_umi_location,
