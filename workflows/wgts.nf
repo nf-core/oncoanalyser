@@ -90,11 +90,14 @@ workflow WGTS {
             ch_inputs,
             ref_data.genome_fasta,
             ref_data.genome_bwamem2_index,
+            [],  // known_umis
             params.max_fastq_records,
-            false,  // umi_enable
-            '',  // umi_location
-            0,  // umi_length
-            -1,  // umi_skip
+            false,  // fastp_umi_enabled
+            '',     // fastp_umi_location
+            0,      // fastp_umi_length
+            -1,     // fastp_umi_skip
+            false,  // fastq_tools_umi_enabled
+            '',     // fastq_tools_umi_duplex_delim
         )
 
         READ_ALIGNMENT_RNA(

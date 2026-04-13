@@ -72,11 +72,14 @@ workflow PANEL_RESOURCE_CREATION {
         ch_inputs,
         ref_data.genome_fasta,
         ref_data.genome_bwamem2_index,
+        panel_data.known_umis,
         params.max_fastq_records,
         params.fastp_umi_enabled,
         params.fastp_umi_location,
         params.fastp_umi_length,
         params.fastp_umi_skip,
+        params.fastq_tools_umi_enabled,
+        params.fastq_tools_umi_delim,
     )
 
     READ_ALIGNMENT_RNA(
