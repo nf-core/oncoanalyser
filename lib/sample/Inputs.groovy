@@ -86,7 +86,8 @@ class Inputs {
         def sample_id = meta_sample.getOrDefault('longitudinal_sample_id', meta_sample['sample_id'])
 
         // NOTE(LN): toUriString() needs to be called, otherwise nextflow will fail to resolve cloud paths
-        def redux_tsvs = nextflow.Nextflow.file("${selected_redux_dir.toUriString()}/${sample_id}.redux.*.tsv*")
+        def redux_dir_uri = nextflow.Nextflow.file(selected_redux_dir).toUriString()
+        def redux_tsvs = nextflow.Nextflow.file("${redux_dir_uri}/${sample_id}.redux.*.tsv*")
 
         return redux_tsvs
     }
@@ -113,9 +114,11 @@ class Inputs {
             default -> throw new IllegalArgumentException("Unsupported sample type: ${sample_type}")
         }
 
+        def sage_dir_uri = nextflow.Nextflow.file(selected_sage_dir).toUriString()
+
         return [
-            nextflow.Nextflow.file("${selected_sage_dir.toUriString()}/${vcf_name}"),
-            nextflow.Nextflow.file("${selected_sage_dir.toUriString()}/${vcf_name}.tbi"),
+            nextflow.Nextflow.file("${sage_dir_uri}/${vcf_name}"),
+            nextflow.Nextflow.file("${sage_dir_uri}/${vcf_name}.tbi"),
         ]
     }
 
