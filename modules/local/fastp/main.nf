@@ -15,9 +15,11 @@ process FASTP {
     val umi_skip
 
     output:
-    tuple val(meta), path('*_R1.fastp.fastq.gz'), path('*_R2.fastp.fastq.gz'), emit: fastq
-    path 'versions.yml'                                                      , emit: versions
-    path '.command.*'                                                        , emit: command_files
+    tuple val(meta),
+        path('output/*_R1.fastp.fastq.gz'),
+        path('output/*_R2.fastp.fastq.gz'), emit: fastq
+    path 'versions.yml'                   , emit: versions
+    path '.command.*'                     , emit: command_files
 
     when:
     task.ext.when == null || task.ext.when
@@ -34,16 +36,21 @@ process FASTP {
     def umi_args = umi_args_list ? '--umi ' + umi_args_list.join(' ') : ''
 
     """
+    mkdir -p output/
+
     fastp \\
         ${args} \\
-        --disable_quality_filtering --disable_length_filtering --disable_adapter_trimming --disable_trim_poly_g \\
+        --disable_adapter_trimming \\
+        --disable_length_filtering \\
+        --disable_quality_filtering \\
+        --disable_trim_poly_g \\
         --in1 ${reads_fwd} \\
         --in2 ${reads_rev} \\
         ${umi_args} \\
         ${split_by_lines_arg} \\
         --thread ${task.cpus} \\
-        --out1 ${meta.sample_id}_${meta.library_id}_${meta.lane}_R1.fastp.fastq.gz \\
-        --out2 ${meta.sample_id}_${meta.library_id}_${meta.lane}_R2.fastp.fastq.gz
+        --out1 output/${meta.sample_id}_${meta.library_id}_${meta.lane}_R1.fastp.fastq.gz \\
+        --out2 output/${meta.sample_id}_${meta.library_id}_${meta.lane}_R2.fastp.fastq.gz
 
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":
@@ -53,8 +60,10 @@ process FASTP {
 
     stub:
     """
-    touch 00{1..4}.${meta.sample_id}_${meta.library_id}_${meta.lane}_R1.fastp.fastq.gz
-    touch 00{1..4}.${meta.sample_id}_${meta.library_id}_${meta.lane}_R2.fastp.fastq.gz
+    mkdir -p output/
+
+    touch output/00{1..4}.${meta.sample_id}_${meta.library_id}_${meta.lane}_R1.fastp.fastq.gz
+    touch output/00{1..4}.${meta.sample_id}_${meta.library_id}_${meta.lane}_R2.fastp.fastq.gz
 
     echo -e '${task.process}:\\n  stub: noversions\\n' > versions.yml
     """
