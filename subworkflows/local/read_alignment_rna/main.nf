@@ -2,6 +2,7 @@
 // Align RNA reads
 //
 
+include { FASTQ_TOOLS as UMI_PROCESSING_FASTQ_TOOLS } from '../../../modules/local/fastqtools/main'
 include { GATK4_MARKDUPLICATES } from '../../../modules/nf-core/gatk4/markduplicates/main'
 include { SAMBAMBA_MERGE       } from '../../../modules/local/sambamba/merge/main'
 include { SAMTOOLS_SORT        } from '../../../modules/nf-core/samtools/sort/main'
@@ -14,6 +15,11 @@ workflow READ_ALIGNMENT_RNA {
 
     // Reference data
     genome_star_index // channel: [mandatory] /path/to/genome_star_index/
+    known_umis        // channel: [mandatory] /path/to/known_umis_file
+
+    // Params
+    fastq_tools_umi_enabled  // boolean: [mandatory] enable fastq-tools UMI processing
+    fastq_tools_umi_delim    // boolean: [optional]  fastq-tools -umi_delim argument
 
     main:
     // Channel for version.yml files
@@ -52,11 +58,33 @@ workflow READ_ALIGNMENT_RNA {
         }
 
     //
+    // UMI processing
+    //
+    // channel: [ meta_fastq, fastq_fwd, fastq_rev ]
+    ch_fastqs_umi_processed = Channel.empty()
+
+    if (fastq_tools_umi_enabled) {
+
+        UMI_PROCESSING_FASTQ_TOOLS(
+            ch_fastq_inputs,
+            fastq_tools_umi_delim,
+            known_umis,
+        )
+
+        ch_fastqs_umi_processed = UMI_PROCESSING_FASTQ_TOOLS.out.fastq
+
+    } else {
+
+        ch_fastqs_umi_processed = ch_fastq_inputs
+
+    }
+
+    //
     // MODULE: STAR alignment
     //
     // Create process input channel
     // channel: [ meta_star, fastq_fwd, fastq_rev ]
-    ch_star_inputs = ch_fastq_inputs
+    ch_star_inputs = ch_fastqs_umi_processed
         .map { meta_fastq, fastq_fwd, fastq_rev ->
             def meta_star = [
                 *:meta_fastq,

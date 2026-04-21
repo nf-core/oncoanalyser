@@ -85,6 +85,9 @@ workflow PANEL_RESOURCE_CREATION {
     READ_ALIGNMENT_RNA(
         ch_inputs,
         ref_data.genome_star_index,
+        panel_data.known_umis,
+        params.fastq_tools_umi_enabled,
+        params.fastq_tools_umi_delim,
     )
 
     // channel: [ meta, [bam, ...], [bai, ...] ]

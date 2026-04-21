@@ -103,6 +103,9 @@ workflow WGTS {
         READ_ALIGNMENT_RNA(
             ch_inputs,
             ref_data.genome_star_index,
+            [],    // known_umis
+            false, // fastq_tools_umi_enabled
+            '',    // fastq_tools_umi_duplex_delim
         )
 
         ch_versions = ch_versions.mix(
