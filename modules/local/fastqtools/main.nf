@@ -27,6 +27,8 @@ process FASTQ_TOOLS {
 
     def xmx_mod = task.ext.xmx_mod ?: 0.75
 
+    def log_level_arg = task.ext.log_level ? "-log_level ${task.ext.log_level}" : ''
+
     """
     mkdir -p output/
 
@@ -37,7 +39,8 @@ process FASTQ_TOOLS {
         -fastq_files '${reads_fwd};${reads_rev}' \\
         -known_umi_file ${known_umis} \\
         -umi_delim ${umi_delim} \\
-        -output_dir output/
+        -output_dir output/ \\
+        ${log_level_arg}
 
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":
