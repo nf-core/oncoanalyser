@@ -80,6 +80,11 @@
                     "default": false,
                     "fa_icon": "fas fa-palette"
                 },
+                "ref_data_types": {
+                    "type": "string",
+                    "description": "Which reference data types to download and extract. To be used with --mode prepare_reference.",
+                    "fa_icon": "fas fa-diagram-project"
+                },
                 "processes_manual": {
                     "type": "string",
                     "description": "Manually run processes provided as a comma separated list.",
@@ -94,23 +99,6 @@
                     "type": "string",
                     "description": "Include processes that are excluded by default, provided as a comma separated list.",
                     "fa_icon": "fas fa-diagram-project"
-                },
-                "ref_data_types": {
-                    "type": "string",
-                    "description": "Which reference data types to download and extract.",
-                    "fa_icon": "fas fa-diagram-project"
-                },
-                "create_stub_placeholders": {
-                    "type": "boolean",
-                    "description": "Create placeholders for reference data during stub run.",
-                    "default": false,
-                    "fa_icon": "fas fa-diagram-project"
-                },
-                "max_fastq_records": {
-                    "type": "integer",
-                    "description": "When positive, will use fastp to split fastq files so that each resultant fastq file has no more than max_fastq_records records. When nonpositive, fastp is not used and the provided fastq files are passed as-is to the aligner.",
-                    "default": 10000000,
-                    "fa_icon": "fas fa-cog"
                 },
                 "umi_type": {
                     "type": "string",
@@ -151,11 +139,6 @@
                     "description": "UMI duplex delimiter as used by REDUX.",
                     "fa_icon": "fas fa-cog"
                 },
-                "gridss_config": {
-                    "type": "string",
-                    "description": "Path to GRIDSS configuration file.",
-                    "fa_icon": "fas fa-cog"
-                },
                 "isofox_read_length": {
                     "type": "integer",
                     "description": "User defined RNA read length used for Isofox.",
@@ -187,6 +170,12 @@
                     "default": "TRANSCRIPT_COUNTS;ALT_SPLICE_JUNCTIONS;FUSIONS;RETAINED_INTRONS",
                     "fa_icon": "fas fa-cog"
                 },
+                "max_fastq_records": {
+                    "type": "integer",
+                    "description": "When positive, will use fastp to split fastq files so that each resultant fastq file has no more than max_fastq_records records. When nonpositive, fastp is not used and the provided fastq files are passed as-is to the aligner.",
+                    "default": 10000000,
+                    "fa_icon": "fas fa-cog"
+                },
                 "driver_gene_panel": {
                     "type": "string",
                     "description": "User defined driver gene panel used in panel resource creation, or for overriding the default file located in ref_data_hmf_data_path",
@@ -197,12 +186,23 @@
                     "description": "User defined target regions BED used in panel resource creation.",
                     "fa_icon": "fas fa-cog"
                 },
+                "gridss_config": {
+                    "type": "string",
+                    "description": "Path to GRIDSS configuration file.",
+                    "fa_icon": "fas fa-cog"
+                },
                 "hmftools_log_level": {
                     "type": "string",
                     "enum": ["ALL", "TRACE", "DEBUG", "INFO", "WARN", "ERROR", "FATAL"],
                     "description": "Log level filter for WiGiTS modules",
                     "default": "DEBUG",
                     "fa_icon": "fas fa-cog"
+                },
+                "create_stub_placeholders": {
+                    "type": "boolean",
+                    "description": "Create placeholders for reference data during stub run.",
+                    "default": false,
+                    "fa_icon": "fas fa-diagram-project"
                 }
             }
         },
