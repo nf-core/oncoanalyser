@@ -194,12 +194,17 @@ class Params {
 
     private static void setUmiDefaults(Map params) {
 
-        def umi_settings
-        if (params.containsKey('panel')) {
+        def umi_settings = UmiSettings.NONE
+
+        if (params.containsKey('umi_type')){
+
+            umi_settings = UmiSettings.fromString((String) params.umi_type)
+
+        } else if (params.containsKey('panel')) {
+
             def maybe_supported_panel = SupportedPanel.fromString((String) params.panel)
             umi_settings = UmiSettings.fromSupportedPanel(maybe_supported_panel)
-        } else {
-            umi_settings = UmiSettings.NONE
+
         }
 
         // Set defaults if params not set by user

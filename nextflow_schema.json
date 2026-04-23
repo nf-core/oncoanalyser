@@ -112,6 +112,11 @@
                     "default": 10000000,
                     "fa_icon": "fas fa-cog"
                 },
+                "umi_type": {
+                    "type": "string",
+                    "description": "UMI type. Sets default '*_umi_* settings'",
+                    "fa_icon": "fas fa-cog"
+                },
                 "fastp_umi_enabled": {
                     "type": "boolean",
                     "description": "Enable fastp UMI processing.",
