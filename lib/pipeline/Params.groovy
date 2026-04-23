@@ -194,30 +194,30 @@ class Params {
 
     private static void setUmiDefaults(Map params) {
 
-        def umi_settings = UmiSettings.NONE
+        def umi_type = UmiType.NONE
 
         if (params.containsKey('umi_type')){
 
-            umi_settings = UmiSettings.fromString((String) params.umi_type)
+            umi_type = UmiType.fromString((String) params.umi_type)
 
         } else if (params.containsKey('panel')) {
 
             def maybe_supported_panel = SupportedPanel.fromString((String) params.panel)
-            umi_settings = UmiSettings.fromSupportedPanel(maybe_supported_panel)
+            umi_type = UmiType.fromSupportedPanel(maybe_supported_panel)
 
         }
 
         // Set defaults if params not set by user
-        params.putIfAbsent('fastp_umi_enabled', umi_settings.fastpArgs().umiProcessingEnabled())
-        params.putIfAbsent('fastp_umi_location', umi_settings.fastpArgs().umiLocation())
-        params.putIfAbsent('fastp_umi_length', umi_settings.fastpArgs().umiLength())
-        params.putIfAbsent('fastp_umi_skip', umi_settings.fastpArgs().umiSkip())
+        params.putIfAbsent('fastp_umi_enabled', umi_type.fastpArgs().umiProcessingEnabled())
+        params.putIfAbsent('fastp_umi_location', umi_type.fastpArgs().umiLocation())
+        params.putIfAbsent('fastp_umi_length', umi_type.fastpArgs().umiLength())
+        params.putIfAbsent('fastp_umi_skip', umi_type.fastpArgs().umiSkip())
 
-        params.putIfAbsent('fastq_tools_umi_enabled', umi_settings.fastqToolsArgs().umiProcessingEnabled())
-        params.putIfAbsent('fastq_tools_umi_delim', umi_settings.fastqToolsArgs().umiDelim())
+        params.putIfAbsent('fastq_tools_umi_enabled', umi_type.fastqToolsArgs().umiProcessingEnabled())
+        params.putIfAbsent('fastq_tools_umi_delim', umi_type.fastqToolsArgs().umiDelim())
 
-        params.putIfAbsent('redux_umi_enabled', umi_settings.reduxArgs().umiProcessingEnabled())
-        params.putIfAbsent('redux_umi_duplex_delim', umi_settings.reduxArgs().duplexUmiDelim())
+        params.putIfAbsent('redux_umi_enabled', umi_type.reduxArgs().umiProcessingEnabled())
+        params.putIfAbsent('redux_umi_duplex_delim', umi_type.reduxArgs().duplexUmiDelim())
 
         // When fastp UMI is enabled, REDUX UMI should be as well
         params.redux_umi_enabled = params.fastp_umi_enabled

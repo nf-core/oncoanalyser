@@ -2,7 +2,7 @@ package pipeline
 
 import util.Enums
 
-public enum UmiSettings {
+public enum UmiType {
 
     TSO500(
         fastpUmiDisabled(),
@@ -32,17 +32,17 @@ public enum UmiSettings {
     private final FastqToolsArgs fastqToolsArgs
     private final ReduxArgs reduxArgs
 
-    UmiSettings(FastpArgs fastpArgs, FastqToolsArgs fastqToolsArgs, ReduxArgs reduxArgs) {
+    UmiType(FastpArgs fastpArgs, FastqToolsArgs fastqToolsArgs, ReduxArgs reduxArgs) {
         this.fastpArgs = fastpArgs
         this.fastqToolsArgs = fastqToolsArgs
         this.reduxArgs = reduxArgs
     }
 
-    public static UmiSettings fromString(String type){
-        return Enums.getValidatedEnumFromString(type, UmiSettings)
+    public static UmiType fromString(String type){
+        return Enums.getValidatedEnumFromString(type, UmiType)
     }
 
-    public static UmiSettings fromSupportedPanel(SupportedPanel supportedPanel) {
+    public static UmiType fromSupportedPanel(SupportedPanel supportedPanel) {
         return switch (supportedPanel) {
             case SupportedPanel.TSO500 -> TSO500
             case SupportedPanel.MSK -> MSK
