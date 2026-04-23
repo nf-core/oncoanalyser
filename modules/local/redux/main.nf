@@ -23,12 +23,10 @@ process REDUX {
     val targeted_mode
 
     output:
-    tuple val(meta), path("redux_${meta.sample_id}/")                                             , emit: dir
+    tuple val(meta), path("redux_${meta.sample_id}/")                               , emit: dir
 
     tuple val(meta), path("redux_${meta.sample_id}/${meta.sample_id}.redux.bam"),
-                     path("redux_${meta.sample_id}/${meta.sample_id}.redux.bam.bai")              , emit: bam
-
-    //tuple val(meta), path("redux_${meta.sample_id}/${meta.sample_id}.redux.*.tsv*", arity: '0..*'), emit: tsv
+                     path("redux_${meta.sample_id}/${meta.sample_id}.redux.bam.bai"), emit: bam
 
     path 'versions.yml', emit: versions
     path '.command.*'  , emit: command_files
@@ -77,9 +75,9 @@ process REDUX {
         bqr_use_all_regions_arg = '-bqr_use_all_regions'
     }
 
-    if(targeted_mode && meta.sample_type == 'tumor') {
-        msi_model_coefficients_arg = "-msi_model_coefficients ${msi_model_coefficients}"
-        msi_model_error_rates_arg = "-msi_model_error_rates ${msi_model_error_rates}"
+    if(meta.sample_type == 'tumor') {
+        if(msi_model_coefficients) msi_model_coefficients_arg = "-msi_model_coefficients ${msi_model_coefficients}"
+        if(msi_model_error_rates)  msi_model_error_rates_arg  = "-msi_model_error_rates ${msi_model_error_rates}"
     }
 
     """

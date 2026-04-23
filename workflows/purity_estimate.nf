@@ -47,7 +47,6 @@ workflow PURITY_ESTIMATE {
     )
     ref_data = PREPARE_REFERENCE.out
     hmf_data = PREPARE_REFERENCE.out.hmf_data
-    panel_data = PREPARE_REFERENCE.out.panel_data
 
     ch_versions = ch_versions.mix(PREPARE_REFERENCE.out.versions)
 
@@ -61,18 +60,19 @@ workflow PURITY_ESTIMATE {
     ch_align_rna_tumor_out = Channel.empty()
     if (stages.alignment) {
 
+        // NOTE(LN): For now we won't support purity estimate mode for panel MSK (i.e. UMI processing with fastq-tools)
         READ_ALIGNMENT_DNA(
             ch_inputs,
             ref_data.genome_fasta,
             ref_data.genome_bwamem2_index,
-            targeted_mode ? panel_data.known_umis : [],
+            [], // known_umis.
             params.max_fastq_records,
             params.fastp_umi_enabled,
             params.fastp_umi_location,
             params.fastp_umi_length,
             params.fastp_umi_skip,
-            params.fastq_tools_umi_enabled,
-            params.fastq_tools_umi_delim,
+            false, // fastq_tools_umi_enabled,
+            '',    // fastq_tools_umi_delim,
         )
 
         ch_versions = ch_versions.mix(READ_ALIGNMENT_DNA.out.versions)
@@ -115,8 +115,9 @@ workflow PURITY_ESTIMATE {
             ref_data.genome_dict,
             hmf_data.unmap_regions,
             hmf_data.msi_jitter_sites,
-            targeted_mode ? hmf_data.msi_model_coefficients : [],
-            targeted_mode ? panel_data.msi_model_error_rates : [],
+            // NOTE(LN): Panel specific MSI predictions not used as indels are unimportant for WISP
+            [], // msi_model_coefficients
+            [], // msi_model_error_rates
             params.sequencing_type,
             params.redux_umi_enabled,
             params.redux_umi_duplex_delim,
