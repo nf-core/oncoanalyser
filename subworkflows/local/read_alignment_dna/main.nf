@@ -94,12 +94,12 @@ workflow READ_ALIGNMENT_DNA {
         UMI_PROCESSING_FASTP(
             ch_fastq_inputs,
             -1, // max_fastq_records
-            umi_location,
-            umi_length,
-            umi_skip,
+            fastp_umi_location,
+            fastp_umi_length,
+            fastp_umi_skip,
         )
 
-        ch_fastqs_umi_processed = FASTP.out.fastq
+        ch_fastqs_umi_processed = UMI_PROCESSING_FASTP.out.fastq
 
     } else if (fastq_tools_umi_enabled) {
 
@@ -128,9 +128,9 @@ workflow READ_ALIGNMENT_DNA {
         FASTQ_SPLITTING(
             ch_fastqs_umi_processed,
             max_fastq_records,
-            "", // umi_location
-            0,  // umi_length
-            -1, // umi_skip
+            "", // fastp_umi_location
+            0,  // fastp_umi_length
+            -1, // fastp_umi_skip
         )
 
         ch_fastqs_ready = FASTQ_SPLITTING.out.fastq

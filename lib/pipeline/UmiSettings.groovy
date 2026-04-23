@@ -1,5 +1,7 @@
 package pipeline
 
+import util.Enums
+
 public enum UmiSettings {
 
     TSO500(
@@ -36,9 +38,9 @@ public enum UmiSettings {
         this.reduxArgs = reduxArgs
     }
 
-    public FastpArgs fastpArgs(){ return this.fastpArgs }
-    public FastqToolsArgs fastqToolsArgs(){ return this.fastqToolsArgs }
-    public ReduxArgs reduxArgs(){ return this.reduxArgs }
+    public static UmiSettings fromString(String type){
+        return Enums.getValidatedEnumFromString(type, UmiSettings)
+    }
 
     public static UmiSettings fromSupportedPanel(SupportedPanel supportedPanel) {
         return switch (supportedPanel) {
@@ -48,6 +50,10 @@ public enum UmiSettings {
             default -> NONE
         }
     }
+
+    public FastpArgs fastpArgs(){ return this.fastpArgs }
+    public FastqToolsArgs fastqToolsArgs(){ return this.fastqToolsArgs }
+    public ReduxArgs reduxArgs(){ return this.reduxArgs }
 
     public static record FastpArgs(boolean umiProcessingEnabled, String umiLocation, int umiLength, int umiSkip) {}
     public static record FastqToolsArgs(boolean umiProcessingEnabled, String umiDelim) {}
