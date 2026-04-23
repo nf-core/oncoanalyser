@@ -105,7 +105,7 @@ class Params {
                 "",
                 "Provide argument --force_genome if you are using a custom genome,",
                 "or adjust the --genome argument to one of the supported genomes:",
-                createBulletedList(SupportedGenome.getNames())
+                createBulletedList(Enums.getEnumNames(SupportedGenome))
             )
         }
 
@@ -119,7 +119,7 @@ class Params {
         if (!params.genome_type) {
             error(
                 "For custom genomes, please provide of the following values to arg --genome_type:",
-                createBulletedList(RefGenomeType.getNames())
+                createBulletedList(Enums.getEnumNames(RefGenomeType))
             )
         }
 
@@ -170,7 +170,7 @@ class Params {
                 "configuration file when running in targeted mode or panel resource creation mode.",
                 "",
                 "Currently, panels with built-in support are:",
-                createBulletedList(SupportedPanel.getNames())
+                createBulletedList(Enums.getEnumNames(SupportedPanel))
             )
         }
 
@@ -186,7 +186,7 @@ class Params {
                 "",
                 "Provide argument --force_panel if you have a custom panel, or adjust the --panel",
                 "argument to one of the panels configured in the pipeline (case-sensitive):",
-                createBulletedList(SupportedPanel.getNames())
+                createBulletedList(Enums.getEnumNames(SupportedPanel))
             )
         }
 

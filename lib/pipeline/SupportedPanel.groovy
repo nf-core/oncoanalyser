@@ -24,8 +24,4 @@ public enum SupportedPanel {
         }
     }
 
-    public static List<String> getNames() {
-        return values().collect{ panel -> panel.toString() }
-    }
-
 }

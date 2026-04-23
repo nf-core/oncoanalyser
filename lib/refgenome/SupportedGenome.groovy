@@ -24,8 +24,4 @@ public enum SupportedGenome {
             return null
         }
     }
-
-    public static List<String> getNames() {
-        return values().collect{ variant -> variant.toString() }
-    }
 }
