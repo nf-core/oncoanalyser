@@ -14,7 +14,9 @@ class PrepareReferenceConfig {
         def has_rna_fastq = inputs.any { Inputs.hasTumorRnaFastq(it) }
         def has_dna_fastq = inputs.any { Inputs.hasTumorDnaFastq(it) || Inputs.hasNormalDnaFastq(it) }
 
-        def targeted_purity_estimate = pipeline_mode == PipelineMode.PURITY_ESTIMATE && purity_estimate_mode == PurityEstimateMode.TARGETED
+        def targeted_purity_estimate =
+            pipeline_mode == PipelineMode.PURITY_ESTIMATE &&
+            purity_estimate_mode == PurityEstimateMode.TARGETED
 
         return [
             require_fasta: true,
@@ -31,7 +33,7 @@ class PrepareReferenceConfig {
         ]
     }
 
-    public static Map<String, Boolean> forPrepRefOnly(Map params, Object log) {
+    public static Map<String, Boolean> forPrepRefOnly(Map params) {
 
         def ref_data_types = params.ref_data_types
             .tokenize(',')
@@ -74,14 +76,12 @@ class PrepareReferenceConfig {
         if (require_panel_data) {
 
             if (params.panel == null) {
-                require_panel_data = false
-                log.warn "Skipping preparing panel specific reference data as --panel CLI argument was not provided"
+                throw new IllegalStateException("Preparing panel specific reference data requires the --panel CLI argument to be provided")
             }
 
             def maybe_supported_panel = SupportedPanel.fromString((String) params.panel)
             if (!maybe_supported_panel) {
-                require_panel_data = false
-                log.warn "Skipping preparing panel specific reference data for custom panel: ${params.panel}"
+                throw new IllegalStateException("Preparing panel specific reference data not supported for custom panel: ${params.panel}")
             }
         }
 

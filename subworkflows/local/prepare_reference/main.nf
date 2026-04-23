@@ -46,7 +46,7 @@ workflow PREPARE_REFERENCE {
         : null
 
     def prep_config = prepare_reference_only
-        ? refdata.PrepareReferenceConfig.forPrepRefOnly(params, log)
+        ? refdata.PrepareReferenceConfig.forPrepRefOnly(params)
         : refdata.PrepareReferenceConfig.forPipelineRun(inputs, pipeline_mode, purity_estimate_mode, stages)
 
     def has_alt_contigs = params.genome_type == refgenome.RefGenomeType.ALT
