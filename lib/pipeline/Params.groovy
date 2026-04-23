@@ -33,16 +33,6 @@ class Params {
         throw new RuntimeException(message_string)
     }
 
-    private static String createBulletedList(List<String> items) {
-        def bulleted_items = []
-
-        for (item in items) {
-            bulleted_items.add(" - ${item}")
-        }
-
-        return bulleted_items.join('\n')
-    }
-
     private static void validateRunModes(Map params) {
 
         // Pipeline mode
@@ -51,7 +41,7 @@ class Params {
                 "Pipeline mode must be set using the --mode CLI argument or in a configuration file.",
                 "",
                 "Currently, the available pipeline modes are:",
-                createBulletedList(Enums.getEnumNames(PipelineMode)),
+                Enums.createBulletedList(PipelineMode),
             )
         }
 
@@ -66,7 +56,7 @@ class Params {
                     "CLI argument or in a configuration file.",
                     "",
                     "Currently, the available modes are:",
-                    createBulletedList(Enums.getEnumNames(PurityEstimateMode)),
+                    Enums.createBulletedList(PurityEstimateMode),
                 )
             }
 
@@ -78,7 +68,7 @@ class Params {
             error(
                 "CLI argument --ref_data_types is required for mode prepare_reference.",
                 "Please specify one or more of the below valid values (separated by commas)",
-                createBulletedList(Enums.getEnumNames(RefDataType)),
+                Enums.createBulletedList(RefDataType),
             )
         }
     }
@@ -105,21 +95,21 @@ class Params {
                 "",
                 "Provide argument --force_genome if you are using a custom genome,",
                 "or adjust the --genome argument to one of the supported genomes:",
-                createBulletedList(Enums.getEnumNames(SupportedGenome))
+                Enums.createBulletedList(SupportedGenome)
             )
         }
 
         if (!params.genome_version) {
             error(
                 "For custom genomes, please provide one of the following values to arg --genome_version:",
-                createBulletedList(RefGenomeVersion.getNumericNames())
+                Enums.createBulletedList(RefGenomeVersion.getNumericNames())
             )
         }
 
         if (!params.genome_type) {
             error(
                 "For custom genomes, please provide of the following values to arg --genome_type:",
-                createBulletedList(Enums.getEnumNames(RefGenomeType))
+                Enums.createBulletedList(RefGenomeType)
             )
         }
 
@@ -170,7 +160,7 @@ class Params {
                 "configuration file when running in targeted mode or panel resource creation mode.",
                 "",
                 "Currently, panels with built-in support are:",
-                createBulletedList(Enums.getEnumNames(SupportedPanel))
+                Enums.createBulletedList(SupportedPanel)
             )
         }
 
@@ -186,7 +176,7 @@ class Params {
                 "",
                 "Provide argument --force_panel if you have a custom panel, or adjust the --panel",
                 "argument to one of the panels configured in the pipeline (case-sensitive):",
-                createBulletedList(Enums.getEnumNames(SupportedPanel))
+                Enums.createBulletedList(SupportedPanel)
             )
         }
 
