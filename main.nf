@@ -98,7 +98,7 @@ workflow NFCORE_ONCOANALYSER {
         } else if (pipeline_mode === pipeline.PipelineMode.PURITY_ESTIMATE) {
             PURITY_ESTIMATE(inputs, stages)
         } else if (pipeline_mode === pipeline.PipelineMode.PANEL_RESOURCE_CREATION) {
-            PANEL_RESOURCE_CREATION(inputs)
+            PANEL_RESOURCE_CREATION(inputs, stages)
         } else {
             log.error("received bad pipeline mode: ${pipeline_mode}")
             Nextflow.exit(1)

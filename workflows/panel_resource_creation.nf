@@ -27,6 +27,7 @@ include { softwareVersionsToYAML } from '../subworkflows/nf-core/utils_nfcore_pi
 workflow PANEL_RESOURCE_CREATION {
     take:
     inputs
+    stages
 
     main:
     // Check input path parameters to see if they exist
@@ -57,8 +58,8 @@ workflow PANEL_RESOURCE_CREATION {
     // Set up reference data, assign more human readable variables
     PREPARE_REFERENCE(
         false, // prepare_reference_only
-        run_config,
         inputs,
+        stages,
     )
     ref_data = PREPARE_REFERENCE.out
     hmf_data = PREPARE_REFERENCE.out.hmf_data
@@ -72,20 +73,20 @@ workflow PANEL_RESOURCE_CREATION {
         ch_inputs,
         ref_data.genome_fasta,
         ref_data.genome_bwamem2_index,
-        panel_data.known_umis,
+        [], // known_umis
         params.max_fastq_records,
         params.fastp_umi_enabled,
         params.fastp_umi_location,
         params.fastp_umi_length,
         params.fastp_umi_skip,
-        params.fastq_tools_umi_enabled,
-        params.fastq_tools_umi_delim,
+        false, // fastq_tools_umi_enabled,
+        '',    // fastq_tools_umi_delim,
     )
 
     READ_ALIGNMENT_RNA(
         ch_inputs,
         ref_data.genome_star_index,
-        panel_data.known_umis,
+        [], // known_umis
         params.fastq_tools_umi_enabled,
         params.fastq_tools_umi_delim,
     )
@@ -115,8 +116,8 @@ workflow PANEL_RESOURCE_CREATION {
         ref_data.genome_dict,
         hmf_data.unmap_regions,
         hmf_data.msi_jitter_sites,
-        hmf_data.msi_model_coefficients,
-        panel_data.msi_model_error_rates,
+        [], // msi_model_coefficients
+        [], // msi_model_error_rates
         params.sequencing_type,
         params.redux_umi_enabled,
         params.redux_umi_duplex_delim,
@@ -126,8 +127,8 @@ workflow PANEL_RESOURCE_CREATION {
     ch_versions = ch_versions.mix(REDUX_PROCESSING.out.versions)
 
     // channel: [ meta, bam, bai ]
-    ch_redux_dna_tumor_bam_out = REDUX_PROCESSING.out.dna_tumor
-    ch_redux_dna_normal_bam_out = REDUX_PROCESSING.out.dna_normal
+    ch_redux_dna_tumor_bam_out = REDUX_PROCESSING.out.dna_tumor_bam
+    ch_redux_dna_normal_bam_out = REDUX_PROCESSING.out.dna_normal_bam
 
     // channel: [ meta, redux_tsv, ... ]
     ch_redux_dna_tumor_dir_out = REDUX_PROCESSING.out.dna_tumor_dir
@@ -149,9 +150,10 @@ workflow PANEL_RESOURCE_CREATION {
         hmf_data.ensembl_data_resources,
         hmf_data.driver_gene_panel,
         hmf_data.known_fusion_data,
+        hmf_data.isofox_gene_distribution,
+        hmf_data.isofox_alt_sj_distribution,
         isofox_counts,
         isofox_gc_ratios,
-        [],  // isofox_gene_ids
         [],  // isofox_tpm_norm
         'TRANSCRIPT_COUNTS',
         isofox_read_length,
