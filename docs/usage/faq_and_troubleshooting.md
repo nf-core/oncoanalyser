@@ -92,7 +92,7 @@ example, you would run `oncoanalyser` with the below command (assuming starting 
 
 ```bash
 nextflow run nf-core/oncoanalyser \
-  -revision 2.3.0 \
+  -revision 3.0.0 \
   -profile docker \
   --mode wgts \
   --processes_manual alignment,redux,amber,cobalt,sage,pave,esvee,purple \
@@ -184,7 +184,7 @@ For example, the `oncoanalyser` arguments which start with `--` in this command:
 
 ```shell
 nextflow run nf-core/oncoanalyser \
-  -revision 2.3.0 \
+  -revision 3.0.0 \
   -profile docker \
   -config refdata.config \
   --mode wgts \
@@ -208,7 +208,7 @@ and provided as a config file when running `oncoanalyser`:
 
 ```shell
 nextflow run nf-core/oncoanalyser \
-  -revision 2.3.0 \
+  -revision 3.0.0 \
   -config refdata.config \
   -config params.config \
   -profile docker \
