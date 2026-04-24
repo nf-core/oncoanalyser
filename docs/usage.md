@@ -693,28 +693,43 @@ nextflow run nf-core/oncoanalyser \
 ### Purity estimate
 
 `--mode purity_estimate` uses [WISP](https://github.com/hartwigmedical/hmftools/tree/master/wisp) to estimate the tumor fraction
-(aka purity) for a longitudinal sample (typically a ctDNA sample) guided by variants identified in a primary sample of the same patient
-(typically a primary tissue biopsy). This can be used for example for detecting minimal residual disease (MRD).
+(aka purity) for a longitudinal sample (e.g. ctDNA sample) guided by variants identified in a primary sample of the same patient
+(e.g. primary tissue biopsy). This can be used for example for detecting minimal residual disease (MRD).
 
 The primary sample must first have been run in either [**WGTS**](#whole-genome--transcriptome-sequencing-wgts) or
 [**targeted**](#targeted-sequencing) mode.
 
-A samplesheet with the paths to the primary and longitudinal sample data is then created. Specifically:
+Purity estimate of the longitudinal sample can likewise be run in WGTS or targeted mode by providing 
+`--purity_estimate_mode wgts` or `--purity_estimate_mode targeted`.
 
-- The BAM from the longitudinal tumor sample
-- The AMBER and PURPLE directories from the **primary tumor** sample
-- (Optional) The REDUX BAM of the normal sample, if the normal sample was provided in the primary sample run (i.e. was run in tumor/normal mode)
+For `--purity_estimate_mode targeted`, purity estimate relies only on SNVs. The sample sheet should contain:
+- BAM or REDUX BAM from the **longitudinal tumor** sample
+- PURPLE directory from the **primary tumor** sample
 
-```csv title="samplesheet.purity_estimate.csv"
+For example:
+```csv title="samplesheet.purity_estimate.snv_only.csv"
 group_id,subject_id,sample_id,sample_type,sequence_type,filetype,info,filepath
-PATEINT1,PATIENT1,PATIENT1-L,tumor,dna,bam,longitudinal_sample,/path/to/PATIENT1-T.dna.longitudinal.bam
-PATIENT1,PATIENT1,PATIENT1-N,normal,dna,bam_redux,,/path/to/PATIENT1-N.dna.redux.bam
-PATEINT1,PATIENT1,PATIENT1-T,tumor,dna,amber_dir,,/path/to/PATIENT1-T/amber/
-PATEINT1,PATIENT1,PATIENT1-T,tumor,dna,purple_dir,,/path/to/PATIENT1-T/purple/
+PATIENT1,PATIENT1,PATIENT1-L,tumor,dna,bam,longitudinal_sample,/path/to/PATIENT1-T.dna.longitudinal.bam
+PATIENT1,PATIENT1,PATIENT1-T,tumor,dna,purple_dir,,/path/to/PATIENT1-T/purple/
 ```
 
-Then run `oncoanalyser` providing `--mode purity_estimate` and `--purity_estimate_mode <wgts|targeted>` (how the **longitudinal sample**
-was sequenced):
+For `--purity_estimate_mode wgts`, purity estimate relies on SNVs, LOH and CNVs. The sample sheet should **additionally** 
+contain:
+- COBALT directory from the **primary tumor** sample
+- AMBER directory from the **primary tumor** sample
+- BAM or REDUX BAM from the **primary normal** sample
+
+For example:
+```csv title="samplesheet.purity_estimate.csv"
+group_id,subject_id,sample_id,sample_type,sequence_type,filetype,info,filepath
+PATIENT1,PATIENT1,PATIENT1-L,tumor,dna,bam,longitudinal_sample,/path/to/PATIENT1-T.dna.longitudinal.bam
+PATIENT1,PATIENT1,PATIENT1-T,tumor,dna,purple_dir,,/path/to/PATIENT1-T/purple/
+PATIENT1,PATIENT1,PATIENT1-T,tumor,dna,cobalt_dir,,/path/to/PATIENT1-T/cobalt/
+PATIENT1,PATIENT1,PATIENT1-T,tumor,dna,amber_dir,,/path/to/PATIENT1-T/amber/
+PATIENT1,PATIENT1,PATIENT1-N,normal,dna,bam_redux,,/path/to/PATIENT1-N.dna.redux.bam
+```
+
+Then run `oncoanalyser` providing `--mode purity_estimate` and `--purity_estimate_mode <wgts|targeted>`:
 
 ```bash
 nextflow run nf-core/oncoanalyser \
