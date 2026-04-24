@@ -594,8 +594,6 @@ Some these files are used with `--mode panel_resource_creation` to create the re
 | :-------- | :---------------------------- | :---------------------------------------------------------------------------------------------------------------------- |
 | DNA       | `driver_gene_panel`           | Manually created                                                                                                        |
 | DNA       | `target_region_bed`           | Manually created                                                                                                        |
-| DNA       | `target_region_msi_indels`    | Manually created                                                                                                        |
-| DNA       | `target_region_ratios`        | Manually created                                                                                                        |
 | DNA       | `target_region_normalisation` | Output from `--mode panel_resource_creation`                                                                            |
 | DNA       | `pon_artefacts`               | Output from `--mode panel_resource_creation`                                                                            |
 | RNA       | `isofox_gene_ids`             | Manually created                                                                                                        |
@@ -650,19 +648,16 @@ params {
 
             // Genome version: '37' or '38'
             '38' {
-                driver_gene_panel           = 'DriverGenePanel.38.tsv'
-                pon_artefacts               = 'pave.somatic_artefacts.38.tsv'
-                target_region_bed           = 'target_regions_definition.38.bed.gz'
-                target_region_normalisation = 'cobalt.region_normalisation.38.tsv'
-                target_region_ratios        = 'target_regions_ratios.38.tsv'
-                target_region_msi_indels    = 'target_regions_msi_indels.38.tsv'
+                driver_gene_panel           = 'driver_genes.38.tsv'
+                pon_artefacts               = 'pon_artefacts.38.tsv.gz'
+                target_region_bed           = 'panel_definition.38.bed.gz'
+                target_region_normalisation = 'cobalt_normalisation.38.tsv'
 
                 // (Optional) RNA reference data
                 // Paths can be omitted (e.g. for panels without RNA) by providing an empty list:
                 // isofox_counts = []
                 isofox_counts               = 'read_151_exp_counts.38.csv'
                 isofox_gc_ratios            = 'read_100_exp_gc_ratios.38.csv'
-                isofox_gene_ids             = 'rna_gene_ids.csv'
                 isofox_tpm_norm             = 'isofox.gene_normalisation.38.csv'
             }
         }
