@@ -23,6 +23,9 @@ workflow AMBER_PROFILING {
     // channel: [ versions.yml ]
     ch_versions = Channel.empty()
 
+    def run_mode = pipeline.PipelineMode.fromString(params.mode)
+    def purity_estimate_mode = run_mode === pipeline.PipelineMode.PURITY_ESTIMATE
+
     // Select input sources and sort
     // channel: runnable: [ meta, tumor_bam, tumor_bai, normal_bam, normal_bai]
     // channel: skip: [ meta ]
@@ -47,13 +50,10 @@ workflow AMBER_PROFILING {
         .branch { meta, tumor_bam, tumor_bai, normal_bam, normal_bai, donor_bam, donor_bai ->
             def has_existing = sample.Inputs.hasExisting(meta, sample.FileKey.AMBER_DIR)
 
-
             // TODO(SW): must improve handling through separation of sample information in meta; currently unable to provide ccfDNA AMBER directory in samplesheet
             def longitudinal_sample = sample.Inputs.getTumorDnaSample(meta).containsKey('longitudinal_sample_id')
 
             runnable: tumor_bam && (!has_existing || longitudinal_sample)
-
-
             skip: true
                 return meta
         }
@@ -63,10 +63,14 @@ workflow AMBER_PROFILING {
     ch_amber_inputs = ch_inputs_sorted.runnable
         .map { meta, tumor_bam, tumor_bai, normal_bam, normal_bai, donor_bam, donor_bai ->
 
+            def tumor_id = purity_estimate_mode
+               ? sample.Inputs.getTumorDnaSampleName(meta, 'longitudinal')
+               : sample.Inputs.getTumorDnaSampleName(meta, 'primary')
+
             def meta_amber = [
                 key: meta.group_id,
                 id: meta.group_id,
-                tumor_id: sample.Inputs.getTumorDnaSampleName(meta),
+                tumor_id: tumor_id,
             ]
 
             if (normal_bam) {

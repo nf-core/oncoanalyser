@@ -9,11 +9,12 @@ process WISP {
 
     input:
     tuple val(meta),
-        path(primary_purple_dir),
-        path('primary_amber_dir'),
-        path('sample_amber_dir'),
-        path(cobalt_dir),
-        path(sage_append_dir)
+        path(primary_purple_dir, stageAs: 'purple_primary'),
+        path(primary_amber_dir, stageAs: 'amber_primary'),
+        path(primary_normal_bam),
+        path(longitudinal_amber_dir, stageAs: 'amber_longitudinal'),
+        path(longitudinal_cobalt_dir, stageAs: 'cobalt_longitudinal'),
+        path(longitudinal_sage_append_dir, stageAs: 'sage_append_longitudinal')
     path genome_fasta
     path genome_fai
     val targeted_mode
@@ -31,35 +32,46 @@ process WISP {
 
     def log_level_arg = task.ext.log_level ? "-log_level ${task.ext.log_level}" : ''
 
-    def purity_methods
     def amber_dir_arg
     def cobalt_dir_arg
     def gc_ratio_min_arg
     def write_types_arg
 
+    def purity_methods = ['SOMATIC_VARIANT']
+
     if (targeted_mode) {
-        purity_methods      = 'SOMATIC_VARIANT'
-        amber_dir_arg       = ''
-        cobalt_dir_arg      = ''
-        gc_ratio_min_arg    = '-gc_ratio_min 0.4'
-        write_types_arg     = "-write_types 'SOMATIC_DATA;SOMATIC_PLOT'"
+
+        amber_dir_arg = ''
+        cobalt_dir_arg = ''
+        gc_ratio_min_arg = '-gc_ratio_min 0.4'
+        write_types_arg = "-write_types 'SOMATIC_DATA;SOMATIC_PLOT'"
+
     } else {
-        purity_methods      = "'SOMATIC_VARIANT;AMBER_LOH;COPY_NUMBER'"
-        amber_dir_arg       = '-amber_dir amber_dir__prepared/'
-        cobalt_dir_arg      = "-cobalt_dir ${cobalt_dir}"
-        gc_ratio_min_arg    = ''
-        write_types_arg     = '-write_types ALL'
+
+        if(primary_amber_dir && primary_normal_bam) {
+            amber_dir_arg = '-amber_dir amber_dir__prepared/'
+            purity_methods += 'AMBER_LOH'
+        } else {
+            amber_dir_arg = ''
+        }
+
+        cobalt_dir_arg = "-cobalt_dir ${longitudinal_cobalt_dir}"
+        purity_methods += 'COPY_NUMBER'
+
+        gc_ratio_min_arg = ''
+        write_types_arg = '-write_types ALL'
     }
 
+    def purity_methods_arg = "'${purity_methods.join(';')}'"
+
     """
-    # Put AMBER outputs from all samples into the same dir
+    ## Put AMBER outputs from primary and longitudinal sample into the same dir
     if [[ -n "${amber_dir_arg}" ]]; then
         mkdir -p amber_dir__prepared/;
         for fp in ${primary_amber_dir}/*.amber.*; do ln -sf ../\$fp amber_dir__prepared/; done
-        for fp in ${sample_amber_dir}/*.amber.*;  do ln -sf ../\$fp amber_dir__prepared/; done
+        for fp in ${longitudinal_amber_dir}/*.amber.*; do ln -sf ../\$fp amber_dir__prepared/; done
     fi;
 
-    # Run WISP
     mkdir -p wisp/
 
     wisp \\
@@ -69,8 +81,8 @@ process WISP {
         -patient_id ${meta.subject_id} \\
         -tumor_id ${meta.primary_id} \\
         -samples ${meta.longitudinal_id} \\
-        -purity_methods ${purity_methods} \\
-        -somatic_vcf ${sage_append_dir}/${meta.longitudinal_id}.sage.append.vcf.gz \\
+        -purity_methods ${purity_methods_arg} \\
+        -somatic_vcf ${longitudinal_sage_append_dir}/${meta.longitudinal_id}.sage.append.vcf.gz \\
         -purple_dir ${primary_purple_dir} \\
         ${amber_dir_arg} \\
         ${cobalt_dir_arg} \\

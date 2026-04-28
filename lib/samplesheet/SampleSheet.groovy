@@ -349,10 +349,13 @@ class SampleSheet {
         def meta_tumor_dna = meta.getOrDefault([SampleType.TUMOR, SequenceType.DNA], [:])
         def longitudinal = meta_tumor_dna.containsKey('longitudinal_sample_id')
         def has_amber_dir = meta_tumor_dna.containsKey(FileType.AMBER_DIR)
-        def has_normal_dna_bam = Inputs.hasNormalDnaBam(meta) || Inputs.hasNormalDnaReduxBam(meta)
+        def has_normal_dna_bam = Inputs.hasNormalDnaReduxBam(meta)
 
         if (longitudinal && has_amber_dir && !has_normal_dna_bam) {
-            throw new IllegalStateException("AMBER input was provided without the required primary normal DNA BAM for group_id(${meta.group_id})")
+            throw new IllegalStateException(
+                "group_id(${meta.group_id}) - In purity estimate mode, if AMBER dir is provided,\n" +
+                "the primary normal DNA REDUX BAM should also be provided"
+            )
         }
 
     }

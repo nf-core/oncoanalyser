@@ -23,6 +23,9 @@ workflow COBALT_PROFILING {
     // channel: [ versions.yml ]
     ch_versions = Channel.empty()
 
+    def run_mode = pipeline.PipelineMode.fromString(params.mode)
+    def purity_estimate_mode = run_mode === pipeline.PipelineMode.PURITY_ESTIMATE
+
     // Select input sources and sort
     // NOTE(SW): germline mode is not currently supported
     // channel: runnable: [ meta, tumor_bam, tumor_bai, normal_bam, normal_bai]
@@ -63,10 +66,14 @@ workflow COBALT_PROFILING {
     ch_cobalt_inputs = ch_inputs_runnable
         .multiMap { meta, tumor_bam, tumor_bai, normal_bam, normal_bai, diploid_bed ->
 
+            def tumor_id = purity_estimate_mode
+               ? sample.Inputs.getTumorDnaSampleName(meta, 'longitudinal')
+               : sample.Inputs.getTumorDnaSampleName(meta, 'primary')
+
             def meta_cobalt = [
                 key: meta.group_id,
                 id: meta.group_id,
-                tumor_id: sample.Inputs.getTumorDnaSampleName(meta),
+                tumor_id: tumor_id,
             ]
 
             if (normal_bam) {

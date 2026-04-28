@@ -32,26 +32,46 @@ workflow WISP_ANALYSIS {
         ch_cobalt_out,
         ch_sage_somatic_append_out,
     )
-        .branch { meta, amber_dir, cobalt_dir, sage_append_dir ->
+        .branch { meta, longitudinal_amber_dir, longitudinal_cobalt_dir, longitudinal_sage_append_dir ->
 
             def primary_purple_dir = sample.Inputs.get(meta, sample.FileKey.PURPLE_DIR)
             def primary_amber_dir = sample.Inputs.get(meta, sample.FileKey.AMBER_DIR)
+            def primary_normal_bam = sample.Inputs.get(meta, sample.FileKey.BAM_REDUX_DNA_NORMAL)
 
-            def runnable = targeted_mode
-                ? primary_purple_dir && sage_append_dir
-                : primary_purple_dir && primary_amber_dir && sage_append_dir && amber_dir && cobalt_dir
+            def runnable
+            if (targeted_mode) {
+                runnable =
+                    primary_purple_dir &&
+                    longitudinal_sage_append_dir
+            } else {
+                runnable =
+                    primary_purple_dir &&
+                    longitudinal_sage_append_dir &&
+                    longitudinal_cobalt_dir
+            }
+
+            def inputs = [:]
+            inputs.meta = meta
+            inputs.primary_purple_dir = primary_purple_dir
+            inputs.primary_amber_dir = primary_amber_dir
+            inputs.primary_normal_bam = primary_normal_bam
+            inputs.longitudinal_amber_dir = longitudinal_amber_dir
+            inputs.longitudinal_cobalt_dir = longitudinal_cobalt_dir
+            inputs.longitudinal_sage_append_dir = longitudinal_sage_append_dir
 
             runnable: runnable
-                return [meta, primary_purple_dir, primary_amber_dir, amber_dir, cobalt_dir, sage_append_dir]
+                return inputs
             skip: true
-                return meta
+                return inputs.meta
         }
 
     // Create process input channel
     // channel: [ meta_wisp, ... ]
     ch_wisp_inputs = ch_inputs_sorted.runnable
 
-        .map { meta, primary_purple_dir, primary_amber_dir, amber_dir, cobalt_dir, sage_append_dir ->
+        .map { inputs ->
+
+            def meta = inputs.meta
 
             def meta_wisp = [
                 key: meta.group_id,
@@ -61,7 +81,9 @@ workflow WISP_ANALYSIS {
                 longitudinal_id: sample.Inputs.getTumorDnaSampleName(meta, 'longitudinal'),
             ]
 
-            return [meta_wisp, primary_purple_dir, primary_amber_dir, amber_dir, cobalt_dir, sage_append_dir]
+            inputs.meta = meta_wisp
+
+            return inputs.values()
         }
 
 
