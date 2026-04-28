@@ -199,25 +199,6 @@ PATIENT1,PATIENT1,PATIENT1-T,tumor,dna,bai,/other/dir/PATIENT1-T.dna.bam.bai
 
 #### CRAM
 
-:::info
-
-To run analyses starting from CRAM, you must use the CRAM format version ≤3.0 with the reference fully embedded. An
-example command converting to the appropriate CRAM format is shown:
-
-```bash
-samtools view \
-  --cram \
-  --output-fmt-option version=3.0 \
-  --output-fmt-option embed_ref=1 \
-  --output-fmt-option reference=/path/to/reference.fasta \
-  --output sample.cram \
-  --threads 4 \
-  --write-index \
-  sample.bam
-```
-
-:::
-
 To run from CRAM, use `cram` and `crai` in the `filetype` field. `crai` only needs to be provided if the CRAM index is
 not in the same directory as the CRAM file:
 
@@ -227,12 +208,19 @@ PATIENT1,PATIENT1,PATIENT1-T,tumor,dna,cram,/path/to/PATIENT1-T.dna.cram
 PATIENT1,PATIENT1,PATIENT1-T,tumor,dna,crai,/other/dir/PATIENT1-T.dna.cram.crai
 ```
 
-Similarly, for REDUX CRAMs, provide `cram_redux` and optionally `crai`:
+CRAMs should be of version ≤3.0 and have the [reference genome](#reference-data-urls) embedded. An example command for 
+converting a BAM to the appropriate CRAM format is:
 
-```csv title="samplesheet.redux_cram.csv"
-group_id,subject_id,sample_id,sample_type,sequence_type,filetype,filepath
-PATIENT1,PATIENT1,PATIENT1-T,tumor,dna,cram_redux,/path/to/PATIENT1-T.dna.redux.cram
-PATIENT1,PATIENT1,PATIENT1-T,tumor,dna,crai,/other/dir/PATIENT1-T.dna.cram.crai
+```bash
+samtools view \
+  --cram \
+  --output-fmt-option version=3.0 \
+  --output-fmt-option embed_ref=1 \
+  --output-fmt-option reference=GRCh38_masked_exclusions_alts_hlas.fasta \
+  --output sample.cram \
+  --threads 4 \
+  --write-index \
+  sample.bam
 ```
 
 :::warning
