@@ -136,27 +136,27 @@ The samplesheet contains information in CSV format for each sample to be analyse
 row as the first line with the below columns:
 
 | Column          | Description                                                                                                                                                                                                                                                                                                                                                       |
-| :-------------- |:------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| `group_id`      | Groups `sample_id` entries (e.g. tumor DNA, normal DNA, tumor RNA for one patient) into the same analysis                                                                                                                                                                                                                                                         |
-| `subject_id`    | Subject/patient identifier, used internally to perform sanity check when processing multiple groups                                                                                                                                                                                                                                                               |
+|:----------------|:------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| `group_id`      | Groups `sample_id` entries into the same analysis                                                                                                                                                                                                                                                                                                                 |
+| `subject_id`    | Must be the same value within each `group_id`                                                                                                                                                                                                                                                                                                                     |
 | `sample_id`     | Sample identifier                                                                                                                                                                                                                                                                                                                                                 |
-| `sample_type`   | Sample type: `tumor`, `normal`                                                                                                                                                                                                                                                                                                                                    |
-| `sequence_type` | Sequence type: `dna`, `rna`                                                                                                                                                                                                                                                                                                                                       |
-| `filetype`      | File type: e.g. `fastq`, `bam`, `bai`; a full list of valid values can be found [here](https://github.com/nf-core/oncoanalyser/blob/3.0.0/lib/samplesheet/FileType.groovy)                                                                                                                                                                                        |
-| `info`          | Additional sample info in the form `<key1>:<value2>;<key1>:<value2>;...`. Valid keys: `lane` and `library_id` for [FASTQ](#fastq) files, `longitudinal_sample` for mode [purity_estimate](#purity-estimate), `cancer_type` as a DOID that is passed to ORANGE (details in [readme](https://github.com/hartwigmedical/hmftools/tree/master/orange#running-orange)) |
-| `filepath`      | Absolute filepath to input file, which can be a local filepath or supported protocol (http, https, ftp, s3, az, gz)                                                                                                                                                                                                                                               |
+| `sample_type`   | Sample type: `tumor`, `normal`, or `tumor_normal`                                                                                                                                                                                                                                                                                                                 |
+| `sequence_type` | Sequence type: `dna`, `rna`, or `dna_rna`                                                                                                                                                                                                                                                                                                                         |
+| `filetype`      | File type: e.g. `fastq`, `bam`, `bai`. All valid values can be found [here](../lib/samplesheet/FileType.groovy).                                                                                                                                                                                                                                                  |
+| `info`          | Additional sample info in the form `<key1>:<value1>;<key1>:<value2>;...`. Valid keys: `lane` and `library_id` for [FASTQ](#fastq) files, `longitudinal_sample` for mode [purity_estimate](#purity-estimate), `cancer_type` as a DOID that is passed to ORANGE (details in [readme](https://github.com/hartwigmedical/hmftools/tree/master/orange#running-orange)) |
+| `filepath`      | Absolute filepath to input file. Can be a local path, URL (e.g. http://, https://, ftp://) or cloud URI (e.g. gs://, s3://)                                                                                                                                                                                                                                       |
 
-The identifiers provided in the samplesheet are used to determine output file paths:
+Output file paths are constructed based on `group_id` and `sample_id`:
 
 - `group_id`: top-level output directory for analysis files e.g. `output/PATIENT1/`
-- tumor `sample_id`: output prefix for most filenames e.g. `PATIENT1-T.purple.sv.vcf.gz`
+- tumor `sample_id`: output prefix for most filenames e.g. `PATIENT1-T.purple.somatic.vcf.gz`
 - normal `sample_id`: output prefix for some filenames e.g. `PATIENT1-N.cobalt.ratio.pcf`
 
 ### Analysis starting points
 
-The `oncoanalyser` pipeline has been designed in such a way that allows an analysis to start from arbitrary entrypoints
-as long as the required inputs are provided in the samplesheet. An analysis will generally start from either FASTQ or
-alignment (BAM, CRAM, REDUX BAM) inputs, which are shown in the examples below.
+An `oncoanalyser` run will typically start from either FASTQ or alignment (BAM, CRAM, REDUX BAM) inputs. However, the
+pipeline can also start from [arbitrary entry points](#starting-from-existing-outputs) as long as the required 
+inputs are provided in the samplesheet.
 
 #### FASTQ
 
@@ -268,11 +268,30 @@ PATIENT1,PATIENT1,PATIENT1-T,tumor,dna,bai,/path/to/PATIENT1-T.dna.redux.bai
 PATIENT1,PATIENT1,PATIENT1-T,tumor,dna,redux_tsv_dir,/path/to/redux_tsv_dir/
 ```
 
-:::tip
+#### Starting from existing outputs
 
-You can also [start from existing inputs](#starting-from-existing-inputs) other than from REDUX BAM
+Similar to starting from existing [REDUX BAM/CRAM](#redux-bam--cram) files, any of the downstream outputs of `oncoanalyser` 
+can be used as inputs so that the associated downstream processes can be skipped. This could be considered an explicit 
+form of [-resume](#-resume) which does not require the Nextflow `work/` directory to be preserved.
 
-:::
+For example, you may already have tumor/normal sample output for small variant calling 
+from [SAGE](https://github.com/hartwigmedical/hmftools/tree/master/sage) 
+and structural variant calling from [ESVEE](https://github.com/hartwigmedical/hmftools/tree/master/esvee), and want to
+run the rest of the pipeline.
+
+```csv title='samplesheet.resume.csv'
+group_id,subject_id,sample_id,sample_type,sequence_type,filetype,filepath
+PATIENT1,PATIENT1,PATIENT1-N,normal,dna,bam_redux,/path/to/PATIENT1-T.dna.redux.bam
+PATIENT1,PATIENT1,PATIENT1-T,tumor,dna,bam_redux,/path/to/PATIENT1-T.dna.redux.bam
+PATIENT1,PATIENT1,PATIENT1-N,normal,dna,sage_dir,/path/to/sage_normal_output_dir/
+PATIENT1,PATIENT1,PATIENT1-T,tumor,dna,sage_dir,/path/to/sage_tumor_output_dir/
+PATIENT1,PATIENT1,PATIENT1-T,tumor_normal,dna,esvee_dir,/path/to/esvee_output_dir/
+```
+
+All valid combinations of `sample_type`, `sequence_type` and `filetype` are can be found [here](../lib/sample/FileKey.groovy).
+
+This approach can be used in combination with [manual process selection](#manual-process-selection) to run specific 
+downstream components of the pipeline.
 
 ### Sample setups
 
@@ -326,7 +345,7 @@ PATIENT1,PATIENT1,PATIENT1-D,donor,dna,bam,/path/to/PATIENT1-D.dna.bam
 PATIENT1,PATIENT1,PATIENT1-T,tumor,dna,bam,/path/to/PATIENT1-T.dna.bam
 ```
 
-### Multiple samples
+#### Multiple samples
 
 To run with multiple samples, specify a different `group_id` and `subject_id` for each desired grouping:
 
@@ -772,45 +791,13 @@ nextflow run nf-core/oncoanalyser \
   --outdir output/
 ```
 
-### Starting from existing inputs
+:::warning
 
-An `oncoanalyser` analysis can start at arbitrary points as long as the required inputs are provided. For example,
-neoepitope calling with [NEO](https://github.com/hartwigmedical/hmftools/tree/master/neo) can be run from existing
-outputs generated by [PURPLE](https://github.com/hartwigmedical/hmftools/tree/master/purple),
-[LILAC](https://github.com/hartwigmedical/hmftools/tree/master/lilac) and
-[ISOFOX](https://github.com/hartwigmedical/hmftools/tree/master/isofox). To do this, provide the below example
-samplesheet:
-
-:::note
-
-The original source input file (e.g. FASTQ, BAM, CRAM) must be provided for `oncoanalyser` to infer the correct analysis
-type.
+It is the user's responsibility to select the required upstream processes for a downstream process to run. If not all
+required processes are selected, `oncoanalyser` will not raise an error but instead finish without the downstream
+process running.
 
 :::
-
-```csv title='samplesheet.neo_inputs.csv'
-group_id,subject_id,sample_id,sample_type,sequence_type,filetype,filepath
-PATIENT1,PATIENT1,PATIENT1-N,normal,dna,bam,/path/to/PATIENT1-N.dna.wgs.bam
-PATIENT1,PATIENT1,PATIENT1-T,tumor,dna,bam,/path/to/PATIENT1-T.dna.wgs.bam
-PATIENT1,PATIENT1,PATIENT1-T-RNA,tumor,rna,bam,/path/to/PATIENT1-T.rna.wgs.bam
-PATIENT1,PATIENT1,PATIENT1-T-RNA,tumor,rna,isofox_dir,/path/to/PATIENT1.isofox_dir/
-PATIENT1,PATIENT1,PATIENT1-T,tumor,dna,purple_dir,/path/to/PATIENT1.purple_dir/
-PATIENT1,PATIENT1,PATIENT1-T,tumor,dna,linx_anno_dir,/path/to/PATIENT1.linx_anno_dir/
-PATIENT1,PATIENT1,PATIENT1-T,tumor,dna,lilac_dir,/path/to/PATIENT1.lilac_dir/
-```
-
-Then, run `oncoanalyser` skipping all processes except for `neo`:
-
-```bash
-nextflow run nf-core/oncoanalyser \
-  -revision 3.0.0 \
-  -profile docker \
-  --mode wgts \
-  --processes_manual neo \
-  --genome GRCh38_hmf \
-  --input samplesheet.neo_inputs.csv \
-  --outdir output/
-```
 
 ## Core Nextflow arguments
 

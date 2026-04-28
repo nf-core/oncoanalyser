@@ -58,8 +58,19 @@ public enum FileKey {
     VIRUSINTERPRETER_DIR(FileType.VIRUSINTERPRETER_DIR, SampleType.TUMOR, SequenceType.DNA),
     
     public final FileType fileType
+
     public final List<SampleType> sampleTypes
     public final List<SequenceType> sequenceTypes
+    // These^ fields have multiple options of values that map to the same FileKey.
+    //
+    // For example, providing this in the sample sheet (only relevant columns shown here):
+    //   filetype,sample_type,sequence_type
+    //   amber_dir,tumor,dna
+    // or:
+    //   amber_dir,tumor_normal,dna
+    //
+    // will both return FileKey.AMBER_DIR
+    //
 
     FileKey(FileType fileType, List<SampleType> sampleTypes, List<SequenceType> sequenceTypes) {
         this.fileType = fileType
