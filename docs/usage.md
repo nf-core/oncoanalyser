@@ -690,32 +690,30 @@ nextflow run nf-core/oncoanalyser \
 The primary sample must first have been run in either [**WGTS**](#whole-genome--transcriptome-sequencing-wgts) or
 [**targeted**](#targeted-sequencing) mode.
 
-Purity estimate of the longitudinal sample can likewise be run in WGTS or targeted mode by providing 
-`--purity_estimate_mode wgts` or `--purity_estimate_mode targeted`.
+Purity estimate of the longitudinal sample can likewise be run in two modes:
+- `--purity_estimate_mode wgts`: relies on SNVs, CNVs, and optionally LOH
+- `--purity_estimate_mode targeted`: relies on SNVs only
 
-For `--purity_estimate_mode targeted`, purity estimate relies only on SNVs. The sample sheet should contain:
+The minimal inputs required are:
 - BAM or REDUX BAM from the **longitudinal tumor** sample
 - PURPLE directory from the **primary tumor** sample
-
-For example:
-```csv title="samplesheet.purity_estimate.snv_only.csv"
-group_id,subject_id,sample_id,sample_type,sequence_type,filetype,info,filepath
-PATIENT1,PATIENT1,PATIENT1-L,tumor,dna,bam,longitudinal_sample,/path/to/PATIENT1-T.dna.longitudinal.bam
-PATIENT1,PATIENT1,PATIENT1-T,tumor,dna,purple_dir,,/path/to/PATIENT1-T/purple/
-```
-
-For `--purity_estimate_mode wgts`, purity estimate relies on SNVs, LOH and CNVs. The sample sheet should **additionally** 
-contain:
-- COBALT directory from the **primary tumor** sample
-- AMBER directory from the **primary tumor** sample
-- BAM or REDUX BAM from the **primary normal** sample
 
 For example:
 ```csv title="samplesheet.purity_estimate.csv"
 group_id,subject_id,sample_id,sample_type,sequence_type,filetype,info,filepath
 PATIENT1,PATIENT1,PATIENT1-L,tumor,dna,bam,longitudinal_sample,/path/to/PATIENT1-T.dna.longitudinal.bam
 PATIENT1,PATIENT1,PATIENT1-T,tumor,dna,purple_dir,,/path/to/PATIENT1-T/purple/
-PATIENT1,PATIENT1,PATIENT1-T,tumor,dna,cobalt_dir,,/path/to/PATIENT1-T/cobalt/
+```
+
+In `--purity_estimate_mode wgts`, to use LOH for purity estimation, you can optionally provide: 
+- AMBER directory from the **primary tumor** sample **AND**
+- REDUX BAM from the **primary normal** sample
+
+For example:
+```csv title="samplesheet.purity_estimate.with_amber.csv"
+group_id,subject_id,sample_id,sample_type,sequence_type,filetype,info,filepath
+PATIENT1,PATIENT1,PATIENT1-L,tumor,dna,bam,longitudinal_sample,/path/to/PATIENT1-T.dna.longitudinal.bam
+PATIENT1,PATIENT1,PATIENT1-T,tumor,dna,purple_dir,,/path/to/PATIENT1-T/purple/
 PATIENT1,PATIENT1,PATIENT1-T,tumor,dna,amber_dir,,/path/to/PATIENT1-T/amber/
 PATIENT1,PATIENT1,PATIENT1-N,normal,dna,bam_redux,,/path/to/PATIENT1-N.dna.redux.bam
 ```
