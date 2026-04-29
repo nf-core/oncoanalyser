@@ -16,6 +16,12 @@ public enum UmiType {
         new ReduxArgs(true, "_")
     ),
 
+    KAPA(
+        new FastpArgs(true, "per_read", 6, 0),
+        fastqToolsUmiDisabled(),
+        new ReduxArgs(true, "_")
+    ),
+
     MSK(
         fastpUmiDisabled(),
         new FastqToolsArgs(true, "+"),
