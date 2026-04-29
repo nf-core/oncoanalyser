@@ -63,9 +63,7 @@ class Inputs {
 
     public static List<Path> resolveReduxTsvFiles(Object redux_dir, Map meta, SampleType sample_type) {
 
-        // NOTE(LN): Get the REDUX TSV files as a glob
-        //
-        // This avoids passing REDUX dir (containing the BAM and TSV files) to downstream processes because in
+        // NOTE(LN): This avoids passing REDUX dir (containing the BAM and TSV files) to downstream processes because in
         // cloud environments, this would mean the BAMs are copied to the VM running that downstream process.
         // When the BAMs are not needed as input, this would result in the VM requiring more disk space than necessary.
 
@@ -85,7 +83,10 @@ class Inputs {
         def meta_sample = meta.getOrDefault([sample_type, SequenceType.DNA], [:])
         def sample_id = meta_sample.getOrDefault('longitudinal_sample_id', meta_sample['sample_id'])
 
-        // NOTE(LN): toUriString() needs to be called, otherwise nextflow will fail to resolve cloud paths
+        // NOTE(LN):
+        // -  Ideally we would use nextflow.Nextflow.file(...).resolve(...) but that returns a Path with wildcard paths
+        //   NOT expanded. However, we want List<Path> where wildcard paths are expanded.
+        // - toUriString() needs to be called, otherwise nextflow will fail to resolve cloud paths.
         def redux_dir_uri = nextflow.Nextflow.file(selected_redux_dir).toUriString()
         def redux_tsvs = nextflow.Nextflow.file("${redux_dir_uri}/${sample_id}.redux.*.tsv*")
 
@@ -114,11 +115,9 @@ class Inputs {
             default -> throw new IllegalArgumentException("Unsupported sample type: ${sample_type}")
         }
 
-        def sage_dir_uri = nextflow.Nextflow.file(selected_sage_dir).toUriString()
-
         return [
-            nextflow.Nextflow.file("${sage_dir_uri}/${vcf_name}"),
-            nextflow.Nextflow.file("${sage_dir_uri}/${vcf_name}.tbi"),
+            nextflow.Nextflow.file(selected_sage_dir).resolve(vcf_name),
+            nextflow.Nextflow.file(selected_sage_dir).resolve(vcf_name + '.tbi'),
         ]
     }
 
