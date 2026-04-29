@@ -270,6 +270,7 @@ workflow WGTS {
             hmf_data.heterozygous_sites,
             [],  // target_region_bed
             [],  // tumor_min_depth
+            false,  // purity_estimate_mode
         )
 
         ch_versions = ch_versions.mix(AMBER_PROFILING.out.versions)
@@ -298,6 +299,7 @@ workflow WGTS {
             hmf_data.diploid_bed,
             [],  // panel_target_region_normalisation
             false,  // targeted_mode
+            false,  // purity_estimate_mode
         )
 
         ch_versions = ch_versions.mix(COBALT_PROFILING.out.versions)

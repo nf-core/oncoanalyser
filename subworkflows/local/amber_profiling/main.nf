@@ -13,18 +13,16 @@ workflow AMBER_PROFILING {
     ch_donor_bam       // channel: [mandatory] [ meta, bam, bai ]
 
     // Reference data
-    genome_version     // channel: [mandatory] genome version
-    heterozygous_sites // channel: [optional]  /path/to/heterozygous_sites
-    target_regions_bed // channel: [optional]  /path/to/target_regions_bed
-    tumor_min_depth    // integer: [optional]  -tumor_min_depth argument value
+    genome_version       // channel: [mandatory] genome version
+    heterozygous_sites   // channel: [optional]  /path/to/heterozygous_sites
+    target_regions_bed   // channel: [optional]  /path/to/target_regions_bed
+    tumor_min_depth      // integer: [optional]  -tumor_min_depth argument value
+    purity_estimate_mode // boolean: [mandatory] Set purity estimate mode
 
     main:
     // Channel for version.yml files
     // channel: [ versions.yml ]
     ch_versions = Channel.empty()
-
-    def run_mode = pipeline.PipelineMode.fromString(params.mode)
-    def purity_estimate_mode = run_mode === pipeline.PipelineMode.PURITY_ESTIMATE
 
     // Select input sources and sort
     // channel: runnable: [ meta, tumor_bam, tumor_bai, normal_bam, normal_bai]

@@ -17,14 +17,12 @@ workflow COBALT_PROFILING {
     diploid_bed                 // channel: [optional]  /path/to/diploid_bed
     target_region_normalisation // channel: [optional]  /path/to/target_region_normalisation
     targeted_mode               // boolean: [mandatory] Set targeted mode
+    purity_estimate_mode        // boolean: [mandatory] Set purity estimate mode
 
     main:
     // Channel for version.yml files
     // channel: [ versions.yml ]
     ch_versions = Channel.empty()
-
-    def run_mode = pipeline.PipelineMode.fromString(params.mode)
-    def purity_estimate_mode = run_mode === pipeline.PipelineMode.PURITY_ESTIMATE
 
     // Select input sources and sort
     // NOTE(SW): germline mode is not currently supported

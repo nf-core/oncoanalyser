@@ -266,6 +266,7 @@ workflow TARGETED {
             hmf_data.heterozygous_sites,
             panel_data.target_region_bed,
             [],  // tumor_min_depth
+            false,  // purity_estimate_mode
         )
 
         ch_versions = ch_versions.mix(AMBER_PROFILING.out.versions)
@@ -293,6 +294,7 @@ workflow TARGETED {
             hmf_data.diploid_bed,
             panel_data.target_region_normalisation,
             true,  // targeted_mode
+            false,  // purity_estimate_mode
         )
 
         ch_versions = ch_versions.mix(COBALT_PROFILING.out.versions)

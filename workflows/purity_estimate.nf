@@ -164,6 +164,7 @@ workflow PURITY_ESTIMATE {
             hmf_data.heterozygous_sites,
             [],  // target_region_bed
             tumor_min_depth,
+            true,  // purity_estimate_mode
         )
 
         ch_versions = ch_versions.mix(AMBER_PROFILING.out.versions)
@@ -192,6 +193,7 @@ workflow PURITY_ESTIMATE {
             hmf_data.diploid_bed,
             [],  // panel_target_region_normalisation
             targeted_mode,
+            true,  // purity_estimate_mode
         )
 
         ch_versions = ch_versions.mix(COBALT_PROFILING.out.versions)
