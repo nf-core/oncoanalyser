@@ -77,8 +77,8 @@ workflow WISP_ANALYSIS {
                 key: meta.group_id,
                 id: meta.group_id,
                 subject_id: meta.subject_id,
-                primary_id: sample.Inputs.getTumorDnaSampleName(meta, 'primary'),
-                longitudinal_id: sample.Inputs.getTumorDnaSampleName(meta, 'longitudinal'),
+                primary_id: sample.Inputs.getTumorDnaSampleNamePrimary(meta),
+                longitudinal_id: sample.Inputs.getTumorDnaSampleNameLongitudinal(meta),
             ]
 
             inputs.meta = meta_wisp

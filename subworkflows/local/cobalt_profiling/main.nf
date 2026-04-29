@@ -65,8 +65,8 @@ workflow COBALT_PROFILING {
         .multiMap { meta, tumor_bam, tumor_bai, normal_bam, normal_bai, diploid_bed ->
 
             def tumor_id = purity_estimate_mode
-               ? sample.Inputs.getTumorDnaSampleName(meta, 'longitudinal')
-               : sample.Inputs.getTumorDnaSampleName(meta, 'primary')
+               ? sample.Inputs.getTumorDnaSampleNameLongitudinal(meta)
+               : sample.Inputs.getTumorDnaSampleNamePrimary(meta)
 
             def meta_cobalt = [
                 key: meta.group_id,

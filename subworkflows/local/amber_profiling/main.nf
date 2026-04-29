@@ -62,8 +62,8 @@ workflow AMBER_PROFILING {
         .map { meta, tumor_bam, tumor_bai, normal_bam, normal_bai, donor_bam, donor_bai ->
 
             def tumor_id = purity_estimate_mode
-               ? sample.Inputs.getTumorDnaSampleName(meta, 'longitudinal')
-               : sample.Inputs.getTumorDnaSampleName(meta, 'primary')
+                ? sample.Inputs.getTumorDnaSampleNameLongitudinal(meta)
+                : sample.Inputs.getTumorDnaSampleNamePrimary(meta)
 
             def meta_amber = [
                 key: meta.group_id,

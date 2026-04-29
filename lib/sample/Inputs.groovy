@@ -124,12 +124,8 @@ class Inputs {
 
 
     // Files - PURPLE
-    public static Path resolvePurpleSomaticVcf(Path purple_dir, Map meta, String sample_type) {
-        return nextflow.Nextflow.file(purple_dir).resolve("${getTumorDnaSampleName(meta, sample_type)}.purple.somatic.vcf.gz")
-    }
-
     public static Path resolvePurpleSomaticVcf(Path purple_dir, Map meta) {
-        return resolvePurpleSomaticVcf(purple_dir, meta, 'primary')
+        return nextflow.Nextflow.file(purple_dir).resolve("${getTumorDnaSampleName(meta)}.purple.somatic.vcf.gz")
     }
 
     public static Path resolvePurpleSomaticVcfTbi(Path purple_dir, Map meta) {
@@ -156,30 +152,13 @@ class Inputs {
     public static Map getDonorDnaSample(Map meta) { return meta.getOrDefault([SampleType.DONOR, SequenceType.DNA], [:]) }
 
     // Sample names
-    public static String getTumorDnaSampleName(Map meta, String sample_type) {
-        def meta_sample = getTumorDnaSample(meta)
-        def sample_id
-
-        // NOTE(LN): Sample type is a string (and not a boolean) so that it is obvious what sample type is being
-        // retrieved when this method is called. This wouldn't be necessary if Nextflow had IDE support, where
-        // the argument name would be displayed as an overlay
-        if(sample_type == 'primary') {
-            sample_id = meta_sample['sample_id']
-        } else if (sample_type == 'longitudinal') {
-            sample_id = meta_sample['longitudinal_sample_id']
-        } else {
-            throw new IllegalArgumentException("`sample_type` must be 'primary' or 'longitudinal'")
-        }
-
-        return sample_id
-    }
-
-    public static String getTumorDnaSampleName(Map meta) { return getTumorDnaSampleName(meta, 'primary') }
+    public static String getTumorDnaSampleName(Map meta) { return getTumorDnaSample(meta)['sample_id'] }
+    public static String getTumorDnaSampleNamePrimary(Map meta) { return getTumorDnaSampleName(meta) } // NOTE(LN): Alias method used for clarity
+    public static String getTumorDnaSampleNameLongitudinal(Map meta) { return getTumorDnaSample(meta)['longitudinal_sample_id'] }
 
     public static String getTumorRnaSampleName(Map meta) { return getTumorRnaSample(meta)['sample_id'] }
     public static String getNormalDnaSampleName(Map meta) { return getNormalDnaSample(meta)['sample_id'] }
     public static String getDonorDnaSampleName(Map meta) { return getDonorDnaSample(meta)['sample_id'] }
-
 
     // Files - Reads/alignments
     public static boolean hasTumorDnaFastq(Map meta) { return getTumorDnaSample(meta).containsKey(FileType.FASTQ) }

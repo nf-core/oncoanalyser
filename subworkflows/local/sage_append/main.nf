@@ -104,8 +104,7 @@ workflow SAGE_APPEND {
 
             def meta = inputs.meta
 
-            // NOTE(SW): explicit in expectation to always obtain the primary tumor DNA sample ID here
-            def tumor_dna_id = sample.Inputs.getTumorDnaSampleName(meta, 'primary')
+            def tumor_dna_id = sample.Inputs.getTumorDnaSampleNamePrimary(meta)
             def output_file_id = sample.Inputs.getNormalDnaSampleName(meta)
 
             def meta_append = [
@@ -170,8 +169,8 @@ workflow SAGE_APPEND {
             def meta = inputs.meta
 
             def output_file_id = purity_estimate_mode
-                ? sample.Inputs.getTumorDnaSampleName(meta, 'longitudinal')
-                : sample.Inputs.getTumorDnaSampleName(meta, 'primary')
+                ? sample.Inputs.getTumorDnaSampleNameLongitudinal(meta)
+                : sample.Inputs.getTumorDnaSampleNamePrimary(meta)
 
             def meta_append = [
                 key: meta.group_id,
@@ -191,13 +190,13 @@ workflow SAGE_APPEND {
             }
 
             if (purity_estimate_mode && inputs.tumor_dna_bam) {
-                meta_append.reference_ids.add(sample.Inputs.getTumorDnaSampleName(meta, 'longitudinal'))
+                meta_append.reference_ids.add(sample.Inputs.getTumorDnaSampleNameLongitudinal(meta))
                 bams.add(inputs.tumor_dna_bam)
                 bais.add(inputs.tumor_dna_bai)
                 redux_tsvs = inputs.tumor_dna_redux_tsvs
             }
 
-            def purple_smlv_vcf = sample.Inputs.resolvePurpleSomaticVcf(inputs.purple_dir, meta, 'primary')
+            def purple_smlv_vcf = sample.Inputs.resolvePurpleSomaticVcf(inputs.purple_dir, meta)
 
             return [meta_append, purple_smlv_vcf, bams, bais, redux_tsvs]
         }
