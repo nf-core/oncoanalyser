@@ -10,29 +10,30 @@ The `oncoanalyser` pipeline typically runs from FASTQ, BAM, or CRAM [input files
 most GRCh37 and GRCh38 human [reference genome builds](#custom-genomes), and provides UMI ([unique molecular
 identifier](#umi-processing)) processing for DNA sequencing data.
 
-Two main analysis modes are supported by `oncoanalyser`:
+Two main pipeline modes are supported by `oncoanalyser`:
 
-- [**wgts**](#whole-genome--transcriptome-sequencing-wgts): whole genome and/or transcriptome sequencing
-- [**targeted**](#targeted-sequencing): targeted/panel sequencing
+- [`wgts`](#whole-genome--transcriptome-sequencing-wgts): whole genome and/or transcriptome sequencing
+- [`targeted`](#targeted-sequencing): targeted/panel sequencing
 
-Both modes accept various combinations of DNA and/or RNA sequencing data from tumor-only or matched tumor / normal (with optional
-[donor](#paired-tumor-and-normal-dna-with-donor-sample) sample). The below table shows the supported [sample setups](#sample-setups):
+Both modes accept various [combinations](#sample-setups) of sequencing type (DNA, RNA) and samples (tumor-only, matched tumor/normal with optional
+[donor](#paired-tumor-and-normal-dna-with-donor-sample) sample):
 
-| DNA samples              | RNA samples |
-| ------------------------ | ----------- |
-| `tumor`                  | -           |
-| `tumor`+`normal`         | -           |
-| `tumor`+`normal`+`donor` | -           |
-| `tumor`                  | `tumor`     |
-| `tumor`+`normal`         | `tumor`     |
-| `tumor`+`normal`+`donor` | `tumor`     |
-| -                        | `tumor`     |
+- **DNA-only**:
+  - DNA(`tumor`)
+  - DNA(`tumor`+`normal`)
+  - DNA(`tumor`+`normal`+`donor`)
+- **DNA and RNA**
+  - RNA(`tumor`) + DNA(`tumor`)
+  - RNA(`tumor`) + DNA(`tumor`+`normal`)
+  - RNA(`tumor`) + DNA(`tumor`+`normal`+`donor`)
+- **RNA-only**:
+  - RNA(`tumor`)
 
-Besides the main analysis modes, several other modes are also available:
+Other available modes are:
 
-- [**purity_estimate**](#purity-estimate): tumor fraction estimation in longitudinal samples (e.g. for MRD)
-- [**prepare_reference**](#automatic-staging): staging genomes and WiGiTS tool reference data
-- [**panel_resource_creation**](#custom-panels): creating reference data for custom panels
+- [`purity_estimate`](#purity-estimate): tumor fraction estimation in longitudinal samples (e.g. for MRD)
+- [`prepare_reference`](#automatic-staging): staging genomes and WiGiTS tool reference data
+- [`panel_resource_creation`](#custom-panels): creating reference data for custom panels
 
 ## Running the pipeline
 
@@ -45,8 +46,8 @@ A typical command for running `oncoanalyser` is shown below:
 ```bash
 nextflow run nf-core/oncoanalyser \
   -revision 3.0.0 \
-  -config reference_data.config \ # Optional but recommended
   -profile docker \
+  -config reference_data.config \ # Optional but recommended
   --mode wgts \
   --genome GRCh38_hmf \
   --input samplesheet.csv \
@@ -55,15 +56,13 @@ nextflow run nf-core/oncoanalyser \
 
 Below is a brief description of each argument:
 
-- `-profile`: [configuration presets](#-profile) for different compute environments
 - `-revision`: `oncoanalyser` version to run (can be a git [tag](https://github.com/nf-core/oncoanalyser/tags), [branch](https://github.com/nf-core/oncoanalyser/branches), or commit hash)
-- `--mode`: [run mode](#run-modes)
+- `-profile`: [configuration presets](#-profile) for different compute environments
+- `-config`: one or more comma separated configuration files for customising e.g. genome/tool reference data, [custom panels](#custom-panels) reference, [compute resources](#compute-resources), or [other configuration](#custom-configuration)
+- `--mode`: [pipeline mode](#pipeline-modes)
 - `--genome`: genome version, typically `GRCh38_hmf` or `GRCh37_hmf`
 - `--input`: the [samplesheet](#samplesheet) containing sample details and corresponding files to be analysed
 - `--output`: output directory
-- `-config`: one or more configuration files for customising e.g. genome and tool specific data (as mentioned above),
-  normalisation data for [custom panels](#custom-panels) (TSO500 panel supported by default), [compute resources](#compute-resources), or
-  [other configuration](#custom-configuration)
 
 :::tip
 
@@ -79,7 +78,7 @@ Running `oncoanalyser` will create the following files in your working directory
 ```bash
 work           # Directory containing the nextflow working files
 <OUTDIR>       # Finished results in specified location (defined with --outdir)
-.nextflow_log  # Log file from Nextflow
+.nextflow.log  # Log file from Nextflow
 # Other nextflow hidden files, e.g. history of pipeline runs and old logs.
 ```
 
@@ -397,16 +396,16 @@ space.
 The below table shows the possible values for `--ref_data_types`. Note that multiple can be provided as comma separated
 list, e.g. `--ref_data_types wgs,dna_alignment`
 
-| Value                              | Description                                                                               | Combination of                                            |
-| :--------------------------------- | :---------------------------------------------------------------------------------------- | :-------------------------------------------------------- |
-| `wgs`                              | Ref data for WGS analysis from BAM                                                        | `fasta`, `fai`, `dict`, `img`, `hmftools`, `gridss_index` |
-| `wts`                              | Ref data for WTS analysis from BAM                                                        | `fasta`, `fai`, `dict`, `img`, `hmftools`                 |
-| `targeted`                         | Ref data for targeted analysis from BAM                                                   | `fasta`, `fai`, `dict`, `img`, `hmftools`, `panel`        |
-| `bwamem2_index` or `dna_alignment` | BWA-MEM2 index. Required if aligning DNA FASTQs                                           |                                                           |
-| `star_index` or `rna_alignment`    | STAR index. Required if aligning RNA FASTQs                                               |                                                           |
-| `gridss_index`                     | GRIDSS index. Required if running Virusbreakend/Virusinterpreter                          |                                                           |
-| `hmftools`                         | [WiGiTS](https://github.com/hartwigmedical/hmftools) resources files                      |                                                           |
-| `panel`                            | Panel ref data. Only TSO500 currently supported. Please also specify arg `--panel tso500` |                                                           |
+| Value                              | Description                                                                                                                          | Combination of                                            |
+|:-----------------------------------|:-------------------------------------------------------------------------------------------------------------------------------------|:----------------------------------------------------------|
+| `wgs`                              | Ref data for WGS analysis from BAM                                                                                                   | `fasta`, `fai`, `dict`, `img`, `hmftools`, `gridss_index` |
+| `wts`                              | Ref data for WTS analysis from BAM                                                                                                   | `fasta`, `fai`, `dict`, `img`, `hmftools`                 |
+| `targeted`                         | Ref data for targeted analysis from BAM                                                                                              | `fasta`, `fai`, `dict`, `img`, `hmftools`, `panel`        |
+| `bwamem2_index` or `dna_alignment` | BWA-MEM2 index. Required if aligning DNA FASTQs                                                                                      |                                                           |
+| `star_index` or `rna_alignment`    | STAR index. Required if aligning RNA FASTQs                                                                                          |                                                           |
+| `gridss_index`                     | GRIDSS index. Required if running Virusbreakend/Virusinterpreter                                                                     |                                                           |
+| `hmftools`                         | [WiGiTS](https://github.com/hartwigmedical/hmftools) resources files                                                                 |                                                           |
+| `panel`                            | Panel ref data. Please also specify arg `--panel <name>`,  e.g. `--panel TSO500` (must be a [supported](#targeted-sequencing) panel) |                                                           |
 
 #### Manual staging
 
@@ -435,7 +434,7 @@ params {
         }
     }
     ref_data_hmf_data_path   = "/path/to/hmftools_data/"
-    ref_data_panel_data_path = "/path/to/tso500_panel_data/"
+    ref_data_panel_data_path = "/path/to/panel_data/"
 }
 ```
 
@@ -540,7 +539,7 @@ _GRCh38 genome (Hartwig): `GRCh38_hmf`_
 | WiGiTS data          | [hmf_pipeline_resources.38_v2.3.0--2.tar.gz](https://pub-cf6ba01919994c3cbd354659947f74d8.r2.dev/hmf_reference_data/hmftools/hmf_pipeline_resources.38_v2.3.0--2.tar.gz)                              |
 | TSO500 panel data    | [hmf_panel_resources.tso500.38_v2.3.0--2.tar.gz](https://pub-cf6ba01919994c3cbd354659947f74d8.r2.dev/hmf_reference_data/panels/hmf_panel_resources.tso500.38_v2.3.0--2.tar.gz)                        |
 
-## Run modes
+## Pipeline modes
 
 ### Whole genome / transcriptome sequencing (WGTS)
 
@@ -559,8 +558,10 @@ nextflow run nf-core/oncoanalyser \
 
 ### Targeted sequencing
 
-`--mode targeted` is used for analysing targeted or panel sequencing samples. The TSO500 panel has in-built support by setting
-`--panel tso500`. A typical run command for TSO500 panels would be:
+`--mode targeted` together with `--panel <panel_name>` is used for analysing targeted or panel sequencing samples.
+Panels with built-in support are `TSO500`, `MSK`, `ONCOPANEL` and `PM_HAEM`. 
+
+A typical run command for `TSO500` would be:
 
 ```bash
 nextflow run nf-core/oncoanalyser \
@@ -568,40 +569,35 @@ nextflow run nf-core/oncoanalyser \
   -config reference_data.config \
   -profile docker \
   --mode targeted \
-  --panel tso500 \
+  --panel TSO500 \
   --genome GRCh38_hmf \
   --input samplesheet.csv \
   --outdir output/
 ```
 
-Panels other than TSO500 require additional arguments, as well as custom reference data to be created.
-Please see [Custom panels](#custom-panels).
+Custom panels (i.e. those without built-in support) require [custom reference data](#custom-panels) to be created, as 
+well as additional arguments provided. Custom panels may require manual [UMI processing configuration](#umi-processing) 
+(handled automatically for supported panels with UMIs such as `TSO500`).
 
 ### Custom panels
 
-`--mode panel_resource_creation` assists with creating custom panel reference data files (for panels other than TSO500), which fit and
-normalise the biases inherent to that specific panel.
+`--mode panel_resource_creation` assists with creating custom panel reference data files which fit and normalise the 
+biases inherent to that specific panel. These files include:
 
-The below table summarises the required reference data files. Some panel reference data files must first be manually created - instructions
-can be found on the [**WiGiTS targeted analysis readme**](https://github.com/hartwigmedical/hmftools/blob/master/pipeline/README_TARGETED.md).
-Some these files are used with `--mode panel_resource_creation` to create the remaining required reference data files.
+| File / config name            | Comment                                                                                                                       |
+|:------------------------------|:------------------------------------------------------------------------------------------------------------------------------|
+| `driver_gene_panel`           | **Manually created**                                                                                                          |
+| `target_region_bed`           | **Manually created**                                                                                                          |
+| `target_region_normalisation` | Output from `--mode panel_resource_creation`                                                                                  |
+| `pon_artefacts`               | Output from `--mode panel_resource_creation`                                                                                  |
+| `isofox_gene_ids`             | (RNA) **Manually created**                                                                                                    |
+| `isofox_tpm_norm`             | (RNA) Output from `--mode panel_resource_creation`                                                                            |
+| `isofox_counts`               | (RNA) Recommended to use `read_151_exp_counts.<ref_genome_version>.csv` from [WiGiTS reference data](#reference-data-urls)    |
+| `isofox_gc_ratios`            | (RNA) Recommended to use `read_100_exp_gc_ratios.<ref_genome_version>.csv` from [WiGiTS reference data](#reference-data-urls) |
 
-| Data type | File / config name            | Comment                                                                                                                 |
-| :-------- | :---------------------------- | :---------------------------------------------------------------------------------------------------------------------- |
-| DNA       | `driver_gene_panel`           | Manually created                                                                                                        |
-| DNA       | `target_region_bed`           | Manually created                                                                                                        |
-| DNA       | `target_region_normalisation` | Output from `--mode panel_resource_creation`                                                                            |
-| DNA       | `pon_artefacts`               | Output from `--mode panel_resource_creation`                                                                            |
-| RNA       | `isofox_gene_ids`             | Manually created                                                                                                        |
-| RNA       | `isofox_tpm_norm`             | Output from `--mode panel_resource_creation`                                                                            |
-| RNA       | `isofox_counts`               | Recommended to use `read_151_exp_counts.<ref_genome_version>.csv` from [WiGiTS reference data](#reference-data-urls)    |
-| RNA       | `isofox_gc_ratios`            | Recommended to use `read_100_exp_gc_ratios.<ref_genome_version>.csv` from [WiGiTS reference data](#reference-data-urls) |
-
-:::note
-
-RNA reference data is only required if your panel supports RNA sequencing data.
-
-:::
+Some files must first be **manually created** and instructions can be found on the [**WiGiTS targeted analysis readme**](https://github.com/hartwigmedical/hmftools/blob/master/pipeline/README_TARGETED.md).
+These are then used when running `--mode panel_resource_creation` to create the remaining files. The `isofox_*` files 
+are only required if your panel supports RNA sequencing.
 
 Once your manually created files are ready, create a samplesheet with a representative set of panel sequencing samples
 (**≥20 recommended**). The below example samplesheet provides BAM files, but [FASTQ files](#fastq) can also be provided.
@@ -609,9 +605,7 @@ Once your manually created files are ready, create a samplesheet with a represen
 ```csv title="samplesheet.panel_resource_creation.csv"
 group_id,subject_id,sample_id,sample_type,sequence_type,filetype,filepath
 PATIENT1,PATIENT1,PATIENT1-T,tumor,dna,bam,/path/to/PATIENT1-T.dna.bam
-PATIENT1,PATIENT1,PATIENT1-T,tumor,dna,bai,/path/to/PATIENT1-T.dna.bam.bai
 PATIENT2,PATIENT2,PATIENT2-T,tumor,dna,bam,/path/to/PATIENT2-T.dna.bam
-PATIENT2,PATIENT2,PATIENT2-T,tumor,dna,bai,/path/to/PATIENT2-T.dna.bam.bai
 ```
 
 Then, run `oncoanalyser` with `--mode panel_resource_creation` providing the samplesheet, as well as the relevant manually created files
@@ -631,52 +625,50 @@ nextflow run nf-core/oncoanalyser \
   --outdir output/
 ```
 
-Place all the custom panel reference data files in a directory and define the paths / file names in a configuration file:
+Place all the custom panel reference data files in a directory. In a config file:
+- Define the reference data directory with `ref_data_panel_data_path` and file names with `panel_data_paths`
+- Set `panel = <name>` and `force_panel = true`.  
+- You may also need to configure other parameters such as for [UMI processing](#umi-processing).
 
 ```groovy title="panel.config"
 params {
-    ref_data_panel_data_path = "/directory/containing/my_custom_panel_resources/"
-
-    // These are relative paths within the dir provided by `ref_data_panel_data_path` above
+    
+    ref_data_panel_data_path = '/directory/containing/my_custom_panel_resources/'
     panel_data_paths {
-
-        my_custom_panel {  // This is the name that should be passed to the `--panel` argument
-
-            // Genome version: '37' or '38'
-            '38' {
+        my_custom_panel {
+            '38' { // Genome version: '37' or '38'
+                // These are relative paths within the dir provided by `ref_data_panel_data_path` above
                 driver_gene_panel           = 'driver_genes.38.tsv'
                 pon_artefacts               = 'pon_artefacts.38.tsv.gz'
                 target_region_bed           = 'panel_definition.38.bed.gz'
                 target_region_normalisation = 'cobalt_normalisation.38.tsv'
 
-                // (Optional) RNA reference data
-                // Paths can be omitted (e.g. for panels without RNA) by providing an empty list:
-                // isofox_counts = []
+                // (Optional) RNA reference data. Provide e.g. `isofox_counts = []` for panels without RNA
                 isofox_counts               = 'read_151_exp_counts.38.csv'
                 isofox_gc_ratios            = 'read_100_exp_gc_ratios.38.csv'
                 isofox_tpm_norm             = 'isofox.gene_normalisation.38.csv'
             }
         }
     }
+
+    // Same as CLI arg `--panel <name>`. Should match name defined in `panel_data_paths`
+    panel = 'my_custom_panel'
+  
+    // Same as CLI arg `--force_panel`. Enable non-built-in panels
+    force_panel = true
 }
 ```
 
-Lastly, run `oncoanalyser` with `--mode targeted` to analyse your panel sequencing sample. You will also need to:
-
-- provide the custom panel reference data configuration file to the `-config <file>` argument
-- set the panel name in the `--panel <name>` argument as defined in the configuration file (e.g. `my_custom_panel`)
-- set the `--force_panel` argument to enable non-built-in panels
+Lastly, run `oncoanalyser` with `--mode targeted` and `-config panel.config`:
 
 ```bash
 nextflow run nf-core/oncoanalyser \
   -revision 3.0.0 \
   -config reference_data.config \
-  -config panel_data.config \
+  -config panel.config \
   -profile docker \
   --mode targeted \
-  --panel my_custom_panel \
   --genome GRCh38_hmf \
-  --force_panel \
   --input samplesheet.csv \
   --outdir output/
 ```
@@ -743,6 +735,60 @@ you do not need to configure panel ref data paths with as you would with `--mode
 
 `--mode prepare_reference` assists with staging all the reference data required to run `oncoanalyser`.
 Please see: [Staging reference data: Automatic staging](#automatic-staging)
+
+## UMI processing
+
+Unique molecular identifiers (UMI) allow for read deduplication and error correction. UMI processing is performed by
+[fastp](https://github.com/OpenGene/fastp?tab=readme-ov-file#unique-molecular-identifier-umi-processing) or
+[fastq-tools](https://github.com/hartwigmedical/hmftools/tree/master/fastq-tools) for FASTQ files,
+and [REDUX](https://github.com/hartwigmedical/hmftools/tree/master/redux#deduplication) for BAM files.
+
+We recommend using the `--umi_type` argument to automatically configure the above tools with the correct arguments.
+Currently, the supported `--umi_type` values are `TSO500`, `TWIST`, `KAPA`, `MSK`, or `NONE` (force disable UMI processing).
+
+When running `oncoanalyser` in targeted mode for some supported panels, `--umi_type` will automatically be set (you
+won't need to set it).
+- `--panel TSO500`: `--umi_type TSO500`
+- `--panel MSK`: `--umi_type MSK`
+- `--panel PM_HAEM`: `--umi_type TWIST`
+
+Providing `--umi_type TWIST` for example is equivalent to the below config. You can also use the below config as a
+template for configuring custom UMIs.
+
+```groovy title='umi.config'
+params {
+    fastp_umi_enabled = true        // Enable UMI stripping by fastp
+    fastp_umi_location = "per_read" // --umi_loc fastp arg
+    fastp_umi_length = 7            // --umi_len fastp arg
+    fastp_umi_skip = 0              // --umi_skip fastp arg
+
+    fastq_tools_umi_enabled = false // Enable UMI stripping by fastq-tools
+    fastq_tools_umi_delim = ""      // UMI delimiter
+  
+    redux_umi_enabled = true        // Enable UMI processing by REDUX
+    redux_umi_duplex_delim = "_"    // Duplex UMI delimiter
+}
+```
+
+Below is an R1 FASTQ entry before and after TWIST UMI stripping:
+
+**Before:**
+```
+@LH00144:313:22YY5KLT3:3:1101:3043:1016 1:N:0:GCGACCGATT+NCAAGTGCAA
+GNTAACTCAGAATCATAGAGTATGCACCATTTTTTNTNAATCTGGGTGGTAGTTACACAGGTGTGTCTATACAGA
++
+I#IIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIII#I#IIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIII
+```
+
+**After:**
+- Stripped first 7 bases `GNTAACT` from R1 (and `NGCATCT` from R2; not shown here)
+- UMI appended to header as `GNTAACT_NGCATCT`
+```
+@LH00144:313:22YY5KLT3:3:1101:3043:1016:GNTAACT_NGCATCT 1:N:0:GCGACCGATT+NCAAGTGCAA
+CAGAATCATAGAGTATGCACCATTTTTTNTNAATCTGGGTGGTAGTTACACAGGTGTGTCTATACAGA
++
+IIIIIIIIIIIIIIIIIIIIIIIIIIII#I#IIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIII
+```
 
 ## Process selection
 
@@ -960,27 +1006,6 @@ executor {
 A pipeline might not always support every possible argument or option of a particular tool used in pipeline. Fortunately, nf-core pipelines provide some freedom to users to insert additional parameters that the pipeline does not include by default.
 
 To learn how to provide additional arguments to a particular tool of the pipeline, please see the [customising tool arguments](https://nf-co.re/docs/usage/configuration#customising-tool-arguments) section of the nf-core website.
-
-### UMI processing
-
-Unique molecular identifiers (UMI) allow for read deduplication and error correction. UMI processing is performed by
-[fastp](https://github.com/OpenGene/fastp?tab=readme-ov-file#unique-molecular-identifier-umi-processing) for FASTQ
-files, and [REDUX](https://github.com/hartwigmedical/hmftools/tree/master/redux#deduplication) for BAM files. Depending
-on the presence/format of your UMI strings, you may need to configure one or more of these arguments:
-
-```groovy title='umi.config'
-params {
-    // For FASTQ files
-    fastp_umi_enabled = true        // Enable UMI processing by fastp
-    fastp_umi_location = "per_read" // --umi_loc fastp arg
-    fastp_umi_length = 7            // --umi_len fastp arg
-    fastp_umi_skip = 0              // --umi_skip fastp arg
-
-    // For BAM files
-    redux_umi_enabled = true        // Enable UMI processing by REDUX
-    redux_umi_duplex_delim = "_"    // Duplex UMI delimiter
-}
-```
 
 ### nf-core/configs
 
