@@ -1,5 +1,6 @@
 lint:
   files_exist:
+    - .github/workflows/nf-test.yml
     - lib/Utils.groovy
     - lib/WorkflowMain.groovy
     - lib/WorkflowOncoanalyser.groovy
@@ -13,7 +14,7 @@ lint:
         - params.fastp_umi_length
         - params.fastp_umi_skip
   nf_test_content: false
-nf_core_version: 3.5.1
+nf_core_version: 4.0.2
 repository_type: pipeline
 template:
   author: Stephen Watts
@@ -26,4 +27,4 @@ template:
   skip_features:
     - gpu
     - nf-test
-  version: 2.2.0dev
+  version: 2.3.0dev
