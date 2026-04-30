@@ -26,10 +26,8 @@ class Params {
 
     private static void error(String... message){
 
-        def message_string = ""
-        message_string += "\n~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n"
+        def message_string = "\n"
         message_string += message.join('\n')
-        message_string += "\n~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
 
         throw new RuntimeException(message_string)
     }
@@ -130,8 +128,8 @@ class Params {
             }
         }
 
-        if (!params.containsKey('ref_data_genome_alt')) params.ref_data_genome_alt = null
-        if (!params.containsKey('ref_data_genome_gtf')) params.ref_data_genome_gtf = null
+        params.putIfAbsent('ref_data_genome_alt', null)
+        params.putIfAbsent('ref_data_genome_gtf', null)
     }
 
     private static void validateSequencingType(Map params) {
@@ -166,12 +164,9 @@ class Params {
         }
 
         def supported_panel = SupportedPanel.fromString((String) params.panel)
+        def genome_version = RefGenomeVersion.fromNumericName((String) params.genome_version)
 
-        if (!supported_panel) {
-
-            if (params.force_panel)
-                return
-
+        if (!supported_panel && !params.force_panel) {
             error(
                 "No built-in supported for panel: ${params.panel} ",
                 "",
@@ -181,15 +176,19 @@ class Params {
             )
         }
 
-        def genome_version = RefGenomeVersion.fromNumericName((String) params.genome_version)
-        if (!supported_panel.hasConfiguredVersion(params, genome_version))
-        {
-            error("panel(${params.panel}) has no built-in support for refGenomeVersion(${params.genome_version})")
-        }
+        if (supported_panel) {
 
-        if (!params.containsKey('ref_data_panel_data_path')) {
-            def ref_genome_version = RefGenomeVersion.fromNumericName((String) params.genome_version)
-            params.ref_data_panel_data_path = RefDataDefaultPaths.panelData(supported_panel, ref_genome_version)
+            if (!supported_panel.hasConfiguredVersion(params, genome_version)) {
+                error("panel(${params.panel}) has no built-in support for refGenomeVersion(${params.genome_version})")
+            }
+
+            params.putIfAbsent('ref_data_panel_data_path', RefDataDefaultPaths.panelData(supported_panel, genome_version))
+
+        } else if (!params.containsKey('ref_data_panel_data_path')) {
+            error(
+                "If you have a custom panel, provide the directory containing the panel ref data using ",
+                "the CLI argument --ref_data_panel_data_path or in a configuration file"
+            )
         }
     }
 
