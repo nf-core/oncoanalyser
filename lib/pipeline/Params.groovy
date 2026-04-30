@@ -239,38 +239,58 @@ class Params {
 
         params.putIfAbsent('redux_umi_enabled', umi_type.reduxArgs().umiProcessingEnabled())
         params.putIfAbsent('redux_umi_duplex_delim', umi_type.reduxArgs().duplexUmiDelim())
-
-        // When fastp UMI is enabled, REDUX UMI should be as well
-        params.redux_umi_enabled = params.fastp_umi_enabled
     }
 
     private static void validateUmiParams(Map params) {
 
-        def fastp_umi_args_set_any = params.fastp_umi_location || params.fastp_umi_length || params.fastp_umi_skip >= 0
+        if (params.fastp_umi_enabled && params.fastq_tools_umi_enabled) {
+            error("Either fastp or fastq-tools (not both) can be enabled for UMI processing")
+        }
 
-        if (fastp_umi_args_set_any && !params.fastp_umi_enabled) {
+        def fastq_umi_enabled_but_bam_umi_disabled =
+            (params.fastp_umi_enabled || params.fastq_tools_umi_enabled) &&
+            !params.redux_umi_enabled
+
+        if (fastq_umi_enabled_but_bam_umi_disabled) {
             error(
-                "Detected use of fastp UMI parameters but fastp UMI processing has not been enabled.",
-                "Please review your configuration and set the fastp_umi_enabled flag or otherwise ",
-                "adjust accordingly."
+                "When FASTQ UMI processing is enabled (with params fastp_umi_enabled or fastp_umi_enabled),",
+                "BAM UMI processing with REDUX should also be enabled (with param redux_umi_enabled)"
             )
         }
 
-        def fastp_umi_args_set_all = params.fastp_umi_location && params.fastp_umi_length && params.fastp_umi_skip >= 0
+        // fastp
+        def fastp_enabled_but_not_configured =
+            params.fastp_umi_enabled &&
+            !(params.fastp_umi_location && params.fastp_umi_length && params.fastp_umi_skip >= 0)
 
-        if (params.fastp_umi_enabled && !fastp_umi_args_set_all) {
-            error(
-                "Refusing to run fastp UMI processing without having any UMI params configured.",
-                "Please review your configuration and appropriately set all fastp_umi_* parameters.",
-            )
+        if (fastp_enabled_but_not_configured) {
+            error("fastp UMI processing is enabled but not all of the fastp_umi_* params have been set")
         }
 
-        if (params.redux_umi_duplex_delim && params.redux_umi_enabled == false) {
-            error(
-                "Detected use of REDUX UMI parameters but REDUX UMI processing has not been",
-                "enabled. Please review your configuration and set the redux_umi_enabled flag or",
-                "otherwise adjust accordingly."
-            )
+        def fastp_disabled_but_configured =
+            !params.fastp_umi_enabled &&
+            (params.fastp_umi_location || params.fastp_umi_length || params.fastp_umi_skip >= 0)
+
+        if (fastp_disabled_but_configured) {
+            error("fastp UMI processing is not enabled with param fastp_umi_enabled but detected use of fastp_umi_* params")
+        }
+
+        // fastq-tools
+        if (params.fastq_tools_umi_enabled && !params.fastq_tools_umi_delim) {
+            error("fastq-tools UMI processing is enabled but param fastq_tools_umi_delim is not set")
+        }
+
+        if (!params.fastq_tools_umi_enabled && params.fastq_tools_umi_delim) {
+            error("fastq-tools UMI processing is not enabled with param fastq_tools_umi_enabled but detected use of param fastq_tools_umi_delim")
+        }
+
+        // REDUX
+        if (params.redux_umi_enabled && !params.redux_umi_duplex_delim) {
+            error("REDUX UMI processing is enabled but param redux_umi_duplex_delim is not set")
+        }
+
+        if (!params.redux_umi_enabled && params.redux_umi_duplex_delim) {
+            error("REDUX UMI processing is not enabled with param fastq_tools_umi_enabled but detected use of param redux_umi_duplex_delim")
         }
     }
 
