@@ -30,17 +30,6 @@ workflow PANEL_RESOURCE_CREATION {
     stages
 
     main:
-    // Check input path parameters to see if they exist
-    def checkPathParamList = [
-        params.isofox_counts,
-        params.isofox_gc_ratios,
-        params.isofox_gene_ids,
-        params.isofox_tpm_norm,
-        params.driver_gene_panel,
-        params.target_regions_bed,
-    ]
-
-    for (param in checkPathParamList) { if (param) { file(param, checkIfExists: true) } }
 
     // Set input paths
     target_regions_bed = params.target_regions_bed ? file(params.target_regions_bed) : []

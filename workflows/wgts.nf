@@ -46,13 +46,6 @@ workflow WGTS {
     stages
 
     main:
-    // Check input path parameters to see if they exist
-    def checkPathParamList = [
-        params.isofox_counts,
-        params.isofox_gc_ratios,
-    ]
-
-    for (param in checkPathParamList) { if (param) { file(param, checkIfExists: true) } }
 
     // Create channel for versions
     // channel: [ versions.yml ]

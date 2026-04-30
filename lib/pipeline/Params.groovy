@@ -18,6 +18,7 @@ class Params {
 
         setDefaultHmfData(params)
         validatePanelDataAndSetDefaults(params)
+        validateRefDataPathOverrides(params)
 
         setUmiDefaults(params)
         validateUmiParams(params)
@@ -190,6 +191,27 @@ class Params {
             def ref_genome_version = RefGenomeVersion.fromNumericName((String) params.genome_version)
             params.ref_data_panel_data_path = RefDataDefaultPaths.panelData(supported_panel, ref_genome_version)
         }
+    }
+
+    private static void validateRefDataPathOverrides(Map params) {
+
+        def keys = [
+            'isofox_counts',
+            'isofox_gc_ratios',
+            'isofox_gene_ids',
+            'isofox_tpm_norm',
+            'driver_gene_panel',
+            'target_regions_bed',
+        ]
+
+        for (key in keys) {
+            def path = params[key]
+
+            if (path) {
+                nextflow.Nextflow.file(params[key], checkIfExists: true)
+            }
+        }
+
     }
 
     private static void setUmiDefaults(Map params) {
