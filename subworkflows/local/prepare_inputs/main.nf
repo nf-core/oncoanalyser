@@ -14,7 +14,7 @@ workflow PREPARE_INPUTS {
 
     main:
     ch_inputs = Channel.fromList(
-        samplesheet.SampleSheet.parse(input_fp_str, workflow.stubRun, log)
+        samplesheet.SampleSheet.parse(input_fp_str, log)
     )
 
     emit:

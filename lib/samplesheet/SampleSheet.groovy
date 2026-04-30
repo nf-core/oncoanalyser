@@ -5,7 +5,7 @@ import sample.Inputs
 
 class SampleSheet {
 
-    public static List<Map> parse(String sample_sheet_path, boolean stub_run, PipelineMode pipeline_mode) {
+    public static List<Map> parse(String sample_sheet_path, PipelineMode pipeline_mode) {
 
         if (!sample_sheet_path) {
             throw new IllegalStateException("Missing required --input argument")
@@ -40,11 +40,6 @@ class SampleSheet {
 
                 // Per sample checks once meta_sample objects are fully constructed
                 sample_keys.each { sample_key ->
-
-                    if(stub_run) {
-                        // NOTE(LN): TODO: not sure if this skip is required
-                        return
-                    }
 
                     def meta_sample = meta[sample_key]
 
