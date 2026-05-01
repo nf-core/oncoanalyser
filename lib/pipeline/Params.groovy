@@ -18,6 +18,8 @@ class Params {
 
         setDefaultHmfData(params)
         validatePanelDataAndSetDefaults(params)
+        checkMissingPanelDataPaths(params)
+
         validateRefDataPathOverrides(params)
 
         setUmiDefaults(params)
@@ -148,7 +150,6 @@ class Params {
     private static void validatePanelDataAndSetDefaults(Map params){
 
         def pipeline_mode = PipelineMode.fromString((String) params.mode)
-
         if (pipeline_mode != PipelineMode.TARGETED && pipeline_mode != PipelineMode.PREPARE_REFERENCE)
             return
 
@@ -176,19 +177,67 @@ class Params {
             )
         }
 
-        if (supported_panel) {
-
-            if (!supported_panel.hasConfiguredVersion(params, genome_version)) {
-                error("panel(${params.panel}) has no built-in support for refGenomeVersion(${params.genome_version})")
-            }
-
-            params.putIfAbsent('ref_data_panel_data_path', RefDataDefaultPaths.panelData(supported_panel, genome_version))
-
-        } else if (!params.containsKey('ref_data_panel_data_path')) {
+        if (!supported_panel && !params.containsKey('ref_data_panel_data_path')) {
             error(
                 "If you have a custom panel, provide the directory containing the panel ref data using ",
                 "the CLI argument --ref_data_panel_data_path or in a configuration file"
             )
+        }
+
+        if (supported_panel) {
+
+            if (!supported_panel.hasConfiguredVersion(params, genome_version)) {
+                error("Panel ${params.panel} does not have built-in support for ref genome version ${params.genome_version}")
+            }
+
+            params.putIfAbsent('ref_data_panel_data_path', RefDataDefaultPaths.panelData(supported_panel, genome_version))
+        }
+    }
+
+    private static void checkMissingPanelDataPaths(Map params) {
+
+        def pipeline_mode = PipelineMode.fromString((String) params.mode)
+        if (pipeline_mode != PipelineMode.TARGETED && pipeline_mode != PipelineMode.PREPARE_REFERENCE)
+            return
+
+        def genome_version = RefGenomeVersion.fromNumericName((String) params.genome_version)
+
+        def required_keys = [
+            'driver_gene_panel',
+            'msi_model_error_rates',
+            'pon_artefacts',
+            'target_region_bed',
+            'target_region_normalisation',
+        ]
+
+        def optional_keys = [
+            'known_umis',
+            'isofox_tpm_norm',
+            'isofox_counts',
+            'isofox_gc_ratios',
+        ]
+
+        for (key in required_keys+optional_keys) {
+
+            def filename = params?['panel_data_paths']?[params.panel]?[genome_version.getNumericName()]?[key]
+
+            def required_filename_invalid = required_keys.contains(key) && !filename
+            def optional_filename_invalid = optional_keys.contains(key) && !filename && filename != []
+
+            if (required_filename_invalid || optional_filename_invalid) {
+
+                def descriptions = []
+                descriptions += required_keys.collect { "${it}: Require non-empty path" }
+                descriptions += optional_keys.collect { "${it}: Optional non-empty path. If not applicable, set to []" }
+
+                error(
+                    "Panel data filename not defined or misconfigured:",
+                    "   params.panel_data_paths.${params.panel}.${genome_version.getNumericName()}.${key} = ${filename}",
+                    "",
+                    "The below panel data filenames should be configured:",
+                    Enums.createBulletedList(descriptions)
+                )
+            }
         }
     }
 
