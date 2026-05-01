@@ -738,7 +738,10 @@ workflow WGTS {
     //
     // channel: [ meta, virusinterpreter_dir ]
     ch_virusinterpreter_out = Channel.empty()
-    if (stages.virusinterpreter) {
+
+    // NOTE(LN): Virusbreakend currently broken for SBX and Ultima
+    def sequencing_type = pipeline.SequencingType.fromString(params.sequencing_type)
+    if (stages.virusinterpreter && sequencing_type == pipeline.SequencingType.ILLUMINA) {
 
         VIRUSBREAKEND_CALLING(
             ch_inputs,
