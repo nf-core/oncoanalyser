@@ -1,9 +1,5 @@
 # FAQ and troubleshooting
 
-- [How to start from CRAM?](#how-to-start-from-cram)
-- [How to handle UMIs?](#how-to-handle-umis)
-- [How to use oncoanalyser with a panel or whole exome?](#how-to-use-oncoanalyser-with-a-panel-or-whole-exome)
-- [Why does LILAC crash on my panel sample?](#why-does-lilac-crash-on-my-panel-sample)
 - [Are my BAM files compatible?](#are-my-bam-files-compatible)
 - [I want to store the output BAMs. Why are there only REDUX BAM(s) with additional
   files?](#i-want-to-store-the-output-bams-why-are-there-only-redux-bams-with-additional-files)
@@ -19,26 +15,6 @@
   file](#placing-oncoanalyser-cli-arguments-into-a-configuration-file)
 - [Errors and navigating the `work/` directory](#errors-and-navigating-the-work-directory)
 - [Resuming runs in Google Batch](#resuming-runs-in-google-batch)
-
-## How to start from CRAM?
-
-Simply provide a CRAM path under filetype `cram` in the sample sheet. See section [Input starting points: CRAM](./#cram)
-for details.
-
-## How to handle UMIs?
-
-UMI processing can be enabled and configured via a config file. See section [UMI processing](./#umi-processing).
-
-## How to use oncoanalyser with a panel or whole exome?
-
-`oncoanalyser` currently has built-in support for the TSO500 panel. For custom panels however, additional reference data
-(for panel specific normalisation and filtering) must first be generated using a training procedure detailed
-[here](https://github.com/hartwigmedical/hmftools/blob/master/pipeline/README_TARGETED.md).
-
-## Why does LILAC crash on my panel sample?
-
-If your panel does not include HLA class I regions there will be no reads in those regions, which causes LILAC to crash.
-You can skip the LILAC tool to avoid crashes by specifying `--processes_exclude lilac` in the `oncoanalyser` command.
 
 ## Are my BAM files compatible?
 
