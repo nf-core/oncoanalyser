@@ -206,13 +206,13 @@ class Params {
 
         def required_keys = [
             'driver_gene_panel',
-            'msi_model_error_rates',
             'pon_artefacts',
             'target_region_bed',
             'target_region_normalisation',
         ]
 
         def optional_keys = [
+            'msi_model_error_rates',
             'known_umis',
             'isofox_tpm_norm',
             'isofox_counts',
@@ -221,7 +221,7 @@ class Params {
 
         for (key in required_keys+optional_keys) {
 
-            def filename = params?['panel_data_paths']?[params.panel]?[genome_version.getNumericName()]?[key]
+            def filename = params.panel_data_paths?[params.panel]?[genome_version.getNumericName()]?[key]
 
             def required_filename_invalid = required_keys.contains(key) && !filename
             def optional_filename_invalid = optional_keys.contains(key) && !filename && filename != []

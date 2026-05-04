@@ -127,6 +127,10 @@ workflow TARGETED {
 
     if (stages.redux) {
 
+        msi_model_error_rates = Channel.empty()
+            .mix(panel_data.msi_model_error_rates, hmf_data.msi_model_error_rates)
+            .flatten().first()
+
         REDUX_PROCESSING(
             ch_inputs,
             ch_align_dna_tumor_out,
@@ -139,7 +143,7 @@ workflow TARGETED {
             hmf_data.unmap_regions,
             hmf_data.msi_jitter_sites,
             hmf_data.msi_model_coefficients,
-            panel_data.msi_model_error_rates,
+            msi_model_error_rates,
             params.sequencing_type,
             params.redux_umi_enabled,
             params.redux_umi_duplex_delim,
