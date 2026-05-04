@@ -190,7 +190,9 @@ class Params {
                 error("Panel ${params.panel} does not have built-in support for ref genome version ${params.genome_version}")
             }
 
-            params.putIfAbsent('ref_data_panel_data_path', RefDataDefaultPaths.panelData(supported_panel, genome_version))
+            if (!params.containsKey('ref_data_panel_data_path')) {
+                params.ref_data_panel_data_path = RefDataDefaultPaths.panelData(supported_panel, genome_version)
+            }
         }
     }
 
