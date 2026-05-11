@@ -43,12 +43,10 @@ process QSEE {
     def cobalt_dir_arg = cobalt_dir ? "-cobalt_dir ${cobalt_dir}" : ''
     def esvee_dir_arg = esvee_dir ? "-esvee_dir ${esvee_dir}" : ''
 
-    def targeted_mode_arg = ''
-    def cohort_percentiles_arg = ''
+    def targeted_mode_arg = targeted_mode ? '-targeted_mode' : ''
 
-    if(targeted_mode){
-        targeted_mode_arg = '-targeted_mode'
-    } else {
+    def cohort_percentiles_arg = ''
+    if(!targeted_mode && sequencing_type == 'ILLUMINA') {
         cohort_percentiles_arg = "-cohort_percentiles_file ${cohort_percentiles}"
     }
 
