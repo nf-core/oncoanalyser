@@ -244,6 +244,7 @@ workflow PURITY_ESTIMATE {
 
         WISP_ANALYSIS(
             ch_inputs,
+            ch_redux_dna_tumor_dir_out,
             ch_amber_out,
             ch_cobalt_out,
             ch_sage_somatic_append_out,

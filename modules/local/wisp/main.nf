@@ -12,6 +12,7 @@ process WISP {
         path(primary_purple_dir, stageAs: 'purple_primary'),
         path(primary_amber_dir, stageAs: 'amber_primary'),
         path(primary_normal_bam),
+        path(longitudinal_redux_dir, stageAs: 'redux_longitudinal'),
         path(longitudinal_amber_dir, stageAs: 'amber_longitudinal'),
         path(longitudinal_cobalt_dir, stageAs: 'cobalt_longitudinal'),
         path(longitudinal_sage_append_dir, stageAs: 'sage_append_longitudinal')
@@ -84,6 +85,7 @@ process WISP {
         -purity_methods ${purity_methods_arg} \\
         -somatic_vcf ${longitudinal_sage_append_dir}/${meta.longitudinal_id}.sage.append.vcf.gz \\
         -purple_dir ${primary_purple_dir} \\
+        -bqr_dir ${longitudinal_redux_dir} \\
         ${amber_dir_arg} \\
         ${cobalt_dir_arg} \\
         -ref_genome ${genome_fasta} \\

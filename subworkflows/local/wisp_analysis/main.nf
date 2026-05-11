@@ -8,6 +8,7 @@ workflow WISP_ANALYSIS {
     take:
     // Sample data
     ch_inputs                  // channel: [mandatory] [ meta ]
+    ch_redux_out               // channel: [mandatory] [ meta, redux_dir ]
     ch_amber_out               // channel: [mandatory] [ meta, amber_dir ]
     ch_cobalt_out              // channel: [mandatory] [ meta, cobalt_dir ]
     ch_sage_somatic_append_out // channel: [mandatory] [ meta, sage_append_dir ]
@@ -28,11 +29,12 @@ workflow WISP_ANALYSIS {
     // channel: runnable: [ meta, ... ]
     // channel: skip: [ meta ]
     ch_inputs_sorted = channels.WorkflowChannels.groupByMeta(
+        ch_redux_out,
         ch_amber_out,
         ch_cobalt_out,
         ch_sage_somatic_append_out,
     )
-        .branch { meta, longitudinal_amber_dir, longitudinal_cobalt_dir, longitudinal_sage_append_dir ->
+        .branch { meta, longitudinal_redux_dir, longitudinal_amber_dir, longitudinal_cobalt_dir, longitudinal_sage_append_dir ->
 
             def primary_purple_dir = sample.Inputs.get(meta, sample.FileKey.PURPLE_DIR)
             def primary_amber_dir = sample.Inputs.get(meta, sample.FileKey.AMBER_DIR)
@@ -55,6 +57,7 @@ workflow WISP_ANALYSIS {
             inputs.primary_purple_dir = primary_purple_dir
             inputs.primary_amber_dir = primary_amber_dir
             inputs.primary_normal_bam = primary_normal_bam
+            inputs.longitudinal_redux_dir = longitudinal_redux_dir
             inputs.longitudinal_amber_dir = longitudinal_amber_dir
             inputs.longitudinal_cobalt_dir = longitudinal_cobalt_dir
             inputs.longitudinal_sage_append_dir = longitudinal_sage_append_dir
