@@ -717,6 +717,7 @@ workflow TARGETED {
             ch_isofox_out,
             ref_data.genome_version,
             hmf_data.disease_ontology,
+            params.sequencing_type,
             true,  // targeted_mode
         )
 

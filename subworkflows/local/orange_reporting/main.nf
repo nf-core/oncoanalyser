@@ -29,6 +29,7 @@ workflow ORANGE_REPORTING {
     disease_ontology            // channel: [mandatory] /path/to/disease_ontology
 
     // Params
+    sequencing_type             // string:  [mandatory] sequencing type
     targeted_mode               // boolean: [mandatory] Set targeted mode
 
     main:
@@ -177,6 +178,7 @@ workflow ORANGE_REPORTING {
         genome_version,
         disease_ontology,
         '3.0.0 [oncoanalyser]',
+        sequencing_type,
         targeted_mode,
     )
 

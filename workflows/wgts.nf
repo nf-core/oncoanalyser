@@ -872,6 +872,7 @@ workflow WGTS {
             ch_isofox_out,
             ref_data.genome_version,
             hmf_data.disease_ontology,
+            params.sequencing_type,
             false,  // targeted_mode
         )
 

@@ -28,6 +28,7 @@ process ORANGE {
     val genome_ver
     path disease_ontology
     val pipeline_version
+    val sequencing_type
     val targeted_mode
 
     output:
@@ -118,6 +119,7 @@ process ORANGE {
         -add_disclaimer \\
         -pipeline_version_file pipeline_version.txt \\
         -experiment_type ${experiment_type} \\
+        -sequencing_type ${sequencing_type} \\
         ${cancer_type_arg} \\
         \\
         -tumor ${meta.tumor_id} \\
