@@ -4,8 +4,7 @@ import refgenome.RefGenomeVersion
 
 public enum SupportedPanel {
     TSO500,
-    MSK,
-    ONCOPANEL;
+    MSK;
 
     public boolean hasConfiguredVersion(Map params, RefGenomeVersion version) {
 

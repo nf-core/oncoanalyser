@@ -559,7 +559,7 @@ nextflow run nf-core/oncoanalyser \
 ### Targeted sequencing
 
 `--mode targeted` together with `--panel <panel_name>` is used for analysing targeted or panel sequencing samples.
-Panels with built-in support are: `TSO500`, `MSK`, `ONCOPANEL` 
+Panels with built-in support are `TSO500` and `MSK`. 
 
 A typical run command for `TSO500` would be:
 
