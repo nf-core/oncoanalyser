@@ -528,7 +528,7 @@ _GRCh37 genome (Hartwig): `GRCh37_hmf`_
 _GRCh38 genome (Hartwig): `GRCh38_hmf`_
 
 | Type                 | Link                                                                                                                                                                                                  |
-| :------------------- | :---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+|:---------------------|:------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
 | FASTA                | [GRCh38_masked_exclusions_alts_hlas.fasta](https://pub-cf6ba01919994c3cbd354659947f74d8.r2.dev/genomes/GRCh38_hmf/25.1/GRCh38_masked_exclusions_alts_hlas.fasta)                                      |
 | FASTA index          | [GRCh38_masked_exclusions_alts_hlas.fasta.fai](https://pub-cf6ba01919994c3cbd354659947f74d8.r2.dev/genomes/GRCh38_hmf/25.1/samtools_index-1.16/GRCh38_masked_exclusions_alts_hlas.fasta.fai)          |
 | FASTA seq dictionary | [GRCh38_masked_exclusions_alts_hlas.fasta.dict](https://pub-cf6ba01919994c3cbd354659947f74d8.r2.dev/genomes/GRCh38_hmf/25.1/samtools_index-1.16/GRCh38_masked_exclusions_alts_hlas.fasta.dict)        |
@@ -537,7 +537,6 @@ _GRCh38 genome (Hartwig): `GRCh38_hmf`_
 | GRIDSS index         | [gridss_index-2.13.2.tar.gz](https://pub-cf6ba01919994c3cbd354659947f74d8.r2.dev/genomes/GRCh38_hmf/25.1/gridss_index-2.13.2.tar.gz)                                                                  |
 | STAR index           | [star_index-gencode_38-2.7.3a.tar.gz](https://pub-cf6ba01919994c3cbd354659947f74d8.r2.dev/genomes/GRCh38_hmf/25.1/star_index-gencode_38-2.7.3a.tar.gz)                                                |
 | WiGiTS data          | [hmf_pipeline_resources.38_v2.3.0--2.tar.gz](https://pub-cf6ba01919994c3cbd354659947f74d8.r2.dev/hmf_reference_data/hmftools/hmf_pipeline_resources.38_v2.3.0--2.tar.gz)                              |
-| TSO500 panel data    | [hmf_panel_resources.tso500.38_v2.3.0--2.tar.gz](https://pub-cf6ba01919994c3cbd354659947f74d8.r2.dev/hmf_reference_data/panels/hmf_panel_resources.tso500.38_v2.3.0--2.tar.gz)                        |
 
 ## Pipeline modes
 
@@ -559,7 +558,7 @@ nextflow run nf-core/oncoanalyser \
 ### Targeted sequencing
 
 `--mode targeted` together with `--panel <panel_name>` is used for analysing targeted or panel sequencing samples.
-Panels with built-in support are `TSO500` and `MSK`. 
+Panels with built-in support are `TSO500` (GRCh37) and `MSK` (GRCh37). 
 
 A typical run command for `TSO500` would be:
 
@@ -570,7 +569,7 @@ nextflow run nf-core/oncoanalyser \
   -profile docker \
   --mode targeted \
   --panel TSO500 \
-  --genome GRCh38_hmf \
+  --genome GRCh37_hmf \
   --input samplesheet.csv \
   --outdir output/
 ```

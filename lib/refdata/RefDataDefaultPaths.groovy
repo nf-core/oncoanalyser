@@ -18,7 +18,6 @@ class RefDataDefaultPaths {
 
         def path_map = [
             [(SupportedPanel.TSO500), (RefGenomeVersion.V37)]: 'https://pub-cf6ba01919994c3cbd354659947f74d8.r2.dev/hmf_reference_data/panels/hmf_panel_resources.tso500.37_v2.3.0--2.tar.gz',
-            [(SupportedPanel.TSO500), (RefGenomeVersion.V38)]: 'https://pub-cf6ba01919994c3cbd354659947f74d8.r2.dev/hmf_reference_data/panels/hmf_panel_resources.tso500.38_v2.3.0--2.tar.gz',
         ]
 
         def panel_key = [panel, version]
