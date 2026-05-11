@@ -336,12 +336,8 @@ class Params {
         }
 
         // REDUX
-        if (params.redux_umi_enabled && !params.redux_umi_duplex_delim) {
-            error("REDUX UMI processing is enabled but param redux_umi_duplex_delim is not set")
-        }
-
         if (!params.redux_umi_enabled && params.redux_umi_duplex_delim) {
-            error("REDUX UMI processing is not enabled with param fastq_tools_umi_enabled but detected use of param redux_umi_duplex_delim")
+            error("REDUX UMI processing is not enabled with param redux_umi_enabled but detected use of param redux_umi_duplex_delim")
         }
     }
 
