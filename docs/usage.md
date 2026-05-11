@@ -559,7 +559,7 @@ nextflow run nf-core/oncoanalyser \
 ### Targeted sequencing
 
 `--mode targeted` together with `--panel <panel_name>` is used for analysing targeted or panel sequencing samples.
-Panels with built-in support are `TSO500`, `MSK`, `ONCOPANEL` and `PM_HAEM`. 
+Panels with built-in support are: `TSO500`, `MSK`, `ONCOPANEL` 
 
 A typical run command for `TSO500` would be:
 
@@ -774,7 +774,6 @@ When running `oncoanalyser` in targeted mode for some supported panels, `--umi_t
 won't need to set it).
 - `--panel TSO500`: `--umi_type TSO500`
 - `--panel MSK`: `--umi_type MSK`
-- `--panel PM_HAEM`: `--umi_type TWIST`
 
 Providing `--umi_type TWIST` for example is equivalent to the below config. You can also use the below config as a
 template for configuring custom UMIs.

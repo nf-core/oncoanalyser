@@ -52,7 +52,6 @@ public enum UmiType {
         return switch (supportedPanel) {
             case SupportedPanel.TSO500 -> TSO500
             case SupportedPanel.MSK -> MSK
-            case SupportedPanel.PM_HAEM -> TWIST
             default -> NONE
         }
     }
