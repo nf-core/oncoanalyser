@@ -127,9 +127,10 @@ workflow TARGETED {
 
     if (stages.redux) {
 
-        msi_model_error_rates = Channel.empty()
-            .mix(panel_data.msi_model_error_rates, hmf_data.msi_model_error_rates)
-            .flatten().first()
+        msi_model_error_rates = panel_data.msi_model_error_rates
+            .concat(hmf_data.msi_model_error_rates)
+            .flatten()
+            .first()
 
         REDUX_PROCESSING(
             ch_inputs,
