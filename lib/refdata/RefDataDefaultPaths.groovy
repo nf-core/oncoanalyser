@@ -2,7 +2,7 @@ package refdata
 
 import pipeline.SupportedPanel
 import refgenome.RefGenomeVersion
-import util.Enums
+import util.Messages
 
 class RefDataDefaultPaths {
 
@@ -24,7 +24,7 @@ class RefDataDefaultPaths {
         def panel_key = [panel, version]
 
         if (!path_map.containsKey(panel_key)){
-            def key_strings = Enums.createBulletedList(path_map.keySet().collect {
+            def key_strings = Messages.createBulletedList(path_map.keySet().collect {
                 _panel, _version -> "panel(${_panel}) refGenomeVersion(${_version})"
             })
 

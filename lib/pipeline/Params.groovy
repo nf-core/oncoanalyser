@@ -6,6 +6,7 @@ import refgenome.RefGenomeType
 import refgenome.RefGenomeVersion
 import refgenome.SupportedGenome
 import util.Enums
+import util.Messages
 
 class Params {
 
@@ -26,23 +27,15 @@ class Params {
         validateUmiParams(params)
     }
 
-    private static void error(String... message){
-
-        def message_string = "\n"
-        message_string += message.join('\n')
-
-        throw new RuntimeException(message_string)
-    }
-
     private static void validateRunModes(Map params) {
 
         // Pipeline mode
         if (!params.mode) {
-            error(
+            Messages.error(
                 "Pipeline mode must be set using the --mode CLI argument or in a configuration file.",
                 "",
                 "Currently, the available pipeline modes are:",
-                Enums.createBulletedList(PipelineMode),
+                Messages.createBulletedList(PipelineMode),
             )
         }
 
@@ -52,12 +45,12 @@ class Params {
         if (pipeline_mode == PipelineMode.PURITY_ESTIMATE) {
 
             if(!params.purity_estimate_mode){
-                error(
+                Messages.error(
                     "A valid purity estimate run mode must be set using the --purity_estimate_mode",
                     "CLI argument or in a configuration file.",
                     "",
                     "Currently, the available modes are:",
-                    Enums.createBulletedList(PurityEstimateMode),
+                    Messages.createBulletedList(PurityEstimateMode),
                 )
             }
 
@@ -66,10 +59,10 @@ class Params {
 
         // Prepare reference
         if (pipeline_mode == PipelineMode.PREPARE_REFERENCE && params.ref_data_types == null) {
-            error(
+            Messages.error(
                 "CLI argument --ref_data_types is required for mode prepare_reference.",
                 "Please specify one or more of the below valid values (separated by commas)",
-                Enums.createBulletedList(RefDataType),
+                Messages.createBulletedList(RefDataType),
             )
         }
     }
@@ -77,7 +70,7 @@ class Params {
     private static void validateGenomeAndSetDefaults(Map params){
 
         if (!params.genome) {
-            error(
+            Messages.error(
                 "Genome must be set using the --genome CLI argument or in a configuration file.",
                 "Currently, the supported genomes are: ${params.genomes.keySet().join(", ")}"
             )
@@ -91,39 +84,39 @@ class Params {
             return
 
         if (!params.force_genome) {
-            error(
+            Messages.error(
                 "Got unsupported genome: ${params.genome}",
                 "",
                 "Provide argument --force_genome if you are using a custom genome,",
                 "or adjust the --genome argument to one of the supported genomes:",
-                Enums.createBulletedList(SupportedGenome)
+                Messages.createBulletedList(SupportedGenome)
             )
         }
 
         if (!params.genome_version) {
-            error(
+            Messages.error(
                 "For custom genomes, please provide one of the following values to arg --genome_version:",
-                Enums.createBulletedList(RefGenomeVersion.getNumericNames())
+                Messages.createBulletedList(RefGenomeVersion.getNumericNames())
             )
         }
 
         if (!params.genome_type) {
-            error(
+            Messages.error(
                 "For custom genomes, please provide of the following values to arg --genome_type:",
-                Enums.createBulletedList(RefGenomeType)
+                Messages.createBulletedList(RefGenomeType)
             )
         }
 
         if (params.containsKey('ref_data_genome_alt') && params.ref_data_genome_alt != null) {
 
             if (params.genome_type != RefGenomeType.ALT) {
-                error("Using a reference genome without ALT contigs but found an .alt file")
+                Messages.error("Using a reference genome without ALT contigs but found an .alt file")
             }
 
             def ref_data_genome_alt_fn = nextflow.Nextflow.file(params.ref_data_genome_alt).getNumericName
             def ref_data_genome_fasta_fn = nextflow.Nextflow.file(params.ref_data_genome_fasta).getNumericName
             if (ref_data_genome_alt_fn != "${ref_data_genome_fasta_fn}.alt") {
-                error(
+                Messages.error(
                     "Found .alt file with filename of ${ref_data_genome_alt_fn} but it is required to match",
                     "reference genome FASTA filename stem: ${ref_data_genome_fasta_fn}.alt"
                 )
@@ -155,12 +148,12 @@ class Params {
 
         if (params.panel == null) {
 
-            error(
+            Messages.error(
                 "A panel is required to be set using the --panel CLI argument or in a ",
                 "configuration file when running in targeted mode or panel resource creation mode.",
                 "",
                 "Currently, panels with built-in support are:",
-                Enums.createBulletedList(SupportedPanel)
+                Messages.createBulletedList(SupportedPanel)
             )
         }
 
@@ -168,17 +161,17 @@ class Params {
         def genome_version = RefGenomeVersion.fromNumericName((String) params.genome_version)
 
         if (!supported_panel && !params.force_panel) {
-            error(
+            Messages.error(
                 "No built-in supported for panel: ${params.panel} ",
                 "",
                 "Provide argument --force_panel if you have a custom panel, or adjust the --panel",
                 "argument to one of the panels configured in the pipeline (case-sensitive):",
-                Enums.createBulletedList(SupportedPanel)
+                Messages.createBulletedList(SupportedPanel)
             )
         }
 
         if (!supported_panel && !params.containsKey('ref_data_panel_data_path')) {
-            error(
+            Messages.error(
                 "If you have a custom panel, provide the directory containing the panel ref data using ",
                 "the CLI argument --ref_data_panel_data_path or in a configuration file"
             )
@@ -225,12 +218,12 @@ class Params {
                 descriptions += required_keys.collect { "${it}: Require non-empty path" }
                 descriptions += optional_keys.collect { "${it}: Optional non-empty path. If not applicable, set to []" }
 
-                error(
+                Messages.error(
                     "Panel data filename not defined or misconfigured:",
                     "   params.panel_data_paths.${params.panel}.${genome_version.getNumericName()}.${key} = ${filename}",
                     "",
                     "The below panel data filenames should be configured:",
-                    Enums.createBulletedList(descriptions)
+                    Messages.createBulletedList(descriptions)
                 )
             }
         }
@@ -288,7 +281,7 @@ class Params {
     private static void validateUmiParams(Map params) {
 
         if (params.fastp_umi_enabled && params.fastq_tools_umi_enabled) {
-            error("Either fastp or fastq-tools (not both) can be enabled for UMI processing")
+            Messages.error("Either fastp or fastq-tools (not both) can be enabled for UMI processing")
         }
 
         def fastq_umi_enabled_but_bam_umi_disabled =
@@ -296,7 +289,7 @@ class Params {
             !params.redux_umi_enabled
 
         if (fastq_umi_enabled_but_bam_umi_disabled) {
-            error(
+            Messages.error(
                 "When FASTQ UMI processing is enabled (with params fastp_umi_enabled or fastp_umi_enabled),",
                 "BAM UMI processing with REDUX should also be enabled (with param redux_umi_enabled)"
             )
@@ -308,7 +301,7 @@ class Params {
             !(params.fastp_umi_location && params.fastp_umi_length && params.fastp_umi_skip >= 0)
 
         if (fastp_enabled_but_not_configured) {
-            error("fastp UMI processing is enabled but not all of the fastp_umi_* params have been set")
+            Messages.error("fastp UMI processing is enabled but not all of the fastp_umi_* params have been set")
         }
 
         def fastp_disabled_but_configured =
@@ -316,21 +309,21 @@ class Params {
             (params.fastp_umi_location || params.fastp_umi_length || params.fastp_umi_skip >= 0)
 
         if (fastp_disabled_but_configured) {
-            error("fastp UMI processing is not enabled with param fastp_umi_enabled but detected use of fastp_umi_* params")
+            Messages.error("fastp UMI processing is not enabled with param fastp_umi_enabled but detected use of fastp_umi_* params")
         }
 
         // fastq-tools
         if (params.fastq_tools_umi_enabled && !params.fastq_tools_umi_delim) {
-            error("fastq-tools UMI processing is enabled but param fastq_tools_umi_delim is not set")
+            Messages.error("fastq-tools UMI processing is enabled but param fastq_tools_umi_delim is not set")
         }
 
         if (!params.fastq_tools_umi_enabled && params.fastq_tools_umi_delim) {
-            error("fastq-tools UMI processing is not enabled with param fastq_tools_umi_enabled but detected use of param fastq_tools_umi_delim")
+            Messages.error("fastq-tools UMI processing is not enabled with param fastq_tools_umi_enabled but detected use of param fastq_tools_umi_delim")
         }
 
         // REDUX
         if (!params.redux_umi_enabled && params.redux_umi_duplex_delim) {
-            error("REDUX UMI processing is not enabled with param redux_umi_enabled but detected use of param redux_umi_duplex_delim")
+            Messages.error("REDUX UMI processing is not enabled with param redux_umi_enabled but detected use of param redux_umi_duplex_delim")
         }
     }
 
