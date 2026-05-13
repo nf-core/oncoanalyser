@@ -2,6 +2,7 @@ package refdata
 
 import pipeline.SupportedPanel
 import refgenome.RefGenomeVersion
+import util.Enums
 
 class RefDataDefaultPaths {
 
@@ -22,8 +23,18 @@ class RefDataDefaultPaths {
 
         def panel_key = [panel, version]
 
-        if (!path_map.containsKey(panel_key))
-            throw new NoSuchElementException("No default panel data path defined for panel(${panel}) refGenomeVersion(${version.getNumericName()})")
+        if (!path_map.containsKey(panel_key)){
+            def key_strings = Enums.createBulletedList(path_map.keySet().collect {
+                _panel, _version -> "panel(${_panel}) refGenomeVersion(${_version})"
+            })
+
+            throw new NoSuchElementException(
+                "No built-in support for panel(${panel}) refGenomeVersion(${version})" +
+                "\n\nPanels with built-in support are:\n" +
+                key_strings
+            )
+        }
+
 
         return path_map[panel_key]
     }

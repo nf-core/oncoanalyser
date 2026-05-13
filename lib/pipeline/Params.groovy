@@ -150,7 +150,7 @@ class Params {
     private static void validatePanelDataAndSetDefaults(Map params){
 
         def pipeline_mode = PipelineMode.fromString((String) params.mode)
-        if (pipeline_mode != PipelineMode.TARGETED && pipeline_mode != PipelineMode.PREPARE_REFERENCE)
+        if (pipeline_mode != PipelineMode.TARGETED)
             return
 
         if (params.panel == null) {
@@ -184,22 +184,15 @@ class Params {
             )
         }
 
-        if (supported_panel) {
-
-            if (!supported_panel.hasConfiguredVersion(params, genome_version)) {
-                error("Panel ${params.panel} does not have built-in support for ref genome version ${params.genome_version}")
-            }
-
-            if (!params.containsKey('ref_data_panel_data_path')) {
-                params.ref_data_panel_data_path = RefDataDefaultPaths.panelData(supported_panel, genome_version)
-            }
+        if (supported_panel && !params.containsKey('ref_data_panel_data_path')) {
+            params.ref_data_panel_data_path = RefDataDefaultPaths.panelData(supported_panel, genome_version)
         }
     }
 
     private static void checkMissingPanelDataPaths(Map params) {
 
         def pipeline_mode = PipelineMode.fromString((String) params.mode)
-        if (pipeline_mode != PipelineMode.TARGETED && pipeline_mode != PipelineMode.PREPARE_REFERENCE)
+        if (pipeline_mode != PipelineMode.TARGETED)
             return
 
         def genome_version = RefGenomeVersion.fromNumericName((String) params.genome_version)

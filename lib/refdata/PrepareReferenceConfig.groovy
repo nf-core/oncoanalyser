@@ -2,6 +2,7 @@ package refdata
 
 import pipeline.PipelineMode
 import pipeline.SupportedPanel
+import refgenome.RefGenomeVersion
 import util.Enums
 import sample.Inputs
 
@@ -74,10 +75,14 @@ class PrepareReferenceConfig {
                 throw new IllegalStateException("Preparing panel specific reference data requires the --panel CLI argument to be provided")
             }
 
-            def maybe_supported_panel = SupportedPanel.fromString((String) params.panel)
-            if (!maybe_supported_panel) {
+            def supported_panel = SupportedPanel.fromString((String) params.panel)
+            if (!supported_panel) {
                 throw new IllegalStateException("Preparing panel specific reference data not supported for custom panel: ${params.panel}")
             }
+
+            def genome_version = RefGenomeVersion.fromNumericName((String) params.genome_version)
+            params.ref_data_panel_data_path = RefDataDefaultPaths.panelData(supported_panel, genome_version)
+
         }
 
         return [
