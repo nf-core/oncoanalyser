@@ -422,9 +422,9 @@ class Utils {
                 Nextflow.exit(1)
             }
 
-            // Do not allow CRAM RNA input
-            if (Utils.hasTumorRnaBam(meta) && Utils.getTumorRnaBam(meta).toString().endsWith('cram')) {
-                log.error "found tumor RNA CRAM input for ${meta.group_id} but RNA CRAM input is not supported"
+            // Do not allow CRAM RNA input unless realign_bam is true
+            if (Utils.hasTumorRnaBam(meta) && Utils.getTumorRnaBam(meta).toString().endsWith('cram') && !params.realign_bam) {
+                log.error "found tumor RNA CRAM input for ${meta.group_id} but RNA CRAM input is only supported if realigning"
                 Nextflow.exit(1)
             }
 
