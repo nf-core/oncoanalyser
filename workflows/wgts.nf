@@ -26,7 +26,9 @@ include { PEACH_CALLING         } from '../subworkflows/local/peach_calling'
 include { PREPARE_REFERENCE     } from '../subworkflows/local/prepare_reference'
 include { PURPLE_CALLING        } from '../subworkflows/local/purple_calling'
 include { READ_ALIGNMENT_DNA    } from '../subworkflows/local/read_alignment_dna'
+include { READ_ALIGNMENT_DNA_FROM_BAM } from '../subworkflows/local/read_alignment_dna_from_bam/main'
 include { READ_ALIGNMENT_RNA    } from '../subworkflows/local/read_alignment_rna'
+include { READ_ALIGNMENT_RNA_FROM_BAM } from '../subworkflows/local/read_alignment_rna_from_bam/main'
 include { REDUX_PROCESSING      } from '../subworkflows/local/redux_processing'
 include { SAGE_APPEND           } from '../subworkflows/local/sage_append'
 include { SAGE_CALLING          } from '../subworkflows/local/sage_calling'
@@ -88,6 +90,31 @@ workflow WGTS {
     ch_align_rna_tumor_out = Channel.empty()
     if (run_config.stages.alignment) {
 
+            if (params.realign_bam) {
+
+        READ_ALIGNMENT_DNA_FROM_BAM(
+            ch_inputs,
+            ref_data.genome_fasta,
+            ref_data.genome_bwamem2_index,
+        )
+
+        READ_ALIGNMENT_RNA_FROM_BAM(
+            ch_inputs,
+            ref_data.genome_star_index,
+        )
+
+        ch_versions = ch_versions.mix(
+            READ_ALIGNMENT_DNA_FROM_BAM.out.versions,
+            READ_ALIGNMENT_RNA_FROM_BAM.out.versions,
+        )
+
+        ch_align_dna_tumor_out  = ch_align_dna_tumor_out.mix(READ_ALIGNMENT_DNA_FROM_BAM.out.dna_tumor)
+        ch_align_dna_normal_out = ch_align_dna_normal_out.mix(READ_ALIGNMENT_DNA_FROM_BAM.out.dna_normal)
+        ch_align_dna_donor_out  = ch_align_dna_donor_out.mix(READ_ALIGNMENT_DNA_FROM_BAM.out.dna_donor)
+        ch_align_rna_tumor_out  = ch_align_rna_tumor_out.mix(READ_ALIGNMENT_RNA_FROM_BAM.out.rna_tumor)
+
+    } else {
+
         READ_ALIGNMENT_DNA(
             ch_inputs,
             ref_data.genome_fasta,
@@ -114,6 +141,7 @@ workflow WGTS {
         ch_align_dna_donor_out = ch_align_dna_donor_out.mix(READ_ALIGNMENT_DNA.out.dna_donor)
         ch_align_rna_tumor_out = ch_align_rna_tumor_out.mix(READ_ALIGNMENT_RNA.out.rna_tumor)
 
+    }
     } else {
 
         ch_align_dna_tumor_out = ch_inputs.map { meta -> [meta, [], []] }
@@ -122,6 +150,7 @@ workflow WGTS {
         ch_align_rna_tumor_out = ch_inputs.map { meta -> [meta, [], []] }
 
     }
+    
 
     //
     // SUBWORKFLOW: Run REDUX for DNA BAMs

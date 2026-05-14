@@ -191,6 +191,12 @@
                     "description": "Log level filter for WiGiTS modules",
                     "default": "DEBUG",
                     "fa_icon": "fas fa-cog"
+                },
+                "realign_bam": {
+                    "type": "boolean",
+                    "description": "Realign input BAM/CRAM files by streaming through samtools fastq. Currently only works in wgts mode.",
+                    "default": false,
+                    "fa_icon": "fas fa-cog"
                 }
             }
         },
