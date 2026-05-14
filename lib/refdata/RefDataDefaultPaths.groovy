@@ -28,9 +28,10 @@ class RefDataDefaultPaths {
                 _panel, _version -> "panel(${_panel}) refGenomeVersion(${_version})"
             })
 
-            throw new NoSuchElementException(
-                "No built-in support for panel(${panel}) refGenomeVersion(${version})" +
-                "\n\nPanels with built-in support are:\n" +
+            Messages.error(
+                "No built-in support for panel(${panel}) refGenomeVersion(${version})",
+                "",
+                "Panels with built-in support are:",
                 key_strings
             )
         }

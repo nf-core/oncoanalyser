@@ -2,6 +2,7 @@ package samplesheet
 
 import pipeline.PipelineMode
 import sample.Inputs
+import util.Messages
 
 class SampleSheet {
 
@@ -263,8 +264,9 @@ class SampleSheet {
             !meta_sample.containsKey(FileType.FASTQ)
 
         if (missing_any_raw_read_data) {
-            throw new IllegalStateException(
-                "No BAM/CRAM nor BAM_REDUX/CRAM_REDUX nor FASTQ files provided for group_id(${group_id})\n\n" +
+            Messages.error(
+                "No BAM/CRAM nor BAM_REDUX/CRAM_REDUX nor FASTQ files provided for group_id(${group_id})",
+                "",
                 "NB: At least one of these files is required as they are the basis to determine input sample type."
             )
         }
@@ -329,9 +331,10 @@ class SampleSheet {
             // Do not allow only tumor RNA
             if (Inputs.hasTumorRna(meta) && !Inputs.hasTumorDna(meta)) {
 
-                throw new IllegalStateException(
-                    "Targeted mode is not compatible with only tumor RNA provided for group_id(${meta.group_id})\n\n" +
-                    "The targeted workflow requires tumor DNA and can optionally take tumor RNA, depending on " +
+                Messages.error(
+                    "Targeted mode is not compatible with only tumor RNA provided for group_id(${meta.group_id})",
+                    "",
+                    "The targeted workflow requires tumor DNA and can optionally take tumor RNA, depending on ",
                     "the configured panel."
                 )
             }
@@ -347,8 +350,8 @@ class SampleSheet {
         def has_normal_dna_bam = Inputs.hasNormalDnaReduxBam(meta)
 
         if (longitudinal && has_amber_dir && !has_normal_dna_bam) {
-            throw new IllegalStateException(
-                "group_id(${meta.group_id}) - In purity estimate mode, if AMBER dir is provided,\n" +
+            Messages.error(
+                "group_id(${meta.group_id}) - In purity estimate mode, if AMBER dir is provided,",
                 "the primary normal DNA REDUX BAM should also be provided"
             )
         }

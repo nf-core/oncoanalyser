@@ -1,6 +1,7 @@
 package pipeline
 
 import util.Enums
+import util.Messages
 
 public enum RunStage {
 
@@ -79,9 +80,11 @@ public enum RunStage {
             .keySet()
 
         if (processes_shared) {
-            def message_base = 'the following processes was found in the include and the exclude list'
-            def processes_shared_str = processes_shared.join('\n  - ')
-            throw new IllegalArgumentException("${message_base}:\n  - ${processes_shared_str}")
+            Messages.error(
+                "The following processes was found in both the include and the exclude list:",
+                Messages.createBulletedList(processes_shared)
+
+            )
         }
     }
 }
