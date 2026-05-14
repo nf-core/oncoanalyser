@@ -26,6 +26,9 @@ workflow SAGE_PLOTTING {
     sage_highconf_regions        // channel: [mandatory] /path/to/sage_highconf_regions
     ensembl_data_resources       // channel: [mandatory] /path/to/ensembl_data_resources/
 
+    // Params
+    targeted_mode                // boolean: [mandatory] Set targeted mode
+
     main:
     // Channel for version.yml files
     // channel: [ versions.yml ]
@@ -117,6 +120,7 @@ workflow SAGE_PLOTTING {
         sage_known_hotspots_somatic,
         sage_highconf_regions,
         ensembl_data_resources,
+        targeted_mode,
     )
 
     ch_versions = ch_versions.mix(SAGE_VISUALISER.out.versions)

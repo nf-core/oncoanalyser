@@ -45,6 +45,8 @@ process SAGE_SOMATIC {
     def reference_bam_arg = reference_bams ? "-reference_bam ${reference_bams.join(',')}" : ''
     def ref_sample_count_arg = reference_ids ? "-ref_sample_count ${reference_ids.size()}" : ''
 
+    def include_mt_arg = targeted_mode ? '' : '-include_mt'
+
     // Tumor in normal contamination (TINC)
     def tinc_args = ''
 
@@ -90,7 +92,7 @@ process SAGE_SOMATIC {
         -high_confidence_bed ${sage_highconf_regions} \\
         -ensembl_data_dir ${ensembl_data_resources} \\
         -sequencing_type ${sequencing_type} \\
-        -include_mt \\
+        ${include_mt_arg} \\
         ${tinc_args} \\
         ${high_depth_mode_arg} \\
         -threads ${task.cpus} \\

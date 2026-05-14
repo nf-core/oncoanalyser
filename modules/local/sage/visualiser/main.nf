@@ -23,6 +23,7 @@ process SAGE_VISUALISER {
     path sage_known_hotspots_somatic
     path sage_highconf_regions
     path ensembl_data_resources
+    val targeted_mode
 
     output:
     tuple val(meta), path('sage_vis/'), emit: sage_vis_dir
@@ -44,6 +45,8 @@ process SAGE_VISUALISER {
     def reference_bam_arg = reference_bams ? "-reference_bam ${reference_bams.join(',')}" : ''
     def ref_sample_count_arg = reference_ids ? "-ref_sample_count ${reference_ids.size()}" : ''
 
+    def include_mt_arg = targeted_mode ? '' : '-include_mt'
+
     """
     mkdir -p sage_vis/
 
@@ -60,7 +63,7 @@ process SAGE_VISUALISER {
         -hotspots ${sage_known_hotspots_somatic} \\
         -high_confidence_bed ${sage_highconf_regions} \\
         -ensembl_data_dir ${ensembl_data_resources} \\
-        -include_mt \\
+        ${include_mt_arg} \\
         -vis_purple_vcf ${purple_vcf} \\
         -vis_output_dir plots/ \\
         -output_vcf sage_vis/${meta.tumor_id}.sage.vis.vcf.gz \\

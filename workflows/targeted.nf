@@ -551,6 +551,7 @@ workflow TARGETED {
             hmf_data.sage_known_hotspots_somatic,
             hmf_data.sage_highconf_regions,
             hmf_data.ensembl_data_resources,
+            true,  // targeted_mode
         )
 
         ch_versions = ch_versions.mix(SAGE_PLOTTING.out.versions)
