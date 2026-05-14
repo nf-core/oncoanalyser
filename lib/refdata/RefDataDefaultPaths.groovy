@@ -1,8 +1,6 @@
 package refdata
 
-import pipeline.SupportedPanel
 import refgenome.RefGenomeVersion
-import util.Messages
 
 class RefDataDefaultPaths {
 
@@ -15,28 +13,4 @@ class RefDataDefaultPaths {
         }
     }
 
-    public static String panelData(SupportedPanel panel, RefGenomeVersion version){
-
-        def path_map = [
-            [(SupportedPanel.TSO500), (RefGenomeVersion.V37)]: 'https://pub-cf6ba01919994c3cbd354659947f74d8.r2.dev/hmf_reference_data/panels/hmf_panel_resources.tso500.37_v2.3.0--2.tar.gz',
-        ]
-
-        def panel_key = [panel, version]
-
-        if (!path_map.containsKey(panel_key)){
-            def key_strings = Messages.createBulletedList(path_map.keySet().collect {
-                _panel, _version -> "panel(${_panel}) refGenomeVersion(${_version})"
-            })
-
-            Messages.error(
-                "No built-in support for panel(${panel}) refGenomeVersion(${version})",
-                "",
-                "Panels with built-in support are:",
-                key_strings
-            )
-        }
-
-
-        return path_map[panel_key]
-    }
 }

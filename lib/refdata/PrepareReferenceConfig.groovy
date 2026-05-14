@@ -1,10 +1,10 @@
 package refdata
 
 import pipeline.PipelineMode
-import pipeline.SupportedPanel
-import refgenome.RefGenomeVersion
+import panel.SupportedPanel
 import util.Enums
 import sample.Inputs
+import util.Messages
 
 class PrepareReferenceConfig {
 
@@ -72,16 +72,20 @@ class PrepareReferenceConfig {
         if (require_panel_data) {
 
             if (params.panel == null) {
-                throw new IllegalStateException("Preparing panel specific reference data requires the --panel CLI argument to be provided")
+                throw new IllegalStateException("Preparing panel resources requires the --panel CLI argument to be provided")
             }
 
-            def supported_panel = SupportedPanel.fromString((String) params.panel)
+            def supported_panel = SupportedPanel.from((String) params.panel, (String) params.genome_version)
             if (!supported_panel) {
-                throw new IllegalStateException("Preparing panel specific reference data not supported for custom panel: ${params.panel}")
+                Messages.error(
+                    "Preparing panel resources not supported for panel(${params.panel}) refGenomeVersion(${params.genome_version})",
+                    "",
+                    "Currently, panels with built-in support are:",
+                    Messages.createBulletedList(SupportedPanel.listAll())
+                )
             }
 
-            def genome_version = RefGenomeVersion.fromNumericName((String) params.genome_version)
-            params.ref_data_panel_data_path = RefDataDefaultPaths.panelData(supported_panel, genome_version)
+            params.ref_data_panel_data_path = supported_panel.defaultDataPath()
 
         }
 

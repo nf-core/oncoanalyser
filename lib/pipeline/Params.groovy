@@ -1,5 +1,6 @@
 package pipeline
 
+import panel.SupportedPanel
 import refdata.RefDataDefaultPaths
 import refdata.RefDataType
 import refgenome.RefGenomeType
@@ -153,32 +154,35 @@ class Params {
                 "configuration file when running in targeted mode or panel resource creation mode.",
                 "",
                 "Currently, panels with built-in support are:",
-                Messages.createBulletedList(SupportedPanel)
+                Messages.createBulletedList(SupportedPanel.listAll())
             )
         }
 
-        def supported_panel = SupportedPanel.fromString((String) params.panel)
-        def genome_version = RefGenomeVersion.fromNumericName((String) params.genome_version)
+        def supported_panel = SupportedPanel.from((String) params.panel, (String) params.genome_version)
+        if (supported_panel) {
 
-        if (!supported_panel && !params.force_panel) {
-            Messages.error(
-                "No built-in supported for panel: ${params.panel} ",
-                "",
-                "Provide argument --force_panel if you have a custom panel, or adjust the --panel",
-                "argument to one of the panels configured in the pipeline (case-sensitive):",
-                Messages.createBulletedList(SupportedPanel)
-            )
-        }
+            if(!params.containsKey('ref_data_panel_data_path')){
+                params.ref_data_panel_data_path = supported_panel.defaultDataPath()
+            }
 
-        if (!supported_panel && !params.containsKey('ref_data_panel_data_path')) {
-            Messages.error(
-                "If you have a custom panel, provide the directory containing the panel ref data using ",
-                "the CLI argument --ref_data_panel_data_path or in a configuration file"
-            )
-        }
+        } else {
 
-        if (supported_panel && !params.containsKey('ref_data_panel_data_path')) {
-            params.ref_data_panel_data_path = RefDataDefaultPaths.panelData(supported_panel, genome_version)
+            if (!params.force_panel) {
+                Messages.error(
+                    "No built-in support for panel: ${params.panel} ",
+                    "",
+                    "Provide argument --force_panel if you have a custom panel, or adjust the --panel",
+                    "argument to one of the panels configured in the pipeline (case-sensitive):",
+                    Messages.createBulletedList(SupportedPanel.listAll())
+                )
+            }
+
+            if (!params.containsKey('ref_data_panel_data_path')) {
+                Messages.error(
+                    "If you have a custom panel, provide the directory containing the panel ref data using ",
+                    "the CLI argument --ref_data_panel_data_path or in a configuration file"
+                )
+            }
         }
     }
 
@@ -260,7 +264,7 @@ class Params {
 
         } else if (params.containsKey('panel')) {
 
-            def maybe_supported_panel = SupportedPanel.fromString((String) params.panel)
+            def maybe_supported_panel = SupportedPanel.from((String) params.panel, (String) params.genome_version)
             umi_type = UmiType.fromSupportedPanel(maybe_supported_panel)
 
         }

@@ -1,5 +1,6 @@
 package pipeline
 
+import panel.SupportedPanel
 import util.Enums
 
 public enum UmiType {
@@ -49,9 +50,15 @@ public enum UmiType {
     }
 
     public static UmiType fromSupportedPanel(SupportedPanel supportedPanel) {
-        return switch (supportedPanel) {
-            case SupportedPanel.TSO500 -> TSO500
-            case SupportedPanel.MSK -> MSK
+
+        if(!supportedPanel) {
+            return NONE
+        }
+
+        def panel = supportedPanel.panel()
+        return switch (panel) {
+            case panel.TSO500 -> TSO500
+            case panel.MSK -> MSK
             default -> NONE
         }
     }
