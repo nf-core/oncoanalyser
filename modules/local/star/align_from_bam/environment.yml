@@ -4,3 +4,4 @@ channels:
   - bioconda
 dependencies:
   - bioconda::star=2.7.3a
+  - bioconda::samtools=1.21

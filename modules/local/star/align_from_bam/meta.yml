@@ -1,0 +1,46 @@
+name: star_align_from_bam
+description: An ultrafast universal RNA-seq aligner, starting from BAM/CRAM files instead of FASTQ files
+keywords:
+  - rna-seq
+  - rna
+  - aligner
+  - star
+tools:
+  - star:
+      description: An ultrafast universal RNA-seq aligner
+      homepage: https://github.com/alexdobin/STAR
+      documentation: https://github.com/alexdobin/STAR/blob/master/doc/STARmanual.pdf
+      licence: ["MIT"]
+input:
+  - meta:
+      type: map
+      description: |
+        Groovy Map containing sample information
+        e.g. [id: 'sample_id']
+  - bam_input:
+        type: file
+        description: Input BAM or CRAM to be realigned.
+        pattern: "*.{bam,cram}"
+  - genome_star_index:
+      type: directory
+      description: STAR index directory
+output:
+  - meta:
+      type: map
+      description: |
+        Groovy Map containing sample information
+        e.g. [id: 'sample_id']
+  - bam:
+      type: file
+      description: BAM file
+      pattern: "*.{bam}"
+  - versions:
+      type: file
+      description: File containing software versions
+      pattern: "versions.yml"
+  - command_files:
+      type: list
+      description: List of command files
+authors:
+  - "@scwatts"
+  - "@oneillkza:"
