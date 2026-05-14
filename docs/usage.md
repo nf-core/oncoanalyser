@@ -207,8 +207,8 @@ PATIENT1,PATIENT1,PATIENT1-T,tumor,dna,cram,/path/to/PATIENT1-T.dna.cram
 PATIENT1,PATIENT1,PATIENT1-T,tumor,dna,crai,/other/dir/PATIENT1-T.dna.cram.crai
 ```
 
-CRAMs should be of version ≤3.0 and have the [reference genome](#reference-data-urls) embedded. An example command for 
-converting a BAM to the appropriate CRAM format is:
+CRAMs should be of version ≤3.0, have the [reference genome](#reference-data-urls) embedded, and have NM tags 
+preserved. You can use the below template command to convert a BAM to a CRAM with the appropriate format:
 
 ```bash
 samtools view \
@@ -216,6 +216,7 @@ samtools view \
   --output-fmt-option version=3.0 \
   --output-fmt-option embed_ref=1 \
   --output-fmt-option reference=GRCh38_masked_exclusions_alts_hlas.fasta \
+  --output-fmt-option store_nm=1 \
   --output sample.cram \
   --threads 4 \
   --write-index \
