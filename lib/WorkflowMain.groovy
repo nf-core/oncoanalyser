@@ -344,17 +344,18 @@ class WorkflowMain {
     ]
 }
 
-    public static getPrepConfigFromSamplesheet(run_config) {
+    public static getPrepConfigFromSamplesheet(run_config, params = null) {
         return [
             prepare_ref_data_only: false,
+            def realign_bam = (params != null && params.containsKey('realign_bam') && params.realign_bam) || run_config.getOrDefault('realign_bam', false)
 
             require_fasta: true,
             require_fai: true,
             require_dict: true,
             require_img: true,
 
-            require_bwamem2_index: run_config.stages.alignment && (run_config.has_dna_fastq || (params.realign_bam && run_config.has_dna_bam)),
-            require_star_index:    run_config.stages.alignment && (run_config.has_rna_fastq || (params.realign_bam && run_config.has_rna_bam)),
+            require_bwamem2_index: run_config.stages.alignment && (run_config.has_dna_fastq || (realign_bam && run_config.has_dna_bam)),
+            require_star_index: run_config.stages.alignment && (run_config.has_rna_fastq || (realign_bam && run_config.has_rna_bam)),
 
             require_gridss_index: run_config.has_dna && run_config.mode === Constants.RunMode.WGTS && run_config.stages.virusinterpreter,
             require_hmftools_data: true,
