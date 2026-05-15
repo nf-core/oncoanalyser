@@ -27,13 +27,16 @@ process STAR_ALIGN_FROM_BAM {
     mkfifo r1.fifo r2.fifo
 
     # Feed samtools fastq into the two FIFOs in the background
+     samtools collate \\
+        -@ ${task.cpus} \\
+        ${bam_input} | \\
     samtools fastq \\
         -@ ${task.cpus} \\
         -1 r1.fifo \\
         -2 r2.fifo \\
         -0 /dev/null \\
         -s /dev/null \\
-        ${bam_input} &
+        - &
 
     STAR \\
         ${args} \\
