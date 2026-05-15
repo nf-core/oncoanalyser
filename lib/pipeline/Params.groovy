@@ -1,7 +1,6 @@
 package pipeline
 
 import panel.SupportedPanel
-import refdata.RefDataDefaultPaths
 import refdata.RefDataType
 import refgenome.RefGenomeType
 import refgenome.RefGenomeVersion
@@ -78,8 +77,8 @@ class Params {
         }
 
         def supported_genome = SupportedGenome.fromString((String) params.genome)
-        params.genome_version = (supported_genome != null) ? supported_genome.getVersion().getNumericName() : null
-        params.genome_type    = (supported_genome != null) ? supported_genome.getType() : null
+        params.genome_version = (supported_genome != null) ? supported_genome.genomeVersion().getNumericName() : null
+        params.genome_type    = (supported_genome != null) ? supported_genome.genomeType() : null
 
         if(supported_genome)
             return
@@ -138,7 +137,7 @@ class Params {
             return
 
         def genome_version = RefGenomeVersion.fromNumericName((String) params.genome_version)
-        params.ref_data_hmf_data_path = RefDataDefaultPaths.hmfData(genome_version)
+        params.ref_data_hmf_data_path = genome_version.getSupportedGenome().defaultHmfDataPath()
     }
 
     private static void validatePanelDataAndSetDefaults(Map params){
