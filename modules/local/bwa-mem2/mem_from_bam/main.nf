@@ -33,6 +33,10 @@ process BWAMEM2_ALIGN_FROM_BAM {
 
     samtools fastq \\
         -@ ${task.cpus} \\
+        -n \\
+        -F 0x900 \\
+        -1 /dev/stdout \\
+        -2 /dev/stdout \\    
         -0 /dev/null \\
         -s /dev/null \\
         ${bam_input} | \\
