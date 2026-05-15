@@ -31,6 +31,9 @@ process BWAMEM2_ALIGN_FROM_BAM {
     """
     ln -fs \$(find -L ${genome_bwamem2_index} -type f) ./
 
+    samtools collate \\
+        -@ ${task.cpus} \\
+        ${bam_input} | \\
     samtools fastq \\
         -@ ${task.cpus} \\
         -n \\
@@ -39,7 +42,7 @@ process BWAMEM2_ALIGN_FROM_BAM {
         -2 /dev/stdout \\
         -0 /dev/null \\
         -s /dev/null \\
-        ${bam_input} | \\
+        - | \\
     \\
     bwa-mem2 mem \\
         ${args} \\
