@@ -58,7 +58,7 @@ workflow ISOFOX_QUANTIFICATION {
             def meta_isofox = [
                 key: meta.group_id,
                 id: meta.group_id,
-                sample_id: sample.Inputs.getTumorRnaSampleName(meta),
+                sample_id: sample.Inputs.getTumorRnaSampleOutputId(meta),
             ]
 
             return [meta_isofox, tumor_bam, tumor_bai]

@@ -69,7 +69,7 @@ process ORANGE {
 
     // RNA sample
     def rna_id_arg = meta.containsKey('tumor_rna_id') ? "-rna_sample_id ${meta.tumor_rna_id}" : ''
-    def isofox_dir_arg = isofox_dir ? '-isofox_dir isofox_dir__prepared/' : ''
+    def isofox_dir_arg = isofox_dir ? "-isofox_dir ${isofox_dir}" : ''
 
     """
     echo "${pipeline_version_str}" > pipeline_version.txt
@@ -97,11 +97,6 @@ process ORANGE {
         if [[ -n "${smlv_germline_vcf}" ]]; then
             cp -L ${smlv_germline_vcf} \${purple_dir_local}/${meta.tumor_id}.purple.germline.vcf.gz;
         fi;
-
-        mkdir -p isofox_dir__prepared/;
-        for fp in ${isofox_dir}/*; do
-            cp -L \${fp} isofox_dir__prepared/\$(sed 's/${meta.tumor_rna_id}/${meta.tumor_id}/' <<< \${fp##*/});
-        done;
 
     fi
 

@@ -131,7 +131,7 @@ workflow NEO_PREDICTION {
             def meta_isofox = [
                 key: meta.group_id,
                 id: meta.group_id,
-                sample_id: sample.Inputs.getTumorDnaSampleName(meta),
+                sample_id: sample.Inputs.getTumorRnaSampleOutputId(meta),
             ]
 
             return [meta_isofox, neo_finder_dir, tumor_bam_rna, tumor_bai_rna]
@@ -182,7 +182,7 @@ workflow NEO_PREDICTION {
 
             def sage_somatic_append_vcf = []
             if (sample.Inputs.hasTumorRna(meta)) {
-                meta_scorer.sample_rna_id = sample.Inputs.getTumorRnaSampleName(meta)
+                meta_scorer.sample_rna_id = sample.Inputs.getTumorRnaSampleOutputId(meta)
 
                 def sage_somatic_append_selected = sample.Inputs.preferUserProvidedInput(sage_somatic_append, meta, sample.FileKey.SAGE_APPEND_DIR_TUMOR)
                 sage_somatic_append_vcf = file(sage_somatic_append_selected).resolve("${meta_scorer.sample_id}.sage.append.vcf.gz")

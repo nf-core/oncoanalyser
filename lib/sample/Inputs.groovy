@@ -159,6 +159,14 @@ class Inputs {
     public static String getNormalDnaSampleName(Map meta) { return getNormalDnaSample(meta)['sample_id'] }
     public static String getDonorDnaSampleName(Map meta) { return getDonorDnaSample(meta)['sample_id'] }
 
+    public static String getTumorRnaSampleOutputId(Map meta) {
+        // For isofox output files, use the tumor DNA sample ID, but fall back to the tumor RNA sample ID when running in RNA-only mode
+        def tumor_dna_id = getTumorDnaSampleName(meta)
+        def tumor_rna_id = getTumorRnaSampleName(meta)
+        return (tumor_dna_id) ? tumor_dna_id : tumor_rna_id
+    }
+
+
     // Files - Reads/alignments
     public static boolean hasTumorDnaFastq(Map meta) { return getTumorDnaSample(meta).containsKey(FileType.FASTQ) }
     public static boolean hasTumorDnaBam(Map meta) { return getTumorDnaSample(meta).containsKey(FileType.BAM) }

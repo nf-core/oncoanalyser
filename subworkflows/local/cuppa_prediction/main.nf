@@ -96,7 +96,7 @@ workflow CUPPA_PREDICTION {
             }
 
             if(run_rna) {
-                meta_cuppa.sample_rna_id = sample.Inputs.getTumorRnaSampleName(meta)
+                meta_cuppa.sample_rna_id = sample.Inputs.getTumorRnaSampleOutputId(meta)
             }
 
             def categories
