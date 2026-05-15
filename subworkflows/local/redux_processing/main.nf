@@ -32,20 +32,15 @@ workflow REDUX_PROCESSING {
     // channel: [ versions.yml ]
     ch_versions = Channel.empty()
 
-    // Select and sort input sources, separating bytumor and normal
+    // Select and sort input sources, separating by tumor and normal
     // channel: runnable: [ meta, [bam, ...], [bai, ...] ]
     // channel: skip: [ meta ]
     ch_inputs_tumor_sorted = ch_dna_tumor
         .map { meta, bams, bais ->
             return [
                 meta,
-                // In realign mode, prefer the current upstream alignment output over original BAM/CRAM input
-                params.realign_bam
-                    ? bams
-                    : (Utils.hasExistingInput(meta, Constants.INPUT.BAM_DNA_TUMOR) ? [Utils.getInput(meta, Constants.INPUT.BAM_DNA_TUMOR)] : bams),
-                params.realign_bam
-                    ? bais
-                    : (Utils.hasExistingInput(meta, Constants.INPUT.BAI_DNA_TUMOR) ? [Utils.getInput(meta, Constants.INPUT.BAI_DNA_TUMOR)] : bais),
+                params.realign_bam ? bams : (Utils.hasExistingInput(meta, Constants.INPUT.BAM_DNA_TUMOR) ? [Utils.getInput(meta, Constants.INPUT.BAM_DNA_TUMOR)] : bams),
+                params.realign_bam ? bais : (Utils.hasExistingInput(meta, Constants.INPUT.BAI_DNA_TUMOR) ? [Utils.getInput(meta, Constants.INPUT.BAI_DNA_TUMOR)] : bais),
             ]
         }
         .branch { meta, bams, bais ->
@@ -59,13 +54,8 @@ workflow REDUX_PROCESSING {
         .map { meta, bams, bais ->
             return [
                 meta,
-                // In realign mode, prefer the current upstream alignment output over original BAM/CRAM input
-                params.realign_bam
-                    ? bams
-                    : (Utils.hasExistingInput(meta, Constants.INPUT.BAM_DNA_NORMAL) ? [Utils.getInput(meta, Constants.INPUT.BAM_DNA_NORMAL)] : bams),
-                params.realign_bam
-                    ? bais
-                    : (Utils.hasExistingInput(meta, Constants.INPUT.BAI_DNA_NORMAL) ? [Utils.getInput(meta, Constants.INPUT.BAI_DNA_NORMAL)] : bais),
+                params.realign_bam ? bams : (Utils.hasExistingInput(meta, Constants.INPUT.BAM_DNA_NORMAL) ? [Utils.getInput(meta, Constants.INPUT.BAM_DNA_NORMAL)] : bams),
+                params.realign_bam ? bais : (Utils.hasExistingInput(meta, Constants.INPUT.BAI_DNA_NORMAL) ? [Utils.getInput(meta, Constants.INPUT.BAI_DNA_NORMAL)] : bais),
             ]
         }
         .branch { meta, bams, bais ->
@@ -79,13 +69,8 @@ workflow REDUX_PROCESSING {
         .map { meta, bams, bais ->
             return [
                 meta,
-                // In realign mode, prefer the current upstream alignment output over original BAM/CRAM input
-                params.realign_bam
-                    ? bams
-                    : (Utils.hasExistingInput(meta, Constants.INPUT.BAM_DNA_DONOR) ? [Utils.getInput(meta, Constants.INPUT.BAM_DNA_DONOR)] : bams),
-                params.realign_bam
-                    ? bais
-                    : (Utils.hasExistingInput(meta, Constants.INPUT.BAI_DNA_DONOR) ? [Utils.getInput(meta, Constants.INPUT.BAI_DNA_DONOR)] : bais),
+                params.realign_bam ? bams : (Utils.hasExistingInput(meta, Constants.INPUT.BAM_DNA_DONOR) ? [Utils.getInput(meta, Constants.INPUT.BAM_DNA_DONOR)] : bams),
+                params.realign_bam ? bais : (Utils.hasExistingInput(meta, Constants.INPUT.BAI_DNA_DONOR) ? [Utils.getInput(meta, Constants.INPUT.BAI_DNA_DONOR)] : bais),
             ]
         }
         .branch { meta, bams, bais ->
