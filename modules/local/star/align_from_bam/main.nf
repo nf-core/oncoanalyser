@@ -23,21 +23,23 @@ process STAR_ALIGN_FROM_BAM {
     def args = task.ext.args ?: ''
 
     """
+
+    # Create a collated version of the bam on local disk (annoying use of disk, but it's RNA so likely not so big)
+    # Unfortunately there's a FIFO deadlock if this is all piped together
+    samtools collate -@ ${task.cpus} -O -o collated.bam ${bam_input}
+
+
     # Create named FIFOs for R1 and R2
     mkfifo r1.fifo r2.fifo
 
     # Feed samtools fastq into the two FIFOs in the background
-     samtools collate \\
-        -O \\
-        -@ ${task.cpus} \\
-        ${bam_input} | \\
     samtools fastq \\
         -@ ${task.cpus} \\
         -1 r1.fifo \\
         -2 r2.fifo \\
         -0 /dev/null \\
         -s /dev/null \\
-        - &
+        collated.bam &
 
     STAR \\
         ${args} \\
