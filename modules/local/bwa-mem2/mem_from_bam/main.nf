@@ -32,6 +32,7 @@ process BWAMEM2_ALIGN_FROM_BAM {
     ln -fs \$(find -L ${genome_bwamem2_index} -type f) ./
 
     samtools collate \\
+        -O \\
         -@ ${task.cpus} \\
         ${bam_input} | \\
     samtools fastq \\
