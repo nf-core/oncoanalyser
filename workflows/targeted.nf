@@ -61,7 +61,7 @@ workflow TARGETED {
     ch_inputs = Channel.fromList(inputs)
 
     // Set up reference data, assign more human readable variables
-    prep_config = WorkflowMain.getPrepConfigFromSamplesheet(run_config)
+    prep_config = WorkflowMain.getPrepConfigFromSamplesheet(run_config, params)
     PREPARE_REFERENCE(
         prep_config,
         run_config,
