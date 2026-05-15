@@ -133,7 +133,7 @@ class Params {
 
     private static void setDefaultHmfData(Map params) {
 
-        if(params.ref_data_hmf_data_path)
+        if(params.containsKey('ref_data_hmf_data_path'))
             return
 
         def genome_version = RefGenomeVersion.fromNumericName((String) params.genome_version)
