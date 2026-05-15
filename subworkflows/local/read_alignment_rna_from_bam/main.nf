@@ -26,8 +26,7 @@ workflow READ_ALIGNMENT_RNA_FROM_BAM {
     // channel: [ meta ]
     ch_inputs_sorted = ch_inputs
         .branch { meta ->
-            def has_existing = Utils.hasExistingInput(meta, Constants.INPUT.BAM_RNA_TUMOR)
-            runnable: Utils.hasTumorRnaBam(meta) && !has_existing
+            runnable: Utils.hasTumorRnaBam(meta)
             skip: true
         }
 
