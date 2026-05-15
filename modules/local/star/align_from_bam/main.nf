@@ -28,6 +28,7 @@ process STAR_ALIGN_FROM_BAM {
 
     # Feed samtools fastq into the two FIFOs in the background
      samtools collate \\
+        -O \\
         -@ ${task.cpus} \\
         ${bam_input} | \\
     samtools fastq \\
