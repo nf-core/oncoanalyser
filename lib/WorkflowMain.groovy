@@ -315,24 +315,34 @@ class WorkflowMain {
 
     public static getRunConfig(params, inputs, log) {
 
-        def run_mode = Utils.getRunMode(params.mode, log)
+    def run_mode = Utils.getRunMode(params.mode, log)
 
-        def stages = Processes.getRunStages(
-            params.processes_include,
-            params.processes_exclude,
-            params.processes_manual,
-            log,
-        )
+    def stages = Processes.getRunStages(
+        params.processes_include,
+        params.processes_exclude,
+        params.processes_manual,
+        log,
+    )
 
-        return [
-            mode: run_mode,
-            stages: stages,
-            has_dna: inputs.any { Utils.hasTumorDna(it) },
-            has_rna: inputs.any { Utils.hasTumorRna(it) },
-            has_rna_fastq: inputs.any { Utils.hasTumorRnaFastq(it) },
-            has_dna_fastq: inputs.any { Utils.hasTumorDnaFastq(it) || Utils.hasNormalDnaFastq(it) },
-        ]
+    def has_dna_bam = inputs.any { Utils.hasTumorDnaBam(it) || Utils.hasNormalDnaBam(it) || Utils.hasDonorDnaBam(it) }
+    def has_rna_bam = inputs.any { Utils.hasTumorRnaBam(it) }
+
+    // Force alignment when realign mode is requested and BAM/CRAM exists
+    if (params.realign_bam && (has_dna_bam || has_rna_bam)) {
+        stages.alignment = true
     }
+
+    return [
+        mode: run_mode,
+        stages: stages,
+        has_dna: inputs.any { Utils.hasTumorDna(it) },
+        has_rna: inputs.any { Utils.hasTumorRna(it) },
+        has_rna_fastq: inputs.any { Utils.hasTumorRnaFastq(it) },
+        has_dna_fastq: inputs.any { Utils.hasTumorDnaFastq(it) || Utils.hasNormalDnaFastq(it) },
+        has_dna_bam: has_dna_bam,
+        has_rna_bam: has_rna_bam,
+    ]
+}
 
     public static getPrepConfigFromSamplesheet(run_config) {
         return [
@@ -343,8 +353,8 @@ class WorkflowMain {
             require_dict: true,
             require_img: true,
 
-            require_bwamem2_index: run_config.has_dna_fastq && run_config.stages.alignment,
-            require_star_index: run_config.has_rna_fastq && run_config.stages.alignment,
+            require_bwamem2_index: run_config.stages.alignment && (run_config.has_dna_fastq || (params.realign_bam && run_config.has_dna_bam)),
+            require_star_index:    run_config.stages.alignment && (run_config.has_rna_fastq || (params.realign_bam && run_config.has_rna_bam)),
 
             require_gridss_index: run_config.has_dna && run_config.mode === Constants.RunMode.WGTS && run_config.stages.virusinterpreter,
             require_hmftools_data: true,
