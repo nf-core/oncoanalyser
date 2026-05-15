@@ -345,10 +345,9 @@ class WorkflowMain {
 }
 
     public static getPrepConfigFromSamplesheet(run_config, params = null) {
+        def realign_bam = params.containsKey('realign_bam') && params.realign_bam
         return [
             prepare_ref_data_only: false,
-            def realign_bam = (params != null && params.containsKey('realign_bam') && params.realign_bam) || run_config.getOrDefault('realign_bam', false)
-
             require_fasta: true,
             require_fai: true,
             require_dict: true,
