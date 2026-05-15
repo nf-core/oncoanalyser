@@ -20,7 +20,7 @@ workflow READ_ALIGNMENT_DNA_FROM_BAM {
     main:
     ch_versions = Channel.empty()
 
-    // Branch inputs: only process samples that have a BAM but no existing realigned output
+    // Branch inputs: process samples that have BAM/CRAM inputs
     ch_inputs_tumor_sorted = ch_inputs
         .branch { meta ->
             runnable: Utils.hasTumorDnaBam(meta)
@@ -39,7 +39,7 @@ workflow READ_ALIGNMENT_DNA_FROM_BAM {
             skip: true
         }
 
-    // Build a flat channel of [ meta_bwamem2, bam ] — one entry per read-group in the source BAM.
+    // Build a flat channel of [ meta_bwamem2, bam ] from input BAM/CRAM.
     ch_bwamem2_inputs = Channel.empty()
         .mix(
             ch_inputs_tumor_sorted.runnable.map { meta ->
@@ -52,7 +52,9 @@ workflow READ_ALIGNMENT_DNA_FROM_BAM {
                     sample_type: 'tumor',
                     read_group:  "${sample_id}.realign",
                 ]
-                return [meta_bwamem2, Utils.getTumorDnaBam(meta)]
+                def bam = Utils.getTumorDnaBam(meta)
+                assert bam != null && bam != [] : "Missing tumor DNA BAM/CRAM for ${meta.group_id}"
+                return [meta_bwamem2, bam]
             },
             ch_inputs_normal_sorted.runnable.map { meta ->
                 def meta_sample = Utils.getNormalDnaSample(meta)
@@ -64,7 +66,9 @@ workflow READ_ALIGNMENT_DNA_FROM_BAM {
                     sample_type: 'normal',
                     read_group:  "${sample_id}.realign",
                 ]
-                return [meta_bwamem2, Utils.getNormalDnaBam(meta)]
+                def bam = Utils.getNormalDnaBam(meta)
+                assert bam != null && bam != [] : "Missing normal DNA BAM/CRAM for ${meta.group_id}"
+                return [meta_bwamem2, bam]
             },
             ch_inputs_donor_sorted.runnable.map { meta ->
                 def meta_sample = Utils.getDonorDnaSample(meta)
@@ -76,9 +80,12 @@ workflow READ_ALIGNMENT_DNA_FROM_BAM {
                     sample_type: 'donor',
                     read_group:  "${sample_id}.realign",
                 ]
-                return [meta_bwamem2, Utils.getDonorDnaBam(meta)]
+                def bam = Utils.getDonorDnaBam(meta)
+                assert bam != null && bam != [] : "Missing donor DNA BAM/CRAM for ${meta.group_id}"
+                return [meta_bwamem2, bam]
             },
         )
+        .filter { meta_bwamem2, bam -> bam != null && bam != [] }
 
     BWAMEM2_ALIGN_FROM_BAM(
         ch_bwamem2_inputs,
