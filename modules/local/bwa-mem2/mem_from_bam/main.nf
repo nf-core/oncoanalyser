@@ -36,7 +36,7 @@ process BWAMEM2_ALIGN_FROM_BAM {
         -n \\
         -F 0x900 \\
         -1 /dev/stdout \\
-        -2 /dev/stdout \\    
+        -2 /dev/stdout \\
         -0 /dev/null \\
         -s /dev/null \\
         ${bam_input} | \\
@@ -64,6 +64,11 @@ process BWAMEM2_ALIGN_FROM_BAM {
         --nthreads ${task.cpus} \\
         --out ${output_fn} \\
         /dev/stdin
+
+    # Force non-empty output check (helps catch upstream empty input quickly)
+    test -s ${output_fn}
+    samtools quickcheck ${output_fn}
+    samtools index -@ ${task.cpus} ${output_fn}
 
     # NOTE(SW): bwa-mem2 version hardcoded as 2.3 reports the wrong version
     cat <<-END_VERSIONS > versions.yml
