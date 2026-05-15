@@ -42,7 +42,7 @@ workflow PURITY_ESTIMATE {
     purity_estimate_run_mode = Utils.getEnumFromString(params.purity_estimate_mode, Constants.RunMode)
 
     // Set up reference data, assign more human readable variables
-    prep_config = WorkflowMain.getPrepConfigFromSamplesheet(run_config)
+    prep_config = WorkflowMain.getPrepConfigFromSamplesheet(run_config, params)
     PREPARE_REFERENCE(
         prep_config,
         run_config,
