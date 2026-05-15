@@ -23,22 +23,19 @@ workflow READ_ALIGNMENT_DNA_FROM_BAM {
     // Branch inputs: only process samples that have a BAM but no existing realigned output
     ch_inputs_tumor_sorted = ch_inputs
         .branch { meta ->
-            def has_existing = Utils.hasExistingInput(meta, Constants.INPUT.BAM_DNA_TUMOR)
-            runnable: Utils.hasTumorDnaBam(meta) && !has_existing
+            runnable: Utils.hasTumorDnaBam(meta)
             skip: true
         }
 
     ch_inputs_normal_sorted = ch_inputs
         .branch { meta ->
-            def has_existing = Utils.hasExistingInput(meta, Constants.INPUT.BAM_DNA_NORMAL)
-            runnable: Utils.hasNormalDnaBam(meta) && !has_existing
+            runnable: Utils.hasNormalDnaBam(meta)
             skip: true
         }
 
     ch_inputs_donor_sorted = ch_inputs
         .branch { meta ->
-            def has_existing = Utils.hasExistingInput(meta, Constants.INPUT.BAM_DNA_DONOR)
-            runnable: Utils.hasDonorDnaBam(meta) && !has_existing
+            runnable: Utils.hasDonorDnaBam(meta)
             skip: true
         }
 
