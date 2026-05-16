@@ -38,17 +38,21 @@ workflow ISOFOX_QUANTIFICATION {
     // channel: skip: [ meta ]
     ch_inputs_sorted = ch_tumor_rna_bam
         .map { meta, tumor_bam, tumor_bai ->
-            return [
-                meta,
-                Utils.selectCurrentOrExisting(tumor_bam, meta, Constants.INPUT.BAM_RNA_TUMOR),
-                Utils.selectCurrentOrExisting(tumor_bai, meta, Constants.INPUT.BAI_RNA_TUMOR),
-            ]
+            def chosen_bam = params.realign_bam
+                ? tumor_bam
+                : Utils.selectCurrentOrExisting(tumor_bam, meta, Constants.INPUT.BAM_RNA_TUMOR)
+
+            def chosen_bai = params.realign_bam
+                ? tumor_bai
+                : Utils.selectCurrentOrExisting(tumor_bai, meta, Constants.INPUT.BAI_RNA_TUMOR)
+
+            return [ meta, chosen_bam, chosen_bai ]
         }
         .branch { meta, tumor_bam, tumor_bai ->
             def has_existing = Utils.hasExistingInput(meta, Constants.INPUT.ISOFOX_DIR)
             runnable: tumor_bam && !has_existing
             skip: true
-                return meta
+            return meta
         }
 
     // Create process input channel
