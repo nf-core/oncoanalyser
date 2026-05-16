@@ -28,22 +28,11 @@ process STAR_ALIGN_FROM_BAM {
     # Unfortunately there's a FIFO deadlock if this is all piped together
     samtools collate -@ ${task.cpus} -u -o collated.bam ${bam_input}
 
-
-    # Create named FIFOs for R1 and R2
-    mkfifo r1.fifo r2.fifo
-
-    # Feed samtools fastq into the two FIFOs in the background
-    samtools fastq \\
-        -@ ${task.cpus} \\
-        -1 r1.fifo \\
-        -2 r2.fifo \\
-        -0 /dev/null \\
-        -s /dev/null \\
-        collated.bam &
-
     STAR \\
         ${args} \\
-        --readFilesIn r1.fifo r2.fifo \\
+        --readFilesIn \\
+          <(samtools fastq -@ ${task.cpus} -n -F 0x900 -1 /dev/stdout -2 /dev/null -0 /dev/null -s /dev/null collated.bam) \\
+          <(samtools fastq -@ ${task.cpus} -n -F 0x900 -1 /dev/null -2 /dev/stdout -0 /dev/null -s /dev/null collated.bam) \\
         --genomeDir ${genome_star_index} \\
         --runThreadN ${task.cpus} \\
         --alignSJstitchMismatchNmax 5 -1 5 5 \\
