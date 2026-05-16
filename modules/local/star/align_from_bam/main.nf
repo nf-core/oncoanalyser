@@ -12,7 +12,7 @@ process STAR_ALIGN_FROM_BAM {
     path genome_star_index
 
     output:
-    tuple val(meta), path('*bam'), emit: bam
+    tuple val(meta), path('Aligned.out.bam'), emit: bam
     path 'versions.yml'          , emit: versions
     path '.command.*'            , emit: command_files
 
