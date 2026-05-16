@@ -107,25 +107,62 @@ workflow NEO_PREDICTION {
     // Select input sources and sort
     // channel: runnable: [ meta, neo_finder_dir, tumor_bam_rna, tumor_bai_rna ]
     // channel: skip: [ meta ]
-    ch_isofox_inputs_sorted = WorkflowOncoanalyser.groupByMeta(
-        ch_finder_out,
-        ch_tumor_rna_bam,
-    )
-        .map { meta, neo_finder_dir, tumor_bam, tumor_bai ->
-            return [
-                meta,
-                neo_finder_dir,
-                Utils.selectCurrentOrExisting(tumor_bam, meta, Constants.INPUT.BAM_RNA_TUMOR),
-                Utils.selectCurrentOrExisting(tumor_bai, meta, Constants.INPUT.BAI_RNA_TUMOR),
-            ]
-        }
-        .branch { meta, neo_finder_dir, tumor_bam, tumor_bai ->
-            runnable: Utils.hasTumorRna(meta)
-                return [meta, neo_finder_dir, tumor_bam, tumor_bai]
-            skip: true
-                return meta
-        }
+    // Select input sources and sort for fusion annotation
+// channel: runnable: [ meta, neo_finder_dir, tumor_bam, tumor_bai ]
+// channel: skip: [ meta ]
+ch_isofox_inputs_sorted = WorkflowOncoanalyser.groupByMeta(
+    ch_finder_out,
+    ch_tumor_rna_bam,
+)
+    .map { meta, neo_finder_dir, tumor_bam, tumor_bai ->
+        return [
+            meta,
+            neo_finder_dir,
+            params.realign_bam
+                ? tumor_bam
+                : Utils.selectCurrentOrExisting(tumor_bam, meta, Constants.INPUT.BAM_RNA_TUMOR),
+            params.realign_bam
+                ? tumor_bai
+                : Utils.selectCurrentOrExisting(tumor_bai, meta, Constants.INPUT.BAI_RNA_TUMOR),
+        ]
+    }
+    .branch { meta, neo_finder_dir, tumor_bam, tumor_bai ->
+        runnable: Utils.hasTumorRna(meta)
+        skip: true
+            return meta
+    }
+The only behavioral change is:
 
+when params.realign_bam == true, use tumor_bam/tumor_bai from upstream channel (realigned output),
+otherwise preserve existing fallback behavior.
+Also, yes — this is the snippet you provided:
+
+Nextflow
+// Select input sources and sort for fusion annotation
+// channel: runnable: [ meta, neo_finder_dir, tumor_bam, tumor_bai ]
+// channel: skip: [ meta ]
+ch_isofox_inputs_sorted = WorkflowOncoanalyser.groupByMeta(
+    ch_finder_out,
+    ch_tumor_rna_bam,
+)
+    .map { meta, neo_finder_dir, tumor_bam, tumor_bai ->
+        return [
+            meta,
+            neo_finder_dir,
+            params.realign_bam
+                ? tumor_bam
+                : Utils.selectCurrentOrExisting(tumor_bam, meta, Constants.INPUT.BAM_RNA_TUMOR),
+            params.realign_bam
+                ? tumor_bai
+                : Utils.selectCurrentOrExisting(tumor_bai, meta, Constants.INPUT.BAI_RNA_TUMOR),
+        ]
+    }
+    .branch { meta, neo_finder_dir, tumor_bam, tumor_bai ->
+        runnable: Utils.hasTumorRna(meta)
+            return [meta, neo_finder_dir, tumor_bam, tumor_bai]
+        skip: true
+            return meta
+    }
     // Create process input channel
     // channel: [ meta_isofox, neo_finder_dir, tumor_bam_rna, tumor_bai_rna ]
     ch_isofox_inputs = ch_isofox_inputs_sorted.runnable
