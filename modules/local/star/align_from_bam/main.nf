@@ -26,7 +26,7 @@ process STAR_ALIGN_FROM_BAM {
 
     # Create a collated version of the bam on local disk (annoying use of disk, but it's RNA so likely not so big)
     # Unfortunately there's a FIFO deadlock if this is all piped together
-    samtools collate -@ ${task.cpus} -O -o collated.bam ${bam_input}
+    samtools collate -@ ${task.cpus} -u -o collated.bam ${bam_input}
 
 
     # Create named FIFOs for R1 and R2
