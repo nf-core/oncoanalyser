@@ -1,357 +1,223 @@
-/*
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-    Config file for defining DSL2 per module options and publishing paths
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-    Available keys to override module options:
-        ext.args   = Additional arguments appended to command in module.
-        ext.args2  = Second set of arguments appended to command in module (multi-tool modules).
-        ext.args3  = Third set of arguments appended to command in module (multi-tool modules).
-        ext.prefix = File name prefix for output files.
-----------------------------------------------------------------------------------------
-*/
+//
+// Neo identifies and scores neoepitopes
+//
 
-process {
+import Constants
+import Utils
 
-    withName: 'WRITE_REFERENCE_DATA' {
-        publishDir = [
-            path: { "${params.outdir}/reference_data/${workflow.manifest.version}" },
-            mode: params.publish_dir_mode,
-        ]
-    }
+include { NEO_ANNOTATE_FUSIONS } from '../../../modules/local/neo/annotate_fusions/main'
+include { NEO_FINDER           } from '../../../modules/local/neo/finder/main'
+include { NEO_SCORER           } from '../../../modules/local/neo/scorer/main'
 
-    withName: 'FASTP' {
-        ext.args = '--disable_quality_filtering --disable_length_filtering --disable_adapter_trimming --disable_trim_poly_g'
-    }
+workflow NEO_PREDICTION {
+    take:
+    // Sample data
+    ch_inputs              // channel: [mandatory] [ meta ]
+    ch_tumor_rna_bam       // channel: [mandatory] [ meta, bam, bai ]
+    ch_isofox              // channel: [mandatory] [ meta, isofox_dir ]
+    ch_purple              // channel: [mandatory] [ meta, purple_dir ]
+    ch_sage_somatic_append // channel: [mandatory] [ meta, sage_append_dir ]
+    ch_lilac               // channel: [mandatory] [ meta, lilac_dir ]
+    ch_linx                // channel: [mandatory] [ meta, linx_annotation_dir ]
 
-    withName: 'STAR_GENOMEGENERATE' {
-        ext.args = '--genomeSAindexNbases 14 --sjdbOverhang 200 --genomeChrBinNbits 15'
-    }
+    // Reference data
+    genome_fasta           // channel: [mandatory] /path/to/genome_fasta
+    genome_version         // channel: [mandatory] genome version
+    genome_fai             // channel: [mandatory] /path/to/genome_fai
+    ensembl_data_resources // channel: [mandatory] /path/to/ensembl_data_resources/
+    neo_resources          // channel: [mandatory] /path/to/neo_resources/
+    cohort_tpm_medians     // channel: [mandatory] /path/to/cohort_tpm_medians/
 
-    withName: 'GATK4_MARKDUPLICATES' {
-        publishDir = [
-            path: { "${params.outdir}" },
-            mode: params.publish_dir_mode,
-            saveAs: { filename -> get_saveas_path(meta, task, filename, "${meta.key}/alignments/rna/${filename}") },
-        ]
-    }
+    // Params
+    isofox_read_length     //  string: [mandatory] Isofox read length
 
-    withName: 'REDUX' {
-        ext.log_level = { "${params.hmftools_log_level}" }
-        publishDir = [
-            path: { "${params.outdir}" },
-            mode: params.publish_dir_mode,
-            saveAs: { filename -> get_saveas_path(meta, task, filename, "${meta.key}/alignments/dna/${filename}") },
-        ]
-    }
+    main:
+    // Channel for versions.yml files
+    // channel: [ versions.yml ]
+    ch_versions = Channel.empty()
 
-    withName: 'AMBER' {
-        ext.log_level = { "${params.hmftools_log_level}" }
-        publishDir = [
-            path: { "${params.outdir}" },
-            mode: params.publish_dir_mode,
-            saveAs: { filename -> get_saveas_path(meta, task, filename, "${meta.key}/${filename}") },
-        ]
-    }
+    //
+    // MODULE: Neo finder
+    //
+    // Select input sources
+    // channel: [ meta, purple_dir, linx_annotation_dir ]
+    ch_finder_inputs_selected = WorkflowOncoanalyser.groupByMeta(
+        ch_purple,
+        ch_linx,
+    )
+        .map { meta, purple_dir, linx_annotation_dir ->
 
-    withName: 'COBALT' {
-        ext.log_level = { "${params.hmftools_log_level}" }
-        publishDir = [
-            path: { "${params.outdir}" },
-            mode: params.publish_dir_mode,
-            saveAs: { filename -> get_saveas_path(meta, task, filename, "${meta.key}/${filename}") },
-        ]
-    }
+            def inputs = [
+                Utils.selectCurrentOrExisting(purple_dir, meta, Constants.INPUT.PURPLE_DIR),
+                Utils.selectCurrentOrExisting(linx_annotation_dir, meta, Constants.INPUT.LINX_ANNO_DIR_TUMOR),
+            ]
 
-    withName: '.*:ESVEE_CALLING:ESVEE' {
-        ext.log_level = { "${params.hmftools_log_level}" }
-        publishDir = [
-            path: { "${params.outdir}" },
-            mode: params.publish_dir_mode,
-            saveAs: { filename -> get_saveas_path(meta, task, filename, "${meta.key}/${filename}") },
-        ]
-    }
+            return [meta, *inputs]
+        }
 
-    withName: '.*:SAGE_CALLING:SAGE_GERMLINE' {
-        ext.log_level = { "${params.hmftools_log_level}" }
-        publishDir = [
-            path: { "${params.outdir}" },
-            mode: params.publish_dir_mode,
-            saveAs: { filename -> get_saveas_path(meta, task, filename, "${meta.key}/sage/${filename}") },
-        ]
-    }
+    // Sort inputs
+    // channel: runnable: [ meta, purple_dir, linx_annotation_dir ]
+    // channel: skip: [ meta ]
+    ch_finder_inputs_sorted = ch_finder_inputs_selected
+        .branch { meta, purple_dir, linx_annotation_dir ->
 
-    withName: '.*:SAGE_CALLING:SAGE_SOMATIC' {
-        ext.log_level = { "${params.hmftools_log_level}" }
-        publishDir = [
-            path: { "${params.outdir}" },
-            mode: params.publish_dir_mode,
-            saveAs: { filename -> get_saveas_path(meta, task, filename, "${meta.key}/sage/${filename}") },
-        ]
-    }
+            def has_normal_dna = Utils.hasNormalDna(meta)
 
-    withName: '.*:SAGE_APPEND:SAGE_APPEND_GERMLINE' {
-        ext.log_level = { "${params.hmftools_log_level}" }
-        publishDir = [
-            path: { "${params.outdir}" },
-            mode: params.publish_dir_mode,
-            saveAs: { filename -> get_saveas_path(meta, task, filename, "${meta.key}/sage_append/germline") },
-        ]
-    }
+            def has_runnable_inputs = purple_dir && linx_annotation_dir && has_normal_dna
 
-    withName: '.*:SAGE_APPEND:SAGE_APPEND_SOMATIC' {
-        ext.log_level = { "${params.hmftools_log_level}" }
-        publishDir = [
-            path: { "${params.outdir}" },
-            mode: params.publish_dir_mode,
-            saveAs: { filename -> get_saveas_path(meta, task, filename, "${meta.key}/sage_append/somatic") },
-        ]
-    }
+            runnable: has_runnable_inputs
+            skip: true
+                return meta
+        }
 
-    withName: '.*:PAVE_ANNOTATION:PAVE_(?:GERMLINE|SOMATIC)' {
-        ext.log_level = { "${params.hmftools_log_level}" }
-        publishDir = [
-            path: { "${params.outdir}" },
-            mode: params.publish_dir_mode,
-            saveAs: { filename -> get_saveas_path(meta, task, filename, "${meta.key}/pave/${filename}") },
-        ]
-    }
+    // Create process input channel
+    // channel: sample_data: [ meta_finder, purple_dir, linx_annotation_dir ]
+    ch_finder_inputs = ch_finder_inputs_sorted.runnable
+        .map { meta, purple_dir, linx_annotation_dir ->
 
-    withName: 'PURPLE' {
-        ext.log_level = { "${params.hmftools_log_level}" }
-        publishDir = [
-            path: { "${params.outdir}" },
-            mode: params.publish_dir_mode,
-            saveAs: { filename -> get_saveas_path(meta, task, filename, "${meta.key}/${filename}") },
-        ]
-    }
+            def meta_finder = [
+                key: meta.group_id,
+                id: meta.group_id,
+                sample_id: Utils.getTumorDnaSampleName(meta),
+            ]
 
-    withName: '.*:LINX_ANNOTATION:LINX_GERMLINE' {
-        ext.log_level = { "${params.hmftools_log_level}" }
-        publishDir = [
-            path: { "${params.outdir}" },
-            mode: params.publish_dir_mode,
-            saveAs: { filename -> get_saveas_path(meta, task, filename, "${meta.key}/linx/germline_annotations/") },
-        ]
-    }
+            return [meta_finder, purple_dir, linx_annotation_dir]
+        }
 
-    withName: '.*:LINX_ANNOTATION:LINX_SOMATIC' {
-        ext.log_level = { "${params.hmftools_log_level}" }
-        publishDir = [
-            path: { "${params.outdir}" },
-            mode: params.publish_dir_mode,
-            saveAs: { filename -> get_saveas_path(meta, task, filename, "${meta.key}/linx/somatic_annotations/") },
-        ]
-    }
+    // Run process
+    NEO_FINDER(
+        ch_finder_inputs,
+        genome_fasta,
+        genome_version,
+        genome_fai,
+        ensembl_data_resources,
+    )
 
-    withName: '.*:LINX_PLOTTING:LINX_VISUALISER' {
-        ext.log_level = { "${params.hmftools_log_level}" }
-        publishDir = [
-            path: { "${params.outdir}" },
-            mode: params.publish_dir_mode,
-            saveAs: { filename -> get_saveas_path(meta, task, filename, "${meta.key}/linx/somatic_plots/") },
-        ]
-    }
+    ch_versions = ch_versions.mix(NEO_FINDER.out.versions)
 
-    withName: '.*:LINX_PLOTTING:LINXREPORT' {
-        publishDir = [
-            path: { "${params.outdir}" },
-            mode: params.publish_dir_mode,
-            saveAs: { filename -> get_saveas_path(meta, task, filename, "${meta.key}/linx/${filename}") },
-        ]
-    }
+    // Set outputs, restoring original meta
+    // channel: [ meta, neo_finder_dir ]
+    ch_finder_out = WorkflowOncoanalyser.restoreMeta(NEO_FINDER.out.neo_finder_dir, ch_inputs)
 
-    withName: 'CIDER' {
-        ext.log_level = { "${params.hmftools_log_level}" }
-        publishDir = [
-            path: { "${params.outdir}" },
-            mode: params.publish_dir_mode,
-            saveAs: { filename -> get_saveas_path(meta, task, filename, "${meta.key}/${filename}") },
-        ]
-    }
+    //
+    // MODULE: Fusion annotation (Isofox)
+    //
+    // Annotate the fusion-derived neoepitope using Isofox where RNA data is available
 
-    withName: 'BAMTOOLS' {
-        ext.log_level = { "${params.hmftools_log_level}" }
-        publishDir = [
-            path: { "${params.outdir}" },
-            mode: params.publish_dir_mode,
-            saveAs: { filename ->
-                def output_filename = filename.replaceFirst(/^bamtools_/, '');
-                get_saveas_path(meta, task, filename, "${meta.key}/bamtools/${output_filename}")
-            },
-        ]
-    }
+    // Select input sources and sort
+    // channel: runnable: [ meta, neo_finder_dir, tumor_bam_rna, tumor_bai_rna ]
+    // channel: skip: [ meta ]
+    ch_isofox_inputs_sorted = WorkflowOncoanalyser.groupByMeta(
+        ch_finder_out,
+        ch_tumor_rna_bam,
+    )
+        .map { meta, neo_finder_dir, tumor_bam, tumor_bai ->
+            return [
+                meta,
+                neo_finder_dir,
+                Utils.selectCurrentOrExisting(tumor_bam, meta, Constants.INPUT.BAM_RNA_TUMOR),
+                Utils.selectCurrentOrExisting(tumor_bai, meta, Constants.INPUT.BAI_RNA_TUMOR),
+            ]
+        }
+        .branch { meta, neo_finder_dir, tumor_bam, tumor_bai ->
+            runnable: Utils.hasTumorRna(meta)
+                return [meta, neo_finder_dir, tumor_bam, tumor_bai]
+            skip: true
+                return meta
+        }
 
-    withName: 'CHORD' {
-        ext.log_level = { "${params.hmftools_log_level}" }
-        publishDir = [
-            path: { "${params.outdir}" },
-            mode: params.publish_dir_mode,
-            saveAs: { filename -> get_saveas_path(meta, task, filename, "${meta.key}/${filename}") },
-        ]
-    }
+    // Create process input channel
+    // channel: [ meta_isofox, neo_finder_dir, tumor_bam_rna, tumor_bai_rna ]
+    ch_isofox_inputs = ch_isofox_inputs_sorted.runnable
+        .map { meta, neo_finder_dir, tumor_bam_rna, tumor_bai_rna ->
 
-    withName: 'LILAC' {
-        ext.log_level = { "${params.hmftools_log_level}" }
-        publishDir = [
-            path: { "${params.outdir}" },
-            mode: params.publish_dir_mode,
-            saveAs: { filename -> get_saveas_path(meta, task, filename, "${meta.key}/${filename}") },
-        ]
-    }
+            def meta_isofox = [
+                key: meta.group_id,
+                id: meta.group_id,
+                sample_id: Utils.getTumorDnaSampleName(meta),
+            ]
 
-    withName: 'SIGS' {
-        ext.log_level = { "${params.hmftools_log_level}" }
-        publishDir = [
-            path: { "${params.outdir}" },
-            mode: params.publish_dir_mode,
-            saveAs: { filename -> get_saveas_path(meta, task, filename, "${meta.key}/${filename}") },
-        ]
-    }
+            return [meta_isofox, neo_finder_dir, tumor_bam_rna, tumor_bai_rna]
+        }
 
-    withName: 'TEAL.*' {
-        publishDir = [
-            path: { "${params.outdir}" },
-            mode: params.publish_dir_mode,
-            saveAs: { filename -> get_saveas_path(meta, task, filename, "${meta.id}/teal/${new File(filename).name}") },
-        ]
-    }
+    // Run process
+    NEO_ANNOTATE_FUSIONS(
+        ch_isofox_inputs,
+        isofox_read_length,
+        genome_fasta,
+        genome_version,
+        genome_fai,
+        ensembl_data_resources,
+    )
 
-    withName: 'VIRUSBREAKEND' {
-        publishDir = [
-            path: { "${params.outdir}" },
-            mode: params.publish_dir_mode,
-            saveAs: { filename -> get_saveas_path(meta, task, filename, "${meta.key}/virusbreakend/${filename}") },
-        ]
-    }
+    ch_versions = ch_versions.mix(NEO_ANNOTATE_FUSIONS.out.versions)
 
-    withName: 'VIRUSINTERPRETER' {
-        ext.log_level = { "${params.hmftools_log_level}" }
-        publishDir = [
-            path: { "${params.outdir}" },
-            mode: params.publish_dir_mode,
-            saveAs: { filename -> get_saveas_path(meta, task, filename, "${meta.key}/${filename}") },
-        ]
-    }
+    // Set outputs, restoring original meta
+    // channel: [ meta, annotated_fusions ]
+    ch_annotate_fusions_out = Channel.empty()
+        .mix(
+            WorkflowOncoanalyser.restoreMeta(NEO_ANNOTATE_FUSIONS.out.annotated_fusions, ch_inputs),
+            ch_isofox_inputs_sorted.skip.map { meta -> [meta, []] },
+        )
 
-    withName: 'ISOFOX' {
-        ext.log_level = { "${params.hmftools_log_level}" }
-        publishDir = [
-            path: { "${params.outdir}" },
-            mode: params.publish_dir_mode,
-            saveAs: { filename -> get_saveas_path(meta, task, filename, "${meta.key}/${filename}") },
-        ]
-    }
 
-    withName: 'NEO_SCORER' {
-        ext.log_level = { "${params.hmftools_log_level}" }
-        publishDir = [
-            path: { "${params.outdir}" },
-            mode: params.publish_dir_mode,
-            saveAs: { filename -> get_saveas_path(meta, task, filename, "${meta.key}/neo/scorer/") },
-        ]
-    }
+    //
+    // MODULE: Neo scorer
+    //
+    // Select input sources and prepare input channel
+    // channel: [ meta_scorer, isofox_dir, purple_dir, sage_somatic_append, lilac_dir, neo_finder_dir, annotated_fusions ]
+    ch_scorer_inputs = WorkflowOncoanalyser.groupByMeta(
+        ch_isofox,
+        ch_purple,
+        ch_sage_somatic_append,
+        ch_lilac,
+        ch_finder_out,
+        ch_annotate_fusions_out,
+    )
+        .map { meta, isofox_dir, purple_dir, sage_somatic_append, lilac_dir, neo_finder_dir, annotated_fusions ->
 
-    withName: '.*:NEO_PREDICTION:NEO_ANNOTATE_FUSIONS' {
-        ext.log_level = { "${params.hmftools_log_level}" }
-        publishDir = [
-            path: { "${params.outdir}" },
-            mode: params.publish_dir_mode,
-            saveAs: { filename -> get_saveas_path(meta, task, filename, "${meta.key}/neo/annotated_fusions/${filename}") },
-        ]
-    }
+            def meta_scorer = [
+                key: meta.group_id,
+                id: meta.group_id,
+                sample_id: Utils.getTumorDnaSampleName(meta, primary: true),
+                cancer_type: meta[Constants.InfoField.CANCER_TYPE],
+            ]
 
-    withName: 'NEO_FINDER' {
-        ext.log_level = { "${params.hmftools_log_level}" }
-        publishDir = [
-            path: { "${params.outdir}" },
-            mode: params.publish_dir_mode,
-            saveAs: { filename -> get_saveas_path(meta, task, filename, "${meta.key}/neo/finder/") },
-        ]
-    }
+            def sage_somatic_append_vcf = []
+            if (Utils.hasTumorRna(meta)) {
+                meta_scorer.sample_rna_id = Utils.getTumorRnaSampleName(meta)
 
-    withName: 'WISP' {
-        ext.log_level = { "${params.hmftools_log_level}" }
-        publishDir = [
-            path: { "${params.outdir}" },
-            mode: params.publish_dir_mode,
-            saveAs: { filename -> get_saveas_path(meta, task, filename, "${meta.key}/${filename}") },
-        ]
-    }
-
-    withName: 'CUPPA' {
-        ext.log_level = { "${params.hmftools_log_level}" }
-        publishDir = [
-            path: { "${params.outdir}" },
-            mode: params.publish_dir_mode,
-            saveAs: { filename -> get_saveas_path(meta, task, filename, "${meta.key}/${filename}") },
-        ]
-    }
-
-    withName: 'PEACH' {
-        ext.log_level = { "${params.hmftools_log_level}" }
-        publishDir = [
-            path: { "${params.outdir}" },
-            mode: params.publish_dir_mode,
-            saveAs: { filename -> get_saveas_path(meta, task, filename, "${meta.key}/${filename}") },
-        ]
-    }
-
-    withName: 'ORANGE' {
-        ext.log_level = { "${params.hmftools_log_level}" }
-        publishDir = [
-            path: { "${params.outdir}" },
-            mode: params.publish_dir_mode,
-            // NOTE(SW): java.io.File and Nextflow's file do not work here, resorting to string splitting
-            saveAs: { filename -> get_saveas_path(meta, task, filename, "${meta.key}/orange/${filename.split('[/]')[-1]}") },
-        ]
-    }
-
-    withName: 'COBALT_PANEL_NORMALISATION' {
-        ext.log_level = { "${params.hmftools_log_level}" }
-        publishDir = [
-            path: { "${params.outdir}" },
-            mode: params.publish_dir_mode,
-            saveAs: { filename -> get_saveas_path(meta, task, filename, "panel_resources/${filename}", panel_resource_creation = true) },
-        ]
-    }
-
-    withName: 'PAVE_PON_PANEL_CREATION' {
-        ext.log_level = { "${params.hmftools_log_level}" }
-        publishDir = [
-            path: { "${params.outdir}" },
-            mode: params.publish_dir_mode,
-            saveAs: { filename -> get_saveas_path(meta, task, filename, "panel_resources/${filename}", panel_resource_creation = true) },
-        ]
-    }
-
-    withName: 'ISOFOX_PANEL_NORMALISATION' {
-        ext.log_level = { "${params.hmftools_log_level}" }
-        publishDir = [
-            path: { "${params.outdir}" },
-            mode: params.publish_dir_mode,
-            saveAs: { filename -> get_saveas_path(meta, task, filename, "panel_resources/${filename}", panel_resource_creation = true) },
-        ]
-    }
-
-}
-
-def get_saveas_path(meta, task, filename, path, panel_resource_creation=false) {
-    if (filename.equals('versions.yml')) {
-        return null
-    } else if (filename.contains('.command.')) {
-        if (filename ==~ /.*\.command\.(sh|out|err|log|run)/) {
-            def process_name = task.process.toLowerCase().replaceFirst(/^.+:/, '')
-
-            if (panel_resource_creation) {
-                return "panel_resources/logs/${process_name}${filename}"
-            } else {
-                return "${meta.key}/logs/${meta.id}.${process_name}${filename}"
+                def sage_somatic_append_selected = Utils.selectCurrentOrExisting(sage_somatic_append, meta, Constants.INPUT.SAGE_APPEND_DIR_TUMOR)
+                sage_somatic_append_vcf = file(sage_somatic_append_selected).resolve("${meta_scorer.sample_id}.sage.append.vcf.gz")
             }
 
-        } else {
-            return null
+            def inputs = [
+                Utils.selectCurrentOrExisting(isofox_dir, meta, Constants.INPUT.ISOFOX_DIR),
+                Utils.selectCurrentOrExisting(purple_dir, meta, Constants.INPUT.PURPLE_DIR),
+                sage_somatic_append_vcf,
+                Utils.selectCurrentOrExisting(lilac_dir, meta, Constants.INPUT.LILAC_DIR),
+                neo_finder_dir,
+                annotated_fusions,
+            ]
+
+            return [meta_scorer, *inputs]
         }
-    } else {
-        return path
-    }
+        .branch { meta, isofox_dir, purple_dir, sage_somatic_append, lilac_dir, neo_finder_dir, annotated_fusions ->
+            runnable: purple_dir && neo_finder_dir && lilac_dir
+            skip: true
+                return meta
+        }
+
+    // Run process
+    NEO_SCORER(
+        ch_scorer_inputs.runnable,
+        ensembl_data_resources,
+        neo_resources,
+        cohort_tpm_medians,
+    )
+
+    ch_versions = ch_versions.mix(NEO_SCORER.out.versions)
+
+    emit:
+    versions = ch_versions // channel: [ versions.yml ]
 }
