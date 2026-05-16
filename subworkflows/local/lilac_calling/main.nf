@@ -1,5 +1,5 @@
 //
-// LILAC is a WGS tool for HLA typing and somatic CNV and SNV calling
+// LILAC performs HLA typing and somatic CNV/SNV calling in the HLA region
 //
 
 import Constants
@@ -10,18 +10,18 @@ include { LILAC } from '../../../modules/local/lilac/main'
 workflow LILAC_CALLING {
     take:
     // Sample data
-    ch_inputs          // channel: [mandatory] [ meta ]
-    ch_tumor_bam       // channel: [mandatory] [ meta, bam, bai ]
-    ch_normal_bam      // channel: [mandatory] [ meta, bam, bai ]
-    ch_tumor_rna_bam   // channel: [mandatory] [ meta, bam, bai ]
-    ch_purple          // channel: [mandatory] [ meta, purple_dir ]
+    ch_inputs      // channel: [mandatory] [ meta ]
+    ch_tumor_bam   // channel: [mandatory] [ meta, bam, bai ]
+    ch_normal_bam  // channel: [mandatory] [ meta, bam, bai ]
+    ch_tumor_rna_bam // channel: [mandatory] [ meta, bam, bai ]
+    ch_purple      // channel: [mandatory] [ meta, purple_dir ]
 
     // Reference data
-    genome_fasta       // channel: [mandatory] /path/to/genome_fasta
-    genome_version     // channel: [mandatory] genome version
-    genome_fai         // channel: [mandatory] /path/to/genome_fai
-    lilac_resource_dir // channel: [mandatory] /path/to/lilac_resource_dir/
-    targeted_mode      // boolean: [mandatory] Set targeted mode
+    genome_fasta      // channel: [mandatory] /path/to/genome_fasta
+    genome_version    // channel: [mandatory] genome version
+    genome_fai        // channel: [mandatory] /path/to/genome_fai
+    lilac_resource_dir // channel: [mandatory] /path/to/lilac_resources
+    targeted_mode     // boolean: [mandatory]
 
     main:
     // Channel for version.yml files
@@ -38,10 +38,18 @@ workflow LILAC_CALLING {
         .map { meta, tumor_bam, tumor_bai, normal_bam, normal_bai ->
             return [
                 meta,
-                Utils.selectCurrentOrExisting(tumor_bam, meta, Constants.INPUT.BAM_REDUX_DNA_TUMOR),
-                tumor_bai ?: Utils.getInput(meta, Constants.INPUT.BAI_DNA_TUMOR),
-                Utils.selectCurrentOrExisting(normal_bam, meta, Constants.INPUT.BAM_REDUX_DNA_NORMAL),
-                normal_bai ?: Utils.getInput(meta, Constants.INPUT.BAI_DNA_NORMAL),
+                params.realign_bam
+                    ? tumor_bam
+                    : Utils.selectCurrentOrExisting(tumor_bam, meta, Constants.INPUT.BAM_REDUX_DNA_TUMOR),
+                params.realign_bam
+                    ? tumor_bai
+                    : (tumor_bai ?: Utils.getInput(meta, Constants.INPUT.BAI_DNA_TUMOR)),
+                params.realign_bam
+                    ? normal_bam
+                    : Utils.selectCurrentOrExisting(normal_bam, meta, Constants.INPUT.BAM_REDUX_DNA_NORMAL),
+                params.realign_bam
+                    ? normal_bai
+                    : (normal_bai ?: Utils.getInput(meta, Constants.INPUT.BAI_DNA_NORMAL)),
             ]
         }
         .branch { meta, tumor_bam, tumor_bai, normal_bam, normal_bai ->
@@ -84,8 +92,12 @@ workflow LILAC_CALLING {
                 nbai_dna,
                 tbam_dna,
                 tbai_dna,
-                Utils.selectCurrentOrExisting(tbam_rna, meta, Constants.INPUT.BAM_RNA_TUMOR),
-                Utils.selectCurrentOrExisting(tbai_rna, meta, Constants.INPUT.BAI_RNA_TUMOR),
+                params.realign_bam
+                    ? tbam_rna
+                    : Utils.selectCurrentOrExisting(tbam_rna, meta, Constants.INPUT.BAM_RNA_TUMOR),
+                params.realign_bam
+                    ? tbai_rna
+                    : Utils.selectCurrentOrExisting(tbai_rna, meta, Constants.INPUT.BAI_RNA_TUMOR),
                 Utils.selectCurrentOrExisting(purple_dir, meta, Constants.INPUT.PURPLE_DIR),
             ]
         }
@@ -112,6 +124,5 @@ workflow LILAC_CALLING {
 
     emit:
     lilac_dir = ch_outputs  // channel: [ meta, lilac_dir ]
-
     versions  = ch_versions // channel: [ versions.yml ]
 }
