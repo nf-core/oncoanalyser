@@ -24,11 +24,4 @@ public enum SupportedGenome {
             return null
         }
     }
-
-    public String defaultHmfDataPath() {
-        return switch (this) {
-            case GRCh37_hmf -> 'https://pub-cf6ba01919994c3cbd354659947f74d8.r2.dev/hmf_reference_data/hmftools/hmf_pipeline_resources.37_v2.3.0--2.tar.gz'
-            case GRCh38_hmf -> 'https://pub-cf6ba01919994c3cbd354659947f74d8.r2.dev/hmf_reference_data/hmftools/hmf_pipeline_resources.38_v2.3.0--2.tar.gz'
-        }
-    }
 }

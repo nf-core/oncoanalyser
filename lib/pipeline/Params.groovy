@@ -137,7 +137,7 @@ class Params {
             return
 
         def genome_version = RefGenomeVersion.fromNumericName((String) params.genome_version)
-        params.ref_data_hmf_data_path = genome_version.getSupportedGenome().defaultHmfDataPath()
+        params.ref_data_hmf_data_path = genome_version.defaultHmfDataPath()
     }
 
     private static void validatePanelDataAndSetDefaults(Map params){
