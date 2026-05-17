@@ -39,7 +39,19 @@ process LILAC {
 
     def purple_dir_arg = purple_dir ? "-purple_dir ${purple_dir}" : ''
 
-    def freq_score_penalty = targeted_mode ? '0.0018' : '0.0009'
+    def freq_score_penalty
+    def gene_groups
+    def targeted_arg
+
+    if (targeted_mode) {
+        freq_score_penalty = '0.0018'
+        gene_groups = 'MHC_CLASS_1'
+        targeted_arg = '-targeted_panel'
+    } else {
+        freq_score_penalty = '0.0009'
+        gene_groups = 'ALL'
+        targeted_arg = ''
+    }
 
     """
     lilac \\
@@ -54,6 +66,8 @@ process LILAC {
         -ref_genome_version ${genome_ver} \\
         -resource_dir ${lilac_resources} \\
         -freq_score_penalty ${freq_score_penalty} \\
+        -genes ${gene_groups} \\
+        ${targeted_arg} \\
         -sequencing_type ${sequencing_type} \\
         -threads ${task.cpus} \\
         ${log_level_arg} \\
