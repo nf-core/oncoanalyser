@@ -2,7 +2,6 @@ package refgenome
 
 public enum SupportedGenome {
 
-    // Genomes that are configured in igenomes.config or hmf_genomes.config
     GRCh37_hmf(RefGenomeVersion.V37, RefGenomeType.NO_ALT),
     GRCh38_hmf(RefGenomeVersion.V38, RefGenomeType.NO_ALT);
 
