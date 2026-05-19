@@ -27,11 +27,11 @@ process ISOFOX_PANEL_NORMALISATION {
 
     """
     mkdir -p inputs/
-    for fp in \$(find -L isofox_dirs.* -name '*.gene_data.csv'); do ln -sf ../\${fp} inputs/; done
+    for fp in \$(find -L isofox_dirs.* -name '*.isf.gene_data.tsv'); do ln -sf ../\${fp} inputs/; done
 
     (
        echo SampleId
-       basename -s .isf.gene_data.csv -a inputs/*.isf.gene_data.csv
+       basename -s .isf.gene_data.tsv -a inputs/*.isf.gene_data.tsv
     ) > sample_ids.txt
 
     isofox \\
