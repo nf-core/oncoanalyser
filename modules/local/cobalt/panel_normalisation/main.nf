@@ -10,6 +10,7 @@ process COBALT_PANEL_NORMALISATION {
     tuple path('amber_dir.*'), path('cobalt_dir.*')
     val genome_ver
     path gc_profile
+    path copy_number_percentiles
     path target_regions_bed
 
     output:
@@ -46,6 +47,7 @@ process COBALT_PANEL_NORMALISATION {
         -cobalt_dir inputs/ \\
         -ref_genome_version ${genome_ver} \\
         -gc_profile ${gc_profile} \\
+        -wgs_copy_number_percentiles ${copy_number_percentiles} \\
         -target_regions_bed ${target_regions_bed} \\
         ${log_level_arg} \\
         -output_file cobalt.region_normalisation.${genome_ver}.tsv

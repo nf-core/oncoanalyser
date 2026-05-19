@@ -11,9 +11,10 @@ workflow COBALT_NORMALISATION {
     ch_cobalt         // channel: [mandatory] [ meta, cobalt_dir ]
 
     // Reference data
-    genome_version    // channel: [mandatory] genome version
-    gc_profile        // channel: [mandatory] /path/to/gc_profile
-    target_region_bed // channel: [mandatory] /path/to/target_region_bed
+    genome_version            // channel: [mandatory] genome version
+    gc_profile                // channel: [mandatory] /path/to/gc_profile
+    copy_number_percentiles   // channel: [mandatory] /path/to/copy_number_percentiles
+    target_region_bed         // channel: [mandatory] /path/to/target_region_bed
 
     main:
     // Channel for version.yml files
@@ -41,6 +42,7 @@ workflow COBALT_NORMALISATION {
         ch_cobalt_inputs,
         genome_version,
         gc_profile,
+        copy_number_percentiles,
         target_region_bed,
     )
 

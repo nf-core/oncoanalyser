@@ -235,6 +235,7 @@ workflow PANEL_RESOURCE_CREATION {
         ch_cobalt_out,
         ref_data.genome_version,
         hmf_data.gc_profile,
+        hmf_data.copy_number_percentiles,
         target_regions_bed,
     )
 
