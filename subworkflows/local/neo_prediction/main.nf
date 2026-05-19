@@ -39,9 +39,25 @@ workflow NEO_PREDICTION {
     //
     // MODULE: Neo finder
     //
-// Select input sources and sort for fusion annotation
-// channel: runnable: [ meta, neo_finder_dir, tumor_bam, tumor_bai ]
-// channel: skip: [ meta ]
+    // Select input sources
+    // channel: [ meta, purple_dir, linx_annotation_dir ]
+    ch_finder_inputs_selected = WorkflowOncoanalyser.groupByMeta(
+        ch_purple,
+        ch_linx,
+    )
+        .map { meta, purple_dir, linx_annotation_dir ->
+
+            def inputs = [
+                Utils.selectCurrentOrExisting(purple_dir, meta, Constants.INPUT.PURPLE_DIR),
+                Utils.selectCurrentOrExisting(linx_annotation_dir, meta, Constants.INPUT.LINX_ANNO_DIR_TUMOR),
+            ]
+
+            return [meta, *inputs]
+        }
+
+    // Sort inputs and select based on whether realigned bam is available
+    // channel: runnable: [ meta, neo_finder_dir, tumor_bam, tumor_bai ]
+    // channel: skip: [ meta ]
 ch_isofox_inputs_sorted = WorkflowOncoanalyser.groupByMeta(
     ch_finder_out,
     ch_tumor_rna_bam,
@@ -63,21 +79,6 @@ ch_isofox_inputs_sorted = WorkflowOncoanalyser.groupByMeta(
         skip: true
             return meta
     }
-
-    // Sort inputs
-    // channel: runnable: [ meta, purple_dir, linx_annotation_dir ]
-    // channel: skip: [ meta ]
-    ch_finder_inputs_sorted = ch_finder_inputs_selected
-        .branch { meta, purple_dir, linx_annotation_dir ->
-
-            def has_normal_dna = Utils.hasNormalDna(meta)
-
-            def has_runnable_inputs = purple_dir && linx_annotation_dir && has_normal_dna
-
-            runnable: has_runnable_inputs
-            skip: true
-                return meta
-        }
 
     // Create process input channel
     // channel: sample_data: [ meta_finder, purple_dir, linx_annotation_dir ]
