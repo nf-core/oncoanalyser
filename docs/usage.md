@@ -705,6 +705,13 @@ If your panel supports RNA-seq, also specify `--isofox_gene_ids` and *optionally
   --isofox_gc_ratios read_100_exp_gc_ratios.38.csv \
 ```
 
+If your panel is for non-solid tumors (e.g. haematological tumors), disable calculation copy number normalisation based 
+on WGS copy number percentiles using arg:
+
+```bash
+  --no_wgs_copy_number_percentiles
+```
+
 ### Running targeted mode with custom panel
 
 Place all the custom panel reference data files in a directory. In a config file:

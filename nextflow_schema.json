@@ -186,6 +186,12 @@
                     "description": "User defined target regions BED used in panel resource creation.",
                     "fa_icon": "fas fa-cog"
                 },
+                "no_wgs_copy_number_percentiles": {
+                    "type": "boolean",
+                    "description": "During panel resource creation, disable copy number normalisation using WGS copy number percentiles. Set this flag for non-solid tumor samples",
+                    "default": false,
+                    "fa_icon": "fas fa-palette"
+                },
                 "gridss_config": {
                     "type": "string",
                     "description": "Path to GRIDSS configuration file.",

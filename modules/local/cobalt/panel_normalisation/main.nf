@@ -26,6 +26,10 @@ process COBALT_PANEL_NORMALISATION {
 
     def log_level_arg = task.ext.log_level ? "-log_level ${task.ext.log_level}" : ''
 
+    def wgs_copy_number_percentiles_arg = copy_number_percentiles
+        ? "-wgs_copy_number_percentiles ${copy_number_percentiles}"
+        : ''
+
     """
     mkdir -p inputs/
 
@@ -47,7 +51,7 @@ process COBALT_PANEL_NORMALISATION {
         -cobalt_dir inputs/ \\
         -ref_genome_version ${genome_ver} \\
         -gc_profile ${gc_profile} \\
-        -wgs_copy_number_percentiles ${copy_number_percentiles} \\
+        ${wgs_copy_number_percentiles_arg} \\
         -target_regions_bed ${target_regions_bed} \\
         ${log_level_arg} \\
         -output_file cobalt.region_normalisation.${genome_ver}.tsv

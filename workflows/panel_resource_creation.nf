@@ -230,12 +230,14 @@ workflow PANEL_RESOURCE_CREATION {
     //
     // SUBWORKFLOW: Run COBALT normalisation
     //
+    copy_number_percentiles = params.no_wgs_copy_number_percentiles ? [] : hmf_data.copy_number_percentiles
+
     COBALT_NORMALISATION(
         ch_amber_out,
         ch_cobalt_out,
         ref_data.genome_version,
         hmf_data.gc_profile,
-        hmf_data.copy_number_percentiles,
+        copy_number_percentiles,
         target_regions_bed,
     )
 
