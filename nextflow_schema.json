@@ -172,8 +172,8 @@
                 },
                 "max_fastq_records": {
                     "type": "integer",
-                    "description": "When positive, will use fastp to split fastq files so that each resultant fastq file has no more than max_fastq_records records. When nonpositive, fastp is not used and the provided fastq files are passed as-is to the aligner.",
-                    "default": 10000000,
+                    "description": "When positive, parallelise read alignment across multiple jobs by splitting fastq files into multiple fastq files with no more than max_fastq_records records.",
+                    "default": -1,
                     "fa_icon": "fas fa-cog"
                 },
                 "driver_gene_panel": {
