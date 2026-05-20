@@ -186,9 +186,9 @@
                     "description": "User defined target regions BED used in panel resource creation.",
                     "fa_icon": "fas fa-cog"
                 },
-                "no_wgs_copy_number_percentiles": {
+                "enable_cn_norm_with_wgs_pct": {
                     "type": "boolean",
-                    "description": "During panel resource creation, disable copy number normalisation using WGS copy number percentiles. Set this flag for non-solid tumor samples",
+                    "description": "During panel resource creation, calculate copy number normalisation factors based on per-region copy number percentiles derived from the Hartwig WGS solid tumor cohort.",
                     "default": false,
                     "fa_icon": "fas fa-palette"
                 },

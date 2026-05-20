@@ -230,7 +230,7 @@ workflow PANEL_RESOURCE_CREATION {
     //
     // SUBWORKFLOW: Run COBALT normalisation
     //
-    copy_number_percentiles = params.no_wgs_copy_number_percentiles ? [] : hmf_data.copy_number_percentiles
+    copy_number_percentiles = params.enable_cn_norm_with_wgs_pct ? hmf_data.copy_number_percentiles : []
 
     COBALT_NORMALISATION(
         ch_amber_out,

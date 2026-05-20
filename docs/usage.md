@@ -705,12 +705,15 @@ If your panel supports RNA-seq, also specify `--isofox_gene_ids` and *optionally
   --isofox_gc_ratios read_100_exp_gc_ratios.38.csv \
 ```
 
-If your panel is for non-solid tumors (e.g. haematological tumors), disable calculation copy number normalisation based 
-on WGS copy number percentiles using arg:
+If your panel is for solid tumors, we recommend setting the below arg, which enables calculation of copy number 
+normalisation factors based on per-region copy number percentiles derived from the Hartwig WGS solid tumor cohort: 
 
 ```bash
-  --no_wgs_copy_number_percentiles
+  --enable_cn_norm_with_wgs_pct
 ```
+
+This prevents commonly amplified regions/genes from being normalised to too low copy numbers in your panel samples, 
+and commonly deleted regions/genes from being normalised to too high copy numbers.
 
 ### Running targeted mode with custom panel
 
