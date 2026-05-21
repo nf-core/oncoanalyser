@@ -169,6 +169,12 @@ class Utils {
 
                 // Check that required indexes are provided or are accessible
                 sample_keys.each { sample_key ->
+                    
+                    // In realign mode, BAM/CRAM inputs are streamed through samtools for re-alignment,
+                    // so we do not require pre-existing BAM/CRAM index files from the sample sheet.
+                    if (params.realign_bam) {
+                        return
+                    }
 
                     meta[sample_key]*.key.each { key ->
 
