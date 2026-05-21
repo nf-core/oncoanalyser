@@ -6,7 +6,7 @@ import nextflow.Nextflow
 
 class Utils {
 
-    public static parseInput(input_fp_str, stub_run, log) {
+    public static parseInput(input_fp_str, stub_run, realign_bam, log) {
 
         if (!input_fp_str) {
             log.error "Missing required --input argument"
@@ -172,7 +172,7 @@ class Utils {
                     
                     // In realign mode, BAM/CRAM inputs are streamed through samtools for re-alignment,
                     // so we do not require pre-existing BAM/CRAM index files from the sample sheet.
-                    if (params.realign_bam) {
+                    if (realign_bam) {
                         return
                     }
 
