@@ -16,7 +16,7 @@ workflow PREPARE_INPUTS {
 
     main:
     ch_inputs = Channel.fromList(
-        Utils.parseInput(input_fp_str, workflow.stubRun, log)
+        Utils.parseInput(input_fp_str, workflow.stubRun, params.realign_bam, log)
     )
 
     emit:
