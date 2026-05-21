@@ -1,0 +1,6 @@
+name: qsee
+channels:
+  - conda-forge
+  - bioconda
+dependencies:
+  - bioconda::hmftools-qsee=1.0

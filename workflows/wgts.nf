@@ -25,11 +25,13 @@ include { PAVE_ANNOTATION       } from '../subworkflows/local/pave_annotation'
 include { PEACH_CALLING         } from '../subworkflows/local/peach_calling'
 include { PREPARE_REFERENCE     } from '../subworkflows/local/prepare_reference'
 include { PURPLE_CALLING        } from '../subworkflows/local/purple_calling'
+include { QSEE_METRICS          } from '../subworkflows/local/qsee_metrics'
 include { READ_ALIGNMENT_DNA    } from '../subworkflows/local/read_alignment_dna'
 include { READ_ALIGNMENT_RNA    } from '../subworkflows/local/read_alignment_rna'
 include { REDUX_PROCESSING      } from '../subworkflows/local/redux_processing'
 include { SAGE_APPEND           } from '../subworkflows/local/sage_append'
 include { SAGE_CALLING          } from '../subworkflows/local/sage_calling'
+include { SAGE_PLOTTING         } from '../subworkflows/local/sage_plotting'
 include { SIGS_FITTING          } from '../subworkflows/local/sigs_fitting'
 include { TEAL_CHARACTERISATION } from '../subworkflows/local/teal_characterisation'
 include { VIRUSBREAKEND_CALLING } from '../subworkflows/local/virusbreakend_calling'
@@ -92,16 +94,22 @@ workflow WGTS {
             ch_inputs,
             ref_data.genome_fasta,
             ref_data.genome_bwamem2_index,
+            [],  // known_umis
             params.max_fastq_records,
-            false,  // umi_enable
-            '',  // umi_location
-            0,  // umi_length
-            -1,  // umi_skip
+            false,  // fastp_umi_enabled
+            '',     // fastp_umi_location
+            0,      // fastp_umi_length
+            -1,     // fastp_umi_skip
+            false,  // fastq_tools_umi_enabled
+            '',     // fastq_tools_umi_duplex_delim
         )
 
         READ_ALIGNMENT_RNA(
             ch_inputs,
             ref_data.genome_star_index,
+            [],    // known_umis
+            false, // fastq_tools_umi_enabled
+            '',    // fastq_tools_umi_duplex_delim
         )
 
         ch_versions = ch_versions.mix(
@@ -437,6 +445,38 @@ workflow WGTS {
     }
 
     //
+    // SUBWORKFLOW: QC metrics
+    //
+    // channel: [ meta, qsee_dir ]
+    ch_qsee_out = Channel.empty()
+    if (stages.qsee) {
+
+        QSEE_METRICS(
+            ch_inputs,
+            ch_redux_dna_tumor_dir_out,
+            ch_redux_dna_normal_dir_out,
+            ch_bamtools_somatic_out,
+            ch_bamtools_germline_out,
+            ch_cobalt_out,
+            ch_esvee_out,
+            ch_purple_out,
+            hmf_data.driver_gene_panel,
+            hmf_data.qsee_cohort_percentiles,
+            params.sequencing_type,
+            false,  // targeted_mode
+        )
+
+        ch_versions = ch_versions.mix(QSEE_METRICS.out.versions)
+
+        ch_qsee_out = ch_qsee_out.mix(QSEE_METRICS.out.qsee_dir)
+
+    } else {
+
+        ch_qsee_out = ch_inputs.map { meta -> [meta, []] }
+
+    }
+
+    //
     // SUBWORKFLOW: Append read data to SAGE VCF
     //
     // channel: [ meta, sage_append_dir ]
@@ -468,6 +508,37 @@ workflow WGTS {
         ch_sage_somatic_append_out = ch_inputs.map { meta -> [meta, []] }
         ch_sage_germline_append_out = ch_inputs.map { meta -> [meta, []] }
 
+    }
+
+    //
+    // SUBWORKFLOW: Visualise SAGE variants
+    //
+    ch_sage_vis_out = Channel.empty()
+    if (stages.sage_vis) {
+
+        SAGE_PLOTTING(
+            ch_inputs,
+            ch_redux_dna_tumor_bam_out,
+            ch_redux_dna_normal_bam_out,
+            ch_redux_dna_donor_bam_out,
+            ch_redux_dna_tumor_dir_out,
+            ch_redux_dna_normal_dir_out,
+            ch_redux_dna_donor_dir_out,
+            ch_purple_out,
+            ref_data.genome_fasta,
+            ref_data.genome_version,
+            ref_data.genome_fai,
+            ref_data.genome_dict,
+            hmf_data.sage_pon,
+            hmf_data.sage_known_hotspots_somatic,
+            hmf_data.sage_highconf_regions,
+            hmf_data.ensembl_data_resources,
+            false,  // targeted_mode
+        )
+
+        ch_versions = ch_versions.mix(SAGE_PLOTTING.out.versions)
+
+        ch_sage_vis_out = ch_sage_vis_out.mix(SAGE_PLOTTING.out.visualiser_dir)
     }
 
     //

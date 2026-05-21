@@ -62,15 +62,19 @@ workflow PURITY_ESTIMATE {
     ch_align_rna_tumor_out = Channel.empty()
     if (run_config.stages.alignment) {
 
+        // NOTE(LN): For now we won't support purity estimate mode for panel MSK (i.e. UMI processing with fastq-tools)
         READ_ALIGNMENT_DNA(
             ch_inputs,
             ref_data.genome_fasta,
             ref_data.genome_bwamem2_index,
+            [], // known_umis.
             params.max_fastq_records,
             params.fastp_umi_enabled,
             params.fastp_umi_location,
             params.fastp_umi_length,
             params.fastp_umi_skip,
+            false, // fastq_tools_umi_enabled,
+            '',    // fastq_tools_umi_delim,
         )
 
         ch_versions = ch_versions.mix(READ_ALIGNMENT_DNA.out.versions)

@@ -5,8 +5,10 @@
 import Constants
 import Utils
 
-include { BWAMEM2_ALIGN  } from '../../../modules/local/bwa-mem2/mem/main'
-include { FASTP          } from '../../../modules/local/fastp/main'
+include { BWAMEM2_ALIGN                             } from '../../../modules/local/bwa-mem2/mem/main'
+include { FASTQ_TOOLS as UMI_PROCESSING_FASTQ_TOOLS } from '../../../modules/local/fastqtools/main'
+include { FASTP as UMI_PROCESSING_FASTP             } from '../../../modules/local/fastp/main'
+include { FASTP as FASTQ_SPLITTING                  } from '../../../modules/local/fastp/main'
 
 workflow READ_ALIGNMENT_DNA {
     take:
@@ -16,13 +18,16 @@ workflow READ_ALIGNMENT_DNA {
     // Reference data
     genome_fasta         // channel: [mandatory] /path/to/genome_fasta
     genome_bwamem2_index // channel: [mandatory] /path/to/genome_bwa-mem2_index_dir/
+    known_umis           // channel: [mandatory] /path/to/known_umis_file
 
     // Params
-    max_fastq_records    // numeric: [optional]  max number of FASTQ records per split
-    umi_enable           // boolean: [mandatory] enable UMI processing
-    umi_location         //  string: [optional]  fastp UMI location argument (--umi_loc)
-    umi_length           // numeric: [optional]  fastp UMI length argument (--umi_len)
-    umi_skip             // numeric: [optional]  fastp UMI skip argument (--umi_skip)
+    max_fastq_records        // numeric: [optional]  max number of FASTQ records per split
+    fastp_umi_enabled        // boolean: [mandatory] enable fastp UMI processing
+    fastp_umi_location       //  string: [optional]  fastp UMI location argument (--umi_loc)
+    fastp_umi_length         // numeric: [optional]  fastp UMI length argument (--umi_len)
+    fastp_umi_skip           // numeric: [optional]  fastp UMI skip argument (--umi_skip)
+    fastq_tools_umi_enabled  // boolean: [mandatory] enable fastq-tools UMI processing
+    fastq_tools_umi_delim    // boolean: [optional]  fastq-tools -umi_delim argument
 
     main:
     // Channel for version.yml files
@@ -82,30 +87,56 @@ workflow READ_ALIGNMENT_DNA {
         }
 
     //
-    // MODULE: fastp
+    // UMI processing
     //
-    // Split FASTQ into chunks if requested for distributed processing
-    // channel: [ meta_fastq_ready, fastq_fwd, fastq_fwd ]
-    ch_fastqs_ready = Channel.empty()
-    if (max_fastq_records > 0 || umi_enable) {
+    // channel: [ meta_fastq, fastq_fwd, fastq_rev ]
+    ch_fastqs_umi_processed = Channel.empty()
 
-        // Run process
-        FASTP(
+    if (fastp_umi_enabled) {
+
+        UMI_PROCESSING_FASTP(
             ch_fastq_inputs,
-            max_fastq_records,
-            umi_location,
-            umi_length,
-            umi_skip,
+            -1, // max_fastq_records
+            fastp_umi_location,
+            fastp_umi_length,
+            fastp_umi_skip,
         )
 
-        ch_versions = ch_versions.mix(FASTP.out.versions)
+        ch_fastqs_umi_processed = UMI_PROCESSING_FASTP.out.fastq
+
+    } else if (fastq_tools_umi_enabled) {
+
+        UMI_PROCESSING_FASTQ_TOOLS(
+            ch_fastq_inputs,
+            fastq_tools_umi_delim,
+            known_umis,
+        )
+
+        ch_fastqs_umi_processed = UMI_PROCESSING_FASTQ_TOOLS.out.fastq
+
+    } else {
+
+        ch_fastqs_umi_processed = ch_fastq_inputs
 
     }
 
-    // Now prepare according to FASTQs splitting
+    //
+    // Split FASTQ into chunks if requested for distributed processing
+    //
+    // channel: [ meta_fastq_ready, fastq_fwd, fastq_rev ]
+    ch_fastqs_ready = Channel.empty()
+
     if (max_fastq_records > 0) {
 
-        ch_fastqs_ready = FASTP.out.fastq
+        FASTQ_SPLITTING(
+            ch_fastqs_umi_processed,
+            max_fastq_records,
+            "", // fastp_umi_location
+            0,  // fastp_umi_length
+            -1, // fastp_umi_skip
+        )
+
+        ch_fastqs_ready = FASTQ_SPLITTING.out.fastq
             .flatMap { meta_fastq, reads_fwd, reads_rev ->
 
                 def data = [reads_fwd, reads_rev]
@@ -132,10 +163,7 @@ workflow READ_ALIGNMENT_DNA {
 
     } else {
 
-        // Select appropriate source
-        ch_fastq_source = umi_enable ? FASTP.out.fastq : ch_fastq_inputs
-
-        ch_fastqs_ready = ch_fastq_source
+        ch_fastqs_ready = ch_fastqs_umi_processed
             .map { meta_fastq, fastq_fwd, fastq_rev ->
 
                 def meta_fastq_ready = [
