@@ -17,6 +17,9 @@ workflow AMBER_PROFILING {
     heterozygous_sites   // channel: [optional]  /path/to/heterozygous_sites
     target_regions_bed   // channel: [optional]  /path/to/target_regions_bed
     tumor_min_depth      // integer: [optional]  -tumor_min_depth argument value
+
+    // Params
+    sequencing_type      // string:  [mandatory] sequencing type
     purity_estimate_mode // boolean: [mandatory] Set purity estimate mode
 
     main:
@@ -91,6 +94,7 @@ workflow AMBER_PROFILING {
         heterozygous_sites,
         target_regions_bed,
         tumor_min_depth,
+        sequencing_type,
     )
 
     ch_versions = ch_versions.mix(AMBER.out.versions)

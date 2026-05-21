@@ -166,6 +166,7 @@ workflow PANEL_RESOURCE_CREATION {
         hmf_data.heterozygous_sites,
         target_regions_bed,
         2,   // tumor_min_depth
+        params.sequencing_type,
         false,  // purity_estimate_mode
     )
 

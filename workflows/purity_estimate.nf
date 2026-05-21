@@ -164,6 +164,7 @@ workflow PURITY_ESTIMATE {
             hmf_data.heterozygous_sites,
             [],  // target_region_bed
             tumor_min_depth,
+            params.sequencing_type,
             true,  // purity_estimate_mode
         )
 

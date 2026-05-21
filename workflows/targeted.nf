@@ -263,6 +263,7 @@ workflow TARGETED {
             hmf_data.heterozygous_sites,
             panel_data.target_region_bed,
             [],  // tumor_min_depth
+            params.sequencing_type,
             false,  // purity_estimate_mode
         )
 

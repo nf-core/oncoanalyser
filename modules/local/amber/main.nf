@@ -13,6 +13,7 @@ process AMBER {
     path heterozygous_sites
     path target_regions_bed
     val tumor_min_depth
+    val sequencing_type
 
     output:
     tuple val(meta), path('amber/'), emit: amber_dir
@@ -48,6 +49,7 @@ process AMBER {
         ${reference_arg} \\
         ${reference_bam_arg} \\
         -ref_genome_version ${genome_ver} \\
+        -sequencing_type ${sequencing_type} \\
         ${target_regions_bed_arg} \\
         -loci ${heterozygous_sites} \\
         ${tumor_min_depth_arg} \\
