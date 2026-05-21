@@ -85,7 +85,7 @@ workflow NFCORE_ONCOANALYSER {
         PREPARE_REFERENCE()
     } else {
         // Parse and validate inputs
-        inputs = Utils.parseInput(params.input, workflow.stubRun, log)
+        inputs = Utils.parseInput(params.input, workflow.stubRun, params.realign_bam, log)
         run_config = WorkflowMain.getRunConfig(params, inputs, log)
         Utils.validateInput(inputs, run_config, params, log)
 
