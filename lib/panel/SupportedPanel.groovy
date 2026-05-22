@@ -8,12 +8,6 @@ public enum SupportedPanel {
         Panel.TSO500,
         RefGenomeVersion.V37,
         'https://pub-cf6ba01919994c3cbd354659947f74d8.r2.dev/hmf_reference_data/panels/hmf_panel_resources.tso500.37_v2.3.0--2.tar.gz'
-    ),
-
-    MSK_GRCH37(
-        Panel.MSK,
-        RefGenomeVersion.V37,
-        null
     );
 
     private final Panel panel

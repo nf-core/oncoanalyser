@@ -1,8 +1,7 @@
 package panel
 
 public enum Panel {
-    TSO500,
-    MSK;
+    TSO500;
 
     public static Panel fromString(String string) {
         try {

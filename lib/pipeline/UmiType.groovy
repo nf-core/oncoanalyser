@@ -58,7 +58,6 @@ public enum UmiType {
         def panel = supportedPanel.panel()
         return switch (panel) {
             case panel.TSO500 -> TSO500
-            case panel.MSK -> MSK
             default -> NONE
         }
     }

@@ -559,7 +559,7 @@ nextflow run nf-core/oncoanalyser \
 ### Targeted sequencing
 
 `--mode targeted` together with `--panel <panel_name>` is used for analysing targeted or panel sequencing samples.
-Panels with built-in support are `TSO500` (GRCh37) and `MSK` (GRCh37). 
+Currently, only the `TSO500` (GRCh37) panel has built-in support. 
 
 A typical run command for `TSO500` would be:
 
@@ -576,8 +576,7 @@ nextflow run nf-core/oncoanalyser \
 ```
 
 Custom panels (i.e. those without built-in support) require [custom reference data](#custom-panels) to be created, as 
-well as additional arguments provided. Custom panels may require manual [UMI processing configuration](#umi-processing) 
-(handled automatically for supported panels with UMIs such as `TSO500`).
+well as additional arguments provided. Custom panels may require manual [UMI processing configuration](#umi-processing).
 
 ### Purity estimate
 
@@ -780,10 +779,8 @@ and [REDUX](https://github.com/hartwigmedical/hmftools/tree/master/redux#dedupli
 We recommend using the `--umi_type` argument to automatically configure the above tools with the correct arguments.
 Currently, the supported `--umi_type` values are `TSO500`, `TWIST`, `KAPA`, `MSK`, or `NONE` (force disable UMI processing).
 
-When running `oncoanalyser` in targeted mode for some supported panels, `--umi_type` will automatically be set (you
-won't need to set it).
-- `--panel TSO500`: `--umi_type TSO500`
-- `--panel MSK`: `--umi_type MSK`
+When running `oncoanalyser` in targeted mode with `--panel TSO500`, `--umi_type TSO500` will automatically be set 
+(you won't need to set this).
 
 Providing `--umi_type TWIST` for example is equivalent to the below config. You can also use the below config as a
 template for configuring custom UMIs.
