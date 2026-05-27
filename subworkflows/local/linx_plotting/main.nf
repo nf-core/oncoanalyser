@@ -2,9 +2,6 @@
 // LINX plotting visualises clusters structural variants
 //
 
-import Constants
-import Utils
-
 include { LINXREPORT      } from '../../../modules/local/linxreport/main'
 include { LINX_VISUALISER } from '../../../modules/local/linx/visualiser/main'
 
@@ -32,7 +29,7 @@ workflow LINX_PLOTTING {
     // channel: runnable: [ meta, annotation_dir, amber_dir, cobalt_dir, purple_dir ]
     // channel: skip: [ meta ]
 
-    ch_inputs_sorted = WorkflowOncoanalyser.groupByMeta(
+    ch_inputs_sorted = channels.WorkflowChannels.groupByMeta(
         ch_annotations,
         ch_amber,
         ch_cobalt,
@@ -42,15 +39,15 @@ workflow LINX_PLOTTING {
 
             return [
                 meta,
-                Utils.selectCurrentOrExisting(annotation_dir, meta, Constants.INPUT.LINX_ANNO_DIR_TUMOR),
-                Utils.selectCurrentOrExisting(amber_dir, meta, Constants.INPUT.AMBER_DIR),
-                Utils.selectCurrentOrExisting(cobalt_dir, meta, Constants.INPUT.COBALT_DIR),
-                Utils.selectCurrentOrExisting(purple_dir, meta, Constants.INPUT.PURPLE_DIR),
+                sample.Inputs.preferUserProvidedInput(annotation_dir, meta, sample.FileKey.LINX_ANNO_DIR_TUMOR),
+                sample.Inputs.preferUserProvidedInput(amber_dir, meta, sample.FileKey.AMBER_DIR),
+                sample.Inputs.preferUserProvidedInput(cobalt_dir, meta, sample.FileKey.COBALT_DIR),
+                sample.Inputs.preferUserProvidedInput(purple_dir, meta, sample.FileKey.PURPLE_DIR),
             ]
         }
         .branch { meta, annotation_dir, amber_dir, cobalt_dir, purple_dir ->
 
-            def has_existing = Utils.hasExistingInput(meta, Constants.INPUT.LINX_PLOT_DIR_TUMOR)
+            def has_existing = sample.Inputs.hasExisting(meta, sample.FileKey.LINX_PLOT_DIR_TUMOR)
 
             runnable: annotation_dir && !has_existing
             skip: true
@@ -68,7 +65,7 @@ workflow LINX_PLOTTING {
             def meta_linx = [
                 key: meta.group_id,
                 id: meta.group_id,
-                sample_id: Utils.getTumorDnaSampleName(meta),
+                sample_id: sample.Inputs.getTumorDnaSampleName(meta),
             ]
 
             return [meta_linx, annotation_dir, amber_dir, cobalt_dir, purple_dir]
@@ -88,16 +85,19 @@ workflow LINX_PLOTTING {
     //
     // Create process input channel
     // channel: [ meta_gpgr, annotation_dir, visualiser_dir ]
-    ch_gpgr_linx_inputs = WorkflowOncoanalyser.groupByMeta(
+
+    // NOTE(LN): UMCCR linx report code needs to be updated
+    /*
+    ch_gpgr_linx_inputs = channels.WorkflowChannels.groupByMeta(
         ch_inputs_sorted.runnable,
-        WorkflowOncoanalyser.restoreMeta(LINX_VISUALISER.out.plots, ch_inputs),
+        channels.WorkflowChannels.restoreMeta(LINX_VISUALISER.out.plots, ch_inputs),
     )
         .map { meta, annotation_dir, amber_dir, cobalt_dir, purple_dir, visualiser_dir ->
 
             def meta_gpgr_linx = [
                 key: meta.group_id,
                 id: meta.group_id,
-                sample_id: Utils.getTumorDnaSampleName(meta),
+                sample_id: sample.Inputs.getTumorDnaSampleName(meta),
             ]
 
             return [meta_gpgr_linx, annotation_dir, visualiser_dir]
@@ -109,12 +109,13 @@ workflow LINX_PLOTTING {
     )
 
     ch_versions = ch_versions.mix(LINXREPORT.out.versions)
+    */
 
     // Set outputs, restoring original meta
     // channel: [ meta, visualiser_dir ]
     ch_visualiser_dir_out = Channel.empty()
         .mix(
-            WorkflowOncoanalyser.restoreMeta(LINX_VISUALISER.out.plots, ch_inputs),
+            channels.WorkflowChannels.restoreMeta(LINX_VISUALISER.out.plots, ch_inputs),
             ch_inputs_sorted.skip.map { meta -> [meta, []] },
         )
 

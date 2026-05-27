@@ -2,9 +2,6 @@
 // Bam Tools calculates summary statistics for BAMs
 //
 
-import Constants
-import Utils
-
 include { BAMTOOLS } from '../../../modules/local/bamtools/main'
 
 workflow BAMTOOLS_METRICS {
@@ -33,12 +30,12 @@ workflow BAMTOOLS_METRICS {
         .map { meta, bam, bai ->
             return [
                 meta,
-                Utils.selectCurrentOrExisting(bam, meta, Constants.INPUT.BAM_REDUX_DNA_TUMOR),
-                bai ?: Utils.getInput(meta, Constants.INPUT.BAI_DNA_TUMOR),
+                sample.Inputs.preferUserProvidedInput(bam, meta, sample.FileKey.BAM_REDUX_DNA_TUMOR),
+                sample.Inputs.preferPipelineOutput(bai, meta, sample.FileKey.BAI_DNA_TUMOR),
             ]
         }
         .branch { meta, bam, bai ->
-            def has_existing = Utils.hasExistingInput(meta, Constants.INPUT.BAMTOOLS_DIR_TUMOR)
+            def has_existing = sample.Inputs.hasExisting(meta, sample.FileKey.BAMTOOLS_DIR_TUMOR)
             runnable: bam && !has_existing
             skip: true
                 return meta
@@ -50,12 +47,12 @@ workflow BAMTOOLS_METRICS {
         .map { meta, bam, bai ->
             return [
                 meta,
-                Utils.selectCurrentOrExisting(bam, meta, Constants.INPUT.BAM_REDUX_DNA_NORMAL),
-                bai ?: Utils.getInput(meta, Constants.INPUT.BAI_DNA_NORMAL),
+                sample.Inputs.preferUserProvidedInput(bam, meta, sample.FileKey.BAM_REDUX_DNA_NORMAL),
+                sample.Inputs.preferPipelineOutput(bai, meta, sample.FileKey.BAI_DNA_NORMAL),
             ]
         }
         .branch { meta, bam, bai ->
-            def has_existing = Utils.hasExistingInput(meta, Constants.INPUT.BAMTOOLS_DIR_NORMAL)
+            def has_existing = sample.Inputs.hasExisting(meta, sample.FileKey.BAMTOOLS_DIR_NORMAL)
             runnable: bam && !has_existing
             skip: true
                 return meta
@@ -65,8 +62,8 @@ workflow BAMTOOLS_METRICS {
     // channel: [ meta_bamtools, bam, bai ]
     ch_bamtools_inputs = Channel.empty()
         .mix(
-            ch_inputs_tumor_sorted.runnable.map { meta, bam, bai -> [meta, Utils.getTumorDnaSample(meta), 'tumor', bam, bai] },
-            ch_inputs_normal_sorted.runnable.map { meta, bam, bai -> [meta, Utils.getNormalDnaSample(meta), 'normal', bam, bai] },
+            ch_inputs_tumor_sorted.runnable.map { meta, bam, bai -> [meta, sample.Inputs.getTumorDnaSample(meta), 'tumor', bam, bai] },
+            ch_inputs_normal_sorted.runnable.map { meta, bam, bai -> [meta, sample.Inputs.getNormalDnaSample(meta), 'normal', bam, bai] },
         )
         .map { meta, meta_sample, sample_type, bam, bai ->
 
@@ -105,13 +102,13 @@ workflow BAMTOOLS_METRICS {
     // channel: [ meta, metrics_dir ]
     ch_somatic_metrics_dir = Channel.empty()
         .mix(
-            WorkflowOncoanalyser.restoreMeta(ch_bamtools_out.tumor, ch_inputs),
+            channels.WorkflowChannels.restoreMeta(ch_bamtools_out.tumor, ch_inputs),
             ch_inputs_tumor_sorted.skip.map { meta -> [meta, []] },
         )
 
     ch_germline_metrics_dir = Channel.empty()
         .mix(
-            WorkflowOncoanalyser.restoreMeta(ch_bamtools_out.normal, ch_inputs),
+            channels.WorkflowChannels.restoreMeta(ch_bamtools_out.normal, ch_inputs),
             ch_inputs_normal_sorted.skip.map { meta -> [meta, []] },
         )
 

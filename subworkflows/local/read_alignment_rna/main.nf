@@ -2,9 +2,6 @@
 // Align RNA reads
 //
 
-import Constants
-import Utils
-
 include { FASTQ_TOOLS as UMI_PROCESSING_FASTQ_TOOLS } from '../../../modules/local/fastqtools/main'
 include { GATK4_MARKDUPLICATES } from '../../../modules/nf-core/gatk4/markduplicates/main'
 include { SAMBAMBA_MERGE       } from '../../../modules/local/sambamba/merge/main'
@@ -33,8 +30,8 @@ workflow READ_ALIGNMENT_RNA {
     // channel: [ meta ]
     ch_inputs_sorted = ch_inputs
         .branch { meta ->
-            def has_existing = Utils.hasExistingInput(meta, Constants.INPUT.BAM_RNA_TUMOR)
-            runnable: Utils.hasTumorRnaFastq(meta) && !has_existing
+            def has_existing = sample.Inputs.hasExisting(meta, sample.FileKey.BAM_RNA_TUMOR)
+            runnable: sample.Inputs.hasTumorRnaFastq(meta) && !has_existing
             skip: true
         }
 
@@ -42,9 +39,9 @@ workflow READ_ALIGNMENT_RNA {
     // channel: [ meta_fastq, fastq_fwd, fastq_rev ]
     ch_fastq_inputs = ch_inputs_sorted.runnable
         .flatMap { meta ->
-            def meta_sample = Utils.getTumorRnaSample(meta)
+            def meta_sample = sample.Inputs.getTumorRnaSample(meta)
             meta_sample
-                .getAt(Constants.FileType.FASTQ)
+                .getAt(samplesheet.FileType.FASTQ)
                 .collect { key, fps ->
                     def (library_id, lane) = key
 
@@ -173,12 +170,12 @@ workflow READ_ALIGNMENT_RNA {
 
     // Create process input channel
     // channel: [ meta_merge, [bams, ...] ]
-    ch_merge_inputs = WorkflowOncoanalyser.restoreMeta(ch_bams_united_sorted.runnable, ch_inputs)
+    ch_merge_inputs = channels.WorkflowChannels.restoreMeta(ch_bams_united_sorted.runnable, ch_inputs)
         .map { meta, bams ->
             def meta_merge = [
                 key: meta.group_id,
                 id: meta.group_id,
-                sample_id: Utils.getTumorRnaSampleName(meta),
+                sample_id: sample.Inputs.getTumorRnaSampleName(meta),
             ]
             return [meta_merge, bams]
         }
@@ -197,14 +194,14 @@ workflow READ_ALIGNMENT_RNA {
     // channel: [ meta_markdups, bam ]
     ch_markdups_inputs = Channel.empty()
         .mix(
-            WorkflowOncoanalyser.restoreMeta(SAMBAMBA_MERGE.out.bam, ch_inputs),
-            WorkflowOncoanalyser.restoreMeta(ch_bams_united_sorted.skip, ch_inputs),
+            channels.WorkflowChannels.restoreMeta(SAMBAMBA_MERGE.out.bam, ch_inputs),
+            channels.WorkflowChannels.restoreMeta(ch_bams_united_sorted.skip, ch_inputs),
         )
         .map { meta, bam ->
             def meta_markdups = [
                 key: meta.group_id,
                 id: meta.group_id,
-                sample_id: Utils.getTumorRnaSampleName(meta),
+                sample_id: sample.Inputs.getTumorRnaSampleName(meta),
             ]
             return [meta_markdups, bam]
         }
@@ -220,9 +217,9 @@ workflow READ_ALIGNMENT_RNA {
 
     // Combine BAMs and BAIs
     // channel: [ meta, bam, bai ]
-    ch_bams_ready = WorkflowOncoanalyser.groupByMeta(
-        WorkflowOncoanalyser.restoreMeta(GATK4_MARKDUPLICATES.out.bam, ch_inputs),
-        WorkflowOncoanalyser.restoreMeta(GATK4_MARKDUPLICATES.out.bai, ch_inputs),
+    ch_bams_ready = channels.WorkflowChannels.groupByMeta(
+        channels.WorkflowChannels.restoreMeta(GATK4_MARKDUPLICATES.out.bam, ch_inputs),
+        channels.WorkflowChannels.restoreMeta(GATK4_MARKDUPLICATES.out.bai, ch_inputs),
     )
 
     // Set outputs

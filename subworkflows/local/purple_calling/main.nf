@@ -2,21 +2,18 @@
 // PURPLE is a CNV caller that infers purity/ploidy and recovers low-confidence SVs
 //
 
-import Constants
-import Utils
-
 include { PURPLE } from '../../../modules/local/purple/main'
 
 workflow PURPLE_CALLING {
     take:
     // Sample data
     ch_inputs                    // channel: [mandatory] [ meta ]
-    ch_amber                     // channel: [mandatory] [ meta, amber_dir ]
-    ch_cobalt                    // channel: [mandatory] [ meta, cobalt_dir ]
-    ch_smlv_somatic              // channel: [mandatory] [ meta, pave_vcf ]
-    ch_smlv_germline             // channel: [mandatory] [ meta, pave_vcf ]
-    ch_sv_somatic                // channel: [mandatory] [ meta, esvee_vcf, esvee_tbi ]
-    ch_sv_germline               // channel: [mandatory] [ meta, esvee_vcf, esvee_tbi ]
+    ch_amber_dir                 // channel: [mandatory] [ meta, amber_dir ]
+    ch_cobalt_dir                // channel: [mandatory] [ meta, cobalt_dir ]
+    ch_esvee_dir                 // channel: [mandatory] [ meta, esvee_dir ]
+    ch_pave_somatic_dir          // channel: [mandatory] [ meta, pave_dir ]
+    ch_pave_germline_dir         // channel: [mandatory] [ meta, pave_dir ]
+    ch_redux_tumor_dir           // channel: [optional]  [ meta, redux_dir ]
 
     // Reference data
     genome_fasta                 // channel: [mandatory] /path/to/genome_fasta
@@ -28,10 +25,8 @@ workflow PURPLE_CALLING {
     sage_known_hotspots_germline // channel: [optional]  /path/to/sage_known_hotspots_germline
     driver_gene_panel            // channel: [mandatory] /path/to/driver_gene_panel
     ensembl_data_resources       // channel: [mandatory] /path/to/ensembl_data_resources/
-    purple_germline_del          // channel: [optional]  /path/to/purple_germline_del
+    germline_amp_del_freq        // channel: [optional]  /path/to/germline_amp_del_freq
     target_region_bed            // channel: [optional]  /path/to/target_region_bed
-    target_region_ratios         // channel: [optional]  /path/to/target_region_ratios
-    target_region_msi_indels     // channel: [optional]  /path/to/target_region_msi_indels
 
     main:
     // Channel for version.yml files
@@ -39,71 +34,65 @@ workflow PURPLE_CALLING {
     ch_versions = Channel.empty()
 
     // Select input sources
-    // channel: [ meta, amber_dir, cobalt_dir, sv_somatic_vcf, sv_somatic_tbi, sv_germline_vcf, sv_germline_tbi, smlv_somatic_vcf, smlv_germline_vcf ]
-    ch_inputs_selected = WorkflowOncoanalyser.groupByMeta(
-        ch_amber,
-        ch_cobalt,
-        ch_sv_somatic,
-        ch_sv_germline,
-        ch_smlv_somatic,
-        ch_smlv_germline,
+    // channel: { meta, amber_dir, cobalt_dir, esvee_dir, pave_somatic_dir, pave_germline_dir, redux_tumor_dir }
+    ch_inputs_selected = channels.WorkflowChannels.groupByMeta(
+        flatten_mode: 'singletons_only',
+        ch_amber_dir,
+        ch_cobalt_dir,
+        ch_esvee_dir,
+        ch_pave_somatic_dir,
+        ch_pave_germline_dir,
+        ch_redux_tumor_dir,
     )
-        .map { d ->
+        .map { meta, amber_dir, cobalt_dir, esvee_dir, pave_somatic_dir, pave_germline_dir, redux_tumor_dir ->
 
-            def meta = d[0]
+            def inputs = [:]
 
-            // NOTE(SW): avoiding further complexity with loops etc
+            inputs.meta              = meta
+            inputs.amber_dir         = sample.Inputs.preferUserProvidedInput(amber_dir, meta, sample.FileKey.AMBER_DIR)
+            inputs.cobalt_dir        = sample.Inputs.preferUserProvidedInput(cobalt_dir, meta, sample.FileKey.COBALT_DIR)
+            inputs.esvee_dir         = sample.Inputs.preferUserProvidedInput(esvee_dir, meta, sample.FileKey.ESVEE_DIR)
+            inputs.pave_somatic_dir  = sample.Inputs.preferUserProvidedInput(pave_somatic_dir, meta, sample.FileKey.PAVE_DIR_TUMOR)
+            inputs.pave_germline_dir = sample.Inputs.preferUserProvidedInput(pave_germline_dir, meta, sample.FileKey.PAVE_DIR_NORMAL)
+            inputs.redux_tumor_tsvs  = sample.Inputs.resolveReduxTsvFiles(redux_tumor_dir, meta, samplesheet.SampleType.TUMOR)
 
-            def inputs = [
-                Utils.selectCurrentOrExisting(d[1], meta, Constants.INPUT.AMBER_DIR),
-                Utils.selectCurrentOrExisting(d[2], meta, Constants.INPUT.COBALT_DIR),
-                Utils.selectCurrentOrExisting(d[3], meta, Constants.INPUT.ESVEE_VCF_TUMOR),
-                Utils.selectCurrentOrExisting(d[4], meta, Constants.INPUT.ESVEE_VCF_TUMOR_TBI),
-                Utils.selectCurrentOrExisting(d[5], meta, Constants.INPUT.ESVEE_VCF_NORMAL),
-                Utils.selectCurrentOrExisting(d[6], meta, Constants.INPUT.ESVEE_VCF_NORMAL_TBI),
-                Utils.selectCurrentOrExisting(d[7], meta, Constants.INPUT.PAVE_VCF_TUMOR),
-                Utils.selectCurrentOrExisting(d[8], meta, Constants.INPUT.PAVE_VCF_NORMAL),
-            ]
-
-            return [meta, *inputs]
+            return inputs
         }
 
     // Sort inputs
-    // channel: runnable: [ meta, amber_dir, cobalt_dir, sv_somatic_vcf, sv_somatic_tbi, sv_germline_vcf, sv_germline_tbi, smlv_somatic_vcf, smlv_germline_vcf ]
+    // channel: runnable: { meta, amber_dir, cobalt_dir, esvee_dir, pave_somatic_dir, pave_germline_dir, [redux_tumor_tsv, ...] }
     // channel: skip: [ meta ]
     ch_inputs_sorted = ch_inputs_selected
-        .branch { d ->
-            def meta = d[0]
-            def amber_dir = d[1]
-            def cobalt_dir = d[2]
+        .branch { inputs ->
 
-            def has_existing = Utils.hasExistingInput(meta, Constants.INPUT.PURPLE_DIR)
+            def has_existing = sample.Inputs.hasExisting(inputs.meta, sample.FileKey.PURPLE_DIR)
 
-            runnable: amber_dir && cobalt_dir && !has_existing
+            runnable: inputs.amber_dir && inputs.cobalt_dir && !has_existing
+                return inputs
             skip: true
-                return meta
+                return inputs.meta
         }
 
     // Create process input channel
-    // channel: [ meta_purple, amber_dir, cobalt_dir, sv_somatic_vcf, sv_somatic_tbi, sv_germline_vcf, sv_germline_tbi, smlv_somatic_vcf, smlv_germline_vcf ]
+    // channel: [ meta_purple, amber_dir, cobalt_dir, esvee_dir, pave_somatic_dir, pave_germline_dir, [redux_tumor_tsv, ...] ]
     ch_purple_inputs = ch_inputs_sorted.runnable
-        .map { d ->
+        .map { inputs ->
 
-            def meta = d[0]
-            def inputs = d[1..-1]
+            def meta = inputs.meta
 
             def meta_purple = [
                 key: meta.group_id,
                 id: meta.group_id,
-                tumor_id: Utils.getTumorDnaSampleName(meta),
+                tumor_id: sample.Inputs.getTumorDnaSampleName(meta),
             ]
 
-            if (Utils.hasNormalDna(meta)) {
-                meta_purple.normal_id = Utils.getNormalDnaSampleName(meta)
+            if (sample.Inputs.hasNormalDna(meta)) {
+                meta_purple.normal_id = sample.Inputs.getNormalDnaSampleName(meta)
             }
 
-            return [meta_purple, *inputs]
+            inputs.meta = meta_purple
 
+            return inputs.values()
         }
 
     // Run process
@@ -118,10 +107,8 @@ workflow PURPLE_CALLING {
         sage_known_hotspots_germline,
         driver_gene_panel,
         ensembl_data_resources,
-        purple_germline_del,
+        germline_amp_del_freq,
         target_region_bed,
-        target_region_ratios,
-        target_region_msi_indels,
     )
 
     ch_versions = ch_versions.mix(PURPLE.out.versions)
@@ -130,7 +117,7 @@ workflow PURPLE_CALLING {
     // channel: [ meta, purple_dir ]
     ch_outputs = Channel.empty()
         .mix(
-            WorkflowOncoanalyser.restoreMeta(PURPLE.out.purple_dir, ch_inputs),
+            channels.WorkflowChannels.restoreMeta(PURPLE.out.purple_dir, ch_inputs),
             ch_inputs_sorted.skip.map { meta -> [meta, []] },
         )
 

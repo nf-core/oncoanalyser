@@ -2,9 +2,6 @@
 // COBALT calculates read ratios between tumor and normal samples
 //
 
-import Constants
-import Utils
-
 include { COBALT } from '../../../modules/local/cobalt/run/main'
 
 workflow COBALT_PROFILING {
@@ -20,6 +17,7 @@ workflow COBALT_PROFILING {
     diploid_bed                 // channel: [optional]  /path/to/diploid_bed
     target_region_normalisation // channel: [optional]  /path/to/target_region_normalisation
     targeted_mode               // boolean: [mandatory] Set targeted mode
+    purity_estimate_mode        // boolean: [mandatory] Set purity estimate mode
 
     main:
     // Channel for version.yml files
@@ -30,21 +28,21 @@ workflow COBALT_PROFILING {
     // NOTE(SW): germline mode is not currently supported
     // channel: runnable: [ meta, tumor_bam, tumor_bai, normal_bam, normal_bai]
     // channel: skip: [ meta ]
-    ch_inputs_sorted = WorkflowOncoanalyser.groupByMeta(
+    ch_inputs_sorted = channels.WorkflowChannels.groupByMeta(
         ch_tumor_bam,
         ch_normal_bam,
     )
         .map { meta, tumor_bam, tumor_bai, normal_bam, normal_bai ->
             return [
                 meta,
-                Utils.selectCurrentOrExisting(tumor_bam, meta, Constants.INPUT.BAM_REDUX_DNA_TUMOR),
-                tumor_bai ?: Utils.getInput(meta, Constants.INPUT.BAI_DNA_TUMOR),
-                Utils.selectCurrentOrExisting(normal_bam, meta, Constants.INPUT.BAM_REDUX_DNA_NORMAL),
-                normal_bai ?: Utils.getInput(meta, Constants.INPUT.BAI_DNA_NORMAL),
+                sample.Inputs.preferUserProvidedInput(tumor_bam, meta, sample.FileKey.BAM_REDUX_DNA_TUMOR),
+                sample.Inputs.preferPipelineOutput(tumor_bai, meta, sample.FileKey.BAI_DNA_TUMOR),
+                sample.Inputs.preferUserProvidedInput(normal_bam, meta, sample.FileKey.BAM_REDUX_DNA_NORMAL),
+                sample.Inputs.preferPipelineOutput(normal_bai, meta, sample.FileKey.BAI_DNA_NORMAL),
             ]
         }
         .branch { meta, tumor_bam, tumor_bai, normal_bam, normal_bai ->
-            def has_existing = Utils.hasExistingInput(meta, Constants.INPUT.COBALT_DIR)
+            def has_existing = sample.Inputs.hasExisting(meta, sample.FileKey.COBALT_DIR)
             runnable_tn: tumor_bam && normal_bam && !has_existing
             runnable_to: tumor_bam && !has_existing
             skip: true
@@ -66,14 +64,18 @@ workflow COBALT_PROFILING {
     ch_cobalt_inputs = ch_inputs_runnable
         .multiMap { meta, tumor_bam, tumor_bai, normal_bam, normal_bai, diploid_bed ->
 
+            def tumor_id = purity_estimate_mode
+               ? sample.Inputs.getTumorDnaSampleNameLongitudinal(meta)
+               : sample.Inputs.getTumorDnaSampleNamePrimary(meta)
+
             def meta_cobalt = [
                 key: meta.group_id,
                 id: meta.group_id,
-                tumor_id: Utils.getTumorDnaSampleName(meta),
+                tumor_id: tumor_id,
             ]
 
             if (normal_bam) {
-                meta_cobalt.normal_id = Utils.getNormalDnaSampleName(meta)
+                meta_cobalt.normal_id = sample.Inputs.getNormalDnaSampleName(meta)
             }
 
             sample_data: [meta_cobalt, tumor_bam, normal_bam, tumor_bai, normal_bai]
@@ -96,7 +98,7 @@ workflow COBALT_PROFILING {
     // channel: [ meta, cobalt_dir ]
     ch_outputs = Channel.empty()
         .mix(
-            WorkflowOncoanalyser.restoreMeta(COBALT.out.cobalt_dir, ch_inputs),
+            channels.WorkflowChannels.restoreMeta(COBALT.out.cobalt_dir, ch_inputs),
             ch_inputs_sorted.skip.map { meta -> [meta, []] },
         )
 

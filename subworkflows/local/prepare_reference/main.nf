@@ -2,8 +2,6 @@
 // Prepare reference data as required
 //
 
-import Constants
-
 include { BWAMEM2_INDEX         } from '../../../modules/nf-core/bwamem2/index/main'
 include { BWA_INDEX             } from '../../../modules/nf-core/bwa/index/main'
 include { SAMTOOLS_DICT         } from '../../../modules/nf-core/samtools/dict/main'
@@ -30,13 +28,25 @@ include { WRITE_REFERENCE_DATA as WRITE_PANEL_DATA      } from '../../../modules
 
 workflow PREPARE_REFERENCE {
     take:
-    prep_config // channel: [mandatory] configuration indicating which reference data is required
-    run_config
+    prepare_reference_only // boolean: [mandatory] prepare reference only, do not run pipeline
+    inputs                 // map:     [optional]  sample metadata
+    stages                 // map:     [optional]  processes to run
 
     main:
     // Channel for version.yml files
     // channel: [ versions.yml ]
     ch_versions = Channel.empty()
+
+    //
+    // Determine which resources need to be prepared
+    //
+    def pipeline_mode = pipeline.PipelineMode.fromString(params.mode)
+    def prep_config = prepare_reference_only
+        ? refdata.PrepareReferenceConfig.forPrepRefOnly(params)
+        : refdata.PrepareReferenceConfig.forPipelineRun(inputs, pipeline_mode, stages)
+
+    def has_alt_contigs = params.genome_type == refgenome.RefGenomeType.ALT
+    def has_alt_file = params.containsKey('ref_data_genome_alt') && params.ref_data_genome_alt
 
     //
     // Set .fasta and main genome indexes, create if required
@@ -89,6 +99,9 @@ workflow PREPARE_REFERENCE {
 
         if (!params.ref_data_genome_bwamem2_index) {
 
+            if(has_alt_contigs && !has_alt_file)
+                error "For ref genomes with ALT contigs, an .alt file is required when building bwa-mem2 indexes"
+
             BWAMEM2_INDEX(
                 ch_genome_fasta,
                 params.ref_data_genome_alt ? file(params.ref_data_genome_alt) : [],
@@ -118,6 +131,9 @@ workflow PREPARE_REFERENCE {
     if (prep_config.require_gridss_index) {
 
         if (!params.ref_data_genome_gridss_index) {
+
+            if(has_alt_contigs && !has_alt_file)
+                error "For ref genomes with ALT contigs, an .alt file is required when building GRIDSS indexes"
 
             BWA_INDEX(
                 ch_genome_fasta,
@@ -157,6 +173,12 @@ workflow PREPARE_REFERENCE {
 
         if (!params.ref_data_genome_star_index) {
 
+            if(has_alt_contigs)
+                error "Refusing to create the STAR index for a ref genome with ALT contigs. Please review https://github.com/alexdobin/STAR docs or contact us on Slack."
+
+            if(!params.ref_data_genome_gtf)
+                error "Creating a STAR index requires the appropriate genome transcript annotations as a GTF file. Please contact us on Slack for further information."
+
             STAR_GENOMEGENERATE(
                 ch_genome_fasta,
                 file(params.ref_data_genome_gtf),
@@ -185,7 +207,7 @@ workflow PREPARE_REFERENCE {
     ch_hmf_data = Channel.empty()
     if (prep_config.require_hmftools_data) {
 
-        hmf_data_paths = params.hmf_data_paths[params.genome_version.toString()]
+        hmf_data_paths = params.hmf_data_paths[params.genome_version]
 
         if (params.ref_data_hmf_data_path.endsWith('tar.gz')) {
 
@@ -208,11 +230,47 @@ workflow PREPARE_REFERENCE {
 
         }
 
+        // Set PON paths
+        def sequencing_type = pipeline.SequencingType.fromString(params.sequencing_type)
+
+        if(sequencing_type === pipeline.SequencingType.ULTIMA) {
+
+            ch_hmf_data = ch_hmf_data
+                .map { d ->
+                    if (d.sage_pon_ultima)
+                        d.sage_pon = d.sage_pon_ultima
+
+                    if (d.esvee_pon_breakends_ultima)
+                        d.esvee_pon_breakends = d.esvee_pon_breakends_ultima
+
+                    if (d.esvee_pon_breakpoints_ultima)
+                        d.esvee_pon_breakpoints = d.esvee_pon_breakpoints_ultima
+
+                    return d
+                }
+
+        } else if(sequencing_type === pipeline.SequencingType.SBX) {
+
+            ch_hmf_data = ch_hmf_data
+                .map { d ->
+                    if (d.sage_pon_sbx)
+                        d.sage_pon = d.sage_pon_sbx
+
+                    if (d.esvee_pon_breakends_sbx)
+                        d.esvee_pon_breakends = d.esvee_pon_breakends_sbx
+
+                    if (d.esvee_pon_breakpoints_sbx)
+                        d.esvee_pon_breakpoints = d.esvee_pon_breakpoints_sbx
+
+                    return d
+                }
+
+        }
+
+        // Set custom driver gene panel
         if (params.driver_gene_panel) {
 
-            def run_mode = Utils.getEnumFromString(params.mode, Constants.RunMode)
-
-            if (run_mode !== Constants.RunMode.PANEL_RESOURCE_CREATION) {
+            if (pipeline_mode !== pipeline.PipelineMode.PANEL_RESOURCE_CREATION) {
                 log.info "Using custom driver gene panel: ${params.driver_gene_panel}"
             }
 
@@ -233,7 +291,7 @@ workflow PREPARE_REFERENCE {
     if (prep_config.require_panel_data) {
 
         panel_data_paths_versions = params.panel_data_paths[params.panel]
-        panel_data_paths = panel_data_paths_versions[params.genome_version.toString()]
+        panel_data_paths = panel_data_paths_versions[params.genome_version]
 
         if (params.ref_data_panel_data_path.endsWith('tar.gz')) {
 
@@ -260,7 +318,7 @@ workflow PREPARE_REFERENCE {
     //
     // Write prepared reference data if requested
     //
-    if (prep_config.prepare_ref_data_only || params.prepare_reference_only) {
+    if (prepare_reference_only) {
 
         WRITE_FASTA(ch_genome_fasta)
         WRITE_FAI(ch_genome_fai)
@@ -272,9 +330,6 @@ workflow PREPARE_REFERENCE {
 
         WRITE_HMF_DATA(ch_hmf_data.map { getDataBaseDirectory(it) })
         WRITE_PANEL_DATA(ch_panel_data.map { getDataBaseDirectory(it) })
-
-        // Clear all stages to prevent running any analysis when driving by samplesheet
-        run_config.stages = [:]
 
     }
 

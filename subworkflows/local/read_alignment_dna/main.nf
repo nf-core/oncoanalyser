@@ -2,9 +2,6 @@
 // Align DNA reads
 //
 
-import Constants
-import Utils
-
 include { BWAMEM2_ALIGN                             } from '../../../modules/local/bwa-mem2/mem/main'
 include { FASTQ_TOOLS as UMI_PROCESSING_FASTQ_TOOLS } from '../../../modules/local/fastqtools/main'
 include { FASTP as UMI_PROCESSING_FASTP             } from '../../../modules/local/fastp/main'
@@ -38,22 +35,22 @@ workflow READ_ALIGNMENT_DNA {
     // channel: [ meta ]
     ch_inputs_tumor_sorted = ch_inputs
         .branch { meta ->
-            def has_existing = Utils.hasExistingInput(meta, Constants.INPUT.BAM_DNA_TUMOR)
-            runnable: Utils.hasTumorDnaFastq(meta) && !has_existing
+            def has_existing = sample.Inputs.hasExisting(meta, sample.FileKey.BAM_DNA_TUMOR)
+            runnable: sample.Inputs.hasTumorDnaFastq(meta) && !has_existing
             skip: true
         }
 
     ch_inputs_normal_sorted = ch_inputs
         .branch { meta ->
-            def has_existing = Utils.hasExistingInput(meta, Constants.INPUT.BAM_DNA_NORMAL)
-            runnable: Utils.hasNormalDnaFastq(meta) && !has_existing
+            def has_existing = sample.Inputs.hasExisting(meta, sample.FileKey.BAM_DNA_NORMAL)
+            runnable: sample.Inputs.hasNormalDnaFastq(meta) && !has_existing
             skip: true
         }
 
     ch_inputs_donor_sorted = ch_inputs
         .branch { meta ->
-            def has_existing = Utils.hasExistingInput(meta, Constants.INPUT.BAM_DNA_DONOR)
-            runnable: Utils.hasDonorDnaFastq(meta) && !has_existing
+            def has_existing = sample.Inputs.hasExisting(meta, sample.FileKey.BAM_DNA_DONOR)
+            runnable: sample.Inputs.hasDonorDnaFastq(meta) && !has_existing
             skip: true
         }
 
@@ -61,13 +58,13 @@ workflow READ_ALIGNMENT_DNA {
     // channel: [ meta_fastq, fastq_fwd, fastq_rev ]
     ch_fastq_inputs = Channel.empty()
         .mix(
-            ch_inputs_tumor_sorted.runnable.map { meta -> [meta, Utils.getTumorDnaSample(meta), 'tumor'] },
-            ch_inputs_normal_sorted.runnable.map { meta -> [meta, Utils.getNormalDnaSample(meta), 'normal'] },
-            ch_inputs_donor_sorted.runnable.map { meta -> [meta, Utils.getDonorDnaSample(meta), 'donor'] },
+            ch_inputs_tumor_sorted.runnable.map { meta -> [meta, sample.Inputs.getTumorDnaSample(meta), 'tumor'] },
+            ch_inputs_normal_sorted.runnable.map { meta -> [meta, sample.Inputs.getNormalDnaSample(meta), 'normal'] },
+            ch_inputs_donor_sorted.runnable.map { meta -> [meta, sample.Inputs.getDonorDnaSample(meta), 'donor'] },
         )
         .flatMap { meta, meta_sample, sample_type ->
             meta_sample
-                .getAt(Constants.FileType.FASTQ)
+                .getAt(samplesheet.FileType.FASTQ)
                 .collect { key, fps ->
                     def (library_id, lane) = key
 
@@ -248,19 +245,19 @@ workflow READ_ALIGNMENT_DNA {
     // channel: [ meta, [bam, ...], [bai, ...] ]
     ch_bam_tumor_out = Channel.empty()
         .mix(
-            WorkflowOncoanalyser.restoreMeta(ch_bams_united.tumor, ch_inputs),
+            channels.WorkflowChannels.restoreMeta(ch_bams_united.tumor, ch_inputs),
             ch_inputs_tumor_sorted.skip.map { meta -> [meta, [], []] },
         )
 
     ch_bam_normal_out = Channel.empty()
         .mix(
-            WorkflowOncoanalyser.restoreMeta(ch_bams_united.normal, ch_inputs),
+            channels.WorkflowChannels.restoreMeta(ch_bams_united.normal, ch_inputs),
             ch_inputs_normal_sorted.skip.map { meta -> [meta, [], []] },
         )
 
     ch_bam_donor_out = Channel.empty()
         .mix(
-            WorkflowOncoanalyser.restoreMeta(ch_bams_united.donor, ch_inputs),
+            channels.WorkflowChannels.restoreMeta(ch_bams_united.donor, ch_inputs),
             ch_inputs_donor_sorted.skip.map { meta -> [meta, [], []] },
         )
 

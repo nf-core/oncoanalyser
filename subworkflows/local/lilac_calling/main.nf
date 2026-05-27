@@ -2,9 +2,6 @@
 // LILAC is a WGS tool for HLA typing and somatic CNV and SNV calling
 //
 
-import Constants
-import Utils
-
 include { LILAC } from '../../../modules/local/lilac/main'
 
 workflow LILAC_CALLING {
@@ -23,6 +20,9 @@ workflow LILAC_CALLING {
     lilac_resource_dir // channel: [mandatory] /path/to/lilac_resource_dir/
     targeted_mode      // boolean: [mandatory] Set targeted mode
 
+    // Params
+    sequencing_type    // string:  [mandatory] sequencing type
+
     main:
     // Channel for version.yml files
     // channel: [ versions.yml ]
@@ -31,22 +31,22 @@ workflow LILAC_CALLING {
     // Select input sources and sort for DNA BAMs
     // channel: runnable: [ meta, tumor_dna_bam, tumor_dna_bai, normal_dna_bam, normal_dna_bai ]
     // channel: skip: [ meta ]
-    ch_dna_inputs_sorted = WorkflowOncoanalyser.groupByMeta(
+    ch_dna_inputs_sorted = channels.WorkflowChannels.groupByMeta(
         ch_tumor_bam,
         ch_normal_bam,
     )
         .map { meta, tumor_bam, tumor_bai, normal_bam, normal_bai ->
             return [
                 meta,
-                Utils.selectCurrentOrExisting(tumor_bam, meta, Constants.INPUT.BAM_REDUX_DNA_TUMOR),
-                tumor_bai ?: Utils.getInput(meta, Constants.INPUT.BAI_DNA_TUMOR),
-                Utils.selectCurrentOrExisting(normal_bam, meta, Constants.INPUT.BAM_REDUX_DNA_NORMAL),
-                normal_bai ?: Utils.getInput(meta, Constants.INPUT.BAI_DNA_NORMAL),
+                sample.Inputs.preferUserProvidedInput(tumor_bam, meta, sample.FileKey.BAM_REDUX_DNA_TUMOR),
+                sample.Inputs.preferPipelineOutput(tumor_bai, meta, sample.FileKey.BAI_DNA_TUMOR),
+                sample.Inputs.preferUserProvidedInput(normal_bam, meta, sample.FileKey.BAM_REDUX_DNA_NORMAL),
+                sample.Inputs.preferPipelineOutput(normal_bai, meta, sample.FileKey.BAI_DNA_NORMAL),
             ]
         }
         .branch { meta, tumor_bam, tumor_bai, normal_bam, normal_bai ->
 
-            def has_existing = Utils.hasExistingInput(meta, Constants.INPUT.LILAC_DIR)
+            def has_existing = sample.Inputs.hasExisting(meta, sample.FileKey.LILAC_DIR)
 
             runnable: (tumor_bam || normal_bam) && !has_existing
             skip: true
@@ -58,7 +58,7 @@ workflow LILAC_CALLING {
     //
     // Create process input channel
     // channel: [ meta_lilac, normal_dna_bam, normal_dna_bai, tumor_dna_bam, tumor_dna_bai, tumor_rna_bam, tumor_rna_bai, purple_dir ]
-    ch_lilac_inputs = WorkflowOncoanalyser.groupByMeta(
+    ch_lilac_inputs = channels.WorkflowChannels.groupByMeta(
         ch_dna_inputs_sorted.runnable,
         ch_tumor_rna_bam,
         ch_purple,
@@ -70,12 +70,12 @@ workflow LILAC_CALLING {
                 id: meta.group_id,
             ]
 
-            if (Utils.hasTumorDna(meta)) {
-                meta_lilac.tumor_id = Utils.getTumorDnaSampleName(meta)
+            if (sample.Inputs.hasTumorDna(meta)) {
+                meta_lilac.tumor_id = sample.Inputs.getTumorDnaSampleName(meta)
             }
 
-            if (Utils.hasNormalDna(meta)) {
-                meta_lilac.normal_id = Utils.getNormalDnaSampleName(meta)
+            if (sample.Inputs.hasNormalDna(meta)) {
+                meta_lilac.normal_id = sample.Inputs.getNormalDnaSampleName(meta)
             }
 
             return [
@@ -84,9 +84,9 @@ workflow LILAC_CALLING {
                 nbai_dna,
                 tbam_dna,
                 tbai_dna,
-                Utils.selectCurrentOrExisting(tbam_rna, meta, Constants.INPUT.BAM_RNA_TUMOR),
-                Utils.selectCurrentOrExisting(tbai_rna, meta, Constants.INPUT.BAI_RNA_TUMOR),
-                Utils.selectCurrentOrExisting(purple_dir, meta, Constants.INPUT.PURPLE_DIR),
+                sample.Inputs.preferUserProvidedInput(tbam_rna, meta, sample.FileKey.BAM_RNA_TUMOR),
+                sample.Inputs.preferUserProvidedInput(tbai_rna, meta, sample.FileKey.BAI_RNA_TUMOR),
+                sample.Inputs.preferUserProvidedInput(purple_dir, meta, sample.FileKey.PURPLE_DIR),
             ]
         }
 
@@ -97,7 +97,8 @@ workflow LILAC_CALLING {
         genome_version,
         genome_fai,
         lilac_resource_dir,
-        targeted_mode
+        targeted_mode,
+        sequencing_type,
     )
 
     ch_versions = ch_versions.mix(LILAC.out.versions)
@@ -106,7 +107,7 @@ workflow LILAC_CALLING {
     // channel: [ meta, amber_dir ]
     ch_outputs = Channel.empty()
         .mix(
-            WorkflowOncoanalyser.restoreMeta(LILAC.out.lilac_dir, ch_inputs),
+            channels.WorkflowChannels.restoreMeta(LILAC.out.lilac_dir, ch_inputs),
             ch_dna_inputs_sorted.skip.map { meta -> [meta, []] },
         )
 

@@ -2,9 +2,6 @@
 // PEACH infers germline haplotypes and reports relevant pharmacogenomics
 //
 
-import Constants
-import Utils
-
 include { PEACH } from '../../../modules/local/peach/main'
 
 workflow PEACH_CALLING {
@@ -30,13 +27,13 @@ workflow PEACH_CALLING {
         .map { meta, purple_dir ->
             return [
                 meta,
-                Utils.selectCurrentOrExisting(purple_dir, meta, Constants.INPUT.PURPLE_DIR),
+                sample.Inputs.preferUserProvidedInput(purple_dir, meta, sample.FileKey.PURPLE_DIR),
             ]
         }
         .branch { meta, purple_dir ->
 
-            def has_normal = Utils.hasNormalDna(meta)
-            def has_existing = Utils.hasExistingInput(meta, Constants.INPUT.PEACH_DIR)
+            def has_normal = sample.Inputs.hasNormalDna(meta)
+            def has_existing = sample.Inputs.hasExisting(meta, sample.FileKey.PEACH_DIR)
 
             runnable: purple_dir && has_normal && !has_existing
             skip: true
@@ -51,10 +48,10 @@ workflow PEACH_CALLING {
             def meta_peach = [
                 key: meta.group_id,
                 id: meta.group_id,
-                sample_id: Utils.getNormalDnaSampleName(meta),
+                sample_id: sample.Inputs.getNormalDnaSampleName(meta),
             ]
 
-            def purple_germline_smlv_vcf = file(purple_dir).resolve("${Utils.getTumorDnaSampleName(meta)}.purple.germline.vcf.gz")
+            def purple_germline_smlv_vcf = sample.Inputs.resolvePurpleGermlineVcf(purple_dir, meta)
 
             return [meta_peach, purple_germline_smlv_vcf]
         }
@@ -73,7 +70,7 @@ workflow PEACH_CALLING {
     // channel: [ meta, peach_dir ]
     ch_outputs = Channel.empty()
         .mix(
-            WorkflowOncoanalyser.restoreMeta(PEACH.out.peach_dir, ch_inputs),
+            channels.WorkflowChannels.restoreMeta(PEACH.out.peach_dir, ch_inputs),
             ch_inputs_sorted.skip.map { meta -> [meta, []] },
         )
 

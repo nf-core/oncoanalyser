@@ -2,16 +2,13 @@
 // PAVE PON creation prepares the panel-specific small variant artefact resource
 //
 
-import Constants
-import Utils
-
 include { PAVE_PON_PANEL_CREATION } from '../../../modules/local/pave/pon_creation/main'
 
 
 workflow PAVE_PON_CREATION {
     take:
     // Sample data
-    ch_sage_somatic_vcf // channel: [mandatory] [ meta, sage_somatic_vcf, sage_somatic_tbi ]
+    ch_sage_dir_somatic // channel: [mandatory] [ meta, sage_dir ]
 
     // Reference data
     genome_version      // channel: [mandatory] genome version
@@ -23,12 +20,12 @@ workflow PAVE_PON_CREATION {
 
     // Create process input channel
     // channel: [ [sage_vcf, ...], [sage_tbi, ...] ]
-    ch_pave_inputs = ch_sage_somatic_vcf
-        .map { meta, sage_vcf, sage_tbi ->
-            return [
-                Utils.selectCurrentOrExisting(sage_vcf, meta, Constants.INPUT.SAGE_VCF_TUMOR),
-                Utils.selectCurrentOrExisting(sage_tbi, meta, Constants.INPUT.SAGE_VCF_TBI_TUMOR),
-            ]
+    ch_pave_inputs = ch_sage_dir_somatic
+        .map { meta, sage_dir ->
+
+            def (sage_vcf, sage_tbi) = sample.Inputs.resolveSageVcfWithTbi(sage_dir, meta, samplesheet.SampleType.TUMOR)
+
+            return [ sage_vcf, sage_tbi ]
         }
         .collect(flat: false)
         .map { d -> d.transpose() }

@@ -2,9 +2,6 @@
 // Neo identifies and scores neoepitopes
 //
 
-import Constants
-import Utils
-
 include { NEO_ANNOTATE_FUSIONS } from '../../../modules/local/neo/annotate_fusions/main'
 include { NEO_FINDER           } from '../../../modules/local/neo/finder/main'
 include { NEO_SCORER           } from '../../../modules/local/neo/scorer/main'
@@ -41,15 +38,15 @@ workflow NEO_PREDICTION {
     //
     // Select input sources
     // channel: [ meta, purple_dir, linx_annotation_dir ]
-    ch_finder_inputs_selected = WorkflowOncoanalyser.groupByMeta(
+    ch_finder_inputs_selected = channels.WorkflowChannels.groupByMeta(
         ch_purple,
         ch_linx,
     )
         .map { meta, purple_dir, linx_annotation_dir ->
 
             def inputs = [
-                Utils.selectCurrentOrExisting(purple_dir, meta, Constants.INPUT.PURPLE_DIR),
-                Utils.selectCurrentOrExisting(linx_annotation_dir, meta, Constants.INPUT.LINX_ANNO_DIR_TUMOR),
+                sample.Inputs.preferUserProvidedInput(purple_dir, meta, sample.FileKey.PURPLE_DIR),
+                sample.Inputs.preferUserProvidedInput(linx_annotation_dir, meta, sample.FileKey.LINX_ANNO_DIR_TUMOR),
             ]
 
             return [meta, *inputs]
@@ -61,7 +58,7 @@ workflow NEO_PREDICTION {
     ch_finder_inputs_sorted = ch_finder_inputs_selected
         .branch { meta, purple_dir, linx_annotation_dir ->
 
-            def has_normal_dna = Utils.hasNormalDna(meta)
+            def has_normal_dna = sample.Inputs.hasNormalDna(meta)
 
             def has_runnable_inputs = purple_dir && linx_annotation_dir && has_normal_dna
 
@@ -78,7 +75,7 @@ workflow NEO_PREDICTION {
             def meta_finder = [
                 key: meta.group_id,
                 id: meta.group_id,
-                sample_id: Utils.getTumorDnaSampleName(meta),
+                sample_id: sample.Inputs.getTumorDnaSampleName(meta),
             ]
 
             return [meta_finder, purple_dir, linx_annotation_dir]
@@ -97,7 +94,7 @@ workflow NEO_PREDICTION {
 
     // Set outputs, restoring original meta
     // channel: [ meta, neo_finder_dir ]
-    ch_finder_out = WorkflowOncoanalyser.restoreMeta(NEO_FINDER.out.neo_finder_dir, ch_inputs)
+    ch_finder_out = channels.WorkflowChannels.restoreMeta(NEO_FINDER.out.neo_finder_dir, ch_inputs)
 
     //
     // MODULE: Fusion annotation (Isofox)
@@ -107,7 +104,7 @@ workflow NEO_PREDICTION {
     // Select input sources and sort
     // channel: runnable: [ meta, neo_finder_dir, tumor_bam_rna, tumor_bai_rna ]
     // channel: skip: [ meta ]
-    ch_isofox_inputs_sorted = WorkflowOncoanalyser.groupByMeta(
+    ch_isofox_inputs_sorted = channels.WorkflowChannels.groupByMeta(
         ch_finder_out,
         ch_tumor_rna_bam,
     )
@@ -115,12 +112,12 @@ workflow NEO_PREDICTION {
             return [
                 meta,
                 neo_finder_dir,
-                Utils.selectCurrentOrExisting(tumor_bam, meta, Constants.INPUT.BAM_RNA_TUMOR),
-                Utils.selectCurrentOrExisting(tumor_bai, meta, Constants.INPUT.BAI_RNA_TUMOR),
+                sample.Inputs.preferUserProvidedInput(tumor_bam, meta, sample.FileKey.BAM_RNA_TUMOR),
+                sample.Inputs.preferUserProvidedInput(tumor_bai, meta, sample.FileKey.BAI_RNA_TUMOR),
             ]
         }
         .branch { meta, neo_finder_dir, tumor_bam, tumor_bai ->
-            runnable: Utils.hasTumorRna(meta)
+            runnable: sample.Inputs.hasTumorRna(meta)
                 return [meta, neo_finder_dir, tumor_bam, tumor_bai]
             skip: true
                 return meta
@@ -134,7 +131,7 @@ workflow NEO_PREDICTION {
             def meta_isofox = [
                 key: meta.group_id,
                 id: meta.group_id,
-                sample_id: Utils.getTumorDnaSampleName(meta),
+                sample_id: sample.Inputs.getTumorRnaSampleOutputId(meta),
             ]
 
             return [meta_isofox, neo_finder_dir, tumor_bam_rna, tumor_bai_rna]
@@ -156,7 +153,7 @@ workflow NEO_PREDICTION {
     // channel: [ meta, annotated_fusions ]
     ch_annotate_fusions_out = Channel.empty()
         .mix(
-            WorkflowOncoanalyser.restoreMeta(NEO_ANNOTATE_FUSIONS.out.annotated_fusions, ch_inputs),
+            channels.WorkflowChannels.restoreMeta(NEO_ANNOTATE_FUSIONS.out.annotated_fusions, ch_inputs),
             ch_isofox_inputs_sorted.skip.map { meta -> [meta, []] },
         )
 
@@ -166,7 +163,7 @@ workflow NEO_PREDICTION {
     //
     // Select input sources and prepare input channel
     // channel: [ meta_scorer, isofox_dir, purple_dir, sage_somatic_append, lilac_dir, neo_finder_dir, annotated_fusions ]
-    ch_scorer_inputs = WorkflowOncoanalyser.groupByMeta(
+    ch_scorer_inputs = channels.WorkflowChannels.groupByMeta(
         ch_isofox,
         ch_purple,
         ch_sage_somatic_append,
@@ -179,23 +176,23 @@ workflow NEO_PREDICTION {
             def meta_scorer = [
                 key: meta.group_id,
                 id: meta.group_id,
-                sample_id: Utils.getTumorDnaSampleName(meta, primary: true),
-                cancer_type: meta[Constants.InfoField.CANCER_TYPE],
+                sample_id: sample.Inputs.getTumorDnaSampleName(meta),
+                cancer_type: meta[samplesheet.InfoField.CANCER_TYPE],
             ]
 
             def sage_somatic_append_vcf = []
-            if (Utils.hasTumorRna(meta)) {
-                meta_scorer.sample_rna_id = Utils.getTumorRnaSampleName(meta)
+            if (sample.Inputs.hasTumorRna(meta)) {
+                meta_scorer.sample_rna_id = sample.Inputs.getTumorRnaSampleOutputId(meta)
 
-                def sage_somatic_append_selected = Utils.selectCurrentOrExisting(sage_somatic_append, meta, Constants.INPUT.SAGE_APPEND_DIR_TUMOR)
+                def sage_somatic_append_selected = sample.Inputs.preferUserProvidedInput(sage_somatic_append, meta, sample.FileKey.SAGE_APPEND_DIR_TUMOR)
                 sage_somatic_append_vcf = file(sage_somatic_append_selected).resolve("${meta_scorer.sample_id}.sage.append.vcf.gz")
             }
 
             def inputs = [
-                Utils.selectCurrentOrExisting(isofox_dir, meta, Constants.INPUT.ISOFOX_DIR),
-                Utils.selectCurrentOrExisting(purple_dir, meta, Constants.INPUT.PURPLE_DIR),
+                sample.Inputs.preferUserProvidedInput(isofox_dir, meta, sample.FileKey.ISOFOX_DIR),
+                sample.Inputs.preferUserProvidedInput(purple_dir, meta, sample.FileKey.PURPLE_DIR),
                 sage_somatic_append_vcf,
-                Utils.selectCurrentOrExisting(lilac_dir, meta, Constants.INPUT.LILAC_DIR),
+                sample.Inputs.preferUserProvidedInput(lilac_dir, meta, sample.FileKey.LILAC_DIR),
                 neo_finder_dir,
                 annotated_fusions,
             ]
