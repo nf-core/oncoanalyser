@@ -1,7 +1,3 @@
-import Constants
-import Processes
-import Utils
-
 /*
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     IMPORT MODULES / SUBWORKFLOWS / FUNCTIONS
@@ -31,20 +27,9 @@ include { softwareVersionsToYAML } from '../subworkflows/nf-core/utils_nfcore_pi
 workflow PANEL_RESOURCE_CREATION {
     take:
     inputs
-    run_config
+    stages
 
     main:
-    // Check input path parameters to see if they exist
-    def checkPathParamList = [
-        params.isofox_counts,
-        params.isofox_gc_ratios,
-        params.isofox_gene_ids,
-        params.isofox_tpm_norm,
-        params.driver_gene_panel,
-        params.target_regions_bed,
-    ]
-
-    for (param in checkPathParamList) { if (param) { file(param, checkIfExists: true) } }
 
     // Set input paths
     target_regions_bed = params.target_regions_bed ? file(params.target_regions_bed) : []
@@ -60,10 +45,10 @@ workflow PANEL_RESOURCE_CREATION {
     ch_inputs = Channel.fromList(inputs)
 
     // Set up reference data, assign more human readable variables
-    prep_config = WorkflowMain.getPrepConfigFromSamplesheet(run_config)
     PREPARE_REFERENCE(
-        prep_config,
-        run_config,
+        false, // prepare_reference_only
+        inputs,
+        stages,
     )
     ref_data = PREPARE_REFERENCE.out
     hmf_data = PREPARE_REFERENCE.out.hmf_data
@@ -120,26 +105,32 @@ workflow PANEL_RESOURCE_CREATION {
         ref_data.genome_dict,
         hmf_data.unmap_regions,
         hmf_data.msi_jitter_sites,
+        hmf_data.msi_model_coefficients,
+        // NOTE(LN): MSI error rates training routine not yet implemented. Use file with default/generic values for now
+        hmf_data.msi_model_error_rates,
+        params.sequencing_type,
         params.redux_umi_enabled,
         params.redux_umi_duplex_delim,
+        params.redux_generate_tsvs_only,
+        true,  // targeted_mode
     )
 
     ch_versions = ch_versions.mix(REDUX_PROCESSING.out.versions)
 
     // channel: [ meta, bam, bai ]
-    ch_redux_dna_tumor_out = REDUX_PROCESSING.out.dna_tumor
-    ch_redux_dna_normal_out = REDUX_PROCESSING.out.dna_normal
+    ch_redux_dna_tumor_bam_out = REDUX_PROCESSING.out.dna_tumor_bam
+    ch_redux_dna_normal_bam_out = REDUX_PROCESSING.out.dna_normal_bam
 
-    // channel: [ meta, dup_freq_tsv, jitter_tsv, ms_tsv, repeat_tsv ]
-    ch_redux_dna_tumor_tsv_out = REDUX_PROCESSING.out.dna_tumor_tsv
-    ch_redux_dna_normal_tsv_out = REDUX_PROCESSING.out.dna_normal_tsv
+    // channel: [ meta, redux_tsv, ... ]
+    ch_redux_dna_tumor_dir_out = REDUX_PROCESSING.out.dna_tumor_dir
+    ch_redux_dna_normal_dir_out = REDUX_PROCESSING.out.dna_normal_dir
 
     //
     // MODULE: Run Isofox to analyse RNA data
     //
     isofox_counts = params.isofox_counts ? file(params.isofox_counts) : hmf_data.isofox_counts
     isofox_gc_ratios = params.isofox_gc_ratios ? file(params.isofox_gc_ratios) : hmf_data.isofox_gc_ratios
-    isofox_read_length = params.isofox_read_length !== null ? params.isofox_read_length : Constants.DEFAULT_ISOFOX_READ_LENGTH_TARGETED
+    isofox_read_length = params.isofox_read_length !== null ? params.isofox_read_length : pipeline.Constants.DEFAULT_ISOFOX_READ_LENGTH_TARGETED
 
     ISOFOX_QUANTIFICATION(
         ch_inputs,
@@ -148,10 +139,13 @@ workflow PANEL_RESOURCE_CREATION {
         ref_data.genome_version,
         ref_data.genome_fai,
         hmf_data.ensembl_data_resources,
+        hmf_data.driver_gene_panel,
         hmf_data.known_fusion_data,
+        hmf_data.isofox_excluded_regions,
+        hmf_data.isofox_gene_distribution,
+        hmf_data.isofox_alt_sj_distribution,
         isofox_counts,
         isofox_gc_ratios,
-        [],  // isofox_gene_ids
         [],  // isofox_tpm_norm
         'TRANSCRIPT_COUNTS',
         isofox_read_length,
@@ -167,13 +161,15 @@ workflow PANEL_RESOURCE_CREATION {
     //
     AMBER_PROFILING(
         ch_inputs,
-        ch_redux_dna_tumor_out,
-        ch_redux_dna_normal_out,
+        ch_redux_dna_tumor_bam_out,
+        ch_redux_dna_normal_bam_out,
         ch_inputs.map { meta -> [meta, [], []] },  // ch_donor_bam
         ref_data.genome_version,
         hmf_data.heterozygous_sites,
         target_regions_bed,
         2,   // tumor_min_depth
+        params.sequencing_type,
+        false,  // purity_estimate_mode
     )
 
     ch_versions = ch_versions.mix(AMBER_PROFILING.out.versions)
@@ -186,13 +182,14 @@ workflow PANEL_RESOURCE_CREATION {
     //
     COBALT_PROFILING(
         ch_inputs,
-        ch_redux_dna_tumor_out,
-        ch_redux_dna_normal_out,
+        ch_redux_dna_tumor_bam_out,
+        ch_redux_dna_normal_bam_out,
         ref_data.genome_version,
         hmf_data.gc_profile,
         hmf_data.diploid_bed,
         [],  // panel_target_region_normalisation
         true,  // targeted_mode
+        false,  // purity_estimate_mode
     )
 
     ch_versions = ch_versions.mix(COBALT_PROFILING.out.versions)
@@ -205,12 +202,12 @@ workflow PANEL_RESOURCE_CREATION {
     //
     SAGE_CALLING(
         ch_inputs,
-        ch_redux_dna_tumor_out,
-        ch_redux_dna_normal_out,
+        ch_redux_dna_tumor_bam_out,
+        ch_redux_dna_normal_bam_out,
         ch_inputs.map { meta -> [meta, [], []] },  // ch_donor_bam
-        ch_redux_dna_tumor_tsv_out,
-        ch_redux_dna_normal_tsv_out,
-        ch_inputs.map { meta -> [meta, [], [], []] },  // ch_donor_tsv
+        ch_redux_dna_tumor_dir_out,
+        ch_redux_dna_normal_dir_out,
+        ch_inputs.map { meta -> [meta, []] },  // ch_donor_tsv
         ref_data.genome_fasta,
         ref_data.genome_version,
         ref_data.genome_fai,
@@ -223,6 +220,7 @@ workflow PANEL_RESOURCE_CREATION {
         driver_gene_panel,
         hmf_data.ensembl_data_resources,
         hmf_data.gnomad_resource,
+        params.sequencing_type,
         true,  // enable_germline
         true,  // targeted_mode
     )
@@ -230,16 +228,19 @@ workflow PANEL_RESOURCE_CREATION {
     ch_versions = ch_versions.mix(SAGE_CALLING.out.versions)
 
     // channel: [ meta, sage_vcf, sage_tbi ]
-    ch_sage_somatic_vcf_out = SAGE_CALLING.out.somatic_vcf
+    ch_sage_somatic_dir_out = SAGE_CALLING.out.somatic_dir
 
     //
     // SUBWORKFLOW: Run COBALT normalisation
     //
+    copy_number_percentiles = params.enable_cn_norm_with_wgs_pct ? hmf_data.copy_number_percentiles : []
+
     COBALT_NORMALISATION(
         ch_amber_out,
         ch_cobalt_out,
         ref_data.genome_version,
         hmf_data.gc_profile,
+        copy_number_percentiles,
         target_regions_bed,
     )
 
@@ -249,7 +250,7 @@ workflow PANEL_RESOURCE_CREATION {
     // SUBWORKFLOW: Run PAVE panel of normals creation
     //
     PAVE_PON_CREATION(
-        ch_sage_somatic_vcf_out,
+        ch_sage_somatic_dir_out,
         ref_data.genome_version,
     )
 
@@ -262,7 +263,7 @@ workflow PANEL_RESOURCE_CREATION {
         ch_isofox_out,
         ref_data.genome_version,
         isofox_gene_ids,
-        hmf_data.gene_exp_distribution,
+        hmf_data.isofox_gene_distribution,
     )
 
     ch_versions = ch_versions.mix(ISOFOX_NORMALISATION.out.versions)

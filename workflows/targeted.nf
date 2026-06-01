@@ -1,7 +1,3 @@
-import Constants
-import Processes
-import Utils
-
 /*
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     IMPORT MODULES / SUBWORKFLOWS / FUNCTIONS
@@ -41,18 +37,9 @@ include { softwareVersionsToYAML } from '../subworkflows/nf-core/utils_nfcore_pi
 workflow TARGETED {
     take:
     inputs
-    run_config
+    stages
 
     main:
-    // Check input path parameters to see if they exist
-    def checkPathParamList = [
-        params.isofox_counts,
-        params.isofox_gc_ratios,
-        params.isofox_gene_ids,
-        params.isofox_tpm_norm,
-    ]
-
-    for (param in checkPathParamList) { if (param) { file(param, checkIfExists: true) } }
 
     // Create channel for versions
     // channel: [ versions.yml ]
@@ -63,10 +50,10 @@ workflow TARGETED {
     ch_inputs = Channel.fromList(inputs)
 
     // Set up reference data, assign more human readable variables
-    prep_config = WorkflowMain.getPrepConfigFromSamplesheet(run_config)
     PREPARE_REFERENCE(
-        prep_config,
-        run_config,
+        false, // prepare_reference_only
+        inputs,
+        stages,
     )
     ref_data = PREPARE_REFERENCE.out
     hmf_data = PREPARE_REFERENCE.out.hmf_data
@@ -82,7 +69,7 @@ workflow TARGETED {
     ch_align_dna_normal_out = Channel.empty()
     ch_align_dna_donor_out = Channel.empty()
     ch_align_rna_tumor_out = Channel.empty()
-    if (run_config.stages.alignment) {
+    if (stages.alignment) {
 
         READ_ALIGNMENT_DNA(
             ch_inputs,
@@ -129,16 +116,21 @@ workflow TARGETED {
     // SUBWORKFLOW: Run REDUX for DNA BAMs
     //
     // channel: [ meta, bam, bai ]
-    ch_redux_dna_tumor_out = Channel.empty()
-    ch_redux_dna_normal_out = Channel.empty()
-    ch_redux_dna_donor_out = Channel.empty()
+    ch_redux_dna_tumor_bam_out = Channel.empty()
+    ch_redux_dna_normal_bam_out = Channel.empty()
+    ch_redux_dna_donor_bam_out = Channel.empty()
 
-    // channel: [ meta, dup_freq_tsv, jitter_tsv, ms_tsv ]
-    ch_redux_dna_tumor_tsv_out = Channel.empty()
-    ch_redux_dna_normal_tsv_out = Channel.empty()
-    ch_redux_dna_donor_tsv_out = Channel.empty()
+    // channel: [ meta, dir ]
+    ch_redux_dna_tumor_dir_out = Channel.empty()
+    ch_redux_dna_normal_dir_out = Channel.empty()
+    ch_redux_dna_donor_dir_out = Channel.empty()
 
-    if (run_config.stages.redux) {
+    if (stages.redux) {
+
+        msi_model_error_rates = panel_data.msi_model_error_rates
+            .concat(hmf_data.msi_model_error_rates)
+            .flatten()
+            .first()
 
         REDUX_PROCESSING(
             ch_inputs,
@@ -151,29 +143,65 @@ workflow TARGETED {
             ref_data.genome_dict,
             hmf_data.unmap_regions,
             hmf_data.msi_jitter_sites,
+            hmf_data.msi_model_coefficients,
+            msi_model_error_rates,
+            params.sequencing_type,
             params.redux_umi_enabled,
             params.redux_umi_duplex_delim,
+            params.redux_generate_tsvs_only,
+            true,  // targeted_mode
         )
 
         ch_versions = ch_versions.mix(REDUX_PROCESSING.out.versions)
 
-        ch_redux_dna_tumor_out = ch_redux_dna_tumor_out.mix(REDUX_PROCESSING.out.dna_tumor)
-        ch_redux_dna_normal_out = ch_redux_dna_normal_out.mix(REDUX_PROCESSING.out.dna_normal)
-        ch_redux_dna_donor_out = ch_redux_dna_donor_out.mix(REDUX_PROCESSING.out.dna_donor)
+        ch_redux_dna_tumor_bam_out = ch_redux_dna_tumor_bam_out.mix(REDUX_PROCESSING.out.dna_tumor_bam)
+        ch_redux_dna_normal_bam_out = ch_redux_dna_normal_bam_out.mix(REDUX_PROCESSING.out.dna_normal_bam)
+        ch_redux_dna_donor_bam_out = ch_redux_dna_donor_bam_out.mix(REDUX_PROCESSING.out.dna_donor_bam)
 
-        ch_redux_dna_tumor_tsv_out = ch_redux_dna_tumor_tsv_out.mix(REDUX_PROCESSING.out.dna_tumor_tsv)
-        ch_redux_dna_normal_tsv_out = ch_redux_dna_normal_tsv_out.mix(REDUX_PROCESSING.out.dna_normal_tsv)
-        ch_redux_dna_donor_tsv_out = ch_redux_dna_donor_tsv_out.mix(REDUX_PROCESSING.out.dna_donor_tsv)
+        ch_redux_dna_tumor_dir_out = ch_redux_dna_tumor_dir_out.mix(REDUX_PROCESSING.out.dna_tumor_dir)
+        ch_redux_dna_normal_dir_out = ch_redux_dna_normal_dir_out.mix(REDUX_PROCESSING.out.dna_normal_dir)
+        ch_redux_dna_donor_dir_out = ch_redux_dna_donor_dir_out.mix(REDUX_PROCESSING.out.dna_donor_dir)
 
     } else {
 
-        ch_redux_dna_tumor_out = ch_inputs.map { meta -> [meta, [], []] }
-        ch_redux_dna_normal_out = ch_inputs.map { meta -> [meta, [], []] }
-        ch_redux_dna_donor_out = ch_inputs.map { meta -> [meta, [], []] }
+        ch_redux_dna_tumor_bam_out = ch_inputs.map { meta -> [meta, [], []] }
+        ch_redux_dna_normal_bam_out = ch_inputs.map { meta -> [meta, [], []] }
+        ch_redux_dna_donor_bam_out = ch_inputs.map { meta -> [meta, [], []] }
 
-        ch_redux_dna_tumor_tsv_out = ch_inputs.map { meta -> [meta, [], [], []] }
-        ch_redux_dna_normal_tsv_out = ch_inputs.map { meta -> [meta, [], [], []] }
-        ch_redux_dna_donor_tsv_out = ch_inputs.map { meta -> [meta, [], [], []] }
+        ch_redux_dna_tumor_dir_out = ch_inputs.map { meta -> [meta, []] }
+        ch_redux_dna_normal_dir_out = ch_inputs.map { meta -> [meta, []] }
+        ch_redux_dna_donor_dir_out = ch_inputs.map { meta -> [meta, []] }
+
+    }
+
+    //
+    // SUBWORKFLOW: Run Bam Tools to generate stats required for downstream processes
+    //
+    // channel: [ meta, metrics ]
+    ch_bamtools_somatic_out = Channel.empty()
+    ch_bamtools_germline_out = Channel.empty()
+    if (stages.bamtools) {
+
+        BAMTOOLS_METRICS(
+            ch_inputs,
+            ch_redux_dna_tumor_bam_out,
+            ch_redux_dna_normal_bam_out,
+            ref_data.genome_fasta,
+            ref_data.genome_version,
+            panel_data.driver_gene_panel,
+            hmf_data.ensembl_data_resources,
+            panel_data.target_region_bed,
+        )
+
+        ch_versions = ch_versions.mix(BAMTOOLS_METRICS.out.versions)
+
+        ch_bamtools_somatic_out = ch_bamtools_somatic_out.mix(BAMTOOLS_METRICS.out.somatic)
+        ch_bamtools_germline_out = ch_bamtools_germline_out.mix(BAMTOOLS_METRICS.out.germline)
+
+    } else {
+
+        ch_bamtools_somatic_out = ch_inputs.map { meta -> [meta, []] }
+        ch_bamtools_germline_out = ch_inputs.map { meta -> [meta, []] }
 
     }
 
@@ -184,14 +212,13 @@ workflow TARGETED {
     isofox_counts = params.isofox_counts ? file(params.isofox_counts) : panel_data.isofox_counts
     isofox_gc_ratios = params.isofox_gc_ratios ? file(params.isofox_gc_ratios) : panel_data.isofox_gc_ratios
 
-    isofox_gene_ids = params.isofox_gene_ids ? file(params.isofox_gene_ids) : panel_data.isofox_gene_ids
     isofox_tpm_norm = params.isofox_tpm_norm ? file(params.isofox_tpm_norm) : panel_data.isofox_tpm_norm
 
-    isofox_read_length = params.isofox_read_length !== null ? params.isofox_read_length : Constants.DEFAULT_ISOFOX_READ_LENGTH_TARGETED
+    isofox_read_length = params.isofox_read_length !== null ? params.isofox_read_length : pipeline.Constants.DEFAULT_ISOFOX_READ_LENGTH_TARGETED
 
     // channel: [ meta, isofox_dir ]
     ch_isofox_out = Channel.empty()
-    if (run_config.stages.isofox) {
+    if (stages.isofox) {
 
         ISOFOX_QUANTIFICATION(
             ch_inputs,
@@ -200,10 +227,13 @@ workflow TARGETED {
             ref_data.genome_version,
             ref_data.genome_fai,
             hmf_data.ensembl_data_resources,
+            hmf_data.driver_gene_panel,
             hmf_data.known_fusion_data,
+            hmf_data.isofox_excluded_regions,
+            hmf_data.isofox_gene_distribution,
+            hmf_data.isofox_alt_sj_distribution,
             isofox_counts,
             isofox_gc_ratios,
-            isofox_gene_ids,
             isofox_tpm_norm,
             params.isofox_functions,
             isofox_read_length,
@@ -224,17 +254,19 @@ workflow TARGETED {
     //
     // channel: [ meta, amber_dir ]
     ch_amber_out = Channel.empty()
-    if (run_config.stages.amber) {
+    if (stages.amber) {
 
         AMBER_PROFILING(
             ch_inputs,
-            ch_redux_dna_tumor_out,
-            ch_redux_dna_normal_out,
-            ch_redux_dna_donor_out,
+            ch_redux_dna_tumor_bam_out,
+            ch_redux_dna_normal_bam_out,
+            ch_redux_dna_donor_bam_out,
             ref_data.genome_version,
             hmf_data.heterozygous_sites,
             panel_data.target_region_bed,
             [],  // tumor_min_depth
+            params.sequencing_type,
+            false,  // purity_estimate_mode
         )
 
         ch_versions = ch_versions.mix(AMBER_PROFILING.out.versions)
@@ -244,7 +276,6 @@ workflow TARGETED {
     } else {
 
         ch_amber_out = ch_inputs.map { meta -> [meta, []] }
-
     }
 
     //
@@ -252,17 +283,18 @@ workflow TARGETED {
     //
     // channel: [ meta, cobalt_dir ]
     ch_cobalt_out = Channel.empty()
-    if (run_config.stages.cobalt) {
+    if (stages.cobalt) {
 
         COBALT_PROFILING(
             ch_inputs,
-            ch_redux_dna_tumor_out,
-            ch_redux_dna_normal_out,
+            ch_redux_dna_tumor_bam_out,
+            ch_redux_dna_normal_bam_out,
             ref_data.genome_version,
             hmf_data.gc_profile,
             hmf_data.diploid_bed,
             panel_data.target_region_normalisation,
             true,  // targeted_mode
+            false,  // purity_estimate_mode
         )
 
         ch_versions = ch_versions.mix(COBALT_PROFILING.out.versions)
@@ -278,15 +310,14 @@ workflow TARGETED {
     //
     // SUBWORKFLOW: Call structural variants with ESVEE
     //
-    // channel: [ meta, esvee_vcf ]
-    ch_esvee_germline_out = Channel.empty()
-    ch_esvee_somatic_out = Channel.empty()
-    if (run_config.stages.esvee) {
+    // channel: [ meta, esvee_dir ]
+    ch_esvee_out = Channel.empty()
+    if (stages.esvee) {
 
         ESVEE_CALLING(
             ch_inputs,
-            ch_redux_dna_tumor_out,
-            ch_redux_dna_normal_out,
+            ch_redux_dna_tumor_bam_out,
+            ch_redux_dna_normal_bam_out,
             ref_data.genome_fasta,
             ref_data.genome_version,
             ref_data.genome_fai,
@@ -299,39 +330,35 @@ workflow TARGETED {
             hmf_data.repeatmasker_annotations,
             hmf_data.unmap_regions,
             panel_data.target_region_bed,
+            params.sequencing_type,
         )
 
         ch_versions = ch_versions.mix(ESVEE_CALLING.out.versions)
 
-        ch_esvee_germline_out = ch_esvee_germline_out.mix(ESVEE_CALLING.out.germline_vcf)
-        ch_esvee_somatic_out = ch_esvee_somatic_out.mix(ESVEE_CALLING.out.somatic_vcf)
+        ch_esvee_out = ch_esvee_out.mix(ESVEE_CALLING.out.esvee_dir)
 
     } else {
 
-        ch_esvee_germline_out = ch_inputs.map { meta -> [meta, []] }
-        ch_esvee_somatic_out = ch_inputs.map { meta -> [meta, []] }
+        ch_esvee_out = ch_inputs.map { meta -> [meta, []] }
 
     }
 
     //
     // SUBWORKFLOW: call SNV, MNV, and small INDELS with SAGE
     //
-    // channel: [ meta, sage_vcf, sage_tbi ]
-    ch_sage_germline_vcf_out = Channel.empty()
-    ch_sage_somatic_vcf_out = Channel.empty()
     // channel: [ meta, sage_dir ]
     ch_sage_germline_dir_out = Channel.empty()
     ch_sage_somatic_dir_out = Channel.empty()
-    if (run_config.stages.sage) {
+    if (stages.sage) {
 
         SAGE_CALLING(
             ch_inputs,
-            ch_redux_dna_tumor_out,
-            ch_redux_dna_normal_out,
-            ch_redux_dna_donor_out,
-            ch_redux_dna_tumor_tsv_out,
-            ch_redux_dna_normal_tsv_out,
-            ch_redux_dna_donor_tsv_out,
+            ch_redux_dna_tumor_bam_out,
+            ch_redux_dna_normal_bam_out,
+            ch_redux_dna_donor_bam_out,
+            ch_redux_dna_tumor_dir_out,
+            ch_redux_dna_normal_dir_out,
+            ch_redux_dna_donor_dir_out,
             ref_data.genome_fasta,
             ref_data.genome_version,
             ref_data.genome_fai,
@@ -344,21 +371,18 @@ workflow TARGETED {
             panel_data.driver_gene_panel,
             hmf_data.ensembl_data_resources,
             hmf_data.gnomad_resource,
+            params.sequencing_type,
             true,  // enable_germline
             true,  // targeted_mode
         )
 
         ch_versions = ch_versions.mix(SAGE_CALLING.out.versions)
 
-        ch_sage_germline_vcf_out = ch_sage_germline_vcf_out.mix(SAGE_CALLING.out.germline_vcf)
-        ch_sage_somatic_vcf_out = ch_sage_somatic_vcf_out.mix(SAGE_CALLING.out.somatic_vcf)
         ch_sage_germline_dir_out = ch_sage_germline_dir_out.mix(SAGE_CALLING.out.germline_dir)
         ch_sage_somatic_dir_out = ch_sage_somatic_dir_out.mix(SAGE_CALLING.out.somatic_dir)
 
     } else {
 
-        ch_sage_germline_vcf_out = ch_inputs.map { meta -> [meta, [], []] }
-        ch_sage_somatic_vcf_out = ch_inputs.map { meta -> [meta, [], []] }
         ch_sage_germline_dir_out = ch_inputs.map { meta -> [meta, []] }
         ch_sage_somatic_dir_out = ch_inputs.map { meta -> [meta, []] }
 
@@ -367,15 +391,15 @@ workflow TARGETED {
     //
     // SUBWORKFLOW: Annotate variants with PAVE
     //
-    // channel: [ meta, pave_vcf ]
+    // channel: [ meta, pave_dir ]
     ch_pave_germline_out = Channel.empty()
     ch_pave_somatic_out = Channel.empty()
-    if (run_config.stages.pave) {
+    if (stages.pave) {
 
         PAVE_ANNOTATION(
             ch_inputs,
-            ch_sage_germline_vcf_out,
-            ch_sage_somatic_vcf_out,
+            ch_sage_germline_dir_out,
+            ch_sage_somatic_dir_out,
             ref_data.genome_fasta,
             ref_data.genome_version,
             ref_data.genome_fai,
@@ -388,6 +412,7 @@ workflow TARGETED {
             panel_data.driver_gene_panel,
             hmf_data.ensembl_data_resources,
             hmf_data.gnomad_resource,
+            params.sequencing_type,
         )
 
         ch_versions = ch_versions.mix(PAVE_ANNOTATION.out.versions)
@@ -407,16 +432,16 @@ workflow TARGETED {
     //
     // channel: [ meta, purple_dir ]
     ch_purple_out = Channel.empty()
-    if (run_config.stages.purple) {
+    if (stages.purple) {
 
         PURPLE_CALLING(
             ch_inputs,
             ch_amber_out,
             ch_cobalt_out,
+            ch_esvee_out,
             ch_pave_somatic_out,
             ch_pave_germline_out,
-            ch_esvee_somatic_out,
-            ch_esvee_germline_out,
+            ch_redux_dna_tumor_dir_out,
             ref_data.genome_fasta,
             ref_data.genome_version,
             ref_data.genome_fai,
@@ -426,10 +451,8 @@ workflow TARGETED {
             hmf_data.sage_known_hotspots_germline,
             panel_data.driver_gene_panel,
             hmf_data.ensembl_data_resources,
-            hmf_data.purple_germline_del,
+            hmf_data.germline_amp_del_freq,
             panel_data.target_region_bed,
-            panel_data.target_region_ratios,
-            panel_data.target_region_msi_indels,
         )
 
         ch_versions = ch_versions.mix(PURPLE_CALLING.out.versions)
@@ -480,18 +503,19 @@ workflow TARGETED {
     // channel: [ meta, sage_append_vcf ]
     ch_sage_somatic_append_out = Channel.empty()
     ch_sage_germline_append_out = Channel.empty()
-    if (run_config.stages.orange) {
+    if (stages.sage_append) {
 
         SAGE_APPEND(
             ch_inputs,
             ch_purple_out,
-            ch_inputs.map { meta -> [meta, [], []] },      // ch_tumor_redux_bam
-            ch_inputs.map { meta -> [meta, [], [], []] },  // ch_tumor_redux_tsv
+            ch_inputs.map { meta -> [meta, [], []] },  // ch_tumor_redux_bam
+            ch_inputs.map { meta -> [meta, []] },  // ch_tumor_redux_tsv
             ch_align_rna_tumor_out,
             ref_data.genome_fasta,
             ref_data.genome_version,
             ref_data.genome_fai,
             ref_data.genome_dict,
+            params.sequencing_type,
             true,  // enable_germline
             true,  // targeted_mode
         )
@@ -545,7 +569,7 @@ workflow TARGETED {
     // channel: [ meta, linx_annotation_dir ]
     ch_linx_somatic_out = Channel.empty()
     ch_linx_germline_out = Channel.empty()
-    if (run_config.stages.linx) {
+    if (stages.linx) {
 
         LINX_ANNOTATION(
             ch_inputs,
@@ -573,7 +597,7 @@ workflow TARGETED {
     //
     // channel: [ meta, linx_visualiser_dir ]
     ch_linx_somatic_visualiser_dir_out = Channel.empty()
-    if (run_config.stages.linx) {
+    if (stages.linx) {
 
         LINX_PLOTTING(
             ch_inputs,
@@ -596,44 +620,13 @@ workflow TARGETED {
     }
 
     //
-    // SUBWORKFLOW: Run Bam Tools to generate stats required for downstream processes
-    //
-    // channel: [ meta, metrics ]
-    ch_bamtools_somatic_out = Channel.empty()
-    ch_bamtools_germline_out = Channel.empty()
-    if (run_config.stages.bamtools) {
-
-        BAMTOOLS_METRICS(
-            ch_inputs,
-            ch_redux_dna_tumor_out,
-            ch_redux_dna_normal_out,
-            ref_data.genome_fasta,
-            ref_data.genome_version,
-            panel_data.driver_gene_panel,
-            hmf_data.ensembl_data_resources,
-            panel_data.target_region_bed,
-        )
-
-        ch_versions = ch_versions.mix(BAMTOOLS_METRICS.out.versions)
-
-        ch_bamtools_somatic_out = ch_bamtools_somatic_out.mix(BAMTOOLS_METRICS.out.somatic)
-        ch_bamtools_germline_out = ch_bamtools_germline_out.mix(BAMTOOLS_METRICS.out.germline)
-
-    } else {
-
-        ch_bamtools_somatic_out = ch_inputs.map { meta -> [meta, []] }
-        ch_bamtools_germline_out = ch_inputs.map { meta -> [meta, []] }
-
-    }
-
-    //
     // SUBWORKFLOW: Run CIDER to identify and annotate CDR3 sequences of IG and TCR loci
     //
-    if (run_config.stages.cider) {
+    if (stages.cider) {
 
         CIDER_CALLING(
             ch_inputs,
-            ch_redux_dna_tumor_out,
+            ch_redux_dna_tumor_bam_out,
             ch_align_rna_tumor_out,
             ref_data.genome_fasta,
             ref_data.genome_version,
@@ -650,19 +643,20 @@ workflow TARGETED {
     //
     // channel: [ meta, lilac_dir ]
     ch_lilac_out = Channel.empty()
-    if (run_config.stages.lilac) {
+    if (stages.lilac) {
 
         LILAC_CALLING(
             ch_inputs,
-            ch_redux_dna_tumor_out,
-            ch_redux_dna_normal_out,
+            ch_redux_dna_tumor_bam_out,
+            ch_redux_dna_normal_bam_out,
             ch_align_rna_tumor_out,
             ch_purple_out,
             ref_data.genome_fasta,
             ref_data.genome_version,
             ref_data.genome_fai,
             hmf_data.lilac_resources,
-            true,  // targeted_mode
+            true,  // targeted_mode,
+            params.sequencing_type,
         )
 
         ch_versions = ch_versions.mix(LILAC_CALLING.out.versions)
@@ -680,7 +674,7 @@ workflow TARGETED {
     //
     // channel: [ meta, peach_dir ]
     ch_peach_out = Channel.empty()
-    if (run_config.stages.peach) {
+    if (stages.peach) {
 
         PEACH_CALLING(
             ch_inputs,
@@ -703,7 +697,7 @@ workflow TARGETED {
     //
     // SUBWORKFLOW: Run ORANGE to generate static PDF report
     //
-    if (run_config.stages.orange) {
+    if (stages.orange) {
 
         // Create placeholder channels for empty remaining channels
         ch_chord_out = ch_inputs.map { meta -> [meta, []] }
@@ -712,14 +706,13 @@ workflow TARGETED {
         ch_virusinterpreter_out = ch_inputs.map { meta -> [meta, []] }
 
         ORANGE_REPORTING(
-            ch_inputs,
-            ch_bamtools_somatic_out,
-            ch_bamtools_germline_out,
             ch_sage_somatic_dir_out,
             ch_sage_germline_dir_out,
             ch_sage_somatic_append_out,
             ch_sage_germline_append_out,
+            ch_sage_vis_out,
             ch_purple_out,
+            ch_qsee_out,
             ch_linx_somatic_out,
             ch_linx_somatic_visualiser_dir_out,
             ch_linx_germline_out,
@@ -732,14 +725,8 @@ workflow TARGETED {
             ch_isofox_out,
             ref_data.genome_version,
             hmf_data.disease_ontology,
-            hmf_data.cohort_mapping,
-            hmf_data.cohort_percentiles,
-            hmf_data.known_fusion_data,
-            panel_data.driver_gene_panel,
-            hmf_data.ensembl_data_resources,
-            hmf_data.sigs_etiology,
-            hmf_data.alt_sj_distribution,
-            hmf_data.gene_exp_distribution,
+            params.sequencing_type,
+            true,  // targeted_mode
         )
 
         ch_versions = ch_versions.mix(ORANGE_REPORTING.out.versions)

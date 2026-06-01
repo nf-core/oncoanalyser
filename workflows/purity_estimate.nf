@@ -1,7 +1,3 @@
-import Constants
-import Processes
-import Utils
-
 /*
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     IMPORT MODULES / SUBWORKFLOWS / FUNCTIONS
@@ -27,7 +23,7 @@ include { softwareVersionsToYAML } from '../subworkflows/nf-core/utils_nfcore_pi
 workflow PURITY_ESTIMATE {
     take:
     inputs
-    run_config
+    stages
 
     main:
     // Create channel for versions
@@ -39,13 +35,15 @@ workflow PURITY_ESTIMATE {
     ch_inputs = Channel.fromList(inputs)
 
     // Get run mode of purity estimate mode
-    purity_estimate_run_mode = Utils.getEnumFromString(params.purity_estimate_mode, Constants.RunMode)
+    def purity_estimate_run_mode = pipeline.PurityEstimateMode.fromString(params.purity_estimate_mode)
+    def targeted_mode = purity_estimate_run_mode === pipeline.PurityEstimateMode.TARGETED
+    def wgts_mode = purity_estimate_run_mode === pipeline.PurityEstimateMode.WGTS // NOTE(LN): Redundant variable, but makes the if clauses clearer
 
     // Set up reference data, assign more human readable variables
-    prep_config = WorkflowMain.getPrepConfigFromSamplesheet(run_config)
     PREPARE_REFERENCE(
-        prep_config,
-        run_config,
+        false, // prepare_reference_only
+        inputs,
+        stages,
     )
     ref_data = PREPARE_REFERENCE.out
     hmf_data = PREPARE_REFERENCE.out.hmf_data
@@ -60,7 +58,7 @@ workflow PURITY_ESTIMATE {
     ch_align_dna_normal_out = Channel.empty()
     ch_align_dna_donor_out = Channel.empty()
     ch_align_rna_tumor_out = Channel.empty()
-    if (run_config.stages.alignment) {
+    if (stages.alignment) {
 
         // NOTE(LN): For now we won't support purity estimate mode for panel MSK (i.e. UMI processing with fastq-tools)
         READ_ALIGNMENT_DNA(
@@ -95,16 +93,16 @@ workflow PURITY_ESTIMATE {
     // SUBWORKFLOW: Run REDUX for DNA BAMs
     //
     // channel: [ meta, bam, bai ]
-    ch_redux_dna_tumor_out = Channel.empty()
-    ch_redux_dna_normal_out = Channel.empty()
-    ch_redux_dna_donor_out = Channel.empty()
+    ch_redux_dna_tumor_bam_out = Channel.empty()
+    ch_redux_dna_normal_bam_out = Channel.empty()
+    ch_redux_dna_donor_bam_out = Channel.empty()
 
-    // channel: [ meta, dup_freq_tsv, jitter_tsv, ms_tsv, repeat_tsv ]
-    ch_redux_dna_tumor_tsv_out = Channel.empty()
-    ch_redux_dna_normal_tsv_out = Channel.empty()
-    ch_redux_dna_donor_tsv_out = Channel.empty()
+    // channel: [ meta, dir ]
+    ch_redux_dna_tumor_dir_out = Channel.empty()
+    ch_redux_dna_normal_dir_out = Channel.empty()
+    ch_redux_dna_donor_dir_out = Channel.empty()
 
-    if (run_config.stages.redux) {
+    if (stages.redux) {
 
         REDUX_PROCESSING(
             ch_inputs,
@@ -117,29 +115,35 @@ workflow PURITY_ESTIMATE {
             ref_data.genome_dict,
             hmf_data.unmap_regions,
             hmf_data.msi_jitter_sites,
+            // NOTE(LN): Panel specific MSI predictions not used as indels are unimportant for WISP
+            [], // msi_model_coefficients
+            [], // msi_model_error_rates
+            params.sequencing_type,
             params.redux_umi_enabled,
             params.redux_umi_duplex_delim,
+            params.redux_generate_tsvs_only,
+            targeted_mode,
         )
 
         ch_versions = ch_versions.mix(REDUX_PROCESSING.out.versions)
 
-        ch_redux_dna_tumor_out = ch_redux_dna_tumor_out.mix(REDUX_PROCESSING.out.dna_tumor)
-        ch_redux_dna_normal_out = ch_redux_dna_normal_out.mix(REDUX_PROCESSING.out.dna_normal)
-        ch_redux_dna_donor_out = ch_redux_dna_donor_out.mix(REDUX_PROCESSING.out.dna_donor)
+        ch_redux_dna_tumor_bam_out = ch_redux_dna_tumor_bam_out.mix(REDUX_PROCESSING.out.dna_tumor_bam)
+        ch_redux_dna_normal_bam_out = ch_redux_dna_normal_bam_out.mix(REDUX_PROCESSING.out.dna_normal_bam)
+        ch_redux_dna_donor_bam_out = ch_redux_dna_donor_bam_out.mix(REDUX_PROCESSING.out.dna_donor_bam)
 
-        ch_redux_dna_tumor_tsv_out = ch_redux_dna_tumor_tsv_out.mix(REDUX_PROCESSING.out.dna_tumor_tsv)
-        ch_redux_dna_normal_tsv_out = ch_redux_dna_normal_tsv_out.mix(REDUX_PROCESSING.out.dna_normal_tsv)
-        ch_redux_dna_donor_tsv_out = ch_redux_dna_donor_tsv_out.mix(REDUX_PROCESSING.out.dna_donor_tsv)
+        ch_redux_dna_tumor_dir_out = ch_redux_dna_tumor_dir_out.mix(REDUX_PROCESSING.out.dna_tumor_dir)
+        ch_redux_dna_normal_dir_out = ch_redux_dna_normal_dir_out.mix(REDUX_PROCESSING.out.dna_normal_dir)
+        ch_redux_dna_donor_dir_out = ch_redux_dna_donor_dir_out.mix(REDUX_PROCESSING.out.dna_donor_dir)
 
     } else {
 
-        ch_redux_dna_tumor_out = ch_inputs.map { meta -> [meta, [], []] }
-        ch_redux_dna_normal_out = ch_inputs.map { meta -> [meta, [], []] }
-        ch_redux_dna_donor_out = ch_inputs.map { meta -> [meta, [], []] }
+        ch_redux_dna_tumor_bam_out = ch_inputs.map { meta -> [meta, [], []] }
+        ch_redux_dna_normal_bam_out = ch_inputs.map { meta -> [meta, [], []] }
+        ch_redux_dna_donor_bam_out = ch_inputs.map { meta -> [meta, [], []] }
 
-        ch_redux_dna_tumor_tsv_out = ch_inputs.map { meta -> [meta, [], [], []] }
-        ch_redux_dna_normal_tsv_out = ch_inputs.map { meta -> [meta, [], [], []] }
-        ch_redux_dna_donor_tsv_out = ch_inputs.map { meta -> [meta, [], [], []] }
+        ch_redux_dna_tumor_dir_out = ch_inputs.map { meta -> [meta, []] }
+        ch_redux_dna_normal_dir_out = ch_inputs.map { meta -> [meta, []] }
+        ch_redux_dna_donor_dir_out = ch_inputs.map { meta -> [meta, []] }
 
     }
 
@@ -148,19 +152,21 @@ workflow PURITY_ESTIMATE {
     //
     // channel: [ meta, amber_dir ]
     ch_amber_out = Channel.empty()
-    if (run_config.stages.amber && purity_estimate_run_mode === Constants.RunMode.WGTS) {
+    if (stages.amber && wgts_mode) {
 
-        tumor_min_depth = purity_estimate_run_mode === Constants.RunMode.WGTS ? 1 : []
+        tumor_min_depth = wgts_mode ? 1 : []
 
         AMBER_PROFILING(
             ch_inputs,
-            ch_redux_dna_tumor_out,
-            ch_redux_dna_normal_out,
-            ch_redux_dna_donor_out,
+            ch_redux_dna_tumor_bam_out,
+            ch_redux_dna_normal_bam_out,
+            ch_redux_dna_donor_bam_out,
             ref_data.genome_version,
             hmf_data.heterozygous_sites,
             [],  // target_region_bed
             tumor_min_depth,
+            params.sequencing_type,
+            true,  // purity_estimate_mode
         )
 
         ch_versions = ch_versions.mix(AMBER_PROFILING.out.versions)
@@ -178,17 +184,18 @@ workflow PURITY_ESTIMATE {
     //
     // channel: [ meta, cobalt_dir ]
     ch_cobalt_out = Channel.empty()
-    if (run_config.stages.cobalt && purity_estimate_run_mode === Constants.RunMode.WGTS) {
+    if (stages.cobalt && wgts_mode) {
 
         COBALT_PROFILING(
             ch_inputs,
-            ch_redux_dna_tumor_out,
-            ch_redux_dna_normal_out,
+            ch_redux_dna_tumor_bam_out,
+            ch_redux_dna_normal_bam_out,
             ref_data.genome_version,
             hmf_data.gc_profile,
             hmf_data.diploid_bed,
             [],  // panel_target_region_normalisation
-            purity_estimate_run_mode === Constants.RunMode.TARGETED,  // targeted_mode
+            targeted_mode,
+            true,  // purity_estimate_mode
         )
 
         ch_versions = ch_versions.mix(COBALT_PROFILING.out.versions)
@@ -206,20 +213,21 @@ workflow PURITY_ESTIMATE {
     //
     // channel: [ meta, sage_append_dir ]
     ch_sage_somatic_append_out = Channel.empty()
-    if (run_config.stages.orange) {
+    if (stages.sage_append) {
 
         SAGE_APPEND(
             ch_inputs,
             ch_inputs.map { meta -> [meta, []] },  // ch_purple_dir
-            ch_redux_dna_tumor_out,
-            ch_redux_dna_tumor_tsv_out,
+            ch_redux_dna_tumor_bam_out,
+            ch_redux_dna_tumor_dir_out,
             ch_inputs.map { meta -> [meta, [], []] },  // ch_tumor_rna_bam
             ref_data.genome_fasta,
             ref_data.genome_version,
             ref_data.genome_fai,
             ref_data.genome_dict,
+            params.sequencing_type,
             false,  // run_germline
-            purity_estimate_run_mode === Constants.RunMode.TARGETED,  // targeted_mode
+            targeted_mode,
         )
 
         ch_versions = ch_versions.mix(SAGE_APPEND.out.versions)
@@ -234,16 +242,17 @@ workflow PURITY_ESTIMATE {
     //
     // SUBWORKFLOW: Run WISP to estimate tumor purity
     //
-    if (run_config.stages.wisp) {
+    if (stages.wisp) {
 
         WISP_ANALYSIS(
             ch_inputs,
+            ch_redux_dna_tumor_dir_out,
             ch_amber_out,
             ch_cobalt_out,
             ch_sage_somatic_append_out,
             ref_data.genome_fasta,
             ref_data.genome_fai,
-            purity_estimate_run_mode === Constants.RunMode.TARGETED,  // targeted_mode
+            targeted_mode,
         )
 
         ch_versions = ch_versions.mix(WISP_ANALYSIS.out.versions)

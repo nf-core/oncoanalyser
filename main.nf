@@ -1,6 +1,4 @@
 #!/usr/bin/env nextflow
-import Constants
-import Utils
 
 /*
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -37,8 +35,7 @@ params.ref_data_genome_bwamem2_index = getGenomeAttribute('bwamem2_index')
 params.ref_data_genome_gridss_index  = getGenomeAttribute('gridss_index')
 params.ref_data_genome_star_index    = getGenomeAttribute('star_index')
 
-WorkflowMain.setParamsDefaults(params, log)
-WorkflowMain.validateParams(params, log)
+pipeline.Params.parse(params)
 
 /*
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -49,7 +46,7 @@ WorkflowMain.validateParams(params, log)
 // NOTE(SW): required prior to workflow import
 
 if (workflow.stubRun && params.create_stub_placeholders) {
-    Utils.createStubPlaceholders(params)
+    pipeline.Params.createStubPlaceholders(params)
 }
 
 /*
@@ -76,30 +73,34 @@ include { WGTS                    } from './workflows/wgts'
 
 workflow NFCORE_ONCOANALYSER {
 
-    // Get run mode
-    run_mode = Utils.getRunMode(params.mode, log)
+    def pipeline_mode = pipeline.PipelineMode.fromString(params.mode)
 
     // Run selected workflow
     // NOTE(SW): prepare reference is checked early as params.input is not required
-    if (run_mode === Constants.RunMode.PREPARE_REFERENCE)  {
+    if (pipeline_mode === pipeline.PipelineMode.PREPARE_REFERENCE)  {
         PREPARE_REFERENCE()
     } else {
-        // Parse and validate inputs
-        inputs = Utils.parseInput(params.input, workflow.stubRun, log)
-        run_config = WorkflowMain.getRunConfig(params, inputs, log)
-        Utils.validateInput(inputs, run_config, params, log)
+
+        def inputs = samplesheet.SampleSheet.parse(params.input, pipeline_mode)
+
+        def stages = pipeline.RunStage.getValidatedRunStages(
+           params.processes_include,
+           params.processes_exclude,
+           params.processes_manual,
+           log,
+        )
 
         // Run requested workflow
-        if (run_mode === Constants.RunMode.WGTS) {
-            WGTS(inputs, run_config)
-        } else if (run_mode === Constants.RunMode.TARGETED) {
-            TARGETED(inputs, run_config)
-        } else if (run_mode === Constants.RunMode.PURITY_ESTIMATE) {
-            PURITY_ESTIMATE(inputs, run_config)
-        } else if (run_mode === Constants.RunMode.PANEL_RESOURCE_CREATION) {
-            PANEL_RESOURCE_CREATION(inputs, run_config)
+        if (pipeline_mode === pipeline.PipelineMode.WGTS) {
+            WGTS(inputs, stages)
+        } else if (pipeline_mode === pipeline.PipelineMode.TARGETED) {
+            TARGETED(inputs, stages)
+        } else if (pipeline_mode === pipeline.PipelineMode.PURITY_ESTIMATE) {
+            PURITY_ESTIMATE(inputs, stages)
+        } else if (pipeline_mode === pipeline.PipelineMode.PANEL_RESOURCE_CREATION) {
+            PANEL_RESOURCE_CREATION(inputs, stages)
         } else {
-            log.error("received bad run mode: ${run_mode}")
+            log.error("received bad pipeline mode: ${pipeline_mode}")
             Nextflow.exit(1)
         }
     }
