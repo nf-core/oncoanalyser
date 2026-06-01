@@ -17,6 +17,7 @@ workflow ISOFOX_QUANTIFICATION {
     ensembl_data_resources     // channel: [mandatory] /path/to/ensembl_data_resources/
     driver_gene_panel          // channel: [mandatory] /path/to/driver_gene_panel
     known_fusion_data          // channel: [mandatory] /path/to/known_fusion_data
+    isofox_excluded_regions    // channel: [mandatory] /path/to/isofox_excluded_regions
     isofox_gene_distribution   // channel: [mandatory] /path/to/isofox_gene_distribution
     isofox_alt_sj_distribution // channel: [mandatory] /path/to/isofox_alt_sj_distribution
     isofox_counts              // channel: [mandatory] /path/to/isofox_counts
@@ -75,6 +76,7 @@ workflow ISOFOX_QUANTIFICATION {
         ensembl_data_resources,
         driver_gene_panel,
         known_fusion_data,
+        isofox_excluded_regions,
         isofox_gene_distribution,
         isofox_alt_sj_distribution,
         isofox_counts,

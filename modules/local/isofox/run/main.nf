@@ -17,6 +17,7 @@ process ISOFOX {
     path ensembl_data_resources
     path driver_gene_panel
     path known_fusion_data
+    path isofox_excluded_regions
     path gene_distribution
     path alt_sj_distribution
     path exp_counts
@@ -60,6 +61,7 @@ process ISOFOX {
         -ensembl_data_dir ${ensembl_data_resources} \\
         -driver_gene_panel ${driver_gene_panel} \\
         -known_fusion_file ${known_fusion_data} \\
+        -excluded_regions ${isofox_excluded_regions} \\
         -gene_distribution_file ${gene_distribution} \\
         -alt_sj_cohort_file ${alt_sj_distribution} \\
         ${exp_counts_arg} \\
