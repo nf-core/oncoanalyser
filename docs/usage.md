@@ -295,6 +295,34 @@ PATIENT1,PATIENT1,PATIENT1-T,tumor,dna,bai,/path/to/PATIENT1-T.dna.redux.bai
 PATIENT1,PATIENT1,PATIENT1-T,tumor,dna,redux_tsv_dir,/path/to/redux_tsv_dir/
 ```
 
+#### REDUX BAM / CRAM but missing REDUX TSV files
+
+You may have existing REDUX BAMs/CRAMs but missing the associated REDUX TSV files, e.g. due having run an older
+`oncoanalyser` version. In this case, provide the REDUX BAM/CRAM path(s) with `filetype` set to 
+`bam`/`cram` (**not** `bam_redux`/`cram_redux`):
+
+```csv title="samplesheet.redux_bam_no_tsv.csv"
+group_id,subject_id,sample_id,sample_type,sequence_type,filetype,filepath
+PATIENT1,PATIENT1,PATIENT1-T,tumor,dna,bam,/path/to/PATIENT1-T.dna.redux.bam
+```
+
+Then, run `oncoanalyser` with the `--redux_generate_tsvs_only` flag:
+
+```bash
+nextflow run nf-core/oncoanalyser \
+-revision 3.0.0 \
+-config reference_data.config \
+-profile docker \
+--mode wgts \
+--genome GRCh38_hmf \
+--input samplesheet.csv \
+--outdir output/ \
+--redux_generate_tsvs_only
+```
+
+REDUX will run in a special mode to only generate the TSV files, skipping the computationally expensive read processing 
+steps. The rest of the pipeline will then be run.
+
 #### Starting from existing outputs
 
 Similar to starting from existing [REDUX BAM/CRAM](#redux-bam--cram) files, any of the downstream outputs of `oncoanalyser` 
