@@ -47,6 +47,7 @@ public enum FileKey {
     SAGE_APPEND_DIR_NORMAL(FileType.SAGE_APPEND_DIR, SampleType.NORMAL, SequenceType.DNA_RNA),
     SAGE_DIR_TUMOR(FileType.SAGE_DIR, SampleType.TUMOR, SequenceType.DNA),
     SAGE_DIR_NORMAL(FileType.SAGE_DIR, SampleType.NORMAL, SequenceType.DNA),
+    SAGE_VIS_DIR(FileType.SAGE_VIS_DIR, [SampleType.TUMOR, SampleType.TUMOR_NORMAL], SequenceType.DNA),
 
     PAVE_DIR_TUMOR(FileType.PAVE_DIR, SampleType.TUMOR, SequenceType.DNA),
     PAVE_DIR_NORMAL(FileType.PAVE_DIR, SampleType.NORMAL, SequenceType.DNA),

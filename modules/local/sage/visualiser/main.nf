@@ -65,7 +65,7 @@ process SAGE_VISUALISER {
         -ensembl_data_dir ${ensembl_data_resources} \\
         ${include_mt_arg} \\
         -vis_purple_vcf ${purple_vcf} \\
-        -vis_output_dir plots/ \\
+        -vis_output_dir sage_vis/ \\
         -output_vcf sage_vis/${meta.tumor_id}.sage.vis.vcf.gz \\
         -threads ${task.cpus} \\
         ${log_level_arg}
@@ -78,9 +78,9 @@ process SAGE_VISUALISER {
 
     stub:
     """
-    mkdir -p sage_vis/plots
+    mkdir -p sage_vis/
 
-    touch sage_vis/plots/placeholder
+    touch sage_vis/placeholder
     touch sage_vis/${meta.tumor_id}.sage.vis.vcf.gz
     touch sage_vis/${meta.tumor_id}.sage.vis.vcf.gz.tbi
 

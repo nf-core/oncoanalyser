@@ -13,6 +13,7 @@ process ORANGE {
         path(sage_germline_dir, stageAs: 'sage_germline'),
         path(smlv_somatic_vcf),
         path(smlv_germline_vcf),
+        path(sage_vis_dir),
         path(purple_dir),
         path(qsee_dir),
         path(linx_somatic_anno_dir),
@@ -60,6 +61,7 @@ process ORANGE {
     def normal_linx_arg = linx_germline_anno_dir ? "-linx_germline_dir ${linx_germline_anno_dir}" : ''
 
     // Optional tools
+    def sage_vis_dir_arg = sage_vis_dir ? "-sage_plot_dir ${sage_vis_dir}" : ''
     def virus_dir_arg = virusinterpreter_dir ? "-virus_dir ${virusinterpreter_dir}" : ''
     def lilac_dir_arg = lilac_dir ? "-lilac_dir ${lilac_dir}" : ''
     def chord_dir_arg = chord_dir ? "-chord_dir ${chord_dir}" : ''
@@ -129,6 +131,7 @@ process ORANGE {
         ${normal_sage_dir_arg} \\
         ${normal_linx_arg} \\
         \\
+        ${sage_vis_dir_arg} \\
         ${virus_dir_arg} \\
         ${lilac_dir_arg} \\
         ${chord_dir_arg} \\

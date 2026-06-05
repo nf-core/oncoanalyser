@@ -32,6 +32,7 @@ public enum FileType {
     QSEE_DIR,
     SAGE_DIR,
     SAGE_APPEND_DIR,
+    SAGE_VIS_DIR,
     SIGS_DIR,
     VIRUSINTERPRETER_DIR;
 

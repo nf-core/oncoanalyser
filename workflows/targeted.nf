@@ -535,6 +535,7 @@ workflow TARGETED {
     //
     // SUBWORKFLOW: Visualise SAGE variants
     //
+    ch_sage_vis_out = Channel.empty()
     if (stages.sage_vis) {
 
         SAGE_PLOTTING(
@@ -559,6 +560,7 @@ workflow TARGETED {
 
         ch_versions = ch_versions.mix(SAGE_PLOTTING.out.versions)
 
+        ch_sage_vis_out = ch_sage_vis_out.mix(SAGE_PLOTTING.out.visualiser_dir)
     }
 
     //
@@ -708,6 +710,7 @@ workflow TARGETED {
             ch_sage_germline_dir_out,
             ch_sage_somatic_append_out,
             ch_sage_germline_append_out,
+            ch_sage_vis_out,
             ch_purple_out,
             ch_qsee_out,
             ch_linx_somatic_out,

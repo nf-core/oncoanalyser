@@ -11,6 +11,7 @@ workflow ORANGE_REPORTING {
     ch_sage_germline            // channel: [mandatory] [ meta, sage_dir ]
     ch_sage_somatic_append      // channel: [mandatory] [ meta, sage_append_dir ]
     ch_sage_germline_append     // channel: [mandatory] [ meta, sage_append_dir ]
+    ch_sage_vis                 // channel: [mandatory] [ meta, sage_vis_dir ]
     ch_purple                   // channel: [mandatory] [ meta, purple_dir ]
     ch_qsee                     // channel: [mandatory] [ meta, qsee_dir ]
     ch_linx_somatic_annotation  // channel: [mandatory] [ meta, linx_annotation_dir ]
@@ -44,6 +45,7 @@ workflow ORANGE_REPORTING {
         ch_sage_germline,
         ch_sage_somatic_append,
         ch_sage_germline_append,
+        ch_sage_vis,
         ch_purple,
         ch_qsee,
         ch_linx_somatic_annotation,
@@ -68,18 +70,19 @@ workflow ORANGE_REPORTING {
             inputs_map.sage_germline            = sample.Inputs.preferUserProvidedInput(inputs_list[2], meta, sample.FileKey.SAGE_DIR_NORMAL)
             inputs_map.sage_somatic_append      = sample.Inputs.preferUserProvidedInput(inputs_list[3], meta, sample.FileKey.SAGE_APPEND_DIR_TUMOR)
             inputs_map.sage_germline_append     = sample.Inputs.preferUserProvidedInput(inputs_list[4], meta, sample.FileKey.SAGE_APPEND_DIR_NORMAL)
-            inputs_map.purple_dir               = sample.Inputs.preferUserProvidedInput(inputs_list[5], meta, sample.FileKey.PURPLE_DIR)
-            inputs_map.qsee_dir                 = sample.Inputs.preferUserProvidedInput(inputs_list[6], meta, sample.FileKey.QSEE_DIR)
-            inputs_map.linx_somatic_annotation  = sample.Inputs.preferUserProvidedInput(inputs_list[7], meta, sample.FileKey.LINX_ANNO_DIR_TUMOR)
-            inputs_map.linx_somatic_plot        = sample.Inputs.preferUserProvidedInput(inputs_list[8], meta, sample.FileKey.LINX_PLOT_DIR_TUMOR)
-            inputs_map.linx_germline_annotation = sample.Inputs.preferUserProvidedInput(inputs_list[9], meta, sample.FileKey.LINX_ANNO_DIR_NORMAL)
-            inputs_map.virusinterpreter         = sample.Inputs.preferUserProvidedInput(inputs_list[10], meta, sample.FileKey.VIRUSINTERPRETER_DIR)
-            inputs_map.chord                    = sample.Inputs.preferUserProvidedInput(inputs_list[11], meta, sample.FileKey.CHORD_DIR)
-            inputs_map.sigs                     = sample.Inputs.preferUserProvidedInput(inputs_list[12], meta, sample.FileKey.SIGS_DIR)
-            inputs_map.lilac                    = sample.Inputs.preferUserProvidedInput(inputs_list[13], meta, sample.FileKey.LILAC_DIR)
-            inputs_map.cuppa                    = sample.Inputs.preferUserProvidedInput(inputs_list[14], meta, sample.FileKey.CUPPA_DIR)
-            inputs_map.peach                    = sample.Inputs.preferUserProvidedInput(inputs_list[15], meta, sample.FileKey.PEACH_DIR)
-            inputs_map.isofox                   = sample.Inputs.preferUserProvidedInput(inputs_list[16], meta, sample.FileKey.ISOFOX_DIR)
+            inputs_map.sage_vis                 = sample.Inputs.preferUserProvidedInput(inputs_list[5], meta, sample.FileKey.SAGE_VIS_DIR)
+            inputs_map.purple_dir               = sample.Inputs.preferUserProvidedInput(inputs_list[6], meta, sample.FileKey.PURPLE_DIR)
+            inputs_map.qsee_dir                 = sample.Inputs.preferUserProvidedInput(inputs_list[7], meta, sample.FileKey.QSEE_DIR)
+            inputs_map.linx_somatic_annotation  = sample.Inputs.preferUserProvidedInput(inputs_list[8], meta, sample.FileKey.LINX_ANNO_DIR_TUMOR)
+            inputs_map.linx_somatic_plot        = sample.Inputs.preferUserProvidedInput(inputs_list[9], meta, sample.FileKey.LINX_PLOT_DIR_TUMOR)
+            inputs_map.linx_germline_annotation = sample.Inputs.preferUserProvidedInput(inputs_list[10], meta, sample.FileKey.LINX_ANNO_DIR_NORMAL)
+            inputs_map.virusinterpreter         = sample.Inputs.preferUserProvidedInput(inputs_list[11], meta, sample.FileKey.VIRUSINTERPRETER_DIR)
+            inputs_map.chord                    = sample.Inputs.preferUserProvidedInput(inputs_list[12], meta, sample.FileKey.CHORD_DIR)
+            inputs_map.sigs                     = sample.Inputs.preferUserProvidedInput(inputs_list[13], meta, sample.FileKey.SIGS_DIR)
+            inputs_map.lilac                    = sample.Inputs.preferUserProvidedInput(inputs_list[14], meta, sample.FileKey.LILAC_DIR)
+            inputs_map.cuppa                    = sample.Inputs.preferUserProvidedInput(inputs_list[15], meta, sample.FileKey.CUPPA_DIR)
+            inputs_map.peach                    = sample.Inputs.preferUserProvidedInput(inputs_list[16], meta, sample.FileKey.PEACH_DIR)
+            inputs_map.isofox                   = sample.Inputs.preferUserProvidedInput(inputs_list[17], meta, sample.FileKey.ISOFOX_DIR)
 
             return inputs_map
         }
