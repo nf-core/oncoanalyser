@@ -121,6 +121,7 @@ workflow PURITY_ESTIMATE {
             params.sequencing_type,
             params.redux_umi_enabled,
             params.redux_umi_duplex_delim,
+            params.redux_generate_tsvs_only,
             targeted_mode,
         )
 

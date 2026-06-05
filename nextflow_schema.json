@@ -139,6 +139,12 @@
                     "description": "UMI duplex delimiter as used by REDUX.",
                     "fa_icon": "fas fa-cog"
                 },
+                "redux_generate_tsvs_only": {
+                    "type": "boolean",
+                    "description": "When running REDUX, generate REDUX TSVs from existing REDUX BAMs. Use this when you have old REDUX BAMs missing the associated TSV files (e.g. *.bqr.tsv)",
+                    "default": false,
+                    "fa_icon": "fas fa-cog"
+                },
                 "isofox_read_length": {
                     "type": "integer",
                     "description": "User defined RNA read length used for Isofox.",

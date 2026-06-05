@@ -151,7 +151,8 @@ workflow WGTS {
             params.sequencing_type,
             false,  // umi_enable
             '',  // umi_duplex_delim
-            false,  // targeted_mode
+            params.redux_generate_tsvs_only,
+            false,  // targeted_mode,
         )
 
         ch_versions = ch_versions.mix(REDUX_PROCESSING.out.versions)

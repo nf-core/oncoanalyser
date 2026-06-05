@@ -26,6 +26,7 @@ workflow REDUX_PROCESSING {
     sequencing_type        // string:  [mandatory] sequencing type
     umi_enable             // boolean: [mandatory] enable UMI processing
     umi_duplex_delim       // string:  [optional] UMI duplex delimiter
+    generate_tsvs_only     // boolean: [mandatory] Generate REDUX TSVs from existing REDUX BAMs
     targeted_mode          // boolean: [mandatory] Set targeted mode
 
     main:
@@ -115,6 +116,7 @@ workflow REDUX_PROCESSING {
         sequencing_type,
         umi_enable,
         umi_duplex_delim,
+        generate_tsvs_only,
         targeted_mode,
     )
 

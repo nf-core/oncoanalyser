@@ -148,6 +148,7 @@ workflow TARGETED {
             params.sequencing_type,
             params.redux_umi_enabled,
             params.redux_umi_duplex_delim,
+            params.redux_generate_tsvs_only,
             true,  // targeted_mode
         )
 

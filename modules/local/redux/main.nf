@@ -20,6 +20,7 @@ process REDUX {
     val sequencing_type
     val umi_enable
     val umi_duplex_delim
+    val generate_tsvs_only
     val targeted_mode
 
     output:
@@ -47,6 +48,7 @@ process REDUX {
     def umi_duplex_delim_arg = ''
     def skip_duplicate_marking_arg = ''
     def bqr_use_all_regions_arg = ''
+    def bqr_jitter_msi_only_arg = ''
 
     def msi_model_coefficients_arg = ''
     def msi_model_error_rates_arg = ''
@@ -75,6 +77,10 @@ process REDUX {
         bqr_use_all_regions_arg = '-bqr_use_all_regions'
     }
 
+    if(generate_tsvs_only) {
+        bqr_jitter_msi_only_arg = '-bqr_jitter_msi_only'
+    }
+
     if(meta.sample_type == 'tumor') {
         if(msi_model_coefficients) msi_model_coefficients_arg = "-msi_model_coefficients ${msi_model_coefficients}"
         if(msi_model_error_rates)  msi_model_error_rates_arg  = "-msi_model_error_rates ${msi_model_error_rates}"
@@ -101,10 +107,18 @@ process REDUX {
         ${umi_args} \\
         ${skip_duplicate_marking_arg} \\
         ${bqr_use_all_regions_arg} \\
+        ${bqr_jitter_msi_only_arg} \\
         -threads ${task.cpus} \\
         ${log_level_arg} \\
         -output_bam redux_${meta.sample_id}/${meta.sample_id}.redux.bam \\
         -output_dir redux_${meta.sample_id}/
+
+    if [[ -n '${bqr_jitter_msi_only_arg}' ]]; then
+        ## NOTE(LN): Assume that only one REDUX BAM is provided (i.e. from the sample sheet).
+        ## Multiple BAMs are only passed to REDUX if running the pipeline from multi-lane FASTQs.
+        ln -sf \$(realpath ${bams}) redux_${meta.sample_id}/${meta.sample_id}.redux.bam
+        ln -sf \$(realpath ${bais}) redux_${meta.sample_id}/${meta.sample_id}.redux.bam.bai
+    fi
 
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":
