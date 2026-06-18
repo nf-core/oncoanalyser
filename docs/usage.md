@@ -207,19 +207,22 @@ Currently only gzip compressed, non-interleaved paired-end FASTQ files are curre
 ##### Custom read groups
 
 By default the read group of each aligned FASTQ pair is set to `ID:<sample_id>.<library_id>.<lane>` with
-`SM:<sample_id>`. To take full control of the read group, provide a `read_group` key in the `info` field. The value is
-passed **verbatim** to the aligner, so it must match the aligner's expected syntax and contain at least an `ID:` field:
+`SM:<sample_id>`. To add or override read group fields, provide a `read_group` key in the `info` field as a
+`|`-delimited list of `<TAG>=<value>` [SAM read group fields](https://samtools.github.io/hts-specs/SAMv1.pdf),
+e.g. `read_group:ID=S1.L001|PL=ILLUMINA|PU=HJ7.1|CN=HMF`.
 
-- DNA (BWA-MEM2): tab (`\t`) delimited, e.g. `read_group:@RG\tID:S1.L001\tSM:PATIENT1-T\tPL:ILLUMINA`. The leading
-  `@RG\t` is optional and added automatically when omitted.
-- RNA (STAR): space delimited with no `@RG` prefix, e.g. `read_group:ID:S1.L001 SM:PATIENT1-T PL:ILLUMINA`.
+The fields are aligner-agnostic: the pipeline formats them correctly for BWA-MEM2 (DNA) and STAR (RNA), so the same
+syntax works for both. Notes:
 
-A separate `read_group` may be set for each FASTQ pair (i.e. each `library_id` + `lane`). Output BAM filenames continue
-to use `<sample_id>.<library_id>.<lane>` regardless of any custom read group.
+- `ID` and `SM` are added automatically (defaulting to `<sample_id>.<library_id>.<lane>` and `<sample_id>`
+  respectively) and may be overridden by specifying them explicitly.
+- `<TAG>` must be a two-character SAM read group tag (e.g. `ID`, `SM`, `PL`, `PU`, `LB`, `CN`).
+- A separate `read_group` may be set for each FASTQ pair (i.e. each `library_id` + `lane`).
+- Output BAM filenames continue to use `<sample_id>.<library_id>.<lane>` regardless of any custom read group.
 
 ```csv title="samplesheet.csv"
 group_id,subject_id,sample_id,sample_type,sequence_type,filetype,info,filepath
-PATIENT1,PATIENT1,PATIENT1-T,tumor,dna,fastq,library_id:S1;lane:001;read_group:@RG\tID:S1.L001\tSM:PATIENT1-T\tPL:ILLUMINA,/path/to/PATIENT1-T_S1_L001_R1_001.fastq.gz;/path/to/PATIENT1-T_S1_L001_R2_001.fastq.gz
+PATIENT1,PATIENT1,PATIENT1-T,tumor,dna,fastq,library_id:S1;lane:001;read_group:ID=S1.L001|PL=ILLUMINA|CN=HMF,/path/to/PATIENT1-T_S1_L001_R1_001.fastq.gz;/path/to/PATIENT1-T_S1_L001_R2_001.fastq.gz
 ```
 
 #### BAM

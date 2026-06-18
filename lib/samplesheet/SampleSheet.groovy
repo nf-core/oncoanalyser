@@ -121,11 +121,7 @@ class SampleSheet {
         entry.info
             .tokenize(';')
             .each { info_item ->
-                // NOTE(PW): split on the first ':' only so that values may themselves contain ':'
-                // (e.g. a custom read_group tag such as 'ID:foo\tSM:bar')
-                def sep_index = info_item.indexOf(':')
-                def info_key = sep_index == -1 ? info_item : info_item.substring(0, sep_index)
-                def info_value = sep_index == -1 ? null : info_item.substring(sep_index + 1)
+                def (info_key, info_value) = info_item.tokenize(':')
                 def info_field = InfoField.fromString(info_key)
 
                 if (info_data.containsKey(info_field)) {
@@ -177,12 +173,6 @@ class SampleSheet {
             throw new IllegalStateException("Missing 'lane' info field for group_id(${entry.group_id}) sample_id(${entry.sample_id})")
         }
 
-        // A custom read_group tag is passed verbatim to the aligner; require at minimum an 'ID:' field so
-        // that BWA-MEM2 / STAR do not fail with a cryptic error
-        if (info_data.containsKey(InfoField.READ_GROUP) && !info_data[InfoField.READ_GROUP].contains('ID:')) {
-            throw new IllegalStateException("Custom read_group must contain an 'ID:' field for group_id(${entry.group_id}) sample_id(${entry.sample_id})")
-        }
-
         def fastq_entries = entry.filepath.tokenize(';')
 
         if (fastq_entries.size() != 2) {
@@ -203,13 +193,58 @@ class SampleSheet {
             throw new IllegalStateException("Got duplicate lane + library_id data for group_id(${entry.group_id}) sample_id(${entry.sample_id}): ${fastq_key}")
         }
 
-        // NOTE(PW): read_group is an optional verbatim aligner read group tag; null when not provided
+        // NOTE(PW): read_group is an optional set of SAM read group fields (e.g. 'ID=..|PL=..'); null when not provided.
+        // It is stored aligner-agnostically and formatted per-aligner downstream (BWA-MEM2 / STAR).
+        def read_group_fields = info_data.containsKey(InfoField.READ_GROUP)
+            ? parseReadGroupFields(info_data[InfoField.READ_GROUP], entry)
+            : null
+
         meta_sample[FileType.FASTQ][fastq_key] = [
             'fwd': getFileObject(fwd),
             'rev': getFileObject(rev),
-            'read_group': info_data[InfoField.READ_GROUP],
+            'read_group_fields': read_group_fields,
         ]
 
+    }
+
+    private static Map parseReadGroupFields(String read_group, Map<String, String> entry) {
+
+        // Parse a custom read group provided as '|'-delimited 'TAG=value' SAM fields (e.g. 'ID=S1.L001|PL=ILLUMINA').
+        // Returns an ordered map of tag -> value, leaving aligner-specific formatting to the alignment modules.
+        def fields = [:]
+
+        read_group.tokenize('|').each { field_item ->
+
+            def sep_index = field_item.indexOf('=')
+
+            if (sep_index < 1 || sep_index == field_item.length() - 1) {
+                throw new IllegalStateException(
+                    "Invalid read_group field('${field_item}') for group_id(${entry.group_id}) sample_id(${entry.sample_id}): " +
+                    "expected '<TAG>=<value>' (e.g. 'ID=S1.L001|PL=ILLUMINA')"
+                )
+            }
+
+            def tag = field_item.substring(0, sep_index)
+            def value = field_item.substring(sep_index + 1)
+
+            // SAM read group tags are two characters matching /[A-Za-z][A-Za-z0-9]/
+            if (!(tag ==~ /[A-Za-z][A-Za-z0-9]/)) {
+                throw new IllegalStateException(
+                    "Invalid read_group tag('${tag}') for group_id(${entry.group_id}) sample_id(${entry.sample_id}): " +
+                    "SAM read group tags are two characters (e.g. ID, SM, PL, PU, LB, CN)"
+                )
+            }
+
+            if (fields.containsKey(tag)) {
+                throw new IllegalStateException(
+                    "Duplicate read_group tag('${tag}') for group_id(${entry.group_id}) sample_id(${entry.sample_id})"
+                )
+            }
+
+            fields[tag] = value
+        }
+
+        return fields
     }
 
     private static void setCramPaths(Map meta_sample) {

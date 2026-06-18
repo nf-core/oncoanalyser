@@ -51,7 +51,7 @@ workflow READ_ALIGNMENT_RNA {
                         sample_id: meta_sample.sample_id,
                         library_id: library_id,
                         lane: lane,
-                        read_group_custom: fps['read_group'],
+                        read_group_fields: fps['read_group_fields'],
                     ]
 
                     return [meta_fastq, fps['fwd'], fps['rev']]

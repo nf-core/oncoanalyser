@@ -22,15 +22,14 @@ process STAR_ALIGN {
     script:
     def args = task.ext.args ?: ''
 
-    // A custom read group (set via the 'read_group' samplesheet info field) is passed verbatim; otherwise
-    // build the default line. STAR expects space-separated 'KEY:VALUE' attributes with no '@RG' prefix, so
-    // strip the prefix if the user supplied one.
-    def read_group_line
-    if (meta.read_group_custom) {
-        read_group_line = meta.read_group_custom.replaceFirst(/^@RG\s+/, '')
-    } else {
-        read_group_line = "ID:${meta.read_group} SM:${meta.sample_id}"
-    }
+    // Build the read group line. Extra/override SAM fields may be supplied via the 'read_group' samplesheet
+    // info field (e.g. 'ID=..|PL=..'); ID and SM default to the sample/library/lane identifiers. STAR expects
+    // space-separated 'KEY:VALUE' attributes with no '@RG' prefix.
+    def rg_fields = meta.read_group_fields ?: [:]
+    def rg_id = rg_fields.ID ?: meta.read_group
+    def rg_sm = rg_fields.SM ?: meta.sample_id
+    def rg_extra = rg_fields.findAll { k, v -> k != 'ID' && k != 'SM' }.collect { k, v -> "${k}:${v}" }
+    def read_group_line = (["ID:${rg_id}", "SM:${rg_sm}"] + rg_extra).join(' ')
 
     """
     STAR \\

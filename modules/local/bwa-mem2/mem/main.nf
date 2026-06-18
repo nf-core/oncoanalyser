@@ -25,14 +25,13 @@ process BWAMEM2_ALIGN {
     def args2 = task.ext.args2 ?: ''
     def args3 = task.ext.args3 ?: ''
 
-    // A custom read group (set via the 'read_group' samplesheet info field) is passed verbatim; otherwise
-    // build the default tag. The '@RG' prefix required by `-R` is added automatically when absent.
-    def read_group_tag
-    if (meta.read_group_custom) {
-        read_group_tag = meta.read_group_custom.startsWith('@RG') ? meta.read_group_custom : "@RG\\t${meta.read_group_custom}"
-    } else {
-        read_group_tag = "@RG\\tID:${meta.read_group}\\tSM:${meta.sample_id}"
-    }
+    // Build the @RG tag (tab-delimited). Extra/override SAM fields may be supplied via the 'read_group'
+    // samplesheet info field (e.g. 'ID=..|PL=..'); ID and SM default to the sample/library/lane identifiers.
+    def rg_fields = meta.read_group_fields ?: [:]
+    def rg_id = rg_fields.ID ?: meta.read_group
+    def rg_sm = rg_fields.SM ?: meta.sample_id
+    def rg_extra = rg_fields.findAll { k, v -> k != 'ID' && k != 'SM' }.collect { k, v -> "${k}:${v}" }
+    def read_group_tag = (["@RG", "ID:${rg_id}", "SM:${rg_sm}"] + rg_extra).join('\\t')
     def output_fn = meta.split ? "${meta.split}.${meta.sample_id}.${meta.read_group}.bam" : "${meta.sample_id}.${meta.read_group}.bam"
 
     """

@@ -77,7 +77,7 @@ workflow READ_ALIGNMENT_DNA {
                         library_id: library_id,
                         lane: lane,
                         sample_type: sample_type,
-                        read_group_custom: fps['read_group'],
+                        read_group_fields: fps['read_group_fields'],
                     ]
 
                     return [meta_fastq, fps['fwd'], fps['rev']]
