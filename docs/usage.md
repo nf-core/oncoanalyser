@@ -169,7 +169,7 @@ row as the first line with the below columns:
 | `sample_type`   | Sample type: `tumor`, `normal`, or `tumor_normal`                                                                                                                                                                                                                                                                                                                 |
 | `sequence_type` | Sequence type: `dna`, `rna`, or `dna_rna`                                                                                                                                                                                                                                                                                                                         |
 | `filetype`      | File type: e.g. `fastq`, `bam`, `bai`. All valid values can be found [here](../lib/samplesheet/FileType.groovy).                                                                                                                                                                                                                                                  |
-| `info`          | Additional sample info in the form `<key1>:<value1>;<key1>:<value2>;...`. Valid keys: `lane` and `library_id` for [FASTQ](#fastq) files, `longitudinal_sample` for mode [purity_estimate](#purity-estimate), `cancer_type` as a DOID that is passed to ORANGE (details in [readme](https://github.com/hartwigmedical/hmftools/tree/master/orange#running-orange)) |
+| `info`          | Additional sample info in the form `<key1>:<value1>;<key1>:<value2>;...`. Valid keys: `lane` and `library_id` for [FASTQ](#fastq) files, `read_group` to set a custom read group tag for [FASTQ](#fastq) files (see [below](#custom-read-groups)), `longitudinal_sample` for mode [purity_estimate](#purity-estimate), `cancer_type` as a DOID that is passed to ORANGE (details in [readme](https://github.com/hartwigmedical/hmftools/tree/master/orange#running-orange)) |
 | `filepath`      | Absolute filepath to input file. Can be a local path, URL (e.g. http://, https://, ftp://) or cloud URI (e.g. gs://, s3://)                                                                                                                                                                                                                                       |
 
 Output file paths are constructed based on `group_id` and `sample_id`:
@@ -203,6 +203,24 @@ PATIENT1,PATIENT1,PATIENT1-T,tumor,dna,fastq,library_id:S1;lane:002,/path/to/PAT
 Currently only gzip compressed, non-interleaved paired-end FASTQ files are currently supported.
 
 :::
+
+##### Custom read groups
+
+By default the read group of each aligned FASTQ pair is set to `ID:<sample_id>.<library_id>.<lane>` with
+`SM:<sample_id>`. To take full control of the read group, provide a `read_group` key in the `info` field. The value is
+passed **verbatim** to the aligner, so it must match the aligner's expected syntax and contain at least an `ID:` field:
+
+- DNA (BWA-MEM2): tab (`\t`) delimited, e.g. `read_group:@RG\tID:S1.L001\tSM:PATIENT1-T\tPL:ILLUMINA`. The leading
+  `@RG\t` is optional and added automatically when omitted.
+- RNA (STAR): space delimited with no `@RG` prefix, e.g. `read_group:ID:S1.L001 SM:PATIENT1-T PL:ILLUMINA`.
+
+A separate `read_group` may be set for each FASTQ pair (i.e. each `library_id` + `lane`). Output BAM filenames continue
+to use `<sample_id>.<library_id>.<lane>` regardless of any custom read group.
+
+```csv title="samplesheet.csv"
+group_id,subject_id,sample_id,sample_type,sequence_type,filetype,info,filepath
+PATIENT1,PATIENT1,PATIENT1-T,tumor,dna,fastq,library_id:S1;lane:001;read_group:@RG\tID:S1.L001\tSM:PATIENT1-T\tPL:ILLUMINA,/path/to/PATIENT1-T_S1_L001_R1_001.fastq.gz;/path/to/PATIENT1-T_S1_L001_R2_001.fastq.gz
+```
 
 #### BAM
 

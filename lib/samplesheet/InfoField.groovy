@@ -6,7 +6,8 @@ public enum InfoField {
     CANCER_TYPE,
     LANE,
     LIBRARY_ID,
-    LONGITUDINAL_SAMPLE;
+    LONGITUDINAL_SAMPLE,
+    READ_GROUP;
 
     public static InfoField fromString(String string) {
         return Enums.getValidatedEnumFromString(string, InfoField)

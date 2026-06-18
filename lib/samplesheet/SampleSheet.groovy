@@ -121,7 +121,11 @@ class SampleSheet {
         entry.info
             .tokenize(';')
             .each { info_item ->
-                def (info_key, info_value) = info_item.tokenize(':')
+                // NOTE(PW): split on the first ':' only so that values may themselves contain ':'
+                // (e.g. a custom read_group tag such as 'ID:foo\tSM:bar')
+                def sep_index = info_item.indexOf(':')
+                def info_key = sep_index == -1 ? info_item : info_item.substring(0, sep_index)
+                def info_value = sep_index == -1 ? null : info_item.substring(sep_index + 1)
                 def info_field = InfoField.fromString(info_key)
 
                 if (info_data.containsKey(info_field)) {
@@ -173,6 +177,12 @@ class SampleSheet {
             throw new IllegalStateException("Missing 'lane' info field for group_id(${entry.group_id}) sample_id(${entry.sample_id})")
         }
 
+        // A custom read_group tag is passed verbatim to the aligner; require at minimum an 'ID:' field so
+        // that BWA-MEM2 / STAR do not fail with a cryptic error
+        if (info_data.containsKey(InfoField.READ_GROUP) && !info_data[InfoField.READ_GROUP].contains('ID:')) {
+            throw new IllegalStateException("Custom read_group must contain an 'ID:' field for group_id(${entry.group_id}) sample_id(${entry.sample_id})")
+        }
+
         def fastq_entries = entry.filepath.tokenize(';')
 
         if (fastq_entries.size() != 2) {
@@ -193,7 +203,12 @@ class SampleSheet {
             throw new IllegalStateException("Got duplicate lane + library_id data for group_id(${entry.group_id}) sample_id(${entry.sample_id}): ${fastq_key}")
         }
 
-        meta_sample[FileType.FASTQ][fastq_key] = ['fwd': getFileObject(fwd), 'rev': getFileObject(rev)]
+        // NOTE(PW): read_group is an optional verbatim aligner read group tag; null when not provided
+        meta_sample[FileType.FASTQ][fastq_key] = [
+            'fwd': getFileObject(fwd),
+            'rev': getFileObject(rev),
+            'read_group': info_data[InfoField.READ_GROUP],
+        ]
 
     }
 

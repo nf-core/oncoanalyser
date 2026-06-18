@@ -25,7 +25,14 @@ process BWAMEM2_ALIGN {
     def args2 = task.ext.args2 ?: ''
     def args3 = task.ext.args3 ?: ''
 
-    def read_group_tag = "@RG\\tID:${meta.read_group}\\tSM:${meta.sample_id}"
+    // A custom read group (set via the 'read_group' samplesheet info field) is passed verbatim; otherwise
+    // build the default tag. The '@RG' prefix required by `-R` is added automatically when absent.
+    def read_group_tag
+    if (meta.read_group_custom) {
+        read_group_tag = meta.read_group_custom.startsWith('@RG') ? meta.read_group_custom : "@RG\\t${meta.read_group_custom}"
+    } else {
+        read_group_tag = "@RG\\tID:${meta.read_group}\\tSM:${meta.sample_id}"
+    }
     def output_fn = meta.split ? "${meta.split}.${meta.sample_id}.${meta.read_group}.bam" : "${meta.sample_id}.${meta.read_group}.bam"
 
     """

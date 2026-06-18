@@ -77,6 +77,7 @@ workflow READ_ALIGNMENT_DNA {
                         library_id: library_id,
                         lane: lane,
                         sample_type: sample_type,
+                        read_group_custom: fps['read_group'],
                     ]
 
                     return [meta_fastq, fps['fwd'], fps['rev']]
@@ -119,6 +120,7 @@ workflow READ_ALIGNMENT_DNA {
 
     //
     // Split FASTQ into chunks if requested for distributed processing
+    
     //
     // channel: [ meta_fastq_ready, fastq_fwd, fastq_rev ]
     ch_fastqs_ready = Channel.empty()

@@ -22,6 +22,16 @@ process STAR_ALIGN {
     script:
     def args = task.ext.args ?: ''
 
+    // A custom read group (set via the 'read_group' samplesheet info field) is passed verbatim; otherwise
+    // build the default line. STAR expects space-separated 'KEY:VALUE' attributes with no '@RG' prefix, so
+    // strip the prefix if the user supplied one.
+    def read_group_line
+    if (meta.read_group_custom) {
+        read_group_line = meta.read_group_custom.replaceFirst(/^@RG\s+/, '')
+    } else {
+        read_group_line = "ID:${meta.read_group} SM:${meta.sample_id}"
+    }
+
     """
     STAR \\
         ${args} \\
@@ -48,7 +58,7 @@ process STAR_ALIGN {
         --outFilterMultimapNmax 10 \\
         --outFilterScoreMinOverLread 0.33 \\
         --outSAMattributes All \\
-        --outSAMattrRGline ID:${meta.read_group} SM:${meta.sample_id} \\
+        --outSAMattrRGline ${read_group_line} \\
         --outSAMtype BAM Unsorted \\
         --outSAMunmapped Within \\
         --peOverlapNbasesMin 10 \\

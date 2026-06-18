@@ -42,8 +42,8 @@
             "info": {
                 "type": "string",
                 "description": "",
-                "pattern": "^\\S+$",
-                "errorMessage": "info cannot contain spaces"
+                "pattern": "^\\S.*\\S$|^\\S$",
+                "errorMessage": "info cannot have leading or trailing whitespace"
             },
             "filetype": {
                 "type": "string",
