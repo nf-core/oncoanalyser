@@ -4,8 +4,8 @@ process FASTQ_TOOLS {
 
     conda "${moduleDir}/environment.yml"
     container "${ workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container ?
-        '' :
-        '' }"
+        'https://depot.galaxyproject.org/singularity/hmftools-fastq-tools:1.0--hdfd78af_0' :
+        'biocontainers/hmftools-fastq-tools:1.0--hdfd78af_0' }"
 
     input:
     tuple val(meta), path(reads_fwd), path(reads_rev)
