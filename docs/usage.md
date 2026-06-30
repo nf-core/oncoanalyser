@@ -248,6 +248,11 @@ used throughout the WiGiTS tools). We plan to address this issue in future relea
 
 :::
 
+#### RUN FROM BAM OR CRAM BUT REALIGN
+
+To run from BAM or CRAM that doesn't meet Oncoanalyser's input requirements, specify `bam` or `cram` in the `filetype` field and prepare a samplesheet as above for BAM or CRAM, but add the `--realign_bam` parameter. This will behave more like the fastq mode, but efficiently streaming directly from the input BAM/CRAM into bwa-mem. 
+
+
 #### REDUX BAM / CRAM
 
 When running an analysis with DNA data from FASTQ, two of the most time consuming and resource intensive pipeline steps
