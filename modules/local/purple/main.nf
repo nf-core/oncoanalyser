@@ -95,11 +95,15 @@ process PURPLE {
     touch purple/${meta.tumor_id}.purple.driver.catalog.germline.tsv
     touch purple/${meta.tumor_id}.purple.driver.catalog.somatic.tsv
     touch purple/${meta.tumor_id}.purple.germline.vcf.gz
+    touch purple/${meta.tumor_id}.purple.germline.vcf.gz.tbi
     touch purple/${meta.tumor_id}.purple.purity.tsv
     touch purple/${meta.tumor_id}.purple.qc
     touch purple/${meta.tumor_id}.purple.somatic.vcf.gz
+    touch purple/${meta.tumor_id}.purple.somatic.vcf.gz.tbi
     touch purple/${meta.tumor_id}.purple.sv.germline.vcf.gz
+    touch purple/${meta.tumor_id}.purple.sv.germline.vcf.gz.tbi
     touch purple/${meta.tumor_id}.purple.sv.vcf.gz
+    touch purple/${meta.tumor_id}.purple.sv.vcf.gz.tbi
 
     echo -e '${task.process}:\\n  stub: noversions\\n' > versions.yml
     """

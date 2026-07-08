@@ -6,7 +6,7 @@ import util.Messages
 
 class SampleSheet {
 
-    public static List<Map> parse(String sample_sheet_path, PipelineMode pipeline_mode) {
+    public static List<Map> parse(String sample_sheet_path, PipelineMode pipeline_mode, boolean stub_run) {
 
         if (!sample_sheet_path) {
             throw new IllegalStateException("Missing required --input argument")
@@ -45,7 +45,7 @@ class SampleSheet {
                     def meta_sample = meta[sample_key]
 
                     // NOTE(LN): The order in which these methods are executed is important
-                    checkAndSetFileIndexes(meta_sample)
+                    checkAndSetFileIndexes(meta_sample, stub_run)
                     setCramPaths(meta_sample)
                     checkRawReadDataExists(meta_sample, group_id)
                     setReduxTsvDirIfUnset(meta_sample)
@@ -217,7 +217,7 @@ class SampleSheet {
 
     }
 
-    private static void checkAndSetFileIndexes(Map meta_sample) {
+    private static void checkAndSetFileIndexes(Map meta_sample, boolean stub_run) {
 
         // NOTE(LN): Cast keys to list to avoid ConcurrentModificationException
         meta_sample.keySet().toList().each { key ->
@@ -246,7 +246,7 @@ class SampleSheet {
             def file_path = meta_sample[key].toUriString()
             def index_path = nextflow.Nextflow.file("${file_path}.${index_extension}")
 
-            if (!index_path.exists()) {
+            if (!index_path.exists() && !stub_run) {
                 throw new IllegalStateException("Could not find index(${index_path}) for file(${file_path})")
             }
 
