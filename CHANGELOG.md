@@ -5,6 +5,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/) 
 
 ## [dev]
 
+- [303](https://github.com/nf-core/oncoanalyser/pull/303) - Fix bug with `purple` module not producing `tbi` files in stub.
+
 - [273](https://github.com/nf-core/oncoanalyser/pull/273) - Post-release bump
 
 ## [[2.3.0](https://github.com/nf-core/oncoanalyser/releases/tag/2.3.0)] Spotted Nightjar - 2025-12-11
