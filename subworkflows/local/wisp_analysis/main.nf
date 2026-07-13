@@ -36,6 +36,11 @@ workflow WISP_ANALYSIS {
     )
         .branch { meta, longitudinal_redux_dir, longitudinal_amber_dir, longitudinal_cobalt_dir, longitudinal_sage_append_dir ->
 
+            // NOTE(LN): Wisp only needs the tumor REDUX TSV files. However, longitudinal_redux_dir is empty when
+            // starting from REDUX_BAM (longitudinal_redux_dir is only populated when REDUX is run, i.e. when starting
+            // from BAM or FASTQ). We instead form the REDUX TSV paths using the REDUX_BAM dir
+            def longitudinal_redux_tsvs = sample.Inputs.resolveReduxTsvFiles(longitudinal_redux_dir, meta, samplesheet.SampleType.TUMOR)
+
             def primary_purple_dir = sample.Inputs.get(meta, sample.FileKey.PURPLE_DIR)
             def primary_amber_dir = sample.Inputs.get(meta, sample.FileKey.AMBER_DIR)
             def primary_normal_bam = sample.Inputs.get(meta, sample.FileKey.BAM_REDUX_DNA_NORMAL)
@@ -44,12 +49,14 @@ workflow WISP_ANALYSIS {
             if (targeted_mode) {
                 runnable =
                     primary_purple_dir &&
-                    longitudinal_sage_append_dir
+                    longitudinal_sage_append_dir &&
+                    longitudinal_redux_tsvs
             } else {
                 runnable =
                     primary_purple_dir &&
                     longitudinal_sage_append_dir &&
-                    longitudinal_cobalt_dir
+                    longitudinal_cobalt_dir &&
+                    longitudinal_redux_tsvs
             }
 
             def inputs = [:]
@@ -57,7 +64,7 @@ workflow WISP_ANALYSIS {
             inputs.primary_purple_dir = primary_purple_dir
             inputs.primary_amber_dir = primary_amber_dir
             inputs.primary_normal_bam = primary_normal_bam
-            inputs.longitudinal_redux_dir = longitudinal_redux_dir
+            inputs.longitudinal_redux_tsvs = longitudinal_redux_tsvs
             inputs.longitudinal_amber_dir = longitudinal_amber_dir
             inputs.longitudinal_cobalt_dir = longitudinal_cobalt_dir
             inputs.longitudinal_sage_append_dir = longitudinal_sage_append_dir
