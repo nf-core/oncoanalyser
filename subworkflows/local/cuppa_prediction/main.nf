@@ -76,6 +76,17 @@ workflow CUPPA_PREDICTION {
     ch_cuppa_inputs = ch_inputs_sorted.runnable
         .multiMap{ meta, isofox_dir, purple_dir, linx_annotation_dir, virusinterpreter_dir ->
 
+            def meta_cuppa = [
+                key: meta.group_id,
+                id: meta.group_id,
+            ]
+
+            def tumor_dna_id = sample.Inputs.getTumorDnaSampleName(meta)
+            def tumor_rna_id = sample.Inputs.getTumorRnaSampleOutputId(meta)
+
+            meta_cuppa.sample_id = tumor_dna_id ?: tumor_rna_id
+            meta_cuppa.sample_rna_id = tumor_rna_id
+
             def has_tumor_dna = sample.Inputs.hasTumorDna(meta)
             def has_normal_dna = sample.Inputs.hasNormalDna(meta)
             def has_tumor_rna = sample.Inputs.hasTumorRna(meta)
@@ -85,19 +96,6 @@ workflow CUPPA_PREDICTION {
 
             def run_dna = has_dna_inputs && has_tumor_dna && has_normal_dna
             def run_rna = has_rna_inputs && has_tumor_rna
-
-            def meta_cuppa = [
-                key: meta.group_id,
-                id: meta.group_id,
-            ]
-
-            if(run_dna) {
-                meta_cuppa.sample_id = sample.Inputs.getTumorDnaSampleName(meta)
-            }
-
-            if(run_rna) {
-                meta_cuppa.sample_rna_id = sample.Inputs.getTumorRnaSampleOutputId(meta)
-            }
 
             def categories
 
