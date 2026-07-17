@@ -24,12 +24,15 @@ input:
       description: Input genome ALT file (optional)
       pattern: "*.{alt}"
 output:
-  - index:
+  - bwa_index:
       type: file
       description: BWA genome index files
       pattern: "*.{amb,ann,bwt,pac,sa,alt}"
       ontologies:
         - edam: "http://edamontology.org/data_3210" # Genome index
+  - command_files:
+      type: list
+      description: List of command files
   - versions:
       type: file
       description: File containing software versions

@@ -14,7 +14,6 @@ include { samplesheetToList         } from 'plugin/nf-schema'
 include { paramsHelp                } from 'plugin/nf-schema'
 include { completionEmail           } from '../../nf-core/utils_nfcore_pipeline'
 include { completionSummary         } from '../../nf-core/utils_nfcore_pipeline'
-include { imNotification            } from '../../nf-core/utils_nfcore_pipeline'
 include { UTILS_NFCORE_PIPELINE     } from '../../nf-core/utils_nfcore_pipeline'
 include { UTILS_NEXTFLOW_PIPELINE   } from '../../nf-core/utils_nextflow_pipeline'
 
@@ -54,6 +53,9 @@ workflow PIPELINE_INITIALISATION {
     //
     // Validate parameters and generate parameter summary to stdout
     //
+
+    def before_text = ""
+    def after_text = ""
     before_text = """
 -\033[2m----------------------------------------------------\033[0m-
                                         \033[0;32m,--.\033[0;30m/\033[0;32m,-.\033[0m
@@ -71,6 +73,10 @@ workflow PIPELINE_INITIALISATION {
 * Software dependencies
     https://github.com/nf-core/oncoanalyser/blob/master/CITATIONS.md
 """
+    if (monochrome_logs) {
+        before_text = before_text.replaceAll(/\033\[[0-9;]*m/, '')
+    }
+
     command = "nextflow run ${workflow.manifest.name} -profile <docker/singularity/.../institute> --input samplesheet.csv --outdir <OUTDIR>"
 
     UTILS_NFSCHEMA_PLUGIN (
@@ -115,10 +121,11 @@ workflow PIPELINE_COMPLETION {
     plaintext_email // boolean: Send plain-text email instead of HTML
     outdir          //    path: Path to output directory where results will be published
     monochrome_logs // boolean: Disable ANSI colour codes in log output
-    hook_url        //  string: hook URL for notifications
+    multiqc_report  //  string: Path to MultiQC report
 
     main:
     summary_params = paramsSummaryMap(workflow, parameters_schema: "nextflow_schema.json")
+    def multiqc_reports = multiqc_report.toList()
 
     //
     // Completion email and summary
@@ -132,17 +139,16 @@ workflow PIPELINE_COMPLETION {
                 plaintext_email,
                 outdir,
                 monochrome_logs,
+                multiqc_reports.getVal(),
             )
         }
 
         completionSummary(monochrome_logs)
-        if (hook_url) {
-            imNotification(summary_params, hook_url)
-        }
+
     }
 
     workflow.onError {
-        log.error "Pipeline failed. Please refer to troubleshooting docs: https://nf-co.re/docs/usage/troubleshooting"
+        log.error "Pipeline failed. Please refer to troubleshooting docs for common issues: https://nf-co.re/docs/running/troubleshooting"
     }
 }
 
@@ -265,4 +271,111 @@ def methodsDescriptionText(mqc_methods_yaml) {
     def description_html = engine.createTemplate(methods_text).make(meta)
 
     return description_html.toString()
+}
+
+def getDnaFastqChannel(ch_inputs) {
+    // Sort inputs
+    // channel: [ meta ]
+    def ch_inputs_tumor_sorted = ch_inputs
+        .branch { meta ->
+            def has_existing = Utils.hasExistingInput(meta, Constants.INPUT.ALN_DNA_TUMOR)
+            runnable: Utils.hasTumorDnaFastq(meta) && ! has_existing
+            skip: true
+        }
+
+    def ch_inputs_normal_sorted = ch_inputs
+        .branch { meta ->
+            def has_existing = Utils.hasExistingInput(meta, Constants.INPUT.ALN_DNA_NORMAL)
+            runnable: Utils.hasNormalDnaFastq(meta) && ! has_existing
+            skip: true
+        }
+
+    def ch_inputs_donor_sorted = ch_inputs
+        .branch { meta ->
+            def has_existing = Utils.hasExistingInput(meta, Constants.INPUT.ALN_DNA_DONOR)
+            runnable: Utils.hasDonorDnaFastq(meta) && ! has_existing
+            skip: true
+        }
+
+    // Create FASTQ input channel
+    // channel: [ meta, fastq_info, fastq_fwd, fastq_rev ]
+    def ch_fastqs = channel.empty()
+        .mix(
+            ch_inputs_tumor_sorted.runnable.map { meta -> [meta, Utils.getTumorDnaSample(meta), 'tumor'] },
+            ch_inputs_normal_sorted.runnable.map { meta -> [meta, Utils.getNormalDnaSample(meta), 'normal'] },
+            ch_inputs_donor_sorted.runnable.map { meta -> [meta, Utils.getDonorDnaSample(meta), 'donor'] },
+        )
+        .flatMap { meta, meta_sample, sample_type ->
+            meta_sample
+                .getAt(Constants.FileType.FASTQ)
+                .collect { key, d ->
+                    def (library_id, lane, flowcell) = key
+
+                    def sample_id = meta_sample.getOrDefault('longitudinal_sample_id', meta_sample['sample_id'])
+
+                    def fastq_info = [
+                        'sample_id': sample_id,
+                        'library_id': library_id,
+                        'lane': lane,
+                        'sample_type': sample_type,
+                        'rg_fields': d.rg_fields,
+                    ]
+
+                    if (flowcell) {
+                         fastq_info.flowcell = flowcell
+                    }
+
+                    return [meta, fastq_info, d['fwd'], d['rev']]
+                }
+        }
+
+    return channel.empty()
+        .mix(
+            ch_fastqs,
+            ch_inputs_tumor_sorted.skip.map { meta -> [meta, [:], [], []] },
+            ch_inputs_normal_sorted.skip.map { meta -> [meta, [:], [], []] },
+            ch_inputs_donor_sorted.skip.map { meta -> [meta, [:], [], []] },
+        )
+}
+
+def getRnaFastqChannel(ch_inputs) {
+    // Sort inputs
+    // channel: [ meta ]
+    def ch_inputs_sorted = ch_inputs
+        .branch { meta ->
+            def has_existing = Utils.hasExistingInput(meta, Constants.INPUT.ALN_RNA_TUMOR)
+            runnable: Utils.hasTumorRnaFastq(meta) && ! has_existing
+            skip: true
+        }
+
+    // Create FASTQ input channel
+    // channel: [ meta, fastq_info, fastq_fwd, fastq_rev ]
+    def ch_fastqs = ch_inputs_sorted.runnable
+        .flatMap { meta ->
+            def meta_sample = Utils.getTumorRnaSample(meta)
+            meta_sample
+                .getAt(Constants.FileType.FASTQ)
+                .collect { key, d ->
+                    def (library_id, lane, flowcell) = key
+
+                    def fastq_info = [
+                        'sample_id': meta_sample.sample_id,
+                        'library_id': library_id,
+                        'lane': lane,
+                        'rg_fields': d.rg_fields,
+                    ]
+
+                    if (flowcell) {
+                         fastq_info.flowcell = flowcell
+                    }
+
+                    return [meta, fastq_info, d['fwd'], d['rev']]
+                }
+        }
+
+    return channel.empty()
+        .mix(
+            ch_fastqs,
+            ch_inputs_sorted.skip.map { meta -> [meta, [:], [], []] },
+        )
 }

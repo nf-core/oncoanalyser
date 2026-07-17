@@ -29,16 +29,16 @@ output:
       description: |
         Groovy Map containing sample information
         e.g. [id: 'sample_id']
-  - html:
+  - linxreport_html:
       type: file
       description: gpgr LINX report file
       pattern: "*.{html}"
+  - command_files:
+      type: list
+      description: List of command files
   - versions:
       type: file
       description: File containing software versions
       pattern: "versions.yml"
-  - command_files:
-      type: list
-      description: List of command files
 authors:
   - "@scwatts"

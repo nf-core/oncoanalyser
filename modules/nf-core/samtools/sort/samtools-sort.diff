@@ -1,4 +1,4 @@
-Changes in module 'nf-core/samtools/sort'
+Changes in component 'nf-core/samtools/sort'
 'modules/nf-core/samtools/sort/environment.yml' is unchanged
 Changes in 'samtools/sort/meta.yml':
 --- modules/nf-core/samtools/sort/meta.yml
@@ -15,7 +15,7 @@ Changes in 'samtools/sort/meta.yml':
  tools:
    - samtools:
        description: |
-@@ -24,18 +22,8 @@
+@@ -24,20 +22,10 @@
            e.g. [ id:'test', single_end:false ]
      - bam:
          type: file
@@ -34,17 +34,21 @@ Changes in 'samtools/sort/meta.yml':
 +        description: BAM file
 +        pattern: "*.{bam}"
  output:
-   - bam:
+-  - bam:
++  - samtools_sort_bam:
        - meta:
-@@ -47,36 +35,6 @@
+           type: map
+           description: |
+@@ -47,36 +35,18 @@
            type: file
            description: Sorted BAM file
            pattern: "*.{bam}"
 -  - cram:
--      - meta:
--          type: map
--          description: |
--            Groovy Map containing sample information
++  - command_files:
+       - meta:
+           type: map
+           description: |
+             Groovy Map containing sample information
 -            e.g. [ id:'test', single_end:false ]
 -      - "*.cram":
 -          type: file
@@ -70,6 +74,13 @@ Changes in 'samtools/sort/meta.yml':
 -          type: file
 -          description: BAM index file (optional)
 -          pattern: "*.csi"
++            e.g. [ id:'sample1', single_end:false ]
++      - identifier:
++        type: string
++        description: Identifier for command files
++      - command_files:
++        type: list
++        description: List of command files
    - versions:
        - versions.yml:
            type: file
@@ -84,7 +95,7 @@ Changes in 'samtools/sort/main.nf':
      label 'process_medium'
  
      conda "${moduleDir}/environment.yml"
-@@ -8,39 +8,28 @@
+@@ -8,39 +8,29 @@
          'biocontainers/samtools:1.21--h50ea8bc_0' }"
  
      input:
@@ -98,8 +109,9 @@ Changes in 'samtools/sort/main.nf':
 -    tuple val(meta), path("*.crai"), emit: crai, optional: true
 -    tuple val(meta), path("*.csi"),  emit: csi,  optional: true
 -    path  "versions.yml",            emit: versions
-+    tuple val(meta), path("*.bam"),  emit: bam
-+    path "versions.yml"           ,  emit: versions
++    tuple val(meta), path('*.bam')                           , topic: samtools_sort_bam
++    tuple val(meta), val('samtools_sort'), path('.command.*'), topic: command_files
++    path 'versions.yml'                                      , topic: versions
  
      when:
      task.ext.when == null || task.ext.when
@@ -134,7 +146,7 @@ Changes in 'samtools/sort/main.nf':
  
      cat <<-END_VERSIONS > versions.yml
      "${task.process}":
-@@ -49,24 +38,11 @@
+@@ -49,24 +39,11 @@
      """
  
      stub:

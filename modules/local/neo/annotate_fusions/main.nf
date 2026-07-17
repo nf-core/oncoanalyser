@@ -4,11 +4,11 @@ process NEO_ANNOTATE_FUSIONS {
 
     conda "${moduleDir}/environment.yml"
     container "${ workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container ?
-        'https://depot.galaxyproject.org/singularity/hmftools-isofox:1.7.2--hdfd78af_1' :
-        'biocontainers/hmftools-isofox:1.7.2--hdfd78af_1' }"
+        'https://depot.galaxyproject.org/singularity/hmftools-isofox:2.0.1--hdfd78af_0' :
+        'biocontainers/hmftools-isofox:2.0.1--hdfd78af_0' }"
 
     input:
-    tuple val(meta), path(neo_finder_dir), path(bam), path(bai)
+    tuple val(meta), path(neo_finder_dir), path(aln), path(idx)
     val read_length
     path genome_fasta
     val genome_ver
@@ -16,9 +16,9 @@ process NEO_ANNOTATE_FUSIONS {
     path ensembl_data_resources
 
     output:
-    tuple val(meta), path('*isf.neoepitope.tsv'), emit: annotated_fusions
-    path 'versions.yml'                         , emit: versions
-    path '.command.*'                           , emit: command_files
+    tuple val(meta), path('*isf.neoepitope.tsv')                    , topic: neo_annotated_fusions_tsv
+    tuple val(meta), val('neo_annotate_fusions'), path('.command.*'), topic: command_files
+    path 'versions.yml'                                             , topic: versions
 
     when:
     task.ext.when == null || task.ext.when
@@ -31,13 +31,11 @@ process NEO_ANNOTATE_FUSIONS {
     def log_level_arg = task.ext.log_level ? "-log_level ${task.ext.log_level}" : ''
 
     """
-    mkdir -p isofox/
-
     isofox \\
         -Xmx${Math.round(task.memory.bytes * xmx_mod)} \\
         ${args} \\
         -sample ${meta.sample_id} \\
-        -bam_file ${bam} \\
+        -bam_file ${aln} \\
         -functions NEO_EPITOPES \\
         -read_length ${read_length} \\
         -neo_dir ${neo_finder_dir} \\
@@ -51,6 +49,7 @@ process NEO_ANNOTATE_FUSIONS {
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":
         isofox: \$(isofox -version | sed -n '/^Isofox version / { s/^.* //p }')
+        java: \$(java --version | sed -n '/^openjdk/ { s/^.*openjdk //; s/ .*//p }')
     END_VERSIONS
     """
 

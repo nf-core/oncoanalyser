@@ -15,14 +15,14 @@ input:
       description: |
         Groovy Map containing sample information
         e.g. [id: 'sample_id']
-  - bam:
+  - aln:
       type: file
-      description: BAM file
-      pattern: "*.{bam}"
-  - bai:
+      description: Alignment file
+      pattern: "*.{bam,cram}"
+  - idx:
       type: file
-      description: BAI file
-      pattern: "*.{bai}"
+      description: Index file
+      pattern: "*.{bai,crai}"
   - functions:
       type: string
       description: Isofox functions to run
@@ -47,6 +47,18 @@ input:
       type: file
       description: Known fusions data file
       pattern: "*.{csv}"
+  - excluded_regions:
+      type: file
+      description: Isofox excluded regions file
+      pattern: "*.{tsv}"
+  - gene_distribution:
+      type: file
+      description: Isofox cohort gene expression file
+      pattern: "*.{csv.gz}"
+  - alt_sj_distribution:
+      type: file
+      description: Isofox cohort alternate slice junction file
+      pattern: "*.{csv.gz}"
   - exp_counts:
       type: file
       description: Isofox expected counts file (optional)
@@ -54,10 +66,6 @@ input:
   - exp_gc_ratios:
       type: file
       description: Isofox expected GC ratio counts file (optional)
-      pattern: "*.{csv}"
-  - gene_ids:
-      type: file
-      description: Isofox gene ID file (optional)
       pattern: "*.{csv}"
   - tpm_norm:
       type: file
@@ -72,12 +80,12 @@ output:
   - isofox_dir:
       type: directory
       description: Isofox output directory
+  - command_files:
+      type: list
+      description: List of command files
   - versions:
       type: file
       description: File containing software versions
       pattern: "versions.yml"
-  - command_files:
-      type: list
-      description: List of command files
 authors:
   - "@scwatts"

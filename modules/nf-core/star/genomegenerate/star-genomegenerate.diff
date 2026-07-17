@@ -50,7 +50,7 @@ Changes in 'star/genomegenerate/meta.yml':
 Changes in 'star/genomegenerate/main.nf':
 --- modules/nf-core/star/genomegenerate/main.nf
 +++ modules/nf-core/star/genomegenerate/main.nf
-@@ -4,16 +4,16 @@
+@@ -4,116 +4,81 @@
  
      conda "${moduleDir}/environment.yml"
      container "${ workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container ?
@@ -68,13 +68,16 @@ Changes in 'star/genomegenerate/main.nf':
      output:
 -    tuple val(meta), path("star")  , emit: index
 -    path "versions.yml"            , emit: versions
-+    path "star_index"  , emit: index
-+    path "versions.yml", emit: versions
++    path 'star_index'                                             , topic: star_index
++    tuple val([:]), val('star_genomegenerate'), path('.command.*'), topic: command_files
++    path 'versions.yml'                                           , topic: versions
  
      when:
      task.ext.when == null || task.ext.when
-@@ -23,97 +23,62 @@
-     def args_list   = args.tokenize()
+ 
+     script:
+     def args        = task.ext.args ?: ''
+-    def args_list   = args.tokenize()
      def memory      = task.memory ? "--limitGenomeGenerateRAM ${task.memory.toBytes() - 100000000}" : ''
      def include_gtf = gtf ? "--sjdbGTFfile $gtf" : ''
 -    if (args_list.contains('--genomeSAindexNbases')) {

@@ -25,7 +25,7 @@ input:
         description: BAM file
         pattern: "*.{bam}"
 output:
-  - bam:
+  - samtools_sort_bam:
       - meta:
           type: map
           description: |
@@ -35,6 +35,18 @@ output:
           type: file
           description: Sorted BAM file
           pattern: "*.{bam}"
+  - command_files:
+      - meta:
+          type: map
+          description: |
+            Groovy Map containing sample information
+            e.g. [ id:'sample1', single_end:false ]
+      - identifier:
+        type: string
+        description: Identifier for command files
+      - command_files:
+        type: list
+        description: List of command files
   - versions:
       - versions.yml:
           type: file

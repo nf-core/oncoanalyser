@@ -22,15 +22,22 @@ input:
   - primary_amber_dir:
       type: directory
       description: AMBER directory of the primary sample
-  - sample_amber_dir:
+  - primary_normal_aln:
+      type: file
+      description: Primary normal alignment file
+      pattern: "*.{bam,ram}"
+  - longitudinal_redux_dir:
       type: directory
-      description: AMBER directory of the query sample
-  - cobalt_dir:
+      description: Longitudinal REDUX directory
+  - longitudinal_amber_dir:
       type: directory
-      description: COBALT directory
-  - sage_append_dir:
+      description: Longitudinal AMBER directory
+  - longitudinal_cobalt_dir:
       type: directory
-      description: SAGE append directory
+      description: Longitudinal COBALT directory
+  - longitudinal_sage_append_dir:
+      type: directory
+      description: Longitudinal SAGE append directory
   - genome_fasta:
       type: file
       description: Reference genome assembly FASTA file
@@ -51,12 +58,12 @@ output:
   - wisp_dir:
       type: directory
       description: WISP output direcotry
+  - command_files:
+      type: list
+      description: List of command files
   - versions:
       type: file
       description: File containing software versions
       pattern: "versions.yml"
-  - command_files:
-      type: list
-      description: List of command files
 authors:
   - "@scwatts"

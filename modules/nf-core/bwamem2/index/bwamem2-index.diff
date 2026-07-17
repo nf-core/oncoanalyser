@@ -13,7 +13,7 @@ Changes in 'bwamem2/index/environment.yml':
 Changes in 'bwamem2/index/meta.yml':
 --- modules/nf-core/bwamem2/index/meta.yml
 +++ modules/nf-core/bwamem2/index/meta.yml
-@@ -14,24 +14,18 @@
+@@ -14,24 +14,21 @@
        documentation: https://github.com/bwa-mem2/bwa-mem2#usage
        licence: ["MIT"]
  input:
@@ -35,11 +35,15 @@ Changes in 'bwamem2/index/meta.yml':
 -      description: |
 -        Groovy Map containing sample information
 -        e.g. [ id:'test', single_end:false ]
-   - index:
+-  - index:
++  - bwamem2_index:
        type: file
        description: BWA genome index files
 -      pattern: "*.{0123,amb,ann,bwt.2bit.64,pac}"
 +      pattern: "*.{0123,amb,ann,bwt.2bit.64,pac,alt}"
++  - command_files:
++      type: list
++      description: List of command files
    - versions:
        type: file
        description: File containing software versions
@@ -55,7 +59,7 @@ Changes in 'bwamem2/index/main.nf':
  
      conda "${moduleDir}/environment.yml"
      container "${ workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container ?
-@@ -8,11 +9,12 @@
+@@ -8,11 +9,13 @@
          'biocontainers/bwa-mem2:2.2.1--he513fc3_0' }"
  
      input:
@@ -66,12 +70,13 @@ Changes in 'bwamem2/index/main.nf':
      output:
 -    tuple val(meta), path("bwamem2"), emit: index
 -    path "versions.yml"             , emit: versions
-+    path "bwa-mem2_index", emit: index
-+    path "versions.yml"  , emit: versions
++    path 'bwa-mem2_index'                                   , topic: bwamem2_index
++    tuple val([:]), val('bwamem2_index'), path('.command.*'), topic: command_files
++    path 'versions.yml'                                     , topic: versions
  
      when:
      task.ext.when == null || task.ext.when
-@@ -20,12 +22,18 @@
+@@ -20,12 +23,18 @@
      script:
      def prefix = task.ext.prefix ?: "${fasta}"
      def args = task.ext.args ?: ''
@@ -92,7 +97,7 @@ Changes in 'bwamem2/index/main.nf':
  
      cat <<-END_VERSIONS > versions.yml
      "${task.process}":
-@@ -37,16 +45,18 @@
+@@ -37,16 +46,19 @@
      def prefix = task.ext.prefix ?: "${fasta}"
  
      """
@@ -103,16 +108,17 @@ Changes in 'bwamem2/index/main.nf':
 -    touch bwamem2/${prefix}.amb
 -    touch bwamem2/${prefix}.bwt.2bit.64
 +    mkdir -p bwa-mem2_index/
-+    touch bwa-mem2_index/${prefix}.0123
-+    touch bwa-mem2_index/${prefix}.ann
-+    touch bwa-mem2_index/${prefix}.pac
-+    touch bwa-mem2_index/${prefix}.amb
-+    touch bwa-mem2_index/${prefix}.bwt.2bit.64
  
 -    cat <<-END_VERSIONS > versions.yml
 -    "${task.process}":
 -        bwamem2: \$(echo \$(bwa-mem2 version 2>&1) | sed 's/.* //')
 -    END_VERSIONS
++    touch bwa-mem2_index/${prefix}.0123
++    touch bwa-mem2_index/${prefix}.ann
++    touch bwa-mem2_index/${prefix}.pac
++    touch bwa-mem2_index/${prefix}.amb
++    touch bwa-mem2_index/${prefix}.bwt.2bit.64
++
 +    # Include ALT file where necessary
 +    if [[ -n "${alt}" ]]; then
 +        ln -s ../${alt} bwa-mem2_index/;

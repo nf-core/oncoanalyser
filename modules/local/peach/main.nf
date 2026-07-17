@@ -8,15 +8,15 @@ process PEACH {
         'biocontainers/hmftools-peach:2.0.0--hdfd78af_1' }"
 
     input:
-    tuple val(meta), path(germline_vcf)
+    tuple val(meta), path(germline_smlv_vcf)
     path haplotypes
     path haplotype_functions
     path drug_info
 
     output:
-    tuple val(meta), path('peach/'), emit: peach_dir
-    path 'versions.yml'            , emit: versions
-    path '.command.*'              , emit: command_files
+    tuple val(meta), path('peach/')                  , topic: peach_dir
+    tuple val(meta), val('peach'), path('.command.*'), topic: command_files
+    path 'versions.yml'                              , topic: versions
 
     when:
     task.ext.when == null || task.ext.when
@@ -33,7 +33,7 @@ process PEACH {
         -Xmx${Math.round(task.memory.bytes * xmx_mod)} \\
         ${args} \\
         -sample_name ${meta.sample_id} \\
-        -vcf_file ${germline_vcf} \\
+        -vcf_file ${germline_smlv_vcf} \\
         -haplotypes_file ${haplotypes} \\
         -function_file ${haplotype_functions} \\
         -drugs_file ${drug_info} \\
@@ -44,6 +44,7 @@ process PEACH {
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":
         peach: \$(peach -version | sed -n '/Peach version/ { s/^.* //p }')
+        java: \$(java --version | sed -n '/^openjdk/ { s/^.*openjdk //; s/ .*//p }')
     END_VERSIONS
     """
 

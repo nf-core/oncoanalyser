@@ -2,18 +2,17 @@
 // ESVEE detects structural variants, and reports breakends and breakpoints.
 //
 
-import Constants
-import Utils
-
-import java.nio.channels.Channel
-
 include { ESVEE } from '../../../modules/local/esvee/main'
 
 workflow ESVEE_CALLING {
     take:
+
+    // Sample data
     ch_inputs                // channel: [mandatory] [ meta ]
-    ch_tumor_bam             // channel: [mandatory] [ meta, bam, bai ]
-    ch_normal_bam            // channel: [mandatory] [ meta, bam, bai ]
+    ch_redux_dir_tumor       // channel: [mandatory] [ meta, redux_dir ]
+    ch_redux_dir_normal      // channel: [mandatory] [ meta, redux_dir ]
+
+    // Reference data
     genome_fasta             // channel: [mandatory] /path/to/genome_fasta
     genome_version           // channel: [mandatory] genome version
     genome_fai               // channel: [mandatory] /path/to/genome_fai
@@ -25,43 +24,47 @@ workflow ESVEE_CALLING {
     decoy_sequences_image    // channel: [mandatory] /path/to/decoy_sequences_image
     repeatmasker_annotations // channel: [mandatory] /path/to/repeatmasker_annotations
     unmap_regions            // channel: [mandatory] /path/to/unmap_regions
-    target_region_bed        // channel: [optional]  /path/to/target_region_bed
+    target_regions_bed       // channel: [optional]  /path/to/target_regions_bed
+
+    // Params
+    sequencing_platform      // string:  [mandatory] sequencing platform
 
     main:
-    // Channel for version.yml files
-    ch_versions = Channel.empty()
-
-    // Select input sources and sort
+    // Select input sources then sort
+    // channel: runnable: [ meta, tumor_aln, tumor_idx, normal_aln, normal_idx ]
+    // channel: skip: [ meta ]
     ch_inputs_sorted = WorkflowOncoanalyser.groupByMeta(
-        ch_tumor_bam,
-        ch_normal_bam,
+        ch_redux_dir_tumor,
+        ch_redux_dir_normal,
     )
-        .map { meta, tumor_bam, tumor_bai, normal_bam, normal_bai ->
-            return [
-                meta,
-                Utils.selectCurrentOrExisting(tumor_bam, meta, Constants.INPUT.BAM_REDUX_DNA_TUMOR),
-                tumor_bai ?: Utils.getInput(meta, Constants.INPUT.BAI_DNA_TUMOR),
-                Utils.selectCurrentOrExisting(normal_bam, meta, Constants.INPUT.BAM_REDUX_DNA_NORMAL),
-                normal_bai ?: Utils.getInput(meta, Constants.INPUT.BAI_DNA_NORMAL),
-            ]
-        }
-        .branch { meta, tumor_bam, tumor_bai, normal_bam, normal_bai ->
-            def has_existing = Utils.hasExistingInput(meta, Constants.INPUT.ESVEE_VCF_TUMOR)
+        .map { meta, redux_dir_tumor, redux_dir_normal ->
 
-            runnable_tn: tumor_bam && normal_bam && !has_existing
-            runnable_to: tumor_bam && !has_existing
-                return [meta, tumor_bam, tumor_bai]
+            def redux_dir_tumor_selected = Utils.selectCurrentOrExisting(redux_dir_tumor, meta, Constants.INPUT.REDUX_DIR_TUMOR)
+            def redux_dir_normal_selected = Utils.selectCurrentOrExisting(redux_dir_normal, meta, Constants.INPUT.REDUX_DIR_NORMAL)
+
+            def (tumor_aln, tumor_idx) = Utils.getTumorReduxDirAlignment(meta, redux_dir_tumor_selected)
+            def (normal_aln, normal_idx) = Utils.getNormalReduxDirAlignment(meta, redux_dir_normal_selected)
+
+            return [meta, tumor_aln, tumor_idx, normal_aln, normal_idx]
+        }
+        .branch { meta, tumor_aln, tumor_idx, normal_aln, normal_idx ->
+            def has_existing = Utils.hasExistingInput(meta, Constants.INPUT.ESVEE_DIR)
+
+            runnable_tn: tumor_aln && normal_aln && ! has_existing
+            runnable_to: tumor_aln && ! has_existing
+                return [meta, tumor_aln, tumor_idx]
             skip: true
                 return meta
         }
 
     // Create process input channel
-    ch_esvee_inputs = Channel.empty()
+    // channel: [ meta_esvee, tumor_aln, tumor_idx, normal_aln, normal_idx ]
+    ch_esvee_inputs = channel.empty()
         .mix(
             ch_inputs_sorted.runnable_tn,
-            ch_inputs_sorted.runnable_to.map { [*it, [], []] },
+            ch_inputs_sorted.runnable_to.map { d -> d + [[], []] },
         )
-        .map { meta, tumor_bam, tumor_bai, normal_bam, normal_bai ->
+        .map { meta, tumor_aln, tumor_idx, normal_aln, normal_idx ->
 
             def meta_esvee = [
                 key: meta.group_id,
@@ -69,14 +72,14 @@ workflow ESVEE_CALLING {
                 tumor_id: Utils.getTumorDnaSampleName(meta),
             ]
 
-            if (normal_bam) {
+            if (normal_aln) {
                 meta_esvee.normal_id = Utils.getNormalDnaSampleName(meta)
             }
 
-            return [meta_esvee, tumor_bam, tumor_bai, normal_bam, normal_bai]
+            return [meta_esvee, tumor_aln, tumor_idx, normal_aln, normal_idx]
         }
 
-    // Run ESVEE process
+    // Run process
     ESVEE(
         ch_esvee_inputs,
         genome_fasta,
@@ -90,35 +93,18 @@ workflow ESVEE_CALLING {
         known_fusions,
         repeatmasker_annotations,
         unmap_regions,
-        target_region_bed,
+        target_regions_bed,
+        sequencing_platform,
     )
 
-    ch_versions = ch_versions.mix(ESVEE.out.versions)
-
     // Set outputs, restoring original meta
-    ch_somatic_out = Channel.empty()
+    // channel: [ meta, esvee_dir ]
+    ch_outputs = channel.empty()
         .mix(
-            WorkflowOncoanalyser.restoreMeta(ESVEE.out.somatic_vcf, ch_inputs),
-            ch_inputs_sorted.skip.map { meta -> [meta, [], []] }
-        )
-
-    ch_germline_out = Channel.empty()
-        .mix(
-            WorkflowOncoanalyser.restoreMeta(ESVEE.out.germline_vcf, ch_inputs),
-            ch_inputs_sorted.runnable_to.map { meta, tumor_bam, tumor_bai -> [meta, [], []] },
-            ch_inputs_sorted.skip.map { meta -> [meta, [], []] },
-        )
-
-    ch_unfiltered_out = Channel.empty()
-        .mix(
-            WorkflowOncoanalyser.restoreMeta(ESVEE.out.unfiltered_vcf, ch_inputs),
-            ch_inputs_sorted.skip.map { meta -> [meta, [], []] }
+            WorkflowOncoanalyser.restoreMeta(channel.topic('esvee_dir'), ch_inputs),
+            ch_inputs_sorted.skip.map { meta -> [meta, []] },
         )
 
     emit:
-    somatic_vcf    = ch_somatic_out    // channel: [ meta, vcf, tbi ]
-    germline_vcf   = ch_germline_out   // channel: [ meta, vcf, tbi ]
-    unfiltered_vcf = ch_unfiltered_out // channel: [ meta, vcf, tbi ]
-
-    versions       = ch_versions       // channel: [ versions.yml ]
+    esvee_dir = ch_outputs // channel: [ meta, esvee_dir ]
 }

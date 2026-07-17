@@ -1,0 +1,11 @@
+process {
+
+    withName: 'MULTIQC*' {
+        container = 'docker.io/scwatts/multiqc:1.35--onconanalyser-plugin-0.0.1--1'
+    }
+
+    withName: 'LINXREPORT*' {
+        container = 'docker.io/scwatts/linxreport:1.2.0--2'
+    }
+
+}

@@ -1,5 +1,5 @@
 repository_type: pipeline
-nf_core_version: 3.5.1
+nf_core_version: 4.0.2
 template:
   author: Stephen Watts
   description: A comprehensive cancer DNA/RNA analysis and reporting pipeline
@@ -11,7 +11,7 @@ template:
   skip_features:
     - gpu
     - nf-test
-  version: 2.3.0
+  version: 2.3.0dev
 lint:
   actions_ci: false
   files_exist:
