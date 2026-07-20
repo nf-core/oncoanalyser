@@ -1,4 +1,4 @@
-name: fastp_umi
+name: fastp
 description: An ultra-fast all-in-one FASTQ preprocessor
 keywords:
   - fastp

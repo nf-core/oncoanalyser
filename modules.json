@@ -47,6 +47,12 @@
                         "installed_by": ["modules"],
                         "patch": "modules/nf-core/samtools/sort/samtools-sort.diff"
                     },
+                    "seqkit/split2": {
+                        "branch": "master",
+                        "git_sha": "d07a945f421a4a91ce4e5a22db63e0e7f8741607",
+                        "installed_by": ["modules"],
+                        "patch": "modules/nf-core/seqkit/split2/seqkit-split2.diff"
+                    },
                     "star/genomegenerate": {
                         "branch": "master",
                         "git_sha": "a21faa6a3481af92a343a10926f59c189a2c16c9",

@@ -2,7 +2,7 @@
 // Process read UMIs
 //
 
-include { FASTP_UMI   } from '../../../modules/local/fastp/umi/main'
+include { FASTP       } from '../../../modules/local/fastp/main'
 include { FASTQ_TOOLS } from '../../../modules/local/fastqtools/main'
 
 workflow READ_UMI_PROCESSING {
@@ -105,7 +105,7 @@ workflow READ_UMI_PROCESSING {
             }
 
         // Run process
-        FASTP_UMI(
+        FASTP(
             ch_fastp_inputs_sorted.runnable,
             fastp_umi_location,
             fastp_umi_length,
@@ -117,7 +117,7 @@ workflow READ_UMI_PROCESSING {
         // Set outputs
         ch_post_fastp = channel.empty()
             .mix(
-                channel.topic('fastp_umi_fastq'),
+                channel.topic('fastp_fastq'),
                 ch_fastp_inputs_sorted.skip,
             )
 
