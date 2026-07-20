@@ -132,7 +132,6 @@ workflow PANEL_RESOURCE_CREATION {
         ref_data.genome_bwamem2_index_rna,
         hmf_data.contigs_mapping_rna,
         hmf_data.unmap_regions_rna,
-        params.max_fastq_records,
     )
 
     // channel: [ meta, [aln, ...], [idx, ...] ]

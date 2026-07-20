@@ -3,7 +3,7 @@
 //
 
 include { BWAMEM2_ALIGN_DNA } from '../../../modules/local/bwa-mem2/mem/dna/main'
-include { FASTP_SPLIT       } from '../../../modules/local/fastp/split/main'
+include { SEQKIT_SPLIT2 } from '../../../modules/nf-core/seqkit/split2/main'
 
 workflow READ_ALIGNMENT_DNA {
     take:
@@ -92,7 +92,7 @@ workflow READ_ALIGNMENT_DNA {
         }
 
     //
-    // MODULE: fastp
+    // MODULE: SeqKit split2
     //
     // Split FASTQ into chunks if requested for distributed processing
     // channel: [ meta_fastq_ready, fastq_fwd, fastq_fwd ]
@@ -101,27 +101,34 @@ workflow READ_ALIGNMENT_DNA {
     if (max_fastq_records.toInteger() > 0) {
 
         // Run process
-        FASTP_SPLIT(
+        SEQKIT_SPLIT2(
             ch_fastq_inputs,
             // NOTE(SW): required for strict syntax without params block declaration
             max_fastq_records.toInteger(),
         )
 
-        // NOTE(LN): the transpose operator pairs the R1 and R2 chunks by index, and also covers the single chunk case
-        // where fastp emits one file per read rather than a list
-        ch_fastqs_ready = channel.topic('fastp_split_fastq')
-            .transpose()
-            .map { meta_fastq, fwd, rev ->
+        ch_fastqs_ready = channel.topic('seqkit_split2_fastq')
+            .flatMap { meta_fastq, reads_fwd_input, reads_rev_input ->
 
-                def split_fwd = fwd.name.replaceAll('\\..+$', '')
-                def split_rev = rev.name.replaceAll('\\..+$', '')
+                def reads_fwd = reads_fwd_input instanceof List ? reads_fwd_input : [reads_fwd_input]
+                def reads_rev = reads_rev_input instanceof List ? reads_rev_input : [reads_rev_input]
 
-                assert split_fwd == split_rev
+                def data = [reads_fwd, reads_rev]
+                    .transpose()
+                    .collect { fwd, rev ->
 
-                // NOTE(SW): split allows meta_fastq_ready to be unique, which is required during reunite below
-                def meta_fastq_ready = meta_fastq + [id: "${meta_fastq.id}_${split_fwd}", split: split_fwd]
+                        def split_fwd = fwd.name.replaceAll(/^.+_R1\.split_(\d+)\.fastq\.gz$/, '$1')
+                        def split_rev = rev.name.replaceAll(/^.+_R2\.split_(\d+)\.fastq\.gz$/, '$1')
 
-                return [meta_fastq_ready, fwd, rev]
+                        assert split_fwd == split_rev
+
+                        // NOTE(SW): split allows meta_fastq_ready to be unique, which is required during reunite below
+                        def meta_fastq_ready = meta_fastq + [id: "${meta_fastq.id}_${split_fwd}", split: split_fwd]
+
+                        return [meta_fastq_ready, fwd, rev]
+                    }
+
+                return data
             }
 
     } else {

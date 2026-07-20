@@ -1,4 +1,4 @@
-name: fastp_umi
+name: fastp
 channels:
   - conda-forge
   - bioconda

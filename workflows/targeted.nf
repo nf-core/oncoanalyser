@@ -149,7 +149,6 @@ workflow TARGETED {
             ref_data.genome_bwamem2_index_rna,
             hmf_data.contigs_mapping_rna,
             hmf_data.unmap_regions_rna,
-            params.max_fastq_records,
         )
 
         ch_align_dna_tumor_out = ch_align_dna_tumor_out.mix(READ_ALIGNMENT_DNA.out.tumor)

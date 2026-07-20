@@ -3,7 +3,6 @@
 //
 
 include { BWAMEM2_ALIGN_RNA } from '../../../modules/local/bwa-mem2/mem/rna/main'
-include { FASTP_SPLIT       } from '../../../modules/local/fastp/split/main'
 include { TARS              } from '../../../modules/local/tars/main'
 
 workflow READ_ALIGNMENT_RNA {
@@ -20,9 +19,6 @@ workflow READ_ALIGNMENT_RNA {
     genome_bwamem2_index // channel: [mandatory] /path/to/genome_bwa-mem2_index_dir/
     contigs_mapping_rna  // channel: [mandatory] /path/to/contigs_mapping_rna
     unmap_regions_rna    // channel: [mandatory] /path/to/unmap_regions_rna
-
-    // Params
-    max_fastq_records    // numeric: [optional]  max number of FASTQ records per split
 
     main:
     //
@@ -72,49 +68,14 @@ workflow READ_ALIGNMENT_RNA {
         }
 
     //
-    // MODULE: fastp
+    // Prepare FASTQs for alignment
     //
-    // Split FASTQ into chunks if requested for distributed processing
-    // channel: [ meta_fastq_ready, fastq_fwd, fastq_fwd ]
-    ch_fastqs_ready = channel.empty()
-    // NOTE(SW): required for strict syntax without params block declaration
-    if (max_fastq_records.toInteger() > 0) {
-
-        // Run process
-        FASTP_SPLIT(
-            ch_fastq_inputs,
-            // NOTE(SW): required for strict syntax without params block declaration
-            max_fastq_records.toInteger(),
-        )
-
-        // NOTE(LN): the transpose operator pairs the R1 and R2 chunks by index, and also covers the single chunk case
-        // where fastp emits one file per read rather than a list
-        ch_fastqs_ready = channel.topic('fastp_split_fastq')
-            .transpose()
-            .map { meta_fastq, fwd, rev ->
-
-                def split_fwd = fwd.name.replaceAll('\\..+$', '')
-                def split_rev = rev.name.replaceAll('\\..+$', '')
-
-                assert split_fwd == split_rev
-
-                // NOTE(SW): split allows meta_fastq_ready to be unique, which is required during reunite below
-                def meta_fastq_ready = meta_fastq + [id: "${meta_fastq.id}_${split_fwd}", split: split_fwd]
-
-                return [meta_fastq_ready, fwd, rev]
-            }
-
-    } else {
-
-        ch_fastqs_ready = ch_fastq_inputs
-            .map { meta_fastq, fastq_fwd, fastq_rev ->
-
-                def meta_fastq_ready = meta_fastq + [split: null]
-
-                return [meta_fastq_ready, fastq_fwd, fastq_rev]
-            }
-
-    }
+    // channel: [ meta_fastq_ready, fastq_fwd, fastq_rev ]
+    ch_fastqs_ready = ch_fastq_inputs
+        .map { meta_fastq, fastq_fwd, fastq_rev ->
+            def meta_fastq_ready = meta_fastq + [split: null]
+            return [meta_fastq_ready, fastq_fwd, fastq_rev]
+        }
 
     //
     // MODULE: BWA-MEM2
