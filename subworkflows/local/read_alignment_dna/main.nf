@@ -3,7 +3,7 @@
 //
 
 include { BWAMEM2_ALIGN } from '../../../modules/local/bwa-mem2/mem/main'
-include { FASTP_SPLIT   } from '../../../modules/local/fastp/split/main'
+include { SEQKIT_SPLIT2 } from '../../../modules/nf-core/seqkit/split2/main'
 
 workflow READ_ALIGNMENT_DNA {
     take:
@@ -92,7 +92,7 @@ workflow READ_ALIGNMENT_DNA {
         }
 
     //
-    // MODULE: fastp
+    // MODULE: SeqKit split2
     //
     // Split FASTQ into chunks if requested for distributed processing
     // channel: [ meta_fastq_ready, fastq_fwd, fastq_fwd ]
@@ -101,14 +101,14 @@ workflow READ_ALIGNMENT_DNA {
     if (max_fastq_records.toInteger() > 0) {
 
         // Run process
-        FASTP_SPLIT(
+        SEQKIT_SPLIT2(
             ch_fastq_inputs,
             // NOTE(SW): required for strict syntax without params block declaration
             max_fastq_records.toInteger(),
         )
 
         // Now prepare according to FASTQs splitting
-        ch_fastqs_ready = channel.topic('fastp_split_fastq')
+        ch_fastqs_ready = channel.topic('seqkit_split2_fastq')
             .flatMap { meta_fastq, reads_fwd_input, reads_rev_input ->
 
                 def reads_fwd = reads_fwd_input instanceof List ? reads_fwd_input : [reads_fwd_input]
@@ -118,8 +118,8 @@ workflow READ_ALIGNMENT_DNA {
                     .transpose()
                     .collect { fwd, rev ->
 
-                        def split_fwd = fwd.name.replaceAll('\\..+$', '')
-                        def split_rev = rev.name.replaceAll('\\..+$', '')
+                        def split_fwd = fwd.name.replaceAll(/^.+_R1\.split_(\d+)\.fastq\.gz$/, '$1')
+                        def split_rev = rev.name.replaceAll(/^.+_R2\.split_(\d+)\.fastq\.gz$/, '$1')
 
                         assert split_fwd == split_rev
 
