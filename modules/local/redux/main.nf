@@ -17,20 +17,16 @@ process REDUX {
     path msi_jitter_sites
     path msi_model_coefficients
     path msi_model_error_rates
-    val sequencing_type
+    val sequencing_platform
+    val targeted_mode
     val umi_enable
     val umi_duplex_delim
     val generate_tsvs_only
-    val targeted_mode
 
     output:
-    tuple val(meta), path("redux_${meta.sample_id}/")                               , emit: dir
-
-    tuple val(meta), path("redux_${meta.sample_id}/${meta.sample_id}.redux.bam"),
-                     path("redux_${meta.sample_id}/${meta.sample_id}.redux.bam.bai"), emit: bam
-
-    path 'versions.yml', emit: versions
-    path '.command.*'  , emit: command_files
+    tuple val(meta), path("redux_${meta.sample_id}/"), emit: redux_dir
+    path 'versions.yml'                              , emit: versions
+    path '.command.*'                                , emit: command_files
 
     when:
     task.ext.when == null || task.ext.when
@@ -68,7 +64,7 @@ process REDUX {
         .findAll { it != '' }
         .join(' ')
 
-    if(sequencing_type == 'ULTIMA') {
+    if (sequencing_platform.toLowerCase() == 'ultima') {
         form_consensus_arg = ''
         skip_duplicate_marking_arg = '-skip_duplicate_marking'
     }
@@ -77,7 +73,10 @@ process REDUX {
         bqr_use_all_regions_arg = '-bqr_use_all_regions'
     }
 
-    if(generate_tsvs_only) {
+    if (generate_tsvs_only) {
+        assert [bams].flatten().size() == 1
+        assert [bais].flatten().size() == 1
+
         bqr_jitter_msi_only_arg = '-bqr_jitter_msi_only'
     }
 
@@ -99,7 +98,7 @@ process REDUX {
         -ref_genome_msi_file ${msi_jitter_sites} \\
         -unmap_regions ${unmap_regions} \\
         -bamtool \$(which samtools) \\
-        -sequencing_type ${sequencing_type} \\
+        -sequencing_type ${sequencing_platform.toUpperCase()} \\
         -bqr_write_plot \\
         ${msi_model_coefficients_arg} \\
         ${msi_model_error_rates_arg} \\

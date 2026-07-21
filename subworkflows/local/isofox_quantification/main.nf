@@ -2,6 +2,9 @@
 // Isofox estimates transcript abundance, detects novel SJs, and identifies fusion events
 //
 
+import Constants
+import Utils
+
 include { ISOFOX } from '../../../modules/local/isofox/run/main'
 
 workflow ISOFOX_QUANTIFICATION {
@@ -33,20 +36,20 @@ workflow ISOFOX_QUANTIFICATION {
     // channel: [ versions.yml ]
     ch_versions = Channel.empty()
 
-    // Select input sources and sort
+    // Select input sources then sort
     // channel: runnable: [ meta, tumor_bam, tumor_bai ]
     // channel: skip: [ meta ]
     ch_inputs_sorted = ch_tumor_rna_bam
         .map { meta, tumor_bam, tumor_bai ->
             return [
                 meta,
-                sample.Inputs.preferUserProvidedInput(tumor_bam, meta, sample.FileKey.BAM_RNA_TUMOR),
-                sample.Inputs.preferUserProvidedInput(tumor_bai, meta, sample.FileKey.BAI_RNA_TUMOR),
+                Utils.selectCurrentOrExisting(tumor_bam, meta, Constants.INPUT.BAM_RNA_TUMOR),
+                Utils.selectCurrentOrExisting(tumor_bai, meta, Constants.INPUT.BAI_RNA_TUMOR),
             ]
         }
         .branch { meta, tumor_bam, tumor_bai ->
-            def has_existing = sample.Inputs.hasExisting(meta, sample.FileKey.ISOFOX_DIR)
-            runnable: tumor_bam && !has_existing
+            def has_existing = Utils.hasExistingInput(meta, Constants.INPUT.ISOFOX_DIR)
+            runnable: tumor_bam && ! has_existing
             skip: true
                 return meta
         }
@@ -59,7 +62,7 @@ workflow ISOFOX_QUANTIFICATION {
             def meta_isofox = [
                 key: meta.group_id,
                 id: meta.group_id,
-                sample_id: sample.Inputs.getTumorRnaSampleOutputId(meta),
+                sample_id: Utils.getTumorDnaSampleName(meta) ?: Utils.getTumorRnaSampleName(meta),
             ]
 
             return [meta_isofox, tumor_bam, tumor_bai]
@@ -90,7 +93,7 @@ workflow ISOFOX_QUANTIFICATION {
     // channel: [ meta, isofox_dir ]
     ch_outputs = Channel.empty()
         .mix(
-            channels.WorkflowChannels.restoreMeta(ISOFOX.out.isofox_dir, ch_inputs),
+            WorkflowOncoanalyser.restoreMeta(ISOFOX.out.isofox_dir, ch_inputs),
             ch_inputs_sorted.skip.map { meta -> [meta, []] },
         )
 

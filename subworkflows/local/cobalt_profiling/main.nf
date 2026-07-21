@@ -2,49 +2,54 @@
 // COBALT calculates read ratios between tumor and normal samples
 //
 
+import Constants
+import Utils
+
 include { COBALT } from '../../../modules/local/cobalt/run/main'
 
 workflow COBALT_PROFILING {
     take:
     // Sample data
-    ch_inputs                   // channel: [mandatory] [ meta ]
-    ch_tumor_bam                // channel: [mandatory] [ meta, bam, bai ]
-    ch_normal_bam               // channel: [mandatory] [ meta, bam, bai ]
+    ch_inputs                    // channel: [mandatory] [ meta ]
+    ch_redux_dir_tumor           // channel: [mandatory] [ meta, redux_dir ]
+    ch_redux_dir_normal          // channel: [mandatory] [ meta, redux_dir ]
 
     // Reference data
-    genome_version              // channel: [mandatory] genome version
-    gc_profile                  // channel: [mandatory] /path/to/gc_profile
-    diploid_bed                 // channel: [optional]  /path/to/diploid_bed
-    target_region_normalisation // channel: [optional]  /path/to/target_region_normalisation
-    targeted_mode               // boolean: [mandatory] Set targeted mode
-    purity_estimate_mode        // boolean: [mandatory] Set purity estimate mode
+    genome_version               // channel: [mandatory] genome version
+    gc_profile                   // channel: [mandatory] /path/to/gc_profile
+    diploid_bed                  // channel: [optional]  /path/to/diploid_bed
+    target_regions_normalisation // channel: [optional]  /path/to/target_regions_normalisation
+    targeted_mode                // boolean: [mandatory] Set targeted mode
+    purity_estimate_mode         // boolean: [mandatory] Set purity estimate mode
 
     main:
     // Channel for version.yml files
     // channel: [ versions.yml ]
     ch_versions = Channel.empty()
 
-    // Select input sources and sort
+    // Select input sources then sort
     // NOTE(SW): germline mode is not currently supported
-    // channel: runnable: [ meta, tumor_bam, tumor_bai, normal_bam, normal_bai]
+    // channel: runnable: [ meta, tumor_bam, tumor_bai, normal_bam, normal_bai ]
     // channel: skip: [ meta ]
-    ch_inputs_sorted = channels.WorkflowChannels.groupByMeta(
-        ch_tumor_bam,
-        ch_normal_bam,
+    ch_inputs_sorted = WorkflowOncoanalyser.groupByMeta(
+        ch_redux_dir_tumor,
+        ch_redux_dir_normal,
     )
-        .map { meta, tumor_bam, tumor_bai, normal_bam, normal_bai ->
-            return [
-                meta,
-                sample.Inputs.preferUserProvidedInput(tumor_bam, meta, sample.FileKey.BAM_REDUX_DNA_TUMOR),
-                sample.Inputs.preferPipelineOutput(tumor_bai, meta, sample.FileKey.BAI_DNA_TUMOR),
-                sample.Inputs.preferUserProvidedInput(normal_bam, meta, sample.FileKey.BAM_REDUX_DNA_NORMAL),
-                sample.Inputs.preferPipelineOutput(normal_bai, meta, sample.FileKey.BAI_DNA_NORMAL),
-            ]
+        .map { meta, redux_dir_tumor, redux_dir_normal ->
+
+            def redux_dir_tumor_selected = Utils.selectCurrentOrExisting(redux_dir_tumor, meta, Constants.INPUT.REDUX_DIR_TUMOR)
+            def redux_dir_normal_selected = Utils.selectCurrentOrExisting(redux_dir_normal, meta, Constants.INPUT.REDUX_DIR_NORMAL)
+
+            def (tumor_bam, tumor_bai) = Utils.getTumorReduxDirAlignment(meta, redux_dir_tumor_selected)
+            def (normal_bam, normal_bai) = Utils.getNormalReduxDirAlignment(meta, redux_dir_normal_selected)
+
+            return [meta, tumor_bam, tumor_bai, normal_bam, normal_bai]
+
         }
         .branch { meta, tumor_bam, tumor_bai, normal_bam, normal_bai ->
-            def has_existing = sample.Inputs.hasExisting(meta, sample.FileKey.COBALT_DIR)
-            runnable_tn: tumor_bam && normal_bam && !has_existing
-            runnable_to: tumor_bam && !has_existing
+            def has_existing = Utils.hasExistingInput(meta, Constants.INPUT.COBALT_DIR)
+            runnable_tn: tumor_bam && normal_bam && ! has_existing
+            runnable_to: tumor_bam && ! has_existing
             skip: true
                 return meta
         }
@@ -59,14 +64,17 @@ workflow COBALT_PROFILING {
         )
 
     // Create process input channel
-    // channel: sample_data: [ meta_cobalt, tumor_bam, normal_bam, tumor_bai, normal_bai ]
+    // channel: sample_data: [ meta_cobalt, tumor_bam, tumor_bai, normal_bam, normal_bai ]
     // channel: diploid_bed: [ diploid_bed ]
     ch_cobalt_inputs = ch_inputs_runnable
         .multiMap { meta, tumor_bam, tumor_bai, normal_bam, normal_bai, diploid_bed ->
 
             def tumor_id = purity_estimate_mode
-               ? sample.Inputs.getTumorDnaSampleNameLongitudinal(meta)
-               : sample.Inputs.getTumorDnaSampleNamePrimary(meta)
+            if (purity_estimate_mode) {
+                tumor_id = Utils.getTumorDnaSampleName(meta, primary: false)
+            } else {
+                tumor_id = Utils.getTumorDnaSampleName(meta, primary: true)
+            }
 
             def meta_cobalt = [
                 key: meta.group_id,
@@ -75,10 +83,10 @@ workflow COBALT_PROFILING {
             ]
 
             if (normal_bam) {
-                meta_cobalt.normal_id = sample.Inputs.getNormalDnaSampleName(meta)
+                meta_cobalt.normal_id = Utils.getNormalDnaSampleName(meta)
             }
 
-            sample_data: [meta_cobalt, tumor_bam, normal_bam, tumor_bai, normal_bai]
+            sample_data: [meta_cobalt, tumor_bam, tumor_bai, normal_bam, normal_bai]
             diploid_bed: diploid_bed
         }
 
@@ -88,7 +96,7 @@ workflow COBALT_PROFILING {
         genome_version,
         gc_profile,
         ch_cobalt_inputs.diploid_bed,
-        target_region_normalisation,
+        target_regions_normalisation,
         targeted_mode,
     )
 
@@ -98,7 +106,7 @@ workflow COBALT_PROFILING {
     // channel: [ meta, cobalt_dir ]
     ch_outputs = Channel.empty()
         .mix(
-            channels.WorkflowChannels.restoreMeta(COBALT.out.cobalt_dir, ch_inputs),
+            WorkflowOncoanalyser.restoreMeta(COBALT.out.cobalt_dir, ch_inputs),
             ch_inputs_sorted.skip.map { meta -> [meta, []] },
         )
 

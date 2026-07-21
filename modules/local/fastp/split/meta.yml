@@ -1,4 +1,4 @@
-name: fastp
+name: fastp_split
 description: An ultra-fast all-in-one FASTQ preprocessor
 keywords:
   - fastp
@@ -28,15 +28,6 @@ input:
   - max_fastq_records:
       type: integer
       description: Maximum number of reads per file (optional)
-  - umi_location:
-      type: string
-      description: UMI location type (optional)
-  - umi_length:
-      type: integer
-      description: UMI length (optional)
-  - umi_skip:
-      type: integer
-      description: UMI base skip (optional)
 output:
   - meta:
       type: map
@@ -47,13 +38,13 @@ output:
       type: list
       description: Forward and reverse FASTQ files
       pattern: "*.{fastq.gz}"
+  - command_files:
+      type: list
+      description: List of command files
   - versions:
       type: file
       description: File containing software versions
       pattern: "versions.yml"
-  - command_files:
-      type: list
-      description: List of command files
 authors:
   - "@scwatts"
   - "@mkcmkc"

@@ -11,10 +11,15 @@ process SAGE_VISUALISER {
 
     input:
     tuple val(meta),
-        path(tumor_bam), path(normal_bam), path(donor_bam),
-        path(tumor_bai), path(normal_bai), path(donor_bai),
+        path(tumor_bam),
+        path(normal_bam),
+        path(donor_bam),
+        path(tumor_bai),
+        path(normal_bai),
+        path(donor_bai),
         path(redux_tsvs),
-        path(purple_vcf), path(purple_vcf_tbi)
+        path(purple_vcf),
+        path(purple_vcf_tbi)
     path genome_fasta
     val genome_ver
     path genome_fai
@@ -26,7 +31,7 @@ process SAGE_VISUALISER {
     val targeted_mode
 
     output:
-    tuple val(meta), path('sage_vis/'), emit: sage_vis_dir
+    tuple val(meta), path('sage_vis/'), emit: sage_visualiser_dir
     path 'versions.yml'               , emit: versions
     path '.command.*'                 , emit: command_files
 
@@ -38,12 +43,16 @@ process SAGE_VISUALISER {
 
     def log_level_arg = task.ext.log_level ? "-log_level ${task.ext.log_level}" : ''
 
-    def reference_ids = [meta.normal_id, meta.donor_id].findAll { it }
-    def reference_bams = [normal_bam, donor_bam].findAll { it }.collect { it.toString() }
+    def reference_ids = []
+    if (meta.containsKey('normal_id')) { reference_ids.add(meta.normal_id) }
+    if (meta.containsKey('donor_id')) { reference_ids.add(meta.donor_id) }
+    def reference_arg = reference_ids.size() > 0 ? "-reference ${reference_ids.join(',')}" : ''
+    def ref_sample_count_arg = reference_ids.size() > 0 ? "-ref_sample_count ${reference_ids.size()}" : ''
 
-    def reference_arg = reference_ids ? "-reference ${reference_ids.join(',')}" : ''
-    def reference_bam_arg = reference_bams ? "-reference_bam ${reference_bams.join(',')}" : ''
-    def ref_sample_count_arg = reference_ids ? "-ref_sample_count ${reference_ids.size()}" : ''
+    def reference_alns = []
+    if (normal_bam) { reference_alns.add(normal_bam.toString()) }
+    if (donor_bam) { reference_alns.add(donor_bam.toString()) }
+    def reference_bam_arg = reference_alns.size() > 0 ? "-reference_bam ${reference_alns.join(',')}" : ''
 
     def include_mt_arg = targeted_mode ? '' : '-include_mt'
 
@@ -66,10 +75,10 @@ process SAGE_VISUALISER {
         ${include_mt_arg} \\
         -vis_purple_vcf ${purple_vcf} \\
         -vis_output_dir sage_vis/ \\
-        -output_vcf sage_vis/${meta.tumor_id}.sage.vis.vcf.gz \\
         -threads ${task.cpus} \\
-        ${log_level_arg}
-        
+        ${log_level_arg} \\
+        -output_vcf sage_vis/${meta.tumor_id}.sage.vis.vcf.gz
+
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":
         sage: \$(sage -version | sed 's/^.* //')

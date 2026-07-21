@@ -9,16 +9,16 @@ process ORANGE {
 
     input:
     tuple val(meta),
-        path(sage_somatic_dir, stageAs: 'sage_somatic'),
-        path(sage_germline_dir, stageAs: 'sage_germline'),
-        path(smlv_somatic_vcf),
-        path(smlv_germline_vcf),
-        path(sage_vis_dir),
+        path(sage_dir_somatic, stageAs: 'sage_somatic'),
+        path(sage_dir_germline, stageAs: 'sage_germline'),
+        path(smlv_vcf_somatic),
+        path(smlv_vcf_germline),
+        path(sage_plot_dir_somatic),
         path(purple_dir),
         path(qsee_dir),
-        path(linx_somatic_anno_dir),
-        path(linx_somatic_plot_dir),
-        path(linx_germline_anno_dir),
+        path(linx_annotation_dir_somatic),
+        path(linx_plot_dir_reportable_somatic),
+        path(linx_annotation_dir_germline),
         path(virusinterpreter_dir),
         path(chord_dir),
         path(sigs_dir),
@@ -29,7 +29,7 @@ process ORANGE {
     val genome_ver
     path disease_ontology
     val pipeline_version
-    val sequencing_type
+    val sequencing_platform
     val targeted_mode
 
     output:
@@ -50,18 +50,13 @@ process ORANGE {
 
     def pipeline_version_str = pipeline_version ?: 'not specified'
     def experiment_type = targeted_mode ? 'PANEL' : 'WGS'
-    def cancer_type_arg = meta.cancer_type ? "-primary_tumor_location ${meta.cancer_type}" : ''
+    def primary_tumor_location_arg = meta.cancer_type ? "-primary_tumor_location ${meta.cancer_type}" : ''
 
-    // Tumor sample
-    def linx_plot_dir = linx_somatic_plot_dir.resolve('reportable/').toUriString().replaceAll('/$', '')
+    def reference_arg = meta.containsKey('normal_dna_id') ? "-reference ${meta.normal_dna_id}" : ''
+    def sage_germline_dir_arg = sage_dir_germline ? "-sage_germline_dir ${sage_dir_germline}" : ''
+    def linx_germline_dir_arg = linx_annotation_dir_germline ? "-linx_germline_dir ${linx_annotation_dir_germline}" : ''
 
-    // Normal sample
-    def normal_id_arg = meta.containsKey('normal_dna_id') ? "-reference ${meta.normal_dna_id}" : ''
-    def normal_sage_dir_arg = sage_germline_dir ? "-sage_germline_dir ${sage_germline_dir}" : ''
-    def normal_linx_arg = linx_germline_anno_dir ? "-linx_germline_dir ${linx_germline_anno_dir}" : ''
-
-    // Optional tools
-    def sage_vis_dir_arg = sage_vis_dir ? "-sage_plot_dir ${sage_vis_dir}" : ''
+    def sage_plot_dir_arg = sage_plot_dir_somatic ? "-sage_plot_dir ${sage_plot_dir_somatic}" : ''
     def virus_dir_arg = virusinterpreter_dir ? "-virus_dir ${virusinterpreter_dir}" : ''
     def lilac_dir_arg = lilac_dir ? "-lilac_dir ${lilac_dir}" : ''
     def chord_dir_arg = chord_dir ? "-chord_dir ${chord_dir}" : ''
@@ -69,8 +64,7 @@ process ORANGE {
     def cuppa_dir_arg = cuppa_dir ? "-cuppa_dir ${cuppa_dir}" : ''
     def peach_dir_arg = peach_dir ? "-peach_dir ${peach_dir}" : ''
 
-    // RNA sample
-    def rna_id_arg = meta.containsKey('tumor_rna_id') ? "-rna_sample_id ${meta.tumor_rna_id}" : ''
+    def rna_sample_id_arg = meta.containsKey('tumor_rna_id') ? "-rna_sample_id ${meta.tumor_rna_id}" : ''
     def isofox_dir_arg = isofox_dir ? "-isofox_dir ${isofox_dir}" : ''
 
     """
@@ -85,7 +79,7 @@ process ORANGE {
     # NOTES(SW): Use of symlinks was causing reliability issues on HPC with Singularity, switched to full file copy instead
 
     purple_dir_local=${purple_dir}
-    if [[ -n "${rna_id_arg}" ]]; then
+    if [[ -n "${rna_sample_id_arg}" ]]; then
 
         purple_dir_local=purple__prepared;
 
@@ -94,17 +88,17 @@ process ORANGE {
         fi
 
         cp -rL ${purple_dir} \${purple_dir_local}/
-        cp -L ${smlv_somatic_vcf} \${purple_dir_local}/${meta.tumor_id}.purple.somatic.vcf.gz;
+        cp -L ${smlv_vcf_somatic} \${purple_dir_local}/${meta.tumor_id}.purple.somatic.vcf.gz;
 
-        if [[ -n "${smlv_germline_vcf}" ]]; then
-            cp -L ${smlv_germline_vcf} \${purple_dir_local}/${meta.tumor_id}.purple.germline.vcf.gz;
+        if [[ -n "${smlv_vcf_germline}" ]]; then
+            cp -L ${smlv_vcf_germline} \${purple_dir_local}/${meta.tumor_id}.purple.germline.vcf.gz;
         fi;
 
     fi
 
     # Set input plot directory and create it doesn't exist. See the LINX visualiser module for further info.
-    if [[ ! -e ${linx_plot_dir}/ ]]; then
-        mkdir -p ${linx_plot_dir}/;
+    if [[ ! -e ${linx_plot_dir_reportable_somatic}/ ]]; then
+        mkdir -p ${linx_plot_dir_reportable_somatic}/;
     fi;
 
     mkdir -p output/
@@ -116,22 +110,22 @@ process ORANGE {
         -add_disclaimer \\
         -pipeline_version_file pipeline_version.txt \\
         -experiment_type ${experiment_type} \\
-        -sequencing_type ${sequencing_type} \\
-        ${cancer_type_arg} \\
+        -sequencing_type ${sequencing_platform.toUpperCase()} \\
+        ${primary_tumor_location_arg} \\
         \\
         -tumor ${meta.tumor_id} \\
-        -sage_dir ${sage_somatic_dir} \\
+        -sage_dir ${sage_dir_somatic} \\
         -purple_dir \${purple_dir_local} \\
         -purple_plot_dir \${purple_dir_local}/plot/ \\
         -qsee_dir ${qsee_dir} \\
-        -linx_dir ${linx_somatic_anno_dir} \\
-        -linx_plot_dir ${linx_plot_dir}/ \\
+        -linx_dir ${linx_annotation_dir_somatic} \\
+        -linx_plot_dir ${linx_plot_dir_reportable_somatic}/ \\
         \\
-        ${normal_id_arg} \\
-        ${normal_sage_dir_arg} \\
-        ${normal_linx_arg} \\
+        ${reference_arg} \\
+        ${sage_germline_dir_arg} \\
+        ${linx_germline_dir_arg} \\
         \\
-        ${sage_vis_dir_arg} \\
+        ${sage_plot_dir_arg} \\
         ${virus_dir_arg} \\
         ${lilac_dir_arg} \\
         ${chord_dir_arg} \\
@@ -139,7 +133,7 @@ process ORANGE {
         ${cuppa_dir_arg} \\
         ${peach_dir_arg} \\
         \\
-        ${rna_id_arg} \\
+        ${rna_sample_id_arg} \\
         ${isofox_dir_arg} \\
         \\
         -ref_genome_version ${genome_ver} \\

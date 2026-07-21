@@ -17,14 +17,13 @@ process SAGE_GERMLINE {
     path sage_highconf_regions
     path driver_gene_panel
     path ensembl_data_resources
-    val sequencing_type
+    val sequencing_platform
     val targeted_mode
 
     output:
-    tuple val(meta), path('germline/*.sage.germline.vcf.gz'), path('germline/*.sage.germline.vcf.gz.tbi'), emit: vcf
-    tuple val(meta), path('germline/')                                                                   , emit: sage_dir
-    path 'versions.yml'                                                                                  , emit: versions
-    path '.command.*'                                                                                    , emit: command_files
+    tuple val(meta), path('germline/'), emit: sage_dir
+    path 'versions.yml'               , emit: versions
+    path '.command.*'                 , emit: command_files
 
     when:
     task.ext.when == null || task.ext.when
@@ -53,7 +52,7 @@ process SAGE_GERMLINE {
         -driver_gene_panel ${driver_gene_panel} \\
         -high_confidence_bed ${sage_highconf_regions} \\
         -ensembl_data_dir ${ensembl_data_resources} \\
-        -sequencing_type ${sequencing_type} \\
+        -sequencing_type ${sequencing_platform.toUpperCase()} \\
         -germline \\
         -panel_only \\
         ${high_depth_mode_arg} \\

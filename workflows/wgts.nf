@@ -1,3 +1,7 @@
+import Constants
+import Processes
+import Utils
+
 /*
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     IMPORT MODULES / SUBWORKFLOWS / FUNCTIONS
@@ -24,6 +28,7 @@ include { PURPLE_CALLING        } from '../subworkflows/local/purple_calling'
 include { QSEE_METRICS          } from '../subworkflows/local/qsee_metrics'
 include { READ_ALIGNMENT_DNA    } from '../subworkflows/local/read_alignment_dna'
 include { READ_ALIGNMENT_RNA    } from '../subworkflows/local/read_alignment_rna'
+include { READ_UMI_PROCESSING   } from '../subworkflows/local/read_umi_processing'
 include { REDUX_PROCESSING      } from '../subworkflows/local/redux_processing'
 include { SAGE_APPEND           } from '../subworkflows/local/sage_append'
 include { SAGE_CALLING          } from '../subworkflows/local/sage_calling'
@@ -34,6 +39,9 @@ include { VIRUSBREAKEND_CALLING } from '../subworkflows/local/virusbreakend_call
 
 include { softwareVersionsToYAML } from '../subworkflows/nf-core/utils_nfcore_pipeline'
 
+include { getDnaFastqChannel } from '../subworkflows/local/utils_nfcore_oncoanalyser_pipeline'
+include { getRnaFastqChannel } from '../subworkflows/local/utils_nfcore_oncoanalyser_pipeline'
+
 /*
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     RUN MAIN WORKFLOW
@@ -43,10 +51,9 @@ include { softwareVersionsToYAML } from '../subworkflows/nf-core/utils_nfcore_pi
 workflow WGTS {
     take:
     inputs
-    stages
+    run_config
 
     main:
-
     // Create channel for versions
     // channel: [ versions.yml ]
     ch_versions = Channel.empty()
@@ -56,18 +63,25 @@ workflow WGTS {
     ch_inputs = Channel.fromList(inputs)
 
     // Set up reference data, assign more human readable variables
+    def prep_config = WorkflowMain.getPrepConfigFromSamplesheet(run_config)
     PREPARE_REFERENCE(
-        false, // prepare_reference_only
-        inputs,
-        stages,
+        prep_config,
+        run_config,
     )
-    ref_data = PREPARE_REFERENCE.out
-    hmf_data = PREPARE_REFERENCE.out.hmf_data
 
     ch_versions = ch_versions.mix(PREPARE_REFERENCE.out.versions)
 
-    // Set GRIDSS config
-    gridss_config = params.gridss_config !== null ? file(params.gridss_config) : hmf_data.gridss_config
+    def ref_data = PREPARE_REFERENCE.out
+    def hmf_data = PREPARE_REFERENCE.out.hmf_data
+
+    // Configure selectable reference data and inputs
+    def hmf_data_pons = Utils.getSequencingPlatformPons(hmf_data, params.sequencing_platform)
+    def driver_gene_panel = params.driver_gene_panel != null ? file(params.driver_gene_panel) : hmf_data.driver_gene_panel
+    def gridss_config = params.gridss_config != null ? file(params.gridss_config) : hmf_data.gridss_config
+
+    def isofox_counts = params.isofox_counts ? file(params.isofox_counts) : hmf_data.isofox_counts
+    def isofox_gc_ratios = params.isofox_gc_ratios ? file(params.isofox_gc_ratios) : hmf_data.isofox_gc_ratios
+    def isofox_read_length = params.isofox_read_length !== null ? params.isofox_read_length : Constants.DEFAULT_ISOFOX_READ_LENGTH_WTS
 
     //
     // SUBWORKFLOW: Run read alignment to generate BAMs
@@ -77,28 +91,24 @@ workflow WGTS {
     ch_align_dna_normal_out = Channel.empty()
     ch_align_dna_donor_out = Channel.empty()
     ch_align_rna_tumor_out = Channel.empty()
-    if (stages.alignment) {
+    if (run_config.stages.alignment) {
+
+        // channel: [ meta, fastq_info, fastq_fwd, fastq_rev ]
+        ch_fastq_dna = getDnaFastqChannel(ch_inputs)
+        ch_fastq_rna = getRnaFastqChannel(ch_inputs)
 
         READ_ALIGNMENT_DNA(
             ch_inputs,
+            ch_fastq_dna,
             ref_data.genome_fasta,
             ref_data.genome_bwamem2_index,
-            [],  // known_umis
             params.max_fastq_records,
-            false,  // fastp_umi_enabled
-            '',     // fastp_umi_location
-            0,      // fastp_umi_length
-            -1,     // fastp_umi_skip
-            false,  // fastq_tools_umi_enabled
-            '',     // fastq_tools_umi_duplex_delim
         )
 
         READ_ALIGNMENT_RNA(
             ch_inputs,
+            ch_fastq_rna,
             ref_data.genome_star_index,
-            [],    // known_umis
-            false, // fastq_tools_umi_enabled
-            '',    // fastq_tools_umi_duplex_delim
         )
 
         ch_versions = ch_versions.mix(
@@ -106,34 +116,30 @@ workflow WGTS {
             READ_ALIGNMENT_RNA.out.versions,
         )
 
-        ch_align_dna_tumor_out = ch_align_dna_tumor_out.mix(READ_ALIGNMENT_DNA.out.dna_tumor)
-        ch_align_dna_normal_out = ch_align_dna_normal_out.mix(READ_ALIGNMENT_DNA.out.dna_normal)
-        ch_align_dna_donor_out = ch_align_dna_donor_out.mix(READ_ALIGNMENT_DNA.out.dna_donor)
-        ch_align_rna_tumor_out = ch_align_rna_tumor_out.mix(READ_ALIGNMENT_RNA.out.rna_tumor)
+        ch_align_dna_tumor_out = ch_align_dna_tumor_out.mix(READ_ALIGNMENT_DNA.out.tumor)
+        ch_align_dna_normal_out = ch_align_dna_normal_out.mix(READ_ALIGNMENT_DNA.out.normal)
+        ch_align_dna_donor_out = ch_align_dna_donor_out.mix(READ_ALIGNMENT_DNA.out.donor)
+
+        ch_align_rna_tumor_out = ch_align_rna_tumor_out.mix(READ_ALIGNMENT_RNA.out.tumor)
 
     } else {
 
         ch_align_dna_tumor_out = ch_inputs.map { meta -> [meta, [], []] }
         ch_align_dna_normal_out = ch_inputs.map { meta -> [meta, [], []] }
         ch_align_dna_donor_out = ch_inputs.map { meta -> [meta, [], []] }
+
         ch_align_rna_tumor_out = ch_inputs.map { meta -> [meta, [], []] }
 
     }
 
     //
-    // SUBWORKFLOW: Run REDUX for DNA BAMs
+    // SUBWORKFLOW: Run REDUX for DNA alignments
     //
-    // channel: [ meta, bam, bai ]
-    ch_redux_dna_tumor_bam_out = Channel.empty()
-    ch_redux_dna_normal_bam_out = Channel.empty()
-    ch_redux_dna_donor_bam_out = Channel.empty()
-
-    // channel: [ meta, dir ]
-    ch_redux_dna_tumor_dir_out = Channel.empty()
-    ch_redux_dna_normal_dir_out = Channel.empty()
-    ch_redux_dna_donor_dir_out = Channel.empty()
-
-    if (stages.redux) {
+    // channel: [ meta, redux_dir ]
+    ch_redux_tumor_out = Channel.empty()
+    ch_redux_normal_out = Channel.empty()
+    ch_redux_donor_out = Channel.empty()
+    if (run_config.stages.redux) {
 
         REDUX_PROCESSING(
             ch_inputs,
@@ -148,77 +154,64 @@ workflow WGTS {
             hmf_data.msi_jitter_sites,
             [],  // msi_model_coefficients
             [],  // msi_model_error_rates
-            params.sequencing_type,
+            params.sequencing_platform,
+            false,  // targeted_mode
             false,  // umi_enable
             '',  // umi_duplex_delim
             params.redux_generate_tsvs_only,
-            false,  // targeted_mode,
         )
 
         ch_versions = ch_versions.mix(REDUX_PROCESSING.out.versions)
 
-        ch_redux_dna_tumor_bam_out = ch_redux_dna_tumor_bam_out.mix(REDUX_PROCESSING.out.dna_tumor_bam)
-        ch_redux_dna_normal_bam_out = ch_redux_dna_normal_bam_out.mix(REDUX_PROCESSING.out.dna_normal_bam)
-        ch_redux_dna_donor_bam_out = ch_redux_dna_donor_bam_out.mix(REDUX_PROCESSING.out.dna_donor_bam)
-
-        ch_redux_dna_tumor_dir_out = ch_redux_dna_tumor_dir_out.mix(REDUX_PROCESSING.out.dna_tumor_dir)
-        ch_redux_dna_normal_dir_out = ch_redux_dna_normal_dir_out.mix(REDUX_PROCESSING.out.dna_normal_dir)
-        ch_redux_dna_donor_dir_out = ch_redux_dna_donor_dir_out.mix(REDUX_PROCESSING.out.dna_donor_dir)
+        ch_redux_tumor_out = ch_redux_tumor_out.mix(REDUX_PROCESSING.out.tumor_dir)
+        ch_redux_normal_out = ch_redux_normal_out.mix(REDUX_PROCESSING.out.normal_dir)
+        ch_redux_donor_out = ch_redux_donor_out.mix(REDUX_PROCESSING.out.donor_dir)
 
     } else {
 
-        ch_redux_dna_tumor_bam_out = ch_inputs.map { meta -> [meta, [], []] }
-        ch_redux_dna_normal_bam_out = ch_inputs.map { meta -> [meta, [], []] }
-        ch_redux_dna_donor_bam_out = ch_inputs.map { meta -> [meta, [], []] }
-
-        ch_redux_dna_tumor_dir_out = ch_inputs.map { meta -> [meta, []] }
-        ch_redux_dna_normal_dir_out = ch_inputs.map { meta -> [meta, []] }
-        ch_redux_dna_donor_dir_out = ch_inputs.map { meta -> [meta, []] }
+        ch_redux_tumor_out = ch_inputs.map { meta -> [meta, []] }
+        ch_redux_normal_out = ch_inputs.map { meta -> [meta, []] }
+        ch_redux_donor_out = ch_inputs.map { meta -> [meta, []] }
 
     }
 
     //
     // SUBWORKFLOW: Run Bam Tools to generate stats required for downstream processes
     //
-    // channel: [ meta, metrics_dir ]
-    ch_bamtools_somatic_out = Channel.empty()
-    ch_bamtools_germline_out = Channel.empty()
-    if (stages.bamtools) {
+    // channel: [ meta, bamtools_dir ]
+    ch_bamtools_tumor_out = Channel.empty()
+    ch_bamtools_normal_out = Channel.empty()
+    if (run_config.stages.bamtools) {
 
         BAMTOOLS_METRICS(
             ch_inputs,
-            ch_redux_dna_tumor_bam_out,
-            ch_redux_dna_normal_bam_out,
+            ch_redux_tumor_out,
+            ch_redux_normal_out,
             ref_data.genome_fasta,
             ref_data.genome_version,
-            hmf_data.driver_gene_panel,
+            driver_gene_panel,
             hmf_data.ensembl_data_resources,
-            [], // target_region_bed
+            [],  // target_regions_bed
         )
 
         ch_versions = ch_versions.mix(BAMTOOLS_METRICS.out.versions)
 
-        ch_bamtools_somatic_out = ch_bamtools_somatic_out.mix(BAMTOOLS_METRICS.out.somatic)
-        ch_bamtools_germline_out = ch_bamtools_germline_out.mix(BAMTOOLS_METRICS.out.germline)
+        ch_bamtools_tumor_out = ch_bamtools_tumor_out.mix(BAMTOOLS_METRICS.out.tumor_dir)
+        ch_bamtools_normal_out = ch_bamtools_normal_out.mix(BAMTOOLS_METRICS.out.normal_dir)
 
     } else {
 
-        ch_bamtools_somatic_out = ch_inputs.map { meta -> [meta, []] }
-        ch_bamtools_germline_out = ch_inputs.map { meta -> [meta, []] }
+        ch_bamtools_tumor_out = ch_inputs.map { meta -> [meta, []] }
+        ch_bamtools_normal_out = ch_inputs.map { meta -> [meta, []] }
 
     }
 
     //
     // MODULE: Run Isofox to analyse RNA data
     //
-
-    isofox_counts = params.isofox_counts ? file(params.isofox_counts) : hmf_data.isofox_counts
-    isofox_gc_ratios = params.isofox_gc_ratios ? file(params.isofox_gc_ratios) : hmf_data.isofox_gc_ratios
-    isofox_read_length = params.isofox_read_length !== null ? params.isofox_read_length : pipeline.Constants.DEFAULT_ISOFOX_READ_LENGTH_WTS
-
     // channel: [ meta, isofox_dir ]
     ch_isofox_out = Channel.empty()
-    if (stages.isofox) {
+    if (run_config.stages.isofox) {
 
         ISOFOX_QUANTIFICATION(
             ch_inputs,
@@ -227,7 +220,7 @@ workflow WGTS {
             ref_data.genome_version,
             ref_data.genome_fai,
             hmf_data.ensembl_data_resources,
-            hmf_data.driver_gene_panel,
+            driver_gene_panel,
             hmf_data.known_fusion_data,
             hmf_data.isofox_excluded_regions,
             hmf_data.isofox_gene_distribution,
@@ -254,18 +247,18 @@ workflow WGTS {
     //
     // channel: [ meta, amber_dir ]
     ch_amber_out = Channel.empty()
-    if (stages.amber) {
+    if (run_config.stages.amber) {
 
         AMBER_PROFILING(
             ch_inputs,
-            ch_redux_dna_tumor_bam_out,
-            ch_redux_dna_normal_bam_out,
-            ch_redux_dna_donor_bam_out,
+            ch_redux_tumor_out,
+            ch_redux_normal_out,
+            ch_redux_donor_out,
             ref_data.genome_version,
             hmf_data.heterozygous_sites,
-            [],  // target_region_bed
+            [],  // target_regions_bed
             [],  // tumor_min_depth
-            params.sequencing_type,
+            params.sequencing_platform,
             false,  // purity_estimate_mode
         )
 
@@ -284,16 +277,16 @@ workflow WGTS {
     //
     // channel: [ meta, cobalt_dir ]
     ch_cobalt_out = Channel.empty()
-    if (stages.cobalt) {
+    if (run_config.stages.cobalt) {
 
         COBALT_PROFILING(
             ch_inputs,
-            ch_redux_dna_tumor_bam_out,
-            ch_redux_dna_normal_bam_out,
+            ch_redux_tumor_out,
+            ch_redux_normal_out,
             ref_data.genome_version,
             hmf_data.gc_profile,
             hmf_data.diploid_bed,
-            [],  // panel_target_region_normalisation
+            [],  // panel_target_regions_normalisation
             false,  // targeted_mode
             false,  // purity_estimate_mode
         )
@@ -313,25 +306,25 @@ workflow WGTS {
     //
     // channel: [ meta, esvee_dir ]
     ch_esvee_out = Channel.empty()
-    if (stages.esvee) {
+    if (run_config.stages.esvee) {
 
         ESVEE_CALLING(
             ch_inputs,
-            ch_redux_dna_tumor_bam_out,
-            ch_redux_dna_normal_bam_out,
+            ch_redux_tumor_out,
+            ch_redux_normal_out,
             ref_data.genome_fasta,
             ref_data.genome_version,
             ref_data.genome_fai,
             ref_data.genome_dict,
             ref_data.genome_img,
             hmf_data.known_fusions,
-            hmf_data.esvee_pon_breakends,
-            hmf_data.esvee_pon_breakpoints,
+            hmf_data_pons.esvee_breakends,
+            hmf_data_pons.esvee_breakpoints,
             hmf_data.decoy_sequences_image,
             hmf_data.repeatmasker_annotations,
             hmf_data.unmap_regions,
-            [],  // target_region_bed
-            params.sequencing_type,
+            [],  // target_regions_bed
+            params.sequencing_platform,
         )
 
         ch_versions = ch_versions.mix(ESVEE_CALLING.out.versions)
@@ -348,44 +341,41 @@ workflow WGTS {
     // SUBWORKFLOW: Call SNV, MNV, and small INDELS with SAGE
     //
     // channel: [ meta, sage_dir ]
-    ch_sage_germline_dir_out = Channel.empty()
-    ch_sage_somatic_dir_out = Channel.empty()
-    if (stages.sage) {
+    ch_sage_germline_out = Channel.empty()
+    ch_sage_somatic_out = Channel.empty()
+    if (run_config.stages.sage) {
 
         SAGE_CALLING(
             ch_inputs,
-            ch_redux_dna_tumor_bam_out,
-            ch_redux_dna_normal_bam_out,
-            ch_redux_dna_donor_bam_out,
-            ch_redux_dna_tumor_dir_out,
-            ch_redux_dna_normal_dir_out,
-            ch_redux_dna_donor_dir_out,
+            ch_redux_tumor_out,
+            ch_redux_normal_out,
+            ch_redux_donor_out,
             ref_data.genome_fasta,
             ref_data.genome_version,
             ref_data.genome_fai,
             ref_data.genome_dict,
-            hmf_data.sage_pon,
+            hmf_data_pons.sage,
             hmf_data.sage_known_hotspots_somatic,
             hmf_data.sage_known_hotspots_germline,
             hmf_data.sage_highconf_regions,
             hmf_data.segment_mappability,
-            hmf_data.driver_gene_panel,
+            driver_gene_panel,
             hmf_data.ensembl_data_resources,
             hmf_data.gnomad_resource,
-            params.sequencing_type,
+            params.sequencing_platform,
+            false,  // targeted_mode
             true,  // enable_germline
-            false, // targeted_mode
         )
 
         ch_versions = ch_versions.mix(SAGE_CALLING.out.versions)
 
-        ch_sage_germline_dir_out = ch_sage_germline_dir_out.mix(SAGE_CALLING.out.germline_dir)
-        ch_sage_somatic_dir_out = ch_sage_somatic_dir_out.mix(SAGE_CALLING.out.somatic_dir)
+        ch_sage_germline_out = ch_sage_germline_out.mix(SAGE_CALLING.out.germline_dir)
+        ch_sage_somatic_out = ch_sage_somatic_out.mix(SAGE_CALLING.out.somatic_dir)
 
     } else {
 
-        ch_sage_germline_dir_out = ch_inputs.map { meta -> [meta, []] }
-        ch_sage_somatic_dir_out = ch_inputs.map { meta -> [meta, []] }
+        ch_sage_germline_out = ch_inputs.map { meta -> [meta, []] }
+        ch_sage_somatic_out = ch_inputs.map { meta -> [meta, []] }
 
     }
 
@@ -395,31 +385,31 @@ workflow WGTS {
     // channel: [ meta, pave_dir ]
     ch_pave_germline_out = Channel.empty()
     ch_pave_somatic_out = Channel.empty()
-    if (stages.pave) {
+    if (run_config.stages.pave) {
 
         PAVE_ANNOTATION(
             ch_inputs,
-            ch_sage_germline_dir_out,
-            ch_sage_somatic_dir_out,
+            ch_sage_somatic_out,
+            ch_sage_germline_out,
             ref_data.genome_fasta,
             ref_data.genome_version,
             ref_data.genome_fai,
             [],  // sage_pon_artefacts
-            hmf_data.sage_pon,
+            hmf_data_pons.sage,
             hmf_data.sage_blocklist_regions,
             hmf_data.sage_blocklist_sites,
             hmf_data.clinvar_annotations,
             hmf_data.segment_mappability,
-            hmf_data.driver_gene_panel,
+            driver_gene_panel,
             hmf_data.ensembl_data_resources,
             hmf_data.gnomad_resource,
-            params.sequencing_type,
+            params.sequencing_platform,
         )
 
         ch_versions = ch_versions.mix(PAVE_ANNOTATION.out.versions)
 
-        ch_pave_germline_out = ch_pave_germline_out.mix(PAVE_ANNOTATION.out.germline)
-        ch_pave_somatic_out = ch_pave_somatic_out.mix(PAVE_ANNOTATION.out.somatic)
+        ch_pave_germline_out = ch_pave_germline_out.mix(PAVE_ANNOTATION.out.germline_dir)
+        ch_pave_somatic_out = ch_pave_somatic_out.mix(PAVE_ANNOTATION.out.somatic_dir)
 
     } else {
 
@@ -433,7 +423,7 @@ workflow WGTS {
     //
     // channel: [ meta, purple_dir ]
     ch_purple_out = Channel.empty()
-    if (stages.purple) {
+    if (run_config.stages.purple) {
 
         PURPLE_CALLING(
             ch_inputs,
@@ -442,7 +432,7 @@ workflow WGTS {
             ch_esvee_out,
             ch_pave_somatic_out,
             ch_pave_germline_out,
-            ch_inputs.map { meta -> [meta, []] }, // redux_dir_tumor
+            ch_inputs.map { meta -> [meta, []] },  // ch_redux_dir_tumor
             ref_data.genome_fasta,
             ref_data.genome_version,
             ref_data.genome_fai,
@@ -450,10 +440,10 @@ workflow WGTS {
             hmf_data.gc_profile,
             hmf_data.sage_known_hotspots_somatic,
             hmf_data.sage_known_hotspots_germline,
-            hmf_data.driver_gene_panel,
+            driver_gene_panel,
             hmf_data.ensembl_data_resources,
             hmf_data.germline_amp_del_freq,
-            [],  // target_region_bed
+            [],  // target_regions_bed
         )
 
         ch_versions = ch_versions.mix(PURPLE_CALLING.out.versions)
@@ -467,24 +457,24 @@ workflow WGTS {
     }
 
     //
-    // SUBWORKFLOW: QC metrics
+    // SUBWORKFLOW: Collect and sumamrise QC metrics with Qsee
     //
     // channel: [ meta, qsee_dir ]
     ch_qsee_out = Channel.empty()
-    if (stages.qsee) {
+    if (run_config.stages.qsee) {
 
         QSEE_METRICS(
             ch_inputs,
-            ch_redux_dna_tumor_dir_out,
-            ch_redux_dna_normal_dir_out,
-            ch_bamtools_somatic_out,
-            ch_bamtools_germline_out,
+            ch_redux_tumor_out,
+            ch_redux_normal_out,
+            ch_bamtools_tumor_out,
+            ch_bamtools_normal_out,
             ch_cobalt_out,
             ch_esvee_out,
             ch_purple_out,
-            hmf_data.driver_gene_panel,
+            driver_gene_panel,
             hmf_data.qsee_cohort_percentiles,
-            params.sequencing_type,
+            params.sequencing_platform,
             false,  // targeted_mode
         )
 
@@ -502,57 +492,54 @@ workflow WGTS {
     // SUBWORKFLOW: Append read data to SAGE VCF
     //
     // channel: [ meta, sage_append_dir ]
-    ch_sage_somatic_append_out = Channel.empty()
-    ch_sage_germline_append_out = Channel.empty()
-    if (stages.sage_append) {
+    ch_sage_append_somatic_out = Channel.empty()
+    ch_sage_append_germline_out = Channel.empty()
+    if (run_config.stages.sage_append) {
 
         SAGE_APPEND(
             ch_inputs,
             ch_purple_out,
-            ch_inputs.map { meta -> [meta, [], []] },  // ch_tumor_redux_bam
-            ch_inputs.map { meta -> [meta, []] },  // ch_tumor_redux_tsv
+            ch_inputs.map { meta -> [meta, []] },  // ch_redux_dir_tumor
             ch_align_rna_tumor_out,
             ref_data.genome_fasta,
             ref_data.genome_version,
             ref_data.genome_fai,
             ref_data.genome_dict,
-            params.sequencing_type,
-            stages.orange,  // enable_germline [run for ORANGE but not Neo]
+            params.sequencing_platform,
+            run_config.stages.orange,  // enable_germline [run for ORANGE but not Neo]
             false,  // targeted_mode
         )
 
         ch_versions = ch_versions.mix(SAGE_APPEND.out.versions)
 
-        ch_sage_somatic_append_out = ch_sage_somatic_append_out.mix(SAGE_APPEND.out.somatic_dir)
-        ch_sage_germline_append_out = ch_sage_germline_append_out.mix(SAGE_APPEND.out.germline_dir)
+        ch_sage_append_somatic_out = ch_sage_append_somatic_out.mix(SAGE_APPEND.out.somatic_dir)
+        ch_sage_append_germline_out = ch_sage_append_germline_out.mix(SAGE_APPEND.out.germline_dir)
 
     } else {
 
-        ch_sage_somatic_append_out = ch_inputs.map { meta -> [meta, []] }
-        ch_sage_germline_append_out = ch_inputs.map { meta -> [meta, []] }
+        ch_sage_append_somatic_out = ch_inputs.map { meta -> [meta, []] }
+        ch_sage_append_germline_out = ch_inputs.map { meta -> [meta, []] }
 
     }
 
     //
     // SUBWORKFLOW: Visualise SAGE variants
     //
-    ch_sage_vis_out = Channel.empty()
-    if (stages.sage_vis) {
+    // channel: [ meta, sage_plot_dir ]
+    ch_sage_somatic_visualiser_out = Channel.empty()
+    if (run_config.stages.sage_visualiser) {
 
         SAGE_PLOTTING(
             ch_inputs,
-            ch_redux_dna_tumor_bam_out,
-            ch_redux_dna_normal_bam_out,
-            ch_redux_dna_donor_bam_out,
-            ch_redux_dna_tumor_dir_out,
-            ch_redux_dna_normal_dir_out,
-            ch_redux_dna_donor_dir_out,
+            ch_redux_tumor_out,
+            ch_redux_normal_out,
+            ch_redux_donor_out,
             ch_purple_out,
             ref_data.genome_fasta,
             ref_data.genome_version,
             ref_data.genome_fai,
             ref_data.genome_dict,
-            hmf_data.sage_pon,
+            hmf_data_pons.sage,
             hmf_data.sage_known_hotspots_somatic,
             hmf_data.sage_highconf_regions,
             hmf_data.ensembl_data_resources,
@@ -561,7 +548,12 @@ workflow WGTS {
 
         ch_versions = ch_versions.mix(SAGE_PLOTTING.out.versions)
 
-        ch_sage_vis_out = ch_sage_vis_out.mix(SAGE_PLOTTING.out.visualiser_dir)
+        ch_sage_somatic_visualiser_out = ch_sage_somatic_visualiser_out.mix(SAGE_PLOTTING.out.visualiser_dir)
+
+    } else {
+
+        ch_sage_somatic_visualiser_out = ch_inputs.map { meta -> [meta, []] }
+
     }
 
     //
@@ -570,7 +562,7 @@ workflow WGTS {
     // channel: [ meta, linx_annotation_dir ]
     ch_linx_somatic_out = Channel.empty()
     ch_linx_germline_out = Channel.empty()
-    if (stages.linx) {
+    if (run_config.stages.linx) {
 
         LINX_ANNOTATION(
             ch_inputs,
@@ -578,13 +570,13 @@ workflow WGTS {
             ref_data.genome_version,
             hmf_data.ensembl_data_resources,
             hmf_data.known_fusion_data,
-            hmf_data.driver_gene_panel,
+            driver_gene_panel,
         )
 
         ch_versions = ch_versions.mix(LINX_ANNOTATION.out.versions)
 
-        ch_linx_somatic_out = ch_linx_somatic_out.mix(LINX_ANNOTATION.out.somatic)
-        ch_linx_germline_out = ch_linx_germline_out.mix(LINX_ANNOTATION.out.germline)
+        ch_linx_somatic_out = ch_linx_somatic_out.mix(LINX_ANNOTATION.out.somatic_dir)
+        ch_linx_germline_out = ch_linx_germline_out.mix(LINX_ANNOTATION.out.germline_dir)
 
     } else {
 
@@ -597,37 +589,37 @@ workflow WGTS {
     // SUBWORKFLOW: Visualise LINX annotations
     //
     // channel: [ meta, linx_visualiser_dir ]
-    ch_linx_somatic_visualiser_dir_out = Channel.empty()
-    if (stages.linx) {
+    ch_linx_somatic_visualiser_out = Channel.empty()
+    if (run_config.stages.linx) {
 
         LINX_PLOTTING(
             ch_inputs,
             ch_linx_somatic_out,
-            ch_inputs.map { meta -> [meta, []] },  // ch_amber
-            ch_inputs.map { meta -> [meta, []] },  // ch_cobalt
-            ch_inputs.map { meta -> [meta, []] },  // ch_purple
+            ch_inputs.map { meta -> [meta, []] },  // ch_amber_dir
+            ch_inputs.map { meta -> [meta, []] },  // ch_cobalt_dir
+            ch_inputs.map { meta -> [meta, []] },  // ch_purple_dir
             ref_data.genome_version,
             hmf_data.ensembl_data_resources,
         )
 
         ch_versions = ch_versions.mix(LINX_PLOTTING.out.versions)
 
-        ch_linx_somatic_visualiser_dir_out = ch_linx_somatic_visualiser_dir_out.mix(LINX_PLOTTING.out.visualiser_dir)
+        ch_linx_somatic_visualiser_out = ch_linx_somatic_visualiser_out.mix(LINX_PLOTTING.out.visualiser_dir)
 
     } else {
 
-        ch_linx_somatic_visualiser_dir_out = ch_inputs.map { meta -> [meta, []] }
+        ch_linx_somatic_visualiser_out = ch_inputs.map { meta -> [meta, []] }
 
     }
 
     //
     // SUBWORKFLOW: Run CIDER to identify and annotate CDR3 sequences of IG and TCR loci
     //
-    if (stages.cider) {
+    if (run_config.stages.cider) {
 
         CIDER_CALLING(
             ch_inputs,
-            ch_redux_dna_tumor_bam_out,
+            ch_redux_tumor_out,
             ch_align_rna_tumor_out,
             ref_data.genome_fasta,
             ref_data.genome_version,
@@ -644,7 +636,7 @@ workflow WGTS {
     //
     // channel: [ meta, sigs_dir ]
     ch_sigs_out = Channel.empty()
-    if (stages.sigs) {
+    if (run_config.stages.sigs) {
 
         SIGS_FITTING(
             ch_inputs,
@@ -667,7 +659,7 @@ workflow WGTS {
     //
     // channel: [ meta, chord_dir ]
     ch_chord_out = Channel.empty()
-    if (stages.chord) {
+    if (run_config.stages.chord) {
 
         CHORD_PREDICTION(
             ch_inputs,
@@ -692,20 +684,20 @@ workflow WGTS {
     //
     // channel: [ meta, lilac_dir ]
     ch_lilac_out = Channel.empty()
-    if (stages.lilac) {
+    if (run_config.stages.lilac) {
 
         LILAC_CALLING(
             ch_inputs,
-            ch_redux_dna_tumor_bam_out,
-            ch_redux_dna_normal_bam_out,
+            ch_redux_tumor_out,
+            ch_redux_normal_out,
             ch_align_rna_tumor_out,
             ch_purple_out,
             ref_data.genome_fasta,
             ref_data.genome_version,
             ref_data.genome_fai,
             hmf_data.lilac_resources,
+            params.sequencing_platform,
             false,  // targeted_mode,
-            params.sequencing_type,
         )
 
         ch_versions = ch_versions.mix(LILAC_CALLING.out.versions)
@@ -721,18 +713,18 @@ workflow WGTS {
     //
     // SUBWORKFLOW: Run TEAL for characterisation of telometic regions
     //
-    if (stages.teal) {
+    if (run_config.stages.teal) {
 
         TEAL_CHARACTERISATION(
             ch_inputs,
-            ch_redux_dna_tumor_bam_out,
-            ch_redux_dna_normal_bam_out,
-            ch_bamtools_somatic_out,
-            ch_bamtools_germline_out,
+            ch_redux_tumor_out,
+            ch_redux_normal_out,
+            ch_bamtools_tumor_out,
+            ch_bamtools_normal_out,
             ch_cobalt_out,
             ch_purple_out,
             ref_data.genome_version,
-            params.sequencing_type,
+            params.sequencing_platform,
         )
 
         ch_versions = ch_versions.mix(TEAL_CHARACTERISATION.out.versions)
@@ -746,14 +738,14 @@ workflow WGTS {
     ch_virusinterpreter_out = Channel.empty()
 
     // NOTE(LN): Virusbreakend currently broken for SBX and Ultima
-    def sequencing_type = pipeline.SequencingType.fromString(params.sequencing_type)
-    if (stages.virusinterpreter && sequencing_type == pipeline.SequencingType.ILLUMINA) {
+    def sequencing_platform = Utils.getEnumFromString(params.sequencing_platform, Constants.SequencingPlatform)
+    if (run_config.stages.virusinterpreter && sequencing_platform == Constants.SequencingPlatform.ILLUMINA) {
 
         VIRUSBREAKEND_CALLING(
             ch_inputs,
-            ch_redux_dna_tumor_bam_out,
+            ch_redux_tumor_out,
+            ch_bamtools_tumor_out,
             ch_purple_out,
-            ch_bamtools_somatic_out,
             ref_data.genome_fasta,
             ref_data.genome_fai,
             ref_data.genome_dict,
@@ -780,7 +772,7 @@ workflow WGTS {
     //
     // channel: [ meta, peach_dir ]
     ch_peach_out = Channel.empty()
-    if (stages.peach) {
+    if (run_config.stages.peach) {
 
         PEACH_CALLING(
             ch_inputs,
@@ -803,14 +795,14 @@ workflow WGTS {
     //
     // SUBWORKFLOW: Run Neo to identify and score neoepitopes
     //
-    if (stages.neo) {
+    if (run_config.stages.neo) {
 
         NEO_PREDICTION(
             ch_inputs,
             ch_align_rna_tumor_out,
             ch_isofox_out,
             ch_purple_out,
-            ch_sage_somatic_append_out,
+            ch_sage_append_somatic_out,
             ch_lilac_out,
             ch_linx_somatic_out,
             ref_data.genome_fasta,
@@ -831,7 +823,7 @@ workflow WGTS {
     //
     // channel: [ meta, cuppa_dir ]
     ch_cuppa_out = Channel.empty()
-    if (stages.cuppa) {
+    if (run_config.stages.cuppa) {
 
         CUPPA_PREDICTION(
             ch_inputs,
@@ -857,18 +849,18 @@ workflow WGTS {
     //
     // SUBWORKFLOW: Run ORANGE to generate static PDF report
     //
-    if (stages.orange) {
+    if (run_config.stages.orange) {
 
         ORANGE_REPORTING(
-            ch_sage_somatic_dir_out,
-            ch_sage_germline_dir_out,
-            ch_sage_somatic_append_out,
-            ch_sage_germline_append_out,
-            ch_sage_vis_out,
+            ch_sage_somatic_out,
+            ch_sage_germline_out,
+            ch_sage_append_somatic_out,
+            ch_sage_append_germline_out,
+            ch_sage_somatic_visualiser_out,
             ch_purple_out,
             ch_qsee_out,
             ch_linx_somatic_out,
-            ch_linx_somatic_visualiser_dir_out,
+            ch_linx_somatic_visualiser_out,
             ch_linx_germline_out,
             ch_virusinterpreter_out,
             ch_chord_out,
@@ -879,7 +871,7 @@ workflow WGTS {
             ch_isofox_out,
             ref_data.genome_version,
             hmf_data.disease_ontology,
-            params.sequencing_type,
+            params.sequencing_platform,
             false,  // targeted_mode
         )
 

@@ -9,16 +9,16 @@ process QSEE {
 
     input:
     tuple val(meta),
-        path(redux_somatic_tsv, stageAs: "redux_somatic/*"),
-        path(redux_germline_tsv, stageAs: "redux_germline/*"),
-        path(bamtools_somatic_dir, stageAs: 'bamtools_somatic'),
-        path(bamtools_germline_dir, stageAs: 'bamtools_germline'),
+        path(redux_tsvs_tumor, stageAs: "redux_tsvs_tumor/*"),
+        path(redux_tsvs_normal, stageAs: "redux_tsvs_normal/*"),
+        path(bamtools_dir_tumor, stageAs: 'bamtools_tumor/'),
+        path(bamtools_dir_normal, stageAs: 'bamtools_tumor/'),
         path(cobalt_dir),
         path(esvee_dir),
         path(purple_dir)
     path driver_gene_panel
     path cohort_percentiles
-    val sequencing_type
+    val sequencing_platform
     val targeted_mode
 
     output:
@@ -37,8 +37,8 @@ process QSEE {
     def log_level_arg = task.ext.log_level ? "-log_level ${task.ext.log_level}" : ''
 
     def reference_arg = meta.normal_id ? "-reference ${meta.normal_id}" : ''
-    def redux_ref_dir_arg = redux_germline_tsv ? "-redux_ref_dir redux_germline/" : ''
-    def bamtools_ref_dir_arg = bamtools_germline_dir ? "-bam_metrics_ref_dir ${bamtools_germline_dir}" : ''
+    def redux_ref_dir_arg = redux_tsvs_normal ? '-redux_ref_dir redux_tsvs_normal/' : ''
+    def bamtools_ref_dir_arg = bamtools_dir_normal ? "-bam_metrics_ref_dir ${bamtools_dir_normal}" : ''
 
     def cobalt_dir_arg = cobalt_dir ? "-cobalt_dir ${cobalt_dir}" : ''
     def esvee_dir_arg = esvee_dir ? "-esvee_dir ${esvee_dir}" : ''
@@ -46,7 +46,7 @@ process QSEE {
     def targeted_mode_arg = targeted_mode ? '-targeted_mode' : ''
 
     def cohort_percentiles_arg = ''
-    if(!targeted_mode && sequencing_type == 'ILLUMINA') {
+    if(! targeted_mode && sequencing_platform.toLowerCase() == 'illumina') {
         cohort_percentiles_arg = "-cohort_percentiles_file ${cohort_percentiles}"
     }
 
@@ -58,14 +58,14 @@ process QSEE {
         ${args} \\
         -tumor ${meta.tumor_id} \\
         ${reference_arg} \\
-        -redux_tumor_dir redux_somatic/ \\
+        -redux_tumor_dir redux_tsvs_tumor/ \\
         ${redux_ref_dir_arg} \\
-        -bam_metrics_tumor_dir ${bamtools_somatic_dir} \\
+        -bam_metrics_tumor_dir ${bamtools_dir_tumor} \\
         ${bamtools_ref_dir_arg} \\
         ${cobalt_dir_arg} \\
         ${esvee_dir_arg} \\
         -purple_dir ${purple_dir} \\
-        -sequencing_type ${sequencing_type} \\
+        -sequencing_type ${sequencing_platform.toUpperCase()} \\
         -driver_gene_panel ${driver_gene_panel} \\
         ${cohort_percentiles_arg} \\
         ${targeted_mode_arg} \\

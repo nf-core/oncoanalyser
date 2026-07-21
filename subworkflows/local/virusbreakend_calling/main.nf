@@ -2,49 +2,56 @@
 // VIRUSBreakend and Virus Interpreter identify viral content and insertion sites
 //
 
+import Constants
+import Utils
+
 include { VIRUSBREAKEND    } from '../../../modules/local/virusbreakend/main'
 include { VIRUSINTERPRETER } from '../../../modules/local/virusinterpreter/main'
 
 workflow VIRUSBREAKEND_CALLING {
     take:
     // Sample data
-    ch_inputs           // channel: [mandatory] [ meta ]
-    ch_tumor_bam        // channel: [mandatory] [ meta, bam, bai ]
-    ch_purple           // channel: [mandatory] [ meta, purple_dir ]
-    ch_bamtools_somatic // channel: [mandatory] [ meta, metrics ]
+    ch_inputs             // channel: [mandatory] [ meta ]
+    ch_redux_dir_tumor    // channel: [mandatory] [ meta, redux_dir ]
+    ch_bamtools_dir_tumor // channel: [mandatory] [ meta, bamtools ]
+    ch_purple             // channel: [mandatory] [ meta, purple_dir ]
 
     // Reference data
-    genome_fasta        // channel: [mandatory] /path/to/genome_fasta
-    genome_fai          // channel: [mandatory] /path/to/genome_fai
-    genome_dict         // channel: [mandatory] /path/to/genome_dict
-    genome_gridss_index // channel: [mandatory] /path/to/genome_gridss_index
-    virusbreakenddb     // channel: [mandatory] /path/to/virusbreakenddb/
-    virus_taxonomy_db   // channel: [mandatory] /path/to/virus_taxonomy_db
-    virus_reporting_db  // channel: [mandatory] /path/to/virus_reporting_db
-    virus_blocklist_db  // channel: [mandatory] /path/to/virus_blocklist_db
+    genome_fasta          // channel: [mandatory] /path/to/genome_fasta
+    genome_fai            // channel: [mandatory] /path/to/genome_fai
+    genome_dict           // channel: [mandatory] /path/to/genome_dict
+    genome_gridss_index   // channel: [mandatory] /path/to/genome_gridss_index
+    virusbreakenddb       // channel: [mandatory] /path/to/virusbreakenddb/
+    virus_taxonomy_db     // channel: [mandatory] /path/to/virus_taxonomy_db
+    virus_reporting_db    // channel: [mandatory] /path/to/virus_reporting_db
+    virus_blocklist_db    // channel: [mandatory] /path/to/virus_blocklist_db
 
     // Params
-    gridss_config          // channel: [optional] /path/to/gridss_config
+    gridss_config         // channel: [optional] /path/to/gridss_config
 
     main:
     // Channel for version.yml files
     // channel: [ versions.yml ]
     ch_versions = Channel.empty()
 
-    // Sort inputs
+    //
+    // STEP: Handle inputs
+    //
+    // Select input sources then sort
     // NOTE(SW): VIRUSBreakend inputs are not allowed in the samplesheet, so aren't considered
     // channel: [ meta, tumor_bam, tumor_bai ]
-    ch_inputs_sorted = ch_tumor_bam
-        .map { meta, tumor_bam, tumor_bai ->
-            return [
-                meta,
-                sample.Inputs.preferUserProvidedInput(tumor_bam, meta, sample.FileKey.BAM_REDUX_DNA_TUMOR),
-                sample.Inputs.preferUserProvidedInput(tumor_bai, meta, sample.FileKey.BAI_DNA_TUMOR),
-            ]
+    ch_inputs_sorted = ch_redux_dir_tumor
+        .map { meta, redux_dir_tumor ->
+
+            def redux_dir_tumor_selected = Utils.selectCurrentOrExisting(redux_dir_tumor, meta, Constants.INPUT.REDUX_DIR_TUMOR)
+            def (tumor_bam, tumor_bai) = Utils.getTumorReduxDirAlignment(meta, redux_dir_tumor_selected)
+
+            return [meta, tumor_bam, tumor_bai]
+
         }
         .branch { meta, tumor_bam, tumor_bai ->
-            def has_existing = sample.Inputs.hasExisting(meta, sample.FileKey.VIRUSINTERPRETER_DIR)
-            runnable: tumor_bam && !has_existing
+            def has_existing = Utils.hasExistingInput(meta, Constants.INPUT.VIRUSINTERPRETER_DIR)
+            runnable: tumor_bam && ! has_existing
             skip: true
                 return meta
         }
@@ -60,7 +67,7 @@ workflow VIRUSBREAKEND_CALLING {
             def meta_virus = [
                 key: meta.group_id,
                 id: meta.group_id,
-                sample_id: sample.Inputs.getTumorDnaSampleName(meta),
+                sample_id: Utils.getTumorDnaSampleName(meta),
             ]
 
             return [meta_virus, tumor_bam]
@@ -83,35 +90,35 @@ workflow VIRUSBREAKEND_CALLING {
     // MODULE: Virus Interpreter
     //
     // Select input sources
-    // channel: [ meta, virus_tsv, purple_dir, metrics ]
-    ch_virusinterpreter_inputs_selected = channels.WorkflowChannels.groupByMeta(
-        channels.WorkflowChannels.restoreMeta(VIRUSBREAKEND.out.tsv, ch_inputs),
+    // channel: [ meta, virusbreakend_tsv, bamtools_dir_tumor, purple_dir ]
+    ch_virusinterpreter_inputs_selected = WorkflowOncoanalyser.groupByMeta(
+        WorkflowOncoanalyser.restoreMeta(VIRUSBREAKEND.out.tsv, ch_inputs),
+        ch_bamtools_dir_tumor,
         ch_purple,
-        ch_bamtools_somatic,
     )
-        .map { meta, virus_tsv, purple_dir, somatic_metrics ->
+        .map { meta, virusbreakend_tsv, bamtools_dir_tumor, purple_dir ->
 
-            def inputs = [
-                virus_tsv,
-                sample.Inputs.preferUserProvidedInput(purple_dir, meta, sample.FileKey.PURPLE_DIR),
-                sample.Inputs.preferUserProvidedInput(somatic_metrics, meta, sample.FileKey.BAMTOOLS_DIR_TUMOR),
+            return [
+                meta,
+                virusbreakend_tsv,
+                Utils.selectCurrentOrExisting(bamtools_dir_tumor, meta, Constants.INPUT.BAMTOOLS_DIR_TUMOR),
+                Utils.selectCurrentOrExisting(purple_dir, meta, Constants.INPUT.PURPLE_DIR),
             ]
 
-            return [meta, *inputs]
         }
 
     // Sort inputs
-    // channel: [ meta, virus_tsv, purple_dir, metrics ]
+    // channel: [ meta, virusbreakend_tsv, bamtools_dir_tumor, purple_dir ]
     // channel: skip: [ meta ]
     ch_virusinterpreter_inputs_sorted = ch_virusinterpreter_inputs_selected
-        .branch { meta, virus_tsv, purple_dir, somatic_metrics ->
-            runnable: virus_tsv && purple_dir && somatic_metrics
+        .branch { meta, virusbreakend_tsv, bamtools_dir_tumor, purple_dir ->
+            runnable: virusbreakend_tsv && bamtools_dir_tumor && purple_dir
             skip: true
                 return meta
         }
 
     // Create process input channel
-    // channel: [ meta_virus, virus_tsv, purple_dir, metrics ]
+    // channel: [ meta_virus, virusbreakend_tsv, bamtools_dir_tumor, purple_dir ]
     ch_virusinterpreter_inputs = ch_virusinterpreter_inputs_sorted.runnable
         .map { d ->
 
@@ -121,7 +128,7 @@ workflow VIRUSBREAKEND_CALLING {
             def meta_virus = [
                 key: meta.group_id,
                 id: meta.group_id,
-                sample_id: sample.Inputs.getTumorDnaSampleName(meta),
+                sample_id: Utils.getTumorDnaSampleName(meta),
             ]
 
             return [meta_virus, *inputs]
@@ -137,11 +144,14 @@ workflow VIRUSBREAKEND_CALLING {
 
     ch_versions = ch_versions.mix(VIRUSINTERPRETER.out.versions)
 
+    //
+    // STEP: Handle outputs
+    //
     // Set outputs, restoring original meta
     // channel: [ meta, virusinterpreter_dir ]
     ch_outputs = Channel.empty()
         .mix(
-            channels.WorkflowChannels.restoreMeta(VIRUSINTERPRETER.out.virusinterpreter_dir, ch_inputs),
+            WorkflowOncoanalyser.restoreMeta(VIRUSINTERPRETER.out.virusinterpreter_dir, ch_inputs),
             ch_virusinterpreter_inputs_sorted.skip.map { meta -> [meta, []] },
             ch_inputs_sorted.skip.map { meta -> [meta, []] },
         )

@@ -20,16 +20,13 @@ process ESVEE {
     path known_fusions
     path repeatmasker_annotations
     path unmap_regions
-    path target_region_bed
-    val sequencing_type
+    path target_regions_bed
+    val sequencing_platform
 
     output:
-    tuple val(meta), path('esvee/')                                                                                                    , emit: esvee_dir
-    tuple val(meta), path("esvee/${meta.tumor_id}.esvee.unfiltered.vcf.gz"), path("esvee/${meta.tumor_id}.esvee.unfiltered.vcf.gz.tbi"), emit: unfiltered_vcf
-    tuple val(meta), path("esvee/${meta.tumor_id}.esvee.somatic.vcf.gz"),    path("esvee/${meta.tumor_id}.esvee.somatic.vcf.gz.tbi")   , emit: somatic_vcf
-    tuple val(meta), path("esvee/${meta.tumor_id}.esvee.germline.vcf.gz"),   path("esvee/${meta.tumor_id}.esvee.germline.vcf.gz.tbi")  , emit: germline_vcf, optional: true
-    path 'versions.yml'                                                                                                                , emit: versions
-    path '.command.*'                                                                                                                  , emit: command_files
+    tuple val(meta), path('esvee/'), emit: esvee_dir
+    path 'versions.yml'            , emit: versions
+    path '.command.*'              , emit: command_files
 
     when:
     task.ext.when == null || task.ext.when
@@ -42,7 +39,7 @@ process ESVEE {
     def reference_arg = meta.normal_id ? "-reference ${meta.normal_id}" : ''
     def reference_bam_arg = meta.normal_id ? "-reference_bam ${normal_bam}" : ''
 
-    def target_region_bed_arg = target_region_bed ? "-target_regions_bed ${target_region_bed}" : ''
+    def target_regions_bed_arg = target_regions_bed ? "-target_regions_bed ${target_regions_bed}" : ''
 
     """
     mkdir -p esvee/
@@ -62,8 +59,8 @@ process ESVEE {
         -pon_sv_file ${pon_breakpoints} \\
         -repeat_mask_file ${repeatmasker_annotations} \\
         -unmap_regions ${unmap_regions} \\
-        -sequencing_type ${sequencing_type} \\
-        ${target_region_bed_arg} \\
+        -sequencing_type ${sequencing_platform.toUpperCase()} \\
+        ${target_regions_bed_arg} \\
         -bamtool \$(which sambamba) \\
         -write_types 'PREP_JUNCTION;PREP_BAM;FRAGMENT_LENGTH_DIST;JUNC_ASSEMBLY;PHASED_ASSEMBLY;ALIGNMENT;BREAKEND;VCF' \\
         -threads ${task.cpus} \\

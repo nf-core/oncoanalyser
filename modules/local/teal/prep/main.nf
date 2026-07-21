@@ -10,11 +10,11 @@ process TEAL_PREP {
     input:
     tuple val(meta), path(tumor_bam), path(tumor_bai), path(normal_bam), path(normal_bai)
     val genome_ver
-    val sequencing_type
+    val sequencing_platform
 
     output:
-    tuple val(meta), path("teal_bam/${meta.tumor_id}.teal.telbam{.bam,.bam.bai}") , emit: tumor_teal_bam
-    tuple val(meta), path("teal_bam/${meta.normal_id}.teal.telbam{.bam,.bam.bai}"), emit: normal_teal_bam, optional: true
+    tuple val(meta), path("teal_bam/${meta.tumor_id}.teal.telbam{.bam,.bam.bai}") , emit: tumor_bam
+    tuple val(meta), path("teal_bam/${meta.normal_id}.teal.telbam{.bam,.bam.bai}"), emit: normal_bam, optional: true
     path 'versions.yml'                                                           , emit: versions
     path '.command.*'                                                             , emit: command_files
 
@@ -26,22 +26,20 @@ process TEAL_PREP {
 
     def xmx_mod = task.ext.xmx_mod ?: 0.95
 
+    def log_level_arg = task.ext.log_level ? "-log_level ${task.ext.log_level}" : ''
+
     def tumor_arg = ''
     def tumor_bam_arg = ''
-    def tumor_bam_index_command = ''
     if (tumor_bam) {
         tumor_arg = "-tumor ${meta.tumor_id}"
         tumor_bam_arg = "-tumor_bam ${tumor_bam}"
-        tumor_bam_index_command = "samtools index teal_bam/${meta.tumor_id}.teal.telbam.bam"
     }
 
     def reference_arg = ''
     def reference_bam_arg = ''
-    def reference_bam_index_command = ''
     if (normal_bam) {
         reference_arg = "-reference ${meta.normal_id}"
         reference_bam_arg = "-reference_bam ${normal_bam}"
-        reference_bam_index_command = "samtools index teal_bam/${meta.normal_id}.teal.telbam.bam"
     }
 
     """
@@ -54,12 +52,13 @@ process TEAL_PREP {
         ${tumor_arg} \\
         ${tumor_bam_arg} \\
         -ref_genome_version ${genome_ver} \\
-        -sequencing_type ${sequencing_type} \\
+        -sequencing_type ${sequencing_platform.toUpperCase()} \\
         -threads ${task.cpus} \\
+        ${log_level_arg} \\
         -output_dir teal_bam/
 
-    ${tumor_bam_index_command}
-    ${reference_bam_index_command}
+    if [[ -e "${tumor_bam}" ]]; then samtools index teal_bam/${meta.tumor_id}.teal.telbam.bam; fi
+    if [[ -e "${normal_bam}" ]]; then samtools index teal_bam/${meta.normal_id}.teal.telbam.bam; fi
 
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":

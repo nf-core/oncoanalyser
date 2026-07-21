@@ -18,12 +18,12 @@ process PAVE_GERMLINE {
     path segment_mappability
     path driver_gene_panel
     path ensembl_data_resources
-    val sequencing_type
+    val sequencing_platform
 
     output:
-    tuple val(meta), path('germline/'), emit: pave_dir
-    path 'versions.yml'               , emit: versions
-    path '.command.*'                 , emit: command_files
+    tuple val(meta), path('pave_germline/'), emit: pave_dir
+    path 'versions.yml'                    , emit: versions
+    path '.command.*'                      , emit: command_files
 
     when:
     task.ext.when == null || task.ext.when
@@ -34,7 +34,7 @@ process PAVE_GERMLINE {
     def log_level_arg = task.ext.log_level ? "-log_level ${task.ext.log_level}" : ''
 
     """
-    mkdir -p germline/
+    mkdir -p pave_germline/
 
     pave \\
         -Xmx${Math.round(task.memory.bytes * 0.95)} \\
@@ -50,11 +50,11 @@ process PAVE_GERMLINE {
         -blacklist_bed ${sage_blocklist_regions} \\
         -blacklist_vcf ${sage_blocklist_sites} \\
         -gnomad_no_filter \\
-        -sequencing_type ${sequencing_type} \\
+        -sequencing_type ${sequencing_platform.toUpperCase()} \\
         -threads ${task.cpus} \\
         ${log_level_arg} \\
-        -output_dir germline/ \\
-        -output_vcf germline/${meta.sample_id}.pave.germline.vcf.gz
+        -output_dir pave_germline/ \\
+        -output_vcf pave_germline/${meta.sample_id}.pave.germline.vcf.gz
 
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":
@@ -64,9 +64,9 @@ process PAVE_GERMLINE {
 
     stub:
     """
-    mkdir -p germline/
+    mkdir -p pave_germline/
 
-    touch germline/${meta.sample_id}.pave.germline.vcf.gz{,.tbi}
+    touch pave_germline/${meta.sample_id}.pave.germline.vcf.gz{,.tbi}
 
     echo -e '${task.process}:\\n  stub: noversions\\n' > versions.yml
     """

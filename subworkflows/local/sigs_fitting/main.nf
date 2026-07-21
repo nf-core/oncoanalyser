@@ -2,13 +2,16 @@
 // Sigs fits trinucleotide signature definitions with sample SNV counts
 //
 
+import Constants
+import Utils
+
 include { SIGS } from '../../../modules/local/sigs/main'
 
 workflow SIGS_FITTING {
     take:
     // Sample data
     ch_inputs       // channel: [mandatory] [ meta ]
-    ch_purple       // channel: [mandatory] [ meta, purple_dir ]
+    ch_purple_dir   // channel: [mandatory] [ meta, purple_dir ]
 
     // Reference data
     sigs_signatures // channel: [mandatory] /path/to/sigs_signatures
@@ -18,29 +21,26 @@ workflow SIGS_FITTING {
     // channel: [ versions.yml ]
     ch_versions = Channel.empty()
 
-    // Select input sources
-    // channel: [ meta, purple_dir ]
-    ch_inputs_selected = ch_purple
-        .map { meta, purple_dir ->
-            return [meta, sample.Inputs.preferUserProvidedInput(purple_dir, meta, sample.FileKey.PURPLE_DIR)]
-        }
-
-    // Sort inputs
+    // Select input sources then sort
     // channel: runnable: [ meta, purple_dir ]
     // channel: skip: [ meta ]
-    ch_inputs_sorted = ch_inputs_selected
+    ch_inputs_sorted = ch_purple_dir
+        .map { meta, purple_dir ->
+            return [meta, Utils.selectCurrentOrExisting(purple_dir, meta, Constants.INPUT.PURPLE_DIR)]
+        }
         .branch { meta, purple_dir ->
 
-            def has_tumor_normal_dna = sample.Inputs.hasTumorDna(meta) && sample.Inputs.hasNormalDna(meta)
+            def has_tumor_normal_dna = Utils.hasTumorDna(meta) && Utils.hasNormalDna(meta)
 
             def has_smlv_vcf = []
-            if (has_tumor_normal_dna) {
-                has_smlv_vcf = purple_dir ? sample.Inputs.resolvePurpleSomaticVcf(purple_dir, meta) : []
+            if (has_tumor_normal_dna && purple_dir) {
+                def tumor_id = Utils.getTumorDnaSampleName(meta)
+                has_smlv_vcf = purple_dir.resolve("${tumor_id}.purple.somatic.vcf.gz").exists()
             }
 
-            def has_existing = sample.Inputs.hasExisting(meta, sample.FileKey.SIGS_DIR)
+            def has_existing = Utils.hasExistingInput(meta, Constants.INPUT.SIGS_DIR)
 
-            runnable: has_tumor_normal_dna && purple_dir && has_smlv_vcf && !has_existing
+            runnable: has_tumor_normal_dna && purple_dir && has_smlv_vcf && ! has_existing
             skip: true
                 return meta
         }
@@ -50,7 +50,7 @@ workflow SIGS_FITTING {
     ch_sigs_inputs = ch_inputs_sorted.runnable
         .map { meta, purple_dir ->
 
-            def tumor_id = sample.Inputs.getTumorDnaSampleName(meta)
+            def tumor_id = Utils.getTumorDnaSampleName(meta)
 
             def meta_sigs = [
                 key: meta.group_id,
@@ -58,7 +58,7 @@ workflow SIGS_FITTING {
                 sample_id: tumor_id,
             ]
 
-            def smlv_vcf = sample.Inputs.resolvePurpleSomaticVcf(purple_dir, meta)
+            def smlv_vcf = purple_dir.resolve("${tumor_id}.purple.somatic.vcf.gz")
 
             return [meta_sigs, smlv_vcf]
         }
@@ -75,7 +75,7 @@ workflow SIGS_FITTING {
     // channel: [ meta, sigs_dir ]
     ch_outputs = Channel.empty()
         .mix(
-            channels.WorkflowChannels.restoreMeta(SIGS.out.sigs_dir, ch_inputs),
+            WorkflowOncoanalyser.restoreMeta(SIGS.out.sigs_dir, ch_inputs),
             ch_inputs_sorted.skip.map { meta -> [meta, []] },
         )
 

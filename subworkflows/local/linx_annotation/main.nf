@@ -2,6 +2,9 @@
 // LINX annotates and interprets structural variants
 //
 
+import Constants
+import Utils
+
 include { LINX_GERMLINE } from '../../../modules/local/linx/germline/main'
 include { LINX_SOMATIC  } from '../../../modules/local/linx/somatic/main'
 
@@ -9,7 +12,7 @@ workflow LINX_ANNOTATION {
     take:
     // Sample data
     ch_inputs              // channel: [mandatory] [ meta ]
-    ch_purple              // channel: [mandatory] [ meta, purple_dir ]
+    ch_purple_dir          // channel: [mandatory] [ meta, purple_dir ]
 
     // Reference data
     genome_version         // channel: [mandatory] genome version
@@ -22,14 +25,17 @@ workflow LINX_ANNOTATION {
     // channel: [ versions.yml ]
     ch_versions = Channel.empty()
 
-    // Select input sources and sort
+    //
+    // STEP: Handle inputs
+    //
+    // Select input sources then sort
     // channel: runnable: [ meta, purple_dir ]
     // channel: skip: [ meta ]
-    ch_inputs_sorted = ch_purple
+    ch_inputs_sorted = ch_purple_dir
         .map { meta, purple_dir ->
             return [
                 meta,
-                sample.Inputs.preferUserProvidedInput(purple_dir, meta, sample.FileKey.PURPLE_DIR),
+                Utils.selectCurrentOrExisting(purple_dir, meta, Constants.INPUT.PURPLE_DIR),
             ]
         }
         .branch { meta, purple_dir ->
@@ -47,21 +53,23 @@ workflow LINX_ANNOTATION {
     ch_inputs_germline_sorted = ch_inputs_sorted.runnable
         .branch { meta, purple_dir ->
 
-            def has_tumor_normal = sample.Inputs.hasTumorDna(meta) && sample.Inputs.hasNormalDna(meta)
-            def has_sv_germline_vcf = sample.Inputs.resolvePurpleGermlineSvVcf(purple_dir, meta)
-            def has_existing = sample.Inputs.hasExisting(meta, sample.FileKey.LINX_ANNO_DIR_NORMAL)
+            def tumor_id = Utils.getTumorDnaSampleName(meta)
 
-            runnable: has_tumor_normal && has_sv_germline_vcf && !has_existing
+            def has_tumor_normal = Utils.hasTumorDna(meta) && Utils.hasNormalDna(meta)
+            def has_sv_germline_vcf = file(purple_dir).resolve("${tumor_id}.purple.sv.germline.vcf.gz")
+            def has_existing = Utils.hasExistingInput(meta, Constants.INPUT.LINX_ANNO_DIR_NORMAL)
+
+            runnable: has_tumor_normal && has_sv_germline_vcf && ! has_existing
             skip: true
                 return meta
         }
 
     // Create process input channel
-    // channel: [ meta, sv_vcf ]
+    // channel: [ meta, purple_sv_vcf ]
     ch_linx_germline_inputs = ch_inputs_germline_sorted.runnable
         .map { meta, purple_dir ->
 
-            def tumor_id = sample.Inputs.getTumorDnaSampleName(meta)
+            def tumor_id = Utils.getTumorDnaSampleName(meta)
 
             def meta_linx = [
                 key: meta.group_id,
@@ -69,7 +77,7 @@ workflow LINX_ANNOTATION {
                 sample_id: tumor_id,
             ]
 
-            def sv_vcf = sample.Inputs.resolvePurpleGermlineSvVcf(purple_dir, meta)
+            def sv_vcf = file(purple_dir).resolve("${tumor_id}.purple.sv.germline.vcf.gz")
 
             return [meta_linx, sv_vcf]
         }
@@ -93,10 +101,10 @@ workflow LINX_ANNOTATION {
     ch_inputs_somatic_sorted = ch_inputs_sorted.runnable
         .branch { meta, purple_dir ->
 
-            def has_tumor = sample.Inputs.hasTumorDna(meta)
-            def has_existing = sample.Inputs.hasExisting(meta, sample.FileKey.LINX_ANNO_DIR_TUMOR)
+            def has_tumor = Utils.hasTumorDna(meta)
+            def has_existing = Utils.hasExistingInput(meta, Constants.INPUT.LINX_ANNO_DIR_TUMOR)
 
-            runnable: has_tumor && !has_existing
+            runnable: has_tumor && ! has_existing
             skip: true
                 return meta
         }
@@ -109,7 +117,7 @@ workflow LINX_ANNOTATION {
             def meta_linx = [
                 key: meta.group_id,
                 id: meta.group_id,
-                sample_id: sample.Inputs.getTumorDnaSampleName(meta),
+                sample_id: Utils.getTumorDnaSampleName(meta),
             ]
 
             return [meta_linx, purple_dir]
@@ -126,26 +134,28 @@ workflow LINX_ANNOTATION {
 
     ch_versions = ch_versions.mix(LINX_SOMATIC.out.versions)
 
-
+    //
+    // STEP: Handle outputs
+    //
     // Set outputs, restoring original meta
     // channel: [ meta, linx_annotation_dir ]
-    ch_somatic_out = Channel.empty()
+    ch_outputs_somatic = Channel.empty()
         .mix(
-            channels.WorkflowChannels.restoreMeta(LINX_SOMATIC.out.annotation_dir, ch_inputs),
+            WorkflowOncoanalyser.restoreMeta(LINX_SOMATIC.out.annotation_dir, ch_inputs),
             ch_inputs_somatic_sorted.skip.map { meta -> [meta, []] },
             ch_inputs_sorted.skip.map { meta -> [meta, []] },
         )
 
-    ch_germline_out = Channel.empty()
+    ch_outputs_germline = Channel.empty()
         .mix(
-            channels.WorkflowChannels.restoreMeta(LINX_GERMLINE.out.annotation_dir, ch_inputs),
+            WorkflowOncoanalyser.restoreMeta(LINX_GERMLINE.out.annotation_dir, ch_inputs),
             ch_inputs_germline_sorted.skip.map { meta -> [meta, []] },
             ch_inputs_sorted.skip.map { meta -> [meta, []] },
         )
 
     emit:
-    somatic  = ch_somatic_out  // channel: [ meta, linx_annotation_dir ]
-    germline = ch_germline_out // channel: [ meta, linx_annotation_dir ]
+    somatic_dir  = ch_outputs_somatic  // channel: [ meta, linx_annotation_dir ]
+    germline_dir = ch_outputs_germline // channel: [ meta, linx_annotation_dir ]
 
-    versions = ch_versions     // channel: [ versions.yml ]
+    versions     = ch_versions         // channel: [ versions.yml ]
 }

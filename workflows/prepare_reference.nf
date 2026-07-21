@@ -1,3 +1,7 @@
+import Constants
+import Processes
+import Utils
+
 /*
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     IMPORT MODULES / SUBWORKFLOWS / FUNCTIONS
@@ -20,10 +24,10 @@ workflow PREPARE_REFERENCE {
     ch_versions = Channel.empty()
 
     // Stage in reference data as requested
+    def prep_config = WorkflowMain.getPrepConfigFromCli(params, log)
     STAGE_REFERENCE(
-        true, // prepare_reference_only
-        [:],  // inputs (sample metadata)
-        [:],  // stages
+        prep_config,
+        [:],
     )
 
     ch_versions = ch_versions.mix(STAGE_REFERENCE.out.versions)

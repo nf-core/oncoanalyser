@@ -2,58 +2,62 @@
 // Bam Tools calculates summary statistics for BAMs
 //
 
+import Constants
+import Utils
+
 include { BAMTOOLS } from '../../../modules/local/bamtools/main'
 
 workflow BAMTOOLS_METRICS {
     take:
     // Sample data
     ch_inputs              // channel: [mandatory] [ meta ]
-    ch_tumor_bam           // channel: [mandatory] [ meta, bam, bai ]
-    ch_normal_bam          // channel: [mandatory] [ meta, bam, bai ]
+    ch_redux_dir_tumor     // channel: [mandatory] [ meta, redux_dir ]
+    ch_redux_dir_normal    // channel: [mandatory] [ meta, redux_dir ]
 
     // Reference data
     genome_fasta           // channel: [mandatory] /path/to/genome_fasta
     genome_version         // channel: [mandatory] genome version
     driver_gene_panel      // channel: [mandatory] /path/to/driver_gene_panel
     ensembl_data_resources // channel: [mandatory] /path/to/ensembl_data_resources/
-    target_region_bed      // channel: [optional]  /path/to/target_region_bed
+    target_regions_bed     // channel: [optional]  /path/to/target_regions_bed
 
     main:
     // Channel for version.yml files
     // channel: [ versions.yml ]
     ch_versions = Channel.empty()
 
-    // Sort inputs, separate by tumor and normal
+    // Select input sources then sort
     // channel: runnable: [ meta, bam, bai ]
     // channel: skip: [ meta ]
-    ch_inputs_tumor_sorted = ch_tumor_bam
-        .map { meta, bam, bai ->
-            return [
-                meta,
-                sample.Inputs.preferUserProvidedInput(bam, meta, sample.FileKey.BAM_REDUX_DNA_TUMOR),
-                sample.Inputs.preferPipelineOutput(bai, meta, sample.FileKey.BAI_DNA_TUMOR),
-            ]
+    ch_inputs_tumor_sorted = ch_redux_dir_tumor
+        .map { meta, redux_dir ->
+
+            def redux_dir_selected = Utils.selectCurrentOrExisting(redux_dir, meta, Constants.INPUT.REDUX_DIR_TUMOR)
+            def (bam, bai) = Utils.getTumorReduxDirAlignment(meta, redux_dir_selected)
+
+            return [meta, bam, bai]
+
         }
         .branch { meta, bam, bai ->
-            def has_existing = sample.Inputs.hasExisting(meta, sample.FileKey.BAMTOOLS_DIR_TUMOR)
-            runnable: bam && !has_existing
+            def has_existing = Utils.hasExistingInput(meta, Constants.INPUT.BAMTOOLS_DIR_TUMOR)
+            runnable: bam && ! has_existing
             skip: true
                 return meta
         }
 
     // channel: runnable: [ meta, bam, bai ]
     // channel: skip: [ meta ]
-    ch_inputs_normal_sorted = ch_normal_bam
-        .map { meta, bam, bai ->
-            return [
-                meta,
-                sample.Inputs.preferUserProvidedInput(bam, meta, sample.FileKey.BAM_REDUX_DNA_NORMAL),
-                sample.Inputs.preferPipelineOutput(bai, meta, sample.FileKey.BAI_DNA_NORMAL),
-            ]
+    ch_inputs_normal_sorted = ch_redux_dir_normal
+        .map { meta, redux_dir ->
+
+            def redux_dir_selected = Utils.selectCurrentOrExisting(redux_dir, meta, Constants.INPUT.REDUX_DIR_NORMAL)
+            def (bam, bai) = Utils.getNormalReduxDirAlignment(meta, redux_dir_selected)
+
+            return [meta, bam, bai]
         }
         .branch { meta, bam, bai ->
-            def has_existing = sample.Inputs.hasExisting(meta, sample.FileKey.BAMTOOLS_DIR_NORMAL)
-            runnable: bam && !has_existing
+            def has_existing = Utils.hasExistingInput(meta, Constants.INPUT.BAMTOOLS_DIR_NORMAL)
+            runnable: bam && ! has_existing
             skip: true
                 return meta
         }
@@ -62,8 +66,8 @@ workflow BAMTOOLS_METRICS {
     // channel: [ meta_bamtools, bam, bai ]
     ch_bamtools_inputs = Channel.empty()
         .mix(
-            ch_inputs_tumor_sorted.runnable.map { meta, bam, bai -> [meta, sample.Inputs.getTumorDnaSample(meta), 'tumor', bam, bai] },
-            ch_inputs_normal_sorted.runnable.map { meta, bam, bai -> [meta, sample.Inputs.getNormalDnaSample(meta), 'normal', bam, bai] },
+            ch_inputs_tumor_sorted.runnable.map { meta, bam, bai -> [meta, Utils.getTumorDnaSample(meta), 'tumor', bam, bai] },
+            ch_inputs_normal_sorted.runnable.map { meta, bam, bai -> [meta, Utils.getNormalDnaSample(meta), 'normal', bam, bai] },
         )
         .map { meta, meta_sample, sample_type, bam, bai ->
 
@@ -84,14 +88,14 @@ workflow BAMTOOLS_METRICS {
         genome_version,
         driver_gene_panel,
         ensembl_data_resources,
-        target_region_bed,
+        target_regions_bed,
     )
 
     ch_versions = ch_versions.mix(BAMTOOLS.out.versions)
 
     // Sort into a tumor and normal channel
-    ch_bamtools_out = BAMTOOLS.out.metrics_dir
-        .branch { meta_bamtools, metrics_dir ->
+    ch_bamtools_out = BAMTOOLS.out.bamtools_dir
+        .branch { meta_bamtools, bamtools_dir ->
             assert ['tumor', 'normal'].contains(meta_bamtools.sample_type)
             tumor: meta_bamtools.sample_type == 'tumor'
             normal: meta_bamtools.sample_type == 'normal'
@@ -99,22 +103,23 @@ workflow BAMTOOLS_METRICS {
         }
 
     // Set outputs, restoring original meta
-    // channel: [ meta, metrics_dir ]
-    ch_somatic_metrics_dir = Channel.empty()
+    // channel: [ meta, bamtools_dir ]
+    ch_tumor_out = Channel.empty()
         .mix(
-            channels.WorkflowChannels.restoreMeta(ch_bamtools_out.tumor, ch_inputs),
+            WorkflowOncoanalyser.restoreMeta(ch_bamtools_out.tumor, ch_inputs),
             ch_inputs_tumor_sorted.skip.map { meta -> [meta, []] },
         )
 
-    ch_germline_metrics_dir = Channel.empty()
+    // channel: [ meta, bamtools_dir ]
+    ch_normal_out = Channel.empty()
         .mix(
-            channels.WorkflowChannels.restoreMeta(ch_bamtools_out.normal, ch_inputs),
+            WorkflowOncoanalyser.restoreMeta(ch_bamtools_out.normal, ch_inputs),
             ch_inputs_normal_sorted.skip.map { meta -> [meta, []] },
         )
 
     emit:
-    somatic  = ch_somatic_metrics_dir  // channel: [ meta, metrics_dir ]
-    germline = ch_germline_metrics_dir // channel: [ meta, metrics_dir ]
+    tumor_dir  = ch_tumor_out  // channel: [ meta, bamtools_dir ]
+    normal_dir = ch_normal_out // channel: [ meta, bamtools_dir ]
 
-    versions = ch_versions             // channel: [ versions.yml ]
+    versions   = ch_versions   // channel: [ versions.yml ]
 }

@@ -26,9 +26,7 @@ process COBALT_PANEL_NORMALISATION {
 
     def log_level_arg = task.ext.log_level ? "-log_level ${task.ext.log_level}" : ''
 
-    def wgs_copy_number_percentiles_arg = copy_number_percentiles
-        ? "-wgs_copy_number_percentiles ${copy_number_percentiles}"
-        : ''
+    def wgs_copy_number_percentiles_arg = copy_number_percentiles ? "-wgs_copy_number_percentiles ${copy_number_percentiles}" : ''
 
     """
     mkdir -p inputs/

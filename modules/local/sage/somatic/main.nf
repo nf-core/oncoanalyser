@@ -21,14 +21,13 @@ process SAGE_SOMATIC {
     path driver_gene_panel
     path ensembl_data_resources
     path gnomad_resource
-    val sequencing_type
+    val sequencing_platform
     val targeted_mode
 
     output:
-    tuple val(meta), path('somatic/*.sage.somatic.vcf.gz'), path('somatic/*.sage.somatic.vcf.gz.tbi'), emit: vcf
-    tuple val(meta), path('somatic/')                                                                , emit: sage_dir
-    path 'versions.yml'                                                                              , emit: versions
-    path '.command.*'                                                                                , emit: command_files
+    tuple val(meta), path('somatic/'), emit: sage_dir
+    path 'versions.yml'              , emit: versions
+    path '.command.*'                , emit: command_files
 
     when:
     task.ext.when == null || task.ext.when
@@ -38,21 +37,25 @@ process SAGE_SOMATIC {
 
     def log_level_arg = task.ext.log_level ? "-log_level ${task.ext.log_level}" : ''
 
-    def reference_ids = [meta.normal_id, meta.donor_id].findAll { it }
-    def reference_bams = [normal_bam, donor_bam].findAll { it }.collect { it.toString() }
+    def reference_ids = []
+    if (meta.containsKey('normal_id')) { reference_ids.add(meta.normal_id) }
+    if (meta.containsKey('donor_id')) { reference_ids.add(meta.donor_id) }
+    def reference_arg = reference_ids.size() > 0 ? "-reference ${reference_ids.join(',')}" : ''
+    def ref_sample_count_arg = reference_ids.size() > 0 ? "-ref_sample_count ${reference_ids.size()}" : ''
 
-    def reference_arg = reference_ids ? "-reference ${reference_ids.join(',')}" : ''
-    def reference_bam_arg = reference_bams ? "-reference_bam ${reference_bams.join(',')}" : ''
-    def ref_sample_count_arg = reference_ids ? "-ref_sample_count ${reference_ids.size()}" : ''
+    def reference_alns = []
+    if (normal_bam) { reference_alns.add(normal_bam.toString()) }
+    if (donor_bam) { reference_alns.add(donor_bam.toString()) }
+    def reference_bam_arg = reference_alns.size() > 0 ? "-reference_bam ${reference_alns.join(',')}" : ''
 
     def include_mt_arg = targeted_mode ? '' : '-include_mt'
 
-    // Tumor in normal contamination (TINC)
+    // Set TINC when if conditions
     def tinc_args = ''
 
-    def should_run_tinc_wgs = !targeted_mode && tumor_bam && normal_bam
-    def should_run_tinc_seq_type = sequencing_type == 'ILLUMINA' // NOTE(LN): Skip TINC for SBX and Ultima for now
-    def should_run_tinc = should_run_tinc_wgs && should_run_tinc_seq_type
+    def should_run_tinc_wgs_tn = ! targeted_mode && tumor_bam && normal_bam
+    def should_run_tinc_seq_type = sequencing_platform.toLowerCase() == 'illumina'
+    def should_run_tinc = should_run_tinc_wgs_tn && should_run_tinc_seq_type
 
     if (should_run_tinc) {
 
@@ -60,11 +63,15 @@ process SAGE_SOMATIC {
         def write_fit_variants_arg = '-write_fit_variants'
         def pon_file_arg = "-pon_file ${sage_pon}"
 
-        def gnomad_arg = genome_ver == '38'
-            ? "-gnomad_freq_dir ${gnomad_resource}"
-            : "-gnomad_freq_file ${gnomad_resource}"
+        def gnomad_arg
+        if (genome_ver == '38') {
+            gnomad_arg = "-gnomad_freq_dir ${gnomad_resource}"
+        } else {
+            gnomad_arg = "-gnomad_freq_file ${gnomad_resource}"
+        }
 
-        tinc_args = "${run_tinc_arg} ${write_fit_variants_arg} ${pon_file_arg} ${gnomad_arg}"
+        tinc_args = "-run_tinc -write_fit_variants -pon_file ${sage_pon} ${gnomad_arg}"
+
     }
 
     // NOTE(SW): use of ternary inexplicitly causes a 'variable already defined in scope error'
@@ -91,7 +98,7 @@ process SAGE_SOMATIC {
         -driver_gene_panel ${driver_gene_panel} \\
         -high_confidence_bed ${sage_highconf_regions} \\
         -ensembl_data_dir ${ensembl_data_resources} \\
-        -sequencing_type ${sequencing_type} \\
+        -sequencing_type ${sequencing_platform.toUpperCase()} \\
         ${include_mt_arg} \\
         ${tinc_args} \\
         ${high_depth_mode_arg} \\

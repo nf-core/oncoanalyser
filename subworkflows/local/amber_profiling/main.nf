@@ -2,15 +2,18 @@
 // AMBER determines b-allele frequencies at predetermined positions
 //
 
+import Constants
+import Utils
+
 include { AMBER } from '../../../modules/local/amber/main'
 
 workflow AMBER_PROFILING {
     take:
     // Sample data
-    ch_inputs          // channel: [mandatory] [ meta ]
-    ch_tumor_bam       // channel: [mandatory] [ meta, bam, bai ]
-    ch_normal_bam      // channel: [mandatory] [ meta, bam, bai ]
-    ch_donor_bam       // channel: [mandatory] [ meta, bam, bai ]
+    ch_inputs            // channel: [mandatory] [ meta ]
+    ch_redux_dir_tumor   // channel: [mandatory] [ meta, redux_dir ]
+    ch_redux_dir_normal  // channel: [mandatory] [ meta, redux_dir ]
+    ch_redux_dir_donor   // channel: [mandatory] [ meta, redux_dir ]
 
     // Reference data
     genome_version       // channel: [mandatory] genome version
@@ -19,7 +22,7 @@ workflow AMBER_PROFILING {
     tumor_min_depth      // integer: [optional]  -tumor_min_depth argument value
 
     // Params
-    sequencing_type      // string:  [mandatory] sequencing type
+    sequencing_platform  // string:  [mandatory] sequencing platform
     purity_estimate_mode // boolean: [mandatory] Set purity estimate mode
 
     main:
@@ -27,31 +30,31 @@ workflow AMBER_PROFILING {
     // channel: [ versions.yml ]
     ch_versions = Channel.empty()
 
-    // Select input sources and sort
-    // channel: runnable: [ meta, tumor_bam, tumor_bai, normal_bam, normal_bai]
+    // Select input sources then sort
+    // channel: runnable: [ meta, tumor_bam, tumor_bai, normal_bam, normal_bai ]
     // channel: skip: [ meta ]
-    ch_inputs_sorted = channels.WorkflowChannels.groupByMeta(
-        ch_tumor_bam,
-        ch_normal_bam,
-        ch_donor_bam,
+    ch_inputs_sorted = WorkflowOncoanalyser.groupByMeta(
+        ch_redux_dir_tumor,
+        ch_redux_dir_normal,
+        ch_redux_dir_donor,
     )
-        .map { meta, tumor_bam, tumor_bai, normal_bam, normal_bai, donor_bam, donor_bai ->
-            return [
-                meta,
-                sample.Inputs.preferUserProvidedInput(tumor_bam, meta, sample.FileKey.BAM_REDUX_DNA_TUMOR),
-                sample.Inputs.preferPipelineOutput(tumor_bai, meta, sample.FileKey.BAI_DNA_TUMOR),
+        .map { meta, redux_dir_tumor, redux_dir_normal, redux_dir_donor ->
 
-                sample.Inputs.preferUserProvidedInput(normal_bam, meta, sample.FileKey.BAM_REDUX_DNA_NORMAL),
-                sample.Inputs.preferPipelineOutput(normal_bai, meta, sample.FileKey.BAI_DNA_NORMAL),
+            def redux_dir_tumor_selected = Utils.selectCurrentOrExisting(redux_dir_tumor, meta, Constants.INPUT.REDUX_DIR_TUMOR)
+            def redux_dir_normal_selected = Utils.selectCurrentOrExisting(redux_dir_normal, meta, Constants.INPUT.REDUX_DIR_NORMAL)
+            def redux_dir_donor_selected = Utils.selectCurrentOrExisting(redux_dir_donor, meta, Constants.INPUT.REDUX_DIR_DONOR)
 
-                sample.Inputs.preferUserProvidedInput(donor_bam, meta, sample.FileKey.BAM_REDUX_DNA_DONOR),
-                sample.Inputs.preferPipelineOutput(donor_bai, meta, sample.FileKey.BAI_DNA_DONOR),
-            ]
+            def (tumor_bam, tumor_bai) = Utils.getTumorReduxDirAlignment(meta, redux_dir_tumor_selected)
+            def (normal_bam, normal_bai) = Utils.getNormalReduxDirAlignment(meta, redux_dir_normal_selected)
+            def (donor_bam, donor_bai) = Utils.getDonorReduxDirAlignment(meta, redux_dir_donor_selected)
+
+            return [meta, tumor_bam, tumor_bai, normal_bam, normal_bai, donor_bam, donor_bai]
+
         }
         .branch { meta, tumor_bam, tumor_bai, normal_bam, normal_bai, donor_bam, donor_bai ->
-            def has_existing = sample.Inputs.hasExisting(meta, sample.FileKey.AMBER_DIR)
 
-            def runnable_standard = !purity_estimate_mode && tumor_bam && !has_existing
+            def has_existing = Utils.hasExistingInput(meta, Constants.INPUT.AMBER_DIR)
+            def runnable_standard = ! purity_estimate_mode && tumor_bam && ! has_existing
 
             // TODO(SW): must improve handling through separation of sample information in meta; currently unable to provide ccfDNA AMBER directory in samplesheet
             def runnable_purity_estimate = purity_estimate_mode && normal_bam
@@ -66,9 +69,12 @@ workflow AMBER_PROFILING {
     ch_amber_inputs = ch_inputs_sorted.runnable
         .map { meta, tumor_bam, tumor_bai, normal_bam, normal_bai, donor_bam, donor_bai ->
 
-            def tumor_id = purity_estimate_mode
-                ? sample.Inputs.getTumorDnaSampleNameLongitudinal(meta)
-                : sample.Inputs.getTumorDnaSampleNamePrimary(meta)
+            def tumor_id
+            if (purity_estimate_mode) {
+                tumor_id = Utils.getTumorDnaSampleName(meta, primary: false)
+            } else {
+                tumor_id = Utils.getTumorDnaSampleName(meta, primary: true)
+            }
 
             def meta_amber = [
                 key: meta.group_id,
@@ -77,14 +83,14 @@ workflow AMBER_PROFILING {
             ]
 
             if (normal_bam) {
-                meta_amber.normal_id = sample.Inputs.getNormalDnaSampleName(meta)
+                meta_amber.normal_id = Utils.getNormalDnaSampleName(meta)
             }
 
             if (donor_bam) {
-                meta_amber.donor_id = sample.Inputs.getDonorDnaSampleName(meta)
+                meta_amber.donor_id = Utils.getDonorDnaSampleName(meta)
             }
 
-            [meta_amber, tumor_bam, normal_bam, donor_bam, tumor_bai, normal_bai, donor_bai]
+            return [meta_amber, tumor_bam, tumor_bai, normal_bam, normal_bai, donor_bam, donor_bai]
         }
 
     // Run process
@@ -94,7 +100,7 @@ workflow AMBER_PROFILING {
         heterozygous_sites,
         target_regions_bed,
         tumor_min_depth,
-        sequencing_type,
+        sequencing_platform,
     )
 
     ch_versions = ch_versions.mix(AMBER.out.versions)
@@ -103,7 +109,7 @@ workflow AMBER_PROFILING {
     // channel: [ meta, amber_dir ]
     ch_outputs = Channel.empty()
         .mix(
-            channels.WorkflowChannels.restoreMeta(AMBER.out.amber_dir, ch_inputs),
+            WorkflowOncoanalyser.restoreMeta(AMBER.out.amber_dir, ch_inputs),
             ch_inputs_sorted.skip.map { meta -> [meta, []] },
         )
 

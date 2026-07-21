@@ -2,6 +2,9 @@
 // PAVE PON creation prepares the panel-specific small variant artefact resource
 //
 
+import Constants
+import Utils
+
 include { PAVE_PON_PANEL_CREATION } from '../../../modules/local/pave/pon_creation/main'
 
 
@@ -23,9 +26,11 @@ workflow PAVE_PON_CREATION {
     ch_pave_inputs = ch_sage_dir_somatic
         .map { meta, sage_dir ->
 
-            def (sage_vcf, sage_tbi) = sample.Inputs.resolveSageVcfWithTbi(sage_dir, meta, samplesheet.SampleType.TUMOR)
+            def sage_dir_selected = Utils.selectCurrentOrExisting(sage_dir, meta, Constants.INPUT.SAGE_DIR_TUMOR)
+            def sage_vcf = sage_dir_selected ? sage_dir_selected.resolve("${Utils.getTumorDnaSampleName(meta)}.sage.somatic.vcf.gz") : []
+            def sage_tbi = sage_dir_selected ? sage_dir_selected.resolve("${Utils.getTumorDnaSampleName(meta)}.sage.somatic.vcf.gz.tbi") : []
 
-            return [ sage_vcf, sage_tbi ]
+            return [sage_vcf, sage_tbi]
         }
         .collect(flat: false)
         .map { d -> d.transpose() }

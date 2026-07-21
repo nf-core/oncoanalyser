@@ -2,16 +2,19 @@
 // WISP estimates tumor purity in longitudinal samples using WGS data of the primary
 //
 
+import Constants
+import Utils
+
 include { WISP } from '../../../modules/local/wisp/main'
 
 workflow WISP_ANALYSIS {
     take:
     // Sample data
     ch_inputs                  // channel: [mandatory] [ meta ]
-    ch_redux_out               // channel: [mandatory] [ meta, redux_dir ]
-    ch_amber_out               // channel: [mandatory] [ meta, amber_dir ]
-    ch_cobalt_out              // channel: [mandatory] [ meta, cobalt_dir ]
-    ch_sage_somatic_append_out // channel: [mandatory] [ meta, sage_append_dir ]
+    ch_redux_dir               // channel: [mandatory] [ meta, redux_dir ]
+    ch_amber_dir               // channel: [mandatory] [ meta, amber_dir ]
+    ch_cobalt_dir              // channel: [mandatory] [ meta, cobalt_dir ]
+    ch_sage_append_dir_somatic // channel: [mandatory] [ meta, sage_append_dir ]
 
     // Reference data
     genome_fasta               // channel: [mandatory] /path/to/genome_fasta
@@ -25,75 +28,67 @@ workflow WISP_ANALYSIS {
     // channel: [ versions.yml ]
     ch_versions = Channel.empty()
 
-    // Select input sources and sort
-    // channel: runnable: [ meta, ... ]
+    // Select input sources then sort
+    // channel: runnable: [ meta, purple_dir (primary), amber_dir (primary), normal_bam (primary), redux_dir (longitudinal), amber_dir (longitudinal), cobalt_dir (longitudinal), sage_append_dir (longitudinal) ]
     // channel: skip: [ meta ]
-    ch_inputs_sorted = channels.WorkflowChannels.groupByMeta(
-        ch_redux_out,
-        ch_amber_out,
-        ch_cobalt_out,
-        ch_sage_somatic_append_out,
+    ch_inputs_sorted = WorkflowOncoanalyser.groupByMeta(
+        ch_redux_dir,
+        ch_amber_dir,
+        ch_cobalt_dir,
+        ch_sage_append_dir_somatic,
     )
-        .branch { meta, longitudinal_redux_dir, longitudinal_amber_dir, longitudinal_cobalt_dir, longitudinal_sage_append_dir ->
+        .map { meta, longitudinal_redux_dir, longitudinal_amber_dir, longitudinal_cobalt_dir, longitudinal_sage_append_dir ->
 
-            // NOTE(LN): Wisp only needs the tumor REDUX TSV files. However, longitudinal_redux_dir is empty when
-            // starting from REDUX_BAM (longitudinal_redux_dir is only populated when REDUX is run, i.e. when starting
-            // from BAM or FASTQ). We instead form the REDUX TSV paths using the REDUX_BAM dir
-            def longitudinal_redux_tsvs = sample.Inputs.resolveReduxTsvFiles(longitudinal_redux_dir, meta, samplesheet.SampleType.TUMOR)
+            def primary_normal_redux_dir = Utils.getInput(meta, Constants.INPUT.REDUX_DIR_NORMAL)
+            def (primary_normal_bam, primary_normal_bai) = Utils.getNormalReduxDirAlignment(meta, primary_normal_redux_dir)
 
-            def primary_purple_dir = sample.Inputs.get(meta, sample.FileKey.PURPLE_DIR)
-            def primary_amber_dir = sample.Inputs.get(meta, sample.FileKey.AMBER_DIR)
-            def primary_normal_bam = sample.Inputs.get(meta, sample.FileKey.BAM_REDUX_DNA_NORMAL)
+            def primary_purple_dir = Utils.getInput(meta, Constants.INPUT.PURPLE_DIR)
+            def primary_amber_dir = Utils.getInput(meta, Constants.INPUT.AMBER_DIR)
+
+            def longitudinal_redux_dir_selected = Utils.selectCurrentOrExisting(longitudinal_redux_dir, meta, Constants.INPUT.REDUX_DIR_TUMOR)
+
+            return [
+              meta,
+              primary_purple_dir,
+              primary_amber_dir,
+              primary_normal_bam,
+              longitudinal_redux_dir_selected,
+              longitudinal_amber_dir,
+              longitudinal_cobalt_dir,
+              longitudinal_sage_append_dir,
+            ]
+        }
+        .branch { meta, primary_purple_dir, primary_amber_dir, primary_normal_bam, longitudinal_redux_dir, longitudinal_amber_dir, longitudinal_cobalt_dir, longitudinal_sage_append_dir ->
 
             def runnable
             if (targeted_mode) {
-                runnable =
-                    primary_purple_dir &&
-                    longitudinal_sage_append_dir &&
-                    longitudinal_redux_tsvs
+                runnable = primary_purple_dir && longitudinal_sage_append_dir
             } else {
-                runnable =
-                    primary_purple_dir &&
-                    longitudinal_sage_append_dir &&
-                    longitudinal_cobalt_dir &&
-                    longitudinal_redux_tsvs
+                runnable = primary_purple_dir && longitudinal_sage_append_dir && longitudinal_cobalt_dir
             }
 
-            def inputs = [:]
-            inputs.meta = meta
-            inputs.primary_purple_dir = primary_purple_dir
-            inputs.primary_amber_dir = primary_amber_dir
-            inputs.primary_normal_bam = primary_normal_bam
-            inputs.longitudinal_redux_tsvs = longitudinal_redux_tsvs
-            inputs.longitudinal_amber_dir = longitudinal_amber_dir
-            inputs.longitudinal_cobalt_dir = longitudinal_cobalt_dir
-            inputs.longitudinal_sage_append_dir = longitudinal_sage_append_dir
-
             runnable: runnable
-                return inputs
             skip: true
-                return inputs.meta
+                return meta
         }
 
     // Create process input channel
-    // channel: [ meta_wisp, ... ]
+    // channel: [ meta_wisp, purple_dir (primary), amber_dir (primary), normal_bam (primary), redux_dir (longitudinal), amber_dir (longitudinal), cobalt_dir (longitudinal), sage_append_dir (longitudinal) ]
     ch_wisp_inputs = ch_inputs_sorted.runnable
+        .map { d ->
 
-        .map { inputs ->
-
-            def meta = inputs.meta
+            def meta = d[0]
+            def inputs = d[1..-1]
 
             def meta_wisp = [
                 key: meta.group_id,
                 id: meta.group_id,
                 subject_id: meta.subject_id,
-                primary_id: sample.Inputs.getTumorDnaSampleNamePrimary(meta),
-                longitudinal_id: sample.Inputs.getTumorDnaSampleNameLongitudinal(meta),
+                primary_id: Utils.getTumorDnaSampleName(meta, primary: true),
+                longitudinal_id: Utils.getTumorDnaSampleName(meta, primary: false),
             ]
 
-            inputs.meta = meta_wisp
-
-            return inputs.values()
+            return [meta] + inputs
         }
 
 

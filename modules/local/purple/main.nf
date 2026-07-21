@@ -12,9 +12,9 @@ process PURPLE {
         path(amber_dir),
         path(cobalt_dir),
         path(esvee_dir),
-        path(pave_somatic_dir, stageAs: 'pave_somatic'),
-        path(pave_germline_dir, stageAs: 'pave_germline'),
-        path(redux_tumor_tsvs, stageAs: "redux_tumor/*")
+        path(pave_somatic_dir),
+        path(pave_germline_dir),
+        path(redux_tumor_tsvs, stageAs: 'redux_tumor_tsvs/*')
     path genome_fasta
     val genome_ver
     path genome_fai
@@ -25,7 +25,7 @@ process PURPLE {
     path driver_gene_panel
     path ensembl_data_resources
     path germline_amp_del_freq
-    path target_region_bed
+    path target_regions_bed
 
     output:
     tuple val(meta), path('purple/'), emit: purple_dir
@@ -47,12 +47,12 @@ process PURPLE {
     def esvee_dir_arg = esvee_dir ? "-esvee_dir ${esvee_dir}" : ''
     def pave_somatic_dir_arg = pave_somatic_dir ? "-pave_somatic_dir ${pave_somatic_dir}" : ''
     def pave_germline_dir_arg = pave_germline_dir ? "-pave_germline_dir ${pave_germline_dir}" : ''
-    def redux_tumor_dir_arg = redux_tumor_tsvs ? "-redux_tumor_dir redux_tumor/" : ''
+    def redux_tumor_dir_arg = redux_tumor_tsvs ? '-redux_tumor_dir redux_tumor_tsvs/' : ''
 
     def sage_known_hotspots_germline_arg = sage_known_hotspots_germline ? "-germline_hotspots ${sage_known_hotspots_germline}" : ''
     def germline_amp_del_freq_file_arg = germline_amp_del_freq ? "-germline_amp_del_freq_file ${germline_amp_del_freq}" : ''
 
-    def target_region_bed_arg = target_region_bed ? "-target_regions_bed ${target_region_bed}" : ''
+    def target_regions_bed_arg = target_regions_bed ? "-target_regions_bed ${target_regions_bed}" : ''
 
     """
     purple \\
@@ -72,7 +72,7 @@ process PURPLE {
         -ensembl_data_dir ${ensembl_data_resources} \\
         -somatic_hotspots ${sage_known_hotspots_somatic} \\
         ${sage_known_hotspots_germline_arg} \\
-        ${target_region_bed_arg} \\
+        ${target_regions_bed_arg} \\
         ${germline_amp_del_freq_file_arg} \\
         -gc_profile ${gc_profile} \\
         -circos \$(which circos) \\

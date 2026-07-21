@@ -141,8 +141,8 @@ providing one of the below values to `--sequencing_type`:
 - `SBX`: [Roche SBX](https://www.roche.com/en-gb/products/sequencing/sequencing-systems/axelios-sbx.html)
 - `ULTIMA`: [Ultima Genomics](https://www.ultimagenomics.com/)
 
-For Illumina sequencing, `--sequencing_type` does not need to be specified. For SBX and Ultima sequencing, you will need 
-to explicitly specify `--sequencing_type` like so:
+For Illumina sequencing, `--sequencing_platform` does not need to be specified. For SBX and Ultima sequencing, you will need
+to explicitly specify `--sequencing_platform` like so:
 
 ```bash
 nextflow run nf-core/oncoanalyser \

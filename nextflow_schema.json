@@ -56,12 +56,11 @@
                     "fa_icon": "fas fa-diagram-project",
                     "pattern": "(?i)^(wgts|targeted)$"
                 },
-                "sequencing_type": {
+                "sequencing_platform": {
                     "type": "string",
                     "description": "Type of sequencing technology.",
                     "fa_icon": "far fa-file-code",
-                    "enum": ["ILLUMINA", "SBX", "ULTIMA"],
-                    "default": "ILLUMINA"
+                    "enum": ["illumina", "sbx", "ultima"]
                 },
                 "panel": {
                     "type": "string",
@@ -105,10 +104,19 @@
                     "description": "UMI type. Sets default '*_umi_* settings'",
                     "fa_icon": "fas fa-cog"
                 },
+                "fastq_tools_umi_enabled": {
+                    "type": "boolean",
+                    "description": "Enable fastq-tools UMI processing.",
+                    "fa_icon": "fas fa-cog"
+                },
+                "fastq_tools_umi_delim": {
+                    "type": "string",
+                    "description": "UMI delimiter fastq-tools.",
+                    "fa_icon": "fas fa-cog"
+                },
                 "fastp_umi_enabled": {
                     "type": "boolean",
                     "description": "Enable fastp UMI processing.",
-                    "default": false,
                     "fa_icon": "fas fa-cog"
                 },
                 "fastp_umi_location": {
@@ -131,7 +139,6 @@
                 "redux_umi_enabled": {
                     "type": "boolean",
                     "description": "Enable REDUX UMI processing.",
-                    "default": false,
                     "fa_icon": "fas fa-cog"
                 },
                 "redux_umi_duplex_delim": {
@@ -179,7 +186,7 @@
                 "max_fastq_records": {
                     "type": "integer",
                     "description": "When positive, parallelise read alignment across multiple jobs by splitting fastq files into multiple fastq files with no more than max_fastq_records records.",
-                    "default": -1,
+                    "default": 10000000,
                     "fa_icon": "fas fa-cog"
                 },
                 "driver_gene_panel": {

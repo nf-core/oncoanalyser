@@ -8,7 +8,7 @@ process VIRUSINTERPRETER {
         'biocontainers/hmftools-virus-interpreter:1.7.2--hdfd78af_0' }"
 
     input:
-    tuple val(meta), path(virus_tsv), path(purple_dir), path(bamtools_somatic_dir)
+    tuple val(meta), path(virusbreakend_tsv), path(bamtools_somatic_dir), path(purple_dir)
     path taxonomy_db
     path reporting_db
     path blocklist_db
@@ -37,7 +37,7 @@ process VIRUSINTERPRETER {
         -sample ${meta.sample_id} \\
         -purple_dir ${purple_dir} \\
         -tumor_metrics_dir ${bamtools_somatic_dir} \\
-        -virus_breakend_tsv ${virus_tsv} \\
+        -virus_breakend_tsv ${virusbreakend_tsv} \\
         -taxonomy_db_tsv ${taxonomy_db} \\
         -virus_reporting_db_tsv ${reporting_db} \\
         -virus_blacklisting_db_tsv ${blocklist_db} \\
