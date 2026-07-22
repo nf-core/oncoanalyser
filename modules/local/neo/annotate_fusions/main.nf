@@ -8,7 +8,7 @@ process NEO_ANNOTATE_FUSIONS {
         'biocontainers/hmftools-isofox:2.0.1--hdfd78af_0' }"
 
     input:
-    tuple val(meta), path(neo_finder_dir), path(bam), path(bai)
+    tuple val(meta), path(neo_finder_dir), path(aln), path(idx)
     val read_length
     path genome_fasta
     val genome_ver
@@ -37,7 +37,7 @@ process NEO_ANNOTATE_FUSIONS {
         -Xmx${Math.round(task.memory.bytes * xmx_mod)} \\
         ${args} \\
         -sample ${meta.sample_id} \\
-        -bam_file ${bam} \\
+        -bam_file ${aln} \\
         -functions NEO_EPITOPES \\
         -read_length ${read_length} \\
         -neo_dir ${neo_finder_dir} \\

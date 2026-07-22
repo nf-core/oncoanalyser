@@ -8,7 +8,7 @@ process REDUX {
         'biocontainers/hmftools-redux:2.0.2--hdfd78af_0' }"
 
     input:
-    tuple val(meta), path(bams), path(bais)
+    tuple val(meta), path(alns), path(idxs)
     path genome_fasta
     val genome_ver
     path genome_fai
@@ -74,8 +74,8 @@ process REDUX {
     }
 
     if (generate_tsvs_only) {
-        assert [bams].flatten().size() == 1
-        assert [bais].flatten().size() == 1
+        assert [alns].flatten().size() == 1
+        assert [idxs].flatten().size() == 1
 
         bqr_jitter_msi_only_arg = '-bqr_jitter_msi_only'
     }
@@ -92,7 +92,7 @@ process REDUX {
         -Xmx${Math.round(task.memory.bytes * xmx_mod)} \\
         ${args} \\
         -sample ${meta.sample_id} \\
-        -input_bam ${bams.join(',')} \\
+        -input_bam ${alns.join(',')} \\
         -ref_genome ${genome_fasta} \\
         -ref_genome_version ${genome_ver} \\
         -ref_genome_msi_file ${msi_jitter_sites} \\

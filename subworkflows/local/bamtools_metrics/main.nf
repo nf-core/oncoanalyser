@@ -27,49 +27,49 @@ workflow BAMTOOLS_METRICS {
     ch_versions = Channel.empty()
 
     // Select input sources then sort
-    // channel: runnable: [ meta, bam, bai ]
+    // channel: runnable: [ meta, aln, idx ]
     // channel: skip: [ meta ]
     ch_inputs_tumor_sorted = ch_redux_dir_tumor
         .map { meta, redux_dir ->
 
             def redux_dir_selected = Utils.selectCurrentOrExisting(redux_dir, meta, Constants.INPUT.REDUX_DIR_TUMOR)
-            def (bam, bai) = Utils.getTumorReduxDirAlignment(meta, redux_dir_selected)
+            def (aln, idx) = Utils.getTumorReduxDirAlignment(meta, redux_dir_selected)
 
-            return [meta, bam, bai]
+            return [meta, aln, idx]
 
         }
-        .branch { meta, bam, bai ->
+        .branch { meta, aln, idx ->
             def has_existing = Utils.hasExistingInput(meta, Constants.INPUT.BAMTOOLS_DIR_TUMOR)
-            runnable: bam && ! has_existing
+            runnable: aln && ! has_existing
             skip: true
                 return meta
         }
 
-    // channel: runnable: [ meta, bam, bai ]
+    // channel: runnable: [ meta, aln, idx ]
     // channel: skip: [ meta ]
     ch_inputs_normal_sorted = ch_redux_dir_normal
         .map { meta, redux_dir ->
 
             def redux_dir_selected = Utils.selectCurrentOrExisting(redux_dir, meta, Constants.INPUT.REDUX_DIR_NORMAL)
-            def (bam, bai) = Utils.getNormalReduxDirAlignment(meta, redux_dir_selected)
+            def (aln, idx) = Utils.getNormalReduxDirAlignment(meta, redux_dir_selected)
 
-            return [meta, bam, bai]
+            return [meta, aln, idx]
         }
-        .branch { meta, bam, bai ->
+        .branch { meta, aln, idx ->
             def has_existing = Utils.hasExistingInput(meta, Constants.INPUT.BAMTOOLS_DIR_NORMAL)
-            runnable: bam && ! has_existing
+            runnable: aln && ! has_existing
             skip: true
                 return meta
         }
 
     // Create process input channel
-    // channel: [ meta_bamtools, bam, bai ]
+    // channel: [ meta_bamtools, aln, idx ]
     ch_bamtools_inputs = Channel.empty()
         .mix(
-            ch_inputs_tumor_sorted.runnable.map { meta, bam, bai -> [meta, Utils.getTumorDnaSample(meta), 'tumor', bam, bai] },
-            ch_inputs_normal_sorted.runnable.map { meta, bam, bai -> [meta, Utils.getNormalDnaSample(meta), 'normal', bam, bai] },
+            ch_inputs_tumor_sorted.runnable.map { meta, aln, idx -> [meta, Utils.getTumorDnaSample(meta), 'tumor', aln, idx] },
+            ch_inputs_normal_sorted.runnable.map { meta, aln, idx -> [meta, Utils.getNormalDnaSample(meta), 'normal', aln, idx] },
         )
-        .map { meta, meta_sample, sample_type, bam, bai ->
+        .map { meta, meta_sample, sample_type, aln, idx ->
 
             def meta_bamtools = [
                 key: meta.group_id,
@@ -78,7 +78,7 @@ workflow BAMTOOLS_METRICS {
                 sample_type: sample_type,
             ]
 
-            return [meta_bamtools, bam, bai]
+            return [meta_bamtools, aln, idx]
         }
 
     // Run process

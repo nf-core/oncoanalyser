@@ -8,7 +8,7 @@ process AMBER {
         'biocontainers/hmftools-amber:4.3--hdfd78af_0' }"
 
     input:
-    tuple val(meta), path(tumor_bam), path(tumor_bai), path(normal_bam), path(normal_bai), path(donor_bam), path(donor_bai)
+    tuple val(meta), path(tumor_aln), path(tumor_idx), path(normal_aln), path(normal_idx), path(donor_aln), path(donor_idx)
     val genome_ver
     path heterozygous_sites
     path target_regions_bed
@@ -36,8 +36,8 @@ process AMBER {
     def reference_arg = reference_ids.size() > 0 ? "-reference ${reference_ids.join(',')}" : ''
 
     def reference_alns = []
-    if (normal_bam) { reference_alns.add(normal_bam.toString()) }
-    if (donor_bam) { reference_alns.add(donor_bam.toString()) }
+    if (normal_aln) { reference_alns.add(normal_aln.toString()) }
+    if (donor_aln) { reference_alns.add(donor_aln.toString()) }
     def reference_bam_arg = reference_alns.size() > 0 ? "-reference_bam ${reference_alns.join(',')}" : ''
 
     def target_regions_bed_arg = target_regions_bed ? "-target_regions_bed ${target_regions_bed}" : ''
@@ -49,7 +49,7 @@ process AMBER {
         -Xmx${Math.round(task.memory.bytes * xmx_mod)} \\
         ${args} \\
         -tumor ${meta.tumor_id} \\
-        -tumor_bam ${tumor_bam} \\
+        -tumor_bam ${tumor_aln} \\
         ${reference_arg} \\
         ${reference_bam_arg} \\
         -ref_genome_version ${genome_ver} \\

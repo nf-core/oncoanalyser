@@ -65,7 +65,7 @@ Below is a brief description of each argument:
 - `--input`: the [samplesheet](#samplesheet) containing sample details and corresponding files to be analysed
 - `--output`: output directory
 
-If you have data from Roche SBX or Ultima sequencing technologies, you will need to specify argument `--sequencing_type` (see [Sequencing technologies](#sequencing-technologies)). 
+If you have data from Roche SBX or Ultima sequencing technologies, you will need to specify argument `--sequencing_platform` (see [Sequencing technologies](#sequencing-technologies)).
 
 :::tip
 
@@ -134,8 +134,8 @@ If you wish to share such a profile (such as upload as supplementary material fo
 
 ## Sequencing technologies
 
-All [pipeline modes](#pipeline-modes) of `oncoanalyser` support sequencing data from the following technologies by 
-providing one of the below values to `--sequencing_type`:
+All [pipeline modes](#pipeline-modes) of `oncoanalyser` support sequencing data from the following technologies by
+providing one of the below values to `--sequencing_platform`:
 
 - `ILLUMINA`: [Illumina](https://emea.illumina.com/science/technology/next-generation-sequencing.html) (default)
 - `SBX`: [Roche SBX](https://www.roche.com/en-gb/products/sequencing/sequencing-systems/axelios-sbx.html)
@@ -149,7 +149,7 @@ nextflow run nf-core/oncoanalyser \
 -revision 2.3.0 \
 -config reference_data.config \
 -profile docker \
---sequencing_type SBX \
+--sequencing_platform SBX \
 --mode wgts \
 --genome GRCh38_hmf \
 --input samplesheet.csv \
@@ -168,7 +168,7 @@ row as the first line with the below columns:
 | `sample_id`     | Sample identifier                                                                                                                                                                                                                                                                                                                                                 |
 | `sample_type`   | Sample type: `tumor`, `normal`, or `tumor_normal`                                                                                                                                                                                                                                                                                                                 |
 | `sequence_type` | Sequence type: `dna`, `rna`, or `dna_rna`                                                                                                                                                                                                                                                                                                                         |
-| `filetype`      | File type: e.g. `fastq`, `bam`, `bai`. All valid values can be found [here](https://github.com/nf-core/oncoanalyser/blob/2.3.0/lib/Constants.groovy#L80).                                                                                                                                                                                                                                                  |
+| `filetype`      | File type: e.g. `fastq`, `bam`, `bai`. All valid values can be found [here](../lib/samplesheet/FileType.groovy).                                                                                                                                                                                                                                                  |
 | `info`          | Additional sample info in the form `<key1>:<value1>;<key1>:<value2>;...`. Valid keys: `lane` and `library_id` for [FASTQ](#fastq) files, `longitudinal_sample` for mode [purity_estimate](#purity-estimate), `cancer_type` as a DOID that is passed to ORANGE (details in [readme](https://github.com/hartwigmedical/hmftools/tree/master/orange#running-orange)) |
 | `filepath`      | Absolute filepath to input file. Can be a local path, URL (e.g. http://, https://, ftp://) or cloud URI (e.g. gs://, s3://)                                                                                                                                                                                                                                       |
 
@@ -180,8 +180,8 @@ Output file paths are constructed based on `group_id` and `sample_id`:
 
 ### Analysis starting points
 
-An `oncoanalyser` run will typically start from either FASTQ or alignment (BAM, CRAM, REDUX BAM) inputs. However, the
-pipeline can also start from [arbitrary entry points](#starting-from-existing-outputs) as long as the required 
+An `oncoanalyser` run will typically start from either FASTQ or alignments (BAM / CRAM, REDUX BAM / CRAM) inputs. However, the
+pipeline can also start from [arbitrary entry points](#starting-from-existing-outputs) as long as the required
 inputs are provided in the samplesheet.
 
 #### FASTQ
@@ -263,11 +263,12 @@ used throughout the WiGiTS tools). We plan to address this issue in future relea
 
 :::
 
-#### REDUX BAM / CRAM
+#### REDUX alignments
 
-The most time and resource intensive pipeline steps are read alignment by [BWA-MEM2](https://github.com/bwa-mem2/bwa-mem2) 
-and read post-processing by [REDUX](https://github.com/hartwigmedical/hmftools/tree/master/redux). You may therefore 
-want to start from existing REDUX output BAMs/CRAMs:
+The most time and resource intensive pipeline steps are read alignment by [BWA-MEM2](https://github.com/bwa-mem2/bwa-mem2)
+and read post-processing by [REDUX](https://github.com/hartwigmedical/hmftools/tree/master/redux). You may therefore
+want to start from existing REDUX output alignments:
+
 - `<sample_id>.redux.bam` or `<sample_id>.redux.cram`
 - `<sample_id>.redux.bam.bai` or `<sample_id>.redux.cram.crai`
 
@@ -277,47 +278,49 @@ Also required are the associated REDUX TSV files (used for small variant calling
 - `<sample_id>.redux.ms_table.tsv.gz`
 - `<sample_id>.redux.duplicate_freq.tsv` (optional, only required for [QC metrics](#https://github.com/hartwigmedical/hmftools/tree/master/qsee))
 
-If the REDUX BAM/CRAM and TSV files are in the same directory, only the BAM/CRAM files should be provided to the
-samplesheet (the TSV file paths will be inferred):
+The REDUX alignments and TSVs are written to the same directory, and when using as starting input the REDUX directory
+itself should be provided:
 
 ```csv title="samplesheet.redux_bam_cram.csv"
 group_id,subject_id,sample_id,sample_type,sequence_type,filetype,filepath
-PATIENT1,PATIENT1,PATIENT1-T,tumor,dna,bam_redux,/path/to/PATIENT1-T.dna.redux.bam
-PATIENT2,PATIENT2,PATIENT2-T,tumor,dna,cram_redux,/path/to/PATIENT2-T.dna.redux.cram
+PATIENT1,PATIENT1,PATIENT1-T,tumor,dna,redux_dir,/path/to/redux_PATIENT1-T/
+PATIENT2,PATIENT2,PATIENT2-T,tumor,dna,redux_dir,/path/to/redux_PATIENT2-T/
 ```
 
-You may also provide the BAM (or CRAM) index location and the REDUX TSV files directory explicitly:
+You may also provide the REDUX alignment and index directly:
 
 ```csv title="samplesheet.redux_bam_bai_tsv.csv"
 group_id,subject_id,sample_id,sample_type,sequence_type,filetype,filepath
-PATIENT1,PATIENT1,PATIENT1-T,tumor,dna,bam_redux,/path/to/PATIENT1-T.dna.redux.bam
-PATIENT1,PATIENT1,PATIENT1-T,tumor,dna,bai,/path/to/PATIENT1-T.dna.redux.bai
-PATIENT1,PATIENT1,PATIENT1-T,tumor,dna,redux_tsv_dir,/path/to/redux_tsv_dir/
+PATIENT1,PATIENT1,PATIENT1-T,tumor,dna,bam_redux,/path/to/PATIENT1-T.redux.bam
+PATIENT1,PATIENT1,PATIENT1-T,tumor,dna,bai,/path/to/PATIENT1-T.redux.bai
 ```
 
-#### REDUX BAM / CRAM but missing REDUX TSV files
+However, the REDUX TSVs are expected to be co-located with the REDUX alignment file. The following section describes
+re-generating REDUX TSVs if the case that are not available.
 
-You may have existing REDUX BAMs/CRAMs but missing the associated REDUX TSV files, e.g. due having run an older
-`oncoanalyser` version. In this case, provide the REDUX BAM/CRAM path(s) with `filetype` set to 
-`bam`/`cram` (**not** `bam_redux`/`cram_redux`):
+#### REDUX alignments but missing REDUX TSV files
+
+You may have existing REDUX alignments but missing the associated REDUX TSV files, e.g. due having run an older
+`oncoanalyser` version. These TSVs can be quickly re-generated without having to full re-process the alignments with
+REDUX by setting `generate_redux_tsvs_only` in the samplesheet info field for the corresponding REDUX alignment:
 
 ```csv title="samplesheet.redux_bam_no_tsv.csv"
-group_id,subject_id,sample_id,sample_type,sequence_type,filetype,filepath
-PATIENT1,PATIENT1,PATIENT1-T,tumor,dna,bam,/path/to/PATIENT1-T.dna.redux.bam
+group_id,subject_id,sample_id,sample_type,sequence_type,filetype,info,filepath
+PATIENT1,PATIENT1,PATIENT1-T,tumor,dna,bam_redux,generate_redux_tsvs_only,/path/to/PATIENT1-T.dna.redux.bam
 ```
 
-Then, run `oncoanalyser` with the `--redux_generate_tsvs_only` flag:
+Then, run `oncoanalyser` with as normal:
 
 ```bash
 nextflow run nf-core/oncoanalyser \
--revision 2.3.0 \
--config reference_data.config \
--profile docker \
---mode wgts \
---genome GRCh38_hmf \
---input samplesheet.csv \
---outdir output/ \
---redux_generate_tsvs_only
+  -revision 2.3.0 \
+  -config reference_data.config \
+  -profile docker \
+  --mode wgts \
+  --genome GRCh38_hmf \
+  --input samplesheet.csv \
+  --outdir output/ \
+  --redux_generate_tsvs_only
 ```
 
 REDUX will run in a special mode to only generate the TSV files, skipping the computationally expensive read processing 
@@ -325,8 +328,8 @@ steps. The rest of the pipeline will then be run.
 
 #### Starting from existing outputs
 
-Similar to starting from existing [REDUX BAM/CRAM](#redux-bam--cram) files, any of the downstream outputs of `oncoanalyser` 
-can be used as inputs so that the associated downstream processes can be skipped. This could be considered an explicit 
+Similar to starting from existing [REDUX alignments](#redux-alignments) files, any of the downstream outputs of `oncoanalyser`
+can be used as inputs so that the associated downstream processes can be skipped. This could be considered an explicit
 form of [-resume](#-resume) which does not require the Nextflow `work/` directory to be preserved.
 
 For example, you may already have tumor/normal sample output for small variant calling 
@@ -336,13 +339,14 @@ run the rest of the pipeline.
 
 ```csv title='samplesheet.resume.csv'
 group_id,subject_id,sample_id,sample_type,sequence_type,filetype,filepath
-PATIENT1,PATIENT1,PATIENT1-N,normal,dna,bam_redux,/path/to/PATIENT1-T.dna.redux.bam
-PATIENT1,PATIENT1,PATIENT1-T,tumor,dna,bam_redux,/path/to/PATIENT1-T.dna.redux.bam
-PATIENT1,PATIENT1,PATIENT1-N,normal,dna,sage_dir,/path/to/sage_normal_output_dir/
-PATIENT1,PATIENT1,PATIENT1-T,tumor,dna,sage_dir,/path/to/sage_tumor_output_dir/
-PATIENT1,PATIENT1,PATIENT1-T,tumor_normal,dna,esvee_dir,/path/to/esvee_output_dir/
+PATIENT1,PATIENT1,PATIENT1-N,normal,dna,redux_dir,/path/to/redux_PATIENT1-N/
+PATIENT1,PATIENT1,PATIENT1-T,tumor,dna,redux_dir,/path/to/redux_PATIENT1-T/
+PATIENT1,PATIENT1,PATIENT1-N,normal,dna,sage_dir,/path/to/sage/germline/
+PATIENT1,PATIENT1,PATIENT1-T,tumor,dna,sage_dir,/path/to/sage/somatic/
+PATIENT1,PATIENT1,PATIENT1-T,tumor_normal,dna,esvee_dir,/path/to/esvee/
 ```
 
+All valid combinations of `sample_type`, `sequence_type` and `filetype` are can be found [here](../lib/sample/FileKey.groovy).
 
 This approach can be used in combination with [manual process selection](#manual-process-selection) to run specific 
 downstream components of the pipeline.
@@ -431,7 +435,7 @@ performing multiple `oncoanalyser` analyses. See the below for instructions.
 The reference data required for running `oncoanalyser` can be staged automatically using
 `--mode prepare_reference` and specifying `--ref_data_types`. The below example command will stage the required
 `GRCh38_hmf` genome (and indexes) and [WiGiTS](https://github.com/hartwigmedical/hmftools) resources files for WGS
-analysis from BAM.
+analysis from alignments.
 
 ```bash
 nextflow run nf-core/oncoanalyser \
@@ -451,16 +455,16 @@ space.
 The below table shows the possible values for `--ref_data_types`. Note that multiple can be provided as comma separated
 list, e.g. `--ref_data_types wgs,dna_alignment`
 
-| Value                              | Description                                                                                                                          | Combination of                                            |
-|:-----------------------------------|:-------------------------------------------------------------------------------------------------------------------------------------|:----------------------------------------------------------|
-| `wgs`                              | Ref data for WGS analysis from BAM                                                                                                   | `fasta`, `fai`, `dict`, `img`, `hmftools`, `gridss_index` |
-| `wts`                              | Ref data for WTS analysis from BAM                                                                                                   | `fasta`, `fai`, `dict`, `img`, `hmftools`                 |
-| `targeted`                         | Ref data for targeted analysis from BAM                                                                                              | `fasta`, `fai`, `dict`, `img`, `hmftools`, `panel`        |
-| `bwamem2_index` or `dna_alignment` | BWA-MEM2 index. Required if aligning DNA FASTQs                                                                                      |                                                           |
-| `star_index` or `rna_alignment`    | STAR index. Required if aligning RNA FASTQs                                                                                          |                                                           |
-| `gridss_index`                     | GRIDSS index. Required if running Virusbreakend/Virusinterpreter                                                                     |                                                           |
-| `hmftools`                         | [WiGiTS](https://github.com/hartwigmedical/hmftools) resources files                                                                 |                                                           |
-| `panel`                            | Panel ref data. Please also specify arg `--panel <name>`,  e.g. `--panel TSO500` (must be a [supported](#targeted-sequencing) panel) |                                                           |
+| Value                              | Description                                                                                                                         | Combination of                                            |
+| :--------------------------------- | :---------------------------------------------------------------------------------------------------------------------------------- | :-------------------------------------------------------- |
+| `wgs`                              | Ref data for WGS analysis from alignments                                                                                           | `fasta`, `fai`, `dict`, `img`, `hmftools`, `gridss_index` |
+| `wts`                              | Ref data for WTS analysis from alignments                                                                                           | `fasta`, `fai`, `dict`, `img`, `hmftools`                 |
+| `targeted`                         | Ref data for targeted analysis from alignments
+| `bwamem2_index` or `dna_alignment` | BWA-MEM2 index. Required if aligning DNA FASTQs                                                                                     |                                                           |
+| `star_index` or `rna_alignment`    | STAR index. Required if aligning RNA FASTQs                                                                                         |                                                           |
+| `gridss_index`                     | GRIDSS index. Required if running Virusbreakend/Virusinterpreter                                                                    |                                                           |
+| `hmftools`                         | [WiGiTS](https://github.com/hartwigmedical/hmftools) resources files                                                                |                                                           |
+| `panel`                            | Panel ref data. Please also specify arg `--panel <name>`, e.g. `--panel tso500` (must be a [supported](#targeted-sequencing) panel) |                                                           |
 
 #### Manual staging
 
@@ -510,7 +514,7 @@ relevant FASTA file in a configuration file:
 
 :::warning
 
-For GRCh38 genome builds, HLA typing and variant calling in `oncoanalyser` is incompatible with BAMs with fragments
+For GRCh38 genome builds, HLA typing and variant calling in `oncoanalyser` is incompatible with alignments with fragments
 aligned to HLA class I ALT contigs. These contigs should be removed or hard masked from the genome prior to use in
 `oncoanalyser`. For cohorts with read data already mapped to a genome with HLA class I ALT contigs, alignments can
 either be converted to FASTQ and provided to `oncoanalyser` with an appropriate genome build, or you can use
@@ -646,27 +650,38 @@ Purity estimate of the longitudinal sample can likewise be run in two modes:
 - `--purity_estimate_mode targeted`: relies on SNVs only
 
 The minimal inputs required are:
-- BAM or REDUX BAM from the **longitudinal tumor** sample
+
+- Alignments or REDUX alignments from the **longitudinal tumor** sample
 - PURPLE directory from the **primary tumor** sample
 
-For example:
-```csv title="samplesheet.purity_estimate.csv"
+In the samplesheet the longitudinal sample must have `longitudinal_sample` set in the info field, for example a minimal
+samplesheet starting from a primary sample PURPLE directory and longitudinal sample REDUX directory:
+
+```csv title="samplesheet.purity_estimate.redux_dir.csv"
 group_id,subject_id,sample_id,sample_type,sequence_type,filetype,info,filepath
-PATIENT1,PATIENT1,PATIENT1-L,tumor,dna,bam,longitudinal_sample,/path/to/PATIENT1-T.dna.longitudinal.bam
 PATIENT1,PATIENT1,PATIENT1-T,tumor,dna,purple_dir,,/path/to/PATIENT1-T/purple/
+PATIENT1,PATIENT1,PATIENT1-L,tumor,dna,redux_dir,longitudinal_sample,/path/to/redux_PATIENT1-L/
+```
+
+Similarly, a minimal samplesheet instead starting from FASTQ for the longitudinal sample:
+
+```csv title="samplesheet.purity_estimate.fastq.csv"
+group_id,subject_id,sample_id,sample_type,sequence_type,filetype,info,filepath
+PATIENT1,PATIENT1,PATIENT1-T,tumor,dna,purple_dir,,/path/to/PATIENT1-T/purple/
+PATIENT1,PATIENT1,PATIENT1-L,tumor,dna,redux_dir,longitudinal_sample;library_id:PATIENT1-L_library;lane:001,/path/to/PATIENT1-L.R1.fastq.gz;/path/to/PATIENT1-L.R2.fastq.gz
 ```
 
 In `--purity_estimate_mode wgts`, to use LOH for purity estimation, you can optionally provide: 
 - AMBER directory from the **primary tumor** sample **AND**
-- REDUX BAM from the **primary normal** sample
+- REDUX alignments from the **primary normal** sample
 
 For example:
 ```csv title="samplesheet.purity_estimate.with_amber.csv"
 group_id,subject_id,sample_id,sample_type,sequence_type,filetype,info,filepath
-PATIENT1,PATIENT1,PATIENT1-L,tumor,dna,bam,longitudinal_sample,/path/to/PATIENT1-T.dna.longitudinal.bam
+PATIENT1,PATIENT1,PATIENT1-N,normal,dna,redux_dir,,/path/to/redux_PATIENT1-N/
 PATIENT1,PATIENT1,PATIENT1-T,tumor,dna,purple_dir,,/path/to/PATIENT1-T/purple/
 PATIENT1,PATIENT1,PATIENT1-T,tumor,dna,amber_dir,,/path/to/PATIENT1-T/amber/
-PATIENT1,PATIENT1,PATIENT1-N,normal,dna,bam_redux,,/path/to/PATIENT1-N.dna.redux.bam
+PATIENT1,PATIENT1,PATIENT1-L,tumor,dna,redux_dir,longitudinal_sample,/path/to/redux_PATIENT1-L/
 ```
 
 Then run `oncoanalyser` providing `--mode purity_estimate` and `--purity_estimate_mode <wgts|targeted>`:
@@ -828,7 +843,7 @@ nextflow run nf-core/oncoanalyser \
 Unique molecular identifiers (UMI) allow for read deduplication and error correction. UMI processing is performed by
 [fastp](https://github.com/OpenGene/fastp?tab=readme-ov-file#unique-molecular-identifier-umi-processing) or
 [fastq-tools](https://github.com/hartwigmedical/hmftools/tree/master/fastq-tools) for FASTQ files,
-and [REDUX](https://github.com/hartwigmedical/hmftools/tree/master/redux#deduplication) for BAM files.
+and [REDUX](https://github.com/hartwigmedical/hmftools/tree/master/redux#deduplication) for alignment files.
 
 We recommend using the `--umi_type` argument to automatically configure the above tools with the correct arguments.
 Currently, the supported `--umi_type` values are `TSO500`, `TWIST`, `KAPA`, `MSK`, or `NONE` (force disable UMI processing).

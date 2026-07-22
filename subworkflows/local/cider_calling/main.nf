@@ -12,7 +12,7 @@ workflow CIDER_CALLING {
     // Sample data
     ch_inputs          // channel: [mandatory] [ meta ]
     ch_redux_dir_tumor // channel: [mandatory] [ meta, redux_dir ]
-    ch_tumor_rna_bam   // channel: [mandatory] [ meta, bam, bai ]
+    ch_tumor_rna_aln   // channel: [mandatory] [ meta, aln, idx ]
 
     // Reference data
     genome_fasta       // channel: [mandatory] /path/to/genome_fasta
@@ -26,47 +26,47 @@ workflow CIDER_CALLING {
     ch_versions = Channel.empty()
 
     // Select input sources then sort, separate by DNA and RNA
-    // channel: runnable: [ meta, bam, bai ]
+    // channel: runnable: [ meta, aln, idx ]
     // channel: skip: [ meta ]
     ch_inputs_tumor_dna_sorted = ch_redux_dir_tumor
         .map { meta, redux_dir_tumor ->
 
             def redux_dir_tumor_selected = Utils.selectCurrentOrExisting(redux_dir_tumor, meta, Constants.INPUT.REDUX_DIR_TUMOR)
-            def (tumor_bam, tumor_bai) = Utils.getTumorReduxDirAlignment(meta, redux_dir_tumor_selected)
+            def (tumor_aln, tumor_idx) = Utils.getTumorReduxDirAlignment(meta, redux_dir_tumor_selected)
 
-            return [meta, tumor_bam, tumor_bai]
+            return [meta, tumor_aln, tumor_idx]
 
         }
-        .branch { meta, bam, bai ->
-            runnable: bam
+        .branch { meta, aln, idx ->
+            runnable: aln
             skip: true
                 return meta
         }
 
-    // channel: runnable: [ meta, bam, bai ]
+    // channel: runnable: [ meta, aln, idx ]
     // channel: skip: [ meta ]
-    ch_inputs_tumor_rna_sorted = ch_tumor_rna_bam
-        .map { meta, bam, bai ->
+    ch_inputs_tumor_rna_sorted = ch_tumor_rna_aln
+        .map { meta, aln, idx ->
             return [
                 meta,
-                Utils.selectCurrentOrExisting(bam, meta, Constants.INPUT.BAM_RNA_TUMOR),
-                bai ?: Utils.getInput(meta, Constants.INPUT.BAI_RNA_TUMOR),
+                Utils.selectCurrentOrExisting(aln, meta, Constants.INPUT.BAM_RNA_TUMOR),
+                idx ?: Utils.getInput(meta, Constants.INPUT.BAI_RNA_TUMOR),
             ]
         }
-        .branch { meta, bam, bai ->
-            runnable: bam
+        .branch { meta, aln, idx ->
+            runnable: aln
             skip: true
                 return meta
         }
 
     // Create process input channel
-    // channel: [ meta_cider, bam, bai ]
+    // channel: [ meta_cider, aln, idx ]
     ch_cider_inputs = Channel.empty()
         .mix(
-            ch_inputs_tumor_dna_sorted.runnable.map { meta, bam, bai -> [meta, Utils.getTumorDnaSample(meta), bam, bai] },
-            ch_inputs_tumor_rna_sorted.runnable.map { meta, bam, bai -> [meta, Utils.getTumorRnaSample(meta), bam, bai] },
+            ch_inputs_tumor_dna_sorted.runnable.map { meta, aln, idx -> [meta, Utils.getTumorDnaSample(meta), aln, idx] },
+            ch_inputs_tumor_rna_sorted.runnable.map { meta, aln, idx -> [meta, Utils.getTumorRnaSample(meta), aln, idx] },
         )
-        .map { meta, meta_sample, bam, bai->
+        .map { meta, meta_sample, aln, idx->
 
             def meta_cider = [
                 key: meta.group_id,
@@ -74,7 +74,7 @@ workflow CIDER_CALLING {
                 sample_id: meta_sample.sample_id,
             ]
 
-            return [meta_cider, bam, bai]
+            return [meta_cider, aln, idx]
         }
 
     // Run process

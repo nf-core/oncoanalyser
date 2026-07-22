@@ -14,7 +14,7 @@ workflow SAGE_APPEND {
     ch_inputs           // channel: [mandatory] [ meta ]
     ch_purple_dir       // channel: [mandatory] [ meta, purple_dir ]
     ch_redux_dir_tumor  // channel: [mandatory] [ meta, redux_dir ]
-    ch_tumor_rna_bam    // channel: [mandatory] [ meta, bam, bai ]
+    ch_tumor_rna_aln    // channel: [mandatory] [ meta, aln, idx ]
 
     // Reference data
     genome_fasta        // channel: [mandatory] /path/to/genome_fasta
@@ -39,33 +39,33 @@ workflow SAGE_APPEND {
     def purity_estimate_mode = run_mode === Constants.RunMode.PURITY_ESTIMATE
 
     // Select input sources then sort
-    // channel: runnable: [ meta, purple_dir, tumor_dna_bam, tumor_dna_bai, [redux_tsv_tumor, ...], tumor_rna_bam, tumor_rna_bai ]
+    // channel: runnable: [ meta, purple_dir, tumor_dna_aln, tumor_dna_idx, [redux_tsv_tumor, ...], tumor_rna_aln, tumor_rna_idx ]
     // channel: skip: [ meta ]
     ch_inputs_sorted = WorkflowOncoanalyser.groupByMeta(
         ch_purple_dir,
         ch_redux_dir_tumor,
-        ch_tumor_rna_bam,
+        ch_tumor_rna_aln,
     )
-        .map { meta, purple_dir, redux_dir_tumor, tumor_rna_bam, tumor_rna_bai ->
+        .map { meta, purple_dir, redux_dir_tumor, tumor_rna_aln, tumor_rna_idx ->
 
             def redux_dir_tumor_selected = Utils.selectCurrentOrExisting(redux_dir_tumor, meta, Constants.INPUT.REDUX_DIR_TUMOR)
-            def (tumor_bam, tumor_bai) = Utils.getTumorReduxDirAlignment(meta, redux_dir_tumor_selected)
+            def (tumor_aln, tumor_idx) = Utils.getTumorReduxDirAlignment(meta, redux_dir_tumor_selected)
             def redux_tsvs_tumor = Utils.getTumorReduxTsvs(meta, redux_dir_tumor_selected)
 
             return [
                 meta,
                 Utils.selectCurrentOrExisting(purple_dir, meta, Constants.INPUT.PURPLE_DIR),
-                tumor_bam,
-                tumor_bai,
+                tumor_aln,
+                tumor_idx,
                 redux_tsvs_tumor,
-                Utils.selectCurrentOrExisting(tumor_rna_bam, meta, Constants.INPUT.BAM_RNA_TUMOR),
-                Utils.selectCurrentOrExisting(tumor_rna_bai, meta, Constants.INPUT.BAI_RNA_TUMOR),
+                Utils.selectCurrentOrExisting(tumor_rna_aln, meta, Constants.INPUT.BAM_RNA_TUMOR),
+                Utils.selectCurrentOrExisting(tumor_rna_idx, meta, Constants.INPUT.BAI_RNA_TUMOR),
             ]
 
         }
-        .branch { meta, purple_dir, tumor_dna_bam, tumor_dna_bai, redux_tsvs_tumor, tumor_rna_bam, tumor_rna_bai ->
-            def has_bam = tumor_dna_bam || tumor_rna_bam
-            runnable: has_bam && purple_dir
+        .branch { meta, purple_dir, tumor_dna_aln, tumor_dna_idx, redux_tsvs_tumor, tumor_rna_aln, tumor_rna_idx ->
+            def has_aln = tumor_dna_aln || tumor_rna_aln
+            runnable: has_aln && purple_dir
             skip: true
                 return meta
         }
@@ -74,10 +74,10 @@ workflow SAGE_APPEND {
     // MODULE: SAGE append germline
     //
     // Select inputs that are eligible to run
-    // channel: runnable: [ meta, purple_dir, tumor_dna_bam, tumor_dna_bai, [redux_tsv_tumor, ...], tumor_rna_bam, tumor_rna_bai ]
+    // channel: runnable: [ meta, purple_dir, tumor_dna_aln, tumor_dna_idx, [redux_tsv_tumor, ...], tumor_rna_aln, tumor_rna_idx ]
     // channel: skip: [ meta ]
     ch_inputs_germline_sorted = ch_inputs_sorted.runnable
-        .branch { meta, purple_dir, tumor_dna_bam, tumor_dna_bai, redux_tsvs_tumor, tumor_rna_bam, tumor_rna_bai ->
+        .branch { meta, purple_dir, tumor_dna_aln, tumor_dna_idx, redux_tsvs_tumor, tumor_rna_aln, tumor_rna_idx ->
 
             // NOTE(SW): explicit in expectation to always obtain the primary tumor DNA sample ID here
             def tumor_dna_id = Utils.getTumorDnaSampleName(meta, primary: true)
@@ -96,9 +96,9 @@ workflow SAGE_APPEND {
         }
 
     // Create process input channel
-    // channel: [ meta_append, purple_smlv_vcf, [bam, ...], [bai, ...], [redux_tsvs_tumor, ...] ]
+    // channel: [ meta_append, purple_smlv_vcf, [aln, ...], [idx, ...], [redux_tsvs_tumor, ...] ]
     ch_sage_append_germline_inputs = ch_inputs_germline_sorted.runnable
-        .map { meta, purple_dir, tumor_dna_bam, tumor_dna_bai, redux_tsvs_tumor, tumor_rna_bam, tumor_rna_bai ->
+        .map { meta, purple_dir, tumor_dna_aln, tumor_dna_idx, redux_tsvs_tumor, tumor_rna_aln, tumor_rna_idx ->
 
             // NOTE(SW): explicit in expectation to always obtain the primary tumor DNA sample ID here
             def tumor_dna_id = Utils.getTumorDnaSampleName(meta, primary: true)
@@ -111,12 +111,12 @@ workflow SAGE_APPEND {
                 reference_ids: [Utils.getTumorRnaSampleName(meta)],
             ]
 
-            def bams = [tumor_rna_bam]
-            def bais = [tumor_rna_bai]
+            def alns = [tumor_rna_aln]
+            def idxs = [tumor_rna_idx]
 
             def purple_smlv_vcf = file(purple_dir).resolve("${tumor_dna_id}.purple.germline.vcf.gz")
 
-            return [meta_append, purple_smlv_vcf, bams, bais, []]
+            return [meta_append, purple_smlv_vcf, alns, idxs, []]
 
         }
 
@@ -137,10 +137,10 @@ workflow SAGE_APPEND {
     // MODULE: SAGE append somatic
     //
     // Select inputs that are eligible to run
-    // channel: runnable: [ meta, purple_dir, tumor_dna_bam, tumor_dna_bai, [redux_tsv_tumor, ...], tumor_rna_bam, tumor_rna_bai ]
+    // channel: runnable: [ meta, purple_dir, tumor_dna_aln, tumor_dna_idx, [redux_tsv_tumor, ...], tumor_rna_aln, tumor_rna_idx ]
     // channel: skip: [ meta ]
     ch_inputs_somatic_sorted = ch_inputs_sorted.runnable
-        .branch { meta, purple_dir, tumor_dna_bam, tumor_dna_bai, redux_tsvs_tumor, tumor_rna_bam, tumor_rna_bai ->
+        .branch { meta, purple_dir, tumor_dna_aln, tumor_dna_idx, redux_tsvs_tumor, tumor_rna_aln, tumor_rna_idx ->
 
             def tumor_dna_id = Utils.getTumorDnaSampleName(meta, primary: true)
 
@@ -159,9 +159,9 @@ workflow SAGE_APPEND {
         }
 
     // Create process input channel
-    // channel: [ meta_append, purple_smlv_vcf, [bam, ...], [bai, ...], [redux_tsvs_tumor, ...] ]
+    // channel: [ meta_append, purple_smlv_vcf, [aln, ...], [idx, ...], [redux_tsvs_tumor, ...] ]
     ch_sage_append_somatic_inputs = ch_inputs_somatic_sorted.runnable
-        .map { meta, purple_dir, tumor_dna_bam, tumor_dna_bai, redux_tsvs_tumor, tumor_rna_bam, tumor_rna_bai ->
+        .map { meta, purple_dir, tumor_dna_aln, tumor_dna_idx, redux_tsvs_tumor, tumor_rna_aln, tumor_rna_idx ->
 
             // NOTE(SW): explicit in expectation to always obtain the primary tumor DNA sample ID here
             def tumor_dna_id = Utils.getTumorDnaSampleName(meta, primary: true)
@@ -174,26 +174,26 @@ workflow SAGE_APPEND {
                 reference_ids: [],
             ]
 
-            def bams = []
-            def bais = []
+            def alns = []
+            def idxs = []
             def redux_tsvs = []
 
-            if (! purity_estimate_mode && tumor_rna_bam) {
+            if (! purity_estimate_mode && tumor_rna_aln) {
                 meta_append.reference_ids.add(Utils.getTumorRnaSampleName(meta))
-                bams.add(tumor_rna_bam)
-                bais.add(tumor_rna_bai)
+                alns.add(tumor_rna_aln)
+                idxs.add(tumor_rna_idx)
             }
 
-            if (purity_estimate_mode && tumor_dna_bam) {
+            if (purity_estimate_mode && tumor_dna_aln) {
                 meta_append.reference_ids.add(Utils.getTumorDnaSampleName(meta, primary: false))
-                bams.add(tumor_dna_bam)
-                bais.add(tumor_dna_bai)
+                alns.add(tumor_dna_aln)
+                idxs.add(tumor_dna_idx)
                 redux_tsvs = redux_tsvs_tumor
             }
 
             def purple_smlv_vcf = file(purple_dir).resolve("${tumor_dna_id}.purple.somatic.vcf.gz")
 
-            return [meta_append, purple_smlv_vcf, bams, bais, redux_tsvs]
+            return [meta_append, purple_smlv_vcf, alns, idxs, redux_tsvs]
         }
 
     // Run process

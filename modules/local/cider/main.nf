@@ -9,7 +9,7 @@ process CIDER {
         'biocontainers/hmftools-cider:1.2--hdfd78af_0' }"
 
     input:
-    tuple val(meta), path(bam), path(bai)
+    tuple val(meta), path(aln), path(idx)
     file genome_fasta
     val genome_ver
     file genome_dict
@@ -36,7 +36,7 @@ process CIDER {
         com.hartwig.hmftools.cider.CiderApplication \\
         ${args} \\
         -sample ${meta.sample_id} \\
-        -bam ${bam} \\
+        -bam ${aln} \\
         -ref_genome_version ${genome_ver} \\
         -ref_genome ${genome_fasta} \\
         -write_cider_bam \\

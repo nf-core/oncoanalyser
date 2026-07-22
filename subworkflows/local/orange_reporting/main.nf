@@ -233,11 +233,7 @@ workflow ORANGE_REPORTING {
         genome_version,
         disease_ontology,
         '2.3.0 [oncoanalyser]',
-<<<<<<< HEAD
-        sequencing_type,
-=======
         sequencing_platform,
->>>>>>> ed465085 (Hartwig integration with backported fixes)
         targeted_mode,
     )
 

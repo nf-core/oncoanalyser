@@ -10,7 +10,7 @@ process SAGE_SOMATIC {
         'biocontainers/hmftools-sage:5.0.2--hdfd78af_0' }"
 
     input:
-    tuple val(meta), path(tumor_bam), path(tumor_bai), path(normal_bam), path(normal_bai), path(donor_bam), path(donor_bai), path(redux_tsvs)
+    tuple val(meta), path(tumor_aln), path(tumor_bai), path(normal_aln), path(normal_bai), path(donor_aln), path(donor_bai), path(redux_tsvs)
     path genome_fasta
     val genome_ver
     path genome_fai
@@ -44,8 +44,8 @@ process SAGE_SOMATIC {
     def ref_sample_count_arg = reference_ids.size() > 0 ? "-ref_sample_count ${reference_ids.size()}" : ''
 
     def reference_alns = []
-    if (normal_bam) { reference_alns.add(normal_bam.toString()) }
-    if (donor_bam) { reference_alns.add(donor_bam.toString()) }
+    if (normal_aln) { reference_alns.add(normal_aln.toString()) }
+    if (donor_aln) { reference_alns.add(donor_aln.toString()) }
     def reference_bam_arg = reference_alns.size() > 0 ? "-reference_bam ${reference_alns.join(',')}" : ''
 
     def include_mt_arg = targeted_mode ? '' : '-include_mt'
@@ -53,7 +53,7 @@ process SAGE_SOMATIC {
     // Set TINC when if conditions
     def tinc_args = ''
 
-    def should_run_tinc_wgs_tn = ! targeted_mode && tumor_bam && normal_bam
+    def should_run_tinc_wgs_tn = ! targeted_mode && tumor_aln && normal_aln
     def should_run_tinc_seq_type = sequencing_platform.toLowerCase() == 'illumina'
     def should_run_tinc = should_run_tinc_wgs_tn && should_run_tinc_seq_type
 
@@ -91,7 +91,7 @@ process SAGE_SOMATIC {
         ${reference_bam_arg} \\
         ${ref_sample_count_arg} \\
         -tumor ${meta.tumor_id} \\
-        -tumor_bam ${tumor_bam} \\
+        -tumor_bam ${tumor_aln} \\
         -ref_genome ${genome_fasta} \\
         -ref_genome_version ${genome_ver} \\
         -hotspots ${sage_known_hotspots_somatic} \\

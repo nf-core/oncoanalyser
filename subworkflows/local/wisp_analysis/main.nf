@@ -29,7 +29,7 @@ workflow WISP_ANALYSIS {
     ch_versions = Channel.empty()
 
     // Select input sources then sort
-    // channel: runnable: [ meta, purple_dir (primary), amber_dir (primary), normal_bam (primary), redux_dir (longitudinal), amber_dir (longitudinal), cobalt_dir (longitudinal), sage_append_dir (longitudinal) ]
+    // channel: runnable: [ meta, purple_dir (primary), amber_dir (primary), normal_aln (primary), redux_dir (longitudinal), amber_dir (longitudinal), cobalt_dir (longitudinal), sage_append_dir (longitudinal) ]
     // channel: skip: [ meta ]
     ch_inputs_sorted = WorkflowOncoanalyser.groupByMeta(
         ch_redux_dir,
@@ -40,7 +40,7 @@ workflow WISP_ANALYSIS {
         .map { meta, longitudinal_redux_dir, longitudinal_amber_dir, longitudinal_cobalt_dir, longitudinal_sage_append_dir ->
 
             def primary_normal_redux_dir = Utils.getInput(meta, Constants.INPUT.REDUX_DIR_NORMAL)
-            def (primary_normal_bam, primary_normal_bai) = Utils.getNormalReduxDirAlignment(meta, primary_normal_redux_dir)
+            def (primary_normal_aln, primary_normal_idx) = Utils.getNormalReduxDirAlignment(meta, primary_normal_redux_dir)
 
             def primary_purple_dir = Utils.getInput(meta, Constants.INPUT.PURPLE_DIR)
             def primary_amber_dir = Utils.getInput(meta, Constants.INPUT.AMBER_DIR)
@@ -51,14 +51,14 @@ workflow WISP_ANALYSIS {
               meta,
               primary_purple_dir,
               primary_amber_dir,
-              primary_normal_bam,
+              primary_normal_aln,
               longitudinal_redux_dir_selected,
               longitudinal_amber_dir,
               longitudinal_cobalt_dir,
               longitudinal_sage_append_dir,
             ]
         }
-        .branch { meta, primary_purple_dir, primary_amber_dir, primary_normal_bam, longitudinal_redux_dir, longitudinal_amber_dir, longitudinal_cobalt_dir, longitudinal_sage_append_dir ->
+        .branch { meta, primary_purple_dir, primary_amber_dir, primary_normal_aln, longitudinal_redux_dir, longitudinal_amber_dir, longitudinal_cobalt_dir, longitudinal_sage_append_dir ->
 
             def runnable
             if (targeted_mode) {
@@ -73,7 +73,7 @@ workflow WISP_ANALYSIS {
         }
 
     // Create process input channel
-    // channel: [ meta_wisp, purple_dir (primary), amber_dir (primary), normal_bam (primary), redux_dir (longitudinal), amber_dir (longitudinal), cobalt_dir (longitudinal), sage_append_dir (longitudinal) ]
+    // channel: [ meta_wisp, purple_dir (primary), amber_dir (primary), normal_aln (primary), redux_dir (longitudinal), amber_dir (longitudinal), cobalt_dir (longitudinal), sage_append_dir (longitudinal) ]
     ch_wisp_inputs = ch_inputs_sorted.runnable
         .map { d ->
 

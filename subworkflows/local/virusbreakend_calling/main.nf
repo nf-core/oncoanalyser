@@ -39,19 +39,19 @@ workflow VIRUSBREAKEND_CALLING {
     //
     // Select input sources then sort
     // NOTE(SW): VIRUSBreakend inputs are not allowed in the samplesheet, so aren't considered
-    // channel: [ meta, tumor_bam, tumor_bai ]
+    // channel: [ meta, tumor_aln, tumor_idx ]
     ch_inputs_sorted = ch_redux_dir_tumor
         .map { meta, redux_dir_tumor ->
 
             def redux_dir_tumor_selected = Utils.selectCurrentOrExisting(redux_dir_tumor, meta, Constants.INPUT.REDUX_DIR_TUMOR)
-            def (tumor_bam, tumor_bai) = Utils.getTumorReduxDirAlignment(meta, redux_dir_tumor_selected)
+            def (tumor_aln, tumor_idx) = Utils.getTumorReduxDirAlignment(meta, redux_dir_tumor_selected)
 
-            return [meta, tumor_bam, tumor_bai]
+            return [meta, tumor_aln, tumor_idx]
 
         }
-        .branch { meta, tumor_bam, tumor_bai ->
+        .branch { meta, tumor_aln, tumor_idx ->
             def has_existing = Utils.hasExistingInput(meta, Constants.INPUT.VIRUSINTERPRETER_DIR)
-            runnable: tumor_bam && ! has_existing
+            runnable: tumor_aln && ! has_existing
             skip: true
                 return meta
         }
@@ -60,9 +60,9 @@ workflow VIRUSBREAKEND_CALLING {
     // MODULE: VIRUSBreakend
     //
     // Create process input channel
-    // channel: [ meta_virus, tumor_bam ]
+    // channel: [ meta_virus, tumor_aln ]
     ch_virusbreakend_inputs = ch_inputs_sorted.runnable
-        .map { meta, tumor_bam, tumor_bai ->
+        .map { meta, tumor_aln, tumor_idx ->
 
             def meta_virus = [
                 key: meta.group_id,
@@ -70,7 +70,7 @@ workflow VIRUSBREAKEND_CALLING {
                 sample_id: Utils.getTumorDnaSampleName(meta),
             ]
 
-            return [meta_virus, tumor_bam]
+            return [meta_virus, tumor_aln]
         }
 
     // Run process

@@ -11,7 +11,7 @@ workflow ISOFOX_QUANTIFICATION {
     take:
     // Sample data
     ch_inputs                  // channel: [mandatory] [ meta ]
-    ch_tumor_rna_bam           // channel: [mandatory] [ meta, bam, bai ]
+    ch_tumor_rna_aln           // channel: [mandatory] [ meta, aln, idx ]
 
     // Reference data
     genome_fasta               // channel: [mandatory] /path/to/genome_fasta
@@ -37,27 +37,27 @@ workflow ISOFOX_QUANTIFICATION {
     ch_versions = Channel.empty()
 
     // Select input sources then sort
-    // channel: runnable: [ meta, tumor_bam, tumor_bai ]
+    // channel: runnable: [ meta, tumor_aln, tumor_idx ]
     // channel: skip: [ meta ]
-    ch_inputs_sorted = ch_tumor_rna_bam
-        .map { meta, tumor_bam, tumor_bai ->
+    ch_inputs_sorted = ch_tumor_rna_aln
+        .map { meta, tumor_aln, tumor_idx ->
             return [
                 meta,
-                Utils.selectCurrentOrExisting(tumor_bam, meta, Constants.INPUT.BAM_RNA_TUMOR),
-                Utils.selectCurrentOrExisting(tumor_bai, meta, Constants.INPUT.BAI_RNA_TUMOR),
+                Utils.selectCurrentOrExisting(tumor_aln, meta, Constants.INPUT.BAM_RNA_TUMOR),
+                Utils.selectCurrentOrExisting(tumor_idx, meta, Constants.INPUT.BAI_RNA_TUMOR),
             ]
         }
-        .branch { meta, tumor_bam, tumor_bai ->
+        .branch { meta, tumor_aln, tumor_idx ->
             def has_existing = Utils.hasExistingInput(meta, Constants.INPUT.ISOFOX_DIR)
-            runnable: tumor_bam && ! has_existing
+            runnable: tumor_aln && ! has_existing
             skip: true
                 return meta
         }
 
     // Create process input channel
-    // channel: [ meta_isofox, tumor_bam, tumor_bai ]
+    // channel: [ meta_isofox, tumor_aln, tumor_idx ]
     ch_isofox_inputs = ch_inputs_sorted.runnable
-        .map { meta, tumor_bam, tumor_bai ->
+        .map { meta, tumor_aln, tumor_idx ->
 
             def meta_isofox = [
                 key: meta.group_id,
@@ -65,7 +65,7 @@ workflow ISOFOX_QUANTIFICATION {
                 sample_id: Utils.getTumorDnaSampleName(meta) ?: Utils.getTumorRnaSampleName(meta),
             ]
 
-            return [meta_isofox, tumor_bam, tumor_bai]
+            return [meta_isofox, tumor_aln, tumor_idx]
         }
 
     // Run process

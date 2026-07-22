@@ -60,7 +60,7 @@ workflow PURITY_ESTIMATE {
     //
     // SUBWORKFLOW: Run read alignment to generate BAMs
     //
-    // channel: [ meta, [bam, ...], [bai, ...] ]
+    // channel: [ meta, [aln, ...], [idx, ...] ]
     ch_align_dna_tumor_out = Channel.empty()
     ch_align_dna_normal_out = Channel.empty()
     ch_align_dna_donor_out = Channel.empty()
@@ -238,7 +238,7 @@ workflow PURITY_ESTIMATE {
             ch_inputs,
             ch_inputs.map { meta -> [meta, []] },  // ch_purple_dir
             ch_redux_tumor_out,
-            ch_inputs.map { meta -> [meta, [], []] },  // ch_tumor_rna_bam
+            ch_inputs.map { meta -> [meta, [], []] },  // ch_tumor_rna_aln
             ref_data.genome_fasta,
             ref_data.genome_version,
             ref_data.genome_fai,

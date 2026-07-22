@@ -29,7 +29,7 @@ workflow COBALT_PROFILING {
 
     // Select input sources then sort
     // NOTE(SW): germline mode is not currently supported
-    // channel: runnable: [ meta, tumor_bam, tumor_bai, normal_bam, normal_bai ]
+    // channel: runnable: [ meta, tumor_aln, tumor_idx, normal_aln, normal_idx ]
     // channel: skip: [ meta ]
     ch_inputs_sorted = WorkflowOncoanalyser.groupByMeta(
         ch_redux_dir_tumor,
@@ -40,23 +40,23 @@ workflow COBALT_PROFILING {
             def redux_dir_tumor_selected = Utils.selectCurrentOrExisting(redux_dir_tumor, meta, Constants.INPUT.REDUX_DIR_TUMOR)
             def redux_dir_normal_selected = Utils.selectCurrentOrExisting(redux_dir_normal, meta, Constants.INPUT.REDUX_DIR_NORMAL)
 
-            def (tumor_bam, tumor_bai) = Utils.getTumorReduxDirAlignment(meta, redux_dir_tumor_selected)
-            def (normal_bam, normal_bai) = Utils.getNormalReduxDirAlignment(meta, redux_dir_normal_selected)
+            def (tumor_aln, tumor_idx) = Utils.getTumorReduxDirAlignment(meta, redux_dir_tumor_selected)
+            def (normal_aln, normal_idx) = Utils.getNormalReduxDirAlignment(meta, redux_dir_normal_selected)
 
-            return [meta, tumor_bam, tumor_bai, normal_bam, normal_bai]
+            return [meta, tumor_aln, tumor_idx, normal_aln, normal_idx]
 
         }
-        .branch { meta, tumor_bam, tumor_bai, normal_bam, normal_bai ->
+        .branch { meta, tumor_aln, tumor_idx, normal_aln, normal_idx ->
             def has_existing = Utils.hasExistingInput(meta, Constants.INPUT.COBALT_DIR)
-            runnable_tn: tumor_bam && normal_bam && ! has_existing
-            runnable_to: tumor_bam && ! has_existing
+            runnable_tn: tumor_aln && normal_aln && ! has_existing
+            runnable_to: tumor_aln && ! has_existing
             skip: true
                 return meta
         }
 
     // First set diploid BED input for tumor/normal and tumor only samples
     // NOTE(SW): since the diploid BED is provided as a channel, I seem to be only able to include via channel ops
-    // channel: [ meta, tumor_bam, tumor_bai, normal_bam, normal_bai, diploid_bed ]
+    // channel: [ meta, tumor_aln, tumor_idx, normal_aln, normal_idx, diploid_bed ]
     ch_inputs_runnable = Channel.empty()
         .mix(
             ch_inputs_sorted.runnable_tn.map { [*it, []] },
@@ -64,10 +64,10 @@ workflow COBALT_PROFILING {
         )
 
     // Create process input channel
-    // channel: sample_data: [ meta_cobalt, tumor_bam, tumor_bai, normal_bam, normal_bai ]
+    // channel: sample_data: [ meta_cobalt, tumor_aln, tumor_idx, normal_aln, normal_idx ]
     // channel: diploid_bed: [ diploid_bed ]
     ch_cobalt_inputs = ch_inputs_runnable
-        .multiMap { meta, tumor_bam, tumor_bai, normal_bam, normal_bai, diploid_bed ->
+        .multiMap { meta, tumor_aln, tumor_idx, normal_aln, normal_idx, diploid_bed ->
 
             def tumor_id = purity_estimate_mode
             if (purity_estimate_mode) {
@@ -82,11 +82,11 @@ workflow COBALT_PROFILING {
                 tumor_id: tumor_id,
             ]
 
-            if (normal_bam) {
+            if (normal_aln) {
                 meta_cobalt.normal_id = Utils.getNormalDnaSampleName(meta)
             }
 
-            sample_data: [meta_cobalt, tumor_bam, tumor_bai, normal_bam, normal_bai]
+            sample_data: [meta_cobalt, tumor_aln, tumor_idx, normal_aln, normal_idx]
             diploid_bed: diploid_bed
         }
 

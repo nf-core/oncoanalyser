@@ -11,7 +11,7 @@ process WISP {
     tuple val(meta),
         path(primary_purple_dir, stageAs: 'purple_primary'),
         path(primary_amber_dir, stageAs: 'amber_primary'),
-        path(primary_normal_bam),
+        path(primary_normal_aln),
         path(longitudinal_redux_dir, stageAs: 'redux_longitudinal'),
         path(longitudinal_amber_dir, stageAs: 'amber_longitudinal'),
         path(longitudinal_cobalt_dir, stageAs: 'cobalt_longitudinal'),
@@ -49,7 +49,7 @@ process WISP {
 
     } else {
 
-        if(primary_amber_dir && primary_normal_bam) {
+        if (primary_amber_dir && primary_normal_aln) {
             amber_dir_arg = '-amber_dir amber_dir__prepared/'
             purity_methods += 'AMBER_LOH'
         } else {

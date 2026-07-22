@@ -190,25 +190,25 @@ workflow READ_ALIGNMENT_DNA {
         .map { meta_count, metas_bwamem2 -> return [meta_count, metas_bwamem2.size()] }
 
     // Now, group with expected size then sort into tumor and normal channels
-    // channel: [ meta_group, [bam, ...], [bai, ...] ]
+    // channel: [ meta_group, [aln, ...], [idx, ...] ]
     ch_alns_united = ch_sample_fastq_counts
         .cross(
             // First element to match meta_count above for `cross`
-            BWAMEM2_ALIGN.out.bam.map { meta_bwamem2, bam, bai -> [[key: meta_bwamem2.key, sample_type: meta_bwamem2.sample_type], bam, bai] }
+            BWAMEM2_ALIGN.out.bam.map { meta_bwamem2, aln, idx -> [[key: meta_bwamem2.key, sample_type: meta_bwamem2.sample_type], aln, idx] }
         )
-        .map { count_tuple, bam_tuple ->
+        .map { count_tuple, aln_tuple ->
 
             def group_size = count_tuple[1]
-            def (meta_bam, bam, bai) = bam_tuple
+            def (meta_aln, aln, idx) = aln_tuple
 
             def meta_group = [
-                *:meta_bam,
+                *:meta_aln,
             ]
 
-            return tuple(groupKey(meta_group, group_size), bam, bai)
+            return tuple(groupKey(meta_group, group_size), aln, idx)
         }
         .groupTuple()
-        .branch { meta_group, bams, bais ->
+        .branch { meta_group, alns, idxs ->
             assert ['tumor', 'normal', 'donor'].contains(meta_group.sample_type)
             tumor: meta_group.sample_type == 'tumor'
             normal: meta_group.sample_type == 'normal'
@@ -220,21 +220,21 @@ workflow READ_ALIGNMENT_DNA {
     // STEP: Handle outputs
     //
     // Set outputs, restoring original meta
-    // channel: [ meta, [bam, ...], [bai, ...] ]
+    // channel: [ meta, [aln, ...], [idx, ...] ]
     ch_outputs_tumor = Channel.empty()
         .mix(
             WorkflowOncoanalyser.restoreMeta(ch_alns_united.tumor, ch_inputs),
             ch_inputs_tumor_sorted.skip.unique().map { meta -> [meta, [], []] },
         )
 
-    // channel: [ meta, [bam, ...], [bai, ...] ]
+    // channel: [ meta, [aln, ...], [idx, ...] ]
     ch_outputs_normal = Channel.empty()
         .mix(
             WorkflowOncoanalyser.restoreMeta(ch_alns_united.normal, ch_inputs),
             ch_inputs_normal_sorted.skip.unique().map { meta -> [meta, [], []] },
         )
 
-    // channel: [ meta, [bam, ...], [bai, ...] ]
+    // channel: [ meta, [aln, ...], [idx, ...] ]
     ch_outputs_donor = Channel.empty()
         .mix(
             WorkflowOncoanalyser.restoreMeta(ch_alns_united.donor, ch_inputs),
@@ -242,9 +242,9 @@ workflow READ_ALIGNMENT_DNA {
         )
 
     emit:
-    tumor      = ch_outputs_tumor  // channel: [ meta, [bam, ...], [bai, ...] ]
-    normal     = ch_outputs_normal // channel: [ meta, [bam, ...], [bai, ...] ]
-    donor      = ch_outputs_donor  // channel: [ meta, [bam, ...], [bai, ...] ]
+    tumor      = ch_outputs_tumor  // channel: [ meta, [aln, ...], [idx, ...] ]
+    normal     = ch_outputs_normal // channel: [ meta, [aln, ...], [idx, ...] ]
+    donor      = ch_outputs_donor  // channel: [ meta, [aln, ...], [idx, ...] ]
 
     versions   = ch_versions       // channel: [ versions.yml ]
 }

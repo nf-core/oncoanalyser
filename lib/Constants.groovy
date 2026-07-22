@@ -135,6 +135,7 @@ class Constants {
         LANE,
         LIBRARY_ID,
         LONGITUDINAL_SAMPLE,
+        GENERATE_REDUX_TSVS_ONLY,
     }
 
     static Map PLACEHOLDER_META = [meta_placeholder: null]

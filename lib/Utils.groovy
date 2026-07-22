@@ -81,7 +81,7 @@ class Utils {
                                     Nextflow.exit(1)
                                 }
 
-                                if (!v && info_field_enum !== Constants.InfoField.LONGITUDINAL_SAMPLE) {
+                                if (!v && info_field_enum !== Constants.InfoField.LONGITUDINAL_SAMPLE && info_field_enum != Constants.InfoField.GENERATE_REDUX_TSVS_ONLY) {
                                     log.error "got empty value for ${group_id} ${sample_type_enum}/${sequence_type_enum} ${info_field_enum}"
                                     Nextflow.exit(1)
                                 }
@@ -92,6 +92,10 @@ class Utils {
                         // Process
                         if (info_data.containsKey(Constants.InfoField.CANCER_TYPE)) {
                             meta[Constants.InfoField.CANCER_TYPE] = info_data[Constants.InfoField.CANCER_TYPE]
+                        }
+
+                        if (info_data.containsKey(Constants.InfoField.GENERATE_REDUX_TSVS_ONLY)) {
+                            meta_sample[Constants.InfoField.GENERATE_REDUX_TSVS_ONLY] = true
                         }
 
                     }
@@ -173,23 +177,23 @@ class Utils {
                     def meta_sample = meta[sample_key]
 
                     if (meta_sample.containsKey(Constants.FileType.BAM)) {
-                        meta_sample[Constants.FileType.BAM] = meta_sample.remove(Constants.FileType.BAM)
+                        meta_sample[Constants.FileType.ALN] = meta_sample.remove(Constants.FileType.BAM)
                     }
 
                     if (meta_sample.containsKey(Constants.FileType.CRAM)) {
-                        meta_sample[Constants.FileType.BAM] = meta_sample.remove(Constants.FileType.CRAM)
+                        meta_sample[Constants.FileType.ALN] = meta_sample.remove(Constants.FileType.CRAM)
                     }
 
                     if (meta_sample.containsKey(Constants.FileType.BAM_REDUX)) {
-                        meta_sample[Constants.FileType.BAM_REDUX] = meta_sample.remove(Constants.FileType.BAM_REDUX)
+                        meta_sample[Constants.FileType.ALN_REDUX] = meta_sample.remove(Constants.FileType.BAM_REDUX)
                     }
 
                     if (meta_sample.containsKey(Constants.FileType.CRAM_REDUX)) {
-                        meta_sample[Constants.FileType.BAM_REDUX] = meta_sample.remove(Constants.FileType.CRAM_REDUX)
+                        meta_sample[Constants.FileType.ALN_REDUX] = meta_sample.remove(Constants.FileType.CRAM_REDUX)
                     }
 
                     if (meta_sample.containsKey(Constants.FileType.BAI)) {
-                        meta_sample[Constants.FileType.BAI] = meta_sample.remove(Constants.FileType.BAI)
+                        meta_sample[Constants.FileType.IDX] = meta_sample.remove(Constants.FileType.BAI)
                     }
 
                     if (meta_sample.containsKey(Constants.FileType.CRAI)) {
@@ -209,18 +213,18 @@ class Utils {
                         return
                     }
 
-                    if (meta_sample.containsKey(Constants.FileType.BAM_REDUX) && meta_sample.containsKey(Constants.FileType.REDUX_DIR)) {
+                    if (meta_sample.containsKey(Constants.FileType.ALN_REDUX) && meta_sample.containsKey(Constants.FileType.REDUX_DIR)) {
                         log.error "expected either REDUX directory or REDUX alignment but got both for ${meta.group_id} ${sample_id}"
                         Nextflow.exit(1)
                     }
 
                     def redux_input
-                    def redux_bam
+                    def redux_aln
                     def redux_dir
-                    if (meta_sample.containsKey(Constants.FileType.BAM_REDUX)) {
+                    if (meta_sample.containsKey(Constants.FileType.ALN_REDUX)) {
 
-                        redux_input = redux_bam = meta_sample[Constants.FileType.BAM_REDUX]
-                        redux_dir = redux_bam.parent
+                        redux_input = redux_aln = meta_sample[Constants.FileType.ALN_REDUX]
+                        redux_dir = redux_aln.parent
                         if (!redux_input.isFile()) {
                             log.error "didn't receive file as REDUX alignment for ${meta.group_id} ${sample_id}: ${redux_input}"
                             Nextflow.exit(1)
@@ -229,7 +233,7 @@ class Utils {
                     } else if (meta_sample.containsKey(Constants.FileType.REDUX_DIR)) {
 
                         redux_input = redux_dir = meta_sample[Constants.FileType.REDUX_DIR]
-                        redux_bam = getReduxDirAlignment(sample_id, redux_dir)[0]
+                        redux_aln = getReduxDirAlignment(sample_id, redux_dir)[0]
                         if (!redux_input.isDirectory()) {
                             log.error "didn't receive directory as REDUX directory for ${meta.group_id} ${sample_id}: ${redux_input}"
                             Nextflow.exit(1)
@@ -248,7 +252,7 @@ class Utils {
                     def has_ms_tsv = redux_dir_files.any { f -> f.name.endsWith('.redux.ms_table.tsv.gz') }
                     def has_redux_tsvs = has_bqr_tsv && has_jitter_tsv && has_ms_tsv
 
-                    def has_colocated_index = nextflow.Nextflow.file("${redux_bam.toUriString()}.bai").exists() || nextflow.Nextflow.file("${redux_bam.toUriString()}.crai").exists()
+                    def has_colocated_index = nextflow.Nextflow.file("${redux_aln.toUriString()}.bai").exists() || nextflow.Nextflow.file("${redux_aln.toUriString()}.crai").exists()
 
                     def has_single_sample = redux_dir_files
                         .every { f -> f.name.startsWith(sample_id) }
@@ -269,7 +273,7 @@ class Utils {
                             Nextflow.exit(1)
                         }
 
-                        if (meta_sample.containsKey(Constants.FileType.BAM_REDUX) && !generate_tsvs_only) {
+                        if (meta_sample.containsKey(Constants.FileType.ALN_REDUX) && !generate_tsvs_only) {
                             log.error "found multiple samples in same directory (requires generate_redux_tsvs_only to proceed): ${meta.group_id} ${sample_id}: ${redux_input}"
                             Nextflow.exit(1)
                         }
@@ -286,22 +290,22 @@ class Utils {
                     }
 
                     if (has_single_sample && has_colocated_index && !meta_sample.containsKey(Constants.FileType.REDUX_DIR)) {
-                        meta_sample.remove(Constants.FileType.BAM_REDUX)
+                        meta_sample.remove(Constants.FileType.ALN_REDUX)
                         meta_sample[Constants.FileType.REDUX_DIR] = redux_dir
                     }
 
                     if (!has_redux_tsvs && generate_tsvs_only) {
                         meta_sample.remove(Constants.FileType.REDUX_DIR)
-                        meta_sample[Constants.FileType.BAM_REDUX] = redux_bam
+                        meta_sample[Constants.FileType.ALN_REDUX] = redux_aln
                     }
 
 
-                    if (meta_sample.containsKey(Constants.FileType.BAM_REDUX) && has_colocated_index && has_redux_tsvs) {
+                    if (meta_sample.containsKey(Constants.FileType.ALN_REDUX) && has_colocated_index && has_redux_tsvs) {
                         log.error "got REDUX alignment but expected REDUX directory given colocation of index and TSVs: ${meta.group_id} ${sample_id}: ${redux_input}"
                         Nextflow.exit(1)
                     }
 
-                    if (meta_sample.containsKey(Constants.FileType.BAM_REDUX) && meta_sample.containsKey(Constants.FileType.BAI) && !generate_tsvs_only) {
+                    if (meta_sample.containsKey(Constants.FileType.ALN_REDUX) && meta_sample.containsKey(Constants.FileType.IDX) && !generate_tsvs_only) {
                         log.error "REDUX alignments without colocated TSVs requires GENERATE_REDUX_TSVS_ONLY to be set in the samplesheet: ${meta.group_id} ${sample_id}: ${redux_input}"
                         Nextflow.exit(1)
                     }
@@ -317,30 +321,30 @@ class Utils {
                         def is_primary = !meta_sample.containsKey('longitudinal_sample_id')
                         def sample_id = is_primary ? meta_sample.sample_id : meta_sample.longitudinal_sample_id
 
-                        def bam
-                        if (key == Constants.FileType.BAM || key == Constants.FileType.BAM_REDUX) {
-                            bam = meta_sample[key]
+                        def aln
+                        if (key == Constants.FileType.ALN || key == Constants.FileType.ALN_REDUX) {
+                            aln = meta_sample[key]
                         } else if (key == Constants.FileType.REDUX_DIR) {
                             def d = getReduxDirAlignment(sample_id, meta_sample[key])
-                            bam = d[0]
+                            aln = d[0]
                         } else {
                             return
                         }
 
                         def index_ext
-                        if (bam.name.endsWith('.bam')) {
+                        if (aln.name.endsWith('.bam')) {
                             index_ext = 'bai'
-                        } else if (bam.name.endsWith('.cram')) {
+                        } else if (aln.name.endsWith('.cram')) {
                             index_ext = 'crai'
                         } else {
                             assert false
                         }
 
-                        if (meta_sample.containsKey(Constants.FileType.BAI) && meta_sample[Constants.FileType.BAI].name.endsWith(index_ext)) {
+                        if (meta_sample.containsKey(Constants.FileType.IDX) && meta_sample[Constants.FileType.IDX].name.endsWith(index_ext)) {
                             return
                         }
 
-                        def fp = bam.toUriString()
+                        def fp = aln.toUriString()
                         def index_fp = nextflow.Nextflow.file("${fp}.${index_ext}")
 
                         if (!index_fp.exists() && !stub_run) {
@@ -349,8 +353,8 @@ class Utils {
                             Nextflow.exit(1)
                         }
 
-                        if (key == Constants.FileType.BAM || key == Constants.FileType.BAM_REDUX) {
-                            meta_sample[Constants.FileType.BAI] = index_fp
+                        if (key == Constants.FileType.ALN || key == Constants.FileType.ALN_REDUX) {
+                            meta_sample[Constants.FileType.IDX] = index_fp
                         }
                     }
                 }
@@ -359,7 +363,7 @@ class Utils {
                 def meta_tumor_dna = meta.getOrDefault([Constants.SampleType.TUMOR, Constants.SequenceType.DNA], [:])
                 def longitudinal = meta_tumor_dna.containsKey('longitudinal_sample_id')
                 def has_amber_dir = meta_tumor_dna.containsKey(Constants.FileType.AMBER_DIR)
-                def has_normal_dna_bam = Utils.hasNormalDnaBam(meta) || Utils.hasNormalDnaReduxBam(meta)
+                def has_normal_dna_bam = Utils.hasNormalDnaBam(meta) || Utils.hasNormalDnaReduxInput(meta)
 
                 if (longitudinal && has_amber_dir && !has_normal_dna_bam) {
                     log.error "AMBER input was provided without the required primary normal DNA BAM for ${meta.group_id}"
@@ -428,7 +432,7 @@ class Utils {
 
         inputs.each { meta ->
 
-            // Require BAM or BAM_REDUX or REDUX_DIR or FASTQs for each defined sample type
+            // Require ALN or ALN_REDUX or REDUX_DIR or FASTQs for each defined sample type
             // NOTE(SW): repeating key pairs above to avoid having to duplicate error messages
             sample_keys.each { key ->
 
@@ -439,8 +443,8 @@ class Utils {
                 def (sample_type, sequence_type) = key
 
                 if (
-                    !meta[key].containsKey(Constants.FileType.BAM) &&
-                    !meta[key].containsKey(Constants.FileType.BAM_REDUX) &&
+                    !meta[key].containsKey(Constants.FileType.ALN) &&
+                    !meta[key].containsKey(Constants.FileType.ALN_REDUX) &&
                     !meta[key].containsKey(Constants.FileType.REDUX_DIR) &&
                     !meta[key].containsKey(Constants.FileType.FASTQ)
                 ) {
@@ -668,16 +672,16 @@ class Utils {
     }
 
     static public getTumorDnaBam(meta) {
-        return getTumorDnaSample(meta).getOrDefault(Constants.FileType.BAM, null)
+        return getTumorDnaSample(meta).getOrDefault(Constants.FileType.ALN, null)
     }
 
-    // TODO(SW): determine if necessary
-    //static public getTumorDnaReduxBam(meta) {
-    //    return getTumorDnaSample(meta).getOrDefault(Constants.FileType.BAM_REDUX, null)
-    //}
+    public static getTumorDnaReduxInput(meta) {
+        def meta_sample = getTumorDnaSample(meta)
+        return hasReduxData(meta_sample) ?: null
+    }
 
     static public getTumorDnaBai(meta) {
-        return getTumorDnaSample(meta).getOrDefault(Constants.FileType.BAI, null)
+        return getTumorDnaSample(meta).getOrDefault(Constants.FileType.IDX, null)
     }
 
 
@@ -689,10 +693,9 @@ class Utils {
         return getTumorDnaBam(meta) !== null
     }
 
-    // TODO(SW): determine if necessary
-    //static public hasTumorDnaReduxBam(meta) {
-    //    return getTumorDnaReduxBam(meta) !== null
-    //}
+    public static hasTumorDnaReduxInput(meta) {
+        return getTumorDnaReduxInput(meta) != null
+    }
 
 
     // Files - Normal DNA
@@ -701,15 +704,15 @@ class Utils {
     }
 
     static public getNormalDnaBam(meta) {
-        return getNormalDnaSample(meta).getOrDefault(Constants.FileType.BAM, null)
+        return getNormalDnaSample(meta).getOrDefault(Constants.FileType.ALN, null)
     }
 
-    // TODO(SW): determine if necessary
-    //static public getNormalDnaReduxBam(meta) {
-    //    return getNormalDnaSample(meta).getOrDefault(Constants.FileType.BAM_REDUX, null)
-    //}
+    public static getNormalDnaReduxInput(meta) {
+        def meta_sample = getNormalDnaSample(meta)
+        return hasReduxData(meta_sample) ?: null
+    }
     static public getNormalDnaBai(meta) {
-        return getNormalDnaSample(meta).getOrDefault(Constants.FileType.BAI, null)
+        return getNormalDnaSample(meta).getOrDefault(Constants.FileType.IDX, null)
     }
 
 
@@ -721,19 +724,17 @@ class Utils {
         return getNormalDnaBam(meta) !== null
     }
 
-    // TODO(SW): determine if necessary
-    //static public hasNormalDnaReduxBam(meta) {
-    //    return getNormalDnaReduxBam(meta) !== null
-    //}
+    public static hasNormalDnaReduxInput(meta) {
+        return getNormalDnaReduxInput(meta) != null
+    }
 
     static public hasDnaFastq(meta) {
         return hasNormalDnaFastq(meta) || hasTumorDnaFastq(meta)
     }
 
-    // TODO(SW): determine if necessary
-    //static public hasDnaReduxBam(meta) {
-    //    return hasNormalDnaReduxBam(meta) || hasTumorDnaReduxBam(meta)
-    //}
+    public static hasDnaReduxInput(meta) {
+        return hasNormalDnaReduxInput(meta) || hasTumorDnaReduxInput(meta)
+    }
 
 
     // Files - Donor DNA
@@ -742,16 +743,16 @@ class Utils {
     }
 
     static public getDonorDnaBam(meta) {
-        return getDonorDnaSample(meta).getOrDefault(Constants.FileType.BAM, null)
+        return getDonorDnaSample(meta).getOrDefault(Constants.FileType.ALN, null)
     }
 
-    // TODO(SW): determine if necessary
-    //static public getDonorDnaReduxBam(meta) {
-    //    return getDonorDnaSample(meta).getOrDefault(Constants.FileType.BAM_REDUX, null)
-    //}
+    public static getDonorDnaReduxInput(meta) {
+        def meta_sample = getDonorDnaSample(meta)
+        return hasReduxData(meta_sample) ?: null
+    }
 
     static public getDonorDnaBai(meta) {
-        return getDonorDnaSample(meta).getOrDefault(Constants.FileType.BAI, null)
+        return getDonorDnaSample(meta).getOrDefault(Constants.FileType.IDX, null)
     }
 
 
@@ -763,10 +764,9 @@ class Utils {
         return getDonorDnaBam(meta) !== null
     }
 
-    // TODO(SW): determine if necessary
-    //static public hasDonorDnaReduxBam(meta) {
-    //    return getDonorDnaReduxBam(meta) !== null
-    //}
+    public static hasDonorDnaReduxInput(meta) {
+        return getDonorDnaReduxInput(meta) != null
+    }
 
 
     // Files - Tumor RNA
@@ -775,11 +775,11 @@ class Utils {
     }
 
     static public getTumorRnaBam(meta) {
-        return getTumorRnaSample(meta).getOrDefault(Constants.FileType.BAM, null)
+        return getTumorRnaSample(meta).getOrDefault(Constants.FileType.ALN, null)
     }
 
     static public getTumorRnaBai(meta) {
-        return getTumorRnaSample(meta).getOrDefault(Constants.FileType.BAI, null)
+        return getTumorRnaSample(meta).getOrDefault(Constants.FileType.IDX, null)
     }
 
 
@@ -794,21 +794,15 @@ class Utils {
 
     // Status
     static public hasTumorDna(meta) {
-        // TODO(SW): determine if necessary
-        //return hasTumorDnaBam(meta) || hasTumorDnaReduxBam(meta) || hasTumorDnaFastq(meta)
-        return hasTumorDnaBam(meta) || hasTumorDnaFastq(meta)
+        return hasTumorDnaBam(meta) || hasTumorDnaReduxInput(meta) || hasTumorDnaFastq(meta)
     }
 
     static public hasNormalDna(meta) {
-        // TODO(SW): determine if necessary
-        //return hasNormalDnaBam(meta) || hasNormalDnaReduxBam(meta) || hasNormalDnaFastq(meta)
-        return hasNormalDnaBam(meta) || hasNormalDnaFastq(meta)
+        return hasNormalDnaBam(meta) || hasNormalDnaReduxInput(meta) || hasNormalDnaFastq(meta)
     }
 
     static public hasDonorDna(meta) {
-        // TODO(SW): determine if necessary
-        //return hasDonorDnaBam(meta) || hasDonorDnaReduxBam(meta) || hasDonorDnaFastq(meta)
-        return hasDonorDnaBam(meta) || hasDonorDnaFastq(meta)
+        return hasDonorDnaBam(meta) || hasDonorDnaReduxInput(meta) || hasDonorDnaFastq(meta)
     }
 
     static public hasTumorRna(meta) {
@@ -816,7 +810,7 @@ class Utils {
     }
 
     public static hasReduxData(meta_sample) {
-        return meta_sample.getOrDefault(Constants.FileType.BAM_REDUX, null) || meta_sample.getOrDefault(Constants.FileType.REDUX_DIR, null)
+        return meta_sample.getOrDefault(Constants.FileType.ALN_REDUX, null) || meta_sample.getOrDefault(Constants.FileType.REDUX_DIR, null)
     }
 
 

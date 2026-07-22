@@ -8,7 +8,7 @@ process SAGE_GERMLINE {
         'biocontainers/hmftools-sage:5.0.2--hdfd78af_0' }"
 
     input:
-    tuple val(meta), path(tumor_bam), path(tumor_bai), path(normal_bam), path(normal_bai), path(redux_tsvs)
+    tuple val(meta), path(tumor_aln), path(tumor_idx), path(normal_aln), path(normal_idx), path(redux_tsvs)
     path genome_fasta
     val genome_ver
     path genome_fai
@@ -42,9 +42,9 @@ process SAGE_GERMLINE {
         -Xmx${Math.round(task.memory.bytes * 0.95)} \\
         ${args} \\
         -tumor ${meta.normal_id} \\
-        -tumor_bam ${normal_bam} \\
+        -tumor_bam ${normal_aln} \\
         -reference ${meta.tumor_id} \\
-        -reference_bam ${tumor_bam} \\
+        -reference_bam ${tumor_aln} \\
         -ref_sample_count 0 \\
         -ref_genome ${genome_fasta} \\
         -ref_genome_version ${genome_ver} \\

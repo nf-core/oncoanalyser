@@ -8,7 +8,7 @@ process BAMTOOLS {
         'biocontainers/hmftools-bam-tools:1.6.1--hdfd78af_0' }"
 
     input:
-    tuple val(meta), path(bam), path(bai)
+    tuple val(meta), path(aln), path(idx)
     path genome_fasta
     val genome_ver
     path driver_gene_panel
@@ -40,7 +40,7 @@ process BAMTOOLS {
         com.hartwig.hmftools.bamtools.metrics.BamMetrics \\
         ${args} \\
         -sample ${meta.sample_id} \\
-        -bam_file ${bam} \\
+        -bam_file ${aln} \\
         -ref_genome ${genome_fasta} \\
         -ref_genome_version ${genome_ver} \\
         -driver_gene_panel ${driver_gene_panel} \\

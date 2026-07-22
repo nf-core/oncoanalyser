@@ -8,7 +8,7 @@ process SAGE_APPEND {
         'biocontainers/hmftools-sage:5.0.2--hdfd78af_0' }"
 
     input:
-    tuple val(meta), path(vcf), path(bams), path(bais), path(redux_tsvs)
+    tuple val(meta), path(vcf), path(alns), path(idxs), path(redux_tsvs)
     path genome_fasta
     val genome_ver
     path genome_fai
@@ -44,7 +44,7 @@ process SAGE_APPEND {
         -input_vcf ${vcf} \\
         -max_read_depth 100000 \\
         -reference ${meta.reference_ids.join(',')} \\
-        -reference_bam ${bams.join(',')} \\
+        -reference_bam ${alns.join(',')} \\
         -ref_genome ${genome_fasta} \\
         -ref_genome_version ${genome_ver} \\
         -sequencing_type ${sequencing_platform.toUpperCase()} \\

@@ -34,7 +34,7 @@ workflow TEAL_CHARACTERISATION {
     // STEP: Handle inputs
     //
     // Select input sources then sort
-    // channel: runnable: [ meta, tumor_bam, tumor_bai, normal_bam, normal_bai ]
+    // channel: runnable: [ meta, tumor_aln, tumor_idx, normal_aln, normal_idx ]
     // channel: skip: [ meta ]
     ch_inputs_sorted = WorkflowOncoanalyser.groupByMeta(
         ch_redux_dir_tumor,
@@ -45,14 +45,14 @@ workflow TEAL_CHARACTERISATION {
             def redux_dir_tumor_selected = Utils.selectCurrentOrExisting(redux_dir_tumor, meta, Constants.INPUT.REDUX_DIR_TUMOR)
             def redux_dir_normal_selected = Utils.selectCurrentOrExisting(redux_dir_normal, meta, Constants.INPUT.REDUX_DIR_NORMAL)
 
-            def (tumor_bam, tumor_bai) = Utils.getTumorReduxDirAlignment(meta, redux_dir_tumor_selected)
-            def (normal_bam, normal_bai) = Utils.getNormalReduxDirAlignment(meta, redux_dir_normal_selected)
+            def (tumor_aln, tumor_idx) = Utils.getTumorReduxDirAlignment(meta, redux_dir_tumor_selected)
+            def (normal_aln, normal_idx) = Utils.getNormalReduxDirAlignment(meta, redux_dir_normal_selected)
 
-            return [meta, tumor_bam, tumor_bai, normal_bam, normal_bai]
+            return [meta, tumor_aln, tumor_idx, normal_aln, normal_idx]
 
         }
-        .branch { meta, tumor_bam, tumor_bai, normal_bam, normal_bai ->
-            runnable: tumor_bam || normal_bam
+        .branch { meta, tumor_aln, tumor_idx, normal_aln, normal_idx ->
+            runnable: tumor_aln || normal_aln
             skip: true
                 return meta
         }
@@ -61,24 +61,24 @@ workflow TEAL_CHARACTERISATION {
     // MODULE: TEAL prep
     //
     // Create process input channel
-    // channel: [ meta_teal, tumor_bam, tumor_bai, normal_bam, normal_bai ]
+    // channel: [ meta_teal, tumor_aln, tumor_idx, normal_aln, normal_idx ]
     ch_teal_prep_inputs = ch_inputs_sorted.runnable
-        .map { meta, tumor_bam, tumor_bai, normal_bam, normal_bai ->
+        .map { meta, tumor_aln, tumor_idx, normal_aln, normal_idx ->
 
             def meta_teal = [
                 key: meta.group_id,
                 id: meta.group_id,
             ]
 
-            if (tumor_bam) {
+            if (tumor_aln) {
                 meta_teal.tumor_id = Utils.getTumorDnaSampleName(meta)
             }
 
-            if (normal_bam) {
+            if (normal_aln) {
                 meta_teal.normal_id = Utils.getNormalDnaSampleName(meta)
             }
 
-            return [meta_teal, tumor_bam, tumor_bai, normal_bam, normal_bai]
+            return [meta_teal, tumor_aln, tumor_idx, normal_aln, normal_idx]
         }
 
     // Run process

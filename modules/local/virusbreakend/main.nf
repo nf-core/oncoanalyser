@@ -8,7 +8,7 @@ process VIRUSBREAKEND {
     container "nf-core/gridss:2.13.2--1"
 
     input:
-    tuple val(meta), path(bam)
+    tuple val(meta), path(aln)
     path genome_fasta
     path genome_fai
     path genome_dict
@@ -41,7 +41,7 @@ process VIRUSBREAKEND {
         --db ${virusbreakenddb.toString().replaceAll("/\$", "")}/ \\
         --output ${meta.sample_id}.virusbreakend.vcf \\
         --reference ${genome_fasta} \\
-        ${bam}
+        ${aln}
 
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":

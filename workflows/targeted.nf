@@ -92,7 +92,7 @@ workflow TARGETED {
     //
     // SUBWORKFLOW: Run read alignment to generate alignments
     //
-    // channel: [ meta, [bam, ...], [bai, ...] ]
+    // channel: [ meta, [aln, ...], [idx, ...] ]
     ch_align_dna_tumor_out = Channel.empty()
     ch_align_dna_normal_out = Channel.empty()
     ch_align_dna_donor_out = Channel.empty()

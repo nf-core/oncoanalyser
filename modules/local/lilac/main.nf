@@ -8,7 +8,7 @@ process LILAC {
         'biocontainers/hmftools-lilac:2.0--hdfd78af_0' }"
 
     input:
-    tuple val(meta), path(normal_dna_bam), path(normal_dna_bai), path(tumor_dna_bam), path(tumor_dna_bai), path(tumor_rna_bam), path(tumor_rna_bai), path(purple_dir)
+    tuple val(meta), path(normal_dna_aln), path(normal_dna_idx), path(tumor_dna_aln), path(tumor_dna_idx), path(tumor_rna_aln), path(tumor_rna_idx), path(purple_dir)
     path genome_fasta
     val genome_ver
     path genome_fai
@@ -31,11 +31,11 @@ process LILAC {
 
     def log_level_arg = task.ext.log_level ? "-log_level ${task.ext.log_level}" : ''
 
-    def sample_name = getSampleName(meta, tumor_dna_bam, normal_dna_bam)
+    def sample_name = getSampleName(meta, tumor_dna_aln, normal_dna_aln)
 
-    def normal_bam_arg = normal_dna_bam ? "-reference_bam ${normal_dna_bam}" : ''
-    def tumor_dna_bam_arg = tumor_dna_bam ? "-tumor_bam ${tumor_dna_bam}" : ''
-    def tumor_rna_bam_arg = tumor_rna_bam ? "-rna_bam ${tumor_rna_bam}" : ''
+    def normal_bam_arg = normal_dna_aln ? "-reference_bam ${normal_dna_aln}" : ''
+    def tumor_dna_bam_arg = tumor_dna_aln ? "-tumor_bam ${tumor_dna_aln}" : ''
+    def tumor_rna_bam_arg = tumor_rna_aln ? "-rna_bam ${tumor_rna_aln}" : ''
 
     def purple_dir_arg = purple_dir ? "-purple_dir ${purple_dir}" : ''
 
@@ -89,10 +89,10 @@ process LILAC {
     """
 }
 
-def getSampleName(meta, tumor_bam, normal_bam) {
-    if (tumor_bam) {
+def getSampleName(meta, tumor_aln, normal_aln) {
+    if (tumor_aln) {
         return meta.tumor_id
-    } else if (normal_bam) {
+    } else if (normal_aln) {
         return meta.normal_id
     } else {
         Sys.exit(1)

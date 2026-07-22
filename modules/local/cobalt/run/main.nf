@@ -8,7 +8,7 @@ process COBALT {
         'biocontainers/hmftools-cobalt:3.0--hdfd78af_0' }"
 
     input:
-    tuple val(meta), path(tumor_bam), path(tumor_bai), path(normal_bam), path(normal_bai)
+    tuple val(meta), path(tumor_aln), path(tumor_idx), path(normal_aln), path(normal_idx)
     val genome_ver
     path gc_profile
     path diploid_regions
@@ -31,7 +31,7 @@ process COBALT {
     def log_level_arg = task.ext.log_level ? "-log_level ${task.ext.log_level}" : ''
 
     def reference_arg = meta.containsKey('normal_id') ? "-reference ${meta.normal_id}" : ''
-    def reference_bam_arg = normal_bam ? "-reference_bam ${normal_bam}" : ''
+    def reference_bam_arg = normal_aln ? "-reference_bam ${normal_aln}" : ''
 
     def target_regions_norm_file_arg = target_regions_normalisation ? "-target_region_norm_file ${target_regions_normalisation}" : ''
 
@@ -46,7 +46,7 @@ process COBALT {
         -Xmx${Math.round(task.memory.bytes * xmx_mod)} \\
         ${args} \\
         -tumor ${meta.tumor_id} \\
-        -tumor_bam ${tumor_bam} \\
+        -tumor_bam ${tumor_aln} \\
         ${pcf_gamma_arg} \\
         ${reference_arg} \\
         ${reference_bam_arg} \\

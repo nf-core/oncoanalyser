@@ -37,7 +37,7 @@ workflow ESVEE_CALLING {
     ch_versions = Channel.empty()
 
     // Select input sources then sort
-    // channel: runnable: [ meta, tumor_bam, tumor_bai, normal_bam, normal_bai ]
+    // channel: runnable: [ meta, tumor_aln, tumor_idx, normal_aln, normal_idx ]
     // channel: skip: [ meta ]
     ch_inputs_sorted = WorkflowOncoanalyser.groupByMeta(
         ch_redux_dir_tumor,
@@ -48,29 +48,29 @@ workflow ESVEE_CALLING {
             def redux_dir_tumor_selected = Utils.selectCurrentOrExisting(redux_dir_tumor, meta, Constants.INPUT.REDUX_DIR_TUMOR)
             def redux_dir_normal_selected = Utils.selectCurrentOrExisting(redux_dir_normal, meta, Constants.INPUT.REDUX_DIR_NORMAL)
 
-            def (tumor_bam, tumor_bai) = Utils.getTumorReduxDirAlignment(meta, redux_dir_tumor_selected)
-            def (normal_bam, normal_bai) = Utils.getNormalReduxDirAlignment(meta, redux_dir_normal_selected)
+            def (tumor_aln, tumor_idx) = Utils.getTumorReduxDirAlignment(meta, redux_dir_tumor_selected)
+            def (normal_aln, normal_idx) = Utils.getNormalReduxDirAlignment(meta, redux_dir_normal_selected)
 
-            return [meta, tumor_bam, tumor_bai, normal_bam, normal_bai]
+            return [meta, tumor_aln, tumor_idx, normal_aln, normal_idx]
         }
-        .branch { meta, tumor_bam, tumor_bai, normal_bam, normal_bai ->
+        .branch { meta, tumor_aln, tumor_idx, normal_aln, normal_idx ->
             def has_existing = Utils.hasExistingInput(meta, Constants.INPUT.ESVEE_DIR)
 
-            runnable_tn: tumor_bam && normal_bam && ! has_existing
-            runnable_to: tumor_bam && ! has_existing
-                return [meta, tumor_bam, tumor_bai]
+            runnable_tn: tumor_aln && normal_aln && ! has_existing
+            runnable_to: tumor_aln && ! has_existing
+                return [meta, tumor_aln, tumor_idx]
             skip: true
                 return meta
         }
 
     // Create process input channel
-    // channel: [ meta_esvee, tumor_bam, tumor_bai, normal_bam, normal_bai ]
+    // channel: [ meta_esvee, tumor_aln, tumor_idx, normal_aln, normal_idx ]
     ch_esvee_inputs = Channel.empty()
         .mix(
             ch_inputs_sorted.runnable_tn,
             ch_inputs_sorted.runnable_to.map { [*it, [], []] },
         )
-        .map { meta, tumor_bam, tumor_bai, normal_bam, normal_bai ->
+        .map { meta, tumor_aln, tumor_idx, normal_aln, normal_idx ->
 
             def meta_esvee = [
                 key: meta.group_id,
@@ -78,11 +78,11 @@ workflow ESVEE_CALLING {
                 tumor_id: Utils.getTumorDnaSampleName(meta),
             ]
 
-            if (normal_bam) {
+            if (normal_aln) {
                 meta_esvee.normal_id = Utils.getNormalDnaSampleName(meta)
             }
 
-            return [meta_esvee, tumor_bam, tumor_bai, normal_bam, normal_bai]
+            return [meta_esvee, tumor_aln, tumor_idx, normal_aln, normal_idx]
         }
 
     // Run process

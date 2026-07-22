@@ -8,7 +8,7 @@ process ESVEE {
         'biocontainers/hmftools-esvee:2.0--hdfd78af_0' }"
 
     input:
-    tuple val(meta), path(tumor_bam), path(tumor_bai), path(normal_bam), path(normal_bai)
+    tuple val(meta), path(tumor_aln), path(tumor_bai), path(normal_aln), path(normal_bai)
     path genome_fasta
     val genome_ver
     path genome_fai
@@ -37,7 +37,7 @@ process ESVEE {
     def log_level_arg = task.ext.log_level ? "-log_level ${task.ext.log_level}" : ''
 
     def reference_arg = meta.normal_id ? "-reference ${meta.normal_id}" : ''
-    def reference_bam_arg = meta.normal_id ? "-reference_bam ${normal_bam}" : ''
+    def reference_bam_arg = meta.normal_id ? "-reference_bam ${normal_aln}" : ''
 
     def target_regions_bed_arg = target_regions_bed ? "-target_regions_bed ${target_regions_bed}" : ''
 
@@ -48,7 +48,7 @@ process ESVEE {
         -Xmx${Math.round(task.memory.bytes * 0.95)} \\
         ${args} \\
         -tumor ${meta.tumor_id} \\
-        -tumor_bam ${tumor_bam} \\
+        -tumor_bam ${tumor_aln} \\
         ${reference_arg} \\
         ${reference_bam_arg} \\
         -esvee_prep_dir esvee/ \\

@@ -142,7 +142,7 @@ workflow PANEL_RESOURCE_CREATION {
         READ_ALIGNMENT_RNA.out.versions,
     )
 
-    // channel: [ meta, [bam, ...], [bai, ...] ]
+    // channel: [ meta, [aln, ...], [idx, ...] ]
     ch_align_dna_tumor_out = READ_ALIGNMENT_DNA.out.tumor
     ch_align_dna_normal_out = READ_ALIGNMENT_DNA.out.normal
     ch_align_rna_tumor_out = READ_ALIGNMENT_RNA.out.tumor

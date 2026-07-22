@@ -8,7 +8,7 @@ process ISOFOX {
         'biocontainers/hmftools-isofox:2.0.1--hdfd78af_0' }"
 
     input:
-    tuple val(meta), path(bam), path(bai)
+    tuple val(meta), path(aln), path(idx)
     val functions
     val read_length
     path genome_fasta
@@ -55,7 +55,7 @@ process ISOFOX {
         -sample ${meta.sample_id} \\
         ${functions_arg} \\
         -read_length ${read_length} \\
-        -bam_file ${bam} \\
+        -bam_file ${aln} \\
         -ref_genome ${genome_fasta} \\
         -ref_genome_version ${genome_ver} \\
         -ensembl_data_dir ${ensembl_data_resources} \\

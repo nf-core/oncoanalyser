@@ -35,7 +35,7 @@ workflow SAGE_PLOTTING {
     ch_versions = Channel.empty()
 
     // Select input sources then sort
-    // channel: runnable: [ meta, tumor_bam, tumor_bai, normal_bam, normal_bai, donor_bam, donor_bai, [redux_tsv, ...], purple_dir ]
+    // channel: runnable: [ meta, tumor_aln, tumor_idx, normal_aln, normal_idx, donor_aln, donor_idx, [redux_tsv, ...], purple_dir ]
     // channel: skip: [ meta ]
     ch_inputs_sorted = WorkflowOncoanalyser.groupByMeta(
         ch_redux_dir_tumor,
@@ -49,9 +49,9 @@ workflow SAGE_PLOTTING {
             def redux_dir_normal_selected = Utils.selectCurrentOrExisting(redux_dir_normal, meta, Constants.INPUT.REDUX_DIR_NORMAL)
             def redux_dir_donor_selected = Utils.selectCurrentOrExisting(redux_dir_donor, meta, Constants.INPUT.REDUX_DIR_DONOR)
 
-            def (tumor_bam, tumor_bai) = Utils.getTumorReduxDirAlignment(meta, redux_dir_tumor_selected)
-            def (normal_bam, normal_bai) = Utils.getNormalReduxDirAlignment(meta, redux_dir_normal_selected)
-            def (donor_bam, donor_bai) = Utils.getDonorReduxDirAlignment(meta, redux_dir_donor_selected)
+            def (tumor_aln, tumor_idx) = Utils.getTumorReduxDirAlignment(meta, redux_dir_tumor_selected)
+            def (normal_aln, normal_idx) = Utils.getNormalReduxDirAlignment(meta, redux_dir_normal_selected)
+            def (donor_aln, donor_idx) = Utils.getDonorReduxDirAlignment(meta, redux_dir_donor_selected)
 
             def redux_tsvs_tumor = Utils.getTumorReduxTsvs(meta, redux_dir_tumor_selected)
             def redux_tsvs_normal = Utils.getNormalReduxTsvs(meta, redux_dir_normal_selected)
@@ -60,27 +60,27 @@ workflow SAGE_PLOTTING {
 
             return [
                 meta,
-                tumor_bam,
-                tumor_bai,
-                normal_bam,
-                normal_bai,
-                donor_bam,
-                donor_bai,
+                tumor_aln,
+                tumor_idx,
+                normal_aln,
+                normal_idx,
+                donor_aln,
+                donor_idx,
                 redux_tsvs,
                 Utils.selectCurrentOrExisting(purple_dir, meta, Constants.INPUT.PURPLE_DIR),
             ]
 
         }
-        .branch { meta, tumor_bam, tumor_bai, normal_bam, normal_bai, donor_bam, donor_bai, redux_tsvs, purple_dir ->
-            runnable: tumor_bam && purple_dir
+        .branch { meta, tumor_aln, tumor_idx, normal_aln, normal_idx, donor_aln, donor_idx, redux_tsvs, purple_dir ->
+            runnable: tumor_aln && purple_dir
             skip: true
                 return meta
         }
 
     // Create process input channel
-    // channel: [ meta, tumor_bam, tumor_bai, normal_bam, normal_bai, donor_bam, donor_bai, [redux_tsv, ...], purple_smlv_vcf ]
+    // channel: [ meta, tumor_aln, tumor_idx, normal_aln, normal_idx, donor_aln, donor_idx, [redux_tsv, ...], purple_smlv_vcf ]
     ch_sage_plotting_inputs = ch_inputs_sorted.runnable
-        .map { meta, tumor_bam, tumor_bai, normal_bam, normal_bai, donor_bam, donor_bai, redux_tsvs, purple_dir ->
+        .map { meta, tumor_aln, tumor_idx, normal_aln, normal_idx, donor_aln, donor_idx, redux_tsvs, purple_dir ->
 
             def meta_sage = [
                 key: meta.group_id,
@@ -88,11 +88,11 @@ workflow SAGE_PLOTTING {
                 tumor_id: Utils.getTumorDnaSampleName(meta),
             ]
 
-            if (normal_bam) {
+            if (normal_aln) {
                 meta_sage.normal_id = Utils.getNormalDnaSampleName(meta)
             }
 
-            if (donor_bam) {
+            if (donor_aln) {
                 meta_sage.donor_id = Utils.getDonorDnaSampleName(meta)
             }
 
@@ -101,12 +101,12 @@ workflow SAGE_PLOTTING {
 
             return [
                 meta_sage,
-                tumor_bam,
-                normal_bam,
-                donor_bam,
-                tumor_bai,
-                normal_bai,
-                donor_bai,
+                tumor_aln,
+                normal_aln,
+                donor_aln,
+                tumor_idx,
+                normal_idx,
+                donor_idx,
                 redux_tsvs,
                 purple_smlv_vcf,
                 purple_smlv_vcf_tbi,

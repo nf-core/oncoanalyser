@@ -8,7 +8,7 @@ process TEAL_PREP {
         'biocontainers/hmftools-teal:1.4--hdfd78af_0' }"
 
     input:
-    tuple val(meta), path(tumor_bam), path(tumor_bai), path(normal_bam), path(normal_bai)
+    tuple val(meta), path(tumor_aln), path(tumor_idx), path(normal_aln), path(normal_idx)
     val genome_ver
     val sequencing_platform
 
@@ -30,16 +30,16 @@ process TEAL_PREP {
 
     def tumor_arg = ''
     def tumor_bam_arg = ''
-    if (tumor_bam) {
+    if (tumor_aln) {
         tumor_arg = "-tumor ${meta.tumor_id}"
-        tumor_bam_arg = "-tumor_bam ${tumor_bam}"
+        tumor_bam_arg = "-tumor_bam ${tumor_aln}"
     }
 
     def reference_arg = ''
     def reference_bam_arg = ''
-    if (normal_bam) {
+    if (normal_aln) {
         reference_arg = "-reference ${meta.normal_id}"
-        reference_bam_arg = "-reference_bam ${normal_bam}"
+        reference_bam_arg = "-reference_bam ${normal_aln}"
     }
 
     """
@@ -57,8 +57,8 @@ process TEAL_PREP {
         ${log_level_arg} \\
         -output_dir teal_bam/
 
-    if [[ -e "${tumor_bam}" ]]; then samtools index teal_bam/${meta.tumor_id}.teal.telbam.bam; fi
-    if [[ -e "${normal_bam}" ]]; then samtools index teal_bam/${meta.normal_id}.teal.telbam.bam; fi
+    if [[ -e "${tumor_aln}" ]]; then samtools index teal_bam/${meta.tumor_id}.teal.telbam.bam; fi
+    if [[ -e "${normal_aln}" ]]; then samtools index teal_bam/${meta.normal_id}.teal.telbam.bam; fi
 
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":

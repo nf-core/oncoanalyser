@@ -13,7 +13,7 @@ workflow NEO_PREDICTION {
     take:
     // Sample data
     ch_inputs                  // channel: [mandatory] [ meta ]
-    ch_tumor_rna_bam           // channel: [mandatory] [ meta, bam, bai ]
+    ch_tumor_rna_aln           // channel: [mandatory] [ meta, aln, idx ]
     ch_isofox_dir              // channel: [mandatory] [ meta, isofox_dir ]
     ch_purple_dir              // channel: [mandatory] [ meta, purple_dir ]
     ch_sage_append_dir_somatic // channel: [mandatory] [ meta, sage_append_dir ]
@@ -105,30 +105,30 @@ workflow NEO_PREDICTION {
     // Annotate the fusion-derived neoepitope using Isofox where RNA data is available
 
     // Select input sources and sort
-    // channel: runnable: [ meta, neo_finder_dir, tumor_rna_bam, tumor_rna_bai ]
+    // channel: runnable: [ meta, neo_finder_dir, tumor_rna_aln, tumor_rna_idx ]
     // channel: skip: [ meta ]
     ch_isofox_inputs_sorted = WorkflowOncoanalyser.groupByMeta(
         ch_finder_out,
-        ch_tumor_rna_bam,
+        ch_tumor_rna_aln,
     )
-        .map { meta, neo_finder_dir, tumor_rna_bam, tumor_rna_bai ->
+        .map { meta, neo_finder_dir, tumor_rna_aln, tumor_rna_idx ->
             return [
                 meta,
                 neo_finder_dir,
-                Utils.selectCurrentOrExisting(tumor_rna_bam, meta, Constants.INPUT.BAM_RNA_TUMOR),
-                Utils.selectCurrentOrExisting(tumor_rna_bai, meta, Constants.INPUT.BAI_RNA_TUMOR),
+                Utils.selectCurrentOrExisting(tumor_rna_aln, meta, Constants.INPUT.BAM_RNA_TUMOR),
+                Utils.selectCurrentOrExisting(tumor_rna_idx, meta, Constants.INPUT.BAI_RNA_TUMOR),
             ]
         }
-        .branch { meta, neo_finder_dir, tumor_rna_bam, tumor_rna_bai ->
+        .branch { meta, neo_finder_dir, tumor_rna_aln, tumor_rna_idx ->
             runnable: Utils.hasTumorRna(meta)
             skip: true
                 return meta
         }
 
     // Create process input channel
-    // channel: [ meta_isofox, neo_finder_dir, tumor_rna_bam, tumor_rna_bai ]
+    // channel: [ meta_isofox, neo_finder_dir, tumor_rna_aln, tumor_rna_idx ]
     ch_isofox_inputs = ch_isofox_inputs_sorted.runnable
-        .map { meta, neo_finder_dir, tumor_rna_bam, tumor_rna_bai ->
+        .map { meta, neo_finder_dir, tumor_rna_aln, tumor_rna_idx ->
 
             def meta_isofox = [
                 key: meta.group_id,
@@ -136,7 +136,7 @@ workflow NEO_PREDICTION {
                 sample_id: Utils.getTumorDnaSampleName(meta),
             ]
 
-            return [meta_isofox, neo_finder_dir, tumor_rna_bam, tumor_rna_bai]
+            return [meta_isofox, neo_finder_dir, tumor_rna_aln, tumor_rna_idx]
         }
 
     // Run process

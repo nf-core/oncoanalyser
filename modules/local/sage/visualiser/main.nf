@@ -11,12 +11,12 @@ process SAGE_VISUALISER {
 
     input:
     tuple val(meta),
-        path(tumor_bam),
-        path(normal_bam),
-        path(donor_bam),
-        path(tumor_bai),
-        path(normal_bai),
-        path(donor_bai),
+        path(tumor_aln),
+        path(normal_aln),
+        path(donor_aln),
+        path(tumor_idx),
+        path(normal_idx),
+        path(donor_idx),
         path(redux_tsvs),
         path(purple_vcf),
         path(purple_vcf_tbi)
@@ -50,8 +50,8 @@ process SAGE_VISUALISER {
     def ref_sample_count_arg = reference_ids.size() > 0 ? "-ref_sample_count ${reference_ids.size()}" : ''
 
     def reference_alns = []
-    if (normal_bam) { reference_alns.add(normal_bam.toString()) }
-    if (donor_bam) { reference_alns.add(donor_bam.toString()) }
+    if (normal_aln) { reference_alns.add(normal_aln.toString()) }
+    if (donor_aln) { reference_alns.add(donor_aln.toString()) }
     def reference_bam_arg = reference_alns.size() > 0 ? "-reference_bam ${reference_alns.join(',')}" : ''
 
     def include_mt_arg = targeted_mode ? '' : '-include_mt'
@@ -66,7 +66,7 @@ process SAGE_VISUALISER {
         ${reference_bam_arg} \\
         ${ref_sample_count_arg} \\
         -tumor ${meta.tumor_id} \\
-        -tumor_bam ${tumor_bam} \\
+        -tumor_bam ${tumor_aln} \\
         -ref_genome ${genome_fasta} \\
         -ref_genome_version ${genome_ver} \\
         -hotspots ${sage_known_hotspots_somatic} \\
