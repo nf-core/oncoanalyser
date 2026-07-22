@@ -94,7 +94,7 @@ class WorkflowMain {
         if (params.containsKey('umi_type') && params.umi_type) {
             umi_type = Utils.getEnumFromString(params.umi_type, Constants.UmiType)
         } else if (params.containsKey('panel') && Constants.PANELS_DEFINED.contains(params.panel)) {
-            if (params.panel == 'TSO500') {
+            if (params.panel == 'tso500') {
                 umi_type = Constants.UmiType.TSO500
             }
         }
