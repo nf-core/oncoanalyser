@@ -537,8 +537,8 @@ workflow TARGETED {
     // SUBWORKFLOW: Visualise SAGE variants
     //
     // channel: [ meta, sage_plot_dir ]
-    ch_sage_somatic_visualiser_out = Channel.empty()
-    if (run_config.stages.sage_vis) {
+    ch_sage_somatic_visualiser_out = channel.empty()
+    if (run_config.stages.sage_visualiser) {
 
         SAGE_PLOTTING(
             ch_inputs,

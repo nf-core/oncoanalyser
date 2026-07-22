@@ -539,7 +539,7 @@ workflow WGTS {
     // SUBWORKFLOW: Visualise SAGE variants
     //
     // channel: [ meta, sage_plot_dir ]
-    ch_sage_somatic_visualiser_out = Channel.empty()
+    ch_sage_somatic_visualiser_out = channel.empty()
     if (run_config.stages.sage_visualiser) {
 
         SAGE_PLOTTING(
