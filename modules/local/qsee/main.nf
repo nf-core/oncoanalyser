@@ -46,7 +46,7 @@ process QSEE {
     def targeted_mode_arg = targeted_mode ? '-targeted_mode' : ''
 
     def cohort_percentiles_arg = ''
-    if(! targeted_mode && sequencing_platform == 'illumina') {
+    if(! targeted_mode && sequencing_platform.toLowerCase() == 'illumina') {
         cohort_percentiles_arg = "-cohort_percentiles_file ${cohort_percentiles}"
     }
 

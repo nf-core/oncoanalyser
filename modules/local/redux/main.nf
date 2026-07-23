@@ -67,7 +67,7 @@ process REDUX {
         .findAll { s -> s != '' }
         .join(' ')
 
-    if (sequencing_platform == 'ultima') {
+    if (sequencing_platform.toLowerCase() == 'ultima') {
         form_consensus_arg = ''
         skip_duplicate_marking_arg = '-skip_duplicate_marking'
     }

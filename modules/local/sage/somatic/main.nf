@@ -54,7 +54,7 @@ process SAGE_SOMATIC {
     def tinc_args = ''
 
     def should_run_tinc_wgs_tn = ! targeted_mode && tumor_aln && normal_aln
-    def should_run_tinc_seq_type = sequencing_platform == 'illumina'
+    def should_run_tinc_seq_type = sequencing_platform.toLowerCase() == 'illumina'
     def should_run_tinc = should_run_tinc_wgs_tn && should_run_tinc_seq_type
 
     if (should_run_tinc) {

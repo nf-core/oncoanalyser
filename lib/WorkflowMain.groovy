@@ -70,7 +70,7 @@ class WorkflowMain {
 
             if (params.containsKey('panel')) {
 
-                if (params.panel == 'tso500') {
+                if (params.panel.toLowerCase() == 'tso500') {
                     if (params.genome_version.toString() == '37') {
                         params.ref_data_panel_data_path = Constants.TSO500_PANEL_37_PATH
                     }
@@ -94,7 +94,7 @@ class WorkflowMain {
         if (params.containsKey('umi_type') && params.umi_type) {
             umi_type = Utils.getEnumFromString(params.umi_type, Constants.UmiType)
         } else if (params.containsKey('panel') && Constants.PANELS_DEFINED.contains(params.panel)) {
-            if (params.panel == 'tso500') {
+            if (params.panel.toLowerCase() == 'tso500') {
                 umi_type = Constants.UmiType.TSO500
             }
         }
