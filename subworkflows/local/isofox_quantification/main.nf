@@ -2,9 +2,6 @@
 // Isofox estimates transcript abundance, detects novel SJs, and identifies fusion events
 //
 
-import Constants
-import Utils
-
 include { ISOFOX } from '../../../modules/local/isofox/run/main'
 
 workflow ISOFOX_QUANTIFICATION {
@@ -32,10 +29,6 @@ workflow ISOFOX_QUANTIFICATION {
     isofox_read_length     //  string: [mandatory] Isofox read length
 
     main:
-    // Channel for version.yml files
-    // channel: [ versions.yml ]
-    ch_versions = Channel.empty()
-
     // Select input sources then sort
     // channel: runnable: [ meta, tumor_aln, tumor_idx ]
     // channel: skip: [ meta ]
@@ -43,8 +36,8 @@ workflow ISOFOX_QUANTIFICATION {
         .map { meta, tumor_aln, tumor_idx ->
             return [
                 meta,
-                Utils.selectCurrentOrExisting(tumor_aln, meta, Constants.INPUT.BAM_RNA_TUMOR),
-                Utils.selectCurrentOrExisting(tumor_idx, meta, Constants.INPUT.BAI_RNA_TUMOR),
+                Utils.selectCurrentOrExisting(tumor_aln, meta, Constants.INPUT.ALN_RNA_TUMOR),
+                Utils.selectCurrentOrExisting(tumor_idx, meta, Constants.INPUT.IDX_RNA_TUMOR),
             ]
         }
         .branch { meta, tumor_aln, tumor_idx ->
@@ -87,18 +80,14 @@ workflow ISOFOX_QUANTIFICATION {
         isofox_tpm_norm,
     )
 
-    ch_versions = ch_versions.mix(ISOFOX.out.versions)
-
     // Set outputs, restoring original meta
     // channel: [ meta, isofox_dir ]
-    ch_outputs = Channel.empty()
+    ch_outputs = channel.empty()
         .mix(
-            WorkflowOncoanalyser.restoreMeta(ISOFOX.out.isofox_dir, ch_inputs),
+            WorkflowOncoanalyser.restoreMeta(channel.topic('isofox_dir'), ch_inputs),
             ch_inputs_sorted.skip.map { meta -> [meta, []] },
         )
 
     emit:
-    isofox_dir = ch_outputs  // channel: [ meta, isofox_dir ]
-
-    versions   = ch_versions // channel: [ versions.yml ]
+    isofox_dir = ch_outputs // channel: [ meta, isofox_dir ]
 }

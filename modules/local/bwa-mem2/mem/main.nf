@@ -13,9 +13,9 @@ process BWAMEM2_ALIGN {
     path genome_bwamem2_index
 
     output:
-    tuple val(meta), path('*.bam'), path('*.bai'), emit: bam
-    path 'versions.yml'                          , emit: versions
-    path '.command.*'                            , emit: command_files
+    tuple val(meta), path('*.bam'), path('*.bai')            , topic: bwamem2_align_bam
+    tuple val(meta), val('bwamem2_align'), path('.command.*'), topic: command_files
+    path 'versions.yml'                                      , topic: versions
 
     when:
     task.ext.when == null || task.ext.when

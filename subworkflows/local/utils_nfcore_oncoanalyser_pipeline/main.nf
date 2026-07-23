@@ -1,8 +1,6 @@
 //
 // Subworkflow with functionality specific to the nf-core/oncoanalyser pipeline
 //
-import Constants
-import Utils
 
 /*
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -277,28 +275,28 @@ def getDnaFastqChannel(ch_inputs) {
     // channel: [ meta ]
     def ch_inputs_tumor_sorted = ch_inputs
         .branch { meta ->
-            def has_existing = Utils.hasExistingInput(meta, Constants.INPUT.BAM_DNA_TUMOR)
+            def has_existing = Utils.hasExistingInput(meta, Constants.INPUT.ALN_DNA_TUMOR)
             runnable: Utils.hasTumorDnaFastq(meta) && ! has_existing
             skip: true
         }
 
     def ch_inputs_normal_sorted = ch_inputs
         .branch { meta ->
-            def has_existing = Utils.hasExistingInput(meta, Constants.INPUT.BAM_DNA_NORMAL)
+            def has_existing = Utils.hasExistingInput(meta, Constants.INPUT.ALN_DNA_NORMAL)
             runnable: Utils.hasNormalDnaFastq(meta) && ! has_existing
             skip: true
         }
 
     def ch_inputs_donor_sorted = ch_inputs
         .branch { meta ->
-            def has_existing = Utils.hasExistingInput(meta, Constants.INPUT.BAM_DNA_DONOR)
+            def has_existing = Utils.hasExistingInput(meta, Constants.INPUT.ALN_DNA_DONOR)
             runnable: Utils.hasDonorDnaFastq(meta) && ! has_existing
             skip: true
         }
 
     // Create FASTQ input channel
     // channel: [ meta, fastq_info, fastq_fwd, fastq_rev ]
-    def ch_fastqs = Channel.empty()
+    def ch_fastqs = channel.empty()
         .mix(
             ch_inputs_tumor_sorted.runnable.map { meta -> [meta, Utils.getTumorDnaSample(meta), 'tumor'] },
             ch_inputs_normal_sorted.runnable.map { meta -> [meta, Utils.getNormalDnaSample(meta), 'normal'] },
@@ -313,7 +311,7 @@ def getDnaFastqChannel(ch_inputs) {
                     def sample_id = meta_sample.getOrDefault('longitudinal_sample_id', meta_sample['sample_id'])
 
                     def fastq_info = [
-                        'sample_id': meta_sample.sample_id,
+                        'sample_id': sample_id,
                         'library_id': library_id,
                         'lane': lane,
                         'sample_type': sample_type,
@@ -323,7 +321,7 @@ def getDnaFastqChannel(ch_inputs) {
                 }
         }
 
-    return Channel.empty()
+    return channel.empty()
         .mix(
             ch_fastqs,
             ch_inputs_tumor_sorted.skip.map { meta -> [meta, [:], [], []] },
@@ -337,7 +335,7 @@ def getRnaFastqChannel(ch_inputs) {
     // channel: [ meta ]
     def ch_inputs_sorted = ch_inputs
         .branch { meta ->
-            def has_existing = Utils.hasExistingInput(meta, Constants.INPUT.BAM_RNA_TUMOR)
+            def has_existing = Utils.hasExistingInput(meta, Constants.INPUT.ALN_RNA_TUMOR)
             runnable: Utils.hasTumorRnaFastq(meta) && ! has_existing
             skip: true
         }
@@ -362,7 +360,7 @@ def getRnaFastqChannel(ch_inputs) {
                 }
         }
 
-    return Channel.empty()
+    return channel.empty()
         .mix(
             ch_fastqs,
             ch_inputs_sorted.skip.map { meta -> [meta, [:], [], []] },

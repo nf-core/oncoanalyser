@@ -2,9 +2,6 @@
 // Neo identifies and scores neoepitopes
 //
 
-import Constants
-import Utils
-
 include { NEO_ANNOTATE_FUSIONS } from '../../../modules/local/neo/annotate_fusions/main'
 include { NEO_FINDER           } from '../../../modules/local/neo/finder/main'
 include { NEO_SCORER           } from '../../../modules/local/neo/scorer/main'
@@ -32,10 +29,6 @@ workflow NEO_PREDICTION {
     isofox_read_length         //  string: [mandatory] Isofox read length
 
     main:
-    // Channel for versions.yml files
-    // channel: [ versions.yml ]
-    ch_versions = Channel.empty()
-
     //
     // MODULE: Neo finder
     //
@@ -93,11 +86,9 @@ workflow NEO_PREDICTION {
         ensembl_data_resources,
     )
 
-    ch_versions = ch_versions.mix(NEO_FINDER.out.versions)
-
     // Set outputs, restoring original meta
     // channel: [ meta, neo_finder_dir ]
-    ch_finder_out = WorkflowOncoanalyser.restoreMeta(NEO_FINDER.out.neo_finder_dir, ch_inputs)
+    ch_finder_out = WorkflowOncoanalyser.restoreMeta(channel.topic('neo_finder_dir'), ch_inputs)
 
     //
     // MODULE: Fusion annotation (Isofox)
@@ -115,8 +106,8 @@ workflow NEO_PREDICTION {
             return [
                 meta,
                 neo_finder_dir,
-                Utils.selectCurrentOrExisting(tumor_rna_aln, meta, Constants.INPUT.BAM_RNA_TUMOR),
-                Utils.selectCurrentOrExisting(tumor_rna_idx, meta, Constants.INPUT.BAI_RNA_TUMOR),
+                Utils.selectCurrentOrExisting(tumor_rna_aln, meta, Constants.INPUT.ALN_RNA_TUMOR),
+                Utils.selectCurrentOrExisting(tumor_rna_idx, meta, Constants.INPUT.IDX_RNA_TUMOR),
             ]
         }
         .branch { meta, neo_finder_dir, tumor_rna_aln, tumor_rna_idx ->
@@ -149,13 +140,11 @@ workflow NEO_PREDICTION {
         ensembl_data_resources,
     )
 
-    ch_versions = ch_versions.mix(NEO_ANNOTATE_FUSIONS.out.versions)
-
     // Set outputs, restoring original meta
     // channel: [ meta, annotated_fusions ]
-    ch_annotate_fusions_out = Channel.empty()
+    ch_annotate_fusions_out = channel.empty()
         .mix(
-            WorkflowOncoanalyser.restoreMeta(NEO_ANNOTATE_FUSIONS.out.annotated_fusions, ch_inputs),
+            WorkflowOncoanalyser.restoreMeta(channel.topic('neo_annotated_fusions_tsv'), ch_inputs),
             ch_isofox_inputs_sorted.skip.map { meta -> [meta, []] },
         )
 
@@ -186,10 +175,11 @@ workflow NEO_PREDICTION {
                 meta_scorer.sample_rna_id = Utils.getTumorDnaSampleName(meta)
 
                 def sage_append_dir_somatic_selected = Utils.selectCurrentOrExisting(sage_append_dir_somatic, meta, Constants.INPUT.SAGE_APPEND_DIR_TUMOR)
-                sage_append_vcf_somatic = file(sage_append_dir_somatic).resolve("${meta_scorer.sample_id}.sage.append.vcf.gz")
+                sage_append_vcf_somatic = file(sage_append_dir_somatic_selected).resolve("${meta_scorer.sample_id}.sage.append.vcf.gz")
             }
 
-            def inputs = [
+            return [
+                meta_scorer,
                 Utils.selectCurrentOrExisting(isofox_dir, meta, Constants.INPUT.ISOFOX_DIR),
                 Utils.selectCurrentOrExisting(purple_dir, meta, Constants.INPUT.PURPLE_DIR),
                 sage_append_vcf_somatic,
@@ -197,8 +187,6 @@ workflow NEO_PREDICTION {
                 neo_finder_dir,
                 annotated_fusions,
             ]
-
-            return [meta_scorer, *inputs]
         }
         .branch { meta, isofox_dir, purple_dir, sage_append_dir_somatic, lilac_dir, neo_finder_dir, annotated_fusions ->
             runnable: purple_dir && neo_finder_dir && lilac_dir
@@ -213,9 +201,4 @@ workflow NEO_PREDICTION {
         neo_resources,
         cohort_tpm_medians,
     )
-
-    ch_versions = ch_versions.mix(NEO_SCORER.out.versions)
-
-    emit:
-    versions = ch_versions // channel: [ versions.yml ]
 }

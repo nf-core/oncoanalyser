@@ -15,9 +15,9 @@ process GRIDSS_INDEX {
     path genome_bwa_index
 
     output:
-    path 'gridss_index/', emit: index
-    path 'versions.yml' , emit: versions
-    path '.command.*'   , emit: command_files
+    path 'gridss_index/'                                   , topic: gridss_index
+    tuple val([:]), val('gridss_index'), path('.command.*'), topic: command_files
+    path 'versions.yml'                                    , topic: versions
 
     when:
     task.ext.when == null || task.ext.when
@@ -59,6 +59,7 @@ process GRIDSS_INDEX {
     stub:
     """
     mkdir -p gridss_index/
+
     touch gridss_index/${genome_fasta.name}.{sa,pac,bwt,ann,amb}
     touch gridss_index/${genome_fasta.name}.img
     touch gridss_index/${genome_fasta.name}.gridsscache

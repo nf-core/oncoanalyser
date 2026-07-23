@@ -13,9 +13,9 @@ process LINX_VISUALISER {
     path ensembl_data_resources
 
     output:
-    tuple val(meta), path('plots/'), emit: linx_visualiser_dir
-    path 'versions.yml'            , emit: versions
-    path '.command.*'              , emit: command_files
+    tuple val(meta), path('plots/')                            , topic: linx_visualiser_plots
+    tuple val(meta), val('linx_visualiser'), path('.command.*'), topic: command_files
+    path 'versions.yml'                                        , topic: versions
 
     when:
     task.ext.when == null || task.ext.when
@@ -108,7 +108,7 @@ process LINX_VISUALISER {
         r: \$(R --version | sed -n '/^R version/ { s/^.*version //; s/ .*//p }')
         r-dplyr: \$(Rscript -e 'packageVersion("dplyr") |> as.character() |> writeLines()')
         r-ggplot2: \$(Rscript -e 'packageVersion("ggplot2") |> as.character() |> writeLines()')
-        circos: \$(circos -version | sed -n '/^circos/ { s/^.* v //; s/ .*$//p }')
+        circos: \$(circos -version | sed -n '/^circos/ { s/^.* v //; s/ .*//p }')
     END_VERSIONS
     """
 
@@ -116,7 +116,7 @@ process LINX_VISUALISER {
     """
     mkdir -p plots/{all,reportable}/
 
-    touch plots/{all,reportable}/placeholder
+    touch plots/{all,reportable}/.stub
 
     echo -e '${task.process}:\n  stub: noversions\n' > versions.yml
     """

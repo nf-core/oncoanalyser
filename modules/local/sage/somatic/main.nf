@@ -25,9 +25,9 @@ process SAGE_SOMATIC {
     val targeted_mode
 
     output:
-    tuple val(meta), path('somatic/'), emit: sage_dir
-    path 'versions.yml'              , emit: versions
-    path '.command.*'                , emit: command_files
+    tuple val(meta), path('somatic/')                       , topic: sage_somatic_dir
+    tuple val(meta), val('sage_somatic'), path('.command.*'), topic: command_files
+    path 'versions.yml'                                     , topic: versions
 
     when:
     task.ext.when == null || task.ext.when
@@ -58,10 +58,6 @@ process SAGE_SOMATIC {
     def should_run_tinc = should_run_tinc_wgs_tn && should_run_tinc_seq_type
 
     if (should_run_tinc) {
-
-        def run_tinc_arg = '-run_tinc'
-        def write_fit_variants_arg = '-write_fit_variants'
-        def pon_file_arg = "-pon_file ${sage_pon}"
 
         def gnomad_arg
         if (genome_ver == '38') {

@@ -16,9 +16,9 @@ process COBALT {
     val targeted_mode
 
     output:
-    tuple val(meta), path('cobalt/'), emit: cobalt_dir
-    path 'versions.yml'             , emit: versions
-    path '.command.*'               , emit: command_files
+    tuple val(meta), path('cobalt/')                  , topic: cobalt_dir
+    tuple val(meta), val('cobalt'), path('.command.*'), topic: command_files
+    path 'versions.yml'                               , topic: versions
 
     when:
     task.ext.when == null || task.ext.when
@@ -72,7 +72,7 @@ process COBALT {
     """
     mkdir -p cobalt/
 
-    touch cobalt/placeholder
+    touch cobalt/.stub
 
     echo -e '${task.process}:\\n  stub: noversions\\n' > versions.yml
     """

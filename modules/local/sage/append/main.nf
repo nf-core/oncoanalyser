@@ -17,9 +17,9 @@ process SAGE_APPEND {
     val targeted_mode
 
     output:
-    tuple val(meta), path("sage_append_${meta.output_file_id}/"), emit: sage_append_dir
-    path 'versions.yml'                                         , emit: versions
-    path '.command.*'                                           , emit: command_files
+    tuple val(meta), path("sage_append_${meta.output_file_id}/"), topic: sage_append_dir
+    tuple val(meta), val('sage_append'), path('.command.*')     , topic: command_files
+    path 'versions.yml'                                         , topic: versions
 
     when:
     task.ext.when == null || task.ext.when

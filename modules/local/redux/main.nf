@@ -19,14 +19,14 @@ process REDUX {
     path msi_model_error_rates
     val sequencing_platform
     val targeted_mode
+    val generate_tsvs_only
     val umi_enable
     val umi_duplex_delim
-    val generate_tsvs_only
 
     output:
-    tuple val(meta), path("redux_${meta.sample_id}/"), emit: redux_dir
-    path 'versions.yml'                              , emit: versions
-    path '.command.*'                                , emit: command_files
+    tuple val(meta), path("redux_${meta.sample_id}/"), topic: redux_dir
+    tuple val(meta), val('redux'), path('.command.*'), topic: command_files
+    path 'versions.yml'                              , topic: versions
 
     when:
     task.ext.when == null || task.ext.when
@@ -39,29 +39,32 @@ process REDUX {
     def log_level_arg = task.ext.log_level ? "-log_level ${task.ext.log_level}" : ''
 
     def form_consensus_arg = ''
+
     def umi_enable_arg = ''
     def umi_duplex_arg = ''
     def umi_duplex_delim_arg = ''
+
     def skip_duplicate_marking_arg = ''
+
     def bqr_use_all_regions_arg = ''
     def bqr_jitter_msi_only_arg = ''
 
     def msi_model_coefficients_arg = ''
     def msi_model_error_rates_arg = ''
 
-    if(umi_enable) {
+    if (umi_enable) {
         umi_enable_arg = '-umi_enabled'
     } else {
         form_consensus_arg = '-form_consensus'
     }
 
-    if(umi_duplex_delim) {
+    if (umi_duplex_delim) {
         umi_duplex_arg = '-umi_duplex'
         umi_duplex_delim_arg = "-umi_duplex_delim ${umi_duplex_delim}"
     }
 
     def umi_args = [umi_enable_arg, umi_duplex_arg, umi_duplex_delim_arg]
-        .findAll { it != '' }
+        .findAll { s -> s != '' }
         .join(' ')
 
     if (sequencing_platform.toLowerCase() == 'ultima') {
@@ -69,7 +72,7 @@ process REDUX {
         skip_duplicate_marking_arg = '-skip_duplicate_marking'
     }
 
-    if(targeted_mode) {
+    if (targeted_mode) {
         bqr_use_all_regions_arg = '-bqr_use_all_regions'
     }
 
@@ -80,9 +83,16 @@ process REDUX {
         bqr_jitter_msi_only_arg = '-bqr_jitter_msi_only'
     }
 
-    if(meta.sample_type == 'tumor') {
-        if(msi_model_coefficients) msi_model_coefficients_arg = "-msi_model_coefficients ${msi_model_coefficients}"
-        if(msi_model_error_rates)  msi_model_error_rates_arg  = "-msi_model_error_rates ${msi_model_error_rates}"
+    if (meta.sample_type == 'tumor') {
+
+        if (msi_model_coefficients) {
+            msi_model_coefficients_arg = "-msi_model_coefficients ${msi_model_coefficients}"
+        }
+
+        if (msi_model_error_rates) {
+            msi_model_error_rates_arg  = "-msi_model_error_rates ${msi_model_error_rates}"
+        }
+
     }
 
     """
@@ -113,10 +123,8 @@ process REDUX {
         -output_dir redux_${meta.sample_id}/
 
     if [[ -n '${bqr_jitter_msi_only_arg}' ]]; then
-        ## NOTE(LN): Assume that only one REDUX BAM is provided (i.e. from the sample sheet).
-        ## Multiple BAMs are only passed to REDUX if running the pipeline from multi-lane FASTQs.
-        ln -sf \$(realpath ${bams}) redux_${meta.sample_id}/${meta.sample_id}.redux.bam
-        ln -sf \$(realpath ${bais}) redux_${meta.sample_id}/${meta.sample_id}.redux.bam.bai
+        ln -sf \$(realpath ${alns}) redux_${meta.sample_id}/${meta.sample_id}.redux.bam
+        ln -sf \$(realpath ${idxs}) redux_${meta.sample_id}/${meta.sample_id}.redux.bam.bai
     fi
 
     cat <<-END_VERSIONS > versions.yml

@@ -2,9 +2,6 @@
 // PAVE annotates somatic and germline variant VCFs with gene and transcript coding and protein effects
 //
 
-import Constants
-import Utils
-
 include { PAVE_GERMLINE } from '../../../modules/local/pave/germline/main'
 include { PAVE_SOMATIC  } from '../../../modules/local/pave/somatic/main'
 
@@ -33,9 +30,6 @@ workflow PAVE_ANNOTATION {
     sequencing_platform    // string:  [mandatory] sequencing platform
 
     main:
-    // Channel for version.yml files
-    ch_versions = Channel.empty()
-
     //
     // MODULE: PAVE germline
     //
@@ -88,8 +82,6 @@ workflow PAVE_ANNOTATION {
         ensembl_data_resources,
         sequencing_platform,
     )
-
-    ch_versions = ch_versions.mix(PAVE_GERMLINE.out.versions)
 
     //
     // MODULE: PAVE somatic
@@ -145,29 +137,25 @@ workflow PAVE_ANNOTATION {
         sequencing_platform,
     )
 
-    ch_versions = ch_versions.mix(PAVE_SOMATIC.out.versions)
-
     //
     // STEP: Outputs
     //
     // Set outputs, restoring original meta
     // channel: [ meta, pave_dir ]
-    ch_outputs_somatic = Channel.empty()
+    ch_outputs_somatic = channel.empty()
         .mix(
-            WorkflowOncoanalyser.restoreMeta(PAVE_SOMATIC.out.pave_dir, ch_inputs),
+            WorkflowOncoanalyser.restoreMeta(channel.topic('pave_somatic_dir'), ch_inputs),
             ch_sage_somatic_inputs_sorted.skip.map { meta -> [meta, []] },
         )
 
     // channel: [ meta, pave_dir ]
-    ch_outputs_germline = Channel.empty()
+    ch_outputs_germline = channel.empty()
         .mix(
-            WorkflowOncoanalyser.restoreMeta(PAVE_GERMLINE.out.pave_dir, ch_inputs),
+            WorkflowOncoanalyser.restoreMeta(channel.topic('pave_germline_dir'), ch_inputs),
             ch_sage_germline_inputs_sorted.skip.map { meta -> [meta, []] },
         )
 
     emit:
     germline_dir = ch_outputs_germline // channel: [ meta, pave_dir ]
     somatic_dir  = ch_outputs_somatic  // channel: [ meta, pave_dir ]
-
-    versions     = ch_versions         // channel: [ versions.yml ]
 }

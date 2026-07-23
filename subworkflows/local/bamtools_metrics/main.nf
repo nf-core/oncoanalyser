@@ -2,9 +2,6 @@
 // Bam Tools calculates summary statistics for BAMs
 //
 
-import Constants
-import Utils
-
 include { BAMTOOLS } from '../../../modules/local/bamtools/main'
 
 workflow BAMTOOLS_METRICS {
@@ -22,10 +19,6 @@ workflow BAMTOOLS_METRICS {
     target_regions_bed     // channel: [optional]  /path/to/target_regions_bed
 
     main:
-    // Channel for version.yml files
-    // channel: [ versions.yml ]
-    ch_versions = Channel.empty()
-
     // Select input sources then sort
     // channel: runnable: [ meta, aln, idx ]
     // channel: skip: [ meta ]
@@ -64,7 +57,7 @@ workflow BAMTOOLS_METRICS {
 
     // Create process input channel
     // channel: [ meta_bamtools, aln, idx ]
-    ch_bamtools_inputs = Channel.empty()
+    ch_bamtools_inputs = channel.empty()
         .mix(
             ch_inputs_tumor_sorted.runnable.map { meta, aln, idx -> [meta, Utils.getTumorDnaSample(meta), 'tumor', aln, idx] },
             ch_inputs_normal_sorted.runnable.map { meta, aln, idx -> [meta, Utils.getNormalDnaSample(meta), 'normal', aln, idx] },
@@ -91,10 +84,8 @@ workflow BAMTOOLS_METRICS {
         target_regions_bed,
     )
 
-    ch_versions = ch_versions.mix(BAMTOOLS.out.versions)
-
     // Sort into a tumor and normal channel
-    ch_bamtools_out = BAMTOOLS.out.bamtools_dir
+    ch_bamtools_out = channel.topic('bamtools_metrics_dir')
         .branch { meta_bamtools, bamtools_dir ->
             assert ['tumor', 'normal'].contains(meta_bamtools.sample_type)
             tumor: meta_bamtools.sample_type == 'tumor'
@@ -104,14 +95,14 @@ workflow BAMTOOLS_METRICS {
 
     // Set outputs, restoring original meta
     // channel: [ meta, bamtools_dir ]
-    ch_tumor_out = Channel.empty()
+    ch_tumor_out = channel.empty()
         .mix(
             WorkflowOncoanalyser.restoreMeta(ch_bamtools_out.tumor, ch_inputs),
             ch_inputs_tumor_sorted.skip.map { meta -> [meta, []] },
         )
 
     // channel: [ meta, bamtools_dir ]
-    ch_normal_out = Channel.empty()
+    ch_normal_out = channel.empty()
         .mix(
             WorkflowOncoanalyser.restoreMeta(ch_bamtools_out.normal, ch_inputs),
             ch_inputs_normal_sorted.skip.map { meta -> [meta, []] },
@@ -120,6 +111,4 @@ workflow BAMTOOLS_METRICS {
     emit:
     tumor_dir  = ch_tumor_out  // channel: [ meta, bamtools_dir ]
     normal_dir = ch_normal_out // channel: [ meta, bamtools_dir ]
-
-    versions   = ch_versions   // channel: [ versions.yml ]
 }

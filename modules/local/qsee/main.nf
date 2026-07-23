@@ -22,9 +22,9 @@ process QSEE {
     val targeted_mode
 
     output:
-    tuple val(meta), path('qsee/'), emit: qsee_dir
-    path 'versions.yml'           , emit: versions
-    path '.command.*'             , emit: command_files
+    tuple val(meta), path('qsee/')                  , topic: qsee_dir
+    tuple val(meta), val('qsee'), path('.command.*'), topic: command_files
+    path 'versions.yml'                             , topic: versions
 
     when:
     task.ext.when == null || task.ext.when
@@ -36,7 +36,7 @@ process QSEE {
 
     def log_level_arg = task.ext.log_level ? "-log_level ${task.ext.log_level}" : ''
 
-    def reference_arg = meta.normal_id ? "-reference ${meta.normal_id}" : ''
+    def reference_arg = meta.containsKey('normal_id') ? "-reference ${meta.normal_id}" : ''
     def redux_ref_dir_arg = redux_tsvs_normal ? '-redux_ref_dir redux_tsvs_normal/' : ''
     def bamtools_ref_dir_arg = bamtools_dir_normal ? "-bam_metrics_ref_dir ${bamtools_dir_normal}" : ''
 

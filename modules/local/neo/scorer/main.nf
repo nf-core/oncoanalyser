@@ -14,9 +14,9 @@ process NEO_SCORER {
     path cohort_tpm_medians
 
     output:
-    tuple val(meta), path('neo_scorer/'), emit: neo_scorer_dir
-    path 'versions.yml'                 , emit: versions
-    path '.command.*'                   , emit: command_files
+    tuple val(meta), path('neo_scorer/')                  , topic: neo_scorer_dir
+    tuple val(meta), val('neo_scorer'), path('.command.*'), topic: command_files
+    path 'versions.yml'                                   , topic: versions
 
     when:
     task.ext.when == null || task.ext.when
@@ -72,6 +72,8 @@ process NEO_SCORER {
     stub:
     """
     mkdir -p neo_scorer/
+
+    touch neo_scorer/.stub
 
     echo -e '${task.process}:\\n  stub: noversions\\n' > versions.yml
     """

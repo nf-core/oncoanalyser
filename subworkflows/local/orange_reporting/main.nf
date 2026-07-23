@@ -2,9 +2,6 @@
 // ORANGE collates outputs of hmftools into a static PDF report
 //
 
-import Constants
-import Utils
-
 include { ORANGE } from '../../../modules/local/orange/main'
 
 workflow ORANGE_REPORTING {
@@ -37,10 +34,6 @@ workflow ORANGE_REPORTING {
     targeted_mode                   // boolean: [mandatory] Set targeted mode
 
     main:
-    // Channel for version.yml files
-    // channel: [ versions.yml ]
-    ch_versions = Channel.empty()
-
     // Mapping for semantic input retrieval
     input_indexes = [
         'sage_dir_somatic':             0,
@@ -120,7 +113,7 @@ workflow ORANGE_REPORTING {
             def inputs = d[1..-1]
 
             def dna_tumor_input_keys = ['sage_dir_somatic', 'purple_dir', 'qsee_dir', 'linx_annotation_dir_somatic', 'linx_plot_dir_somatic']
-            def has_dna_tumor = dna_tumor_input_keys.every { k -> i = input_indexes[k]; return inputs[i] }
+            def has_dna_tumor = dna_tumor_input_keys.every { k -> def i = input_indexes[k]; return inputs[i] }
 
             runnable: has_dna_tumor
             skip: true
@@ -146,12 +139,12 @@ workflow ORANGE_REPORTING {
 
             // Require all normal DNA inputs to be present else clear them
             def dna_normal_input_keys = ['sage_dir_germline', 'linx_annotation_dir_germline']
-            def has_dna_normal = dna_normal_input_keys.every { k -> i = input_indexes[k]; return inputs[i] }
+            def has_dna_normal = dna_normal_input_keys.every { k -> def i = input_indexes[k]; return inputs[i] }
 
             if (has_dna_normal) {
                 meta_orange.normal_dna_id = Utils.getNormalDnaSampleName(meta)
             } else {
-                dna_normal_input_keys.each { k -> i = input_indexes[k]; inputs_selected[i] = [] }
+                dna_normal_input_keys.each { k -> def i = input_indexes[k]; inputs_selected[i] = [] }
             }
 
             // Require all tumor RNA inputs to be present else clear them
@@ -163,12 +156,12 @@ workflow ORANGE_REPORTING {
                 rna_tumor_input_keys = ['isofox_dir', 'sage_append_dir_somatic']
             }
 
-            def has_rna_tumor = rna_tumor_input_keys.every { k -> i = input_indexes[k]; return inputs[i] }
+            def has_rna_tumor = rna_tumor_input_keys.every { k -> def i = input_indexes[k]; return inputs[i] }
 
             if (has_rna_tumor) {
                 meta_orange.tumor_rna_id = Utils.getTumorRnaSampleName(meta)
             } else {
-                rna_tumor_input_keys.each { k -> i = input_indexes[k]; inputs_selected[i] = [] }
+                rna_tumor_input_keys.each { k -> def i = input_indexes[k]; inputs_selected[i] = [] }
             }
 
             // ORANGE only accepts CUPPA with DNA; when providing DNA/RNA inputs but skipping Virus Interpreter CUPPA
@@ -236,9 +229,4 @@ workflow ORANGE_REPORTING {
         sequencing_platform,
         targeted_mode,
     )
-
-    ch_versions = ch_versions.mix(ORANGE.out.versions)
-
-    emit:
-    versions = ch_versions // channel: [ versions.yml ]
 }

@@ -2,9 +2,6 @@
 // Qsee calculates and visualises QC metrics
 //
 
-import Constants
-import Utils
-
 include { QSEE } from '../../../modules/local/qsee/main'
 
 workflow QSEE_METRICS {
@@ -28,10 +25,6 @@ workflow QSEE_METRICS {
     targeted_mode            // boolean: [mandatory] Set targeted mode
 
     main:
-    // Channel for version.yml files
-    // channel: [ versions.yml ]
-    ch_versions = Channel.empty()
-
     // Select input sources then sort
     // channel: runnable: [ meta, [redux_tsv_tumor, ...], [redux_tsv_normal, ...], bamtools_tumor_dir, bamtools_normal_dir, cobalt_dir, esvee_dir, purple_dir ]
     // channel: skip: [ meta ]
@@ -99,18 +92,14 @@ workflow QSEE_METRICS {
         targeted_mode,
     )
 
-    ch_versions = ch_versions.mix(QSEE.out.versions)
-
     // Set outputs, restoring original meta
     // channel: [ meta, qsee_dir ]
-    ch_outputs = Channel.empty()
+    ch_outputs = channel.empty()
         .mix(
-            WorkflowOncoanalyser.restoreMeta(QSEE.out.qsee_dir, ch_inputs),
+            WorkflowOncoanalyser.restoreMeta(channel.topic('qsee_dir'), ch_inputs),
             ch_inputs_sorted.skip.map { meta -> [meta, []] },
         )
 
     emit:
-    qsee_dir = ch_outputs  // channel: [ meta, qsee_dir ]
-
-    versions = ch_versions // channel: [ versions.yml ]
+    qsee_dir = ch_outputs // channel: [ meta, qsee_dir ]
 }

@@ -33,10 +33,10 @@ process ORANGE {
     val targeted_mode
 
     output:
-    tuple val(meta), path('output/*.orange.pdf') , emit: pdf, optional: true
-    tuple val(meta), path('output/*.orange.json'), emit: json, optional: true
-    path 'versions.yml'                          , emit: versions
-    path '.command.*'                            , emit: command_files
+    tuple val(meta), path('output/*.orange.pdf')      , topic: orange_pdf, optional: true
+    tuple val(meta), path('output/*.orange.json')     , topic: orange_json, optional: true
+    tuple val(meta), val('orange'), path('.command.*'), topic: command_files
+    path 'versions.yml'                               , topic: versions
 
     when:
     task.ext.when == null || task.ext.when

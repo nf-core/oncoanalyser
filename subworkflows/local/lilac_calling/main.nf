@@ -2,9 +2,6 @@
 // LILAC is a WGS tool for HLA typing and somatic CNV and SNV calling
 //
 
-import Constants
-import Utils
-
 include { LILAC } from '../../../modules/local/lilac/main'
 
 workflow LILAC_CALLING {
@@ -27,10 +24,6 @@ workflow LILAC_CALLING {
     targeted_mode       // boolean: [mandatory] Set targeted mode
 
     main:
-    // Channel for version.yml files
-    // channel: [ versions.yml ]
-    ch_versions = Channel.empty()
-
     // Select input sources then sort
     // channel: runnable: [meta, normal_dna_aln, normal_dna_idx, tumor_dna_aln, tumor_dna_idx, tumor_rna_aln, tumor_rna_idx, purple_dir]
     // channel: skip: [ meta ]
@@ -54,8 +47,8 @@ workflow LILAC_CALLING {
                 normal_dna_idx,
                 tumor_dna_aln,
                 tumor_dna_idx,
-                Utils.selectCurrentOrExisting(tumor_rna_aln, meta, Constants.INPUT.BAM_RNA_TUMOR),
-                Utils.selectCurrentOrExisting(tumor_rna_idx, meta, Constants.INPUT.BAI_RNA_TUMOR),
+                Utils.selectCurrentOrExisting(tumor_rna_aln, meta, Constants.INPUT.ALN_RNA_TUMOR),
+                Utils.selectCurrentOrExisting(tumor_rna_idx, meta, Constants.INPUT.IDX_RNA_TUMOR),
                 Utils.selectCurrentOrExisting(purple_dir, meta, Constants.INPUT.PURPLE_DIR),
             ]
 
@@ -103,18 +96,14 @@ workflow LILAC_CALLING {
         sequencing_platform,
     )
 
-    ch_versions = ch_versions.mix(LILAC.out.versions)
-
     // Set outputs, restoring original meta
     // channel: [ meta, amber_dir ]
-    ch_outputs = Channel.empty()
+    ch_outputs = channel.empty()
         .mix(
-            WorkflowOncoanalyser.restoreMeta(LILAC.out.lilac_dir, ch_inputs),
+            WorkflowOncoanalyser.restoreMeta(channel.topic('lilac_dir'), ch_inputs),
             ch_dna_inputs_sorted.skip.map { meta -> [meta, []] },
         )
 
     emit:
-    lilac_dir = ch_outputs  // channel: [ meta, lilac_dir ]
-
-    versions  = ch_versions // channel: [ versions.yml ]
+    lilac_dir = ch_outputs // channel: [ meta, lilac_dir ]
 }

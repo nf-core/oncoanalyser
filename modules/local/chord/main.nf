@@ -14,9 +14,9 @@ process CHORD {
     path genome_dict
 
     output:
-    tuple val(meta), path('chord/'), emit: chord_dir
-    path 'versions.yml'            , emit: versions
-    path '.command.*'              , emit: command_files
+    tuple val(meta), path('chord/')                  , topic: chord_dir
+    tuple val(meta), val('chord'), path('.command.*'), topic: command_files
+    path 'versions.yml'                              , topic: versions
 
     when:
     task.ext.when == null || task.ext.when

@@ -2,9 +2,6 @@
 // MultiQC aggregates and collates metrics for QC review
 //
 
-import Constants
-import Utils
-
 include { MULTIQC } from '../../../modules/nf-core/multiqc/main'
 
 include { paramsSummaryMap } from 'plugin/nf-schema'
@@ -110,8 +107,8 @@ workflow MULTIQC_REPORTING {
                 // Sort: [ [gid_a, f], [gid_b, f], ...]
                 // Sorting done on primarily on group_id (index 0) then secondarily on filename (index 1)
                 // NOTE(SW): assumes common prefix in filenames from each output stage that is consistent between samples
-                .sort { it[1].name }
-                .sort { it[0] }
+                .sort { d -> d[1].name }
+                .sort { d -> d[0] }
                 // Separate: [ [gid_a, gid_b, ...], [f, f, ..] ]
                 .transpose()
 
@@ -120,7 +117,7 @@ workflow MULTIQC_REPORTING {
         }
 
     // Channel for other input files; essentially unused but retained for nf-core
-    ch_multiqc_files = Channel.empty()
+    ch_multiqc_files = channel.empty()
 
     // nf-core boilerplate
     ch_multiqc_config = channel.fromPath("$projectDir/assets/multiqc_config.yml", checkIfExists: true)
@@ -151,7 +148,7 @@ workflow MULTIQC_REPORTING {
     )
 
     // Set outputs
-    ch_outputs = MULTIQC.out.report.toList()
+    ch_outputs = channel.topic('multiqc_report').toList()
 
     emit:
     report = ch_outputs // channel: [ meta, multiqc_report ]

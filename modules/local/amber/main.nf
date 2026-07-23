@@ -16,9 +16,9 @@ process AMBER {
     val sequencing_platform
 
     output:
-    tuple val(meta), path('amber/'), emit: amber_dir
-    path 'versions.yml'            , emit: versions
-    path '.command.*'              , emit: command_files
+    tuple val(meta), path('amber/')                  , topic: amber_dir
+    tuple val(meta), val('amber'), path('.command.*'), topic: command_files
+    path 'versions.yml'                              , topic: versions
 
     when:
     task.ext.when == null || task.ext.when
@@ -38,6 +38,7 @@ process AMBER {
     def reference_alns = []
     if (normal_aln) { reference_alns.add(normal_aln.toString()) }
     if (donor_aln) { reference_alns.add(donor_aln.toString()) }
+
     def reference_bam_arg = reference_alns.size() > 0 ? "-reference_bam ${reference_alns.join(',')}" : ''
 
     def target_regions_bed_arg = target_regions_bed ? "-target_regions_bed ${target_regions_bed}" : ''
@@ -74,7 +75,7 @@ process AMBER {
     """
     mkdir -p amber/
 
-    touch amber/placeholder
+    touch amber/.stub
 
     echo -e '${task.process}:\\n  stub: noversions\\n' > versions.yml
     """

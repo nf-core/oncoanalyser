@@ -14,10 +14,11 @@ process MULTIQC {
     path(multiqc_logo)
 
     output:
-    path "*multiqc_report.html", emit: report
-    path "*_data"              , emit: data
-    path "*_plots"             , optional:true, emit: plots
-    path "versions.yml"        , emit: versions
+    path '*multiqc_report.html', topic: multiqc_report
+    path '*_data'              , topic: multiqc_data
+    path '*_plots'             , topic: multiqc_plots, optional:true
+    // NOTE(SW): cannot published otherwise produce ~ consume on topic channel becomes circular and blocks
+    //path "versions.yml"        , topic: versions
 
     when:
     task.ext.when == null || task.ext.when
@@ -33,7 +34,7 @@ process MULTIQC {
     def logo_arg = multiqc_logo ? "--cl-config 'custom_logo: \"${multiqc_logo}\"'" : ''
 
     // Prepare sample linkage for process
-    def group_id_data = meta.collectEntries { gid, sns -> [gid, "sample/${gid}"] }
+    def group_id_data = meta.collectEntries { gid, _sns -> [gid, "sample/${gid}"] }
 
     def group_id_mapping = [fs_group_ids, fs]
         .transpose()
@@ -85,7 +86,10 @@ process MULTIQC {
     """
     mkdir -p multiqc_data/
     mkdir -p multiqc_plots/
+
     touch multiqc_report.html
+    touch multiqc_data/.stub
+    touch multiqc_plots/.stub
 
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":

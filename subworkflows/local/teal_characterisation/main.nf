@@ -2,9 +2,6 @@
 // TEAL performs characterisation of telomeric features and rearrangements
 //
 
-import Constants
-import Utils
-
 include { TEAL_PREP     } from '../../../modules/local/teal/prep/main'
 include { TEAL_PIPELINE } from '../../../modules/local/teal/pipeline/main'
 
@@ -26,10 +23,6 @@ workflow TEAL_CHARACTERISATION {
     sequencing_platform    // string:  [mandatory] sequencing platform
 
     main:
-    // Channel for version.yml files
-    // channel: [ versions.yml ]
-    ch_versions = Channel.empty()
-
     //
     // STEP: Handle inputs
     //
@@ -88,22 +81,20 @@ workflow TEAL_CHARACTERISATION {
         sequencing_platform,
     )
 
-    ch_versions = ch_versions.mix(TEAL_PREP.out.versions)
-
     // Flatten TEAL_PREP output
     // channel: [ meta, teal_bam, teal_bai ]
-    ch_tumor_teal_bam = WorkflowOncoanalyser.restoreMeta(TEAL_PREP.out.tumor_bam, ch_inputs)
-        .map { meta, bam_bai -> [meta, *bam_bai] }
+    ch_tumor_teal_bam = WorkflowOncoanalyser.restoreMeta(channel.topic('teal_prep_tumor_bam'), ch_inputs)
+        .map { meta, bam_bai -> [meta] + bam_bai }
 
     ch_normal_teal_bam_placeholder = WorkflowOncoanalyser.restoreMeta(
         ch_teal_prep_inputs
-            .filter { it[0].normal_id == null } // Only populate placeholder channel if normal sample is missing
-            .map { [ it[0], [], [] ] },
+            .filter { d -> d[0].normal_id == null }  // Only populate placeholder channel if normal sample is missing
+            .map { d -> [d[0], [], []] },
         ch_inputs
     )
 
-    ch_normal_teal_bam = WorkflowOncoanalyser.restoreMeta(TEAL_PREP.out.normal_bam, ch_inputs)
-        .map { meta, bam_bai -> [meta, *bam_bai] }
+    ch_normal_teal_bam = WorkflowOncoanalyser.restoreMeta(channel.topic('teal_prep_normal_bam'), ch_inputs)
+        .map { meta, bam_bai -> [meta] + bam_bai }
         .mix(ch_normal_teal_bam_placeholder)
 
     //
@@ -170,9 +161,4 @@ workflow TEAL_CHARACTERISATION {
         genome_version,
         sequencing_platform,
     )
-
-    ch_versions = ch_versions.mix(TEAL_PIPELINE.out.versions)
-
-    emit:
-    versions = ch_versions // channel: [ versions.yml ]
 }

@@ -2,9 +2,6 @@
 // WISP estimates tumor purity in longitudinal samples using WGS data of the primary
 //
 
-import Constants
-import Utils
-
 include { WISP } from '../../../modules/local/wisp/main'
 
 workflow WISP_ANALYSIS {
@@ -24,10 +21,6 @@ workflow WISP_ANALYSIS {
     targeted_mode              // boolean: [mandatory] Set targeted mode
 
     main:
-    // Channel for version.yml files
-    // channel: [ versions.yml ]
-    ch_versions = Channel.empty()
-
     // Select input sources then sort
     // channel: runnable: [ meta, purple_dir (primary), amber_dir (primary), normal_aln (primary), redux_dir (longitudinal), amber_dir (longitudinal), cobalt_dir (longitudinal), sage_append_dir (longitudinal) ]
     // channel: skip: [ meta ]
@@ -40,7 +33,7 @@ workflow WISP_ANALYSIS {
         .map { meta, longitudinal_redux_dir, longitudinal_amber_dir, longitudinal_cobalt_dir, longitudinal_sage_append_dir ->
 
             def primary_normal_redux_dir = Utils.getInput(meta, Constants.INPUT.REDUX_DIR_NORMAL)
-            def (primary_normal_aln, primary_normal_idx) = Utils.getNormalReduxDirAlignment(meta, primary_normal_redux_dir)
+            def (primary_normal_aln, _primary_normal_idx) = Utils.getNormalReduxDirAlignment(meta, primary_normal_redux_dir)
 
             def primary_purple_dir = Utils.getInput(meta, Constants.INPUT.PURPLE_DIR)
             def primary_amber_dir = Utils.getInput(meta, Constants.INPUT.AMBER_DIR)
@@ -88,9 +81,8 @@ workflow WISP_ANALYSIS {
                 longitudinal_id: Utils.getTumorDnaSampleName(meta, primary: false),
             ]
 
-            return [meta] + inputs
+            return [meta_wisp] + inputs
         }
-
 
     // Run process
     WISP(
@@ -99,9 +91,4 @@ workflow WISP_ANALYSIS {
         genome_fai,
         targeted_mode,
     )
-
-    ch_versions = ch_versions.mix(WISP.out.versions)
-
-    emit:
-    versions = ch_versions // channel: [ versions.yml ]
 }

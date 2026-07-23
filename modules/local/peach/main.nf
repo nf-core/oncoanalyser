@@ -14,9 +14,9 @@ process PEACH {
     path drug_info
 
     output:
-    tuple val(meta), path('peach/'), emit: peach_dir
-    path 'versions.yml'            , emit: versions
-    path '.command.*'              , emit: command_files
+    tuple val(meta), path('peach/')                  , topic: peach_dir
+    tuple val(meta), val('peach'), path('.command.*'), topic: command_files
+    path 'versions.yml'                              , topic: versions
 
     when:
     task.ext.when == null || task.ext.when

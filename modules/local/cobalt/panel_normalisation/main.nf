@@ -14,9 +14,9 @@ process COBALT_PANEL_NORMALISATION {
     path target_regions_bed
 
     output:
-    path 'cobalt.region_normalisation.*.tsv', emit: cobalt_normalisation
-    path 'versions.yml'                     , emit: versions
-    path '.command.*'                       , emit: command_files
+    path 'cobalt.region_normalisation.*.tsv'                             , topic: cobalt_normalisation_tsv
+    tuple val([:]), val('cobalt_panel_normalisation'), path('.command.*'), topic: command_files
+    path 'versions.yml'                                                  , topic: versions
 
     when:
     task.ext.when == null || task.ext.when

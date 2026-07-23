@@ -1,21 +1,18 @@
-import Constants
-import Processes
-import Utils
-
 /*
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     IMPORT MODULES / SUBWORKFLOWS / FUNCTIONS
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 */
 
-include { AMBER_PROFILING     } from '../subworkflows/local/amber_profiling'
-include { COBALT_PROFILING    } from '../subworkflows/local/cobalt_profiling'
-include { PREPARE_REFERENCE   } from '../subworkflows/local/prepare_reference'
-include { READ_ALIGNMENT_DNA  } from '../subworkflows/local/read_alignment_dna'
-include { READ_UMI_PROCESSING } from '../subworkflows/local/read_umi_processing'
-include { REDUX_PROCESSING    } from '../subworkflows/local/redux_processing'
-include { SAGE_APPEND         } from '../subworkflows/local/sage_append'
-include { WISP_ANALYSIS       } from '../subworkflows/local/wisp_analysis'
+include { AMBER_PROFILING                 } from '../subworkflows/local/amber_profiling'
+include { COBALT_PROFILING                } from '../subworkflows/local/cobalt_profiling'
+include { PREPARE_OUTPUTS_PURITY_ESTIMATE } from '../subworkflows/local/prepare_outputs'
+include { PREPARE_REFERENCE               } from '../subworkflows/local/prepare_reference'
+include { READ_ALIGNMENT_DNA              } from '../subworkflows/local/read_alignment_dna'
+include { READ_UMI_PROCESSING             } from '../subworkflows/local/read_umi_processing'
+include { REDUX_PROCESSING                } from '../subworkflows/local/redux_processing'
+include { SAGE_APPEND                     } from '../subworkflows/local/sage_append'
+include { WISP_ANALYSIS                   } from '../subworkflows/local/wisp_analysis'
 
 include { softwareVersionsToYAML } from '../subworkflows/nf-core/utils_nfcore_pipeline'
 
@@ -31,15 +28,12 @@ workflow PURITY_ESTIMATE {
     take:
     inputs
     run_config
+    params
 
     main:
-    // Create channel for versions
-    // channel: [ versions.yml ]
-    ch_versions = Channel.empty()
-
     // Create input channel from parsed CSV
     // channel: [ meta ]
-    ch_inputs = Channel.fromList(inputs)
+    ch_inputs = channel.fromList(inputs)
 
     // Get run mode of purity estimate mode
     def purity_estimate_run_mode = Utils.getEnumFromString(params.purity_estimate_mode, Constants.RunMode)
@@ -47,23 +41,24 @@ workflow PURITY_ESTIMATE {
     def wgts_mode = purity_estimate_run_mode == Constants.RunMode.WGTS
 
     // Set up reference data, assign more human readable variables
+    def prep_config = WorkflowMain.getPrepConfigFromSamplesheet(run_config)
     PREPARE_REFERENCE(
         prep_config,
         run_config,
+        params,
     )
-
-    ch_versions = ch_versions.mix(PREPARE_REFERENCE.out.versions)
 
     def ref_data = PREPARE_REFERENCE.out
     def hmf_data = PREPARE_REFERENCE.out.hmf_data
+    def panel_data = PREPARE_REFERENCE.out.panel_data
 
     //
     // SUBWORKFLOW: Run read alignment to generate BAMs
     //
     // channel: [ meta, [aln, ...], [idx, ...] ]
-    ch_align_dna_tumor_out = Channel.empty()
-    ch_align_dna_normal_out = Channel.empty()
-    ch_align_dna_donor_out = Channel.empty()
+    ch_align_dna_tumor_out = channel.empty()
+    ch_align_dna_normal_out = channel.empty()
+    ch_align_dna_donor_out = channel.empty()
     if (run_config.stages.alignment) {
 
 
@@ -74,7 +69,7 @@ workflow PURITY_ESTIMATE {
         ch_fastq_dna = getDnaFastqChannel(ch_inputs)
 
         // channel: [ meta, fastq_info, fastq_fwd, fastq_rev ]
-        ch_align_dna_input = Channel.empty()
+        ch_align_dna_input = channel.empty()
         if (params.fastp_umi_enabled || params.fastq_tools_umi_enabled) {
 
             READ_UMI_PROCESSING(
@@ -89,8 +84,6 @@ workflow PURITY_ESTIMATE {
                 false,  // fastq_tools_umi_enabled
                 '',  // fastq_tools_umi_delim
             )
-
-            ch_versions = ch_versions.mix(READ_UMI_PROCESSING.out.versions)
 
             ch_align_dna_input = ch_align_dna_input.mix(READ_UMI_PROCESSING.out.fastq_dna)
 
@@ -108,8 +101,6 @@ workflow PURITY_ESTIMATE {
             params.max_fastq_records,
         )
 
-        ch_versions = ch_versions.mix(READ_ALIGNMENT_DNA.out.versions)
-
         ch_align_dna_tumor_out = ch_align_dna_tumor_out.mix(READ_ALIGNMENT_DNA.out.tumor)
         ch_align_dna_normal_out = ch_align_dna_normal_out.mix(READ_ALIGNMENT_DNA.out.normal)
         ch_align_dna_donor_out = ch_align_dna_donor_out.mix(READ_ALIGNMENT_DNA.out.donor)
@@ -126,9 +117,9 @@ workflow PURITY_ESTIMATE {
     // SUBWORKFLOW: Run REDUX for DNA alignments
     //
     // channel: [ meta, redux_dir ]
-    ch_redux_tumor_out = Channel.empty()
-    ch_redux_normal_out = Channel.empty()
-    ch_redux_donor_out = Channel.empty()
+    ch_redux_tumor_out = channel.empty()
+    ch_redux_normal_out = channel.empty()
+    ch_redux_donor_out = channel.empty()
     if (run_config.stages.redux) {
 
         REDUX_PROCESSING(
@@ -149,10 +140,7 @@ workflow PURITY_ESTIMATE {
             targeted_mode,
             params.redux_umi_enabled,
             params.redux_umi_duplex_delim,
-            params.redux_generate_tsvs_only,
         )
-
-        ch_versions = ch_versions.mix(REDUX_PROCESSING.out.versions)
 
         ch_redux_tumor_out = ch_redux_tumor_out.mix(REDUX_PROCESSING.out.tumor_dir)
         ch_redux_normal_out = ch_redux_normal_out.mix(REDUX_PROCESSING.out.normal_dir)
@@ -170,7 +158,7 @@ workflow PURITY_ESTIMATE {
     // SUBWORKFLOW: Run AMBER to obtain b-allele frequencies
     //
     // channel: [ meta, amber_dir ]
-    ch_amber_out = Channel.empty()
+    ch_amber_out = channel.empty()
     if (run_config.stages.amber && wgts_mode) {
 
         def tumor_min_depth = wgts_mode ? 1 : []
@@ -188,8 +176,6 @@ workflow PURITY_ESTIMATE {
             true,  // purity_estimate_mode
         )
 
-        ch_versions = ch_versions.mix(AMBER_PROFILING.out.versions)
-
         ch_amber_out = ch_amber_out.mix(AMBER_PROFILING.out.amber_dir)
 
     } else {
@@ -202,7 +188,7 @@ workflow PURITY_ESTIMATE {
     // SUBWORKFLOW: Run COBALT to obtain read ratios
     //
     // channel: [ meta, cobalt_dir ]
-    ch_cobalt_out = Channel.empty()
+    ch_cobalt_out = channel.empty()
     if (run_config.stages.cobalt && wgts_mode) {
 
         COBALT_PROFILING(
@@ -217,8 +203,6 @@ workflow PURITY_ESTIMATE {
             true,  // purity_estimate_mode
         )
 
-        ch_versions = ch_versions.mix(COBALT_PROFILING.out.versions)
-
         ch_cobalt_out = ch_cobalt_out.mix(COBALT_PROFILING.out.cobalt_dir)
 
     } else {
@@ -231,7 +215,7 @@ workflow PURITY_ESTIMATE {
     // SUBWORKFLOW: Append new sample data to primary SAGE WGS VCF
     //
     // channel: [ meta, sage_append_dir ]
-    ch_sage_somatic_append_out = Channel.empty()
+    ch_sage_somatic_append_out = channel.empty()
     if (run_config.stages.sage_append) {
 
         SAGE_APPEND(
@@ -248,7 +232,6 @@ workflow PURITY_ESTIMATE {
             targeted_mode,
         )
 
-        ch_versions = ch_versions.mix(SAGE_APPEND.out.versions)
         ch_sage_somatic_append_out = ch_sage_somatic_append_out.mix(SAGE_APPEND.out.somatic_dir)
 
     } else {
@@ -273,14 +256,12 @@ workflow PURITY_ESTIMATE {
             targeted_mode,
         )
 
-        ch_versions = ch_versions.mix(WISP_ANALYSIS.out.versions)
-
     }
 
     //
     // TASK: Aggregate software versions
     //
-    def topic_versions = Channel.topic("versions")
+    def topic_versions = channel.topic("versions")
         .distinct()
         .branch { entry ->
             versions_file: entry instanceof Path
@@ -297,14 +278,22 @@ workflow PURITY_ESTIMATE {
             "${process}:\n${tool_versions.join('\n')}"
         }
 
-    softwareVersionsToYAML(ch_versions.mix(topic_versions.versions_file))
+    softwareVersionsToYAML(topic_versions.versions_file)
         .mix(topic_versions_string)
         .collectFile(
             storeDir: "${params.outdir}/pipeline_info",
-            name: 'software_versions.yml',
+            name: 'nf_core_'  +  'oncoanalyser_software_'  + 'mqc_'  + 'versions.yml',
             sort: true,
             newLine: true,
         )
+
+    //
+    // SUBWORKFLOW: Prepare outputs for publishing
+    //
+    PREPARE_OUTPUTS_PURITY_ESTIMATE()
+
+    emit:
+    results = PREPARE_OUTPUTS_PURITY_ESTIMATE.out.results
 }
 
 /*

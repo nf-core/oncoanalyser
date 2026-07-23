@@ -10,7 +10,7 @@ process WRITE_REFERENCE_DATA {
     path fp
 
     output:
-    path fp, includeInputs: true
+    path fp, includeInputs: true, topic: write_reference_data
 
     when:
     task.ext.when == null || task.ext.when

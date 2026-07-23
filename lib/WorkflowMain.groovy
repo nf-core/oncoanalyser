@@ -16,11 +16,11 @@ class WorkflowMain {
         def default_invalid = false
 
         // Set defaults common to all run configuration
-        if (!params.containsKey('sequencing_platform')) {
+        if (! params.containsKey('sequencing_platform')) {
             params.sequencing_platform = 'illumina'
         }
 
-        if (!params.containsKey('genome_version')) {
+        if (! params.containsKey('genome_version')) {
             if (Constants.GENOMES_VERSION_37.contains(params.genome)) {
                 params.genome_version = '37'
             } else if (Constants.GENOMES_VERSION_38.contains(params.genome)) {
@@ -30,7 +30,7 @@ class WorkflowMain {
             }
         }
 
-        if (!params.containsKey('genome_type')) {
+        if (! params.containsKey('genome_type')) {
             if (Constants.GENOMES_ALT.contains(params.genome)) {
                 params.genome_type = 'alt'
             } else if (Constants.GENOMES_DEFINED.contains(params.genome)) {
@@ -40,7 +40,7 @@ class WorkflowMain {
             }
         }
 
-        if (!params.containsKey('ref_data_hmf_data_path')) {
+        if (! params.containsKey('ref_data_hmf_data_path')) {
             if (params.genome_version.toString() == '37') {
                 params.ref_data_hmf_data_path = Constants.HMF_DATA_37_PATH
             } else if (params.genome_version.toString() == '38') {
@@ -58,7 +58,7 @@ class WorkflowMain {
         // Set defaults specific to run configuration without attempting to validate
 
         def run_mode
-        if (params.mode !== null) {
+        if (params.mode != null) {
             run_mode = Utils.getRunMode(params.mode, log)
         } else {
             // Bad configuration, catch in validateParams
@@ -66,7 +66,7 @@ class WorkflowMain {
         }
 
         // Attempt to set default panel data path; make no assumption on valid 'panel' value
-        if (run_mode === Constants.RunMode.TARGETED || run_mode === Constants.RunMode.PREPARE_REFERENCE) {
+        if (run_mode == Constants.RunMode.TARGETED || run_mode == Constants.RunMode.PREPARE_REFERENCE) {
 
             if (params.containsKey('panel')) {
 
@@ -89,21 +89,57 @@ class WorkflowMain {
             log,
         )
 
+        //
+        // Resolve UMI type and set UMI parameters
+        //
+        def umi_type
+        if (params.containsKey('umi_type')) {
+            umi_type = Utils.getEnumFromString(params.umi_type, Constants.UmiType)
+        } else if (params.panel && Constants.PANELS_DEFINED.contains(params.panel)) {
+            if (params.panel == 'TSO500') {
+                umi_type = Constants.UmiType.TSO500
+            }
+        }
+
+        if (umi_type == Constants.UmiType.KAPA) {
+              params.fastp_umi_enabled = true
+              params.fastp_umi_location = 'per_read'
+              params.fastp_umi_length = 6
+              params.fastp_umi_skip = 0
+              params.redux_umi_enabled = true
+              params.redux_umi_duplex_delim = '_'
+        } else if (umi_type == Constants.UmiType.MSK) {
+              params.fastq_tools_umi_enabled = true
+              params.fastq_tools_umi_delim = '+'
+              params.redux_umi_enabled = true
+              params.redux_umi_duplex_delim = ''
+        } else if (umi_type == Constants.UmiType.TSO500) {
+              params.redux_umi_enabled = true
+              params.redux_umi_duplex_delim = '+'
+        } else if (umi_type == Constants.UmiType.TWIST) {
+              params.fastp_umi_enabled = true
+              params.fastp_umi_location = 'per_read'
+              params.fastp_umi_length = 7
+              params.fastp_umi_skip = 0
+              params.redux_umi_enabled = true
+              params.redux_umi_duplex_delim = '_'
+        }
+
         // Final point to set any default to avoid access to undefined parameters during nf-validation
-        if (!params.containsKey('panel')) params.panel = null
-        if (!params.containsKey('ref_data_genome_alt')) params.ref_data_genome_alt = null
-        if (!params.containsKey('ref_data_genome_gtf')) params.ref_data_genome_gtf = null
-        if (!params.containsKey('ref_data_panel_data_path')) params.ref_data_panel_data_path = null
+        if (! params.containsKey('panel')) params.panel = null
+        if (! params.containsKey('ref_data_genome_alt')) params.ref_data_genome_alt = null
+        if (! params.containsKey('ref_data_genome_gtf')) params.ref_data_genome_gtf = null
+        if (! params.containsKey('ref_data_panel_data_path')) params.ref_data_panel_data_path = null
 
         // Additionally set selected parameters with false-ish truthy values to avoid passing null values as inputs
-        if (!params.containsKey('fastp_umi_enabled')) params.fastp_umi_enabled = false
-        if (!params.containsKey('fastp_umi_length')) params.fastp_umi_length = 0
-        if (!params.containsKey('fastp_umi_location')) params.fastp_umi_location = ''
-        if (!params.containsKey('fastp_umi_skip')) params.fastp_umi_skip = -1
-        if (!params.containsKey('fastq_tools_umi_enabled')) params.fastq_tools_umi_enabled = false
-        if (!params.containsKey('fastq_tools_umi_delim')) params.fastq_tools_umi_delim = ''
-        if (!params.containsKey('redux_umi_enabled')) params.redux_umi_enabled = false
-        if (!params.containsKey('redux_umi_duplex_delim')) params.redux_umi_duplex_delim = ''
+        if (! params.containsKey('fastp_umi_enabled')) params.fastp_umi_enabled = false
+        if (! params.containsKey('fastp_umi_length')) params.fastp_umi_length = 0
+        if (! params.containsKey('fastp_umi_location')) params.fastp_umi_location = ''
+        if (! params.containsKey('fastp_umi_skip')) params.fastp_umi_skip = -1
+        if (! params.containsKey('fastq_tools_umi_enabled')) params.fastq_tools_umi_enabled = false
+        if (! params.containsKey('fastq_tools_umi_delim')) params.fastq_tools_umi_delim = ''
+        if (! params.containsKey('redux_umi_enabled')) params.redux_umi_enabled = false
+        if (! params.containsKey('redux_umi_duplex_delim')) params.redux_umi_duplex_delim = ''
 
     }
 
@@ -114,14 +150,14 @@ class WorkflowMain {
 
         // Common parameters
 
-        if (!params.genome) {
+        if (! params.genome) {
             log.error "\n~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n" +
                 "  Genome must be set using the --genome CLI argument or in a configuration file.\n" +
                 "  Currently, the available genome are:\n" +
                 "  ${params.genomes.keySet().join(", ")}\n" +
                 "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
             Nextflow.exit(1)
-        } else if (!params.genomes.containsKey(params.genome)) {
+        } else if (! params.genomes.containsKey(params.genome)) {
             log.error "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n" +
                 "  Genome '${params.genome}' not found in any config files provided to the pipeline.\n" +
                 "  Currently, the available genome are:\n" +
@@ -130,8 +166,8 @@ class WorkflowMain {
             Nextflow.exit(1)
         }
 
-        if (!Constants.GENOMES_SUPPORTED.contains(params.genome)) {
-            if (!params.force_genome) {
+        if (! Constants.GENOMES_SUPPORTED.contains(params.genome)) {
+            if (! params.force_genome) {
                 log.error "currently only the GRCh37_hmf and GRCh38_hmf genomes are supported but got ${params.genome}" +
                     ", please adjust the --genome argument accordingly or override with --force_genome."
                 Nextflow.exit(1)
@@ -141,7 +177,7 @@ class WorkflowMain {
             }
         }
 
-        if (!params.genome_version) {
+        if (! params.genome_version) {
             log.error "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n" +
                 "  Genome version wasn't provided and genome '${params.genome}' is not defined in   \n" +
                 "  genome version list.\n" +
@@ -151,7 +187,7 @@ class WorkflowMain {
             Nextflow.exit(1)
         }
 
-        if (!params.genome_type) {
+        if (! params.genome_type) {
             log.error "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n" +
                 "  Genome type wasn't provided and genome '${params.genome}' is not defined in      \n" +
                 "  genome type list.\n" +
@@ -161,14 +197,14 @@ class WorkflowMain {
             Nextflow.exit(1)
         }
 
-        if (!params.ref_data_hmf_data_path) {
+        if (! params.ref_data_hmf_data_path) {
             log.error "HMF data path wasn't provided"
             Nextflow.exit(1)
         }
 
         // Run configuration specific parameters
 
-        if (!params.mode) {
+        if (! params.mode) {
             def run_modes = Utils.getEnumNames(Constants.RunMode).join('\n    - ')
             log.error "\n~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n" +
                 "  Run mode must be set using the --mode CLI argument or in a configuration  \n" +
@@ -181,7 +217,7 @@ class WorkflowMain {
 
         def run_mode = Utils.getRunMode(params.mode, log)
 
-        if (run_mode === Constants.RunMode.PREPARE_REFERENCE && params.ref_data_types == null) {
+        if (run_mode == Constants.RunMode.PREPARE_REFERENCE && params.ref_data_types == null) {
 
             def ref_data_types = Utils.getEnumNames(Constants.RefDataType).join('\n    - ')
 
@@ -193,9 +229,9 @@ class WorkflowMain {
             Nextflow.exit(1)
         }
 
-        if (run_mode === Constants.RunMode.TARGETED) {
+        if (run_mode == Constants.RunMode.TARGETED) {
 
-            if (!params.containsKey('panel') || params.panel === null) {
+            if (! params.containsKey('panel') || params.panel == null) {
 
                 def panels = Constants.PANELS_DEFINED.join('\n    - ')
                 log.error "\n~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n" +
@@ -206,7 +242,7 @@ class WorkflowMain {
                     "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
                 Nextflow.exit(1)
 
-            } else if (!Constants.PANELS_DEFINED.contains(params.panel)) {
+            } else if (! Constants.PANELS_DEFINED.contains(params.panel)) {
 
                 if (params.containsKey('force_panel') && params.force_panel) {
                     log.warn "provided panel ${params.panel} does not have built-in support but forcing to proceed"
@@ -225,7 +261,7 @@ class WorkflowMain {
 
             // Require the panel to have defined
 
-            if (!params.panel_data_paths.containsKey(params.panel)) {
+            if (! params.panel_data_paths.containsKey(params.panel)) {
                 def panels = params.panel_data_paths.keySet().join('\n    - ')
                 log.error "\n~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n" +
                     "  Did not find data path definitions for the provided ${params.panel} panel.\n" +
@@ -236,7 +272,7 @@ class WorkflowMain {
             }
 
             def panel_data_paths_versions = params.panel_data_paths[params.panel]
-            if (!panel_data_paths_versions.containsKey(params.genome_version.toString())) {
+            if (! panel_data_paths_versions.containsKey(params.genome_version.toString())) {
                 def panel_versions = panel_data_paths_versions.keySet().join('\n    - ')
                 log.error "\n~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n" +
                     "  Did not find path definitions for the provided ${params.panel} panel and\n" +
@@ -266,7 +302,7 @@ class WorkflowMain {
                 'msi_model_error_rates',
             ]
 
-            def required_entries_missing = required_entries.findAll { n -> !panel_data_paths.containsKey(n) || !panel_data_paths[n] }
+            def required_entries_missing = required_entries.findAll { n -> ! panel_data_paths.containsKey(n) || ! panel_data_paths[n] }
             if (required_entries_missing) {
                 def required_entries_missing_str = required_entries_missing.join('\n    - ')
                 log.error "\n~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n" +
@@ -278,7 +314,7 @@ class WorkflowMain {
             }
 
             // Require optional entries to also always be present, but either set to a file or an empty list []; i.e. do not allow empty string ''
-            def optional_entries_missing = optional_entries.findAll { n -> !panel_data_paths.containsKey(n) }
+            def optional_entries_missing = optional_entries.findAll { n -> ! panel_data_paths.containsKey(n) }
             if (optional_entries_missing) {
                 def optional_entries_missing_str = optional_entries_missing.join('\n    - ')
                 log.error "\n~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n" +
@@ -289,7 +325,7 @@ class WorkflowMain {
                 Nextflow.exit(1)
             }
 
-            def optional_entries_invalid = optional_entries.findAll { n -> !panel_data_paths[n] && panel_data_paths[n] != []  }
+            def optional_entries_invalid = optional_entries.findAll { n -> ! panel_data_paths[n] && panel_data_paths[n] != []  }
             if (optional_entries_invalid) {
                 def optional_entries_invalid_str = optional_entries_invalid.join('\n    - ')
                 log.error "\n~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n" +
@@ -303,15 +339,13 @@ class WorkflowMain {
 
         }
 
-        if (run_mode === Constants.RunMode.PURITY_ESTIMATE) {
+        if (run_mode == Constants.RunMode.PURITY_ESTIMATE) {
 
             def purity_estimate_modes = [Constants.RunMode.WGTS, Constants.RunMode.TARGETED]
 
-            def purity_mode_enum = !params.purity_estimate_mode
-                ? null
-                : Utils.getEnumFromString(params.purity_estimate_mode, Constants.RunMode)
+            def purity_mode_enum = ! params.purity_estimate_mode ? null : Utils.getEnumFromString(params.purity_estimate_mode, Constants.RunMode)
 
-            if (!purity_mode_enum || !purity_estimate_modes.contains(purity_mode_enum)) {
+            if (! purity_mode_enum || ! purity_estimate_modes.contains(purity_mode_enum)) {
 
                 def purity_estimate_modes_str = purity_estimate_modes
                     .collect { e -> e.name().toLowerCase() }
@@ -327,7 +361,7 @@ class WorkflowMain {
             }
         }
 
-        if (params.ref_data_genome_alt !== null) {
+        if (params.ref_data_genome_alt != null) {
             if (params.genome_type != 'alt') {
                 log.error "\n~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n" +
                     "  Using a reference genome without ALT contigs but found an .alt file\n" +
@@ -355,7 +389,7 @@ class WorkflowMain {
             Nextflow.exit(1)
         }
 
-        if ((params.fastp_umi_enabled || params.fastq_tools_umi_enabled) && !params.redux_umi_enabled) {
+        if ((params.fastp_umi_enabled || params.fastq_tools_umi_enabled) && ! params.redux_umi_enabled) {
             log.error "\n~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n" +
                   "  When FASTQ UMI processing is enabled (via fastp_umi_enabled or fastp_umi_enabled),\n" +
                   "  REDUX UMI processing must also be enabled with redux_umi_enabled\n" +
@@ -364,7 +398,7 @@ class WorkflowMain {
         }
 
         def fastp_umi_args_set_any = params.fastp_umi_location || params.fastp_umi_length || params.fastp_umi_skip >= 0
-        if (fastp_umi_args_set_any && !params.fastp_umi_enabled) {
+        if (fastp_umi_args_set_any && ! params.fastp_umi_enabled) {
             log.error "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n" +
                 "  Detected use of fastp UMI parameters but fastp UMI processing has not been enabled.\n" +
                 "  Please review your configuration and set the fastp_umi_enabled flag or otherwise " +
@@ -374,7 +408,7 @@ class WorkflowMain {
         }
 
         def fastp_umi_args_set_all = params.fastp_umi_location && params.fastp_umi_length && params.fastp_umi_skip >= 0
-        if (params.fastp_umi_enabled && !fastp_umi_args_set_all) {
+        if (params.fastp_umi_enabled && ! fastp_umi_args_set_all) {
             log.error "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n" +
                 "  Refusing to run fastp UMI processing without having any UMI params configured.\n" +
                 "  Please review your configuration and appropriately set all fastp_umi_* parameters.\n" +
@@ -382,7 +416,7 @@ class WorkflowMain {
             Nextflow.exit(1)
         }
 
-        if (params.fastq_tools_umi_delim && !params.fastq_tools_umi_enabled) {
+        if (params.fastq_tools_umi_delim && ! params.fastq_tools_umi_enabled) {
             log.error "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n" +
                 "  Detected use of fastq-tools UMI parameter fastq_tools_umi_enabled fastq-tools UMI\n" +
                 "  processing has not been enabled. Please review your configuration and set the\n" +
@@ -391,7 +425,7 @@ class WorkflowMain {
             Nextflow.exit(1)
         }
 
-        if (params.fastq_tools_umi_enabled && !params.fastq_tools_umi_delim) {
+        if (params.fastq_tools_umi_enabled && ! params.fastq_tools_umi_delim) {
             log.error "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n" +
                 "  Refusing to run fastq-tools UMI processing without fastq_tools_umi_delim configured.\n" +
                 "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
@@ -442,9 +476,9 @@ class WorkflowMain {
             require_bwamem2_index: run_config.has_dna_fastq && run_config.stages.alignment,
             require_star_index: run_config.has_rna_fastq && run_config.stages.alignment,
 
-            require_gridss_index: run_config.has_dna && run_config.mode === Constants.RunMode.WGTS && run_config.stages.virusinterpreter,
+            require_gridss_index: run_config.has_dna && run_config.mode == Constants.RunMode.WGTS && run_config.stages.virusinterpreter,
             require_hmftools_data: true,
-            require_panel_data: run_config.mode === Constants.RunMode.TARGETED,
+            require_panel_data: run_config.mode == Constants.RunMode.TARGETED,
         ]
     }
 
@@ -454,7 +488,7 @@ class WorkflowMain {
             .collect {
                 def ref_data_type_enum = Utils.getEnumFromString(it, Constants.RefDataType)
 
-                if (!ref_data_type_enum) {
+                if (! ref_data_type_enum) {
                     def ref_data_type_str = Utils.getEnumNames(Constants.RefDataType).join('\n  - ')
                     log.error "received invalid ref data type: '${it}'. Valid options are:\n  - ${ref_data_type_str}"
                     Nextflow.exit(1)
@@ -501,7 +535,7 @@ class WorkflowMain {
             if (params.panel == null) {
                 require_panel_data = false
                 log.warn "Skipping preparing panel specific reference data as --panel CLI argument was not provided"
-            } else if (!Constants.PANELS_DEFINED.contains(params.panel)) {
+            } else if (! Constants.PANELS_DEFINED.contains(params.panel)) {
                 require_panel_data = false
                 log.warn "Skipping preparing panel specific reference data for custom panel: ${params.panel}"
             }
