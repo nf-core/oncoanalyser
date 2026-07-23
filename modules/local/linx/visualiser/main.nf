@@ -104,6 +104,11 @@ process LINX_VISUALISER {
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":
         linx: \$(linx -version | sed -n '/^Linx version / { s/^.* //p }')
+        java: \$(java --version | sed -n '/^openjdk/ { s/^.*openjdk //; s/ .*//p }')
+        r: \$(R --version | sed -n '/^R version/ { s/^.*version //; s/ .*//p }')
+        r-dplyr: \$(Rscript -e 'packageVersion("dplyr") |> as.character() |> writeLines()')
+        r-ggplot2: \$(Rscript -e 'packageVersion("ggplot2") |> as.character() |> writeLines()')
+        circos: \$(circos -version | sed -n '/^circos/ { s/^.* v //; s/ .*$//p }')
     END_VERSIONS
     """
 

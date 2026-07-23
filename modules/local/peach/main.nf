@@ -44,6 +44,7 @@ process PEACH {
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":
         peach: \$(peach -version | sed -n '/Peach version/ { s/^.* //p }')
+        java: \$(java --version | sed -n '/^openjdk/ { s/^.*openjdk //; s/ .*//p }')
     END_VERSIONS
     """
 

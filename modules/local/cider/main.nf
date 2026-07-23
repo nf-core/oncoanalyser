@@ -47,6 +47,7 @@ process CIDER {
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":
         cider: \$(cider -version | sed -n '/^Cider version/ { s/^.* //p }')
+        java: \$(java --version | sed -n '/^openjdk/ { s/^.*openjdk //; s/ .*//p }')
     END_VERSIONS
     """
 

@@ -19,6 +19,7 @@ include { ISOFOX_QUANTIFICATION } from '../subworkflows/local/isofox_quantificat
 include { LILAC_CALLING         } from '../subworkflows/local/lilac_calling'
 include { LINX_ANNOTATION       } from '../subworkflows/local/linx_annotation'
 include { LINX_PLOTTING         } from '../subworkflows/local/linx_plotting'
+include { MULTIQC_REPORTING     } from '../subworkflows/local/multiqc_reporting'
 include { NEO_PREDICTION        } from '../subworkflows/local/neo_prediction'
 include { ORANGE_REPORTING      } from '../subworkflows/local/orange_reporting'
 include { PAVE_ANNOTATION       } from '../subworkflows/local/pave_annotation'
@@ -876,6 +877,7 @@ workflow WGTS {
         )
 
         ch_versions = ch_versions.mix(ORANGE_REPORTING.out.versions)
+
     }
 
     //
@@ -898,7 +900,7 @@ workflow WGTS {
             "${process}:\n${tool_versions.join('\n')}"
         }
 
-    softwareVersionsToYAML(ch_versions.mix(topic_versions.versions_file))
+    ch_collated_versions = softwareVersionsToYAML(ch_versions.mix(topic_versions.versions_file))
         .mix(topic_versions_string)
         .collectFile(
             storeDir: "${params.outdir}/pipeline_info",
@@ -906,6 +908,31 @@ workflow WGTS {
             sort: true,
             newLine: true,
         )
+
+    //
+    // SUBWORKFLOW: Run MultiQC to generate HTML report
+    //
+    // channel: [ multiqc_report ]
+    ch_multiqc_out = Channel.empty()
+    if (run_config.stages.multiqc) {
+
+        MULTIQC_REPORTING(
+            ch_bamtools_tumor_out,
+            ch_bamtools_normal_out,
+            ch_amber_out,
+            ch_purple_out,
+            ch_collated_versions,
+            params.multiqc_config,
+            params.multiqc_methods_description,
+            params.multiqc_logo,
+        )
+
+        ch_multiqc_out = ch_multiqc_out.mix(MULTIQC_REPORTING.out.report)
+
+    }
+
+    emit:
+    multiqc_report = ch_multiqc_out
 }
 
 /*

@@ -76,6 +76,13 @@ process CUPPA {
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":
         cuppa: \$(cuppa -version | sed -n '/Cuppa version/ { s/^.* //p }')
+        java: \$(java --version | sed -n '/^openjdk/ { s/^.*openjdk //; s/ .*//p }')
+        r: \$(R --version | sed -n '/^R version/ { s/^.*version //; s/ .*//p }')
+        r-ggplot2: \$(Rscript -e 'packageVersion("ggplot2") |> as.character() |> writeLines()')
+        python: \$(python --version | sed -n '/^[Pp]ython/ { s/^.* //p }')
+        numpy: \$(python -c "import numpy; print(numpy.__version__)")
+        pandas: \$(python -c "import pandas; print(pandas.__version__)")
+        scikit-learn: \$(python -c "import sklearn; print(sklearn.__version__)")
     END_VERSIONS
     """
 

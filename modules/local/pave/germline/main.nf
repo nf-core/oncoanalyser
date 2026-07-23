@@ -59,6 +59,7 @@ process PAVE_GERMLINE {
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":
         pave: \$(pave -version | sed 's/^.* //')
+        java: \$(java --version | sed -n '/^openjdk/ { s/^.*openjdk //; s/ .*//p }')
     END_VERSIONS
     """
 

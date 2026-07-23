@@ -144,6 +144,7 @@ process ORANGE {
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":
         orange: \$(orange -version | sed -n '/^Orange version / { s/^.* //p }')
+        java: \$(java --version | sed -n '/^openjdk/ { s/^.*openjdk //; s/ .*//p }')
     END_VERSIONS
     """
 

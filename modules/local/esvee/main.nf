@@ -70,6 +70,8 @@ process ESVEE {
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":
         esvee: \$(esvee -version | sed -n '/^.*Esvee version/ { s/^.* //p }')
+        java: \$(java --version | sed -n '/^openjdk/ { s/^.*openjdk //; s/ .*//p }')
+        sambamba: \$(sambamba --version 2>&1 | sed -n '/^sambamba / { s/^.* //p }' | head -n1)
     END_VERSIONS
     """
 
