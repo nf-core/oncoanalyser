@@ -44,6 +44,7 @@ process LINX_GERMLINE {
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":
         linx: \$(linx -version | sed -n '/^Linx version / { s/^.* //p }')
+        java: \$(java --version | sed -n '/^openjdk/ { s/^.*openjdk //; s/ .*//p }')
     END_VERSIONS
     """
 

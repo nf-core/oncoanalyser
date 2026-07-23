@@ -53,6 +53,7 @@ process BAMTOOLS {
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":
         bamtools: \$(bamtools -version | sed -n '/^BamTools version/ { s/^.* //p }')
+        java: \$(java --version | sed -n '/^openjdk/ { s/^.*openjdk //; s/ .*//p }')
     END_VERSIONS
     """
 

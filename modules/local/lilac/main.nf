@@ -76,6 +76,7 @@ process LILAC {
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":
         lilac: \$(lilac -version | sed -n '/^Lilac version / { s/^.* //p }')
+        java: \$(java --version | sed -n '/^openjdk/ { s/^.*openjdk //; s/ .*//p }')
     END_VERSIONS
     """
 
