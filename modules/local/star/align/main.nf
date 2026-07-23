@@ -8,7 +8,7 @@ process STAR_ALIGN {
         'biocontainers/star:2.7.3a--0' }"
 
     input:
-    tuple val(meta), path(reads_fwd), path(reads_rev)
+    tuple val(meta), val(rg_lines), path(reads_fwds), path(reads_revs)
     path genome_star_index
 
     output:
@@ -23,10 +23,16 @@ process STAR_ALIGN {
     script:
     def args = task.ext.args ?: ''
 
+    def reads_fwds_str = reads_fwds.join(',')
+    def reads_revs_str = reads_revs.join(',')
+
+    def rg_lines_str = rg_lines.join(' , ')
+
     """
     STAR \\
         ${args} \\
-        --readFilesIn ${reads_fwd} ${reads_rev} \\
+        --readFilesIn ${reads_fwds_str} ${reads_revs_str} \\
+        --outSAMattrRGline ${rg_lines_str} \\
         --genomeDir ${genome_star_index} \\
         --runThreadN ${task.cpus} \\
         --readFilesCommand zcat \\
@@ -49,7 +55,6 @@ process STAR_ALIGN {
         --outFilterMultimapNmax 10 \\
         --outFilterScoreMinOverLread 0.33 \\
         --outSAMattributes All \\
-        --outSAMattrRGline ID:${meta.read_group} SM:${meta.sample_id} \\
         --outSAMtype BAM Unsorted \\
         --outSAMunmapped Within \\
         --peOverlapNbasesMin 10 \\
@@ -64,6 +69,7 @@ process STAR_ALIGN {
     stub:
     """
     touch Aligned.out.bam
+    touch Log.final.out
 
     echo -e '${task.process}:\\n  stub: noversions\\n' > versions.yml
     """
