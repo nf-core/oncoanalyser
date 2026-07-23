@@ -24,9 +24,9 @@ process ESVEE {
     val sequencing_platform
 
     output:
-    tuple val(meta), path('esvee/'), emit: esvee_dir
-    path 'versions.yml'            , emit: versions
-    path '.command.*'              , emit: command_files
+    tuple val(meta), path('esvee/')                  , topic: esvee_dir
+    tuple val(meta), val('esvee'), path('.command.*'), topic: command_files
+    path 'versions.yml'                              , topic: versions
 
     when:
     task.ext.when == null || task.ext.when
@@ -36,8 +36,8 @@ process ESVEE {
 
     def log_level_arg = task.ext.log_level ? "-log_level ${task.ext.log_level}" : ''
 
-    def reference_arg = meta.normal_id ? "-reference ${meta.normal_id}" : ''
-    def reference_bam_arg = meta.normal_id ? "-reference_bam ${normal_aln}" : ''
+    def reference_arg = meta.containsKey('normal_id') ? "-reference ${meta.normal_id}" : ''
+    def reference_bam_arg = meta.containsKey('normal_id') ? "-reference_bam ${normal_aln}" : ''
 
     def target_regions_bed_arg = target_regions_bed ? "-target_regions_bed ${target_regions_bed}" : ''
 

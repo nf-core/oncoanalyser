@@ -2,9 +2,6 @@
 // SAGE is a precise and highly sensitive somatic SNV, MNV and small INDEL caller
 //
 
-import Constants
-import Utils
-
 include { SAGE_GERMLINE } from '../../../modules/local/sage/germline/main'
 include { SAGE_SOMATIC  } from '../../../modules/local/sage/somatic/main'
 
@@ -36,10 +33,6 @@ workflow SAGE_CALLING {
     enable_germline              // boolean: [mandatory] Enable germline mode
 
     main:
-    // Channel for version.yml files
-    // channel: [ versions.yml ]
-    ch_versions = Channel.empty()
-
     //
     // STEP: Handle inputs
     //
@@ -63,7 +56,7 @@ workflow SAGE_CALLING {
             def redux_tsvs_tumor = Utils.getTumorReduxTsvs(meta, redux_dir_tumor_selected)
             def redux_tsvs_normal = Utils.getNormalReduxTsvs(meta, redux_dir_normal_selected)
             def redux_tsvs_donor = Utils.getDonorReduxTsvs(meta, redux_dir_donor_selected)
-            def redux_tsvs = [*redux_tsvs_tumor, *redux_tsvs_normal, *redux_tsvs_donor].findAll{ it.exists() }
+            def redux_tsvs = (redux_tsvs_tumor + redux_tsvs_normal + redux_tsvs_donor).findAll{ tsv -> tsv.exists() }
 
             return [meta, tumor_aln, tumor_idx, normal_aln, normal_idx, donor_aln, donor_idx, redux_tsvs]
         }
@@ -92,7 +85,7 @@ workflow SAGE_CALLING {
     // Create process input channel
     // channel: [ meta_sage, tumor_aln, tumor_idx, normal_aln, normal_idx, [redux_tsv, ...] ]
     ch_sage_germline_inputs = ch_inputs_germline_sorted.runnable
-        .map { meta, tumor_aln, tumor_idx, normal_aln, normal_idx, donor_aln, donor_idx, redux_tsvs ->
+        .map { meta, tumor_aln, tumor_idx, normal_aln, normal_idx, _donor_aln, _donor_idx, redux_tsvs ->
 
             def meta_sage = [
                 key: meta.group_id,
@@ -118,8 +111,6 @@ workflow SAGE_CALLING {
         sequencing_platform,
         targeted_mode,
     )
-
-    ch_versions = ch_versions.mix(SAGE_GERMLINE.out.versions)
 
     //
     // MODULE: SAGE somatic
@@ -177,24 +168,22 @@ workflow SAGE_CALLING {
         targeted_mode,
     )
 
-    ch_versions = ch_versions.mix(SAGE_SOMATIC.out.versions)
-
     //
     // STEP: Handle outputs
     //
     // Set outputs, restoring original meta
     // channel: [ meta, sage_dir ]
-    ch_outputs_somatic = Channel.empty()
+    ch_outputs_somatic = channel.empty()
         .mix(
-            WorkflowOncoanalyser.restoreMeta(SAGE_SOMATIC.out.sage_dir, ch_inputs),
+            WorkflowOncoanalyser.restoreMeta(channel.topic('sage_somatic_dir'), ch_inputs),
             ch_inputs_somatic_sorted.skip.map { meta -> [meta, []] },
             ch_inputs_sorted.skip.map { meta -> [meta, []] },
         )
 
     // channel: [ meta, sage_dir ]
-    ch_outputs_germline = Channel.empty()
+    ch_outputs_germline = channel.empty()
         .mix(
-            WorkflowOncoanalyser.restoreMeta(SAGE_GERMLINE.out.sage_dir, ch_inputs),
+            WorkflowOncoanalyser.restoreMeta(channel.topic('sage_germline_dir'), ch_inputs),
             ch_inputs_germline_sorted.skip.map { meta -> [meta, []] },
             ch_inputs_sorted.skip.map { meta -> [meta, []] },
         )
@@ -202,6 +191,4 @@ workflow SAGE_CALLING {
     emit:
     germline_dir = ch_outputs_germline // channel: [ meta, sage_dir ]
     somatic_dir  = ch_outputs_somatic  // channel: [ meta, sage_dir ]
-
-    versions     = ch_versions         // channel: [ versions.yml ]
 }

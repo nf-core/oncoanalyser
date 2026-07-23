@@ -2,9 +2,6 @@
 // Apply post-alignment processing
 //
 
-import Constants
-import Utils
-
 include { REDUX } from '../../../modules/local/redux/main'
 
 workflow REDUX_PROCESSING {
@@ -30,14 +27,8 @@ workflow REDUX_PROCESSING {
     targeted_mode          // boolean: [mandatory] Set targeted mode
     umi_enable             // boolean: [mandatory] enable UMI processing
     umi_duplex_delim       // string:  [optional] UMI duplex delimiter
-    generate_tsvs_only     // boolean: [mandatory] Generate REDUX TSVs from existing REDUX BAMs
-    targeted_mode          // boolean: [mandatory] Set targeted mode
 
     main:
-    // Channel for version.yml files
-    // channel: [ versions.yml ]
-    ch_versions = Channel.empty()
-
     // Select input sources then sort, separating by sample type
     // channel: runnable: [ meta, [aln, ...], [idx, ...] ]
     // channel: skip: [ meta ]
@@ -45,8 +36,8 @@ workflow REDUX_PROCESSING {
         .map { meta, alns, idxs ->
             return [
                 meta,
-                Utils.hasExistingInput(meta, Constants.INPUT.BAM_DNA_TUMOR) ? [Utils.getInput(meta, Constants.INPUT.BAM_DNA_TUMOR)] : alns,
-                Utils.hasExistingInput(meta, Constants.INPUT.BAI_DNA_TUMOR) ? [Utils.getInput(meta, Constants.INPUT.BAI_DNA_TUMOR)] : idxs,
+                Utils.hasExistingInput(meta, Constants.INPUT.ALN_DNA_TUMOR) ? [Utils.getInput(meta, Constants.INPUT.ALN_DNA_TUMOR)] : alns,
+                Utils.hasExistingInput(meta, Constants.INPUT.IDX_DNA_TUMOR) ? [Utils.getInput(meta, Constants.INPUT.IDX_DNA_TUMOR)] : idxs,
             ]
         }
         .branch { meta, alns, idxs ->
@@ -60,8 +51,8 @@ workflow REDUX_PROCESSING {
         .map { meta, alns, idxs ->
             return [
                 meta,
-                Utils.hasExistingInput(meta, Constants.INPUT.BAM_DNA_NORMAL) ? [Utils.getInput(meta, Constants.INPUT.BAM_DNA_NORMAL)] : alns,
-                Utils.hasExistingInput(meta, Constants.INPUT.BAI_DNA_NORMAL) ? [Utils.getInput(meta, Constants.INPUT.BAI_DNA_NORMAL)] : idxs,
+                Utils.hasExistingInput(meta, Constants.INPUT.ALN_DNA_NORMAL) ? [Utils.getInput(meta, Constants.INPUT.ALN_DNA_NORMAL)] : alns,
+                Utils.hasExistingInput(meta, Constants.INPUT.IDX_DNA_NORMAL) ? [Utils.getInput(meta, Constants.INPUT.IDX_DNA_NORMAL)] : idxs,
             ]
         }
         .branch { meta, alns, idxs ->
@@ -75,8 +66,8 @@ workflow REDUX_PROCESSING {
         .map { meta, alns, idxs ->
             return [
                 meta,
-                Utils.hasExistingInput(meta, Constants.INPUT.BAM_DNA_DONOR) ? [Utils.getInput(meta, Constants.INPUT.BAM_DNA_DONOR)] : alns,
-                Utils.hasExistingInput(meta, Constants.INPUT.BAI_DNA_DONOR) ? [Utils.getInput(meta, Constants.INPUT.BAI_DNA_DONOR)] : idxs,
+                Utils.hasExistingInput(meta, Constants.INPUT.ALN_DNA_DONOR) ? [Utils.getInput(meta, Constants.INPUT.ALN_DNA_DONOR)] : alns,
+                Utils.hasExistingInput(meta, Constants.INPUT.IDX_DNA_DONOR) ? [Utils.getInput(meta, Constants.INPUT.IDX_DNA_DONOR)] : idxs,
             ]
         }
         .branch { meta, alns, idxs ->
@@ -88,13 +79,13 @@ workflow REDUX_PROCESSING {
 
     // Create process input channel
     // channel: [ meta_redux, [aln, ...], [idx, ...] ]
-    ch_redux_inputs = Channel.empty()
+    ch_redux_inputs = channel.empty()
         .mix(
             ch_inputs_tumor_sorted.runnable.map { meta, alns, idxs -> [meta, Utils.getTumorDnaSample(meta), 'tumor', alns, idxs] },
             ch_inputs_normal_sorted.runnable.map { meta, alns, idxs -> [meta, Utils.getNormalDnaSample(meta), 'normal', alns, idxs] },
             ch_inputs_donor_sorted.runnable.map { meta, alns, idxs -> [meta, Utils.getDonorDnaSample(meta), 'donor', alns, idxs] },
         )
-        .map { meta, meta_sample, sample_type, alns, idxs ->
+        .multiMap { meta, meta_sample, sample_type, alns, idxs ->
 
             def sample_id = meta_sample.getOrDefault('longitudinal_sample_id', meta_sample['sample_id'])
 
@@ -111,7 +102,7 @@ workflow REDUX_PROCESSING {
 
     // Run process
     REDUX(
-        ch_redux_inputs,
+        ch_redux_inputs.sample_data,
         genome_fasta,
         genome_ver,
         genome_fai,
@@ -125,15 +116,11 @@ workflow REDUX_PROCESSING {
         ch_redux_inputs.generate_tsvs_only,
         umi_enable,
         umi_duplex_delim,
-        generate_tsvs_only,
-        targeted_mode,
     )
-
-    ch_versions = ch_versions.mix(REDUX.out.versions)
 
     // Split into sample type channels
     // channel: [ meta_redux, redux_dir ]
-    ch_redux_out_sorted = REDUX.out.redux_dir
+    ch_redux_out_sorted = channel.topic('redux_dir')
         .branch { meta_redux, redux_dir ->
             assert ['tumor', 'normal', 'donor'].contains(meta_redux.sample_type)
             tumor: meta_redux.sample_type == 'tumor'
@@ -144,21 +131,21 @@ workflow REDUX_PROCESSING {
 
     // Set outputs, restoring original meta
     // channel: [ meta, redux_dir ]
-    ch_outputs_tumor = Channel.empty()
+    ch_outputs_tumor = channel.empty()
         .mix(
             WorkflowOncoanalyser.restoreMeta(ch_redux_out_sorted.tumor, ch_inputs),
             ch_inputs_tumor_sorted.skip.map { meta -> [meta, []] },
         )
 
     // channel: [ meta, redux_dir ]
-    ch_outputs_normal = Channel.empty()
+    ch_outputs_normal = channel.empty()
         .mix(
             WorkflowOncoanalyser.restoreMeta(ch_redux_out_sorted.normal, ch_inputs),
             ch_inputs_normal_sorted.skip.map { meta -> [meta, []] },
         )
 
     // channel: [ meta, redux_dir ]
-    ch_outputs_donor = Channel.empty()
+    ch_outputs_donor = channel.empty()
         .mix(
             WorkflowOncoanalyser.restoreMeta(ch_redux_out_sorted.donor, ch_inputs),
             ch_inputs_donor_sorted.skip.map { meta -> [meta, []] },
@@ -168,6 +155,4 @@ workflow REDUX_PROCESSING {
     tumor_dir  = ch_outputs_tumor  // channel: [ meta, redux_dir ]
     normal_dir = ch_outputs_normal // channel: [ meta, redux_dir ]
     donor_dir  = ch_outputs_donor  // channel: [ meta, redux_dir ]
-
-    versions   = ch_versions       // channel: [ versions.yml ]
 }

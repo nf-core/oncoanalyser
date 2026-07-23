@@ -39,7 +39,7 @@ class Processes {
     }
 
     public static getProcessList(process_str, log) {
-        if (!process_str) {
+        if (! process_str) {
             return []
         }
         return process_str
@@ -57,7 +57,7 @@ class Processes {
     }
 
     public static checkIncludeExcludeList(include_list, exclude_list, log) {
-        def processes_shared = [*include_list, *exclude_list]
+        def processes_shared = include_list + exclude_list
             .countBy { it }
             .findAll { k, v -> v > 1 }
             .keySet()

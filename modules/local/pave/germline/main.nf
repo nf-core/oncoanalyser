@@ -21,9 +21,9 @@ process PAVE_GERMLINE {
     val sequencing_platform
 
     output:
-    tuple val(meta), path('pave_germline/'), emit: pave_dir
-    path 'versions.yml'                    , emit: versions
-    path '.command.*'                      , emit: command_files
+    tuple val(meta), path('pave_germline/')                  , topic: pave_germline_dir
+    tuple val(meta), val('pave_germline'), path('.command.*'), topic: command_files
+    path 'versions.yml'                                      , topic: versions
 
     when:
     task.ext.when == null || task.ext.when

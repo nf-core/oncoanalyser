@@ -2,9 +2,6 @@
 // COBALT calculates read ratios between tumor and normal samples
 //
 
-import Constants
-import Utils
-
 include { COBALT } from '../../../modules/local/cobalt/run/main'
 
 workflow COBALT_PROFILING {
@@ -23,10 +20,6 @@ workflow COBALT_PROFILING {
     purity_estimate_mode         // boolean: [mandatory] Set purity estimate mode
 
     main:
-    // Channel for version.yml files
-    // channel: [ versions.yml ]
-    ch_versions = Channel.empty()
-
     // Select input sources then sort
     // NOTE(SW): germline mode is not currently supported
     // channel: runnable: [ meta, tumor_aln, tumor_idx, normal_aln, normal_idx ]
@@ -57,9 +50,9 @@ workflow COBALT_PROFILING {
     // First set diploid BED input for tumor/normal and tumor only samples
     // NOTE(SW): since the diploid BED is provided as a channel, I seem to be only able to include via channel ops
     // channel: [ meta, tumor_aln, tumor_idx, normal_aln, normal_idx, diploid_bed ]
-    ch_inputs_runnable = Channel.empty()
+    ch_inputs_runnable = channel.empty()
         .mix(
-            ch_inputs_sorted.runnable_tn.map { [*it, []] },
+            ch_inputs_sorted.runnable_tn.map { d -> d + [[]] },
             ch_inputs_sorted.runnable_to.combine(diploid_bed),
         )
 
@@ -67,7 +60,7 @@ workflow COBALT_PROFILING {
     // channel: sample_data: [ meta_cobalt, tumor_aln, tumor_idx, normal_aln, normal_idx ]
     // channel: diploid_bed: [ diploid_bed ]
     ch_cobalt_inputs = ch_inputs_runnable
-        .multiMap { meta, tumor_aln, tumor_idx, normal_aln, normal_idx, diploid_bed ->
+        .multiMap { meta, tumor_aln, tumor_idx, normal_aln, normal_idx, ref_diploid_bed ->
 
             def tumor_id = purity_estimate_mode
             if (purity_estimate_mode) {
@@ -87,7 +80,7 @@ workflow COBALT_PROFILING {
             }
 
             sample_data: [meta_cobalt, tumor_aln, tumor_idx, normal_aln, normal_idx]
-            diploid_bed: diploid_bed
+            diploid_bed: ref_diploid_bed
         }
 
     // Run process
@@ -100,18 +93,14 @@ workflow COBALT_PROFILING {
         targeted_mode,
     )
 
-    ch_versions = ch_versions.mix(COBALT.out.versions)
-
     // Set outputs, restoring original meta
     // channel: [ meta, cobalt_dir ]
-    ch_outputs = Channel.empty()
+    ch_outputs = channel.empty()
         .mix(
-            WorkflowOncoanalyser.restoreMeta(COBALT.out.cobalt_dir, ch_inputs),
+            WorkflowOncoanalyser.restoreMeta(channel.topic('cobalt_dir'), ch_inputs),
             ch_inputs_sorted.skip.map { meta -> [meta, []] },
         )
 
     emit:
-    cobalt_dir = ch_outputs  // channel: [ meta, cobalt_dir ]
-
-    versions   = ch_versions // channel: [ versions.yml ]
+    cobalt_dir = ch_outputs // channel: [ meta, cobalt_dir ]
 }

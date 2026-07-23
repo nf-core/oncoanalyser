@@ -8,7 +8,7 @@ class Utils {
 
     public static parseInput(input_fp_str, stub_run, log) {
 
-        if (!input_fp_str) {
+        if (! input_fp_str) {
             log.error "Missing required --input argument"
             Nextflow.exit(1)
         }
@@ -35,7 +35,7 @@ class Utils {
 
                     // Sample type
                     def sample_type_enum = Utils.getEnumFromString(it.sample_type, Constants.SampleType)
-                    if (!sample_type_enum) {
+                    if (! sample_type_enum) {
                         def sample_type_str = Utils.getEnumNames(Constants.SampleType).join('\n  - ')
                         log.error "received invalid sample type: '${it.sample_type}'. Valid options are:\n  - ${sample_type_str}"
                         Nextflow.exit(1)
@@ -43,7 +43,7 @@ class Utils {
 
                     // Sequence type
                     def sequence_type_enum = Utils.getEnumFromString(it.sequence_type, Constants.SequenceType)
-                    if (!sequence_type_enum) {
+                    if (! sequence_type_enum) {
                         def sequence_type_str = Utils.getEnumNames(Constants.SequenceType).join('\n  - ')
                         log.error "received invalid sequence type: '${it.sequence_type}'. Valid options are:\n  - ${sequence_type_str}"
                         Nextflow.exit(1)
@@ -51,7 +51,7 @@ class Utils {
 
                     // Filetype
                     def filetype_enum = Utils.getEnumFromString(it.filetype, Constants.FileType)
-                    if (!filetype_enum) {
+                    if (! filetype_enum) {
                         def filetype_str = Utils.getEnumNames(Constants.FileType).join('\n  - ')
                         log.error "received invalid file type: '${it.filetype}'. Valid options are:\n  - ${filetype_str}"
                         Nextflow.exit(1)
@@ -70,7 +70,7 @@ class Utils {
                                 def (k, v) = e.tokenize(':')
                                 def info_field_enum = Utils.getEnumFromString(k, Constants.InfoField)
 
-                                if (!info_field_enum) {
+                                if (! info_field_enum) {
                                     def info_field_str = Utils.getEnumNames(Constants.InfoField).join('\n  - ')
                                     log.error "received invalid info field: '${k}'. Valid options are:\n  - ${info_field_str}"
                                     Nextflow.exit(1)
@@ -81,7 +81,7 @@ class Utils {
                                     Nextflow.exit(1)
                                 }
 
-                                if (!v && info_field_enum !== Constants.InfoField.LONGITUDINAL_SAMPLE && info_field_enum != Constants.InfoField.GENERATE_REDUX_TSVS_ONLY) {
+                                if (! v && info_field_enum != Constants.InfoField.LONGITUDINAL_SAMPLE && info_field_enum != Constants.InfoField.GENERATE_REDUX_TSVS_ONLY) {
                                     log.error "got empty value for ${group_id} ${sample_type_enum}/${sequence_type_enum} ${info_field_enum}"
                                     Nextflow.exit(1)
                                 }
@@ -127,14 +127,14 @@ class Utils {
                     }
 
                     // Handle inputs appropriately
-                    if (filetype_enum === Constants.FileType.FASTQ) {
+                    if (filetype_enum == Constants.FileType.FASTQ) {
 
-                        if (!info_data.containsKey(Constants.InfoField.LIBRARY_ID)) {
+                        if (! info_data.containsKey(Constants.InfoField.LIBRARY_ID)) {
                             log.error "missing 'library_id' info field for ${group_id} ${sample_type_enum}/${sequence_type_enum}"
                             Nextflow.exit(1)
                         }
 
-                        if (!info_data.containsKey(Constants.InfoField.LANE)) {
+                        if (! info_data.containsKey(Constants.InfoField.LANE)) {
                             log.error "missing 'lane' info field for ${group_id} ${sample_type_enum}/${sequence_type_enum}"
                             Nextflow.exit(1)
                         }
@@ -150,7 +150,7 @@ class Utils {
                         def (fwd, rev) = fastq_entries
                         def fastq_key = [info_data[Constants.InfoField.LIBRARY_ID], info_data[Constants.InfoField.LANE]]
 
-                        if (!meta_sample.containsKey(filetype_enum)) {
+                        if (! meta_sample.containsKey(filetype_enum)) {
                             meta_sample[filetype_enum] = [:]
                         }
 
@@ -206,7 +206,7 @@ class Utils {
                 sample_keys.each { sample_key ->
 
                     def meta_sample = meta[sample_key]
-                    def is_primary = !meta_sample.containsKey('longitudinal_sample_id')
+                    def is_primary = ! meta_sample.containsKey('longitudinal_sample_id')
                     def sample_id = is_primary ? meta_sample.sample_id : meta_sample.longitudinal_sample_id
 
                     if (stub_run) {
@@ -225,7 +225,7 @@ class Utils {
 
                         redux_input = redux_aln = meta_sample[Constants.FileType.ALN_REDUX]
                         redux_dir = redux_aln.parent
-                        if (!redux_input.isFile()) {
+                        if (! redux_input.isFile()) {
                             log.error "didn't receive file as REDUX alignment for ${meta.group_id} ${sample_id}: ${redux_input}"
                             Nextflow.exit(1)
                         }
@@ -234,7 +234,7 @@ class Utils {
 
                         redux_input = redux_dir = meta_sample[Constants.FileType.REDUX_DIR]
                         redux_aln = getReduxDirAlignment(sample_id, redux_dir)[0]
-                        if (!redux_input.isDirectory()) {
+                        if (! redux_input.isDirectory()) {
                             log.error "didn't receive directory as REDUX directory for ${meta.group_id} ${sample_id}: ${redux_input}"
                             Nextflow.exit(1)
                         }
@@ -259,28 +259,28 @@ class Utils {
 
                     def generate_tsvs_only = meta_sample.getOrDefault(Constants.InfoField.GENERATE_REDUX_TSVS_ONLY, false)
 
-                    if (!has_redux_tsvs && !generate_tsvs_only) {
+                    if (! has_redux_tsvs && ! generate_tsvs_only) {
 
                         log.error "no REDUX TSVs for provided or found for ${meta.group_id} ${sample_id}: ${redux_input}"
                         Nextflow.exit(1)
 
                     }
 
-                    if (!has_single_sample) {
+                    if (! has_single_sample) {
 
                         if (meta_sample.containsKey(Constants.FileType.REDUX_DIR)) {
                             log.error "found unexpected files in REDUX directory for ${meta.group_id} ${sample_id}: ${redux_input}"
                             Nextflow.exit(1)
                         }
 
-                        if (meta_sample.containsKey(Constants.FileType.ALN_REDUX) && !generate_tsvs_only) {
+                        if (meta_sample.containsKey(Constants.FileType.ALN_REDUX) && ! generate_tsvs_only) {
                             log.error "found multiple samples in same directory (requires generate_redux_tsvs_only to proceed): ${meta.group_id} ${sample_id}: ${redux_input}"
                             Nextflow.exit(1)
                         }
 
                     }
 
-                    if (!has_colocated_index) {
+                    if (! has_colocated_index) {
 
                         if (meta_sample.containsKey(Constants.FileType.REDUX_DIR)) {
                             log.error "required index not located in REDUX directory: ${meta.group_id} ${sample_id}: ${redux_input}"
@@ -289,12 +289,12 @@ class Utils {
 
                     }
 
-                    if (has_single_sample && has_colocated_index && !meta_sample.containsKey(Constants.FileType.REDUX_DIR)) {
+                    if (has_single_sample && has_colocated_index && ! meta_sample.containsKey(Constants.FileType.REDUX_DIR)) {
                         meta_sample.remove(Constants.FileType.ALN_REDUX)
                         meta_sample[Constants.FileType.REDUX_DIR] = redux_dir
                     }
 
-                    if (!has_redux_tsvs && generate_tsvs_only) {
+                    if (! has_redux_tsvs && generate_tsvs_only) {
                         meta_sample.remove(Constants.FileType.REDUX_DIR)
                         meta_sample[Constants.FileType.ALN_REDUX] = redux_aln
                     }
@@ -305,7 +305,7 @@ class Utils {
                         Nextflow.exit(1)
                     }
 
-                    if (meta_sample.containsKey(Constants.FileType.ALN_REDUX) && meta_sample.containsKey(Constants.FileType.IDX) && !generate_tsvs_only) {
+                    if (meta_sample.containsKey(Constants.FileType.ALN_REDUX) && meta_sample.containsKey(Constants.FileType.IDX) && ! generate_tsvs_only) {
                         log.error "REDUX alignments without colocated TSVs requires GENERATE_REDUX_TSVS_ONLY to be set in the samplesheet: ${meta.group_id} ${sample_id}: ${redux_input}"
                         Nextflow.exit(1)
                     }
@@ -318,7 +318,7 @@ class Utils {
                     meta[sample_key]*.key.each { key ->
 
                         def meta_sample = meta[sample_key]
-                        def is_primary = !meta_sample.containsKey('longitudinal_sample_id')
+                        def is_primary = ! meta_sample.containsKey('longitudinal_sample_id')
                         def sample_id = is_primary ? meta_sample.sample_id : meta_sample.longitudinal_sample_id
 
                         def aln
@@ -347,7 +347,7 @@ class Utils {
                         def fp = aln.toUriString()
                         def index_fp = nextflow.Nextflow.file("${fp}.${index_ext}")
 
-                        if (!index_fp.exists() && !stub_run) {
+                        if (! index_fp.exists() && ! stub_run) {
                             def (sample_type, sequence_type) = sample_key
                             log.error "no index provided or found for ${meta.group_id} ${sample_type}/${sequence_type}: ${key}: ${fp}"
                             Nextflow.exit(1)
@@ -365,7 +365,7 @@ class Utils {
                 def has_amber_dir = meta_tumor_dna.containsKey(Constants.FileType.AMBER_DIR)
                 def has_normal_dna_bam = Utils.hasNormalDnaBam(meta) || Utils.hasNormalDnaReduxInput(meta)
 
-                if (longitudinal && has_amber_dir && !has_normal_dna_bam) {
+                if (longitudinal && has_amber_dir && ! has_normal_dna_bam) {
                     log.error "AMBER input was provided without the required primary normal DNA BAM for ${meta.group_id}"
                     Nextflow.exit(1)
                 }
@@ -394,7 +394,7 @@ class Utils {
                 fps << "${params.ref_data_hmf_data_path.replaceAll('/$', '')}/${v}"
             }
 
-        if (params.panel !== null) {
+        if (params.panel != null) {
             params.panel_data_paths[params.panel][params.genome_version.toString()]
                 .each { k, v ->
                     fps << "${params.ref_data_panel_data_path.replaceAll('/$', '')}/${v}"
@@ -402,13 +402,13 @@ class Utils {
         }
 
         fps.each { fp_str ->
-            if (fp_str === null) {
+            if (fp_str == null) {
                 return
             }
 
             def fp = Utils.getFileObject(fp_str)
 
-            if (!fp_str || fp.exists()) {
+            if (! fp_str || fp.exists()) {
                 return
             }
 
@@ -436,17 +436,17 @@ class Utils {
             // NOTE(SW): repeating key pairs above to avoid having to duplicate error messages
             sample_keys.each { key ->
 
-                if (!meta.containsKey(key)) {
+                if (! meta.containsKey(key)) {
                     return
                 }
 
                 def (sample_type, sequence_type) = key
 
                 if (
-                    !meta[key].containsKey(Constants.FileType.ALN) &&
-                    !meta[key].containsKey(Constants.FileType.ALN_REDUX) &&
-                    !meta[key].containsKey(Constants.FileType.REDUX_DIR) &&
-                    !meta[key].containsKey(Constants.FileType.FASTQ)
+                    ! meta[key].containsKey(Constants.FileType.FASTQ) &&
+                    ! meta[key].containsKey(Constants.FileType.ALN) &&
+                    ! meta[key].containsKey(Constants.FileType.ALN_REDUX) &&
+                    ! meta[key].containsKey(Constants.FileType.REDUX_DIR)
                 ) {
                     log.error "no alignments (or REDUX alignments / directory) nor FASTQ files provided for ${meta.group_id} ${sample_type}/${sequence_type}\n\n" +
                         "NB: At least one of these files is required as they are the basis to determine input sample type."
@@ -456,14 +456,14 @@ class Utils {
             }
 
             // Do not allow donor sample without normal sample
-            if (Utils.hasDonorDna(meta) && !Utils.hasNormalDna(meta)) {
+            if (Utils.hasDonorDna(meta) && ! Utils.hasNormalDna(meta)) {
                 log.error "a donor sample but not normal sample was found for ${meta.group_id}\n\n" +
                     "Analysis with a donor sample requires a normal sample."
                 Nextflow.exit(1)
             }
 
             // Apply some required restrictions to targeted mode
-            if (run_config.mode === Constants.RunMode.TARGETED) {
+            if (run_config.mode == Constants.RunMode.TARGETED) {
 
                 // Do not allow donor DNA
                 if (Utils.hasDonorDna(meta)) {
@@ -473,7 +473,7 @@ class Utils {
                 }
 
                 // Do not allow only tumor RNA
-                if (Utils.hasTumorRna(meta) && !Utils.hasTumorDna(meta)) {
+                if (Utils.hasTumorRna(meta) && ! Utils.hasTumorDna(meta)) {
                     log.error "targeted mode is not compatible with only tumor RNA provided for ${meta.group_id}\n\n" +
                         "The targeted workflow requires tumor DNA and can optionally take tumor RNA, depending on " +
                         "the configured panel."
@@ -483,7 +483,7 @@ class Utils {
             }
 
             // Do not allow normal DNA only
-            if (Utils.hasNormalDna(meta) && !Utils.hasTumorDna(meta)) {
+            if (Utils.hasNormalDna(meta) && ! Utils.hasTumorDna(meta)) {
                 log.error "found only normal DNA input for ${meta.group_id} but germline only analysis is not supported"
                 Nextflow.exit(1)
             }
@@ -497,7 +497,7 @@ class Utils {
             // Enforce unique samples names within groups
             def sample_ids_duplicated = sample_keys
                 .groupBy { meta.getOrDefault(it, [:]).getOrDefault('sample_id', null) }
-                .findResults { k, v -> k !== null & v.size() > 1 ? [k, v] : null }
+                .findResults { k, v -> k != null & v.size() > 1 ? [k, v] : null }
 
             if (sample_ids_duplicated) {
                 def duplicate_message_strs = sample_ids_duplicated.collect { sample_id, keys ->
@@ -519,9 +519,9 @@ class Utils {
         // Ensure that custom genomes with ALT contigs that need indexes built have the required .alt file
         def has_bwa_indexes = (params.ref_data_genome_bwamem2_index && params.ref_data_genome_gridss_index)
         def has_alt_file = params.containsKey('ref_data_genome_alt') && params.ref_data_genome_alt
-        def run_bwa_or_gridss_index = run_config.stages.alignment && run_config.has_dna_fastq && !has_bwa_indexes
+        def run_bwa_or_gridss_index = run_config.stages.alignment && run_config.has_dna_fastq && ! has_bwa_indexes
 
-        if (run_bwa_or_gridss_index && has_alt_contigs && !has_alt_file) {
+        if (run_bwa_or_gridss_index && has_alt_contigs && ! has_alt_file) {
             log.error "\n~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n" +
                 "  The genome .alt file is required when building bwa-mem2 or GRIDSS indexes\n" +
                 "  for reference genomes containing ALT contigs\n" +
@@ -530,7 +530,7 @@ class Utils {
         }
 
         // Refuse to create STAR index for reference genome containing ALTs, refer to Slack channel
-        def run_star_index = run_config.stages.alignment && run_config.has_rna_fastq && !params.ref_data_genome_star_index
+        def run_star_index = run_config.stages.alignment && run_config.has_rna_fastq && ! params.ref_data_genome_star_index
 
         if (run_star_index && has_alt_contigs) {
             log.error "\n~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n" +
@@ -541,7 +541,7 @@ class Utils {
         }
 
         // Require that an input GTF file is provided when creating STAR index
-        if (run_star_index && !params.ref_data_genome_gtf) {
+        if (run_star_index && ! params.ref_data_genome_gtf) {
             log.error "\n~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n" +
                 "  Creating a STAR index requires the appropriate genome transcript annotations\n" +
                 "  as a GTF file. Please contact us on Slack for further information.\n" +
@@ -550,7 +550,7 @@ class Utils {
         }
 
         // Require --isofox_gene_ids argument to be provided in PANEL_RESOURCE_CREATION when RNA inputs are present
-        if (run_config.mode === Constants.RunMode.PANEL_RESOURCE_CREATION && run_config.has_rna && !params.isofox_gene_ids) {
+        if (run_config.mode == Constants.RunMode.PANEL_RESOURCE_CREATION && run_config.has_rna && ! params.isofox_gene_ids) {
             log.error "\n~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n" +
                 "  Running the panel resource creation workflow with RNA requires that the\n" +
                 "  --isofox_gene_ids argument is set with an appropriate input file.\n" +
@@ -587,10 +587,10 @@ class Utils {
         }
     }
 
-    static public getEnumFromString(s, e) {
+    public static getEnumFromString(s, e) {
         try {
             return e.valueOf(s.toUpperCase())
-        } catch(java.lang.IllegalArgumentException err) {
+        } catch (java.lang.IllegalArgumentException err) {
             return null
         }
     }
@@ -603,13 +603,13 @@ class Utils {
     }
 
 
-    static public getFileObject(path) {
+    public static getFileObject(path) {
         return path ? nextflow.Nextflow.file(path) : []
     }
 
-    static public getRunMode(run_mode, log) {
+    public static getRunMode(run_mode, log) {
         def run_mode_enum = Utils.getEnumFromString(run_mode, Constants.RunMode)
-        if (!run_mode_enum) {
+        if (! run_mode_enum) {
             def run_modes_str = Utils.getEnumNames(Constants.RunMode).join('\n  - ')
             log.error "received an invalid run mode: '${run_mode}'. Valid options are:\n  - ${run_modes_str}"
             Nextflow.exit(1)
@@ -619,24 +619,24 @@ class Utils {
 
 
     // Sample records
-    static public getTumorDnaSample(meta) {
+    public static getTumorDnaSample(meta) {
         return meta.getOrDefault([Constants.SampleType.TUMOR, Constants.SequenceType.DNA], [:])
     }
 
-    static public getTumorRnaSample(meta) {
+    public static getTumorRnaSample(meta) {
         return meta.getOrDefault([Constants.SampleType.TUMOR, Constants.SequenceType.RNA], [:])
     }
 
-    static public getNormalDnaSample(meta) {
+    public static getNormalDnaSample(meta) {
         return meta.getOrDefault([Constants.SampleType.NORMAL, Constants.SequenceType.DNA], [:])
     }
 
-    static public getDonorDnaSample(meta) {
+    public static getDonorDnaSample(meta) {
         return meta.getOrDefault([Constants.SampleType.DONOR, Constants.SequenceType.DNA], [:])
     }
 
     // Sample names
-    static public getTumorDnaSampleName(Map named_args, meta) {
+    public static getTumorDnaSampleName(Map named_args, meta) {
         def meta_sample = getTumorDnaSample(meta)
         def sample_id
 
@@ -649,29 +649,29 @@ class Utils {
         return sample_id
     }
 
-    static public getTumorDnaSampleName(meta) {
+    public static getTumorDnaSampleName(meta) {
         getTumorDnaSampleName([:], meta)
     }
 
-    static public getTumorRnaSampleName(meta) {
+    public static getTumorRnaSampleName(meta) {
         return getTumorRnaSample(meta)['sample_id']
     }
 
-    static public getNormalDnaSampleName(meta) {
+    public static getNormalDnaSampleName(meta) {
         return getNormalDnaSample(meta)['sample_id']
     }
 
-    static public getDonorDnaSampleName(meta) {
+    public static getDonorDnaSampleName(meta) {
         return getDonorDnaSample(meta)['sample_id']
     }
 
 
     // Files - Tumor DNA
-    static public getTumorDnaFastq(meta) {
+    public static getTumorDnaFastq(meta) {
         return getTumorDnaSample(meta).getOrDefault(Constants.FileType.FASTQ, null)
     }
 
-    static public getTumorDnaBam(meta) {
+    public static getTumorDnaBam(meta) {
         return getTumorDnaSample(meta).getOrDefault(Constants.FileType.ALN, null)
     }
 
@@ -680,17 +680,17 @@ class Utils {
         return hasReduxData(meta_sample) ?: null
     }
 
-    static public getTumorDnaBai(meta) {
+    public static getTumorDnaBai(meta) {
         return getTumorDnaSample(meta).getOrDefault(Constants.FileType.IDX, null)
     }
 
 
-    static public hasTumorDnaFastq(meta) {
-        return getTumorDnaFastq(meta) !== null
+    public static hasTumorDnaFastq(meta) {
+        return getTumorDnaFastq(meta) != null
     }
 
-    static public hasTumorDnaBam(meta) {
-        return getTumorDnaBam(meta) !== null
+    public static hasTumorDnaBam(meta) {
+        return getTumorDnaBam(meta) != null
     }
 
     public static hasTumorDnaReduxInput(meta) {
@@ -699,11 +699,11 @@ class Utils {
 
 
     // Files - Normal DNA
-    static public getNormalDnaFastq(meta) {
+    public static getNormalDnaFastq(meta) {
         return getNormalDnaSample(meta).getOrDefault(Constants.FileType.FASTQ, null)
     }
 
-    static public getNormalDnaBam(meta) {
+    public static getNormalDnaBam(meta) {
         return getNormalDnaSample(meta).getOrDefault(Constants.FileType.ALN, null)
     }
 
@@ -711,24 +711,25 @@ class Utils {
         def meta_sample = getNormalDnaSample(meta)
         return hasReduxData(meta_sample) ?: null
     }
-    static public getNormalDnaBai(meta) {
+
+    public static getNormalDnaBai(meta) {
         return getNormalDnaSample(meta).getOrDefault(Constants.FileType.IDX, null)
     }
 
 
-    static public hasNormalDnaFastq(meta) {
-        return getNormalDnaFastq(meta) !== null
+    public static hasNormalDnaFastq(meta) {
+        return getNormalDnaFastq(meta) != null
     }
 
-    static public hasNormalDnaBam(meta) {
-        return getNormalDnaBam(meta) !== null
+    public static hasNormalDnaBam(meta) {
+        return getNormalDnaBam(meta) != null
     }
 
     public static hasNormalDnaReduxInput(meta) {
         return getNormalDnaReduxInput(meta) != null
     }
 
-    static public hasDnaFastq(meta) {
+    public static hasDnaFastq(meta) {
         return hasNormalDnaFastq(meta) || hasTumorDnaFastq(meta)
     }
 
@@ -738,11 +739,11 @@ class Utils {
 
 
     // Files - Donor DNA
-    static public getDonorDnaFastq(meta) {
+    public static getDonorDnaFastq(meta) {
         return getDonorDnaSample(meta).getOrDefault(Constants.FileType.FASTQ, null)
     }
 
-    static public getDonorDnaBam(meta) {
+    public static getDonorDnaBam(meta) {
         return getDonorDnaSample(meta).getOrDefault(Constants.FileType.ALN, null)
     }
 
@@ -751,17 +752,17 @@ class Utils {
         return hasReduxData(meta_sample) ?: null
     }
 
-    static public getDonorDnaBai(meta) {
+    public static getDonorDnaBai(meta) {
         return getDonorDnaSample(meta).getOrDefault(Constants.FileType.IDX, null)
     }
 
 
-    static public hasDonorDnaFastq(meta) {
-        return getDonorDnaFastq(meta) !== null
+    public static hasDonorDnaFastq(meta) {
+        return getDonorDnaFastq(meta) != null
     }
 
-    static public hasDonorDnaBam(meta) {
-        return getDonorDnaBam(meta) !== null
+    public static hasDonorDnaBam(meta) {
+        return getDonorDnaBam(meta) != null
     }
 
     public static hasDonorDnaReduxInput(meta) {
@@ -770,42 +771,42 @@ class Utils {
 
 
     // Files - Tumor RNA
-    static public getTumorRnaFastq(meta) {
+    public static getTumorRnaFastq(meta) {
         return getTumorRnaSample(meta).getOrDefault(Constants.FileType.FASTQ, null)
     }
 
-    static public getTumorRnaBam(meta) {
+    public static getTumorRnaBam(meta) {
         return getTumorRnaSample(meta).getOrDefault(Constants.FileType.ALN, null)
     }
 
-    static public getTumorRnaBai(meta) {
+    public static getTumorRnaBai(meta) {
         return getTumorRnaSample(meta).getOrDefault(Constants.FileType.IDX, null)
     }
 
 
-    static public hasTumorRnaFastq(meta) {
-        return getTumorRnaFastq(meta) !== null
+    public static hasTumorRnaFastq(meta) {
+        return getTumorRnaFastq(meta) != null
     }
 
-    static public hasTumorRnaBam(meta) {
-        return getTumorRnaBam(meta) !== null
+    public static hasTumorRnaBam(meta) {
+        return getTumorRnaBam(meta) != null
     }
 
 
     // Status
-    static public hasTumorDna(meta) {
+    public static hasTumorDna(meta) {
         return hasTumorDnaBam(meta) || hasTumorDnaReduxInput(meta) || hasTumorDnaFastq(meta)
     }
 
-    static public hasNormalDna(meta) {
+    public static hasNormalDna(meta) {
         return hasNormalDnaBam(meta) || hasNormalDnaReduxInput(meta) || hasNormalDnaFastq(meta)
     }
 
-    static public hasDonorDna(meta) {
+    public static hasDonorDna(meta) {
         return hasDonorDnaBam(meta) || hasDonorDnaReduxInput(meta) || hasDonorDnaFastq(meta)
     }
 
-    static public hasTumorRna(meta) {
+    public static hasTumorRna(meta) {
         return hasTumorRnaBam(meta) || hasTumorRnaFastq(meta)
     }
 
@@ -828,7 +829,7 @@ class Utils {
     }
 
     public static getReduxDirAlignment(sample_name, redux_dir) {
-        if (!redux_dir) {
+        if (! redux_dir) {
             return [[], []]
         }
 
@@ -857,7 +858,7 @@ class Utils {
 
     public static getReduxTsvs(sample_name, redux_dir) {
 
-        if (!redux_dir) {
+        if (! redux_dir) {
             return []
         }
 

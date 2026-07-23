@@ -2,9 +2,6 @@
 // LINX annotates and interprets structural variants
 //
 
-import Constants
-import Utils
-
 include { LINX_GERMLINE } from '../../../modules/local/linx/germline/main'
 include { LINX_SOMATIC  } from '../../../modules/local/linx/somatic/main'
 
@@ -21,10 +18,6 @@ workflow LINX_ANNOTATION {
     driver_gene_panel      // channel: [mandatory] /path/to/driver_gene_panel
 
     main:
-    // Channel for versions.yml files
-    // channel: [ versions.yml ]
-    ch_versions = Channel.empty()
-
     //
     // STEP: Handle inputs
     //
@@ -90,8 +83,6 @@ workflow LINX_ANNOTATION {
         driver_gene_panel,
     )
 
-    ch_versions = ch_versions.mix(LINX_GERMLINE.out.versions)
-
     //
     // MODULE: LINX somatic annotation
     //
@@ -132,23 +123,21 @@ workflow LINX_ANNOTATION {
         driver_gene_panel,
     )
 
-    ch_versions = ch_versions.mix(LINX_SOMATIC.out.versions)
-
     //
     // STEP: Handle outputs
     //
     // Set outputs, restoring original meta
     // channel: [ meta, linx_annotation_dir ]
-    ch_outputs_somatic = Channel.empty()
+    ch_outputs_somatic = channel.empty()
         .mix(
-            WorkflowOncoanalyser.restoreMeta(LINX_SOMATIC.out.annotation_dir, ch_inputs),
+            WorkflowOncoanalyser.restoreMeta(channel.topic('linx_somatic_annotation_dir'), ch_inputs),
             ch_inputs_somatic_sorted.skip.map { meta -> [meta, []] },
             ch_inputs_sorted.skip.map { meta -> [meta, []] },
         )
 
-    ch_outputs_germline = Channel.empty()
+    ch_outputs_germline = channel.empty()
         .mix(
-            WorkflowOncoanalyser.restoreMeta(LINX_GERMLINE.out.annotation_dir, ch_inputs),
+            WorkflowOncoanalyser.restoreMeta(channel.topic('linx_germline_annotation_dir'), ch_inputs),
             ch_inputs_germline_sorted.skip.map { meta -> [meta, []] },
             ch_inputs_sorted.skip.map { meta -> [meta, []] },
         )
@@ -156,6 +145,4 @@ workflow LINX_ANNOTATION {
     emit:
     somatic_dir  = ch_outputs_somatic  // channel: [ meta, linx_annotation_dir ]
     germline_dir = ch_outputs_germline // channel: [ meta, linx_annotation_dir ]
-
-    versions     = ch_versions         // channel: [ versions.yml ]
 }

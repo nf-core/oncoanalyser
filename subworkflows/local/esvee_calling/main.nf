@@ -2,9 +2,6 @@
 // ESVEE detects structural variants, and reports breakends and breakpoints.
 //
 
-import Constants
-import Utils
-
 include { ESVEE } from '../../../modules/local/esvee/main'
 
 workflow ESVEE_CALLING {
@@ -33,9 +30,6 @@ workflow ESVEE_CALLING {
     sequencing_platform      // string:  [mandatory] sequencing platform
 
     main:
-    // Channel for version.yml files
-    ch_versions = Channel.empty()
-
     // Select input sources then sort
     // channel: runnable: [ meta, tumor_aln, tumor_idx, normal_aln, normal_idx ]
     // channel: skip: [ meta ]
@@ -65,10 +59,10 @@ workflow ESVEE_CALLING {
 
     // Create process input channel
     // channel: [ meta_esvee, tumor_aln, tumor_idx, normal_aln, normal_idx ]
-    ch_esvee_inputs = Channel.empty()
+    ch_esvee_inputs = channel.empty()
         .mix(
             ch_inputs_sorted.runnable_tn,
-            ch_inputs_sorted.runnable_to.map { [*it, [], []] },
+            ch_inputs_sorted.runnable_to.map { d -> d + [[], []] },
         )
         .map { meta, tumor_aln, tumor_idx, normal_aln, normal_idx ->
 
@@ -103,18 +97,14 @@ workflow ESVEE_CALLING {
         sequencing_platform,
     )
 
-    ch_versions = ch_versions.mix(ESVEE.out.versions)
-
     // Set outputs, restoring original meta
     // channel: [ meta, esvee_dir ]
-    ch_outputs = Channel.empty()
+    ch_outputs = channel.empty()
         .mix(
-            WorkflowOncoanalyser.restoreMeta(ESVEE.out.esvee_dir, ch_inputs),
+            WorkflowOncoanalyser.restoreMeta(channel.topic('esvee_dir'), ch_inputs),
             ch_inputs_sorted.skip.map { meta -> [meta, []] },
         )
 
     emit:
-    esvee_dir = ch_outputs  // channel: [ meta, esvee_dir ]
-
-    versions  = ch_versions // channel: [ versions.yml ]
+    esvee_dir = ch_outputs // channel: [ meta, esvee_dir ]
 }

@@ -1,25 +1,22 @@
-import Constants
-import Processes
-import Utils
-
 /*
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     IMPORT MODULES / SUBWORKFLOWS / FUNCTIONS
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 */
 
-include { AMBER_PROFILING       } from '../subworkflows/local/amber_profiling'
-include { COBALT_NORMALISATION  } from '../subworkflows/local/cobalt_normalisation'
-include { COBALT_PROFILING      } from '../subworkflows/local/cobalt_profiling'
-include { ISOFOX_NORMALISATION  } from '../subworkflows/local/isofox_normalisation'
-include { ISOFOX_QUANTIFICATION } from '../subworkflows/local/isofox_quantification'
-include { PAVE_PON_CREATION     } from '../subworkflows/local/pave_pon_creation'
-include { PREPARE_REFERENCE     } from '../subworkflows/local/prepare_reference'
-include { READ_ALIGNMENT_DNA    } from '../subworkflows/local/read_alignment_dna'
-include { READ_ALIGNMENT_RNA    } from '../subworkflows/local/read_alignment_rna'
-include { READ_UMI_PROCESSING   } from '../subworkflows/local/read_umi_processing'
-include { REDUX_PROCESSING      } from '../subworkflows/local/redux_processing'
-include { SAGE_CALLING          } from '../subworkflows/local/sage_calling'
+include { AMBER_PROFILING                         } from '../subworkflows/local/amber_profiling'
+include { COBALT_NORMALISATION                    } from '../subworkflows/local/cobalt_normalisation'
+include { COBALT_PROFILING                        } from '../subworkflows/local/cobalt_profiling'
+include { ISOFOX_NORMALISATION                    } from '../subworkflows/local/isofox_normalisation'
+include { ISOFOX_QUANTIFICATION                   } from '../subworkflows/local/isofox_quantification'
+include { PAVE_PON_CREATION                       } from '../subworkflows/local/pave_pon_creation'
+include { PREPARE_OUTPUTS_PANEL_RESOURCE_CREATION } from '../subworkflows/local/prepare_outputs'
+include { PREPARE_REFERENCE                       } from '../subworkflows/local/prepare_reference'
+include { READ_ALIGNMENT_DNA                      } from '../subworkflows/local/read_alignment_dna'
+include { READ_ALIGNMENT_RNA                      } from '../subworkflows/local/read_alignment_rna'
+include { READ_UMI_PROCESSING                     } from '../subworkflows/local/read_umi_processing'
+include { REDUX_PROCESSING                        } from '../subworkflows/local/redux_processing'
+include { SAGE_CALLING                            } from '../subworkflows/local/sage_calling'
 
 include { softwareVersionsToYAML } from '../subworkflows/nf-core/utils_nfcore_pipeline'
 
@@ -36,51 +33,47 @@ workflow PANEL_RESOURCE_CREATION {
     take:
     inputs
     run_config
+    params
 
     main:
     // Check input path parameters to see if they exist
     def checkPathParamList = [
+        params.driver_gene_panel,
         params.isofox_counts,
         params.isofox_gc_ratios,
         params.isofox_gene_ids,
-        params.isofox_tpm_norm,
-        params.driver_gene_panel,
         params.target_regions_bed,
     ]
 
-    for (param in checkPathParamList) { if (param) { file(param, checkIfExists: true) } }
-
-    // Create channel for versions
-    // channel: [ versions.yml ]
-    ch_versions = Channel.empty()
+    checkPathParamList.each { param -> if (param) { file(param, checkIfExists: true) } }
 
     // Create input channel from parsed CSV
     // channel: [ meta ]
-    ch_inputs = Channel.fromList(inputs)
+    ch_inputs = channel.fromList(inputs)
 
     // Set up reference data, assign more human readable variables
     def prep_config = WorkflowMain.getPrepConfigFromSamplesheet(run_config)
     PREPARE_REFERENCE(
         prep_config,
         run_config,
+        params,
     )
-
-    ch_versions = ch_versions.mix(PREPARE_REFERENCE.out.versions)
 
     def ref_data = PREPARE_REFERENCE.out
     def hmf_data = PREPARE_REFERENCE.out.hmf_data
+    def panel_data = PREPARE_REFERENCE.out.panel_data
 
     // Configure selectable reference data and inputs
     def hmf_data_pons = Utils.getSequencingPlatformPons(hmf_data, params.sequencing_platform)
-    def target_regions_bed = params.target_regions_bed ? file(params.target_regions_bed) : file(panel_data.target_regions_bed)
-    def driver_gene_panel = params.driver_gene_panel ? file(params.driver_gene_panel) : file(hmf_data.driver_gene_panel)
+    def target_regions_bed = params.target_regions_bed != null ? file(params.target_regions_bed) : file(panel_data.target_regions_bed)
+    def driver_gene_panel = params.driver_gene_panel != null ? file(params.driver_gene_panel) : file(hmf_data.driver_gene_panel)
 
     def copy_number_percentiles = params.enable_cn_norm_with_wgs_pct ? hmf_data.copy_number_percentiles : []
 
-    def isofox_counts = params.isofox_counts ? file(params.isofox_counts) : hmf_data.isofox_counts
-    def isofox_gene_ids = params.isofox_gene_ids ? file(params.isofox_gene_ids) : []
-    def isofox_gc_ratios = params.isofox_gc_ratios ? file(params.isofox_gc_ratios) : hmf_data.isofox_gc_ratios
-    def isofox_read_length = params.isofox_read_length !== null ? params.isofox_read_length : Constants.DEFAULT_ISOFOX_READ_LENGTH_TARGETED
+    def isofox_counts = params.isofox_counts != null ? file(params.isofox_counts) : hmf_data.isofox_counts
+    def isofox_gene_ids = params.isofox_gene_ids != null ? file(params.isofox_gene_ids) : []
+    def isofox_gc_ratios = params.isofox_gc_ratios != null ? file(params.isofox_gc_ratios) : hmf_data.isofox_gc_ratios
+    def isofox_read_length = params.isofox_read_length != null ? params.isofox_read_length : Constants.DEFAULT_ISOFOX_READ_LENGTH_TARGETED
 
     //
     // SUBWORKFLOW: Run read alignment to generate BAMs
@@ -94,8 +87,8 @@ workflow PANEL_RESOURCE_CREATION {
     ch_fastq_rna = getRnaFastqChannel(ch_inputs)
 
     // channel: [ meta, fastq_info, fastq_fwd, fastq_rev ]
-    ch_align_dna_input = Channel.empty()
-    ch_align_rna_input = Channel.empty()
+    ch_align_dna_input = channel.empty()
+    ch_align_rna_input = channel.empty()
     if (params.fastp_umi_enabled || params.fastq_tools_umi_enabled) {
 
         READ_UMI_PROCESSING(
@@ -110,8 +103,6 @@ workflow PANEL_RESOURCE_CREATION {
             params.fastq_tools_umi_enabled,
             params.fastq_tools_umi_delim,
         )
-
-        ch_versions = ch_versions.mix(READ_UMI_PROCESSING.out.versions)
 
         ch_align_dna_input = ch_align_dna_input.mix(READ_UMI_PROCESSING.out.fastq_dna)
         ch_align_rna_input = ch_align_rna_input.mix(READ_UMI_PROCESSING.out.fastq_rna)
@@ -135,11 +126,6 @@ workflow PANEL_RESOURCE_CREATION {
         ch_inputs,
         ch_align_rna_input,
         ref_data.genome_star_index,
-    )
-
-    ch_versions = ch_versions.mix(
-        READ_ALIGNMENT_DNA.out.versions,
-        READ_ALIGNMENT_RNA.out.versions,
     )
 
     // channel: [ meta, [aln, ...], [idx, ...] ]
@@ -167,15 +153,11 @@ workflow PANEL_RESOURCE_CREATION {
         true,  // targeted_mode
         params.redux_umi_enabled,
         params.redux_umi_duplex_delim,
-        params.redux_generate_tsvs_only,
     )
-
-    ch_versions = ch_versions.mix(REDUX_PROCESSING.out.versions)
 
     // channel: [ meta, redux_dir ]
     ch_redux_tumor_out = REDUX_PROCESSING.out.tumor_dir
     ch_redux_normal_out = REDUX_PROCESSING.out.normal_dir
-    ch_redux_donor_out = REDUX_PROCESSING.out.donor_dir
 
     //
     // MODULE: Run Isofox to analyse RNA data
@@ -199,8 +181,6 @@ workflow PANEL_RESOURCE_CREATION {
         isofox_read_length,
     )
 
-    ch_versions = ch_versions.mix(ISOFOX_QUANTIFICATION.out.versions)
-
     // channel: [ meta, isofox_dir ]
     ch_isofox_out = ISOFOX_QUANTIFICATION.out.isofox_dir
 
@@ -220,8 +200,6 @@ workflow PANEL_RESOURCE_CREATION {
         false,  // purity_estimate_mode
     )
 
-    ch_versions = ch_versions.mix(AMBER_PROFILING.out.versions)
-
     // channel: [ meta, amber_dir ]
     ch_amber_out = AMBER_PROFILING.out.amber_dir
 
@@ -239,8 +217,6 @@ workflow PANEL_RESOURCE_CREATION {
         true,  // targeted_mode
         false,  // purity_estimate_mode
     )
-
-    ch_versions = ch_versions.mix(COBALT_PROFILING.out.versions)
 
     // channel: [ meta, cobalt_dir ]
     ch_cobalt_out = COBALT_PROFILING.out.cobalt_dir
@@ -270,8 +246,6 @@ workflow PANEL_RESOURCE_CREATION {
         true,  // enable_germline
     )
 
-    ch_versions = ch_versions.mix(SAGE_CALLING.out.versions)
-
     // channel: [ meta, sage_dir ]
     ch_sage_somatic_dir_out = SAGE_CALLING.out.somatic_dir
 
@@ -287,8 +261,6 @@ workflow PANEL_RESOURCE_CREATION {
         target_regions_bed,
     )
 
-    ch_versions = ch_versions.mix(COBALT_NORMALISATION.out.versions)
-
     //
     // SUBWORKFLOW: Run PAVE panel of normals creation
     //
@@ -296,8 +268,6 @@ workflow PANEL_RESOURCE_CREATION {
         ch_sage_somatic_dir_out,
         ref_data.genome_version,
     )
-
-    ch_versions = ch_versions.mix(PAVE_PON_CREATION.out.versions)
 
     //
     // SUBWORKFLOW: Run Isofox TPM normalisation
@@ -309,12 +279,10 @@ workflow PANEL_RESOURCE_CREATION {
         hmf_data.isofox_gene_distribution,
     )
 
-    ch_versions = ch_versions.mix(ISOFOX_NORMALISATION.out.versions)
-
     //
     // TASK: Aggregate software versions
     //
-    def topic_versions = Channel.topic("versions")
+    def topic_versions = channel.topic("versions")
         .distinct()
         .branch { entry ->
             versions_file: entry instanceof Path
@@ -331,14 +299,22 @@ workflow PANEL_RESOURCE_CREATION {
             "${process}:\n${tool_versions.join('\n')}"
         }
 
-    softwareVersionsToYAML(ch_versions.mix(topic_versions.versions_file))
+    softwareVersionsToYAML(topic_versions.versions_file)
         .mix(topic_versions_string)
         .collectFile(
             storeDir: "${params.outdir}/pipeline_info",
-            name: 'software_versions.yml',
+            name: 'nf_core_'  +  'oncoanalyser_software_'  + 'mqc_'  + 'versions.yml',
             sort: true,
             newLine: true,
         )
+
+    //
+    // SUBWORKFLOW: Prepare outputs for publishing
+    //
+    PREPARE_OUTPUTS_PANEL_RESOURCE_CREATION()
+
+    emit:
+    results = PREPARE_OUTPUTS_PANEL_RESOURCE_CREATION.out.results
 }
 
 /*

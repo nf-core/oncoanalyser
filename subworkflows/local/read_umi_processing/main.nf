@@ -2,9 +2,6 @@
 // Process read UMIs
 //
 
-import Constants
-import Utils
-
 include { FASTP_UMI   } from '../../../modules/local/fastp/umi/main'
 include { FASTQ_TOOLS } from '../../../modules/local/fastqtools/main'
 
@@ -27,10 +24,6 @@ workflow READ_UMI_PROCESSING {
     fastq_tools_umi_delim   // boolean: [optional]  fastq-tools -umi_delim argument
 
     main:
-    // Channel for version.yml files
-    // channel: [ versions.yml ]
-    ch_versions = Channel.empty()
-
     //
     // STEP: Handle inputs
     //
@@ -59,7 +52,7 @@ workflow READ_UMI_PROCESSING {
 
     // Create base FASTQ input channel
     // channel: [ meta, sequence_type, fastq_info, fastq_fwd, fastq_rev ]
-    ch_inputs_runnable = Channel.empty()
+    ch_inputs_runnable = channel.empty()
         .mix(
             ch_inputs_dna_sorted.runnable,
             ch_inputs_rna_sorted.runnable,
@@ -97,7 +90,7 @@ workflow READ_UMI_PROCESSING {
     // MODULE: fastp
     //
     // channel: [ meta_fastq, fastq_fwd, fastq_rev ]
-    ch_post_fastp = Channel.empty()
+    ch_post_fastp = channel.empty()
     if (fastp_umi_enabled) {
 
 
@@ -115,15 +108,15 @@ workflow READ_UMI_PROCESSING {
             ch_fastp_inputs_sorted.runnable,
             fastp_umi_location,
             fastp_umi_length,
-            fastp_umi_skip,
+            // NOTE(SW): required for strict syntax without params block declaration
+            fastp_umi_skip.toInteger(),
         )
 
-        ch_versions = ch_versions.mix(FASTP.out.versions)
 
         // Set outputs
-        ch_post_fastp = Channel.empty()
+        ch_post_fastp = channel.empty()
             .mix(
-                FASTP_UMI.out.fastq,
+                channel.topic('fastp_umi_fastq'),
                 ch_fastp_inputs_sorted.skip,
             )
 
@@ -137,7 +130,7 @@ workflow READ_UMI_PROCESSING {
     // MODULE: FASTQTOOLS
     //
     // channel: [ meta_fastq, fastq_fwd, fastq_rev ]
-    ch_post_fastqtools = Channel.empty()
+    ch_post_fastqtools = channel.empty()
     if (fastq_tools_umi_enabled) {
 
         // NOTE(SW): only run DNA FASTQs when fastp hasn't already been run
@@ -157,12 +150,10 @@ workflow READ_UMI_PROCESSING {
             known_umis,
         )
 
-        ch_versions = ch_versions.mix(FASTQ_TOOLS.out.versions)
-
         // Set outputs
-        ch_post_fastqtools = Channel.empty()
+        ch_post_fastqtools = channel.empty()
             .mix(
-                FASTQ_TOOLS.out.fastq,
+                channel.topic('fastqtools_fastq'),
                 ch_fastqtools_inputs_sorted.skip,
             )
 
@@ -200,14 +191,14 @@ workflow READ_UMI_PROCESSING {
     //
     // Set outputs, restoring original meta
     // channel: [ meta, fastq_info, fastq_fwd, fastq_rev ]
-    ch_outputs_dna = Channel.empty()
+    ch_outputs_dna = channel.empty()
         .mix(
             WorkflowOncoanalyser.restoreMeta(ch_fastq_processed_sorted.dna, ch_inputs),
             ch_inputs_dna_sorted.skip.map { meta -> [meta, [:], [], []] },
         )
 
     // channel: [ meta, fastq_info, fastq_fwd, fastq_rev ]
-    ch_outputs_rna = Channel.empty()
+    ch_outputs_rna = channel.empty()
         .mix(
             WorkflowOncoanalyser.restoreMeta(ch_fastq_processed_sorted.rna, ch_inputs),
             ch_inputs_rna_sorted.skip.map { meta -> [meta, [:], [], []] },
@@ -216,6 +207,4 @@ workflow READ_UMI_PROCESSING {
     emit:
     fastq_dna = ch_outputs_dna // channel: [ meta, fastq_info, fastq_fwd, fastq_rev ]
     fastq_rna = ch_outputs_rna // channel: [ meta, fastq_info, fastq_fwd, fastq_rev ]
-
-    versions  = ch_versions    // channel: [ versions.yml ]
 }

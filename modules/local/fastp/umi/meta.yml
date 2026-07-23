@@ -40,7 +40,7 @@ output:
       description: |
         Groovy Map containing sample information
         e.g. [id: 'sample_id']
-  - fastq:
+  - fastp_umi_fastq:
       type: list
       description: Forward and reverse FASTQ files
       pattern: "*.{fastq.gz}"

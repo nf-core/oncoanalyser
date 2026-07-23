@@ -17,9 +17,9 @@ process LILAC {
     val sequencing_platform
 
     output:
-    tuple val(meta), path('lilac/'), emit: lilac_dir
-    path 'versions.yml'            , emit: versions
-    path '.command.*'              , emit: command_files
+    tuple val(meta), path('lilac/')                  , topic: lilac_dir
+    tuple val(meta), val('lilac'), path('.command.*'), topic: command_files
+    path 'versions.yml'                              , topic: versions
 
     when:
     task.ext.when == null || task.ext.when
@@ -84,7 +84,7 @@ process LILAC {
     """
     mkdir -p lilac/
 
-    touch lilac/placeholder
+    touch lilac/.stub
 
     echo -e '${task.process}:\\n  stub: noversions\\n' > versions.yml
     """
@@ -96,6 +96,6 @@ def getSampleName(meta, tumor_aln, normal_aln) {
     } else if (normal_aln) {
         return meta.normal_id
     } else {
-        Sys.exit(1)
+        exit(1)
     }
 }

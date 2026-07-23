@@ -28,9 +28,9 @@ process PURPLE {
     path target_regions_bed
 
     output:
-    tuple val(meta), path('purple/'), emit: purple_dir
-    path 'versions.yml'             , emit: versions
-    path '.command.*'               , emit: command_files
+    tuple val(meta), path('purple/')                  , topic: purple_dir
+    tuple val(meta), val('purple'), path('.command.*'), topic: command_files
+    path 'versions.yml'                               , topic: versions
 
     when:
     task.ext.when == null || task.ext.when
@@ -87,7 +87,7 @@ process PURPLE {
         r: \$(R --version | sed -n '/^R version/ { s/^.*version //; s/ .*//p }')
         r-dplyr: \$(Rscript -e 'packageVersion("dplyr") |> as.character() |> writeLines()')
         r-ggplot2: \$(Rscript -e 'packageVersion("ggplot2") |> as.character() |> writeLines()')
-        circos: \$(circos -version | sed -n '/^circos/ { s/^.* v //; s/ .*$//p }')
+        circos: \$(circos -version | sed -n '/^circos/ { s/^.* v //; s/ .*//p }')
     END_VERSIONS
     """
 

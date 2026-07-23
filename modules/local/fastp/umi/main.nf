@@ -14,9 +14,9 @@ process FASTP_UMI {
     val umi_skip
 
     output:
-    tuple val(meta), path('output/*_R1.fastp_umi.fastq.gz'), path('output/*_R2.fastp_umi.fastq.gz'), emit: fastq
-    tuple val(meta), val('fastp'), path('.command.*')                                              , emit: command_files
-    path 'versions.yml'                                                                            , emit: versions
+    tuple val(meta), path('output/*_R1.fastp_umi.fastq.gz'), path('output/*_R2.fastp_umi.fastq.gz'), topic: fastp_umi_fastq
+    tuple val(meta), val('fastp_umi'), path('.command.*')                                          , topic: command_files
+    path 'versions.yml'                                                                            , topic: versions
 
     when:
     task.ext.when == null || task.ext.when

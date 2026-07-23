@@ -12,9 +12,9 @@ process FASTP_SPLIT {
     val max_fastq_records
 
     output:
-    tuple val(meta), path('output/*_R1.fastp_split.fastq.gz'), path('output/*_R2.fastp_split.fastq.gz'), emit: fastq
-    tuple val(meta), val('fastp'), path('.command.*')                                                  , emit: command_files
-    path 'versions.yml'                                                                                , emit: versions
+    tuple val(meta), path('output/*_R1.fastp_split.fastq.gz'), path('output/*_R2.fastp_split.fastq.gz'), topic: fastp_split_fastq
+    tuple val(meta), val('fastp_split'), path('.command.*')                                            , topic: command_files
+    path 'versions.yml'                                                                                , topic: versions
 
     when:
     task.ext.when == null || task.ext.when
