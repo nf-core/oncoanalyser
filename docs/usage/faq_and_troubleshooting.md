@@ -1,7 +1,5 @@
 # FAQ and troubleshooting
 
-- [I want to store the output BAMs. Why are there only REDUX BAM(s) with additional
-  files?](#i-want-to-store-the-output-bams-why-are-there-only-redux-bams-with-additional-files)
 - [I only want variant calls, where can I find this data?](#i-only-want-variant-calls-where-can-i-find-this-data)
 - [Why does `oncoanalyser` call too many / too few variants than another
   pipeline?](#why-does-oncoanalyser-call-too-many--too-few-variants-than-another-pipeline)
@@ -14,29 +12,6 @@
   file](#placing-oncoanalyser-cli-arguments-into-a-configuration-file)
 - [Errors and navigating the `work/` directory](#errors-and-navigating-the-work-directory)
 - [Resuming runs in Google Batch](#resuming-runs-in-google-batch)
-
-## I want to store the output BAMs. Why does that REDUX BAM come with additional files?
-
-When storing REDUX BAMs, the `*.redux.bqr.tsv`, `*.redux.jitter_params.tsv`, and `*.redux.ms_table.tsv.gz` files
-must also be stored. These files are used downstream by [SAGE](https://github.com/hartwigmedical/hmftools/tree/master/sage#key-concepts-in-sage)
-for error-calibrated small variant calling, and contain:
-
-- The required base quality calibration (BQR) per trinucleotide mutation context
-  (see: [alt-specific BQR](https://github.com/hartwigmedical/hmftools/tree/master/sage#1-alt-specific-base-quality-recalibration))
-- The rate of microsatellite errors
-  (see: [jitter modeling](https://github.com/hartwigmedical/hmftools/tree/master/redux#microsatellite-jitter-modelling))
-
-[REDUX](https://github.com/hartwigmedical/hmftools/tree/master/redux) performs other some important read post-processing
-steps:
-
-- Unmapping of reads in pre-defined problematic regions (extremely high depth, reads often discordant or have long soft
-  clipping). This is done to remove obvious poor alignments from the BAM prior to running downstream tools reads are
-  retained in the BAM
-- [Read deduplication](https://github.com/hartwigmedical/hmftools/tree/master/redux#deduplication) to form a consensus
-  read with consensus sequence / base qualities
-
-It was therefore a choice to provide the user the REDUX BAM (plus TSV files) as output, rather than BAMs from BWA-MEM2
-which have potentially more poor alignments and read duplicates.
 
 ## I only want variant calls, where can I find this data?
 
