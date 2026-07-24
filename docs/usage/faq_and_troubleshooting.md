@@ -6,8 +6,6 @@
 - [My compute environment does not allow Docker](#my-compute-environment-does-not-allow-docker)
 - [Running `oncoanalyser` offline](#running-oncoanalyser-offline)
 - [Network timeout](#network-timeout)
-- [Automatically increasing compute resources after failed
-  runs](#automatically-increasing-compute-resources-after-failed-runs)
 - [Placing `oncoanalyser` CLI arguments into a configuration
   file](#placing-oncoanalyser-cli-arguments-into-a-configuration-file)
 - [Errors and navigating the `work/` directory](#errors-and-navigating-the-work-directory)
