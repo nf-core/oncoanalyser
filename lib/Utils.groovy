@@ -223,7 +223,9 @@ class Utils {
 
                 }
 
-                // Handle REDUX alignments; require TSVs to be present, and promote to directory where the directory contains only given sample
+                // Handle REDUX alignments; require TSVs to be present, and promote to directory when files for this sample are found.
+                // Allow multiple samples to be in the same dir (e.g. both tumor and normal sample).
+                // Existing helpers (getReduxDirAlignment, getReduxTsvs) already resolve files by exact {sample_id}.redux.* filename.
                 sample_keys.each { sample_key ->
 
                     def meta_sample = meta[sample_key]
@@ -266,41 +268,19 @@ class Utils {
 
                     }
 
-                    def redux_dir_files = redux_dir.listFiles()
-
-                    def has_bqr_tsv = redux_dir_files.any { f -> f.name.endsWith('.redux.bqr.tsv') }
-                    def has_jitter_tsv = redux_dir_files.any { f -> f.name.endsWith('.redux.jitter_params.tsv') }
-                    def has_ms_tsv = redux_dir_files.any { f -> f.name.endsWith('.redux.ms_table.tsv.gz') }
+                    def has_bqr_tsv = redux_dir.resolve("${sample_id}.redux.bqr.tsv").exists()
+                    def has_jitter_tsv = redux_dir.resolve("${sample_id}.redux.jitter_params.tsv").exists()
+                    def has_ms_tsv = redux_dir.resolve("${sample_id}.redux.ms_table.tsv.gz").exists()
                     def has_redux_tsvs = has_bqr_tsv && has_jitter_tsv && has_ms_tsv
 
                     def has_colocated_index = nextflow.Nextflow.file("${redux_aln.toUriString()}.bai").exists() || nextflow.Nextflow.file("${redux_aln.toUriString()}.crai").exists()
-
-                    def a = nextflow.Nextflow.file("${redux_aln.toUriString()}.bai")
-                    def b = nextflow.Nextflow.file("${redux_aln.toUriString()}.crai")
-
-                    def has_single_sample = redux_dir_files
-                        .every { f -> f.name.startsWith(sample_id) }
 
                     def generate_tsvs_only = meta_sample.getOrDefault(Constants.InfoField.GENERATE_REDUX_TSVS_ONLY, false)
 
                     if (! has_redux_tsvs && ! generate_tsvs_only) {
 
-                        log.error "no REDUX TSVs for provided or found for ${meta.group_id} ${sample_id}: ${redux_input}"
+                        log.error "no REDUX TSVs provided or found for ${meta.group_id} ${sample_id}: ${redux_input}"
                         Nextflow.exit(1)
-
-                    }
-
-                    if (! has_single_sample) {
-
-                        if (meta_sample.containsKey(Constants.FileType.REDUX_DIR)) {
-                            log.error "found unexpected files in REDUX directory for ${meta.group_id} ${sample_id}: ${redux_input}"
-                            Nextflow.exit(1)
-                        }
-
-                        if (meta_sample.containsKey(Constants.FileType.ALN_REDUX) && ! generate_tsvs_only) {
-                            log.error "found multiple samples in same directory (requires generate_redux_tsvs_only to be set in the samplesheet): ${meta.group_id} ${sample_id}: ${redux_input}"
-                            Nextflow.exit(1)
-                        }
 
                     }
 
@@ -313,7 +293,7 @@ class Utils {
 
                     }
 
-                    if (has_single_sample && has_colocated_index && ! meta_sample.containsKey(Constants.FileType.REDUX_DIR)) {
+                    if (has_colocated_index && ! meta_sample.containsKey(Constants.FileType.REDUX_DIR)) {
                         meta_sample.remove(Constants.FileType.ALN_REDUX)
                         meta_sample[Constants.FileType.REDUX_DIR] = redux_dir
                     }
@@ -321,12 +301,6 @@ class Utils {
                     if (! has_redux_tsvs && generate_tsvs_only) {
                         meta_sample.remove(Constants.FileType.REDUX_DIR)
                         meta_sample[Constants.FileType.ALN_REDUX] = redux_aln
-                    }
-
-
-                    if (meta_sample.containsKey(Constants.FileType.ALN_REDUX) && has_colocated_index && has_redux_tsvs) {
-                        log.error "REDUX BAM/CRAM for ${meta.group_id} ${sample_id} has colocated index and TSVs but is in a multi-sample directory (generate_redux_tsvs_only set): ${redux_input}. Move this sample's REDUX files into their own directory."
-                        Nextflow.exit(1)
                     }
 
                     if (meta_sample.containsKey(Constants.FileType.ALN_REDUX) && meta_sample.containsKey(Constants.FileType.IDX) && ! generate_tsvs_only) {
