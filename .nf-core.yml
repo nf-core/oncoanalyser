@@ -19,10 +19,13 @@ lint:
     - lib/Utils.groovy
     - lib/WorkflowMain.groovy
     - lib/WorkflowOncoanalyser.groovy
+    - .github/workflows/linting_comment.yml
   files_unchanged:
     - assets/nf-core-oncoanalyser_logo_light.png
     - docs/images/nf-core-oncoanalyser_logo_dark.png
     - docs/images/nf-core-oncoanalyser_logo_light.png
+    - .github/workflows/branch.yml
+    - .github/workflows/linting.yml
   multiqc_config: false
   nextflow_config:
     - config_defaults:

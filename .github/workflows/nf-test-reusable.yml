@@ -121,3 +121,19 @@ jobs:
               exit 1
             fi
           fi
+
+      # continue-on-error keeps latest-everything from failing the job, so it never shows up in
+      # `needs.nf-test.result` downstream and CI stays green. Surface it via a PR comment instead;
+      # other NXF_VER failures already fail the job/CI directly, so no comment is needed for those.
+      - name: Prepare PR comment fragment
+        if: ${{ always() && steps.run_nf_test.outcome == 'failure' && matrix.NXF_VER == 'latest-everything' }}
+        run: |
+          mkdir -p pr-comment-fragment
+          echo "* ❌ \`${{ matrix.profile }}\` | \`${{ matrix.NXF_VER }}\` | Shard ${{ matrix.shard }}/${{ env.TOTAL_SHARDS }}" > pr-comment-fragment/fragment.md
+
+      - name: Upload PR comment fragment
+        if: ${{ always() && steps.run_nf_test.outcome == 'failure' && matrix.NXF_VER == 'latest-everything' }}
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7
+        with:
+          name: pr-comment-fragment-${{ strategy.job-index }}
+          path: pr-comment-fragment/
