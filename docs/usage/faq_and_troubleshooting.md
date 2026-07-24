@@ -1,6 +1,5 @@
 # FAQ and troubleshooting
 
-- [Are my BAM files compatible?](#are-my-bam-files-compatible)
 - [I want to store the output BAMs. Why are there only REDUX BAM(s) with additional
   files?](#i-want-to-store-the-output-bams-why-are-there-only-redux-bams-with-additional-files)
 - [I only want variant calls, where can I find this data?](#i-only-want-variant-calls-where-can-i-find-this-data)
@@ -15,17 +14,6 @@
   file](#placing-oncoanalyser-cli-arguments-into-a-configuration-file)
 - [Errors and navigating the `work/` directory](#errors-and-navigating-the-work-directory)
 - [Resuming runs in Google Batch](#resuming-runs-in-google-batch)
-
-## Are my BAM files compatible?
-
-The `oncoanalyser` pipeline has been validated on BAMs aligned with BWA-MEM, BWA-MEM2 and DRAGEN. BAM files from other
-aligners / sources may be incompatible with `oncoanalyser` can cause the pipeline to crash.
-
-One requirement for example that the mate CIGAR attribute must be present for any BAM records with paired reads.
-Non-compatible BAMs may be rectified using tools such as the [Picard
-FixMateInformation](https://gatk.broadinstitute.org/hc/en-us/articles/360036713471-FixMateInformation-Picard) routine.
-
-In other cases, converting from BAM back to FASTQ may be required to run `oncoanalyser`.
 
 ## I want to store the output BAMs. Why does that REDUX BAM come with additional files?
 
