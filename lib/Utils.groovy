@@ -298,7 +298,7 @@ class Utils {
                         }
 
                         if (meta_sample.containsKey(Constants.FileType.ALN_REDUX) && ! generate_tsvs_only) {
-                            log.error "found multiple samples in same directory (requires generate_redux_tsvs_only to proceed): ${meta.group_id} ${sample_id}: ${redux_input}"
+                            log.error "found multiple samples in same directory (requires generate_redux_tsvs_only to be set in the samplesheet): ${meta.group_id} ${sample_id}: ${redux_input}"
                             Nextflow.exit(1)
                         }
 
@@ -325,12 +325,12 @@ class Utils {
 
 
                     if (meta_sample.containsKey(Constants.FileType.ALN_REDUX) && has_colocated_index && has_redux_tsvs) {
-                        log.error "got REDUX alignment but expected REDUX directory given colocation of index and TSVs: ${meta.group_id} ${sample_id}: ${redux_input}"
+                        log.error "REDUX BAM/CRAM for ${meta.group_id} ${sample_id} has colocated index and TSVs but is in a multi-sample directory (generate_redux_tsvs_only set): ${redux_input}. Move this sample's REDUX files into their own directory."
                         Nextflow.exit(1)
                     }
 
                     if (meta_sample.containsKey(Constants.FileType.ALN_REDUX) && meta_sample.containsKey(Constants.FileType.IDX) && ! generate_tsvs_only) {
-                        log.error "REDUX alignments without colocated TSVs requires GENERATE_REDUX_TSVS_ONLY to be set in the samplesheet: ${meta.group_id} ${sample_id}: ${redux_input}"
+                        log.error "REDUX alignments without colocated TSVs requires generate_redux_tsvs_only to be set in the samplesheet: ${meta.group_id} ${sample_id}: ${redux_input}"
                         Nextflow.exit(1)
                     }
 
