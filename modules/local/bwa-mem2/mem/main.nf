@@ -25,8 +25,7 @@ process BWAMEM2_ALIGN {
     def args2 = task.ext.args2 ?: ''
     def args3 = task.ext.args3 ?: ''
 
-    def read_group_tag = "@RG\\tID:${meta.read_group}\\tSM:${meta.sample_id}"
-    def output_fn = meta.split ? "${meta.split}.${meta.sample_id}.${meta.read_group}.bam" : "${meta.sample_id}.${meta.read_group}.bam"
+    def output_fn = meta.split ? "${meta.split}.${meta.output_file_id}.bam" : "${meta.output_file_id}.bam"
 
     """
     ln -fs \$(find -L ${genome_bwamem2_index} -type f) ./
@@ -35,7 +34,7 @@ process BWAMEM2_ALIGN {
         ${args} \\
         -Y \\
         -K 100000000 \\
-        -R '${read_group_tag}' \\
+        -R '${meta.rg_line}' \\
         -t ${task.cpus} \\
         ${genome_fasta} \\
         ${reads_fwd} \\
@@ -65,7 +64,7 @@ process BWAMEM2_ALIGN {
     """
 
     stub:
-    def output_fn = meta.split ? "${meta.split}.${meta.sample_id}.${meta.read_group}.bam" : "${meta.sample_id}.${meta.read_group}.bam"
+    def output_fn = meta.split ? "${meta.split}.${meta.output_file_id}.bam" : "${meta.output_file_id}.bam"
 
     """
     touch ${output_fn}
