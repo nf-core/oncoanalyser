@@ -147,10 +147,12 @@ class Constants {
 
     static enum InfoField {
         CANCER_TYPE,
+        FLOWCELL,
         LANE,
         LIBRARY_ID,
         LONGITUDINAL_SAMPLE,
         GENERATE_REDUX_TSVS_ONLY,
+        READ_GROUP_OVERRIDES,
     }
 
     static Map PLACEHOLDER_META = [meta_placeholder: null]

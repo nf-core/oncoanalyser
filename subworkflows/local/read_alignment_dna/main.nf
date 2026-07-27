@@ -67,15 +67,25 @@ workflow READ_ALIGNMENT_DNA {
         )
         .map { meta, fastq_info, fastq_fwd, fastq_rev ->
 
+            // NOTE(SW): initial map sets defaults and conventional ordering of selected fields, merging then overwrites / adds while preserving order
+            def rg_id = [fastq_info.sample_id, fastq_info.library_id, fastq_info.lane, fastq_info.flowcell].findAll().join('.')
+            def rg_entries = [ID: rg_id, SM: fastq_info.sample_id, LB: fastq_info.library_id] + fastq_info.rg_fields
+            def rg_line = '@RG\\t' + rg_entries.collect { k, v -> "${k}:${v}" }.join('\\t')
 
             def meta_fastq = [
                 key: meta.group_id,
                 id: "${meta.group_id}_${fastq_info.sample_id}_${fastq_info.library_id}_${fastq_info.lane}",
+                rg_line: rg_line,
                 sample_id: fastq_info.sample_id,
                 library_id: fastq_info.library_id,
                 lane: fastq_info.lane,
+                output_file_id: rg_id,
                 sample_type: fastq_info.sample_type,
             ]
+
+            if (fastq_info.flowcell) {
+                meta_fastq.id = "${meta_fastq.id}_${fastq_info.flowcell}"
+            }
 
             return [meta_fastq, fastq_fwd, fastq_rev]
 
@@ -141,9 +151,7 @@ workflow READ_ALIGNMENT_DNA {
     // channel: [ meta_bwamem2, fastq_fwd, fastq_rev ]
     ch_bwamem2_inputs = ch_fastqs_ready
         .map { meta_fastq_ready, fastq_fwd, fastq_rev ->
-
-            def meta_bwamem2 = meta_fastq_ready + [read_group: "${meta_fastq_ready.sample_id}.${meta_fastq_ready.library_id}.${meta_fastq_ready.lane}"]
-
+            def meta_bwamem2 = meta_fastq_ready.clone()
             return [meta_bwamem2, fastq_fwd, fastq_rev]
         }
 

@@ -305,8 +305,8 @@ def getDnaFastqChannel(ch_inputs) {
         .flatMap { meta, meta_sample, sample_type ->
             meta_sample
                 .getAt(Constants.FileType.FASTQ)
-                .collect { key, fps ->
-                    def (library_id, lane) = key
+                .collect { key, d ->
+                    def (library_id, lane, flowcell) = key
 
                     def sample_id = meta_sample.getOrDefault('longitudinal_sample_id', meta_sample['sample_id'])
 
@@ -315,9 +315,14 @@ def getDnaFastqChannel(ch_inputs) {
                         'library_id': library_id,
                         'lane': lane,
                         'sample_type': sample_type,
+                        'rg_fields': d.rg_fields,
                     ]
 
-                    return [meta, fastq_info, fps['fwd'], fps['rev']]
+                    if (flowcell) {
+                         fastq_info.flowcell = flowcell
+                    }
+
+                    return [meta, fastq_info, d['fwd'], d['rev']]
                 }
         }
 
@@ -347,16 +352,21 @@ def getRnaFastqChannel(ch_inputs) {
             def meta_sample = Utils.getTumorRnaSample(meta)
             meta_sample
                 .getAt(Constants.FileType.FASTQ)
-                .collect { key, fps ->
-                    def (library_id, lane) = key
+                .collect { key, d ->
+                    def (library_id, lane, flowcell) = key
 
                     def fastq_info = [
                         'sample_id': meta_sample.sample_id,
                         'library_id': library_id,
                         'lane': lane,
+                        'rg_fields': d.rg_fields,
                     ]
 
-                    return [meta, fastq_info, fps['fwd'], fps['rev']]
+                    if (flowcell) {
+                         fastq_info.flowcell = flowcell
+                    }
+
+                    return [meta, fastq_info, d['fwd'], d['rev']]
                 }
         }
 
