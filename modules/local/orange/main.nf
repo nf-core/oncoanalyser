@@ -65,7 +65,8 @@ process ORANGE {
     def peach_dir_arg = peach_dir ? "-peach_dir ${peach_dir}" : ''
 
     def rna_sample_id_arg = meta.containsKey('tumor_rna_id') ? "-rna_sample_id ${meta.tumor_rna_id}" : ''
-    def isofox_dir_arg = isofox_dir ? "-isofox_dir ${isofox_dir}" : ''
+    def isofox_dir_local = 'isofox__prepared'
+    def isofox_dir_arg = isofox_dir ? "-isofox_dir ${isofox_dir_local}" : ''
 
     """
     echo "${pipeline_version_str}" > pipeline_version.txt
@@ -73,8 +74,6 @@ process ORANGE {
     # When WTS data is present, ORANGE expects the somatic SAGE VCF to have appended WTS data; CS indicates this should
     # occur after PURPLE. Since ORANGE only collects the somatic SAGE VCF from the PURPLE output directory, we must
     # prepare accordingly
-
-    # Isofox inputs are also expected to have the tumor sample ID in the filename
 
     # NOTES(SW): Use of symlinks was causing reliability issues on HPC with Singularity, switched to full file copy instead
 
@@ -100,6 +99,17 @@ process ORANGE {
     if [[ ! -e ${linx_plot_dir_reportable_somatic}/ ]]; then
         mkdir -p ${linx_plot_dir_reportable_somatic}/;
     fi;
+
+    # When provided existing ISOFOX results generated in a RNA-only analysis we must adjust identifier
+    if [[ -n "${isofox_dir}" && -n "\$(find -L ${isofox_dir} -name '${meta.tumor_rna_id}*')" ]]; then
+      mkdir -p ${isofox_dir_local}/;
+      for e in \$(find -L ${isofox_dir}/*); do
+         s=\$(sed 's/^${meta.tumor_rna_id}//' <<< \${e##*/});
+         ln -s ../\${e} ${isofox_dir_local}/${meta.tumor_id}\${s};
+      done;
+    elif [[ -n "${isofox_dir}" ]]; then
+      ln -s ${isofox_dir} ${isofox_dir_local};
+    fi
 
     mkdir -p output/
 

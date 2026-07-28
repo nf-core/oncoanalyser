@@ -34,18 +34,30 @@ process CUPPA {
     def linx_dir_arg = linx_dir ? "-linx_dir ${linx_dir}" : ''
     def virusinterpreter_dir_arg = virusinterpreter_dir ? "-virus_dir ${virusinterpreter_dir}" : ''
 
+    def isofox_dir_local = 'isofox__prepared'
     def isofox_dir_arg = ''
     def rna_sample_arg = ''
     def ref_alt_sj_sites_arg = ''
 
     if (isofox_dir) {
-        isofox_dir_arg = "-isofox_dir ${isofox_dir}"
-        rna_sample_arg = "-rna_sample ${meta.sample_rna_id}"
+        isofox_dir_arg = "-isofox_dir ${isofox_dir_local}"
+        rna_sample_arg = "-rna_sample ${meta.sample_id}"
         ref_alt_sj_sites_arg = "-ref_alt_sj_sites ${cuppa_alt_sj}"
     }
 
     """
     mkdir -p cuppa/
+
+    # When provided existing ISOFOX results generated in a RNA-only analysis we must adjust identifier
+    if [[ ${categories} == ALL && -n "\$(find -L ${isofox_dir} -name '${meta.sample_rna_id}*')" ]]; then
+        mkdir -p ${isofox_dir_local}/;
+        for e in \$(find -L ${isofox_dir}/*); do
+           s=\$(sed 's/^${meta.sample_rna_id}//' <<< \${e##*/});
+           ln -s ../\${e} ${isofox_dir_local}/${meta.sample_id}\${s};
+        done;
+    elif [[ -n "${isofox_dir}" ]]; then
+        ln -s ${isofox_dir} ${isofox_dir_local};
+    fi
 
     # Extract input features
     cuppa \\

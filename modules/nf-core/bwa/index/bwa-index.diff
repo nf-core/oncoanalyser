@@ -1,4 +1,4 @@
-Changes in module 'nf-core/bwa/index'
+Changes in component 'nf-core/bwa/index'
 Changes in 'bwa/index/environment.yml':
 --- modules/nf-core/bwa/index/environment.yml
 +++ modules/nf-core/bwa/index/environment.yml
@@ -12,7 +12,7 @@ Changes in 'bwa/index/environment.yml':
 Changes in 'bwa/index/meta.yml':
 --- modules/nf-core/bwa/index/meta.yml
 +++ modules/nf-core/bwa/index/meta.yml
-@@ -16,37 +16,24 @@
+@@ -16,37 +16,27 @@
        licence: ["GPL-3.0-or-later"]
        identifier: "biotools:bwa"
  input:
@@ -35,7 +35,7 @@ Changes in 'bwa/index/meta.yml':
 +      description: Input genome ALT file (optional)
 +      pattern: "*.{alt}"
  output:
-   - index:
+-  - index:
 -      - meta:
 -          type: map
 -          description: |
@@ -49,11 +49,15 @@ Changes in 'bwa/index/meta.yml':
 -          pattern: "*.{amb,ann,bwt,pac,sa}"
 -          ontologies:
 -            - edam: "http://edamontology.org/data_3210" # Genome index
++  - bwa_index:
 +      type: file
 +      description: BWA genome index files
 +      pattern: "*.{amb,ann,bwt,pac,sa,alt}"
 +      ontologies:
 +        - edam: "http://edamontology.org/data_3210" # Genome index
++  - command_files:
++      type: list
++      description: List of command files
    - versions:
 -      - versions.yml:
 -          type: file
@@ -69,7 +73,7 @@ Changes in 'bwa/index/meta.yml':
 Changes in 'bwa/index/main.nf':
 --- modules/nf-core/bwa/index/main.nf
 +++ modules/nf-core/bwa/index/main.nf
-@@ -4,29 +4,37 @@
+@@ -4,29 +4,39 @@
  
      conda "${moduleDir}/environment.yml"
      container "${ workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container ?
@@ -86,8 +90,9 @@ Changes in 'bwa/index/main.nf':
      output:
 -    tuple val(meta), path("bwa")  , emit: index
 -    path "versions.yml"             , emit: versions
-+    path bwa_index     , emit: index
-+    path "versions.yml", emit: versions
++    path 'bwa_index/'                                   , topic: bwa_index
++    tuple val([:]), val('bwa_index'), path('.command.*'), topic: command_files
++    path 'versions.yml'                                 , topic: versions
  
      when:
      task.ext.when == null || task.ext.when
@@ -101,6 +106,7 @@ Changes in 'bwa/index/main.nf':
      """
 -    mkdir bwa
 +    mkdir -p bwa_index/
++
      bwa \\
          index \\
          $args \\
@@ -115,7 +121,7 @@ Changes in 'bwa/index/main.nf':
  
      cat <<-END_VERSIONS > versions.yml
      "${task.process}":
-@@ -35,19 +43,17 @@
+@@ -35,19 +45,17 @@
      """
  
      stub:

@@ -126,6 +126,16 @@ class Utils {
 
                     }
 
+                    // Disallow AMBER, COBALT, SAGE_APPEND inputs for longitudinal samples; these would clash with primary inputs
+                    if (info_data.containsKey(Constants.InfoField.LONGITUDINAL_SAMPLE)) {
+                        def longitudinal_disallowed_input_list = [Constants.FileType.AMBER_DIR, Constants.FileType.COBALT_DIR, Constants.FileType.SAGE_APPEND_DIR]
+                        def disallowed_inputs = longitudinal_disallowed_input_list.findAll { e -> e == filetype_enum }
+                        if (disallowed_inputs) {
+                            log.error "got disallowed ${filetype_enum} input for longitudinal sample ${group_id} ${meta_sample.sample_id} ${sample_type_enum}/${sequence_type_enum}"
+                            Nextflow.exit(1)
+                        }
+                    }
+
                     // Filetype uniqueness
                     if (meta_sample.containsKey(filetype_enum) & filetype_enum != Constants.FileType.FASTQ) {
                         log.error "got duplicate file for ${group_id} ${sample_type_enum}/${sequence_type_enum}: ${filetype_enum}"

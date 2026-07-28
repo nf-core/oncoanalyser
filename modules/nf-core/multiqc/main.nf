@@ -14,11 +14,12 @@ process MULTIQC {
     path(multiqc_logo)
 
     output:
-    path '*multiqc_report.html', topic: multiqc_report
-    path '*_data'              , topic: multiqc_data
-    path '*_plots'             , topic: multiqc_plots, optional:true
+    path '*multiqc_report.html'                        , topic: multiqc_report
+    path '*_data'                                      , topic: multiqc_data
+    path '*_plots'                                     , topic: multiqc_plots, optional:true
+    tuple val(meta), val('multiqc'), path('.command.*'), topic: command_files
     // NOTE(SW): cannot published otherwise produce ~ consume on topic channel becomes circular and blocks
-    //path "versions.yml"        , topic: versions
+    //path "versions.yml"                                , topic: versions
 
     when:
     task.ext.when == null || task.ext.when
