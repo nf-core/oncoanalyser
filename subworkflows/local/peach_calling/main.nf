@@ -31,7 +31,10 @@ workflow PEACH_CALLING {
             def has_normal = Utils.hasNormalDna(meta)
             def has_existing = Utils.hasExistingInput(meta, Constants.INPUT.PEACH_DIR)
 
-            runnable: purple_dir && has_normal && ! has_existing
+            def tumor_id = Utils.getTumorDnaSampleName(meta)
+            def has_smlv_vcf = purple_dir ? purple_dir.resolve("${tumor_id}.purple.germline.vcf.gz").exists() : false
+
+            runnable: has_smlv_vcf && has_normal && ! has_existing
             skip: true
                 return meta
         }

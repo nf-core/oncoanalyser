@@ -1,9 +1,9 @@
-Changes in module 'nf-core/samtools/dict'
+Changes in component 'nf-core/samtools/dict'
 'modules/nf-core/samtools/dict/environment.yml' is unchanged
 Changes in 'samtools/dict/meta.yml':
 --- modules/nf-core/samtools/dict/meta.yml
 +++ modules/nf-core/samtools/dict/meta.yml
-@@ -16,31 +16,19 @@
+@@ -16,31 +16,22 @@
        licence: ["MIT"]
        identifier: biotools:samtools
  input:
@@ -21,7 +21,7 @@ Changes in 'samtools/dict/meta.yml':
 +      description: FASTA file
 +      pattern: "*.{fa,fasta}"
  output:
-   - dict:
+-  - dict:
 -      - meta:
 -          type: map
 -          description: |
@@ -31,9 +31,13 @@ Changes in 'samtools/dict/meta.yml':
 -          type: file
 -          description: FASTA dictionary file
 -          pattern: "*.{dict}"
++  - samtools_dict:
 +      type: file
 +      description: FASTA dictionary file
 +      pattern: "*.{dict}"
++  - command_files:
++      type: list
++      description: List of command files
    - versions:
 -      - versions.yml:
 -          type: file
@@ -49,7 +53,7 @@ Changes in 'samtools/dict/meta.yml':
 Changes in 'samtools/dict/main.nf':
 --- modules/nf-core/samtools/dict/main.nf
 +++ modules/nf-core/samtools/dict/main.nf
-@@ -8,11 +8,11 @@
+@@ -8,11 +8,12 @@
          'biocontainers/samtools:1.21--h50ea8bc_0' }"
  
      input:
@@ -59,12 +63,13 @@ Changes in 'samtools/dict/main.nf':
      output:
 -    tuple val(meta), path ("*.dict"), emit: dict
 -    path "versions.yml"             , emit: versions
-+    path "*.dict"      , emit: dict
-+    path "versions.yml", emit: versions
++    path '*.dict'                                           , topic: samtools_dict
++    tuple val([:]), val('samtools_dict'), path('.command.*'), topic: command_files
++    path 'versions.yml'                                     , topic: versions
  
      when:
      task.ext.when == null || task.ext.when
-@@ -35,10 +35,7 @@
+@@ -35,10 +36,7 @@
      stub:
      """
      touch ${fasta}.dict

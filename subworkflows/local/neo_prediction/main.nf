@@ -56,7 +56,10 @@ workflow NEO_PREDICTION {
 
             def has_normal_dna = Utils.hasNormalDna(meta)
 
-            def has_runnable_inputs = purple_dir && linx_annotation_dir && has_normal_dna
+            def tumor_id = Utils.getTumorDnaSampleName(meta)
+            def has_smlv_vcf = purple_dir ? purple_dir.resolve("${tumor_id}.purple.somatic.vcf.gz").exists() : false
+
+            def has_runnable_inputs = has_smlv_vcf && linx_annotation_dir && has_normal_dna
 
             runnable: has_runnable_inputs
             skip: true
@@ -172,7 +175,7 @@ workflow NEO_PREDICTION {
 
             def sage_append_vcf_somatic = []
             if (Utils.hasTumorRna(meta)) {
-                meta_scorer.sample_rna_id = Utils.getTumorDnaSampleName(meta)
+                meta_scorer.sample_rna_id = Utils.getTumorRnaSampleName(meta)
 
                 def sage_append_dir_somatic_selected = Utils.selectCurrentOrExisting(sage_append_dir_somatic, meta, Constants.INPUT.SAGE_APPEND_DIR_TUMOR)
                 sage_append_vcf_somatic = file(sage_append_dir_somatic_selected).resolve("${meta_scorer.sample_id}.sage.append.vcf.gz")

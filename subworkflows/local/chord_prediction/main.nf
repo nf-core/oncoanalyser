@@ -31,8 +31,8 @@ workflow CHORD_PREDICTION {
             def has_sv_vcf = []
             if (has_tumor_normal_dna && purple_dir) {
                 def tumor_id = Utils.getTumorDnaSampleName(meta)
-                has_smlv_vcf = purple_dir.resolve("${tumor_id}.purple.somatic.vcf.gz")
-                has_sv_vcf = purple_dir.resolve("${tumor_id}.purple.sv.vcf.gz")
+                has_smlv_vcf = purple_dir.resolve("${tumor_id}.purple.somatic.vcf.gz").exists()
+                has_sv_vcf = purple_dir.resolve("${tumor_id}.purple.sv.vcf.gz").exists()
             }
 
             def has_existing = Utils.hasExistingInput(meta, Constants.INPUT.CHORD_DIR)

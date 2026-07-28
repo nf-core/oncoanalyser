@@ -65,7 +65,13 @@ workflow SAGE_PLOTTING {
 
         }
         .branch { meta, tumor_aln, tumor_idx, normal_aln, normal_idx, donor_aln, donor_idx, redux_tsvs, purple_dir ->
-            runnable: tumor_aln && purple_dir
+
+            def has_existing = Utils.hasExistingInput(meta, Constants.INPUT.SAGE_PLOT_DIR_TUMOR)
+
+            def tumor_dna_id = Utils.getTumorDnaSampleName(meta)
+            def has_smlv_vcf = purple_dir ? purple_dir.resolve("${tumor_dna_id}.purple.somatic.vcf.gz").exists() : false
+
+            runnable: tumor_aln && has_smlv_vcf && ! has_existing
             skip: true
                 return meta
         }
