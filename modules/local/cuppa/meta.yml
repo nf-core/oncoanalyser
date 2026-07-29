@@ -22,12 +22,12 @@ input:
   - purple_dir:
       type: directory
       description: PURPLE output directory (optional)
-  - linx_dir:
-      type: directory
-      description: LINX output directory (optional)
   - virusinterpreter_dir:
       type: directory
       description: Virus Interpreter output directory (optional)
+  - linx_dir:
+      type: directory
+      description: LINX output directory (optional)
   - genome_ver:
       type: string
       description: Reference genome version
@@ -49,12 +49,12 @@ output:
   - cuppa_dir:
       type: directory
       description: CUPPA output directory
+  - command_files:
+      type: list
+      description: List of command files
   - versions:
       type: file
       description: File containing software versions
       pattern: "versions.yml"
-  - command_files:
-      type: list
-      description: List of command files
 authors:
   - "@scwatts"

@@ -24,30 +24,15 @@ input:
   - cobalt_dir:
       type: directory
       description: COBALT output directory
-  - sv_tumor_vcf:
-      type: file
-      description: GRIPSS somatic VCF file (optional)
-      pattern: "*.{vcf.gz}"
-  - sv_tumor_tbi:
-      type: file
-      description: GRIPSS somatic VCF index file (optional)
-      pattern: "*.{vcf.gz.tbi}"
-  - sv_normal_vcf:
-      type: file
-      description: GRIPSS germline VCF file (optional)
-      pattern: "*.{vcf.gz}"
-  - sv_normal_tbi:
-      type: file
-      description: GRIPSS germline VCF index file (optional)
-      pattern: "*.{vcf.gz.tbi}"
-  - smlv_tumor_vcf:
-      type: file
-      description: Small variant tumor VCF file (optional)
-      pattern: "*.{vcf.gz}"
-  - smlv_normal_vcf:
-      type: file
-      description: Small variant normal VCF file (optional)
-      pattern: "*.{vcf.gz}"
+  - esvee_dir:
+      type: directory
+      description: ESVEE output directory
+  - pave_somatic_dir:
+      type: directory
+      description: PAVE somatic output directory
+  - pave_germline_dir:
+      type: directory
+      description: PAVE germline output directory
   - genome_fasta:
       type: file
       description: Reference genome assembly FASTA file
@@ -82,7 +67,7 @@ input:
   - ensembl_data_resources:
       type: directory
       description: HMF ensembl data resources directory
-  - germline_del:
+  - germline_amp_del_freq:
       type: file
       description: Cohort frequency for germline deletions (optional)
       pattern: "*.{csv}"
@@ -90,14 +75,6 @@ input:
       type: file
       description: Target regions BED file (optional)
       pattern: "*.{bed}"
-  - target_regions_ratios:
-      type: file
-      description: Target regions ratios file (optional)
-      pattern: "*.{tsv}"
-  - target_regions_msi_indels:
-      type: file
-      description: Target regions MSI/INDELS file (optional)
-      pattern: "*.{tsv}"
 output:
   - meta:
       type: map
@@ -107,12 +84,12 @@ output:
   - purple_dir:
       type: directory
       description: PURPLE output directory
+  - command_files:
+      type: list
+      description: List of command files
   - versions:
       type: file
       description: File containing software versions
       pattern: "versions.yml"
-  - command_files:
-      type: list
-      description: List of command files
 authors:
   - "@scwatts"

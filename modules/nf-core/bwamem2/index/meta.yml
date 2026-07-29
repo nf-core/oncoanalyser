@@ -22,10 +22,13 @@ input:
       description: Input genome ALT file (optional)
       pattern: "*.{alt}"
 output:
-  - index:
+  - bwamem2_index:
       type: file
       description: BWA genome index files
       pattern: "*.{0123,amb,ann,bwt.2bit.64,pac,alt}"
+  - command_files:
+      type: list
+      description: List of command files
   - versions:
       type: file
       description: File containing software versions

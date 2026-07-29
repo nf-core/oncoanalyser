@@ -14,34 +14,34 @@ input:
       description: |
         Groovy Map containing sample information
         e.g. [id: 'sample_id']
-  - bamtools_somatic_dir:
-      type: directory
-      description: BamTools somatic output directory
-  - bamtools_germline_dir:
-      type: directory
-      description: BamTools germline output directory
-  - sage_somatic_dir:
+  - sage_dir_somatic:
       type: directory
       description: SAGE somatic output directory
-  - sage_germline_dir:
+  - sage_dir_germline:
       type: directory
       description: SAGE germline output directory (optional)
-  - smlv_somatic_vcf:
+  - smlv_vcf_somatic:
       type: file
       description: Small somatic variant VCF file (annotated with RNA data) (optional)
-  - smlv_germline_vcf:
+  - smlv_vcf_germline:
       type: file
       description: Small germline variant VCF file (annotated with RNA data) (optional)
+  - sage_plot_dir_somatic:
+      type: file
+      description: SAGE somatic plot directory
   - purple_dir:
       type: directory
       description: PURPLE output directory
-  - linx_somatic_anno_dir:
+  - qsee_dir:
+      type: directory
+      description: QSEE output directory
+  - linx_annotation_dir_somatic:
       type: directory
       description: LINX somatic annotation output directory
-  - linx_somatic_plot_dir:
+  - linx_plot_dir_reportable_somatic:
       type: directory
       description: LINX somatic plot output directory
-  - linx_germline_anno_dir:
+  - linx_annotation_dir_germline:
       type: directory
       description: LINX germline annotation output directory (optional)
   - virusinterpreter_dir:
@@ -72,60 +72,35 @@ input:
       type: file
       description: Disease ontology file
       pattern: "*.{json}"
-  - cohort_mapping:
-      type: file
-      description: HMF cohort mapping file
-      pattern: "*.{tsv}"
-  - cohort_percentiles:
-      type: file
-      description: HMF cohort percentiles file
-      pattern: "*.{tsv}"
-  - known_fusion_data:
-      type: file
-      description: Known fusions data file
-      pattern: "*.{csv}"
-  - driver_gene_panel:
-      type: file
-      description: Driver gene panel file
-      pattern: "*.{tsv}"
-  - ensembl_data_resources:
-      type: directory
-      description: HMF ensembl data resources directory
-  - sigs_etiology:
-      type: file
-      description: Mutational signature etiologies file
-      pattern: "*.{tsv}"
-  - isofox_alt_sj:
-      type: file
-      description: Isofox cohort alternate slice junction file
-      pattern: "*.{csv}"
-  - isofox_gene_distribution:
-      type: file
-      description: Isofox cohort gene expression file
-      pattern: "*.{csv}"
   - pipeline_version:
       type: string
       description: Pipeline version to display in report
+  - sequencing_platform:
+      type: string
+      description: Sequencing platform
+  - targeted_mode:
+      type: boolean
+      description: Flag indicating whether targeted mode is set
 output:
   - meta:
       type: map
       description: |
         Groovy Map containing sample information
         e.g. [id: 'sample_id']
-  - pdf:
+  - orange_pdf:
       type: file
       description: PDF report file (optional)
       pattern: "*.{pdf}"
-  - json:
+  - orange_json:
       type: file
       description: Compiled JSON output file (optional)
       pattern: "*.{json}"
+  - command_files:
+      type: list
+      description: List of command files
   - versions:
       type: file
       description: File containing software versions
       pattern: "versions.yml"
-  - command_files:
-      type: list
-      description: List of command files
 authors:
   - "@scwatts"

@@ -16,30 +16,30 @@ input:
       description: |
         Groovy Map containing sample information
         e.g. [id: 'sample_id']
-  - normal_dna_bam:
+  - normal_dna_aln:
       type: file
-      description: Normal DNA BAM file (optional)
-      pattern: "*.{bam}"
-  - normal_dna_bai:
+      description: Normal DNA alignment file (optional)
+      pattern: "*.{bam,cram}"
+  - normal_dna_idx:
       type: file
-      description: Normal DNA BAI file (optional)
-      pattern: "*.{bai}"
-  - tumor_dna_bam:
+      description: Normal DNA index file (optional)
+      pattern: "*.{bai,crai}"
+  - tumor_dna_aln:
       type: file
-      description: Normal DNA BAM file (optional)
-      pattern: "*.{bam}"
-  - tumor_dna_bai:
+      description: Normal DNA alignment file (optional)
+      pattern: "*.{bam,cram}"
+  - tumor_dna_idx:
       type: file
-      description: Tumor DNA BAI file (optional)
-      pattern: "*.{bai}"
-  - tumor_rna_bam:
+      description: Tumor DNA index file (optional)
+      pattern: "*.{bai,crai}"
+  - tumor_rna_aln:
       type: file
-      description: Normal RNA BAM file (optional)
-      pattern: "*.{bam}"
-  - tumor_rna_bai:
+      description: Normal RNA alignment file (optional)
+      pattern: "*.{bam,cram}"
+  - tumor_rna_idx:
       type: file
-      description: Tumor RNA BAI file (optional)
-      pattern: "*.{bai}"
+      description: Tumor RNA index file (optional)
+      pattern: "*.{bai,crai}"
   - purple_dir:
       type: directory
       description: PURPLE output directory (optional)
@@ -60,6 +60,9 @@ input:
   - targeted_mode:
       type: boolean
       description: Flag indicating whether targeted mode is set
+  - sequencing_platform:
+      type: string
+      description: Sequencing platform
 output:
   - meta:
       type: map
@@ -69,12 +72,12 @@ output:
   - lilac_dir:
       type: file
       description: LILAC output directory
+  - command_files:
+      type: list
+      description: List of command files
   - versions:
       type: file
       description: File containing software versions
       pattern: "versions.yml"
-  - command_files:
-      type: list
-      description: List of command files
 authors:
   - "@scwatts"
