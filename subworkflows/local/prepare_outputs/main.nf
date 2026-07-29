@@ -166,12 +166,18 @@ workflow PREPARE_OUTPUTS_PREPARE_REFERENCE {
 // - Process emits output as directory (e.g. amber_dir) -> directory publish FAIL -> BUG
 // - Process emits output as files or glob (e.g. teal_tsvs) -> individual files publish SUCCESS
 //
-// To publish directories, the workaround is to extract the file paths within that directory
+// To publish directories, the workaround is to recursively extract the file paths within that directory
+//
 def get_dir_filepaths(meta, d, target_dir=null) {
 
     def dir = target_dir ?: d.name
 
-    return d.listFiles().collect { f -> ["${meta.key}/${dir}/${f.name}", f] }
+    def filepaths = []
+    d.eachFileRecurse(groovy.io.FileType.FILES) { f ->
+        def rel_path = d.relativize(f).toString()
+        filepaths << ["${meta.key}/${dir}/${rel_path}", f]
+    }
+    return filepaths
 }
 
 
