@@ -35,12 +35,16 @@ workflow READ_ALIGNMENT_RNA {
     ch_fastq_inputs = ch_inputs_sorted.runnable
         .map { meta, fastq_info, fastq_fwd, fastq_rev ->
 
+            // NOTE(SW): initial map sets defaults and conventional ordering of selected fields, merging then overwrites / adds while preserving order
+            def rg_id = [fastq_info.sample_id, fastq_info.library_id, fastq_info.lane, fastq_info.flowcell].findAll().join('.')
+            def rg_entries = [ID: rg_id, SM: fastq_info.sample_id, LB: fastq_info.library_id] + fastq_info.rg_fields
+            def rg_line = rg_entries.collect { k, v -> "'${k}:${v}'" }.join(' ')
+
             def meta_fastq = [
                 key: meta.group_id,
                 id: "${meta.group_id}_${fastq_info.sample_id}",
                 sample_id: fastq_info.sample_id,
-                library_id: fastq_info.library_id,
-                lane: fastq_info.lane,
+                rg_line: rg_line,
             ]
 
             return [meta_fastq, fastq_fwd, fastq_rev]
@@ -79,10 +83,7 @@ workflow READ_ALIGNMENT_RNA {
                 sample_id: meta_fastq.sample_id,
             ]
 
-            def rgid = "${meta_fastq.sample_id}.${meta_fastq.library_id}.${meta_fastq.lane}"
-            def rg_line = "ID:${rgid} LB:${meta_fastq.library_id} SM:${meta_fastq.sample_id}"
-
-            return tuple(groupKey(meta_star, group_size), rg_line, fastq_fwd, fastq_rev)
+            return tuple(groupKey(meta_star, group_size), meta_fastq.rg_line, fastq_fwd, fastq_rev)
         }
         // channel: [ meta_star, rg_lines, fastq_fwds, fastq_revs ]
         .groupTuple()

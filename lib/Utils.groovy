@@ -98,6 +98,12 @@ class Utils {
                             meta_sample[Constants.InfoField.GENERATE_REDUX_TSVS_ONLY] = true
                         }
 
+                        // Only allow READ_GROUP_OVERRIDES for FASTQ
+                        if (filetype_enum != Constants.FileType.FASTQ && info_data.containsKey(Constants.InfoField.READ_GROUP_OVERRIDES)) {
+                            log.error "The read_group info field is only applicable to FASTQ input but got '${it.filetype}' for ${group_id} ${sample_type_enum}/${sequence_type_enum}"
+                            Nextflow.exit(1)
+                        }
+
                     }
 
                     if (info_data.containsKey(Constants.InfoField.LONGITUDINAL_SAMPLE)) {
@@ -158,7 +164,7 @@ class Utils {
                         }
 
                         def (fwd, rev) = fastq_entries
-                        def fastq_key = [info_data[Constants.InfoField.LIBRARY_ID], info_data[Constants.InfoField.LANE]]
+                        def fastq_key = [info_data[Constants.InfoField.LIBRARY_ID], info_data[Constants.InfoField.LANE], info_data.getOrDefault(Constants.InfoField.FLOWCELL, null)]
 
                         if (! meta_sample.containsKey(filetype_enum)) {
                             meta_sample[filetype_enum] = [:]
@@ -169,7 +175,12 @@ class Utils {
                             Nextflow.exit(1)
                         }
 
-                        meta_sample[filetype_enum][fastq_key] = ['fwd': Utils.getFileObject(fwd), 'rev': Utils.getFileObject(rev)]
+                        def rg_fields = [:]
+                        if (info_data.containsKey(Constants.InfoField.READ_GROUP_OVERRIDES)) {
+                            rg_fields = Utils.parse_read_group_info(info_data[Constants.InfoField.READ_GROUP_OVERRIDES], log)
+                        }
+
+                        meta_sample[filetype_enum][fastq_key] = ['fwd': Utils.getFileObject(fwd), 'rev': Utils.getFileObject(rev), 'rg_fields': rg_fields]
 
                     } else {
 
@@ -568,6 +579,36 @@ class Utils {
             Nextflow.exit(1)
         }
 
+    }
+
+    public static parse_read_group_info(rg_info_raw, log) {
+        def escape_char = "\u0000"
+        def validate_rg_tags = ['BC', 'CN', 'DS', 'DT', 'FO', 'ID', 'KS', 'LB', 'PG', 'PI', 'PL', 'PM', 'PU', 'SM']
+
+        def fields = [:]
+        def rg_info_escaped = rg_info_raw.replace('||', escape_char)
+        rg_info_escaped.split('\\|').each { field_str_escaped ->
+            def field_str = field_str_escaped.replace(escape_char, '|')
+            if (! field_str.contains('=')) {
+                log.error "Received bad read group field (must be in format `<name>=<value>`): ${field_str}"
+                Nextflow.exit(1)
+            }
+
+            def (name, value) = field_str.split('=', 2)
+            if (! validate_rg_tags.contains(name)) {
+                log.error "Received bad read group tag '${name}' in: ${rg_info_raw}"
+                Nextflow.exit(1)
+            }
+
+            if (! value) {
+                log.error "Received empty read group value for '${name}' in: ${rg_info_raw}"
+                Nextflow.exit(1)
+            }
+
+            fields[name] = value
+        }
+
+        return fields
     }
 
     public static getSequencingPlatformPons(hmf_data, sequencing_platform_string) {
