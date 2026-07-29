@@ -20,16 +20,16 @@ input:
       description: Reference genome assembly FASTA file
       pattern: "*.{fa,fasta}"
 output:
-  - img:
+  - gatk4_bwa_index_img:
       type: file
       description: Reference genome assembly img file
       pattern: "*.{img}"
+  - command_files:
+      type: list
+      description: List of command files
   - versions:
       type: file
       description: File containing software versions
       pattern: "versions.yml"
-  - command_files:
-      type: list
-      description: List of command files
 authors:
   - "@scwatts"

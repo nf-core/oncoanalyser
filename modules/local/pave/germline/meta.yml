@@ -60,26 +60,24 @@ input:
   - ensembl_data_resources:
       type: directory
       description: HMF ensembl data resources directory
+  - sequencing_platform:
+      type: string
+      description: Sequencing platform
 output:
   - meta:
       type: map
       description: |
         Groovy Map containing sample information
         e.g. [id: 'sample_id']
-  - vcf:
-      type: file
-      description: PAVE VCF file
-      pattern: "*.{vcf.gz}"
-  - index:
-      type: file
-      description: PAVE VCF index file
-      pattern: "*.{vcf.gz.tbi}"
+  - pave_germline_dir:
+      type: directory
+      description: PAVE germline directory
+  - command_files:
+      type: list
+      description: List of command files
   - versions:
       type: file
       description: File containing software versions
       pattern: "versions.yml"
-  - command_files:
-      type: list
-      description: List of command files
 authors:
   - "@scwatts"

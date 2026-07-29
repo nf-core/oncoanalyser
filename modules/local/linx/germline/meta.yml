@@ -36,15 +36,15 @@ output:
       description: |
         Groovy Map containing sample information
         e.g. [id: 'sample_id']
-  - annotation_dir:
+  - linx_germline_annotation_dir:
       type: directory
       description: LINX annotation output directory
+  - command_files:
+      type: list
+      description: List of command files
   - versions:
       type: file
       description: File containing software versions
       pattern: "versions.yml"
-  - command_files:
-      type: list
-      description: List of command files
 authors:
   - "@scwatts"

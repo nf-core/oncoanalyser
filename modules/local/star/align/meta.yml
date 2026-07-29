@@ -17,14 +17,15 @@ input:
       description: |
         Groovy Map containing sample information
         e.g. [id: 'sample_id']
-  - reads_fwd:
-      type: file
-      description: Forward reads FASTQ file
-      pattern: "*.{fastq.gz}"
-  - reads_rev:
-      type: file
-      description: Reverse reads FASTQ file
-      pattern: "*.{fastq.gz}"
+  - rg_lines:
+      type: list
+      description: List of STAR read group lines
+  - reads_fwds:
+      type: list
+      description: List of forward reads FASTQ file
+  - reads_revs:
+      type: list
+      description: List of reverse reads FASTQ file
   - genome_star_index:
       type: directory
       description: STAR index directory
@@ -34,16 +35,20 @@ output:
       description: |
         Groovy Map containing sample information
         e.g. [id: 'sample_id']
-  - bam:
+  - star_align_bam:
       type: file
       description: BAM file
       pattern: "*.{bam}"
+  - star_align_qc_log:
+      type: file
+      description: STAR log QC file
+      pattern: "*.{out}"
+  - command_files:
+      type: list
+      description: List of command files
   - versions:
       type: file
       description: File containing software versions
       pattern: "versions.yml"
-  - command_files:
-      type: list
-      description: List of command files
 authors:
   - "@scwatts"
