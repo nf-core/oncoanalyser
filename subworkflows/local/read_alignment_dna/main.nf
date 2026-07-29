@@ -156,35 +156,31 @@ workflow READ_ALIGNMENT_DNA {
 
     // Reunite BAMs
     // First, count expected BAMs per sample for non-blocking groupTuple op
-    // channel: [ meta_count, group_size ]
+    // channel: [ meta_group, group_size ]
     ch_sample_fastq_counts = ch_bwamem2_inputs
         .map { meta_bwamem2, _reads_fwd, _reads_rev ->
 
-            def meta_count = [
+            def meta_group = [
                 key: meta_bwamem2.key,
                 sample_type: meta_bwamem2.sample_type,
             ]
 
-            return [meta_count, meta_bwamem2]
+            return [meta_group, meta_bwamem2]
         }
         .groupTuple()
-        .map { meta_count, metas_bwamem2 -> return [meta_count, metas_bwamem2.size()] }
+        .map { meta_group, metas_bwamem2 -> return [meta_group, metas_bwamem2.size()] }
 
     // Now, group with expected size then sort into tumor and normal channels
     // channel: [ meta_group, [aln, ...], [idx, ...] ]
     ch_alns_united = ch_sample_fastq_counts
+        // channel: [ [ meta_group, count ], [ meta_group, aln, idx ] ]
         .cross(
             // First element to match meta_group above for `cross`
             channel.topic('bwamem2_align_bam').map { meta_bwamem2, aln, idx -> [[key: meta_bwamem2.key, sample_type: meta_bwamem2.sample_type], aln, idx] }
         )
-        .map { count_tuple, aln_tuple ->
-
+        .map { count_tuple, inputs_tuple ->
             def group_size = count_tuple[1]
-            def (meta_aln, aln, idx) = aln_tuple
-
-            def meta_group = [
-                *:meta_aln,
-            ]
+            def (meta_group, aln, idx) = inputs_tuple
 
             return tuple(groupKey(meta_group, group_size), aln, idx)
         }
