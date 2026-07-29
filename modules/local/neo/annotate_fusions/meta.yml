@@ -19,14 +19,14 @@ input:
   - neo_finder_dir:
       type: directory
       description: Neo Finder directory
-  - bam:
+  - aln:
       type: file
-      description: BAM file
-      pattern: "*.{bam}"
-  - bai:
+      description: Alignment file
+      pattern: "*.{bam,cram}"
+  - idx:
       type: file
-      description: BAI file
-      pattern: "*.{bai}"
+      description: Index file
+      pattern: "*.{bai,crai}"
   - read_length:
       type: integer
       description: Read length
@@ -50,17 +50,17 @@ output:
       description: |
         Groovy Map containing sample information
         e.g. [id: 'sample_id']
-  - annotated_fusions:
+  - neo_annotated_fusions_tsv:
       type: file
       description: Annotated neoepitopes file
       pattern: "*.{tsv}"
+  - command_files:
+      type: list
+      description: List of command files
   - versions:
       type: file
       description: File containing software versions
       pattern: "versions.yml"
-  - command_files:
-      type: list
-      description: List of command files
 authors:
   - "@scwatts"
   - "@charlesshale"

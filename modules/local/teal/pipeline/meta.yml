@@ -33,12 +33,12 @@ input:
       type: file
       description: Normal TEAL BAI file (optional)
       pattern: "*.{bai}"
-  - tumor_metrics_dir:
+  - bamtools_dir_tumor:
       type: directory
-      description: Tumor metrics directory (optional)
-  - normal_metrics_dir:
+      description: BamTools tumor directory (optional)
+  - bamtools_dir_normal:
       type: directory
-      description: Normal metrics directory (optional)
+      description: BamTools normal directory (optional)
   - cobalt_dir:
       type: directory
       description: COBALT output directory
@@ -48,6 +48,9 @@ input:
   - genome_ver:
       type: string
       description: Reference genome version
+  - sequencing_platform:
+      type: string
+      description: Sequencing platform
 output:
   - meta:
       type: map
@@ -58,12 +61,12 @@ output:
       type: list
       description: TEAL output directory
       pattern: "*.{tsv,tsv.*}"
+  - command_files:
+      type: list
+      description: List of command files
   - versions:
       type: file
       description: File containing software versions
       pattern: "versions.yml"
-  - command_files:
-      type: list
-      description: List of command files
 authors:
   - "@scwatts"

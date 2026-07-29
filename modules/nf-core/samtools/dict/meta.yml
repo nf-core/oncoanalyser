@@ -21,10 +21,13 @@ input:
       description: FASTA file
       pattern: "*.{fa,fasta}"
 output:
-  - dict:
+  - samtools_dict:
       type: file
       description: FASTA dictionary file
       pattern: "*.{dict}"
+  - command_files:
+      type: list
+      description: List of command files
   - versions:
       type: file
       description: File containing software versions

@@ -1,15 +1,12 @@
-name: fastp_umi
-description: An ultra-fast all-in-one FASTQ preprocessor
+name: fastq-tools
+description: Operate on FASTQs to process UMIs
 keywords:
-  - fastp
-  - fastq
+  - fastq-tools
   - processing
-  - quality control
 tools:
-  - fastp:
-      description: An ultra-fast all-in-one FASTQ preprocessor
-      homepage: https://github.com/OpenGene/fastp
-      documentation: https://github.com/OpenGene/fastp
+  - fastq-tools:
+      description: FASTQ processor
+      homepage: https://github.com/hartwigmedical/hmftools/tree/master/fastq-tools
       licence: ["MIT"]
 input:
   - meta:
@@ -25,22 +22,19 @@ input:
       type: file
       description: Reverse reads FASTQ file
       pattern: "*.{fastq.gz}"
-  - umi_location:
+  - umi_delim:
       type: string
-      description: UMI location type (optional)
-  - umi_length:
-      type: integer
-      description: UMI length (optional)
-  - umi_skip:
-      type: integer
-      description: UMI base skip (optional)
+      description: UMI delimiter
+  - known_umis:
+      type: file
+      description: Known UMIs file
 output:
   - meta:
       type: map
       description: |
         Groovy Map containing sample information
         e.g. [id: 'sample_id']
-  - fastp_umi_fastq:
+  - fastqtools_fastq:
       type: list
       description: Forward and reverse FASTQ files
       pattern: "*.{fastq.gz}"
@@ -52,5 +46,5 @@ output:
       description: File containing software versions
       pattern: "versions.yml"
 authors:
+  - "@luan-n-nguyen"
   - "@scwatts"
-  - "@mkcmkc"
