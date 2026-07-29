@@ -56,10 +56,10 @@ process CIDER {
     mkdir -p cider/
 
     touch cider/${meta.sample_id}.cider.bam
-    touch cider/${meta.sample_id}.cider.alignment_match.tsv.gz
-    touch cider/${meta.sample_id}.cider.layout.gz
+    gzip <<< '' > cider/${meta.sample_id}.cider.alignment_match.tsv.gz
+    gzip <<< '' > cider/${meta.sample_id}.cider.layout.gz
     touch cider/${meta.sample_id}.cider.locus_stats.tsv
-    touch cider/${meta.sample_id}.cider.vdj.tsv.gz
+    gzip <<< '' > cider/${meta.sample_id}.cider.vdj.tsv.gz
 
     echo -e '${task.process}:\\n  stub: noversions\\n' > versions.yml
     """

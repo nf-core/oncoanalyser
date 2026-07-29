@@ -113,7 +113,7 @@ process SAGE_SOMATIC {
     """
     mkdir -p somatic/
 
-    touch somatic/${meta.tumor_id}.sage.somatic.vcf.gz
+    gzip <<< '' > somatic/${meta.tumor_id}.sage.somatic.vcf.gz
     touch somatic/${meta.tumor_id}.sage.somatic.vcf.gz.tbi
     touch somatic/${meta.tumor_id}.gene.coverage.tsv
     touch somatic/${meta.tumor_id}.sage.bqr.png

@@ -50,8 +50,15 @@ process FASTP_SPLIT {
     """
     mkdir -p output/
 
-    touch output/00{1..4}.${base_name}_R1.fastp_split.fastq.gz;
-    touch output/00{1..4}.${base_name}_R2.fastp_split.fastq.gz;
+    gzip <<< '' > output/001.${base_name}_R1.fastp_split.fastq.gz;
+    gzip <<< '' > output/002.${base_name}_R1.fastp_split.fastq.gz;
+    gzip <<< '' > output/003.${base_name}_R1.fastp_split.fastq.gz;
+    gzip <<< '' > output/004.${base_name}_R1.fastp_split.fastq.gz;
+
+    gzip <<< '' > output/001.${base_name}_R2.fastp_split.fastq.gz;
+    gzip <<< '' > output/002.${base_name}_R2.fastp_split.fastq.gz;
+    gzip <<< '' > output/003.${base_name}_R2.fastp_split.fastq.gz;
+    gzip <<< '' > output/004.${base_name}_R2.fastp_split.fastq.gz;
 
     echo -e '${task.process}:\\n  stub: noversions\\n' > versions.yml
     """

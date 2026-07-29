@@ -102,7 +102,7 @@ process CUPPA {
     """
     mkdir -p cuppa/
 
-    touch cuppa/${meta.sample_id}.cuppa_data.tsv.gz
+    gzip <<< '' > cuppa/${meta.sample_id}.cuppa_data.tsv.gz
     touch cuppa/${meta.sample_id}.cuppa.pred_summ.tsv
     touch cuppa/${meta.sample_id}.cuppa.vis_data.tsv
     touch cuppa/${meta.sample_id}.cuppa.vis.png

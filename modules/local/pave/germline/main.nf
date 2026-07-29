@@ -67,7 +67,8 @@ process PAVE_GERMLINE {
     """
     mkdir -p pave_germline/
 
-    touch pave_germline/${meta.sample_id}.pave.germline.vcf.gz{,.tbi}
+    gzip <<< '' > pave_germline/${meta.sample_id}.pave.germline.vcf.gz
+    touch pave_germline/${meta.sample_id}.pave.germline.vcf.gz.tbi
 
     echo -e '${task.process}:\\n  stub: noversions\\n' > versions.yml
     """

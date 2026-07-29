@@ -89,7 +89,7 @@ process SAGE_VISUALISER {
     """
     mkdir -p sage_vis/
 
-    touch sage_vis/${meta.tumor_id}.sage.vis.vcf.gz
+    gzip <<< '' > sage_vis/${meta.tumor_id}.sage.vis.vcf.gz
     touch sage_vis/${meta.tumor_id}.sage.vis.vcf.gz.tbi
 
     echo -e '${task.process}:\\n  stub: noversions\\n' > versions.yml

@@ -82,7 +82,8 @@ process PAVE_SOMATIC {
     """
     mkdir -p pave_somatic/
 
-    touch pave_somatic/${meta.sample_id}.pave.somatic.vcf.gz{,.tbi}
+    gzip <<< '' > pave_somatic/${meta.sample_id}.pave.somatic.vcf.gz
+    touch pave_somatic/${meta.sample_id}.pave.somatic.vcf.gz.tbi
 
     echo -e '${task.process}:\\n  stub: noversions\\n' > versions.yml
     """

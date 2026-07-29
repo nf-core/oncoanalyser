@@ -49,7 +49,7 @@ process SIGS {
     """
     mkdir -p sigs/
 
-    touch sigs/.stub
+    touch sigs/.placeholder
 
     echo -e '${task.process}:\\n  stub: noversions\\n' > versions.yml
     """

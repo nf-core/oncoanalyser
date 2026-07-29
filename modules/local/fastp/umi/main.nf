@@ -58,8 +58,8 @@ process FASTP_UMI {
     """
     mkdir -p output/
 
-    touch output/${base_name}_R1.fastp_umi.fastq.gz;
-    touch output/${base_name}_R2.fastp_umi.fastq.gz;
+    gzip <<< '' > output/${base_name}_R1.fastp_umi.fastq.gz;
+    gzip <<< '' > output/${base_name}_R2.fastp_umi.fastq.gz;
 
     echo -e '${task.process}:\\n  stub: noversions\\n' > versions.yml
     """
