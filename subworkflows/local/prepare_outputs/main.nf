@@ -34,7 +34,7 @@ workflow PREPARE_OUTPUTS_WGTS {
             channel.topic('peach_dir').flatMap { meta, d ->                    return get_dir_filepaths(meta, d) },
             channel.topic('purple_dir').flatMap { meta, d ->                   return get_dir_filepaths(meta, d) },
             channel.topic('qsee_dir').flatMap { meta, d ->                     return get_dir_filepaths(meta, d) },
-            channel.topic('redux_dir').flatMap { e -> def meta = e[0];         return e[1..-1].collect { d -> ["${meta.key}/alignments/${meta.sample_id}", d] } },
+            channel.topic('redux_dir').flatMap { meta, d ->                    return get_dir_filepaths(meta, d, "alignments/${meta.sample_id}") },
             channel.topic('sage_append_dir').flatMap { meta, d ->              return get_dir_filepaths(meta, d, "sage_append/${meta.output_file_id}") },
             channel.topic('sage_germline_dir').flatMap { meta, d ->            return get_dir_filepaths(meta, d, 'sage/germline') },
             channel.topic('sage_somatic_dir').flatMap { meta, d ->             return get_dir_filepaths(meta, d, 'sage/somatic') },
@@ -82,7 +82,7 @@ workflow PREPARE_OUTPUTS_TARGETED {
             channel.topic('pave_germline_dir').flatMap { meta, d ->            return get_dir_filepaths(meta, d, 'pave/germline') },
             channel.topic('peach_dir').flatMap { meta, d ->                    return get_dir_filepaths(meta, d) },
             channel.topic('purple_dir').flatMap { meta, d ->                   return get_dir_filepaths(meta, d) },
-            channel.topic('redux_dir').flatMap { e -> def meta = e[0];         return e[1..-1].collect { d -> ["${meta.key}/alignments/${meta.sample_id}", d] } },
+            channel.topic('redux_dir').flatMap { meta, d ->                    return get_dir_filepaths(meta, d, "alignments/${meta.sample_id}") },
             channel.topic('sage_append_dir').flatMap { meta, d ->              return get_dir_filepaths(meta, d, "sage_append/${meta.output_file_id}") },
             channel.topic('sage_germline_dir').flatMap { meta, d ->            return get_dir_filepaths(meta, d, 'sage/germline') },
             channel.topic('sage_somatic_dir').flatMap { meta, d ->             return get_dir_filepaths(meta, d, 'sage/somatic') },
@@ -104,7 +104,7 @@ workflow PREPARE_OUTPUTS_PURITY_ESTIMATE {
         .mix(
             channel.topic('amber_dir').flatMap { meta, d ->            return get_dir_filepaths(meta, d) },
             channel.topic('cobalt_dir').flatMap { meta, d ->           return get_dir_filepaths(meta, d) },
-            channel.topic('redux_dir').flatMap { e -> def meta = e[0]; return e[1..-1].collect { d -> ["${meta.key}/alignments/${meta.sample_id}", d] } },
+            channel.topic('redux_dir').flatMap { meta, d ->            return get_dir_filepaths(meta, d, "alignments/${meta.sample_id}") },
             channel.topic('sage_append_dir').flatMap { meta, d ->      return get_dir_filepaths(meta, d, "sage_append/${meta.output_file_id}") },
             channel.topic('wisp_dir').flatMap { meta, d ->             return get_dir_filepaths(meta, d) },
 
@@ -128,7 +128,7 @@ workflow PREPARE_OUTPUTS_PANEL_RESOURCE_CREATION {
             channel.topic('gatk4_markduplicates_bai').map { meta, d ->    return ["${meta.key}/alignments/${meta.sample_id}/${d.name}", d] },
             channel.topic('gatk4_markduplicates_bam').map { meta, d ->    return ["${meta.key}/alignments/${meta.sample_id}/${d.name}", d] },
             channel.topic('isofox_dir').flatMap { meta, d ->              return get_dir_filepaths(meta, d) },
-            channel.topic('redux_dir').flatMap { e -> def meta = e[0];    return e[1..-1].collect { d -> ["${meta.key}/alignments/${meta.sample_id}", d] } },
+            channel.topic('redux_dir').flatMap { meta, d ->               return get_dir_filepaths(meta, d, "alignments/${meta.sample_id}") },
             channel.topic('sage_germline_dir').flatMap { meta, d ->       return get_dir_filepaths(meta, d, 'sage/germline') },
             channel.topic('sage_somatic_dir').flatMap { meta, d ->        return get_dir_filepaths(meta, d, 'sage/somatic') },
 
