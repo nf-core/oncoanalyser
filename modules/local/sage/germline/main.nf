@@ -71,7 +71,7 @@ process SAGE_GERMLINE {
     """
     mkdir -p germline/
 
-    touch germline/${meta.tumor_id}.sage.germline.vcf.gz
+    gzip <<< '' > germline/${meta.tumor_id}.sage.germline.vcf.gz
     touch germline/${meta.tumor_id}.sage.germline.vcf.gz.tbi
     touch germline/${meta.tumor_id}.sage.bqr.png
     touch germline/${meta.tumor_id}.sage.bqr.tsv

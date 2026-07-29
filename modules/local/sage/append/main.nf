@@ -65,8 +65,8 @@ process SAGE_APPEND {
     """
     mkdir -p sage_append_${meta.output_file_id}/
 
-    touch sage_append_${meta.output_file_id}/${meta.output_file_id}.frag_lengths.tsv.gz
-    touch sage_append_${meta.output_file_id}/${meta.output_file_id}.sage.append.vcf.gz
+    gzip <<< '' > sage_append_${meta.output_file_id}/${meta.output_file_id}.frag_lengths.tsv.gz
+    gzip <<< '' > sage_append_${meta.output_file_id}/${meta.output_file_id}.sage.append.vcf.gz
     touch sage_append_${meta.output_file_id}/${meta.output_file_id}.sage.append.vcf.gz.tbi
     touch sage_append_${meta.output_file_id}/${meta.output_file_id}_query.sage.bqr.tsv
 

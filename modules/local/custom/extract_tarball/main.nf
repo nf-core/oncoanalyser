@@ -22,7 +22,7 @@ process CUSTOM_EXTRACTTARBALL {
     """
     mkdir -p ${meta.id}/
 
-    tar ${args} -xzvf ${tarball} --strip-components 1 -C ${meta.id}/
+    tar ${args} -xzvf ${tarball} --transform 's#^\\./##' --strip-components 1 -C ${meta.id}/
     """
 
     stub:

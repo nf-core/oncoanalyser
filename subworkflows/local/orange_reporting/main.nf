@@ -115,7 +115,12 @@ workflow ORANGE_REPORTING {
             def dna_tumor_input_keys = ['sage_dir_somatic', 'purple_dir', 'qsee_dir', 'linx_annotation_dir_somatic', 'linx_plot_dir_somatic']
             def has_dna_tumor = dna_tumor_input_keys.every { k -> def i = input_indexes[k]; return inputs[i] }
 
-            runnable: has_dna_tumor
+            def purple_dir = inputs[input_indexes['purple_dir']]
+            def tumor_dna_id = Utils.getTumorDnaSampleName(meta)
+            def has_smlv_vcf = purple_dir ? purple_dir.resolve("${tumor_dna_id}.purple.somatic.vcf.gz").exists() : false
+            def has_purple_plots = purple_dir ? purple_dir.resolve("plot/${tumor_dna_id}.circos.png").exists() : false
+
+            runnable: has_dna_tumor && has_smlv_vcf && has_purple_plots
             skip: true
                 return meta
         }
@@ -141,7 +146,11 @@ workflow ORANGE_REPORTING {
             def dna_normal_input_keys = ['sage_dir_germline', 'linx_annotation_dir_germline']
             def has_dna_normal = dna_normal_input_keys.every { k -> def i = input_indexes[k]; return inputs[i] }
 
-            if (has_dna_normal) {
+            // NOTE(SW): guards against inputs where no germline smlv are called; relevant to minifed data
+            def purple_dir = inputs[input_indexes['purple_dir']]
+            def has_germline_smlv_vcf = purple_dir ? purple_dir.resolve("${meta_orange.tumor_id}.purple.germline.vcf.gz").exists() : false
+
+            if (has_dna_normal && has_germline_smlv_vcf) {
                 meta_orange.normal_dna_id = Utils.getNormalDnaSampleName(meta)
             } else {
                 dna_normal_input_keys.each { k -> def i = input_indexes[k]; inputs_selected[i] = [] }
@@ -186,7 +195,7 @@ workflow ORANGE_REPORTING {
 
                 // Germline
                 def sage_append_dir_germline = inputs_selected[input_indexes['sage_append_dir_germline']]
-                if (sage_append_dir_germline) {
+                if (sage_append_dir_germline && meta_orange.normal_dna_id) {
                     sage_append_vcf_germline = sage_append_dir_germline.resolve("${meta_orange.normal_dna_id}.sage.append.vcf.gz")
                 }
             }

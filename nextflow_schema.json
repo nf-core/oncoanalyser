@@ -185,7 +185,6 @@
                 "max_fastq_records": {
                     "type": "integer",
                     "description": "When positive, parallelise read alignment across multiple jobs by splitting fastq files into multiple fastq files with no more than max_fastq_records records.",
-                    "default": 10000000,
                     "fa_icon": "fas fa-cog"
                 },
                 "driver_gene_panel": {
@@ -264,13 +263,19 @@
                     "hidden": true,
                     "default": "s3://ngi-igenomes/igenomes/"
                 },
-                "hmf_genomes_base": {
+                "ref_data_base": {
                     "type": "string",
                     "format": "directory-path",
-                    "description": "The base path to the HMF genome reference files",
+                    "description": "The URL and root path to the oncoanalyser reference files",
                     "fa_icon": "fas fa-ban",
-                    "hidden": true,
-                    "default": "https://pub-cf6ba01919994c3cbd354659947f74d8.r2.dev/genomes"
+                    "hidden": true
+                },
+                "ref_data_genomes_base": {
+                    "type": "string",
+                    "format": "directory-path",
+                    "description": "The URL and root path to the Hartwig genome reference files",
+                    "fa_icon": "fas fa-ban",
+                    "hidden": true
                 },
                 "ref_data_hmf_data_path": {
                     "type": "string",

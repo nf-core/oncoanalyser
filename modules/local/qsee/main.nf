@@ -86,9 +86,9 @@ process QSEE {
     """
     mkdir -p qsee/
 
-    touch qsee/${meta.tumor_id}.qsee.status.tsv.gz
+    gzip <<< '' > qsee/${meta.tumor_id}.qsee.status.tsv.gz
     touch qsee/${meta.tumor_id}.qsee.vis.report.pdf
-    touch qsee/${meta.tumor_id}.qsee.vis.data.tsv.gz
+    gzip <<< '' > qsee/${meta.tumor_id}.qsee.vis.data.tsv.gz
 
     echo -e '${task.process}:\\n  stub: noversions\\n' > versions.yml
     """

@@ -79,11 +79,11 @@ process ESVEE {
     """
     mkdir -p esvee/
 
-    touch esvee/${meta.tumor_id}.esvee.unfiltered.vcf.gz
+    gzip <<< '' > esvee/${meta.tumor_id}.esvee.unfiltered.vcf.gz
     touch esvee/${meta.tumor_id}.esvee.unfiltered.vcf.gz.tbi
-    touch esvee/${meta.tumor_id}.esvee.somatic.vcf.gz
+    gzip <<< '' > esvee/${meta.tumor_id}.esvee.somatic.vcf.gz
     touch esvee/${meta.tumor_id}.esvee.somatic.vcf.gz.tbi
-    touch esvee/${meta.tumor_id}.esvee.germline.vcf.gz
+    gzip <<< '' > esvee/${meta.tumor_id}.esvee.germline.vcf.gz
     touch esvee/${meta.tumor_id}.esvee.germline.vcf.gz.tbi
 
     echo -e '${task.process}:\\n  stub: noversions\\n' > versions.yml

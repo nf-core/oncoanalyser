@@ -1,9 +1,9 @@
-Changes in module 'nf-core/samtools/faidx'
+Changes in component 'nf-core/samtools/faidx'
 'modules/nf-core/samtools/faidx/environment.yml' is unchanged
 Changes in 'samtools/faidx/meta.yml':
 --- modules/nf-core/samtools/faidx/meta.yml
 +++ modules/nf-core/samtools/faidx/meta.yml
-@@ -16,60 +16,19 @@
+@@ -16,60 +16,22 @@
        licence: ["MIT"]
        identifier: biotools:samtools
  input:
@@ -40,7 +40,7 @@ Changes in 'samtools/faidx/meta.yml':
 -          type: file
 -          description: FASTA file
 -          pattern: "*.{fa}"
-   - fai:
+-  - fai:
 -      - meta:
 -          type: map
 -          description: |
@@ -60,9 +60,13 @@ Changes in 'samtools/faidx/meta.yml':
 -          type: file
 -          description: Optional gzip index file for compressed inputs
 -          pattern: "*.gzi"
++  - samtools_fai:
 +    type: file
 +    description: FASTA index file
 +    pattern: "*.{fai}"
++  - command_files:
++    type: list
++    description: List of command files
    - versions:
 -      - versions.yml:
 -          type: file
@@ -78,7 +82,7 @@ Changes in 'samtools/faidx/meta.yml':
 Changes in 'samtools/faidx/main.nf':
 --- modules/nf-core/samtools/faidx/main.nf
 +++ modules/nf-core/samtools/faidx/main.nf
-@@ -8,14 +8,11 @@
+@@ -8,14 +8,12 @@
          'biocontainers/samtools:1.21--h50ea8bc_0' }"
  
      input:
@@ -91,12 +95,13 @@ Changes in 'samtools/faidx/main.nf':
 -    tuple val(meta), path ("*.fai")        , emit: fai, optional: true
 -    tuple val(meta), path ("*.gzi")        , emit: gzi, optional: true
 -    path "versions.yml"                    , emit: versions
-+    path "*.fai"       , emit: fai
-+    path "versions.yml", emit: versions
++    path '*.fai'                                             , topic: samtools_fai
++    tuple val([:]), val('samtools_faidx'), path('.command.*'), topic: command_files
++    path 'versions.yml'                                      , topic: versions
  
      when:
      task.ext.when == null || task.ext.when
-@@ -35,16 +32,9 @@
+@@ -35,16 +33,9 @@
      """
  
      stub:

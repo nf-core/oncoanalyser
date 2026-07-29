@@ -11,11 +11,11 @@ class Constants {
     static List PANELS_DEFINED = ['tso500']
 
 
-    static String HMF_DATA_37_PATH = 'https://pub-cf6ba01919994c3cbd354659947f74d8.r2.dev/hmf_reference_data/hmftools/hmf_pipeline_resources.37_v2.3.0--2.tar.gz'
-    static String HMF_DATA_38_PATH = 'https://pub-cf6ba01919994c3cbd354659947f74d8.r2.dev/hmf_reference_data/hmftools/hmf_pipeline_resources.38_v2.3.0--2.tar.gz'
+    static String HMF_DATA_37_PATH = 'hmf_reference_data/hmftools/hmf_pipeline_resources.37_v2.3.0--2.tar.gz'
+    static String HMF_DATA_38_PATH = 'hmf_reference_data/hmftools/hmf_pipeline_resources.38_v2.3.0--2.tar.gz'
 
-    static String TSO500_PANEL_37_PATH = 'https://pub-cf6ba01919994c3cbd354659947f74d8.r2.dev/hmf_reference_data/panels/hmf_panel_resources.tso500.37_v2.3.0--2.tar.gz'
-    static String TSO500_PANEL_38_PATH = 'https://pub-cf6ba01919994c3cbd354659947f74d8.r2.dev/hmf_reference_data/panels/hmf_panel_resources.tso500.38_v2.3.0--2.tar.gz'
+    static String TSO500_PANEL_37_PATH = 'hmf_reference_data/panels/hmf_panel_resources.tso500.37_v2.3.0--2.tar.gz'
+    static String TSO500_PANEL_38_PATH = 'hmf_reference_data/panels/hmf_panel_resources.tso500.38_v2.3.0--2.tar.gz'
 
 
     static Integer DEFAULT_ISOFOX_READ_LENGTH_WTS = 151

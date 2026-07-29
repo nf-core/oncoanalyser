@@ -679,7 +679,7 @@ workflow WGTS {
     //
     // SUBWORKFLOW: Run TEAL for characterisation of telometic regions
     //
-    if (run_config.stages.teal) {
+    if (run_config.stages.teal && run_config.stages.purple) {
 
         TEAL_CHARACTERISATION(
             ch_inputs,
