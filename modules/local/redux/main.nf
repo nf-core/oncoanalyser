@@ -150,8 +150,8 @@ process REDUX {
     touch redux_${meta.sample_id}/${meta.sample_id}.redux.duplicate_freq.tsv
     touch redux_${meta.sample_id}/${meta.sample_id}.redux.jitter_params.tsv
     touch redux_${meta.sample_id}/${meta.sample_id}.redux.msi_prediction.tsv
-    touch redux_${meta.sample_id}/${meta.sample_id}.redux.ms_table.tsv.gz
-    touch redux_${meta.sample_id}/${meta.sample_id}.redux.repeat.tsv.gz
+    gzip <<< '' > redux_${meta.sample_id}/${meta.sample_id}.redux.ms_table.tsv.gz
+    gzip <<< '' > redux_${meta.sample_id}/${meta.sample_id}.redux.repeat.tsv.gz
 
     if [[ -n "${umi_enable}" ]]; then
         touch redux_${meta.sample_id}/${meta.sample_id}.umi_coord_freq.tsv

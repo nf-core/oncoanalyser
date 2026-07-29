@@ -56,7 +56,7 @@ process LINX_SOMATIC {
     """
     mkdir linx_somatic/
 
-    touch linx_somatic/.stub
+    touch linx_somatic/.placeholder
 
     echo -e '${task.process}:\\n  stub: noversions\\n' > versions.yml
     """

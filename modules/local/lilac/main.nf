@@ -84,7 +84,7 @@ process LILAC {
     """
     mkdir -p lilac/
 
-    touch lilac/.stub
+    touch lilac/.placeholder
 
     echo -e '${task.process}:\\n  stub: noversions\\n' > versions.yml
     """
