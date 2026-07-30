@@ -101,13 +101,44 @@ workflow WGTS {
 
     if (run_config.stages.alignment) {
 
+        // NOTE(SW): fastp can be run twice, multiple passes of the FASTQ in some scenarios, typically not computationally
+        // expensive in such situations, so separation between umi / split processing maintained
+
         // channel: [ meta, fastq_info, fastq_fwd, fastq_rev ]
         ch_fastq_dna = getDnaFastqChannel(ch_inputs)
         ch_fastq_rna = getRnaFastqChannel(ch_inputs)
 
+        // channel: [ meta, fastq_info, fastq_fwd, fastq_rev ]
+        ch_align_dna_input = channel.empty()
+        ch_align_rna_input = channel.empty()
+        if (params.fastp_umi_enabled || params.fastq_tools_umi_enabled) {
+
+            READ_UMI_PROCESSING(
+                ch_inputs,
+                ch_fastq_dna,
+                ch_fastq_rna,
+                hmf_data.known_umis,
+                params.fastp_umi_enabled,
+                params.fastp_umi_location,
+                params.fastp_umi_length,
+                params.fastp_umi_skip,
+                params.fastq_tools_umi_enabled,
+                params.fastq_tools_umi_delim,
+            )
+
+            ch_align_dna_input = ch_align_dna_input.mix(READ_UMI_PROCESSING.out.fastq_dna)
+            ch_align_rna_input = ch_align_rna_input.mix(READ_UMI_PROCESSING.out.fastq_rna)
+
+        } else {
+
+            ch_align_dna_input = ch_fastq_dna
+            ch_align_rna_input = ch_fastq_rna
+
+        }
+
         READ_ALIGNMENT_DNA(
             ch_inputs,
-            ch_fastq_dna,
+            ch_align_dna_input,
             ref_data.genome_fasta,
             ref_data.genome_bwamem2_index,
             params.max_fastq_records,
@@ -115,7 +146,7 @@ workflow WGTS {
 
         READ_ALIGNMENT_RNA(
             ch_inputs,
-            ch_fastq_rna,
+            ch_align_rna_input,
             ref_data.genome_star_index,
         )
 
@@ -161,8 +192,8 @@ workflow WGTS {
             [],  // msi_model_error_rates
             params.sequencing_platform,
             false,  // targeted_mode
-            false,  // umi_enable
-            '',  // umi_duplex_delim
+            params.redux_umi_enabled,
+            params.redux_umi_duplex_delim,
         )
 
         ch_redux_tumor_out = ch_redux_tumor_out.mix(REDUX_PROCESSING.out.tumor_dir)
