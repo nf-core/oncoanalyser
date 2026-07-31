@@ -11,8 +11,8 @@ process QSEE {
     tuple val(meta),
         path(redux_tsvs_tumor, stageAs: "redux_tsvs_tumor/*"),
         path(redux_tsvs_normal, stageAs: "redux_tsvs_normal/*"),
-        path(bamtools_dir_tumor, stageAs: 'bamtools_tumor/'),
-        path(bamtools_dir_normal, stageAs: 'bamtools_tumor/'),
+        path(bamtools_dir_tumor, stageAs: 'bamtools_tumor'),
+        path(bamtools_dir_normal, stageAs: 'bamtools_normal'),
         path(cobalt_dir),
         path(esvee_dir),
         path(purple_dir)
