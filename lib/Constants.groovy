@@ -11,11 +11,10 @@ class Constants {
     static List PANELS_DEFINED = ['tso500']
 
 
-    static String HMF_DATA_37_PATH = 'hmf_reference_data/hmftools/hmf_pipeline_resources.37_v2.3.0--2.tar.gz'
-    static String HMF_DATA_38_PATH = 'hmf_reference_data/hmftools/hmf_pipeline_resources.38_v2.3.0--2.tar.gz'
+    static String HMF_DATA_37_PATH = 'hartwig/pipeline_resources/hmf_pipeline_resources.37_v3.0.0--7.tar.gz'
+    static String HMF_DATA_38_PATH = 'hartwig/pipeline_resources/hmf_pipeline_resources.38_v3.0.0--7.tar.gz'
 
-    static String TSO500_PANEL_37_PATH = 'hmf_reference_data/panels/hmf_panel_resources.tso500.37_v2.3.0--2.tar.gz'
-    static String TSO500_PANEL_38_PATH = 'hmf_reference_data/panels/hmf_panel_resources.tso500.38_v2.3.0--2.tar.gz'
+    static String TSO500_PANEL_37_PATH = 'hartwig/panel_resources/hmf_panel_resources.tso500.37_v3.0.0--7.tar.gz'
 
 
     static Integer DEFAULT_ISOFOX_READ_LENGTH_WTS = 151

@@ -615,30 +615,30 @@ haplotypes since this requires careful processing and is hence left to the user.
 
 _GRCh37 genome (Hartwig): `GRCh37_hmf`_
 
-| Type                 | Link                                                                                                                                                                                                |
-| :------------------- | :-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| FASTA                | [Homo_sapiens.GRCh37.GATK.illumina.fasta](https://pub-cf6ba01919994c3cbd354659947f74d8.r2.dev/genomes/GRCh37_hmf/24.0/Homo_sapiens.GRCh37.GATK.illumina.fasta)                                      |
-| FASTA index          | [Homo_sapiens.GRCh37.GATK.illumina.fasta.fai](https://pub-cf6ba01919994c3cbd354659947f74d8.r2.dev/genomes/GRCh37_hmf/24.0/samtools_index/1.16/Homo_sapiens.GRCh37.GATK.illumina.fasta.fai)          |
-| FASTA seq dictionary | [Homo_sapiens.GRCh37.GATK.illumina.fasta.dict](https://pub-cf6ba01919994c3cbd354659947f74d8.r2.dev/genomes/GRCh37_hmf/24.0/samtools_index/1.16/Homo_sapiens.GRCh37.GATK.illumina.fasta.dict)        |
-| BWA-MEM index image  | [Homo_sapiens.GRCh37.GATK.illumina.fasta.img](https://pub-cf6ba01919994c3cbd354659947f74d8.r2.dev/genomes/GRCh37_hmf/24.0/bwa_index_image/0.7.17-r1188/Homo_sapiens.GRCh37.GATK.illumina.fasta.img) |
-| BWA-MEM2 index       | [bwa-mem2_index-2.2.1.tar.gz](https://pub-cf6ba01919994c3cbd354659947f74d8.r2.dev/genomes/GRCh37_hmf/25.1/bwa-mem2_index-2.2.1.tar.gz)                                                              |
-| GRIDSS index         | [gridss_index-2.13.2.tar.gz](https://pub-cf6ba01919994c3cbd354659947f74d8.r2.dev/genomes/GRCh37_hmf/25.1/gridss_index-2.13.2.tar.gz)                                                                |
-| STAR index           | [star_index-gencode_19-2.7.3a.tar.gz](https://pub-cf6ba01919994c3cbd354659947f74d8.r2.dev/genomes/GRCh37_hmf/25.1/star_index-gencode_19-2.7.3a.tar.gz)                                              |
-| WiGiTS data          | [hmf_pipeline_resources.37_v3.0.0--7.tar.gz](https://pub-cf6ba01919994c3cbd354659947f74d8.r2.dev/hmf_reference_data/hmftools/hmf_pipeline_resources.37_v3.0.0--7.tar.gz)                            |
-| TSO500 panel data    | [hmf_panel_resources.tso500.37_v3.0.0--7.tar.gz](https://pub-cf6ba01919994c3cbd354659947f74d8.r2.dev/hmf_reference_data/panels/hmf_panel_resources.tso500.37_v3.0.0--7.tar.gz)                      |
+| Type                 | Link                                                                                                                                                                                               |
+| :------------------- | :--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| FASTA                | [Homo_sapiens.GRCh37.GATK.illumina.fasta](https://data.oncoanalyser.com/r2/reference/dist/v1/genomes/GRCh37_hmf/26.1/Homo_sapiens.GRCh37.GATK.illumina.fasta)                                      |
+| FASTA index          | [Homo_sapiens.GRCh37.GATK.illumina.fasta.fai](https://data.oncoanalyser.com/r2/reference/dist/v1/genomes/GRCh37_hmf/26.1/samtools_index-1.16/Homo_sapiens.GRCh37.GATK.illumina.fasta.fai)          |
+| FASTA seq dictionary | [Homo_sapiens.GRCh37.GATK.illumina.fasta.dict](https://data.oncoanalyser.com/r2/reference/dist/v1/genomes/GRCh37_hmf/26.1/samtools_index-1.16/Homo_sapiens.GRCh37.GATK.illumina.fasta.dict)        |
+| BWA-MEM index image  | [Homo_sapiens.GRCh37.GATK.illumina.fasta.img](https://data.oncoanalyser.com/r2/reference/dist/v1/genomes/GRCh37_hmf/26.1/bwa_index_image-gatk-4.6.1.0/Homo_sapiens.GRCh37.GATK.illumina.fasta.img) |
+| BWA-MEM2 index       | [bwa-mem2_index-2.2.1.tar.gz](https://data.oncoanalyser.com/r2/reference/dist/v1/genomes/GRCh37_hmf/26.1/bwa-mem2_index-2.2.1.tar.gz)                                                              |
+| GRIDSS index         | [gridss_index-2.13.2.tar.gz](https://data.oncoanalyser.com/r2/reference/dist/v1/genomes/GRCh37_hmf/26.1/gridss_index-2.13.2.tar.gz)                                                                |
+| STAR index           | [star_index-gencode_19-2.7.3a.tar.gz](https://data.oncoanalyser.com/r2/reference/dist/v1/genomes/GRCh37_hmf/26.1/star_index-gencode_19-2.7.3a.tar.gz)                                              |
+| WiGiTS data          | [hmf_pipeline_resources.37_v3.0.0--7.tar.gz](https://data.oncoanalyser.com/r2/reference/dist/v1/hartwig/pipeline_resources/hmf_pipeline_resources.37_v3.0.0--7.tar.gz)                             |
+| TSO500 panel data    | [hmf_panel_resources.tso500.37_v3.0.0--7.tar.gz](https://data.oncoanalyser.com/r2/reference/dist/v1/hartwig/panel_resources/hmf_panel_resources.tso500.37_v3.0.0--7.tar.gz)                        |
 
 _GRCh38 genome (Hartwig): `GRCh38_hmf`_
 
-| Type                 | Link                                                                                                                                                                                                  |
-|:---------------------|:------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| FASTA                | [GRCh38_masked_exclusions_alts_hlas.fasta](https://pub-cf6ba01919994c3cbd354659947f74d8.r2.dev/genomes/GRCh38_hmf/25.1/GRCh38_masked_exclusions_alts_hlas.fasta)                                      |
-| FASTA index          | [GRCh38_masked_exclusions_alts_hlas.fasta.fai](https://pub-cf6ba01919994c3cbd354659947f74d8.r2.dev/genomes/GRCh38_hmf/25.1/samtools_index-1.16/GRCh38_masked_exclusions_alts_hlas.fasta.fai)          |
-| FASTA seq dictionary | [GRCh38_masked_exclusions_alts_hlas.fasta.dict](https://pub-cf6ba01919994c3cbd354659947f74d8.r2.dev/genomes/GRCh38_hmf/25.1/samtools_index-1.16/GRCh38_masked_exclusions_alts_hlas.fasta.dict)        |
-| BWA-MEM index image  | [GRCh38_masked_exclusions_alts_hlas.fasta.img](https://pub-cf6ba01919994c3cbd354659947f74d8.r2.dev/genomes/GRCh38_hmf/25.1/bwa_index_image-gatk-4.6.1.0/GRCh38_masked_exclusions_alts_hlas.fasta.img) |
-| BWA-MEM2 index       | [bwa-mem2_index-2.2.1.tar.gz](https://pub-cf6ba01919994c3cbd354659947f74d8.r2.dev/genomes/GRCh38_hmf/25.1/bwa-mem2_index-2.2.1.tar.gz)                                                                |
-| GRIDSS index         | [gridss_index-2.13.2.tar.gz](https://pub-cf6ba01919994c3cbd354659947f74d8.r2.dev/genomes/GRCh38_hmf/25.1/gridss_index-2.13.2.tar.gz)                                                                  |
-| STAR index           | [star_index-gencode_38-2.7.3a.tar.gz](https://pub-cf6ba01919994c3cbd354659947f74d8.r2.dev/genomes/GRCh38_hmf/25.1/star_index-gencode_38-2.7.3a.tar.gz)                                                |
-| WiGiTS data          | [hmf_pipeline_resources.38_v3.0.0--7.tar.gz](https://pub-cf6ba01919994c3cbd354659947f74d8.r2.dev/hmf_reference_data/hmftools/hmf_pipeline_resources.38_v3.0.0--7.tar.gz)                              |
+| Type                 | Link                                                                                                                                                                                                 |
+|:---------------------|:-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| FASTA                | [GRCh38_masked_exclusions_alts_hlas.fasta](https://data.oncoanalyser.com/r2/reference/dist/v1/genomes/GRCh38_hmf/26.1/GRCh38_masked_exclusions_alts_hlas.fasta)                                      |
+| FASTA index          | [GRCh38_masked_exclusions_alts_hlas.fasta.fai](https://data.oncoanalyser.com/r2/reference/dist/v1/genomes/GRCh38_hmf/26.1/samtools_index-1.16/GRCh38_masked_exclusions_alts_hlas.fasta.fai)          |
+| FASTA seq dictionary | [GRCh38_masked_exclusions_alts_hlas.fasta.dict](https://data.oncoanalyser.com/r2/reference/dist/v1/genomes/GRCh38_hmf/26.1/samtools_index-1.16/GRCh38_masked_exclusions_alts_hlas.fasta.dict)        |
+| BWA-MEM index image  | [GRCh38_masked_exclusions_alts_hlas.fasta.img](https://data.oncoanalyser.com/r2/reference/dist/v1/genomes/GRCh38_hmf/26.1/bwa_index_image-gatk-4.6.1.0/GRCh38_masked_exclusions_alts_hlas.fasta.img) |
+| BWA-MEM2 index       | [bwa-mem2_index-2.2.1.tar.gz](https://data.oncoanalyser.com/r2/reference/dist/v1/genomes/GRCh38_hmf/26.1/bwa-mem2_index-2.2.1.tar.gz)                                                                |
+| GRIDSS index         | [gridss_index-2.13.2.tar.gz](https://data.oncoanalyser.com/r2/reference/dist/v1/genomes/GRCh38_hmf/26.1/gridss_index-2.13.2.tar.gz)                                                                  |
+| STAR index           | [star_index-gencode_38-2.7.3a.tar.gz](https://data.oncoanalyser.com/r2/reference/dist/v1/genomes/GRCh38_hmf/26.1/star_index-gencode_38-2.7.3a.tar.gz)                                                |
+| WiGiTS data          | [hmf_pipeline_resources.38_v3.0.0--7.tar.gz](https://data.oncoanalyser.com/r2/reference/dist/v1/hartwig/pipeline_resources/hmf_pipeline_resources.38_v3.0.0--7.tar.gz)                               |
 
 ## Pipeline modes
 
