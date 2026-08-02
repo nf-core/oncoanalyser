@@ -36,6 +36,13 @@ class Constants {
         ULTIMA,
     }
 
+    static enum UmiType {
+        KAPA,
+        MSK,
+        TSO500,
+        TWIST,
+    }
+
     static enum RefDataType {
         // Compound types
         TARGETED,
@@ -88,12 +95,19 @@ class Constants {
     static List DEFAULT_EXCLUDED_PROCESSES = [] // For experimental tools
 
     static enum FileType {
-        // Generic
-        BAI,
-        BAM,
-        CRAI,
-        CRAM,
+        // Input only
         FASTQ,
+        BAM,
+        CRAM,
+        BAM_REDUX,
+        CRAM_REDUX,
+        BAI,
+        CRAI,
+
+        // Generic (internal representation)
+        ALN,
+        ALN_REDUX,
+        IDX,
 
         // Process
         AMBER_DIR,
@@ -144,51 +158,52 @@ class Constants {
 
     static Map INPUT = [
 
-        // Bams
-        BAM_DNA_TUMOR: [
-            FileType.BAM,
+        // Alignments
+        // NOTE(SW): The ALN_DNA_* are only used in REDUX, where the ALN_REDUX can only run when they're set to have only TSVs generated
+        ALN_DNA_TUMOR: [
+            [FileType.ALN, FileType.ALN_REDUX],
             SampleType.TUMOR,
             SequenceType.DNA,
         ],
 
-        BAM_DNA_NORMAL: [
-            FileType.BAM,
+        ALN_DNA_NORMAL: [
+            [FileType.ALN, FileType.ALN_REDUX],
             SampleType.NORMAL,
             SequenceType.DNA,
         ],
 
-        BAM_DNA_DONOR: [
-            FileType.BAM,
+        ALN_DNA_DONOR: [
+            [FileType.ALN, FileType.ALN_REDUX],
             SampleType.DONOR,
             SequenceType.DNA,
         ],
 
-        BAM_RNA_TUMOR: [
-            FileType.BAM,
+        ALN_RNA_TUMOR: [
+            FileType.ALN,
             SampleType.TUMOR,
             SequenceType.RNA,
         ],
 
-        BAI_DNA_TUMOR: [
-            FileType.BAI,
+        IDX_DNA_TUMOR: [
+            FileType.IDX,
             SampleType.TUMOR,
             SequenceType.DNA,
         ],
 
-        BAI_DNA_NORMAL: [
-            FileType.BAI,
+        IDX_DNA_NORMAL: [
+            FileType.IDX,
             SampleType.NORMAL,
             SequenceType.DNA,
         ],
 
-        BAI_DNA_DONOR: [
-            FileType.BAI,
+        IDX_DNA_DONOR: [
+            FileType.IDX,
             SampleType.DONOR,
             SequenceType.DNA,
         ],
 
-        BAI_RNA_TUMOR: [
-            FileType.BAI,
+        IDX_RNA_TUMOR: [
+            FileType.IDX,
             SampleType.TUMOR,
             SequenceType.RNA,
         ],

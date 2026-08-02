@@ -2,9 +2,6 @@
 // SAGE is a precise and highly sensitive somatic SNV, MNV and small INDEL caller
 //
 
-import Constants
-import Utils
-
 include { SAGE_VISUALISER } from '../../../modules/local/sage/visualiser/main'
 
 workflow SAGE_PLOTTING {
@@ -30,10 +27,6 @@ workflow SAGE_PLOTTING {
     targeted_mode               // boolean: [mandatory] Set targeted mode
 
     main:
-    // Channel for version.yml files
-    // channel: [ versions.yml ]
-    ch_versions = Channel.empty()
-
     // Select input sources then sort
     // channel: runnable: [ meta, tumor_aln, tumor_idx, normal_aln, normal_idx, donor_aln, donor_idx, [redux_tsv, ...], purple_dir ]
     // channel: skip: [ meta ]
@@ -56,7 +49,7 @@ workflow SAGE_PLOTTING {
             def redux_tsvs_tumor = Utils.getTumorReduxTsvs(meta, redux_dir_tumor_selected)
             def redux_tsvs_normal = Utils.getNormalReduxTsvs(meta, redux_dir_normal_selected)
             def redux_tsvs_donor = Utils.getDonorReduxTsvs(meta, redux_dir_donor_selected)
-            def redux_tsvs = [*redux_tsvs_tumor, *redux_tsvs_normal, *redux_tsvs_donor].findAll{ it.exists() }
+            def redux_tsvs = (redux_tsvs_tumor + redux_tsvs_normal + redux_tsvs_donor).findAll{ tsv -> tsv.exists() }
 
             return [
                 meta,
@@ -128,18 +121,14 @@ workflow SAGE_PLOTTING {
         targeted_mode,
     )
 
-    ch_versions = ch_versions.mix(SAGE_VISUALISER.out.versions)
-
     // Set outputs, restoring original meta
     // channel: [ meta, sage_visualiser_dir ]
-    ch_outputs = Channel.empty()
+    ch_outputs = channel.empty()
         .mix(
-            WorkflowOncoanalyser.restoreMeta(SAGE_VISUALISER.out.sage_visualiser_dir, ch_inputs),
+            WorkflowOncoanalyser.restoreMeta(channel.topic('sage_visualiser_dir'), ch_inputs),
             ch_inputs_sorted.skip.map { meta -> [meta, []] },
         )
 
     emit:
     visualiser_dir = ch_outputs  // channel: [ meta, sage_plot_dir ]
-
-    versions       = ch_versions // channel: [ versions.yml ]
 }

@@ -13,8 +13,9 @@ process BWAMEM2_INDEX {
     path alt
 
     output:
-    path "bwa-mem2_index", emit: index
-    path "versions.yml"  , emit: versions
+    path 'bwa-mem2_index'                                   , topic: bwamem2_index
+    tuple val([:]), val('bwamem2_index'), path('.command.*'), topic: command_files
+    path 'versions.yml'                                     , topic: versions
 
     when:
     task.ext.when == null || task.ext.when
@@ -46,6 +47,7 @@ process BWAMEM2_INDEX {
 
     """
     mkdir -p bwa-mem2_index/
+
     touch bwa-mem2_index/${prefix}.0123
     touch bwa-mem2_index/${prefix}.ann
     touch bwa-mem2_index/${prefix}.pac

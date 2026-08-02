@@ -2,9 +2,6 @@
 // LINX plotting visualises clusters structural variants
 //
 
-import Constants
-import Utils
-
 include { LINXREPORT      } from '../../../modules/local/linxreport/main'
 include { LINX_VISUALISER } from '../../../modules/local/linx/visualiser/main'
 
@@ -22,10 +19,6 @@ workflow LINX_PLOTTING {
     ensembl_data_resources      // channel: [mandatory] /path/to/ensembl_data_resources/
 
     main:
-    // Channel for versions.yml files
-    // channel: [ versions.yml ]
-    ch_versions = Channel.empty()
-
     //
     // STEP: Handle inputs
     //
@@ -81,8 +74,6 @@ workflow LINX_PLOTTING {
         ensembl_data_resources,
     )
 
-    ch_versions = ch_versions.mix(LINX_VISUALISER.out.versions)
-
     //
     // MODULE: gpgr LINX report
     //
@@ -90,9 +81,9 @@ workflow LINX_PLOTTING {
     // channel: [ meta_gpgr, linx_annotation_dir, linx_visualiser_dir ]
     ch_gpgr_linx_inputs = WorkflowOncoanalyser.groupByMeta(
         ch_inputs_sorted.runnable,
-        WorkflowOncoanalyser.restoreMeta(LINX_VISUALISER.out.linx_visualiser_dir, ch_inputs),
+        WorkflowOncoanalyser.restoreMeta(channel.topic('linx_visualiser_plots'), ch_inputs),
     )
-        .map { meta, linx_annotation_dir, amber_dir, cobalt_dir, purple_dir, linx_visualiser_dir ->
+        .map { meta, linx_annotation_dir, _amber_dir, _cobalt_dir, _purple_dir, linx_visualiser_dir ->
 
             def meta_gpgr_linx = [
                 key: meta.group_id,
@@ -108,21 +99,17 @@ workflow LINX_PLOTTING {
         ch_gpgr_linx_inputs,
     )
 
-    ch_versions = ch_versions.mix(LINXREPORT.out.versions)
-
     //
     // STEP: Handle outputs
     //
     // Set outputs, restoring original meta
     // channel: [ meta, linx_visualiser_dir ]
-    ch_outputs = Channel.empty()
+    ch_outputs = channel.empty()
         .mix(
-            WorkflowOncoanalyser.restoreMeta(LINX_VISUALISER.out.linx_visualiser_dir, ch_inputs),
+            WorkflowOncoanalyser.restoreMeta(channel.topic('linx_visualiser_plots'), ch_inputs),
             ch_inputs_sorted.skip.map { meta -> [meta, []] },
         )
 
     emit:
-    visualiser_dir = ch_outputs   // channel: [ meta, linx_visualiser_dir ]
-
-    versions       = ch_versions  // channel: [ versions.yml ]
+    visualiser_dir = ch_outputs // channel: [ meta, linx_visualiser_dir ]
 }

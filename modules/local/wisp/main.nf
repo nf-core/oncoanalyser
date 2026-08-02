@@ -21,9 +21,9 @@ process WISP {
     val targeted_mode
 
     output:
-    path 'wisp/'       , emit: wisp_dir
-    path 'versions.yml', emit: versions
-    path '.command.*'  , emit: command_files
+    tuple val(meta), path('wisp/')                  , topic: wisp_dir
+    tuple val(meta), val('wisp'), path('.command.*'), topic: command_files
+    path 'versions.yml'                             , topic: versions
 
     when:
     task.ext.when == null || task.ext.when

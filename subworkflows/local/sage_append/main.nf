@@ -2,9 +2,6 @@
 // SAGE append adds additional sample data to an existing SAGE VCF
 //
 
-import Constants
-import Utils
-
 include { SAGE_APPEND as SAGE_APPEND_SOMATIC  } from '../../../modules/local/sage/append/main'
 include { SAGE_APPEND as SAGE_APPEND_GERMLINE } from '../../../modules/local/sage/append/main'
 
@@ -28,15 +25,11 @@ workflow SAGE_APPEND {
     targeted_mode       // boolean: [mandatory] Set targeted mode
 
     main:
-    // Channel for version.yml files
-    // channel: [ versions.yml ]
-    ch_versions = Channel.empty()
-
     //
     // STEP: Handle inputs
     //
     def run_mode = Utils.getEnumFromString(params.mode, Constants.RunMode)
-    def purity_estimate_mode = run_mode === Constants.RunMode.PURITY_ESTIMATE
+    def purity_estimate_mode = run_mode == Constants.RunMode.PURITY_ESTIMATE
 
     // Select input sources then sort
     // channel: runnable: [ meta, purple_dir, tumor_dna_aln, tumor_dna_idx, [redux_tsv_tumor, ...], tumor_rna_aln, tumor_rna_idx ]
@@ -58,8 +51,8 @@ workflow SAGE_APPEND {
                 tumor_aln,
                 tumor_idx,
                 redux_tsvs_tumor,
-                Utils.selectCurrentOrExisting(tumor_rna_aln, meta, Constants.INPUT.BAM_RNA_TUMOR),
-                Utils.selectCurrentOrExisting(tumor_rna_idx, meta, Constants.INPUT.BAI_RNA_TUMOR),
+                Utils.selectCurrentOrExisting(tumor_rna_aln, meta, Constants.INPUT.ALN_RNA_TUMOR),
+                Utils.selectCurrentOrExisting(tumor_rna_idx, meta, Constants.INPUT.IDX_RNA_TUMOR),
             ]
 
         }
@@ -98,7 +91,7 @@ workflow SAGE_APPEND {
     // Create process input channel
     // channel: [ meta_append, purple_smlv_vcf, [aln, ...], [idx, ...], [redux_tsvs_tumor, ...] ]
     ch_sage_append_germline_inputs = ch_inputs_germline_sorted.runnable
-        .map { meta, purple_dir, tumor_dna_aln, tumor_dna_idx, redux_tsvs_tumor, tumor_rna_aln, tumor_rna_idx ->
+        .map { meta, purple_dir, _tumor_dna_aln, _tumor_dna_idx, _redux_tsvs_tumor, tumor_rna_aln, tumor_rna_idx ->
 
             // NOTE(SW): explicit in expectation to always obtain the primary tumor DNA sample ID here
             def tumor_dna_id = Utils.getTumorDnaSampleName(meta, primary: true)
@@ -106,6 +99,7 @@ workflow SAGE_APPEND {
 
             def meta_append = [
                 key: meta.group_id,
+                topic_key: 'germline',
                 id: "${meta.group_id}_${output_file_id}",
                 output_file_id: output_file_id,
                 reference_ids: [Utils.getTumorRnaSampleName(meta)],
@@ -130,8 +124,6 @@ workflow SAGE_APPEND {
         sequencing_platform,
         targeted_mode,
     )
-
-    ch_versions = ch_versions.mix(SAGE_APPEND_GERMLINE.out.versions)
 
     //
     // MODULE: SAGE append somatic
@@ -169,6 +161,7 @@ workflow SAGE_APPEND {
 
             def meta_append = [
                 key: meta.group_id,
+                topic_key: 'somatic',
                 id: "${meta.group_id}_${output_file_id}",
                 output_file_id: output_file_id,
                 reference_ids: [],
@@ -207,24 +200,22 @@ workflow SAGE_APPEND {
         targeted_mode,
     )
 
-    ch_versions = ch_versions.mix(SAGE_APPEND_SOMATIC.out.versions)
-
     //
     // STEP: Handle outputs
     //
     // Set outputs, restoring original meta
     // channel: [ meta, sage_append_dir ]
-    ch_outputs_somatic = Channel.empty()
+    ch_outputs_somatic = channel.empty()
         .mix(
-            WorkflowOncoanalyser.restoreMeta(SAGE_APPEND_SOMATIC.out.sage_append_dir, ch_inputs),
+            WorkflowOncoanalyser.restoreMeta(channel.topic('sage_append_dir').filter { d -> d[0].topic_key == 'somatic' }, ch_inputs),
             ch_inputs_somatic_sorted.skip.map { meta -> [meta, []] },
             ch_inputs_sorted.skip.map { meta -> [meta, []] },
         )
 
     // channel: [ meta, sage_append_dir ]
-    ch_outputs_germline = Channel.empty()
+    ch_outputs_germline = channel.empty()
         .mix(
-            WorkflowOncoanalyser.restoreMeta(SAGE_APPEND_GERMLINE.out.sage_append_dir, ch_inputs),
+            WorkflowOncoanalyser.restoreMeta(channel.topic('sage_append_dir').filter { d -> d[0].topic_key == 'germline' }, ch_inputs),
             ch_inputs_germline_sorted.skip.map { meta -> [meta, []] },
             ch_inputs_sorted.skip.map { meta -> [meta, []] },
         )
@@ -232,6 +223,4 @@ workflow SAGE_APPEND {
     emit:
     somatic_dir  = ch_outputs_somatic  // channel: [ meta, sage_append_dir ]
     germline_dir = ch_outputs_germline // channel: [ meta, sage_append_dir ]
-
-    versions     = ch_versions         // channel: [ versions.yml ]
 }

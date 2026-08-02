@@ -13,11 +13,9 @@ process FASTQ_TOOLS {
     path known_umis
 
     output:
-    tuple val(meta),
-        path('output/*_R1.umi.fastq.gz'),
-        path('output/*_R2.umi.fastq.gz'), emit: fastq
-    path 'versions.yml'                 , emit: versions
-    path '.command.*'                   , emit: command_files
+    tuple val(meta), path('output/*R1.umi.fastq.gz'), path('output/*R2.umi.fastq.gz'), topic: fastqtools_fastq
+    tuple val(meta), val('fastqtools'), path('.command.*')                           , topic: command_files
+    path 'versions.yml'                                                              , topic: versions
 
     when:
     task.ext.when == null || task.ext.when

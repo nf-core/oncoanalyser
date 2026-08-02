@@ -31,9 +31,9 @@ process SAGE_VISUALISER {
     val targeted_mode
 
     output:
-    tuple val(meta), path('sage_vis/'), emit: sage_visualiser_dir
-    path 'versions.yml'               , emit: versions
-    path '.command.*'                 , emit: command_files
+    tuple val(meta), path('sage_vis/')                         , topic: sage_visualiser_dir
+    tuple val(meta), val('sage_visualiser'), path('.command.*'), topic: command_files
+    path 'versions.yml'                                        , topic: versions
 
     when:
     task.ext.when == null || task.ext.when
@@ -89,7 +89,6 @@ process SAGE_VISUALISER {
     """
     mkdir -p sage_vis/
 
-    touch sage_vis/placeholder
     touch sage_vis/${meta.tumor_id}.sage.vis.vcf.gz
     touch sage_vis/${meta.tumor_id}.sage.vis.vcf.gz.tbi
 

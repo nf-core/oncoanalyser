@@ -2,9 +2,6 @@
 // CHORD predicts HR status for tumor samples
 //
 
-import Constants
-import Utils
-
 include { CHORD } from '../../../modules/local/chord/main'
 
 workflow CHORD_PREDICTION {
@@ -19,10 +16,6 @@ workflow CHORD_PREDICTION {
     genome_dict    // channel: [mandatory] /path/to/genome_dict
 
     main:
-    // Channel for version.yml files
-    // channel: [ versions.yml ]
-    ch_versions = Channel.empty()
-
     // Select input sources then sort
     // channel: runnable: [ meta, purple_dir ]
     // channel: skip: [ meta ]
@@ -76,18 +69,14 @@ workflow CHORD_PREDICTION {
         genome_dict,
     )
 
-    ch_versions = ch_versions.mix(CHORD.out.versions)
-
     // Set outputs, restoring original meta
     // channel: [ meta, chord_dir ]
-    ch_outputs = Channel.empty()
+    ch_outputs = channel.empty()
         .mix(
-            WorkflowOncoanalyser.restoreMeta(CHORD.out.chord_dir, ch_inputs),
+            WorkflowOncoanalyser.restoreMeta(channel.topic('chord_dir'), ch_inputs),
             ch_inputs_sorted.skip.map { meta -> [meta, []] },
         )
 
     emit:
-    chord_dir = ch_outputs  // channel: [ meta, chord_dir ]
-
-    versions  = ch_versions // channel: [ versions.yml ]
+    chord_dir = ch_outputs // channel: [ meta, chord_dir ]
 }

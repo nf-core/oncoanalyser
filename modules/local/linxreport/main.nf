@@ -11,9 +11,9 @@ process LINXREPORT {
     tuple val(meta), path(linx_annotation_dir), path(linx_visualiser_dir)
 
     output:
-    tuple val(meta), path('*_linx.html'), emit: html
-    path 'versions.yml'                 , emit: versions
-    path '.command.*'                   , emit: command_files
+    tuple val(meta), path('*_linx.html')                  , topic: linxreport_html
+    tuple val(meta), val('linxreport'), path('.command.*'), topic: command_files
+    path 'versions.yml'                                   , topic: versions
 
     when:
     task.ext.when == null || task.ext.when

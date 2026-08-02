@@ -2,9 +2,6 @@
 // VIRUSBreakend and Virus Interpreter identify viral content and insertion sites
 //
 
-import Constants
-import Utils
-
 include { VIRUSBREAKEND    } from '../../../modules/local/virusbreakend/main'
 include { VIRUSINTERPRETER } from '../../../modules/local/virusinterpreter/main'
 
@@ -30,10 +27,6 @@ workflow VIRUSBREAKEND_CALLING {
     gridss_config         // channel: [optional] /path/to/gridss_config
 
     main:
-    // Channel for version.yml files
-    // channel: [ versions.yml ]
-    ch_versions = Channel.empty()
-
     //
     // STEP: Handle inputs
     //
@@ -62,7 +55,7 @@ workflow VIRUSBREAKEND_CALLING {
     // Create process input channel
     // channel: [ meta_virus, tumor_aln ]
     ch_virusbreakend_inputs = ch_inputs_sorted.runnable
-        .map { meta, tumor_aln, tumor_idx ->
+        .map { meta, tumor_aln, _tumor_idx ->
 
             def meta_virus = [
                 key: meta.group_id,
@@ -84,15 +77,13 @@ workflow VIRUSBREAKEND_CALLING {
         gridss_config,
     )
 
-    ch_versions = ch_versions.mix(VIRUSBREAKEND.out.versions)
-
     //
     // MODULE: Virus Interpreter
     //
     // Select input sources
     // channel: [ meta, virusbreakend_tsv, bamtools_dir_tumor, purple_dir ]
     ch_virusinterpreter_inputs_selected = WorkflowOncoanalyser.groupByMeta(
-        WorkflowOncoanalyser.restoreMeta(VIRUSBREAKEND.out.tsv, ch_inputs),
+        WorkflowOncoanalyser.restoreMeta(channel.topic('virusbreakend_tsv'), ch_inputs),
         ch_bamtools_dir_tumor,
         ch_purple,
     )
@@ -131,7 +122,7 @@ workflow VIRUSBREAKEND_CALLING {
                 sample_id: Utils.getTumorDnaSampleName(meta),
             ]
 
-            return [meta_virus, *inputs]
+            return [meta_virus] + inputs
         }
 
     // Run process
@@ -142,22 +133,18 @@ workflow VIRUSBREAKEND_CALLING {
         virus_blocklist_db,
     )
 
-    ch_versions = ch_versions.mix(VIRUSINTERPRETER.out.versions)
-
     //
     // STEP: Handle outputs
     //
     // Set outputs, restoring original meta
     // channel: [ meta, virusinterpreter_dir ]
-    ch_outputs = Channel.empty()
+    ch_outputs = channel.empty()
         .mix(
-            WorkflowOncoanalyser.restoreMeta(VIRUSINTERPRETER.out.virusinterpreter_dir, ch_inputs),
+            WorkflowOncoanalyser.restoreMeta(channel.topic('virusinterpreter_dir'), ch_inputs),
             ch_virusinterpreter_inputs_sorted.skip.map { meta -> [meta, []] },
             ch_inputs_sorted.skip.map { meta -> [meta, []] },
         )
 
     emit:
-    virusinterpreter_dir = ch_outputs  // channel: [ meta, virusinterpreter_dir ]
-
-    versions             = ch_versions // channel: [ versions.yml ]
+    virusinterpreter_dir = ch_outputs // channel: [ meta, virusinterpreter_dir ]
 }

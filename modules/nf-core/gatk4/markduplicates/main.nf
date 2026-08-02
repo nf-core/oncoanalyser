@@ -13,13 +13,13 @@ process GATK4_MARKDUPLICATES {
     path  fasta_fai
 
     output:
-    tuple val(meta), path("*/*cram")    , emit: cram,  optional: true
-    tuple val(meta), path("*/*bam")     , emit: bam,   optional: true
-    tuple val(meta), path("*/*.crai")   , emit: crai,  optional: true
-    tuple val(meta), path("*/*.bai")    , emit: bai,   optional: true
-    tuple val(meta), path("*/*.metrics"), emit: metrics
-    path 'versions.yml'                 , emit: versions
-    path '.command.{sh,log}'            , emit: command_files
+    tuple val(meta), path("*cram")                                  , topic: gatk4_markduplicates_cram, optional: true
+    tuple val(meta), path("*bam")                                   , topic: gatk4_markduplicates_bam, optional: true
+    tuple val(meta), path("*.crai")                                 , topic: gatk4_markduplicates_crai, optional: true
+    tuple val(meta), path("*.bai")                                  , topic: gatk4_markduplicates_bai, optional: true
+    tuple val(meta), path("*.metrics")                              , topic: gatk4_markduplicates_metrics
+    tuple val(meta), val('gatk4_markduplicates'), path('.command.*'), topic: command_files
+    path 'versions.yml'                                             , topic: versions
 
     when:
     task.ext.when == null || task.ext.when
@@ -29,7 +29,7 @@ process GATK4_MARKDUPLICATES {
 
     prefix = task.ext.prefix ?: "${meta.sample_id}"
 
-    def input_list = bam.collect{"--INPUT $it"}.join(' ')
+    def input_list = bam.collect { s -> "--INPUT ${s}" }.join(' ')
     def reference = fasta ? "--REFERENCE_SEQUENCE ${fasta}" : ""
 
     def avail_mem = 3072
@@ -39,18 +39,16 @@ process GATK4_MARKDUPLICATES {
         avail_mem = (task.memory.mega*0.8).intValue()
     }
     """
-    mkdir -p ${prefix}/
-
     gatk --java-options "-Xmx${avail_mem}M" MarkDuplicates \\
         $input_list \\
-        --OUTPUT ${prefix}/${prefix}.md.bam \\
-        --METRICS_FILE ${prefix}/${prefix}.md.metrics \\
+        --OUTPUT ${prefix}.md.bam \\
+        --METRICS_FILE ${prefix}.md.metrics \\
         --TMP_DIR . \\
         --CREATE_INDEX \\
         ${reference} \\
         $args
 
-    mv ${prefix}/${prefix}.md.bai ${prefix}/${prefix}.md.bam.bai
+    mv ${prefix}.md.bai ${prefix}.md.bam.bai
 
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":
@@ -62,11 +60,9 @@ process GATK4_MARKDUPLICATES {
     prefix = task.ext.prefix ?: "${meta.sample_id}"
 
     """
-    mkdir -p ${prefix}/
-
-    touch ${prefix}/${prefix}.md.bam
-    touch ${prefix}/${prefix}.md.bam.bai
-    touch ${prefix}/${prefix}.md.metrics
+    touch ${prefix}.md.bam
+    touch ${prefix}.md.bam.bai
+    touch ${prefix}.md.metrics
 
     echo -e '${task.process}:\\n  stub: noversions\\n' > versions.yml
     """

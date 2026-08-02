@@ -22,9 +22,9 @@ process PAVE_SOMATIC {
     val sequencing_platform
 
     output:
-    tuple val(meta), path('pave_somatic/'), emit: pave_dir
-    path 'versions.yml'                   , emit: versions
-    path '.command.*'                     , emit: command_files
+    tuple val(meta), path('pave_somatic/')                  , topic: pave_somatic_dir
+    tuple val(meta), val('pave_somatic'), path('.command.*'), topic: command_files
+    path 'versions.yml'                                     , topic: versions
 
     when:
     task.ext.when == null || task.ext.when

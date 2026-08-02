@@ -12,8 +12,9 @@ process BWA_INDEX {
     path alt
 
     output:
-    path bwa_index     , emit: index
-    path "versions.yml", emit: versions
+    path 'bwa_index/'                                   , topic: bwa_index
+    tuple val([:]), val('bwa_index'), path('.command.*'), topic: command_files
+    path 'versions.yml'                                 , topic: versions
 
     when:
     task.ext.when == null || task.ext.when
@@ -25,6 +26,7 @@ process BWA_INDEX {
 
     """
     mkdir -p bwa_index/
+
     bwa \\
         index \\
         $args \\
