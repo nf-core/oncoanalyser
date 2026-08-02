@@ -11,7 +11,7 @@ workflow SIGS_FITTING {
     take:
     // Sample data
     ch_inputs       // channel: [mandatory] [ meta ]
-    ch_purple       // channel: [mandatory] [ meta, purple_dir ]
+    ch_purple_dir   // channel: [mandatory] [ meta, purple_dir ]
 
     // Reference data
     sigs_signatures // channel: [mandatory] /path/to/sigs_signatures
@@ -21,31 +21,26 @@ workflow SIGS_FITTING {
     // channel: [ versions.yml ]
     ch_versions = Channel.empty()
 
-    // Select input sources
-    // channel: [ meta, purple_dir ]
-    ch_inputs_selected = ch_purple
+    // Select input sources then sort
+    // channel: runnable: [ meta, purple_dir ]
+    // channel: skip: [ meta ]
+    ch_inputs_sorted = ch_purple_dir
         .map { meta, purple_dir ->
             return [meta, Utils.selectCurrentOrExisting(purple_dir, meta, Constants.INPUT.PURPLE_DIR)]
         }
-
-    // Sort inputs
-    // channel: runnable: [ meta, purple_dir ]
-    // channel: skip: [ meta ]
-    ch_inputs_sorted = ch_inputs_selected
         .branch { meta, purple_dir ->
 
-            def has_dna = Utils.hasTumorDna(meta)
+            def has_tumor_normal_dna = Utils.hasTumorDna(meta) && Utils.hasNormalDna(meta)
 
-            def tumor_id
-            def has_smlv_vcf
-            if (has_dna) {
-                tumor_id = Utils.getTumorDnaSampleName(meta)
-                has_smlv_vcf = purple_dir ? file(purple_dir).resolve("${tumor_id}.purple.somatic.vcf.gz") : []
+            def has_smlv_vcf = []
+            if (has_tumor_normal_dna && purple_dir) {
+                def tumor_id = Utils.getTumorDnaSampleName(meta)
+                has_smlv_vcf = purple_dir.resolve("${tumor_id}.purple.somatic.vcf.gz").exists()
             }
 
             def has_existing = Utils.hasExistingInput(meta, Constants.INPUT.SIGS_DIR)
 
-            runnable: has_dna && purple_dir && has_smlv_vcf && !has_existing
+            runnable: has_tumor_normal_dna && purple_dir && has_smlv_vcf && ! has_existing
             skip: true
                 return meta
         }
@@ -63,7 +58,7 @@ workflow SIGS_FITTING {
                 sample_id: tumor_id,
             ]
 
-            def smlv_vcf = file(purple_dir).resolve("${tumor_id}.purple.somatic.vcf.gz")
+            def smlv_vcf = purple_dir.resolve("${tumor_id}.purple.somatic.vcf.gz")
 
             return [meta_sigs, smlv_vcf]
         }

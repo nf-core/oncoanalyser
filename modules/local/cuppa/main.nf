@@ -4,8 +4,8 @@ process CUPPA {
 
     conda "${moduleDir}/environment.yml"
     container "${ workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container ?
-        'https://depot.galaxyproject.org/singularity/hmftools-cuppa:2.3.2--py311r42hdfd78af_0' :
-        'biocontainers/hmftools-cuppa:2.3.2--py311r42hdfd78af_0' }"
+        'https://depot.galaxyproject.org/singularity/hmftools-cuppa:2.5.1--py311r42hdfd78af_0' :
+        'biocontainers/hmftools-cuppa:2.5.1--py311r42hdfd78af_0' }"
 
     input:
     tuple val(meta), path(isofox_dir), path(purple_dir), path(linx_dir), path(virusinterpreter_dir)
@@ -30,23 +30,21 @@ process CUPPA {
 
     def log_level_arg = task.ext.log_level ? "-log_level ${task.ext.log_level}" : ''
 
-    def isofox_dir_name = categories == 'ALL' ? 'isofox_dir__prepared' : isofox_dir
-    def isofox_dir_arg = isofox_dir ? "-isofox_dir ${isofox_dir_name}" : ''
-    def ref_alt_sj_sites_arg = isofox_dir ? "-ref_alt_sj_sites ${cuppa_alt_sj}" : ''
-
     def purple_dir_arg = purple_dir ? "-purple_dir ${purple_dir}" : ''
     def linx_dir_arg = linx_dir ? "-linx_dir ${linx_dir}" : ''
     def virusinterpreter_dir_arg = virusinterpreter_dir ? "-virus_dir ${virusinterpreter_dir}" : ''
 
-    """
-    if [[ -n "${isofox_dir}" && "${categories}" == 'ALL' ]]; then
-        # NOTE(SW): when DNA and RNA inputs are provide the DNA sample ID must be used in all filenames
-        mkdir -p ${isofox_dir_name}/;
-        for fp in ${isofox_dir}/*; do
-            cp -L \${fp} ${isofox_dir_name}/\$(sed 's/${meta.sample_rna_id}/${meta.sample_id}/' <<< \${fp##*/});
-        done;
-    fi;
+    def isofox_dir_arg = ''
+    def rna_sample_arg = ''
+    def ref_alt_sj_sites_arg = ''
 
+    if (isofox_dir) {
+        isofox_dir_arg = "-isofox_dir ${isofox_dir}"
+        rna_sample_arg = "-rna_sample ${meta.sample_rna_id}"
+        ref_alt_sj_sites_arg = "-ref_alt_sj_sites ${cuppa_alt_sj}"
+    }
+
+    """
     mkdir -p cuppa/
 
     # Extract input features
@@ -55,6 +53,7 @@ process CUPPA {
         com.hartwig.hmftools.cup.prep.CuppaDataPrep \\
         ${args} \\
         -sample ${meta.sample_id} \\
+        ${rna_sample_arg} \\
         -categories ${categories} \\
         ${purple_dir_arg} \\
         ${linx_dir_arg} \\

@@ -4,8 +4,8 @@ process LINX_VISUALISER {
 
     conda "${moduleDir}/environment.yml"
     container "${ workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container ?
-        'https://depot.galaxyproject.org/singularity/hmftools-linx:2.2--hdfd78af_0' :
-        'biocontainers/hmftools-linx:2.2--hdfd78af_0' }"
+        'https://depot.galaxyproject.org/singularity/hmftools-linx:2.3--hdfd78af_0' :
+        'biocontainers/hmftools-linx:2.3--hdfd78af_0' }"
 
     input:
     tuple val(meta), path(linx_annotation_dir), path(amber_dir), path(cobalt_dir), path(purple_dir)
@@ -13,7 +13,7 @@ process LINX_VISUALISER {
     path ensembl_data_resources
 
     output:
-    tuple val(meta), path('plots/'), emit: plots
+    tuple val(meta), path('plots/'), emit: linx_visualiser_dir
     path 'versions.yml'            , emit: versions
     path '.command.*'              , emit: command_files
 
@@ -28,7 +28,6 @@ process LINX_VISUALISER {
 
     def log_level_arg = task.ext.log_level ? "-log_level ${task.ext.log_level}" : ''
 
-    // For copy number circos tracks
     def amber_dir_arg = amber_dir ? "-amber_dir ${amber_dir}" : ''
     def cobalt_dir_arg = cobalt_dir ? "-cobalt_dir ${cobalt_dir}" : ''
     def purple_dir_arg = purple_dir ? "-purple_dir ${purple_dir}" : ''

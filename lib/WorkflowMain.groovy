@@ -16,6 +16,10 @@ class WorkflowMain {
         def default_invalid = false
 
         // Set defaults common to all run configuration
+        if (!params.containsKey('sequencing_platform')) {
+            params.sequencing_platform = 'illumina'
+        }
+
         if (!params.containsKey('genome_version')) {
             if (Constants.GENOMES_VERSION_37.contains(params.genome)) {
                 params.genome_version = '37'
@@ -78,27 +82,6 @@ class WorkflowMain {
 
         }
 
-
-        if (run_mode === Constants.RunMode.TARGETED) {
-
-            // When fastp UMI is enabled, REDUX UMI should be as well
-            if (params.fastp_umi_enabled && (!params.containsKey('redux_umi_enabled') || !params.redux_umi_enabled)) {
-                params.redux_umi_enabled = true
-            }
-
-            // Set the REDUX UMI duplex delimiter to '_' when the following conditions are met:
-            //   - both fastp and REDUX UMI processing enabled
-            //   - fastp is using a duplex UMI location type (per_index or per_read)
-            //   - no REDUX duplex delimiter has been set
-            def fastp_and_redux_umi_enabled = params.fastp_umi_enabled && params.redux_umi_enabled
-            def fastp_duplex_location = params.containsKey('fastp_umi_location') && (params.fastp_umi_location == 'per_index' || params.fastp_umi_location == 'per_read')
-            def no_umi_duplex_delim = !params.containsKey('redux_umi_duplex_delim') || !params.redux_umi_duplex_delim
-            if (fastp_and_redux_umi_enabled && fastp_duplex_location && no_umi_duplex_delim) {
-                params.redux_umi_duplex_delim = '_'
-            }
-
-        }
-
         def stages = Processes.getRunStages(
             params.processes_include,
             params.processes_exclude,
@@ -113,9 +96,13 @@ class WorkflowMain {
         if (!params.containsKey('ref_data_panel_data_path')) params.ref_data_panel_data_path = null
 
         // Additionally set selected parameters with false-ish truthy values to avoid passing null values as inputs
-        if (!params.containsKey('fastp_umi_location')) params.fastp_umi_location = ''
+        if (!params.containsKey('fastp_umi_enabled')) params.fastp_umi_enabled = false
         if (!params.containsKey('fastp_umi_length')) params.fastp_umi_length = 0
+        if (!params.containsKey('fastp_umi_location')) params.fastp_umi_location = ''
         if (!params.containsKey('fastp_umi_skip')) params.fastp_umi_skip = -1
+        if (!params.containsKey('fastq_tools_umi_enabled')) params.fastq_tools_umi_enabled = false
+        if (!params.containsKey('fastq_tools_umi_delim')) params.fastq_tools_umi_delim = ''
+        if (!params.containsKey('redux_umi_enabled')) params.redux_umi_enabled = false
         if (!params.containsKey('redux_umi_duplex_delim')) params.redux_umi_duplex_delim = ''
 
     }
@@ -235,6 +222,85 @@ class WorkflowMain {
                 }
 
             }
+
+            // Require the panel to have defined
+
+            if (!params.panel_data_paths.containsKey(params.panel)) {
+                def panels = params.panel_data_paths.keySet().join('\n    - ')
+                log.error "\n~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n" +
+                    "  Did not find data path definitions for the provided ${params.panel} panel.\n" +
+                    "  Please check your configuration. Found the following panel definitions:\n" +
+                    "    - ${panels}\n" +
+                    "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
+                Nextflow.exit(1)
+            }
+
+            def panel_data_paths_versions = params.panel_data_paths[params.panel]
+            if (!panel_data_paths_versions.containsKey(params.genome_version.toString())) {
+                def panel_versions = panel_data_paths_versions.keySet().join('\n    - ')
+                log.error "\n~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n" +
+                    "  Did not find path definitions for the provided ${params.panel} panel and\n" +
+                    "  genome version ${params.genome_version}. Please check your configuration.\n" +
+                    "  Found the following genome version panel definitions for ${params.panel}:\n" +
+                    "    - ${panel_versions}\n" +
+                    "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
+                Nextflow.exit(1)
+            }
+
+            // Perform check for for required and optional fields
+
+            def panel_data_paths = panel_data_paths_versions[params.genome_version.toString()]
+
+            def required_entries = [
+                'driver_gene_panel',
+                'pon_artefacts',
+                'target_regions_bed',
+                'target_regions_normalisation',
+            ]
+
+            def optional_entries = [
+                'isofox_counts',
+                'isofox_gc_ratios',
+                'isofox_tpm_norm',
+                'known_umis',
+                'msi_model_error_rates',
+            ]
+
+            def required_entries_missing = required_entries.findAll { n -> !panel_data_paths.containsKey(n) || !panel_data_paths[n] }
+            if (required_entries_missing) {
+                def required_entries_missing_str = required_entries_missing.join('\n    - ')
+                log.error "\n~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n" +
+                    "  The following panel data path entries are required but were not found:\n" +
+                    "    - ${required_entries_missing_str}\n\n" +
+                    "  Please review configuration for the ${params.panel} (${params.genome_version}) panel\n" +
+                    "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
+                Nextflow.exit(1)
+            }
+
+            // Require optional entries to also always be present, but either set to a file or an empty list []; i.e. do not allow empty string ''
+            def optional_entries_missing = optional_entries.findAll { n -> !panel_data_paths.containsKey(n) }
+            if (optional_entries_missing) {
+                def optional_entries_missing_str = optional_entries_missing.join('\n    - ')
+                log.error "\n~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n" +
+                    "  The following panel data path entries are required but were not found:\n" +
+                    "    - ${optional_entries_missing_str}\n\n" +
+                    "  Please review configuration for the ${params.panel} (${params.genome_version}) panel\n" +
+                    "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
+                Nextflow.exit(1)
+            }
+
+            def optional_entries_invalid = optional_entries.findAll { n -> !panel_data_paths[n] && panel_data_paths[n] != []  }
+            if (optional_entries_invalid) {
+                def optional_entries_invalid_str = optional_entries_invalid.join('\n    - ')
+                log.error "\n~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n" +
+                    "  The following panel data path optional entries should only be set to [] if\n" +
+                    "  not applicable:\n" +
+                    "    - ${optional_entries_invalid_str}\n\n" +
+                    "  Please review configuration for the ${params.panel} (${params.genome_version}) panel\n" +
+                    "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
+                Nextflow.exit(1)
+            }
+
         }
 
         if (run_mode === Constants.RunMode.PURITY_ESTIMATE) {
@@ -282,6 +348,20 @@ class WorkflowMain {
         }
 
         // UMI parameters
+        if (params.fastp_umi_enabled && params.fastq_tools_umi_enabled) {
+            log.error "\n~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n" +
+                  "  UMI processing with either fastp or fastq-tools but not both can be enabled\n" +
+                  "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
+            Nextflow.exit(1)
+        }
+
+        if ((params.fastp_umi_enabled || params.fastq_tools_umi_enabled) && !params.redux_umi_enabled) {
+            log.error "\n~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n" +
+                  "  When FASTQ UMI processing is enabled (via fastp_umi_enabled or fastp_umi_enabled),\n" +
+                  "  REDUX UMI processing must also be enabled with redux_umi_enabled\n" +
+                  "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
+            Nextflow.exit(1)
+        }
 
         def fastp_umi_args_set_any = params.fastp_umi_location || params.fastp_umi_length || params.fastp_umi_skip >= 0
         if (fastp_umi_args_set_any && !params.fastp_umi_enabled) {
@@ -302,7 +382,23 @@ class WorkflowMain {
             Nextflow.exit(1)
         }
 
-        if (params.redux_umi_duplex_delim && params.redux_umi_enabled === false) {
+        if (params.fastq_tools_umi_delim && !params.fastq_tools_umi_enabled) {
+            log.error "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n" +
+                "  Detected use of fastq-tools UMI parameter fastq_tools_umi_enabled fastq-tools UMI\n" +
+                "  processing has not been enabled. Please review your configuration and set the\n" +
+                "  fastq_tools_umi_enabled or otherwise adjust accordingly.\n" +
+                "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
+            Nextflow.exit(1)
+        }
+
+        if (params.fastq_tools_umi_enabled && !params.fastq_tools_umi_delim) {
+            log.error "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n" +
+                "  Refusing to run fastq-tools UMI processing without fastq_tools_umi_delim configured.\n" +
+                "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
+            Nextflow.exit(1)
+        }
+
+        if (params.redux_umi_duplex_delim && params.redux_umi_enabled == false) {
             log.error "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n" +
                 "  Detected use of REDUX UMI parameters but REDUX UMI processing has not been\n" +
                 "  enabled. Please review your configuration and set the redux_umi_enabled flag or\n" +

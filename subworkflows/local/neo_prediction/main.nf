@@ -12,24 +12,24 @@ include { NEO_SCORER           } from '../../../modules/local/neo/scorer/main'
 workflow NEO_PREDICTION {
     take:
     // Sample data
-    ch_inputs              // channel: [mandatory] [ meta ]
-    ch_tumor_rna_bam       // channel: [mandatory] [ meta, bam, bai ]
-    ch_isofox              // channel: [mandatory] [ meta, isofox_dir ]
-    ch_purple              // channel: [mandatory] [ meta, purple_dir ]
-    ch_sage_somatic_append // channel: [mandatory] [ meta, sage_append_dir ]
-    ch_lilac               // channel: [mandatory] [ meta, lilac_dir ]
-    ch_linx                // channel: [mandatory] [ meta, linx_annotation_dir ]
+    ch_inputs                  // channel: [mandatory] [ meta ]
+    ch_tumor_rna_aln           // channel: [mandatory] [ meta, aln, idx ]
+    ch_isofox_dir              // channel: [mandatory] [ meta, isofox_dir ]
+    ch_purple_dir              // channel: [mandatory] [ meta, purple_dir ]
+    ch_sage_append_dir_somatic // channel: [mandatory] [ meta, sage_append_dir ]
+    ch_lilac_dir               // channel: [mandatory] [ meta, lilac_dir ]
+    ch_linx_annotation_dir     // channel: [mandatory] [ meta, linx_annotation_dir ]
 
     // Reference data
-    genome_fasta           // channel: [mandatory] /path/to/genome_fasta
-    genome_version         // channel: [mandatory] genome version
-    genome_fai             // channel: [mandatory] /path/to/genome_fai
-    ensembl_data_resources // channel: [mandatory] /path/to/ensembl_data_resources/
-    neo_resources          // channel: [mandatory] /path/to/neo_resources/
-    cohort_tpm_medians     // channel: [mandatory] /path/to/cohort_tpm_medians/
+    genome_fasta               // channel: [mandatory] /path/to/genome_fasta
+    genome_version             // channel: [mandatory] genome version
+    genome_fai                 // channel: [mandatory] /path/to/genome_fai
+    ensembl_data_resources     // channel: [mandatory] /path/to/ensembl_data_resources/
+    neo_resources              // channel: [mandatory] /path/to/neo_resources/
+    cohort_tpm_medians         // channel: [mandatory] /path/to/cohort_tpm_medians/
 
     // Params
-    isofox_read_length     //  string: [mandatory] Isofox read length
+    isofox_read_length         //  string: [mandatory] Isofox read length
 
     main:
     // Channel for versions.yml files
@@ -42,17 +42,17 @@ workflow NEO_PREDICTION {
     // Select input sources
     // channel: [ meta, purple_dir, linx_annotation_dir ]
     ch_finder_inputs_selected = WorkflowOncoanalyser.groupByMeta(
-        ch_purple,
-        ch_linx,
+        ch_purple_dir,
+        ch_linx_annotation_dir,
     )
         .map { meta, purple_dir, linx_annotation_dir ->
 
-            def inputs = [
+            return [
+                meta,
                 Utils.selectCurrentOrExisting(purple_dir, meta, Constants.INPUT.PURPLE_DIR),
                 Utils.selectCurrentOrExisting(linx_annotation_dir, meta, Constants.INPUT.LINX_ANNO_DIR_TUMOR),
             ]
 
-            return [meta, *inputs]
         }
 
     // Sort inputs
@@ -105,31 +105,30 @@ workflow NEO_PREDICTION {
     // Annotate the fusion-derived neoepitope using Isofox where RNA data is available
 
     // Select input sources and sort
-    // channel: runnable: [ meta, neo_finder_dir, tumor_bam_rna, tumor_bai_rna ]
+    // channel: runnable: [ meta, neo_finder_dir, tumor_rna_aln, tumor_rna_idx ]
     // channel: skip: [ meta ]
     ch_isofox_inputs_sorted = WorkflowOncoanalyser.groupByMeta(
         ch_finder_out,
-        ch_tumor_rna_bam,
+        ch_tumor_rna_aln,
     )
-        .map { meta, neo_finder_dir, tumor_bam, tumor_bai ->
+        .map { meta, neo_finder_dir, tumor_rna_aln, tumor_rna_idx ->
             return [
                 meta,
                 neo_finder_dir,
-                Utils.selectCurrentOrExisting(tumor_bam, meta, Constants.INPUT.BAM_RNA_TUMOR),
-                Utils.selectCurrentOrExisting(tumor_bai, meta, Constants.INPUT.BAI_RNA_TUMOR),
+                Utils.selectCurrentOrExisting(tumor_rna_aln, meta, Constants.INPUT.BAM_RNA_TUMOR),
+                Utils.selectCurrentOrExisting(tumor_rna_idx, meta, Constants.INPUT.BAI_RNA_TUMOR),
             ]
         }
-        .branch { meta, neo_finder_dir, tumor_bam, tumor_bai ->
+        .branch { meta, neo_finder_dir, tumor_rna_aln, tumor_rna_idx ->
             runnable: Utils.hasTumorRna(meta)
-                return [meta, neo_finder_dir, tumor_bam, tumor_bai]
             skip: true
                 return meta
         }
 
     // Create process input channel
-    // channel: [ meta_isofox, neo_finder_dir, tumor_bam_rna, tumor_bai_rna ]
+    // channel: [ meta_isofox, neo_finder_dir, tumor_rna_aln, tumor_rna_idx ]
     ch_isofox_inputs = ch_isofox_inputs_sorted.runnable
-        .map { meta, neo_finder_dir, tumor_bam_rna, tumor_bai_rna ->
+        .map { meta, neo_finder_dir, tumor_rna_aln, tumor_rna_idx ->
 
             def meta_isofox = [
                 key: meta.group_id,
@@ -137,7 +136,7 @@ workflow NEO_PREDICTION {
                 sample_id: Utils.getTumorDnaSampleName(meta),
             ]
 
-            return [meta_isofox, neo_finder_dir, tumor_bam_rna, tumor_bai_rna]
+            return [meta_isofox, neo_finder_dir, tumor_rna_aln, tumor_rna_idx]
         }
 
     // Run process
@@ -160,41 +159,40 @@ workflow NEO_PREDICTION {
             ch_isofox_inputs_sorted.skip.map { meta -> [meta, []] },
         )
 
-
     //
     // MODULE: Neo scorer
     //
     // Select input sources and prepare input channel
-    // channel: [ meta_scorer, isofox_dir, purple_dir, sage_somatic_append, lilac_dir, neo_finder_dir, annotated_fusions ]
+    // channel: [ meta_scorer, isofox_dir, purple_dir, sage_append_dir_somatic, lilac_dir, neo_finder_dir, annotated_fusions ]
     ch_scorer_inputs = WorkflowOncoanalyser.groupByMeta(
-        ch_isofox,
-        ch_purple,
-        ch_sage_somatic_append,
-        ch_lilac,
+        ch_isofox_dir,
+        ch_purple_dir,
+        ch_sage_append_dir_somatic,
+        ch_lilac_dir,
         ch_finder_out,
         ch_annotate_fusions_out,
     )
-        .map { meta, isofox_dir, purple_dir, sage_somatic_append, lilac_dir, neo_finder_dir, annotated_fusions ->
+        .map { meta, isofox_dir, purple_dir, sage_append_dir_somatic, lilac_dir, neo_finder_dir, annotated_fusions ->
 
             def meta_scorer = [
                 key: meta.group_id,
                 id: meta.group_id,
-                sample_id: Utils.getTumorDnaSampleName(meta, primary: true),
+                sample_id: Utils.getTumorDnaSampleName(meta),
                 cancer_type: meta[Constants.InfoField.CANCER_TYPE],
             ]
 
-            def sage_somatic_append_vcf = []
+            def sage_append_vcf_somatic = []
             if (Utils.hasTumorRna(meta)) {
-                meta_scorer.sample_rna_id = Utils.getTumorRnaSampleName(meta)
+                meta_scorer.sample_rna_id = Utils.getTumorDnaSampleName(meta)
 
-                def sage_somatic_append_selected = Utils.selectCurrentOrExisting(sage_somatic_append, meta, Constants.INPUT.SAGE_APPEND_DIR_TUMOR)
-                sage_somatic_append_vcf = file(sage_somatic_append_selected).resolve("${meta_scorer.sample_id}.sage.append.vcf.gz")
+                def sage_append_dir_somatic_selected = Utils.selectCurrentOrExisting(sage_append_dir_somatic, meta, Constants.INPUT.SAGE_APPEND_DIR_TUMOR)
+                sage_append_vcf_somatic = file(sage_append_dir_somatic).resolve("${meta_scorer.sample_id}.sage.append.vcf.gz")
             }
 
             def inputs = [
                 Utils.selectCurrentOrExisting(isofox_dir, meta, Constants.INPUT.ISOFOX_DIR),
                 Utils.selectCurrentOrExisting(purple_dir, meta, Constants.INPUT.PURPLE_DIR),
-                sage_somatic_append_vcf,
+                sage_append_vcf_somatic,
                 Utils.selectCurrentOrExisting(lilac_dir, meta, Constants.INPUT.LILAC_DIR),
                 neo_finder_dir,
                 annotated_fusions,
@@ -202,7 +200,7 @@ workflow NEO_PREDICTION {
 
             return [meta_scorer, *inputs]
         }
-        .branch { meta, isofox_dir, purple_dir, sage_somatic_append, lilac_dir, neo_finder_dir, annotated_fusions ->
+        .branch { meta, isofox_dir, purple_dir, sage_append_dir_somatic, lilac_dir, neo_finder_dir, annotated_fusions ->
             runnable: purple_dir && neo_finder_dir && lilac_dir
             skip: true
                 return meta

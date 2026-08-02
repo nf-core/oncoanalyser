@@ -77,7 +77,7 @@ include { WGTS                    } from './workflows/wgts'
 workflow NFCORE_ONCOANALYSER {
 
     // Get run mode
-    run_mode = Utils.getRunMode(params.mode, log)
+    def run_mode = Utils.getRunMode(params.mode, log)
 
     // Run selected workflow
     // NOTE(SW): prepare reference is checked early as params.input is not required
@@ -85,8 +85,8 @@ workflow NFCORE_ONCOANALYSER {
         PREPARE_REFERENCE()
     } else {
         // Parse and validate inputs
-        inputs = Utils.parseInput(params.input, workflow.stubRun, log)
-        run_config = WorkflowMain.getRunConfig(params, inputs, log)
+        def inputs = Utils.parseInput(params.input, workflow.stubRun, log)
+        def run_config = WorkflowMain.getRunConfig(params, inputs, log)
         Utils.validateInput(inputs, run_config, params, log)
 
         // Run requested workflow

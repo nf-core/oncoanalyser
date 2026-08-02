@@ -4,20 +4,21 @@ process TEAL_PIPELINE {
 
     conda "${moduleDir}/environment.yml"
     container "${ workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container ?
-        'https://depot.galaxyproject.org/singularity/hmftools-teal:1.3.6--hdfd78af_0' :
-        'biocontainers/hmftools-teal:1.3.6--hdfd78af_0' }"
+        'https://depot.galaxyproject.org/singularity/hmftools-teal:1.4--hdfd78af_0' :
+        'biocontainers/hmftools-teal:1.4--hdfd78af_0' }"
 
     input:
     tuple val(meta),
-        path(tumor_teal_bam),
-        path(tumor_teal_bai),
-        path(normal_teal_bam),
-        path(normal_teal_bai),
-        path(tumor_metrics_dir),
-        path(normal_metrics_dir),
+        path(teal_bam_tumor),
+        path(tumor_bai_tumor),
+        path(teal_bam_normal),
+        path(teal_bai_normal),
+        path(bamtools_dir_tumor),
+        path(bamtools_dir_normal),
         path(cobalt_dir),
         path(purple_dir)
     val genome_ver
+    val sequencing_platform
 
     output:
     tuple val(meta), path('teal/*.tsv*'), emit: teal_tsvs
@@ -32,20 +33,22 @@ process TEAL_PIPELINE {
 
     def xmx_mod = task.ext.xmx_mod ?: 0.95
 
-    def tumor_arg = tumor_teal_bam ? "-tumor ${meta.tumor_id}": ''
-    def tumor_bam_arg = tumor_teal_bam ? "-tumor_bam ${tumor_teal_bam}": ''
-    def tumor_wgs_metrics_arg = tumor_metrics_dir ? "-tumor_wgs_metrics ${tumor_metrics_dir}/${meta.tumor_id}.bam_metric.summary.tsv": ''
-    def purple_arg = purple_dir ? "-purple ${purple_dir}": ''
+    def log_level_arg = task.ext.log_level ? "-log_level ${task.ext.log_level}" : ''
 
-    def reference_arg = normal_teal_bam ? "-reference ${meta.normal_id}" : ''
-    def reference_bam_arg = normal_teal_bam ? "-reference_bam ${normal_teal_bam}" : ''
-    def reference_wgs_metrics_arg = normal_metrics_dir ? "-reference_wgs_metrics ${normal_metrics_dir}/${meta.normal_id}.bam_metric.summary.tsv" : ''
+    def tumor_arg = teal_bam_tumor ? "-tumor ${meta.tumor_id}": ''
+    def tumor_bam_arg = teal_bam_tumor ? "-tumor_bam ${teal_bam_tumor}": ''
+    def tumor_wgs_metrics_arg = bamtools_dir_tumor ? "-tumor_wgs_metrics ${bamtools_dir_tumor}/${meta.tumor_id}.bam_metric.summary.tsv": ''
+    def purple_arg = purple_dir ? "-purple_dir ${purple_dir}" : ''
 
-    if (tumor_arg && !purple_arg) {
+    def reference_arg = teal_bam_normal ? "-reference ${meta.normal_id}" : ''
+    def reference_bam_arg = teal_bam_normal ? "-reference_bam ${teal_bam_normal}" : ''
+    def reference_wgs_metrics_arg = bamtools_dir_normal ? "-reference_wgs_metrics ${bamtools_dir_normal}/${meta.normal_id}.bam_metric.summary.tsv" : ''
+
+    if (tumor_arg && ! purple_arg) {
         error 'TEAL requires PURPLE inputs when analysing tumor data'
     }
 
-    if (!tumor_arg && !reference_arg) {
+    if (! tumor_arg && ! reference_arg) {
         error 'TEAL at least tumor or normal data for analyses'
     }
 
@@ -58,12 +61,14 @@ process TEAL_PIPELINE {
         ${reference_bam_arg} \\
         ${tumor_arg} \\
         ${tumor_bam_arg} \\
-        -cobalt ${cobalt_dir} \\
+        -cobalt_dir ${cobalt_dir} \\
         ${purple_arg} \\
         ${reference_wgs_metrics_arg} \\
         ${tumor_wgs_metrics_arg} \\
         -ref_genome_version ${genome_ver} \\
+        -sequencing_type ${sequencing_platform.toUpperCase()} \\
         -threads ${task.cpus} \\
+        ${log_level_arg} \\
         -output_dir teal/
 
     cat <<-END_VERSIONS > versions.yml

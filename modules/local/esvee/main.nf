@@ -4,11 +4,11 @@ process ESVEE {
 
     conda "${moduleDir}/environment.yml"
     container "${ workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container ?
-        'https://depot.galaxyproject.org/singularity/hmftools-esvee:1.2--hdfd78af_0' :
-        'biocontainers/hmftools-esvee:1.2--hdfd78af_0' }"
+        'https://depot.galaxyproject.org/singularity/hmftools-esvee:2.0--hdfd78af_0' :
+        'biocontainers/hmftools-esvee:2.0--hdfd78af_0' }"
 
     input:
-    tuple val(meta), path(tumor_bam), path(tumor_bai), path(normal_bam), path(normal_bai)
+    tuple val(meta), path(tumor_aln), path(tumor_bai), path(normal_aln), path(normal_bai)
     path genome_fasta
     val genome_ver
     path genome_fai
@@ -20,15 +20,13 @@ process ESVEE {
     path known_fusions
     path repeatmasker_annotations
     path unmap_regions
-    path target_region_bed
+    path target_regions_bed
+    val sequencing_platform
 
     output:
-    tuple val(meta), path('esvee/')                                                                                                    , emit: esvee_dir
-    tuple val(meta), path("esvee/${meta.tumor_id}.esvee.unfiltered.vcf.gz"), path("esvee/${meta.tumor_id}.esvee.unfiltered.vcf.gz.tbi"), emit: unfiltered_vcf
-    tuple val(meta), path("esvee/${meta.tumor_id}.esvee.somatic.vcf.gz"),    path("esvee/${meta.tumor_id}.esvee.somatic.vcf.gz.tbi")   , emit: somatic_vcf
-    tuple val(meta), path("esvee/${meta.tumor_id}.esvee.germline.vcf.gz"),   path("esvee/${meta.tumor_id}.esvee.germline.vcf.gz.tbi")  , emit: germline_vcf, optional: true
-    path 'versions.yml'                                                                                                                , emit: versions
-    path '.command.*'                                                                                                                  , emit: command_files
+    tuple val(meta), path('esvee/'), emit: esvee_dir
+    path 'versions.yml'            , emit: versions
+    path '.command.*'              , emit: command_files
 
     when:
     task.ext.when == null || task.ext.when
@@ -39,9 +37,9 @@ process ESVEE {
     def log_level_arg = task.ext.log_level ? "-log_level ${task.ext.log_level}" : ''
 
     def reference_arg = meta.normal_id ? "-reference ${meta.normal_id}" : ''
-    def reference_bam_arg = meta.normal_id ? "-reference_bam ${normal_bam}" : ''
+    def reference_bam_arg = meta.normal_id ? "-reference_bam ${normal_aln}" : ''
 
-    def target_region_bed_arg = target_region_bed ? "-target_regions_bed ${target_region_bed}" : ''
+    def target_regions_bed_arg = target_regions_bed ? "-target_regions_bed ${target_regions_bed}" : ''
 
     """
     mkdir -p esvee/
@@ -50,7 +48,7 @@ process ESVEE {
         -Xmx${Math.round(task.memory.bytes * 0.95)} \\
         ${args} \\
         -tumor ${meta.tumor_id} \\
-        -tumor_bam ${tumor_bam} \\
+        -tumor_bam ${tumor_aln} \\
         ${reference_arg} \\
         ${reference_bam_arg} \\
         -esvee_prep_dir esvee/ \\
@@ -61,7 +59,8 @@ process ESVEE {
         -pon_sv_file ${pon_breakpoints} \\
         -repeat_mask_file ${repeatmasker_annotations} \\
         -unmap_regions ${unmap_regions} \\
-        ${target_region_bed_arg} \\
+        -sequencing_type ${sequencing_platform.toUpperCase()} \\
+        ${target_regions_bed_arg} \\
         -bamtool \$(which sambamba) \\
         -write_types 'PREP_JUNCTION;PREP_BAM;FRAGMENT_LENGTH_DIST;JUNC_ASSEMBLY;PHASED_ASSEMBLY;ALIGNMENT;BREAKEND;VCF' \\
         -threads ${task.cpus} \\
@@ -85,9 +84,6 @@ process ESVEE {
     touch esvee/${meta.tumor_id}.esvee.germline.vcf.gz
     touch esvee/${meta.tumor_id}.esvee.germline.vcf.gz.tbi
 
-    cat <<-END_VERSIONS > versions.yml
-    "${task.process}":
-        esvee: \$(echo "1.0-beta")
-    END_VERSIONS
+    echo -e '${task.process}:\\n  stub: noversions\\n' > versions.yml
     """
 }

@@ -3,8 +3,8 @@ process ISOFOX_PANEL_NORMALISATION {
 
     conda "${moduleDir}/environment.yml"
     container "${ workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container ?
-        'https://depot.galaxyproject.org/singularity/hmftools-isofox:1.7.2--hdfd78af_1' :
-        'biocontainers/hmftools-isofox:1.7.2--hdfd78af_1' }"
+        'https://depot.galaxyproject.org/singularity/2.0.1--hdfd78af_0' :
+        'biocontainers/hmftools-isofox:2.0.1--hdfd78af_0' }"
 
     input:
     path 'isofox_dirs.*'
@@ -27,11 +27,11 @@ process ISOFOX_PANEL_NORMALISATION {
 
     """
     mkdir -p inputs/
-    for fp in \$(find -L isofox_dirs.* -name '*.gene_data.csv'); do ln -sf ../\${fp} inputs/; done
+    for fp in \$(find -L isofox_dirs.* -name '*.isf.gene_data.tsv'); do ln -sf ../\${fp} inputs/; done
 
     (
        echo SampleId
-       basename -s .isf.gene_data.csv -a inputs/*.isf.gene_data.csv
+       basename -s .isf.gene_data.tsv -a inputs/*.isf.gene_data.tsv
     ) > sample_ids.txt
 
     isofox \\

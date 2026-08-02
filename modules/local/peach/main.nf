@@ -8,7 +8,7 @@ process PEACH {
         'biocontainers/hmftools-peach:2.0.0--hdfd78af_1' }"
 
     input:
-    tuple val(meta), path(germline_vcf)
+    tuple val(meta), path(germline_smlv_vcf)
     path haplotypes
     path haplotype_functions
     path drug_info
@@ -33,7 +33,7 @@ process PEACH {
         -Xmx${Math.round(task.memory.bytes * xmx_mod)} \\
         ${args} \\
         -sample_name ${meta.sample_id} \\
-        -vcf_file ${germline_vcf} \\
+        -vcf_file ${germline_smlv_vcf} \\
         -haplotypes_file ${haplotypes} \\
         -function_file ${haplotype_functions} \\
         -drugs_file ${drug_info} \\
