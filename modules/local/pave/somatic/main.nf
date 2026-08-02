@@ -74,6 +74,7 @@ process PAVE_SOMATIC {
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":
         pave: \$(pave -version | sed -n '/^Pave version / { s/^.* //p }')
+        java: \$(java --version | sed -n '/^openjdk/ { s/^.*openjdk //; s/ .*//p }')
     END_VERSIONS
     """
 

@@ -47,6 +47,9 @@ process CHORD {
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":
         chord: \$(chord -version | sed -n '/^CHORD version/ { s/^.* //p }')
+        java: \$(java --version | sed -n '/^openjdk/ { s/^.*openjdk //; s/ .*//p }')
+        r: \$(R --version | sed -n '/^R version/ { s/^.*version //; s/ .*//p }')
+        r-randomforest: \$(Rscript -e 'packageVersion("randomForest") |> as.character() |> writeLines()')
     END_VERSIONS
     """
 

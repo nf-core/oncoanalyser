@@ -76,6 +76,9 @@ process QSEE {
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":
         qsee: \$(qsee -version | sed -n '/^Qsee version/ { s/^.* //p }')
+        r: \$(R --version | sed -n '/^R version/ { s/^.*version //; s/ .*//p }')
+        r-dplyr: \$(Rscript -e 'packageVersion("dplyr") |> as.character() |> writeLines()')
+        r-ggplot2: \$(Rscript -e 'packageVersion("ggplot2") |> as.character() |> writeLines()')
     END_VERSIONS
     """
 

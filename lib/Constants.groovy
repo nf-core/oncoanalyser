@@ -68,6 +68,7 @@ class Constants {
         ISOFOX,
         LILAC,
         LINX,
+        MULTIQC,
         NEO,
         ORANGE,
         PAVE,

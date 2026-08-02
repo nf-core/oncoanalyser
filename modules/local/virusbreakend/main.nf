@@ -46,6 +46,14 @@ process VIRUSBREAKEND {
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":
         gridss: \$(CallVariants --version 2>&1 | sed -n '/-gridss\$/ { s/-gridss//p }')
+        java: \$(java --version | sed -n '/^openjdk/ { s/^.*openjdk //; s/ .*//p }')
+        samtools: \$(samtools --version | sed -n '/^samtools / { s/^.* //p }')
+        bcftools: \$(bcftools --version | sed -n '/^bcftools / { s/^.* //p }')
+        bwa: \$(bwa 2>&1 | sed -n '/Version/ { s/^Version: //p }')
+        repeatmasker: \$(RepeatMasker -v | sed -n '/version/ { s/Repeat.* //p }')
+        kraken2: \$(kraken2 -v | sed -n '/version/ { s/^Kraken version //p }')
+        r: \$(R --version | sed -n '/^R version/ { s/^.*version //; s/ .*//p }')
+        r-structuralvariantannotation: \$(Rscript -e 'packageVersion("StructuralVariantAnnotation") |> as.character() |> writeLines()')
     END_VERSIONS
     """
 

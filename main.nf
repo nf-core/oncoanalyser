@@ -81,6 +81,7 @@ workflow NFCORE_ONCOANALYSER {
 
     // Run selected workflow
     // NOTE(SW): prepare reference is checked early as params.input is not required
+    ch_multiqc_out = Channel.empty()
     if (run_mode === Constants.RunMode.PREPARE_REFERENCE)  {
         PREPARE_REFERENCE()
     } else {
@@ -92,8 +93,10 @@ workflow NFCORE_ONCOANALYSER {
         // Run requested workflow
         if (run_mode === Constants.RunMode.WGTS) {
             WGTS(inputs, run_config)
+            ch_multiqc_out = ch_multiqc_out.mix(WGTS.out.multiqc_report)
         } else if (run_mode === Constants.RunMode.TARGETED) {
             TARGETED(inputs, run_config)
+            ch_multiqc_out = ch_multiqc_out.mix(TARGETED.out.multiqc_report)
         } else if (run_mode === Constants.RunMode.PURITY_ESTIMATE) {
             PURITY_ESTIMATE(inputs, run_config)
         } else if (run_mode === Constants.RunMode.PANEL_RESOURCE_CREATION) {
@@ -104,6 +107,8 @@ workflow NFCORE_ONCOANALYSER {
         }
     }
 
+    emit:
+    multiqc_report = ch_multiqc_out // channel: [ multiqc_report ]
 }
 
 /*
@@ -144,6 +149,7 @@ workflow {
         params.outdir,
         params.monochrome_logs,
         params.hook_url,
+        NFCORE_ONCOANALYSER.out.multiqc_report,
     )
 
 }

@@ -97,6 +97,9 @@ process WISP {
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":
         wisp: \$(wisp -version | sed 's/^.* //')
+        java: \$(java --version | sed -n '/^openjdk/ { s/^.*openjdk //; s/ .*//p }')
+        r: \$(R --version | sed -n '/^R version/ { s/^.*version //; s/ .*//p }')
+        r-tidyverse: \$(Rscript -e 'packageVersion("tidyverse") |> as.character() |> writeLines()')
     END_VERSIONS
     """
 

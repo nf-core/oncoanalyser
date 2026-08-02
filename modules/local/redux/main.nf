@@ -122,7 +122,11 @@ process REDUX {
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":
         redux: \$(redux -version | sed -n '/^Redux version/ { s/^.* //p }')
+        java: \$(java --version | sed -n '/^openjdk/ { s/^.*openjdk //; s/ .*//p }')
         samtools: \$(samtools --version | sed -n '/^samtools / { s/^.* //p }')
+        r: \$(R --version | sed -n '/^R version/ { s/^.*version //; s/ .*//p }')
+        r-dplyr: \$(Rscript -e 'packageVersion("dplyr") |> as.character() |> writeLines()')
+        r-ggplot2: \$(Rscript -e 'packageVersion("ggplot2") |> as.character() |> writeLines()')
     END_VERSIONS
     """
 

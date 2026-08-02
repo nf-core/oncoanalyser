@@ -45,6 +45,7 @@ process FASTQ_TOOLS {
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":
         fastq-tools: 1.0
+        java: \$(java --version | sed -n '/^openjdk/ { s/^.*openjdk //; s/ .*//p }')
     END_VERSIONS
     """
 

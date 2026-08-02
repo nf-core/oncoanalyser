@@ -64,6 +64,9 @@ process AMBER {
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":
         amber: \$(amber -version | sed -n '/^Amber version/ { s/^.* //p }')
+        java: \$(java --version | sed -n '/^openjdk/ { s/^.*openjdk //; s/ .*//p }')
+        r: \$(R --version | sed -n '/^R version/ { s/^.*version //; s/ .*//p }')
+        bioconductor-copynumber: \$(Rscript -e 'packageVersion("copynumber") |> as.character() |> writeLines()')
     END_VERSIONS
     """
 
