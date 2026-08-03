@@ -89,6 +89,12 @@ Descriptions of each output file in `<OUTDIR>` are provided in the [output](../o
 
 ### Reusing CLI arguments
 
+> [!WARNING]
+> Do not use `-c <file>` to specify parameters as this will result in errors. Custom config files specified with `-c`
+> must only be used for [tuning process resource
+> specifications](https://nf-co.re/docs/running/run-pipelines#configuring-pipelines), other infrastructural tweaks (such
+> as output directories), or module arguments (args).
+
 To use the same CLI arguments across multiple runs, you can specify these in a `yaml` or `json` file via `-params-file <file>`.
 The [above command](#running-the-pipeline) would have the equivalent `yaml` file:
 
@@ -106,11 +112,14 @@ and be run using this command:
 nextflow run nf-core/oncoanalyser -revision 2.3.0 -profile docker -params-file params.yaml
 ```
 
-You can also generate such `yaml`/`json` files via [nf-core/launch](https://nf-co.re/launch).
+You can also generate such `YAML`/`JSON` files via [nf-core/launch](https://nf-co.re/launch).
 
 ### Updating the pipeline
 
-When you run the above command, Nextflow automatically pulls the pipeline code from GitHub and stores it as a cached version. When running the pipeline after this, it will always use the cached version if available - even if the pipeline has been updated since. To make sure that you're running the latest version of the pipeline, make sure that you regularly update the cached version of the pipeline:
+When you run the above command, Nextflow automatically pulls the pipeline code from GitHub and stores it as a cached
+version. When running the pipeline after this, it will always use the cached version if available - even if the pipeline
+has been updated since. To make sure that you're running the latest version of the pipeline, make sure that you
+regularly update the cached version of the pipeline:
 
 ```bash
 nextflow pull nf-core/oncoanalyser
@@ -118,17 +127,24 @@ nextflow pull nf-core/oncoanalyser
 
 ### Reproducibility
 
-It is a good idea to specify the pipeline version when running the pipeline on your data. This ensures that a specific version of the pipeline code and software are used when you run your pipeline. If you keep using the same tag, you'll be running the same version of the pipeline, even if there have been changes to the code since.
+It is a good idea to specify the pipeline version when running the pipeline on your data. This ensures that a specific
+version of the pipeline code and software are used when you run your pipeline. If you keep using the same tag, you'll be
+running the same version of the pipeline, even if there have been changes to the code since.
 
-First, go to the [nf-core/oncoanalyser releases page](https://github.com/nf-core/oncoanalyser/releases) and find the latest pipeline version - numeric only (e.g. `2.3.0`). Then specify this when running the pipeline with `-revision` (one hyphen) - e.g. `-revision 2.3.0`. Of course, you can switch to another version by changing the number after the `-revision` flag.
+First, go to the [nf-core/oncoanalyser releases page](https://github.com/nf-core/oncoanalyser/releases) and find the
+latest pipeline version - numeric only (eg. `1.3.1`). Then specify this when running the pipeline with `-r` (one hyphen)
+- eg. `-r 1.3.1`. Of course, you can switch to another version by changing the number after the `-r` flag.
 
-This version number will be logged in reports when you run the pipeline, so that you'll know what you used when you look back in the future. For example, in the `<outdir>/pipeline_info/software_versions.yml` file.
+This version number will be logged in reports when you run the pipeline, so that you'll know what you used when you look
+back in the future. For example, at the bottom of the MultiQC reports.
 
-To further assist in reproducibility, you can share and re-use [parameter files](#running-the-pipeline) to repeat pipeline runs with the same settings without having to write out a command with every single parameter.
+To further assist in reproducibility, you can use share and reuse [parameter files](#running-the-pipeline) to repeat
+pipeline runs with the same settings without having to write out a command with every single parameter.
 
 :::tip
 
-If you wish to share such a profile (such as upload as supplementary material for academic publications), make sure to NOT include cluster specific paths to files, nor institutional specific profiles.
+If you wish to share such profile (such as upload as supplementary material for academic publications), make sure to NOT
+include cluster specific paths to files, nor institutional specific profiles.
 
 :::
 
@@ -952,9 +968,11 @@ These options are part of Nextflow and use a _single_ hyphen (pipeline parameter
 
 ### `-profile`
 
-Use this parameter to choose a configuration profile. Profiles can give configuration presets for different compute environments.
+Use this parameter to choose a configuration profile. Profiles can give configuration presets for different compute
+environments.
 
-Several generic profiles are bundled with the pipeline which instruct the pipeline to use software packaged using different methods (Docker, Singularity, Podman, Shifter, Charliecloud, Apptainer, Conda) - see below.
+Several generic profiles are bundled with the pipeline which instruct the pipeline to use software packaged using
+different methods (Docker, Singularity, Podman, Shifter, Charliecloud, Apptainer, Conda) - see below.
 
 :::info
 
@@ -991,13 +1009,18 @@ If `-profile` is not specified, the pipeline will run locally and expect all sof
 
 ### `-resume`
 
-Specify this when restarting a pipeline. Nextflow will use cached results from any pipeline steps where the inputs are the same, continuing from where it got to previously. For input to be considered the same, not only the names must be identical but the files' contents as well. For more info about this parameter, see [this blog post](https://www.nextflow.io/blog/2019/demystifying-nextflow-resume.html).
+Specify this when restarting a pipeline. Nextflow will use cached results from any pipeline steps where the inputs are
+the same, continuing from where it got to previously. For input to be considered the same, not only the names must be
+identical but the files' contents as well. For more info about this parameter, see [this blog
+post](https://www.nextflow.io/blog/2019/demystifying-nextflow-resume.html).
 
-You can also supply a run name to resume a specific run: `-resume [run-name]`. Use the `nextflow log` command to show previous run names.
+You can also supply a run name to resume a specific run: `-resume [run-name]`. Use the `nextflow log` command to show
+previous run names.
 
 ### `-c`
 
-Specify the path to a specific config file (this is a core Nextflow command). See the [nf-core website documentation](https://nf-co.re/usage/configuration) for more information.
+Specify the path to a specific config file (this is a core Nextflow command). See the [nf-core website
+documentation](https://nf-co.re/usage/configuration) for more information.
 
 ## Custom configuration
 
@@ -1011,19 +1034,29 @@ Compute resources (e.g. CPUs, RAM, disk space) can be configured in `oncoanalyse
 for one or more processes. Please see [Usage: Compute resources](./usage/compute_resources.md) for recommendations on
 compute resource configuration.
 
+To change the resource requests, please see the [max
+resources](https://nf-co.re/docs/running/configuration/nextflow-for-your-system#set-max-resources) and [customise
+process resources](https://nf-co.re/docs/running/configuration/nextflow-for-your-system#customize-process-resources)
+section of the nf-core website.
+
 ### Container images
 
 #### Custom containers
 
-You may want to change which container or conda environment uses for a particular process (e.g. due to a newer tool
-version being available). Please see [updating tool versions](https://nf-co.re/docs/usage/configuration#updating-tool-versions) for
-instructions.
+In some cases, you may wish to change the container or conda environment used by a pipeline steps for a particular tool.
+By default, nf-core pipelines use containers and software from the [biocontainers](https://biocontainers.pro/) or
+[bioconda](https://bioconda.github.io/) projects. However, in some cases the pipeline specified version maybe out of
+date.
+
+To use a different container from the default container or conda environment specified in a pipeline, please see the
+[updating tool versions](https://nf-co.re/docs/running/configuration/nextflow-for-your-system#update-tool-versions)
+section of the nf-core website.
 
 #### Default containers
 
 By default, nf-core pipelines use containers and software from the [biocontainers](https://biocontainers.pro/) or [bioconda](https://bioconda.github.io/) projects.
 
-To use a different container from the default container or conda environment specified in a pipeline, please see the [updating tool versions](https://nf-co.re/docs/usage/configuration#updating-tool-versions) section of the nf-core website.
+To use a different container from the default container or conda environment specified in a pipeline, please see the [updating tool versions](https://nf-co.re/docs/running/configuration/nextflow-for-your-system#update-tool-versions) section of the nf-core website.
 
 Below are links to these default images should you want to download images manually (e.g. to [run `oncoanalyser` offline](https://nf-co.re/docs/usage/getting_started/offline)).
 
@@ -1104,29 +1137,41 @@ executor {
 
 A pipeline might not always support every possible argument or option of a particular tool used in pipeline. Fortunately, nf-core pipelines provide some freedom to users to insert additional parameters that the pipeline does not include by default.
 
-To learn how to provide additional arguments to a particular tool of the pipeline, please see the [customising tool arguments](https://nf-co.re/docs/usage/configuration#customising-tool-arguments) section of the nf-core website.
+To learn how to provide additional arguments to a particular tool of the pipeline, please see the [customising tool arguments](https://nf-co.re/docs/running/configuration/nextflow-for-your-system#modifying-tool-arguments) section of the nf-core website.
 
 ### nf-core/configs
 
-In most cases, you will only need to create a custom config as a one-off but if you and others within your organisation are likely to be running nf-core pipelines regularly and need to use the same settings regularly it may be a good idea to request that your custom config file is uploaded to the `nf-core/configs` git repository. Before you do this please can you test that the config file works with your pipeline of choice using the `-c` parameter. You can then create a pull request to the `nf-core/configs` repository with the addition of your config file, associated documentation file (see examples in [`nf-core/configs/docs`](https://github.com/nf-core/configs/tree/master/docs)), and amending [`nfcore_custom.config`](https://github.com/nf-core/configs/blob/master/nfcore_custom.config) to include your custom profile.
+In most cases, you will only need to create a custom config as a one-off but if you and others within your organisation
+are likely to be running nf-core pipelines regularly and need to use the same settings regularly it may be a good idea
+to request that your custom config file is uploaded to the `nf-core/configs` git repository. Before you do this please
+can you test that the config file works with your pipeline of choice using the `-c` parameter. You can then create a
+pull request to the `nf-core/configs` repository with the addition of your config file, associated documentation file
+(see examples in [`nf-core/configs/docs`](https://github.com/nf-core/configs/tree/master/docs)), and amending
+[`nfcore_custom.config`](https://github.com/nf-core/configs/blob/master/nfcore_custom.config) to include your custom
+profile.
 
-See the main [Nextflow documentation](https://www.nextflow.io/docs/latest/config.html) for more information about creating your own configuration files.
+See the main [Nextflow documentation](https://www.nextflow.io/docs/latest/config.html) for more information about
+creating your own configuration files.
 
-If you have any questions or issues please send us a message on [Slack](https://nf-co.re/join/slack) on the [`#configs` channel](https://nfcore.slack.com/channels/configs).
+If you have any questions or issues please send us a message on [Slack](https://nf-co.re/join/slack) on the [`#configs`
+channel](https://nfcore.slack.com/channels/configs).
 
 ## Running in the background
 
-Nextflow handles job submissions and supervises the running jobs. The Nextflow process must run until the pipeline is finished.
+Nextflow handles job submissions and supervises the running jobs. The Nextflow process must run until the pipeline is
+finished.
 
-The Nextflow `-bg` flag launches Nextflow in the background, detached from your terminal so that the workflow does not stop if you log out of your session. The logs are saved to a file.
+The Nextflow `-bg` flag launches Nextflow in the background, detached from your terminal so that the workflow does not
+stop if you log out of your session. The logs are saved to a file.
 
-Alternatively, you can use `screen` / `tmux` or similar tool to create a detached session which you can log back into at a later time.
-Some HPC setups also allow you to run nextflow within a cluster job submitted your job scheduler (from where it submits more jobs).
+Alternatively, you can use `screen` / `tmux` or similar tool to create a detached session which you can log back into at
+a later time. Some HPC setups also allow you to run nextflow within a cluster job submitted your job scheduler (from
+where it submits more jobs).
 
 ## Nextflow memory requirements
 
-In some cases, the Nextflow Java virtual machines can start to request a large amount of memory.
-We recommend adding the following line to your environment to limit this (typically in `~/.bashrc` or `~./bash_profile`):
+In some cases, the Nextflow Java virtual machines can start to request a large amount of memory. We recommend adding
+the following line to your environment to limit this (typically in `~/.bashrc` or `~./bash_profile`):
 
 ```bash
 NXF_OPTS='-Xms1g -Xmx4g'
