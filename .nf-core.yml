@@ -1,30 +1,36 @@
+repository_type: pipeline
+
+nf_core_version: 4.0.3
+
 lint:
   files_exist:
     - .github/workflows/nf-test.yml
     - lib/Utils.groovy
     - lib/WorkflowMain.groovy
     - lib/WorkflowOncoanalyser.groovy
+    - .github/workflows/linting_comment.yml
   files_unchanged:
     - assets/nf-core-oncoanalyser_logo_light.png
     - docs/images/nf-core-oncoanalyser_logo_dark.png
     - docs/images/nf-core-oncoanalyser_logo_light.png
+    - .github/workflows/branch.yml
+    - .github/workflows/linting.yml
   multiqc_config: false
   nextflow_config:
     - config_defaults:
         - params.fastp_umi_length
         - params.fastp_umi_skip
   nf_test_content: false
-nf_core_version: 4.0.3
-repository_type: pipeline
+
 template:
-  author: Stephen Watts
-  description: A comprehensive cancer DNA/RNA analysis and reporting pipeline
-  force: false
-  is_nfcore: true
-  name: oncoanalyser
   org: nf-core
+  name: oncoanalyser
+  description: A comprehensive cancer DNA/RNA analysis and reporting pipeline
+  author: Stephen Watts
+  version: 2.3.0dev
+  force: false
   outdir: .
   skip_features:
     - gpu
     - nf-test
-  version: 2.3.0dev
+  is_nfcore: true

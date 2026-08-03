@@ -1,0 +1,44 @@
+name: cobalt_panel_normalisation
+description: Count bam lines determines the read depth ratios of the supplied tumor and reference genomes
+keywords:
+  - cobalt
+  - read depth ratios
+  - cnv
+tools:
+  - cobalt:
+      description: Count bam lines determines the read depth ratios of the supplied tumor and reference genomes.
+      homepage: https://github.com/hartwigmedical/hmftools/tree/master/cobalt
+      documentation: https://github.com/hartwigmedical/hmftools/tree/master/cobalt
+      licence: ["GPL v3"]
+input:
+  - amber_dirs:
+      type: directory
+      description: List of AMBER output directories
+  - cobalt_dirs:
+      type: directory
+      description: List of COBALT output directories
+  - genome_ver:
+      type: string
+      description: Reference genome version
+  - gc_profile:
+      type: file
+      description: GC profile file
+      pattern: "*.{cnp}"
+  - target_regions_bed:
+      type: file
+      description: Target regions BED file
+      pattern: "*.{bed}"
+output:
+  - cobalt_normalisation:
+      type: file
+      description: COBALT normalisation file
+      pattern: "*.{tsv}"
+  - versions:
+      type: file
+      description: File containing software versions
+      pattern: "versions.yml"
+  - command_files:
+      type: list
+      description: List of command files
+authors:
+  - "@scwatts"

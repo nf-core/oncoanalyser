@@ -1,0 +1,6 @@
+name: cobalt_run
+channels:
+  - conda-forge
+  - bioconda
+dependencies:
+  - bioconda::hmftools-cobalt=3.0

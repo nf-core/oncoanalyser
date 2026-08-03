@@ -1,0 +1,6 @@
+name: orange
+channels:
+  - conda-forge
+  - bioconda
+dependencies:
+  - bioconda::hmftools-orange=5.0

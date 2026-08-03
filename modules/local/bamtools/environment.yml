@@ -1,0 +1,6 @@
+name: bamtools
+channels:
+  - conda-forge
+  - bioconda
+dependencies:
+  - bioconda::hmftools-bam-tools=1.6.1

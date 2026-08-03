@@ -1,0 +1,62 @@
+name: wisp
+description: Estimates TF in a given sample using biomarkers of an existing sample from the same patient
+keywords:
+  - tumor_fraction
+  - purity
+  - ccfdna
+tools:
+  - wisp:
+      description: Estimates TF in a given sample using biomarkers of an existing sample from the same patient.
+      homepage: https://github.com/hartwigmedical/hmftools/tree/master/wisp
+      documentation: https://github.com/hartwigmedical/hmftools/tree/master/wisp
+      licence: ["GPL v3"]
+input:
+  - meta:
+      type: map
+      description: |
+        Groovy Map containing sample information
+        e.g. [id: 'sample_id']
+  - primary_purple_dir:
+      type: directory
+      description: PURPLE directory of the primary sample
+  - primary_amber_dir:
+      type: directory
+      description: AMBER directory of the primary sample
+  - sample_amber_dir:
+      type: directory
+      description: AMBER directory of the query sample
+  - cobalt_dir:
+      type: directory
+      description: COBALT directory
+  - sage_append_dir:
+      type: directory
+      description: SAGE append directory
+  - genome_fasta:
+      type: file
+      description: Reference genome assembly FASTA file
+      pattern: "*.{fa,fasta}"
+  - genome_fai:
+      type: file
+      description: Reference genome assembly fai file
+      pattern: "*.{fai}"
+  - targeted_mode:
+      type: boolean
+      description: Flag indicating whether targeted mode is set
+output:
+  - meta:
+      type: map
+      description: |
+        Groovy Map containing sample information
+        e.g. [id: 'sample_id']
+  - wisp_dir:
+      type: directory
+      description: WISP output direcotry
+  - versions:
+      type: file
+      description: File containing software versions
+      pattern: "versions.yml"
+  - command_files:
+      type: list
+      description: List of command files
+authors:
+  - "@scwatts"

@@ -1,0 +1,6 @@
+name: isofox_panel_normalisation
+channels:
+  - conda-forge
+  - bioconda
+dependencies:
+  - bioconda::hmftools-isofox=2.0.1
