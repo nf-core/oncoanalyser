@@ -31,6 +31,7 @@ process ORANGE {
     val pipeline_version
     val sequencing_platform
     val targeted_mode
+    val panel
 
     output:
     tuple val(meta), path('output/*.orange.pdf')      , topic: orange_pdf, optional: true
@@ -49,7 +50,14 @@ process ORANGE {
     def log_level_arg = task.ext.log_level ? "-log_level ${task.ext.log_level}" : ''
 
     def pipeline_version_str = pipeline_version ?: 'not specified'
-    def experiment_type = targeted_mode ? 'PANEL' : 'WGS'
+
+    def experiment_type = 'WGS'
+    def panel_name_arg = ''
+    if (targeted_mode) {
+        experiment_type = 'PANEL'
+        panel_name_arg = "-panel_name ${panel.toUpperCase()}"
+    }
+
     def primary_tumor_location_arg = meta.cancer_type ? "-primary_tumor_location ${meta.cancer_type}" : ''
 
     def reference_arg = meta.containsKey('normal_dna_id') ? "-reference ${meta.normal_dna_id}" : ''
@@ -121,6 +129,7 @@ process ORANGE {
         -pipeline_version_file pipeline_version.txt \\
         -experiment_type ${experiment_type} \\
         -sequencing_type ${sequencing_platform.toUpperCase()} \\
+        ${panel_name_arg} \\
         ${primary_tumor_location_arg} \\
         \\
         -tumor ${meta.tumor_id} \\

@@ -862,6 +862,7 @@ workflow WGTS {
             hmf_data.disease_ontology,
             params.sequencing_platform,
             false,  // targeted_mode
+            '' ,  // panel
         )
 
     }

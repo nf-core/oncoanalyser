@@ -719,6 +719,7 @@ workflow TARGETED {
             hmf_data.disease_ontology,
             params.sequencing_platform,
             true,  // targeted_mode
+            params.panel,
         )
 
     }

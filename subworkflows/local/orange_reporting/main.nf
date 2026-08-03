@@ -32,6 +32,7 @@ workflow ORANGE_REPORTING {
     // Params
     sequencing_platform             // string:  [mandatory] sequencing platform
     targeted_mode                   // boolean: [mandatory] Set targeted mode
+    panel                           // string:  [optional]  panel
 
     main:
     // Mapping for semantic input retrieval
@@ -237,5 +238,6 @@ workflow ORANGE_REPORTING {
         '2.3.0 [oncoanalyser]',
         sequencing_platform,
         targeted_mode,
+        panel,
     )
 }
