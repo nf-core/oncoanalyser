@@ -46,7 +46,7 @@ A typical command for running `oncoanalyser` is shown below:
 
 ```bash
 nextflow run nf-core/oncoanalyser \
-  -revision 2.3.0 \
+  -revision 3.0.0 \
   -profile docker \
   -config reference_data.config \ # Optional but recommended
   --mode wgts \
@@ -70,7 +70,7 @@ If you have data from Roche SBX or Ultima sequencing technologies, you will need
 :::tip
 
 If you encounter any issues setting up or running `oncoanalyser`, please see
-[FAQ and troubleshooting](oncoanalyser/2.3.0/docs/usage/faq_and_troubleshooting)
+[FAQ and troubleshooting](oncoanalyser/3.0.0/docs/usage/faq_and_troubleshooting)
 
 :::
 
@@ -109,7 +109,7 @@ outdir: 'output/'
 and be run using this command:
 
 ```bash
-nextflow run nf-core/oncoanalyser -revision 2.3.0 -profile docker -params-file params.yaml
+nextflow run nf-core/oncoanalyser -revision 3.0.0 -profile docker -params-file params.yaml
 ```
 
 You can also generate such `YAML`/`JSON` files via [nf-core/launch](https://nf-co.re/launch).
@@ -163,7 +163,7 @@ to explicitly specify `--sequencing_platform` like so:
 
 ```bash
 nextflow run nf-core/oncoanalyser \
--revision 2.3.0 \
+-revision 3.0.0 \
 -config reference_data.config \
 -profile docker \
 --sequencing_platform sbx \
@@ -357,7 +357,7 @@ Then, run `oncoanalyser` with as normal:
 
 ```bash
 nextflow run nf-core/oncoanalyser \
-  -revision 2.3.0 \
+  -revision 3.0.0 \
   -config reference_data.config \
   -profile docker \
   --mode wgts \
@@ -486,7 +486,7 @@ analysis from alignments.
 
 ```bash
 nextflow run nf-core/oncoanalyser \
-  -revision 2.3.0 \
+  -revision 3.0.0 \
   -profile docker \
   --mode prepare_reference \
   --ref_data_types wgs \
@@ -494,7 +494,7 @@ nextflow run nf-core/oncoanalyser \
   --outdir output/
 ```
 
-Once the above commands complete, the stated reference data can be found in `<outdir>/reference_data/2.3.0`. You will
+Once the above commands complete, the stated reference data can be found in `<outdir>/reference_data/3.0.0`. You will
 then need to provide a config file that points to these reference files (see [Configuring reference data](#configuring-reference-data))
 which can be used for subsequent `oncoanalyser` runs. The Nextflow work directory can also be removed to free up disk
 space.
@@ -548,7 +548,7 @@ The configuration file can then be supplied to `oncoanalyser` via the `-config <
 
 ```bash
 nextflow run nf-core/oncoanalyser \
-  -revision 2.3.0 \
+  -revision 3.0.0 \
   -config reference_data.config  \
   <...>
 ```
@@ -585,7 +585,7 @@ Each index can then be created in by using `--mode prepare_reference` and `--ref
 
 ```bash
 nextflow run nf-core/oncoanalyser \
-  -revision 2.3.0 \
+  -revision 3.0.0 \
   -config genome.custom.config \
   -profile docker \
   --mode prepare_reference \
@@ -652,7 +652,7 @@ _GRCh38 genome (Hartwig): `GRCh38_hmf`_
 
 ```bash
 nextflow run nf-core/oncoanalyser \
-  -revision 2.3.0 \
+  -revision 3.0.0 \
   -config reference_data.config \
   -profile docker \
   --mode wgts \
@@ -670,7 +670,7 @@ A typical run command for TSO500 would be:
 
 ```bash
 nextflow run nf-core/oncoanalyser \
-  -revision 2.3.0 \
+  -revision 3.0.0 \
   -config reference_data.config \
   -profile docker \
   --mode targeted \
@@ -738,7 +738,7 @@ Then run `oncoanalyser` providing `--mode purity_estimate` and `--purity_estimat
 
 ```bash
 nextflow run nf-core/oncoanalyser \
-  -revision 2.3.0 \
+  -revision 3.0.0 \
   -config reference_data.config \
   -profile docker \
   --mode purity_estimate \
@@ -807,7 +807,7 @@ manually created files to `--driver_gene_panel` and `--target_regions_bed`:
 
 ```bash
 nextflow run nf-core/oncoanalyser \
-  -revision 2.3.0 \
+  -revision 3.0.0 \
   -config reference_data.config \
   -profile docker \
   --mode panel_resource_creation \
@@ -882,7 +882,7 @@ Run `oncoanalyser` with `--mode targeted` and `-config panel.config`:
 
 ```bash
 nextflow run nf-core/oncoanalyser \
-  -revision 2.3.0 \
+  -revision 3.0.0 \
   -config reference_data.config \
   -config panel.config \
   -profile docker \
@@ -949,7 +949,7 @@ IIIIIIIIIIIIIIIIIIIIIIIIIIII#I#IIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIII
 ## Process selection
 
 It is possible to exclude or manually select specific processes when running `oncoanalyser`. The full list of processes that can
-be selected is available [here](https://github.com/nf-core/oncoanalyser/blob/2.3.0/lib/Constants.groovy#L53).
+be selected is available [here](https://github.com/nf-core/oncoanalyser/blob/3.0.0/lib/Constants.groovy#L53).
 
 :::warning
 
@@ -966,7 +966,7 @@ skip resource intensive processes like Virusbreakend, or ORANGE because you do n
 
 ```bash
 nextflow run nf-core/oncoanalyser \
-  -revision 2.3.0 \
+  -revision 3.0.0 \
   -profile docker \
   --mode wgts \
   --processes_exclude virusinterpreter,orange \
@@ -982,7 +982,7 @@ you may only want to run alignment and SNV/indel, SV and CNV calling from DNA FA
 
 ```bash
 nextflow run nf-core/oncoanalyser \
-  -revision 2.3.0 \
+  -revision 3.0.0 \
   -profile docker \
   --mode wgts \
   --processes_manual alignment,redux,sage,amber,cobalt,esvee,sage,pave,purple \

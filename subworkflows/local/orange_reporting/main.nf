@@ -237,7 +237,7 @@ workflow ORANGE_REPORTING {
         ch_orange_inputs,
         genome_version,
         disease_ontology,
-        '2.3.0 [oncoanalyser]',
+        '3.0.0 [oncoanalyser]',
         sequencing_platform,
         targeted_mode,
         panel,
