@@ -1,5 +1,4 @@
 process MULTIQC {
-    tag "${meta.id}"
     label 'process_single'
 
     conda "${moduleDir}/environment.yml"
@@ -90,8 +89,8 @@ process MULTIQC {
     mkdir -p multiqc_plots/
 
     touch multiqc_report.html
-    touch multiqc_data/.placeholder
-    touch multiqc_plots/.placeholder
+    touch multiqc_data/.stub
+    touch multiqc_plots/.stub
 
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":

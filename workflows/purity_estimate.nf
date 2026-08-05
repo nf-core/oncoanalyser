@@ -161,8 +161,6 @@ workflow PURITY_ESTIMATE {
     ch_amber_out = channel.empty()
     if (run_config.stages.amber && wgts_mode) {
 
-        def tumor_min_depth = wgts_mode ? 1 : []
-
         AMBER_PROFILING(
             ch_inputs,
             ch_redux_tumor_out,
@@ -171,7 +169,7 @@ workflow PURITY_ESTIMATE {
             ref_data.genome_version,
             hmf_data.heterozygous_sites,
             [],  // target_regions_bed
-            tumor_min_depth,
+            1,  // tumor_min_depth
             params.sequencing_platform,
             true,  // purity_estimate_mode
         )

@@ -21,10 +21,10 @@ process LINXREPORT {
     script:
     def args = task.ext.args ?: ''
 
-    def plot_dir = linx_visualiser_dir.resolve('all/').toUriString()
+    def plot_dir = linx_visualiser_dir.resolve('all/').toString()
 
     """
-    # Set input plot directory and create it doesn't exist. See the LINX visualiser module for further info.
+    # Set input plot directory and create if doesn't exist. See the LINX visualiser module for further info.
     if [[ ! -e ${plot_dir} ]]; then
         mkdir -p ${plot_dir};
     fi;

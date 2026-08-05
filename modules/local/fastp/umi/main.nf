@@ -48,7 +48,7 @@ process FASTP_UMI {
 
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":
-        fastp: \$(fastp --version 2>&1 | sed 's/^.* //')
+        fastp: \$(fastp --version 2>&1 | sed -n '/^fastp / { s/^.* //p }')
     END_VERSIONS
     """
 

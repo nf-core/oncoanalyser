@@ -41,7 +41,7 @@ process PAVE_PON_PANEL_CREATION {
 
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":
-        pave: \$(pave -version | sed 's/^.* //')
+        pave: \$(pave -version | sed -n '/^Pave version / { s/^.* //p }')
         java: \$(java --version | sed -n '/^openjdk/ { s/^.*openjdk //; s/ .*//p }')
     END_VERSIONS
     """

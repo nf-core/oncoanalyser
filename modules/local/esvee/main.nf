@@ -39,6 +39,8 @@ process ESVEE {
     def reference_arg = meta.containsKey('normal_id') ? "-reference ${meta.normal_id}" : ''
     def reference_bam_arg = meta.containsKey('normal_id') ? "-reference_bam ${normal_aln}" : ''
 
+    def decoy_genome_arg = decoy_sequences_image ? "-decoy_genome ${decoy_sequences_image}" : ''
+
     def target_regions_bed_arg = target_regions_bed ? "-target_regions_bed ${target_regions_bed}" : ''
 
     """
@@ -59,6 +61,7 @@ process ESVEE {
         -pon_sv_file ${pon_breakpoints} \\
         -repeat_mask_file ${repeatmasker_annotations} \\
         -unmap_regions ${unmap_regions} \\
+        ${decoy_genome_arg} \\
         -sequencing_type ${sequencing_platform.toUpperCase()} \\
         ${target_regions_bed_arg} \\
         -bamtool \$(which sambamba) \\

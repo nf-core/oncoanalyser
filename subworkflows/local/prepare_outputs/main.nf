@@ -29,8 +29,8 @@ workflow PREPARE_OUTPUTS_WGTS {
             channel.topic('neo_scorer_dir').flatMap { meta, d ->               return get_dir_filepaths(meta, d, 'neo/scorer') },
             channel.topic('orange_json').map { meta, d ->                      return ["${meta.key}/orange/${d.name}", d] },
             channel.topic('orange_pdf').map { meta, d ->                       return ["${meta.key}/orange/${d.name}", d] },
-            channel.topic('pave_somatic_dir').flatMap { meta, d ->             return get_dir_filepaths(meta, d, 'pave/somatic') },
             channel.topic('pave_germline_dir').flatMap { meta, d ->            return get_dir_filepaths(meta, d, 'pave/germline') },
+            channel.topic('pave_somatic_dir').flatMap { meta, d ->             return get_dir_filepaths(meta, d, 'pave/somatic') },
             channel.topic('peach_dir').flatMap { meta, d ->                    return get_dir_filepaths(meta, d) },
             channel.topic('purple_dir').flatMap { meta, d ->                   return get_dir_filepaths(meta, d) },
             channel.topic('qsee_dir').flatMap { meta, d ->                     return get_dir_filepaths(meta, d) },
@@ -78,14 +78,16 @@ workflow PREPARE_OUTPUTS_TARGETED {
             channel.topic('multiqc_report').map { d ->                         return [d.name, d] },
             channel.topic('orange_json').map { meta, d ->                      return ["${meta.key}/orange/${d.name}", d] },
             channel.topic('orange_pdf').map { meta, d ->                       return ["${meta.key}/orange/${d.name}", d] },
-            channel.topic('pave_somatic_dir').flatMap { meta, d ->             return get_dir_filepaths(meta, d, 'pave/somatic') },
             channel.topic('pave_germline_dir').flatMap { meta, d ->            return get_dir_filepaths(meta, d, 'pave/germline') },
+            channel.topic('pave_somatic_dir').flatMap { meta, d ->             return get_dir_filepaths(meta, d, 'pave/somatic') },
             channel.topic('peach_dir').flatMap { meta, d ->                    return get_dir_filepaths(meta, d) },
             channel.topic('purple_dir').flatMap { meta, d ->                   return get_dir_filepaths(meta, d) },
+            channel.topic('qsee_dir').flatMap { meta, d ->                     return get_dir_filepaths(meta, d) },
             channel.topic('redux_dir').flatMap { meta, d ->                    return get_dir_filepaths(meta, d, "alignments/${meta.sample_id}") },
             channel.topic('sage_append_dir').flatMap { meta, d ->              return get_dir_filepaths(meta, d, "sage_append/${meta.output_file_id}") },
             channel.topic('sage_germline_dir').flatMap { meta, d ->            return get_dir_filepaths(meta, d, 'sage/germline') },
             channel.topic('sage_somatic_dir').flatMap { meta, d ->             return get_dir_filepaths(meta, d, 'sage/somatic') },
+            channel.topic('sage_visualiser_dir').flatMap { meta, d ->          return get_dir_filepaths(meta, d, 'sage/visualiser') },
 
             channel.topic('write_reference_data').map { d -> return ["reference_data/${workflow.manifest.version}/", d] },
 
@@ -183,14 +185,16 @@ def get_dir_filepaths(meta, d, target_dir=null) {
 
 def get_command_log_filepath(data) {
 
-    def other_logs = ['gatk4_bwa_index_image', 'gridss_index', 'bwa_index', 'bwamem2_index', 'samtools_dict', 'samtools_faidx', 'star_genomegenerate', 'extracttarball', 'multiqc']
+    def other_logs = ['gatk4_bwa_index_image', 'gridss_index', 'bwa_index', 'bwamem2_index', 'samtools_dict', 'samtools_faidx', 'star_genomegenerate', 'multiqc']
     def panel_logs = ['cobalt_panel_normalisation', 'pave_pon_panel_creation', 'isofox_panel_normalisation']
 
     def (meta, name, fps_all) = data
 
     def fps = fps_all.findAll { f -> f.name.matches(/.*\.command\.(sh|out|err|log|run)/) }
 
-    if (other_logs.contains(name)) {
+    if (name == 'extracttarball') {
+        return fps.collect { d -> ["logs/other/${name}.${meta.id}${d.name}", d] }
+    } else if (other_logs.contains(name)) {
         return fps.collect { d -> ["logs/other/${name}${d.name}", d] }
     } else if (panel_logs.contains(name)) {
         return fps.collect { d -> ["logs/panel_resources/${name}${d.name}", d] }

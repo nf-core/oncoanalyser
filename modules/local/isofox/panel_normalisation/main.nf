@@ -3,7 +3,7 @@ process ISOFOX_PANEL_NORMALISATION {
 
     conda "${moduleDir}/environment.yml"
     container "${ workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container ?
-        'https://depot.galaxyproject.org/singularity/2.0.1--hdfd78af_0' :
+        'https://depot.galaxyproject.org/singularity/hmftools-isofox:2.0.1--hdfd78af_0' :
         'biocontainers/hmftools-isofox:2.0.1--hdfd78af_0' }"
 
     input:
@@ -50,7 +50,7 @@ process ISOFOX_PANEL_NORMALISATION {
 
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":
-        isofox: \$(isofox -version | sed 's/^.* //')
+        isofox: \$(isofox -version | sed -n '/^Isofox version / { s/^.* //p }')
         java: \$(java --version | sed -n '/^openjdk/ { s/^.*openjdk //; s/ .*//p }')
     END_VERSIONS
     """

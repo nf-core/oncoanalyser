@@ -136,5 +136,5 @@ workflow SAGE_PLOTTING {
         )
 
     emit:
-    visualiser_dir = ch_outputs  // channel: [ meta, sage_plot_dir ]
+    visualiser_dir = ch_outputs  // channel: [ meta, sage_visualiser_dir ]
 }

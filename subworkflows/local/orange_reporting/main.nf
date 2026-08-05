@@ -57,7 +57,7 @@ workflow ORANGE_REPORTING {
     ]
 
     // Select input sources then sort
-    // channel: runnable: [meta, sage_dir_somatic, sage_dir_germline, sage_append_dir_somatic, sage_append_dir_germline, sage_plot_dir_somatic, purple_dir, qsee_dir, linx_annotation_dir_somatic, linx_plot_dir_somatic, linx_annotation_dir_germline, virusinterpreter_dir, chord_dir, sigs_dir, lilac_dr, cuppa_dir, peach_dir, isofox_dir ]
+    // channel: runnable: [meta, sage_dir_somatic, sage_dir_germline, sage_append_dir_somatic, sage_append_dir_germline, sage_visualiser_dir_somatic, purple_dir, qsee_dir, linx_annotation_dir_somatic, linx_plot_dir_somatic, linx_annotation_dir_germline, virusinterpreter_dir, chord_dir, sigs_dir, lilac_dr, cuppa_dir, peach_dir, isofox_dir ]
     // channel: skip: [ meta ]
     ch_inputs_sorted = WorkflowOncoanalyser.groupByMeta(
         ch_sage_dir_somatic,
@@ -127,7 +127,7 @@ workflow ORANGE_REPORTING {
         }
 
     // Create process input channel
-    // channel: [meta, sage_dir_somatic, sage_dir_germline, sage_append_dir_somatic, sage_append_dir_germline, sage_plot_dir_somatic, purple_dir, qsee_dir, linx_annotation_dir_somatic, linx_plot_dir_somatic, linx_annotation_dir_germline, virusinterpreter_dir, chord_dir, sigs_dir, lilac_dr, cuppa_dir, peach_dir, isofox_dir ]
+    // channel: [meta, sage_dir_somatic, sage_dir_germline, sage_append_dir_somatic, sage_append_dir_germline, sage_visualiser_dir_somatic, purple_dir, qsee_dir, linx_annotation_dir_somatic, linx_plot_dir_somatic, linx_annotation_dir_germline, virusinterpreter_dir, chord_dir, sigs_dir, lilac_dr, cuppa_dir, peach_dir, isofox_dir ]
     ch_orange_inputs = ch_inputs_sorted.runnable
         .map { d ->
 
@@ -203,10 +203,12 @@ workflow ORANGE_REPORTING {
 
             // Set LINX reportable plot directory
             def linx_plot_dir_somatic = inputs_selected[input_indexes['linx_plot_dir_somatic']]
-            def linx_plot_dir_somatic_reportable = linx_plot_dir_somatic.resolve('reportable/')
-
-            // The LINX directory may not exist on object store providers where no plots where created
-            linx_plot_dir_somatic_reportable = linx_plot_dir_somatic_reportable.exists() ? linx_plot_dir_somatic_reportable : []
+            def linx_plot_dir_somatic_reportable = []
+            if (linx_plot_dir_somatic) {
+                // The LINX directory may not exist on object store providers where no plots where created
+                def dp = linx_plot_dir_somatic.resolve('reportable/')
+                linx_plot_dir_somatic_reportable = dp.exists() ? dp : []
+            }
 
             return [
                 meta_orange,

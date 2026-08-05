@@ -77,8 +77,8 @@ process REDUX {
     }
 
     if (generate_tsvs_only) {
-        assert [alns].flatten().size() == 1
-        assert [idxs].flatten().size() == 1
+        def bad_inputs = [alns].flatten().size() != 1 || [idxs].flatten().size() != 1
+        if (bad_inputs) { error 'Got too many alignments / indexes for `generate_tsvs_only`' }
 
         bqr_jitter_msi_only_arg = '-bqr_jitter_msi_only'
     }
@@ -153,7 +153,7 @@ process REDUX {
     gzip <<< '' > redux_${meta.sample_id}/${meta.sample_id}.redux.ms_table.tsv.gz
     gzip <<< '' > redux_${meta.sample_id}/${meta.sample_id}.redux.repeat.tsv.gz
 
-    if [[ -n "${umi_enable}" ]]; then
+    if [[ "${umi_enable}" == "true" ]]; then
         touch redux_${meta.sample_id}/${meta.sample_id}.umi_coord_freq.tsv
         touch redux_${meta.sample_id}/${meta.sample_id}.umi_edit_distance.tsv
         touch redux_${meta.sample_id}/${meta.sample_id}.umi_nucleotide_freq.tsv

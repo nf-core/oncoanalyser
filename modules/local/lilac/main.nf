@@ -84,7 +84,7 @@ process LILAC {
     """
     mkdir -p lilac/
 
-    touch lilac/.placeholder
+    touch lilac/.stub
 
     echo -e '${task.process}:\\n  stub: noversions\\n' > versions.yml
     """
@@ -96,6 +96,6 @@ def getSampleName(meta, tumor_aln, normal_aln) {
     } else if (normal_aln) {
         return meta.normal_id
     } else {
-        exit(1)
+        error 'did not receive either a tumor or normal alignment'
     }
 }

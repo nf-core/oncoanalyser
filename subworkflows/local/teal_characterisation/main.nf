@@ -9,8 +9,8 @@ workflow TEAL_CHARACTERISATION {
     take:
     // Sample data
     ch_inputs              // channel: [mandatory] [ meta ]
-    ch_redux_dir_tumor     // channel: [mandatory] [ meta, bam, bai ]
-    ch_redux_dir_normal    // channel: [mandatory] [ meta, bam, bai ]
+    ch_redux_dir_tumor     // channel: [mandatory] [ meta, redux_dir ]
+    ch_redux_dir_normal    // channel: [mandatory] [ meta, redux_dir ]
     ch_bamtools_dir_tumor  // channel: [mandatory] [ meta, bamtools_dir ]
     ch_bamtools_dir_normal // channel: [mandatory] [ meta, bamtools_dir ]
     ch_cobalt_dir          // channel: [mandatory] [ meta, cobalt_dir ]

@@ -108,7 +108,7 @@ workflow SAGE_APPEND {
             def alns = [tumor_rna_aln]
             def idxs = [tumor_rna_idx]
 
-            def purple_smlv_vcf = file(purple_dir).resolve("${tumor_dna_id}.purple.germline.vcf.gz")
+            def purple_smlv_vcf = purple_dir.resolve("${tumor_dna_id}.purple.germline.vcf.gz")
 
             return [meta_append, purple_smlv_vcf, alns, idxs, []]
 
@@ -138,7 +138,7 @@ workflow SAGE_APPEND {
 
             def has_tumor_rna = Utils.hasTumorRna(meta)
             def has_tumor_dna = Utils.hasTumorDna(meta)
-            def has_smlv_somatic = file(purple_dir).resolve("${tumor_dna_id}.purple.somatic.vcf.gz")
+            def has_smlv_somatic = purple_dir.resolve("${tumor_dna_id}.purple.somatic.vcf.gz").exists()
 
             def should_append_rna_variants = ! purity_estimate_mode && has_tumor_rna && has_tumor_dna && has_smlv_somatic
             def should_append_longitudinal_variants = purity_estimate_mode && has_tumor_dna && has_smlv_somatic
@@ -184,7 +184,7 @@ workflow SAGE_APPEND {
                 redux_tsvs = redux_tsvs_tumor
             }
 
-            def purple_smlv_vcf = file(purple_dir).resolve("${tumor_dna_id}.purple.somatic.vcf.gz")
+            def purple_smlv_vcf = purple_dir.resolve("${tumor_dna_id}.purple.somatic.vcf.gz")
 
             return [meta_append, purple_smlv_vcf, alns, idxs, redux_tsvs]
         }

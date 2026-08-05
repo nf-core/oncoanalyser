@@ -74,7 +74,7 @@ workflow TARGETED {
     def panel_data = PREPARE_REFERENCE.out.panel_data
 
     // Configure selectable reference data and inputs
-    def hmf_data_pons = Utils.getSequencingPlatformPons(hmf_data, params.sequencing_platform)
+    def hmf_data_pons = Utils.getSequencingPlatformPons(hmf_data, params.sequencing_platform, log)
     def driver_gene_panel = params.driver_gene_panel != null ? file(params.driver_gene_panel) : panel_data.driver_gene_panel
     def msi_model_error_rates = panel_data.msi_model_error_rates != null ? panel_data.msi_model_error_rates : hmf_data.msi_model_error_rates
 
@@ -536,7 +536,7 @@ workflow TARGETED {
     //
     // SUBWORKFLOW: Visualise SAGE variants
     //
-    // channel: [ meta, sage_plot_dir ]
+    // channel: [ meta, sage_visualiser_dir ]
     ch_sage_somatic_visualiser_out = channel.empty()
     if (run_config.stages.sage_visualiser) {
 

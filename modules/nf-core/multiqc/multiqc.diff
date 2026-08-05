@@ -142,7 +142,9 @@ Changes in 'multiqc/meta.yml':
 Changes in 'multiqc/main.nf':
 --- modules/nf-core/multiqc/main.nf
 +++ modules/nf-core/multiqc/main.nf
-@@ -3,48 +3,99 @@
+@@ -1,50 +1,100 @@
+ process MULTIQC {
+-    tag "${meta.id}"
      label 'process_single'
  
      conda "${moduleDir}/environment.yml"
@@ -251,15 +253,14 @@ Changes in 'multiqc/main.nf':
      stub:
      """
 -    mkdir multiqc_data
--    touch multiqc_data/.stub
--    mkdir multiqc_plots
--    touch multiqc_plots/.stub
 +    mkdir -p multiqc_data/
 +    mkdir -p multiqc_plots/
 +
-     touch multiqc_report.html
-+    touch multiqc_data/.placeholder
-+    touch multiqc_plots/.placeholder
++    touch multiqc_report.html
+     touch multiqc_data/.stub
+-    mkdir multiqc_plots
+     touch multiqc_plots/.stub
+-    touch multiqc_report.html
 +
 +    cat <<-END_VERSIONS > versions.yml
 +    "${task.process}":

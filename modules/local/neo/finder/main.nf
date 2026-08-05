@@ -55,7 +55,7 @@ process NEO_FINDER {
     """
     mkdir -p neo_finder/
 
-    touch neo_finder/.placeholder
+    touch neo_finder/.stub
 
     echo -e '${task.process}:\\n  stub: noversions\\n' > versions.yml
     """

@@ -40,7 +40,7 @@ process NEO_SCORER {
     mkdir -p neo_scorer/
 
     # Prepare ISOFOX results
-    if [[ -n "${isofox_dir}" ]]; then
+    if [[ -n "${isofox_dir_arg}" ]]; then
       # When provided existing results generated in a RNA-only analysis we must adjust identifier
       if [[ -n "\$(find -L ${isofox_dir} -name '${meta.sample_rna_id}*')" ]]; then
           mkdir -p ${isofox_dir_local}/;
@@ -83,7 +83,7 @@ process NEO_SCORER {
     """
     mkdir -p neo_scorer/
 
-    touch neo_scorer/.placeholder
+    touch neo_scorer/.stub
 
     echo -e '${task.process}:\\n  stub: noversions\\n' > versions.yml
     """

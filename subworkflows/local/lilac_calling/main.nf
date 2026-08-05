@@ -102,7 +102,7 @@ workflow LILAC_CALLING {
     )
 
     // Set outputs, restoring original meta
-    // channel: [ meta, amber_dir ]
+    // channel: [ meta, lilac_dir ]
     ch_outputs = channel.empty()
         .mix(
             WorkflowOncoanalyser.restoreMeta(channel.topic('lilac_dir'), ch_inputs),

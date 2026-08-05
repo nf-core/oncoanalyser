@@ -109,13 +109,13 @@ process ORANGE {
     fi;
 
     # When provided existing ISOFOX results generated in a RNA-only analysis we must adjust identifier
-    if [[ -n "${isofox_dir}" && -n "\$(find -L ${isofox_dir} -name '${meta.tumor_rna_id}*')" ]]; then
+    if [[ -n "${isofox_dir_arg}" && -n "\$(find -L ${isofox_dir} -name '${meta.tumor_rna_id}*')" ]]; then
       mkdir -p ${isofox_dir_local}/;
       for e in \$(find -L ${isofox_dir}/*); do
          s=\$(sed 's/^${meta.tumor_rna_id}//' <<< \${e##*/});
          ln -s ../\${e} ${isofox_dir_local}/${meta.tumor_id}\${s};
       done;
-    elif [[ -n "${isofox_dir}" ]]; then
+    elif [[ -n "${isofox_dir_arg}" ]]; then
       ln -s ${isofox_dir} ${isofox_dir_local};
     fi
 

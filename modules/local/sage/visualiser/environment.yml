@@ -1,4 +1,4 @@
-name: sage_somatic
+name: sage_visualiser
 channels:
   - conda-forge
   - bioconda

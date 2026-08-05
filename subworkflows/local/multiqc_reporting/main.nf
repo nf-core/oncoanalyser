@@ -26,13 +26,13 @@ workflow MULTIQC_REPORTING {
 
     main:
     // Select input sources then sort
-    // channel: [ meta, bamtools_tumor_dir, bamtools_normal_dir, amber_dir, purple_dir ]
+    // channel: [ meta, bamtools_tumor_dir, bamtools_normal_dir, amber_dir, purple_dir, star_log, rna_md_metrics ]
     ch_inputs_sorted = WorkflowOncoanalyser.groupByMeta(
-        ch_align_rna_qc_tumor_out,
         ch_bamtools_dir_tumor,
         ch_bamtools_dir_normal,
         ch_amber_dir,
         ch_purple_dir,
+        ch_align_rna_qc_tumor_out,
     )
         .map { meta, bamtools_dir_tumor, bamtools_dir_normal, amber_dir, purple_dir, star_log, rna_md_metrics ->
 
@@ -157,5 +157,5 @@ workflow MULTIQC_REPORTING {
     ch_outputs = channel.topic('multiqc_report').toList()
 
     emit:
-    report = ch_outputs // channel: [ meta, multiqc_report ]
+    report = ch_outputs // path: multiqc_report
 }

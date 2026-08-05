@@ -82,7 +82,7 @@ process ISOFOX {
     """
     mkdir -p isofox/
 
-    touch isofox/.placeholder
+    touch isofox/.stub
 
     echo -e '${task.process}:\\n  stub: noversions\\n' > versions.yml
     """

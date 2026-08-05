@@ -116,7 +116,7 @@ process LINX_VISUALISER {
     """
     mkdir -p plots/{all,reportable}/
 
-    touch plots/{all,reportable}/.placeholder
+    touch plots/{all,reportable}/.stub
 
     echo -e '${task.process}:\n  stub: noversions\n' > versions.yml
     """

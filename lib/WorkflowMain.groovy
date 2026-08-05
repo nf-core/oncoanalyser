@@ -42,9 +42,9 @@ class WorkflowMain {
 
         if (! params.containsKey('ref_data_hmf_data_path')) {
             if (params.genome_version.toString() == '37') {
-                params.ref_data_hmf_data_path = "${params.refdata_base}/${Constants.HMF_DATA_37_PATH}"
+                params.ref_data_hmf_data_path = "${params.ref_data_base}/${Constants.HMF_DATA_37_PATH}"
             } else if (params.genome_version.toString() == '38') {
-                params.ref_data_hmf_data_path = "${params.refdata_base}/${Constants.HMF_DATA_38_PATH}"
+                params.ref_data_hmf_data_path = "${params.ref_data_base}/${Constants.HMF_DATA_38_PATH}"
             } else {
                 default_invalid = true
             }
@@ -72,7 +72,7 @@ class WorkflowMain {
 
                 if (params.panel.toLowerCase() == 'tso500') {
                     if (params.genome_version.toString() == '37') {
-                        params.ref_data_panel_data_path = "${params.refdata_base}/${Constants.TSO500_PANEL_37_PATH}"
+                        params.ref_data_panel_data_path = "${params.ref_data_base}/${Constants.TSO500_PANEL_37_PATH}"
                     }
                 }
 
@@ -151,14 +151,14 @@ class WorkflowMain {
         if (! params.genome) {
             log.error "\n~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n" +
                 "  Genome must be set using the --genome CLI argument or in a configuration file.\n" +
-                "  Currently, the available genome are:\n" +
+                "  Currently, the available genomes are:\n" +
                 "  ${params.genomes.keySet().join(", ")}\n" +
                 "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
             Nextflow.exit(1)
         } else if (! params.genomes.containsKey(params.genome)) {
             log.error "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n" +
                 "  Genome '${params.genome}' not found in any config files provided to the pipeline.\n" +
-                "  Currently, the available genome are:\n" +
+                "  Currently, the available genomes are:\n" +
                 "  ${params.genomes.keySet().join(", ")}\n" +
                 "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
             Nextflow.exit(1)
@@ -179,7 +179,7 @@ class WorkflowMain {
             log.error "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n" +
                 "  Genome version wasn't provided and genome '${params.genome}' is not defined in   \n" +
                 "  genome version list.\n" +
-                "  Currently, the list of genomes in the version list include:\n" +
+                "  Currently, the list of genomes in the version list includes:\n" +
                 "  ${Constants.GENOMES_DEFINED.join(", ")}\n" +
                 "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
             Nextflow.exit(1)
@@ -306,7 +306,7 @@ class WorkflowMain {
                 Nextflow.exit(1)
             }
 
-            // Perform check for for required and optional fields
+            // Perform check for required and optional fields
 
             def panel_data_paths = panel_data_paths_versions[params.genome_version.toString()]
 
@@ -378,7 +378,7 @@ class WorkflowMain {
                     "  A valid purity estimate run mode must be set using the --purity_estimate_mode\n" +
                     "  CLI argument or in a configuration file.\n" +
                     "  Currently, the available run modes are:\n" +
-                    "    - ${purity_estimate_modes_str}\n"
+                    "    - ${purity_estimate_modes_str}\n" +
                     "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
                 Nextflow.exit(1)
             }
@@ -414,7 +414,7 @@ class WorkflowMain {
 
         if ((params.fastp_umi_enabled || params.fastq_tools_umi_enabled) && ! params.redux_umi_enabled) {
             log.error "\n~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n" +
-                  "  When FASTQ UMI processing is enabled (via fastp_umi_enabled or fastp_umi_enabled),\n" +
+                  "  When FASTQ UMI processing is enabled (via fastp_umi_enabled or fastq_tools_umi_enabled),\n" +
                   "  REDUX UMI processing must also be enabled with redux_umi_enabled\n" +
                   "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
             Nextflow.exit(1)
@@ -433,7 +433,7 @@ class WorkflowMain {
         def fastp_umi_args_set_all = params.fastp_umi_location && params.fastp_umi_length && params.fastp_umi_skip >= 0
         if (params.fastp_umi_enabled && ! fastp_umi_args_set_all) {
             log.error "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n" +
-                "  Refusing to run fastp UMI processing without having any UMI params configured.\n" +
+                "  Refusing to run fastp UMI processing without having all UMI params configured.\n" +
                 "  Please review your configuration and appropriately set all fastp_umi_* parameters.\n" +
                 "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
             Nextflow.exit(1)
@@ -441,7 +441,7 @@ class WorkflowMain {
 
         if (params.fastq_tools_umi_delim && ! params.fastq_tools_umi_enabled) {
             log.error "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n" +
-                "  Detected use of fastq-tools UMI parameter fastq_tools_umi_enabled fastq-tools UMI\n" +
+                "  Detected use of fastq-tools UMI parameter fastq_tools_umi_delim but fastq-tools UMI\n" +
                 "  processing has not been enabled. Please review your configuration and set the\n" +
                 "  fastq_tools_umi_enabled or otherwise adjust accordingly.\n" +
                 "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"

@@ -67,7 +67,15 @@ class Utils {
                         it.info
                             .tokenize(';')
                             .each { e ->
-                                def (k, v) = e.tokenize(':')
+
+                                def k
+                                def v
+                                if (e.contains(':')) {
+                                   (k, v) = e.split(':', 2)
+                                } else {
+                                   k = e
+                                }
+
                                 def info_field_enum = Utils.getEnumFromString(k, Constants.InfoField)
 
                                 if (! info_field_enum) {
@@ -137,7 +145,7 @@ class Utils {
                     }
 
                     // Filetype uniqueness
-                    if (meta_sample.containsKey(filetype_enum) & filetype_enum != Constants.FileType.FASTQ) {
+                    if (meta_sample.containsKey(filetype_enum) && filetype_enum != Constants.FileType.FASTQ) {
                         log.error "got duplicate file for ${group_id} ${sample_type_enum}/${sequence_type_enum}: ${filetype_enum}"
                         Nextflow.exit(1)
                     }
@@ -218,7 +226,7 @@ class Utils {
                     }
 
                     if (meta_sample.containsKey(Constants.FileType.CRAI)) {
-                        meta_sample[Constants.FileType.BAI] = meta_sample.remove(Constants.FileType.CRAI)
+                        meta_sample[Constants.FileType.IDX] = meta_sample.remove(Constants.FileType.CRAI)
                     }
 
                 }
@@ -455,7 +463,7 @@ class Utils {
 
             // Do not allow donor sample without normal sample
             if (Utils.hasDonorDna(meta) && ! Utils.hasNormalDna(meta)) {
-                log.error "a donor sample but not normal sample was found for ${meta.group_id}\n\n" +
+                log.error "a donor sample but no normal sample was found for ${meta.group_id}\n\n" +
                     "Analysis with a donor sample requires a normal sample."
                 Nextflow.exit(1)
             }
@@ -495,7 +503,7 @@ class Utils {
             // Enforce unique samples names within groups
             def sample_ids_duplicated = sample_keys
                 .groupBy { meta.getOrDefault(it, [:]).getOrDefault('sample_id', null) }
-                .findResults { k, v -> k != null & v.size() > 1 ? [k, v] : null }
+                .findResults { k, v -> k != null && v.size() > 1 ? [k, v] : null }
 
             if (sample_ids_duplicated) {
                 def duplicate_message_strs = sample_ids_duplicated.collect { sample_id, keys ->
@@ -509,7 +517,7 @@ class Utils {
         }
 
 
-        // NOTE(SW): the follwing final config checks are performed here since they require additional information
+        // NOTE(SW): the following final config checks are performed here since they require additional information
         // regarding processes that are run and also inputs
 
         def has_alt_contigs = params.genome_type == 'alt'
@@ -588,29 +596,30 @@ class Utils {
         return fields
     }
 
-    public static getSequencingPlatformPons(hmf_data, sequencing_platform_string) {
+    public static getSequencingPlatformPons(hmf_data, sequencing_platform_string, log) {
         def sequencing_platform = Utils.getEnumFromString(sequencing_platform_string, Constants.SequencingPlatform)
         hmf_data.map { d ->
             if (sequencing_platform == Constants.SequencingPlatform.ILLUMINA) {
-              return [
-                  'esvee_breakends': d.esvee_pon_breakends_illumina,
-                  'esvee_breakpoints': d.esvee_pon_breakpoints_illumina,
-                  'sage': d.sage_pon_illumina,
-              ]
+                return [
+                    'esvee_breakends': d.esvee_pon_breakends_illumina,
+                    'esvee_breakpoints': d.esvee_pon_breakpoints_illumina,
+                    'sage': d.sage_pon_illumina,
+                ]
             } else if (sequencing_platform == Constants.SequencingPlatform.SBX) {
-              return [
-                  'esvee_breakends': d.esvee_pon_breakends_sbx,
-                  'esvee_breakpoints': d.esvee_pon_breakpoints_sbx,
-                  'sage': d.sage_pon_sbx,
-              ]
+                return [
+                    'esvee_breakends': d.esvee_pon_breakends_sbx,
+                    'esvee_breakpoints': d.esvee_pon_breakpoints_sbx,
+                    'sage': d.sage_pon_sbx,
+                ]
             } else if (sequencing_platform == Constants.SequencingPlatform.ULTIMA) {
-              return [
-                  'esvee_breakends': d.esvee_pon_breakends_ultima,
-                  'esvee_breakpoints': d.esvee_pon_breakpoints_ultima,
-                  'sage': d.sage_pon_ultima,
-              ]
+                return [
+                    'esvee_breakends': d.esvee_pon_breakends_ultima,
+                    'esvee_breakpoints': d.esvee_pon_breakpoints_ultima,
+                    'sage': d.sage_pon_ultima,
+                ]
             } else {
-              error "Got bad sequencing platform: ${sequencing_platform}"
+                log.error "Got bad sequencing platform: ${sequencing_platform}"
+                Nextflow.exit(1)
             }
         }
     }
@@ -863,7 +872,7 @@ class Utils {
 
         def redux_cram = redux_dir.resolve("${sample_name}.redux.cram")
         if (redux_cram.exists()) {
-            return [redux_cram, "${redux_cram.toUriString()}.crai}"]
+            return [redux_cram, "${redux_cram.toUriString()}.crai"]
         }
 
         def redux_bam = redux_dir.resolve("${sample_name}.redux.bam")

@@ -55,7 +55,7 @@ process CUPPA {
            s=\$(sed 's/^${meta.sample_rna_id}//' <<< \${e##*/});
            ln -s ../\${e} ${isofox_dir_local}/${meta.sample_id}\${s};
         done;
-    elif [[ -n "${isofox_dir}" ]]; then
+    elif [[ -n "${isofox_dir_arg}" ]]; then
         ln -s ${isofox_dir} ${isofox_dir_local};
     fi
 

@@ -11,10 +11,10 @@ class Constants {
     static List PANELS_DEFINED = ['tso500']
 
 
-    static String HMF_DATA_37_PATH = 'hartwig/pipeline_resources/hmf_pipeline_resources.37_v3.0.0--7.tar.gz'
-    static String HMF_DATA_38_PATH = 'hartwig/pipeline_resources/hmf_pipeline_resources.38_v3.0.0--7.tar.gz'
+    static String HMF_DATA_37_PATH = 'hartwig/pipeline_resources/hmf_pipeline_resources.37_v3.0.0--8.tar.gz'
+    static String HMF_DATA_38_PATH = 'hartwig/pipeline_resources/hmf_pipeline_resources.38_v3.0.0--8.tar.gz'
 
-    static String TSO500_PANEL_37_PATH = 'hartwig/panel_resources/hmf_panel_resources.tso500.37_v3.0.0--7.tar.gz'
+    static String TSO500_PANEL_37_PATH = 'hartwig/panel_resources/hmf_panel_resources.tso500.37_v3.0.0--8.tar.gz'
 
 
     static Integer DEFAULT_ISOFOX_READ_LENGTH_WTS = 151
@@ -155,7 +155,6 @@ class Constants {
     }
 
     static Map PLACEHOLDER_META = [meta_placeholder: null]
-    static List PLACEHOLDER_OPTIONAL_CHANNEL = []
 
     static Map INPUT = [
 

@@ -53,7 +53,7 @@ workflow READ_ALIGNMENT_DNA {
         .branch { meta, fastq_info, fastq_fwd, fastq_rev ->
             def has_inputs = fastq_fwd && fastq_rev
             runnable: fastq_info.sample_type == 'donor' && has_inputs
-            skip: ! Utils.hasDonorDna(meta)
+            skip: ! Utils.hasDonorDnaFastq(meta)
               return meta
         }
 

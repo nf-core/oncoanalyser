@@ -20,7 +20,7 @@
                     "mimetype": "text/csv",
                     "pattern": "^\\S+\\.csv$",
                     "description": "Path to comma-separated file containing information about the samples in the experiment.",
-                    "help_text": "You will need to create a design file with information about the samples in your experiment before running the pipeline. Use this parameter to specify its location. It has to be a comma-separated file with 3 columns, and a header row. See [usage docs](https://nf-co.re/oncoanalyser/usage#samplesheet-input).",
+                    "help_text": "You will need to create a design file with information about the samples in your experiment before running the pipeline. Use this parameter to specify its location. It has to be a comma-separated file with 8 columns, and a header row. See [usage docs](https://nf-co.re/oncoanalyser/usage#samplesheet-input).",
                     "fa_icon": "fas fa-file-csv"
                 },
                 "outdir": {
@@ -76,13 +76,13 @@
                     "type": "boolean",
                     "description": "Skip check for restricted genome.",
                     "default": false,
-                    "fa_icon": "fas fa-palette"
+                    "fa_icon": "fas fas fa-lock-open"
                 },
                 "force_panel": {
                     "type": "boolean",
                     "description": "Skip check for known panels.",
                     "default": false,
-                    "fa_icon": "fas fa-palette"
+                    "fa_icon": "fas fas fa-lock-open"
                 },
                 "ref_data_types": {
                     "type": "string",
@@ -201,7 +201,7 @@
                     "type": "boolean",
                     "description": "During panel resource creation, calculate copy number normalisation factors based on per-region copy number percentiles derived from the Hartwig WGS solid tumor cohort.",
                     "default": false,
-                    "fa_icon": "fas fa-palette"
+                    "fa_icon": "fas fa-chart-bar"
                 },
                 "gridss_config": {
                     "type": "string",
@@ -238,7 +238,7 @@
                     "type": "string",
                     "description": "Version of reference genome.",
                     "fa_icon": "far fa-file-code",
-                    "enum": ["37", "38", 37, 38],
+                    "enum": ["37", "38"],
                     "hidden": true
                 },
                 "genome_type": {

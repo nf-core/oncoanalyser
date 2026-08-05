@@ -4,7 +4,7 @@ process WISP {
 
     conda "${moduleDir}/environment.yml"
     container "${ workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container ?
-        'https://depot.galaxyproject.org/singularity/hmftools-wisp:1.3--hdfd78af_0' :
+        'https://depot.galaxyproject.org/singularity/hmftools-wisp:1.3.1--hdfd78af_0' :
         'biocontainers/hmftools-wisp:1.3.1--hdfd78af_0' }"
 
     input:
@@ -96,7 +96,7 @@ process WISP {
 
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":
-        wisp: \$(wisp -version | sed 's/^.* //')
+        wisp: \$(wisp -version | sed -n '/^Wisp version / { s/^.* //p }')
         java: \$(java --version | sed -n '/^openjdk/ { s/^.*openjdk //; s/ .*//p }')
         r: \$(R --version | sed -n '/^R version/ { s/^.*version //; s/ .*//p }')
         r-tidyverse: \$(Rscript -e 'packageVersion("tidyverse") |> as.character() |> writeLines()')

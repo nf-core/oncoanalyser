@@ -49,7 +49,7 @@ process TEAL_PIPELINE {
     }
 
     if (! tumor_arg && ! reference_arg) {
-        error 'TEAL at least tumor or normal data for analyses'
+        error 'TEAL requires at least tumor or normal data for analyses'
     }
 
     """
