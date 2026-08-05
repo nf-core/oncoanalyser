@@ -74,7 +74,7 @@ workflow TARGETED {
     def panel_data = PREPARE_REFERENCE.out.panel_data
 
     // Configure selectable reference data and inputs
-    def hmf_data_pons = Utils.getSequencingPlatformPons(hmf_data, params.sequencing_platform)
+    def hmf_data_pons = Utils.getSequencingPlatformPons(hmf_data, params.sequencing_platform, log)
     def driver_gene_panel = params.driver_gene_panel != null ? file(params.driver_gene_panel) : panel_data.driver_gene_panel
     def msi_model_error_rates = panel_data.msi_model_error_rates != null ? panel_data.msi_model_error_rates : hmf_data.msi_model_error_rates
 
@@ -153,6 +153,7 @@ workflow TARGETED {
         ch_align_dna_donor_out = ch_align_dna_donor_out.mix(READ_ALIGNMENT_DNA.out.donor)
 
         ch_align_rna_tumor_out = ch_align_rna_tumor_out.mix(READ_ALIGNMENT_RNA.out.tumor)
+        ch_align_rna_qc_tumor_out = ch_align_rna_qc_tumor_out.mix(READ_ALIGNMENT_RNA.out.qc_files)
 
     } else {
 
@@ -161,6 +162,7 @@ workflow TARGETED {
         ch_align_dna_donor_out = ch_inputs.map { meta -> [meta, [], []] }
 
         ch_align_rna_tumor_out = ch_inputs.map { meta -> [meta, [], []] }
+        ch_align_rna_qc_tumor_out = ch_inputs.map { meta -> [meta, [], []] }
 
     }
 
@@ -534,9 +536,9 @@ workflow TARGETED {
     //
     // SUBWORKFLOW: Visualise SAGE variants
     //
-    // channel: [ meta, sage_plot_dir ]
+    // channel: [ meta, sage_visualiser_dir ]
     ch_sage_somatic_visualiser_out = channel.empty()
-    if (run_config.stages.sage_vis) {
+    if (run_config.stages.sage_visualiser) {
 
         SAGE_PLOTTING(
             ch_inputs,
@@ -717,6 +719,7 @@ workflow TARGETED {
             hmf_data.disease_ontology,
             params.sequencing_platform,
             true,  // targeted_mode
+            params.panel,
         )
 
     }
@@ -762,6 +765,7 @@ workflow TARGETED {
             ch_bamtools_normal_out,
             ch_amber_out,
             ch_purple_out,
+            ch_align_rna_qc_tumor_out,
             ch_collated_versions,
             params.multiqc_config,
             params.multiqc_methods_description,

@@ -62,7 +62,7 @@ workflow COBALT_PROFILING {
     ch_cobalt_inputs = ch_inputs_runnable
         .multiMap { meta, tumor_aln, tumor_idx, normal_aln, normal_idx, ref_diploid_bed ->
 
-            def tumor_id = purity_estimate_mode
+            def tumor_id
             if (purity_estimate_mode) {
                 tumor_id = Utils.getTumorDnaSampleName(meta, primary: false)
             } else {

@@ -31,6 +31,7 @@ process ORANGE {
     val pipeline_version
     val sequencing_platform
     val targeted_mode
+    val panel
 
     output:
     tuple val(meta), path('output/*.orange.pdf')      , topic: orange_pdf, optional: true
@@ -49,7 +50,14 @@ process ORANGE {
     def log_level_arg = task.ext.log_level ? "-log_level ${task.ext.log_level}" : ''
 
     def pipeline_version_str = pipeline_version ?: 'not specified'
-    def experiment_type = targeted_mode ? 'PANEL' : 'WGS'
+
+    def experiment_type = 'WGS'
+    def panel_name_arg = ''
+    if (targeted_mode) {
+        experiment_type = 'PANEL'
+        panel_name_arg = "-panel_name ${panel.toUpperCase()}"
+    }
+
     def primary_tumor_location_arg = meta.cancer_type ? "-primary_tumor_location ${meta.cancer_type}" : ''
 
     def reference_arg = meta.containsKey('normal_dna_id') ? "-reference ${meta.normal_dna_id}" : ''
@@ -65,7 +73,8 @@ process ORANGE {
     def peach_dir_arg = peach_dir ? "-peach_dir ${peach_dir}" : ''
 
     def rna_sample_id_arg = meta.containsKey('tumor_rna_id') ? "-rna_sample_id ${meta.tumor_rna_id}" : ''
-    def isofox_dir_arg = isofox_dir ? "-isofox_dir ${isofox_dir}" : ''
+    def isofox_dir_local = 'isofox__prepared'
+    def isofox_dir_arg = isofox_dir ? "-isofox_dir ${isofox_dir_local}" : ''
 
     """
     echo "${pipeline_version_str}" > pipeline_version.txt
@@ -73,8 +82,6 @@ process ORANGE {
     # When WTS data is present, ORANGE expects the somatic SAGE VCF to have appended WTS data; CS indicates this should
     # occur after PURPLE. Since ORANGE only collects the somatic SAGE VCF from the PURPLE output directory, we must
     # prepare accordingly
-
-    # Isofox inputs are also expected to have the tumor sample ID in the filename
 
     # NOTES(SW): Use of symlinks was causing reliability issues on HPC with Singularity, switched to full file copy instead
 
@@ -101,6 +108,17 @@ process ORANGE {
         mkdir -p ${linx_plot_dir_reportable_somatic}/;
     fi;
 
+    # When provided existing ISOFOX results generated in a RNA-only analysis we must adjust identifier
+    if [[ -n "${isofox_dir_arg}" && -n "\$(find -L ${isofox_dir} -name '${meta.tumor_rna_id}*')" ]]; then
+      mkdir -p ${isofox_dir_local}/;
+      for e in \$(find -L ${isofox_dir}/*); do
+         s=\$(sed 's/^${meta.tumor_rna_id}//' <<< \${e##*/});
+         ln -s ../\${e} ${isofox_dir_local}/${meta.tumor_id}\${s};
+      done;
+    elif [[ -n "${isofox_dir_arg}" ]]; then
+      ln -s ${isofox_dir} ${isofox_dir_local};
+    fi
+
     mkdir -p output/
 
     orange \\
@@ -111,6 +129,7 @@ process ORANGE {
         -pipeline_version_file pipeline_version.txt \\
         -experiment_type ${experiment_type} \\
         -sequencing_type ${sequencing_platform.toUpperCase()} \\
+        ${panel_name_arg} \\
         ${primary_tumor_location_arg} \\
         \\
         -tumor ${meta.tumor_id} \\

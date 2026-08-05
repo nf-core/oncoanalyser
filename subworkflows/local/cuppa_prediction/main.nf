@@ -53,7 +53,10 @@ workflow CUPPA_PREDICTION {
             def has_existing = Utils.hasExistingInput(meta, Constants.INPUT.CUPPA_DIR)
             def has_normal_dna = Utils.hasNormalDna(meta)
 
-            def has_runnable_inputs = isofox_dir || (purple_dir && linx_annotation_dir && has_normal_dna)
+            def tumor_dna_id = Utils.getTumorDnaSampleName(meta)
+            def has_smlv_vcf = purple_dir ? purple_dir.resolve("${tumor_dna_id}.purple.somatic.vcf.gz").exists() : false
+
+            def has_runnable_inputs = isofox_dir || (has_smlv_vcf && linx_annotation_dir && has_normal_dna)
 
             runnable: has_runnable_inputs && ! has_existing
             skip: true
@@ -91,7 +94,7 @@ workflow CUPPA_PREDICTION {
                 categories = 'ALL'
 
                 meta_cuppa.sample_id = tumor_dna_id
-                meta_cuppa.sample_rna_id = meta_cuppa.sample_id
+                meta_cuppa.sample_rna_id = tumor_rna_id
 
             } else if (run_dna) {
 
@@ -105,8 +108,8 @@ workflow CUPPA_PREDICTION {
 
                 categories = 'RNA'
 
-                meta_cuppa.sample_id = tumor_dna_id ?: tumor_rna_id
-                meta_cuppa.sample_rna_id = meta_cuppa.sample_id
+                meta_cuppa.sample_id = tumor_rna_id
+                meta_cuppa.sample_rna_id = tumor_rna_id
 
                 purple_dir = []
                 linx_annotation_dir = []

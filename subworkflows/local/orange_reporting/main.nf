@@ -32,6 +32,7 @@ workflow ORANGE_REPORTING {
     // Params
     sequencing_platform             // string:  [mandatory] sequencing platform
     targeted_mode                   // boolean: [mandatory] Set targeted mode
+    panel                           // string:  [optional]  panel
 
     main:
     // Mapping for semantic input retrieval
@@ -56,7 +57,7 @@ workflow ORANGE_REPORTING {
     ]
 
     // Select input sources then sort
-    // channel: runnable: [meta, sage_dir_somatic, sage_dir_germline, sage_append_dir_somatic, sage_append_dir_germline, sage_plot_dir_somatic, purple_dir, qsee_dir, linx_annotation_dir_somatic, linx_plot_dir_somatic, linx_annotation_dir_germline, virusinterpreter_dir, chord_dir, sigs_dir, lilac_dr, cuppa_dir, peach_dir, isofox_dir ]
+    // channel: runnable: [meta, sage_dir_somatic, sage_dir_germline, sage_append_dir_somatic, sage_append_dir_germline, sage_visualiser_dir_somatic, purple_dir, qsee_dir, linx_annotation_dir_somatic, linx_plot_dir_somatic, linx_annotation_dir_germline, virusinterpreter_dir, chord_dir, sigs_dir, lilac_dr, cuppa_dir, peach_dir, isofox_dir ]
     // channel: skip: [ meta ]
     ch_inputs_sorted = WorkflowOncoanalyser.groupByMeta(
         ch_sage_dir_somatic,
@@ -115,13 +116,18 @@ workflow ORANGE_REPORTING {
             def dna_tumor_input_keys = ['sage_dir_somatic', 'purple_dir', 'qsee_dir', 'linx_annotation_dir_somatic', 'linx_plot_dir_somatic']
             def has_dna_tumor = dna_tumor_input_keys.every { k -> def i = input_indexes[k]; return inputs[i] }
 
-            runnable: has_dna_tumor
+            def purple_dir = inputs[input_indexes['purple_dir']]
+            def tumor_dna_id = Utils.getTumorDnaSampleName(meta)
+            def has_smlv_vcf = purple_dir ? purple_dir.resolve("${tumor_dna_id}.purple.somatic.vcf.gz").exists() : false
+            def has_purple_plots = purple_dir ? purple_dir.resolve("plot/${tumor_dna_id}.circos.png").exists() : false
+
+            runnable: has_dna_tumor && has_smlv_vcf && has_purple_plots
             skip: true
                 return meta
         }
 
     // Create process input channel
-    // channel: [meta, sage_dir_somatic, sage_dir_germline, sage_append_dir_somatic, sage_append_dir_germline, sage_plot_dir_somatic, purple_dir, qsee_dir, linx_annotation_dir_somatic, linx_plot_dir_somatic, linx_annotation_dir_germline, virusinterpreter_dir, chord_dir, sigs_dir, lilac_dr, cuppa_dir, peach_dir, isofox_dir ]
+    // channel: [meta, sage_dir_somatic, sage_dir_germline, sage_append_dir_somatic, sage_append_dir_germline, sage_visualiser_dir_somatic, purple_dir, qsee_dir, linx_annotation_dir_somatic, linx_plot_dir_somatic, linx_annotation_dir_germline, virusinterpreter_dir, chord_dir, sigs_dir, lilac_dr, cuppa_dir, peach_dir, isofox_dir ]
     ch_orange_inputs = ch_inputs_sorted.runnable
         .map { d ->
 
@@ -141,7 +147,11 @@ workflow ORANGE_REPORTING {
             def dna_normal_input_keys = ['sage_dir_germline', 'linx_annotation_dir_germline']
             def has_dna_normal = dna_normal_input_keys.every { k -> def i = input_indexes[k]; return inputs[i] }
 
-            if (has_dna_normal) {
+            // NOTE(SW): guards against inputs where no germline smlv are called; relevant to minifed data
+            def purple_dir = inputs[input_indexes['purple_dir']]
+            def has_germline_smlv_vcf = purple_dir ? purple_dir.resolve("${meta_orange.tumor_id}.purple.germline.vcf.gz").exists() : false
+
+            if (has_dna_normal && has_germline_smlv_vcf) {
                 meta_orange.normal_dna_id = Utils.getNormalDnaSampleName(meta)
             } else {
                 dna_normal_input_keys.each { k -> def i = input_indexes[k]; inputs_selected[i] = [] }
@@ -186,17 +196,19 @@ workflow ORANGE_REPORTING {
 
                 // Germline
                 def sage_append_dir_germline = inputs_selected[input_indexes['sage_append_dir_germline']]
-                if (sage_append_dir_germline) {
+                if (sage_append_dir_germline && meta_orange.normal_dna_id) {
                     sage_append_vcf_germline = sage_append_dir_germline.resolve("${meta_orange.normal_dna_id}.sage.append.vcf.gz")
                 }
             }
 
             // Set LINX reportable plot directory
             def linx_plot_dir_somatic = inputs_selected[input_indexes['linx_plot_dir_somatic']]
-            def linx_plot_dir_somatic_reportable = linx_plot_dir_somatic.resolve('reportable/')
-
-            // The LINX directory may not exist on object store providers where no plots where created
-            linx_plot_dir_somatic_reportable = linx_plot_dir_somatic_reportable.exists() ? linx_plot_dir_somatic_reportable : []
+            def linx_plot_dir_somatic_reportable = []
+            if (linx_plot_dir_somatic) {
+                // The LINX directory may not exist on object store providers where no plots where created
+                def dp = linx_plot_dir_somatic.resolve('reportable/')
+                linx_plot_dir_somatic_reportable = dp.exists() ? dp : []
+            }
 
             return [
                 meta_orange,
@@ -228,5 +240,6 @@ workflow ORANGE_REPORTING {
         '2.3.0 [oncoanalyser]',
         sequencing_platform,
         targeted_mode,
+        panel,
     )
 }

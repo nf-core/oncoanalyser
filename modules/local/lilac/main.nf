@@ -96,6 +96,6 @@ def getSampleName(meta, tumor_aln, normal_aln) {
     } else if (normal_aln) {
         return meta.normal_id
     } else {
-        exit(1)
+        error 'did not receive either a tumor or normal alignment'
     }
 }

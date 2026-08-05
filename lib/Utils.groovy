@@ -67,7 +67,15 @@ class Utils {
                         it.info
                             .tokenize(';')
                             .each { e ->
-                                def (k, v) = e.tokenize(':')
+
+                                def k
+                                def v
+                                if (e.contains(':')) {
+                                   (k, v) = e.split(':', 2)
+                                } else {
+                                   k = e
+                                }
+
                                 def info_field_enum = Utils.getEnumFromString(k, Constants.InfoField)
 
                                 if (! info_field_enum) {
@@ -98,6 +106,12 @@ class Utils {
                             meta_sample[Constants.InfoField.GENERATE_REDUX_TSVS_ONLY] = true
                         }
 
+                        // Only allow READ_GROUP_OVERRIDES for FASTQ
+                        if (filetype_enum != Constants.FileType.FASTQ && info_data.containsKey(Constants.InfoField.READ_GROUP_OVERRIDES)) {
+                            log.error "The read_group info field is only applicable to FASTQ input but got '${it.filetype}' for ${group_id} ${sample_type_enum}/${sequence_type_enum}"
+                            Nextflow.exit(1)
+                        }
+
                     }
 
                     if (info_data.containsKey(Constants.InfoField.LONGITUDINAL_SAMPLE)) {
@@ -120,8 +134,18 @@ class Utils {
 
                     }
 
+                    // Disallow AMBER, COBALT, SAGE_APPEND inputs for longitudinal samples; these would clash with primary inputs
+                    if (info_data.containsKey(Constants.InfoField.LONGITUDINAL_SAMPLE)) {
+                        def longitudinal_disallowed_input_list = [Constants.FileType.AMBER_DIR, Constants.FileType.COBALT_DIR, Constants.FileType.SAGE_APPEND_DIR]
+                        def disallowed_inputs = longitudinal_disallowed_input_list.findAll { e -> e == filetype_enum }
+                        if (disallowed_inputs) {
+                            log.error "got disallowed ${filetype_enum} input for longitudinal sample ${group_id} ${meta_sample.sample_id} ${sample_type_enum}/${sequence_type_enum}"
+                            Nextflow.exit(1)
+                        }
+                    }
+
                     // Filetype uniqueness
-                    if (meta_sample.containsKey(filetype_enum) & filetype_enum != Constants.FileType.FASTQ) {
+                    if (meta_sample.containsKey(filetype_enum) && filetype_enum != Constants.FileType.FASTQ) {
                         log.error "got duplicate file for ${group_id} ${sample_type_enum}/${sequence_type_enum}: ${filetype_enum}"
                         Nextflow.exit(1)
                     }
@@ -148,7 +172,7 @@ class Utils {
                         }
 
                         def (fwd, rev) = fastq_entries
-                        def fastq_key = [info_data[Constants.InfoField.LIBRARY_ID], info_data[Constants.InfoField.LANE]]
+                        def fastq_key = [info_data[Constants.InfoField.LIBRARY_ID], info_data[Constants.InfoField.LANE], info_data.getOrDefault(Constants.InfoField.FLOWCELL, null)]
 
                         if (! meta_sample.containsKey(filetype_enum)) {
                             meta_sample[filetype_enum] = [:]
@@ -159,7 +183,12 @@ class Utils {
                             Nextflow.exit(1)
                         }
 
-                        meta_sample[filetype_enum][fastq_key] = ['fwd': Utils.getFileObject(fwd), 'rev': Utils.getFileObject(rev)]
+                        def rg_fields = [:]
+                        if (info_data.containsKey(Constants.InfoField.READ_GROUP_OVERRIDES)) {
+                            rg_fields = Utils.parse_read_group_info(info_data[Constants.InfoField.READ_GROUP_OVERRIDES], log)
+                        }
+
+                        meta_sample[filetype_enum][fastq_key] = ['fwd': Utils.getFileObject(fwd), 'rev': Utils.getFileObject(rev), 'rg_fields': rg_fields]
 
                     } else {
 
@@ -197,12 +226,14 @@ class Utils {
                     }
 
                     if (meta_sample.containsKey(Constants.FileType.CRAI)) {
-                        meta_sample[Constants.FileType.BAI] = meta_sample.remove(Constants.FileType.CRAI)
+                        meta_sample[Constants.FileType.IDX] = meta_sample.remove(Constants.FileType.CRAI)
                     }
 
                 }
 
-                // Handle REDUX alignments; require TSVs to be present, and promote to directory where the directory contains only given sample
+                // Handle REDUX alignments; require TSVs to be present, and promote to directory when files for this sample are found.
+                // Allow multiple samples to be in the same dir (e.g. both tumor and normal sample).
+                // Existing helpers (getReduxDirAlignment, getReduxTsvs) already resolve files by exact {sample_id}.redux.* filename.
                 sample_keys.each { sample_key ->
 
                     def meta_sample = meta[sample_key]
@@ -245,38 +276,19 @@ class Utils {
 
                     }
 
-                    def redux_dir_files = redux_dir.listFiles()
-
-                    def has_bqr_tsv = redux_dir_files.any { f -> f.name.endsWith('.redux.bqr.tsv') }
-                    def has_jitter_tsv = redux_dir_files.any { f -> f.name.endsWith('.redux.jitter_params.tsv') }
-                    def has_ms_tsv = redux_dir_files.any { f -> f.name.endsWith('.redux.ms_table.tsv.gz') }
+                    def has_bqr_tsv = redux_dir.resolve("${sample_id}.redux.bqr.tsv").exists()
+                    def has_jitter_tsv = redux_dir.resolve("${sample_id}.redux.jitter_params.tsv").exists()
+                    def has_ms_tsv = redux_dir.resolve("${sample_id}.redux.ms_table.tsv.gz").exists()
                     def has_redux_tsvs = has_bqr_tsv && has_jitter_tsv && has_ms_tsv
 
                     def has_colocated_index = nextflow.Nextflow.file("${redux_aln.toUriString()}.bai").exists() || nextflow.Nextflow.file("${redux_aln.toUriString()}.crai").exists()
-
-                    def has_single_sample = redux_dir_files
-                        .every { f -> f.name.startsWith(sample_id) }
 
                     def generate_tsvs_only = meta_sample.getOrDefault(Constants.InfoField.GENERATE_REDUX_TSVS_ONLY, false)
 
                     if (! has_redux_tsvs && ! generate_tsvs_only) {
 
-                        log.error "no REDUX TSVs for provided or found for ${meta.group_id} ${sample_id}: ${redux_input}"
+                        log.error "no REDUX TSVs provided or found for ${meta.group_id} ${sample_id}: ${redux_input}"
                         Nextflow.exit(1)
-
-                    }
-
-                    if (! has_single_sample) {
-
-                        if (meta_sample.containsKey(Constants.FileType.REDUX_DIR)) {
-                            log.error "found unexpected files in REDUX directory for ${meta.group_id} ${sample_id}: ${redux_input}"
-                            Nextflow.exit(1)
-                        }
-
-                        if (meta_sample.containsKey(Constants.FileType.ALN_REDUX) && ! generate_tsvs_only) {
-                            log.error "found multiple samples in same directory (requires generate_redux_tsvs_only to proceed): ${meta.group_id} ${sample_id}: ${redux_input}"
-                            Nextflow.exit(1)
-                        }
 
                     }
 
@@ -289,7 +301,7 @@ class Utils {
 
                     }
 
-                    if (has_single_sample && has_colocated_index && ! meta_sample.containsKey(Constants.FileType.REDUX_DIR)) {
+                    if (has_colocated_index && ! meta_sample.containsKey(Constants.FileType.REDUX_DIR)) {
                         meta_sample.remove(Constants.FileType.ALN_REDUX)
                         meta_sample[Constants.FileType.REDUX_DIR] = redux_dir
                     }
@@ -299,14 +311,8 @@ class Utils {
                         meta_sample[Constants.FileType.ALN_REDUX] = redux_aln
                     }
 
-
-                    if (meta_sample.containsKey(Constants.FileType.ALN_REDUX) && has_colocated_index && has_redux_tsvs) {
-                        log.error "got REDUX alignment but expected REDUX directory given colocation of index and TSVs: ${meta.group_id} ${sample_id}: ${redux_input}"
-                        Nextflow.exit(1)
-                    }
-
                     if (meta_sample.containsKey(Constants.FileType.ALN_REDUX) && meta_sample.containsKey(Constants.FileType.IDX) && ! generate_tsvs_only) {
-                        log.error "REDUX alignments without colocated TSVs requires GENERATE_REDUX_TSVS_ONLY to be set in the samplesheet: ${meta.group_id} ${sample_id}: ${redux_input}"
+                        log.error "REDUX alignments without colocated TSVs requires generate_redux_tsvs_only to be set in the samplesheet: ${meta.group_id} ${sample_id}: ${redux_input}"
                         Nextflow.exit(1)
                     }
 
@@ -457,7 +463,7 @@ class Utils {
 
             // Do not allow donor sample without normal sample
             if (Utils.hasDonorDna(meta) && ! Utils.hasNormalDna(meta)) {
-                log.error "a donor sample but not normal sample was found for ${meta.group_id}\n\n" +
+                log.error "a donor sample but no normal sample was found for ${meta.group_id}\n\n" +
                     "Analysis with a donor sample requires a normal sample."
                 Nextflow.exit(1)
             }
@@ -497,7 +503,7 @@ class Utils {
             // Enforce unique samples names within groups
             def sample_ids_duplicated = sample_keys
                 .groupBy { meta.getOrDefault(it, [:]).getOrDefault('sample_id', null) }
-                .findResults { k, v -> k != null & v.size() > 1 ? [k, v] : null }
+                .findResults { k, v -> k != null && v.size() > 1 ? [k, v] : null }
 
             if (sample_ids_duplicated) {
                 def duplicate_message_strs = sample_ids_duplicated.collect { sample_id, keys ->
@@ -511,7 +517,7 @@ class Utils {
         }
 
 
-        // NOTE(SW): the follwing final config checks are performed here since they require additional information
+        // NOTE(SW): the following final config checks are performed here since they require additional information
         // regarding processes that are run and also inputs
 
         def has_alt_contigs = params.genome_type == 'alt'
@@ -560,29 +566,60 @@ class Utils {
 
     }
 
-    public static getSequencingPlatformPons(hmf_data, sequencing_platform_string) {
+    public static parse_read_group_info(rg_info_raw, log) {
+        def escape_char = "\u0000"
+        def validate_rg_tags = ['BC', 'CN', 'DS', 'DT', 'FO', 'ID', 'KS', 'LB', 'PG', 'PI', 'PL', 'PM', 'PU', 'SM']
+
+        def fields = [:]
+        def rg_info_escaped = rg_info_raw.replace('||', escape_char)
+        rg_info_escaped.split('\\|').each { field_str_escaped ->
+            def field_str = field_str_escaped.replace(escape_char, '|')
+            if (! field_str.contains('=')) {
+                log.error "Received bad read group field (must be in format `<name>=<value>`): ${field_str}"
+                Nextflow.exit(1)
+            }
+
+            def (name, value) = field_str.split('=', 2)
+            if (! validate_rg_tags.contains(name)) {
+                log.error "Received bad read group tag '${name}' in: ${rg_info_raw}"
+                Nextflow.exit(1)
+            }
+
+            if (! value) {
+                log.error "Received empty read group value for '${name}' in: ${rg_info_raw}"
+                Nextflow.exit(1)
+            }
+
+            fields[name] = value
+        }
+
+        return fields
+    }
+
+    public static getSequencingPlatformPons(hmf_data, sequencing_platform_string, log) {
         def sequencing_platform = Utils.getEnumFromString(sequencing_platform_string, Constants.SequencingPlatform)
         hmf_data.map { d ->
             if (sequencing_platform == Constants.SequencingPlatform.ILLUMINA) {
-              return [
-                  'esvee_breakends': d.esvee_pon_breakends_illumina,
-                  'esvee_breakpoints': d.esvee_pon_breakpoints_illumina,
-                  'sage': d.sage_pon_illumina,
-              ]
+                return [
+                    'esvee_breakends': d.esvee_pon_breakends_illumina,
+                    'esvee_breakpoints': d.esvee_pon_breakpoints_illumina,
+                    'sage': d.sage_pon_illumina,
+                ]
             } else if (sequencing_platform == Constants.SequencingPlatform.SBX) {
-              return [
-                  'esvee_breakends': d.esvee_pon_breakends_sbx,
-                  'esvee_breakpoints': d.esvee_pon_breakpoints_sbx,
-                  'sage': d.sage_pon_sbx,
-              ]
+                return [
+                    'esvee_breakends': d.esvee_pon_breakends_sbx,
+                    'esvee_breakpoints': d.esvee_pon_breakpoints_sbx,
+                    'sage': d.sage_pon_sbx,
+                ]
             } else if (sequencing_platform == Constants.SequencingPlatform.ULTIMA) {
-              return [
-                  'esvee_breakends': d.esvee_pon_breakends_ultima,
-                  'esvee_breakpoints': d.esvee_pon_breakpoints_ultima,
-                  'sage': d.sage_pon_ultima,
-              ]
+                return [
+                    'esvee_breakends': d.esvee_pon_breakends_ultima,
+                    'esvee_breakpoints': d.esvee_pon_breakpoints_ultima,
+                    'sage': d.sage_pon_ultima,
+                ]
             } else {
-              error "Got bad sequencing platform: ${sequencing_platform}"
+                log.error "Got bad sequencing platform: ${sequencing_platform}"
+                Nextflow.exit(1)
             }
         }
     }
@@ -835,7 +872,7 @@ class Utils {
 
         def redux_cram = redux_dir.resolve("${sample_name}.redux.cram")
         if (redux_cram.exists()) {
-            return [redux_cram, "${redux_cram.toUriString()}.crai}"]
+            return [redux_cram, "${redux_cram.toUriString()}.crai"]
         }
 
         def redux_bam = redux_dir.resolve("${sample_name}.redux.bam")

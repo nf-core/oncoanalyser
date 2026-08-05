@@ -19,7 +19,7 @@ concurrency:
 env:
   # NOTE: also duplicated in the nf-test job 'with' block below; the env context is
   # not available in reusable workflow calls (https://github.com/orgs/community/discussions/26671)
-  HMF_REF_VERSION: "grch38-v25.1-v2"
+  HMF_REF_VERSION: "grch38_hmf--26.1--1"
 
 jobs:
   download-reference:
@@ -99,7 +99,7 @@ jobs:
       runson_instance_type: ${{ matrix.runson_instance_type }}
       runson_volume_size: ${{ matrix.runson_volume_size }}
       use_reference_cache: ${{ matrix.use_reference_cache }}
-      hmf_ref_version: "grch38-v25.1-v2"
+      hmf_ref_version: ${{ env.HMF_REF_VERSION }}
 
   confirm-pass:
     needs: [nf-test]

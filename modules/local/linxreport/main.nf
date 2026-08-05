@@ -4,8 +4,8 @@ process LINXREPORT {
 
     conda "${moduleDir}/environment.yml"
     container "${ workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container ?
-        'https://depot.galaxyproject.org/singularity/r-linxreport:1.1.0--r44hdfd78af_0' :
-        'biocontainers/r-linxreport:1.1.0--r44hdfd78af_0' }"
+        'https://depot.galaxyproject.org/singularity/r-linxreport:1.2.0--r45hdfd78af_0' :
+        'biocontainers/r-linxreport:1.2.0--r45hdfd78af_0' }"
 
     input:
     tuple val(meta), path(linx_annotation_dir), path(linx_visualiser_dir)
@@ -21,10 +21,10 @@ process LINXREPORT {
     script:
     def args = task.ext.args ?: ''
 
-    def plot_dir = linx_visualiser_dir.resolve('all/').toUriString()
+    def plot_dir = linx_visualiser_dir.resolve('all/').toString()
 
     """
-    # Set input plot directory and create it doesn't exist. See the LINX visualiser module for further info.
+    # Set input plot directory and create if doesn't exist. See the LINX visualiser module for further info.
     if [[ ! -e ${plot_dir} ]]; then
         mkdir -p ${plot_dir};
     fi;

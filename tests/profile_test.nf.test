@@ -22,7 +22,7 @@ nextflow_pipeline {
             def stable_path = getAllFilesFromDir(params.outdir, ignoreFile: 'tests/.nftignore')
             // Task count depends on config: when NXF_REF_DATA_PATH is set, reference data is cached (no DECOMP tasks)
             def refDataCached = System.getenv('NXF_REF_DATA_PATH') != null
-            def expectedTaskCount = refDataCached ? 39 : 43
+            def expectedTaskCount = refDataCached ? 36 : 43
             def actualTaskCount = workflow.trace.succeeded().size()
             assertAll(
                 { assert workflow.success },

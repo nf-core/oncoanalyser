@@ -79,7 +79,7 @@ workflow WGTS {
     def hmf_data = PREPARE_REFERENCE.out.hmf_data
 
     // Configure selectable reference data and inputs
-    def hmf_data_pons = Utils.getSequencingPlatformPons(hmf_data, params.sequencing_platform)
+    def hmf_data_pons = Utils.getSequencingPlatformPons(hmf_data, params.sequencing_platform, log)
     def driver_gene_panel = params.driver_gene_panel != null ? file(params.driver_gene_panel) : hmf_data.driver_gene_panel
     def gridss_config = params.gridss_config != null ? file(params.gridss_config) : hmf_data.gridss_config
 
@@ -101,13 +101,44 @@ workflow WGTS {
 
     if (run_config.stages.alignment) {
 
+        // NOTE(SW): fastp can be run twice, multiple passes of the FASTQ in some scenarios, typically not computationally
+        // expensive in such situations, so separation between umi / split processing maintained
+
         // channel: [ meta, fastq_info, fastq_fwd, fastq_rev ]
         ch_fastq_dna = getDnaFastqChannel(ch_inputs)
         ch_fastq_rna = getRnaFastqChannel(ch_inputs)
 
+        // channel: [ meta, fastq_info, fastq_fwd, fastq_rev ]
+        ch_align_dna_input = channel.empty()
+        ch_align_rna_input = channel.empty()
+        if (params.fastp_umi_enabled || params.fastq_tools_umi_enabled) {
+
+            READ_UMI_PROCESSING(
+                ch_inputs,
+                ch_fastq_dna,
+                ch_fastq_rna,
+                hmf_data.known_umis,
+                params.fastp_umi_enabled,
+                params.fastp_umi_location,
+                params.fastp_umi_length,
+                params.fastp_umi_skip,
+                params.fastq_tools_umi_enabled,
+                params.fastq_tools_umi_delim,
+            )
+
+            ch_align_dna_input = ch_align_dna_input.mix(READ_UMI_PROCESSING.out.fastq_dna)
+            ch_align_rna_input = ch_align_rna_input.mix(READ_UMI_PROCESSING.out.fastq_rna)
+
+        } else {
+
+            ch_align_dna_input = ch_fastq_dna
+            ch_align_rna_input = ch_fastq_rna
+
+        }
+
         READ_ALIGNMENT_DNA(
             ch_inputs,
-            ch_fastq_dna,
+            ch_align_dna_input,
             ref_data.genome_fasta,
             ref_data.genome_bwamem2_index,
             params.max_fastq_records,
@@ -115,7 +146,7 @@ workflow WGTS {
 
         READ_ALIGNMENT_RNA(
             ch_inputs,
-            ch_fastq_rna,
+            ch_align_rna_input,
             ref_data.genome_star_index,
         )
 
@@ -124,6 +155,7 @@ workflow WGTS {
         ch_align_dna_donor_out = ch_align_dna_donor_out.mix(READ_ALIGNMENT_DNA.out.donor)
 
         ch_align_rna_tumor_out = ch_align_rna_tumor_out.mix(READ_ALIGNMENT_RNA.out.tumor)
+        ch_align_rna_qc_tumor_out = ch_align_rna_qc_tumor_out.mix(READ_ALIGNMENT_RNA.out.qc_files)
 
     } else {
 
@@ -132,6 +164,7 @@ workflow WGTS {
         ch_align_dna_donor_out = ch_inputs.map { meta -> [meta, [], []] }
 
         ch_align_rna_tumor_out = ch_inputs.map { meta -> [meta, [], []] }
+        ch_align_rna_qc_tumor_out = ch_inputs.map { meta -> [meta, [], []] }
 
     }
 
@@ -159,8 +192,8 @@ workflow WGTS {
             [],  // msi_model_error_rates
             params.sequencing_platform,
             false,  // targeted_mode
-            false,  // umi_enable
-            '',  // umi_duplex_delim
+            params.redux_umi_enabled,
+            params.redux_umi_duplex_delim,
         )
 
         ch_redux_tumor_out = ch_redux_tumor_out.mix(REDUX_PROCESSING.out.tumor_dir)
@@ -505,7 +538,7 @@ workflow WGTS {
     //
     // SUBWORKFLOW: Visualise SAGE variants
     //
-    // channel: [ meta, sage_plot_dir ]
+    // channel: [ meta, sage_visualiser_dir ]
     ch_sage_somatic_visualiser_out = channel.empty()
     if (run_config.stages.sage_visualiser) {
 
@@ -679,7 +712,7 @@ workflow WGTS {
     //
     // SUBWORKFLOW: Run TEAL for characterisation of telometic regions
     //
-    if (run_config.stages.teal) {
+    if (run_config.stages.teal && run_config.stages.purple) {
 
         TEAL_CHARACTERISATION(
             ch_inputs,
@@ -829,6 +862,7 @@ workflow WGTS {
             hmf_data.disease_ontology,
             params.sequencing_platform,
             false,  // targeted_mode
+            '' ,  // panel
         )
 
     }
@@ -874,6 +908,7 @@ workflow WGTS {
             ch_bamtools_normal_out,
             ch_amber_out,
             ch_purple_out,
+            ch_align_rna_qc_tumor_out,
             ch_collated_versions,
             params.multiqc_config,
             params.multiqc_methods_description,

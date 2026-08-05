@@ -58,7 +58,7 @@ process PAVE_GERMLINE {
 
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":
-        pave: \$(pave -version | sed 's/^.* //')
+        pave: \$(pave -version | sed -n '/^Pave version / { s/^.* //p }')
         java: \$(java --version | sed -n '/^openjdk/ { s/^.*openjdk //; s/ .*//p }')
     END_VERSIONS
     """
@@ -67,7 +67,8 @@ process PAVE_GERMLINE {
     """
     mkdir -p pave_germline/
 
-    touch pave_germline/${meta.sample_id}.pave.germline.vcf.gz{,.tbi}
+    gzip <<< '' > pave_germline/${meta.sample_id}.pave.germline.vcf.gz
+    touch pave_germline/${meta.sample_id}.pave.germline.vcf.gz.tbi
 
     echo -e '${task.process}:\\n  stub: noversions\\n' > versions.yml
     """

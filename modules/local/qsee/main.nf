@@ -11,8 +11,8 @@ process QSEE {
     tuple val(meta),
         path(redux_tsvs_tumor, stageAs: "redux_tsvs_tumor/*"),
         path(redux_tsvs_normal, stageAs: "redux_tsvs_normal/*"),
-        path(bamtools_dir_tumor, stageAs: 'bamtools_tumor/'),
-        path(bamtools_dir_normal, stageAs: 'bamtools_tumor/'),
+        path(bamtools_dir_tumor, stageAs: 'bamtools_tumor'),
+        path(bamtools_dir_normal, stageAs: 'bamtools_normal'),
         path(cobalt_dir),
         path(esvee_dir),
         path(purple_dir)
@@ -86,9 +86,9 @@ process QSEE {
     """
     mkdir -p qsee/
 
-    touch qsee/${meta.tumor_id}.qsee.status.tsv.gz
+    gzip <<< '' > qsee/${meta.tumor_id}.qsee.status.tsv.gz
     touch qsee/${meta.tumor_id}.qsee.vis.report.pdf
-    touch qsee/${meta.tumor_id}.qsee.vis.data.tsv.gz
+    gzip <<< '' > qsee/${meta.tumor_id}.qsee.vis.data.tsv.gz
 
     echo -e '${task.process}:\\n  stub: noversions\\n' > versions.yml
     """

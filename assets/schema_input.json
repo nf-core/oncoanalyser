@@ -23,7 +23,7 @@
                 "type": "string",
                 "description": "Sample identifier",
                 "pattern": "^\\S+$",
-                "errorMessage": "subject_id must be provided and cannot contain spaces"
+                "errorMessage": "sample_id must be provided and cannot contain spaces"
             },
             "sample_type": {
                 "type": "string",

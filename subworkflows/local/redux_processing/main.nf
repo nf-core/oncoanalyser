@@ -14,7 +14,7 @@ workflow REDUX_PROCESSING {
 
     // Reference data
     genome_fasta           // channel: [mandatory] /path/to/genome_fasta
-    genome_ver             // channel: [mandatory] genome version
+    genome_version         // channel: [mandatory] genome version
     genome_fai             // channel: [mandatory] /path/to/genome_fai
     genome_dict            // channel: [mandatory] /path/to/genome_dict
     unmap_regions          // channel: [mandatory] /path/to/unmap_regions
@@ -104,7 +104,7 @@ workflow REDUX_PROCESSING {
     REDUX(
         ch_redux_inputs.sample_data,
         genome_fasta,
-        genome_ver,
+        genome_version,
         genome_fai,
         genome_dict,
         unmap_regions,

@@ -42,9 +42,9 @@ class WorkflowMain {
 
         if (! params.containsKey('ref_data_hmf_data_path')) {
             if (params.genome_version.toString() == '37') {
-                params.ref_data_hmf_data_path = Constants.HMF_DATA_37_PATH
+                params.ref_data_hmf_data_path = "${params.ref_data_base}/${Constants.HMF_DATA_37_PATH}"
             } else if (params.genome_version.toString() == '38') {
-                params.ref_data_hmf_data_path = Constants.HMF_DATA_38_PATH
+                params.ref_data_hmf_data_path = "${params.ref_data_base}/${Constants.HMF_DATA_38_PATH}"
             } else {
                 default_invalid = true
             }
@@ -70,11 +70,9 @@ class WorkflowMain {
 
             if (params.containsKey('panel')) {
 
-                if (params.panel == 'tso500') {
+                if (params.panel.toLowerCase() == 'tso500') {
                     if (params.genome_version.toString() == '37') {
-                        params.ref_data_panel_data_path = Constants.TSO500_PANEL_37_PATH
-                    } else if (params.genome_version.toString() == '38') {
-                        params.ref_data_panel_data_path = Constants.TSO500_PANEL_38_PATH
+                        params.ref_data_panel_data_path = "${params.ref_data_base}/${Constants.TSO500_PANEL_37_PATH}"
                     }
                 }
 
@@ -93,10 +91,10 @@ class WorkflowMain {
         // Resolve UMI type and set UMI parameters
         //
         def umi_type
-        if (params.containsKey('umi_type')) {
+        if (params.containsKey('umi_type') && params.umi_type) {
             umi_type = Utils.getEnumFromString(params.umi_type, Constants.UmiType)
-        } else if (params.panel && Constants.PANELS_DEFINED.contains(params.panel)) {
-            if (params.panel == 'TSO500') {
+        } else if (params.containsKey('panel') && Constants.PANELS_DEFINED.contains(params.panel)) {
+            if (params.panel.toLowerCase() == 'tso500') {
                 umi_type = Constants.UmiType.TSO500
             }
         }
@@ -153,14 +151,14 @@ class WorkflowMain {
         if (! params.genome) {
             log.error "\n~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n" +
                 "  Genome must be set using the --genome CLI argument or in a configuration file.\n" +
-                "  Currently, the available genome are:\n" +
+                "  Currently, the available genomes are:\n" +
                 "  ${params.genomes.keySet().join(", ")}\n" +
                 "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
             Nextflow.exit(1)
         } else if (! params.genomes.containsKey(params.genome)) {
             log.error "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n" +
                 "  Genome '${params.genome}' not found in any config files provided to the pipeline.\n" +
-                "  Currently, the available genome are:\n" +
+                "  Currently, the available genomes are:\n" +
                 "  ${params.genomes.keySet().join(", ")}\n" +
                 "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
             Nextflow.exit(1)
@@ -181,7 +179,7 @@ class WorkflowMain {
             log.error "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n" +
                 "  Genome version wasn't provided and genome '${params.genome}' is not defined in   \n" +
                 "  genome version list.\n" +
-                "  Currently, the list of genomes in the version list include:\n" +
+                "  Currently, the list of genomes in the version list includes:\n" +
                 "  ${Constants.GENOMES_DEFINED.join(", ")}\n" +
                 "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
             Nextflow.exit(1)
@@ -199,6 +197,17 @@ class WorkflowMain {
 
         if (! params.ref_data_hmf_data_path) {
             log.error "HMF data path wasn't provided"
+            Nextflow.exit(1)
+        }
+
+        if (! params.hmf_data_paths.containsKey(params.genome_version.toString())) {
+            def hmf_data_versions = params.hmf_data_paths.keySet().join('\n    - ')
+            log.error "\n~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n" +
+                "  Did not find path definitions for the provided 'hmf_data_paths' and\n" +
+                "  genome version ${params.genome_version}. Please check your configuration.\n" +
+                "  Found the following genome version definitions for 'hmf_data_paths':\n" +
+                "    - ${hmf_data_versions}\n" +
+                "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
             Nextflow.exit(1)
         }
 
@@ -227,6 +236,20 @@ class WorkflowMain {
                 "    - ${ref_data_types}\n" +
                 "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
             Nextflow.exit(1)
+        }
+
+        if (run_mode == Constants.RunMode.WGTS) {
+
+            // We allow fastq-tools UMI processing in WGTS but this requires that the user manually set the 'known_umis' file in hmf_data, enforce here
+            def has_known_umis = params.hmf_data_paths[params.genome_version.toString()].containsKey('known_umis')
+            if (params.fastq_tools_umi_enabled && ! has_known_umis) {
+                log.error "\n~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n" +
+                    "  The fastq-tools process is enabled but the required 'known_umis' data path was\n" +
+                    "  not configured in the respective 'hmf_data_paths' for genome version ${params.genome_version.toString()}\n" +
+                    "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
+                Nextflow.exit(1)
+            }
+
         }
 
         if (run_mode == Constants.RunMode.TARGETED) {
@@ -283,7 +306,7 @@ class WorkflowMain {
                 Nextflow.exit(1)
             }
 
-            // Perform check for for required and optional fields
+            // Perform check for required and optional fields
 
             def panel_data_paths = panel_data_paths_versions[params.genome_version.toString()]
 
@@ -355,7 +378,7 @@ class WorkflowMain {
                     "  A valid purity estimate run mode must be set using the --purity_estimate_mode\n" +
                     "  CLI argument or in a configuration file.\n" +
                     "  Currently, the available run modes are:\n" +
-                    "    - ${purity_estimate_modes_str}\n"
+                    "    - ${purity_estimate_modes_str}\n" +
                     "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
                 Nextflow.exit(1)
             }
@@ -391,7 +414,7 @@ class WorkflowMain {
 
         if ((params.fastp_umi_enabled || params.fastq_tools_umi_enabled) && ! params.redux_umi_enabled) {
             log.error "\n~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n" +
-                  "  When FASTQ UMI processing is enabled (via fastp_umi_enabled or fastp_umi_enabled),\n" +
+                  "  When FASTQ UMI processing is enabled (via fastp_umi_enabled or fastq_tools_umi_enabled),\n" +
                   "  REDUX UMI processing must also be enabled with redux_umi_enabled\n" +
                   "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
             Nextflow.exit(1)
@@ -410,7 +433,7 @@ class WorkflowMain {
         def fastp_umi_args_set_all = params.fastp_umi_location && params.fastp_umi_length && params.fastp_umi_skip >= 0
         if (params.fastp_umi_enabled && ! fastp_umi_args_set_all) {
             log.error "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n" +
-                "  Refusing to run fastp UMI processing without having any UMI params configured.\n" +
+                "  Refusing to run fastp UMI processing without having all UMI params configured.\n" +
                 "  Please review your configuration and appropriately set all fastp_umi_* parameters.\n" +
                 "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
             Nextflow.exit(1)
@@ -418,7 +441,7 @@ class WorkflowMain {
 
         if (params.fastq_tools_umi_delim && ! params.fastq_tools_umi_enabled) {
             log.error "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n" +
-                "  Detected use of fastq-tools UMI parameter fastq_tools_umi_enabled fastq-tools UMI\n" +
+                "  Detected use of fastq-tools UMI parameter fastq_tools_umi_delim but fastq-tools UMI\n" +
                 "  processing has not been enabled. Please review your configuration and set the\n" +
                 "  fastq_tools_umi_enabled or otherwise adjust accordingly.\n" +
                 "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
@@ -532,7 +555,7 @@ class WorkflowMain {
         def require_panel_data = ref_data_types.contains(Constants.RefDataType.PANEL)
 
         if (require_panel_data) {
-            if (params.panel == null) {
+            if (! params.containsKey('panel') || params.panel == null) {
                 require_panel_data = false
                 log.warn "Skipping preparing panel specific reference data as --panel CLI argument was not provided"
             } else if (! Constants.PANELS_DEFINED.contains(params.panel)) {

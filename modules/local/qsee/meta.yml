@@ -14,24 +14,24 @@ input:
       description: |
         Groovy Map containing sample information
         e.g. [tumor_id: 'tumor_id', normal_id: 'normal_id']
-  - redux_somatic_dir:
+  - redux_tsvs_tumor:
+      type: list
+      description: REDUX tumor TSV files
+  - redux_tsvs_normal:
+      type: list
+      description: REDUX normal TSV files
+  - bamtools_dir_tumor:
       type: directory
-      description: REDUX somatic output directory
-  - redux_germline_dir:
+      description: BamTools tumor output directory
+  - bamtools_dir_normal:
       type: directory
-      description: REDUX germline output directory
-  - bamtools_somatic_dir:
-      type: directory
-      description: BamTools somatic output directory
-  - bamtools_germline_dir:
-      type: directory
-      description: BamTools germline output directory
+      description: BamTools normal output directory
   - cobalt_dir:
       type: directory
       description: COBALT output directory
   - esvee_dir:
-    type: directory
-    description: ESVEE output directory
+      type: directory
+      description: ESVEE output directory
   - purple_dir:
       type: directory
       description: PURPLE output directory
@@ -43,9 +43,12 @@ input:
       type: file
       description: HMF cohort percentiles file
       pattern: "*.{tsv}"
-  - pipeline_version:
+  - sequencing_platform:
       type: string
-      description: Pipeline version to display in report
+      description: Sequencing platform
+  - targeted_mode:
+      type: boolean
+      description: Flag indicating whether targeted mode is set
 output:
   - meta:
       type: map
@@ -55,12 +58,12 @@ output:
   - qsee_dir:
       type: directory
       description: Qsee output directory
+  - command_files:
+      type: list
+      description: List of command files
   - versions:
       type: file
       description: File containing software versions
       pattern: "versions.yml"
-  - command_files:
-      type: list
-      description: List of command files
 authors:
   - "@luan-n-nguyen"

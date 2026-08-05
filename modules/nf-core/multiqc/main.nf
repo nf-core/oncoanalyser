@@ -1,11 +1,10 @@
 process MULTIQC {
-    tag "${meta.id}"
     label 'process_single'
 
     conda "${moduleDir}/environment.yml"
     container "${ workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container ?
-        '' :
-        '' }"
+        'https://depot.galaxyproject.org/singularity/mulled-v2-d8bcaa0f18f0068460deb4841052ef5429108a27:f0d5b44eec0233d9bc8357f24755076bceef041a-0' :
+        'biocontainers/mulled-v2-d8bcaa0f18f0068460deb4841052ef5429108a27:f0d5b44eec0233d9bc8357f24755076bceef041a-0' }"
 
     input:
     tuple val(meta), val(fs_group_ids), path(fs, name: 'sample_flat/*/*')
@@ -15,11 +14,12 @@ process MULTIQC {
     path(multiqc_logo)
 
     output:
-    path '*multiqc_report.html', topic: multiqc_report
-    path '*_data'              , topic: multiqc_data
-    path '*_plots'             , topic: multiqc_plots, optional:true
+    path '*multiqc_report.html'                        , topic: multiqc_report
+    path '*_data'                                      , topic: multiqc_data
+    path '*_plots'                                     , topic: multiqc_plots, optional:true
+    tuple val(meta), val('multiqc'), path('.command.*'), topic: command_files
     // NOTE(SW): cannot published otherwise produce ~ consume on topic channel becomes circular and blocks
-    //path "versions.yml"        , topic: versions
+    //path "versions.yml"                                , topic: versions
 
     when:
     task.ext.when == null || task.ext.when

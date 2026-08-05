@@ -31,8 +31,6 @@ process NEO_ANNOTATE_FUSIONS {
     def log_level_arg = task.ext.log_level ? "-log_level ${task.ext.log_level}" : ''
 
     """
-    mkdir -p isofox/
-
     isofox \\
         -Xmx${Math.round(task.memory.bytes * xmx_mod)} \\
         ${args} \\

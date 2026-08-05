@@ -81,7 +81,8 @@ process SAGE_VISUALISER {
 
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":
-        sage: \$(sage -version | sed 's/^.* //')
+        sage: \$(sage -version | sed -n '/^Sage version / { s/^.* //p }')
+        java: \$(java --version | sed -n '/^openjdk/ { s/^.*openjdk //; s/ .*//p }')
     END_VERSIONS
     """
 
@@ -89,7 +90,7 @@ process SAGE_VISUALISER {
     """
     mkdir -p sage_vis/
 
-    touch sage_vis/${meta.tumor_id}.sage.vis.vcf.gz
+    gzip <<< '' > sage_vis/${meta.tumor_id}.sage.vis.vcf.gz
     touch sage_vis/${meta.tumor_id}.sage.vis.vcf.gz.tbi
 
     echo -e '${task.process}:\\n  stub: noversions\\n' > versions.yml

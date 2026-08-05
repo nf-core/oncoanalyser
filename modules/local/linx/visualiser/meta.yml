@@ -41,15 +41,15 @@ output:
       description: |
         Groovy Map containing sample information
         e.g. [id: 'sample_id']
-  - plots:
+  - linx_visualiser_plots:
       type: directory
       description: Directory containing output plots
+  - command_files:
+      type: list
+      description: List of command files
   - versions:
       type: file
       description: File containing software versions
       pattern: "versions.yml"
-  - command_files:
-      type: list
-      description: List of command files
 authors:
   - "@scwatts"

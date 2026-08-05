@@ -51,8 +51,8 @@ process FASTQ_TOOLS {
     """
     mkdir -p output/
 
-    touch output/${meta.sample_id}_${meta.library_id}_${meta.lane}_R1.umi.fastq.gz
-    touch output/${meta.sample_id}_${meta.library_id}_${meta.lane}_R2.umi.fastq.gz
+    gzip <<< '' > output/${meta.sample_id}_${meta.library_id}_${meta.lane}_R1.umi.fastq.gz
+    gzip <<< '' > output/${meta.sample_id}_${meta.library_id}_${meta.lane}_R2.umi.fastq.gz
 
     echo -e '${task.process}:\\n  stub: noversions\\n' > versions.yml
     """

@@ -57,7 +57,12 @@ workflow LILAC_CALLING {
 
             def has_existing = Utils.hasExistingInput(meta, Constants.INPUT.LILAC_DIR)
 
-            runnable: (tumor_dna_aln || normal_dna_aln) && ! has_existing
+            def tumor_normal_mode = tumor_dna_aln && normal_dna_aln
+
+            def tumor_dna_id = Utils.getTumorDnaSampleName(meta)
+            def has_tn_smlv_vcf = purple_dir ? purple_dir.resolve("${tumor_dna_id}.purple.somatic.vcf.gz").exists() : false
+
+            runnable: (tumor_dna_aln || normal_dna_aln) && (has_tn_smlv_vcf || ! tumor_normal_mode) && ! has_existing
             skip: true
                 return meta
         }
@@ -97,7 +102,7 @@ workflow LILAC_CALLING {
     )
 
     // Set outputs, restoring original meta
-    // channel: [ meta, amber_dir ]
+    // channel: [ meta, lilac_dir ]
     ch_outputs = channel.empty()
         .mix(
             WorkflowOncoanalyser.restoreMeta(channel.topic('lilac_dir'), ch_inputs),

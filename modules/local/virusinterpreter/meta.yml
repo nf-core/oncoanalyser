@@ -17,16 +17,16 @@ input:
       description: |
         Groovy Map containing sample information
         e.g. [id: 'sample_id']
-  - virus_tsv:
+  - virusbreakend_tsv:
       type: file
       description: VIRUSBreakend summary file
       pattern: "*.{tsv}"
-  - purple_dir:
-      type: directory
-      description: PURPLE output directory
   - bamtools_somatic_dir:
       type: directory
       description: BamTools somatic output directory
+  - purple_dir:
+      type: directory
+      description: PURPLE output directory
   - taxonomy_db:
       type: file
       description: Virus Interpreter taxonomy database file
@@ -48,12 +48,12 @@ output:
   - virusinterpreter_dir:
       type: directory
       description: Virus Interpreter output direcotry
+  - command_files:
+      type: list
+      description: List of command files
   - versions:
       type: file
       description: File containing software versions
       pattern: "versions.yml"
-  - command_files:
-      type: list
-      description: List of command files
 authors:
   - "@scwatts"

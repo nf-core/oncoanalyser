@@ -14,7 +14,7 @@ class Processes {
             processes = this.getProcessList(manual_select, log)
 
             if (include || exclude) {
-                log.warning "When manually selecting processes, including/excluding processes is ignored"
+                log.warn 'When manually selecting processes, including/excluding processes is ignored'
             }
 
         } else {
@@ -64,7 +64,7 @@ class Processes {
 
         if (processes_shared) {
             def processes_shared_str = processes_shared.join('\n  - ')
-            def message_base = 'the following processes was found in the include and the exclude list'
+            def message_base = 'the following processes were found in the include and the exclude list'
             log.error "${message_base}:\n  - ${processes_shared_str}"
             Nextflow.exit(1)
         }

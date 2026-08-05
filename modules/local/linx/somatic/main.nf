@@ -54,7 +54,7 @@ process LINX_SOMATIC {
 
     stub:
     """
-    mkdir linx_somatic/
+    mkdir -p linx_somatic/
 
     touch linx_somatic/.stub
 

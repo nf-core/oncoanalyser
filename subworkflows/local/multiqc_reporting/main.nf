@@ -12,27 +12,31 @@ include { methodsDescriptionText } from '../../../subworkflows/local/utils_nfcor
 workflow MULTIQC_REPORTING {
     take:
     // Sample data
-    ch_bamtools_dir_tumor  // channel: [mandatory] [ meta, bamtools_dir ]
-    ch_bamtools_dir_normal // channel: [optional]  [ meta, bamtools_dir ]
-    ch_amber_dir           // channel: [mandatory] [ meta, amber_dir ]
-    ch_purple_dir          // channel: [mandatory] [ meta, purple_dir ]
+    ch_bamtools_dir_tumor     // channel: [mandatory] [ meta, bamtools_dir ]
+    ch_bamtools_dir_normal    // channel: [optional]  [ meta, bamtools_dir ]
+    ch_amber_dir              // channel: [mandatory] [ meta, amber_dir ]
+    ch_purple_dir             // channel: [mandatory] [ meta, purple_dir ]
+    ch_align_rna_qc_tumor_out // channel: [mandatory] [ meta, star_log, rna_md_metrics ]
 
     // Other
-    ch_collated_versions   // channel: [mandatory] [ collated_versions.yml ]
-    custom_config          //  string: [optional]  Custom configuration for MultiQC
-    custom_desc            //  string: [optional]  Custom methods description for MultiQC
-    custom_logo            //  string: [optional]  Custom logo for MultiQC
+    ch_collated_versions      // channel: [mandatory] [ collated_versions.yml ]
+    custom_config             //  string: [optional]  Custom configuration for MultiQC
+    custom_desc               //  string: [optional]  Custom methods description for MultiQC
+    custom_logo               //  string: [optional]  Custom logo for MultiQC
 
     main:
     // Select input sources then sort
-    // channel: [ meta, bamtools_tumor_dir, bamtools_normal_dir, amber_dir, purple_dir ]
+    // channel: [ meta, bamtools_tumor_dir, bamtools_normal_dir, amber_dir, purple_dir, star_log, rna_md_metrics ]
     ch_inputs_sorted = WorkflowOncoanalyser.groupByMeta(
         ch_bamtools_dir_tumor,
         ch_bamtools_dir_normal,
         ch_amber_dir,
         ch_purple_dir,
+        ch_align_rna_qc_tumor_out,
     )
-        .map { meta, bamtools_dir_tumor, bamtools_dir_normal, amber_dir, purple_dir ->
+        .map { meta, bamtools_dir_tumor, bamtools_dir_normal, amber_dir, purple_dir, star_log, rna_md_metrics ->
+
+            // NOTE(SW): will not implement ability for user to provide RNA alignment QC metrics
 
             return [
                 meta,
@@ -40,12 +44,14 @@ workflow MULTIQC_REPORTING {
                 Utils.selectCurrentOrExisting(bamtools_dir_normal, meta, Constants.INPUT.BAMTOOLS_DIR_NORMAL),
                 Utils.selectCurrentOrExisting(amber_dir, meta, Constants.INPUT.AMBER_DIR),
                 Utils.selectCurrentOrExisting(purple_dir, meta, Constants.INPUT.PURPLE_DIR),
+                star_log,
+                rna_md_metrics,
             ]
 
         }
-        .branch { meta, bamtools_dir_tumor, bamtools_dir_normal, amber_dir, purple_dir ->
+        .branch { meta, bamtools_dir_tumor, bamtools_dir_normal, amber_dir, purple_dir, star_log, rna_md_metrics ->
 
-            runnable: bamtools_dir_tumor || bamtools_dir_normal || amber_dir || purple_dir
+            runnable: bamtools_dir_tumor || bamtools_dir_normal || amber_dir || purple_dir || star_log || rna_md_metrics
             skip: true
                 return meta
         }
@@ -151,5 +157,5 @@ workflow MULTIQC_REPORTING {
     ch_outputs = channel.topic('multiqc_report').toList()
 
     emit:
-    report = ch_outputs // channel: [ meta, multiqc_report ]
+    report = ch_outputs // path: multiqc_report
 }

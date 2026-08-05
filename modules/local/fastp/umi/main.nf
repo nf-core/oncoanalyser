@@ -48,7 +48,7 @@ process FASTP_UMI {
 
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":
-        fastp: \$(fastp --version 2>&1 | sed 's/^.* //')
+        fastp: \$(fastp --version 2>&1 | sed -n '/^fastp / { s/^.* //p }')
     END_VERSIONS
     """
 
@@ -58,8 +58,8 @@ process FASTP_UMI {
     """
     mkdir -p output/
 
-    touch output/${base_name}_R1.fastp_umi.fastq.gz;
-    touch output/${base_name}_R2.fastp_umi.fastq.gz;
+    gzip <<< '' > output/${base_name}_R1.fastp_umi.fastq.gz;
+    gzip <<< '' > output/${base_name}_R2.fastp_umi.fastq.gz;
 
     echo -e '${task.process}:\\n  stub: noversions\\n' > versions.yml
     """

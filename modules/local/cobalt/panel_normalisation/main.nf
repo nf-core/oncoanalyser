@@ -56,7 +56,7 @@ process COBALT_PANEL_NORMALISATION {
 
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":
-        cobalt: \$(cobalt -version | sed 's/^.* //')
+        cobalt: \$(cobalt -version | sed -n '/^Cobalt version / { s/^.* //p }')
         java: \$(java --version | sed -n '/^openjdk/ { s/^.*openjdk //; s/ .*//p }')
         r: \$(R --version | sed -n '/^R version/ { s/^.*version //; s/ .*//p }')
         r-dplyr: \$(Rscript -e 'packageVersion("dplyr") |> as.character() |> writeLines()')

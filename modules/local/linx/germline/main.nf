@@ -50,7 +50,7 @@ process LINX_GERMLINE {
 
     stub:
     """
-    mkdir linx_germline/
+    mkdir -p linx_germline/
 
     touch linx_germline/.stub
 

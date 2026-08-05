@@ -69,6 +69,7 @@ workflow READ_UMI_PROCESSING {
                   sample_id: fastq_info.sample_id,
                   library_id: fastq_info.library_id,
                   lane: fastq_info.lane,
+                  rg_fields: fastq_info.rg_fields,
               ]
 
               if (sequence_type == 'dna') {
@@ -172,6 +173,7 @@ workflow READ_UMI_PROCESSING {
                 'sample_id': meta_fastq.sample_id,
                 'library_id': meta_fastq.library_id,
                 'lane': meta_fastq.lane,
+                'rg_fields': meta_fastq.rg_fields,
             ]
 
             if (meta_fastq.sequence_type == 'dna') {

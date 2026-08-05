@@ -20,15 +20,15 @@ input:
       type: file
       description: VCF file
       pattern: "*.{vcf.gz}"
-  - bams:
+  - alns:
       type: list
-      description: BAM files
-  - bais:
+      description: Alignment files
+  - idxs:
       type: list
-      description: BAI files
+      description: Index files
   - redux_tsvs:
       type: list
-      description: REDUX MS files
+      description: REDUX TSV files
   - genome_fasta:
       type: file
       description: Reference genome assembly FASTA file
@@ -44,6 +44,9 @@ input:
       type: file
       description: Reference genome assembly dict file
       pattern: "*.{dict}"
+  - sequencing_platform:
+      type: string
+      description: Sequencing platform
   - targeted_mode:
       type: boolean
       description: Flag indicating whether targeted mode is set
@@ -56,12 +59,12 @@ output:
   - sage_append_dir:
       type: directory
       description: SAGE append output directory
+  - command_files:
+      type: list
+      description: List of command files
   - versions:
       type: file
       description: File containing software versions
       pattern: "versions.yml"
-  - command_files:
-      type: list
-      description: List of command files
 authors:
   - "@scwatts"

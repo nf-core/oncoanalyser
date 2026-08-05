@@ -93,18 +93,22 @@ process PURPLE {
 
     stub:
     """
-    mkdir purple/
+    mkdir -p purple/
 
     touch purple/${meta.tumor_id}.purple.cnv.gene.tsv
     touch purple/${meta.tumor_id}.purple.cnv.somatic.tsv
     touch purple/${meta.tumor_id}.purple.driver.catalog.germline.tsv
     touch purple/${meta.tumor_id}.purple.driver.catalog.somatic.tsv
-    touch purple/${meta.tumor_id}.purple.germline.vcf.gz
+    gzip <<< '' > purple/${meta.tumor_id}.purple.germline.vcf.gz
+    touch purple/${meta.tumor_id}.purple.germline.vcf.gz.tbi
     touch purple/${meta.tumor_id}.purple.purity.tsv
     touch purple/${meta.tumor_id}.purple.qc
-    touch purple/${meta.tumor_id}.purple.somatic.vcf.gz
-    touch purple/${meta.tumor_id}.purple.sv.germline.vcf.gz
-    touch purple/${meta.tumor_id}.purple.sv.vcf.gz
+    gzip <<< '' > purple/${meta.tumor_id}.purple.somatic.vcf.gz
+    touch purple/${meta.tumor_id}.purple.somatic.vcf.gz.tbi
+    gzip <<< '' >purple/${meta.tumor_id}.purple.sv.germline.vcf.gz
+    touch purple/${meta.tumor_id}.purple.sv.germline.vcf.gz.tbi
+    gzip <<< '' > purple/${meta.tumor_id}.purple.sv.vcf.gz
+    touch purple/${meta.tumor_id}.purple.sv.vcf.gz.tbi
 
     echo -e '${task.process}:\\n  stub: noversions\\n' > versions.yml
     """

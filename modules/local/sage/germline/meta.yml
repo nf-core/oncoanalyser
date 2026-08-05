@@ -17,21 +17,21 @@ input:
       description: |
         Groovy Map containing sample informatio
         e.g. [id: 'sample_id']
-  - tumor_bam:
+  - tumor_aln:
       type: file
-      description: Tumor BAM file
-      pattern: "*.{bam}"
-  - normal_bam:
+      description: Tumor alignment file
+      pattern: "*.{bam,cram}"
+  - tumor_idx:
       type: file
-      description: Normal BAM file
-      pattern: "*.{bam}"
-  - tumor_bai:
+      description: Tumor index file
+      pattern: "*.{bai,crai}"
+  - normal_aln:
       type: file
-      description: Tumor BAI file
-      pattern: "*.{bai}"
-  - normal_bai:
+      description: Normal alignment file
+      pattern: "*.{bam,cram}"
+  - normal_idx:
       type: file
-      description: Normal BAI file
+      description: Normal index file
       pattern: "*.{tsv,tsv.gz}"
   - redux_tsvs:
       type: list
@@ -66,6 +66,9 @@ input:
   - ensembl_data_resources:
       type: directory
       description: HMF ensembl data resources directory
+  - sequencing_platform:
+      type: string
+      description: Sequencing platform
   - targeted_mode:
       type: boolean
       description: Flag indicating whether targeted mode is set
@@ -75,19 +78,15 @@ output:
       description: |
         Groovy Map containing sample information
         e.g. [id: 'sample_id']
-  - vcf:
-      type: file
-      description: VCF file
-      pattern: "*.{vcf.gz}"
-  - sage_dir:
+  - sage_germline_dir:
       type: directory
-      description: SAGE output directory
+      description: SAGE germline output directory
+  - command_files:
+      type: list
+      description: List of command files
   - versions:
       type: file
       description: File containing software versions
       pattern: "versions.yml"
-  - command_files:
-      type: list
-      description: List of command files
 authors:
   - "@scwatts"

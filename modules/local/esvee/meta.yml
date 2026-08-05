@@ -15,22 +15,22 @@ input:
       description: |
         Groovy Map containing sample information
         e.g. [id: 'sample_id']
-  - tumor_bam:
+  - tumor_aln:
       type: file
-      description: Tumor BAM file
-      pattern: "*.{bam}"
-  - tumor_bai:
+      description: Tumor alignment file
+      pattern: "*.{bam,cram}"
+  - tumor_idx:
       type: file
-      description: Tumor BAI file
-      pattern: "*.{bai}"
-  - normal_bam:
+      description: Tumor index file
+      pattern: "*.{bai,crai}"
+  - normal_aln:
       type: file
-      description: Normal BAM file
-      pattern: "*.{bam}"
-  - normal_bai:
+      description: Normal alignment file
+      pattern: "*.{bam,cram}"
+  - normal_idx:
       type: file
-      description: Normal BAI file
-      pattern: "*.{bai}"
+      description: Normal index file
+      pattern: "*.{bai,crai}"
   - genome_fasta:
       type: file
       description: Reference genome assembly FASTA file
@@ -77,6 +77,9 @@ input:
       type: file
       description: Target regions BED file (optional)
       pattern: "*.{bed}"
+  - sequencing_platform:
+      type: string
+      description: Sequencing platform
 output:
   - meta:
       type: map
@@ -86,24 +89,12 @@ output:
   - esvee_dir:
       type: directory
       description: ESVEE output directory
-  - unfiltered_vcf:
+  - command_files:
       type: list
-      description: Unfiltered VCF file
-      pattern: "*.{vcf.gz,vcf.gz.tbi}"
-  - somatic_vcf:
-      type: list
-      description: Somatic VCF file
-      pattern: "*.{vcf.gz,vcf.gz.tbi}"
-  - germline_vcf:
-      type: list
-      description: Germline VCF file (optional)
-      pattern: "*.{vcf.gz,vcf.gz.tbi}"
+      description: List of command files
   - versions:
       type: file
       description: File containing software versions
       pattern: "versions.yml"
-  - command_files:
-      type: list
-      description: List of command files
 authors:
   - "@scwatts"
