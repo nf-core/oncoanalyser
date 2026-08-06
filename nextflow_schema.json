@@ -76,13 +76,13 @@
                     "type": "boolean",
                     "description": "Skip check for restricted genome.",
                     "default": false,
-                    "fa_icon": "fas fas fa-lock-open"
+                    "fa_icon": "fas fa-lock-open"
                 },
                 "force_panel": {
                     "type": "boolean",
                     "description": "Skip check for known panels.",
                     "default": false,
-                    "fa_icon": "fas fas fa-lock-open"
+                    "fa_icon": "fas fa-lock-open"
                 },
                 "ref_data_types": {
                     "type": "string",

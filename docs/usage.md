@@ -46,7 +46,7 @@ A typical command for running `oncoanalyser` is shown below:
 
 ```bash
 nextflow run nf-core/oncoanalyser \
-  -revision 2.3.0 \
+  -revision 3.0.0 \
   -profile docker \
   -config reference_data.config \ # Optional but recommended
   --mode wgts \
@@ -70,7 +70,7 @@ If you have data from Roche SBX or Ultima sequencing technologies, you will need
 :::tip
 
 If you encounter any issues setting up or running `oncoanalyser`, please see
-[FAQ and troubleshooting](oncoanalyser/2.3.0/docs/usage/faq_and_troubleshooting)
+[FAQ and troubleshooting](oncoanalyser/3.0.0/docs/usage/faq_and_troubleshooting)
 
 :::
 
@@ -98,7 +98,7 @@ Descriptions of each output file in `<OUTDIR>` are provided in the [output](../o
 To use the same CLI arguments across multiple runs, you can specify these in a `yaml` or `json` file via `-params-file <file>`.
 The [above command](#running-the-pipeline) would have the equivalent `yaml` file:
 
-```yaml title="params.yaml
+```yaml title="params.yaml"
 mode: 'wgts'
 genome: 'GRCh38_hmf'
 input: 'samplesheet.csv'
@@ -109,7 +109,7 @@ outdir: 'output/'
 and be run using this command:
 
 ```bash
-nextflow run nf-core/oncoanalyser -revision 2.3.0 -profile docker -params-file params.yaml
+nextflow run nf-core/oncoanalyser -revision 3.0.0 -profile docker -params-file params.yaml
 ```
 
 You can also generate such `YAML`/`JSON` files via [nf-core/launch](https://nf-co.re/launch).
@@ -163,7 +163,7 @@ to explicitly specify `--sequencing_platform` like so:
 
 ```bash
 nextflow run nf-core/oncoanalyser \
--revision 2.3.0 \
+-revision 3.0.0 \
 -config reference_data.config \
 -profile docker \
 --sequencing_platform sbx \
@@ -198,22 +198,26 @@ In other cases, converting from BAM back to FASTQ may be required to run `oncoan
 The samplesheet contains information in CSV format for each sample to be analysed by `oncoanalyser`, and uses a header
 row as the first line with the below columns:
 
-| Column          | Description                                                                                                                                                                                                                                                                                                                                                                                                           |
-| :-------------- | :-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------- |
-| `group_id`      | Groups `sample_id` entries into the same analysis                                                                                                                                                                                                                                                                                                                                                                     |
-| `subject_id`    | Must be the same value within each `group_id`                                                                                                                                                                                                                                                                                                                                                                         |
-| `sample_id`     | Sample identifier                                                                                                                                                                                                                                                                                                                                                                                                     |
-| `sample_type`   | Sample type: `tumor`, `normal`, or `tumor_normal`                                                                                                                                                                                                                                                                                                                                                                     |
-| `sequence_type` | Sequence type: `dna`, `rna`, or `dna_rna`                                                                                                                                                                                                                                                                                                                                                                             |
-| `filetype`      | File type: e.g. `fastq`, `bam`, `bai`. All valid values can be found [here](../lib/Constants.groovy).                                                                                                                                                                                                                                                                                                                 |
-| `info`          | Additional sample info in the form `<key1>:<value1>;<key1>:<value2>;...`. Valid keys: `lane` and `library_id` for [FASTQ](#fastq) files, `longitudinal_sample` for mode [purity_estimate](#purity-estimate), `cancer_type` as a DOID that is passed to ORANGE (details in [readme](https://github.com/hartwigmedical/hmftools/tree/master/orange#running-orange), `read_group_overrides` in the form `<tag1>=<value1> | <tag2>=<value2>`) |
-| `filepath`      | Absolute filepath to input file. Can be a local path, URL (e.g. http://, https://, ftp://) or cloud URI (e.g. gs://, s3://)                                                                                                                                                                                                                                                                                           |
+| Column          | Description                                                                                                                                                                                                                                                                                                              |
+| :-------------- | :----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `group_id`      | Groups `sample_id` entries into the same analysis                                                                                                                                                                                                                                                                        |
+| `subject_id`    | Must be the same value within each `group_id`                                                                                                                                                                                                                                                                            |
+| `sample_id`     | Sample identifier                                                                                                                                                                                                                                                                                                        |
+| `sample_type`   | Sample type: `tumor`, `normal`, or `tumor_normal`                                                                                                                                                                                                                                                                        |
+| `sequence_type` | Sequence type: `dna`, `rna`, or `dna_rna`                                                                                                                                                                                                                                                                                |
+| `filetype`      | File type: e.g. `fastq`, `bam`, `bai`. All valid values can be found [here](../lib/Constants.groovy).                                                                                                                                                                                                                    |
+| `info`          | Additional sample info in the form `<key1>:<value1>;<key1>:<value2>;...`. Valid keys: `lane` and `library_id` for [FASTQ](#fastq) files, `longitudinal_sample` for mode [purity_estimate](#purity-estimate), `cancer_type` as a DOID that is passed to ORANGE, `read_group_overrides` to override and set BAM RG fields. |
+| `filepath`      | Absolute filepath to input file. Can be a local path, URL (e.g. http://, https://, ftp://) or cloud URI (e.g. gs://, s3://)                                                                                                                                                                                              |
 
 Output file paths are constructed based on `group_id` and `sample_id`:
 
 - `group_id`: top-level output directory for analysis files e.g. `output/PATIENT1/`
 - tumor `sample_id`: output prefix for most filenames e.g. `PATIENT1-T.purple.somatic.vcf.gz`
 - normal `sample_id`: output prefix for some filenames e.g. `PATIENT1-N.cobalt.ratio.pcf`
+
+The `read_group_overrides` info field can be used for FASTQ inputs to override and set read group tags, which are then
+propagated through alignment into the respective output BAM / CRAM file. Tags are specified as `<tag>=<value>` with
+multiple tag and value entries separated by `|`, for example `read_group_overrides:ID=id-1|SM=sample-1|LB=lib-1`.
 
 ### Analysis starting points
 
@@ -237,7 +241,7 @@ PATIENT1,PATIENT1,PATIENT1-T,tumor,dna,fastq,library_id:S1;lane:002,/path/to/PAT
 
 :::note
 
-Currently only gzip compressed, non-interleaved paired-end FASTQ files are currently supported.
+Currently only gzip compressed, non-interleaved paired-end FASTQ files are supported.
 
 :::
 
@@ -357,7 +361,7 @@ Then, run `oncoanalyser` with as normal:
 
 ```bash
 nextflow run nf-core/oncoanalyser \
-  -revision 2.3.0 \
+  -revision 3.0.0 \
   -config reference_data.config \
   -profile docker \
   --mode wgts \
@@ -390,7 +394,7 @@ PATIENT1,PATIENT1,PATIENT1-T,tumor,dna,sage_dir,/path/to/sage/somatic/
 PATIENT1,PATIENT1,PATIENT1-T,tumor_normal,dna,esvee_dir,/path/to/esvee/
 ```
 
-All valid combinations of `sample_type`, `sequence_type` and `filetype` are can be found [here](../lib/Constants.groovy).
+All valid combinations of `sample_type`, `sequence_type` and `filetype` can be found [here](../lib/Constants.groovy).
 
 This approach can be used in combination with [manual process selection](#manual-process-selection) to run specific
 downstream components of the pipeline.
@@ -486,7 +490,7 @@ analysis from alignments.
 
 ```bash
 nextflow run nf-core/oncoanalyser \
-  -revision 2.3.0 \
+  -revision 3.0.0 \
   -profile docker \
   --mode prepare_reference \
   --ref_data_types wgs \
@@ -494,7 +498,7 @@ nextflow run nf-core/oncoanalyser \
   --outdir output/
 ```
 
-Once the above commands complete, the stated reference data can be found in `<outdir>/reference_data/2.3.0`. You will
+Once the above commands complete, the stated reference data can be found in `<outdir>/reference_data/3.0.0`. You will
 then need to provide a config file that points to these reference files (see [Configuring reference data](#configuring-reference-data))
 which can be used for subsequent `oncoanalyser` runs. The Nextflow work directory can also be removed to free up disk
 space.
@@ -548,7 +552,7 @@ The configuration file can then be supplied to `oncoanalyser` via the `-config <
 
 ```bash
 nextflow run nf-core/oncoanalyser \
-  -revision 2.3.0 \
+  -revision 3.0.0 \
   -config reference_data.config  \
   <...>
 ```
@@ -585,7 +589,7 @@ Each index can then be created in by using `--mode prepare_reference` and `--ref
 
 ```bash
 nextflow run nf-core/oncoanalyser \
-  -revision 2.3.0 \
+  -revision 3.0.0 \
   -config genome.custom.config \
   -profile docker \
   --mode prepare_reference \
@@ -628,8 +632,8 @@ _GRCh37 genome (Hartwig): `GRCh37_hmf`_
 | BWA-MEM2 index       | [bwa-mem2_index-2.2.1.tar.gz](https://data.oncoanalyser.com/r2/reference/dist/v1/genomes/GRCh37_hmf/26.1/bwa-mem2_index-2.2.1.tar.gz)                                                              |
 | GRIDSS index         | [gridss_index-2.13.2.tar.gz](https://data.oncoanalyser.com/r2/reference/dist/v1/genomes/GRCh37_hmf/26.1/gridss_index-2.13.2.tar.gz)                                                                |
 | STAR index           | [star_index-gencode_19-2.7.3a.tar.gz](https://data.oncoanalyser.com/r2/reference/dist/v1/genomes/GRCh37_hmf/26.1/star_index-gencode_19-2.7.3a.tar.gz)                                              |
-| WiGiTS data          | [hmf_pipeline_resources.37_v3.0.0--7.tar.gz](https://data.oncoanalyser.com/r2/reference/dist/v1/hartwig/pipeline_resources/hmf_pipeline_resources.37_v3.0.0--7.tar.gz)                             |
-| TSO500 panel data    | [hmf_panel_resources.tso500.37_v3.0.0--7.tar.gz](https://data.oncoanalyser.com/r2/reference/dist/v1/hartwig/panel_resources/hmf_panel_resources.tso500.37_v3.0.0--7.tar.gz)                        |
+| WiGiTS data          | [hmf_pipeline_resources.37_v3.0.0--8.tar.gz](https://data.oncoanalyser.com/r2/reference/dist/v1/hartwig/pipeline_resources/hmf_pipeline_resources.37_v3.0.0--8.tar.gz)                             |
+| TSO500 panel data    | [hmf_panel_resources.tso500.37_v3.0.0--8.tar.gz](https://data.oncoanalyser.com/r2/reference/dist/v1/hartwig/panel_resources/hmf_panel_resources.tso500.37_v3.0.0--8.tar.gz)                        |
 
 _GRCh38 genome (Hartwig): `GRCh38_hmf`_
 
@@ -642,7 +646,7 @@ _GRCh38 genome (Hartwig): `GRCh38_hmf`_
 | BWA-MEM2 index       | [bwa-mem2_index-2.2.1.tar.gz](https://data.oncoanalyser.com/r2/reference/dist/v1/genomes/GRCh38_hmf/26.1/bwa-mem2_index-2.2.1.tar.gz)                                                                |
 | GRIDSS index         | [gridss_index-2.13.2.tar.gz](https://data.oncoanalyser.com/r2/reference/dist/v1/genomes/GRCh38_hmf/26.1/gridss_index-2.13.2.tar.gz)                                                                  |
 | STAR index           | [star_index-gencode_38-2.7.3a.tar.gz](https://data.oncoanalyser.com/r2/reference/dist/v1/genomes/GRCh38_hmf/26.1/star_index-gencode_38-2.7.3a.tar.gz)                                                |
-| WiGiTS data          | [hmf_pipeline_resources.38_v3.0.0--7.tar.gz](https://data.oncoanalyser.com/r2/reference/dist/v1/hartwig/pipeline_resources/hmf_pipeline_resources.38_v3.0.0--7.tar.gz)                               |
+| WiGiTS data          | [hmf_pipeline_resources.38_v3.0.0--8.tar.gz](https://data.oncoanalyser.com/r2/reference/dist/v1/hartwig/pipeline_resources/hmf_pipeline_resources.38_v3.0.0--8.tar.gz)                               |
 
 ## Pipeline modes
 
@@ -652,7 +656,7 @@ _GRCh38 genome (Hartwig): `GRCh38_hmf`_
 
 ```bash
 nextflow run nf-core/oncoanalyser \
-  -revision 2.3.0 \
+  -revision 3.0.0 \
   -config reference_data.config \
   -profile docker \
   --mode wgts \
@@ -670,7 +674,7 @@ A typical run command for TSO500 would be:
 
 ```bash
 nextflow run nf-core/oncoanalyser \
-  -revision 2.3.0 \
+  -revision 3.0.0 \
   -config reference_data.config \
   -profile docker \
   --mode targeted \
@@ -738,7 +742,7 @@ Then run `oncoanalyser` providing `--mode purity_estimate` and `--purity_estimat
 
 ```bash
 nextflow run nf-core/oncoanalyser \
-  -revision 2.3.0 \
+  -revision 3.0.0 \
   -config reference_data.config \
   -profile docker \
   --mode purity_estimate \
@@ -807,7 +811,7 @@ manually created files to `--driver_gene_panel` and `--target_regions_bed`:
 
 ```bash
 nextflow run nf-core/oncoanalyser \
-  -revision 2.3.0 \
+  -revision 3.0.0 \
   -config reference_data.config \
   -profile docker \
   --mode panel_resource_creation \
@@ -863,9 +867,9 @@ params {
                 known_umis                  = [] // Only required for MSK-IMPACT panel
 
                 // Only for panels with RNA-seq. Provide e.g. `isofox_counts = []` for panels without RNA
-                isofox_counts               = 'read_151_exp_counts.38.csv'
-                isofox_gc_ratios            = 'read_100_exp_gc_ratios.38.csv'
                 isofox_tpm_norm             = 'isofox.gene_normalisation.38.csv'
+                isofox_counts               = 'read_151_exp_counts.38.csv'
+                isofox_gc_ratios            = 'read_151_exp_gc_ratios.38.csv'
             }
         }
     }
@@ -882,7 +886,7 @@ Run `oncoanalyser` with `--mode targeted` and `-config panel.config`:
 
 ```bash
 nextflow run nf-core/oncoanalyser \
-  -revision 2.3.0 \
+  -revision 3.0.0 \
   -config reference_data.config \
   -config panel.config \
   -profile docker \
@@ -949,7 +953,7 @@ IIIIIIIIIIIIIIIIIIIIIIIIIIII#I#IIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIII
 ## Process selection
 
 It is possible to exclude or manually select specific processes when running `oncoanalyser`. The full list of processes that can
-be selected is available [here](https://github.com/nf-core/oncoanalyser/blob/2.3.0/lib/Constants.groovy#L53).
+be selected is available [here](https://github.com/nf-core/oncoanalyser/blob/3.0.0/lib/Constants.groovy#L53).
 
 :::warning
 
@@ -966,7 +970,7 @@ skip resource intensive processes like Virusbreakend, or ORANGE because you do n
 
 ```bash
 nextflow run nf-core/oncoanalyser \
-  -revision 2.3.0 \
+  -revision 3.0.0 \
   -profile docker \
   --mode wgts \
   --processes_exclude virusinterpreter,orange \
@@ -982,10 +986,10 @@ you may only want to run alignment and SNV/indel, SV and CNV calling from DNA FA
 
 ```bash
 nextflow run nf-core/oncoanalyser \
-  -revision 2.3.0 \
+  -revision 3.0.0 \
   -profile docker \
   --mode wgts \
-  --processes_manual alignment,redux,sage,amber,cobalt,esvee,sage,pave,purple \
+  --processes_manual alignment,redux,amber,cobalt,esvee,sage,pave,purple \
   --genome GRCh38_hmf \
   --input samplesheet.csv \
   --outdir output/
@@ -1044,7 +1048,7 @@ If `-profile` is not specified, the pipeline will run locally and expect all sof
 - `apptainer`
   - A generic configuration profile to be used with [Apptainer](https://apptainer.org/)
 - `wave`
-  - A generic configuration profile to enable [Wave](https://seqera.io/wave/) containers. Use together with one of the above (requires Nextflow ` 24.03.0-edge` or later).
+  - A generic configuration profile to enable [Wave](https://seqera.io/wave/) containers. Use together with one of the above (requires Nextflow `24.03.0-edge` or later).
 - `conda`
   - A generic configuration profile to be used with [Conda](https://conda.io/docs/). Please only use Conda as a last resort i.e. when it's not possible to run the pipeline with Docker, Singularity, Podman, Shifter, Charliecloud, or Apptainer.
 
@@ -1212,7 +1216,7 @@ where it submits more jobs).
 ## Nextflow memory requirements
 
 In some cases, the Nextflow Java virtual machines can start to request a large amount of memory. We recommend adding
-the following line to your environment to limit this (typically in `~/.bashrc` or `~./bash_profile`):
+the following line to your environment to limit this (typically in `~/.bashrc` or `~/.bash_profile`):
 
 ```bash
 NXF_OPTS='-Xms1g -Xmx4g'

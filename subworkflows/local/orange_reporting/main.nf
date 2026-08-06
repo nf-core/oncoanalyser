@@ -57,7 +57,7 @@ workflow ORANGE_REPORTING {
     ]
 
     // Select input sources then sort
-    // channel: runnable: [meta, sage_dir_somatic, sage_dir_germline, sage_append_dir_somatic, sage_append_dir_germline, sage_visualiser_dir_somatic, purple_dir, qsee_dir, linx_annotation_dir_somatic, linx_plot_dir_somatic, linx_annotation_dir_germline, virusinterpreter_dir, chord_dir, sigs_dir, lilac_dr, cuppa_dir, peach_dir, isofox_dir ]
+    // channel: runnable: [meta, sage_dir_somatic, sage_dir_germline, sage_append_dir_somatic, sage_append_dir_germline, sage_visualiser_dir_somatic, purple_dir, qsee_dir, linx_annotation_dir_somatic, linx_plot_dir_somatic, linx_annotation_dir_germline, virusinterpreter_dir, chord_dir, sigs_dir, lilac_dir, cuppa_dir, peach_dir, isofox_dir ]
     // channel: skip: [ meta ]
     ch_inputs_sorted = WorkflowOncoanalyser.groupByMeta(
         ch_sage_dir_somatic,
@@ -127,7 +127,7 @@ workflow ORANGE_REPORTING {
         }
 
     // Create process input channel
-    // channel: [meta, sage_dir_somatic, sage_dir_germline, sage_append_dir_somatic, sage_append_dir_germline, sage_visualiser_dir_somatic, purple_dir, qsee_dir, linx_annotation_dir_somatic, linx_plot_dir_somatic, linx_annotation_dir_germline, virusinterpreter_dir, chord_dir, sigs_dir, lilac_dr, cuppa_dir, peach_dir, isofox_dir ]
+    // channel: [meta, sage_dir_somatic, sage_dir_germline, sage_append_dir_somatic, sage_append_dir_germline, sage_visualiser_dir_somatic, purple_dir, qsee_dir, linx_annotation_dir_somatic, linx_plot_dir_somatic, linx_annotation_dir_germline, virusinterpreter_dir, chord_dir, sigs_dir, lilac_dir, cuppa_dir, peach_dir, isofox_dir ]
     ch_orange_inputs = ch_inputs_sorted.runnable
         .map { d ->
 
@@ -237,7 +237,7 @@ workflow ORANGE_REPORTING {
         ch_orange_inputs,
         genome_version,
         disease_ontology,
-        '2.3.0 [oncoanalyser]',
+        '3.0.0 [oncoanalyser]',
         sequencing_platform,
         targeted_mode,
         panel,

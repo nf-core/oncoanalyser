@@ -42,7 +42,7 @@ panel](https://www.illumina.com/products/by-type/clinical-research-products/trus
 panels and exomes requiring [creation of custom panel reference
 data](https://nf-co.re/oncoanalyser/usage#custom-panels)</sub>
 <br />
-<sub><sup>2</sup> for example a primary WGS tissue biospy and longitudinal low-pass WGS ccfDNA sample taken from the
+<sub><sup>2</sup> for example a primary WGS tissue biopsy and longitudinal low-pass WGS ccfDNA sample taken from the
 same patient</sub>
 
 ## Pipeline overview
@@ -96,7 +96,7 @@ Launch `oncoanalyser`:
 ```bash
 nextflow run nf-core/oncoanalyser \
     -profile <docker/singularity/.../institute> \
-    -revision 2.3.0 \
+    -revision 3.0.0 \
     --mode <wgts/targeted> \
     --genome <GRCh37_hmf/GRCh38_hmf> \
     --input samplesheet.csv \
