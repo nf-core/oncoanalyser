@@ -77,7 +77,7 @@ output/
   - [CIDER](#cider) - IG/TCR CDR3 identification
   - [NEO](#neo) - Neoepitope prediction
 - [Mutational signature fitting](#mutational-signature-fitting)
-  - [SIGS](#sigs) - Mutational signature fitting
+  - [Sigs](#sigs) - Mutational signature fitting
 - [HRD status prediction](#hrd-status-prediction)
   - [CHORD](#chord) - HRD status prediction
 - [Tissue of origin prediction](#tissue-of-origin-prediction)
@@ -145,7 +145,7 @@ do so.
 
 _REDUX is only run on DNA alignments_
 
-### Picard MarkDuplicates
+#### Picard MarkDuplicates
 
 <details markdown="1">
 <summary>Output files</summary>
@@ -548,7 +548,7 @@ statistical inference on the basis of relative somatic mutation counts.
 
 ### Mutational signature fitting
 
-#### SIGS
+#### Sigs
 
 <details markdown="1">
 <summary>Output files</summary>
