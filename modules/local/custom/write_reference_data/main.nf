@@ -4,7 +4,7 @@ process WRITE_REFERENCE_DATA {
 
     container "${ workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container ?
         'https://depot.galaxyproject.org/singularity/ubuntu:24.04' :
-        'quay.io/nf-core/ubuntu:24.04' }"
+        'nf-core/ubuntu:24.04' }"
 
     input:
     path fp

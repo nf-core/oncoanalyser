@@ -327,6 +327,10 @@ class Utils {
                         def is_primary = ! meta_sample.containsKey('longitudinal_sample_id')
                         def sample_id = is_primary ? meta_sample.sample_id : meta_sample.longitudinal_sample_id
 
+                        if (stub_run) {
+                            return
+                        }
+
                         def aln
                         if (key == Constants.FileType.ALN || key == Constants.FileType.ALN_REDUX) {
                             aln = meta_sample[key]
@@ -343,7 +347,9 @@ class Utils {
                         } else if (aln.name.endsWith('.cram')) {
                             index_ext = 'crai'
                         } else {
-                            assert false
+                            def (sample_type, sequence_type) = sample_key
+                            log.error "got bad alignment type for ${meta.group_id} ${sample_type}/${sequence_type}: ${key}: ${aln}"
+                            Nextflow.exit(1)
                         }
 
                         if (meta_sample.containsKey(Constants.FileType.IDX) && meta_sample[Constants.FileType.IDX].name.endsWith(index_ext)) {
@@ -401,7 +407,7 @@ class Utils {
             }
 
         if (params.panel != null) {
-            params.panel_data_paths[params.panel][params.genome_version.toString()]
+            params.panel_data_paths[params.panel.toLowerCase()][params.genome_version.toString()]
                 .each { k, v ->
                     fps << "${params.ref_data_panel_data_path.replaceAll('/$', '')}/${v}"
                 }

@@ -99,7 +99,7 @@ jobs:
       runson_instance_type: ${{ matrix.runson_instance_type }}
       runson_volume_size: ${{ matrix.runson_volume_size }}
       use_reference_cache: ${{ matrix.use_reference_cache }}
-      hmf_ref_version: ${{ env.HMF_REF_VERSION }}
+      hmf_ref_version: "grch38_hmf--26.1--1"
 
   confirm-pass:
     needs: [nf-test]
