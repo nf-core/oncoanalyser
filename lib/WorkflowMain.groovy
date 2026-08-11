@@ -93,7 +93,7 @@ class WorkflowMain {
         def umi_type
         if (params.containsKey('umi_type') && params.umi_type) {
             umi_type = Utils.getEnumFromString(params.umi_type, Constants.UmiType)
-        } else if (params.containsKey('panel') && Constants.PANELS_DEFINED.contains(params.panel)) {
+        } else if (params.containsKey('panel') && Constants.PANELS_DEFINED.contains(params.panel.toLowerCase())) {
             if (params.panel.toLowerCase() == 'tso500') {
                 umi_type = Constants.UmiType.TSO500
             }
@@ -265,14 +265,14 @@ class WorkflowMain {
                     "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
                 Nextflow.exit(1)
 
-            } else if (! Constants.PANELS_DEFINED.contains(params.panel)) {
+            } else if (! Constants.PANELS_DEFINED.contains(params.panel.toLowerCase())) {
 
                 if (params.containsKey('force_panel') && params.force_panel) {
-                    log.warn "provided panel ${params.panel} does not have built-in support but forcing to proceed"
+                    log.warn "provided panel ${params.panel.toLowerCase()} does not have built-in support but forcing to proceed"
                 } else {
                     def panels = Constants.PANELS_DEFINED.join('\n    - ')
                     log.error "\n~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n" +
-                        "  The ${params.panel} panel does not have built-in support. Currently, the\n" +
+                        "  The ${params.panel.toLowerCase()} panel does not have built-in support. Currently, the\n" +
                         "  available supported panels are:\n" +
                         "    - ${panels}\n\n" +
                         "  Please adjust the --panel argument or override with --force_panel.\n" +
@@ -284,23 +284,23 @@ class WorkflowMain {
 
             // Require the panel to have defined
 
-            if (! params.panel_data_paths.containsKey(params.panel)) {
+            if (! params.panel_data_paths.containsKey(params.panel.toLowerCase())) {
                 def panels = params.panel_data_paths.keySet().join('\n    - ')
                 log.error "\n~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n" +
-                    "  Did not find data path definitions for the provided ${params.panel} panel.\n" +
+                    "  Did not find data path definitions for the provided ${params.panel.toLowerCase()} panel.\n" +
                     "  Please check your configuration. Found the following panel definitions:\n" +
                     "    - ${panels}\n" +
                     "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
                 Nextflow.exit(1)
             }
 
-            def panel_data_paths_versions = params.panel_data_paths[params.panel]
+            def panel_data_paths_versions = params.panel_data_paths[params.panel.toLowerCase()]
             if (! panel_data_paths_versions.containsKey(params.genome_version.toString())) {
                 def panel_versions = panel_data_paths_versions.keySet().join('\n    - ')
                 log.error "\n~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n" +
-                    "  Did not find path definitions for the provided ${params.panel} panel and\n" +
+                    "  Did not find path definitions for the provided ${params.panel.toLowerCase()} panel and\n" +
                     "  genome version ${params.genome_version}. Please check your configuration.\n" +
-                    "  Found the following genome version panel definitions for ${params.panel}:\n" +
+                    "  Found the following genome version panel definitions for ${params.panel.toLowerCase()}:\n" +
                     "    - ${panel_versions}\n" +
                     "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
                 Nextflow.exit(1)
@@ -331,7 +331,7 @@ class WorkflowMain {
                 log.error "\n~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n" +
                     "  The following panel data path entries are required but were not found:\n" +
                     "    - ${required_entries_missing_str}\n\n" +
-                    "  Please review configuration for the ${params.panel} (${params.genome_version}) panel\n" +
+                    "  Please review configuration for the ${params.panel.toLowerCase()} (${params.genome_version}) panel\n" +
                     "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
                 Nextflow.exit(1)
             }
@@ -343,7 +343,7 @@ class WorkflowMain {
                 log.error "\n~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n" +
                     "  The following panel data path entries are required but were not found:\n" +
                     "    - ${optional_entries_missing_str}\n\n" +
-                    "  Please review configuration for the ${params.panel} (${params.genome_version}) panel\n" +
+                    "  Please review configuration for the ${params.panel.toLowerCase()} (${params.genome_version}) panel\n" +
                     "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
                 Nextflow.exit(1)
             }
@@ -355,7 +355,17 @@ class WorkflowMain {
                     "  The following panel data path optional entries should only be set to [] if\n" +
                     "  not applicable:\n" +
                     "    - ${optional_entries_invalid_str}\n\n" +
-                    "  Please review configuration for the ${params.panel} (${params.genome_version}) panel\n" +
+                    "  Please review configuration for the ${params.panel.toLowerCase()} (${params.genome_version}) panel\n" +
+                    "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
+                Nextflow.exit(1)
+            }
+
+            // Require known_umis in panel data when fastq-tools UMI processing is enabled
+            if (params.fastq_tools_umi_enabled && ! panel_data_paths['known_umis']) {
+                log.error "\n~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n" +
+                    "  The fastq-tools process is enabled but the required 'known_umis' data path was\n" +
+                    "  not configured in the panel data paths for panel ${params.panel.toLowerCase()}\n" +
+                    "  (${params.genome_version}).\n" +
                     "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
                 Nextflow.exit(1)
             }
@@ -558,9 +568,9 @@ class WorkflowMain {
             if (! params.containsKey('panel') || params.panel == null) {
                 require_panel_data = false
                 log.warn "Skipping preparing panel specific reference data as --panel CLI argument was not provided"
-            } else if (! Constants.PANELS_DEFINED.contains(params.panel)) {
+            } else if (! Constants.PANELS_DEFINED.contains(params.panel.toLowerCase())) {
                 require_panel_data = false
-                log.warn "Skipping preparing panel specific reference data for custom panel: ${params.panel}"
+                log.warn "Skipping preparing panel specific reference data for custom panel: ${params.panel.toLowerCase()}"
             }
         }
 

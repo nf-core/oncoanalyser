@@ -22,6 +22,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/) 
   - Remove support for GRCh38 TSO500
 - [273](https://github.com/nf-core/oncoanalyser/pull/273) - Post-release bump
 
+### Breaking change
+
+- Removed support for GRCh38 TSO500
+
 ### Software dependencies
 
 | Dependency   | Old version | New version |
@@ -35,13 +39,13 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/) 
 | `FastqTools` | -           | 1.0         |
 | `ISOFOX`     | 1.7.2       | 2.0.1       |
 | `LILAC`      | 1.7.3       | 2.0         |
-| `LINX`       | 2.2         | 2.3         |
+| `LINX`       | 2.2         | 2.3.1       |
 | `NEO`        | 1.2.1       | 1.3         |
-| `ORANGE`     | 4.1.2       | 5.0         |
+| `ORANGE`     | 4.1.2       | 5.0.1       |
 | `PAVE`       | 1.8.2       | 1.9         |
 | `PURPLE`     | 4.3         | 4.4         |
 | `QSEE`       | -           | 1.0         |
-| `REDUX`      | 1.2.2       | 2.0.3       |
+| `REDUX`      | 1.2.2       | 2.0.4       |
 | `SAGE`       | 4.2         | 5.0.2       |
 | `TEAL`       | 1.3.6       | 1.4         |
 | `WISP`       | 1.2         | 1.3.1       |

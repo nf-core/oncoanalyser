@@ -110,6 +110,9 @@ workflow SAGE_APPEND {
 
             def purple_smlv_vcf = purple_dir.resolve("${tumor_dna_id}.purple.germline.vcf.gz")
 
+            // NOTE(SW): in stub mode we allow absence of indexes so must handle here
+            idxs = idxs.flatten()
+
             return [meta_append, purple_smlv_vcf, alns, idxs, []]
 
         }
@@ -185,6 +188,9 @@ workflow SAGE_APPEND {
             }
 
             def purple_smlv_vcf = purple_dir.resolve("${tumor_dna_id}.purple.somatic.vcf.gz")
+
+            // NOTE(SW): in stub mode we allow absence of indexes so must handle here
+            idxs = idxs.flatten()
 
             return [meta_append, purple_smlv_vcf, alns, idxs, redux_tsvs]
         }

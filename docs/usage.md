@@ -30,6 +30,8 @@ Both modes accept various [combinations](#sample-setups) of sequencing type (DNA
 - **RNA-only**:
   - RNA(`tumor`)
 
+Different sequencing technologies can be set by the `--sequencing_platform` parameter (see [Sequencing technologies](#sequencing-technologies)).
+
 Other available pipeline modes are:
 
 - [`purity_estimate`](#purity-estimate): tumor fraction estimation in longitudinal samples (e.g. for MRD)
@@ -198,22 +200,34 @@ In other cases, converting from BAM back to FASTQ may be required to run `oncoan
 The samplesheet contains information in CSV format for each sample to be analysed by `oncoanalyser`, and uses a header
 row as the first line with the below columns:
 
-| Column          | Description                                                                                                                                                                                                                                                                                                              |
-| :-------------- | :----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `group_id`      | Groups `sample_id` entries into the same analysis                                                                                                                                                                                                                                                                        |
-| `subject_id`    | Must be the same value within each `group_id`                                                                                                                                                                                                                                                                            |
-| `sample_id`     | Sample identifier                                                                                                                                                                                                                                                                                                        |
-| `sample_type`   | Sample type: `tumor`, `normal`, or `tumor_normal`                                                                                                                                                                                                                                                                        |
-| `sequence_type` | Sequence type: `dna`, `rna`, or `dna_rna`                                                                                                                                                                                                                                                                                |
-| `filetype`      | File type: e.g. `fastq`, `bam`, `bai`. All valid values can be found [here](../lib/Constants.groovy).                                                                                                                                                                                                                    |
-| `info`          | Additional sample info in the form `<key1>:<value1>;<key1>:<value2>;...`. Valid keys: `lane` and `library_id` for [FASTQ](#fastq) files, `longitudinal_sample` for mode [purity_estimate](#purity-estimate), `cancer_type` as a DOID that is passed to ORANGE, `read_group_overrides` to override and set BAM RG fields. |
-| `filepath`      | Absolute filepath to input file. Can be a local path, URL (e.g. http://, https://, ftp://) or cloud URI (e.g. gs://, s3://)                                                                                                                                                                                              |
+| Column          | Description                                                                                                                 |
+| :-------------- | :-------------------------------------------------------------------------------------------------------------------------- |
+| `group_id`      | Groups `sample_id` entries into the same analysis                                                                           |
+| `subject_id`    | Must be the same value within each `group_id`                                                                               |
+| `sample_id`     | Sample identifier                                                                                                           |
+| `sample_type`   | Sample type: `tumor`, `normal`, or `tumor_normal`                                                                           |
+| `sequence_type` | Sequence type: `dna`, `rna`, or `dna_rna`                                                                                   |
+| `filetype`      | File type: e.g. `fastq`, `bam`, `bai`. All valid values can be found [here](../lib/Constants.groovy).                       |
+| `info`          | Additional sample info in the form `<key>:<value>;<key>:<value>;...`. See [info field keys](#info-field-keys).              |
+| `filepath`      | Absolute filepath to input file. Can be a local path, URL (e.g. http://, https://, ftp://) or cloud URI (e.g. gs://, s3://) |
 
 Output file paths are constructed based on `group_id` and `sample_id`:
 
 - `group_id`: top-level output directory for analysis files e.g. `output/PATIENT1/`
 - tumor `sample_id`: output prefix for most filenames e.g. `PATIENT1-T.purple.somatic.vcf.gz`
 - normal `sample_id`: output prefix for some filenames e.g. `PATIENT1-N.cobalt.ratio.pcf`
+
+#### Info field keys
+
+| Key                        | Description                                        | Applicable context                                 |
+| :------------------------- | :------------------------------------------------- | :------------------------------------------------- |
+| `lane`                     | Sequencing lane                                    | FASTQ inputs                                       |
+| `library_id`               | Sequencing library identifier                      | FASTQ inputs                                       |
+| `flowcell`                 | Flowcell identifier                                | FASTQ inputs                                       |
+| `longitudinal_sample`      | Longitudinal sample identifier                     | Mode `purity_estimate`                             |
+| `cancer_type`              | Cancer type as a DOID                              | Passed to [ORANGE](output.md#orange) for reporting |
+| `generate_redux_tsvs_only` | Only generate REDUX TSV files, skip BAM processing | REDUX inputs                                       |
+| `read_group_overrides`     | Override read group tags in output BAM/CRAM        | FASTQ inputs                                       |
 
 The `read_group_overrides` info field can be used for FASTQ inputs to override and set read group tags, which are then
 propagated through alignment into the respective output BAM / CRAM file. Tags are specified as `<tag>=<value>` with
@@ -367,8 +381,7 @@ nextflow run nf-core/oncoanalyser \
   --mode wgts \
   --genome GRCh38_hmf \
   --input samplesheet.csv \
-  --outdir output/ \
-  --redux_generate_tsvs_only
+  --outdir output/
 ```
 
 REDUX will run in a special mode to only generate the TSV files, skipping the computationally expensive read processing
@@ -557,6 +570,15 @@ nextflow run nf-core/oncoanalyser \
   <...>
 ```
 
+:::info
+
+If you have staged the full reference data tree locally while preserving the directory layout, you can alternatively set
+`--ref_data_base` and `--ref_data_genomes_base` instead of each individual file path. `ref_data_base` sets the root for
+HMF tool resources and panel data (default `https://data.oncoanalyser.com/r2/reference/dist/v1`). Additionally, the
+`ref_data_genomes_base` sets the root for genome FASTA files and indexes (defaults to `ref_data_base`/genomes).
+
+:::
+
 ### Custom genomes
 
 It is strongly recommended to use a Hartwig-distributed reference genome for alignments and subsequent analysis
@@ -720,7 +742,7 @@ Similarly, a minimal samplesheet instead starting from FASTQ for the longitudina
 ```csv title="samplesheet.purity_estimate.fastq.csv"
 group_id,subject_id,sample_id,sample_type,sequence_type,filetype,info,filepath
 PATIENT1,PATIENT1,PATIENT1-T,tumor,dna,purple_dir,,/path/to/PATIENT1-T/purple/
-PATIENT1,PATIENT1,PATIENT1-L,tumor,dna,redux_dir,longitudinal_sample;library_id:PATIENT1-L_library;lane:001,/path/to/PATIENT1-L.R1.fastq.gz;/path/to/PATIENT1-L.R2.fastq.gz
+PATIENT1,PATIENT1,PATIENT1-L,tumor,dna,fastq,longitudinal_sample;library_id:PATIENT1-L_library;lane:001,/path/to/PATIENT1-L.R1.fastq.gz;/path/to/PATIENT1-L.R2.fastq.gz
 ```
 
 In `--purity_estimate_mode wgts`, to use LOH for purity estimation, you can optionally provide:
@@ -779,14 +801,14 @@ The panel resource files are used to fit and normalise the biases inherent to th
 These files need to be **manually created** to run `--mode panel_resource_creation` (instructions in [**WiGiTS targeted analysis readme**](https://github.com/hartwigmedical/hmftools/blob/master/pipeline/README_TARGETED.md)):
 
 - `driver_gene_panel`: Configuration for which driver gene events are to be reported
-- `target_region_bed`: Bed file defining panel regions
+- `target_regions_bed`: Bed file defining panel regions
 - `isofox_gene_ids`: **[RNA]** List of gene names and IDs
 - `isofox_counts`: **[RNA]** Expected fragment counts per transcript and gene. **Optional:** If not provided, defaults to `read_151_exp_counts.<ref_genome_version>.csv` from [WiGiTS reference data](#reference-data-urls)
 - `isofox_gc_ratios`: **[RNA]** Expected GC ratios per transcript. **Optional**: If not provided, defaults to `read_100_exp_gc_ratios.<ref_genome_version>.csv` from [WiGiTS reference data](#reference-data-urls)
 
 These files are generated after running `--mode panel_resource_creation`:
 
-- `target_region_normalisation`: For normalising panel copy number levels to whole genome levels
+- `target_regions_normalisation`: For normalising panel copy number levels to whole genome levels
 - `pon_artefacts`: For variant filtering
 - `isofox_tpm_norm`: **[RNA]** For normalising panel TPM levels to whole transcriptome levels
 
@@ -857,19 +879,19 @@ params {
             '38' { // Genome version: '37' or '38'
                 // These are relative paths within the dir provided by `ref_data_panel_data_path` above
 
-                driver_gene_panel           = 'driver_genes.38.tsv'
-                pon_artefacts               = 'pon_artefacts.38.tsv.gz'
-                target_region_bed           = 'panel_definition.38.bed.gz'
-                target_region_normalisation = 'cobalt_normalisation.38.tsv'
+                driver_gene_panel            = 'driver_genes.38.tsv'
+                pon_artefacts                = 'pon_artefacts.38.tsv.gz'
+                target_regions_bed           = 'panel_definition.38.bed.gz'
+                target_regions_normalisation = 'cobalt_normalisation.38.tsv'
 
                 // These are not required and left unset by providing an empty list `[]`
-                msi_model_error_rates       = [] // Currently defaults to TS0500 panel error rates for all custom panels
-                known_umis                  = [] // Only required for MSK-IMPACT panel
+                msi_model_error_rates        = [] // Currently defaults to TS0500 panel error rates for all custom panels
+                known_umis                   = [] // Only required for MSK-IMPACT panel
 
                 // Only for panels with RNA-seq. Provide e.g. `isofox_counts = []` for panels without RNA
-                isofox_tpm_norm             = 'isofox.gene_normalisation.38.csv'
-                isofox_counts               = 'read_151_exp_counts.38.csv'
-                isofox_gc_ratios            = 'read_151_exp_gc_ratios.38.csv'
+                isofox_tpm_norm              = 'isofox.gene_normalisation.38.csv'
+                isofox_counts                = 'read_151_exp_counts.38.csv'
+                isofox_gc_ratios             = 'read_151_exp_gc_ratios.38.csv'
             }
         }
     }
@@ -1090,7 +1112,7 @@ section of the nf-core website.
 
 In some cases, you may wish to change the container or conda environment used by a pipeline steps for a particular tool.
 By default, nf-core pipelines use containers and software from the [biocontainers](https://biocontainers.pro/) or
-[bioconda](https://bioconda.github.io/) projects. However, in some cases the pipeline specified version maybe out of
+[bioconda](https://bioconda.github.io/) projects. However, in some cases the pipeline specified version may be out of
 date.
 
 To use a different container from the default container or conda environment specified in a pipeline, please see the
