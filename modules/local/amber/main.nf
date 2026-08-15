@@ -9,7 +9,9 @@ process AMBER {
 
     input:
     tuple val(meta), path(tumor_aln), path(tumor_idx), path(normal_aln), path(normal_idx), path(donor_aln), path(donor_idx)
+    path genome_fasta
     val genome_ver
+    path genome_fai
     path heterozygous_sites
     path target_regions_bed
     val tumor_min_depth
@@ -53,6 +55,7 @@ process AMBER {
         -tumor_bam ${tumor_aln} \\
         ${reference_arg} \\
         ${reference_bam_arg} \\
+        -ref_genome ${genome_fasta} \\
         -ref_genome_version ${genome_ver} \\
         -sequencing_type ${sequencing_platform.toUpperCase()} \\
         ${target_regions_bed_arg} \\

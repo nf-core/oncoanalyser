@@ -9,7 +9,9 @@ process COBALT {
 
     input:
     tuple val(meta), path(tumor_aln), path(tumor_idx), path(normal_aln), path(normal_idx)
+    path genome_fasta
     val genome_ver
+    path genome_fai
     path gc_profile
     path diploid_regions
     path target_regions_normalisation
@@ -50,6 +52,7 @@ process COBALT {
         ${pcf_gamma_arg} \\
         ${reference_arg} \\
         ${reference_bam_arg} \\
+        -ref_genome ${genome_fasta} \\
         -ref_genome_version ${genome_ver} \\
         -gc_profile ${gc_profile} \\
         ${diploid_regions_arg} \\

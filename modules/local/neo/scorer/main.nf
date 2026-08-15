@@ -31,7 +31,7 @@ process NEO_SCORER {
     def rna_sample_arg = meta.containsKey('sample_rna_id') ? "-rna_sample ${meta.sample_id}" : ''
     def rna_somatic_vcf_arg = meta.containsKey('sample_rna_id') ? "-rna_somatic_vcf ${sage_vcf}" : ''
 
-    def cancer_type_arg = meta.containsKey('cancer_type') ? "-cancer_type ${meta.cancer_type}" : ''
+    def cancer_type_arg = meta.cancer_type ? "-cancer_type ${meta.cancer_type}" : ''
 
     def isofox_dir_local = 'isofox__prepared/'
     def isofox_dir_arg = isofox_dir ? "-isofox_dir ${isofox_dir_local}" : ''

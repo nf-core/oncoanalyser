@@ -166,7 +166,9 @@ workflow PURITY_ESTIMATE {
             ch_redux_tumor_out,
             ch_redux_normal_out,
             ch_redux_donor_out,
+            ref_data.genome_fasta,
             ref_data.genome_version,
+            ref_data.genome_fai,
             hmf_data.heterozygous_sites,
             [],  // target_regions_bed
             1,  // tumor_min_depth
@@ -193,7 +195,9 @@ workflow PURITY_ESTIMATE {
             ch_inputs,
             ch_redux_tumor_out,
             ch_redux_normal_out,
+            ref_data.genome_fasta,
             ref_data.genome_version,
+            ref_data.genome_fai,
             hmf_data.gc_profile,
             hmf_data.diploid_bed,
             [],  // panel_target_regions_normalisation

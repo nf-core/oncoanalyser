@@ -12,6 +12,7 @@ process CIDER {
     tuple val(meta), path(aln), path(idx)
     file genome_fasta
     val genome_ver
+    file genome_fai
     file genome_dict
     file genome_img
 

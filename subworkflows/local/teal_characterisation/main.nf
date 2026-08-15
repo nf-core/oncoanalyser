@@ -17,7 +17,9 @@ workflow TEAL_CHARACTERISATION {
     ch_purple_dir          // channel: [mandatory] [ meta, purple_dir ]
 
     // Reference data
+    genome_fasta           // channel: [mandatory] /path/to/genome_fasta
     genome_version         // channel: [mandatory] genome version
+    genome_fai             // channel: [mandatory] /path/to/genome_fai
 
     // Params
     sequencing_platform    // string:  [mandatory] sequencing platform
@@ -77,7 +79,9 @@ workflow TEAL_CHARACTERISATION {
     // Run process
     TEAL_PREP(
         ch_teal_prep_inputs,
+        genome_fasta,
         genome_version,
+        genome_fai,
         sequencing_platform,
     )
 

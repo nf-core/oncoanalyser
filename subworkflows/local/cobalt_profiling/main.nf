@@ -12,7 +12,9 @@ workflow COBALT_PROFILING {
     ch_redux_dir_normal          // channel: [mandatory] [ meta, redux_dir ]
 
     // Reference data
+    genome_fasta                 // channel: [mandatory] /path/to/genome_fasta
     genome_version               // channel: [mandatory] genome version
+    genome_fai                   // channel: [mandatory] /path/to/genome_fai
     gc_profile                   // channel: [mandatory] /path/to/gc_profile
     diploid_bed                  // channel: [optional]  /path/to/diploid_bed
     target_regions_normalisation // channel: [optional]  /path/to/target_regions_normalisation
@@ -86,7 +88,9 @@ workflow COBALT_PROFILING {
     // Run process
     COBALT(
         ch_cobalt_inputs.sample_data,
+        genome_fasta,
         genome_version,
+        genome_fai,
         gc_profile,
         ch_cobalt_inputs.diploid_bed,
         target_regions_normalisation,
