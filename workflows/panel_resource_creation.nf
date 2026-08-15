@@ -192,7 +192,9 @@ workflow PANEL_RESOURCE_CREATION {
         ch_redux_tumor_out,
         ch_redux_normal_out,
         ch_inputs.map { meta -> [meta, []] },  // ch_redux_dir_donor
+        ref_data.genome_fasta,
         ref_data.genome_version,
+        ref_data.genome_fai,
         hmf_data.heterozygous_sites,
         target_regions_bed,
         2,  // tumor_min_depth
@@ -210,7 +212,9 @@ workflow PANEL_RESOURCE_CREATION {
         ch_inputs,
         ch_redux_tumor_out,
         ch_redux_normal_out,
+        ref_data.genome_fasta,
         ref_data.genome_version,
+        ref_data.genome_fai,
         hmf_data.gc_profile,
         hmf_data.diploid_bed,
         [],  // panel_target_regions_normalisation

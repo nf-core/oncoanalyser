@@ -47,7 +47,10 @@ process REDUX {
     def skip_duplicate_marking_arg = ''
 
     def bqr_use_all_regions_arg = ''
+
     def bqr_jitter_msi_only_arg = ''
+    def aln_symlink_ext = ''
+    def idx_symlink_ext = ''
 
     def msi_model_coefficients_arg = ''
     def msi_model_error_rates_arg = ''
@@ -79,6 +82,9 @@ process REDUX {
     if (generate_tsvs_only) {
         def bad_inputs = [alns].flatten().size() != 1 || [idxs].flatten().size() != 1
         if (bad_inputs) { error 'Got too many alignments / indexes for `generate_tsvs_only`' }
+
+        aln_symlink_ext = alns.extension
+        idx_symlink_ext = idxs.extension
 
         bqr_jitter_msi_only_arg = '-bqr_jitter_msi_only'
     }
@@ -123,8 +129,8 @@ process REDUX {
         -output_dir redux_${meta.sample_id}/
 
     if [[ -n '${bqr_jitter_msi_only_arg}' ]]; then
-        ln -sf \$(realpath ${alns}) redux_${meta.sample_id}/${meta.sample_id}.redux.bam
-        ln -sf \$(realpath ${idxs}) redux_${meta.sample_id}/${meta.sample_id}.redux.bam.bai
+        ln -sf \$(realpath ${alns}) redux_${meta.sample_id}/${meta.sample_id}.redux.${aln_symlink_ext}
+        ln -sf \$(realpath ${idxs}) redux_${meta.sample_id}/${meta.sample_id}.redux.${aln_symlink_ext}.${idx_symlink_ext}
     fi
 
     cat <<-END_VERSIONS > versions.yml

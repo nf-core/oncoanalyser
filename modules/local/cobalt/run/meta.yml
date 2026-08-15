@@ -32,9 +32,17 @@ input:
       type: file
       description: Normal index file (optional)
       pattern: "*.{bai,crai}"
+  - genome_fasta:
+      type: file
+      description: Reference genome assembly FASTA file
+      pattern: "*.{fa,fasta}"
   - genome_ver:
       type: string
       description: Reference genome version
+  - genome_fai:
+      type: file
+      description: Reference genome assembly fai file
+      pattern: "*.{fai}"
   - gc_profile:
       type: file
       description: GC profile file

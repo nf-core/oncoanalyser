@@ -14,6 +14,7 @@ workflow CIDER_CALLING {
     // Reference data
     genome_fasta       // channel: [mandatory] /path/to/genome_fasta
     genome_version     // channel: [mandatory] genome version
+    genome_fai         // channel: [mandatory] /path/to/genome_fai
     genome_dict        // channel: [mandatory] /path/to/genome_dict
     genome_img         // channel: [optional]  /path/to/genome_img
 
@@ -75,6 +76,7 @@ workflow CIDER_CALLING {
         ch_cider_inputs,
         genome_fasta,
         genome_version,
+        genome_fai,
         genome_dict,
         genome_img,
     )

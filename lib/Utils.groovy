@@ -311,9 +311,13 @@ class Utils {
                         meta_sample[Constants.FileType.ALN_REDUX] = redux_aln
                     }
 
-                    if (meta_sample.containsKey(Constants.FileType.ALN_REDUX) && meta_sample.containsKey(Constants.FileType.IDX) && ! generate_tsvs_only) {
+                    if (meta_sample.containsKey(Constants.FileType.ALN_REDUX) && meta_sample.containsKey(Constants.FileType.IDX) && ! has_redux_tsvs && ! generate_tsvs_only) {
                         log.error "REDUX alignments without colocated TSVs requires generate_redux_tsvs_only to be set in the samplesheet: ${meta.group_id} ${sample_id}: ${redux_input}"
                         Nextflow.exit(1)
+                    }
+
+                    if (meta_sample.containsKey(Constants.FileType.REDUX_DIR) && has_redux_tsvs && generate_tsvs_only) {
+                        log.warn "REDUX directory already contains TSVs, ignoring generate_redux_tsvs_only flag for: ${meta.group_id} ${sample_id}: ${redux_input}"
                     }
 
                 }

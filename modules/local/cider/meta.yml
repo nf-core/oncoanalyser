@@ -31,6 +31,10 @@ input:
   - genome_ver:
       type: string
       description: Reference genome version
+  - genome_fai:
+      type: file
+      description: Reference genome assembly fai file
+      pattern: "*.{fai}"
   - genome_dict:
       type: file
       description: Reference genome assembly dict file

@@ -29,6 +29,10 @@ input:
   - genome_ver:
       type: string
       description: Reference genome version
+  - genome_fai:
+      type: file
+      description: Reference genome assembly fai file
+      pattern: "*.{fai}"
   - driver_gene_panel:
       type: file
       description: Driver gene panel file

@@ -14,6 +14,7 @@ workflow BAMTOOLS_METRICS {
     // Reference data
     genome_fasta           // channel: [mandatory] /path/to/genome_fasta
     genome_version         // channel: [mandatory] genome version
+    genome_fai             // channel: [mandatory] /path/to/genome_fai
     driver_gene_panel      // channel: [mandatory] /path/to/driver_gene_panel
     ensembl_data_resources // channel: [mandatory] /path/to/ensembl_data_resources/
     target_regions_bed     // channel: [optional]  /path/to/target_regions_bed
@@ -79,6 +80,7 @@ workflow BAMTOOLS_METRICS {
         ch_bamtools_inputs,
         genome_fasta,
         genome_version,
+        genome_fai,
         driver_gene_panel,
         ensembl_data_resources,
         target_regions_bed,
