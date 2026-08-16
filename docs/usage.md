@@ -219,15 +219,15 @@ Output file paths are constructed based on `group_id` and `sample_id`:
 
 #### Info field keys
 
-| Key                        | Description                                        | Applicable context                                 |
-| :------------------------- | :------------------------------------------------- | :------------------------------------------------- |
-| `lane`                     | Sequencing lane                                    | FASTQ inputs                                       |
-| `library_id`               | Sequencing library identifier                      | FASTQ inputs                                       |
-| `flowcell`                 | Flowcell identifier                                | FASTQ inputs                                       |
-| `longitudinal_sample`      | Longitudinal sample identifier                     | Mode `purity_estimate`                             |
-| `cancer_type`              | Cancer type as a DOID                              | Passed to [ORANGE](output.md#orange) for reporting |
-| `generate_redux_tsvs_only` | Only generate REDUX TSV files, skip BAM processing | REDUX inputs                                       |
-| `read_group_overrides`     | Override read group tags in output BAM/CRAM        | FASTQ inputs                                       |
+| Key                        | Description                                            | Applicable context                                   |
+| :------------------------- | :----------------------------------------------------- | :--------------------------------------------------- |
+| `lane`                     | Sequencing lane                                        | FASTQ inputs                                         |
+| `library_id`               | Sequencing library identifier                          | FASTQ inputs                                         |
+| `flowcell`                 | Flowcell identifier                                    | FASTQ inputs                                         |
+| `longitudinal_sample`      | Longitudinal sample identifier                         | Mode `purity_estimate`                               |
+| `cancer_type`              | Name of cancer type                                    | NEO scorer (TPM analysis) and ORANGE (report header) |
+| `generate_redux_tsvs_only` | Only generate REDUX TSV files, skip BAM processing     | REDUX inputs                                         |
+| `read_group_overrides`     | Override read group tags in output BAM/CRAM            | FASTQ inputs                                         |
 
 The `read_group_overrides` info field can be used for FASTQ inputs to override and set read group tags, which are then
 propagated through alignment into the respective output BAM / CRAM file. Tags are specified as `<tag>=<value>` with
