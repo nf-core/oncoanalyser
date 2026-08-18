@@ -2,6 +2,8 @@
 // Preflight helpers for the nf-core/oncoanalyser pipeline
 //
 
+include { getRunStages } from './processes'
+
 //
 // Set parameter defaults where required
 //
@@ -74,7 +76,7 @@ def setParamsDefaults(params, log) {
 
     }
 
-    def stages = Processes.getRunStages(
+    def stages = getRunStages(
         params.processes_include,
         params.processes_exclude,
         params.processes_manual,
@@ -472,7 +474,7 @@ def getRunConfig(params, inputs, log) {
 
     def run_mode = Utils.getRunMode(params.mode, log)
 
-    def stages = Processes.getRunStages(
+    def stages = getRunStages(
         params.processes_include,
         params.processes_exclude,
         params.processes_manual,
