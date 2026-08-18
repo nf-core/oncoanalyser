@@ -6,7 +6,6 @@ lint:
   files_exist:
     - .github/workflows/nf-test.yml
     - lib/Utils.groovy
-    - lib/WorkflowMain.groovy
     - .github/workflows/linting_comment.yml
   files_unchanged:
     - assets/nf-core-oncoanalyser_logo_light.png

@@ -46,6 +46,7 @@ include { PREPARE_REFERENCE       } from './workflows/prepare_reference'
 include { PURITY_ESTIMATE         } from './workflows/purity_estimate'
 include { TARGETED                } from './workflows/targeted'
 include { WGTS                    } from './workflows/wgts'
+include { getRunConfig; setParamsDefaults; validateParams } from './subworkflows/local/utils_nfcore_oncoanalyser_pipeline/preflight'
 
 /*
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -74,7 +75,7 @@ workflow NFCORE_ONCOANALYSER {
     } else {
         // Parse and validate inputs
         inputs = Utils.parseInput(params.input, workflow.stubRun, log)
-        run_config = WorkflowMain.getRunConfig(params, inputs, log)
+        run_config = getRunConfig(params, inputs, log)
         Utils.validateInput(inputs, run_config, params, log)
 
         // Run requested workflow
@@ -111,8 +112,8 @@ workflow {
     //
     // STEP: Set defaults and apply extended, custom validation
     //
-    WorkflowMain.setParamsDefaults(params, log)
-    WorkflowMain.validateParams(params, log)
+    setParamsDefaults(params, log)
+    validateParams(params, log)
 
     //
     // STEP: Create placeholders for stub runs if requested

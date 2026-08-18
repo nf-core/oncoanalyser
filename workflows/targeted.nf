@@ -33,6 +33,7 @@ include { softwareVersionsToYAML } from '../subworkflows/nf-core/utils_nfcore_pi
 
 include { getDnaFastqChannel } from '../subworkflows/local/utils_nfcore_oncoanalyser_pipeline'
 include { getRnaFastqChannel } from '../subworkflows/local/utils_nfcore_oncoanalyser_pipeline'
+include { getPrepConfigFromSamplesheet } from '../subworkflows/local/utils_nfcore_oncoanalyser_pipeline/preflight'
 
 /*
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -62,7 +63,7 @@ workflow TARGETED {
     ch_inputs = channel.fromList(inputs)
 
     // Set up reference data, assign more human readable variables
-    def prep_config = WorkflowMain.getPrepConfigFromSamplesheet(run_config)
+    def prep_config = getPrepConfigFromSamplesheet(run_config)
     PREPARE_REFERENCE(
         prep_config,
         run_config,

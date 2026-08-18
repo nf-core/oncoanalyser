@@ -8,6 +8,7 @@ include { PREPARE_OUTPUTS_PREPARE_REFERENCE    } from '../subworkflows/local/pre
 include { PREPARE_REFERENCE as STAGE_REFERENCE } from '../subworkflows/local/prepare_reference'
 
 include { softwareVersionsToYAML } from '../subworkflows/nf-core/utils_nfcore_pipeline'
+include { getPrepConfigFromCli } from '../subworkflows/local/utils_nfcore_oncoanalyser_pipeline/preflight'
 
 /*
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -21,7 +22,7 @@ workflow PREPARE_REFERENCE {
 
     main:
     // Stage in reference data as requested
-    def prep_config = WorkflowMain.getPrepConfigFromCli(params, log)
+    def prep_config = getPrepConfigFromCli(params, log)
     STAGE_REFERENCE(
         prep_config,
         [:],

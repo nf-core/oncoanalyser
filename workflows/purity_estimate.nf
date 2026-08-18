@@ -17,6 +17,7 @@ include { WISP_ANALYSIS                   } from '../subworkflows/local/wisp_ana
 include { softwareVersionsToYAML } from '../subworkflows/nf-core/utils_nfcore_pipeline'
 
 include { getDnaFastqChannel } from '../subworkflows/local/utils_nfcore_oncoanalyser_pipeline'
+include { getPrepConfigFromSamplesheet } from '../subworkflows/local/utils_nfcore_oncoanalyser_pipeline/preflight'
 
 /*
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -41,7 +42,7 @@ workflow PURITY_ESTIMATE {
     def wgts_mode = purity_estimate_run_mode == Constants.RunMode.WGTS
 
     // Set up reference data, assign more human readable variables
-    def prep_config = WorkflowMain.getPrepConfigFromSamplesheet(run_config)
+    def prep_config = getPrepConfigFromSamplesheet(run_config)
     PREPARE_REFERENCE(
         prep_config,
         run_config,
