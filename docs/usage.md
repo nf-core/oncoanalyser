@@ -801,14 +801,14 @@ The panel resource files are used to fit and normalise the biases inherent to th
 These files need to be **manually created** to run `--mode panel_resource_creation` (instructions in [**WiGiTS targeted analysis readme**](https://github.com/hartwigmedical/hmftools/blob/master/pipeline/README_TARGETED.md)):
 
 - `driver_gene_panel`: Configuration for which driver gene events are to be reported
-- `target_region_bed`: Bed file defining panel regions
+- `target_regions_bed`: Bed file defining panel regions
 - `isofox_gene_ids`: **[RNA]** List of gene names and IDs
 - `isofox_counts`: **[RNA]** Expected fragment counts per transcript and gene. **Optional:** If not provided, defaults to `read_151_exp_counts.<ref_genome_version>.csv` from [WiGiTS reference data](#reference-data-urls)
 - `isofox_gc_ratios`: **[RNA]** Expected GC ratios per transcript. **Optional**: If not provided, defaults to `read_100_exp_gc_ratios.<ref_genome_version>.csv` from [WiGiTS reference data](#reference-data-urls)
 
 These files are generated after running `--mode panel_resource_creation`:
 
-- `target_region_normalisation`: For normalising panel copy number levels to whole genome levels
+- `target_regions_normalisation`: For normalising panel copy number levels to whole genome levels
 - `pon_artefacts`: For variant filtering
 - `isofox_tpm_norm`: **[RNA]** For normalising panel TPM levels to whole transcriptome levels
 
@@ -879,19 +879,19 @@ params {
             '38' { // Genome version: '37' or '38'
                 // These are relative paths within the dir provided by `ref_data_panel_data_path` above
 
-                driver_gene_panel           = 'driver_genes.38.tsv'
-                pon_artefacts               = 'pon_artefacts.38.tsv.gz'
-                target_region_bed           = 'panel_definition.38.bed.gz'
-                target_region_normalisation = 'cobalt_normalisation.38.tsv'
+                driver_gene_panel            = 'driver_genes.38.tsv'
+                pon_artefacts                = 'pon_artefacts.38.tsv.gz'
+                target_regions_bed           = 'panel_definition.38.bed.gz'
+                target_regions_normalisation = 'cobalt_normalisation.38.tsv'
 
                 // These are not required and left unset by providing an empty list `[]`
-                msi_model_error_rates       = [] // Currently defaults to TS0500 panel error rates for all custom panels
-                known_umis                  = [] // Only required for MSK-IMPACT panel
+                msi_model_error_rates        = [] // Currently defaults to TS0500 panel error rates for all custom panels
+                known_umis                   = [] // Only required for MSK-IMPACT panel
 
                 // Only for panels with RNA-seq. Provide e.g. `isofox_counts = []` for panels without RNA
-                isofox_tpm_norm             = 'isofox.gene_normalisation.38.csv'
-                isofox_counts               = 'read_151_exp_counts.38.csv'
-                isofox_gc_ratios            = 'read_151_exp_gc_ratios.38.csv'
+                isofox_tpm_norm              = 'isofox.gene_normalisation.38.csv'
+                isofox_counts                = 'read_151_exp_counts.38.csv'
+                isofox_gc_ratios             = 'read_151_exp_gc_ratios.38.csv'
             }
         }
     }
