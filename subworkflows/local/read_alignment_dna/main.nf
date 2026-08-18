@@ -4,6 +4,7 @@
 
 include { BWAMEM2_ALIGN } from '../../../modules/local/bwa-mem2/mem/main'
 include { FASTP_SPLIT   } from '../../../modules/local/fastp/split/main'
+include { groupByMeta; joinMeta; restoreMeta } from '../utils_nfcore_oncoanalyser_pipeline/channel_helpers'
 
 workflow READ_ALIGNMENT_DNA {
     take:
@@ -208,21 +209,21 @@ workflow READ_ALIGNMENT_DNA {
     // channel: [ meta, [aln, ...], [idx, ...] ]
     ch_outputs_tumor = channel.empty()
         .mix(
-            WorkflowOncoanalyser.restoreMeta(ch_alns_united.tumor, ch_inputs),
+            restoreMeta(ch_alns_united.tumor, ch_inputs),
             ch_inputs_tumor_sorted.skip.unique().map { meta -> [meta, [], []] },
         )
 
     // channel: [ meta, [aln, ...], [idx, ...] ]
     ch_outputs_normal = channel.empty()
         .mix(
-            WorkflowOncoanalyser.restoreMeta(ch_alns_united.normal, ch_inputs),
+            restoreMeta(ch_alns_united.normal, ch_inputs),
             ch_inputs_normal_sorted.skip.unique().map { meta -> [meta, [], []] },
         )
 
     // channel: [ meta, [aln, ...], [idx, ...] ]
     ch_outputs_donor = channel.empty()
         .mix(
-            WorkflowOncoanalyser.restoreMeta(ch_alns_united.donor, ch_inputs),
+            restoreMeta(ch_alns_united.donor, ch_inputs),
             ch_inputs_donor_sorted.skip.unique().map { meta -> [meta, [], []] },
         )
 

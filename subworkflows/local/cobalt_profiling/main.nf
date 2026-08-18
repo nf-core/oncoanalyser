@@ -3,6 +3,7 @@
 //
 
 include { COBALT } from '../../../modules/local/cobalt/run/main'
+include { groupByMeta; joinMeta; restoreMeta } from '../utils_nfcore_oncoanalyser_pipeline/channel_helpers'
 
 workflow COBALT_PROFILING {
     take:
@@ -26,10 +27,10 @@ workflow COBALT_PROFILING {
     // NOTE(SW): germline mode is not currently supported
     // channel: runnable: [ meta, tumor_aln, tumor_idx, normal_aln, normal_idx ]
     // channel: skip: [ meta ]
-    ch_inputs_sorted = WorkflowOncoanalyser.groupByMeta(
+    ch_inputs_sorted = groupByMeta([
         ch_redux_dir_tumor,
         ch_redux_dir_normal,
-    )
+    ])
         .map { meta, redux_dir_tumor, redux_dir_normal ->
 
             def redux_dir_tumor_selected = Utils.selectCurrentOrExisting(redux_dir_tumor, meta, Constants.INPUT.REDUX_DIR_TUMOR)
@@ -101,7 +102,7 @@ workflow COBALT_PROFILING {
     // channel: [ meta, cobalt_dir ]
     ch_outputs = channel.empty()
         .mix(
-            WorkflowOncoanalyser.restoreMeta(channel.topic('cobalt_dir'), ch_inputs),
+            restoreMeta(channel.topic('cobalt_dir'), ch_inputs),
             ch_inputs_sorted.skip.map { meta -> [meta, []] },
         )
 

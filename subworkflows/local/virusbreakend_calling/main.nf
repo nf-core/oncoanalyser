@@ -4,6 +4,7 @@
 
 include { VIRUSBREAKEND    } from '../../../modules/local/virusbreakend/main'
 include { VIRUSINTERPRETER } from '../../../modules/local/virusinterpreter/main'
+include { groupByMeta; joinMeta; restoreMeta } from '../utils_nfcore_oncoanalyser_pipeline/channel_helpers'
 
 workflow VIRUSBREAKEND_CALLING {
     take:
@@ -82,11 +83,11 @@ workflow VIRUSBREAKEND_CALLING {
     //
     // Select input sources
     // channel: [ meta, virusbreakend_tsv, bamtools_dir_tumor, purple_dir ]
-    ch_virusinterpreter_inputs_selected = WorkflowOncoanalyser.groupByMeta(
-        WorkflowOncoanalyser.restoreMeta(channel.topic('virusbreakend_tsv'), ch_inputs),
+    ch_virusinterpreter_inputs_selected = groupByMeta([
+        restoreMeta(channel.topic('virusbreakend_tsv'), ch_inputs),
         ch_bamtools_dir_tumor,
         ch_purple,
-    )
+    ])
         .map { meta, virusbreakend_tsv, bamtools_dir_tumor, purple_dir ->
 
             return [
@@ -140,7 +141,7 @@ workflow VIRUSBREAKEND_CALLING {
     // channel: [ meta, virusinterpreter_dir ]
     ch_outputs = channel.empty()
         .mix(
-            WorkflowOncoanalyser.restoreMeta(channel.topic('virusinterpreter_dir'), ch_inputs),
+            restoreMeta(channel.topic('virusinterpreter_dir'), ch_inputs),
             ch_virusinterpreter_inputs_sorted.skip.map { meta -> [meta, []] },
             ch_inputs_sorted.skip.map { meta -> [meta, []] },
         )

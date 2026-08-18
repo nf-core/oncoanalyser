@@ -3,6 +3,7 @@
 //
 
 include { QSEE } from '../../../modules/local/qsee/main'
+include { groupByMeta; joinMeta; restoreMeta } from '../utils_nfcore_oncoanalyser_pipeline/channel_helpers'
 
 workflow QSEE_METRICS {
     take:
@@ -28,7 +29,7 @@ workflow QSEE_METRICS {
     // Select input sources then sort
     // channel: runnable: [ meta, [redux_tsv_tumor, ...], [redux_tsv_normal, ...], bamtools_tumor_dir, bamtools_normal_dir, cobalt_dir, esvee_dir, purple_dir ]
     // channel: skip: [ meta ]
-    ch_inputs_sorted = WorkflowOncoanalyser.groupByMeta(
+    ch_inputs_sorted = groupByMeta([
         ch_redux_dir_tumor,
         ch_redux_dir_normal,
         ch_bamtools_dir_tumor,
@@ -36,7 +37,7 @@ workflow QSEE_METRICS {
         ch_cobalt_dir,
         ch_esvee_dir,
         ch_purple_dir,
-    )
+    ])
         .map { meta, redux_dir_tumor, redux_dir_normal, bamtools_dir_tumor, bamtools_dir_normal, cobalt_dir, esvee_dir, purple_dir ->
 
             def redux_tumor_dir_selected = Utils.selectCurrentOrExisting(redux_dir_tumor, meta, Constants.INPUT.REDUX_DIR_TUMOR)
@@ -96,7 +97,7 @@ workflow QSEE_METRICS {
     // channel: [ meta, qsee_dir ]
     ch_outputs = channel.empty()
         .mix(
-            WorkflowOncoanalyser.restoreMeta(channel.topic('qsee_dir'), ch_inputs),
+            restoreMeta(channel.topic('qsee_dir'), ch_inputs),
             ch_inputs_sorted.skip.map { meta -> [meta, []] },
         )
 

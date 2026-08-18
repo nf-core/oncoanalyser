@@ -3,6 +3,7 @@
 //
 
 include { CUPPA } from '../../../modules/local/cuppa/main'
+include { groupByMeta; joinMeta; restoreMeta } from '../utils_nfcore_oncoanalyser_pipeline/channel_helpers'
 
 workflow CUPPA_PREDICTION {
     take:
@@ -22,12 +23,12 @@ workflow CUPPA_PREDICTION {
     // Select input sources then sort
     // channel: runnable: [ meta, isofox_dir, purple_dir, linx_annotation_dir, virusinterpreter_dir ]
     // channel: skip: [ meta ]
-    ch_inputs_sorted = WorkflowOncoanalyser.groupByMeta(
+    ch_inputs_sorted = groupByMeta([
         ch_isofox_dir,
         ch_purple_dir,
         ch_linx_annotation_dir,
         ch_virusinterpreter_dir,
-    )
+    ])
         .map { meta, isofox_dir, purple_dir, linx_annotation_dir, virusinterpreter_dir ->
             return [
                 meta,
@@ -138,7 +139,7 @@ workflow CUPPA_PREDICTION {
     // channel: [ meta, cuppa_dir ]
     ch_outputs = channel.empty()
         .mix(
-            WorkflowOncoanalyser.restoreMeta(channel.topic('cuppa_dir'), ch_inputs),
+            restoreMeta(channel.topic('cuppa_dir'), ch_inputs),
             ch_inputs_sorted.skip.map { meta -> [meta, []] },
         )
 

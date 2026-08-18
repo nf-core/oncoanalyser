@@ -8,6 +8,7 @@ include { paramsSummaryMap } from 'plugin/nf-schema'
 
 include { paramsSummaryMultiqc   } from '../../../subworkflows/nf-core/utils_nfcore_pipeline'
 include { methodsDescriptionText } from '../../../subworkflows/local/utils_nfcore_oncoanalyser_pipeline'
+include { groupByMeta; joinMeta; restoreMeta } from '../utils_nfcore_oncoanalyser_pipeline/channel_helpers'
 
 workflow MULTIQC_REPORTING {
     take:
@@ -27,13 +28,13 @@ workflow MULTIQC_REPORTING {
     main:
     // Select input sources then sort
     // channel: [ meta, bamtools_tumor_dir, bamtools_normal_dir, amber_dir, purple_dir, star_log, rna_md_metrics ]
-    ch_inputs_sorted = WorkflowOncoanalyser.groupByMeta(
+    ch_inputs_sorted = groupByMeta([
         ch_bamtools_dir_tumor,
         ch_bamtools_dir_normal,
         ch_amber_dir,
         ch_purple_dir,
         ch_align_rna_qc_tumor_out,
-    )
+    ])
         .map { meta, bamtools_dir_tumor, bamtools_dir_normal, amber_dir, purple_dir, star_log, rna_md_metrics ->
 
             // NOTE(SW): will not implement ability for user to provide RNA alignment QC metrics

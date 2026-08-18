@@ -3,6 +3,7 @@
 //
 
 include { PURPLE } from '../../../modules/local/purple/main'
+include { groupByMeta; joinMeta; restoreMeta } from '../utils_nfcore_oncoanalyser_pipeline/channel_helpers'
 
 workflow PURPLE_CALLING {
     take:
@@ -32,14 +33,14 @@ workflow PURPLE_CALLING {
     // Select input sources then sort
     // channel: runnable: [ meta, amber_dir, cobalt_dir, esvee_dir, pave_somatic_dir, pave_germline_dir, [redux_tsv_tumor, ...] ]
     // channel: skip: [ meta ]
-    ch_inputs_sorted = WorkflowOncoanalyser.groupByMeta(
+    ch_inputs_sorted = groupByMeta([
         ch_amber_dir,
         ch_cobalt_dir,
         ch_esvee_dir,
         ch_pave_somatic_dir,
         ch_pave_germline_dir,
         ch_redux_dir_tumor,
-    )
+    ])
         .map { meta, amber_dir, cobalt_dir, esvee_dir, pave_somatic_dir, pave_germline_dir, redux_dir_tumor ->
 
             def tumor_dir_selected = Utils.selectCurrentOrExisting(redux_dir_tumor, meta, Constants.INPUT.REDUX_DIR_TUMOR)
@@ -102,7 +103,7 @@ workflow PURPLE_CALLING {
     // channel: [ meta, purple_dir ]
     ch_outputs = channel.empty()
         .mix(
-            WorkflowOncoanalyser.restoreMeta(channel.topic('purple_dir'), ch_inputs),
+            restoreMeta(channel.topic('purple_dir'), ch_inputs),
             ch_inputs_sorted.skip.map { meta -> [meta, []] },
         )
 

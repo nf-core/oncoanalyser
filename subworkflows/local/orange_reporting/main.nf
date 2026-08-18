@@ -3,6 +3,7 @@
 //
 
 include { ORANGE } from '../../../modules/local/orange/main'
+include { groupByMeta; joinMeta; restoreMeta } from '../utils_nfcore_oncoanalyser_pipeline/channel_helpers'
 
 workflow ORANGE_REPORTING {
     take:
@@ -59,7 +60,7 @@ workflow ORANGE_REPORTING {
     // Select input sources then sort
     // channel: runnable: [meta, sage_dir_somatic, sage_dir_germline, sage_append_dir_somatic, sage_append_dir_germline, sage_visualiser_dir_somatic, purple_dir, qsee_dir, linx_annotation_dir_somatic, linx_plot_dir_somatic, linx_annotation_dir_germline, virusinterpreter_dir, chord_dir, sigs_dir, lilac_dir, cuppa_dir, peach_dir, isofox_dir ]
     // channel: skip: [ meta ]
-    ch_inputs_sorted = WorkflowOncoanalyser.groupByMeta(
+    ch_inputs_sorted = groupByMeta([
         ch_sage_dir_somatic,
         ch_sage_dir_germline,
         ch_sage_append_dir_somatic,
@@ -77,7 +78,7 @@ workflow ORANGE_REPORTING {
         ch_cuppa_dir,
         ch_peach_dir,
         ch_isofox_dir,
-    )
+    ])
         .map { d ->
 
             def meta = d[0]

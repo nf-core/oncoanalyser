@@ -5,6 +5,7 @@
 include { NEO_ANNOTATE_FUSIONS } from '../../../modules/local/neo/annotate_fusions/main'
 include { NEO_FINDER           } from '../../../modules/local/neo/finder/main'
 include { NEO_SCORER           } from '../../../modules/local/neo/scorer/main'
+include { groupByMeta; joinMeta; restoreMeta } from '../utils_nfcore_oncoanalyser_pipeline/channel_helpers'
 
 workflow NEO_PREDICTION {
     take:
@@ -34,10 +35,10 @@ workflow NEO_PREDICTION {
     //
     // Select input sources
     // channel: [ meta, purple_dir, linx_annotation_dir ]
-    ch_finder_inputs_selected = WorkflowOncoanalyser.groupByMeta(
+    ch_finder_inputs_selected = groupByMeta([
         ch_purple_dir,
         ch_linx_annotation_dir,
-    )
+    ])
         .map { meta, purple_dir, linx_annotation_dir ->
 
             return [
@@ -91,7 +92,7 @@ workflow NEO_PREDICTION {
 
     // Set outputs, restoring original meta
     // channel: [ meta, neo_finder_dir ]
-    ch_finder_out = WorkflowOncoanalyser.restoreMeta(channel.topic('neo_finder_dir'), ch_inputs)
+    ch_finder_out = restoreMeta(channel.topic('neo_finder_dir'), ch_inputs)
 
     //
     // MODULE: Fusion annotation (Isofox)
@@ -101,10 +102,10 @@ workflow NEO_PREDICTION {
     // Select input sources and sort
     // channel: runnable: [ meta, neo_finder_dir, tumor_rna_aln, tumor_rna_idx ]
     // channel: skip: [ meta ]
-    ch_isofox_inputs_sorted = WorkflowOncoanalyser.groupByMeta(
+    ch_isofox_inputs_sorted = groupByMeta([
         ch_finder_out,
         ch_tumor_rna_aln,
-    )
+    ])
         .map { meta, neo_finder_dir, tumor_rna_aln, tumor_rna_idx ->
             return [
                 meta,
@@ -147,7 +148,7 @@ workflow NEO_PREDICTION {
     // channel: [ meta, annotated_fusions ]
     ch_annotate_fusions_out = channel.empty()
         .mix(
-            WorkflowOncoanalyser.restoreMeta(channel.topic('neo_annotated_fusions_tsv'), ch_inputs),
+            restoreMeta(channel.topic('neo_annotated_fusions_tsv'), ch_inputs),
             ch_isofox_inputs_sorted.skip.map { meta -> [meta, []] },
         )
 
@@ -156,14 +157,14 @@ workflow NEO_PREDICTION {
     //
     // Select input sources and prepare input channel
     // channel: [ meta_scorer, isofox_dir, purple_dir, sage_append_dir_somatic, lilac_dir, neo_finder_dir, annotated_fusions ]
-    ch_scorer_inputs = WorkflowOncoanalyser.groupByMeta(
+    ch_scorer_inputs = groupByMeta([
         ch_isofox_dir,
         ch_purple_dir,
         ch_sage_append_dir_somatic,
         ch_lilac_dir,
         ch_finder_out,
         ch_annotate_fusions_out,
-    )
+    ])
         .map { meta, isofox_dir, purple_dir, sage_append_dir_somatic, lilac_dir, neo_finder_dir, annotated_fusions ->
 
             def meta_scorer = [

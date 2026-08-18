@@ -4,6 +4,7 @@
 
 include { LINX_GERMLINE } from '../../../modules/local/linx/germline/main'
 include { LINX_SOMATIC  } from '../../../modules/local/linx/somatic/main'
+include { groupByMeta; joinMeta; restoreMeta } from '../utils_nfcore_oncoanalyser_pipeline/channel_helpers'
 
 workflow LINX_ANNOTATION {
     take:
@@ -130,14 +131,14 @@ workflow LINX_ANNOTATION {
     // channel: [ meta, linx_annotation_dir ]
     ch_outputs_somatic = channel.empty()
         .mix(
-            WorkflowOncoanalyser.restoreMeta(channel.topic('linx_somatic_annotation_dir'), ch_inputs),
+            restoreMeta(channel.topic('linx_somatic_annotation_dir'), ch_inputs),
             ch_inputs_somatic_sorted.skip.map { meta -> [meta, []] },
             ch_inputs_sorted.skip.map { meta -> [meta, []] },
         )
 
     ch_outputs_germline = channel.empty()
         .mix(
-            WorkflowOncoanalyser.restoreMeta(channel.topic('linx_germline_annotation_dir'), ch_inputs),
+            restoreMeta(channel.topic('linx_germline_annotation_dir'), ch_inputs),
             ch_inputs_germline_sorted.skip.map { meta -> [meta, []] },
             ch_inputs_sorted.skip.map { meta -> [meta, []] },
         )

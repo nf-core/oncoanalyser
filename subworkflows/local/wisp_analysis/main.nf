@@ -3,6 +3,7 @@
 //
 
 include { WISP } from '../../../modules/local/wisp/main'
+include { groupByMeta; joinMeta; restoreMeta } from '../utils_nfcore_oncoanalyser_pipeline/channel_helpers'
 
 workflow WISP_ANALYSIS {
     take:
@@ -24,12 +25,12 @@ workflow WISP_ANALYSIS {
     // Select input sources then sort
     // channel: runnable: [ meta, purple_dir (primary), amber_dir (primary), normal_aln (primary), redux_dir (longitudinal), amber_dir (longitudinal), cobalt_dir (longitudinal), sage_append_dir (longitudinal) ]
     // channel: skip: [ meta ]
-    ch_inputs_sorted = WorkflowOncoanalyser.groupByMeta(
+    ch_inputs_sorted = groupByMeta([
         ch_redux_dir,
         ch_amber_dir,
         ch_cobalt_dir,
         ch_sage_append_dir_somatic,
-    )
+    ])
         .map { meta, longitudinal_redux_dir, longitudinal_amber_dir, longitudinal_cobalt_dir, longitudinal_sage_append_dir ->
 
             def primary_normal_redux_dir = Utils.getInput(meta, Constants.INPUT.REDUX_DIR_NORMAL)

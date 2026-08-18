@@ -3,6 +3,7 @@
 //
 
 include { PEACH } from '../../../modules/local/peach/main'
+include { groupByMeta; joinMeta; restoreMeta } from '../utils_nfcore_oncoanalyser_pipeline/channel_helpers'
 
 workflow PEACH_CALLING {
     take:
@@ -67,7 +68,7 @@ workflow PEACH_CALLING {
     // channel: [ meta, peach_dir ]
     ch_outputs = channel.empty()
         .mix(
-            WorkflowOncoanalyser.restoreMeta(channel.topic('peach_dir'), ch_inputs),
+            restoreMeta(channel.topic('peach_dir'), ch_inputs),
             ch_inputs_sorted.skip.map { meta -> [meta, []] },
         )
 

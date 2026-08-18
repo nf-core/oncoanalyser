@@ -3,6 +3,7 @@
 //
 
 include { REDUX } from '../../../modules/local/redux/main'
+include { groupByMeta; joinMeta; restoreMeta } from '../utils_nfcore_oncoanalyser_pipeline/channel_helpers'
 
 workflow REDUX_PROCESSING {
     take:
@@ -133,21 +134,21 @@ workflow REDUX_PROCESSING {
     // channel: [ meta, redux_dir ]
     ch_outputs_tumor = channel.empty()
         .mix(
-            WorkflowOncoanalyser.restoreMeta(ch_redux_out_sorted.tumor, ch_inputs),
+            restoreMeta(ch_redux_out_sorted.tumor, ch_inputs),
             ch_inputs_tumor_sorted.skip.map { meta -> [meta, []] },
         )
 
     // channel: [ meta, redux_dir ]
     ch_outputs_normal = channel.empty()
         .mix(
-            WorkflowOncoanalyser.restoreMeta(ch_redux_out_sorted.normal, ch_inputs),
+            restoreMeta(ch_redux_out_sorted.normal, ch_inputs),
             ch_inputs_normal_sorted.skip.map { meta -> [meta, []] },
         )
 
     // channel: [ meta, redux_dir ]
     ch_outputs_donor = channel.empty()
         .mix(
-            WorkflowOncoanalyser.restoreMeta(ch_redux_out_sorted.donor, ch_inputs),
+            restoreMeta(ch_redux_out_sorted.donor, ch_inputs),
             ch_inputs_donor_sorted.skip.map { meta -> [meta, []] },
         )
 

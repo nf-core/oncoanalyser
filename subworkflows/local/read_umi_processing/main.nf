@@ -4,6 +4,7 @@
 
 include { FASTP_UMI   } from '../../../modules/local/fastp/umi/main'
 include { FASTQ_TOOLS } from '../../../modules/local/fastqtools/main'
+include { groupByMeta; joinMeta; restoreMeta } from '../utils_nfcore_oncoanalyser_pipeline/channel_helpers'
 
 workflow READ_UMI_PROCESSING {
     take:
@@ -197,14 +198,14 @@ workflow READ_UMI_PROCESSING {
     // channel: [ meta, fastq_info, fastq_fwd, fastq_rev ]
     ch_outputs_dna = channel.empty()
         .mix(
-            WorkflowOncoanalyser.restoreMeta(ch_fastq_processed_sorted.dna, ch_inputs),
+            restoreMeta(ch_fastq_processed_sorted.dna, ch_inputs),
             ch_inputs_dna_sorted.skip.map { meta -> [meta, [:], [], []] },
         )
 
     // channel: [ meta, fastq_info, fastq_fwd, fastq_rev ]
     ch_outputs_rna = channel.empty()
         .mix(
-            WorkflowOncoanalyser.restoreMeta(ch_fastq_processed_sorted.rna, ch_inputs),
+            restoreMeta(ch_fastq_processed_sorted.rna, ch_inputs),
             ch_inputs_rna_sorted.skip.map { meta -> [meta, [:], [], []] },
         )
 

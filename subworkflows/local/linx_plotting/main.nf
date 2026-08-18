@@ -4,6 +4,7 @@
 
 include { LINXREPORT      } from '../../../modules/local/linxreport/main'
 include { LINX_VISUALISER } from '../../../modules/local/linx/visualiser/main'
+include { groupByMeta; joinMeta; restoreMeta } from '../utils_nfcore_oncoanalyser_pipeline/channel_helpers'
 
 workflow LINX_PLOTTING {
     take:
@@ -25,12 +26,12 @@ workflow LINX_PLOTTING {
     // Select input sources then sort
     // channel: runnable: [ meta, linx_annotation_dir, amber_dir, cobalt_dir, purple_dir ]
     // channel: skip: [ meta ]
-    ch_inputs_sorted = WorkflowOncoanalyser.groupByMeta(
+    ch_inputs_sorted = groupByMeta([
         ch_linx_somatic_annotations,
         ch_amber_dir,
         ch_cobalt_dir,
         ch_purple_dir,
-    )
+    ])
         .map{ meta, linx_annotations_dir, amber_dir, cobalt_dir, purple_dir ->
 
             return [
@@ -79,10 +80,10 @@ workflow LINX_PLOTTING {
     //
     // Create process input channel
     // channel: [ meta_gpgr, linx_annotation_dir, linx_visualiser_dir ]
-    ch_gpgr_linx_inputs = WorkflowOncoanalyser.groupByMeta(
+    ch_gpgr_linx_inputs = groupByMeta([
         ch_inputs_sorted.runnable,
-        WorkflowOncoanalyser.restoreMeta(channel.topic('linx_visualiser_plots'), ch_inputs),
-    )
+        restoreMeta(channel.topic('linx_visualiser_plots'), ch_inputs),
+    ])
         .map { meta, linx_annotation_dir, _amber_dir, _cobalt_dir, _purple_dir, linx_visualiser_dir ->
 
             def meta_gpgr_linx = [
@@ -106,7 +107,7 @@ workflow LINX_PLOTTING {
     // channel: [ meta, linx_visualiser_dir ]
     ch_outputs = channel.empty()
         .mix(
-            WorkflowOncoanalyser.restoreMeta(channel.topic('linx_visualiser_plots'), ch_inputs),
+            restoreMeta(channel.topic('linx_visualiser_plots'), ch_inputs),
             ch_inputs_sorted.skip.map { meta -> [meta, []] },
         )
 

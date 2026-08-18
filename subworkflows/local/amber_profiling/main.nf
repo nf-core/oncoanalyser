@@ -3,6 +3,7 @@
 //
 
 include { AMBER } from '../../../modules/local/amber/main'
+include { groupByMeta; joinMeta; restoreMeta } from '../utils_nfcore_oncoanalyser_pipeline/channel_helpers'
 
 workflow AMBER_PROFILING {
     take:
@@ -28,11 +29,11 @@ workflow AMBER_PROFILING {
     // Select input sources then sort
     // channel: runnable: [ meta, tumor_aln, tumor_idx, normal_aln, normal_idx ]
     // channel: skip: [ meta ]
-    ch_inputs_sorted = WorkflowOncoanalyser.groupByMeta(
+    ch_inputs_sorted = groupByMeta([
         ch_redux_dir_tumor,
         ch_redux_dir_normal,
         ch_redux_dir_donor,
-    )
+    ])
         .map { meta, redux_dir_tumor, redux_dir_normal, redux_dir_donor ->
 
             def redux_dir_tumor_selected = Utils.selectCurrentOrExisting(redux_dir_tumor, meta, Constants.INPUT.REDUX_DIR_TUMOR)
@@ -104,7 +105,7 @@ workflow AMBER_PROFILING {
     // channel: [ meta, amber_dir ]
     ch_outputs = channel.empty()
         .mix(
-            WorkflowOncoanalyser.restoreMeta(channel.topic('amber_dir'), ch_inputs),
+            restoreMeta(channel.topic('amber_dir'), ch_inputs),
             ch_inputs_sorted.skip.map { meta -> [meta, []] },
         )
 

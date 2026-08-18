@@ -3,6 +3,7 @@
 //
 
 include { ESVEE } from '../../../modules/local/esvee/main'
+include { groupByMeta; joinMeta; restoreMeta } from '../utils_nfcore_oncoanalyser_pipeline/channel_helpers'
 
 workflow ESVEE_CALLING {
     take:
@@ -33,10 +34,10 @@ workflow ESVEE_CALLING {
     // Select input sources then sort
     // channel: runnable: [ meta, tumor_aln, tumor_idx, normal_aln, normal_idx ]
     // channel: skip: [ meta ]
-    ch_inputs_sorted = WorkflowOncoanalyser.groupByMeta(
+    ch_inputs_sorted = groupByMeta([
         ch_redux_dir_tumor,
         ch_redux_dir_normal,
-    )
+    ])
         .map { meta, redux_dir_tumor, redux_dir_normal ->
 
             def redux_dir_tumor_selected = Utils.selectCurrentOrExisting(redux_dir_tumor, meta, Constants.INPUT.REDUX_DIR_TUMOR)
@@ -101,7 +102,7 @@ workflow ESVEE_CALLING {
     // channel: [ meta, esvee_dir ]
     ch_outputs = channel.empty()
         .mix(
-            WorkflowOncoanalyser.restoreMeta(channel.topic('esvee_dir'), ch_inputs),
+            restoreMeta(channel.topic('esvee_dir'), ch_inputs),
             ch_inputs_sorted.skip.map { meta -> [meta, []] },
         )
 

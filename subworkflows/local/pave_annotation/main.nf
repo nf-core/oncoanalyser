@@ -4,6 +4,7 @@
 
 include { PAVE_GERMLINE } from '../../../modules/local/pave/germline/main'
 include { PAVE_SOMATIC  } from '../../../modules/local/pave/somatic/main'
+include { groupByMeta; joinMeta; restoreMeta } from '../utils_nfcore_oncoanalyser_pipeline/channel_helpers'
 
 workflow PAVE_ANNOTATION {
     take:
@@ -144,14 +145,14 @@ workflow PAVE_ANNOTATION {
     // channel: [ meta, pave_dir ]
     ch_outputs_somatic = channel.empty()
         .mix(
-            WorkflowOncoanalyser.restoreMeta(channel.topic('pave_somatic_dir'), ch_inputs),
+            restoreMeta(channel.topic('pave_somatic_dir'), ch_inputs),
             ch_sage_somatic_inputs_sorted.skip.map { meta -> [meta, []] },
         )
 
     // channel: [ meta, pave_dir ]
     ch_outputs_germline = channel.empty()
         .mix(
-            WorkflowOncoanalyser.restoreMeta(channel.topic('pave_germline_dir'), ch_inputs),
+            restoreMeta(channel.topic('pave_germline_dir'), ch_inputs),
             ch_sage_germline_inputs_sorted.skip.map { meta -> [meta, []] },
         )
 

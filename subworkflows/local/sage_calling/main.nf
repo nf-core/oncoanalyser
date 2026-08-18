@@ -4,6 +4,7 @@
 
 include { SAGE_GERMLINE } from '../../../modules/local/sage/germline/main'
 include { SAGE_SOMATIC  } from '../../../modules/local/sage/somatic/main'
+include { groupByMeta; joinMeta; restoreMeta } from '../utils_nfcore_oncoanalyser_pipeline/channel_helpers'
 
 workflow SAGE_CALLING {
     take:
@@ -38,11 +39,11 @@ workflow SAGE_CALLING {
     //
     // Select input sources then sort
     // channel: [ meta, tumor_aln, tumor_idx, normal_aln, normal_idx, donor_aln, donor_idx, [redux_tsv, ...] ]
-    ch_inputs_sorted = WorkflowOncoanalyser.groupByMeta(
+    ch_inputs_sorted = groupByMeta([
         ch_redux_dir_tumor,
         ch_redux_dir_normal,
         ch_redux_dir_donor,
-    )
+    ])
         .map { meta, redux_dir_tumor, redux_dir_normal, redux_dir_donor ->
 
             def redux_dir_tumor_selected = Utils.selectCurrentOrExisting(redux_dir_tumor, meta, Constants.INPUT.REDUX_DIR_TUMOR)
@@ -175,7 +176,7 @@ workflow SAGE_CALLING {
     // channel: [ meta, sage_dir ]
     ch_outputs_somatic = channel.empty()
         .mix(
-            WorkflowOncoanalyser.restoreMeta(channel.topic('sage_somatic_dir'), ch_inputs),
+            restoreMeta(channel.topic('sage_somatic_dir'), ch_inputs),
             ch_inputs_somatic_sorted.skip.map { meta -> [meta, []] },
             ch_inputs_sorted.skip.map { meta -> [meta, []] },
         )
@@ -183,7 +184,7 @@ workflow SAGE_CALLING {
     // channel: [ meta, sage_dir ]
     ch_outputs_germline = channel.empty()
         .mix(
-            WorkflowOncoanalyser.restoreMeta(channel.topic('sage_germline_dir'), ch_inputs),
+            restoreMeta(channel.topic('sage_germline_dir'), ch_inputs),
             ch_inputs_germline_sorted.skip.map { meta -> [meta, []] },
             ch_inputs_sorted.skip.map { meta -> [meta, []] },
         )

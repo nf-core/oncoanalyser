@@ -3,6 +3,7 @@
 //
 
 include { BAMTOOLS } from '../../../modules/local/bamtools/main'
+include { groupByMeta; joinMeta; restoreMeta } from '../utils_nfcore_oncoanalyser_pipeline/channel_helpers'
 
 workflow BAMTOOLS_METRICS {
     take:
@@ -99,14 +100,14 @@ workflow BAMTOOLS_METRICS {
     // channel: [ meta, bamtools_dir ]
     ch_tumor_out = channel.empty()
         .mix(
-            WorkflowOncoanalyser.restoreMeta(ch_bamtools_out.tumor, ch_inputs),
+            restoreMeta(ch_bamtools_out.tumor, ch_inputs),
             ch_inputs_tumor_sorted.skip.map { meta -> [meta, []] },
         )
 
     // channel: [ meta, bamtools_dir ]
     ch_normal_out = channel.empty()
         .mix(
-            WorkflowOncoanalyser.restoreMeta(ch_bamtools_out.normal, ch_inputs),
+            restoreMeta(ch_bamtools_out.normal, ch_inputs),
             ch_inputs_normal_sorted.skip.map { meta -> [meta, []] },
         )
 

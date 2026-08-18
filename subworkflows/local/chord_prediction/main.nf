@@ -3,6 +3,7 @@
 //
 
 include { CHORD } from '../../../modules/local/chord/main'
+include { groupByMeta; joinMeta; restoreMeta } from '../utils_nfcore_oncoanalyser_pipeline/channel_helpers'
 
 workflow CHORD_PREDICTION {
     take:
@@ -73,7 +74,7 @@ workflow CHORD_PREDICTION {
     // channel: [ meta, chord_dir ]
     ch_outputs = channel.empty()
         .mix(
-            WorkflowOncoanalyser.restoreMeta(channel.topic('chord_dir'), ch_inputs),
+            restoreMeta(channel.topic('chord_dir'), ch_inputs),
             ch_inputs_sorted.skip.map { meta -> [meta, []] },
         )
 

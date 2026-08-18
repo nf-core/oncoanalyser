@@ -4,6 +4,7 @@
 
 include { TEAL_PREP     } from '../../../modules/local/teal/prep/main'
 include { TEAL_PIPELINE } from '../../../modules/local/teal/pipeline/main'
+include { groupByMeta; joinMeta; restoreMeta } from '../utils_nfcore_oncoanalyser_pipeline/channel_helpers'
 
 workflow TEAL_CHARACTERISATION {
     take:
@@ -31,10 +32,10 @@ workflow TEAL_CHARACTERISATION {
     // Select input sources then sort
     // channel: runnable: [ meta, tumor_aln, tumor_idx, normal_aln, normal_idx ]
     // channel: skip: [ meta ]
-    ch_inputs_sorted = WorkflowOncoanalyser.groupByMeta(
+    ch_inputs_sorted = groupByMeta([
         ch_redux_dir_tumor,
         ch_redux_dir_normal,
-    )
+    ])
         .map { meta, redux_dir_tumor, redux_dir_normal ->
 
             def redux_dir_tumor_selected = Utils.selectCurrentOrExisting(redux_dir_tumor, meta, Constants.INPUT.REDUX_DIR_TUMOR)
@@ -87,17 +88,17 @@ workflow TEAL_CHARACTERISATION {
 
     // Flatten TEAL_PREP output
     // channel: [ meta, teal_bam, teal_bai ]
-    ch_tumor_teal_bam = WorkflowOncoanalyser.restoreMeta(channel.topic('teal_prep_tumor_bam'), ch_inputs)
+    ch_tumor_teal_bam = restoreMeta(channel.topic('teal_prep_tumor_bam'), ch_inputs)
         .map { meta, bam_bai -> [meta] + bam_bai }
 
-    ch_normal_teal_bam_placeholder = WorkflowOncoanalyser.restoreMeta(
+    ch_normal_teal_bam_placeholder = restoreMeta(
         ch_teal_prep_inputs
             .filter { d -> d[0].normal_id == null }  // Only populate placeholder channel if normal sample is missing
             .map { d -> [d[0], [], []] },
         ch_inputs
     )
 
-    ch_normal_teal_bam = WorkflowOncoanalyser.restoreMeta(channel.topic('teal_prep_normal_bam'), ch_inputs)
+    ch_normal_teal_bam = restoreMeta(channel.topic('teal_prep_normal_bam'), ch_inputs)
         .map { meta, bam_bai -> [meta] + bam_bai }
         .mix(ch_normal_teal_bam_placeholder)
 
@@ -107,14 +108,14 @@ workflow TEAL_CHARACTERISATION {
     // Select input sources then sort
     // channel: runnable: [ meta, teal_bam_tumor, teal_bai_tumor, teal_bam_normal, teal_bai_normal, bamtools_dir_tumor, bamtools_dir_normal, cobalt_dir, purple_dir ]
     // channel: skip: [ meta ]
-    ch_teal_pipeline_inputs_sorted = WorkflowOncoanalyser.groupByMeta(
+    ch_teal_pipeline_inputs_sorted = groupByMeta([
         ch_tumor_teal_bam,
         ch_normal_teal_bam,
         ch_bamtools_dir_tumor,
         ch_bamtools_dir_normal,
         ch_cobalt_dir,
         ch_purple_dir,
-    )
+    ])
         .map { meta, teal_bam_tumor, teal_bai_tumor, teal_bam_normal, teal_bai_normal, bamtools_dir_tumor, bamtools_dir_normal, cobalt_dir, purple_dir ->
             return [
                 meta,

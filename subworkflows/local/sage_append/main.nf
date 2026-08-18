@@ -4,6 +4,7 @@
 
 include { SAGE_APPEND as SAGE_APPEND_SOMATIC  } from '../../../modules/local/sage/append/main'
 include { SAGE_APPEND as SAGE_APPEND_GERMLINE } from '../../../modules/local/sage/append/main'
+include { groupByMeta; joinMeta; restoreMeta } from '../utils_nfcore_oncoanalyser_pipeline/channel_helpers'
 
 workflow SAGE_APPEND {
     take:
@@ -34,11 +35,11 @@ workflow SAGE_APPEND {
     // Select input sources then sort
     // channel: runnable: [ meta, purple_dir, tumor_dna_aln, tumor_dna_idx, [redux_tsv_tumor, ...], tumor_rna_aln, tumor_rna_idx ]
     // channel: skip: [ meta ]
-    ch_inputs_sorted = WorkflowOncoanalyser.groupByMeta(
+    ch_inputs_sorted = groupByMeta([
         ch_purple_dir,
         ch_redux_dir_tumor,
         ch_tumor_rna_aln,
-    )
+    ])
         .map { meta, purple_dir, redux_dir_tumor, tumor_rna_aln, tumor_rna_idx ->
 
             def redux_dir_tumor_selected = Utils.selectCurrentOrExisting(redux_dir_tumor, meta, Constants.INPUT.REDUX_DIR_TUMOR)
@@ -213,7 +214,7 @@ workflow SAGE_APPEND {
     // channel: [ meta, sage_append_dir ]
     ch_outputs_somatic = channel.empty()
         .mix(
-            WorkflowOncoanalyser.restoreMeta(channel.topic('sage_append_dir').filter { d -> d[0].topic_key == 'somatic' }, ch_inputs),
+            restoreMeta(channel.topic('sage_append_dir').filter { d -> d[0].topic_key == 'somatic' }, ch_inputs),
             ch_inputs_somatic_sorted.skip.map { meta -> [meta, []] },
             ch_inputs_sorted.skip.map { meta -> [meta, []] },
         )
@@ -221,7 +222,7 @@ workflow SAGE_APPEND {
     // channel: [ meta, sage_append_dir ]
     ch_outputs_germline = channel.empty()
         .mix(
-            WorkflowOncoanalyser.restoreMeta(channel.topic('sage_append_dir').filter { d -> d[0].topic_key == 'germline' }, ch_inputs),
+            restoreMeta(channel.topic('sage_append_dir').filter { d -> d[0].topic_key == 'germline' }, ch_inputs),
             ch_inputs_germline_sorted.skip.map { meta -> [meta, []] },
             ch_inputs_sorted.skip.map { meta -> [meta, []] },
         )

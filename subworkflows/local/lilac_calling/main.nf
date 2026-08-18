@@ -3,6 +3,7 @@
 //
 
 include { LILAC } from '../../../modules/local/lilac/main'
+include { groupByMeta; joinMeta; restoreMeta } from '../utils_nfcore_oncoanalyser_pipeline/channel_helpers'
 
 workflow LILAC_CALLING {
     take:
@@ -27,12 +28,12 @@ workflow LILAC_CALLING {
     // Select input sources then sort
     // channel: runnable: [meta, normal_dna_aln, normal_dna_idx, tumor_dna_aln, tumor_dna_idx, tumor_rna_aln, tumor_rna_idx, purple_dir]
     // channel: skip: [ meta ]
-    ch_dna_inputs_sorted = WorkflowOncoanalyser.groupByMeta(
+    ch_dna_inputs_sorted = groupByMeta([
         ch_redux_dir_tumor,
         ch_redux_dir_normal,
         ch_tumor_rna_aln,
         ch_purple,
-    )
+    ])
         .map { meta, redux_dir_tumor, redux_dir_normal, tumor_rna_aln, tumor_rna_idx, purple_dir ->
 
             def redux_dir_tumor_selected = Utils.selectCurrentOrExisting(redux_dir_tumor, meta, Constants.INPUT.REDUX_DIR_TUMOR)
@@ -69,9 +70,9 @@ workflow LILAC_CALLING {
 
     // Create process input channel
     // channel: [ meta_lilac, normal_dna_aln, normal_dna_idx, tumor_dna_aln, tumor_dna_idx, tumor_rna_aln, tumor_rna_idx, purple_dir
-    ch_lilac_inputs = WorkflowOncoanalyser.groupByMeta(
+    ch_lilac_inputs = groupByMeta([
         ch_dna_inputs_sorted.runnable,
-    )
+    ])
         .map { meta, normal_dna_aln, normal_dna_idx, tumor_dna_aln, tumor_dna_idx, tumor_rna_aln, tumor_rna_idx, purple_dir ->
 
             def meta_lilac = [
@@ -105,7 +106,7 @@ workflow LILAC_CALLING {
     // channel: [ meta, lilac_dir ]
     ch_outputs = channel.empty()
         .mix(
-            WorkflowOncoanalyser.restoreMeta(channel.topic('lilac_dir'), ch_inputs),
+            restoreMeta(channel.topic('lilac_dir'), ch_inputs),
             ch_dna_inputs_sorted.skip.map { meta -> [meta, []] },
         )
 

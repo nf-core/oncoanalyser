@@ -5,6 +5,7 @@
 include { GATK4_MARKDUPLICATES } from '../../../modules/nf-core/gatk4/markduplicates/main'
 include { SAMTOOLS_SORT        } from '../../../modules/nf-core/samtools/sort/main'
 include { STAR_ALIGN           } from '../../../modules/local/star/align/main'
+include { groupByMeta; joinMeta; restoreMeta } from '../utils_nfcore_oncoanalyser_pipeline/channel_helpers'
 
 workflow READ_ALIGNMENT_RNA {
     take:
@@ -129,7 +130,7 @@ workflow READ_ALIGNMENT_RNA {
     //
     // Create process input channel
     // channel: [ meta_markdups, aln ]
-    ch_markdups_inputs = WorkflowOncoanalyser.restoreMeta(channel.topic('samtools_sort_bam'), ch_inputs)
+    ch_markdups_inputs = restoreMeta(channel.topic('samtools_sort_bam'), ch_inputs)
         .map { meta, aln ->
             def meta_markdups = [
                 key: meta.group_id,
@@ -151,17 +152,17 @@ workflow READ_ALIGNMENT_RNA {
     //
     // Combine BAMs and BAIs
     // channel: [ meta, aln, idx ]
-    ch_alns_ready = WorkflowOncoanalyser.groupByMeta(
-        WorkflowOncoanalyser.restoreMeta(channel.topic('gatk4_markduplicates_bam'), ch_inputs),
-        WorkflowOncoanalyser.restoreMeta(channel.topic('gatk4_markduplicates_bai'), ch_inputs),
-    )
+    ch_alns_ready = groupByMeta([
+        restoreMeta(channel.topic('gatk4_markduplicates_bam'), ch_inputs),
+        restoreMeta(channel.topic('gatk4_markduplicates_bai'), ch_inputs),
+    ])
 
     // Combine STAR log with QC and MarkDuplicates metrics
     // channel: [ meta, star_log, md_metrics ]
-    ch_qc_files_ready = WorkflowOncoanalyser.groupByMeta(
-        WorkflowOncoanalyser.restoreMeta(channel.topic('star_align_qc_log'), ch_inputs),
-        WorkflowOncoanalyser.restoreMeta(channel.topic('gatk4_markduplicates_metrics'), ch_inputs),
-    )
+    ch_qc_files_ready = groupByMeta([
+        restoreMeta(channel.topic('star_align_qc_log'), ch_inputs),
+        restoreMeta(channel.topic('gatk4_markduplicates_metrics'), ch_inputs),
+    ])
 
     // Set outputs
     // channel: [ meta, aln, idx ]

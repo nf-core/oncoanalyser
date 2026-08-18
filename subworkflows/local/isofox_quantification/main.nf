@@ -3,6 +3,7 @@
 //
 
 include { ISOFOX } from '../../../modules/local/isofox/run/main'
+include { groupByMeta; joinMeta; restoreMeta } from '../utils_nfcore_oncoanalyser_pipeline/channel_helpers'
 
 workflow ISOFOX_QUANTIFICATION {
     take:
@@ -84,7 +85,7 @@ workflow ISOFOX_QUANTIFICATION {
     // channel: [ meta, isofox_dir ]
     ch_outputs = channel.empty()
         .mix(
-            WorkflowOncoanalyser.restoreMeta(channel.topic('isofox_dir'), ch_inputs),
+            restoreMeta(channel.topic('isofox_dir'), ch_inputs),
             ch_inputs_sorted.skip.map { meta -> [meta, []] },
         )
 

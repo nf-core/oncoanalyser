@@ -3,6 +3,7 @@
 //
 
 include { SIGS } from '../../../modules/local/sigs/main'
+include { groupByMeta; joinMeta; restoreMeta } from '../utils_nfcore_oncoanalyser_pipeline/channel_helpers'
 
 workflow SIGS_FITTING {
     take:
@@ -66,7 +67,7 @@ workflow SIGS_FITTING {
     // channel: [ meta, sigs_dir ]
     ch_outputs = channel.empty()
         .mix(
-            WorkflowOncoanalyser.restoreMeta(channel.topic('sigs_dir'), ch_inputs),
+            restoreMeta(channel.topic('sigs_dir'), ch_inputs),
             ch_inputs_sorted.skip.map { meta -> [meta, []] },
         )
 

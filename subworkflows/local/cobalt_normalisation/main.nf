@@ -3,6 +3,7 @@
 //
 
 include { COBALT_PANEL_NORMALISATION } from '../../../modules/local/cobalt/panel_normalisation/main'
+include { groupByMeta; joinMeta; restoreMeta } from '../utils_nfcore_oncoanalyser_pipeline/channel_helpers'
 
 workflow COBALT_NORMALISATION {
     take:
@@ -19,10 +20,10 @@ workflow COBALT_NORMALISATION {
     main:
     // Create process input channel
     // channel: [ [amber_dir, ...], [cobalt_dir, ...] ]
-    ch_cobalt_inputs = WorkflowOncoanalyser.groupByMeta(
+    ch_cobalt_inputs = groupByMeta([
         ch_amber,
         ch_cobalt,
-    )
+    ])
         .map { meta, amber_dir, cobalt_dir ->
             return [
                 Utils.selectCurrentOrExisting(amber_dir, meta, Constants.INPUT.AMBER_DIR),
