@@ -37,7 +37,7 @@ workflow READ_ALIGNMENT_DNA {
 
     ch_inputs_tumor_sorted = ch_fastq
         .branch { meta, fastq_info, fastq_fwd, fastq_rev ->
-            def has_inputs = fastq_fwd && fastq_rev
+            def has_inputs = fastq_fwd
             runnable: fastq_info.sample_type == 'tumor' && has_inputs
             skip: ! hasTumorDnaFastq(meta)
               return meta
@@ -45,7 +45,7 @@ workflow READ_ALIGNMENT_DNA {
 
     ch_inputs_normal_sorted = ch_fastq
         .branch { meta, fastq_info, fastq_fwd, fastq_rev ->
-            def has_inputs = fastq_fwd && fastq_rev
+            def has_inputs = fastq_fwd
             runnable: fastq_info.sample_type == 'normal' && has_inputs
             skip: ! hasNormalDnaFastq(meta)
               return meta
@@ -53,7 +53,7 @@ workflow READ_ALIGNMENT_DNA {
 
     ch_inputs_donor_sorted = ch_fastq
         .branch { meta, fastq_info, fastq_fwd, fastq_rev ->
-            def has_inputs = fastq_fwd && fastq_rev
+            def has_inputs = fastq_fwd
             runnable: fastq_info.sample_type == 'donor' && has_inputs
             skip: ! hasDonorDnaFastq(meta)
               return meta
@@ -83,6 +83,7 @@ workflow READ_ALIGNMENT_DNA {
                 lane: fastq_info.lane,
                 output_file_id: rg_id,
                 sample_type: fastq_info.sample_type,
+                single_end: fastq_info.single_end,
             ]
 
             if (fastq_info.flowcell) {
@@ -114,6 +115,16 @@ workflow READ_ALIGNMENT_DNA {
             .flatMap { meta_fastq, reads_fwd_input, reads_rev_input ->
 
                 def reads_fwd = reads_fwd_input instanceof List ? reads_fwd_input : [reads_fwd_input]
+
+                // Single-end splits emit only R1; there is no reverse to pair
+                if (meta_fastq.single_end) {
+                    return reads_fwd.collect { fwd ->
+                        def split_fwd = fwd.name.replaceAll('\\..+$', '')
+                        def meta_fastq_ready = meta_fastq + [id: "${meta_fastq.id}_${split_fwd}", split: split_fwd]
+                        return [meta_fastq_ready, fwd, []]
+                    }
+                }
+
                 def reads_rev = reads_rev_input instanceof List ? reads_rev_input : [reads_rev_input]
 
                 def data = [reads_fwd, reads_rev]

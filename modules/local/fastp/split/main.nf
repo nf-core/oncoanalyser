@@ -12,7 +12,7 @@ process FASTP_SPLIT {
     val max_fastq_records
 
     output:
-    tuple val(meta), path('output/*_R1.fastp_split.fastq.gz'), path('output/*_R2.fastp_split.fastq.gz'), topic: fastp_split_fastq
+    tuple val(meta), path('output/*_R1.fastp_split.fastq.gz'), path('output/*_R2.fastp_split.fastq.gz', optional: true), topic: fastp_split_fastq
     tuple val(meta), val('fastp_split'), path('.command.*')                                            , topic: command_files
     path 'versions.yml'                                                                                , topic: versions
 
@@ -21,6 +21,8 @@ process FASTP_SPLIT {
 
     script:
     def args = task.ext.args ?: ''
+    def in2_args = meta.single_end ? '' : "--in2 ${reads_rev}"
+    def out2_args = meta.single_end ? '' : "--out2 output/${meta.sample_id}_${meta.library_id}_${meta.lane}_R2.fastp_split.fastq.gz"
 
     """
     mkdir -p output/
@@ -32,11 +34,11 @@ process FASTP_SPLIT {
         --disable_quality_filtering \\
         --disable_trim_poly_g \\
         --in1 ${reads_fwd} \\
-        --in2 ${reads_rev} \\
+        ${in2_args} \\
         --split_by_lines ${4 * max_fastq_records.toLong()} \\
         --thread ${task.cpus} \\
         --out1 output/${meta.sample_id}_${meta.library_id}_${meta.lane}_R1.fastp_split.fastq.gz \\
-        --out2 output/${meta.sample_id}_${meta.library_id}_${meta.lane}_R2.fastp_split.fastq.gz
+        ${out2_args}
 
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":

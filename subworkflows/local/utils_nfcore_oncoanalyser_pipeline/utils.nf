@@ -634,6 +634,7 @@ def getDnaFastqChannel(ch_inputs) {
                         'library_id': fastq.library_id,
                         'lane': fastq.lane,
                         'sample_type': sample_type,
+                        'single_end': fastq.single_end,
                         'rg_fields': fastq.rg_fields,
                     ]
 
@@ -641,7 +642,7 @@ def getDnaFastqChannel(ch_inputs) {
                          fastq_info.flowcell = fastq.flowcell
                     }
 
-                    return [case_record, fastq_info, fastq.read_fwd, fastq.read_rev]
+                    return [case_record, fastq_info, fastq.read_fwd, fastq.read_rev ?: []]
                 }
         }
 

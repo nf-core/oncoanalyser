@@ -26,6 +26,7 @@ process BWAMEM2_ALIGN {
     def args3 = task.ext.args3 ?: ''
 
     def output_fn = meta.split ? "${meta.split}.${meta.output_file_id}.bam" : "${meta.output_file_id}.bam"
+    def reads = meta.single_end ? "${reads_fwd}" : "${reads_fwd} ${reads_rev}"
 
     """
     ln -fs \$(find -L ${genome_bwamem2_index} -type f) ./
@@ -37,8 +38,7 @@ process BWAMEM2_ALIGN {
         -R '${meta.rg_line}' \\
         -t ${task.cpus} \\
         ${genome_fasta} \\
-        ${reads_fwd} \\
-        ${reads_rev} | \\
+        ${reads} | \\
         \\
         sambamba view \\
             ${args2} \\
