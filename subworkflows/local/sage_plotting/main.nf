@@ -84,8 +84,8 @@ workflow SAGE_PLOTTING {
         .map { meta, tumor_aln, tumor_idx, normal_aln, normal_idx, donor_aln, donor_idx, redux_tsvs, purple_dir ->
 
             def meta_sage = [
-                key: meta.group_id,
-                id: meta.group_id,
+                key: meta.case_id,
+                id: meta.case_id,
                 tumor_id: getTumorDnaSampleName(meta),
             ]
 

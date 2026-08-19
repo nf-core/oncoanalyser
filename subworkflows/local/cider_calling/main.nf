@@ -64,8 +64,8 @@ workflow CIDER_CALLING {
         .map { meta, meta_sample, aln, idx->
 
             def meta_cider = [
-                key: meta.group_id,
-                id: "${meta.group_id}_${meta_sample.sample_id}",
+                key: meta.case_id,
+                id: "${meta.case_id}_${meta_sample.sample_id}",
                 sample_id: meta_sample.sample_id,
             ]
 

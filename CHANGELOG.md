@@ -7,6 +7,17 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/) 
 
 - [325](https://github.com/nf-core/oncoanalyser/pull/325) - Post-release bump
 
+### Breaking change
+
+- Rename samplesheet columns `group_id` to `case_id` and `subject_id` to `patient_id`
+- Represent longitudinal samples with `sample_type=longitudinal` instead of the `info=longitudinal_sample` flag
+- Bump minimum Nextflow to `>=26.04.0`
+
+### Added
+
+- Support multiple normal, donor, and tumor samples per case
+- Support single-end FASTQ for SBX and Ultima DNA alignment
+
 ## [[3.0.0](https://github.com/nf-core/oncoanalyser/releases/tag/3.0.0)] Scarlet Honeyeater - 2026-09-01
 
 - [314](https://github.com/nf-core/oncoanalyser/pull/314) - Other additions and fixes

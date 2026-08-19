@@ -9,7 +9,7 @@ directory.
 ```tree
 output/
 │
-├── <group_id-1>/
+├── <case_id-1>/
 │   ├── alignments/
 │   ├── amber/
 │   ├── bamtools/
@@ -35,7 +35,7 @@ output/
 │   ├── virusinterpreter/
 │   └── wisp/
 │
-├── <group_id-2>/
+├── <case_id-2>/
 │   └── ...
 │
 ...
@@ -119,7 +119,7 @@ _No outputs are published directly from STAR, see [Picard MarkDuplicates](#picar
 <details markdown="1">
 <summary>Output files</summary>
 
-- `<group_id>/alignments/<tumor_dna_id>/`
+- `<case_id>/alignments/<tumor_dna_id>/`
   - `<tumor_dna_id>.redux.bam`: Tumor DNA sample read alignments.
   - `<tumor_dna_id>.redux.bam.bai`: Tumor DNA sample read alignments index.
   - `<tumor_dna_id>.redux.bqr.png`: Tumor DNA sample base quality recalibration metrics plot.
@@ -128,7 +128,7 @@ _No outputs are published directly from STAR, see [Picard MarkDuplicates](#picar
   - `<tumor_dna_id>.redux.jitter_params.tsv`: Tumor DNA sample microsatellite jitter model parameters.
   - `<tumor_dna_id>.redux.ms_table.tsv.gz`: Tumor DNA sample aggregated repeat units and repeat counts.
 
-- `<group_id>/alignments/<normal_dna_id>/`
+- `<case_id>/alignments/<normal_dna_id>/`
   - `<normal_dna_id>.redux.bam`: Normal DNA sample read alignments.
   - `<normal_dna_id>.redux.bam.bai`: Normal DNA sample read alignments index.
   - `<normal_dna_id>.redux.bqr.png`: Normal DNA sample base quality recalibration metrics plot.
@@ -150,7 +150,7 @@ _REDUX is only run on DNA alignments_
 <details markdown="1">
 <summary>Output files</summary>
 
-- `<group_id>/alignments/<tumor_rna_id>/`
+- `<case_id>/alignments/<tumor_rna_id>/`
   - `<tumor_rna_id>.md.bam`: Tumor RNA sample read alignments.
   - `<tumor_rna_id>.md.bam.bai`: Tumor RNA sample read alignments index.
 
@@ -166,7 +166,7 @@ _Picard MarkDuplicates is only run on RNA alignments_
 <details markdown="1">
 <summary>Output files</summary>
 
-- `<group_id>/bamtools/<tumor_dna_id>/`
+- `<case_id>/bamtools/<tumor_dna_id>/`
   - `<tumor_dna_id>.bam_metric.coverage.tsv`: Tumor DNA sample coverage metrics.
   - `<tumor_dna_id>.bam_metric.exon_coverage.tsv`: Tumor DNA sample exon coverage metrics.
   - `<tumor_dna_id>.bam_metric.flag_counts.tsv`: Tumor DNA sample flag counts.
@@ -175,7 +175,7 @@ _Picard MarkDuplicates is only run on RNA alignments_
   - `<tumor_dna_id>.bam_metric.partition_stats.tsv`: Tumor DNA sample partition statistics.
   - `<tumor_dna_id>.bam_metric.summary.tsv`: Tumor DNA sample summary.
 
-- `<group_id>/bamtools/<normal_dna_id>/`
+- `<case_id>/bamtools/<normal_dna_id>/`
   - `<normal_dna_id>.bam_metric.coverage.tsv`: Normal DNA sample coverage metrics.
   - `<normal_dna_id>.bam_metric.exon_coverage.tsv`: Normal DNA sample exon coverage metrics.
   - `<normal_dna_id>.bam_metric.flag_counts.tsv`: Normal DNA sample flag counts.
@@ -198,26 +198,26 @@ _BamTools is only run on DNA alignments_
 <details markdown="1">
 <summary>Output files</summary>
 
-- `<group_id>/sage_append/<tumor_dna_id>/`
+- `<case_id>/sage_append/<tumor_dna_id>/`
   - `<tumor_dna_id>.sage.append.frag_lengths.tsv.gz`: Tumor DNA sample fragment length data appended to SAGE VCF.
   - `<tumor_dna_id>.sage.append.vcf.gz`: Tumor DNA sample small variant VCF with RNA data appended.
   - `<tumor_dna_id>.sage.append.vcf.gz.tbi`: Tumor DNA sample small variant VCF index.
 
-- `<group_id>/sage_append/<normal_dna_id>/`
+- `<case_id>/sage_append/<normal_dna_id>/`
   - `<normal_dna_id>.sage.append.frag_lengths.tsv.gz`: Normal DNA sample fragment length data appended to SAGE VCF.
   - `<normal_dna_id>.sage.append.vcf.gz`: Normal DNA sample small variant VCF with RNA data appended.
   - `<normal_dna_id>.sage.append.vcf.gz.tbi`: Normal DNA sample small variant VCF index.
 
-- `<group_id>/sage/somatic/`
+- `<case_id>/sage/somatic/`
   - `<tumor_dna_id>.sage.somatic.fit_variant.tsv`: Tumor DNA sample somatic variant fit data.
   - `<tumor_dna_id>.sage.somatic.vcf.gz`: Tumor DNA sample small variant calls.
   - `<tumor_dna_id>.sage.somatic.vcf.gz.tbi`: Tumor DNA sample small variant calls index.
 
-- `<group_id>/sage/germline/`
+- `<case_id>/sage/germline/`
   - `<tumor_dna_id>.sage.germline.vcf.gz`: Normal DNA sample small variant calls.
   - `<tumor_dna_id>.sage.germline.vcf.gz.tbi`: Normal DNA sample small variant calls index.
 
-- `<group_id>/sage/visualiser/`
+- `<case_id>/sage/visualiser/`
   - `<tumor_dna_id>.sage.vis.vcf.gz`: Visualised SAGE small variant calls.
   - `<tumor_dna_id>.sage.vis.vcf.gz.tbi`: Visualised SAGE small variant calls index.
   - `<tumor_dna_id>.sage.*.html.gz`: Driver variant visualisation HTML reports.
@@ -233,12 +233,12 @@ BAMs, but performs best if both BAMs have at least 30x typical depth.
 <details markdown="1">
 <summary>Output files</summary>
 
-- `<group_id>/pave/germline/`
+- `<case_id>/pave/germline/`
   - `pave.version`: PAVE version file.
   - `<tumor_dna_id>.pave.germline.vcf.gz`: Annotated SAGE germline small variants.
   - `<tumor_dna_id>.pave.germline.vcf.gz.tbi`: Annotated SAGE germline small variants index.
 
-- `<group_id>/pave/somatic/`
+- `<case_id>/pave/somatic/`
   - `pave.version`: PAVE version file.
   - `<tumor_dna_id>.pave.somatic.vcf.gz`: Annotated SAGE somatic small variants.
   - `<tumor_dna_id>.pave.somatic.vcf.gz.tbi`: Annotated SAGE somatic small variants index.
@@ -255,7 +255,7 @@ information with regards to transcript and coding effects.
 <details markdown="1">
 <summary>Output files</summary>
 
-- `<group_id>/esvee/`
+- `<case_id>/esvee/`
   - `<tumor_dna_id>.esvee.alignment.tsv`: Tumor DNA sample assemblies realigned to the reference genome.
   - `<tumor_dna_id>.esvee.assembly.tsv`: Tumor DNA sample breakend assemblies.
   - `<tumor_dna_id>.esvee.breakend.tsv`: Tumor DNA sample breakends.
@@ -290,7 +290,7 @@ local breakend/breakpoint assemblies to call variants.
 <details markdown="1">
 <summary>Output files</summary>
 
-- `<group_id>/amber/`
+- `<case_id>/amber/`
   - `amber.version`: AMBER version file.
   - `<tumor_dna_id>.amber.baf.pcf`: Tumor DNA sample piecewise constant fit.
   - `<tumor_dna_id>.amber.baf.tsv.gz`: Tumor DNA sample β-allele frequencies.
@@ -310,7 +310,7 @@ for CNV calling in PURPLE.
 <details markdown="1">
 <summary>Output files</summary>
 
-- `<group_id>/cobalt/`
+- `<case_id>/cobalt/`
   - `cobalt.version`: COBALT version file.
   - `<tumor_dna_id>.cobalt.gc.median.tsv`: Tumor DNA sample GC median read depths.
   - `<tumor_dna_id>.cobalt.ratio.pcf`: Tumor DNA sample piecewise constant fit.
@@ -329,7 +329,7 @@ for tumor-only) for CNV calling in PURPLE.
 <details markdown="1">
 <summary>Output files</summary>
 
-- `<group_id>/purple/`
+- `<case_id>/purple/`
   - `circos/`: Circos plot data.
   - `<tumor_dna_id>.purple.chromosome_arm.tsv`: Tumor DNA sample chromosome arm copy number data.
   - `<tumor_dna_id>.purple.cnv.gene.tsv`: Somatic gene copy number.
@@ -366,7 +366,7 @@ purity/ploidy and annotates both small and structural variant calls with copy-nu
 <details markdown="1">
 <summary>Output files</summary>
 
-- `<group_id>/linx/germline_annotations/`
+- `<case_id>/linx/germline_annotations/`
   - `linx.version`: LINX version file.
   - `<tumor_dna_id>.linx.germline.breakend.tsv`: Normal DNA sample breakend data.
   - `<tumor_dna_id>.linx.germline.clusters.tsv`: Normal DNA sample clustered events.
@@ -375,7 +375,7 @@ purity/ploidy and annotates both small and structural variant calls with copy-nu
   - `<tumor_dna_id>.linx.germline.links.tsv`: Normal DNA sample cluster links.
   - `<tumor_dna_id>.linx.germline.svs.tsv`: Normal DNA sample structural variants.
 
-- `<group_id>/linx/somatic_annotations/`
+- `<case_id>/linx/somatic_annotations/`
   - `linx.version`: LINX version file.
   - `<tumor_dna_id>.linx.breakend.tsv`: Tumor DNA sample breakend data.
   - `<tumor_dna_id>.linx.clusters.tsv`: Tumor DNA sample clustered events.
@@ -392,7 +392,7 @@ purity/ploidy and annotates both small and structural variant calls with copy-nu
   - `<tumor_dna_id>.linx.vis_segments.tsv`: Tumor DNA sample segment visualisation data.
   - `<tumor_dna_id>.linx.vis_sv_data.tsv`: Tumor DNA sample SV data for visualisation.
 
-- `<group_id>/linx/somatic_plots/`
+- `<case_id>/linx/somatic_plots/`
   - `all/*png`: All available tumor DNA sample cluster plots.
   - `reportable/*png`: Driver-only tumor DNA sample cluster plots.
 
@@ -409,7 +409,7 @@ as LINX plots.
 <details markdown="1">
 <summary>Output files</summary>
 
-- `<group_id>/isofox/`
+- `<case_id>/isofox/`
   - `<tumor_rna_id>.isf.alt_splice_junc.tsv`: Tumor RNA sample alternative splice junctions.
   - `<tumor_rna_id>.isf.alt_splice_junc_unfiltered.tsv`: Tumor RNA sample alternative splice junctions, unfiltered.
   - `<tumor_rna_id>.isf.fusions.tsv`: Tumor RNA sample fusions, unfiltered.
@@ -432,7 +432,7 @@ transcripts, identify novel splice junctions, and caller fusions.
 <details markdown="1">
 <summary>Output files</summary>
 
-- `<group_id>/virusbreakend/`
+- `<case_id>/virusbreakend/`
   - `<tumor_dna_id>.virusbreakend.vcf`: Tumor DNA sample viral integration sites.
   - `<tumor_dna_id>.virusbreakend.vcf.summary.tsv`: Tumor DNA sample analysis summary file.
 
@@ -446,7 +446,7 @@ oncoviruses and integration sites in tumor samples.
 <details markdown="1">
 <summary>Output files</summary>
 
-- `<group_id>/virusinterpreter/`
+- `<case_id>/virusinterpreter/`
   - `<tumor_dna_id>.virus.annotated.tsv`: Processed oncoviral call/annotation data.
 
 </details>
@@ -461,7 +461,7 @@ for VIRUSBreakend calls to provide higher-level interpretation of data.
 <details markdown="1">
 <summary>Output files</summary>
 
-- `<group_id>/teal/`
+- `<case_id>/teal/`
   - `<normal_dna_id>.teal.telbam.bam`: Normal DNA sample BAM with telomeric fragments.
   - `<normal_dna_id>.teal.telbam.bam.bai`: Normal DNA sample BAM index.
   - `<normal_dna_id>.teal.tellength.tsv`: Normal DNA sample telomeric content and length estimate.
@@ -482,7 +482,7 @@ length based on WGS BAM input.
 <details markdown="1">
 <summary>Output files</summary>
 
-- `<group_id>/lilac/`
+- `<case_id>/lilac/`
   - `<tumor_dna_id>.lilac.candidates.coverage.tsv`: Coverage of high scoring candidates.
   - `<tumor_dna_id>.lilac.qc.tsv`: LILAC QC file.
   - `<tumor_dna_id>.lilac.tsv`: Analysis summary.
@@ -498,7 +498,7 @@ measurement of allele expression.
 <details markdown="1">
 <summary>Output files</summary>
 
-- `<group_id>/cider/`
+- `<case_id>/cider/`
   - `<tumor_dna_id|tumor_rna_id>.cider.bam`: Tumor DNA or RNA read alignments overlapping anchor sites.
   - `<tumor_dna_id|tumor_rna_id>.cider.alignment_match.tsv.gz`: Tumor DNA or RNA alignment match hits of sequences.
   - `<tumor_dna_id|tumor_rna_id>.cider.layout.gz`: Tumor DNA or RNA read layout of each locus.
@@ -515,13 +515,13 @@ for each of the IG and TCR loci including an abundance estimate.
 <details markdown="1">
 <summary>Output files</summary>
 
-- `<group_id>/neo/finder/`
+- `<case_id>/neo/finder/`
   - `<tumor_dna_id>.neo.neo_data.tsv`: Tumor sample neoepitope candidates.
 
-- `<group_id>/neo/annotated_fusions/`
+- `<case_id>/neo/annotated_fusions/`
   - `<tumor_dna_id>.isf.neoepitope.tsv`: Tumor sample annotated Isofox fusions.
 
-- `<group_id>/neo/scorer/`
+- `<case_id>/neo/scorer/`
   - `<tumor_dna_id>.neo.peptide_scores.tsv`: Tumor sample peptide scores.
   - `<tumor_dna_id>.neo.neoepitope.tsv`: Tumor sample neoepitope predictions.
 
@@ -537,7 +537,7 @@ indels and gene fusions, as well as calculating allele specific neoepitope bindi
 <details markdown="1">
 <summary>Output files</summary>
 
-- `<group_id>/chord/`
+- `<case_id>/chord/`
   - `<tumor_dna_id>.chord.prediction.tsv`: Tumor DNA sample analysis summary file.
   - `<tumor_dna_id>.chord.mutation_contexts.tsv`: Tumor DNA sample counts of mutation types.
 
@@ -553,7 +553,7 @@ statistical inference on the basis of relative somatic mutation counts.
 <details markdown="1">
 <summary>Output files</summary>
 
-- `<group_id>/sigs/`
+- `<case_id>/sigs/`
   - `<tumor_dna_id>.sig.allocation.tsv`: Tumor DNA sample signature allocations.
   - `<tumor_dna_id>.sig.snv_counts.csv`: Tumor DNA sample variant counts contributing to signatures.
 
@@ -569,7 +569,7 @@ signatures to tumor sample data.
 <details markdown="1">
 <summary>Output files</summary>
 
-- `<group_id>/cuppa/`
+- `<case_id>/cuppa/`
   - `<tumor_dna_id>.cuppa_data.tsv.gz`: Tumor sample input features
   - `<tumor_dna_id>.cuppa.pred_summ.tsv`: Tumor sample prediction summary
   - `<tumor_dna_id>.cuppa.vis_data.tsv`: Tumor sample predication visualisation data
@@ -587,7 +587,7 @@ using DNA and/or RNA features generated by upstream WiGiTS components.
 <details markdown="1">
 <summary>Output files</summary>
 
-- `<group_id>/peach/`
+- `<case_id>/peach/`
   - `<normal_dna_id>.peach.events.tsv`: Normal DNA sample variant events.
   - `<normal_dna_id>.peach.gene.events.tsv`: Normal DNA sample variant events (linked by gene).
   - `<normal_dna_id>.peach.haplotypes.all.tsv`: Normal DNA sample all haplotypes.
@@ -606,16 +606,16 @@ pharmacogenomic context.
 <details markdown="1">
 <summary>Output files</summary>
 
-- `<group_id>/wisp/`
+- `<case_id>/wisp/`
   - `<longitudinal_id>.cn_gc_ratio_fit.png`: Longitudinal sample copy number GC ratio fit.
   - `<longitudinal_id>.somatic_vaf.png`: Longitudinal sample somatic variant allele frequency plot.
-  - `<subject_id>_<longitudinal_id>.wisp.amber_loh.tsv`: Longitudinal sample LOH sites used for tumor fraction estimation.
-  - `<subject_id>_<longitudinal_id>.wisp.cn_plot_calcs.tsv`: Longitudinal sample copy number fit coefficients.
-  - `<subject_id>_<longitudinal_id>.wisp.cn_segments.tsv`: Longitudinal sample copy number segments.
-  - `<subject_id>_<longitudinal_id>.wisp.fragment_length.tsv`: Longitudinal sample fragment lengths stats.
-  - `<subject_id>_<longitudinal_id>.wisp.somatic_peak.tsv`: Longitudinal sample implied tumor fraction per somatic variant.
-  - `<subject_id>_<longitudinal_id>.wisp.somatic_variants.tsv`: Longitudinal sample counts and filtering rules per variant used in the SNV tumor fraction estimate.
-  - `<subject_id>_<longitudinal_id>.wisp.summary.tsv`: Longitudinal sample summary.
+  - `<patient_id>_<longitudinal_id>.wisp.amber_loh.tsv`: Longitudinal sample LOH sites used for tumor fraction estimation.
+  - `<patient_id>_<longitudinal_id>.wisp.cn_plot_calcs.tsv`: Longitudinal sample copy number fit coefficients.
+  - `<patient_id>_<longitudinal_id>.wisp.cn_segments.tsv`: Longitudinal sample copy number segments.
+  - `<patient_id>_<longitudinal_id>.wisp.fragment_length.tsv`: Longitudinal sample fragment lengths stats.
+  - `<patient_id>_<longitudinal_id>.wisp.somatic_peak.tsv`: Longitudinal sample implied tumor fraction per somatic variant.
+  - `<patient_id>_<longitudinal_id>.wisp.somatic_variants.tsv`: Longitudinal sample counts and filtering rules per variant used in the SNV tumor fraction estimate.
+  - `<patient_id>_<longitudinal_id>.wisp.summary.tsv`: Longitudinal sample summary.
 
 </details>
 
@@ -630,7 +630,7 @@ patient (typically a primary tissue biopsy).
 <details markdown="1">
 <summary>Output files</summary>
 
-- `<group_id>/qsee/`
+- `<case_id>/qsee/`
   - `<tumor_dna_id>.qsee.status.tsv.gz`: Status data for variant visualisation.
   - `<tumor_dna_id>.qsee.vis.data.tsv.gz`: Visualisation data for somatic variants.
   - `<tumor_dna_id>.qsee.vis.report.pdf`: PDF visualisation report.
@@ -646,7 +646,7 @@ variant QC.
 <details markdown="1">
 <summary>Output files</summary>
 
-- `<group_id>/orange/`
+- `<case_id>/orange/`
   - `<tumor_dna_id>.orange.json`: Aggregated report data.
   - `<tumor_dna_id>.orange.pdf`: Static report PDF.
 
@@ -660,7 +660,7 @@ hmftool components into a single static PDF report.
 <details markdown="1">
 <summary>Output files</summary>
 
-- `<group_id>/linx/`
+- `<case_id>/linx/`
   - `<tumor_dna_id>_linx.html`: Interactive HTML report.
 
 </details>
@@ -674,12 +674,12 @@ hmftool components into a single static PDF report.
 
 Sample-specific log files
 
-- `logs/<group_id>/`
-  - `<process_name>.<group_id>.command.sh`: Run command with tool arguments.
-  - `<process_name>.<group_id>.command.out`: Standard output.
-  - `<process_name>.<group_id>.command.err`: Standard error.
-  - `<process_name>.<group_id>.command.run`: Nextflow launch wrapper.
-  - `<process_name>.<group_id>.command.log`: Combined standard output and error (may not exist for some executors).
+- `logs/<case_id>/`
+  - `<process_name>.<case_id>.command.sh`: Run command with tool arguments.
+  - `<process_name>.<case_id>.command.out`: Standard output.
+  - `<process_name>.<case_id>.command.err`: Standard error.
+  - `<process_name>.<case_id>.command.run`: Nextflow launch wrapper.
+  - `<process_name>.<case_id>.command.log`: Combined standard output and error (may not exist for some executors).
 
 General log files
 

@@ -62,8 +62,8 @@ workflow PAVE_ANNOTATION {
         .map { meta, sage_vcf, sage_tbi ->
 
             def meta_pave = [
-                key: meta.group_id,
-                id: meta.group_id,
+                key: meta.case_id,
+                id: meta.case_id,
                 sample_id: getTumorDnaSampleName(meta),
             ]
 
@@ -115,8 +115,8 @@ workflow PAVE_ANNOTATION {
         .map { meta, sage_vcf, sage_tbi ->
 
             def meta_pave = [
-                key: meta.group_id,
-                id: meta.group_id,
+                key: meta.case_id,
+                id: meta.case_id,
                 sample_id: getTumorDnaSampleName(meta),
             ]
 

@@ -67,8 +67,8 @@ workflow LINX_ANNOTATION {
             def tumor_id = getTumorDnaSampleName(meta)
 
             def meta_linx = [
-                key: meta.group_id,
-                id: meta.group_id,
+                key: meta.case_id,
+                id: meta.case_id,
                 sample_id: tumor_id,
             ]
 
@@ -108,8 +108,8 @@ workflow LINX_ANNOTATION {
         .map { meta, purple_dir ->
 
             def meta_linx = [
-                key: meta.group_id,
-                id: meta.group_id,
+                key: meta.case_id,
+                id: meta.case_id,
                 sample_id: getTumorDnaSampleName(meta),
             ]
 

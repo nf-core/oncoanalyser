@@ -89,17 +89,17 @@ workflow REDUX_PROCESSING {
         )
         .multiMap { meta, meta_sample, sample_type, alns, idxs ->
 
-            def sample_id = meta_sample.getOrDefault('longitudinal_sample_id', meta_sample['sample_id'])
+            def sample_id = meta_sample.sample_id
 
             def meta_redux = [
-                key: meta.group_id,
-                id: "${meta.group_id}_${sample_id}",
+                key: meta.case_id,
+                id: "${meta.case_id}_${sample_id}",
                 sample_id: sample_id,
                 sample_type: sample_type,
             ]
 
             sample_data: [meta_redux, alns, idxs]
-            generate_tsvs_only: meta_sample.getOrDefault(Constants.InfoField.GENERATE_REDUX_TSVS_ONLY, false)
+            generate_tsvs_only: meta_sample.generate_redux_tsvs_only
         }
 
     // Run process

@@ -43,8 +43,8 @@ workflow READ_ALIGNMENT_RNA {
             def rg_line = rg_entries.collect { k, v -> "'${k}:${v}'" }.join(' ')
 
             def meta_fastq = [
-                key: meta.group_id,
-                id: "${meta.group_id}_${fastq_info.sample_id}",
+                key: meta.case_id,
+                id: "${meta.case_id}_${fastq_info.sample_id}",
                 sample_id: fastq_info.sample_id,
                 rg_line: rg_line,
             ]
@@ -134,8 +134,8 @@ workflow READ_ALIGNMENT_RNA {
     ch_markdups_inputs = restoreMeta(channel.topic('samtools_sort_bam'), ch_inputs)
         .map { meta, aln ->
             def meta_markdups = [
-                key: meta.group_id,
-                id: meta.group_id,
+                key: meta.case_id,
+                id: meta.case_id,
                 sample_id: getTumorRnaSampleName(meta),
             ]
             return [meta_markdups, aln]

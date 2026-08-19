@@ -76,9 +76,9 @@ workflow WISP_ANALYSIS {
             def inputs = d[1..-1]
 
             def meta_wisp = [
-                key: meta.group_id,
-                id: meta.group_id,
-                subject_id: meta.subject_id,
+                key: meta.case_id,
+                id: meta.case_id,
+                patient_id: meta.patient_id,
                 primary_id: getTumorDnaSampleName(meta, primary: true),
                 longitudinal_id: getTumorDnaSampleName(meta, primary: false),
             ]

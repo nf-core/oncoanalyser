@@ -50,41 +50,27 @@ def createStubPlaceholders(params) {
 
 def validateInput(inputs, run_config, params, log) {
 
-    def sample_keys = [
-        [Constants.SampleType.TUMOR, Constants.SequenceType.DNA],
-        [Constants.SampleType.TUMOR, Constants.SequenceType.RNA],
-        [Constants.SampleType.NORMAL, Constants.SequenceType.DNA],
-    ]
+    inputs.each { case_record ->
 
-    inputs.each { meta ->
-
-        // Require ALN or ALN_REDUX or REDUX_DIR or FASTQs for each defined sample type
-        // NOTE(SW): repeating key pairs above to avoid having to duplicate error messages
-        sample_keys.each { key ->
-
-            if (! meta.containsKey(key)) {
-                return
-            }
-
-            def (sample_type, sequence_type) = key
-
-            if (
-                ! meta[key].containsKey(Constants.FileType.FASTQ) &&
-                ! meta[key].containsKey(Constants.FileType.ALN) &&
-                ! meta[key].containsKey(Constants.FileType.ALN_REDUX) &&
-                ! meta[key].containsKey(Constants.FileType.REDUX_DIR)
-            ) {
-                log.error "no alignments (or REDUX alignments / directory) nor FASTQ files provided for ${meta.group_id} ${sample_type}/${sequence_type}\n\n" +
+        // Require ALN or ALN_REDUX or REDUX_DIR or FASTQs for each defined sample
+        getSamples(case_record).each { sample ->
+            if (! hasAlignmentInput(sample)) {
+                log.error "no alignments (or REDUX alignments / directory) nor FASTQ files provided for ${case_record.case_id} ${sample.sample_type}/${sample.sequence_type}\n\n" +
                     "NB: At least one of these files is required as they are the basis to determine input sample type."
                 exit 1
             }
-
         }
 
         // Do not allow donor sample without normal sample
-        if (hasDonorDna(meta) && ! hasNormalDna(meta)) {
-            log.error "a donor sample but no normal sample was found for ${meta.group_id}\n\n" +
+        if (case_record.donor_dna_samples && ! case_record.normal_dna_samples) {
+            log.error "a donor sample but no normal sample was found for ${case_record.case_id}\n\n" +
                 "Analysis with a donor sample requires a normal sample."
+            exit 1
+        }
+
+        // Longitudinal samples require a primary normal DNA alignment when AMBER input is provided
+        if (case_record.longitudinal_samples && case_record.directories.containsKey(Constants.FileType.AMBER_DIR) && ! hasNormalDnaAlignment(case_record)) {
+            log.error "AMBER input was provided without the required primary normal DNA BAM for ${case_record.case_id}"
             exit 1
         }
 
@@ -92,15 +78,15 @@ def validateInput(inputs, run_config, params, log) {
         if (run_config.mode == Constants.RunMode.TARGETED) {
 
             // Do not allow donor DNA
-            if (hasDonorDna(meta)) {
-                log.error "targeted mode is not compatible with the donor DNA BAM/CRAM provided for ${meta.group_id}\n\n" +
+            if (case_record.donor_dna_samples) {
+                log.error "targeted mode is not compatible with the donor DNA BAM/CRAM provided for ${case_record.case_id}\n\n" +
                     "The targeted workflow supports only tumor and normal DNA BAM/CRAMs (and tumor RNA BAM/CRAMs for TSO500)"
                 exit 1
             }
 
             // Do not allow only tumor RNA
-            if (hasTumorRna(meta) && ! hasTumorDna(meta)) {
-                log.error "targeted mode is not compatible with only tumor RNA provided for ${meta.group_id}\n\n" +
+            if (hasTumorRna(case_record) && ! hasTumorDna(case_record)) {
+                log.error "targeted mode is not compatible with only tumor RNA provided for ${case_record.case_id}\n\n" +
                     "The targeted workflow requires tumor DNA and can optionally take tumor RNA, depending on " +
                     "the configured panel."
                 exit 1
@@ -109,22 +95,22 @@ def validateInput(inputs, run_config, params, log) {
         }
 
         // Do not allow normal DNA only
-        if (hasNormalDna(meta) && ! hasTumorDna(meta)) {
-            log.error "found only normal DNA input for ${meta.group_id} but germline only analysis is not supported"
+        if (hasNormalDna(case_record) && ! hasTumorDna(case_record)) {
+            log.error "found only normal DNA input for ${case_record.case_id} but germline only analysis is not supported"
             exit 1
         }
 
-        // Enforce unique samples names within groups
-        def sample_ids_duplicated = sample_keys
-            .groupBy { meta.getOrDefault(it, [:]).getOrDefault('sample_id', null) }
-            .findResults { k, v -> k != null && v.size() > 1 ? [k, v] : null }
+        // Enforce unique samples names within cases
+        def sample_ids_duplicated = getSamples(case_record)
+            .groupBy { it.sample_id }
+            .findAll { k, v -> v.size() > 1 }
 
         if (sample_ids_duplicated) {
-            def duplicate_message_strs = sample_ids_duplicated.collect { sample_id, keys ->
-                def key_strs = keys.collect { sample_type, sequence_type -> "${sample_type}/${sequence_type}" }
+            def duplicate_message_strs = sample_ids_duplicated.collect { sample_id, samples ->
+                def key_strs = samples.collect { "${it.sample_type}/${it.sequence_type}" }
                 return "  * ${sample_id}: ${key_strs.join(", ")}"
             }
-            log.error "duplicate sample names found for ${meta.group_id}:\n\n${duplicate_message_strs.join("\n")}"
+            log.error "duplicate sample names found for ${case_record.case_id}:\n\n${duplicate_message_strs.join("\n")}"
             exit 1
         }
 
@@ -279,214 +265,249 @@ def getRunMode(run_mode, log) {
 }
 
 
-// Sample records
-def getTumorDnaSample(meta) {
-    return meta.getOrDefault([Constants.SampleType.TUMOR, Constants.SequenceType.DNA], [:])
+// All samples in a case, across every sample list
+def getSamples(case_record) {
+    return case_record.normal_dna_samples + case_record.donor_dna_samples + case_record.tumor_dna_samples + case_record.tumor_rna_samples + case_record.longitudinal_samples
 }
 
-def getTumorRnaSample(meta) {
-    return meta.getOrDefault([Constants.SampleType.TUMOR, Constants.SequenceType.RNA], [:])
+// All samples matching the given sample types and sequence types
+def getSamples(case_record, sampletypes, sequencetypes) {
+    return getSamples(case_record).findAll { s -> sampletypes.contains(s.sample_type) && sequencetypes.contains(s.sequence_type) }
 }
 
-def getNormalDnaSample(meta) {
-    return meta.getOrDefault([Constants.SampleType.NORMAL, Constants.SequenceType.DNA], [:])
+def hasAlignmentInput(sample) {
+    def files = sample.files
+    return files.containsKey(Constants.FileType.FASTQ) ||
+        files.containsKey(Constants.FileType.ALN) ||
+        files.containsKey(Constants.FileType.ALN_REDUX) ||
+        files.containsKey(Constants.FileType.REDUX_DIR)
 }
 
-def getDonorDnaSample(meta) {
-    return meta.getOrDefault([Constants.SampleType.DONOR, Constants.SequenceType.DNA], [:])
+
+// Sample records (singular: first matching sample, or null)
+def getTumorDnaSample(case_record) {
+    def samples = case_record.tumor_dna_samples.findAll { it.sequence_type == Constants.SequenceType.DNA }
+    return samples ? samples[0] : null
 }
+
+def getTumorRnaSample(case_record) {
+    return case_record.tumor_rna_samples ? case_record.tumor_rna_samples[0] : null
+}
+
+def getNormalDnaSample(case_record) {
+    def samples = case_record.normal_dna_samples.findAll { it.sequence_type == Constants.SequenceType.DNA }
+    return samples ? samples[0] : null
+}
+
+def getDonorDnaSample(case_record) {
+    def samples = case_record.donor_dna_samples.findAll { it.sequence_type == Constants.SequenceType.DNA }
+    return samples ? samples[0] : null
+}
+
+def getLongitudinalSample(case_record) {
+    return case_record.longitudinal_samples ? case_record.longitudinal_samples[0] : null
+}
+
 
 // Sample names
-def getTumorDnaSampleName(Map named_args, meta) {
-    def meta_sample = getTumorDnaSample(meta)
-    def sample_id
-
+def getTumorDnaSampleName(Map named_args, case_record) {
+    def sample
     if (named_args.getOrDefault('primary', false)) {
-        sample_id = meta_sample['sample_id']
+        sample = getTumorDnaSample(case_record)
     } else {
-        sample_id = meta_sample.getOrDefault('longitudinal_sample_id', meta_sample['sample_id'])
+        sample = getLongitudinalSample(case_record) ?: getTumorDnaSample(case_record)
     }
-
-    return sample_id
+    return sample?.sample_id
 }
 
-def getTumorDnaSampleName(meta) {
-    getTumorDnaSampleName([:], meta)
+def getTumorDnaSampleName(case_record) {
+    getTumorDnaSampleName([:], case_record)
 }
 
-def getTumorRnaSampleName(meta) {
-    return getTumorRnaSample(meta)['sample_id']
+def getTumorRnaSampleName(case_record) {
+    return getTumorRnaSample(case_record)?.sample_id
 }
 
-def getNormalDnaSampleName(meta) {
-    return getNormalDnaSample(meta)['sample_id']
+def getNormalDnaSampleName(case_record) {
+    return getNormalDnaSample(case_record)?.sample_id
 }
 
-def getDonorDnaSampleName(meta) {
-    return getDonorDnaSample(meta)['sample_id']
+def getDonorDnaSampleName(case_record) {
+    return getDonorDnaSample(case_record)?.sample_id
+}
+
+def getLongitudinalSampleName(case_record) {
+    return getLongitudinalSample(case_record)?.sample_id
 }
 
 
 // Files - Tumor DNA
-def getTumorDnaFastq(meta) {
-    return getTumorDnaSample(meta).getOrDefault(Constants.FileType.FASTQ, null)
+def getTumorDnaFastq(case_record) {
+    return getTumorDnaSample(case_record)?.files?.get(Constants.FileType.FASTQ)
 }
 
-def getTumorDnaBam(meta) {
-    return getTumorDnaSample(meta).getOrDefault(Constants.FileType.ALN, null)
+def getTumorDnaBam(case_record) {
+    return getTumorDnaSample(case_record)?.files?.get(Constants.FileType.ALN)?.path
 }
 
-def getTumorDnaReduxInput(meta) {
-    def meta_sample = getTumorDnaSample(meta)
-    return hasReduxData(meta_sample) ?: null
+def getTumorDnaReduxInput(case_record) {
+    def d = hasReduxData(getTumorDnaSample(case_record))
+    return d ? d.path : null
 }
 
-def getTumorDnaBai(meta) {
-    return getTumorDnaSample(meta).getOrDefault(Constants.FileType.IDX, null)
+def getTumorDnaBai(case_record) {
+    return getTumorDnaSample(case_record)?.files?.get(Constants.FileType.IDX)?.path
 }
 
 
-def hasTumorDnaFastq(meta) {
-    return getTumorDnaFastq(meta) != null
+def hasTumorDnaFastq(case_record) {
+    return getTumorDnaFastq(case_record) != null
 }
 
-def hasTumorDnaBam(meta) {
-    return getTumorDnaBam(meta) != null
+def hasTumorDnaBam(case_record) {
+    return getTumorDnaBam(case_record) != null
 }
 
-def hasTumorDnaReduxInput(meta) {
-    return getTumorDnaReduxInput(meta) != null
+def hasTumorDnaReduxInput(case_record) {
+    return getTumorDnaReduxInput(case_record) != null
 }
 
 
 // Files - Normal DNA
-def getNormalDnaFastq(meta) {
-    return getNormalDnaSample(meta).getOrDefault(Constants.FileType.FASTQ, null)
+def getNormalDnaFastq(case_record) {
+    return getNormalDnaSample(case_record)?.files?.get(Constants.FileType.FASTQ)
 }
 
-def getNormalDnaBam(meta) {
-    return getNormalDnaSample(meta).getOrDefault(Constants.FileType.ALN, null)
+def getNormalDnaBam(case_record) {
+    return getNormalDnaSample(case_record)?.files?.get(Constants.FileType.ALN)?.path
 }
 
-def getNormalDnaReduxInput(meta) {
-    def meta_sample = getNormalDnaSample(meta)
-    return hasReduxData(meta_sample) ?: null
+def getNormalDnaReduxInput(case_record) {
+    def d = hasReduxData(getNormalDnaSample(case_record))
+    return d ? d.path : null
 }
 
-def getNormalDnaBai(meta) {
-    return getNormalDnaSample(meta).getOrDefault(Constants.FileType.IDX, null)
+def getNormalDnaBai(case_record) {
+    return getNormalDnaSample(case_record)?.files?.get(Constants.FileType.IDX)?.path
 }
 
 
-def hasNormalDnaFastq(meta) {
-    return getNormalDnaFastq(meta) != null
+def hasNormalDnaFastq(case_record) {
+    return getNormalDnaFastq(case_record) != null
 }
 
-def hasNormalDnaBam(meta) {
-    return getNormalDnaBam(meta) != null
+def hasNormalDnaBam(case_record) {
+    return getNormalDnaBam(case_record) != null
 }
 
-def hasNormalDnaReduxInput(meta) {
-    return getNormalDnaReduxInput(meta) != null
+def hasNormalDnaReduxInput(case_record) {
+    return getNormalDnaReduxInput(case_record) != null
 }
 
-def hasDnaFastq(meta) {
-    return hasNormalDnaFastq(meta) || hasTumorDnaFastq(meta)
+def hasDnaFastq(case_record) {
+    return hasNormalDnaFastq(case_record) || hasTumorDnaFastq(case_record)
 }
 
-def hasDnaReduxInput(meta) {
-    return hasNormalDnaReduxInput(meta) || hasTumorDnaReduxInput(meta)
+def hasDnaReduxInput(case_record) {
+    return hasNormalDnaReduxInput(case_record) || hasTumorDnaReduxInput(case_record)
 }
 
 
 // Files - Donor DNA
-def getDonorDnaFastq(meta) {
-    return getDonorDnaSample(meta).getOrDefault(Constants.FileType.FASTQ, null)
+def getDonorDnaFastq(case_record) {
+    return getDonorDnaSample(case_record)?.files?.get(Constants.FileType.FASTQ)
 }
 
-def getDonorDnaBam(meta) {
-    return getDonorDnaSample(meta).getOrDefault(Constants.FileType.ALN, null)
+def getDonorDnaBam(case_record) {
+    return getDonorDnaSample(case_record)?.files?.get(Constants.FileType.ALN)?.path
 }
 
-def getDonorDnaReduxInput(meta) {
-    def meta_sample = getDonorDnaSample(meta)
-    return hasReduxData(meta_sample) ?: null
+def getDonorDnaReduxInput(case_record) {
+    def d = hasReduxData(getDonorDnaSample(case_record))
+    return d ? d.path : null
 }
 
-def getDonorDnaBai(meta) {
-    return getDonorDnaSample(meta).getOrDefault(Constants.FileType.IDX, null)
+def getDonorDnaBai(case_record) {
+    return getDonorDnaSample(case_record)?.files?.get(Constants.FileType.IDX)?.path
 }
 
 
-def hasDonorDnaFastq(meta) {
-    return getDonorDnaFastq(meta) != null
+def hasDonorDnaFastq(case_record) {
+    return getDonorDnaFastq(case_record) != null
 }
 
-def hasDonorDnaBam(meta) {
-    return getDonorDnaBam(meta) != null
+def hasDonorDnaBam(case_record) {
+    return getDonorDnaBam(case_record) != null
 }
 
-def hasDonorDnaReduxInput(meta) {
-    return getDonorDnaReduxInput(meta) != null
+def hasDonorDnaReduxInput(case_record) {
+    return getDonorDnaReduxInput(case_record) != null
 }
 
 
 // Files - Tumor RNA
-def getTumorRnaFastq(meta) {
-    return getTumorRnaSample(meta).getOrDefault(Constants.FileType.FASTQ, null)
+def getTumorRnaFastq(case_record) {
+    return getTumorRnaSample(case_record)?.files?.get(Constants.FileType.FASTQ)
 }
 
-def getTumorRnaBam(meta) {
-    return getTumorRnaSample(meta).getOrDefault(Constants.FileType.ALN, null)
+def getTumorRnaBam(case_record) {
+    return getTumorRnaSample(case_record)?.files?.get(Constants.FileType.ALN)?.path
 }
 
-def getTumorRnaBai(meta) {
-    return getTumorRnaSample(meta).getOrDefault(Constants.FileType.IDX, null)
+def getTumorRnaBai(case_record) {
+    return getTumorRnaSample(case_record)?.files?.get(Constants.FileType.IDX)?.path
 }
 
 
-def hasTumorRnaFastq(meta) {
-    return getTumorRnaFastq(meta) != null
+def hasTumorRnaFastq(case_record) {
+    return getTumorRnaFastq(case_record) != null
 }
 
-def hasTumorRnaBam(meta) {
-    return getTumorRnaBam(meta) != null
+def hasTumorRnaBam(case_record) {
+    return getTumorRnaBam(case_record) != null
 }
 
 
 // Status
-def hasTumorDna(meta) {
-    return hasTumorDnaBam(meta) || hasTumorDnaReduxInput(meta) || hasTumorDnaFastq(meta)
+def hasTumorDna(case_record) {
+    return hasTumorDnaBam(case_record) || hasTumorDnaReduxInput(case_record) || hasTumorDnaFastq(case_record)
 }
 
-def hasNormalDna(meta) {
-    return hasNormalDnaBam(meta) || hasNormalDnaReduxInput(meta) || hasNormalDnaFastq(meta)
+def hasNormalDna(case_record) {
+    return hasNormalDnaBam(case_record) || hasNormalDnaReduxInput(case_record) || hasNormalDnaFastq(case_record)
 }
 
-def hasDonorDna(meta) {
-    return hasDonorDnaBam(meta) || hasDonorDnaReduxInput(meta) || hasDonorDnaFastq(meta)
+def hasNormalDnaAlignment(case_record) {
+    return hasNormalDnaBam(case_record) || hasNormalDnaReduxInput(case_record)
 }
 
-def hasTumorRna(meta) {
-    return hasTumorRnaBam(meta) || hasTumorRnaFastq(meta)
+def hasDonorDna(case_record) {
+    return hasDonorDnaBam(case_record) || hasDonorDnaReduxInput(case_record) || hasDonorDnaFastq(case_record)
 }
 
-def hasReduxData(meta_sample) {
-    return meta_sample.getOrDefault(Constants.FileType.ALN_REDUX, null) || meta_sample.getOrDefault(Constants.FileType.REDUX_DIR, null)
+def hasTumorRna(case_record) {
+    return hasTumorRnaBam(case_record) || hasTumorRnaFastq(case_record)
+}
+
+def hasReduxData(sample) {
+    if (! sample) {
+        return null
+    }
+    return sample.files.get(Constants.FileType.ALN_REDUX, null) ?: sample.files.get(Constants.FileType.REDUX_DIR, null)
 }
 
 
 // REDUX alignment and index retrieval
-def getTumorReduxDirAlignment(meta, redux_dir) {
-    return getReduxDirAlignment(getTumorDnaSampleName(meta), redux_dir)
+def getTumorReduxDirAlignment(case_record, redux_dir) {
+    return getReduxDirAlignment(getTumorDnaSampleName(case_record), redux_dir)
 }
 
-def getNormalReduxDirAlignment(meta, redux_dir) {
-    return getReduxDirAlignment(getNormalDnaSampleName(meta), redux_dir)
+def getNormalReduxDirAlignment(case_record, redux_dir) {
+    return getReduxDirAlignment(getNormalDnaSampleName(case_record), redux_dir)
 }
 
-def getDonorReduxDirAlignment(meta, redux_dir) {
-    return getReduxDirAlignment(getDonorDnaSampleName(meta), redux_dir)
+def getDonorReduxDirAlignment(case_record, redux_dir) {
+    return getReduxDirAlignment(getDonorDnaSampleName(case_record), redux_dir)
 }
 
 def getReduxDirAlignment(sample_name, redux_dir) {
@@ -505,16 +526,16 @@ def getReduxDirAlignment(sample_name, redux_dir) {
 
 
 // REDUX TSV retrieval
-def getTumorReduxTsvs(meta, redux_dir) {
-    return getReduxTsvs(getTumorDnaSampleName(meta), redux_dir)
+def getTumorReduxTsvs(case_record, redux_dir) {
+    return getReduxTsvs(getTumorDnaSampleName(case_record), redux_dir)
 }
 
-def getNormalReduxTsvs(meta, redux_dir) {
-    return getReduxTsvs(getNormalDnaSampleName(meta), redux_dir)
+def getNormalReduxTsvs(case_record, redux_dir) {
+    return getReduxTsvs(getNormalDnaSampleName(case_record), redux_dir)
 }
 
-def getDonorReduxTsvs(meta, redux_dir) {
-    return getReduxTsvs(getDonorDnaSampleName(meta), redux_dir)
+def getDonorReduxTsvs(case_record, redux_dir) {
+    return getReduxTsvs(getDonorDnaSampleName(case_record), redux_dir)
 }
 
 def getReduxTsvs(sample_name, redux_dir) {
@@ -540,29 +561,34 @@ def getReduxTsvs(sample_name, redux_dir) {
 }
 
 
-// Misc
-def getInput(meta, key_set) {
-    def keys = key_set.combinations().collect { filetype, sampletype, sequencetype -> return [filetype, [sampletype, sequencetype]] }
+// Misc: resolve an existing input (or existing output dir) from a case
+def getInput(case_record, key_set) {
+    def filetypes = key_set[0] instanceof List ? key_set[0] : [key_set[0]]
+    def sampletypes = key_set[1] instanceof List ? key_set[1] : [key_set[1]]
+    def sequencetypes = key_set[2] instanceof List ? key_set[2] : [key_set[2]]
 
-    def result = []
-    def matched = keys.find { key ->
-        def (key_filetype, key_sample) = key
-        meta.containsKey(key_sample) && meta[key_sample].containsKey(key_filetype)
+    // Case-level directories
+    def dir_ft = filetypes.find { ft -> case_record.directories.containsKey(ft) }
+    if (dir_ft) {
+        return case_record.directories[dir_ft].path
     }
-    if (matched) {
-        def (key_filetype, key_sample) = matched
-        result = meta[key_sample].get(key_filetype)
+
+    // Sample-level files
+    def samples = getSamples(case_record, sampletypes, sequencetypes)
+    def match = samples.findResult { sample ->
+        def ft = filetypes.find { f -> sample.files.containsKey(f) }
+        return ft ? sample.files[ft].path : null
     }
-    return result
+    return match ?: []
 }
 
-def hasExistingInput(meta, key) {
-    return getInput(meta, key) != []
+def hasExistingInput(case_record, key) {
+    return getInput(case_record, key) != []
 }
 
-def selectCurrentOrExisting(val, meta, key) {
-    if (hasExistingInput(meta, key)) {
-        return getInput(meta, key)
+def selectCurrentOrExisting(val, case_record, key) {
+    if (hasExistingInput(case_record, key)) {
+        return getInput(case_record, key)
     } else {
         return val
     }
@@ -570,107 +596,100 @@ def selectCurrentOrExisting(val, meta, key) {
 
 def getDnaFastqChannel(ch_inputs) {
     // Sort inputs
-    // channel: [ meta ]
+    // channel: [ case_record ]
     def ch_inputs_tumor_sorted = ch_inputs
-        .branch { meta ->
-            def has_existing = hasExistingInput(meta, Constants.INPUT.ALN_DNA_TUMOR)
-            runnable: hasTumorDnaFastq(meta) && ! has_existing
+        .branch { case_record ->
+            def has_existing = hasExistingInput(case_record, Constants.INPUT.ALN_DNA_TUMOR)
+            runnable: hasTumorDnaFastq(case_record) && ! has_existing
             skip: true
         }
 
     def ch_inputs_normal_sorted = ch_inputs
-        .branch { meta ->
-            def has_existing = hasExistingInput(meta, Constants.INPUT.ALN_DNA_NORMAL)
-            runnable: hasNormalDnaFastq(meta) && ! has_existing
+        .branch { case_record ->
+            def has_existing = hasExistingInput(case_record, Constants.INPUT.ALN_DNA_NORMAL)
+            runnable: hasNormalDnaFastq(case_record) && ! has_existing
             skip: true
         }
 
     def ch_inputs_donor_sorted = ch_inputs
-        .branch { meta ->
-            def has_existing = hasExistingInput(meta, Constants.INPUT.ALN_DNA_DONOR)
-            runnable: hasDonorDnaFastq(meta) && ! has_existing
+        .branch { case_record ->
+            def has_existing = hasExistingInput(case_record, Constants.INPUT.ALN_DNA_DONOR)
+            runnable: hasDonorDnaFastq(case_record) && ! has_existing
             skip: true
         }
 
     // Create FASTQ input channel
-    // channel: [ meta, fastq_info, fastq_fwd, fastq_rev ]
+    // channel: [ case_record, fastq_info, fastq_fwd, fastq_rev ]
     def ch_fastqs = channel.empty()
         .mix(
-            ch_inputs_tumor_sorted.runnable.map { meta -> [meta, getTumorDnaSample(meta), 'tumor'] },
-            ch_inputs_normal_sorted.runnable.map { meta -> [meta, getNormalDnaSample(meta), 'normal'] },
-            ch_inputs_donor_sorted.runnable.map { meta -> [meta, getDonorDnaSample(meta), 'donor'] },
+            ch_inputs_tumor_sorted.runnable.map { case_record -> [case_record, getTumorDnaSample(case_record), 'tumor'] },
+            ch_inputs_normal_sorted.runnable.map { case_record -> [case_record, getNormalDnaSample(case_record), 'normal'] },
+            ch_inputs_donor_sorted.runnable.map { case_record -> [case_record, getDonorDnaSample(case_record), 'donor'] },
         )
-        .flatMap { meta, meta_sample, sample_type ->
-            meta_sample
-                .getAt(Constants.FileType.FASTQ)
-                .collect { key, d ->
-                    def (library_id, lane, flowcell) = key
-
-                    def sample_id = meta_sample.getOrDefault('longitudinal_sample_id', meta_sample['sample_id'])
-
+        .flatMap { case_record, sample, sample_type ->
+            sample.files.getAt(Constants.FileType.FASTQ)
+                .collect { fastq ->
                     def fastq_info = [
-                        'sample_id': sample_id,
-                        'library_id': library_id,
-                        'lane': lane,
+                        'sample_id': sample.sample_id,
+                        'library_id': fastq.library_id,
+                        'lane': fastq.lane,
                         'sample_type': sample_type,
-                        'rg_fields': d.rg_fields,
+                        'rg_fields': fastq.rg_fields,
                     ]
 
-                    if (flowcell) {
-                         fastq_info.flowcell = flowcell
+                    if (fastq.flowcell) {
+                         fastq_info.flowcell = fastq.flowcell
                     }
 
-                    return [meta, fastq_info, d['fwd'], d['rev']]
+                    return [case_record, fastq_info, fastq.read_fwd, fastq.read_rev]
                 }
         }
 
     return channel.empty()
         .mix(
             ch_fastqs,
-            ch_inputs_tumor_sorted.skip.map { meta -> [meta, [:], [], []] },
-            ch_inputs_normal_sorted.skip.map { meta -> [meta, [:], [], []] },
-            ch_inputs_donor_sorted.skip.map { meta -> [meta, [:], [], []] },
+            ch_inputs_tumor_sorted.skip.map { case_record -> [case_record, [:], [], []] },
+            ch_inputs_normal_sorted.skip.map { case_record -> [case_record, [:], [], []] },
+            ch_inputs_donor_sorted.skip.map { case_record -> [case_record, [:], [], []] },
         )
 }
 
 def getRnaFastqChannel(ch_inputs) {
     // Sort inputs
-    // channel: [ meta ]
+    // channel: [ case_record ]
     def ch_inputs_sorted = ch_inputs
-        .branch { meta ->
-            def has_existing = hasExistingInput(meta, Constants.INPUT.ALN_RNA_TUMOR)
-            runnable: hasTumorRnaFastq(meta) && ! has_existing
+        .branch { case_record ->
+            def has_existing = hasExistingInput(case_record, Constants.INPUT.ALN_RNA_TUMOR)
+            runnable: hasTumorRnaFastq(case_record) && ! has_existing
             skip: true
         }
 
     // Create FASTQ input channel
-    // channel: [ meta, fastq_info, fastq_fwd, fastq_rev ]
+    // channel: [ case_record, fastq_info, fastq_fwd, fastq_rev ]
     def ch_fastqs = ch_inputs_sorted.runnable
-        .flatMap { meta ->
-            def meta_sample = getTumorRnaSample(meta)
-            meta_sample
+        .flatMap { case_record ->
+            def sample = getTumorRnaSample(case_record)
+            sample.files
                 .getAt(Constants.FileType.FASTQ)
-                .collect { key, d ->
-                    def (library_id, lane, flowcell) = key
-
+                .collect { fastq ->
                     def fastq_info = [
-                        'sample_id': meta_sample.sample_id,
-                        'library_id': library_id,
-                        'lane': lane,
-                        'rg_fields': d.rg_fields,
+                        'sample_id': sample.sample_id,
+                        'library_id': fastq.library_id,
+                        'lane': fastq.lane,
+                        'rg_fields': fastq.rg_fields,
                     ]
 
-                    if (flowcell) {
-                         fastq_info.flowcell = flowcell
+                    if (fastq.flowcell) {
+                         fastq_info.flowcell = fastq.flowcell
                     }
 
-                    return [meta, fastq_info, d['fwd'], d['rev']]
+                    return [case_record, fastq_info, fastq.read_fwd, fastq.read_rev]
                 }
         }
 
     return channel.empty()
         .mix(
             ch_fastqs,
-            ch_inputs_sorted.skip.map { meta -> [meta, [:], [], []] },
+            ch_inputs_sorted.skip.map { case_record -> [case_record, [:], [], []] },
         )
 }

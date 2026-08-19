@@ -77,8 +77,8 @@ workflow LILAC_CALLING {
         .map { meta, normal_dna_aln, normal_dna_idx, tumor_dna_aln, tumor_dna_idx, tumor_rna_aln, tumor_rna_idx, purple_dir ->
 
             def meta_lilac = [
-                key: meta.group_id,
-                id: meta.group_id,
+                key: meta.case_id,
+                id: meta.case_id,
             ]
 
             if (hasTumorDna(meta)) {

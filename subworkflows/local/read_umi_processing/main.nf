@@ -64,8 +64,8 @@ workflow READ_UMI_PROCESSING {
         .map { meta, sequence_type, fastq_info, fastq_fwd, fastq_rev ->
 
               def meta_fastq = [
-                  key: meta.group_id,
-                  id: "${meta.group_id}_${fastq_info.sample_id}",
+                  key: meta.case_id,
+                  id: "${meta.case_id}_${fastq_info.sample_id}",
                   sequence_type: sequence_type,
                   sample_id: fastq_info.sample_id,
                   library_id: fastq_info.library_id,

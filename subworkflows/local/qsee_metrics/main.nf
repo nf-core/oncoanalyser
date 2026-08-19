@@ -72,8 +72,8 @@ workflow QSEE_METRICS {
         .map { meta, redux_tsvs_tumor, redux_tsvs_normal, bamtools_dir_tumor, bamtools_dir_normal, cobalt_dir, esvee_dir, purple_dir ->
 
             def meta_qsee = [
-                key: meta.group_id,
-                id: meta.group_id,
+                key: meta.case_id,
+                id: meta.case_id,
                 tumor_id: getTumorDnaSampleName(meta),
             ]
 

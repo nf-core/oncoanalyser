@@ -55,8 +55,8 @@ workflow ISOFOX_QUANTIFICATION {
         .map { meta, tumor_aln, tumor_idx ->
 
             def meta_isofox = [
-                key: meta.group_id,
-                id: meta.group_id,
+                key: meta.case_id,
+                id: meta.case_id,
                 sample_id: getTumorDnaSampleName(meta) ?: getTumorRnaSampleName(meta),
             ]
 

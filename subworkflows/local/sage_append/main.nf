@@ -100,9 +100,9 @@ workflow SAGE_APPEND {
             def output_file_id = getNormalDnaSampleName(meta)
 
             def meta_append = [
-                key: meta.group_id,
+                key: meta.case_id,
                 topic_key: 'germline',
-                id: "${meta.group_id}_${output_file_id}",
+                id: "${meta.case_id}_${output_file_id}",
                 output_file_id: output_file_id,
                 reference_ids: [getTumorRnaSampleName(meta)],
             ]
@@ -165,9 +165,9 @@ workflow SAGE_APPEND {
             def output_file_id = purity_estimate_mode ? getTumorDnaSampleName(meta, primary: false) : tumor_dna_id
 
             def meta_append = [
-                key: meta.group_id,
+                key: meta.case_id,
                 topic_key: 'somatic',
-                id: "${meta.group_id}_${output_file_id}",
+                id: "${meta.case_id}_${output_file_id}",
                 output_file_id: output_file_id,
                 reference_ids: [],
             ]

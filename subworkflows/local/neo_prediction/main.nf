@@ -74,8 +74,8 @@ workflow NEO_PREDICTION {
         .map { meta, purple_dir, linx_annotation_dir ->
 
             def meta_finder = [
-                key: meta.group_id,
-                id: meta.group_id,
+                key: meta.case_id,
+                id: meta.case_id,
                 sample_id: getTumorDnaSampleName(meta),
             ]
 
@@ -127,8 +127,8 @@ workflow NEO_PREDICTION {
         .map { meta, neo_finder_dir, tumor_rna_aln, tumor_rna_idx ->
 
             def meta_isofox = [
-                key: meta.group_id,
-                id: meta.group_id,
+                key: meta.case_id,
+                id: meta.case_id,
                 sample_id: getTumorDnaSampleName(meta),
             ]
 
@@ -169,10 +169,10 @@ workflow NEO_PREDICTION {
         .map { meta, isofox_dir, purple_dir, sage_append_dir_somatic, lilac_dir, neo_finder_dir, annotated_fusions ->
 
             def meta_scorer = [
-                key: meta.group_id,
-                id: meta.group_id,
+                key: meta.case_id,
+                id: meta.case_id,
                 sample_id: getTumorDnaSampleName(meta),
-                cancer_type: meta[Constants.InfoField.CANCER_TYPE],
+                cancer_type: meta.cancer_type,
             ]
 
             def sage_append_vcf_somatic = []

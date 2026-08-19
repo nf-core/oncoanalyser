@@ -74,8 +74,8 @@ workflow COBALT_PROFILING {
             }
 
             def meta_cobalt = [
-                key: meta.group_id,
-                id: meta.group_id,
+                key: meta.case_id,
+                id: meta.case_id,
                 tumor_id: tumor_id,
             ]
 

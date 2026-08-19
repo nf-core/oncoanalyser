@@ -74,8 +74,8 @@ workflow AMBER_PROFILING {
             }
 
             def meta_amber = [
-                key: meta.group_id,
-                id: meta.group_id,
+                key: meta.case_id,
+                id: meta.case_id,
                 tumor_id: tumor_id,
             ]
 

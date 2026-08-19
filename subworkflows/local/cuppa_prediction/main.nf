@@ -72,8 +72,8 @@ workflow CUPPA_PREDICTION {
         .multiMap { meta, isofox_dir, purple_dir, linx_annotation_dir, virusinterpreter_dir ->
 
             def meta_cuppa = [
-                key: meta.group_id,
-                id: meta.group_id,
+                key: meta.case_id,
+                id: meta.case_id,
             ]
 
             def has_tumor_dna = hasTumorDna(meta)

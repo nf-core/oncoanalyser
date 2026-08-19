@@ -191,7 +191,7 @@ The `work/` directory can be hard to navigate due to the `<short_hash>/<long_has
 (truncated) in the console while running `oncoanalyser` (but can also be found in the `.nextflow.log` files):
 
 ```shell
-[e5/f6e2e8] process > NFCORE_ONCOANALYSER:WGTS:REDUX_PROCESSING:REDUX (<group_id>_<sample_id>)     [100%] 2 of 2 ✔
+[e5/f6e2e8] process > NFCORE_ONCOANALYSER:WGTS:REDUX_PROCESSING:REDUX (<case_id>_<sample_id>)     [100%] 2 of 2 ✔
 ```
 
 Otherwise, you can use a utility like [tree](<https://en.wikipedia.org/wiki/Tree_(command)>) to show the directory

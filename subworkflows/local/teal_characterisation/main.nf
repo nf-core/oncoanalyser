@@ -63,8 +63,8 @@ workflow TEAL_CHARACTERISATION {
         .map { meta, tumor_aln, tumor_idx, normal_aln, normal_idx ->
 
             def meta_teal = [
-                key: meta.group_id,
-                id: meta.group_id,
+                key: meta.case_id,
+                id: meta.case_id,
             ]
 
             if (tumor_aln) {
@@ -146,8 +146,8 @@ workflow TEAL_CHARACTERISATION {
         .map { meta, teal_bam_tumor, teal_bai_tumor, teal_bam_normal, teal_bai_normal, bamtools_dir_tumor, bamtools_dir_normal, cobalt_dir, purple_dir ->
 
             def meta_teal = [
-                key: meta.group_id,
-                id: meta.group_id,
+                key: meta.case_id,
+                id: meta.case_id,
             ]
 
             if (teal_bam_tumor) {

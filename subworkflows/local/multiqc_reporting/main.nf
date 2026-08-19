@@ -59,7 +59,7 @@ workflow MULTIQC_REPORTING {
         }
 
     // Create linkage between identifiers and output files
-    // channel: [ group_ids, file_group_ids, files ]
+    // channel: [ case_ids, file_case_ids, files ]
     ch_multiqc_files_sample = ch_inputs_sorted.runnable
 
         // channel: [ meta, [ file_one, file_two, ... ] ]
@@ -78,11 +78,11 @@ workflow MULTIQC_REPORTING {
         // ]
         .collect(flat: false)
 
-        // channel: [ meta_multiqc, file_group_ids, files ]
+        // channel: [ meta_multiqc, file_case_ids, files ]
         .map { metas_and_files  ->
 
             def files = []
-            def files_group_ids = []
+            def files_case_ids = []
             def group_sample_ids = [:]
 
             metas_and_files.each { meta, files_nested ->
@@ -92,13 +92,13 @@ workflow MULTIQC_REPORTING {
                         return
                     }
 
-                    files_group_ids << meta.group_id
+                    files_case_ids << meta.case_id
                     files << f
                 }
 
               // NOTE(SW): not handled here are cases with no input files, unlikely scenario (impossible?)
 
-              group_sample_ids[meta.group_id] = [
+              group_sample_ids[meta.case_id] = [
                   'normal_dna_id': getNormalDnaSampleName(meta),
                   'tumor_dna_id': getTumorDnaSampleName(meta),
                   'tumor_rna_id': getTumorRnaSampleName(meta),
@@ -109,18 +109,18 @@ workflow MULTIQC_REPORTING {
             // Perform stable sort on aggregated data and without channels ops to ensure no NF language assumptions are broken
             // This sort is done to remove some non-deterministic behaviour in MultiQC resulting from unstable input ordering
             // NOTE(SW): nonetheless approaches to create other inputs are non-deterministic and hence MultiQC is never cached
-            def (files_group_ids_sorted, files_sorted) = [files_group_ids, files]
+            def (files_case_ids_sorted, files_sorted) = [files_case_ids, files]
                 // Pair: [ [gid_e, f], [gid_a, f], ...]
                 .transpose()
                 // Sort: [ [gid_a, f], [gid_b, f], ...]
-                // Sorting done on primarily on group_id (index 0) then secondarily on filename (index 1)
+                // Sorting done on primarily on case_id (index 0) then secondarily on filename (index 1)
                 // NOTE(SW): assumes common prefix in filenames from each output stage that is consistent between samples
                 .sort { d -> d[1].name }
                 .sort { d -> d[0] }
                 // Separate: [ [gid_a, gid_b, ...], [f, f, ..] ]
                 .transpose()
 
-            return [group_sample_ids, files_group_ids_sorted, files_sorted]
+            return [group_sample_ids, files_case_ids_sorted, files_sorted]
 
         }
 

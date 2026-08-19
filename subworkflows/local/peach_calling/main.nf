@@ -47,8 +47,8 @@ workflow PEACH_CALLING {
         .map { meta, purple_dir ->
 
             def meta_peach = [
-                key: meta.group_id,
-                id: meta.group_id,
+                key: meta.case_id,
+                id: meta.case_id,
                 sample_id: getNormalDnaSampleName(meta),
             ]
 

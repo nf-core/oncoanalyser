@@ -85,7 +85,7 @@ For the `purity_estimate` mode, several of the above tools are run with adjusted
 Create a samplesheet with your inputs (WGS/WTS BAMs in this example):
 
 ```csv
-group_id,subject_id,sample_id,sample_type,sequence_type,filetype,filepath
+case_id,patient_id,sample_id,sample_type,sequence_type,filetype,filepath
 PATIENT1_WGTS,PATIENT1,PATIENT1-N,normal,dna,bam,/path/to/PATIENT1-N.dna.bam
 PATIENT1_WGTS,PATIENT1,PATIENT1-T,tumor,dna,bam,/path/to/PATIENT1-T.dna.bam
 PATIENT1_WGTS,PATIENT1,PATIENT1-T-RNA,tumor,rna,bam,/path/to/PATIENT1-T.rna.bam

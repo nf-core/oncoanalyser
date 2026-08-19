@@ -137,10 +137,10 @@ workflow ORANGE_REPORTING {
             def inputs = d[1..-1]
 
             def meta_orange = [
-                key: meta.group_id,
-                id: meta.group_id,
+                key: meta.case_id,
+                id: meta.case_id,
                 tumor_id: getTumorDnaSampleName(meta),
-                cancer_type: meta[Constants.InfoField.CANCER_TYPE],
+                cancer_type: meta.cancer_type,
             ]
 
             def inputs_selected = inputs.clone()

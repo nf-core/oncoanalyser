@@ -69,8 +69,8 @@ workflow ESVEE_CALLING {
         .map { meta, tumor_aln, tumor_idx, normal_aln, normal_idx ->
 
             def meta_esvee = [
-                key: meta.group_id,
-                id: meta.group_id,
+                key: meta.case_id,
+                id: meta.case_id,
                 tumor_id: getTumorDnaSampleName(meta),
             ]
 

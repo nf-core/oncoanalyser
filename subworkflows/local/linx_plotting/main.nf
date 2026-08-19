@@ -61,8 +61,8 @@ workflow LINX_PLOTTING {
         .map { meta, linx_annotations_dir, amber_dir, cobalt_dir, purple_dir ->
 
             def meta_linx = [
-                key: meta.group_id,
-                id: meta.group_id,
+                key: meta.case_id,
+                id: meta.case_id,
                 sample_id: getTumorDnaSampleName(meta),
             ]
 
@@ -88,8 +88,8 @@ workflow LINX_PLOTTING {
         .map { meta, linx_annotation_dir, _amber_dir, _cobalt_dir, _purple_dir, linx_visualiser_dir ->
 
             def meta_gpgr_linx = [
-                key: meta.group_id,
-                id: meta.group_id,
+                key: meta.case_id,
+                id: meta.case_id,
                 sample_id: getTumorDnaSampleName(meta),
             ]
 

@@ -90,8 +90,8 @@ workflow SAGE_CALLING {
         .map { meta, tumor_aln, tumor_idx, normal_aln, normal_idx, _donor_aln, _donor_idx, redux_tsvs ->
 
             def meta_sage = [
-                key: meta.group_id,
-                id: meta.group_id,
+                key: meta.case_id,
+                id: meta.case_id,
                 tumor_id: getTumorDnaSampleName(meta),
                 normal_id: getNormalDnaSampleName(meta),
             ]
@@ -137,8 +137,8 @@ workflow SAGE_CALLING {
         .map { meta, tumor_aln, tumor_idx, normal_aln, normal_idx, donor_aln, donor_idx, redux_tsvs ->
 
             def meta_sage = [
-                key: meta.group_id,
-                id: meta.group_id,
+                key: meta.case_id,
+                id: meta.case_id,
                 tumor_id: getTumorDnaSampleName(meta),
             ]
 

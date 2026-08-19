@@ -79,7 +79,7 @@ process WISP {
         -Xmx${Math.round(task.memory.bytes * 0.95)} \\
         com.hartwig.hmftools.wisp.purity.PurityEstimator \\
         ${args} \\
-        -patient_id ${meta.subject_id} \\
+        -patient_id ${meta.patient_id} \\
         -tumor_id ${meta.primary_id} \\
         -samples ${meta.longitudinal_id} \\
         -purity_methods ${purity_methods_arg} \\
@@ -107,11 +107,11 @@ process WISP {
     """
     mkdir -p wisp/
 
-    touch wisp/${meta.subject_id}_${meta.longitudinal_id}.wisp.cn_plot_calcs.tsv
-    touch wisp/${meta.subject_id}_${meta.longitudinal_id}.wisp.cn_segments.tsv
-    touch wisp/${meta.subject_id}_${meta.longitudinal_id}.wisp.somatic_peak.tsv
-    touch wisp/${meta.subject_id}_${meta.longitudinal_id}.wisp.somatic_variants.tsv
-    touch wisp/${meta.subject_id}_${meta.longitudinal_id}.wisp.summary.tsv
+    touch wisp/${meta.patient_id}_${meta.longitudinal_id}.wisp.cn_plot_calcs.tsv
+    touch wisp/${meta.patient_id}_${meta.longitudinal_id}.wisp.cn_segments.tsv
+    touch wisp/${meta.patient_id}_${meta.longitudinal_id}.wisp.somatic_peak.tsv
+    touch wisp/${meta.patient_id}_${meta.longitudinal_id}.wisp.somatic_variants.tsv
+    touch wisp/${meta.patient_id}_${meta.longitudinal_id}.wisp.summary.tsv
     touch wisp/${meta.longitudinal_id}.cn_gc_ratio_fit.png
     touch wisp/${meta.longitudinal_id}.somatic_vaf.png
 
