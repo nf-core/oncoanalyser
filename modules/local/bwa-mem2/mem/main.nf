@@ -11,6 +11,7 @@ process BWAMEM2_ALIGN {
     tuple val(meta), path(reads_fwd), path(reads_rev)
     path genome_fasta
     path genome_bwamem2_index
+    val append_fastq_comment
 
     output:
     tuple val(meta), path('*.bam'), path('*.bai')            , topic: bwamem2_align_bam
@@ -27,6 +28,7 @@ process BWAMEM2_ALIGN {
 
     def output_fn = meta.split ? "${meta.split}.${meta.output_file_id}.bam" : "${meta.output_file_id}.bam"
     def reads = meta.single_end ? "${reads_fwd}" : "${reads_fwd} ${reads_rev}"
+    def comment_arg = append_fastq_comment ? '-C' : ''
 
     """
     ln -fs \$(find -L ${genome_bwamem2_index} -type f) ./
@@ -34,6 +36,7 @@ process BWAMEM2_ALIGN {
     bwa-mem2 mem \\
         ${args} \\
         -Y \\
+        ${comment_arg} \\
         -K 100000000 \\
         -R '${meta.rg_line}' \\
         -t ${task.cpus} \\

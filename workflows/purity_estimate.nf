@@ -101,6 +101,7 @@ workflow PURITY_ESTIMATE {
             ref_data.genome_fasta,
             ref_data.genome_bwamem2_index,
             params.max_fastq_records,
+            params.sequencing_platform,
         )
 
         ch_align_dna_tumor_out = ch_align_dna_tumor_out.mix(READ_ALIGNMENT_DNA.out.tumor)

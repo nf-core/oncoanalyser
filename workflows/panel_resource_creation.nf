@@ -122,6 +122,7 @@ workflow PANEL_RESOURCE_CREATION {
         ref_data.genome_fasta,
         ref_data.genome_bwamem2_index,
         params.max_fastq_records,
+        params.sequencing_platform,
     )
 
     READ_ALIGNMENT_RNA(

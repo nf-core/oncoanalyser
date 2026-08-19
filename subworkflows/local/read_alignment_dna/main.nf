@@ -19,6 +19,7 @@ workflow READ_ALIGNMENT_DNA {
 
     // Params
     max_fastq_records    // numeric: [optional]  max number of FASTQ records per split
+    sequencing_platform  // string:  [mandatory] sequencing platform
 
     main:
     //
@@ -173,6 +174,7 @@ workflow READ_ALIGNMENT_DNA {
         ch_bwamem2_inputs,
         genome_fasta,
         genome_bwamem2_index,
+        sequencing_platform.toLowerCase() == 'sbx',
     )
 
     // Reunite BAMs
