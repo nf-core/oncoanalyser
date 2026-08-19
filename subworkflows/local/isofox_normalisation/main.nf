@@ -3,6 +3,7 @@
 //
 
 include { ISOFOX_PANEL_NORMALISATION } from '../../../modules/local/isofox/panel_normalisation/main'
+include { selectCurrentOrExisting } from '../utils_nfcore_oncoanalyser_pipeline/utils'
 
 workflow ISOFOX_NORMALISATION {
     take:
@@ -19,7 +20,7 @@ workflow ISOFOX_NORMALISATION {
     // channel: [ [isofox_dir, ...] ]
     ch_isofox_inputs = ch_isofox
         .map { meta, isofox_dir ->
-            return Utils.selectCurrentOrExisting(isofox_dir, meta, Constants.INPUT.ISOFOX_DIR)
+            return selectCurrentOrExisting(isofox_dir, meta, Constants.INPUT.ISOFOX_DIR)
         }
         .collect()
 

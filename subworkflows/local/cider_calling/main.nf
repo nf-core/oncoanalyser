@@ -3,6 +3,7 @@
 //
 
 include { CIDER } from '../../../modules/local/cider/main'
+include { getInput; getTumorDnaSample; getTumorReduxDirAlignment; getTumorRnaSample; selectCurrentOrExisting } from '../utils_nfcore_oncoanalyser_pipeline/utils'
 
 workflow CIDER_CALLING {
     take:
@@ -25,8 +26,8 @@ workflow CIDER_CALLING {
     ch_inputs_tumor_dna_sorted = ch_redux_dir_tumor
         .map { meta, redux_dir_tumor ->
 
-            def redux_dir_tumor_selected = Utils.selectCurrentOrExisting(redux_dir_tumor, meta, Constants.INPUT.REDUX_DIR_TUMOR)
-            def (tumor_aln, tumor_idx) = Utils.getTumorReduxDirAlignment(meta, redux_dir_tumor_selected)
+            def redux_dir_tumor_selected = selectCurrentOrExisting(redux_dir_tumor, meta, Constants.INPUT.REDUX_DIR_TUMOR)
+            def (tumor_aln, tumor_idx) = getTumorReduxDirAlignment(meta, redux_dir_tumor_selected)
 
             return [meta, tumor_aln, tumor_idx]
 
@@ -43,8 +44,8 @@ workflow CIDER_CALLING {
         .map { meta, aln, idx ->
             return [
                 meta,
-                Utils.selectCurrentOrExisting(aln, meta, Constants.INPUT.ALN_RNA_TUMOR),
-                idx ?: Utils.getInput(meta, Constants.INPUT.IDX_RNA_TUMOR),
+                selectCurrentOrExisting(aln, meta, Constants.INPUT.ALN_RNA_TUMOR),
+                idx ?: getInput(meta, Constants.INPUT.IDX_RNA_TUMOR),
             ]
         }
         .branch { meta, aln, idx ->
@@ -57,8 +58,8 @@ workflow CIDER_CALLING {
     // channel: [ meta_cider, aln, idx ]
     ch_cider_inputs = channel.empty()
         .mix(
-            ch_inputs_tumor_dna_sorted.runnable.map { meta, aln, idx -> [meta, Utils.getTumorDnaSample(meta), aln, idx] },
-            ch_inputs_tumor_rna_sorted.runnable.map { meta, aln, idx -> [meta, Utils.getTumorRnaSample(meta), aln, idx] },
+            ch_inputs_tumor_dna_sorted.runnable.map { meta, aln, idx -> [meta, getTumorDnaSample(meta), aln, idx] },
+            ch_inputs_tumor_rna_sorted.runnable.map { meta, aln, idx -> [meta, getTumorRnaSample(meta), aln, idx] },
         )
         .map { meta, meta_sample, aln, idx->
 

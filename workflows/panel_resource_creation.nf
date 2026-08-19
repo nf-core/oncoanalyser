@@ -20,9 +20,10 @@ include { SAGE_CALLING                            } from '../subworkflows/local/
 
 include { softwareVersionsToYAML } from '../subworkflows/nf-core/utils_nfcore_pipeline'
 
-include { getDnaFastqChannel } from '../subworkflows/local/utils_nfcore_oncoanalyser_pipeline'
-include { getRnaFastqChannel } from '../subworkflows/local/utils_nfcore_oncoanalyser_pipeline'
+include { getDnaFastqChannel } from '../subworkflows/local/utils_nfcore_oncoanalyser_pipeline/utils'
+include { getRnaFastqChannel } from '../subworkflows/local/utils_nfcore_oncoanalyser_pipeline/utils'
 include { getPrepConfigFromSamplesheet } from '../subworkflows/local/utils_nfcore_oncoanalyser_pipeline/preflight'
+include { getSequencingPlatformPons } from '../subworkflows/local/utils_nfcore_oncoanalyser_pipeline/utils'
 
 /*
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -65,7 +66,7 @@ workflow PANEL_RESOURCE_CREATION {
     def panel_data = PREPARE_REFERENCE.out.panel_data
 
     // Configure selectable reference data and inputs
-    def hmf_data_pons = Utils.getSequencingPlatformPons(hmf_data, params.sequencing_platform, log)
+    def hmf_data_pons = getSequencingPlatformPons(hmf_data, params.sequencing_platform, log)
     def target_regions_bed = params.target_regions_bed != null ? file(params.target_regions_bed) : []
     def driver_gene_panel = params.driver_gene_panel != null ? file(params.driver_gene_panel) : []
 

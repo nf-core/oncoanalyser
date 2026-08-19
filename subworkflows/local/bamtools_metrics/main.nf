@@ -4,6 +4,7 @@
 
 include { BAMTOOLS } from '../../../modules/local/bamtools/main'
 include { groupByMeta; joinMeta; restoreMeta } from '../utils_nfcore_oncoanalyser_pipeline/channel_helpers'
+include { getNormalDnaSample; getNormalReduxDirAlignment; getTumorDnaSample; getTumorReduxDirAlignment; hasExistingInput; selectCurrentOrExisting } from '../utils_nfcore_oncoanalyser_pipeline/utils'
 
 workflow BAMTOOLS_METRICS {
     take:
@@ -27,14 +28,14 @@ workflow BAMTOOLS_METRICS {
     ch_inputs_tumor_sorted = ch_redux_dir_tumor
         .map { meta, redux_dir ->
 
-            def redux_dir_selected = Utils.selectCurrentOrExisting(redux_dir, meta, Constants.INPUT.REDUX_DIR_TUMOR)
-            def (aln, idx) = Utils.getTumorReduxDirAlignment(meta, redux_dir_selected)
+            def redux_dir_selected = selectCurrentOrExisting(redux_dir, meta, Constants.INPUT.REDUX_DIR_TUMOR)
+            def (aln, idx) = getTumorReduxDirAlignment(meta, redux_dir_selected)
 
             return [meta, aln, idx]
 
         }
         .branch { meta, aln, idx ->
-            def has_existing = Utils.hasExistingInput(meta, Constants.INPUT.BAMTOOLS_DIR_TUMOR)
+            def has_existing = hasExistingInput(meta, Constants.INPUT.BAMTOOLS_DIR_TUMOR)
             runnable: aln && ! has_existing
             skip: true
                 return meta
@@ -45,13 +46,13 @@ workflow BAMTOOLS_METRICS {
     ch_inputs_normal_sorted = ch_redux_dir_normal
         .map { meta, redux_dir ->
 
-            def redux_dir_selected = Utils.selectCurrentOrExisting(redux_dir, meta, Constants.INPUT.REDUX_DIR_NORMAL)
-            def (aln, idx) = Utils.getNormalReduxDirAlignment(meta, redux_dir_selected)
+            def redux_dir_selected = selectCurrentOrExisting(redux_dir, meta, Constants.INPUT.REDUX_DIR_NORMAL)
+            def (aln, idx) = getNormalReduxDirAlignment(meta, redux_dir_selected)
 
             return [meta, aln, idx]
         }
         .branch { meta, aln, idx ->
-            def has_existing = Utils.hasExistingInput(meta, Constants.INPUT.BAMTOOLS_DIR_NORMAL)
+            def has_existing = hasExistingInput(meta, Constants.INPUT.BAMTOOLS_DIR_NORMAL)
             runnable: aln && ! has_existing
             skip: true
                 return meta
@@ -61,8 +62,8 @@ workflow BAMTOOLS_METRICS {
     // channel: [ meta_bamtools, aln, idx ]
     ch_bamtools_inputs = channel.empty()
         .mix(
-            ch_inputs_tumor_sorted.runnable.map { meta, aln, idx -> [meta, Utils.getTumorDnaSample(meta), 'tumor', aln, idx] },
-            ch_inputs_normal_sorted.runnable.map { meta, aln, idx -> [meta, Utils.getNormalDnaSample(meta), 'normal', aln, idx] },
+            ch_inputs_tumor_sorted.runnable.map { meta, aln, idx -> [meta, getTumorDnaSample(meta), 'tumor', aln, idx] },
+            ch_inputs_normal_sorted.runnable.map { meta, aln, idx -> [meta, getNormalDnaSample(meta), 'normal', aln, idx] },
         )
         .map { meta, meta_sample, sample_type, aln, idx ->
 

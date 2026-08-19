@@ -5,6 +5,7 @@
 include { LINX_GERMLINE } from '../../../modules/local/linx/germline/main'
 include { LINX_SOMATIC  } from '../../../modules/local/linx/somatic/main'
 include { groupByMeta; joinMeta; restoreMeta } from '../utils_nfcore_oncoanalyser_pipeline/channel_helpers'
+include { getTumorDnaSampleName; hasExistingInput; hasNormalDna; hasTumorDna; selectCurrentOrExisting } from '../utils_nfcore_oncoanalyser_pipeline/utils'
 
 workflow LINX_ANNOTATION {
     take:
@@ -29,7 +30,7 @@ workflow LINX_ANNOTATION {
         .map { meta, purple_dir ->
             return [
                 meta,
-                Utils.selectCurrentOrExisting(purple_dir, meta, Constants.INPUT.PURPLE_DIR),
+                selectCurrentOrExisting(purple_dir, meta, Constants.INPUT.PURPLE_DIR),
             ]
         }
         .branch { meta, purple_dir ->
@@ -47,11 +48,11 @@ workflow LINX_ANNOTATION {
     ch_inputs_germline_sorted = ch_inputs_sorted.runnable
         .branch { meta, purple_dir ->
 
-            def tumor_id = Utils.getTumorDnaSampleName(meta)
+            def tumor_id = getTumorDnaSampleName(meta)
 
-            def has_tumor_normal = Utils.hasTumorDna(meta) && Utils.hasNormalDna(meta)
+            def has_tumor_normal = hasTumorDna(meta) && hasNormalDna(meta)
             def has_sv_germline_vcf = purple_dir.resolve("${tumor_id}.purple.sv.germline.vcf.gz").exists()
-            def has_existing = Utils.hasExistingInput(meta, Constants.INPUT.LINX_ANNO_DIR_NORMAL)
+            def has_existing = hasExistingInput(meta, Constants.INPUT.LINX_ANNO_DIR_NORMAL)
 
             runnable: has_tumor_normal && has_sv_germline_vcf && ! has_existing
             skip: true
@@ -63,7 +64,7 @@ workflow LINX_ANNOTATION {
     ch_linx_germline_inputs = ch_inputs_germline_sorted.runnable
         .map { meta, purple_dir ->
 
-            def tumor_id = Utils.getTumorDnaSampleName(meta)
+            def tumor_id = getTumorDnaSampleName(meta)
 
             def meta_linx = [
                 key: meta.group_id,
@@ -93,8 +94,8 @@ workflow LINX_ANNOTATION {
     ch_inputs_somatic_sorted = ch_inputs_sorted.runnable
         .branch { meta, purple_dir ->
 
-            def has_tumor = Utils.hasTumorDna(meta)
-            def has_existing = Utils.hasExistingInput(meta, Constants.INPUT.LINX_ANNO_DIR_TUMOR)
+            def has_tumor = hasTumorDna(meta)
+            def has_existing = hasExistingInput(meta, Constants.INPUT.LINX_ANNO_DIR_TUMOR)
 
             runnable: has_tumor && ! has_existing
             skip: true
@@ -109,7 +110,7 @@ workflow LINX_ANNOTATION {
             def meta_linx = [
                 key: meta.group_id,
                 id: meta.group_id,
-                sample_id: Utils.getTumorDnaSampleName(meta),
+                sample_id: getTumorDnaSampleName(meta),
             ]
 
             return [meta_linx, purple_dir]

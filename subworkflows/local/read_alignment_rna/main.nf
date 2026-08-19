@@ -6,6 +6,7 @@ include { GATK4_MARKDUPLICATES } from '../../../modules/nf-core/gatk4/markduplic
 include { SAMTOOLS_SORT        } from '../../../modules/nf-core/samtools/sort/main'
 include { STAR_ALIGN           } from '../../../modules/local/star/align/main'
 include { groupByMeta; joinMeta; restoreMeta } from '../utils_nfcore_oncoanalyser_pipeline/channel_helpers'
+include { getTumorRnaSampleName } from '../utils_nfcore_oncoanalyser_pipeline/utils'
 
 workflow READ_ALIGNMENT_RNA {
     take:
@@ -135,7 +136,7 @@ workflow READ_ALIGNMENT_RNA {
             def meta_markdups = [
                 key: meta.group_id,
                 id: meta.group_id,
-                sample_id: Utils.getTumorRnaSampleName(meta),
+                sample_id: getTumorRnaSampleName(meta),
             ]
             return [meta_markdups, aln]
         }

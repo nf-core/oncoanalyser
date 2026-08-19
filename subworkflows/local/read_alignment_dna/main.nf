@@ -5,6 +5,7 @@
 include { BWAMEM2_ALIGN } from '../../../modules/local/bwa-mem2/mem/main'
 include { FASTP_SPLIT   } from '../../../modules/local/fastp/split/main'
 include { groupByMeta; joinMeta; restoreMeta } from '../utils_nfcore_oncoanalyser_pipeline/channel_helpers'
+include { hasDonorDnaFastq; hasNormalDnaFastq; hasTumorDnaFastq } from '../utils_nfcore_oncoanalyser_pipeline/utils'
 
 workflow READ_ALIGNMENT_DNA {
     take:
@@ -38,7 +39,7 @@ workflow READ_ALIGNMENT_DNA {
         .branch { meta, fastq_info, fastq_fwd, fastq_rev ->
             def has_inputs = fastq_fwd && fastq_rev
             runnable: fastq_info.sample_type == 'tumor' && has_inputs
-            skip: ! Utils.hasTumorDnaFastq(meta)
+            skip: ! hasTumorDnaFastq(meta)
               return meta
         }
 
@@ -46,7 +47,7 @@ workflow READ_ALIGNMENT_DNA {
         .branch { meta, fastq_info, fastq_fwd, fastq_rev ->
             def has_inputs = fastq_fwd && fastq_rev
             runnable: fastq_info.sample_type == 'normal' && has_inputs
-            skip: ! Utils.hasNormalDnaFastq(meta)
+            skip: ! hasNormalDnaFastq(meta)
               return meta
         }
 
@@ -54,7 +55,7 @@ workflow READ_ALIGNMENT_DNA {
         .branch { meta, fastq_info, fastq_fwd, fastq_rev ->
             def has_inputs = fastq_fwd && fastq_rev
             runnable: fastq_info.sample_type == 'donor' && has_inputs
-            skip: ! Utils.hasDonorDnaFastq(meta)
+            skip: ! hasDonorDnaFastq(meta)
               return meta
         }
 

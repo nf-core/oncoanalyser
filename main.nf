@@ -47,6 +47,7 @@ include { PURITY_ESTIMATE         } from './workflows/purity_estimate'
 include { TARGETED                } from './workflows/targeted'
 include { WGTS                    } from './workflows/wgts'
 include { getRunConfig; setParamsDefaults; validateParams } from './subworkflows/local/utils_nfcore_oncoanalyser_pipeline/preflight'
+include { createStubPlaceholders; getRunMode; parseInput; validateInput } from './subworkflows/local/utils_nfcore_oncoanalyser_pipeline/utils'
 
 /*
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -61,7 +62,7 @@ include { getRunConfig; setParamsDefaults; validateParams } from './subworkflows
 workflow NFCORE_ONCOANALYSER {
     main:
     // Get run mode
-    def run_mode = Utils.getRunMode(params.mode, log)
+    def run_mode = getRunMode(params.mode, log)
 
     // Results channel for eventual publishing
     // channel: [filepath, file]
@@ -74,9 +75,9 @@ workflow NFCORE_ONCOANALYSER {
         ch_results = ch_results.mix(PREPARE_REFERENCE.out.results)
     } else {
         // Parse and validate inputs
-        inputs = Utils.parseInput(params.input, workflow.stubRun, log)
+        inputs = parseInput(params.input, workflow.stubRun, log)
         run_config = getRunConfig(params, inputs, log)
-        Utils.validateInput(inputs, run_config, params, log)
+        validateInput(inputs, run_config, params, log)
 
         // Run requested workflow
         if (run_mode == Constants.RunMode.WGTS) {
@@ -119,7 +120,7 @@ workflow {
     // STEP: Create placeholders for stub runs if requested
     //
     if (workflow.stubRun && params.create_stub_placeholders) {
-        Utils.createStubPlaceholders(params)
+        createStubPlaceholders(params)
     }
 
     //

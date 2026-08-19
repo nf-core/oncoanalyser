@@ -4,6 +4,7 @@
 
 include { AMBER } from '../../../modules/local/amber/main'
 include { groupByMeta; joinMeta; restoreMeta } from '../utils_nfcore_oncoanalyser_pipeline/channel_helpers'
+include { getDonorDnaSampleName; getDonorReduxDirAlignment; getNormalDnaSampleName; getNormalReduxDirAlignment; getTumorDnaSampleName; getTumorReduxDirAlignment; hasExistingInput; selectCurrentOrExisting } from '../utils_nfcore_oncoanalyser_pipeline/utils'
 
 workflow AMBER_PROFILING {
     take:
@@ -36,20 +37,20 @@ workflow AMBER_PROFILING {
     ])
         .map { meta, redux_dir_tumor, redux_dir_normal, redux_dir_donor ->
 
-            def redux_dir_tumor_selected = Utils.selectCurrentOrExisting(redux_dir_tumor, meta, Constants.INPUT.REDUX_DIR_TUMOR)
-            def redux_dir_normal_selected = Utils.selectCurrentOrExisting(redux_dir_normal, meta, Constants.INPUT.REDUX_DIR_NORMAL)
-            def redux_dir_donor_selected = Utils.selectCurrentOrExisting(redux_dir_donor, meta, Constants.INPUT.REDUX_DIR_DONOR)
+            def redux_dir_tumor_selected = selectCurrentOrExisting(redux_dir_tumor, meta, Constants.INPUT.REDUX_DIR_TUMOR)
+            def redux_dir_normal_selected = selectCurrentOrExisting(redux_dir_normal, meta, Constants.INPUT.REDUX_DIR_NORMAL)
+            def redux_dir_donor_selected = selectCurrentOrExisting(redux_dir_donor, meta, Constants.INPUT.REDUX_DIR_DONOR)
 
-            def (tumor_aln, tumor_idx) = Utils.getTumorReduxDirAlignment(meta, redux_dir_tumor_selected)
-            def (normal_aln, normal_idx) = Utils.getNormalReduxDirAlignment(meta, redux_dir_normal_selected)
-            def (donor_aln, donor_idx) = Utils.getDonorReduxDirAlignment(meta, redux_dir_donor_selected)
+            def (tumor_aln, tumor_idx) = getTumorReduxDirAlignment(meta, redux_dir_tumor_selected)
+            def (normal_aln, normal_idx) = getNormalReduxDirAlignment(meta, redux_dir_normal_selected)
+            def (donor_aln, donor_idx) = getDonorReduxDirAlignment(meta, redux_dir_donor_selected)
 
             return [meta, tumor_aln, tumor_idx, normal_aln, normal_idx, donor_aln, donor_idx]
 
         }
         .branch { meta, tumor_aln, tumor_idx, normal_aln, normal_idx, donor_aln, donor_idx ->
 
-            def has_existing = Utils.hasExistingInput(meta, Constants.INPUT.AMBER_DIR)
+            def has_existing = hasExistingInput(meta, Constants.INPUT.AMBER_DIR)
             def runnable_standard = ! purity_estimate_mode && tumor_aln && ! has_existing
 
             // TODO(SW): must improve handling through separation of sample information in meta; currently unable to provide ccfDNA AMBER directory in samplesheet
@@ -67,9 +68,9 @@ workflow AMBER_PROFILING {
 
             def tumor_id
             if (purity_estimate_mode) {
-                tumor_id = Utils.getTumorDnaSampleName(meta, primary: false)
+                tumor_id = getTumorDnaSampleName(meta, primary: false)
             } else {
-                tumor_id = Utils.getTumorDnaSampleName(meta, primary: true)
+                tumor_id = getTumorDnaSampleName(meta, primary: true)
             }
 
             def meta_amber = [
@@ -79,11 +80,11 @@ workflow AMBER_PROFILING {
             ]
 
             if (normal_aln) {
-                meta_amber.normal_id = Utils.getNormalDnaSampleName(meta)
+                meta_amber.normal_id = getNormalDnaSampleName(meta)
             }
 
             if (donor_aln) {
-                meta_amber.donor_id = Utils.getDonorDnaSampleName(meta)
+                meta_amber.donor_id = getDonorDnaSampleName(meta)
             }
 
             return [meta_amber, tumor_aln, tumor_idx, normal_aln, normal_idx, donor_aln, donor_idx]

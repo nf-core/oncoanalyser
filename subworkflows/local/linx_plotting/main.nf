@@ -5,6 +5,7 @@
 include { LINXREPORT      } from '../../../modules/local/linxreport/main'
 include { LINX_VISUALISER } from '../../../modules/local/linx/visualiser/main'
 include { groupByMeta; joinMeta; restoreMeta } from '../utils_nfcore_oncoanalyser_pipeline/channel_helpers'
+include { getTumorDnaSampleName; hasExistingInput; selectCurrentOrExisting } from '../utils_nfcore_oncoanalyser_pipeline/utils'
 
 workflow LINX_PLOTTING {
     take:
@@ -36,15 +37,15 @@ workflow LINX_PLOTTING {
 
             return [
                 meta,
-                Utils.selectCurrentOrExisting(linx_annotations_dir, meta, Constants.INPUT.LINX_ANNO_DIR_TUMOR),
-                Utils.selectCurrentOrExisting(amber_dir, meta, Constants.INPUT.AMBER_DIR),
-                Utils.selectCurrentOrExisting(cobalt_dir, meta, Constants.INPUT.COBALT_DIR),
-                Utils.selectCurrentOrExisting(purple_dir, meta, Constants.INPUT.PURPLE_DIR),
+                selectCurrentOrExisting(linx_annotations_dir, meta, Constants.INPUT.LINX_ANNO_DIR_TUMOR),
+                selectCurrentOrExisting(amber_dir, meta, Constants.INPUT.AMBER_DIR),
+                selectCurrentOrExisting(cobalt_dir, meta, Constants.INPUT.COBALT_DIR),
+                selectCurrentOrExisting(purple_dir, meta, Constants.INPUT.PURPLE_DIR),
             ]
         }
         .branch { meta, linx_annotations_dir, amber_dir, cobalt_dir, purple_dir ->
 
-            def has_existing = Utils.hasExistingInput(meta, Constants.INPUT.LINX_PLOT_DIR_TUMOR)
+            def has_existing = hasExistingInput(meta, Constants.INPUT.LINX_PLOT_DIR_TUMOR)
 
             runnable: linx_annotations_dir && ! has_existing
             skip: true
@@ -62,7 +63,7 @@ workflow LINX_PLOTTING {
             def meta_linx = [
                 key: meta.group_id,
                 id: meta.group_id,
-                sample_id: Utils.getTumorDnaSampleName(meta),
+                sample_id: getTumorDnaSampleName(meta),
             ]
 
             return [meta_linx, linx_annotations_dir, amber_dir, cobalt_dir, purple_dir]
@@ -89,7 +90,7 @@ workflow LINX_PLOTTING {
             def meta_gpgr_linx = [
                 key: meta.group_id,
                 id: meta.group_id,
-                sample_id: Utils.getTumorDnaSampleName(meta),
+                sample_id: getTumorDnaSampleName(meta),
             ]
 
             return [meta_gpgr_linx, linx_annotation_dir, linx_visualiser_dir]

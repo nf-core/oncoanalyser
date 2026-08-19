@@ -4,6 +4,7 @@
 
 include { COBALT } from '../../../modules/local/cobalt/run/main'
 include { groupByMeta; joinMeta; restoreMeta } from '../utils_nfcore_oncoanalyser_pipeline/channel_helpers'
+include { getNormalDnaSampleName; getNormalReduxDirAlignment; getTumorDnaSampleName; getTumorReduxDirAlignment; hasExistingInput; selectCurrentOrExisting } from '../utils_nfcore_oncoanalyser_pipeline/utils'
 
 workflow COBALT_PROFILING {
     take:
@@ -33,17 +34,17 @@ workflow COBALT_PROFILING {
     ])
         .map { meta, redux_dir_tumor, redux_dir_normal ->
 
-            def redux_dir_tumor_selected = Utils.selectCurrentOrExisting(redux_dir_tumor, meta, Constants.INPUT.REDUX_DIR_TUMOR)
-            def redux_dir_normal_selected = Utils.selectCurrentOrExisting(redux_dir_normal, meta, Constants.INPUT.REDUX_DIR_NORMAL)
+            def redux_dir_tumor_selected = selectCurrentOrExisting(redux_dir_tumor, meta, Constants.INPUT.REDUX_DIR_TUMOR)
+            def redux_dir_normal_selected = selectCurrentOrExisting(redux_dir_normal, meta, Constants.INPUT.REDUX_DIR_NORMAL)
 
-            def (tumor_aln, tumor_idx) = Utils.getTumorReduxDirAlignment(meta, redux_dir_tumor_selected)
-            def (normal_aln, normal_idx) = Utils.getNormalReduxDirAlignment(meta, redux_dir_normal_selected)
+            def (tumor_aln, tumor_idx) = getTumorReduxDirAlignment(meta, redux_dir_tumor_selected)
+            def (normal_aln, normal_idx) = getNormalReduxDirAlignment(meta, redux_dir_normal_selected)
 
             return [meta, tumor_aln, tumor_idx, normal_aln, normal_idx]
 
         }
         .branch { meta, tumor_aln, tumor_idx, normal_aln, normal_idx ->
-            def has_existing = Utils.hasExistingInput(meta, Constants.INPUT.COBALT_DIR)
+            def has_existing = hasExistingInput(meta, Constants.INPUT.COBALT_DIR)
             runnable_tn: tumor_aln && normal_aln && ! has_existing
             runnable_to: tumor_aln && ! has_existing
             skip: true
@@ -67,9 +68,9 @@ workflow COBALT_PROFILING {
 
             def tumor_id
             if (purity_estimate_mode) {
-                tumor_id = Utils.getTumorDnaSampleName(meta, primary: false)
+                tumor_id = getTumorDnaSampleName(meta, primary: false)
             } else {
-                tumor_id = Utils.getTumorDnaSampleName(meta, primary: true)
+                tumor_id = getTumorDnaSampleName(meta, primary: true)
             }
 
             def meta_cobalt = [
@@ -79,7 +80,7 @@ workflow COBALT_PROFILING {
             ]
 
             if (normal_aln) {
-                meta_cobalt.normal_id = Utils.getNormalDnaSampleName(meta)
+                meta_cobalt.normal_id = getNormalDnaSampleName(meta)
             }
 
             sample_data: [meta_cobalt, tumor_aln, tumor_idx, normal_aln, normal_idx]

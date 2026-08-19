@@ -4,6 +4,7 @@
 
 include { ESVEE } from '../../../modules/local/esvee/main'
 include { groupByMeta; joinMeta; restoreMeta } from '../utils_nfcore_oncoanalyser_pipeline/channel_helpers'
+include { getNormalDnaSampleName; getNormalReduxDirAlignment; getTumorDnaSampleName; getTumorReduxDirAlignment; hasExistingInput; selectCurrentOrExisting } from '../utils_nfcore_oncoanalyser_pipeline/utils'
 
 workflow ESVEE_CALLING {
     take:
@@ -40,16 +41,16 @@ workflow ESVEE_CALLING {
     ])
         .map { meta, redux_dir_tumor, redux_dir_normal ->
 
-            def redux_dir_tumor_selected = Utils.selectCurrentOrExisting(redux_dir_tumor, meta, Constants.INPUT.REDUX_DIR_TUMOR)
-            def redux_dir_normal_selected = Utils.selectCurrentOrExisting(redux_dir_normal, meta, Constants.INPUT.REDUX_DIR_NORMAL)
+            def redux_dir_tumor_selected = selectCurrentOrExisting(redux_dir_tumor, meta, Constants.INPUT.REDUX_DIR_TUMOR)
+            def redux_dir_normal_selected = selectCurrentOrExisting(redux_dir_normal, meta, Constants.INPUT.REDUX_DIR_NORMAL)
 
-            def (tumor_aln, tumor_idx) = Utils.getTumorReduxDirAlignment(meta, redux_dir_tumor_selected)
-            def (normal_aln, normal_idx) = Utils.getNormalReduxDirAlignment(meta, redux_dir_normal_selected)
+            def (tumor_aln, tumor_idx) = getTumorReduxDirAlignment(meta, redux_dir_tumor_selected)
+            def (normal_aln, normal_idx) = getNormalReduxDirAlignment(meta, redux_dir_normal_selected)
 
             return [meta, tumor_aln, tumor_idx, normal_aln, normal_idx]
         }
         .branch { meta, tumor_aln, tumor_idx, normal_aln, normal_idx ->
-            def has_existing = Utils.hasExistingInput(meta, Constants.INPUT.ESVEE_DIR)
+            def has_existing = hasExistingInput(meta, Constants.INPUT.ESVEE_DIR)
 
             runnable_tn: tumor_aln && normal_aln && ! has_existing
             runnable_to: tumor_aln && ! has_existing
@@ -70,11 +71,11 @@ workflow ESVEE_CALLING {
             def meta_esvee = [
                 key: meta.group_id,
                 id: meta.group_id,
-                tumor_id: Utils.getTumorDnaSampleName(meta),
+                tumor_id: getTumorDnaSampleName(meta),
             ]
 
             if (normal_aln) {
-                meta_esvee.normal_id = Utils.getNormalDnaSampleName(meta)
+                meta_esvee.normal_id = getNormalDnaSampleName(meta)
             }
 
             return [meta_esvee, tumor_aln, tumor_idx, normal_aln, normal_idx]

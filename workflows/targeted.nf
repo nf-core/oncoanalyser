@@ -31,9 +31,10 @@ include { SAGE_PLOTTING            } from '../subworkflows/local/sage_plotting'
 
 include { softwareVersionsToYAML } from '../subworkflows/nf-core/utils_nfcore_pipeline'
 
-include { getDnaFastqChannel } from '../subworkflows/local/utils_nfcore_oncoanalyser_pipeline'
-include { getRnaFastqChannel } from '../subworkflows/local/utils_nfcore_oncoanalyser_pipeline'
+include { getDnaFastqChannel } from '../subworkflows/local/utils_nfcore_oncoanalyser_pipeline/utils'
+include { getRnaFastqChannel } from '../subworkflows/local/utils_nfcore_oncoanalyser_pipeline/utils'
 include { getPrepConfigFromSamplesheet } from '../subworkflows/local/utils_nfcore_oncoanalyser_pipeline/preflight'
+include { getSequencingPlatformPons } from '../subworkflows/local/utils_nfcore_oncoanalyser_pipeline/utils'
 
 /*
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -75,7 +76,7 @@ workflow TARGETED {
     def panel_data = PREPARE_REFERENCE.out.panel_data
 
     // Configure selectable reference data and inputs
-    def hmf_data_pons = Utils.getSequencingPlatformPons(hmf_data, params.sequencing_platform, log)
+    def hmf_data_pons = getSequencingPlatformPons(hmf_data, params.sequencing_platform, log)
     def driver_gene_panel = params.driver_gene_panel != null ? file(params.driver_gene_panel) : panel_data.driver_gene_panel
     def msi_model_error_rates = panel_data.msi_model_error_rates != null ? panel_data.msi_model_error_rates : hmf_data.msi_model_error_rates
 

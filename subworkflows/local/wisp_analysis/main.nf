@@ -4,6 +4,7 @@
 
 include { WISP } from '../../../modules/local/wisp/main'
 include { groupByMeta; joinMeta; restoreMeta } from '../utils_nfcore_oncoanalyser_pipeline/channel_helpers'
+include { getInput; getNormalReduxDirAlignment; getTumorDnaSampleName; selectCurrentOrExisting } from '../utils_nfcore_oncoanalyser_pipeline/utils'
 
 workflow WISP_ANALYSIS {
     take:
@@ -33,13 +34,13 @@ workflow WISP_ANALYSIS {
     ])
         .map { meta, longitudinal_redux_dir, longitudinal_amber_dir, longitudinal_cobalt_dir, longitudinal_sage_append_dir ->
 
-            def primary_normal_redux_dir = Utils.getInput(meta, Constants.INPUT.REDUX_DIR_NORMAL)
-            def (primary_normal_aln, _primary_normal_idx) = Utils.getNormalReduxDirAlignment(meta, primary_normal_redux_dir)
+            def primary_normal_redux_dir = getInput(meta, Constants.INPUT.REDUX_DIR_NORMAL)
+            def (primary_normal_aln, _primary_normal_idx) = getNormalReduxDirAlignment(meta, primary_normal_redux_dir)
 
-            def primary_purple_dir = Utils.getInput(meta, Constants.INPUT.PURPLE_DIR)
-            def primary_amber_dir = Utils.getInput(meta, Constants.INPUT.AMBER_DIR)
+            def primary_purple_dir = getInput(meta, Constants.INPUT.PURPLE_DIR)
+            def primary_amber_dir = getInput(meta, Constants.INPUT.AMBER_DIR)
 
-            def longitudinal_redux_dir_selected = Utils.selectCurrentOrExisting(longitudinal_redux_dir, meta, Constants.INPUT.REDUX_DIR_TUMOR)
+            def longitudinal_redux_dir_selected = selectCurrentOrExisting(longitudinal_redux_dir, meta, Constants.INPUT.REDUX_DIR_TUMOR)
 
             return [
               meta,
@@ -78,8 +79,8 @@ workflow WISP_ANALYSIS {
                 key: meta.group_id,
                 id: meta.group_id,
                 subject_id: meta.subject_id,
-                primary_id: Utils.getTumorDnaSampleName(meta, primary: true),
-                longitudinal_id: Utils.getTumorDnaSampleName(meta, primary: false),
+                primary_id: getTumorDnaSampleName(meta, primary: true),
+                longitudinal_id: getTumorDnaSampleName(meta, primary: false),
             ]
 
             return [meta_wisp] + inputs

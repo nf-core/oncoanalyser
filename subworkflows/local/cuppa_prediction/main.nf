@@ -4,6 +4,7 @@
 
 include { CUPPA } from '../../../modules/local/cuppa/main'
 include { groupByMeta; joinMeta; restoreMeta } from '../utils_nfcore_oncoanalyser_pipeline/channel_helpers'
+include { getTumorDnaSampleName; getTumorRnaSampleName; hasExistingInput; hasNormalDna; hasTumorDna; hasTumorRna; selectCurrentOrExisting } from '../utils_nfcore_oncoanalyser_pipeline/utils'
 
 workflow CUPPA_PREDICTION {
     take:
@@ -32,10 +33,10 @@ workflow CUPPA_PREDICTION {
         .map { meta, isofox_dir, purple_dir, linx_annotation_dir, virusinterpreter_dir ->
             return [
                 meta,
-                Utils.selectCurrentOrExisting(isofox_dir, meta, Constants.INPUT.ISOFOX_DIR),
-                Utils.selectCurrentOrExisting(purple_dir, meta, Constants.INPUT.PURPLE_DIR),
-                Utils.selectCurrentOrExisting(linx_annotation_dir, meta, Constants.INPUT.LINX_ANNO_DIR_TUMOR),
-                Utils.selectCurrentOrExisting(virusinterpreter_dir, meta, Constants.INPUT.VIRUSINTERPRETER_DIR),
+                selectCurrentOrExisting(isofox_dir, meta, Constants.INPUT.ISOFOX_DIR),
+                selectCurrentOrExisting(purple_dir, meta, Constants.INPUT.PURPLE_DIR),
+                selectCurrentOrExisting(linx_annotation_dir, meta, Constants.INPUT.LINX_ANNO_DIR_TUMOR),
+                selectCurrentOrExisting(virusinterpreter_dir, meta, Constants.INPUT.VIRUSINTERPRETER_DIR),
             ]
         }
         .branch { meta, isofox_dir, purple_dir, linx_annotation_dir, virusinterpreter_dir ->
@@ -51,10 +52,10 @@ workflow CUPPA_PREDICTION {
             //
             // (run exclusions currently done basis for presence of normal DNA)
 
-            def has_existing = Utils.hasExistingInput(meta, Constants.INPUT.CUPPA_DIR)
-            def has_normal_dna = Utils.hasNormalDna(meta)
+            def has_existing = hasExistingInput(meta, Constants.INPUT.CUPPA_DIR)
+            def has_normal_dna = hasNormalDna(meta)
 
-            def tumor_dna_id = Utils.getTumorDnaSampleName(meta)
+            def tumor_dna_id = getTumorDnaSampleName(meta)
             def has_smlv_vcf = purple_dir ? purple_dir.resolve("${tumor_dna_id}.purple.somatic.vcf.gz").exists() : false
 
             def has_runnable_inputs = isofox_dir || (has_smlv_vcf && linx_annotation_dir && has_normal_dna)
@@ -75,9 +76,9 @@ workflow CUPPA_PREDICTION {
                 id: meta.group_id,
             ]
 
-            def has_tumor_dna = Utils.hasTumorDna(meta)
-            def has_normal_dna = Utils.hasNormalDna(meta)
-            def has_tumor_rna = Utils.hasTumorRna(meta)
+            def has_tumor_dna = hasTumorDna(meta)
+            def has_normal_dna = hasNormalDna(meta)
+            def has_tumor_rna = hasTumorRna(meta)
 
             def has_dna_inputs = (purple_dir && linx_annotation_dir)
             def has_rna_inputs = isofox_dir
@@ -85,8 +86,8 @@ workflow CUPPA_PREDICTION {
             def run_dna = has_dna_inputs && has_tumor_dna && has_normal_dna
             def run_rna = has_rna_inputs && has_tumor_rna
 
-            def tumor_dna_id = Utils.getTumorDnaSampleName(meta)
-            def tumor_rna_id = Utils.getTumorRnaSampleName(meta)
+            def tumor_dna_id = getTumorDnaSampleName(meta)
+            def tumor_rna_id = getTumorRnaSampleName(meta)
 
             def categories
 

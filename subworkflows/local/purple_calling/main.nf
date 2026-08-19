@@ -4,6 +4,7 @@
 
 include { PURPLE } from '../../../modules/local/purple/main'
 include { groupByMeta; joinMeta; restoreMeta } from '../utils_nfcore_oncoanalyser_pipeline/channel_helpers'
+include { getNormalDnaSampleName; getTumorDnaSampleName; getTumorReduxTsvs; hasExistingInput; hasNormalDna; selectCurrentOrExisting } from '../utils_nfcore_oncoanalyser_pipeline/utils'
 
 workflow PURPLE_CALLING {
     take:
@@ -43,22 +44,22 @@ workflow PURPLE_CALLING {
     ])
         .map { meta, amber_dir, cobalt_dir, esvee_dir, pave_somatic_dir, pave_germline_dir, redux_dir_tumor ->
 
-            def tumor_dir_selected = Utils.selectCurrentOrExisting(redux_dir_tumor, meta, Constants.INPUT.REDUX_DIR_TUMOR)
-            def tumor_tsvs = Utils.getTumorReduxTsvs(meta, tumor_dir_selected)
+            def tumor_dir_selected = selectCurrentOrExisting(redux_dir_tumor, meta, Constants.INPUT.REDUX_DIR_TUMOR)
+            def tumor_tsvs = getTumorReduxTsvs(meta, tumor_dir_selected)
 
             return [
                 meta,
-                Utils.selectCurrentOrExisting(amber_dir, meta, Constants.INPUT.AMBER_DIR),
-                Utils.selectCurrentOrExisting(cobalt_dir, meta, Constants.INPUT.COBALT_DIR),
-                Utils.selectCurrentOrExisting(esvee_dir, meta, Constants.INPUT.ESVEE_DIR),
-                Utils.selectCurrentOrExisting(pave_somatic_dir, meta, Constants.INPUT.PAVE_DIR_TUMOR),
-                Utils.selectCurrentOrExisting(pave_germline_dir, meta, Constants.INPUT.PAVE_DIR_NORMAL),
+                selectCurrentOrExisting(amber_dir, meta, Constants.INPUT.AMBER_DIR),
+                selectCurrentOrExisting(cobalt_dir, meta, Constants.INPUT.COBALT_DIR),
+                selectCurrentOrExisting(esvee_dir, meta, Constants.INPUT.ESVEE_DIR),
+                selectCurrentOrExisting(pave_somatic_dir, meta, Constants.INPUT.PAVE_DIR_TUMOR),
+                selectCurrentOrExisting(pave_germline_dir, meta, Constants.INPUT.PAVE_DIR_NORMAL),
                 tumor_tsvs.findAll { f -> f.exists() },
             ]
         }
         .branch { meta, amber_dir, cobalt_dir, esvee_dir, pave_somatic_dir, pave_germline_dir, redux_tsvs_tumor ->
 
-            def has_existing = Utils.hasExistingInput(meta, Constants.INPUT.PURPLE_DIR)
+            def has_existing = hasExistingInput(meta, Constants.INPUT.PURPLE_DIR)
 
             runnable: amber_dir && cobalt_dir && ! has_existing
             skip: true
@@ -73,11 +74,11 @@ workflow PURPLE_CALLING {
             def meta_purple = [
                 key: meta.group_id,
                 id: meta.group_id,
-                tumor_id: Utils.getTumorDnaSampleName(meta),
+                tumor_id: getTumorDnaSampleName(meta),
             ]
 
-            if (Utils.hasNormalDna(meta)) {
-                meta_purple.normal_id = Utils.getNormalDnaSampleName(meta)
+            if (hasNormalDna(meta)) {
+                meta_purple.normal_id = getNormalDnaSampleName(meta)
             }
 
             return [meta_purple, amber_dir, cobalt_dir, esvee_dir, pave_somatic_dir, pave_germline_dir, redux_tsvs_tumor]

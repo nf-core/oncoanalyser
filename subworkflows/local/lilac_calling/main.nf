@@ -4,6 +4,7 @@
 
 include { LILAC } from '../../../modules/local/lilac/main'
 include { groupByMeta; joinMeta; restoreMeta } from '../utils_nfcore_oncoanalyser_pipeline/channel_helpers'
+include { getNormalDnaSampleName; getNormalReduxDirAlignment; getTumorDnaSampleName; getTumorReduxDirAlignment; hasExistingInput; hasNormalDna; hasTumorDna; selectCurrentOrExisting } from '../utils_nfcore_oncoanalyser_pipeline/utils'
 
 workflow LILAC_CALLING {
     take:
@@ -36,11 +37,11 @@ workflow LILAC_CALLING {
     ])
         .map { meta, redux_dir_tumor, redux_dir_normal, tumor_rna_aln, tumor_rna_idx, purple_dir ->
 
-            def redux_dir_tumor_selected = Utils.selectCurrentOrExisting(redux_dir_tumor, meta, Constants.INPUT.REDUX_DIR_TUMOR)
-            def redux_dir_normal_selected = Utils.selectCurrentOrExisting(redux_dir_normal, meta, Constants.INPUT.REDUX_DIR_NORMAL)
+            def redux_dir_tumor_selected = selectCurrentOrExisting(redux_dir_tumor, meta, Constants.INPUT.REDUX_DIR_TUMOR)
+            def redux_dir_normal_selected = selectCurrentOrExisting(redux_dir_normal, meta, Constants.INPUT.REDUX_DIR_NORMAL)
 
-            def (tumor_dna_aln, tumor_dna_idx) = Utils.getTumorReduxDirAlignment(meta, redux_dir_tumor_selected)
-            def (normal_dna_aln, normal_dna_idx) = Utils.getNormalReduxDirAlignment(meta, redux_dir_normal_selected)
+            def (tumor_dna_aln, tumor_dna_idx) = getTumorReduxDirAlignment(meta, redux_dir_tumor_selected)
+            def (normal_dna_aln, normal_dna_idx) = getNormalReduxDirAlignment(meta, redux_dir_normal_selected)
 
             return [
                 meta,
@@ -48,19 +49,19 @@ workflow LILAC_CALLING {
                 normal_dna_idx,
                 tumor_dna_aln,
                 tumor_dna_idx,
-                Utils.selectCurrentOrExisting(tumor_rna_aln, meta, Constants.INPUT.ALN_RNA_TUMOR),
-                Utils.selectCurrentOrExisting(tumor_rna_idx, meta, Constants.INPUT.IDX_RNA_TUMOR),
-                Utils.selectCurrentOrExisting(purple_dir, meta, Constants.INPUT.PURPLE_DIR),
+                selectCurrentOrExisting(tumor_rna_aln, meta, Constants.INPUT.ALN_RNA_TUMOR),
+                selectCurrentOrExisting(tumor_rna_idx, meta, Constants.INPUT.IDX_RNA_TUMOR),
+                selectCurrentOrExisting(purple_dir, meta, Constants.INPUT.PURPLE_DIR),
             ]
 
         }
         .branch { meta, normal_dna_aln, normal_dna_idx, tumor_dna_aln, tumor_dna_idx, tumor_rna_aln, tumor_rna_idx, purple_dir ->
 
-            def has_existing = Utils.hasExistingInput(meta, Constants.INPUT.LILAC_DIR)
+            def has_existing = hasExistingInput(meta, Constants.INPUT.LILAC_DIR)
 
             def tumor_normal_mode = tumor_dna_aln && normal_dna_aln
 
-            def tumor_dna_id = Utils.getTumorDnaSampleName(meta)
+            def tumor_dna_id = getTumorDnaSampleName(meta)
             def has_tn_smlv_vcf = purple_dir ? purple_dir.resolve("${tumor_dna_id}.purple.somatic.vcf.gz").exists() : false
 
             runnable: (tumor_dna_aln || normal_dna_aln) && (has_tn_smlv_vcf || ! tumor_normal_mode) && ! has_existing
@@ -80,12 +81,12 @@ workflow LILAC_CALLING {
                 id: meta.group_id,
             ]
 
-            if (Utils.hasTumorDna(meta)) {
-                meta_lilac.tumor_id = Utils.getTumorDnaSampleName(meta)
+            if (hasTumorDna(meta)) {
+                meta_lilac.tumor_id = getTumorDnaSampleName(meta)
             }
 
-            if (Utils.hasNormalDna(meta)) {
-                meta_lilac.normal_id = Utils.getNormalDnaSampleName(meta)
+            if (hasNormalDna(meta)) {
+                meta_lilac.normal_id = getNormalDnaSampleName(meta)
             }
 
             return [meta_lilac, normal_dna_aln, normal_dna_idx, tumor_dna_aln, tumor_dna_idx, tumor_rna_aln, tumor_rna_idx, purple_dir]

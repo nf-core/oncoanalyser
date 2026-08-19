@@ -3,6 +3,7 @@
 //
 
 include { getRunStages } from './processes'
+include { getEnumFromString; getEnumNames; getRunMode; hasNormalDnaFastq; hasTumorDna; hasTumorDnaFastq; hasTumorRna; hasTumorRnaFastq } from './utils'
 
 //
 // Set parameter defaults where required
@@ -55,7 +56,7 @@ def setParamsDefaults(params, log) {
 
     def run_mode
     if (params.mode != null) {
-        run_mode = Utils.getRunMode(params.mode, log)
+        run_mode = getRunMode(params.mode, log)
     } else {
         // Bad configuration, catch in validateParams
         return
@@ -88,7 +89,7 @@ def setParamsDefaults(params, log) {
     //
     def umi_type
     if (params.containsKey('umi_type') && params.umi_type) {
-        umi_type = Utils.getEnumFromString(params.umi_type, Constants.UmiType)
+        umi_type = getEnumFromString(params.umi_type, Constants.UmiType)
     } else if (params.containsKey('panel') && Constants.PANELS_DEFINED.contains(params.panel.toLowerCase())) {
         if (params.panel.toLowerCase() == 'tso500') {
             umi_type = Constants.UmiType.TSO500
@@ -210,7 +211,7 @@ def validateParams(params, log) {
     // Run configuration specific parameters
 
     if (! params.mode) {
-        def run_modes = Utils.getEnumNames(Constants.RunMode).join('\n    - ')
+        def run_modes = getEnumNames(Constants.RunMode).join('\n    - ')
         log.error "\n~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n" +
             "  Run mode must be set using the --mode CLI argument or in a configuration  \n" +
             "  file.\n" +
@@ -220,11 +221,11 @@ def validateParams(params, log) {
         exit 1
     }
 
-    def run_mode = Utils.getRunMode(params.mode, log)
+    def run_mode = getRunMode(params.mode, log)
 
     if (run_mode == Constants.RunMode.PREPARE_REFERENCE && params.ref_data_types == null) {
 
-        def ref_data_types = Utils.getEnumNames(Constants.RefDataType).join('\n    - ')
+        def ref_data_types = getEnumNames(Constants.RefDataType).join('\n    - ')
 
         log.error "\n~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n" +
             "  CLI argument --ref_data_types is required for mode prepare_reference.\n" +
@@ -372,7 +373,7 @@ def validateParams(params, log) {
 
         def purity_estimate_modes = [Constants.RunMode.WGTS, Constants.RunMode.TARGETED]
 
-        def purity_mode_enum = ! params.purity_estimate_mode ? null : Utils.getEnumFromString(params.purity_estimate_mode, Constants.RunMode)
+        def purity_mode_enum = ! params.purity_estimate_mode ? null : getEnumFromString(params.purity_estimate_mode, Constants.RunMode)
 
         if (! purity_mode_enum || ! purity_estimate_modes.contains(purity_mode_enum)) {
 
@@ -472,7 +473,7 @@ def validateParams(params, log) {
 
 def getRunConfig(params, inputs, log) {
 
-    def run_mode = Utils.getRunMode(params.mode, log)
+    def run_mode = getRunMode(params.mode, log)
 
     def stages = getRunStages(
         params.processes_include,
@@ -484,10 +485,10 @@ def getRunConfig(params, inputs, log) {
     return [
         mode: run_mode,
         stages: stages,
-        has_dna: inputs.any { Utils.hasTumorDna(it) },
-        has_rna: inputs.any { Utils.hasTumorRna(it) },
-        has_rna_fastq: inputs.any { Utils.hasTumorRnaFastq(it) },
-        has_dna_fastq: inputs.any { Utils.hasTumorDnaFastq(it) || Utils.hasNormalDnaFastq(it) },
+        has_dna: inputs.any { hasTumorDna(it) },
+        has_rna: inputs.any { hasTumorRna(it) },
+        has_rna_fastq: inputs.any { hasTumorRnaFastq(it) },
+        has_dna_fastq: inputs.any { hasTumorDnaFastq(it) || hasNormalDnaFastq(it) },
     ]
 }
 
@@ -511,10 +512,10 @@ def getPrepConfigFromSamplesheet(run_config) {
 
 def getPrepConfigFromCli(params, log) {
     def ref_data_types = params.ref_data_types.tokenize(',').collect {
-            def ref_data_type_enum = Utils.getEnumFromString(it, Constants.RefDataType)
+            def ref_data_type_enum = getEnumFromString(it, Constants.RefDataType)
 
             if (! ref_data_type_enum) {
-                def ref_data_type_str = Utils.getEnumNames(Constants.RefDataType).join('\n  - ')
+                def ref_data_type_str = getEnumNames(Constants.RefDataType).join('\n  - ')
                 log.error "received invalid ref data type: '${it}'. Valid options are:\n  - ${ref_data_type_str}"
                 exit 1
             }

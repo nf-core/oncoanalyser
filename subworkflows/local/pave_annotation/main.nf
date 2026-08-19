@@ -5,6 +5,7 @@
 include { PAVE_GERMLINE } from '../../../modules/local/pave/germline/main'
 include { PAVE_SOMATIC  } from '../../../modules/local/pave/somatic/main'
 include { groupByMeta; joinMeta; restoreMeta } from '../utils_nfcore_oncoanalyser_pipeline/channel_helpers'
+include { getTumorDnaSampleName; hasExistingInput; hasNormalDna; hasTumorDna; selectCurrentOrExisting } from '../utils_nfcore_oncoanalyser_pipeline/utils'
 
 workflow PAVE_ANNOTATION {
     take:
@@ -40,17 +41,17 @@ workflow PAVE_ANNOTATION {
     ch_sage_germline_inputs_sorted = ch_sage_dir_germline
         .map { meta, sage_dir ->
 
-            def sage_dir_selected = Utils.selectCurrentOrExisting(sage_dir, meta, Constants.INPUT.SAGE_DIR_NORMAL)
-            def sage_vcf = sage_dir_selected ? sage_dir_selected.resolve("${Utils.getTumorDnaSampleName(meta)}.sage.germline.vcf.gz") : []
-            def sage_tbi = sage_dir_selected ? sage_dir_selected.resolve("${Utils.getTumorDnaSampleName(meta)}.sage.germline.vcf.gz.tbi") : []
+            def sage_dir_selected = selectCurrentOrExisting(sage_dir, meta, Constants.INPUT.SAGE_DIR_NORMAL)
+            def sage_vcf = sage_dir_selected ? sage_dir_selected.resolve("${getTumorDnaSampleName(meta)}.sage.germline.vcf.gz") : []
+            def sage_tbi = sage_dir_selected ? sage_dir_selected.resolve("${getTumorDnaSampleName(meta)}.sage.germline.vcf.gz.tbi") : []
 
             return [meta, sage_vcf, sage_tbi]
         }
         .branch { meta, sage_vcf, sage_tbi ->
 
-            def has_existing = Utils.hasExistingInput(meta, Constants.INPUT.PAVE_DIR_NORMAL)
+            def has_existing = hasExistingInput(meta, Constants.INPUT.PAVE_DIR_NORMAL)
 
-            runnable: Utils.hasTumorDna(meta) && Utils.hasNormalDna(meta) && sage_vcf && ! has_existing
+            runnable: hasTumorDna(meta) && hasNormalDna(meta) && sage_vcf && ! has_existing
             skip: true
                 return meta
         }
@@ -63,7 +64,7 @@ workflow PAVE_ANNOTATION {
             def meta_pave = [
                 key: meta.group_id,
                 id: meta.group_id,
-                sample_id: Utils.getTumorDnaSampleName(meta),
+                sample_id: getTumorDnaSampleName(meta),
             ]
 
             return [meta_pave, sage_vcf, sage_tbi]
@@ -93,17 +94,17 @@ workflow PAVE_ANNOTATION {
     ch_sage_somatic_inputs_sorted = ch_sage_dir_somatic
         .map { meta, sage_dir ->
 
-            def sage_dir_selected = Utils.selectCurrentOrExisting(sage_dir, meta, Constants.INPUT.SAGE_DIR_TUMOR)
-            def sage_vcf = sage_dir_selected ? sage_dir_selected.resolve("${Utils.getTumorDnaSampleName(meta)}.sage.somatic.vcf.gz") : []
-            def sage_tbi = sage_dir_selected ? sage_dir_selected.resolve("${Utils.getTumorDnaSampleName(meta)}.sage.somatic.vcf.gz.tbi") : []
+            def sage_dir_selected = selectCurrentOrExisting(sage_dir, meta, Constants.INPUT.SAGE_DIR_TUMOR)
+            def sage_vcf = sage_dir_selected ? sage_dir_selected.resolve("${getTumorDnaSampleName(meta)}.sage.somatic.vcf.gz") : []
+            def sage_tbi = sage_dir_selected ? sage_dir_selected.resolve("${getTumorDnaSampleName(meta)}.sage.somatic.vcf.gz.tbi") : []
 
             return [meta, sage_vcf, sage_tbi]
         }
         .branch { meta, sage_vcf, sage_tbi ->
 
-            def has_existing = Utils.hasExistingInput(meta, Constants.INPUT.PAVE_DIR_TUMOR)
+            def has_existing = hasExistingInput(meta, Constants.INPUT.PAVE_DIR_TUMOR)
 
-            runnable: Utils.hasTumorDna(meta) && sage_vcf && ! has_existing
+            runnable: hasTumorDna(meta) && sage_vcf && ! has_existing
             skip: true
                 return meta
         }
@@ -116,7 +117,7 @@ workflow PAVE_ANNOTATION {
             def meta_pave = [
                 key: meta.group_id,
                 id: meta.group_id,
-                sample_id: Utils.getTumorDnaSampleName(meta),
+                sample_id: getTumorDnaSampleName(meta),
             ]
 
             return [meta_pave, sage_vcf, sage_tbi]

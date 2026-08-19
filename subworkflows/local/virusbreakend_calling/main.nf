@@ -5,6 +5,7 @@
 include { VIRUSBREAKEND    } from '../../../modules/local/virusbreakend/main'
 include { VIRUSINTERPRETER } from '../../../modules/local/virusinterpreter/main'
 include { groupByMeta; joinMeta; restoreMeta } from '../utils_nfcore_oncoanalyser_pipeline/channel_helpers'
+include { getTumorDnaSampleName; getTumorReduxDirAlignment; hasExistingInput; selectCurrentOrExisting } from '../utils_nfcore_oncoanalyser_pipeline/utils'
 
 workflow VIRUSBREAKEND_CALLING {
     take:
@@ -37,14 +38,14 @@ workflow VIRUSBREAKEND_CALLING {
     ch_inputs_sorted = ch_redux_dir_tumor
         .map { meta, redux_dir_tumor ->
 
-            def redux_dir_tumor_selected = Utils.selectCurrentOrExisting(redux_dir_tumor, meta, Constants.INPUT.REDUX_DIR_TUMOR)
-            def (tumor_aln, tumor_idx) = Utils.getTumorReduxDirAlignment(meta, redux_dir_tumor_selected)
+            def redux_dir_tumor_selected = selectCurrentOrExisting(redux_dir_tumor, meta, Constants.INPUT.REDUX_DIR_TUMOR)
+            def (tumor_aln, tumor_idx) = getTumorReduxDirAlignment(meta, redux_dir_tumor_selected)
 
             return [meta, tumor_aln, tumor_idx]
 
         }
         .branch { meta, tumor_aln, tumor_idx ->
-            def has_existing = Utils.hasExistingInput(meta, Constants.INPUT.VIRUSINTERPRETER_DIR)
+            def has_existing = hasExistingInput(meta, Constants.INPUT.VIRUSINTERPRETER_DIR)
             runnable: tumor_aln && ! has_existing
             skip: true
                 return meta
@@ -61,7 +62,7 @@ workflow VIRUSBREAKEND_CALLING {
             def meta_virus = [
                 key: meta.group_id,
                 id: meta.group_id,
-                sample_id: Utils.getTumorDnaSampleName(meta),
+                sample_id: getTumorDnaSampleName(meta),
             ]
 
             return [meta_virus, tumor_aln]
@@ -93,8 +94,8 @@ workflow VIRUSBREAKEND_CALLING {
             return [
                 meta,
                 virusbreakend_tsv,
-                Utils.selectCurrentOrExisting(bamtools_dir_tumor, meta, Constants.INPUT.BAMTOOLS_DIR_TUMOR),
-                Utils.selectCurrentOrExisting(purple_dir, meta, Constants.INPUT.PURPLE_DIR),
+                selectCurrentOrExisting(bamtools_dir_tumor, meta, Constants.INPUT.BAMTOOLS_DIR_TUMOR),
+                selectCurrentOrExisting(purple_dir, meta, Constants.INPUT.PURPLE_DIR),
             ]
 
         }
@@ -120,7 +121,7 @@ workflow VIRUSBREAKEND_CALLING {
             def meta_virus = [
                 key: meta.group_id,
                 id: meta.group_id,
-                sample_id: Utils.getTumorDnaSampleName(meta),
+                sample_id: getTumorDnaSampleName(meta),
             ]
 
             return [meta_virus] + inputs

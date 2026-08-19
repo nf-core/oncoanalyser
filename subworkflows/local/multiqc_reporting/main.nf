@@ -9,6 +9,7 @@ include { paramsSummaryMap } from 'plugin/nf-schema'
 include { paramsSummaryMultiqc   } from '../../../subworkflows/nf-core/utils_nfcore_pipeline'
 include { methodsDescriptionText } from '../../../subworkflows/local/utils_nfcore_oncoanalyser_pipeline'
 include { groupByMeta; joinMeta; restoreMeta } from '../utils_nfcore_oncoanalyser_pipeline/channel_helpers'
+include { getNormalDnaSampleName; getTumorDnaSampleName; getTumorRnaSampleName; selectCurrentOrExisting } from '../utils_nfcore_oncoanalyser_pipeline/utils'
 
 workflow MULTIQC_REPORTING {
     take:
@@ -41,10 +42,10 @@ workflow MULTIQC_REPORTING {
 
             return [
                 meta,
-                Utils.selectCurrentOrExisting(bamtools_dir_tumor, meta, Constants.INPUT.BAMTOOLS_DIR_TUMOR),
-                Utils.selectCurrentOrExisting(bamtools_dir_normal, meta, Constants.INPUT.BAMTOOLS_DIR_NORMAL),
-                Utils.selectCurrentOrExisting(amber_dir, meta, Constants.INPUT.AMBER_DIR),
-                Utils.selectCurrentOrExisting(purple_dir, meta, Constants.INPUT.PURPLE_DIR),
+                selectCurrentOrExisting(bamtools_dir_tumor, meta, Constants.INPUT.BAMTOOLS_DIR_TUMOR),
+                selectCurrentOrExisting(bamtools_dir_normal, meta, Constants.INPUT.BAMTOOLS_DIR_NORMAL),
+                selectCurrentOrExisting(amber_dir, meta, Constants.INPUT.AMBER_DIR),
+                selectCurrentOrExisting(purple_dir, meta, Constants.INPUT.PURPLE_DIR),
                 star_log,
                 rna_md_metrics,
             ]
@@ -98,9 +99,9 @@ workflow MULTIQC_REPORTING {
               // NOTE(SW): not handled here are cases with no input files, unlikely scenario (impossible?)
 
               group_sample_ids[meta.group_id] = [
-                  'normal_dna_id': Utils.getNormalDnaSampleName(meta),
-                  'tumor_dna_id': Utils.getTumorDnaSampleName(meta),
-                  'tumor_rna_id': Utils.getTumorRnaSampleName(meta),
+                  'normal_dna_id': getNormalDnaSampleName(meta),
+                  'tumor_dna_id': getTumorDnaSampleName(meta),
+                  'tumor_rna_id': getTumorRnaSampleName(meta),
               ]
 
             }

@@ -4,6 +4,7 @@
 
 include { SAGE_VISUALISER } from '../../../modules/local/sage/visualiser/main'
 include { groupByMeta; joinMeta; restoreMeta } from '../utils_nfcore_oncoanalyser_pipeline/channel_helpers'
+include { getDonorDnaSampleName; getDonorReduxDirAlignment; getDonorReduxTsvs; getNormalDnaSampleName; getNormalReduxDirAlignment; getNormalReduxTsvs; getTumorDnaSampleName; getTumorReduxDirAlignment; getTumorReduxTsvs; hasExistingInput; selectCurrentOrExisting } from '../utils_nfcore_oncoanalyser_pipeline/utils'
 
 workflow SAGE_PLOTTING {
     take:
@@ -39,17 +40,17 @@ workflow SAGE_PLOTTING {
     ])
         .map { meta, redux_dir_tumor, redux_dir_normal, redux_dir_donor, purple_dir ->
 
-            def redux_dir_tumor_selected = Utils.selectCurrentOrExisting(redux_dir_tumor, meta, Constants.INPUT.REDUX_DIR_TUMOR)
-            def redux_dir_normal_selected = Utils.selectCurrentOrExisting(redux_dir_normal, meta, Constants.INPUT.REDUX_DIR_NORMAL)
-            def redux_dir_donor_selected = Utils.selectCurrentOrExisting(redux_dir_donor, meta, Constants.INPUT.REDUX_DIR_DONOR)
+            def redux_dir_tumor_selected = selectCurrentOrExisting(redux_dir_tumor, meta, Constants.INPUT.REDUX_DIR_TUMOR)
+            def redux_dir_normal_selected = selectCurrentOrExisting(redux_dir_normal, meta, Constants.INPUT.REDUX_DIR_NORMAL)
+            def redux_dir_donor_selected = selectCurrentOrExisting(redux_dir_donor, meta, Constants.INPUT.REDUX_DIR_DONOR)
 
-            def (tumor_aln, tumor_idx) = Utils.getTumorReduxDirAlignment(meta, redux_dir_tumor_selected)
-            def (normal_aln, normal_idx) = Utils.getNormalReduxDirAlignment(meta, redux_dir_normal_selected)
-            def (donor_aln, donor_idx) = Utils.getDonorReduxDirAlignment(meta, redux_dir_donor_selected)
+            def (tumor_aln, tumor_idx) = getTumorReduxDirAlignment(meta, redux_dir_tumor_selected)
+            def (normal_aln, normal_idx) = getNormalReduxDirAlignment(meta, redux_dir_normal_selected)
+            def (donor_aln, donor_idx) = getDonorReduxDirAlignment(meta, redux_dir_donor_selected)
 
-            def redux_tsvs_tumor = Utils.getTumorReduxTsvs(meta, redux_dir_tumor_selected)
-            def redux_tsvs_normal = Utils.getNormalReduxTsvs(meta, redux_dir_normal_selected)
-            def redux_tsvs_donor = Utils.getDonorReduxTsvs(meta, redux_dir_donor_selected)
+            def redux_tsvs_tumor = getTumorReduxTsvs(meta, redux_dir_tumor_selected)
+            def redux_tsvs_normal = getNormalReduxTsvs(meta, redux_dir_normal_selected)
+            def redux_tsvs_donor = getDonorReduxTsvs(meta, redux_dir_donor_selected)
             def redux_tsvs = (redux_tsvs_tumor + redux_tsvs_normal + redux_tsvs_donor).findAll{ tsv -> tsv.exists() }
 
             return [
@@ -61,15 +62,15 @@ workflow SAGE_PLOTTING {
                 donor_aln,
                 donor_idx,
                 redux_tsvs,
-                Utils.selectCurrentOrExisting(purple_dir, meta, Constants.INPUT.PURPLE_DIR),
+                selectCurrentOrExisting(purple_dir, meta, Constants.INPUT.PURPLE_DIR),
             ]
 
         }
         .branch { meta, tumor_aln, tumor_idx, normal_aln, normal_idx, donor_aln, donor_idx, redux_tsvs, purple_dir ->
 
-            def has_existing = Utils.hasExistingInput(meta, Constants.INPUT.SAGE_PLOT_DIR_TUMOR)
+            def has_existing = hasExistingInput(meta, Constants.INPUT.SAGE_PLOT_DIR_TUMOR)
 
-            def tumor_dna_id = Utils.getTumorDnaSampleName(meta)
+            def tumor_dna_id = getTumorDnaSampleName(meta)
             def has_smlv_vcf = purple_dir ? purple_dir.resolve("${tumor_dna_id}.purple.somatic.vcf.gz").exists() : false
 
             runnable: tumor_aln && has_smlv_vcf && ! has_existing
@@ -85,19 +86,19 @@ workflow SAGE_PLOTTING {
             def meta_sage = [
                 key: meta.group_id,
                 id: meta.group_id,
-                tumor_id: Utils.getTumorDnaSampleName(meta),
+                tumor_id: getTumorDnaSampleName(meta),
             ]
 
             if (normal_aln) {
-                meta_sage.normal_id = Utils.getNormalDnaSampleName(meta)
+                meta_sage.normal_id = getNormalDnaSampleName(meta)
             }
 
             if (donor_aln) {
-                meta_sage.donor_id = Utils.getDonorDnaSampleName(meta)
+                meta_sage.donor_id = getDonorDnaSampleName(meta)
             }
 
-            def purple_smlv_vcf = purple_dir.resolve("${Utils.getTumorDnaSampleName(meta)}.purple.somatic.vcf.gz")
-            def purple_smlv_vcf_tbi = purple_dir.resolve("${Utils.getTumorDnaSampleName(meta)}.purple.somatic.vcf.gz.tbi")
+            def purple_smlv_vcf = purple_dir.resolve("${getTumorDnaSampleName(meta)}.purple.somatic.vcf.gz")
+            def purple_smlv_vcf_tbi = purple_dir.resolve("${getTumorDnaSampleName(meta)}.purple.somatic.vcf.gz.tbi")
 
             return [
                 meta_sage,

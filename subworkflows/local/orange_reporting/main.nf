@@ -4,6 +4,7 @@
 
 include { ORANGE } from '../../../modules/local/orange/main'
 include { groupByMeta; joinMeta; restoreMeta } from '../utils_nfcore_oncoanalyser_pipeline/channel_helpers'
+include { getNormalDnaSampleName; getTumorDnaSampleName; getTumorRnaSampleName; selectCurrentOrExisting } from '../utils_nfcore_oncoanalyser_pipeline/utils'
 
 workflow ORANGE_REPORTING {
     take:
@@ -89,23 +90,23 @@ workflow ORANGE_REPORTING {
             // NOTE(SW): avoiding further complexity with loops etc
             return [
                 meta,
-                Utils.selectCurrentOrExisting(inputs[input_indexes['sage_dir_somatic']],             meta, Constants.INPUT.SAGE_DIR_TUMOR),
-                Utils.selectCurrentOrExisting(inputs[input_indexes['sage_dir_germline']],            meta, Constants.INPUT.SAGE_DIR_NORMAL),
-                Utils.selectCurrentOrExisting(inputs[input_indexes['sage_append_dir_somatic']],      meta, Constants.INPUT.SAGE_APPEND_DIR_TUMOR),
-                Utils.selectCurrentOrExisting(inputs[input_indexes['sage_append_dir_germline']],     meta, Constants.INPUT.SAGE_APPEND_DIR_NORMAL),
-                Utils.selectCurrentOrExisting(inputs[input_indexes['sage_plot_dir_somatic']],        meta, Constants.INPUT.SAGE_PLOT_DIR_TUMOR),
-                Utils.selectCurrentOrExisting(inputs[input_indexes['purple_dir']],                   meta, Constants.INPUT.PURPLE_DIR),
-                Utils.selectCurrentOrExisting(inputs[input_indexes['qsee_dir']],                     meta, Constants.INPUT.QSEE_DIR),
-                Utils.selectCurrentOrExisting(inputs[input_indexes['linx_annotation_dir_somatic']],  meta, Constants.INPUT.LINX_ANNO_DIR_TUMOR),
-                Utils.selectCurrentOrExisting(inputs[input_indexes['linx_plot_dir_somatic']],        meta, Constants.INPUT.LINX_PLOT_DIR_TUMOR),
-                Utils.selectCurrentOrExisting(inputs[input_indexes['linx_annotation_dir_germline']], meta, Constants.INPUT.LINX_ANNO_DIR_NORMAL),
-                Utils.selectCurrentOrExisting(inputs[input_indexes['virusinterpreter_dir']],         meta, Constants.INPUT.VIRUSINTERPRETER_DIR),
-                Utils.selectCurrentOrExisting(inputs[input_indexes['chord_dir']],                    meta, Constants.INPUT.CHORD_DIR),
-                Utils.selectCurrentOrExisting(inputs[input_indexes['sigs_dir']],                     meta, Constants.INPUT.SIGS_DIR),
-                Utils.selectCurrentOrExisting(inputs[input_indexes['lilac_dir']],                    meta, Constants.INPUT.LILAC_DIR),
-                Utils.selectCurrentOrExisting(inputs[input_indexes['cuppa_dir']],                    meta, Constants.INPUT.CUPPA_DIR),
-                Utils.selectCurrentOrExisting(inputs[input_indexes['peach_dir']],                    meta, Constants.INPUT.PEACH_DIR),
-                Utils.selectCurrentOrExisting(inputs[input_indexes['isofox_dir']],                   meta, Constants.INPUT.ISOFOX_DIR),
+                selectCurrentOrExisting(inputs[input_indexes['sage_dir_somatic']],             meta, Constants.INPUT.SAGE_DIR_TUMOR),
+                selectCurrentOrExisting(inputs[input_indexes['sage_dir_germline']],            meta, Constants.INPUT.SAGE_DIR_NORMAL),
+                selectCurrentOrExisting(inputs[input_indexes['sage_append_dir_somatic']],      meta, Constants.INPUT.SAGE_APPEND_DIR_TUMOR),
+                selectCurrentOrExisting(inputs[input_indexes['sage_append_dir_germline']],     meta, Constants.INPUT.SAGE_APPEND_DIR_NORMAL),
+                selectCurrentOrExisting(inputs[input_indexes['sage_plot_dir_somatic']],        meta, Constants.INPUT.SAGE_PLOT_DIR_TUMOR),
+                selectCurrentOrExisting(inputs[input_indexes['purple_dir']],                   meta, Constants.INPUT.PURPLE_DIR),
+                selectCurrentOrExisting(inputs[input_indexes['qsee_dir']],                     meta, Constants.INPUT.QSEE_DIR),
+                selectCurrentOrExisting(inputs[input_indexes['linx_annotation_dir_somatic']],  meta, Constants.INPUT.LINX_ANNO_DIR_TUMOR),
+                selectCurrentOrExisting(inputs[input_indexes['linx_plot_dir_somatic']],        meta, Constants.INPUT.LINX_PLOT_DIR_TUMOR),
+                selectCurrentOrExisting(inputs[input_indexes['linx_annotation_dir_germline']], meta, Constants.INPUT.LINX_ANNO_DIR_NORMAL),
+                selectCurrentOrExisting(inputs[input_indexes['virusinterpreter_dir']],         meta, Constants.INPUT.VIRUSINTERPRETER_DIR),
+                selectCurrentOrExisting(inputs[input_indexes['chord_dir']],                    meta, Constants.INPUT.CHORD_DIR),
+                selectCurrentOrExisting(inputs[input_indexes['sigs_dir']],                     meta, Constants.INPUT.SIGS_DIR),
+                selectCurrentOrExisting(inputs[input_indexes['lilac_dir']],                    meta, Constants.INPUT.LILAC_DIR),
+                selectCurrentOrExisting(inputs[input_indexes['cuppa_dir']],                    meta, Constants.INPUT.CUPPA_DIR),
+                selectCurrentOrExisting(inputs[input_indexes['peach_dir']],                    meta, Constants.INPUT.PEACH_DIR),
+                selectCurrentOrExisting(inputs[input_indexes['isofox_dir']],                   meta, Constants.INPUT.ISOFOX_DIR),
             ]
 
         }
@@ -118,7 +119,7 @@ workflow ORANGE_REPORTING {
             def has_dna_tumor = dna_tumor_input_keys.every { k -> def i = input_indexes[k]; return inputs[i] }
 
             def purple_dir = inputs[input_indexes['purple_dir']]
-            def tumor_dna_id = Utils.getTumorDnaSampleName(meta)
+            def tumor_dna_id = getTumorDnaSampleName(meta)
             def has_smlv_vcf = purple_dir ? purple_dir.resolve("${tumor_dna_id}.purple.somatic.vcf.gz").exists() : false
             def has_purple_plots = purple_dir ? purple_dir.resolve("plot/${tumor_dna_id}.circos.png").exists() : false
 
@@ -138,7 +139,7 @@ workflow ORANGE_REPORTING {
             def meta_orange = [
                 key: meta.group_id,
                 id: meta.group_id,
-                tumor_id: Utils.getTumorDnaSampleName(meta),
+                tumor_id: getTumorDnaSampleName(meta),
                 cancer_type: meta[Constants.InfoField.CANCER_TYPE],
             ]
 
@@ -153,7 +154,7 @@ workflow ORANGE_REPORTING {
             def has_germline_smlv_vcf = purple_dir ? purple_dir.resolve("${meta_orange.tumor_id}.purple.germline.vcf.gz").exists() : false
 
             if (has_dna_normal && has_germline_smlv_vcf) {
-                meta_orange.normal_dna_id = Utils.getNormalDnaSampleName(meta)
+                meta_orange.normal_dna_id = getNormalDnaSampleName(meta)
             } else {
                 dna_normal_input_keys.each { k -> def i = input_indexes[k]; inputs_selected[i] = [] }
             }
@@ -170,7 +171,7 @@ workflow ORANGE_REPORTING {
             def has_rna_tumor = rna_tumor_input_keys.every { k -> def i = input_indexes[k]; return inputs[i] }
 
             if (has_rna_tumor) {
-                meta_orange.tumor_rna_id = Utils.getTumorRnaSampleName(meta)
+                meta_orange.tumor_rna_id = getTumorRnaSampleName(meta)
             } else {
                 rna_tumor_input_keys.each { k -> def i = input_indexes[k]; inputs_selected[i] = [] }
             }

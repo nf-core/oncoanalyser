@@ -5,6 +5,7 @@
 include { TEAL_PREP     } from '../../../modules/local/teal/prep/main'
 include { TEAL_PIPELINE } from '../../../modules/local/teal/pipeline/main'
 include { groupByMeta; joinMeta; restoreMeta } from '../utils_nfcore_oncoanalyser_pipeline/channel_helpers'
+include { getNormalDnaSampleName; getNormalReduxDirAlignment; getTumorDnaSampleName; getTumorReduxDirAlignment; selectCurrentOrExisting } from '../utils_nfcore_oncoanalyser_pipeline/utils'
 
 workflow TEAL_CHARACTERISATION {
     take:
@@ -38,11 +39,11 @@ workflow TEAL_CHARACTERISATION {
     ])
         .map { meta, redux_dir_tumor, redux_dir_normal ->
 
-            def redux_dir_tumor_selected = Utils.selectCurrentOrExisting(redux_dir_tumor, meta, Constants.INPUT.REDUX_DIR_TUMOR)
-            def redux_dir_normal_selected = Utils.selectCurrentOrExisting(redux_dir_normal, meta, Constants.INPUT.REDUX_DIR_NORMAL)
+            def redux_dir_tumor_selected = selectCurrentOrExisting(redux_dir_tumor, meta, Constants.INPUT.REDUX_DIR_TUMOR)
+            def redux_dir_normal_selected = selectCurrentOrExisting(redux_dir_normal, meta, Constants.INPUT.REDUX_DIR_NORMAL)
 
-            def (tumor_aln, tumor_idx) = Utils.getTumorReduxDirAlignment(meta, redux_dir_tumor_selected)
-            def (normal_aln, normal_idx) = Utils.getNormalReduxDirAlignment(meta, redux_dir_normal_selected)
+            def (tumor_aln, tumor_idx) = getTumorReduxDirAlignment(meta, redux_dir_tumor_selected)
+            def (normal_aln, normal_idx) = getNormalReduxDirAlignment(meta, redux_dir_normal_selected)
 
             return [meta, tumor_aln, tumor_idx, normal_aln, normal_idx]
 
@@ -67,11 +68,11 @@ workflow TEAL_CHARACTERISATION {
             ]
 
             if (tumor_aln) {
-                meta_teal.tumor_id = Utils.getTumorDnaSampleName(meta)
+                meta_teal.tumor_id = getTumorDnaSampleName(meta)
             }
 
             if (normal_aln) {
-                meta_teal.normal_id = Utils.getNormalDnaSampleName(meta)
+                meta_teal.normal_id = getNormalDnaSampleName(meta)
             }
 
             return [meta_teal, tumor_aln, tumor_idx, normal_aln, normal_idx]
@@ -123,10 +124,10 @@ workflow TEAL_CHARACTERISATION {
                 teal_bai_tumor,
                 teal_bam_normal,
                 teal_bai_normal,
-                Utils.selectCurrentOrExisting(bamtools_dir_tumor, meta, Constants.INPUT.BAMTOOLS_DIR_TUMOR),
-                Utils.selectCurrentOrExisting(bamtools_dir_normal, meta, Constants.INPUT.BAMTOOLS_DIR_NORMAL),
-                Utils.selectCurrentOrExisting(cobalt_dir, meta, Constants.INPUT.COBALT_DIR),
-                Utils.selectCurrentOrExisting(purple_dir, meta, Constants.INPUT.PURPLE_DIR),
+                selectCurrentOrExisting(bamtools_dir_tumor, meta, Constants.INPUT.BAMTOOLS_DIR_TUMOR),
+                selectCurrentOrExisting(bamtools_dir_normal, meta, Constants.INPUT.BAMTOOLS_DIR_NORMAL),
+                selectCurrentOrExisting(cobalt_dir, meta, Constants.INPUT.COBALT_DIR),
+                selectCurrentOrExisting(purple_dir, meta, Constants.INPUT.PURPLE_DIR),
             ]
         }
         .branch { meta, teal_bam_tumor, teal_bai_tumor, teal_bam_normal, teal_bai_normal, bamtools_dir_tumor, bamtools_dir_normal, cobalt_dir, purple_dir ->
@@ -150,11 +151,11 @@ workflow TEAL_CHARACTERISATION {
             ]
 
             if (teal_bam_tumor) {
-                meta_teal.tumor_id = Utils.getTumorDnaSampleName(meta)
+                meta_teal.tumor_id = getTumorDnaSampleName(meta)
             }
 
             if (teal_bam_normal) {
-                meta_teal.normal_id = Utils.getNormalDnaSampleName(meta)
+                meta_teal.normal_id = getNormalDnaSampleName(meta)
             }
 
             return [meta_teal, teal_bam_tumor, teal_bai_tumor, teal_bam_normal, teal_bai_normal, bamtools_dir_tumor, bamtools_dir_normal, cobalt_dir, purple_dir]
