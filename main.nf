@@ -46,8 +46,9 @@ include { PREPARE_REFERENCE       } from './workflows/prepare_reference'
 include { PURITY_ESTIMATE         } from './workflows/purity_estimate'
 include { TARGETED                } from './workflows/targeted'
 include { WGTS                    } from './workflows/wgts'
-include { getRunConfig; setParamsDefaults; validateParams } from './subworkflows/local/utils_nfcore_oncoanalyser_pipeline/preflight'
-include { createStubPlaceholders; getRunMode; parseInput; validateInput } from './subworkflows/local/utils_nfcore_oncoanalyser_pipeline/utils'
+include { getRunConfig; setParamsDefaults; validateParams } from './subworkflows/local/utils_nfcore_oncoanalyser_pipeline/validate_params'
+include { createStubPlaceholders; getRunMode; validateInput } from './subworkflows/local/utils_nfcore_oncoanalyser_pipeline/utils'
+include { parseInput } from './subworkflows/local/utils_nfcore_oncoanalyser_pipeline/parse_inputs'
 
 /*
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~

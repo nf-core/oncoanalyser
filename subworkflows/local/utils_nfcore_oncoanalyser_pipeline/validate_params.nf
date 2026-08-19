@@ -1,14 +1,46 @@
 //
-// Preflight helpers for the nf-core/oncoanalyser pipeline
+// Parameter default and validation helpers for the nf-core/oncoanalyser pipeline
 //
 
 include { getRunStages } from './processes'
-include { getEnumFromString; getEnumNames; getRunMode; hasNormalDnaFastq; hasTumorDna; hasTumorDnaFastq; hasTumorRna; hasTumorRnaFastq } from './utils'
+include { getEnumFromString; getEnumFromStringOrFail; getEnumNames; getRunMode; hasNormalDnaFastq; hasTumorDna; hasTumorDnaFastq; hasTumorRna; hasTumorRnaFastq } from './utils'
 
 //
 // Set parameter defaults where required
 //
 def setParamsDefaults(params, log) {
+
+    def default_invalid = setCommonDefaults(params)
+
+    // Bad configuration, catch in validateParams
+    if (default_invalid) {
+        return
+    }
+
+    // Set defaults specific to run configuration without attempting to validate
+    def run_mode
+    if (params.mode != null) {
+        run_mode = getRunMode(params.mode, log)
+    } else {
+        // Bad configuration, catch in validateParams
+        return
+    }
+
+    setRunModeDefaults(params, run_mode)
+
+    def stages = getRunStages(
+        params.processes_include,
+        params.processes_exclude,
+        params.processes_manual,
+        log,
+    )
+
+    setUmiDefaults(params, log)
+
+    setParamPlaceholderDefaults(params)
+}
+
+def setCommonDefaults(params) {
 
     def default_invalid = false
 
@@ -47,20 +79,10 @@ def setParamsDefaults(params, log) {
         }
     }
 
-    // Bad configuration, catch in validateParams
-    if (default_invalid) {
-        return
-    }
+    return default_invalid
+}
 
-    // Set defaults specific to run configuration without attempting to validate
-
-    def run_mode
-    if (params.mode != null) {
-        run_mode = getRunMode(params.mode, log)
-    } else {
-        // Bad configuration, catch in validateParams
-        return
-    }
+def setRunModeDefaults(params, run_mode) {
 
     // Attempt to set default panel data path; make no assumption on valid 'panel' value
     if (run_mode == Constants.RunMode.TARGETED || run_mode == Constants.RunMode.PREPARE_REFERENCE) {
@@ -76,13 +98,9 @@ def setParamsDefaults(params, log) {
         }
 
     }
+}
 
-    def stages = getRunStages(
-        params.processes_include,
-        params.processes_exclude,
-        params.processes_manual,
-        log,
-    )
+def setUmiDefaults(params, log) {
 
     //
     // Resolve UMI type and set UMI parameters
@@ -119,6 +137,9 @@ def setParamsDefaults(params, log) {
           params.redux_umi_enabled = true
           params.redux_umi_duplex_delim = '_'
     }
+}
+
+def setParamPlaceholderDefaults(params) {
 
     // Final point to set any default to avoid access to undefined parameters during nf-validation
     if (! params.containsKey('panel')) params.panel = null
@@ -135,13 +156,31 @@ def setParamsDefaults(params, log) {
     if (! params.containsKey('fastq_tools_umi_delim')) params.fastq_tools_umi_delim = ''
     if (! params.containsKey('redux_umi_enabled')) params.redux_umi_enabled = false
     if (! params.containsKey('redux_umi_duplex_delim')) params.redux_umi_duplex_delim = ''
-
 }
 
 //
 // Check and validate parameters
 //
 def validateParams(params, log) {
+
+    validateGenomeParams(params, log)
+
+    def run_mode = validateRunModeParams(params, log)
+
+    validatePrepareReferenceParams(params, run_mode, log)
+
+    validateWgtsParams(params, run_mode, log)
+
+    validateTargetedParams(params, run_mode, log)
+
+    validatePurityEstimateParams(params, run_mode, log)
+
+    validateAltContigsParams(params, log)
+
+    validateUmiParams(params, log)
+}
+
+def validateGenomeParams(params, log) {
 
     // Common parameters
 
@@ -207,6 +246,9 @@ def validateParams(params, log) {
             "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
         exit 1
     }
+}
+
+def validateRunModeParams(params, log) {
 
     // Run configuration specific parameters
 
@@ -221,7 +263,10 @@ def validateParams(params, log) {
         exit 1
     }
 
-    def run_mode = getRunMode(params.mode, log)
+    return getRunMode(params.mode, log)
+}
+
+def validatePrepareReferenceParams(params, run_mode, log) {
 
     if (run_mode == Constants.RunMode.PREPARE_REFERENCE && params.ref_data_types == null) {
 
@@ -234,6 +279,9 @@ def validateParams(params, log) {
             "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
         exit 1
     }
+}
+
+def validateWgtsParams(params, run_mode, log) {
 
     if (run_mode == Constants.RunMode.WGTS) {
 
@@ -248,6 +296,9 @@ def validateParams(params, log) {
         }
 
     }
+}
+
+def validateTargetedParams(params, run_mode, log) {
 
     if (run_mode == Constants.RunMode.TARGETED) {
 
@@ -368,6 +419,9 @@ def validateParams(params, log) {
         }
 
     }
+}
+
+def validatePurityEstimateParams(params, run_mode, log) {
 
     if (run_mode == Constants.RunMode.PURITY_ESTIMATE) {
 
@@ -388,6 +442,9 @@ def validateParams(params, log) {
             exit 1
         }
     }
+}
+
+def validateAltContigsParams(params, log) {
 
     if (params.ref_data_genome_alt != null) {
         if (params.genome_type != 'alt') {
@@ -408,6 +465,9 @@ def validateParams(params, log) {
         }
 
     }
+}
+
+def validateUmiParams(params, log) {
 
     // UMI parameters
     if (params.fastp_umi_enabled && params.fastq_tools_umi_enabled) {
@@ -512,15 +572,7 @@ def getPrepConfigFromSamplesheet(run_config) {
 
 def getPrepConfigFromCli(params, log) {
     def ref_data_types = params.ref_data_types.tokenize(',').collect {
-            def ref_data_type_enum = getEnumFromString(it, Constants.RefDataType)
-
-            if (! ref_data_type_enum) {
-                def ref_data_type_str = getEnumNames(Constants.RefDataType).join('\n  - ')
-                log.error "received invalid ref data type: '${it}'. Valid options are:\n  - ${ref_data_type_str}"
-                exit 1
-            }
-
-            return ref_data_type_enum
+            return getEnumFromStringOrFail(it, Constants.RefDataType, 'ref data type', log)
         }
 
     if (
