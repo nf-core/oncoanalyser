@@ -1,5 +1,6 @@
-nextflow.enable.types = true
-
+// NOTE(SW): kept untyped (legacy `topic:` qualifier) because this process is aliased multiple times
+// in prepare_reference, and a typed process with a `topic:` section under multiple aliases hangs the
+// run (Nextflow issue #7434). Re-enable static types once that bug is fixed.
 process CUSTOM_EXTRACTTARBALL {
     label 'process_single'
 
@@ -9,11 +10,11 @@ process CUSTOM_EXTRACTTARBALL {
         'nf-core/ubuntu:24.04' }"
 
     input:
-    tuple(meta: Map, tarball: Path)
+    tuple val(meta), path(tarball)
 
-    topic:
-    tuple(meta, file("${meta.id}/")) >> 'extracted_dir'
-    tuple(meta, 'extracttarball', files('.command.*')) >> 'command_files'
+    output:
+    tuple val(meta), path("${meta.id}/")                      , topic: extracted_dir
+    tuple val(meta), val('extracttarball'), path('.command.*'), topic: command_files
 
     when:
     task.ext.when == null || task.ext.when

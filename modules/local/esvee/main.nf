@@ -18,7 +18,7 @@ process ESVEE {
     genome_img: Path
     pon_breakends: Path
     pon_breakpoints: Path
-    decoy_sequences_image: Path
+    decoy_sequences_image: Path?
     known_fusions: Path
     repeatmasker_annotations: Path
     unmap_regions: Path

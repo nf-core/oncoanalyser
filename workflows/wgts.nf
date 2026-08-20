@@ -194,8 +194,8 @@ workflow WGTS {
             ref_data.genome_dict,
             hmf_data.unmap_regions,
             hmf_data.msi_jitter_sites,
-            [],  // msi_model_coefficients
-            [],  // msi_model_error_rates
+            null,  // msi_model_coefficients
+            null,  // msi_model_error_rates
             params.sequencing_platform,
             false,  // targeted_mode
             params.redux_umi_enabled,
@@ -231,7 +231,7 @@ workflow WGTS {
             ref_data.genome_fai,
             driver_gene_panel,
             hmf_data.ensembl_data_resources,
-            [],  // target_regions_bed
+            null,  // target_regions_bed
         )
 
         ch_bamtools_tumor_out = ch_bamtools_tumor_out.mix(BAMTOOLS_METRICS.out.tumor_dir)
@@ -265,7 +265,7 @@ workflow WGTS {
             hmf_data.isofox_alt_sj_distribution,
             isofox_counts,
             isofox_gc_ratios,
-            [],  // isofox_tpm_norm
+            null,  // isofox_tpm_norm
             params.isofox_functions,
             isofox_read_length,
         )
@@ -294,8 +294,8 @@ workflow WGTS {
             ref_data.genome_version,
             ref_data.genome_fai,
             hmf_data.heterozygous_sites,
-            [],  // target_regions_bed
-            [],  // tumor_min_depth
+            null,  // target_regions_bed
+            null,  // tumor_min_depth
             params.sequencing_platform,
             false,  // purity_estimate_mode
         )
@@ -324,7 +324,7 @@ workflow WGTS {
             ref_data.genome_fai,
             hmf_data.gc_profile,
             hmf_data.diploid_bed,
-            [],  // panel_target_regions_normalisation
+            null,  // panel_target_regions_normalisation
             false,  // targeted_mode
             false,  // purity_estimate_mode
         )
@@ -359,7 +359,7 @@ workflow WGTS {
             hmf_data.decoy_sequences_image,
             hmf_data.repeatmasker_annotations,
             hmf_data.unmap_regions,
-            [],  // target_regions_bed
+            null,  // target_regions_bed
             params.sequencing_platform,
         )
 
@@ -426,7 +426,7 @@ workflow WGTS {
             ref_data.genome_fasta,
             ref_data.genome_version,
             ref_data.genome_fai,
-            [],  // sage_pon_artefacts
+            null,  // sage_pon_artefacts
             hmf_data_pons.sage,
             hmf_data.sage_blocklist_regions,
             hmf_data.sage_blocklist_sites,
@@ -473,7 +473,7 @@ workflow WGTS {
             driver_gene_panel,
             hmf_data.ensembl_data_resources,
             hmf_data.germline_amp_del_freq,
-            [],  // target_regions_bed
+            null,  // target_regions_bed
         )
 
         ch_purple_out = ch_purple_out.mix(PURPLE_CALLING.out.purple_dir)

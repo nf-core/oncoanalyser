@@ -10,7 +10,7 @@ process QSEE {
         'biocontainers/hmftools-qsee:1.0--hdfd78af_0' }"
 
     input:
-    tuple(meta: Map, redux_tsvs_tumor: Path, redux_tsvs_normal: Path?, bamtools_dir_tumor: Path, bamtools_dir_normal: Path?, cobalt_dir: Path?, esvee_dir: Path?, purple_dir: Path)
+    tuple(meta: Map, redux_tsvs_tumor: List<Path>, redux_tsvs_normal: List<Path>?, bamtools_dir_tumor: Path, bamtools_dir_normal: Path?, cobalt_dir: Path?, esvee_dir: Path?, purple_dir: Path)
     driver_gene_panel: Path
     cohort_percentiles: Path
     sequencing_platform: String

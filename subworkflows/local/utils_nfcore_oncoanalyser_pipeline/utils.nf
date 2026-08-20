@@ -105,7 +105,7 @@ def getEnumFromStringOrFail(value, enum_class, label, log) {
 }
 
 def getFileObject(path) {
-    return path ? nextflow.Nextflow.file(path) : []
+    return path ? nextflow.Nextflow.file(path) : null
 }
 
 def getRunMode(run_mode, log) {

@@ -68,7 +68,7 @@ workflow COBALT_PROFILING {
     // channel: [ meta, tumor_aln, tumor_idx, normal_aln, normal_idx, diploid_bed ]
     ch_inputs_runnable = channel.empty()
         .mix(
-            ch_inputs_sorted.runnable_tn.map { d -> d + [[]] },
+            ch_inputs_sorted.runnable_tn.map { d -> d + [null] },
             ch_inputs_sorted.runnable_to.combine(diploid_bed),
         )
 

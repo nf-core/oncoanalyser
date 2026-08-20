@@ -10,7 +10,7 @@ process PURPLE {
         'biocontainers/hmftools-purple:4.4--hdfd78af_0' }"
 
     input:
-    tuple(meta: Map, amber_dir: Path, cobalt_dir: Path, esvee_dir: Path?, pave_somatic_dir: Path?, pave_germline_dir: Path?, redux_tumor_tsvs: Path?)
+    tuple(meta: Map, amber_dir: Path, cobalt_dir: Path, esvee_dir: Path?, pave_somatic_dir: Path?, pave_germline_dir: Path?, redux_tumor_tsvs: List<Path>?)
     genome_fasta: Path
     genome_ver: String
     genome_fai: Path

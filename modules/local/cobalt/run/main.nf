@@ -15,7 +15,7 @@ process COBALT {
     genome_ver: String
     genome_fai: Path
     gc_profile: Path
-    diploid_regions: Path
+    diploid_regions: Path?
     target_regions_normalisation: Path?
     targeted_mode: Boolean
 

@@ -17,8 +17,8 @@ process REDUX {
     genome_dict: Path
     unmap_regions: Path
     msi_jitter_sites: Path
-    msi_model_coefficients: Path
-    msi_model_error_rates: Path
+    msi_model_coefficients: Path?
+    msi_model_error_rates: Path?
     sequencing_platform: String
     targeted_mode: Boolean
     generate_tsvs_only: Boolean
