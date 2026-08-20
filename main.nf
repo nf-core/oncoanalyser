@@ -49,6 +49,7 @@ include { WGTS                    } from './workflows/wgts'
 include { getRunConfig; setParamsDefaults; validateParams } from './subworkflows/local/utils_nfcore_oncoanalyser_pipeline/validate_params'
 include { createStubPlaceholders; getRunMode; validateInput } from './subworkflows/local/utils_nfcore_oncoanalyser_pipeline/utils'
 include { parseInput } from './subworkflows/local/utils_nfcore_oncoanalyser_pipeline/parse_inputs'
+include { RunMode } from './subworkflows/local/utils_nfcore_oncoanalyser_pipeline/types'
 
 /*
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -71,7 +72,7 @@ workflow NFCORE_ONCOANALYSER {
 
     // Run selected workflow
     // NOTE(SW): prepare reference is checked early as params.input is not required
-    if (run_mode == Constants.RunMode.PREPARE_REFERENCE)  {
+    if (run_mode == RunMode.PREPARE_REFERENCE)  {
         PREPARE_REFERENCE(params)
         ch_results = ch_results.mix(PREPARE_REFERENCE.out.results)
     } else {
@@ -81,16 +82,16 @@ workflow NFCORE_ONCOANALYSER {
         validateInput(inputs, run_config, params, log)
 
         // Run requested workflow
-        if (run_mode == Constants.RunMode.WGTS) {
+        if (run_mode == RunMode.WGTS) {
             WGTS(inputs, run_config, params)
             ch_results = ch_results.mix(WGTS.out.results)
-        } else if (run_mode == Constants.RunMode.TARGETED) {
+        } else if (run_mode == RunMode.TARGETED) {
             TARGETED(inputs, run_config, params)
             ch_results = ch_results.mix(TARGETED.out.results)
-        } else if (run_mode == Constants.RunMode.PURITY_ESTIMATE) {
+        } else if (run_mode == RunMode.PURITY_ESTIMATE) {
             PURITY_ESTIMATE(inputs, run_config, params)
             ch_results = ch_results.mix(PURITY_ESTIMATE.out.results)
-        } else if (run_mode == Constants.RunMode.PANEL_RESOURCE_CREATION) {
+        } else if (run_mode == RunMode.PANEL_RESOURCE_CREATION) {
             PANEL_RESOURCE_CREATION(inputs, run_config, params)
             ch_results = ch_results.mix(PANEL_RESOURCE_CREATION.out.results)
         } else {

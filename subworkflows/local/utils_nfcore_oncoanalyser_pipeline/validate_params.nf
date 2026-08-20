@@ -2,6 +2,7 @@
 // Parameter default and validation helpers for the nf-core/oncoanalyser pipeline
 //
 
+include { RefDataType; RunMode; UmiType } from './types'
 include { getRunStages            } from './processes'
 include { getEnumFromString       } from './utils'
 include { getEnumFromStringOrFail } from './utils'
@@ -93,7 +94,7 @@ def setCommonDefaults(params) {
 def setRunModeDefaults(params, run_mode) {
 
     // Attempt to set default panel data path; make no assumption on valid 'panel' value
-    if (run_mode == Constants.RunMode.TARGETED || run_mode == Constants.RunMode.PREPARE_REFERENCE) {
+    if (run_mode == RunMode.TARGETED || run_mode == RunMode.PREPARE_REFERENCE) {
 
         if (params.containsKey('panel')) {
 
@@ -115,29 +116,29 @@ def setUmiDefaults(params, log) {
     //
     def umi_type
     if (params.containsKey('umi_type') && params.umi_type) {
-        umi_type = getEnumFromString(params.umi_type, Constants.UmiType)
+        umi_type = getEnumFromString(params.umi_type, UmiType)
     } else if (params.containsKey('panel') && Constants.PANELS_DEFINED.contains(params.panel.toLowerCase())) {
         if (params.panel.toLowerCase() == 'tso500') {
-            umi_type = Constants.UmiType.TSO500
+            umi_type = UmiType.TSO500
         }
     }
 
-    if (umi_type == Constants.UmiType.KAPA) {
+    if (umi_type == UmiType.KAPA) {
           params.fastp_umi_enabled = true
           params.fastp_umi_location = 'per_read'
           params.fastp_umi_length = 6
           params.fastp_umi_skip = 0
           params.redux_umi_enabled = true
           params.redux_umi_duplex_delim = '_'
-    } else if (umi_type == Constants.UmiType.MSK) {
+    } else if (umi_type == UmiType.MSK) {
           params.fastq_tools_umi_enabled = true
           params.fastq_tools_umi_delim = '+'
           params.redux_umi_enabled = true
           params.redux_umi_duplex_delim = ''
-    } else if (umi_type == Constants.UmiType.TSO500) {
+    } else if (umi_type == UmiType.TSO500) {
           params.redux_umi_enabled = true
           params.redux_umi_duplex_delim = '+'
-    } else if (umi_type == Constants.UmiType.TWIST) {
+    } else if (umi_type == UmiType.TWIST) {
           params.fastp_umi_enabled = true
           params.fastp_umi_location = 'per_read'
           params.fastp_umi_length = 7
@@ -261,7 +262,7 @@ def validateRunModeParams(params, log) {
     // Run configuration specific parameters
 
     if (! params.mode) {
-        def run_modes = getEnumNames(Constants.RunMode).join('\n    - ')
+        def run_modes = getEnumNames(RunMode).join('\n    - ')
         log.error "\n~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n" +
             "  Run mode must be set using the --mode CLI argument or in a configuration  \n" +
             "  file.\n" +
@@ -276,9 +277,9 @@ def validateRunModeParams(params, log) {
 
 def validatePrepareReferenceParams(params, run_mode, log) {
 
-    if (run_mode == Constants.RunMode.PREPARE_REFERENCE && params.ref_data_types == null) {
+    if (run_mode == RunMode.PREPARE_REFERENCE && params.ref_data_types == null) {
 
-        def ref_data_types = getEnumNames(Constants.RefDataType).join('\n    - ')
+        def ref_data_types = getEnumNames(RefDataType).join('\n    - ')
 
         log.error "\n~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n" +
             "  CLI argument --ref_data_types is required for mode prepare_reference.\n" +
@@ -291,7 +292,7 @@ def validatePrepareReferenceParams(params, run_mode, log) {
 
 def validateWgtsParams(params, run_mode, log) {
 
-    if (run_mode == Constants.RunMode.WGTS) {
+    if (run_mode == RunMode.WGTS) {
 
         // We allow fastq-tools UMI processing in WGTS but this requires that the user manually set the 'known_umis' file in hmf_data, enforce here
         def has_known_umis = params.hmf_data_paths[params.genome_version.toString()].containsKey('known_umis')
@@ -308,7 +309,7 @@ def validateWgtsParams(params, run_mode, log) {
 
 def validateTargetedParams(params, run_mode, log) {
 
-    if (run_mode == Constants.RunMode.TARGETED) {
+    if (run_mode == RunMode.TARGETED) {
 
         if (! params.containsKey('panel') || params.panel == null) {
 
@@ -431,11 +432,11 @@ def validateTargetedParams(params, run_mode, log) {
 
 def validatePurityEstimateParams(params, run_mode, log) {
 
-    if (run_mode == Constants.RunMode.PURITY_ESTIMATE) {
+    if (run_mode == RunMode.PURITY_ESTIMATE) {
 
-        def purity_estimate_modes = [Constants.RunMode.WGTS, Constants.RunMode.TARGETED]
+        def purity_estimate_modes = [RunMode.WGTS, RunMode.TARGETED]
 
-        def purity_mode_enum = ! params.purity_estimate_mode ? null : getEnumFromString(params.purity_estimate_mode, Constants.RunMode)
+        def purity_mode_enum = ! params.purity_estimate_mode ? null : getEnumFromString(params.purity_estimate_mode, RunMode)
 
         if (! purity_mode_enum || ! purity_estimate_modes.contains(purity_mode_enum)) {
 
@@ -572,50 +573,50 @@ def getPrepConfigFromSamplesheet(run_config) {
         require_bwamem2_index: run_config.has_dna_fastq && run_config.stages.alignment,
         require_star_index: run_config.has_rna_fastq && run_config.stages.alignment,
 
-        require_gridss_index: run_config.has_dna && run_config.mode == Constants.RunMode.WGTS && run_config.stages.virusinterpreter,
+        require_gridss_index: run_config.has_dna && run_config.mode == RunMode.WGTS && run_config.stages.virusinterpreter,
         require_hmftools_data: true,
-        require_panel_data: run_config.mode == Constants.RunMode.TARGETED,
+        require_panel_data: run_config.mode == RunMode.TARGETED,
     ]
 }
 
 def getPrepConfigFromCli(params, log) {
     def ref_data_types = params.ref_data_types.tokenize(',').collect {
-            return getEnumFromStringOrFail(it, Constants.RefDataType, 'ref data type', log)
+            return getEnumFromStringOrFail(it, RefDataType, 'ref data type', log)
         }
 
     if (
-        ref_data_types.contains(Constants.RefDataType.WGS) ||
-        ref_data_types.contains(Constants.RefDataType.WTS) ||
-        ref_data_types.contains(Constants.RefDataType.TARGETED)
+        ref_data_types.contains(RefDataType.WGS) ||
+        ref_data_types.contains(RefDataType.WTS) ||
+        ref_data_types.contains(RefDataType.TARGETED)
     ) {
         ref_data_types += [
-            Constants.RefDataType.FASTA,
-            Constants.RefDataType.FAI,
-            Constants.RefDataType.DICT,
-            Constants.RefDataType.IMG,
-            Constants.RefDataType.HMFTOOLS
+            RefDataType.FASTA,
+            RefDataType.FAI,
+            RefDataType.DICT,
+            RefDataType.IMG,
+            RefDataType.HMFTOOLS
         ]
     }
 
-    if (ref_data_types.contains(Constants.RefDataType.WGS)) {
-        ref_data_types += [Constants.RefDataType.GRIDSS_INDEX]
+    if (ref_data_types.contains(RefDataType.WGS)) {
+        ref_data_types += [RefDataType.GRIDSS_INDEX]
     }
 
-    if (ref_data_types.contains(Constants.RefDataType.TARGETED)) {
-        ref_data_types += [Constants.RefDataType.PANEL]
+    if (ref_data_types.contains(RefDataType.TARGETED)) {
+        ref_data_types += [RefDataType.PANEL]
     }
 
-    def require_fasta = ref_data_types.contains(Constants.RefDataType.FASTA)
-    def require_fai = ref_data_types.contains(Constants.RefDataType.FAI)
-    def require_dict = ref_data_types.contains(Constants.RefDataType.DICT)
-    def require_img = ref_data_types.contains(Constants.RefDataType.IMG)
+    def require_fasta = ref_data_types.contains(RefDataType.FASTA)
+    def require_fai = ref_data_types.contains(RefDataType.FAI)
+    def require_dict = ref_data_types.contains(RefDataType.DICT)
+    def require_img = ref_data_types.contains(RefDataType.IMG)
 
-    def require_bwamem2_index = ref_data_types.contains(Constants.RefDataType.BWAMEM2_INDEX) || ref_data_types.contains(Constants.RefDataType.DNA_ALIGNMENT)
-    def require_star_index = ref_data_types.contains(Constants.RefDataType.STAR_INDEX) || ref_data_types.contains(Constants.RefDataType.RNA_ALIGNMENT)
+    def require_bwamem2_index = ref_data_types.contains(RefDataType.BWAMEM2_INDEX) || ref_data_types.contains(RefDataType.DNA_ALIGNMENT)
+    def require_star_index = ref_data_types.contains(RefDataType.STAR_INDEX) || ref_data_types.contains(RefDataType.RNA_ALIGNMENT)
 
-    def require_gridss_index = ref_data_types.contains(Constants.RefDataType.GRIDSS_INDEX)
-    def require_hmftools_data = ref_data_types.contains(Constants.RefDataType.HMFTOOLS)
-    def require_panel_data = ref_data_types.contains(Constants.RefDataType.PANEL)
+    def require_gridss_index = ref_data_types.contains(RefDataType.GRIDSS_INDEX)
+    def require_hmftools_data = ref_data_types.contains(RefDataType.HMFTOOLS)
+    def require_panel_data = ref_data_types.contains(RefDataType.PANEL)
 
     if (require_panel_data) {
         if (! params.containsKey('panel') || params.panel == null) {

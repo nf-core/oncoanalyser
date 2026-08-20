@@ -2,6 +2,8 @@
 // Process-selection helpers for the nf-core/oncoanalyser pipeline
 //
 
+include { Process } from './types'
+
 def getRunStages(processes_include, exclude, manual_select, log) {
 
     def processes
@@ -16,7 +18,7 @@ def getRunStages(processes_include, exclude, manual_select, log) {
     } else {
 
         // Get default processes
-        processes = Constants.Process.values().toList()
+        processes = Process.values().toList()
 
         // NOTE(LN): Disable some processes from running by default
         Constants.DEFAULT_EXCLUDED_PROCESSES.each {it -> processes.remove(it) }
@@ -29,7 +31,7 @@ def getRunStages(processes_include, exclude, manual_select, log) {
         processes.removeAll(exclude_list)
     }
 
-    return Constants.Process
+    return Process
         .values()
         .collectEntries { p -> [p.name().toLowerCase(), p in processes] }
 }
@@ -40,7 +42,7 @@ def getProcessList(process_str, log) {
     }
     return process_str.tokenize(',').collect { name ->
             try {
-                return Constants.Process.valueOf(name.toUpperCase())
+                return Process.valueOf(name.toUpperCase())
             } catch(java.lang.IllegalArgumentException e) {
                 def processes_str = getProcessNames().join('\n  - ')
                 log.error "received invalid process: '${name}'. Valid options are:\n  - ${processes_str}"
@@ -65,7 +67,7 @@ def checkIncludeExcludeList(include_list, exclude_list, log) {
 }
 
 def getProcessNames() {
-    Constants.Process
+    Process
         .values()
         *.name()
         *.toLowerCase()

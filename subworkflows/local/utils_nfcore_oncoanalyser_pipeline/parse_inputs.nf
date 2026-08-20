@@ -6,6 +6,7 @@ include { getEnumFromStringOrFail } from './utils'
 include { getFileObject           } from './utils'
 include { getReduxDirAlignment    } from './utils'
 include { parse_read_group_info   } from './utils'
+include { FileType; InfoField; SampleType; SequenceType; getCaseLevelDirs } from './types'
 include { CaseRecord              } from './records'
 include { DataFile                } from './records'
 include { FastqFile               } from './records'
@@ -53,11 +54,11 @@ def parseCaseEntry(case_id, entries, stub_run, log) {
     }
 
     // NOTE(SW): dna_rna samples are folded into the DNA lists until the dna_rna overhaul lands
-    def normal_dna = samples.findAll { it.sample_type == Constants.SampleType.NORMAL }
-    def donor_dna = samples.findAll { it.sample_type == Constants.SampleType.DONOR }
-    def tumor_dna = samples.findAll { it.sample_type == Constants.SampleType.TUMOR && it.sequence_type != Constants.SequenceType.RNA }
-    def tumor_rna = samples.findAll { it.sample_type == Constants.SampleType.TUMOR && it.sequence_type == Constants.SequenceType.RNA }
-    def longitudinal = samples.findAll { it.sample_type == Constants.SampleType.LONGITUDINAL }
+    def normal_dna = samples.findAll { it.sample_type == SampleType.NORMAL }
+    def donor_dna = samples.findAll { it.sample_type == SampleType.DONOR }
+    def tumor_dna = samples.findAll { it.sample_type == SampleType.TUMOR && it.sequence_type != SequenceType.RNA }
+    def tumor_rna = samples.findAll { it.sample_type == SampleType.TUMOR && it.sequence_type == SequenceType.RNA }
+    def longitudinal = samples.findAll { it.sample_type == SampleType.LONGITUDINAL }
 
     return CaseRecord(case_id, patient_id, ctx.cancer_type, normal_dna, donor_dna, tumor_dna, tumor_rna, longitudinal, directories)
 }
@@ -65,16 +66,16 @@ def parseCaseEntry(case_id, entries, stub_run, log) {
 def parseSampleEntry(case_id, patient_id, ctx, entry, sample_builders, directories, log) {
 
     // Sample type
-    def sample_type_enum = getEnumFromStringOrFail(entry.sample_type, Constants.SampleType, 'sample type', log)
+    def sample_type_enum = getEnumFromStringOrFail(entry.sample_type, SampleType, 'sample type', log)
 
     // Sequence type
-    def sequence_type_enum = getEnumFromStringOrFail(entry.sequence_type, Constants.SequenceType, 'sequence type', log)
+    def sequence_type_enum = getEnumFromStringOrFail(entry.sequence_type, SequenceType, 'sequence type', log)
 
     // Filetype
-    def filetype_enum = getEnumFromStringOrFail(entry.filetype, Constants.FileType, 'file type', log)
+    def filetype_enum = getEnumFromStringOrFail(entry.filetype, FileType, 'file type', log)
 
     // Case-level directories (one per case, e.g. sample_type=tumor_normal rows and process dirs)
-    if (sample_type_enum == Constants.SampleType.TUMOR_NORMAL || Constants.CASE_LEVEL_DIRS.contains(filetype_enum)) {
+    if (sample_type_enum == SampleType.TUMOR_NORMAL || getCaseLevelDirs().contains(filetype_enum)) {
         if (directories.containsKey(filetype_enum)) {
             log.error "got duplicate file for ${case_id}: ${filetype_enum}"
             exit 1
@@ -95,23 +96,23 @@ def parseSampleEntry(case_id, patient_id, ctx, entry, sample_builders, directori
     if (entry.containsKey('info') && entry.info) {
         info_data = parseInfoFields(entry.info, case_id, sample_type_enum, sequence_type_enum, log)
 
-        if (info_data.containsKey(Constants.InfoField.CANCER_TYPE)) {
-            ctx.cancer_type = info_data[Constants.InfoField.CANCER_TYPE]
+        if (info_data.containsKey(InfoField.CANCER_TYPE)) {
+            ctx.cancer_type = info_data[InfoField.CANCER_TYPE]
         }
 
-        if (info_data.containsKey(Constants.InfoField.GENERATE_REDUX_TSVS_ONLY)) {
+        if (info_data.containsKey(InfoField.GENERATE_REDUX_TSVS_ONLY)) {
             b.generate_redux_tsvs_only = true
         }
 
         // Only allow READ_GROUP_OVERRIDES for FASTQ
-        if (filetype_enum != Constants.FileType.FASTQ && info_data.containsKey(Constants.InfoField.READ_GROUP_OVERRIDES)) {
+        if (filetype_enum != FileType.FASTQ && info_data.containsKey(InfoField.READ_GROUP_OVERRIDES)) {
             log.error "The read_group info field is only applicable to FASTQ input but got '${entry.filetype}' for ${case_id} ${sample_type_enum}/${sequence_type_enum}"
             exit 1
         }
     }
 
     // Handle inputs appropriately
-    if (filetype_enum == Constants.FileType.FASTQ) {
+    if (filetype_enum == FileType.FASTQ) {
         parseFastqFile(b, entry, info_data, case_id, log)
     } else {
         if (b.files.containsKey(filetype_enum)) {
@@ -124,12 +125,12 @@ def parseSampleEntry(case_id, patient_id, ctx, entry, sample_builders, directori
 
 def parseFastqFile(b, entry, info_data, case_id, log) {
 
-    if (! info_data.containsKey(Constants.InfoField.LIBRARY_ID)) {
+    if (! info_data.containsKey(InfoField.LIBRARY_ID)) {
         log.error "missing 'library_id' info field for ${case_id} ${b.sample_type}/${b.sequence_type} ${b.sample_id}"
         exit 1
     }
 
-    if (! info_data.containsKey(Constants.InfoField.LANE)) {
+    if (! info_data.containsKey(InfoField.LANE)) {
         log.error "missing 'lane' info field for ${case_id} ${b.sample_type}/${b.sequence_type} ${b.sample_id}"
         exit 1
     }
@@ -147,25 +148,25 @@ def parseFastqFile(b, entry, info_data, case_id, log) {
     def rev = single_end ? null : getFileObject(fastq_entries[1])
 
     def rg_fields = [:]
-    if (info_data.containsKey(Constants.InfoField.READ_GROUP_OVERRIDES)) {
-        rg_fields = parse_read_group_info(info_data[Constants.InfoField.READ_GROUP_OVERRIDES], log)
+    if (info_data.containsKey(InfoField.READ_GROUP_OVERRIDES)) {
+        rg_fields = parse_read_group_info(info_data[InfoField.READ_GROUP_OVERRIDES], log)
     }
 
-    if (! b.files.containsKey(Constants.FileType.FASTQ)) {
-        b.files[Constants.FileType.FASTQ] = []
+    if (! b.files.containsKey(FileType.FASTQ)) {
+        b.files[FileType.FASTQ] = []
     }
 
     def fastq = FastqFile(
         fwd,
         rev,
         single_end,
-        info_data[Constants.InfoField.LIBRARY_ID],
-        info_data[Constants.InfoField.LANE],
-        info_data.getOrDefault(Constants.InfoField.FLOWCELL, null),
+        info_data[InfoField.LIBRARY_ID],
+        info_data[InfoField.LANE],
+        info_data.getOrDefault(InfoField.FLOWCELL, null),
         rg_fields,
     )
 
-    def duplicate = b.files[Constants.FileType.FASTQ].find { existing ->
+    def duplicate = b.files[FileType.FASTQ].find { existing ->
         existing.library_id == fastq.library_id && existing.lane == fastq.lane && existing.flowcell == fastq.flowcell
     }
     if (duplicate) {
@@ -173,7 +174,7 @@ def parseFastqFile(b, entry, info_data, case_id, log) {
         exit 1
     }
 
-    b.files[Constants.FileType.FASTQ] << fastq
+    b.files[FileType.FASTQ] << fastq
 }
 
 def parseInfoFields(info_str, case_id, sample_type_enum, sequence_type_enum, log) {
@@ -191,14 +192,14 @@ def parseInfoFields(info_str, case_id, sample_type_enum, sequence_type_enum, log
                k = e
             }
 
-            def info_field_enum = getEnumFromStringOrFail(k, Constants.InfoField, 'info field', log)
+            def info_field_enum = getEnumFromStringOrFail(k, InfoField, 'info field', log)
 
             if (info_data.containsKey(info_field_enum)) {
                 log.error "got duplicate info field for ${case_id} ${sample_type_enum}/${sequence_type_enum}: ${info_field_enum}"
                 exit 1
             }
 
-            if (! v && info_field_enum != Constants.InfoField.LONGITUDINAL_SAMPLE && info_field_enum != Constants.InfoField.GENERATE_REDUX_TSVS_ONLY) {
+            if (! v && info_field_enum != InfoField.LONGITUDINAL_SAMPLE && info_field_enum != InfoField.GENERATE_REDUX_TSVS_ONLY) {
                 log.error "got empty value for ${case_id} ${sample_type_enum}/${sequence_type_enum} ${info_field_enum}"
                 exit 1
             }
@@ -212,28 +213,28 @@ def parseInfoFields(info_str, case_id, sample_type_enum, sequence_type_enum, log
 def promoteAlignmentFiles(b) {
     def files = b.files
 
-    if (files.containsKey(Constants.FileType.BAM)) {
-        files[Constants.FileType.ALN] = files.remove(Constants.FileType.BAM)
+    if (files.containsKey(FileType.BAM)) {
+        files[FileType.ALN] = files.remove(FileType.BAM)
     }
 
-    if (files.containsKey(Constants.FileType.CRAM)) {
-        files[Constants.FileType.ALN] = files.remove(Constants.FileType.CRAM)
+    if (files.containsKey(FileType.CRAM)) {
+        files[FileType.ALN] = files.remove(FileType.CRAM)
     }
 
-    if (files.containsKey(Constants.FileType.BAM_REDUX)) {
-        files[Constants.FileType.ALN_REDUX] = files.remove(Constants.FileType.BAM_REDUX)
+    if (files.containsKey(FileType.BAM_REDUX)) {
+        files[FileType.ALN_REDUX] = files.remove(FileType.BAM_REDUX)
     }
 
-    if (files.containsKey(Constants.FileType.CRAM_REDUX)) {
-        files[Constants.FileType.ALN_REDUX] = files.remove(Constants.FileType.CRAM_REDUX)
+    if (files.containsKey(FileType.CRAM_REDUX)) {
+        files[FileType.ALN_REDUX] = files.remove(FileType.CRAM_REDUX)
     }
 
-    if (files.containsKey(Constants.FileType.BAI)) {
-        files[Constants.FileType.IDX] = files.remove(Constants.FileType.BAI)
+    if (files.containsKey(FileType.BAI)) {
+        files[FileType.IDX] = files.remove(FileType.BAI)
     }
 
-    if (files.containsKey(Constants.FileType.CRAI)) {
-        files[Constants.FileType.IDX] = files.remove(Constants.FileType.CRAI)
+    if (files.containsKey(FileType.CRAI)) {
+        files[FileType.IDX] = files.remove(FileType.CRAI)
     }
 }
 
@@ -246,7 +247,7 @@ def resolveReduxInputs(b, case_id, stub_run, log) {
     def files = b.files
     def sample_id = b.sample_id
 
-    if (files.containsKey(Constants.FileType.ALN_REDUX) && files.containsKey(Constants.FileType.REDUX_DIR)) {
+    if (files.containsKey(FileType.ALN_REDUX) && files.containsKey(FileType.REDUX_DIR)) {
         log.error "expected either REDUX directory or REDUX alignment but got both for ${case_id} ${sample_id}"
         exit 1
     }
@@ -254,9 +255,9 @@ def resolveReduxInputs(b, case_id, stub_run, log) {
     def redux_input
     def redux_aln
     def redux_dir
-    if (files.containsKey(Constants.FileType.ALN_REDUX)) {
+    if (files.containsKey(FileType.ALN_REDUX)) {
 
-        redux_aln = files[Constants.FileType.ALN_REDUX].path
+        redux_aln = files[FileType.ALN_REDUX].path
         redux_input = redux_aln
         redux_dir = redux_aln.parent
         if (! redux_input.isFile()) {
@@ -264,9 +265,9 @@ def resolveReduxInputs(b, case_id, stub_run, log) {
             exit 1
         }
 
-    } else if (files.containsKey(Constants.FileType.REDUX_DIR)) {
+    } else if (files.containsKey(FileType.REDUX_DIR)) {
 
-        redux_dir = files[Constants.FileType.REDUX_DIR].path
+        redux_dir = files[FileType.REDUX_DIR].path
         redux_input = redux_dir
         redux_aln = getReduxDirAlignment(sample_id, redux_dir)[0]
         if (! redux_input.isDirectory()) {
@@ -298,29 +299,29 @@ def resolveReduxInputs(b, case_id, stub_run, log) {
 
     if (! has_colocated_index) {
 
-        if (files.containsKey(Constants.FileType.REDUX_DIR)) {
+        if (files.containsKey(FileType.REDUX_DIR)) {
             log.error "required index not located in REDUX directory: ${case_id} ${sample_id}: ${redux_input}"
             exit 1
         }
 
     }
 
-    if (has_colocated_index && ! files.containsKey(Constants.FileType.REDUX_DIR)) {
-        files.remove(Constants.FileType.ALN_REDUX)
-        files[Constants.FileType.REDUX_DIR] = DataFile(redux_dir)
+    if (has_colocated_index && ! files.containsKey(FileType.REDUX_DIR)) {
+        files.remove(FileType.ALN_REDUX)
+        files[FileType.REDUX_DIR] = DataFile(redux_dir)
     }
 
     if (! has_redux_tsvs && generate_tsvs_only) {
-        files.remove(Constants.FileType.REDUX_DIR)
-        files[Constants.FileType.ALN_REDUX] = DataFile(redux_aln)
+        files.remove(FileType.REDUX_DIR)
+        files[FileType.ALN_REDUX] = DataFile(redux_aln)
     }
 
-    if (files.containsKey(Constants.FileType.ALN_REDUX) && files.containsKey(Constants.FileType.IDX) && ! has_redux_tsvs && ! generate_tsvs_only) {
+    if (files.containsKey(FileType.ALN_REDUX) && files.containsKey(FileType.IDX) && ! has_redux_tsvs && ! generate_tsvs_only) {
         log.error "REDUX alignments without colocated TSVs requires generate_redux_tsvs_only to be set in the samplesheet: ${case_id} ${sample_id}: ${redux_input}"
         exit 1
     }
 
-    if (files.containsKey(Constants.FileType.REDUX_DIR) && has_redux_tsvs && generate_tsvs_only) {
+    if (files.containsKey(FileType.REDUX_DIR) && has_redux_tsvs && generate_tsvs_only) {
         log.warn "REDUX directory already contains TSVs, ignoring generate_redux_tsvs_only flag for: ${case_id} ${sample_id}: ${redux_input}"
     }
 }
@@ -337,9 +338,9 @@ def checkAlignmentIndexes(b, case_id, stub_run, log) {
     files.keySet().toList().each { key ->
 
         def aln
-        if (key == Constants.FileType.ALN || key == Constants.FileType.ALN_REDUX) {
+        if (key == FileType.ALN || key == FileType.ALN_REDUX) {
             aln = files[key].path
-        } else if (key == Constants.FileType.REDUX_DIR) {
+        } else if (key == FileType.REDUX_DIR) {
             def d = getReduxDirAlignment(sample_id, files[key].path)
             aln = d[0]
         } else {
@@ -356,7 +357,7 @@ def checkAlignmentIndexes(b, case_id, stub_run, log) {
             exit 1
         }
 
-        if (files.containsKey(Constants.FileType.IDX) && files[Constants.FileType.IDX].path.name.endsWith(index_ext)) {
+        if (files.containsKey(FileType.IDX) && files[FileType.IDX].path.name.endsWith(index_ext)) {
             return
         }
 
@@ -368,8 +369,8 @@ def checkAlignmentIndexes(b, case_id, stub_run, log) {
             exit 1
         }
 
-        if (key == Constants.FileType.ALN || key == Constants.FileType.ALN_REDUX) {
-            files[Constants.FileType.IDX] = DataFile(index_fp)
+        if (key == FileType.ALN || key == FileType.ALN_REDUX) {
+            files[FileType.IDX] = DataFile(index_fp)
         }
     }
 }

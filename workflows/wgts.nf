@@ -37,6 +37,8 @@ include { VIRUSBREAKEND_CALLING } from '../subworkflows/local/virusbreakend_call
 
 include { softwareVersionsToYAML } from '../subworkflows/nf-core/utils_nfcore_pipeline'
 
+include { SequencingPlatform } from '../subworkflows/local/utils_nfcore_oncoanalyser_pipeline/types'
+
 include { getDnaFastqChannel           } from '../subworkflows/local/utils_nfcore_oncoanalyser_pipeline/utils'
 include { getEnumFromString            } from '../subworkflows/local/utils_nfcore_oncoanalyser_pipeline/utils'
 include { getRnaFastqChannel           } from '../subworkflows/local/utils_nfcore_oncoanalyser_pipeline/utils'
@@ -747,8 +749,8 @@ workflow WGTS {
     ch_virusinterpreter_out = channel.empty()
 
     // NOTE(LN): Virusbreakend currently broken for SBX and Ultima
-    def sequencing_platform = getEnumFromString(params.sequencing_platform, Constants.SequencingPlatform)
-    if (run_config.stages.virusinterpreter && sequencing_platform == Constants.SequencingPlatform.ILLUMINA) {
+    def sequencing_platform = getEnumFromString(params.sequencing_platform, SequencingPlatform)
+    if (run_config.stages.virusinterpreter && sequencing_platform == SequencingPlatform.ILLUMINA) {
 
         VIRUSBREAKEND_CALLING(
             ch_inputs,

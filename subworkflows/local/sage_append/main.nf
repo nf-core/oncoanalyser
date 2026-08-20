@@ -5,6 +5,8 @@
 include { SAGE_APPEND as SAGE_APPEND_SOMATIC  } from '../../../modules/local/sage/append/main'
 include { SAGE_APPEND as SAGE_APPEND_GERMLINE } from '../../../modules/local/sage/append/main'
 
+include { RunMode } from '../utils_nfcore_oncoanalyser_pipeline/types'
+
 include { groupByMeta               } from '../utils_nfcore_oncoanalyser_pipeline/channel_helpers'
 include { joinMeta                  } from '../utils_nfcore_oncoanalyser_pipeline/channel_helpers'
 include { restoreMeta               } from '../utils_nfcore_oncoanalyser_pipeline/channel_helpers'
@@ -48,8 +50,8 @@ workflow SAGE_APPEND {
     //
     // STEP: Handle inputs
     //
-    def run_mode = getEnumFromString(params.mode, Constants.RunMode)
-    def purity_estimate_mode = run_mode == Constants.RunMode.PURITY_ESTIMATE
+    def run_mode = getEnumFromString(params.mode, RunMode)
+    def purity_estimate_mode = run_mode == RunMode.PURITY_ESTIMATE
 
     // Select input sources then sort
     // channel: runnable: [ meta, purple_dir, tumor_dna_aln, tumor_dna_idx, [redux_tsv_tumor, ...], tumor_rna_aln, tumor_rna_idx ]

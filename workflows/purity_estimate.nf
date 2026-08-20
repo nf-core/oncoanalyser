@@ -16,6 +16,8 @@ include { WISP_ANALYSIS                   } from '../subworkflows/local/wisp_ana
 
 include { softwareVersionsToYAML } from '../subworkflows/nf-core/utils_nfcore_pipeline'
 
+include { RunMode } from '../subworkflows/local/utils_nfcore_oncoanalyser_pipeline/types'
+
 include { getDnaFastqChannel           } from '../subworkflows/local/utils_nfcore_oncoanalyser_pipeline/utils'
 include { getEnumFromString            } from '../subworkflows/local/utils_nfcore_oncoanalyser_pipeline/utils'
 include { getPrepConfigFromSamplesheet } from '../subworkflows/local/utils_nfcore_oncoanalyser_pipeline/validate_params'
@@ -38,9 +40,9 @@ workflow PURITY_ESTIMATE {
     ch_inputs = channel.fromList(inputs)
 
     // Get run mode of purity estimate mode
-    def purity_estimate_run_mode = getEnumFromString(params.purity_estimate_mode, Constants.RunMode)
-    def targeted_mode = purity_estimate_run_mode == Constants.RunMode.TARGETED
-    def wgts_mode = purity_estimate_run_mode == Constants.RunMode.WGTS
+    def purity_estimate_run_mode = getEnumFromString(params.purity_estimate_mode, RunMode)
+    def targeted_mode = purity_estimate_run_mode == RunMode.TARGETED
+    def wgts_mode = purity_estimate_run_mode == RunMode.WGTS
 
     // Set up reference data, assign more human readable variables
     def prep_config = getPrepConfigFromSamplesheet(run_config)
