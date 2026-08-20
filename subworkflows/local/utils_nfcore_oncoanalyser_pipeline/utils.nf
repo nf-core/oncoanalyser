@@ -333,10 +333,6 @@ def getDonorDnaSampleName(case_record) {
     return getDonorDnaSample(case_record)?.sample_id
 }
 
-def getLongitudinalSampleName(case_record) {
-    return getLongitudinalSample(case_record)?.sample_id
-}
-
 // Files - Tumor DNA
 def getTumorDnaFastq(case_record) {
     return getTumorDnaSample(case_record)?.files?.get(FileType.FASTQ)
@@ -373,30 +369,13 @@ def hasNormalDnaReduxInput(case_record) {
     return getNormalDnaReduxInput(case_record) != null
 }
 
-def hasDnaFastq(case_record) {
-    return hasNormalDnaFastq(case_record) || hasTumorDnaFastq(case_record)
-}
-
-def hasDnaReduxInput(case_record) {
-    return hasNormalDnaReduxInput(case_record) || hasTumorDnaReduxInput(case_record)
-}
-
 // Files - Donor DNA
 def getDonorDnaFastq(case_record) {
     return getDonorDnaSample(case_record)?.files?.get(FileType.FASTQ)
 }
 
-def getDonorDnaReduxInput(case_record) {
-    def d = hasReduxData(getDonorDnaSample(case_record))
-    return d
-}
-
 def hasDonorDnaFastq(case_record) {
     return getDonorDnaFastq(case_record) != null
-}
-
-def hasDonorDnaReduxInput(case_record) {
-    return getDonorDnaReduxInput(case_record) != null
 }
 
 // Files - Tumor RNA
@@ -406,114 +385,6 @@ def getTumorRnaFastq(case_record) {
 
 def hasTumorRnaFastq(case_record) {
     return getTumorRnaFastq(case_record) != null
-}
-
-// Plural accessors: one entry per matching sample, empty list when none
-
-// Sample records
-def getTumorDnaSamples(case_record) {
-    return case_record.tumor_dna_samples.findAll { it.sequence_type == SequenceType.DNA }
-}
-
-def getNormalDnaSamples(case_record) {
-    return case_record.normal_dna_samples.findAll { it.sequence_type == SequenceType.DNA }
-}
-
-def getDonorDnaSamples(case_record) {
-    return case_record.donor_dna_samples.findAll { it.sequence_type == SequenceType.DNA }
-}
-
-def getTumorRnaSamples(case_record) {
-    return case_record.tumor_rna_samples
-}
-
-def getLongitudinalSamples(case_record) {
-    return case_record.longitudinal_samples
-}
-
-// Sample names
-def getTumorDnaSampleNames(case_record) {
-    return getTumorDnaSamples(case_record).collect { it.sample_id }
-}
-
-def getNormalDnaSampleNames(case_record) {
-    return getNormalDnaSamples(case_record).collect { it.sample_id }
-}
-
-def getDonorDnaSampleNames(case_record) {
-    return getDonorDnaSamples(case_record).collect { it.sample_id }
-}
-
-def getTumorRnaSampleNames(case_record) {
-    return getTumorRnaSamples(case_record).collect { it.sample_id }
-}
-
-def getLongitudinalSampleNames(case_record) {
-    return getLongitudinalSamples(case_record).collect { it.sample_id }
-}
-
-// Files - Tumor DNA
-def getTumorDnaBams(case_record) {
-    return getTumorDnaSamples(case_record).collect { it.files.get(FileType.ALN) }.findAll { it != null }
-}
-
-def getTumorDnaFastqs(case_record) {
-    return getTumorDnaSamples(case_record).collect { it.files.get(FileType.FASTQ) }.findAll { it != null }
-}
-
-def getTumorDnaBais(case_record) {
-    return getTumorDnaSamples(case_record).collect { it.files.get(FileType.IDX) }.findAll { it != null }
-}
-
-def getTumorDnaReduxInputs(case_record) {
-    return getTumorDnaSamples(case_record).collect { hasReduxData(it) }.findAll { it != null }
-}
-
-// Files - Normal DNA
-def getNormalDnaBams(case_record) {
-    return getNormalDnaSamples(case_record).collect { it.files.get(FileType.ALN) }.findAll { it != null }
-}
-
-def getNormalDnaFastqs(case_record) {
-    return getNormalDnaSamples(case_record).collect { it.files.get(FileType.FASTQ) }.findAll { it != null }
-}
-
-def getNormalDnaBais(case_record) {
-    return getNormalDnaSamples(case_record).collect { it.files.get(FileType.IDX) }.findAll { it != null }
-}
-
-def getNormalDnaReduxInputs(case_record) {
-    return getNormalDnaSamples(case_record).collect { hasReduxData(it) }.findAll { it != null }
-}
-
-// Files - Donor DNA
-def getDonorDnaBams(case_record) {
-    return getDonorDnaSamples(case_record).collect { it.files.get(FileType.ALN) }.findAll { it != null }
-}
-
-def getDonorDnaFastqs(case_record) {
-    return getDonorDnaSamples(case_record).collect { it.files.get(FileType.FASTQ) }.findAll { it != null }
-}
-
-def getDonorDnaBais(case_record) {
-    return getDonorDnaSamples(case_record).collect { it.files.get(FileType.IDX) }.findAll { it != null }
-}
-
-def getDonorDnaReduxInputs(case_record) {
-    return getDonorDnaSamples(case_record).collect { hasReduxData(it) }.findAll { it != null }
-}
-
-// Files - Tumor RNA
-def getTumorRnaBams(case_record) {
-    return getTumorRnaSamples(case_record).collect { it.files.get(FileType.ALN) }.findAll { it != null }
-}
-
-def getTumorRnaFastqs(case_record) {
-    return getTumorRnaSamples(case_record).collect { it.files.get(FileType.FASTQ) }.findAll { it != null }
-}
-
-def getTumorRnaBais(case_record) {
-    return getTumorRnaSamples(case_record).collect { it.files.get(FileType.IDX) }.findAll { it != null }
 }
 
 // Status
@@ -527,10 +398,6 @@ def hasNormalDna(case_record) {
 
 def hasNormalDnaAlignment(case_record) {
     return hasInput(getNormalDnaSample(case_record), FileType.ALN) || hasNormalDnaReduxInput(case_record)
-}
-
-def hasDonorDna(case_record) {
-    return hasInput(getDonorDnaSample(case_record), FileType.ALN) || hasDonorDnaReduxInput(case_record) || hasDonorDnaFastq(case_record)
 }
 
 def hasTumorRna(case_record) {
