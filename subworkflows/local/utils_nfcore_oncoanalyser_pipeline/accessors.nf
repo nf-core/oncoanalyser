@@ -175,16 +175,16 @@ def getDonorReduxDirAlignment(case_record, redux_dir) {
 
 def getReduxDirAlignment(sample_name, redux_dir) {
     if (! redux_dir) {
-        return [[], []]
+        return [null, null]
     }
 
     def redux_cram = redux_dir.resolve("${sample_name}.redux.cram")
     if (redux_cram.exists()) {
-        return [redux_cram, "${redux_cram.toUriString()}.crai"]
+        return [redux_cram, nextflow.Nextflow.file("${redux_cram.toUriString()}.crai")]
     }
 
     def redux_bam = redux_dir.resolve("${sample_name}.redux.bam")
-    return [redux_bam, "${redux_bam.toUriString()}.bai"]
+    return [redux_bam, nextflow.Nextflow.file("${redux_bam.toUriString()}.bai")]
 }
 
 // REDUX TSV retrieval
