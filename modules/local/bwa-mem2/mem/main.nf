@@ -1,3 +1,5 @@
+nextflow.enable.types = true
+
 process BWAMEM2_ALIGN {
     tag "${meta.id}"
     label 'process_high'
@@ -8,15 +10,15 @@ process BWAMEM2_ALIGN {
         'biocontainers/mulled-v2-4dde50190ae599f2bb2027cb2c8763ea00fb5084:596c0d6a494faa218562f2be03af2714d454da4f-0' }"
 
     input:
-    tuple val(meta), path(reads_fwd), path(reads_rev)
-    path genome_fasta
-    path genome_bwamem2_index
-    val append_fastq_comment
+    tuple(meta: Map, reads_fwd: Path, reads_rev: Path?)
+    genome_fasta: Path
+    genome_bwamem2_index: Path
+    append_fastq_comment: Boolean
 
-    output:
-    tuple val(meta), path('*.bam'), path('*.bai')            , topic: bwamem2_align_bam
-    tuple val(meta), val('bwamem2_align'), path('.command.*'), topic: command_files
-    path 'versions.yml'                                      , topic: versions
+    topic:
+    tuple(meta, file('*.bam'), file('*.bai')) >> 'bwamem2_align_bam'
+    tuple(meta, 'bwamem2_align', files('.command.*')) >> 'command_files'
+    file('versions.yml') >> 'versions'
 
     when:
     task.ext.when == null || task.ext.when
