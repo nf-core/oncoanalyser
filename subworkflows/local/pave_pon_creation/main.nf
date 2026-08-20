@@ -3,7 +3,9 @@
 //
 
 include { PAVE_PON_PANEL_CREATION } from '../../../modules/local/pave/pon_creation/main'
-include { getTumorDnaSageDir; getTumorDnaSampleName; selectCurrentOrExisting } from '../utils_nfcore_oncoanalyser_pipeline/utils'
+include { getTumorDnaSageDir      } from '../utils_nfcore_oncoanalyser_pipeline/utils'
+include { getTumorDnaSampleName   } from '../utils_nfcore_oncoanalyser_pipeline/utils'
+include { selectCurrentOrExisting } from '../utils_nfcore_oncoanalyser_pipeline/utils'
 
 workflow PAVE_PON_CREATION {
     take:

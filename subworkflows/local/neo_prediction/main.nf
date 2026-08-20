@@ -5,8 +5,21 @@
 include { NEO_ANNOTATE_FUSIONS } from '../../../modules/local/neo/annotate_fusions/main'
 include { NEO_FINDER           } from '../../../modules/local/neo/finder/main'
 include { NEO_SCORER           } from '../../../modules/local/neo/scorer/main'
-include { groupByMeta; joinMeta; restoreMeta } from '../utils_nfcore_oncoanalyser_pipeline/channel_helpers'
-include { getLilacDir; getPurpleDir; getTumorDnaLinxAnnoDir; getTumorDnaSageAppendDir; getTumorDnaSampleName; getTumorRnaBai; getTumorRnaBam; getTumorRnaIsofoxDir; getTumorRnaSampleName; hasNormalDna; hasTumorRna; selectCurrentOrExisting } from '../utils_nfcore_oncoanalyser_pipeline/utils'
+include { groupByMeta              } from '../utils_nfcore_oncoanalyser_pipeline/channel_helpers'
+include { joinMeta                 } from '../utils_nfcore_oncoanalyser_pipeline/channel_helpers'
+include { restoreMeta              } from '../utils_nfcore_oncoanalyser_pipeline/channel_helpers'
+include { getLilacDir              } from '../utils_nfcore_oncoanalyser_pipeline/utils'
+include { getPurpleDir             } from '../utils_nfcore_oncoanalyser_pipeline/utils'
+include { getTumorDnaLinxAnnoDir   } from '../utils_nfcore_oncoanalyser_pipeline/utils'
+include { getTumorDnaSageAppendDir } from '../utils_nfcore_oncoanalyser_pipeline/utils'
+include { getTumorDnaSampleName    } from '../utils_nfcore_oncoanalyser_pipeline/utils'
+include { getTumorRnaBai           } from '../utils_nfcore_oncoanalyser_pipeline/utils'
+include { getTumorRnaBam           } from '../utils_nfcore_oncoanalyser_pipeline/utils'
+include { getTumorRnaIsofoxDir     } from '../utils_nfcore_oncoanalyser_pipeline/utils'
+include { getTumorRnaSampleName    } from '../utils_nfcore_oncoanalyser_pipeline/utils'
+include { hasNormalDna             } from '../utils_nfcore_oncoanalyser_pipeline/utils'
+include { hasTumorRna              } from '../utils_nfcore_oncoanalyser_pipeline/utils'
+include { selectCurrentOrExisting  } from '../utils_nfcore_oncoanalyser_pipeline/utils'
 
 workflow NEO_PREDICTION {
     take:

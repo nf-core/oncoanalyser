@@ -4,8 +4,24 @@
 
 include { SAGE_GERMLINE } from '../../../modules/local/sage/germline/main'
 include { SAGE_SOMATIC  } from '../../../modules/local/sage/somatic/main'
-include { groupByMeta; joinMeta; restoreMeta } from '../utils_nfcore_oncoanalyser_pipeline/channel_helpers'
-include { getDonorDnaReduxDir; getDonorDnaSampleName; getDonorReduxDirAlignment; getDonorReduxTsvs; getNormalDnaReduxDir; getNormalDnaSampleName; getNormalReduxDirAlignment; getNormalReduxTsvs; getTumorDnaReduxDir; getTumorDnaSampleName; getTumorReduxDirAlignment; getTumorReduxTsvs; hasNormalDnaSageDir; hasTumorDnaSageDir; selectCurrentOrExisting } from '../utils_nfcore_oncoanalyser_pipeline/utils'
+include { groupByMeta                } from '../utils_nfcore_oncoanalyser_pipeline/channel_helpers'
+include { joinMeta                   } from '../utils_nfcore_oncoanalyser_pipeline/channel_helpers'
+include { restoreMeta                } from '../utils_nfcore_oncoanalyser_pipeline/channel_helpers'
+include { getDonorDnaReduxDir        } from '../utils_nfcore_oncoanalyser_pipeline/utils'
+include { getDonorDnaSampleName      } from '../utils_nfcore_oncoanalyser_pipeline/utils'
+include { getDonorReduxDirAlignment  } from '../utils_nfcore_oncoanalyser_pipeline/utils'
+include { getDonorReduxTsvs          } from '../utils_nfcore_oncoanalyser_pipeline/utils'
+include { getNormalDnaReduxDir       } from '../utils_nfcore_oncoanalyser_pipeline/utils'
+include { getNormalDnaSampleName     } from '../utils_nfcore_oncoanalyser_pipeline/utils'
+include { getNormalReduxDirAlignment } from '../utils_nfcore_oncoanalyser_pipeline/utils'
+include { getNormalReduxTsvs         } from '../utils_nfcore_oncoanalyser_pipeline/utils'
+include { getTumorDnaReduxDir        } from '../utils_nfcore_oncoanalyser_pipeline/utils'
+include { getTumorDnaSampleName      } from '../utils_nfcore_oncoanalyser_pipeline/utils'
+include { getTumorReduxDirAlignment  } from '../utils_nfcore_oncoanalyser_pipeline/utils'
+include { getTumorReduxTsvs          } from '../utils_nfcore_oncoanalyser_pipeline/utils'
+include { hasNormalDnaSageDir        } from '../utils_nfcore_oncoanalyser_pipeline/utils'
+include { hasTumorDnaSageDir         } from '../utils_nfcore_oncoanalyser_pipeline/utils'
+include { selectCurrentOrExisting    } from '../utils_nfcore_oncoanalyser_pipeline/utils'
 
 workflow SAGE_CALLING {
     take:

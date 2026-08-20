@@ -3,8 +3,22 @@
 //
 
 include { LILAC } from '../../../modules/local/lilac/main'
-include { groupByMeta; joinMeta; restoreMeta } from '../utils_nfcore_oncoanalyser_pipeline/channel_helpers'
-include { getNormalDnaReduxDir; getNormalDnaSampleName; getNormalReduxDirAlignment; getPurpleDir; getTumorDnaReduxDir; getTumorDnaSampleName; getTumorReduxDirAlignment; getTumorRnaBai; getTumorRnaBam; hasLilacDir; hasNormalDna; hasTumorDna; selectCurrentOrExisting } from '../utils_nfcore_oncoanalyser_pipeline/utils'
+include { groupByMeta                } from '../utils_nfcore_oncoanalyser_pipeline/channel_helpers'
+include { joinMeta                   } from '../utils_nfcore_oncoanalyser_pipeline/channel_helpers'
+include { restoreMeta                } from '../utils_nfcore_oncoanalyser_pipeline/channel_helpers'
+include { getNormalDnaReduxDir       } from '../utils_nfcore_oncoanalyser_pipeline/utils'
+include { getNormalDnaSampleName     } from '../utils_nfcore_oncoanalyser_pipeline/utils'
+include { getNormalReduxDirAlignment } from '../utils_nfcore_oncoanalyser_pipeline/utils'
+include { getPurpleDir               } from '../utils_nfcore_oncoanalyser_pipeline/utils'
+include { getTumorDnaReduxDir        } from '../utils_nfcore_oncoanalyser_pipeline/utils'
+include { getTumorDnaSampleName      } from '../utils_nfcore_oncoanalyser_pipeline/utils'
+include { getTumorReduxDirAlignment  } from '../utils_nfcore_oncoanalyser_pipeline/utils'
+include { getTumorRnaBai             } from '../utils_nfcore_oncoanalyser_pipeline/utils'
+include { getTumorRnaBam             } from '../utils_nfcore_oncoanalyser_pipeline/utils'
+include { hasLilacDir                } from '../utils_nfcore_oncoanalyser_pipeline/utils'
+include { hasNormalDna               } from '../utils_nfcore_oncoanalyser_pipeline/utils'
+include { hasTumorDna                } from '../utils_nfcore_oncoanalyser_pipeline/utils'
+include { selectCurrentOrExisting    } from '../utils_nfcore_oncoanalyser_pipeline/utils'
 
 workflow LILAC_CALLING {
     take:

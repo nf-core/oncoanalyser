@@ -3,8 +3,16 @@
 //
 
 include { WISP } from '../../../modules/local/wisp/main'
-include { groupByMeta; joinMeta; restoreMeta } from '../utils_nfcore_oncoanalyser_pipeline/channel_helpers'
-include { getAmberDir; getNormalDnaReduxDir; getNormalReduxDirAlignment; getPurpleDir; getTumorDnaReduxDir; getTumorDnaSampleName; selectCurrentOrExisting } from '../utils_nfcore_oncoanalyser_pipeline/utils'
+include { groupByMeta                } from '../utils_nfcore_oncoanalyser_pipeline/channel_helpers'
+include { joinMeta                   } from '../utils_nfcore_oncoanalyser_pipeline/channel_helpers'
+include { restoreMeta                } from '../utils_nfcore_oncoanalyser_pipeline/channel_helpers'
+include { getAmberDir                } from '../utils_nfcore_oncoanalyser_pipeline/utils'
+include { getNormalDnaReduxDir       } from '../utils_nfcore_oncoanalyser_pipeline/utils'
+include { getNormalReduxDirAlignment } from '../utils_nfcore_oncoanalyser_pipeline/utils'
+include { getPurpleDir               } from '../utils_nfcore_oncoanalyser_pipeline/utils'
+include { getTumorDnaReduxDir        } from '../utils_nfcore_oncoanalyser_pipeline/utils'
+include { getTumorDnaSampleName      } from '../utils_nfcore_oncoanalyser_pipeline/utils'
+include { selectCurrentOrExisting    } from '../utils_nfcore_oncoanalyser_pipeline/utils'
 
 workflow WISP_ANALYSIS {
     take:

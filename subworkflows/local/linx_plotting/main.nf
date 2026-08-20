@@ -4,8 +4,16 @@
 
 include { LINXREPORT      } from '../../../modules/local/linxreport/main'
 include { LINX_VISUALISER } from '../../../modules/local/linx/visualiser/main'
-include { groupByMeta; joinMeta; restoreMeta } from '../utils_nfcore_oncoanalyser_pipeline/channel_helpers'
-include { getAmberDir; getCobaltDir; getPurpleDir; getTumorDnaLinxAnnoDir; getTumorDnaSampleName; hasLinxPlotDir; selectCurrentOrExisting } from '../utils_nfcore_oncoanalyser_pipeline/utils'
+include { groupByMeta             } from '../utils_nfcore_oncoanalyser_pipeline/channel_helpers'
+include { joinMeta                } from '../utils_nfcore_oncoanalyser_pipeline/channel_helpers'
+include { restoreMeta             } from '../utils_nfcore_oncoanalyser_pipeline/channel_helpers'
+include { getAmberDir             } from '../utils_nfcore_oncoanalyser_pipeline/utils'
+include { getCobaltDir            } from '../utils_nfcore_oncoanalyser_pipeline/utils'
+include { getPurpleDir            } from '../utils_nfcore_oncoanalyser_pipeline/utils'
+include { getTumorDnaLinxAnnoDir  } from '../utils_nfcore_oncoanalyser_pipeline/utils'
+include { getTumorDnaSampleName   } from '../utils_nfcore_oncoanalyser_pipeline/utils'
+include { hasLinxPlotDir          } from '../utils_nfcore_oncoanalyser_pipeline/utils'
+include { selectCurrentOrExisting } from '../utils_nfcore_oncoanalyser_pipeline/utils'
 
 workflow LINX_PLOTTING {
     take:

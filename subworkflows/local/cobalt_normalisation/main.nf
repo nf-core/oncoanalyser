@@ -3,8 +3,12 @@
 //
 
 include { COBALT_PANEL_NORMALISATION } from '../../../modules/local/cobalt/panel_normalisation/main'
-include { groupByMeta; joinMeta; restoreMeta } from '../utils_nfcore_oncoanalyser_pipeline/channel_helpers'
-include { getAmberDir; getCobaltDir; selectCurrentOrExisting } from '../utils_nfcore_oncoanalyser_pipeline/utils'
+include { groupByMeta             } from '../utils_nfcore_oncoanalyser_pipeline/channel_helpers'
+include { joinMeta                } from '../utils_nfcore_oncoanalyser_pipeline/channel_helpers'
+include { restoreMeta             } from '../utils_nfcore_oncoanalyser_pipeline/channel_helpers'
+include { getAmberDir             } from '../utils_nfcore_oncoanalyser_pipeline/utils'
+include { getCobaltDir            } from '../utils_nfcore_oncoanalyser_pipeline/utils'
+include { selectCurrentOrExisting } from '../utils_nfcore_oncoanalyser_pipeline/utils'
 
 workflow COBALT_NORMALISATION {
     take:

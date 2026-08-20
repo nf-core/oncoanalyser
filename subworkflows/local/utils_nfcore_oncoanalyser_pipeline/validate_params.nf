@@ -2,8 +2,16 @@
 // Parameter default and validation helpers for the nf-core/oncoanalyser pipeline
 //
 
-include { getRunStages } from './processes'
-include { getEnumFromString; getEnumFromStringOrFail; getEnumNames; getRunMode; hasNormalDnaFastq; hasTumorDna; hasTumorDnaFastq; hasTumorRna; hasTumorRnaFastq } from './utils'
+include { getRunStages            } from './processes'
+include { getEnumFromString       } from './utils'
+include { getEnumFromStringOrFail } from './utils'
+include { getEnumNames            } from './utils'
+include { getRunMode              } from './utils'
+include { hasNormalDnaFastq       } from './utils'
+include { hasTumorDna             } from './utils'
+include { hasTumorDnaFastq        } from './utils'
+include { hasTumorRna             } from './utils'
+include { hasTumorRnaFastq        } from './utils'
 
 //
 // Set parameter defaults where required

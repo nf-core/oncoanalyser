@@ -3,8 +3,18 @@
 //
 
 include { BAMTOOLS } from '../../../modules/local/bamtools/main'
-include { groupByMeta; joinMeta; restoreMeta } from '../utils_nfcore_oncoanalyser_pipeline/channel_helpers'
-include { getNormalDnaReduxDir; getNormalDnaSample; getNormalReduxDirAlignment; getTumorDnaReduxDir; getTumorDnaSample; getTumorReduxDirAlignment; hasNormalDnaBamtoolsDir; hasTumorDnaBamtoolsDir; selectCurrentOrExisting } from '../utils_nfcore_oncoanalyser_pipeline/utils'
+include { groupByMeta                } from '../utils_nfcore_oncoanalyser_pipeline/channel_helpers'
+include { joinMeta                   } from '../utils_nfcore_oncoanalyser_pipeline/channel_helpers'
+include { restoreMeta                } from '../utils_nfcore_oncoanalyser_pipeline/channel_helpers'
+include { getNormalDnaReduxDir       } from '../utils_nfcore_oncoanalyser_pipeline/utils'
+include { getNormalDnaSample         } from '../utils_nfcore_oncoanalyser_pipeline/utils'
+include { getNormalReduxDirAlignment } from '../utils_nfcore_oncoanalyser_pipeline/utils'
+include { getTumorDnaReduxDir        } from '../utils_nfcore_oncoanalyser_pipeline/utils'
+include { getTumorDnaSample          } from '../utils_nfcore_oncoanalyser_pipeline/utils'
+include { getTumorReduxDirAlignment  } from '../utils_nfcore_oncoanalyser_pipeline/utils'
+include { hasNormalDnaBamtoolsDir    } from '../utils_nfcore_oncoanalyser_pipeline/utils'
+include { hasTumorDnaBamtoolsDir     } from '../utils_nfcore_oncoanalyser_pipeline/utils'
+include { selectCurrentOrExisting    } from '../utils_nfcore_oncoanalyser_pipeline/utils'
 
 workflow BAMTOOLS_METRICS {
     take:

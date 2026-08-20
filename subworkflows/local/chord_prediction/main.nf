@@ -3,8 +3,15 @@
 //
 
 include { CHORD } from '../../../modules/local/chord/main'
-include { groupByMeta; joinMeta; restoreMeta } from '../utils_nfcore_oncoanalyser_pipeline/channel_helpers'
-include { getPurpleDir; getTumorDnaSampleName; hasChordDir; hasNormalDna; hasTumorDna; selectCurrentOrExisting } from '../utils_nfcore_oncoanalyser_pipeline/utils'
+include { groupByMeta             } from '../utils_nfcore_oncoanalyser_pipeline/channel_helpers'
+include { joinMeta                } from '../utils_nfcore_oncoanalyser_pipeline/channel_helpers'
+include { restoreMeta             } from '../utils_nfcore_oncoanalyser_pipeline/channel_helpers'
+include { getPurpleDir            } from '../utils_nfcore_oncoanalyser_pipeline/utils'
+include { getTumorDnaSampleName   } from '../utils_nfcore_oncoanalyser_pipeline/utils'
+include { hasChordDir             } from '../utils_nfcore_oncoanalyser_pipeline/utils'
+include { hasNormalDna            } from '../utils_nfcore_oncoanalyser_pipeline/utils'
+include { hasTumorDna             } from '../utils_nfcore_oncoanalyser_pipeline/utils'
+include { selectCurrentOrExisting } from '../utils_nfcore_oncoanalyser_pipeline/utils'
 
 workflow CHORD_PREDICTION {
     take:

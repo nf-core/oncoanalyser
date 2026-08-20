@@ -3,7 +3,8 @@
 //
 
 include { ISOFOX_PANEL_NORMALISATION } from '../../../modules/local/isofox/panel_normalisation/main'
-include { getTumorRnaIsofoxDir; selectCurrentOrExisting } from '../utils_nfcore_oncoanalyser_pipeline/utils'
+include { getTumorRnaIsofoxDir    } from '../utils_nfcore_oncoanalyser_pipeline/utils'
+include { selectCurrentOrExisting } from '../utils_nfcore_oncoanalyser_pipeline/utils'
 
 workflow ISOFOX_NORMALISATION {
     take:

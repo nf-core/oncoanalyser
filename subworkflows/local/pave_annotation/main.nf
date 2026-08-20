@@ -4,8 +4,17 @@
 
 include { PAVE_GERMLINE } from '../../../modules/local/pave/germline/main'
 include { PAVE_SOMATIC  } from '../../../modules/local/pave/somatic/main'
-include { groupByMeta; joinMeta; restoreMeta } from '../utils_nfcore_oncoanalyser_pipeline/channel_helpers'
-include { getNormalDnaSageDir; getTumorDnaSageDir; getTumorDnaSampleName; hasNormalDna; hasNormalDnaPaveDir; hasTumorDna; hasTumorDnaPaveDir; selectCurrentOrExisting } from '../utils_nfcore_oncoanalyser_pipeline/utils'
+include { groupByMeta             } from '../utils_nfcore_oncoanalyser_pipeline/channel_helpers'
+include { joinMeta                } from '../utils_nfcore_oncoanalyser_pipeline/channel_helpers'
+include { restoreMeta             } from '../utils_nfcore_oncoanalyser_pipeline/channel_helpers'
+include { getNormalDnaSageDir     } from '../utils_nfcore_oncoanalyser_pipeline/utils'
+include { getTumorDnaSageDir      } from '../utils_nfcore_oncoanalyser_pipeline/utils'
+include { getTumorDnaSampleName   } from '../utils_nfcore_oncoanalyser_pipeline/utils'
+include { hasNormalDna            } from '../utils_nfcore_oncoanalyser_pipeline/utils'
+include { hasNormalDnaPaveDir     } from '../utils_nfcore_oncoanalyser_pipeline/utils'
+include { hasTumorDna             } from '../utils_nfcore_oncoanalyser_pipeline/utils'
+include { hasTumorDnaPaveDir      } from '../utils_nfcore_oncoanalyser_pipeline/utils'
+include { selectCurrentOrExisting } from '../utils_nfcore_oncoanalyser_pipeline/utils'
 
 workflow PAVE_ANNOTATION {
     take:

@@ -3,8 +3,27 @@
 //
 
 include { REDUX } from '../../../modules/local/redux/main'
-include { groupByMeta; joinMeta; restoreMeta } from '../utils_nfcore_oncoanalyser_pipeline/channel_helpers'
-include { getDonorDnaAln; getDonorDnaBai; getDonorDnaSample; getNormalDnaAln; getNormalDnaBai; getNormalDnaSample; getTumorDnaAln; getTumorDnaBai; getTumorDnaSample; hasDonorDnaAln; hasDonorDnaBai; hasDonorDnaReduxDir; hasNormalDnaAln; hasNormalDnaBai; hasNormalDnaReduxDir; hasTumorDnaAln; hasTumorDnaBai; hasTumorDnaReduxDir } from '../utils_nfcore_oncoanalyser_pipeline/utils'
+include { groupByMeta          } from '../utils_nfcore_oncoanalyser_pipeline/channel_helpers'
+include { joinMeta             } from '../utils_nfcore_oncoanalyser_pipeline/channel_helpers'
+include { restoreMeta          } from '../utils_nfcore_oncoanalyser_pipeline/channel_helpers'
+include { getDonorDnaAln       } from '../utils_nfcore_oncoanalyser_pipeline/utils'
+include { getDonorDnaBai       } from '../utils_nfcore_oncoanalyser_pipeline/utils'
+include { getDonorDnaSample    } from '../utils_nfcore_oncoanalyser_pipeline/utils'
+include { getNormalDnaAln      } from '../utils_nfcore_oncoanalyser_pipeline/utils'
+include { getNormalDnaBai      } from '../utils_nfcore_oncoanalyser_pipeline/utils'
+include { getNormalDnaSample   } from '../utils_nfcore_oncoanalyser_pipeline/utils'
+include { getTumorDnaAln       } from '../utils_nfcore_oncoanalyser_pipeline/utils'
+include { getTumorDnaBai       } from '../utils_nfcore_oncoanalyser_pipeline/utils'
+include { getTumorDnaSample    } from '../utils_nfcore_oncoanalyser_pipeline/utils'
+include { hasDonorDnaAln       } from '../utils_nfcore_oncoanalyser_pipeline/utils'
+include { hasDonorDnaBai       } from '../utils_nfcore_oncoanalyser_pipeline/utils'
+include { hasDonorDnaReduxDir  } from '../utils_nfcore_oncoanalyser_pipeline/utils'
+include { hasNormalDnaAln      } from '../utils_nfcore_oncoanalyser_pipeline/utils'
+include { hasNormalDnaBai      } from '../utils_nfcore_oncoanalyser_pipeline/utils'
+include { hasNormalDnaReduxDir } from '../utils_nfcore_oncoanalyser_pipeline/utils'
+include { hasTumorDnaAln       } from '../utils_nfcore_oncoanalyser_pipeline/utils'
+include { hasTumorDnaBai       } from '../utils_nfcore_oncoanalyser_pipeline/utils'
+include { hasTumorDnaReduxDir  } from '../utils_nfcore_oncoanalyser_pipeline/utils'
 
 workflow REDUX_PROCESSING {
     take:

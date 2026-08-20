@@ -3,8 +3,30 @@
 //
 
 include { ORANGE } from '../../../modules/local/orange/main'
-include { groupByMeta; joinMeta; restoreMeta } from '../utils_nfcore_oncoanalyser_pipeline/channel_helpers'
-include { getChordDir; getCuppaDir; getLilacDir; getLinxPlotDir; getNormalDnaLinxAnnoDir; getNormalDnaSageAppendDir; getNormalDnaSageDir; getNormalDnaSampleName; getPeachDir; getPurpleDir; getQseeDir; getSagePlotDir; getSigsDir; getTumorDnaLinxAnnoDir; getTumorDnaSageAppendDir; getTumorDnaSageDir; getTumorDnaSampleName; getTumorRnaIsofoxDir; getTumorRnaSampleName; getVirusinterpreterDir; selectCurrentOrExisting } from '../utils_nfcore_oncoanalyser_pipeline/utils'
+include { groupByMeta               } from '../utils_nfcore_oncoanalyser_pipeline/channel_helpers'
+include { joinMeta                  } from '../utils_nfcore_oncoanalyser_pipeline/channel_helpers'
+include { restoreMeta               } from '../utils_nfcore_oncoanalyser_pipeline/channel_helpers'
+include { getChordDir               } from '../utils_nfcore_oncoanalyser_pipeline/utils'
+include { getCuppaDir               } from '../utils_nfcore_oncoanalyser_pipeline/utils'
+include { getLilacDir               } from '../utils_nfcore_oncoanalyser_pipeline/utils'
+include { getLinxPlotDir            } from '../utils_nfcore_oncoanalyser_pipeline/utils'
+include { getNormalDnaLinxAnnoDir   } from '../utils_nfcore_oncoanalyser_pipeline/utils'
+include { getNormalDnaSageAppendDir } from '../utils_nfcore_oncoanalyser_pipeline/utils'
+include { getNormalDnaSageDir       } from '../utils_nfcore_oncoanalyser_pipeline/utils'
+include { getNormalDnaSampleName    } from '../utils_nfcore_oncoanalyser_pipeline/utils'
+include { getPeachDir               } from '../utils_nfcore_oncoanalyser_pipeline/utils'
+include { getPurpleDir              } from '../utils_nfcore_oncoanalyser_pipeline/utils'
+include { getQseeDir                } from '../utils_nfcore_oncoanalyser_pipeline/utils'
+include { getSagePlotDir            } from '../utils_nfcore_oncoanalyser_pipeline/utils'
+include { getSigsDir                } from '../utils_nfcore_oncoanalyser_pipeline/utils'
+include { getTumorDnaLinxAnnoDir    } from '../utils_nfcore_oncoanalyser_pipeline/utils'
+include { getTumorDnaSageAppendDir  } from '../utils_nfcore_oncoanalyser_pipeline/utils'
+include { getTumorDnaSageDir        } from '../utils_nfcore_oncoanalyser_pipeline/utils'
+include { getTumorDnaSampleName     } from '../utils_nfcore_oncoanalyser_pipeline/utils'
+include { getTumorRnaIsofoxDir      } from '../utils_nfcore_oncoanalyser_pipeline/utils'
+include { getTumorRnaSampleName     } from '../utils_nfcore_oncoanalyser_pipeline/utils'
+include { getVirusinterpreterDir    } from '../utils_nfcore_oncoanalyser_pipeline/utils'
+include { selectCurrentOrExisting   } from '../utils_nfcore_oncoanalyser_pipeline/utils'
 
 workflow ORANGE_REPORTING {
     take:

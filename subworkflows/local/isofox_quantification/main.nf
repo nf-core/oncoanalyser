@@ -3,8 +3,15 @@
 //
 
 include { ISOFOX } from '../../../modules/local/isofox/run/main'
-include { groupByMeta; joinMeta; restoreMeta } from '../utils_nfcore_oncoanalyser_pipeline/channel_helpers'
-include { getTumorDnaSampleName; getTumorRnaBai; getTumorRnaBam; getTumorRnaSampleName; hasTumorRnaIsofoxDir; selectCurrentOrExisting } from '../utils_nfcore_oncoanalyser_pipeline/utils'
+include { groupByMeta             } from '../utils_nfcore_oncoanalyser_pipeline/channel_helpers'
+include { joinMeta                } from '../utils_nfcore_oncoanalyser_pipeline/channel_helpers'
+include { restoreMeta             } from '../utils_nfcore_oncoanalyser_pipeline/channel_helpers'
+include { getTumorDnaSampleName   } from '../utils_nfcore_oncoanalyser_pipeline/utils'
+include { getTumorRnaBai          } from '../utils_nfcore_oncoanalyser_pipeline/utils'
+include { getTumorRnaBam          } from '../utils_nfcore_oncoanalyser_pipeline/utils'
+include { getTumorRnaSampleName   } from '../utils_nfcore_oncoanalyser_pipeline/utils'
+include { hasTumorRnaIsofoxDir    } from '../utils_nfcore_oncoanalyser_pipeline/utils'
+include { selectCurrentOrExisting } from '../utils_nfcore_oncoanalyser_pipeline/utils'
 
 workflow ISOFOX_QUANTIFICATION {
     take:

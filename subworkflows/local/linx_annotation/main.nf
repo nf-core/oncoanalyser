@@ -4,8 +4,16 @@
 
 include { LINX_GERMLINE } from '../../../modules/local/linx/germline/main'
 include { LINX_SOMATIC  } from '../../../modules/local/linx/somatic/main'
-include { groupByMeta; joinMeta; restoreMeta } from '../utils_nfcore_oncoanalyser_pipeline/channel_helpers'
-include { getPurpleDir; getTumorDnaSampleName; hasNormalDna; hasNormalDnaLinxAnnoDir; hasTumorDna; hasTumorDnaLinxAnnoDir; selectCurrentOrExisting } from '../utils_nfcore_oncoanalyser_pipeline/utils'
+include { groupByMeta             } from '../utils_nfcore_oncoanalyser_pipeline/channel_helpers'
+include { joinMeta                } from '../utils_nfcore_oncoanalyser_pipeline/channel_helpers'
+include { restoreMeta             } from '../utils_nfcore_oncoanalyser_pipeline/channel_helpers'
+include { getPurpleDir            } from '../utils_nfcore_oncoanalyser_pipeline/utils'
+include { getTumorDnaSampleName   } from '../utils_nfcore_oncoanalyser_pipeline/utils'
+include { hasNormalDna            } from '../utils_nfcore_oncoanalyser_pipeline/utils'
+include { hasNormalDnaLinxAnnoDir } from '../utils_nfcore_oncoanalyser_pipeline/utils'
+include { hasTumorDna             } from '../utils_nfcore_oncoanalyser_pipeline/utils'
+include { hasTumorDnaLinxAnnoDir  } from '../utils_nfcore_oncoanalyser_pipeline/utils'
+include { selectCurrentOrExisting } from '../utils_nfcore_oncoanalyser_pipeline/utils'
 
 workflow LINX_ANNOTATION {
     take:

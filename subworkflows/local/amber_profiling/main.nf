@@ -3,8 +3,20 @@
 //
 
 include { AMBER } from '../../../modules/local/amber/main'
-include { groupByMeta; joinMeta; restoreMeta } from '../utils_nfcore_oncoanalyser_pipeline/channel_helpers'
-include { getDonorDnaReduxDir; getDonorDnaSampleName; getDonorReduxDirAlignment; getNormalDnaReduxDir; getNormalDnaSampleName; getNormalReduxDirAlignment; getTumorDnaReduxDir; getTumorDnaSampleName; getTumorReduxDirAlignment; hasAmberDir; selectCurrentOrExisting } from '../utils_nfcore_oncoanalyser_pipeline/utils'
+include { groupByMeta                } from '../utils_nfcore_oncoanalyser_pipeline/channel_helpers'
+include { joinMeta                   } from '../utils_nfcore_oncoanalyser_pipeline/channel_helpers'
+include { restoreMeta                } from '../utils_nfcore_oncoanalyser_pipeline/channel_helpers'
+include { getDonorDnaReduxDir        } from '../utils_nfcore_oncoanalyser_pipeline/utils'
+include { getDonorDnaSampleName      } from '../utils_nfcore_oncoanalyser_pipeline/utils'
+include { getDonorReduxDirAlignment  } from '../utils_nfcore_oncoanalyser_pipeline/utils'
+include { getNormalDnaReduxDir       } from '../utils_nfcore_oncoanalyser_pipeline/utils'
+include { getNormalDnaSampleName     } from '../utils_nfcore_oncoanalyser_pipeline/utils'
+include { getNormalReduxDirAlignment } from '../utils_nfcore_oncoanalyser_pipeline/utils'
+include { getTumorDnaReduxDir        } from '../utils_nfcore_oncoanalyser_pipeline/utils'
+include { getTumorDnaSampleName      } from '../utils_nfcore_oncoanalyser_pipeline/utils'
+include { getTumorReduxDirAlignment  } from '../utils_nfcore_oncoanalyser_pipeline/utils'
+include { hasAmberDir                } from '../utils_nfcore_oncoanalyser_pipeline/utils'
+include { selectCurrentOrExisting    } from '../utils_nfcore_oncoanalyser_pipeline/utils'
 
 workflow AMBER_PROFILING {
     take:

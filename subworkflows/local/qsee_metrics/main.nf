@@ -3,8 +3,21 @@
 //
 
 include { QSEE } from '../../../modules/local/qsee/main'
-include { groupByMeta; joinMeta; restoreMeta } from '../utils_nfcore_oncoanalyser_pipeline/channel_helpers'
-include { getCobaltDir; getEsveeDir; getNormalDnaBamtoolsDir; getNormalDnaReduxDir; getNormalDnaSampleName; getNormalReduxTsvs; getPurpleDir; getTumorDnaBamtoolsDir; getTumorDnaReduxDir; getTumorDnaSampleName; getTumorReduxTsvs; selectCurrentOrExisting } from '../utils_nfcore_oncoanalyser_pipeline/utils'
+include { groupByMeta             } from '../utils_nfcore_oncoanalyser_pipeline/channel_helpers'
+include { joinMeta                } from '../utils_nfcore_oncoanalyser_pipeline/channel_helpers'
+include { restoreMeta             } from '../utils_nfcore_oncoanalyser_pipeline/channel_helpers'
+include { getCobaltDir            } from '../utils_nfcore_oncoanalyser_pipeline/utils'
+include { getEsveeDir             } from '../utils_nfcore_oncoanalyser_pipeline/utils'
+include { getNormalDnaBamtoolsDir } from '../utils_nfcore_oncoanalyser_pipeline/utils'
+include { getNormalDnaReduxDir    } from '../utils_nfcore_oncoanalyser_pipeline/utils'
+include { getNormalDnaSampleName  } from '../utils_nfcore_oncoanalyser_pipeline/utils'
+include { getNormalReduxTsvs      } from '../utils_nfcore_oncoanalyser_pipeline/utils'
+include { getPurpleDir            } from '../utils_nfcore_oncoanalyser_pipeline/utils'
+include { getTumorDnaBamtoolsDir  } from '../utils_nfcore_oncoanalyser_pipeline/utils'
+include { getTumorDnaReduxDir     } from '../utils_nfcore_oncoanalyser_pipeline/utils'
+include { getTumorDnaSampleName   } from '../utils_nfcore_oncoanalyser_pipeline/utils'
+include { getTumorReduxTsvs       } from '../utils_nfcore_oncoanalyser_pipeline/utils'
+include { selectCurrentOrExisting } from '../utils_nfcore_oncoanalyser_pipeline/utils'
 
 workflow QSEE_METRICS {
     take:

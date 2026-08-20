@@ -4,8 +4,12 @@
 
 include { BWAMEM2_ALIGN } from '../../../modules/local/bwa-mem2/mem/main'
 include { FASTP_SPLIT   } from '../../../modules/local/fastp/split/main'
-include { groupByMeta; joinMeta; restoreMeta } from '../utils_nfcore_oncoanalyser_pipeline/channel_helpers'
-include { hasDonorDnaFastq; hasNormalDnaFastq; hasTumorDnaFastq } from '../utils_nfcore_oncoanalyser_pipeline/utils'
+include { groupByMeta       } from '../utils_nfcore_oncoanalyser_pipeline/channel_helpers'
+include { joinMeta          } from '../utils_nfcore_oncoanalyser_pipeline/channel_helpers'
+include { restoreMeta       } from '../utils_nfcore_oncoanalyser_pipeline/channel_helpers'
+include { hasDonorDnaFastq  } from '../utils_nfcore_oncoanalyser_pipeline/utils'
+include { hasNormalDnaFastq } from '../utils_nfcore_oncoanalyser_pipeline/utils'
+include { hasTumorDnaFastq  } from '../utils_nfcore_oncoanalyser_pipeline/utils'
 
 workflow READ_ALIGNMENT_DNA {
     take:

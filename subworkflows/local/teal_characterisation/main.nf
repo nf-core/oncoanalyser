@@ -4,8 +4,20 @@
 
 include { TEAL_PREP     } from '../../../modules/local/teal/prep/main'
 include { TEAL_PIPELINE } from '../../../modules/local/teal/pipeline/main'
-include { groupByMeta; joinMeta; restoreMeta } from '../utils_nfcore_oncoanalyser_pipeline/channel_helpers'
-include { getCobaltDir; getNormalDnaBamtoolsDir; getNormalDnaReduxDir; getNormalDnaSampleName; getNormalReduxDirAlignment; getPurpleDir; getTumorDnaBamtoolsDir; getTumorDnaReduxDir; getTumorDnaSampleName; getTumorReduxDirAlignment; selectCurrentOrExisting } from '../utils_nfcore_oncoanalyser_pipeline/utils'
+include { groupByMeta                } from '../utils_nfcore_oncoanalyser_pipeline/channel_helpers'
+include { joinMeta                   } from '../utils_nfcore_oncoanalyser_pipeline/channel_helpers'
+include { restoreMeta                } from '../utils_nfcore_oncoanalyser_pipeline/channel_helpers'
+include { getCobaltDir               } from '../utils_nfcore_oncoanalyser_pipeline/utils'
+include { getNormalDnaBamtoolsDir    } from '../utils_nfcore_oncoanalyser_pipeline/utils'
+include { getNormalDnaReduxDir       } from '../utils_nfcore_oncoanalyser_pipeline/utils'
+include { getNormalDnaSampleName     } from '../utils_nfcore_oncoanalyser_pipeline/utils'
+include { getNormalReduxDirAlignment } from '../utils_nfcore_oncoanalyser_pipeline/utils'
+include { getPurpleDir               } from '../utils_nfcore_oncoanalyser_pipeline/utils'
+include { getTumorDnaBamtoolsDir     } from '../utils_nfcore_oncoanalyser_pipeline/utils'
+include { getTumorDnaReduxDir        } from '../utils_nfcore_oncoanalyser_pipeline/utils'
+include { getTumorDnaSampleName      } from '../utils_nfcore_oncoanalyser_pipeline/utils'
+include { getTumorReduxDirAlignment  } from '../utils_nfcore_oncoanalyser_pipeline/utils'
+include { selectCurrentOrExisting    } from '../utils_nfcore_oncoanalyser_pipeline/utils'
 
 workflow TEAL_CHARACTERISATION {
     take:

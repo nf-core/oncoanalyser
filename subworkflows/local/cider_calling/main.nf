@@ -3,7 +3,13 @@
 //
 
 include { CIDER } from '../../../modules/local/cider/main'
-include { getTumorDnaReduxDir; getTumorDnaSample; getTumorReduxDirAlignment; getTumorRnaBai; getTumorRnaBam; getTumorRnaSample; selectCurrentOrExisting } from '../utils_nfcore_oncoanalyser_pipeline/utils'
+include { getTumorDnaReduxDir       } from '../utils_nfcore_oncoanalyser_pipeline/utils'
+include { getTumorDnaSample         } from '../utils_nfcore_oncoanalyser_pipeline/utils'
+include { getTumorReduxDirAlignment } from '../utils_nfcore_oncoanalyser_pipeline/utils'
+include { getTumorRnaBai            } from '../utils_nfcore_oncoanalyser_pipeline/utils'
+include { getTumorRnaBam            } from '../utils_nfcore_oncoanalyser_pipeline/utils'
+include { getTumorRnaSample         } from '../utils_nfcore_oncoanalyser_pipeline/utils'
+include { selectCurrentOrExisting   } from '../utils_nfcore_oncoanalyser_pipeline/utils'
 
 workflow CIDER_CALLING {
     take:

@@ -3,8 +3,20 @@
 //
 
 include { CUPPA } from '../../../modules/local/cuppa/main'
-include { groupByMeta; joinMeta; restoreMeta } from '../utils_nfcore_oncoanalyser_pipeline/channel_helpers'
-include { getPurpleDir; getTumorDnaLinxAnnoDir; getTumorDnaSampleName; getTumorRnaIsofoxDir; getTumorRnaSampleName; getVirusinterpreterDir; hasCuppaDir; hasNormalDna; hasTumorDna; hasTumorRna; selectCurrentOrExisting } from '../utils_nfcore_oncoanalyser_pipeline/utils'
+include { groupByMeta             } from '../utils_nfcore_oncoanalyser_pipeline/channel_helpers'
+include { joinMeta                } from '../utils_nfcore_oncoanalyser_pipeline/channel_helpers'
+include { restoreMeta             } from '../utils_nfcore_oncoanalyser_pipeline/channel_helpers'
+include { getPurpleDir            } from '../utils_nfcore_oncoanalyser_pipeline/utils'
+include { getTumorDnaLinxAnnoDir  } from '../utils_nfcore_oncoanalyser_pipeline/utils'
+include { getTumorDnaSampleName   } from '../utils_nfcore_oncoanalyser_pipeline/utils'
+include { getTumorRnaIsofoxDir    } from '../utils_nfcore_oncoanalyser_pipeline/utils'
+include { getTumorRnaSampleName   } from '../utils_nfcore_oncoanalyser_pipeline/utils'
+include { getVirusinterpreterDir  } from '../utils_nfcore_oncoanalyser_pipeline/utils'
+include { hasCuppaDir             } from '../utils_nfcore_oncoanalyser_pipeline/utils'
+include { hasNormalDna            } from '../utils_nfcore_oncoanalyser_pipeline/utils'
+include { hasTumorDna             } from '../utils_nfcore_oncoanalyser_pipeline/utils'
+include { hasTumorRna             } from '../utils_nfcore_oncoanalyser_pipeline/utils'
+include { selectCurrentOrExisting } from '../utils_nfcore_oncoanalyser_pipeline/utils'
 
 workflow CUPPA_PREDICTION {
     take:

@@ -3,8 +3,21 @@
 //
 
 include { PURPLE } from '../../../modules/local/purple/main'
-include { groupByMeta; joinMeta; restoreMeta } from '../utils_nfcore_oncoanalyser_pipeline/channel_helpers'
-include { getAmberDir; getCobaltDir; getEsveeDir; getNormalDnaPaveDir; getNormalDnaSampleName; getTumorDnaPaveDir; getTumorDnaReduxDir; getTumorDnaSampleName; getTumorReduxTsvs; hasNormalDna; hasPurpleDir; selectCurrentOrExisting } from '../utils_nfcore_oncoanalyser_pipeline/utils'
+include { groupByMeta             } from '../utils_nfcore_oncoanalyser_pipeline/channel_helpers'
+include { joinMeta                } from '../utils_nfcore_oncoanalyser_pipeline/channel_helpers'
+include { restoreMeta             } from '../utils_nfcore_oncoanalyser_pipeline/channel_helpers'
+include { getAmberDir             } from '../utils_nfcore_oncoanalyser_pipeline/utils'
+include { getCobaltDir            } from '../utils_nfcore_oncoanalyser_pipeline/utils'
+include { getEsveeDir             } from '../utils_nfcore_oncoanalyser_pipeline/utils'
+include { getNormalDnaPaveDir     } from '../utils_nfcore_oncoanalyser_pipeline/utils'
+include { getNormalDnaSampleName  } from '../utils_nfcore_oncoanalyser_pipeline/utils'
+include { getTumorDnaPaveDir      } from '../utils_nfcore_oncoanalyser_pipeline/utils'
+include { getTumorDnaReduxDir     } from '../utils_nfcore_oncoanalyser_pipeline/utils'
+include { getTumorDnaSampleName   } from '../utils_nfcore_oncoanalyser_pipeline/utils'
+include { getTumorReduxTsvs       } from '../utils_nfcore_oncoanalyser_pipeline/utils'
+include { hasNormalDna            } from '../utils_nfcore_oncoanalyser_pipeline/utils'
+include { hasPurpleDir            } from '../utils_nfcore_oncoanalyser_pipeline/utils'
+include { selectCurrentOrExisting } from '../utils_nfcore_oncoanalyser_pipeline/utils'
 
 workflow PURPLE_CALLING {
     take:

@@ -4,8 +4,25 @@
 
 include { SAGE_APPEND as SAGE_APPEND_SOMATIC  } from '../../../modules/local/sage/append/main'
 include { SAGE_APPEND as SAGE_APPEND_GERMLINE } from '../../../modules/local/sage/append/main'
-include { groupByMeta; joinMeta; restoreMeta } from '../utils_nfcore_oncoanalyser_pipeline/channel_helpers'
-include { getEnumFromString; getNormalDnaSampleName; getPurpleDir; getTumorDnaReduxDir; getTumorDnaSampleName; getTumorReduxDirAlignment; getTumorReduxTsvs; getTumorRnaBai; getTumorRnaBam; getTumorRnaSampleName; hasNormalDna; hasNormalDnaSageAppendDir; hasTumorDna; hasTumorDnaSageAppendDir; hasTumorRna; selectCurrentOrExisting } from '../utils_nfcore_oncoanalyser_pipeline/utils'
+include { groupByMeta               } from '../utils_nfcore_oncoanalyser_pipeline/channel_helpers'
+include { joinMeta                  } from '../utils_nfcore_oncoanalyser_pipeline/channel_helpers'
+include { restoreMeta               } from '../utils_nfcore_oncoanalyser_pipeline/channel_helpers'
+include { getEnumFromString         } from '../utils_nfcore_oncoanalyser_pipeline/utils'
+include { getNormalDnaSampleName    } from '../utils_nfcore_oncoanalyser_pipeline/utils'
+include { getPurpleDir              } from '../utils_nfcore_oncoanalyser_pipeline/utils'
+include { getTumorDnaReduxDir       } from '../utils_nfcore_oncoanalyser_pipeline/utils'
+include { getTumorDnaSampleName     } from '../utils_nfcore_oncoanalyser_pipeline/utils'
+include { getTumorReduxDirAlignment } from '../utils_nfcore_oncoanalyser_pipeline/utils'
+include { getTumorReduxTsvs         } from '../utils_nfcore_oncoanalyser_pipeline/utils'
+include { getTumorRnaBai            } from '../utils_nfcore_oncoanalyser_pipeline/utils'
+include { getTumorRnaBam            } from '../utils_nfcore_oncoanalyser_pipeline/utils'
+include { getTumorRnaSampleName     } from '../utils_nfcore_oncoanalyser_pipeline/utils'
+include { hasNormalDna              } from '../utils_nfcore_oncoanalyser_pipeline/utils'
+include { hasNormalDnaSageAppendDir } from '../utils_nfcore_oncoanalyser_pipeline/utils'
+include { hasTumorDna               } from '../utils_nfcore_oncoanalyser_pipeline/utils'
+include { hasTumorDnaSageAppendDir  } from '../utils_nfcore_oncoanalyser_pipeline/utils'
+include { hasTumorRna               } from '../utils_nfcore_oncoanalyser_pipeline/utils'
+include { selectCurrentOrExisting   } from '../utils_nfcore_oncoanalyser_pipeline/utils'
 
 workflow SAGE_APPEND {
     take:

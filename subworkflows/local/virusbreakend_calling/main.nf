@@ -4,8 +4,16 @@
 
 include { VIRUSBREAKEND    } from '../../../modules/local/virusbreakend/main'
 include { VIRUSINTERPRETER } from '../../../modules/local/virusinterpreter/main'
-include { groupByMeta; joinMeta; restoreMeta } from '../utils_nfcore_oncoanalyser_pipeline/channel_helpers'
-include { getPurpleDir; getTumorDnaBamtoolsDir; getTumorDnaReduxDir; getTumorDnaSampleName; getTumorReduxDirAlignment; hasVirusinterpreterDir; selectCurrentOrExisting } from '../utils_nfcore_oncoanalyser_pipeline/utils'
+include { groupByMeta               } from '../utils_nfcore_oncoanalyser_pipeline/channel_helpers'
+include { joinMeta                  } from '../utils_nfcore_oncoanalyser_pipeline/channel_helpers'
+include { restoreMeta               } from '../utils_nfcore_oncoanalyser_pipeline/channel_helpers'
+include { getPurpleDir              } from '../utils_nfcore_oncoanalyser_pipeline/utils'
+include { getTumorDnaBamtoolsDir    } from '../utils_nfcore_oncoanalyser_pipeline/utils'
+include { getTumorDnaReduxDir       } from '../utils_nfcore_oncoanalyser_pipeline/utils'
+include { getTumorDnaSampleName     } from '../utils_nfcore_oncoanalyser_pipeline/utils'
+include { getTumorReduxDirAlignment } from '../utils_nfcore_oncoanalyser_pipeline/utils'
+include { hasVirusinterpreterDir    } from '../utils_nfcore_oncoanalyser_pipeline/utils'
+include { selectCurrentOrExisting   } from '../utils_nfcore_oncoanalyser_pipeline/utils'
 
 workflow VIRUSBREAKEND_CALLING {
     take:
