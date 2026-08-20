@@ -2,23 +2,26 @@
 // Parameter default and validation helpers for the nf-core/oncoanalyser pipeline
 //
 
-include { FileType; RefDataType; RunMode; UmiType } from './types'
-include { getRunStages             } from './processes'
-include { getEnumFromString        } from './utils'
-include { getEnumFromStringOrFail  } from './utils'
-include { getEnumNames             } from './utils'
-include { getRunMode               } from './utils'
-include { hasNormalDnaFastq        } from './accessors'
-include { hasTumorDna              } from './accessors'
-include { hasTumorDnaFastq         } from './accessors'
-include { hasTumorRna              } from './accessors'
-include { hasTumorRnaFastq         } from './accessors'
 include { getSamples               } from './accessors'
 include { getTumorDnaSample        } from './accessors'
 include { hasAlignmentInput        } from './accessors'
 include { hasInput                 } from './accessors'
 include { hasNormalDna             } from './accessors'
 include { hasNormalDnaAlignment    } from './accessors'
+include { hasNormalDnaFastq        } from './accessors'
+include { hasTumorDna              } from './accessors'
+include { hasTumorDnaFastq         } from './accessors'
+include { hasTumorRna              } from './accessors'
+include { hasTumorRnaFastq         } from './accessors'
+include { getRunStages             } from './processes'
+include { FileType                 } from './types'
+include { RefDataType              } from './types'
+include { RunMode                  } from './types'
+include { UmiType                  } from './types'
+include { getEnumFromString        } from './utils'
+include { getEnumFromStringOrFail  } from './utils'
+include { getEnumNames             } from './utils'
+include { getRunMode               } from './utils'
 
 //
 // Set parameter defaults where required

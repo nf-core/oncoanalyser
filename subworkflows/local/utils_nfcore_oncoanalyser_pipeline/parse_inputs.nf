@@ -2,13 +2,16 @@
 // Input parsing helpers for the nf-core/oncoanalyser pipeline
 //
 
-include { getEnumFromStringOrFail  } from './utils'
-include { getFileObject            } from './utils'
 include { getReduxDirAlignment     } from './accessors'
-include { FileType; InfoField; SampleType; SequenceType } from './types'
 include { CaseRecord               } from './records'
 include { FastqFile                } from './records'
 include { SampleRecord             } from './records'
+include { FileType                 } from './types'
+include { InfoField                } from './types'
+include { SampleType               } from './types'
+include { SequenceType             } from './types'
+include { getEnumFromStringOrFail  } from './utils'
+include { getFileObject            } from './utils'
 
 def parseInput(input_fp_str, stub_run, log) {
 

@@ -2,7 +2,8 @@
 // Sample and file accessors for the nf-core/oncoanalyser pipeline
 //
 
-include { FileType; SequenceType } from './types'
+include { FileType     } from './types'
+include { SequenceType } from './types'
 
 // All samples in a case, across every sample list
 def getSamples(case_record) {

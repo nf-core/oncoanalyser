@@ -2,7 +2,6 @@
 // Input channel builders for the nf-core/oncoanalyser pipeline
 //
 
-include { FileType            } from './types'
 include { getDonorDnaSample   } from './accessors'
 include { getNormalDnaSample  } from './accessors'
 include { getTumorDnaSample   } from './accessors'
@@ -15,6 +14,7 @@ include { hasNormalDnaFastq   } from './accessors'
 include { hasTumorDnaAln      } from './accessors'
 include { hasTumorDnaFastq    } from './accessors'
 include { hasTumorRnaFastq    } from './accessors'
+include { FileType            } from './types'
 
 def getDnaFastqChannel(ch_inputs) {
     // Sort inputs
