@@ -30,7 +30,7 @@ def SampleRecord(sample_id, case_id, patient_id, sample_type, sequence_type, fil
     )
 }
 
-def CaseRecord(case_id, patient_id, cancer_type, normal_dna_samples, donor_dna_samples, tumor_dna_samples, tumor_rna_samples, longitudinal_samples, directories) {
+def CaseRecord(case_id, patient_id, cancer_type, normal_dna_samples, donor_dna_samples, tumor_dna_samples, tumor_rna_samples, longitudinal_samples) {
     return record(
         case_id: case_id,
         patient_id: patient_id,
@@ -40,6 +40,5 @@ def CaseRecord(case_id, patient_id, cancer_type, normal_dna_samples, donor_dna_s
         tumor_dna_samples: tumor_dna_samples,
         tumor_rna_samples: tumor_rna_samples,
         longitudinal_samples: longitudinal_samples,
-        directories: directories,
     )
 }

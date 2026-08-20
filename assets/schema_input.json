@@ -29,7 +29,7 @@
                 "type": "string",
                 "description": "Sample type",
                 "pattern": "^\\S+$",
-                "enum": ["normal", "tumor", "donor", "tumor_normal", "longitudinal"],
+                "enum": ["normal", "tumor", "donor", "longitudinal"],
                 "errorMessage": "sample_type must be provided and cannot contain spaces"
             },
             "sequence_type": {

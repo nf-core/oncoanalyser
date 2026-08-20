@@ -117,7 +117,6 @@ enum SampleType {
     LONGITUDINAL,
     NORMAL,
     TUMOR,
-    TUMOR_NORMAL,
 }
 
 enum SequenceType {
@@ -136,22 +135,3 @@ enum InfoField {
     READ_GROUP_OVERRIDES,
 }
 
-// Directories that are produced/consumed once per case rather than per sample. These live on
-// CaseRecord.directories instead of a SampleRecord.files entry.
-def getCaseLevelDirs() {
-    return [
-        FileType.AMBER_DIR,
-        FileType.COBALT_DIR,
-        FileType.ESVEE_DIR,
-        FileType.PURPLE_DIR,
-        FileType.QSEE_DIR,
-        FileType.SAGE_PLOT_DIR,
-        FileType.LINX_PLOT_DIR,
-        FileType.LILAC_DIR,
-        FileType.CHORD_DIR,
-        FileType.SIGS_DIR,
-        FileType.VIRUSINTERPRETER_DIR,
-        FileType.CUPPA_DIR,
-        FileType.PEACH_DIR,
-    ] as Set
-}

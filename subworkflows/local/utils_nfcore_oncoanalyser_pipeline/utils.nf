@@ -71,7 +71,7 @@ def validateInput(inputs, run_config, params, log) {
         }
 
         // Longitudinal samples require a primary normal DNA alignment when AMBER input is provided
-        if (case_record.longitudinal_samples && case_record.directories.containsKey(FileType.AMBER_DIR) && ! hasNormalDnaAlignment(case_record)) {
+        if (case_record.longitudinal_samples && hasAmberDir(case_record) && ! hasNormalDnaAlignment(case_record)) {
             log.error "AMBER input was provided without the required primary normal DNA BAM for ${case_record.case_id}"
             exit 1
         }
@@ -757,19 +757,19 @@ def hasTumorRnaIsofoxDir(case_record) { return getTumorRnaIsofoxDir(case_record)
 
 
 // Case-level directory accessors
-def getAmberDir(case_record) { return case_record.directories?.get(FileType.AMBER_DIR) }
-def getCobaltDir(case_record) { return case_record.directories?.get(FileType.COBALT_DIR) }
-def getEsveeDir(case_record) { return case_record.directories?.get(FileType.ESVEE_DIR) }
-def getPurpleDir(case_record) { return case_record.directories?.get(FileType.PURPLE_DIR) }
-def getQseeDir(case_record) { return case_record.directories?.get(FileType.QSEE_DIR) }
-def getSagePlotDir(case_record) { return case_record.directories?.get(FileType.SAGE_PLOT_DIR) }
-def getLinxPlotDir(case_record) { return case_record.directories?.get(FileType.LINX_PLOT_DIR) }
-def getChordDir(case_record) { return case_record.directories?.get(FileType.CHORD_DIR) }
-def getSigsDir(case_record) { return case_record.directories?.get(FileType.SIGS_DIR) }
-def getLilacDir(case_record) { return case_record.directories?.get(FileType.LILAC_DIR) }
-def getVirusinterpreterDir(case_record) { return case_record.directories?.get(FileType.VIRUSINTERPRETER_DIR) }
-def getCuppaDir(case_record) { return case_record.directories?.get(FileType.CUPPA_DIR) }
-def getPeachDir(case_record) { return case_record.directories?.get(FileType.PEACH_DIR) }
+def getAmberDir(case_record) { return getTumorDnaSample(case_record)?.files?.get(FileType.AMBER_DIR) }
+def getCobaltDir(case_record) { return getTumorDnaSample(case_record)?.files?.get(FileType.COBALT_DIR) }
+def getEsveeDir(case_record) { return getTumorDnaSample(case_record)?.files?.get(FileType.ESVEE_DIR) }
+def getPurpleDir(case_record) { return getTumorDnaSample(case_record)?.files?.get(FileType.PURPLE_DIR) }
+def getQseeDir(case_record) { return getTumorDnaSample(case_record)?.files?.get(FileType.QSEE_DIR) }
+def getSagePlotDir(case_record) { return getTumorDnaSample(case_record)?.files?.get(FileType.SAGE_PLOT_DIR) }
+def getLinxPlotDir(case_record) { return getTumorDnaSample(case_record)?.files?.get(FileType.LINX_PLOT_DIR) }
+def getChordDir(case_record) { return getTumorDnaSample(case_record)?.files?.get(FileType.CHORD_DIR) }
+def getSigsDir(case_record) { return getTumorDnaSample(case_record)?.files?.get(FileType.SIGS_DIR) }
+def getLilacDir(case_record) { return getTumorDnaSample(case_record)?.files?.get(FileType.LILAC_DIR) }
+def getVirusinterpreterDir(case_record) { return getTumorDnaSample(case_record)?.files?.get(FileType.VIRUSINTERPRETER_DIR) }
+def getCuppaDir(case_record) { return getTumorDnaSample(case_record)?.files?.get(FileType.CUPPA_DIR) }
+def getPeachDir(case_record) { return getNormalDnaSample(case_record)?.files?.get(FileType.PEACH_DIR) }
 
 def hasAmberDir(case_record) { return getAmberDir(case_record) != null }
 def hasCobaltDir(case_record) { return getCobaltDir(case_record) != null }

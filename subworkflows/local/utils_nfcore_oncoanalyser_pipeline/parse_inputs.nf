@@ -6,7 +6,7 @@ include { getEnumFromStringOrFail } from './utils'
 include { getFileObject           } from './utils'
 include { getReduxDirAlignment    } from './utils'
 include { parse_read_group_info   } from './utils'
-include { FileType; InfoField; SampleType; SequenceType; getCaseLevelDirs } from './types'
+include { FileType; InfoField; SampleType; SequenceType } from './types'
 include { CaseRecord              } from './records'
 include { FastqFile               } from './records'
 include { SampleRecord            } from './records'
@@ -39,10 +39,9 @@ def parseCaseEntry(case_id, entries, stub_run, log) {
 
     def ctx = [cancer_type: null]
     def sample_builders = [:]
-    def directories = [:]
 
     entries.each { entry ->
-        parseSampleEntry(case_id, patient_id, ctx, entry, sample_builders, directories, log)
+        parseSampleEntry(case_id, patient_id, ctx, entry, sample_builders, log)
     }
 
     def samples = sample_builders.values().collect { b ->
@@ -59,10 +58,10 @@ def parseCaseEntry(case_id, entries, stub_run, log) {
     def tumor_rna = samples.findAll { it.sample_type == SampleType.TUMOR && it.sequence_type == SequenceType.RNA }
     def longitudinal = samples.findAll { it.sample_type == SampleType.LONGITUDINAL }
 
-    return CaseRecord(case_id, patient_id, ctx.cancer_type, normal_dna, donor_dna, tumor_dna, tumor_rna, longitudinal, directories)
+    return CaseRecord(case_id, patient_id, ctx.cancer_type, normal_dna, donor_dna, tumor_dna, tumor_rna, longitudinal)
 }
 
-def parseSampleEntry(case_id, patient_id, ctx, entry, sample_builders, directories, log) {
+def parseSampleEntry(case_id, patient_id, ctx, entry, sample_builders, log) {
 
     // Sample type
     def sample_type_enum = getEnumFromStringOrFail(entry.sample_type, SampleType, 'sample type', log)
@@ -72,16 +71,6 @@ def parseSampleEntry(case_id, patient_id, ctx, entry, sample_builders, directori
 
     // Filetype
     def filetype_enum = getEnumFromStringOrFail(entry.filetype, FileType, 'file type', log)
-
-    // Case-level directories (one per case, e.g. sample_type=tumor_normal rows and process dirs)
-    if (sample_type_enum == SampleType.TUMOR_NORMAL || getCaseLevelDirs().contains(filetype_enum)) {
-        if (directories.containsKey(filetype_enum)) {
-            log.error "got duplicate file for ${case_id}: ${filetype_enum}"
-            exit 1
-        }
-        directories[filetype_enum] = getFileObject(entry.filepath)
-        return
-    }
 
     def sample_key = "${sample_type_enum}_${sequence_type_enum}_${entry.sample_id}"
     def b = sample_builders[sample_key]
