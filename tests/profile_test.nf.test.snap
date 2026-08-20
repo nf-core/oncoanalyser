@@ -527,7 +527,7 @@
                 "subject_a.tumor.cuppa.vis.png:md5,e7bd107057f0c0098c2e1189595d770a",
                 "subject_a.tumor.cuppa_data.tsv.gz:md5,3d45992a7d770ef120b58126f0dafa44",
                 "subject_a.normal.esvee.prep.bam.bai:md5,4786ed0c6a387caea63676d8666f9811",
-                "subject_a.tumor.esvee.germline.vcf.gz:md5,382154831d3c6bec625490ba45c8e780",
+                "subject_a.tumor.esvee.germline.vcf.gz:md5,18290814cc2484a8086ffddf35de0bc0",
                 "subject_a.tumor.esvee.germline.vcf.gz.tbi:md5,092a7a3162e7cff25d273525751eb284",
                 "subject_a.tumor.esvee.prep.bam.bai:md5,803487d770b59c8798c59e15d472db40",
                 "subject_a.tumor.esvee.prep.disc_stats.tsv:md5,5d72e173332384f09cc2fce33b7dd5b5",
@@ -622,7 +622,7 @@
                 "subject_a.tumor.purple.somatic.hist.tsv:md5,e6b12b6d510ffa29a29250dfb2706da0",
                 "subject_a.tumor.purple.somatic.vcf.gz:md5,6599ab8ef531c2545d0726a0549d0bf3",
                 "subject_a.tumor.purple.somatic.vcf.gz.tbi:md5,68bad83bf02174ee80b64305958d7b4d",
-                "subject_a.tumor.purple.sv.germline.vcf.gz:md5,d81e21afdfcdb2728fc68e02a8dd1741",
+                "subject_a.tumor.purple.sv.germline.vcf.gz:md5,a6f2671ae705c120877b5dec524a4f8e",
                 "subject_a.tumor.purple.sv.germline.vcf.gz.tbi:md5,092a7a3162e7cff25d273525751eb284",
                 "subject_a.tumor.qsee.status.tsv.gz:md5,f4ab013379a15e475fdf7510581aea1d",
                 "subject_a.tumor.qsee.vis.data.tsv.gz:md5,e91f89f27c8fcac7a66539fec0066222",
@@ -652,7 +652,7 @@
                 "subject_a.tumor.virus.annotated.tsv:md5,561893f68d6b7fcd9deb1f3212d15164"
             ]
         ],
-        "timestamp": "2026-08-13T18:35:06.96475",
+        "timestamp": "2026-08-20T19:20:08.781472",
         "meta": {
             "nf-test": "0.9.5",
             "nextflow": "26.04.6"
