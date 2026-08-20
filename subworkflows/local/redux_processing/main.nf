@@ -2,23 +2,23 @@
 // Apply post-alignment processing
 //
 
-include { REDUX } from '../../../modules/local/redux/main'
+include { REDUX  } from '../../../modules/local/redux/main'
 
-include { FileType } from '../utils_nfcore_oncoanalyser_pipeline/types'
-include { groupByMeta          } from '../utils_nfcore_oncoanalyser_pipeline/channel_helpers'
-include { joinMeta             } from '../utils_nfcore_oncoanalyser_pipeline/channel_helpers'
-include { restoreMeta          } from '../utils_nfcore_oncoanalyser_pipeline/channel_helpers'
-include { getDonorDnaAln     } from '../utils_nfcore_oncoanalyser_pipeline/utils'
-include { getDonorDnaSample  } from '../utils_nfcore_oncoanalyser_pipeline/utils'
-include { getInput           } from '../utils_nfcore_oncoanalyser_pipeline/utils'
-include { getNormalDnaAln    } from '../utils_nfcore_oncoanalyser_pipeline/utils'
-include { getNormalDnaSample } from '../utils_nfcore_oncoanalyser_pipeline/utils'
-include { getTumorDnaAln     } from '../utils_nfcore_oncoanalyser_pipeline/utils'
-include { getTumorDnaSample  } from '../utils_nfcore_oncoanalyser_pipeline/utils'
-include { hasDonorDnaAln     } from '../utils_nfcore_oncoanalyser_pipeline/utils'
-include { hasInput           } from '../utils_nfcore_oncoanalyser_pipeline/utils'
-include { hasNormalDnaAln    } from '../utils_nfcore_oncoanalyser_pipeline/utils'
-include { hasTumorDnaAln     } from '../utils_nfcore_oncoanalyser_pipeline/utils'
+include { FileType            } from '../utils_nfcore_oncoanalyser_pipeline/types'
+include { groupByMeta         } from '../utils_nfcore_oncoanalyser_pipeline/channel_helpers'
+include { joinMeta            } from '../utils_nfcore_oncoanalyser_pipeline/channel_helpers'
+include { restoreMeta         } from '../utils_nfcore_oncoanalyser_pipeline/channel_helpers'
+include { getDonorDnaAln      } from '../utils_nfcore_oncoanalyser_pipeline/accessors'
+include { getDonorDnaSample   } from '../utils_nfcore_oncoanalyser_pipeline/accessors'
+include { getInput            } from '../utils_nfcore_oncoanalyser_pipeline/accessors'
+include { getNormalDnaAln     } from '../utils_nfcore_oncoanalyser_pipeline/accessors'
+include { getNormalDnaSample  } from '../utils_nfcore_oncoanalyser_pipeline/accessors'
+include { getTumorDnaAln      } from '../utils_nfcore_oncoanalyser_pipeline/accessors'
+include { getTumorDnaSample   } from '../utils_nfcore_oncoanalyser_pipeline/accessors'
+include { hasDonorDnaAln      } from '../utils_nfcore_oncoanalyser_pipeline/accessors'
+include { hasInput            } from '../utils_nfcore_oncoanalyser_pipeline/accessors'
+include { hasNormalDnaAln     } from '../utils_nfcore_oncoanalyser_pipeline/accessors'
+include { hasTumorDnaAln      } from '../utils_nfcore_oncoanalyser_pipeline/accessors'
 
 workflow REDUX_PROCESSING {
     take:

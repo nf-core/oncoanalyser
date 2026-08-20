@@ -2,21 +2,21 @@
 // TEAL performs characterisation of telomeric features and rearrangements
 //
 
-include { TEAL_PREP     } from '../../../modules/local/teal/prep/main'
-include { TEAL_PIPELINE } from '../../../modules/local/teal/pipeline/main'
+include { TEAL_PREP  } from '../../../modules/local/teal/prep/main'
+include { TEAL_PIPELINE  } from '../../../modules/local/teal/pipeline/main'
 
-include { FileType } from '../utils_nfcore_oncoanalyser_pipeline/types'
-include { groupByMeta                } from '../utils_nfcore_oncoanalyser_pipeline/channel_helpers'
-include { joinMeta                   } from '../utils_nfcore_oncoanalyser_pipeline/channel_helpers'
-include { restoreMeta                } from '../utils_nfcore_oncoanalyser_pipeline/channel_helpers'
-include { getInput                   } from '../utils_nfcore_oncoanalyser_pipeline/utils'
-include { getNormalDnaSample         } from '../utils_nfcore_oncoanalyser_pipeline/utils'
-include { getNormalDnaSampleName     } from '../utils_nfcore_oncoanalyser_pipeline/utils'
-include { getNormalReduxDirAlignment } from '../utils_nfcore_oncoanalyser_pipeline/utils'
-include { getTumorDnaSample          } from '../utils_nfcore_oncoanalyser_pipeline/utils'
-include { getTumorDnaSampleName      } from '../utils_nfcore_oncoanalyser_pipeline/utils'
-include { getTumorReduxDirAlignment  } from '../utils_nfcore_oncoanalyser_pipeline/utils'
-include { selectCurrentOrExisting    } from '../utils_nfcore_oncoanalyser_pipeline/utils'
+include { FileType                    } from '../utils_nfcore_oncoanalyser_pipeline/types'
+include { groupByMeta                 } from '../utils_nfcore_oncoanalyser_pipeline/channel_helpers'
+include { joinMeta                    } from '../utils_nfcore_oncoanalyser_pipeline/channel_helpers'
+include { restoreMeta                 } from '../utils_nfcore_oncoanalyser_pipeline/channel_helpers'
+include { getInput                    } from '../utils_nfcore_oncoanalyser_pipeline/accessors'
+include { getNormalDnaSample          } from '../utils_nfcore_oncoanalyser_pipeline/accessors'
+include { getNormalDnaSampleName      } from '../utils_nfcore_oncoanalyser_pipeline/accessors'
+include { getNormalReduxDirAlignment  } from '../utils_nfcore_oncoanalyser_pipeline/accessors'
+include { getTumorDnaSample           } from '../utils_nfcore_oncoanalyser_pipeline/accessors'
+include { getTumorDnaSampleName       } from '../utils_nfcore_oncoanalyser_pipeline/accessors'
+include { getTumorReduxDirAlignment   } from '../utils_nfcore_oncoanalyser_pipeline/accessors'
+include { selectCurrentOrExisting     } from '../utils_nfcore_oncoanalyser_pipeline/utils'
 
 workflow TEAL_CHARACTERISATION {
     take:

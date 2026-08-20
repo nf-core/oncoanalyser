@@ -2,20 +2,20 @@
 // Qsee calculates and visualises QC metrics
 //
 
-include { QSEE } from '../../../modules/local/qsee/main'
+include { QSEE  } from '../../../modules/local/qsee/main'
 
-include { FileType } from '../utils_nfcore_oncoanalyser_pipeline/types'
-include { groupByMeta             } from '../utils_nfcore_oncoanalyser_pipeline/channel_helpers'
-include { joinMeta                } from '../utils_nfcore_oncoanalyser_pipeline/channel_helpers'
-include { restoreMeta             } from '../utils_nfcore_oncoanalyser_pipeline/channel_helpers'
-include { getInput                } from '../utils_nfcore_oncoanalyser_pipeline/utils'
-include { getNormalDnaSample      } from '../utils_nfcore_oncoanalyser_pipeline/utils'
-include { getNormalDnaSampleName  } from '../utils_nfcore_oncoanalyser_pipeline/utils'
-include { getNormalReduxTsvs      } from '../utils_nfcore_oncoanalyser_pipeline/utils'
-include { getTumorDnaSample       } from '../utils_nfcore_oncoanalyser_pipeline/utils'
-include { getTumorDnaSampleName   } from '../utils_nfcore_oncoanalyser_pipeline/utils'
-include { getTumorReduxTsvs       } from '../utils_nfcore_oncoanalyser_pipeline/utils'
-include { selectCurrentOrExisting } from '../utils_nfcore_oncoanalyser_pipeline/utils'
+include { FileType                 } from '../utils_nfcore_oncoanalyser_pipeline/types'
+include { groupByMeta              } from '../utils_nfcore_oncoanalyser_pipeline/channel_helpers'
+include { joinMeta                 } from '../utils_nfcore_oncoanalyser_pipeline/channel_helpers'
+include { restoreMeta              } from '../utils_nfcore_oncoanalyser_pipeline/channel_helpers'
+include { getInput                 } from '../utils_nfcore_oncoanalyser_pipeline/accessors'
+include { getNormalDnaSample       } from '../utils_nfcore_oncoanalyser_pipeline/accessors'
+include { getNormalDnaSampleName   } from '../utils_nfcore_oncoanalyser_pipeline/accessors'
+include { getNormalReduxTsvs       } from '../utils_nfcore_oncoanalyser_pipeline/accessors'
+include { getTumorDnaSample        } from '../utils_nfcore_oncoanalyser_pipeline/accessors'
+include { getTumorDnaSampleName    } from '../utils_nfcore_oncoanalyser_pipeline/accessors'
+include { getTumorReduxTsvs        } from '../utils_nfcore_oncoanalyser_pipeline/accessors'
+include { selectCurrentOrExisting  } from '../utils_nfcore_oncoanalyser_pipeline/utils'
 
 workflow QSEE_METRICS {
     take:

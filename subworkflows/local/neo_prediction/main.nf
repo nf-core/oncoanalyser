@@ -2,22 +2,22 @@
 // Neo identifies and scores neoepitopes
 //
 
-include { NEO_ANNOTATE_FUSIONS } from '../../../modules/local/neo/annotate_fusions/main'
-include { NEO_FINDER           } from '../../../modules/local/neo/finder/main'
-include { NEO_SCORER           } from '../../../modules/local/neo/scorer/main'
+include { NEO_ANNOTATE_FUSIONS  } from '../../../modules/local/neo/annotate_fusions/main'
+include { NEO_FINDER  } from '../../../modules/local/neo/finder/main'
+include { NEO_SCORER  } from '../../../modules/local/neo/scorer/main'
 
-include { FileType } from '../utils_nfcore_oncoanalyser_pipeline/types'
+include { FileType                 } from '../utils_nfcore_oncoanalyser_pipeline/types'
 include { groupByMeta              } from '../utils_nfcore_oncoanalyser_pipeline/channel_helpers'
 include { joinMeta                 } from '../utils_nfcore_oncoanalyser_pipeline/channel_helpers'
 include { restoreMeta              } from '../utils_nfcore_oncoanalyser_pipeline/channel_helpers'
-include { getInput                } from '../utils_nfcore_oncoanalyser_pipeline/utils'
-include { getTumorDnaSample       } from '../utils_nfcore_oncoanalyser_pipeline/utils'
-include { getTumorDnaSampleName   } from '../utils_nfcore_oncoanalyser_pipeline/utils'
-include { getTumorRnaSample       } from '../utils_nfcore_oncoanalyser_pipeline/utils'
-include { getTumorRnaSampleName   } from '../utils_nfcore_oncoanalyser_pipeline/utils'
-include { hasNormalDna            } from '../utils_nfcore_oncoanalyser_pipeline/utils'
-include { hasTumorRna             } from '../utils_nfcore_oncoanalyser_pipeline/utils'
-include { selectCurrentOrExisting } from '../utils_nfcore_oncoanalyser_pipeline/utils'
+include { getInput                 } from '../utils_nfcore_oncoanalyser_pipeline/accessors'
+include { getTumorDnaSample        } from '../utils_nfcore_oncoanalyser_pipeline/accessors'
+include { getTumorDnaSampleName    } from '../utils_nfcore_oncoanalyser_pipeline/accessors'
+include { getTumorRnaSample        } from '../utils_nfcore_oncoanalyser_pipeline/accessors'
+include { getTumorRnaSampleName    } from '../utils_nfcore_oncoanalyser_pipeline/accessors'
+include { hasNormalDna             } from '../utils_nfcore_oncoanalyser_pipeline/accessors'
+include { hasTumorRna              } from '../utils_nfcore_oncoanalyser_pipeline/accessors'
+include { selectCurrentOrExisting  } from '../utils_nfcore_oncoanalyser_pipeline/utils'
 
 workflow NEO_PREDICTION {
     take:

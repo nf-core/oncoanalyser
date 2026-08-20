@@ -2,22 +2,22 @@
 // CUPPA predicts tissue of origin from molecular profiles
 //
 
-include { CUPPA } from '../../../modules/local/cuppa/main'
+include { CUPPA  } from '../../../modules/local/cuppa/main'
 
-include { FileType } from '../utils_nfcore_oncoanalyser_pipeline/types'
-include { groupByMeta             } from '../utils_nfcore_oncoanalyser_pipeline/channel_helpers'
-include { joinMeta                } from '../utils_nfcore_oncoanalyser_pipeline/channel_helpers'
-include { restoreMeta             } from '../utils_nfcore_oncoanalyser_pipeline/channel_helpers'
-include { getInput                } from '../utils_nfcore_oncoanalyser_pipeline/utils'
-include { getTumorDnaSample       } from '../utils_nfcore_oncoanalyser_pipeline/utils'
-include { getTumorDnaSampleName   } from '../utils_nfcore_oncoanalyser_pipeline/utils'
-include { getTumorRnaSample       } from '../utils_nfcore_oncoanalyser_pipeline/utils'
-include { getTumorRnaSampleName   } from '../utils_nfcore_oncoanalyser_pipeline/utils'
-include { hasInput                } from '../utils_nfcore_oncoanalyser_pipeline/utils'
-include { hasNormalDna            } from '../utils_nfcore_oncoanalyser_pipeline/utils'
-include { hasTumorDna             } from '../utils_nfcore_oncoanalyser_pipeline/utils'
-include { hasTumorRna             } from '../utils_nfcore_oncoanalyser_pipeline/utils'
-include { selectCurrentOrExisting } from '../utils_nfcore_oncoanalyser_pipeline/utils'
+include { FileType                 } from '../utils_nfcore_oncoanalyser_pipeline/types'
+include { groupByMeta              } from '../utils_nfcore_oncoanalyser_pipeline/channel_helpers'
+include { joinMeta                 } from '../utils_nfcore_oncoanalyser_pipeline/channel_helpers'
+include { restoreMeta              } from '../utils_nfcore_oncoanalyser_pipeline/channel_helpers'
+include { getInput                 } from '../utils_nfcore_oncoanalyser_pipeline/accessors'
+include { getTumorDnaSample        } from '../utils_nfcore_oncoanalyser_pipeline/accessors'
+include { getTumorDnaSampleName    } from '../utils_nfcore_oncoanalyser_pipeline/accessors'
+include { getTumorRnaSample        } from '../utils_nfcore_oncoanalyser_pipeline/accessors'
+include { getTumorRnaSampleName    } from '../utils_nfcore_oncoanalyser_pipeline/accessors'
+include { hasInput                 } from '../utils_nfcore_oncoanalyser_pipeline/accessors'
+include { hasNormalDna             } from '../utils_nfcore_oncoanalyser_pipeline/accessors'
+include { hasTumorDna              } from '../utils_nfcore_oncoanalyser_pipeline/accessors'
+include { hasTumorRna              } from '../utils_nfcore_oncoanalyser_pipeline/accessors'
+include { selectCurrentOrExisting  } from '../utils_nfcore_oncoanalyser_pipeline/utils'
 
 workflow CUPPA_PREDICTION {
     take:

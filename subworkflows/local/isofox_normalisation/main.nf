@@ -2,12 +2,12 @@
 // ISOFOX normalisation prepares panel-specific TPM normalisation resource
 //
 
-include { ISOFOX_PANEL_NORMALISATION } from '../../../modules/local/isofox/panel_normalisation/main'
+include { ISOFOX_PANEL_NORMALISATION  } from '../../../modules/local/isofox/panel_normalisation/main'
 
-include { FileType } from '../utils_nfcore_oncoanalyser_pipeline/types'
-include { getInput                } from '../utils_nfcore_oncoanalyser_pipeline/utils'
-include { getTumorRnaSample       } from '../utils_nfcore_oncoanalyser_pipeline/utils'
-include { selectCurrentOrExisting } from '../utils_nfcore_oncoanalyser_pipeline/utils'
+include { FileType                 } from '../utils_nfcore_oncoanalyser_pipeline/types'
+include { getInput                 } from '../utils_nfcore_oncoanalyser_pipeline/accessors'
+include { getTumorRnaSample        } from '../utils_nfcore_oncoanalyser_pipeline/accessors'
+include { selectCurrentOrExisting  } from '../utils_nfcore_oncoanalyser_pipeline/utils'
 
 workflow ISOFOX_NORMALISATION {
     take:

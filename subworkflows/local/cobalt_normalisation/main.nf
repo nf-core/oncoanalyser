@@ -2,15 +2,15 @@
 // COBALT normalisation prepares the panel-specific target region normalisation resource
 //
 
-include { COBALT_PANEL_NORMALISATION } from '../../../modules/local/cobalt/panel_normalisation/main'
+include { COBALT_PANEL_NORMALISATION  } from '../../../modules/local/cobalt/panel_normalisation/main'
 
-include { FileType } from '../utils_nfcore_oncoanalyser_pipeline/types'
-include { groupByMeta             } from '../utils_nfcore_oncoanalyser_pipeline/channel_helpers'
-include { joinMeta                } from '../utils_nfcore_oncoanalyser_pipeline/channel_helpers'
-include { restoreMeta             } from '../utils_nfcore_oncoanalyser_pipeline/channel_helpers'
-include { getInput                } from '../utils_nfcore_oncoanalyser_pipeline/utils'
-include { getTumorDnaSample       } from '../utils_nfcore_oncoanalyser_pipeline/utils'
-include { selectCurrentOrExisting } from '../utils_nfcore_oncoanalyser_pipeline/utils'
+include { FileType                 } from '../utils_nfcore_oncoanalyser_pipeline/types'
+include { groupByMeta              } from '../utils_nfcore_oncoanalyser_pipeline/channel_helpers'
+include { joinMeta                 } from '../utils_nfcore_oncoanalyser_pipeline/channel_helpers'
+include { restoreMeta              } from '../utils_nfcore_oncoanalyser_pipeline/channel_helpers'
+include { getInput                 } from '../utils_nfcore_oncoanalyser_pipeline/accessors'
+include { getTumorDnaSample        } from '../utils_nfcore_oncoanalyser_pipeline/accessors'
+include { selectCurrentOrExisting  } from '../utils_nfcore_oncoanalyser_pipeline/utils'
 
 workflow COBALT_NORMALISATION {
     take:

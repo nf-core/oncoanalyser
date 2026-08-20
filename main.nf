@@ -16,10 +16,10 @@
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 */
 
-include { PIPELINE_INITIALISATION } from './subworkflows/local/utils_nfcore_oncoanalyser_pipeline'
-include { PIPELINE_COMPLETION     } from './subworkflows/local/utils_nfcore_oncoanalyser_pipeline'
+include { PIPELINE_INITIALISATION  } from './subworkflows/local/utils_nfcore_oncoanalyser_pipeline'
+include { PIPELINE_COMPLETION      } from './subworkflows/local/utils_nfcore_oncoanalyser_pipeline'
 
-include { getGenomeAttribute } from './subworkflows/local/utils_nfcore_oncoanalyser_pipeline'
+include { getGenomeAttribute       } from './subworkflows/local/utils_nfcore_oncoanalyser_pipeline'
 
 /*
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -41,13 +41,13 @@ params.ref_data_genome_star_index    = getGenomeAttribute('star_index')
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 */
 
-include { PANEL_RESOURCE_CREATION } from './workflows/panel_resource_creation'
-include { PREPARE_REFERENCE       } from './workflows/prepare_reference'
-include { PURITY_ESTIMATE         } from './workflows/purity_estimate'
-include { TARGETED                } from './workflows/targeted'
-include { WGTS                    } from './workflows/wgts'
-include { getRunConfig; setParamsDefaults; validateParams } from './subworkflows/local/utils_nfcore_oncoanalyser_pipeline/validate_params'
-include { createStubPlaceholders; getRunMode; validateInput } from './subworkflows/local/utils_nfcore_oncoanalyser_pipeline/utils'
+include { PANEL_RESOURCE_CREATION  } from './workflows/panel_resource_creation'
+include { PREPARE_REFERENCE        } from './workflows/prepare_reference'
+include { PURITY_ESTIMATE          } from './workflows/purity_estimate'
+include { TARGETED                 } from './workflows/targeted'
+include { WGTS                     } from './workflows/wgts'
+include { getRunConfig; setParamsDefaults; validateParams; validateInput } from './subworkflows/local/utils_nfcore_oncoanalyser_pipeline/validate_params'
+include { createStubPlaceholders; getRunMode } from './subworkflows/local/utils_nfcore_oncoanalyser_pipeline/utils'
 include { parseInput } from './subworkflows/local/utils_nfcore_oncoanalyser_pipeline/parse_inputs'
 include { RunMode } from './subworkflows/local/utils_nfcore_oncoanalyser_pipeline/types'
 

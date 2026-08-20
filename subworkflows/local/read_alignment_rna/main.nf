@@ -2,14 +2,14 @@
 // Align RNA reads
 //
 
-include { GATK4_MARKDUPLICATES } from '../../../modules/nf-core/gatk4/markduplicates/main'
-include { SAMTOOLS_SORT        } from '../../../modules/nf-core/samtools/sort/main'
-include { STAR_ALIGN           } from '../../../modules/local/star/align/main'
+include { GATK4_MARKDUPLICATES  } from '../../../modules/nf-core/gatk4/markduplicates/main'
+include { SAMTOOLS_SORT  } from '../../../modules/nf-core/samtools/sort/main'
+include { STAR_ALIGN  } from '../../../modules/local/star/align/main'
 
-include { groupByMeta           } from '../utils_nfcore_oncoanalyser_pipeline/channel_helpers'
-include { joinMeta              } from '../utils_nfcore_oncoanalyser_pipeline/channel_helpers'
-include { restoreMeta           } from '../utils_nfcore_oncoanalyser_pipeline/channel_helpers'
-include { getTumorRnaSampleName } from '../utils_nfcore_oncoanalyser_pipeline/utils'
+include { groupByMeta            } from '../utils_nfcore_oncoanalyser_pipeline/channel_helpers'
+include { joinMeta               } from '../utils_nfcore_oncoanalyser_pipeline/channel_helpers'
+include { restoreMeta            } from '../utils_nfcore_oncoanalyser_pipeline/channel_helpers'
+include { getTumorRnaSampleName  } from '../utils_nfcore_oncoanalyser_pipeline/accessors'
 
 workflow READ_ALIGNMENT_RNA {
     take:

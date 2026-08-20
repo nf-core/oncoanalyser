@@ -2,14 +2,14 @@
 // CIDER identifies and annotates CDR3 sequences of IG and TCR loci
 //
 
-include { CIDER } from '../../../modules/local/cider/main'
+include { CIDER  } from '../../../modules/local/cider/main'
 
-include { FileType } from '../utils_nfcore_oncoanalyser_pipeline/types'
-include { getInput                  } from '../utils_nfcore_oncoanalyser_pipeline/utils'
-include { getTumorDnaSample         } from '../utils_nfcore_oncoanalyser_pipeline/utils'
-include { getTumorReduxDirAlignment } from '../utils_nfcore_oncoanalyser_pipeline/utils'
-include { getTumorRnaSample         } from '../utils_nfcore_oncoanalyser_pipeline/utils'
-include { selectCurrentOrExisting   } from '../utils_nfcore_oncoanalyser_pipeline/utils'
+include { FileType                   } from '../utils_nfcore_oncoanalyser_pipeline/types'
+include { getInput                   } from '../utils_nfcore_oncoanalyser_pipeline/accessors'
+include { getTumorDnaSample          } from '../utils_nfcore_oncoanalyser_pipeline/accessors'
+include { getTumorReduxDirAlignment  } from '../utils_nfcore_oncoanalyser_pipeline/accessors'
+include { getTumorRnaSample          } from '../utils_nfcore_oncoanalyser_pipeline/accessors'
+include { selectCurrentOrExisting    } from '../utils_nfcore_oncoanalyser_pipeline/utils'
 
 workflow CIDER_CALLING {
     take:

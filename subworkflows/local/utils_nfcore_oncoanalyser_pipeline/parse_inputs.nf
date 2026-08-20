@@ -2,14 +2,13 @@
 // Input parsing helpers for the nf-core/oncoanalyser pipeline
 //
 
-include { getEnumFromStringOrFail } from './utils'
-include { getFileObject           } from './utils'
-include { getReduxDirAlignment    } from './utils'
-include { parse_read_group_info   } from './utils'
+include { getEnumFromStringOrFail  } from './utils'
+include { getFileObject            } from './utils'
+include { getReduxDirAlignment     } from './accessors'
 include { FileType; InfoField; SampleType; SequenceType } from './types'
-include { CaseRecord              } from './records'
-include { FastqFile               } from './records'
-include { SampleRecord            } from './records'
+include { CaseRecord               } from './records'
+include { FastqFile                } from './records'
+include { SampleRecord             } from './records'
 
 def parseInput(input_fp_str, stub_run, log) {
 
@@ -361,4 +360,34 @@ def checkAlignmentIndexes(b, case_id, stub_run, log) {
             files[FileType.IDX] = index_fp
         }
     }
+}
+
+def parse_read_group_info(rg_info_raw, log) {
+    def escape_char = "\u0000"
+    def validate_rg_tags = ['BC', 'CN', 'DS', 'DT', 'FO', 'ID', 'KS', 'LB', 'PG', 'PI', 'PL', 'PM', 'PU', 'SM']
+
+    def fields = [:]
+    def rg_info_escaped = rg_info_raw.replace('||', escape_char)
+    rg_info_escaped.split('\\|').each { field_str_escaped ->
+        def field_str = field_str_escaped.replace(escape_char, '|')
+        if (! field_str.contains('=')) {
+            log.error "Received bad read group field (must be in format `<name>=<value>`): ${field_str}"
+            exit 1
+        }
+
+        def (name, value) = field_str.split('=', 2)
+        if (! validate_rg_tags.contains(name)) {
+            log.error "Received bad read group tag '${name}' in: ${rg_info_raw}"
+            exit 1
+        }
+
+        if (! value) {
+            log.error "Received empty read group value for '${name}' in: ${rg_info_raw}"
+            exit 1
+        }
+
+        fields[name] = value
+    }
+
+    return fields
 }

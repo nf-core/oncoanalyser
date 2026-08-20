@@ -2,23 +2,23 @@
 // MultiQC aggregates and collates metrics for QC review
 //
 
-include { MULTIQC } from '../../../modules/local/multiqc/main'
+include { MULTIQC  } from '../../../modules/local/multiqc/main'
 
-include { paramsSummaryMap } from 'plugin/nf-schema'
+include { paramsSummaryMap  } from 'plugin/nf-schema'
 
-include { paramsSummaryMultiqc    } from '../../../subworkflows/nf-core/utils_nfcore_pipeline'
-include { FileType } from '../utils_nfcore_oncoanalyser_pipeline/types'
+include { paramsSummaryMultiqc  } from '../../../subworkflows/nf-core/utils_nfcore_pipeline'
+include { FileType                 } from '../utils_nfcore_oncoanalyser_pipeline/types'
 include { methodsDescriptionText  } from '../../../subworkflows/local/utils_nfcore_oncoanalyser_pipeline'
-include { groupByMeta             } from '../utils_nfcore_oncoanalyser_pipeline/channel_helpers'
-include { joinMeta                } from '../utils_nfcore_oncoanalyser_pipeline/channel_helpers'
-include { restoreMeta             } from '../utils_nfcore_oncoanalyser_pipeline/channel_helpers'
-include { getInput                } from '../utils_nfcore_oncoanalyser_pipeline/utils'
-include { getNormalDnaSample      } from '../utils_nfcore_oncoanalyser_pipeline/utils'
-include { getNormalDnaSampleName  } from '../utils_nfcore_oncoanalyser_pipeline/utils'
-include { getTumorDnaSample       } from '../utils_nfcore_oncoanalyser_pipeline/utils'
-include { getTumorDnaSampleName   } from '../utils_nfcore_oncoanalyser_pipeline/utils'
-include { getTumorRnaSampleName   } from '../utils_nfcore_oncoanalyser_pipeline/utils'
-include { selectCurrentOrExisting } from '../utils_nfcore_oncoanalyser_pipeline/utils'
+include { groupByMeta              } from '../utils_nfcore_oncoanalyser_pipeline/channel_helpers'
+include { joinMeta                 } from '../utils_nfcore_oncoanalyser_pipeline/channel_helpers'
+include { restoreMeta              } from '../utils_nfcore_oncoanalyser_pipeline/channel_helpers'
+include { getInput                 } from '../utils_nfcore_oncoanalyser_pipeline/accessors'
+include { getNormalDnaSample       } from '../utils_nfcore_oncoanalyser_pipeline/accessors'
+include { getNormalDnaSampleName   } from '../utils_nfcore_oncoanalyser_pipeline/accessors'
+include { getTumorDnaSample        } from '../utils_nfcore_oncoanalyser_pipeline/accessors'
+include { getTumorDnaSampleName    } from '../utils_nfcore_oncoanalyser_pipeline/accessors'
+include { getTumorRnaSampleName    } from '../utils_nfcore_oncoanalyser_pipeline/accessors'
+include { selectCurrentOrExisting  } from '../utils_nfcore_oncoanalyser_pipeline/utils'
 
 workflow MULTIQC_REPORTING {
     take:

@@ -2,17 +2,23 @@
 // Parameter default and validation helpers for the nf-core/oncoanalyser pipeline
 //
 
-include { RefDataType; RunMode; UmiType } from './types'
-include { getRunStages            } from './processes'
-include { getEnumFromString       } from './utils'
-include { getEnumFromStringOrFail } from './utils'
-include { getEnumNames            } from './utils'
-include { getRunMode              } from './utils'
-include { hasNormalDnaFastq       } from './utils'
-include { hasTumorDna             } from './utils'
-include { hasTumorDnaFastq        } from './utils'
-include { hasTumorRna             } from './utils'
-include { hasTumorRnaFastq        } from './utils'
+include { FileType; RefDataType; RunMode; UmiType } from './types'
+include { getRunStages             } from './processes'
+include { getEnumFromString        } from './utils'
+include { getEnumFromStringOrFail  } from './utils'
+include { getEnumNames             } from './utils'
+include { getRunMode               } from './utils'
+include { hasNormalDnaFastq        } from './accessors'
+include { hasTumorDna              } from './accessors'
+include { hasTumorDnaFastq         } from './accessors'
+include { hasTumorRna              } from './accessors'
+include { hasTumorRnaFastq         } from './accessors'
+include { getSamples               } from './accessors'
+include { getTumorDnaSample        } from './accessors'
+include { hasAlignmentInput        } from './accessors'
+include { hasInput                 } from './accessors'
+include { hasNormalDna             } from './accessors'
+include { hasNormalDnaAlignment    } from './accessors'
 
 //
 // Set parameter defaults where required
@@ -643,4 +649,121 @@ def getPrepConfigFromCli(params, log) {
         require_hmftools_data: require_hmftools_data,
         require_panel_data: require_panel_data,
     ]
+}
+
+def validateInput(inputs, run_config, params, log) {
+
+    inputs.each { case_record ->
+
+        // Require ALN or ALN_REDUX or REDUX_DIR or FASTQs for each defined sample
+        getSamples(case_record).each { sample ->
+            if (! hasAlignmentInput(sample)) {
+                log.error "no alignments (or REDUX alignments / directory) nor FASTQ files provided for ${case_record.case_id} ${sample.sample_type}/${sample.sequence_type}\n\n" +
+                    "NB: At least one of these files is required as they are the basis to determine input sample type."
+                exit 1
+            }
+        }
+
+        // Do not allow donor sample without normal sample
+        if (case_record.donor_dna_samples && ! case_record.normal_dna_samples) {
+            log.error "a donor sample but no normal sample was found for ${case_record.case_id}\n\n" +
+                "Analysis with a donor sample requires a normal sample."
+            exit 1
+        }
+
+        // Longitudinal samples require a primary normal DNA alignment when AMBER input is provided
+        if (case_record.longitudinal_samples && hasInput(getTumorDnaSample(case_record), FileType.AMBER_DIR) && ! hasNormalDnaAlignment(case_record)) {
+            log.error "AMBER input was provided without the required primary normal DNA BAM for ${case_record.case_id}"
+            exit 1
+        }
+
+        // Apply some required restrictions to targeted mode
+        if (run_config.mode == RunMode.TARGETED) {
+
+            // Do not allow donor DNA
+            if (case_record.donor_dna_samples) {
+                log.error "targeted mode is not compatible with the donor DNA BAM/CRAM provided for ${case_record.case_id}\n\n" +
+                    "The targeted workflow supports only tumor and normal DNA BAM/CRAMs (and tumor RNA BAM/CRAMs for TSO500)"
+                exit 1
+            }
+
+            // Do not allow only tumor RNA
+            if (hasTumorRna(case_record) && ! hasTumorDna(case_record)) {
+                log.error "targeted mode is not compatible with only tumor RNA provided for ${case_record.case_id}\n\n" +
+                    "The targeted workflow requires tumor DNA and can optionally take tumor RNA, depending on " +
+                    "the configured panel."
+                exit 1
+            }
+
+        }
+
+        // Do not allow normal DNA only
+        if (hasNormalDna(case_record) && ! hasTumorDna(case_record)) {
+            log.error "found only normal DNA input for ${case_record.case_id} but germline only analysis is not supported"
+            exit 1
+        }
+
+        // Enforce unique samples names within cases
+        def sample_ids_duplicated = getSamples(case_record)
+            .groupBy { it.sample_id }
+            .findAll { k, v -> v.size() > 1 }
+
+        if (sample_ids_duplicated) {
+            def duplicate_message_strs = sample_ids_duplicated.collect { sample_id, samples ->
+                def key_strs = samples.collect { "${it.sample_type}/${it.sequence_type}" }
+                return "  * ${sample_id}: ${key_strs.join(", ")}"
+            }
+            log.error "duplicate sample names found for ${case_record.case_id}:\n\n${duplicate_message_strs.join("\n")}"
+            exit 1
+        }
+
+    }
+
+    // NOTE(SW): the following final config checks are performed here since they require additional information
+    // regarding processes that are run and also inputs
+
+    def has_alt_contigs = params.genome_type == 'alt'
+
+    // Ensure that custom genomes with ALT contigs that need indexes built have the required .alt file
+    def has_bwa_indexes = (params.ref_data_genome_bwamem2_index && params.ref_data_genome_gridss_index)
+    def has_alt_file = params.containsKey('ref_data_genome_alt') && params.ref_data_genome_alt
+    def run_bwa_or_gridss_index = run_config.stages.alignment && run_config.has_dna_fastq && ! has_bwa_indexes
+
+    if (run_bwa_or_gridss_index && has_alt_contigs && ! has_alt_file) {
+        log.error "\n~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n" +
+            "  The genome .alt file is required when building bwa-mem2 or GRIDSS indexes\n" +
+            "  for reference genomes containing ALT contigs\n" +
+            "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
+        exit 1
+    }
+
+    // Refuse to create STAR index for reference genome containing ALTs, refer to Slack channel
+    def run_star_index = run_config.stages.alignment && run_config.has_rna_fastq && ! params.ref_data_genome_star_index
+
+    if (run_star_index && has_alt_contigs) {
+        log.error "\n~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n" +
+            "  Refusing to create the STAR index for a reference genome with ALT contigs.\n" +
+            "  Please review https://github.com/alexdobin/STAR docs or contact us on Slack.\n" +
+            "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
+        exit 1
+    }
+
+    // Require that an input GTF file is provided when creating STAR index
+    if (run_star_index && ! params.ref_data_genome_gtf) {
+        log.error "\n~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n" +
+            "  Creating a STAR index requires the appropriate genome transcript annotations\n" +
+            "  as a GTF file. Please contact us on Slack for further information.\n" +
+            "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
+        exit 1
+    }
+
+    // Require --isofox_gene_ids argument to be provided in PANEL_RESOURCE_CREATION when RNA inputs are present
+    if (run_config.mode == RunMode.PANEL_RESOURCE_CREATION && run_config.has_rna && ! params.isofox_gene_ids) {
+        log.error "\n~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n" +
+            "  Running the panel resource creation workflow with RNA requires that the\n" +
+            "  --isofox_gene_ids argument is set with an appropriate input file.\n" +
+            "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
+        exit 1
+    }
+
 }

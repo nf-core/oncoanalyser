@@ -2,18 +2,18 @@
 // LINX plotting visualises clusters structural variants
 //
 
-include { LINXREPORT      } from '../../../modules/local/linxreport/main'
-include { LINX_VISUALISER } from '../../../modules/local/linx/visualiser/main'
+include { LINXREPORT  } from '../../../modules/local/linxreport/main'
+include { LINX_VISUALISER  } from '../../../modules/local/linx/visualiser/main'
 
-include { FileType } from '../utils_nfcore_oncoanalyser_pipeline/types'
-include { groupByMeta             } from '../utils_nfcore_oncoanalyser_pipeline/channel_helpers'
-include { joinMeta                } from '../utils_nfcore_oncoanalyser_pipeline/channel_helpers'
-include { restoreMeta             } from '../utils_nfcore_oncoanalyser_pipeline/channel_helpers'
-include { getInput                } from '../utils_nfcore_oncoanalyser_pipeline/utils'
-include { getTumorDnaSample       } from '../utils_nfcore_oncoanalyser_pipeline/utils'
-include { getTumorDnaSampleName   } from '../utils_nfcore_oncoanalyser_pipeline/utils'
-include { hasInput                } from '../utils_nfcore_oncoanalyser_pipeline/utils'
-include { selectCurrentOrExisting } from '../utils_nfcore_oncoanalyser_pipeline/utils'
+include { FileType                 } from '../utils_nfcore_oncoanalyser_pipeline/types'
+include { groupByMeta              } from '../utils_nfcore_oncoanalyser_pipeline/channel_helpers'
+include { joinMeta                 } from '../utils_nfcore_oncoanalyser_pipeline/channel_helpers'
+include { restoreMeta              } from '../utils_nfcore_oncoanalyser_pipeline/channel_helpers'
+include { getInput                 } from '../utils_nfcore_oncoanalyser_pipeline/accessors'
+include { getTumorDnaSample        } from '../utils_nfcore_oncoanalyser_pipeline/accessors'
+include { getTumorDnaSampleName    } from '../utils_nfcore_oncoanalyser_pipeline/accessors'
+include { hasInput                 } from '../utils_nfcore_oncoanalyser_pipeline/accessors'
+include { selectCurrentOrExisting  } from '../utils_nfcore_oncoanalyser_pipeline/utils'
 
 workflow LINX_PLOTTING {
     take:

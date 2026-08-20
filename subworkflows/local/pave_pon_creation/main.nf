@@ -2,13 +2,13 @@
 // PAVE PON creation prepares the panel-specific small variant artefact resource
 //
 
-include { PAVE_PON_PANEL_CREATION } from '../../../modules/local/pave/pon_creation/main'
+include { PAVE_PON_PANEL_CREATION  } from '../../../modules/local/pave/pon_creation/main'
 
-include { FileType } from '../utils_nfcore_oncoanalyser_pipeline/types'
-include { getInput                } from '../utils_nfcore_oncoanalyser_pipeline/utils'
-include { getTumorDnaSample       } from '../utils_nfcore_oncoanalyser_pipeline/utils'
-include { getTumorDnaSampleName   } from '../utils_nfcore_oncoanalyser_pipeline/utils'
-include { selectCurrentOrExisting } from '../utils_nfcore_oncoanalyser_pipeline/utils'
+include { FileType                 } from '../utils_nfcore_oncoanalyser_pipeline/types'
+include { getInput                 } from '../utils_nfcore_oncoanalyser_pipeline/accessors'
+include { getTumorDnaSample        } from '../utils_nfcore_oncoanalyser_pipeline/accessors'
+include { getTumorDnaSampleName    } from '../utils_nfcore_oncoanalyser_pipeline/accessors'
+include { selectCurrentOrExisting  } from '../utils_nfcore_oncoanalyser_pipeline/utils'
 
 workflow PAVE_PON_CREATION {
     take:

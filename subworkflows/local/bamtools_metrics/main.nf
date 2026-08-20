@@ -2,19 +2,19 @@
 // Bam Tools calculates summary statistics for BAMs
 //
 
-include { BAMTOOLS } from '../../../modules/local/bamtools/main'
+include { BAMTOOLS  } from '../../../modules/local/bamtools/main'
 
-include { FileType } from '../utils_nfcore_oncoanalyser_pipeline/types'
-include { groupByMeta                } from '../utils_nfcore_oncoanalyser_pipeline/channel_helpers'
-include { joinMeta                   } from '../utils_nfcore_oncoanalyser_pipeline/channel_helpers'
-include { restoreMeta                } from '../utils_nfcore_oncoanalyser_pipeline/channel_helpers'
-include { getInput                   } from '../utils_nfcore_oncoanalyser_pipeline/utils'
-include { getNormalDnaSample         } from '../utils_nfcore_oncoanalyser_pipeline/utils'
-include { getNormalReduxDirAlignment } from '../utils_nfcore_oncoanalyser_pipeline/utils'
-include { getTumorDnaSample          } from '../utils_nfcore_oncoanalyser_pipeline/utils'
-include { getTumorReduxDirAlignment  } from '../utils_nfcore_oncoanalyser_pipeline/utils'
-include { hasInput                   } from '../utils_nfcore_oncoanalyser_pipeline/utils'
-include { selectCurrentOrExisting    } from '../utils_nfcore_oncoanalyser_pipeline/utils'
+include { FileType                    } from '../utils_nfcore_oncoanalyser_pipeline/types'
+include { groupByMeta                 } from '../utils_nfcore_oncoanalyser_pipeline/channel_helpers'
+include { joinMeta                    } from '../utils_nfcore_oncoanalyser_pipeline/channel_helpers'
+include { restoreMeta                 } from '../utils_nfcore_oncoanalyser_pipeline/channel_helpers'
+include { getInput                    } from '../utils_nfcore_oncoanalyser_pipeline/accessors'
+include { getNormalDnaSample          } from '../utils_nfcore_oncoanalyser_pipeline/accessors'
+include { getNormalReduxDirAlignment  } from '../utils_nfcore_oncoanalyser_pipeline/accessors'
+include { getTumorDnaSample           } from '../utils_nfcore_oncoanalyser_pipeline/accessors'
+include { getTumorReduxDirAlignment   } from '../utils_nfcore_oncoanalyser_pipeline/accessors'
+include { hasInput                    } from '../utils_nfcore_oncoanalyser_pipeline/accessors'
+include { selectCurrentOrExisting     } from '../utils_nfcore_oncoanalyser_pipeline/utils'
 
 workflow BAMTOOLS_METRICS {
     take:
