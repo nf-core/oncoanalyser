@@ -1,3 +1,5 @@
+nextflow.enable.types = true
+
 process ESVEE {
     tag "${meta.id}"
     label 'process_high'
@@ -8,25 +10,25 @@ process ESVEE {
         'biocontainers/hmftools-esvee:2.0.1--hdfd78af_0' }"
 
     input:
-    tuple val(meta), path(tumor_aln), path(tumor_bai), path(normal_aln), path(normal_bai)
-    path genome_fasta
-    val genome_ver
-    path genome_fai
-    path genome_dict
-    path genome_img
-    path pon_breakends
-    path pon_breakpoints
-    path decoy_sequences_image
-    path known_fusions
-    path repeatmasker_annotations
-    path unmap_regions
-    path target_regions_bed
-    val sequencing_platform
+    tuple(meta: Map, tumor_aln: Path, tumor_bai: Path, normal_aln: Path?, normal_bai: Path?)
+    genome_fasta: Path
+    genome_ver: String
+    genome_fai: Path
+    genome_dict: Path
+    genome_img: Path
+    pon_breakends: Path
+    pon_breakpoints: Path
+    decoy_sequences_image: Path
+    known_fusions: Path
+    repeatmasker_annotations: Path
+    unmap_regions: Path
+    target_regions_bed: Path?
+    sequencing_platform: String
 
-    output:
-    tuple val(meta), path('esvee/')                  , topic: esvee_dir
-    tuple val(meta), val('esvee'), path('.command.*'), topic: command_files
-    path 'versions.yml'                              , topic: versions
+    topic:
+    tuple(meta, file('esvee/')) >> 'esvee_dir'
+    tuple(meta, 'esvee', files('.command.*')) >> 'command_files'
+    file('versions.yml') >> 'versions'
 
     when:
     task.ext.when == null || task.ext.when

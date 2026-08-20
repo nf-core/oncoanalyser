@@ -1,3 +1,5 @@
+nextflow.enable.types = true
+
 process CIDER {
     tag "${meta.id}"
     label 'process_medium'
@@ -9,17 +11,17 @@ process CIDER {
         'biocontainers/hmftools-cider:1.2--hdfd78af_0' }"
 
     input:
-    tuple val(meta), path(aln), path(idx)
-    file genome_fasta
-    val genome_ver
-    file genome_fai
-    file genome_dict
-    file genome_img
+    tuple(meta: Map, aln: Path, idx: Path)
+    genome_fasta: Path
+    genome_ver: String
+    genome_fai: Path
+    genome_dict: Path
+    genome_img: Path
 
-    output:
-    tuple val(meta), path('cider/*')                 , topic: cider_results
-    tuple val(meta), val('cider'), path('.command.*'), topic: command_files
-    path 'versions.yml'                              , topic: versions
+    topic:
+    tuple(meta, files('cider/*')) >> 'cider_results'
+    tuple(meta, 'cider', files('.command.*')) >> 'command_files'
+    file('versions.yml') >> 'versions'
 
     when:
     task.ext.when == null || task.ext.when

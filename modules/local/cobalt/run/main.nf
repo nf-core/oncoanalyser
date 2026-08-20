@@ -1,3 +1,5 @@
+nextflow.enable.types = true
+
 process COBALT {
     tag "${meta.id}"
     label 'process_high'
@@ -8,19 +10,19 @@ process COBALT {
         'biocontainers/hmftools-cobalt:3.0--hdfd78af_0' }"
 
     input:
-    tuple val(meta), path(tumor_aln), path(tumor_idx), path(normal_aln), path(normal_idx)
-    path genome_fasta
-    val genome_ver
-    path genome_fai
-    path gc_profile
-    path diploid_regions
-    path target_regions_normalisation
-    val targeted_mode
+    tuple(meta: Map, tumor_aln: Path, tumor_idx: Path, normal_aln: Path?, normal_idx: Path?)
+    genome_fasta: Path
+    genome_ver: String
+    genome_fai: Path
+    gc_profile: Path
+    diploid_regions: Path
+    target_regions_normalisation: Path?
+    targeted_mode: Boolean
 
-    output:
-    tuple val(meta), path('cobalt/')                  , topic: cobalt_dir
-    tuple val(meta), val('cobalt'), path('.command.*'), topic: command_files
-    path 'versions.yml'                               , topic: versions
+    topic:
+    tuple(meta, file('cobalt/')) >> 'cobalt_dir'
+    tuple(meta, 'cobalt', files('.command.*')) >> 'command_files'
+    file('versions.yml') >> 'versions'
 
     when:
     task.ext.when == null || task.ext.when
