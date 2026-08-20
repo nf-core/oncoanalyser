@@ -4,6 +4,8 @@
 // a name collision between the `Process` enum and java.lang.Process.
 //
 
+nextflow.enable.types = true
+
 enum RunMode {
     PANEL_RESOURCE_CREATION,
     PREPARE_REFERENCE,
