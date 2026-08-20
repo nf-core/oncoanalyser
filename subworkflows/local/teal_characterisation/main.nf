@@ -101,7 +101,7 @@ workflow TEAL_CHARACTERISATION {
     // Flatten TEAL_PREP output
     // channel: [ meta, teal_bam, teal_bai ]
     ch_tumor_teal_bam = restoreMeta(channel.topic('teal_prep_tumor_bam'), ch_inputs)
-        .map { meta, bam_bai -> [meta] + bam_bai }
+        .map { meta, bam_bai -> [meta] + orderTealBamBai(bam_bai) }
 
     ch_normal_teal_bam_placeholder = restoreMeta(
         ch_teal_prep_inputs
@@ -111,7 +111,7 @@ workflow TEAL_CHARACTERISATION {
     )
 
     ch_normal_teal_bam = restoreMeta(channel.topic('teal_prep_normal_bam'), ch_inputs)
-        .map { meta, bam_bai -> [meta] + bam_bai }
+        .map { meta, bam_bai -> [meta] + orderTealBamBai(bam_bai) }
         .mix(ch_normal_teal_bam_placeholder)
 
     //
@@ -178,4 +178,12 @@ workflow TEAL_CHARACTERISATION {
         genome_version,
         sequencing_platform,
     )
+}
+
+// NOTE(SW): teal_prep emits the .bam and .bam.bai as a single files() glob, whose order is not
+// guaranteed (filesystem order varies on APFS). Order them so the bam precedes the bai.
+def orderTealBamBai(files) {
+    def bam = files.find { it.name.endsWith('.bam') }
+    def bai = files.find { it.name.endsWith('.bam.bai') }
+    return [bam, bai]
 }
