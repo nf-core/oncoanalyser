@@ -5,23 +5,24 @@
 include { SAGE_GERMLINE } from '../../../modules/local/sage/germline/main'
 include { SAGE_SOMATIC  } from '../../../modules/local/sage/somatic/main'
 
+include { FileType } from '../utils_nfcore_oncoanalyser_pipeline/types'
 include { groupByMeta                } from '../utils_nfcore_oncoanalyser_pipeline/channel_helpers'
 include { joinMeta                   } from '../utils_nfcore_oncoanalyser_pipeline/channel_helpers'
 include { restoreMeta                } from '../utils_nfcore_oncoanalyser_pipeline/channel_helpers'
-include { getDonorDnaReduxDir        } from '../utils_nfcore_oncoanalyser_pipeline/utils'
+include { getDonorDnaSample          } from '../utils_nfcore_oncoanalyser_pipeline/utils'
 include { getDonorDnaSampleName      } from '../utils_nfcore_oncoanalyser_pipeline/utils'
 include { getDonorReduxDirAlignment  } from '../utils_nfcore_oncoanalyser_pipeline/utils'
 include { getDonorReduxTsvs          } from '../utils_nfcore_oncoanalyser_pipeline/utils'
-include { getNormalDnaReduxDir       } from '../utils_nfcore_oncoanalyser_pipeline/utils'
+include { getInput                   } from '../utils_nfcore_oncoanalyser_pipeline/utils'
+include { getNormalDnaSample         } from '../utils_nfcore_oncoanalyser_pipeline/utils'
 include { getNormalDnaSampleName     } from '../utils_nfcore_oncoanalyser_pipeline/utils'
 include { getNormalReduxDirAlignment } from '../utils_nfcore_oncoanalyser_pipeline/utils'
 include { getNormalReduxTsvs         } from '../utils_nfcore_oncoanalyser_pipeline/utils'
-include { getTumorDnaReduxDir        } from '../utils_nfcore_oncoanalyser_pipeline/utils'
+include { getTumorDnaSample          } from '../utils_nfcore_oncoanalyser_pipeline/utils'
 include { getTumorDnaSampleName      } from '../utils_nfcore_oncoanalyser_pipeline/utils'
 include { getTumorReduxDirAlignment  } from '../utils_nfcore_oncoanalyser_pipeline/utils'
 include { getTumorReduxTsvs          } from '../utils_nfcore_oncoanalyser_pipeline/utils'
-include { hasNormalDnaSageDir        } from '../utils_nfcore_oncoanalyser_pipeline/utils'
-include { hasTumorDnaSageDir         } from '../utils_nfcore_oncoanalyser_pipeline/utils'
+include { hasInput                   } from '../utils_nfcore_oncoanalyser_pipeline/utils'
 include { selectCurrentOrExisting    } from '../utils_nfcore_oncoanalyser_pipeline/utils'
 
 workflow SAGE_CALLING {
@@ -64,9 +65,9 @@ workflow SAGE_CALLING {
     ])
         .map { meta, redux_dir_tumor, redux_dir_normal, redux_dir_donor ->
 
-            def redux_dir_tumor_selected = selectCurrentOrExisting(redux_dir_tumor, getTumorDnaReduxDir(meta))
-            def redux_dir_normal_selected = selectCurrentOrExisting(redux_dir_normal, getNormalDnaReduxDir(meta))
-            def redux_dir_donor_selected = selectCurrentOrExisting(redux_dir_donor, getDonorDnaReduxDir(meta))
+            def redux_dir_tumor_selected = selectCurrentOrExisting(redux_dir_tumor, getInput(getTumorDnaSample(meta), FileType.REDUX_DIR))
+            def redux_dir_normal_selected = selectCurrentOrExisting(redux_dir_normal, getInput(getNormalDnaSample(meta), FileType.REDUX_DIR))
+            def redux_dir_donor_selected = selectCurrentOrExisting(redux_dir_donor, getInput(getDonorDnaSample(meta), FileType.REDUX_DIR))
 
             def (tumor_aln, tumor_idx) = getTumorReduxDirAlignment(meta, redux_dir_tumor_selected)
             def (normal_aln, normal_idx) = getNormalReduxDirAlignment(meta, redux_dir_normal_selected)
@@ -94,7 +95,7 @@ workflow SAGE_CALLING {
     ch_inputs_germline_sorted = ch_inputs_sorted.runnable
         .branch { meta, tumor_aln, tumor_idx, normal_aln, normal_idx, donor_aln, donor_idx, redux_tsvs ->
             def has_tumor_normal = tumor_aln && normal_aln
-            def has_existing = hasNormalDnaSageDir(meta)
+            def has_existing = hasInput(getNormalDnaSample(meta), FileType.SAGE_DIR)
 
             runnable: has_tumor_normal && ! has_existing && enable_germline
             skip: true
@@ -140,7 +141,7 @@ workflow SAGE_CALLING {
     ch_inputs_somatic_sorted = ch_inputs_sorted.runnable
         .branch { meta, tumor_aln, tumor_idx, normal_aln, normal_idx, donor_aln, donor_idx, redux_tsvs ->
             def has_tumor = tumor_aln
-            def has_existing = hasTumorDnaSageDir(meta)
+            def has_existing = hasInput(getTumorDnaSample(meta), FileType.SAGE_DIR)
 
             runnable: has_tumor && ! has_existing
             skip: true

@@ -4,14 +4,17 @@
 
 include { PEACH } from '../../../modules/local/peach/main'
 
+include { FileType } from '../utils_nfcore_oncoanalyser_pipeline/types'
 include { groupByMeta             } from '../utils_nfcore_oncoanalyser_pipeline/channel_helpers'
 include { joinMeta                } from '../utils_nfcore_oncoanalyser_pipeline/channel_helpers'
 include { restoreMeta             } from '../utils_nfcore_oncoanalyser_pipeline/channel_helpers'
+include { getInput                } from '../utils_nfcore_oncoanalyser_pipeline/utils'
+include { getNormalDnaSample      } from '../utils_nfcore_oncoanalyser_pipeline/utils'
 include { getNormalDnaSampleName  } from '../utils_nfcore_oncoanalyser_pipeline/utils'
-include { getPurpleDir            } from '../utils_nfcore_oncoanalyser_pipeline/utils'
+include { getTumorDnaSample       } from '../utils_nfcore_oncoanalyser_pipeline/utils'
 include { getTumorDnaSampleName   } from '../utils_nfcore_oncoanalyser_pipeline/utils'
+include { hasInput                } from '../utils_nfcore_oncoanalyser_pipeline/utils'
 include { hasNormalDna            } from '../utils_nfcore_oncoanalyser_pipeline/utils'
-include { hasPeachDir             } from '../utils_nfcore_oncoanalyser_pipeline/utils'
 include { selectCurrentOrExisting } from '../utils_nfcore_oncoanalyser_pipeline/utils'
 
 workflow PEACH_CALLING {
@@ -33,13 +36,13 @@ workflow PEACH_CALLING {
         .map { meta, purple_dir ->
             return [
                 meta,
-                selectCurrentOrExisting(purple_dir, getPurpleDir(meta)),
+                selectCurrentOrExisting(purple_dir, getInput(getTumorDnaSample(meta), FileType.PURPLE_DIR)),
             ]
         }
         .branch { meta, purple_dir ->
 
             def has_normal = hasNormalDna(meta)
-            def has_existing = hasPeachDir(meta)
+            def has_existing = hasInput(getNormalDnaSample(meta), FileType.PEACH_DIR)
 
             def tumor_id = getTumorDnaSampleName(meta)
             def has_smlv_vcf = purple_dir ? purple_dir.resolve("${tumor_id}.purple.germline.vcf.gz").exists() : false

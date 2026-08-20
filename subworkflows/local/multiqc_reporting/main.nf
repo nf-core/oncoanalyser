@@ -7,15 +7,15 @@ include { MULTIQC } from '../../../modules/local/multiqc/main'
 include { paramsSummaryMap } from 'plugin/nf-schema'
 
 include { paramsSummaryMultiqc    } from '../../../subworkflows/nf-core/utils_nfcore_pipeline'
+include { FileType } from '../utils_nfcore_oncoanalyser_pipeline/types'
 include { methodsDescriptionText  } from '../../../subworkflows/local/utils_nfcore_oncoanalyser_pipeline'
 include { groupByMeta             } from '../utils_nfcore_oncoanalyser_pipeline/channel_helpers'
 include { joinMeta                } from '../utils_nfcore_oncoanalyser_pipeline/channel_helpers'
 include { restoreMeta             } from '../utils_nfcore_oncoanalyser_pipeline/channel_helpers'
-include { getAmberDir             } from '../utils_nfcore_oncoanalyser_pipeline/utils'
-include { getNormalDnaBamtoolsDir } from '../utils_nfcore_oncoanalyser_pipeline/utils'
+include { getInput                } from '../utils_nfcore_oncoanalyser_pipeline/utils'
+include { getNormalDnaSample      } from '../utils_nfcore_oncoanalyser_pipeline/utils'
 include { getNormalDnaSampleName  } from '../utils_nfcore_oncoanalyser_pipeline/utils'
-include { getPurpleDir            } from '../utils_nfcore_oncoanalyser_pipeline/utils'
-include { getTumorDnaBamtoolsDir  } from '../utils_nfcore_oncoanalyser_pipeline/utils'
+include { getTumorDnaSample       } from '../utils_nfcore_oncoanalyser_pipeline/utils'
 include { getTumorDnaSampleName   } from '../utils_nfcore_oncoanalyser_pipeline/utils'
 include { getTumorRnaSampleName   } from '../utils_nfcore_oncoanalyser_pipeline/utils'
 include { selectCurrentOrExisting } from '../utils_nfcore_oncoanalyser_pipeline/utils'
@@ -51,10 +51,10 @@ workflow MULTIQC_REPORTING {
 
             return [
                 meta,
-                selectCurrentOrExisting(bamtools_dir_tumor, getTumorDnaBamtoolsDir(meta)),
-                selectCurrentOrExisting(bamtools_dir_normal, getNormalDnaBamtoolsDir(meta)),
-                selectCurrentOrExisting(amber_dir, getAmberDir(meta)),
-                selectCurrentOrExisting(purple_dir, getPurpleDir(meta)),
+                selectCurrentOrExisting(bamtools_dir_tumor, getInput(getTumorDnaSample(meta), FileType.BAMTOOLS_DIR)),
+                selectCurrentOrExisting(bamtools_dir_normal, getInput(getNormalDnaSample(meta), FileType.BAMTOOLS_DIR)),
+                selectCurrentOrExisting(amber_dir, getInput(getTumorDnaSample(meta), FileType.AMBER_DIR)),
+                selectCurrentOrExisting(purple_dir, getInput(getTumorDnaSample(meta), FileType.PURPLE_DIR)),
                 star_log,
                 rna_md_metrics,
             ]

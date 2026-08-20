@@ -4,27 +4,21 @@
 
 include { REDUX } from '../../../modules/local/redux/main'
 
+include { FileType } from '../utils_nfcore_oncoanalyser_pipeline/types'
 include { groupByMeta          } from '../utils_nfcore_oncoanalyser_pipeline/channel_helpers'
 include { joinMeta             } from '../utils_nfcore_oncoanalyser_pipeline/channel_helpers'
 include { restoreMeta          } from '../utils_nfcore_oncoanalyser_pipeline/channel_helpers'
-include { getDonorDnaAln       } from '../utils_nfcore_oncoanalyser_pipeline/utils'
-include { getDonorDnaBai       } from '../utils_nfcore_oncoanalyser_pipeline/utils'
-include { getDonorDnaSample    } from '../utils_nfcore_oncoanalyser_pipeline/utils'
-include { getNormalDnaAln      } from '../utils_nfcore_oncoanalyser_pipeline/utils'
-include { getNormalDnaBai      } from '../utils_nfcore_oncoanalyser_pipeline/utils'
-include { getNormalDnaSample   } from '../utils_nfcore_oncoanalyser_pipeline/utils'
-include { getTumorDnaAln       } from '../utils_nfcore_oncoanalyser_pipeline/utils'
-include { getTumorDnaBai       } from '../utils_nfcore_oncoanalyser_pipeline/utils'
-include { getTumorDnaSample    } from '../utils_nfcore_oncoanalyser_pipeline/utils'
-include { hasDonorDnaAln       } from '../utils_nfcore_oncoanalyser_pipeline/utils'
-include { hasDonorDnaBai       } from '../utils_nfcore_oncoanalyser_pipeline/utils'
-include { hasDonorDnaReduxDir  } from '../utils_nfcore_oncoanalyser_pipeline/utils'
-include { hasNormalDnaAln      } from '../utils_nfcore_oncoanalyser_pipeline/utils'
-include { hasNormalDnaBai      } from '../utils_nfcore_oncoanalyser_pipeline/utils'
-include { hasNormalDnaReduxDir } from '../utils_nfcore_oncoanalyser_pipeline/utils'
-include { hasTumorDnaAln       } from '../utils_nfcore_oncoanalyser_pipeline/utils'
-include { hasTumorDnaBai       } from '../utils_nfcore_oncoanalyser_pipeline/utils'
-include { hasTumorDnaReduxDir  } from '../utils_nfcore_oncoanalyser_pipeline/utils'
+include { getDonorDnaAln     } from '../utils_nfcore_oncoanalyser_pipeline/utils'
+include { getDonorDnaSample  } from '../utils_nfcore_oncoanalyser_pipeline/utils'
+include { getInput           } from '../utils_nfcore_oncoanalyser_pipeline/utils'
+include { getNormalDnaAln    } from '../utils_nfcore_oncoanalyser_pipeline/utils'
+include { getNormalDnaSample } from '../utils_nfcore_oncoanalyser_pipeline/utils'
+include { getTumorDnaAln     } from '../utils_nfcore_oncoanalyser_pipeline/utils'
+include { getTumorDnaSample  } from '../utils_nfcore_oncoanalyser_pipeline/utils'
+include { hasDonorDnaAln     } from '../utils_nfcore_oncoanalyser_pipeline/utils'
+include { hasInput           } from '../utils_nfcore_oncoanalyser_pipeline/utils'
+include { hasNormalDnaAln    } from '../utils_nfcore_oncoanalyser_pipeline/utils'
+include { hasTumorDnaAln     } from '../utils_nfcore_oncoanalyser_pipeline/utils'
 
 workflow REDUX_PROCESSING {
     take:
@@ -59,11 +53,11 @@ workflow REDUX_PROCESSING {
             return [
                 meta,
                 hasTumorDnaAln(meta) ? [getTumorDnaAln(meta)] : alns,
-                hasTumorDnaBai(meta) ? [getTumorDnaBai(meta)] : idxs,
+                hasInput(getTumorDnaSample(meta), FileType.IDX) ? [getInput(getTumorDnaSample(meta), FileType.IDX)] : idxs,
             ]
         }
         .branch { meta, alns, idxs ->
-            def has_existing = hasTumorDnaReduxDir(meta)
+            def has_existing = hasInput(getTumorDnaSample(meta), FileType.REDUX_DIR)
             runnable: alns && ! has_existing
             skip: true
                 return meta
@@ -74,11 +68,11 @@ workflow REDUX_PROCESSING {
             return [
                 meta,
                 hasNormalDnaAln(meta) ? [getNormalDnaAln(meta)] : alns,
-                hasNormalDnaBai(meta) ? [getNormalDnaBai(meta)] : idxs,
+                hasInput(getNormalDnaSample(meta), FileType.IDX) ? [getInput(getNormalDnaSample(meta), FileType.IDX)] : idxs,
             ]
         }
         .branch { meta, alns, idxs ->
-            def has_existing = hasNormalDnaReduxDir(meta)
+            def has_existing = hasInput(getNormalDnaSample(meta), FileType.REDUX_DIR)
             runnable: alns && ! has_existing
             skip: true
                 return meta
@@ -89,11 +83,11 @@ workflow REDUX_PROCESSING {
             return [
                 meta,
                 hasDonorDnaAln(meta) ? [getDonorDnaAln(meta)] : alns,
-                hasDonorDnaBai(meta) ? [getDonorDnaBai(meta)] : idxs,
+                hasInput(getDonorDnaSample(meta), FileType.IDX) ? [getInput(getDonorDnaSample(meta), FileType.IDX)] : idxs,
             ]
         }
         .branch { meta, alns, idxs ->
-            def has_existing = hasDonorDnaReduxDir(meta)
+            def has_existing = hasInput(getDonorDnaSample(meta), FileType.REDUX_DIR)
             runnable: alns && ! has_existing
             skip: true
             return meta

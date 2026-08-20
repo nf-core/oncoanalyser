@@ -4,16 +4,18 @@
 
 include { ESVEE } from '../../../modules/local/esvee/main'
 
+include { FileType } from '../utils_nfcore_oncoanalyser_pipeline/types'
 include { groupByMeta                } from '../utils_nfcore_oncoanalyser_pipeline/channel_helpers'
 include { joinMeta                   } from '../utils_nfcore_oncoanalyser_pipeline/channel_helpers'
 include { restoreMeta                } from '../utils_nfcore_oncoanalyser_pipeline/channel_helpers'
-include { getNormalDnaReduxDir       } from '../utils_nfcore_oncoanalyser_pipeline/utils'
+include { getInput                   } from '../utils_nfcore_oncoanalyser_pipeline/utils'
+include { getNormalDnaSample         } from '../utils_nfcore_oncoanalyser_pipeline/utils'
 include { getNormalDnaSampleName     } from '../utils_nfcore_oncoanalyser_pipeline/utils'
 include { getNormalReduxDirAlignment } from '../utils_nfcore_oncoanalyser_pipeline/utils'
-include { getTumorDnaReduxDir        } from '../utils_nfcore_oncoanalyser_pipeline/utils'
+include { getTumorDnaSample          } from '../utils_nfcore_oncoanalyser_pipeline/utils'
 include { getTumorDnaSampleName      } from '../utils_nfcore_oncoanalyser_pipeline/utils'
 include { getTumorReduxDirAlignment  } from '../utils_nfcore_oncoanalyser_pipeline/utils'
-include { hasEsveeDir                } from '../utils_nfcore_oncoanalyser_pipeline/utils'
+include { hasInput                   } from '../utils_nfcore_oncoanalyser_pipeline/utils'
 include { selectCurrentOrExisting    } from '../utils_nfcore_oncoanalyser_pipeline/utils'
 
 workflow ESVEE_CALLING {
@@ -51,8 +53,8 @@ workflow ESVEE_CALLING {
     ])
         .map { meta, redux_dir_tumor, redux_dir_normal ->
 
-            def redux_dir_tumor_selected = selectCurrentOrExisting(redux_dir_tumor, getTumorDnaReduxDir(meta))
-            def redux_dir_normal_selected = selectCurrentOrExisting(redux_dir_normal, getNormalDnaReduxDir(meta))
+            def redux_dir_tumor_selected = selectCurrentOrExisting(redux_dir_tumor, getInput(getTumorDnaSample(meta), FileType.REDUX_DIR))
+            def redux_dir_normal_selected = selectCurrentOrExisting(redux_dir_normal, getInput(getNormalDnaSample(meta), FileType.REDUX_DIR))
 
             def (tumor_aln, tumor_idx) = getTumorReduxDirAlignment(meta, redux_dir_tumor_selected)
             def (normal_aln, normal_idx) = getNormalReduxDirAlignment(meta, redux_dir_normal_selected)
@@ -60,7 +62,7 @@ workflow ESVEE_CALLING {
             return [meta, tumor_aln, tumor_idx, normal_aln, normal_idx]
         }
         .branch { meta, tumor_aln, tumor_idx, normal_aln, normal_idx ->
-            def has_existing = hasEsveeDir(meta)
+            def has_existing = hasInput(getTumorDnaSample(meta), FileType.ESVEE_DIR)
 
             runnable_tn: tumor_aln && normal_aln && ! has_existing
             runnable_to: tumor_aln && ! has_existing

@@ -4,23 +4,24 @@
 
 include { SAGE_VISUALISER } from '../../../modules/local/sage/visualiser/main'
 
+include { FileType } from '../utils_nfcore_oncoanalyser_pipeline/types'
 include { groupByMeta                } from '../utils_nfcore_oncoanalyser_pipeline/channel_helpers'
 include { joinMeta                   } from '../utils_nfcore_oncoanalyser_pipeline/channel_helpers'
 include { restoreMeta                } from '../utils_nfcore_oncoanalyser_pipeline/channel_helpers'
-include { getDonorDnaReduxDir        } from '../utils_nfcore_oncoanalyser_pipeline/utils'
+include { getDonorDnaSample          } from '../utils_nfcore_oncoanalyser_pipeline/utils'
 include { getDonorDnaSampleName      } from '../utils_nfcore_oncoanalyser_pipeline/utils'
 include { getDonorReduxDirAlignment  } from '../utils_nfcore_oncoanalyser_pipeline/utils'
 include { getDonorReduxTsvs          } from '../utils_nfcore_oncoanalyser_pipeline/utils'
-include { getNormalDnaReduxDir       } from '../utils_nfcore_oncoanalyser_pipeline/utils'
+include { getInput                   } from '../utils_nfcore_oncoanalyser_pipeline/utils'
+include { getNormalDnaSample         } from '../utils_nfcore_oncoanalyser_pipeline/utils'
 include { getNormalDnaSampleName     } from '../utils_nfcore_oncoanalyser_pipeline/utils'
 include { getNormalReduxDirAlignment } from '../utils_nfcore_oncoanalyser_pipeline/utils'
 include { getNormalReduxTsvs         } from '../utils_nfcore_oncoanalyser_pipeline/utils'
-include { getPurpleDir               } from '../utils_nfcore_oncoanalyser_pipeline/utils'
-include { getTumorDnaReduxDir        } from '../utils_nfcore_oncoanalyser_pipeline/utils'
+include { getTumorDnaSample          } from '../utils_nfcore_oncoanalyser_pipeline/utils'
 include { getTumorDnaSampleName      } from '../utils_nfcore_oncoanalyser_pipeline/utils'
 include { getTumorReduxDirAlignment  } from '../utils_nfcore_oncoanalyser_pipeline/utils'
 include { getTumorReduxTsvs          } from '../utils_nfcore_oncoanalyser_pipeline/utils'
-include { hasSagePlotDir             } from '../utils_nfcore_oncoanalyser_pipeline/utils'
+include { hasInput                   } from '../utils_nfcore_oncoanalyser_pipeline/utils'
 include { selectCurrentOrExisting    } from '../utils_nfcore_oncoanalyser_pipeline/utils'
 
 workflow SAGE_PLOTTING {
@@ -57,9 +58,9 @@ workflow SAGE_PLOTTING {
     ])
         .map { meta, redux_dir_tumor, redux_dir_normal, redux_dir_donor, purple_dir ->
 
-            def redux_dir_tumor_selected = selectCurrentOrExisting(redux_dir_tumor, getTumorDnaReduxDir(meta))
-            def redux_dir_normal_selected = selectCurrentOrExisting(redux_dir_normal, getNormalDnaReduxDir(meta))
-            def redux_dir_donor_selected = selectCurrentOrExisting(redux_dir_donor, getDonorDnaReduxDir(meta))
+            def redux_dir_tumor_selected = selectCurrentOrExisting(redux_dir_tumor, getInput(getTumorDnaSample(meta), FileType.REDUX_DIR))
+            def redux_dir_normal_selected = selectCurrentOrExisting(redux_dir_normal, getInput(getNormalDnaSample(meta), FileType.REDUX_DIR))
+            def redux_dir_donor_selected = selectCurrentOrExisting(redux_dir_donor, getInput(getDonorDnaSample(meta), FileType.REDUX_DIR))
 
             def (tumor_aln, tumor_idx) = getTumorReduxDirAlignment(meta, redux_dir_tumor_selected)
             def (normal_aln, normal_idx) = getNormalReduxDirAlignment(meta, redux_dir_normal_selected)
@@ -79,13 +80,13 @@ workflow SAGE_PLOTTING {
                 donor_aln,
                 donor_idx,
                 redux_tsvs,
-                selectCurrentOrExisting(purple_dir, getPurpleDir(meta)),
+                selectCurrentOrExisting(purple_dir, getInput(getTumorDnaSample(meta), FileType.PURPLE_DIR)),
             ]
 
         }
         .branch { meta, tumor_aln, tumor_idx, normal_aln, normal_idx, donor_aln, donor_idx, redux_tsvs, purple_dir ->
 
-            def has_existing = hasSagePlotDir(meta)
+            def has_existing = hasInput(getTumorDnaSample(meta), FileType.SAGE_PLOT_DIR)
 
             def tumor_dna_id = getTumorDnaSampleName(meta)
             def has_smlv_vcf = purple_dir ? purple_dir.resolve("${tumor_dna_id}.purple.somatic.vcf.gz").exists() : false

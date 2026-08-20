@@ -5,15 +5,15 @@
 include { VIRUSBREAKEND    } from '../../../modules/local/virusbreakend/main'
 include { VIRUSINTERPRETER } from '../../../modules/local/virusinterpreter/main'
 
+include { FileType } from '../utils_nfcore_oncoanalyser_pipeline/types'
 include { groupByMeta               } from '../utils_nfcore_oncoanalyser_pipeline/channel_helpers'
 include { joinMeta                  } from '../utils_nfcore_oncoanalyser_pipeline/channel_helpers'
 include { restoreMeta               } from '../utils_nfcore_oncoanalyser_pipeline/channel_helpers'
-include { getPurpleDir              } from '../utils_nfcore_oncoanalyser_pipeline/utils'
-include { getTumorDnaBamtoolsDir    } from '../utils_nfcore_oncoanalyser_pipeline/utils'
-include { getTumorDnaReduxDir       } from '../utils_nfcore_oncoanalyser_pipeline/utils'
+include { getInput                  } from '../utils_nfcore_oncoanalyser_pipeline/utils'
+include { getTumorDnaSample         } from '../utils_nfcore_oncoanalyser_pipeline/utils'
 include { getTumorDnaSampleName     } from '../utils_nfcore_oncoanalyser_pipeline/utils'
 include { getTumorReduxDirAlignment } from '../utils_nfcore_oncoanalyser_pipeline/utils'
-include { hasVirusinterpreterDir    } from '../utils_nfcore_oncoanalyser_pipeline/utils'
+include { hasInput                  } from '../utils_nfcore_oncoanalyser_pipeline/utils'
 include { selectCurrentOrExisting   } from '../utils_nfcore_oncoanalyser_pipeline/utils'
 
 workflow VIRUSBREAKEND_CALLING {
@@ -47,14 +47,14 @@ workflow VIRUSBREAKEND_CALLING {
     ch_inputs_sorted = ch_redux_dir_tumor
         .map { meta, redux_dir_tumor ->
 
-            def redux_dir_tumor_selected = selectCurrentOrExisting(redux_dir_tumor, getTumorDnaReduxDir(meta))
+            def redux_dir_tumor_selected = selectCurrentOrExisting(redux_dir_tumor, getInput(getTumorDnaSample(meta), FileType.REDUX_DIR))
             def (tumor_aln, tumor_idx) = getTumorReduxDirAlignment(meta, redux_dir_tumor_selected)
 
             return [meta, tumor_aln, tumor_idx]
 
         }
         .branch { meta, tumor_aln, tumor_idx ->
-            def has_existing = hasVirusinterpreterDir(meta)
+            def has_existing = hasInput(getTumorDnaSample(meta), FileType.VIRUSINTERPRETER_DIR)
             runnable: tumor_aln && ! has_existing
             skip: true
                 return meta
@@ -103,8 +103,8 @@ workflow VIRUSBREAKEND_CALLING {
             return [
                 meta,
                 virusbreakend_tsv,
-                selectCurrentOrExisting(bamtools_dir_tumor, getTumorDnaBamtoolsDir(meta)),
-                selectCurrentOrExisting(purple_dir, getPurpleDir(meta)),
+                selectCurrentOrExisting(bamtools_dir_tumor, getInput(getTumorDnaSample(meta), FileType.BAMTOOLS_DIR)),
+                selectCurrentOrExisting(purple_dir, getInput(getTumorDnaSample(meta), FileType.PURPLE_DIR)),
             ]
 
         }

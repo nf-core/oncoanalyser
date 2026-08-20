@@ -6,21 +6,18 @@ include { NEO_ANNOTATE_FUSIONS } from '../../../modules/local/neo/annotate_fusio
 include { NEO_FINDER           } from '../../../modules/local/neo/finder/main'
 include { NEO_SCORER           } from '../../../modules/local/neo/scorer/main'
 
+include { FileType } from '../utils_nfcore_oncoanalyser_pipeline/types'
 include { groupByMeta              } from '../utils_nfcore_oncoanalyser_pipeline/channel_helpers'
 include { joinMeta                 } from '../utils_nfcore_oncoanalyser_pipeline/channel_helpers'
 include { restoreMeta              } from '../utils_nfcore_oncoanalyser_pipeline/channel_helpers'
-include { getLilacDir              } from '../utils_nfcore_oncoanalyser_pipeline/utils'
-include { getPurpleDir             } from '../utils_nfcore_oncoanalyser_pipeline/utils'
-include { getTumorDnaLinxAnnoDir   } from '../utils_nfcore_oncoanalyser_pipeline/utils'
-include { getTumorDnaSageAppendDir } from '../utils_nfcore_oncoanalyser_pipeline/utils'
-include { getTumorDnaSampleName    } from '../utils_nfcore_oncoanalyser_pipeline/utils'
-include { getTumorRnaBai           } from '../utils_nfcore_oncoanalyser_pipeline/utils'
-include { getTumorRnaBam           } from '../utils_nfcore_oncoanalyser_pipeline/utils'
-include { getTumorRnaIsofoxDir     } from '../utils_nfcore_oncoanalyser_pipeline/utils'
-include { getTumorRnaSampleName    } from '../utils_nfcore_oncoanalyser_pipeline/utils'
-include { hasNormalDna             } from '../utils_nfcore_oncoanalyser_pipeline/utils'
-include { hasTumorRna              } from '../utils_nfcore_oncoanalyser_pipeline/utils'
-include { selectCurrentOrExisting  } from '../utils_nfcore_oncoanalyser_pipeline/utils'
+include { getInput                } from '../utils_nfcore_oncoanalyser_pipeline/utils'
+include { getTumorDnaSample       } from '../utils_nfcore_oncoanalyser_pipeline/utils'
+include { getTumorDnaSampleName   } from '../utils_nfcore_oncoanalyser_pipeline/utils'
+include { getTumorRnaSample       } from '../utils_nfcore_oncoanalyser_pipeline/utils'
+include { getTumorRnaSampleName   } from '../utils_nfcore_oncoanalyser_pipeline/utils'
+include { hasNormalDna            } from '../utils_nfcore_oncoanalyser_pipeline/utils'
+include { hasTumorRna             } from '../utils_nfcore_oncoanalyser_pipeline/utils'
+include { selectCurrentOrExisting } from '../utils_nfcore_oncoanalyser_pipeline/utils'
 
 workflow NEO_PREDICTION {
     take:
@@ -58,8 +55,8 @@ workflow NEO_PREDICTION {
 
             return [
                 meta,
-                selectCurrentOrExisting(purple_dir, getPurpleDir(meta)),
-                selectCurrentOrExisting(linx_annotation_dir, getTumorDnaLinxAnnoDir(meta)),
+                selectCurrentOrExisting(purple_dir, getInput(getTumorDnaSample(meta), FileType.PURPLE_DIR)),
+                selectCurrentOrExisting(linx_annotation_dir, getInput(getTumorDnaSample(meta), FileType.LINX_ANNO_DIR)),
             ]
 
         }
@@ -125,8 +122,8 @@ workflow NEO_PREDICTION {
             return [
                 meta,
                 neo_finder_dir,
-                selectCurrentOrExisting(tumor_rna_aln, getTumorRnaBam(meta)),
-                selectCurrentOrExisting(tumor_rna_idx, getTumorRnaBai(meta)),
+                selectCurrentOrExisting(tumor_rna_aln, getInput(getTumorRnaSample(meta), FileType.ALN)),
+                selectCurrentOrExisting(tumor_rna_idx, getInput(getTumorRnaSample(meta), FileType.IDX)),
             ]
         }
         .branch { meta, neo_finder_dir, tumor_rna_aln, tumor_rna_idx ->
@@ -193,16 +190,16 @@ workflow NEO_PREDICTION {
             if (hasTumorRna(meta)) {
                 meta_scorer.sample_rna_id = getTumorRnaSampleName(meta)
 
-                def sage_append_dir_somatic_selected = selectCurrentOrExisting(sage_append_dir_somatic, getTumorDnaSageAppendDir(meta))
+                def sage_append_dir_somatic_selected = selectCurrentOrExisting(sage_append_dir_somatic, getInput(getTumorDnaSample(meta), FileType.SAGE_APPEND_DIR))
                 sage_append_vcf_somatic = file(sage_append_dir_somatic_selected).resolve("${meta_scorer.sample_id}.sage.append.vcf.gz")
             }
 
             return [
                 meta_scorer,
-                selectCurrentOrExisting(isofox_dir, getTumorRnaIsofoxDir(meta)),
-                selectCurrentOrExisting(purple_dir, getPurpleDir(meta)),
+                selectCurrentOrExisting(isofox_dir, getInput(getTumorRnaSample(meta), FileType.ISOFOX_DIR)),
+                selectCurrentOrExisting(purple_dir, getInput(getTumorDnaSample(meta), FileType.PURPLE_DIR)),
                 sage_append_vcf_somatic,
-                selectCurrentOrExisting(lilac_dir, getLilacDir(meta)),
+                selectCurrentOrExisting(lilac_dir, getInput(getTumorDnaSample(meta), FileType.LILAC_DIR)),
                 neo_finder_dir,
                 annotated_fusions,
             ]

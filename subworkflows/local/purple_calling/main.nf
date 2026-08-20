@@ -4,20 +4,18 @@
 
 include { PURPLE } from '../../../modules/local/purple/main'
 
+include { FileType } from '../utils_nfcore_oncoanalyser_pipeline/types'
 include { groupByMeta             } from '../utils_nfcore_oncoanalyser_pipeline/channel_helpers'
 include { joinMeta                } from '../utils_nfcore_oncoanalyser_pipeline/channel_helpers'
 include { restoreMeta             } from '../utils_nfcore_oncoanalyser_pipeline/channel_helpers'
-include { getAmberDir             } from '../utils_nfcore_oncoanalyser_pipeline/utils'
-include { getCobaltDir            } from '../utils_nfcore_oncoanalyser_pipeline/utils'
-include { getEsveeDir             } from '../utils_nfcore_oncoanalyser_pipeline/utils'
-include { getNormalDnaPaveDir     } from '../utils_nfcore_oncoanalyser_pipeline/utils'
+include { getInput                } from '../utils_nfcore_oncoanalyser_pipeline/utils'
+include { getNormalDnaSample      } from '../utils_nfcore_oncoanalyser_pipeline/utils'
 include { getNormalDnaSampleName  } from '../utils_nfcore_oncoanalyser_pipeline/utils'
-include { getTumorDnaPaveDir      } from '../utils_nfcore_oncoanalyser_pipeline/utils'
-include { getTumorDnaReduxDir     } from '../utils_nfcore_oncoanalyser_pipeline/utils'
+include { getTumorDnaSample       } from '../utils_nfcore_oncoanalyser_pipeline/utils'
 include { getTumorDnaSampleName   } from '../utils_nfcore_oncoanalyser_pipeline/utils'
 include { getTumorReduxTsvs       } from '../utils_nfcore_oncoanalyser_pipeline/utils'
+include { hasInput                } from '../utils_nfcore_oncoanalyser_pipeline/utils'
 include { hasNormalDna            } from '../utils_nfcore_oncoanalyser_pipeline/utils'
-include { hasPurpleDir            } from '../utils_nfcore_oncoanalyser_pipeline/utils'
 include { selectCurrentOrExisting } from '../utils_nfcore_oncoanalyser_pipeline/utils'
 
 workflow PURPLE_CALLING {
@@ -58,22 +56,22 @@ workflow PURPLE_CALLING {
     ])
         .map { meta, amber_dir, cobalt_dir, esvee_dir, pave_somatic_dir, pave_germline_dir, redux_dir_tumor ->
 
-            def tumor_dir_selected = selectCurrentOrExisting(redux_dir_tumor, getTumorDnaReduxDir(meta))
+            def tumor_dir_selected = selectCurrentOrExisting(redux_dir_tumor, getInput(getTumorDnaSample(meta), FileType.REDUX_DIR))
             def tumor_tsvs = getTumorReduxTsvs(meta, tumor_dir_selected)
 
             return [
                 meta,
-                selectCurrentOrExisting(amber_dir, getAmberDir(meta)),
-                selectCurrentOrExisting(cobalt_dir, getCobaltDir(meta)),
-                selectCurrentOrExisting(esvee_dir, getEsveeDir(meta)),
-                selectCurrentOrExisting(pave_somatic_dir, getTumorDnaPaveDir(meta)),
-                selectCurrentOrExisting(pave_germline_dir, getNormalDnaPaveDir(meta)),
+                selectCurrentOrExisting(amber_dir, getInput(getTumorDnaSample(meta), FileType.AMBER_DIR)),
+                selectCurrentOrExisting(cobalt_dir, getInput(getTumorDnaSample(meta), FileType.COBALT_DIR)),
+                selectCurrentOrExisting(esvee_dir, getInput(getTumorDnaSample(meta), FileType.ESVEE_DIR)),
+                selectCurrentOrExisting(pave_somatic_dir, getInput(getTumorDnaSample(meta), FileType.PAVE_DIR)),
+                selectCurrentOrExisting(pave_germline_dir, getInput(getNormalDnaSample(meta), FileType.PAVE_DIR)),
                 tumor_tsvs.findAll { f -> f.exists() },
             ]
         }
         .branch { meta, amber_dir, cobalt_dir, esvee_dir, pave_somatic_dir, pave_germline_dir, redux_tsvs_tumor ->
 
-            def has_existing = hasPurpleDir(meta)
+            def has_existing = hasInput(getTumorDnaSample(meta), FileType.PURPLE_DIR)
 
             runnable: amber_dir && cobalt_dir && ! has_existing
             skip: true

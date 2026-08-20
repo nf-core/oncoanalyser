@@ -71,7 +71,7 @@ def validateInput(inputs, run_config, params, log) {
         }
 
         // Longitudinal samples require a primary normal DNA alignment when AMBER input is provided
-        if (case_record.longitudinal_samples && hasAmberDir(case_record) && ! hasNormalDnaAlignment(case_record)) {
+        if (case_record.longitudinal_samples && hasInput(getTumorDnaSample(case_record), FileType.AMBER_DIR) && ! hasNormalDnaAlignment(case_record)) {
             log.error "AMBER input was provided without the required primary normal DNA BAM for ${case_record.case_id}"
             exit 1
         }
@@ -117,7 +117,6 @@ def validateInput(inputs, run_config, params, log) {
         }
 
     }
-
 
     // NOTE(SW): the following final config checks are performed here since they require additional information
     // regarding processes that are run and also inputs
@@ -251,7 +250,6 @@ def getEnumFromStringOrFail(value, enum_class, label, log) {
     return enum_value
 }
 
-
 def getFileObject(path) {
     return path ? nextflow.Nextflow.file(path) : []
 }
@@ -265,7 +263,6 @@ def getRunMode(run_mode, log) {
     }
     return run_mode_enum
 }
-
 
 // All samples in a case, across every sample list
 def getSamples(case_record) {
@@ -284,7 +281,6 @@ def hasAlignmentInput(sample) {
         files.containsKey(FileType.ALN_REDUX) ||
         files.containsKey(FileType.REDUX_DIR)
 }
-
 
 // Sample records (singular: first matching sample, or null)
 def getTumorDnaSample(case_record) {
@@ -309,7 +305,6 @@ def getDonorDnaSample(case_record) {
 def getLongitudinalSample(case_record) {
     return case_record.longitudinal_samples ? case_record.longitudinal_samples[0] : null
 }
-
 
 // Sample names
 def getTumorDnaSampleName(Map named_args, case_record) {
@@ -342,14 +337,9 @@ def getLongitudinalSampleName(case_record) {
     return getLongitudinalSample(case_record)?.sample_id
 }
 
-
 // Files - Tumor DNA
 def getTumorDnaFastq(case_record) {
     return getTumorDnaSample(case_record)?.files?.get(FileType.FASTQ)
-}
-
-def getTumorDnaBam(case_record) {
-    return getTumorDnaSample(case_record)?.files?.get(FileType.ALN)
 }
 
 def getTumorDnaReduxInput(case_record) {
@@ -357,31 +347,17 @@ def getTumorDnaReduxInput(case_record) {
     return d
 }
 
-def getTumorDnaBai(case_record) {
-    return getTumorDnaSample(case_record)?.files?.get(FileType.IDX)
-}
-
-
 def hasTumorDnaFastq(case_record) {
     return getTumorDnaFastq(case_record) != null
-}
-
-def hasTumorDnaBam(case_record) {
-    return getTumorDnaBam(case_record) != null
 }
 
 def hasTumorDnaReduxInput(case_record) {
     return getTumorDnaReduxInput(case_record) != null
 }
 
-
 // Files - Normal DNA
 def getNormalDnaFastq(case_record) {
     return getNormalDnaSample(case_record)?.files?.get(FileType.FASTQ)
-}
-
-def getNormalDnaBam(case_record) {
-    return getNormalDnaSample(case_record)?.files?.get(FileType.ALN)
 }
 
 def getNormalDnaReduxInput(case_record) {
@@ -389,17 +365,8 @@ def getNormalDnaReduxInput(case_record) {
     return d
 }
 
-def getNormalDnaBai(case_record) {
-    return getNormalDnaSample(case_record)?.files?.get(FileType.IDX)
-}
-
-
 def hasNormalDnaFastq(case_record) {
     return getNormalDnaFastq(case_record) != null
-}
-
-def hasNormalDnaBam(case_record) {
-    return getNormalDnaBam(case_record) != null
 }
 
 def hasNormalDnaReduxInput(case_record) {
@@ -414,14 +381,9 @@ def hasDnaReduxInput(case_record) {
     return hasNormalDnaReduxInput(case_record) || hasTumorDnaReduxInput(case_record)
 }
 
-
 // Files - Donor DNA
 def getDonorDnaFastq(case_record) {
     return getDonorDnaSample(case_record)?.files?.get(FileType.FASTQ)
-}
-
-def getDonorDnaBam(case_record) {
-    return getDonorDnaSample(case_record)?.files?.get(FileType.ALN)
 }
 
 def getDonorDnaReduxInput(case_record) {
@@ -429,46 +391,22 @@ def getDonorDnaReduxInput(case_record) {
     return d
 }
 
-def getDonorDnaBai(case_record) {
-    return getDonorDnaSample(case_record)?.files?.get(FileType.IDX)
-}
-
-
 def hasDonorDnaFastq(case_record) {
     return getDonorDnaFastq(case_record) != null
-}
-
-def hasDonorDnaBam(case_record) {
-    return getDonorDnaBam(case_record) != null
 }
 
 def hasDonorDnaReduxInput(case_record) {
     return getDonorDnaReduxInput(case_record) != null
 }
 
-
 // Files - Tumor RNA
 def getTumorRnaFastq(case_record) {
     return getTumorRnaSample(case_record)?.files?.get(FileType.FASTQ)
 }
 
-def getTumorRnaBam(case_record) {
-    return getTumorRnaSample(case_record)?.files?.get(FileType.ALN)
-}
-
-def getTumorRnaBai(case_record) {
-    return getTumorRnaSample(case_record)?.files?.get(FileType.IDX)
-}
-
-
 def hasTumorRnaFastq(case_record) {
     return getTumorRnaFastq(case_record) != null
 }
-
-def hasTumorRnaBam(case_record) {
-    return getTumorRnaBam(case_record) != null
-}
-
 
 // Plural accessors: one entry per matching sample, empty list when none
 
@@ -493,7 +431,6 @@ def getLongitudinalSamples(case_record) {
     return case_record.longitudinal_samples
 }
 
-
 // Sample names
 def getTumorDnaSampleNames(case_record) {
     return getTumorDnaSamples(case_record).collect { it.sample_id }
@@ -515,7 +452,6 @@ def getLongitudinalSampleNames(case_record) {
     return getLongitudinalSamples(case_record).collect { it.sample_id }
 }
 
-
 // Files - Tumor DNA
 def getTumorDnaBams(case_record) {
     return getTumorDnaSamples(case_record).collect { it.files.get(FileType.ALN) }.findAll { it != null }
@@ -532,7 +468,6 @@ def getTumorDnaBais(case_record) {
 def getTumorDnaReduxInputs(case_record) {
     return getTumorDnaSamples(case_record).collect { hasReduxData(it) }.findAll { it != null }
 }
-
 
 // Files - Normal DNA
 def getNormalDnaBams(case_record) {
@@ -551,7 +486,6 @@ def getNormalDnaReduxInputs(case_record) {
     return getNormalDnaSamples(case_record).collect { hasReduxData(it) }.findAll { it != null }
 }
 
-
 // Files - Donor DNA
 def getDonorDnaBams(case_record) {
     return getDonorDnaSamples(case_record).collect { it.files.get(FileType.ALN) }.findAll { it != null }
@@ -569,7 +503,6 @@ def getDonorDnaReduxInputs(case_record) {
     return getDonorDnaSamples(case_record).collect { hasReduxData(it) }.findAll { it != null }
 }
 
-
 // Files - Tumor RNA
 def getTumorRnaBams(case_record) {
     return getTumorRnaSamples(case_record).collect { it.files.get(FileType.ALN) }.findAll { it != null }
@@ -583,26 +516,25 @@ def getTumorRnaBais(case_record) {
     return getTumorRnaSamples(case_record).collect { it.files.get(FileType.IDX) }.findAll { it != null }
 }
 
-
 // Status
 def hasTumorDna(case_record) {
-    return hasTumorDnaBam(case_record) || hasTumorDnaReduxInput(case_record) || hasTumorDnaFastq(case_record)
+    return hasInput(getTumorDnaSample(case_record), FileType.ALN) || hasTumorDnaReduxInput(case_record) || hasTumorDnaFastq(case_record)
 }
 
 def hasNormalDna(case_record) {
-    return hasNormalDnaBam(case_record) || hasNormalDnaReduxInput(case_record) || hasNormalDnaFastq(case_record)
+    return hasInput(getNormalDnaSample(case_record), FileType.ALN) || hasNormalDnaReduxInput(case_record) || hasNormalDnaFastq(case_record)
 }
 
 def hasNormalDnaAlignment(case_record) {
-    return hasNormalDnaBam(case_record) || hasNormalDnaReduxInput(case_record)
+    return hasInput(getNormalDnaSample(case_record), FileType.ALN) || hasNormalDnaReduxInput(case_record)
 }
 
 def hasDonorDna(case_record) {
-    return hasDonorDnaBam(case_record) || hasDonorDnaReduxInput(case_record) || hasDonorDnaFastq(case_record)
+    return hasInput(getDonorDnaSample(case_record), FileType.ALN) || hasDonorDnaReduxInput(case_record) || hasDonorDnaFastq(case_record)
 }
 
 def hasTumorRna(case_record) {
-    return hasTumorRnaBam(case_record) || hasTumorRnaFastq(case_record)
+    return hasInput(getTumorRnaSample(case_record), FileType.ALN) || hasTumorRnaFastq(case_record)
 }
 
 def hasReduxData(sample) {
@@ -612,6 +544,13 @@ def hasReduxData(sample) {
     return sample.files.get(FileType.ALN_REDUX) ?: sample.files.get(FileType.REDUX_DIR)
 }
 
+def getInput(sample, filetype) {
+    return sample?.files?.get(filetype)
+}
+
+def hasInput(sample, filetype) {
+    return getInput(sample, filetype) != null
+}
 
 // REDUX alignment and index retrieval
 def getTumorReduxDirAlignment(case_record, redux_dir) {
@@ -639,7 +578,6 @@ def getReduxDirAlignment(sample_name, redux_dir) {
     def redux_bam = redux_dir.resolve("${sample_name}.redux.bam")
     return [redux_bam, "${redux_bam.toUriString()}.bai"]
 }
-
 
 // REDUX TSV retrieval
 def getTumorReduxTsvs(case_record, redux_dir) {
@@ -676,115 +614,22 @@ def getReduxTsvs(sample_name, redux_dir) {
     return tsv_exts.collect { ext -> redux_dir.resolve("${sample_name}.${ext}") }.findAll { it.exists() }
 }
 
-
-// Fine-grained REDUX/alignment accessors
-def getTumorDnaReduxAln(case_record) {
-    return getTumorDnaSample(case_record)?.files?.get(FileType.ALN_REDUX)
-}
-
-def getNormalDnaReduxAln(case_record) {
-    return getNormalDnaSample(case_record)?.files?.get(FileType.ALN_REDUX)
-}
-
-def getDonorDnaReduxAln(case_record) {
-    return getDonorDnaSample(case_record)?.files?.get(FileType.ALN_REDUX)
-}
-
-def getTumorDnaReduxDir(case_record) {
-    return getTumorDnaSample(case_record)?.files?.get(FileType.REDUX_DIR)
-}
-
-def getNormalDnaReduxDir(case_record) {
-    return getNormalDnaSample(case_record)?.files?.get(FileType.REDUX_DIR)
-}
-
-def getDonorDnaReduxDir(case_record) {
-    return getDonorDnaSample(case_record)?.files?.get(FileType.REDUX_DIR)
-}
-
 // Existing alignment (plan ALN, else REDUX alignment) to feed REDUX
 def getTumorDnaAln(case_record) {
-    return getTumorDnaBam(case_record) ?: getTumorDnaReduxAln(case_record)
+    return getInput(getTumorDnaSample(case_record), FileType.ALN) ?: getInput(getTumorDnaSample(case_record), FileType.ALN_REDUX)
 }
 
 def getNormalDnaAln(case_record) {
-    return getNormalDnaBam(case_record) ?: getNormalDnaReduxAln(case_record)
+    return getInput(getNormalDnaSample(case_record), FileType.ALN) ?: getInput(getNormalDnaSample(case_record), FileType.ALN_REDUX)
 }
 
 def getDonorDnaAln(case_record) {
-    return getDonorDnaBam(case_record) ?: getDonorDnaReduxAln(case_record)
+    return getInput(getDonorDnaSample(case_record), FileType.ALN) ?: getInput(getDonorDnaSample(case_record), FileType.ALN_REDUX)
 }
 
-def hasTumorDnaReduxAln(case_record) { return getTumorDnaReduxAln(case_record) != null }
-def hasNormalDnaReduxAln(case_record) { return getNormalDnaReduxAln(case_record) != null }
-def hasDonorDnaReduxAln(case_record) { return getDonorDnaReduxAln(case_record) != null }
-def hasTumorDnaReduxDir(case_record) { return getTumorDnaReduxDir(case_record) != null }
-def hasNormalDnaReduxDir(case_record) { return getNormalDnaReduxDir(case_record) != null }
-def hasDonorDnaReduxDir(case_record) { return getDonorDnaReduxDir(case_record) != null }
 def hasTumorDnaAln(case_record) { return getTumorDnaAln(case_record) != null }
 def hasNormalDnaAln(case_record) { return getNormalDnaAln(case_record) != null }
 def hasDonorDnaAln(case_record) { return getDonorDnaAln(case_record) != null }
-def hasTumorDnaBai(case_record) { return getTumorDnaBai(case_record) != null }
-def hasNormalDnaBai(case_record) { return getNormalDnaBai(case_record) != null }
-def hasDonorDnaBai(case_record) { return getDonorDnaBai(case_record) != null }
-def hasTumorRnaBai(case_record) { return getTumorRnaBai(case_record) != null }
-
-
-// Sample-level directory accessors
-def getTumorDnaBamtoolsDir(case_record) { return getTumorDnaSample(case_record)?.files?.get(FileType.BAMTOOLS_DIR) }
-def getNormalDnaBamtoolsDir(case_record) { return getNormalDnaSample(case_record)?.files?.get(FileType.BAMTOOLS_DIR) }
-def getTumorDnaSageDir(case_record) { return getTumorDnaSample(case_record)?.files?.get(FileType.SAGE_DIR) }
-def getNormalDnaSageDir(case_record) { return getNormalDnaSample(case_record)?.files?.get(FileType.SAGE_DIR) }
-def getTumorDnaSageAppendDir(case_record) { return getTumorDnaSample(case_record)?.files?.get(FileType.SAGE_APPEND_DIR) }
-def getNormalDnaSageAppendDir(case_record) { return getNormalDnaSample(case_record)?.files?.get(FileType.SAGE_APPEND_DIR) }
-def getTumorDnaPaveDir(case_record) { return getTumorDnaSample(case_record)?.files?.get(FileType.PAVE_DIR) }
-def getNormalDnaPaveDir(case_record) { return getNormalDnaSample(case_record)?.files?.get(FileType.PAVE_DIR) }
-def getTumorDnaLinxAnnoDir(case_record) { return getTumorDnaSample(case_record)?.files?.get(FileType.LINX_ANNO_DIR) }
-def getNormalDnaLinxAnnoDir(case_record) { return getNormalDnaSample(case_record)?.files?.get(FileType.LINX_ANNO_DIR) }
-def getTumorRnaIsofoxDir(case_record) { return getTumorRnaSample(case_record)?.files?.get(FileType.ISOFOX_DIR) }
-
-def hasTumorDnaBamtoolsDir(case_record) { return getTumorDnaBamtoolsDir(case_record) != null }
-def hasNormalDnaBamtoolsDir(case_record) { return getNormalDnaBamtoolsDir(case_record) != null }
-def hasTumorDnaSageDir(case_record) { return getTumorDnaSageDir(case_record) != null }
-def hasNormalDnaSageDir(case_record) { return getNormalDnaSageDir(case_record) != null }
-def hasTumorDnaSageAppendDir(case_record) { return getTumorDnaSageAppendDir(case_record) != null }
-def hasNormalDnaSageAppendDir(case_record) { return getNormalDnaSageAppendDir(case_record) != null }
-def hasTumorDnaPaveDir(case_record) { return getTumorDnaPaveDir(case_record) != null }
-def hasNormalDnaPaveDir(case_record) { return getNormalDnaPaveDir(case_record) != null }
-def hasTumorDnaLinxAnnoDir(case_record) { return getTumorDnaLinxAnnoDir(case_record) != null }
-def hasNormalDnaLinxAnnoDir(case_record) { return getNormalDnaLinxAnnoDir(case_record) != null }
-def hasTumorRnaIsofoxDir(case_record) { return getTumorRnaIsofoxDir(case_record) != null }
-
-
-// Case-level directory accessors
-def getAmberDir(case_record) { return getTumorDnaSample(case_record)?.files?.get(FileType.AMBER_DIR) }
-def getCobaltDir(case_record) { return getTumorDnaSample(case_record)?.files?.get(FileType.COBALT_DIR) }
-def getEsveeDir(case_record) { return getTumorDnaSample(case_record)?.files?.get(FileType.ESVEE_DIR) }
-def getPurpleDir(case_record) { return getTumorDnaSample(case_record)?.files?.get(FileType.PURPLE_DIR) }
-def getQseeDir(case_record) { return getTumorDnaSample(case_record)?.files?.get(FileType.QSEE_DIR) }
-def getSagePlotDir(case_record) { return getTumorDnaSample(case_record)?.files?.get(FileType.SAGE_PLOT_DIR) }
-def getLinxPlotDir(case_record) { return getTumorDnaSample(case_record)?.files?.get(FileType.LINX_PLOT_DIR) }
-def getChordDir(case_record) { return getTumorDnaSample(case_record)?.files?.get(FileType.CHORD_DIR) }
-def getSigsDir(case_record) { return getTumorDnaSample(case_record)?.files?.get(FileType.SIGS_DIR) }
-def getLilacDir(case_record) { return getTumorDnaSample(case_record)?.files?.get(FileType.LILAC_DIR) }
-def getVirusinterpreterDir(case_record) { return getTumorDnaSample(case_record)?.files?.get(FileType.VIRUSINTERPRETER_DIR) }
-def getCuppaDir(case_record) { return getTumorDnaSample(case_record)?.files?.get(FileType.CUPPA_DIR) }
-def getPeachDir(case_record) { return getNormalDnaSample(case_record)?.files?.get(FileType.PEACH_DIR) }
-
-def hasAmberDir(case_record) { return getAmberDir(case_record) != null }
-def hasCobaltDir(case_record) { return getCobaltDir(case_record) != null }
-def hasEsveeDir(case_record) { return getEsveeDir(case_record) != null }
-def hasPurpleDir(case_record) { return getPurpleDir(case_record) != null }
-def hasQseeDir(case_record) { return getQseeDir(case_record) != null }
-def hasSagePlotDir(case_record) { return getSagePlotDir(case_record) != null }
-def hasLinxPlotDir(case_record) { return getLinxPlotDir(case_record) != null }
-def hasChordDir(case_record) { return getChordDir(case_record) != null }
-def hasSigsDir(case_record) { return getSigsDir(case_record) != null }
-def hasLilacDir(case_record) { return getLilacDir(case_record) != null }
-def hasVirusinterpreterDir(case_record) { return getVirusinterpreterDir(case_record) != null }
-def hasCuppaDir(case_record) { return getCuppaDir(case_record) != null }
-def hasPeachDir(case_record) { return getPeachDir(case_record) != null }
-
 
 def selectCurrentOrExisting(val, existing) {
     return existing != null ? existing : val
@@ -856,7 +701,7 @@ def getRnaFastqChannel(ch_inputs) {
     // channel: [ case_record ]
     def ch_inputs_sorted = ch_inputs
         .branch { case_record ->
-            def has_existing = hasTumorRnaBam(case_record)
+            def has_existing = hasInput(getTumorRnaSample(case_record), FileType.ALN)
             runnable: hasTumorRnaFastq(case_record) && ! has_existing
             skip: true
         }

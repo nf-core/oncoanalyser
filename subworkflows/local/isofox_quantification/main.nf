@@ -4,14 +4,15 @@
 
 include { ISOFOX } from '../../../modules/local/isofox/run/main'
 
+include { FileType } from '../utils_nfcore_oncoanalyser_pipeline/types'
 include { groupByMeta             } from '../utils_nfcore_oncoanalyser_pipeline/channel_helpers'
 include { joinMeta                } from '../utils_nfcore_oncoanalyser_pipeline/channel_helpers'
 include { restoreMeta             } from '../utils_nfcore_oncoanalyser_pipeline/channel_helpers'
+include { getInput                } from '../utils_nfcore_oncoanalyser_pipeline/utils'
 include { getTumorDnaSampleName   } from '../utils_nfcore_oncoanalyser_pipeline/utils'
-include { getTumorRnaBai          } from '../utils_nfcore_oncoanalyser_pipeline/utils'
-include { getTumorRnaBam          } from '../utils_nfcore_oncoanalyser_pipeline/utils'
+include { getTumorRnaSample       } from '../utils_nfcore_oncoanalyser_pipeline/utils'
 include { getTumorRnaSampleName   } from '../utils_nfcore_oncoanalyser_pipeline/utils'
-include { hasTumorRnaIsofoxDir    } from '../utils_nfcore_oncoanalyser_pipeline/utils'
+include { hasInput                } from '../utils_nfcore_oncoanalyser_pipeline/utils'
 include { selectCurrentOrExisting } from '../utils_nfcore_oncoanalyser_pipeline/utils'
 
 workflow ISOFOX_QUANTIFICATION {
@@ -46,12 +47,12 @@ workflow ISOFOX_QUANTIFICATION {
         .map { meta, tumor_aln, tumor_idx ->
             return [
                 meta,
-                selectCurrentOrExisting(tumor_aln, getTumorRnaBam(meta)),
-                selectCurrentOrExisting(tumor_idx, getTumorRnaBai(meta)),
+                selectCurrentOrExisting(tumor_aln, getInput(getTumorRnaSample(meta), FileType.ALN)),
+                selectCurrentOrExisting(tumor_idx, getInput(getTumorRnaSample(meta), FileType.IDX)),
             ]
         }
         .branch { meta, tumor_aln, tumor_idx ->
-            def has_existing = hasTumorRnaIsofoxDir(meta)
+            def has_existing = hasInput(getTumorRnaSample(meta), FileType.ISOFOX_DIR)
             runnable: tumor_aln && ! has_existing
             skip: true
                 return meta

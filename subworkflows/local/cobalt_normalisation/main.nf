@@ -4,11 +4,12 @@
 
 include { COBALT_PANEL_NORMALISATION } from '../../../modules/local/cobalt/panel_normalisation/main'
 
+include { FileType } from '../utils_nfcore_oncoanalyser_pipeline/types'
 include { groupByMeta             } from '../utils_nfcore_oncoanalyser_pipeline/channel_helpers'
 include { joinMeta                } from '../utils_nfcore_oncoanalyser_pipeline/channel_helpers'
 include { restoreMeta             } from '../utils_nfcore_oncoanalyser_pipeline/channel_helpers'
-include { getAmberDir             } from '../utils_nfcore_oncoanalyser_pipeline/utils'
-include { getCobaltDir            } from '../utils_nfcore_oncoanalyser_pipeline/utils'
+include { getInput                } from '../utils_nfcore_oncoanalyser_pipeline/utils'
+include { getTumorDnaSample       } from '../utils_nfcore_oncoanalyser_pipeline/utils'
 include { selectCurrentOrExisting } from '../utils_nfcore_oncoanalyser_pipeline/utils'
 
 workflow COBALT_NORMALISATION {
@@ -32,8 +33,8 @@ workflow COBALT_NORMALISATION {
     ])
         .map { meta, amber_dir, cobalt_dir ->
             return [
-                selectCurrentOrExisting(amber_dir, getAmberDir(meta)),
-                selectCurrentOrExisting(cobalt_dir, getCobaltDir(meta)),
+                selectCurrentOrExisting(amber_dir, getInput(getTumorDnaSample(meta), FileType.AMBER_DIR)),
+                selectCurrentOrExisting(cobalt_dir, getInput(getTumorDnaSample(meta), FileType.COBALT_DIR)),
             ]
         }
         .collect(flat: false)

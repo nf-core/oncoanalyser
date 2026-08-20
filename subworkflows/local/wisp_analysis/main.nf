@@ -4,14 +4,14 @@
 
 include { WISP } from '../../../modules/local/wisp/main'
 
+include { FileType } from '../utils_nfcore_oncoanalyser_pipeline/types'
 include { groupByMeta                } from '../utils_nfcore_oncoanalyser_pipeline/channel_helpers'
 include { joinMeta                   } from '../utils_nfcore_oncoanalyser_pipeline/channel_helpers'
 include { restoreMeta                } from '../utils_nfcore_oncoanalyser_pipeline/channel_helpers'
-include { getAmberDir                } from '../utils_nfcore_oncoanalyser_pipeline/utils'
-include { getNormalDnaReduxDir       } from '../utils_nfcore_oncoanalyser_pipeline/utils'
+include { getInput                   } from '../utils_nfcore_oncoanalyser_pipeline/utils'
+include { getNormalDnaSample         } from '../utils_nfcore_oncoanalyser_pipeline/utils'
 include { getNormalReduxDirAlignment } from '../utils_nfcore_oncoanalyser_pipeline/utils'
-include { getPurpleDir               } from '../utils_nfcore_oncoanalyser_pipeline/utils'
-include { getTumorDnaReduxDir        } from '../utils_nfcore_oncoanalyser_pipeline/utils'
+include { getTumorDnaSample          } from '../utils_nfcore_oncoanalyser_pipeline/utils'
 include { getTumorDnaSampleName      } from '../utils_nfcore_oncoanalyser_pipeline/utils'
 include { selectCurrentOrExisting    } from '../utils_nfcore_oncoanalyser_pipeline/utils'
 
@@ -43,13 +43,13 @@ workflow WISP_ANALYSIS {
     ])
         .map { meta, longitudinal_redux_dir, longitudinal_amber_dir, longitudinal_cobalt_dir, longitudinal_sage_append_dir ->
 
-            def primary_normal_redux_dir = getNormalDnaReduxDir(meta)
+            def primary_normal_redux_dir = getInput(getNormalDnaSample(meta), FileType.REDUX_DIR)
             def (primary_normal_aln, _primary_normal_idx) = getNormalReduxDirAlignment(meta, primary_normal_redux_dir)
 
-            def primary_purple_dir = getPurpleDir(meta)
-            def primary_amber_dir = getAmberDir(meta)
+            def primary_purple_dir = getInput(getTumorDnaSample(meta), FileType.PURPLE_DIR)
+            def primary_amber_dir = getInput(getTumorDnaSample(meta), FileType.AMBER_DIR)
 
-            def longitudinal_redux_dir_selected = selectCurrentOrExisting(longitudinal_redux_dir, getTumorDnaReduxDir(meta))
+            def longitudinal_redux_dir_selected = selectCurrentOrExisting(longitudinal_redux_dir, getInput(getTumorDnaSample(meta), FileType.REDUX_DIR))
 
             return [
               meta,

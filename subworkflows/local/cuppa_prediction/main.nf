@@ -4,16 +4,16 @@
 
 include { CUPPA } from '../../../modules/local/cuppa/main'
 
+include { FileType } from '../utils_nfcore_oncoanalyser_pipeline/types'
 include { groupByMeta             } from '../utils_nfcore_oncoanalyser_pipeline/channel_helpers'
 include { joinMeta                } from '../utils_nfcore_oncoanalyser_pipeline/channel_helpers'
 include { restoreMeta             } from '../utils_nfcore_oncoanalyser_pipeline/channel_helpers'
-include { getPurpleDir            } from '../utils_nfcore_oncoanalyser_pipeline/utils'
-include { getTumorDnaLinxAnnoDir  } from '../utils_nfcore_oncoanalyser_pipeline/utils'
+include { getInput                } from '../utils_nfcore_oncoanalyser_pipeline/utils'
+include { getTumorDnaSample       } from '../utils_nfcore_oncoanalyser_pipeline/utils'
 include { getTumorDnaSampleName   } from '../utils_nfcore_oncoanalyser_pipeline/utils'
-include { getTumorRnaIsofoxDir    } from '../utils_nfcore_oncoanalyser_pipeline/utils'
+include { getTumorRnaSample       } from '../utils_nfcore_oncoanalyser_pipeline/utils'
 include { getTumorRnaSampleName   } from '../utils_nfcore_oncoanalyser_pipeline/utils'
-include { getVirusinterpreterDir  } from '../utils_nfcore_oncoanalyser_pipeline/utils'
-include { hasCuppaDir             } from '../utils_nfcore_oncoanalyser_pipeline/utils'
+include { hasInput                } from '../utils_nfcore_oncoanalyser_pipeline/utils'
 include { hasNormalDna            } from '../utils_nfcore_oncoanalyser_pipeline/utils'
 include { hasTumorDna             } from '../utils_nfcore_oncoanalyser_pipeline/utils'
 include { hasTumorRna             } from '../utils_nfcore_oncoanalyser_pipeline/utils'
@@ -46,10 +46,10 @@ workflow CUPPA_PREDICTION {
         .map { meta, isofox_dir, purple_dir, linx_annotation_dir, virusinterpreter_dir ->
             return [
                 meta,
-                selectCurrentOrExisting(isofox_dir, getTumorRnaIsofoxDir(meta)),
-                selectCurrentOrExisting(purple_dir, getPurpleDir(meta)),
-                selectCurrentOrExisting(linx_annotation_dir, getTumorDnaLinxAnnoDir(meta)),
-                selectCurrentOrExisting(virusinterpreter_dir, getVirusinterpreterDir(meta)),
+                selectCurrentOrExisting(isofox_dir, getInput(getTumorRnaSample(meta), FileType.ISOFOX_DIR)),
+                selectCurrentOrExisting(purple_dir, getInput(getTumorDnaSample(meta), FileType.PURPLE_DIR)),
+                selectCurrentOrExisting(linx_annotation_dir, getInput(getTumorDnaSample(meta), FileType.LINX_ANNO_DIR)),
+                selectCurrentOrExisting(virusinterpreter_dir, getInput(getTumorDnaSample(meta), FileType.VIRUSINTERPRETER_DIR)),
             ]
         }
         .branch { meta, isofox_dir, purple_dir, linx_annotation_dir, virusinterpreter_dir ->
@@ -65,7 +65,7 @@ workflow CUPPA_PREDICTION {
             //
             // (run exclusions currently done basis for presence of normal DNA)
 
-            def has_existing = hasCuppaDir(meta)
+            def has_existing = hasInput(getTumorDnaSample(meta), FileType.CUPPA_DIR)
             def has_normal_dna = hasNormalDna(meta)
 
             def tumor_dna_id = getTumorDnaSampleName(meta)

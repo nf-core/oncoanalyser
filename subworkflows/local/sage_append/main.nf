@@ -5,25 +5,24 @@
 include { SAGE_APPEND as SAGE_APPEND_SOMATIC  } from '../../../modules/local/sage/append/main'
 include { SAGE_APPEND as SAGE_APPEND_GERMLINE } from '../../../modules/local/sage/append/main'
 
-include { RunMode } from '../utils_nfcore_oncoanalyser_pipeline/types'
+include { FileType; RunMode } from '../utils_nfcore_oncoanalyser_pipeline/types'
 
 include { groupByMeta               } from '../utils_nfcore_oncoanalyser_pipeline/channel_helpers'
 include { joinMeta                  } from '../utils_nfcore_oncoanalyser_pipeline/channel_helpers'
 include { restoreMeta               } from '../utils_nfcore_oncoanalyser_pipeline/channel_helpers'
 include { getEnumFromString         } from '../utils_nfcore_oncoanalyser_pipeline/utils'
+include { getInput                  } from '../utils_nfcore_oncoanalyser_pipeline/utils'
+include { getNormalDnaSample        } from '../utils_nfcore_oncoanalyser_pipeline/utils'
 include { getNormalDnaSampleName    } from '../utils_nfcore_oncoanalyser_pipeline/utils'
-include { getPurpleDir              } from '../utils_nfcore_oncoanalyser_pipeline/utils'
-include { getTumorDnaReduxDir       } from '../utils_nfcore_oncoanalyser_pipeline/utils'
+include { getTumorDnaSample         } from '../utils_nfcore_oncoanalyser_pipeline/utils'
 include { getTumorDnaSampleName     } from '../utils_nfcore_oncoanalyser_pipeline/utils'
 include { getTumorReduxDirAlignment } from '../utils_nfcore_oncoanalyser_pipeline/utils'
 include { getTumorReduxTsvs         } from '../utils_nfcore_oncoanalyser_pipeline/utils'
-include { getTumorRnaBai            } from '../utils_nfcore_oncoanalyser_pipeline/utils'
-include { getTumorRnaBam            } from '../utils_nfcore_oncoanalyser_pipeline/utils'
+include { getTumorRnaSample         } from '../utils_nfcore_oncoanalyser_pipeline/utils'
 include { getTumorRnaSampleName     } from '../utils_nfcore_oncoanalyser_pipeline/utils'
+include { hasInput                  } from '../utils_nfcore_oncoanalyser_pipeline/utils'
 include { hasNormalDna              } from '../utils_nfcore_oncoanalyser_pipeline/utils'
-include { hasNormalDnaSageAppendDir } from '../utils_nfcore_oncoanalyser_pipeline/utils'
 include { hasTumorDna               } from '../utils_nfcore_oncoanalyser_pipeline/utils'
-include { hasTumorDnaSageAppendDir  } from '../utils_nfcore_oncoanalyser_pipeline/utils'
 include { hasTumorRna               } from '../utils_nfcore_oncoanalyser_pipeline/utils'
 include { selectCurrentOrExisting   } from '../utils_nfcore_oncoanalyser_pipeline/utils'
 
@@ -63,18 +62,18 @@ workflow SAGE_APPEND {
     ])
         .map { meta, purple_dir, redux_dir_tumor, tumor_rna_aln, tumor_rna_idx ->
 
-            def redux_dir_tumor_selected = selectCurrentOrExisting(redux_dir_tumor, getTumorDnaReduxDir(meta))
+            def redux_dir_tumor_selected = selectCurrentOrExisting(redux_dir_tumor, getInput(getTumorDnaSample(meta), FileType.REDUX_DIR))
             def (tumor_aln, tumor_idx) = getTumorReduxDirAlignment(meta, redux_dir_tumor_selected)
             def redux_tsvs_tumor = getTumorReduxTsvs(meta, redux_dir_tumor_selected)
 
             return [
                 meta,
-                selectCurrentOrExisting(purple_dir, getPurpleDir(meta)),
+                selectCurrentOrExisting(purple_dir, getInput(getTumorDnaSample(meta), FileType.PURPLE_DIR)),
                 tumor_aln,
                 tumor_idx,
                 redux_tsvs_tumor,
-                selectCurrentOrExisting(tumor_rna_aln, getTumorRnaBam(meta)),
-                selectCurrentOrExisting(tumor_rna_idx, getTumorRnaBai(meta)),
+                selectCurrentOrExisting(tumor_rna_aln, getInput(getTumorRnaSample(meta), FileType.ALN)),
+                selectCurrentOrExisting(tumor_rna_idx, getInput(getTumorRnaSample(meta), FileType.IDX)),
             ]
 
         }
@@ -103,7 +102,7 @@ workflow SAGE_APPEND {
 
             def should_append_rna_variants = has_tumor_rna && has_normal_dna && has_smlv_germline
 
-            def has_existing = hasNormalDnaSageAppendDir(meta)
+            def has_existing = hasInput(getNormalDnaSample(meta), FileType.SAGE_APPEND_DIR)
 
             runnable: should_append_rna_variants && ! has_existing && enable_germline
             skip: true
@@ -168,7 +167,7 @@ workflow SAGE_APPEND {
             def should_append_rna_variants = ! purity_estimate_mode && has_tumor_rna && has_tumor_dna && has_smlv_somatic
             def should_append_longitudinal_variants = purity_estimate_mode && has_tumor_dna && has_smlv_somatic
 
-            def has_existing = hasTumorDnaSageAppendDir(meta)
+            def has_existing = hasInput(getTumorDnaSample(meta), FileType.SAGE_APPEND_DIR)
 
             runnable: (should_append_rna_variants || should_append_longitudinal_variants) && ! has_existing
             skip: true

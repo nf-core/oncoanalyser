@@ -4,18 +4,15 @@
 
 include { QSEE } from '../../../modules/local/qsee/main'
 
+include { FileType } from '../utils_nfcore_oncoanalyser_pipeline/types'
 include { groupByMeta             } from '../utils_nfcore_oncoanalyser_pipeline/channel_helpers'
 include { joinMeta                } from '../utils_nfcore_oncoanalyser_pipeline/channel_helpers'
 include { restoreMeta             } from '../utils_nfcore_oncoanalyser_pipeline/channel_helpers'
-include { getCobaltDir            } from '../utils_nfcore_oncoanalyser_pipeline/utils'
-include { getEsveeDir             } from '../utils_nfcore_oncoanalyser_pipeline/utils'
-include { getNormalDnaBamtoolsDir } from '../utils_nfcore_oncoanalyser_pipeline/utils'
-include { getNormalDnaReduxDir    } from '../utils_nfcore_oncoanalyser_pipeline/utils'
+include { getInput                } from '../utils_nfcore_oncoanalyser_pipeline/utils'
+include { getNormalDnaSample      } from '../utils_nfcore_oncoanalyser_pipeline/utils'
 include { getNormalDnaSampleName  } from '../utils_nfcore_oncoanalyser_pipeline/utils'
 include { getNormalReduxTsvs      } from '../utils_nfcore_oncoanalyser_pipeline/utils'
-include { getPurpleDir            } from '../utils_nfcore_oncoanalyser_pipeline/utils'
-include { getTumorDnaBamtoolsDir  } from '../utils_nfcore_oncoanalyser_pipeline/utils'
-include { getTumorDnaReduxDir     } from '../utils_nfcore_oncoanalyser_pipeline/utils'
+include { getTumorDnaSample       } from '../utils_nfcore_oncoanalyser_pipeline/utils'
 include { getTumorDnaSampleName   } from '../utils_nfcore_oncoanalyser_pipeline/utils'
 include { getTumorReduxTsvs       } from '../utils_nfcore_oncoanalyser_pipeline/utils'
 include { selectCurrentOrExisting } from '../utils_nfcore_oncoanalyser_pipeline/utils'
@@ -55,8 +52,8 @@ workflow QSEE_METRICS {
     ])
         .map { meta, redux_dir_tumor, redux_dir_normal, bamtools_dir_tumor, bamtools_dir_normal, cobalt_dir, esvee_dir, purple_dir ->
 
-            def redux_tumor_dir_selected = selectCurrentOrExisting(redux_dir_tumor, getTumorDnaReduxDir(meta))
-            def redux_normal_dir_selected = selectCurrentOrExisting(redux_dir_normal, getNormalDnaReduxDir(meta))
+            def redux_tumor_dir_selected = selectCurrentOrExisting(redux_dir_tumor, getInput(getTumorDnaSample(meta), FileType.REDUX_DIR))
+            def redux_normal_dir_selected = selectCurrentOrExisting(redux_dir_normal, getInput(getNormalDnaSample(meta), FileType.REDUX_DIR))
 
             def redux_tsvs_tumor = getTumorReduxTsvs(meta, redux_tumor_dir_selected)
             def redux_tsvs_normal = getNormalReduxTsvs(meta, redux_normal_dir_selected)
@@ -65,11 +62,11 @@ workflow QSEE_METRICS {
                 meta,
                 redux_tsvs_tumor,
                 redux_tsvs_normal,
-                selectCurrentOrExisting(bamtools_dir_tumor, getTumorDnaBamtoolsDir(meta)),
-                selectCurrentOrExisting(bamtools_dir_normal, getNormalDnaBamtoolsDir(meta)),
-                selectCurrentOrExisting(cobalt_dir, getCobaltDir(meta)),
-                selectCurrentOrExisting(esvee_dir, getEsveeDir(meta)),
-                selectCurrentOrExisting(purple_dir, getPurpleDir(meta)),
+                selectCurrentOrExisting(bamtools_dir_tumor, getInput(getTumorDnaSample(meta), FileType.BAMTOOLS_DIR)),
+                selectCurrentOrExisting(bamtools_dir_normal, getInput(getNormalDnaSample(meta), FileType.BAMTOOLS_DIR)),
+                selectCurrentOrExisting(cobalt_dir, getInput(getTumorDnaSample(meta), FileType.COBALT_DIR)),
+                selectCurrentOrExisting(esvee_dir, getInput(getTumorDnaSample(meta), FileType.ESVEE_DIR)),
+                selectCurrentOrExisting(purple_dir, getInput(getTumorDnaSample(meta), FileType.PURPLE_DIR)),
             ]
 
         }

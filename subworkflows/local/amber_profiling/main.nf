@@ -4,19 +4,21 @@
 
 include { AMBER } from '../../../modules/local/amber/main'
 
+include { FileType } from '../utils_nfcore_oncoanalyser_pipeline/types'
 include { groupByMeta                } from '../utils_nfcore_oncoanalyser_pipeline/channel_helpers'
 include { joinMeta                   } from '../utils_nfcore_oncoanalyser_pipeline/channel_helpers'
 include { restoreMeta                } from '../utils_nfcore_oncoanalyser_pipeline/channel_helpers'
-include { getDonorDnaReduxDir        } from '../utils_nfcore_oncoanalyser_pipeline/utils'
+include { getDonorDnaSample          } from '../utils_nfcore_oncoanalyser_pipeline/utils'
 include { getDonorDnaSampleName      } from '../utils_nfcore_oncoanalyser_pipeline/utils'
 include { getDonorReduxDirAlignment  } from '../utils_nfcore_oncoanalyser_pipeline/utils'
-include { getNormalDnaReduxDir       } from '../utils_nfcore_oncoanalyser_pipeline/utils'
+include { getInput                   } from '../utils_nfcore_oncoanalyser_pipeline/utils'
+include { getNormalDnaSample         } from '../utils_nfcore_oncoanalyser_pipeline/utils'
 include { getNormalDnaSampleName     } from '../utils_nfcore_oncoanalyser_pipeline/utils'
 include { getNormalReduxDirAlignment } from '../utils_nfcore_oncoanalyser_pipeline/utils'
-include { getTumorDnaReduxDir        } from '../utils_nfcore_oncoanalyser_pipeline/utils'
+include { getTumorDnaSample          } from '../utils_nfcore_oncoanalyser_pipeline/utils'
 include { getTumorDnaSampleName      } from '../utils_nfcore_oncoanalyser_pipeline/utils'
 include { getTumorReduxDirAlignment  } from '../utils_nfcore_oncoanalyser_pipeline/utils'
-include { hasAmberDir                } from '../utils_nfcore_oncoanalyser_pipeline/utils'
+include { hasInput                   } from '../utils_nfcore_oncoanalyser_pipeline/utils'
 include { selectCurrentOrExisting    } from '../utils_nfcore_oncoanalyser_pipeline/utils'
 
 workflow AMBER_PROFILING {
@@ -50,9 +52,9 @@ workflow AMBER_PROFILING {
     ])
         .map { meta, redux_dir_tumor, redux_dir_normal, redux_dir_donor ->
 
-            def redux_dir_tumor_selected = selectCurrentOrExisting(redux_dir_tumor, getTumorDnaReduxDir(meta))
-            def redux_dir_normal_selected = selectCurrentOrExisting(redux_dir_normal, getNormalDnaReduxDir(meta))
-            def redux_dir_donor_selected = selectCurrentOrExisting(redux_dir_donor, getDonorDnaReduxDir(meta))
+            def redux_dir_tumor_selected = selectCurrentOrExisting(redux_dir_tumor, getInput(getTumorDnaSample(meta), FileType.REDUX_DIR))
+            def redux_dir_normal_selected = selectCurrentOrExisting(redux_dir_normal, getInput(getNormalDnaSample(meta), FileType.REDUX_DIR))
+            def redux_dir_donor_selected = selectCurrentOrExisting(redux_dir_donor, getInput(getDonorDnaSample(meta), FileType.REDUX_DIR))
 
             def (tumor_aln, tumor_idx) = getTumorReduxDirAlignment(meta, redux_dir_tumor_selected)
             def (normal_aln, normal_idx) = getNormalReduxDirAlignment(meta, redux_dir_normal_selected)
@@ -63,7 +65,7 @@ workflow AMBER_PROFILING {
         }
         .branch { meta, tumor_aln, tumor_idx, normal_aln, normal_idx, donor_aln, donor_idx ->
 
-            def has_existing = hasAmberDir(meta)
+            def has_existing = hasInput(getTumorDnaSample(meta), FileType.AMBER_DIR)
             def runnable_standard = ! purity_estimate_mode && tumor_aln && ! has_existing
 
             // TODO(SW): must improve handling through separation of sample information in meta; currently unable to provide ccfDNA AMBER directory in samplesheet

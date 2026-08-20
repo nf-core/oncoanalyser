@@ -4,13 +4,15 @@
 
 include { SIGS } from '../../../modules/local/sigs/main'
 
+include { FileType } from '../utils_nfcore_oncoanalyser_pipeline/types'
 include { groupByMeta             } from '../utils_nfcore_oncoanalyser_pipeline/channel_helpers'
 include { joinMeta                } from '../utils_nfcore_oncoanalyser_pipeline/channel_helpers'
 include { restoreMeta             } from '../utils_nfcore_oncoanalyser_pipeline/channel_helpers'
-include { getPurpleDir            } from '../utils_nfcore_oncoanalyser_pipeline/utils'
+include { getInput                } from '../utils_nfcore_oncoanalyser_pipeline/utils'
+include { getTumorDnaSample       } from '../utils_nfcore_oncoanalyser_pipeline/utils'
 include { getTumorDnaSampleName   } from '../utils_nfcore_oncoanalyser_pipeline/utils'
+include { hasInput                } from '../utils_nfcore_oncoanalyser_pipeline/utils'
 include { hasNormalDna            } from '../utils_nfcore_oncoanalyser_pipeline/utils'
-include { hasSigsDir              } from '../utils_nfcore_oncoanalyser_pipeline/utils'
 include { hasTumorDna             } from '../utils_nfcore_oncoanalyser_pipeline/utils'
 include { selectCurrentOrExisting } from '../utils_nfcore_oncoanalyser_pipeline/utils'
 
@@ -29,7 +31,7 @@ workflow SIGS_FITTING {
     // channel: skip: [ meta ]
     ch_inputs_sorted = ch_purple_dir
         .map { meta, purple_dir ->
-            return [meta, selectCurrentOrExisting(purple_dir, getPurpleDir(meta))]
+            return [meta, selectCurrentOrExisting(purple_dir, getInput(getTumorDnaSample(meta), FileType.PURPLE_DIR))]
         }
         .branch { meta, purple_dir ->
 
@@ -41,7 +43,7 @@ workflow SIGS_FITTING {
                 has_smlv_vcf = purple_dir.resolve("${tumor_id}.purple.somatic.vcf.gz").exists()
             }
 
-            def has_existing = hasSigsDir(meta)
+            def has_existing = hasInput(getTumorDnaSample(meta), FileType.SIGS_DIR)
 
             runnable: has_tumor_normal_dna && purple_dir && has_smlv_vcf && ! has_existing
             skip: true

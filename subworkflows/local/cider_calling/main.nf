@@ -4,11 +4,10 @@
 
 include { CIDER } from '../../../modules/local/cider/main'
 
-include { getTumorDnaReduxDir       } from '../utils_nfcore_oncoanalyser_pipeline/utils'
+include { FileType } from '../utils_nfcore_oncoanalyser_pipeline/types'
+include { getInput                  } from '../utils_nfcore_oncoanalyser_pipeline/utils'
 include { getTumorDnaSample         } from '../utils_nfcore_oncoanalyser_pipeline/utils'
 include { getTumorReduxDirAlignment } from '../utils_nfcore_oncoanalyser_pipeline/utils'
-include { getTumorRnaBai            } from '../utils_nfcore_oncoanalyser_pipeline/utils'
-include { getTumorRnaBam            } from '../utils_nfcore_oncoanalyser_pipeline/utils'
 include { getTumorRnaSample         } from '../utils_nfcore_oncoanalyser_pipeline/utils'
 include { selectCurrentOrExisting   } from '../utils_nfcore_oncoanalyser_pipeline/utils'
 
@@ -33,7 +32,7 @@ workflow CIDER_CALLING {
     ch_inputs_tumor_dna_sorted = ch_redux_dir_tumor
         .map { meta, redux_dir_tumor ->
 
-            def redux_dir_tumor_selected = selectCurrentOrExisting(redux_dir_tumor, getTumorDnaReduxDir(meta))
+            def redux_dir_tumor_selected = selectCurrentOrExisting(redux_dir_tumor, getInput(getTumorDnaSample(meta), FileType.REDUX_DIR))
             def (tumor_aln, tumor_idx) = getTumorReduxDirAlignment(meta, redux_dir_tumor_selected)
 
             return [meta, tumor_aln, tumor_idx]
@@ -51,8 +50,8 @@ workflow CIDER_CALLING {
         .map { meta, aln, idx ->
             return [
                 meta,
-                selectCurrentOrExisting(aln, getTumorRnaBam(meta)),
-                idx ?: getTumorRnaBai(meta),
+                selectCurrentOrExisting(aln, getInput(getTumorRnaSample(meta), FileType.ALN)),
+                idx ?: getInput(getTumorRnaSample(meta), FileType.IDX),
             ]
         }
         .branch { meta, aln, idx ->

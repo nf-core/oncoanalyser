@@ -4,7 +4,9 @@
 
 include { PAVE_PON_PANEL_CREATION } from '../../../modules/local/pave/pon_creation/main'
 
-include { getTumorDnaSageDir      } from '../utils_nfcore_oncoanalyser_pipeline/utils'
+include { FileType } from '../utils_nfcore_oncoanalyser_pipeline/types'
+include { getInput                } from '../utils_nfcore_oncoanalyser_pipeline/utils'
+include { getTumorDnaSample       } from '../utils_nfcore_oncoanalyser_pipeline/utils'
 include { getTumorDnaSampleName   } from '../utils_nfcore_oncoanalyser_pipeline/utils'
 include { selectCurrentOrExisting } from '../utils_nfcore_oncoanalyser_pipeline/utils'
 
@@ -22,7 +24,7 @@ workflow PAVE_PON_CREATION {
     ch_pave_inputs = ch_sage_dir_somatic
         .map { meta, sage_dir ->
 
-            def sage_dir_selected = selectCurrentOrExisting(sage_dir, getTumorDnaSageDir(meta))
+            def sage_dir_selected = selectCurrentOrExisting(sage_dir, getInput(getTumorDnaSample(meta), FileType.SAGE_DIR))
             def sage_vcf = sage_dir_selected ? sage_dir_selected.resolve("${getTumorDnaSampleName(meta)}.sage.somatic.vcf.gz") : []
             def sage_tbi = sage_dir_selected ? sage_dir_selected.resolve("${getTumorDnaSampleName(meta)}.sage.somatic.vcf.gz.tbi") : []
 

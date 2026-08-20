@@ -4,17 +4,16 @@
 
 include { BAMTOOLS } from '../../../modules/local/bamtools/main'
 
+include { FileType } from '../utils_nfcore_oncoanalyser_pipeline/types'
 include { groupByMeta                } from '../utils_nfcore_oncoanalyser_pipeline/channel_helpers'
 include { joinMeta                   } from '../utils_nfcore_oncoanalyser_pipeline/channel_helpers'
 include { restoreMeta                } from '../utils_nfcore_oncoanalyser_pipeline/channel_helpers'
-include { getNormalDnaReduxDir       } from '../utils_nfcore_oncoanalyser_pipeline/utils'
+include { getInput                   } from '../utils_nfcore_oncoanalyser_pipeline/utils'
 include { getNormalDnaSample         } from '../utils_nfcore_oncoanalyser_pipeline/utils'
 include { getNormalReduxDirAlignment } from '../utils_nfcore_oncoanalyser_pipeline/utils'
-include { getTumorDnaReduxDir        } from '../utils_nfcore_oncoanalyser_pipeline/utils'
 include { getTumorDnaSample          } from '../utils_nfcore_oncoanalyser_pipeline/utils'
 include { getTumorReduxDirAlignment  } from '../utils_nfcore_oncoanalyser_pipeline/utils'
-include { hasNormalDnaBamtoolsDir    } from '../utils_nfcore_oncoanalyser_pipeline/utils'
-include { hasTumorDnaBamtoolsDir     } from '../utils_nfcore_oncoanalyser_pipeline/utils'
+include { hasInput                   } from '../utils_nfcore_oncoanalyser_pipeline/utils'
 include { selectCurrentOrExisting    } from '../utils_nfcore_oncoanalyser_pipeline/utils'
 
 workflow BAMTOOLS_METRICS {
@@ -39,14 +38,14 @@ workflow BAMTOOLS_METRICS {
     ch_inputs_tumor_sorted = ch_redux_dir_tumor
         .map { meta, redux_dir ->
 
-            def redux_dir_selected = selectCurrentOrExisting(redux_dir, getTumorDnaReduxDir(meta))
+            def redux_dir_selected = selectCurrentOrExisting(redux_dir, getInput(getTumorDnaSample(meta), FileType.REDUX_DIR))
             def (aln, idx) = getTumorReduxDirAlignment(meta, redux_dir_selected)
 
             return [meta, aln, idx]
 
         }
         .branch { meta, aln, idx ->
-            def has_existing = hasTumorDnaBamtoolsDir(meta)
+            def has_existing = hasInput(getTumorDnaSample(meta), FileType.BAMTOOLS_DIR)
             runnable: aln && ! has_existing
             skip: true
                 return meta
@@ -57,13 +56,13 @@ workflow BAMTOOLS_METRICS {
     ch_inputs_normal_sorted = ch_redux_dir_normal
         .map { meta, redux_dir ->
 
-            def redux_dir_selected = selectCurrentOrExisting(redux_dir, getNormalDnaReduxDir(meta))
+            def redux_dir_selected = selectCurrentOrExisting(redux_dir, getInput(getNormalDnaSample(meta), FileType.REDUX_DIR))
             def (aln, idx) = getNormalReduxDirAlignment(meta, redux_dir_selected)
 
             return [meta, aln, idx]
         }
         .branch { meta, aln, idx ->
-            def has_existing = hasNormalDnaBamtoolsDir(meta)
+            def has_existing = hasInput(getNormalDnaSample(meta), FileType.BAMTOOLS_DIR)
             runnable: aln && ! has_existing
             skip: true
                 return meta

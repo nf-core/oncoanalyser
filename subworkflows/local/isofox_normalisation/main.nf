@@ -4,7 +4,9 @@
 
 include { ISOFOX_PANEL_NORMALISATION } from '../../../modules/local/isofox/panel_normalisation/main'
 
-include { getTumorRnaIsofoxDir    } from '../utils_nfcore_oncoanalyser_pipeline/utils'
+include { FileType } from '../utils_nfcore_oncoanalyser_pipeline/types'
+include { getInput                } from '../utils_nfcore_oncoanalyser_pipeline/utils'
+include { getTumorRnaSample       } from '../utils_nfcore_oncoanalyser_pipeline/utils'
 include { selectCurrentOrExisting } from '../utils_nfcore_oncoanalyser_pipeline/utils'
 
 workflow ISOFOX_NORMALISATION {
@@ -22,7 +24,7 @@ workflow ISOFOX_NORMALISATION {
     // channel: [ [isofox_dir, ...] ]
     ch_isofox_inputs = ch_isofox
         .map { meta, isofox_dir ->
-            return selectCurrentOrExisting(isofox_dir, getTumorRnaIsofoxDir(meta))
+            return selectCurrentOrExisting(isofox_dir, getInput(getTumorRnaSample(meta), FileType.ISOFOX_DIR))
         }
         .collect()
 

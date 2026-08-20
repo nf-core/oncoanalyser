@@ -4,12 +4,14 @@
 
 include { CHORD } from '../../../modules/local/chord/main'
 
+include { FileType } from '../utils_nfcore_oncoanalyser_pipeline/types'
 include { groupByMeta             } from '../utils_nfcore_oncoanalyser_pipeline/channel_helpers'
 include { joinMeta                } from '../utils_nfcore_oncoanalyser_pipeline/channel_helpers'
 include { restoreMeta             } from '../utils_nfcore_oncoanalyser_pipeline/channel_helpers'
-include { getPurpleDir            } from '../utils_nfcore_oncoanalyser_pipeline/utils'
+include { getInput                } from '../utils_nfcore_oncoanalyser_pipeline/utils'
+include { getTumorDnaSample       } from '../utils_nfcore_oncoanalyser_pipeline/utils'
 include { getTumorDnaSampleName   } from '../utils_nfcore_oncoanalyser_pipeline/utils'
-include { hasChordDir             } from '../utils_nfcore_oncoanalyser_pipeline/utils'
+include { hasInput                } from '../utils_nfcore_oncoanalyser_pipeline/utils'
 include { hasNormalDna            } from '../utils_nfcore_oncoanalyser_pipeline/utils'
 include { hasTumorDna             } from '../utils_nfcore_oncoanalyser_pipeline/utils'
 include { selectCurrentOrExisting } from '../utils_nfcore_oncoanalyser_pipeline/utils'
@@ -31,7 +33,7 @@ workflow CHORD_PREDICTION {
     // channel: skip: [ meta ]
     ch_inputs_sorted = ch_purple_dir
         .map { meta, purple_dir ->
-            return [meta, selectCurrentOrExisting(purple_dir, getPurpleDir(meta))]
+            return [meta, selectCurrentOrExisting(purple_dir, getInput(getTumorDnaSample(meta), FileType.PURPLE_DIR))]
         }
         .branch { meta, purple_dir ->
 
@@ -45,7 +47,7 @@ workflow CHORD_PREDICTION {
                 has_sv_vcf = purple_dir.resolve("${tumor_id}.purple.sv.vcf.gz").exists()
             }
 
-            def has_existing = hasChordDir(meta)
+            def has_existing = hasInput(getTumorDnaSample(meta), FileType.CHORD_DIR)
 
             runnable: has_tumor_normal_dna && purple_dir && has_smlv_vcf && has_sv_vcf && ! has_existing
             skip: true

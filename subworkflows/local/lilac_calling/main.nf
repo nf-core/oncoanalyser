@@ -4,19 +4,19 @@
 
 include { LILAC } from '../../../modules/local/lilac/main'
 
+include { FileType } from '../utils_nfcore_oncoanalyser_pipeline/types'
 include { groupByMeta                } from '../utils_nfcore_oncoanalyser_pipeline/channel_helpers'
 include { joinMeta                   } from '../utils_nfcore_oncoanalyser_pipeline/channel_helpers'
 include { restoreMeta                } from '../utils_nfcore_oncoanalyser_pipeline/channel_helpers'
-include { getNormalDnaReduxDir       } from '../utils_nfcore_oncoanalyser_pipeline/utils'
+include { getInput                   } from '../utils_nfcore_oncoanalyser_pipeline/utils'
+include { getNormalDnaSample         } from '../utils_nfcore_oncoanalyser_pipeline/utils'
 include { getNormalDnaSampleName     } from '../utils_nfcore_oncoanalyser_pipeline/utils'
 include { getNormalReduxDirAlignment } from '../utils_nfcore_oncoanalyser_pipeline/utils'
-include { getPurpleDir               } from '../utils_nfcore_oncoanalyser_pipeline/utils'
-include { getTumorDnaReduxDir        } from '../utils_nfcore_oncoanalyser_pipeline/utils'
+include { getTumorDnaSample          } from '../utils_nfcore_oncoanalyser_pipeline/utils'
 include { getTumorDnaSampleName      } from '../utils_nfcore_oncoanalyser_pipeline/utils'
 include { getTumorReduxDirAlignment  } from '../utils_nfcore_oncoanalyser_pipeline/utils'
-include { getTumorRnaBai             } from '../utils_nfcore_oncoanalyser_pipeline/utils'
-include { getTumorRnaBam             } from '../utils_nfcore_oncoanalyser_pipeline/utils'
-include { hasLilacDir                } from '../utils_nfcore_oncoanalyser_pipeline/utils'
+include { getTumorRnaSample          } from '../utils_nfcore_oncoanalyser_pipeline/utils'
+include { hasInput                   } from '../utils_nfcore_oncoanalyser_pipeline/utils'
 include { hasNormalDna               } from '../utils_nfcore_oncoanalyser_pipeline/utils'
 include { hasTumorDna                } from '../utils_nfcore_oncoanalyser_pipeline/utils'
 include { selectCurrentOrExisting    } from '../utils_nfcore_oncoanalyser_pipeline/utils'
@@ -52,8 +52,8 @@ workflow LILAC_CALLING {
     ])
         .map { meta, redux_dir_tumor, redux_dir_normal, tumor_rna_aln, tumor_rna_idx, purple_dir ->
 
-            def redux_dir_tumor_selected = selectCurrentOrExisting(redux_dir_tumor, getTumorDnaReduxDir(meta))
-            def redux_dir_normal_selected = selectCurrentOrExisting(redux_dir_normal, getNormalDnaReduxDir(meta))
+            def redux_dir_tumor_selected = selectCurrentOrExisting(redux_dir_tumor, getInput(getTumorDnaSample(meta), FileType.REDUX_DIR))
+            def redux_dir_normal_selected = selectCurrentOrExisting(redux_dir_normal, getInput(getNormalDnaSample(meta), FileType.REDUX_DIR))
 
             def (tumor_dna_aln, tumor_dna_idx) = getTumorReduxDirAlignment(meta, redux_dir_tumor_selected)
             def (normal_dna_aln, normal_dna_idx) = getNormalReduxDirAlignment(meta, redux_dir_normal_selected)
@@ -64,15 +64,15 @@ workflow LILAC_CALLING {
                 normal_dna_idx,
                 tumor_dna_aln,
                 tumor_dna_idx,
-                selectCurrentOrExisting(tumor_rna_aln, getTumorRnaBam(meta)),
-                selectCurrentOrExisting(tumor_rna_idx, getTumorRnaBai(meta)),
-                selectCurrentOrExisting(purple_dir, getPurpleDir(meta)),
+                selectCurrentOrExisting(tumor_rna_aln, getInput(getTumorRnaSample(meta), FileType.ALN)),
+                selectCurrentOrExisting(tumor_rna_idx, getInput(getTumorRnaSample(meta), FileType.IDX)),
+                selectCurrentOrExisting(purple_dir, getInput(getTumorDnaSample(meta), FileType.PURPLE_DIR)),
             ]
 
         }
         .branch { meta, normal_dna_aln, normal_dna_idx, tumor_dna_aln, tumor_dna_idx, tumor_rna_aln, tumor_rna_idx, purple_dir ->
 
-            def has_existing = hasLilacDir(meta)
+            def has_existing = hasInput(getTumorDnaSample(meta), FileType.LILAC_DIR)
 
             def tumor_normal_mode = tumor_dna_aln && normal_dna_aln
 
