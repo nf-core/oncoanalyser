@@ -1,3 +1,5 @@
+nextflow.enable.types = true
+
 process STAR_ALIGN {
     tag "${meta.id}"
     label 'process_high'
@@ -8,14 +10,14 @@ process STAR_ALIGN {
         'biocontainers/star:2.7.3a--0' }"
 
     input:
-    tuple val(meta), val(rg_lines), path(reads_fwds), path(reads_revs)
-    path genome_star_index
+    tuple(meta: Map, rg_lines: List<String>, reads_fwds: List<Path>, reads_revs: List<Path>)
+    genome_star_index: Path
 
-    output:
-    tuple val(meta), path('*bam')                         , topic: star_align_bam
-    tuple val(meta), path('*Log.final.out')               , topic: star_align_qc_log
-    tuple val(meta), val('star_align'), path('.command.*'), topic: command_files
-    path 'versions.yml'                                   , topic: versions
+    topic:
+    tuple(meta, file('*bam')) >> 'star_align_bam'
+    tuple(meta, file('*Log.final.out')) >> 'star_align_qc_log'
+    tuple(meta, 'star_align', files('.command.*')) >> 'command_files'
+    file('versions.yml') >> 'versions'
 
     when:
     task.ext.when == null || task.ext.when

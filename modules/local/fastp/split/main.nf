@@ -1,3 +1,5 @@
+nextflow.enable.types = true
+
 process FASTP_SPLIT {
     tag "${meta.id}"
     label 'process_medium'
@@ -8,13 +10,13 @@ process FASTP_SPLIT {
         'biocontainers/fastp:0.23.4--hadf994f_2' }"
 
     input:
-    tuple val(meta), path(reads_fwd), path(reads_rev)
-    val max_fastq_records
+    tuple(meta: Map, reads_fwd: Path, reads_rev: Path)
+    max_fastq_records: Integer
 
-    output:
-    tuple val(meta), path('output/*_R1.fastp_split.fastq.gz'), path('output/*_R2.fastp_split.fastq.gz', optional: true), topic: fastp_split_fastq
-    tuple val(meta), val('fastp_split'), path('.command.*')                                            , topic: command_files
-    path 'versions.yml'                                                                                , topic: versions
+    topic:
+    tuple(meta, files('output/*_R1.fastp_split.fastq.gz'), files('output/*_R2.fastp_split.fastq.gz', optional: true)) >> 'fastp_split_fastq'
+    tuple(meta, 'fastp_split', files('.command.*')) >> 'command_files'
+    file('versions.yml') >> 'versions'
 
     when:
     task.ext.when == null || task.ext.when

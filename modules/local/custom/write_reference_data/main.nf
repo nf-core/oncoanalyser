@@ -1,3 +1,5 @@
+nextflow.enable.types = true
+
 process WRITE_REFERENCE_DATA {
     tag "${fp.name}"
     label 'process_single'
@@ -7,10 +9,10 @@ process WRITE_REFERENCE_DATA {
         'nf-core/ubuntu:24.04' }"
 
     input:
-    path fp
+    fp: Path
 
-    output:
-    path fp, includeInputs: true, topic: write_reference_data
+    topic:
+    file(fp, includeInputs: true) >> 'write_reference_data'
 
     when:
     task.ext.when == null || task.ext.when

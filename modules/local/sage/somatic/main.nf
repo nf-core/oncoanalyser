@@ -1,3 +1,5 @@
+nextflow.enable.types = true
+
 // NOTE(SW): logic that determines BQR outputs assumes '-output_vcf' is a path that includes at least leading one directory
 
 process SAGE_SOMATIC {
@@ -10,24 +12,24 @@ process SAGE_SOMATIC {
         'biocontainers/hmftools-sage:5.0.2--hdfd78af_0' }"
 
     input:
-    tuple val(meta), path(tumor_aln), path(tumor_bai), path(normal_aln), path(normal_bai), path(donor_aln), path(donor_bai), path(redux_tsvs)
-    path genome_fasta
-    val genome_ver
-    path genome_fai
-    path genome_dict
-    path sage_pon
-    path sage_known_hotspots_somatic
-    path sage_highconf_regions
-    path driver_gene_panel
-    path ensembl_data_resources
-    path gnomad_resource
-    val sequencing_platform
-    val targeted_mode
+    tuple(meta: Map, tumor_aln: Path, tumor_bai: Path, normal_aln: Path?, normal_bai: Path?, donor_aln: Path?, donor_bai: Path?, redux_tsvs: List<Path>)
+    genome_fasta: Path
+    genome_ver: String
+    genome_fai: Path
+    genome_dict: Path
+    sage_pon: Path
+    sage_known_hotspots_somatic: Path
+    sage_highconf_regions: Path
+    driver_gene_panel: Path
+    ensembl_data_resources: Path
+    gnomad_resource: Path
+    sequencing_platform: String
+    targeted_mode: Boolean
 
-    output:
-    tuple val(meta), path('somatic/')                       , topic: sage_somatic_dir
-    tuple val(meta), val('sage_somatic'), path('.command.*'), topic: command_files
-    path 'versions.yml'                                     , topic: versions
+    topic:
+    tuple(meta, file('somatic/')) >> 'sage_somatic_dir'
+    tuple(meta, 'sage_somatic', files('.command.*')) >> 'command_files'
+    file('versions.yml') >> 'versions'
 
     when:
     task.ext.when == null || task.ext.when

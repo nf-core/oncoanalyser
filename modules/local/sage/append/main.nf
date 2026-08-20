@@ -1,3 +1,5 @@
+nextflow.enable.types = true
+
 process SAGE_APPEND {
     tag "${meta.id}"
     label 'process_medium'
@@ -8,18 +10,18 @@ process SAGE_APPEND {
         'biocontainers/hmftools-sage:5.0.2--hdfd78af_0' }"
 
     input:
-    tuple val(meta), path(vcf), path(alns), path(idxs), path(redux_tsvs)
-    path genome_fasta
-    val genome_ver
-    path genome_fai
-    path genome_dict
-    val sequencing_platform
-    val targeted_mode
+    tuple(meta: Map, vcf: Path, alns: List<Path>, idxs: List<Path>, redux_tsvs: List<Path>)
+    genome_fasta: Path
+    genome_ver: String
+    genome_fai: Path
+    genome_dict: Path
+    sequencing_platform: String
+    targeted_mode: Boolean
 
-    output:
-    tuple val(meta), path("sage_append_${meta.output_file_id}/"), topic: sage_append_dir
-    tuple val(meta), val('sage_append'), path('.command.*')     , topic: command_files
-    path 'versions.yml'                                         , topic: versions
+    topic:
+    tuple(meta, file("sage_append_${meta.output_file_id}/")) >> 'sage_append_dir'
+    tuple(meta, 'sage_append', files('.command.*')) >> 'command_files'
+    file('versions.yml') >> 'versions'
 
     when:
     task.ext.when == null || task.ext.when

@@ -1,3 +1,5 @@
+nextflow.enable.types = true
+
 process PAVE_SOMATIC {
     tag "${meta.id}"
     label 'process_medium'
@@ -8,23 +10,23 @@ process PAVE_SOMATIC {
         'biocontainers/hmftools-pave:1.9--hdfd78af_0' }"
 
     input:
-    tuple val(meta), path(sage_vcf), path(sage_tbi)
-    path genome_fasta
-    val genome_ver
-    path genome_fai
-    path pon_artefacts
-    path sage_pon
-    path clinvar_annotations
-    path segment_mappability
-    path driver_gene_panel
-    path ensembl_data_resources
-    path gnomad_resource
-    val sequencing_platform
+    tuple(meta: Map, sage_vcf: Path, sage_tbi: Path)
+    genome_fasta: Path
+    genome_ver: String
+    genome_fai: Path
+    pon_artefacts: Path?
+    sage_pon: Path
+    clinvar_annotations: Path
+    segment_mappability: Path
+    driver_gene_panel: Path
+    ensembl_data_resources: Path
+    gnomad_resource: Path
+    sequencing_platform: String
 
-    output:
-    tuple val(meta), path('pave_somatic/')                  , topic: pave_somatic_dir
-    tuple val(meta), val('pave_somatic'), path('.command.*'), topic: command_files
-    path 'versions.yml'                                     , topic: versions
+    topic:
+    tuple(meta, file('pave_somatic/')) >> 'pave_somatic_dir'
+    tuple(meta, 'pave_somatic', files('.command.*')) >> 'command_files'
+    file('versions.yml') >> 'versions'
 
     when:
     task.ext.when == null || task.ext.when

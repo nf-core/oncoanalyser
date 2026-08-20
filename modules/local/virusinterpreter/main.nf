@@ -1,3 +1,5 @@
+nextflow.enable.types = true
+
 process VIRUSINTERPRETER {
     tag "${meta.id}"
     label 'process_single'
@@ -8,15 +10,15 @@ process VIRUSINTERPRETER {
         'biocontainers/hmftools-virus-interpreter:1.7.2--hdfd78af_0' }"
 
     input:
-    tuple val(meta), path(virusbreakend_tsv), path(bamtools_somatic_dir), path(purple_dir)
-    path taxonomy_db
-    path reporting_db
-    path blocklist_db
+    tuple(meta: Map, virusbreakend_tsv: Path, bamtools_somatic_dir: Path, purple_dir: Path)
+    taxonomy_db: Path
+    reporting_db: Path
+    blocklist_db: Path
 
-    output:
-    tuple val(meta), path('virusinterpreter/')                  , topic: virusinterpreter_dir
-    tuple val(meta), val('virusinterpreter'), path('.command.*'), topic: command_files
-    path 'versions.yml'                                         , topic: versions
+    topic:
+    tuple(meta, file('virusinterpreter/')) >> 'virusinterpreter_dir'
+    tuple(meta, 'virusinterpreter', files('.command.*')) >> 'command_files'
+    file('versions.yml') >> 'versions'
 
     when:
     task.ext.when == null || task.ext.when

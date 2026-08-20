@@ -1,3 +1,5 @@
+nextflow.enable.types = true
+
 process PAVE_PON_PANEL_CREATION {
     label 'process_medium'
 
@@ -7,13 +9,13 @@ process PAVE_PON_PANEL_CREATION {
         'biocontainers/hmftools-pave:1.9--hdfd78af_0' }"
 
     input:
-    tuple path(sage_vcf), path(sage_tbi)
-    val genome_ver
+    tuple(sage_vcf: Path, sage_tbi: Path)
+    genome_ver: String
 
-    output:
-    path 'pave.somatic_artefacts.*.tsv'                               , topic: pave_pon_panel_creation_artefacts
-    tuple val([:]), val('pave_pon_panel_creation'), path('.command.*'), topic: command_files
-    path 'versions.yml'                                               , topic: versions
+    topic:
+    file('pave.somatic_artefacts.*.tsv') >> 'pave_pon_panel_creation_artefacts'
+    tuple([:], 'pave_pon_panel_creation', files('.command.*')) >> 'command_files'
+    file('versions.yml') >> 'versions'
 
     when:
     task.ext.when == null || task.ext.when

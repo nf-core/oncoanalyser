@@ -1,3 +1,5 @@
+nextflow.enable.types = true
+
 process SAGE_GERMLINE {
     tag "${meta.id}"
     label 'process_high'
@@ -8,22 +10,22 @@ process SAGE_GERMLINE {
         'biocontainers/hmftools-sage:5.0.2--hdfd78af_0' }"
 
     input:
-    tuple val(meta), path(tumor_aln), path(tumor_idx), path(normal_aln), path(normal_idx), path(redux_tsvs)
-    path genome_fasta
-    val genome_ver
-    path genome_fai
-    path genome_dict
-    path sage_known_hotspots_germline
-    path sage_highconf_regions
-    path driver_gene_panel
-    path ensembl_data_resources
-    val sequencing_platform
-    val targeted_mode
+    tuple(meta: Map, tumor_aln: Path, tumor_idx: Path, normal_aln: Path?, normal_idx: Path?, redux_tsvs: List<Path>)
+    genome_fasta: Path
+    genome_ver: String
+    genome_fai: Path
+    genome_dict: Path
+    sage_known_hotspots_germline: Path
+    sage_highconf_regions: Path
+    driver_gene_panel: Path
+    ensembl_data_resources: Path
+    sequencing_platform: String
+    targeted_mode: Boolean
 
-    output:
-    tuple val(meta), path('germline/')                       , topic: sage_germline_dir
-    tuple val(meta), val('sage_germline'), path('.command.*'), topic: command_files
-    path 'versions.yml'                                      , topic: versions
+    topic:
+    tuple(meta, file('germline/')) >> 'sage_germline_dir'
+    tuple(meta, 'sage_germline', files('.command.*')) >> 'command_files'
+    file('versions.yml') >> 'versions'
 
     when:
     task.ext.when == null || task.ext.when

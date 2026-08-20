@@ -1,3 +1,5 @@
+nextflow.enable.types = true
+
 process NEO_SCORER {
     tag "${meta.id}"
     label 'process_medium'
@@ -8,15 +10,18 @@ process NEO_SCORER {
         'biocontainers/hmftools-neo:1.3--hdfd78af_0' }"
 
     input:
-    tuple val(meta), path(isofox_dir), path(purple_dir), path(sage_vcf), path(lilac_dir), path(neo_finder_dir), path(annotated_fusions)
-    path ensembl_data_resources
-    path neo_resources, stageAs: 'neo_reference_data'
-    path cohort_tpm_medians
+    tuple(meta: Map, isofox_dir: Path?, purple_dir: Path, sage_vcf: Path?, lilac_dir: Path, neo_finder_dir: Path, annotated_fusions: Path?)
+    ensembl_data_resources: Path
+    neo_resources: Path
+    cohort_tpm_medians: Path
 
-    output:
-    tuple val(meta), path('neo_scorer/')                  , topic: neo_scorer_dir
-    tuple val(meta), val('neo_scorer'), path('.command.*'), topic: command_files
-    path 'versions.yml'                                   , topic: versions
+    stage:
+    stageAs neo_resources, 'neo_reference_data'
+
+    topic:
+    tuple(meta, file('neo_scorer/')) >> 'neo_scorer_dir'
+    tuple(meta, 'neo_scorer', files('.command.*')) >> 'command_files'
+    file('versions.yml') >> 'versions'
 
     when:
     task.ext.when == null || task.ext.when

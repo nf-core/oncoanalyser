@@ -1,3 +1,5 @@
+nextflow.enable.types = true
+
 process LINX_SOMATIC {
     tag "${meta.id}"
     label 'process_low'
@@ -8,16 +10,16 @@ process LINX_SOMATIC {
         'biocontainers/hmftools-linx:2.3.1--hdfd78af_0' }"
 
     input:
-    tuple val(meta), path(purple_dir)
-    val genome_ver
-    path ensembl_data_resources
-    path known_fusion_data
-    path driver_gene_panel
+    tuple(meta: Map, purple_dir: Path)
+    genome_ver: String
+    ensembl_data_resources: Path
+    known_fusion_data: Path
+    driver_gene_panel: Path
 
-    output:
-    tuple val(meta), path('linx_somatic/')                  , topic: linx_somatic_annotation_dir
-    tuple val(meta), val('linx_somatic'), path('.command.*'), topic: command_files
-    path 'versions.yml'                                     , topic: versions
+    topic:
+    tuple(meta, file('linx_somatic/')) >> 'linx_somatic_annotation_dir'
+    tuple(meta, 'linx_somatic', files('.command.*')) >> 'command_files'
+    file('versions.yml') >> 'versions'
 
     when:
     task.ext.when == null || task.ext.when

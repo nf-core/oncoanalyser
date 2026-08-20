@@ -1,3 +1,5 @@
+nextflow.enable.types = true
+
 process REDUX {
     tag "${meta.id}"
     label 'process_high'
@@ -8,25 +10,25 @@ process REDUX {
         'biocontainers/hmftools-redux:2.0.5--hdfd78af_0' }"
 
     input:
-    tuple val(meta), path(alns), path(idxs)
-    path genome_fasta
-    val genome_ver
-    path genome_fai
-    path genome_dict
-    path unmap_regions
-    path msi_jitter_sites
-    path msi_model_coefficients
-    path msi_model_error_rates
-    val sequencing_platform
-    val targeted_mode
-    val generate_tsvs_only
-    val umi_enable
-    val umi_duplex_delim
+    tuple(meta: Map, alns: List<Path>, idxs: List<Path>)
+    genome_fasta: Path
+    genome_ver: String
+    genome_fai: Path
+    genome_dict: Path
+    unmap_regions: Path
+    msi_jitter_sites: Path
+    msi_model_coefficients: Path
+    msi_model_error_rates: Path
+    sequencing_platform: String
+    targeted_mode: Boolean
+    generate_tsvs_only: Boolean
+    umi_enable: Boolean
+    umi_duplex_delim: String
 
-    output:
-    tuple val(meta), path("redux_${meta.sample_id}/"), topic: redux_dir
-    tuple val(meta), val('redux'), path('.command.*'), topic: command_files
-    path 'versions.yml'                              , topic: versions
+    topic:
+    tuple(meta, file("redux_${meta.sample_id}/")) >> 'redux_dir'
+    tuple(meta, 'redux', files('.command.*')) >> 'command_files'
+    file('versions.yml') >> 'versions'
 
     when:
     task.ext.when == null || task.ext.when

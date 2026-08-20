@@ -1,3 +1,5 @@
+nextflow.enable.types = true
+
 process CUSTOM_EXTRACTTARBALL {
     label 'process_single'
 
@@ -7,11 +9,11 @@ process CUSTOM_EXTRACTTARBALL {
         'nf-core/ubuntu:24.04' }"
 
     input:
-    tuple val(meta), path(tarball)
+    tuple(meta: Map, tarball: Path)
 
-    output:
-    tuple val(meta), path("${meta.id}/")                      , topic: extracted_dir
-    tuple val(meta), val('extracttarball'), path('.command.*'), topic: command_files
+    topic:
+    tuple(meta, file("${meta.id}/")) >> 'extracted_dir'
+    tuple(meta, 'extracttarball', files('.command.*')) >> 'command_files'
 
     when:
     task.ext.when == null || task.ext.when

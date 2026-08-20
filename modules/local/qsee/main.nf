@@ -1,3 +1,5 @@
+nextflow.enable.types = true
+
 process QSEE {
     tag "${meta.id}"
     label 'process_low'
@@ -8,23 +10,22 @@ process QSEE {
         'biocontainers/hmftools-qsee:1.0--hdfd78af_0' }"
 
     input:
-    tuple val(meta),
-        path(redux_tsvs_tumor, stageAs: "redux_tsvs_tumor/*"),
-        path(redux_tsvs_normal, stageAs: "redux_tsvs_normal/*"),
-        path(bamtools_dir_tumor, stageAs: 'bamtools_tumor'),
-        path(bamtools_dir_normal, stageAs: 'bamtools_normal'),
-        path(cobalt_dir),
-        path(esvee_dir),
-        path(purple_dir)
-    path driver_gene_panel
-    path cohort_percentiles
-    val sequencing_platform
-    val targeted_mode
+    tuple(meta: Map, redux_tsvs_tumor: Path, redux_tsvs_normal: Path?, bamtools_dir_tumor: Path, bamtools_dir_normal: Path?, cobalt_dir: Path?, esvee_dir: Path?, purple_dir: Path)
+    driver_gene_panel: Path
+    cohort_percentiles: Path
+    sequencing_platform: String
+    targeted_mode: Boolean
 
-    output:
-    tuple val(meta), path('qsee/')                  , topic: qsee_dir
-    tuple val(meta), val('qsee'), path('.command.*'), topic: command_files
-    path 'versions.yml'                             , topic: versions
+    stage:
+    stageAs redux_tsvs_tumor, 'redux_tsvs_tumor/*'
+    stageAs redux_tsvs_normal, 'redux_tsvs_normal/*'
+    stageAs bamtools_dir_tumor, 'bamtools_tumor'
+    stageAs bamtools_dir_normal, 'bamtools_normal'
+
+    topic:
+    tuple(meta, file('qsee/')) >> 'qsee_dir'
+    tuple(meta, 'qsee', files('.command.*')) >> 'command_files'
+    file('versions.yml') >> 'versions'
 
     when:
     task.ext.when == null || task.ext.when

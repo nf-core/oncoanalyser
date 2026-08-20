@@ -1,3 +1,5 @@
+nextflow.enable.types = true
+
 process ISOFOX_PANEL_NORMALISATION {
     label 'process_medium'
 
@@ -7,15 +9,15 @@ process ISOFOX_PANEL_NORMALISATION {
         'biocontainers/hmftools-isofox:2.0.1--hdfd78af_0' }"
 
     input:
-    path 'isofox_dirs.*'
-    val genome_ver
-    path gene_ids
-    path gene_distribution
+    isofox_dirs: Path
+    genome_ver: String
+    gene_ids: Path
+    gene_distribution: Path
 
-    output:
-    path 'isofox.gene_normalisation.*.csv'                               , topic: isofox_normalisation_csv
-    tuple val([:]), val('isofox_panel_normalisation'), path('.command.*'), topic: command_files
-    path 'versions.yml'                                                  , topic: versions
+    topic:
+    file('isofox.gene_normalisation.*.csv') >> 'isofox_normalisation_csv'
+    tuple([:], 'isofox_panel_normalisation', files('.command.*')) >> 'command_files'
+    file('versions.yml') >> 'versions'
 
     when:
     task.ext.when == null || task.ext.when

@@ -1,3 +1,5 @@
+nextflow.enable.types = true
+
 process WISP {
     tag "${meta.id}"
     label 'process_low'
@@ -8,22 +10,23 @@ process WISP {
         'biocontainers/hmftools-wisp:1.3.1--hdfd78af_0' }"
 
     input:
-    tuple val(meta),
-        path(primary_purple_dir, stageAs: 'purple_primary'),
-        path(primary_amber_dir, stageAs: 'amber_primary'),
-        path(primary_normal_aln),
-        path(longitudinal_redux_dir, stageAs: 'redux_longitudinal'),
-        path(longitudinal_amber_dir, stageAs: 'amber_longitudinal'),
-        path(longitudinal_cobalt_dir, stageAs: 'cobalt_longitudinal'),
-        path(longitudinal_sage_append_dir, stageAs: 'sage_append_longitudinal')
-    path genome_fasta
-    path genome_fai
-    val targeted_mode
+    tuple(meta: Map, primary_purple_dir: Path, primary_amber_dir: Path?, primary_normal_aln: Path?, longitudinal_redux_dir: Path, longitudinal_amber_dir: Path, longitudinal_cobalt_dir: Path, longitudinal_sage_append_dir: Path)
+    genome_fasta: Path
+    genome_fai: Path
+    targeted_mode: Boolean
 
-    output:
-    tuple val(meta), path('wisp/')                  , topic: wisp_dir
-    tuple val(meta), val('wisp'), path('.command.*'), topic: command_files
-    path 'versions.yml'                             , topic: versions
+    stage:
+    stageAs primary_purple_dir, 'purple_primary'
+    stageAs primary_amber_dir, 'amber_primary'
+    stageAs longitudinal_redux_dir, 'redux_longitudinal'
+    stageAs longitudinal_amber_dir, 'amber_longitudinal'
+    stageAs longitudinal_cobalt_dir, 'cobalt_longitudinal'
+    stageAs longitudinal_sage_append_dir, 'sage_append_longitudinal'
+
+    topic:
+    tuple(meta, file('wisp/')) >> 'wisp_dir'
+    tuple(meta, 'wisp', files('.command.*')) >> 'command_files'
+    file('versions.yml') >> 'versions'
 
     when:
     task.ext.when == null || task.ext.when

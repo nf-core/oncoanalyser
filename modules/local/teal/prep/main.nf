@@ -1,3 +1,5 @@
+nextflow.enable.types = true
+
 process TEAL_PREP {
     tag "${meta.id}"
     label 'process_medium'
@@ -8,17 +10,17 @@ process TEAL_PREP {
         'biocontainers/hmftools-teal:1.4--hdfd78af_0' }"
 
     input:
-    tuple val(meta), path(tumor_aln), path(tumor_idx), path(normal_aln), path(normal_idx)
-    path genome_fasta
-    val genome_ver
-    path genome_fai
-    val sequencing_platform
+    tuple(meta: Map, tumor_aln: Path?, tumor_idx: Path?, normal_aln: Path?, normal_idx: Path?)
+    genome_fasta: Path
+    genome_ver: String
+    genome_fai: Path
+    sequencing_platform: String
 
-    output:
-    tuple val(meta), path("teal_bam/${meta.tumor_id}.teal.telbam{.bam,.bam.bai}") , topic: teal_prep_tumor_bam
-    tuple val(meta), path("teal_bam/${meta.normal_id}.teal.telbam{.bam,.bam.bai}"), topic: teal_prep_normal_bam, optional: true
-    tuple val(meta), val('teal_prep'), path('.command.*')                         , topic: command_files
-    path 'versions.yml'                                                           , topic: versions
+    topic:
+    tuple(meta, files("teal_bam/${meta.tumor_id}.teal.telbam{.bam,.bam.bai}")) >> 'teal_prep_tumor_bam'
+    tuple(meta, files("teal_bam/${meta.normal_id}.teal.telbam{.bam,.bam.bai}", optional: true)) >> 'teal_prep_normal_bam'
+    tuple(meta, 'teal_prep', files('.command.*')) >> 'command_files'
+    file('versions.yml') >> 'versions'
 
     when:
     task.ext.when == null || task.ext.when

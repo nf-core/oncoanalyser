@@ -1,3 +1,5 @@
+nextflow.enable.types = true
+
 process ORANGE {
     tag "${meta.id}"
     label 'process_single'
@@ -8,36 +10,23 @@ process ORANGE {
         'biocontainers/hmftools-orange:5.0.1--hdfd78af_0' }"
 
     input:
-    tuple val(meta),
-        path(sage_dir_somatic, stageAs: 'sage_somatic'),
-        path(sage_dir_germline, stageAs: 'sage_germline'),
-        path(smlv_vcf_somatic),
-        path(smlv_vcf_germline),
-        path(sage_plot_dir_somatic),
-        path(purple_dir),
-        path(qsee_dir),
-        path(linx_annotation_dir_somatic),
-        path(linx_plot_dir_reportable_somatic),
-        path(linx_annotation_dir_germline),
-        path(virusinterpreter_dir),
-        path(chord_dir),
-        path(sigs_dir),
-        path(lilac_dir),
-        path(cuppa_dir),
-        path(peach_dir),
-        path(isofox_dir)
-    val genome_ver
-    path disease_ontology
-    val pipeline_version
-    val sequencing_platform
-    val targeted_mode
-    val panel
+    tuple(meta: Map, sage_dir_somatic: Path, sage_dir_germline: Path?, smlv_vcf_somatic: Path?, smlv_vcf_germline: Path?, sage_plot_dir_somatic: Path?, purple_dir: Path, qsee_dir: Path, linx_annotation_dir_somatic: Path, linx_plot_dir_reportable_somatic: Path, linx_annotation_dir_germline: Path?, virusinterpreter_dir: Path?, chord_dir: Path?, sigs_dir: Path?, lilac_dir: Path?, cuppa_dir: Path?, peach_dir: Path?, isofox_dir: Path?)
+    genome_ver: String
+    disease_ontology: Path
+    pipeline_version: String?
+    sequencing_platform: String
+    targeted_mode: Boolean
+    panel: String
 
-    output:
-    tuple val(meta), path('output/*.orange.pdf')      , topic: orange_pdf, optional: true
-    tuple val(meta), path('output/*.orange.json')     , topic: orange_json, optional: true
-    tuple val(meta), val('orange'), path('.command.*'), topic: command_files
-    path 'versions.yml'                               , topic: versions
+    stage:
+    stageAs sage_dir_somatic, 'sage_somatic'
+    stageAs sage_dir_germline, 'sage_germline'
+
+    topic:
+    tuple(meta, file('output/*.orange.pdf', optional: true)) >> 'orange_pdf'
+    tuple(meta, file('output/*.orange.json', optional: true)) >> 'orange_json'
+    tuple(meta, 'orange', files('.command.*')) >> 'command_files'
+    file('versions.yml') >> 'versions'
 
     when:
     task.ext.when == null || task.ext.when

@@ -1,3 +1,5 @@
+nextflow.enable.types = true
+
 // NOTE(SW): logic that determines BQR outputs assumes '-output_vcf' is a path that includes at least leading one directory
 
 process SAGE_VISUALISER {
@@ -10,30 +12,30 @@ process SAGE_VISUALISER {
         'biocontainers/hmftools-sage:5.0.2--hdfd78af_0' }"
 
     input:
-    tuple val(meta),
-        path(tumor_aln),
-        path(normal_aln),
-        path(donor_aln),
-        path(tumor_idx),
-        path(normal_idx),
-        path(donor_idx),
-        path(redux_tsvs),
-        path(purple_vcf),
-        path(purple_vcf_tbi)
-    path genome_fasta
-    val genome_ver
-    path genome_fai
-    path genome_dict
-    path sage_pon
-    path sage_known_hotspots_somatic
-    path sage_highconf_regions
-    path ensembl_data_resources
-    val targeted_mode
+    tuple(meta: Map,
+        tumor_aln: Path,
+        normal_aln: Path?,
+        donor_aln: Path?,
+        tumor_idx: Path,
+        normal_idx: Path?,
+        donor_idx: Path?,
+        redux_tsvs: List<Path>,
+        purple_vcf: Path,
+        purple_vcf_tbi: Path)
+    genome_fasta: Path
+    genome_ver: String
+    genome_fai: Path
+    genome_dict: Path
+    sage_pon: Path
+    sage_known_hotspots_somatic: Path
+    sage_highconf_regions: Path
+    ensembl_data_resources: Path
+    targeted_mode: Boolean
 
-    output:
-    tuple val(meta), path('sage_vis/')                         , topic: sage_visualiser_dir
-    tuple val(meta), val('sage_visualiser'), path('.command.*'), topic: command_files
-    path 'versions.yml'                                        , topic: versions
+    topic:
+    tuple(meta, file('sage_vis/')) >> 'sage_visualiser_dir'
+    tuple(meta, 'sage_visualiser', files('.command.*')) >> 'command_files'
+    file('versions.yml') >> 'versions'
 
     when:
     task.ext.when == null || task.ext.when
