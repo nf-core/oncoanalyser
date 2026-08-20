@@ -8,7 +8,6 @@ include { getReduxDirAlignment    } from './utils'
 include { parse_read_group_info   } from './utils'
 include { FileType; InfoField; SampleType; SequenceType; getCaseLevelDirs } from './types'
 include { CaseRecord              } from './records'
-include { DataFile                } from './records'
 include { FastqFile               } from './records'
 include { SampleRecord            } from './records'
 
@@ -80,7 +79,7 @@ def parseSampleEntry(case_id, patient_id, ctx, entry, sample_builders, directori
             log.error "got duplicate file for ${case_id}: ${filetype_enum}"
             exit 1
         }
-        directories[filetype_enum] = DataFile(getFileObject(entry.filepath))
+        directories[filetype_enum] = getFileObject(entry.filepath)
         return
     }
 
@@ -119,7 +118,7 @@ def parseSampleEntry(case_id, patient_id, ctx, entry, sample_builders, directori
             log.error "got duplicate file for ${case_id} ${sample_type_enum}/${sequence_type_enum} ${b.sample_id}: ${filetype_enum}"
             exit 1
         }
-        b.files[filetype_enum] = DataFile(getFileObject(entry.filepath))
+        b.files[filetype_enum] = getFileObject(entry.filepath)
     }
 }
 
@@ -257,7 +256,7 @@ def resolveReduxInputs(b, case_id, stub_run, log) {
     def redux_dir
     if (files.containsKey(FileType.ALN_REDUX)) {
 
-        redux_aln = files[FileType.ALN_REDUX].path
+        redux_aln = files[FileType.ALN_REDUX]
         redux_input = redux_aln
         redux_dir = redux_aln.parent
         if (! redux_input.isFile()) {
@@ -267,7 +266,7 @@ def resolveReduxInputs(b, case_id, stub_run, log) {
 
     } else if (files.containsKey(FileType.REDUX_DIR)) {
 
-        redux_dir = files[FileType.REDUX_DIR].path
+        redux_dir = files[FileType.REDUX_DIR]
         redux_input = redux_dir
         redux_aln = getReduxDirAlignment(sample_id, redux_dir)[0]
         if (! redux_input.isDirectory()) {
@@ -308,12 +307,12 @@ def resolveReduxInputs(b, case_id, stub_run, log) {
 
     if (has_colocated_index && ! files.containsKey(FileType.REDUX_DIR)) {
         files.remove(FileType.ALN_REDUX)
-        files[FileType.REDUX_DIR] = DataFile(redux_dir)
+        files[FileType.REDUX_DIR] = redux_dir
     }
 
     if (! has_redux_tsvs && generate_tsvs_only) {
         files.remove(FileType.REDUX_DIR)
-        files[FileType.ALN_REDUX] = DataFile(redux_aln)
+        files[FileType.ALN_REDUX] = redux_aln
     }
 
     if (files.containsKey(FileType.ALN_REDUX) && files.containsKey(FileType.IDX) && ! has_redux_tsvs && ! generate_tsvs_only) {
@@ -339,9 +338,9 @@ def checkAlignmentIndexes(b, case_id, stub_run, log) {
 
         def aln
         if (key == FileType.ALN || key == FileType.ALN_REDUX) {
-            aln = files[key].path
+            aln = files[key]
         } else if (key == FileType.REDUX_DIR) {
-            def d = getReduxDirAlignment(sample_id, files[key].path)
+            def d = getReduxDirAlignment(sample_id, files[key])
             aln = d[0]
         } else {
             return
@@ -357,7 +356,7 @@ def checkAlignmentIndexes(b, case_id, stub_run, log) {
             exit 1
         }
 
-        if (files.containsKey(FileType.IDX) && files[FileType.IDX].path.name.endsWith(index_ext)) {
+        if (files.containsKey(FileType.IDX) && files[FileType.IDX].name.endsWith(index_ext)) {
             return
         }
 
@@ -370,7 +369,7 @@ def checkAlignmentIndexes(b, case_id, stub_run, log) {
         }
 
         if (key == FileType.ALN || key == FileType.ALN_REDUX) {
-            files[FileType.IDX] = DataFile(index_fp)
+            files[FileType.IDX] = index_fp
         }
     }
 }

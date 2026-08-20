@@ -6,10 +6,6 @@
 // e.g. `case.case_id` or `case['case_id']`.
 //
 
-def DataFile(path) {
-    return record(path: path)
-}
-
 def FastqFile(read_fwd, read_rev, single_end, library_id, lane, flowcell, rg_fields) {
     return record(
         read_fwd: read_fwd,
