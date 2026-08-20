@@ -675,37 +675,117 @@ def getReduxTsvs(sample_name, redux_dir) {
 }
 
 
-// Misc: resolve an existing input (or existing output dir) from a case
-def getInput(case_record, key_set) {
-    def filetypes = key_set[0] instanceof List ? key_set[0] : [key_set[0]]
-    def sampletypes = key_set[1] instanceof List ? key_set[1] : [key_set[1]]
-    def sequencetypes = key_set[2] instanceof List ? key_set[2] : [key_set[2]]
-
-    // Case-level directories
-    def dir_ft = filetypes.find { ft -> case_record.directories.containsKey(ft) }
-    if (dir_ft) {
-        return case_record.directories[dir_ft].path
-    }
-
-    // Sample-level files
-    def samples = getSamples(case_record, sampletypes, sequencetypes)
-    def match = samples.findResult { sample ->
-        def ft = filetypes.find { f -> sample.files.containsKey(f) }
-        return ft ? sample.files[ft].path : null
-    }
-    return match ?: []
+// Fine-grained REDUX/alignment accessors
+def getTumorDnaReduxAln(case_record) {
+    return getTumorDnaSample(case_record)?.files?.get(Constants.FileType.ALN_REDUX)?.path
 }
 
-def hasExistingInput(case_record, key) {
-    return getInput(case_record, key) != []
+def getNormalDnaReduxAln(case_record) {
+    return getNormalDnaSample(case_record)?.files?.get(Constants.FileType.ALN_REDUX)?.path
 }
 
-def selectCurrentOrExisting(val, case_record, key) {
-    if (hasExistingInput(case_record, key)) {
-        return getInput(case_record, key)
-    } else {
-        return val
-    }
+def getDonorDnaReduxAln(case_record) {
+    return getDonorDnaSample(case_record)?.files?.get(Constants.FileType.ALN_REDUX)?.path
+}
+
+def getTumorDnaReduxDir(case_record) {
+    return getTumorDnaSample(case_record)?.files?.get(Constants.FileType.REDUX_DIR)?.path
+}
+
+def getNormalDnaReduxDir(case_record) {
+    return getNormalDnaSample(case_record)?.files?.get(Constants.FileType.REDUX_DIR)?.path
+}
+
+def getDonorDnaReduxDir(case_record) {
+    return getDonorDnaSample(case_record)?.files?.get(Constants.FileType.REDUX_DIR)?.path
+}
+
+// Existing alignment (plan ALN, else REDUX alignment) to feed REDUX
+def getTumorDnaAln(case_record) {
+    return getTumorDnaBam(case_record) ?: getTumorDnaReduxAln(case_record)
+}
+
+def getNormalDnaAln(case_record) {
+    return getNormalDnaBam(case_record) ?: getNormalDnaReduxAln(case_record)
+}
+
+def getDonorDnaAln(case_record) {
+    return getDonorDnaBam(case_record) ?: getDonorDnaReduxAln(case_record)
+}
+
+def hasTumorDnaReduxAln(case_record) { return getTumorDnaReduxAln(case_record) != null }
+def hasNormalDnaReduxAln(case_record) { return getNormalDnaReduxAln(case_record) != null }
+def hasDonorDnaReduxAln(case_record) { return getDonorDnaReduxAln(case_record) != null }
+def hasTumorDnaReduxDir(case_record) { return getTumorDnaReduxDir(case_record) != null }
+def hasNormalDnaReduxDir(case_record) { return getNormalDnaReduxDir(case_record) != null }
+def hasDonorDnaReduxDir(case_record) { return getDonorDnaReduxDir(case_record) != null }
+def hasTumorDnaAln(case_record) { return getTumorDnaAln(case_record) != null }
+def hasNormalDnaAln(case_record) { return getNormalDnaAln(case_record) != null }
+def hasDonorDnaAln(case_record) { return getDonorDnaAln(case_record) != null }
+def hasTumorDnaBai(case_record) { return getTumorDnaBai(case_record) != null }
+def hasNormalDnaBai(case_record) { return getNormalDnaBai(case_record) != null }
+def hasDonorDnaBai(case_record) { return getDonorDnaBai(case_record) != null }
+def hasTumorRnaBai(case_record) { return getTumorRnaBai(case_record) != null }
+
+
+// Sample-level directory accessors
+def getTumorDnaBamtoolsDir(case_record) { return getTumorDnaSample(case_record)?.files?.get(Constants.FileType.BAMTOOLS_DIR)?.path }
+def getNormalDnaBamtoolsDir(case_record) { return getNormalDnaSample(case_record)?.files?.get(Constants.FileType.BAMTOOLS_DIR)?.path }
+def getTumorDnaSageDir(case_record) { return getTumorDnaSample(case_record)?.files?.get(Constants.FileType.SAGE_DIR)?.path }
+def getNormalDnaSageDir(case_record) { return getNormalDnaSample(case_record)?.files?.get(Constants.FileType.SAGE_DIR)?.path }
+def getTumorDnaSageAppendDir(case_record) { return getTumorDnaSample(case_record)?.files?.get(Constants.FileType.SAGE_APPEND_DIR)?.path }
+def getNormalDnaSageAppendDir(case_record) { return getNormalDnaSample(case_record)?.files?.get(Constants.FileType.SAGE_APPEND_DIR)?.path }
+def getTumorDnaPaveDir(case_record) { return getTumorDnaSample(case_record)?.files?.get(Constants.FileType.PAVE_DIR)?.path }
+def getNormalDnaPaveDir(case_record) { return getNormalDnaSample(case_record)?.files?.get(Constants.FileType.PAVE_DIR)?.path }
+def getTumorDnaLinxAnnoDir(case_record) { return getTumorDnaSample(case_record)?.files?.get(Constants.FileType.LINX_ANNO_DIR)?.path }
+def getNormalDnaLinxAnnoDir(case_record) { return getNormalDnaSample(case_record)?.files?.get(Constants.FileType.LINX_ANNO_DIR)?.path }
+def getTumorRnaIsofoxDir(case_record) { return getTumorRnaSample(case_record)?.files?.get(Constants.FileType.ISOFOX_DIR)?.path }
+
+def hasTumorDnaBamtoolsDir(case_record) { return getTumorDnaBamtoolsDir(case_record) != null }
+def hasNormalDnaBamtoolsDir(case_record) { return getNormalDnaBamtoolsDir(case_record) != null }
+def hasTumorDnaSageDir(case_record) { return getTumorDnaSageDir(case_record) != null }
+def hasNormalDnaSageDir(case_record) { return getNormalDnaSageDir(case_record) != null }
+def hasTumorDnaSageAppendDir(case_record) { return getTumorDnaSageAppendDir(case_record) != null }
+def hasNormalDnaSageAppendDir(case_record) { return getNormalDnaSageAppendDir(case_record) != null }
+def hasTumorDnaPaveDir(case_record) { return getTumorDnaPaveDir(case_record) != null }
+def hasNormalDnaPaveDir(case_record) { return getNormalDnaPaveDir(case_record) != null }
+def hasTumorDnaLinxAnnoDir(case_record) { return getTumorDnaLinxAnnoDir(case_record) != null }
+def hasNormalDnaLinxAnnoDir(case_record) { return getNormalDnaLinxAnnoDir(case_record) != null }
+def hasTumorRnaIsofoxDir(case_record) { return getTumorRnaIsofoxDir(case_record) != null }
+
+
+// Case-level directory accessors
+def getAmberDir(case_record) { return case_record.directories?.get(Constants.FileType.AMBER_DIR)?.path }
+def getCobaltDir(case_record) { return case_record.directories?.get(Constants.FileType.COBALT_DIR)?.path }
+def getEsveeDir(case_record) { return case_record.directories?.get(Constants.FileType.ESVEE_DIR)?.path }
+def getPurpleDir(case_record) { return case_record.directories?.get(Constants.FileType.PURPLE_DIR)?.path }
+def getQseeDir(case_record) { return case_record.directories?.get(Constants.FileType.QSEE_DIR)?.path }
+def getSagePlotDir(case_record) { return case_record.directories?.get(Constants.FileType.SAGE_PLOT_DIR)?.path }
+def getLinxPlotDir(case_record) { return case_record.directories?.get(Constants.FileType.LINX_PLOT_DIR)?.path }
+def getChordDir(case_record) { return case_record.directories?.get(Constants.FileType.CHORD_DIR)?.path }
+def getSigsDir(case_record) { return case_record.directories?.get(Constants.FileType.SIGS_DIR)?.path }
+def getLilacDir(case_record) { return case_record.directories?.get(Constants.FileType.LILAC_DIR)?.path }
+def getVirusinterpreterDir(case_record) { return case_record.directories?.get(Constants.FileType.VIRUSINTERPRETER_DIR)?.path }
+def getCuppaDir(case_record) { return case_record.directories?.get(Constants.FileType.CUPPA_DIR)?.path }
+def getPeachDir(case_record) { return case_record.directories?.get(Constants.FileType.PEACH_DIR)?.path }
+
+def hasAmberDir(case_record) { return getAmberDir(case_record) != null }
+def hasCobaltDir(case_record) { return getCobaltDir(case_record) != null }
+def hasEsveeDir(case_record) { return getEsveeDir(case_record) != null }
+def hasPurpleDir(case_record) { return getPurpleDir(case_record) != null }
+def hasQseeDir(case_record) { return getQseeDir(case_record) != null }
+def hasSagePlotDir(case_record) { return getSagePlotDir(case_record) != null }
+def hasLinxPlotDir(case_record) { return getLinxPlotDir(case_record) != null }
+def hasChordDir(case_record) { return getChordDir(case_record) != null }
+def hasSigsDir(case_record) { return getSigsDir(case_record) != null }
+def hasLilacDir(case_record) { return getLilacDir(case_record) != null }
+def hasVirusinterpreterDir(case_record) { return getVirusinterpreterDir(case_record) != null }
+def hasCuppaDir(case_record) { return getCuppaDir(case_record) != null }
+def hasPeachDir(case_record) { return getPeachDir(case_record) != null }
+
+
+def selectCurrentOrExisting(val, existing) {
+    return existing != null ? existing : val
 }
 
 def getDnaFastqChannel(ch_inputs) {
@@ -713,21 +793,21 @@ def getDnaFastqChannel(ch_inputs) {
     // channel: [ case_record ]
     def ch_inputs_tumor_sorted = ch_inputs
         .branch { case_record ->
-            def has_existing = hasExistingInput(case_record, Constants.INPUT.ALN_DNA_TUMOR)
+            def has_existing = hasTumorDnaAln(case_record)
             runnable: hasTumorDnaFastq(case_record) && ! has_existing
             skip: true
         }
 
     def ch_inputs_normal_sorted = ch_inputs
         .branch { case_record ->
-            def has_existing = hasExistingInput(case_record, Constants.INPUT.ALN_DNA_NORMAL)
+            def has_existing = hasNormalDnaAln(case_record)
             runnable: hasNormalDnaFastq(case_record) && ! has_existing
             skip: true
         }
 
     def ch_inputs_donor_sorted = ch_inputs
         .branch { case_record ->
-            def has_existing = hasExistingInput(case_record, Constants.INPUT.ALN_DNA_DONOR)
+            def has_existing = hasDonorDnaAln(case_record)
             runnable: hasDonorDnaFastq(case_record) && ! has_existing
             skip: true
         }
@@ -774,7 +854,7 @@ def getRnaFastqChannel(ch_inputs) {
     // channel: [ case_record ]
     def ch_inputs_sorted = ch_inputs
         .branch { case_record ->
-            def has_existing = hasExistingInput(case_record, Constants.INPUT.ALN_RNA_TUMOR)
+            def has_existing = hasTumorRnaBam(case_record)
             runnable: hasTumorRnaFastq(case_record) && ! has_existing
             skip: true
         }

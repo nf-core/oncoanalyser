@@ -5,7 +5,7 @@
 include { TEAL_PREP     } from '../../../modules/local/teal/prep/main'
 include { TEAL_PIPELINE } from '../../../modules/local/teal/pipeline/main'
 include { groupByMeta; joinMeta; restoreMeta } from '../utils_nfcore_oncoanalyser_pipeline/channel_helpers'
-include { getNormalDnaSampleName; getNormalReduxDirAlignment; getTumorDnaSampleName; getTumorReduxDirAlignment; selectCurrentOrExisting } from '../utils_nfcore_oncoanalyser_pipeline/utils'
+include { getCobaltDir; getNormalDnaBamtoolsDir; getNormalDnaReduxDir; getNormalDnaSampleName; getNormalReduxDirAlignment; getPurpleDir; getTumorDnaBamtoolsDir; getTumorDnaReduxDir; getTumorDnaSampleName; getTumorReduxDirAlignment; selectCurrentOrExisting } from '../utils_nfcore_oncoanalyser_pipeline/utils'
 
 workflow TEAL_CHARACTERISATION {
     take:
@@ -39,8 +39,8 @@ workflow TEAL_CHARACTERISATION {
     ])
         .map { meta, redux_dir_tumor, redux_dir_normal ->
 
-            def redux_dir_tumor_selected = selectCurrentOrExisting(redux_dir_tumor, meta, Constants.INPUT.REDUX_DIR_TUMOR)
-            def redux_dir_normal_selected = selectCurrentOrExisting(redux_dir_normal, meta, Constants.INPUT.REDUX_DIR_NORMAL)
+            def redux_dir_tumor_selected = selectCurrentOrExisting(redux_dir_tumor, getTumorDnaReduxDir(meta))
+            def redux_dir_normal_selected = selectCurrentOrExisting(redux_dir_normal, getNormalDnaReduxDir(meta))
 
             def (tumor_aln, tumor_idx) = getTumorReduxDirAlignment(meta, redux_dir_tumor_selected)
             def (normal_aln, normal_idx) = getNormalReduxDirAlignment(meta, redux_dir_normal_selected)
@@ -124,10 +124,10 @@ workflow TEAL_CHARACTERISATION {
                 teal_bai_tumor,
                 teal_bam_normal,
                 teal_bai_normal,
-                selectCurrentOrExisting(bamtools_dir_tumor, meta, Constants.INPUT.BAMTOOLS_DIR_TUMOR),
-                selectCurrentOrExisting(bamtools_dir_normal, meta, Constants.INPUT.BAMTOOLS_DIR_NORMAL),
-                selectCurrentOrExisting(cobalt_dir, meta, Constants.INPUT.COBALT_DIR),
-                selectCurrentOrExisting(purple_dir, meta, Constants.INPUT.PURPLE_DIR),
+                selectCurrentOrExisting(bamtools_dir_tumor, getTumorDnaBamtoolsDir(meta)),
+                selectCurrentOrExisting(bamtools_dir_normal, getNormalDnaBamtoolsDir(meta)),
+                selectCurrentOrExisting(cobalt_dir, getCobaltDir(meta)),
+                selectCurrentOrExisting(purple_dir, getPurpleDir(meta)),
             ]
         }
         .branch { meta, teal_bam_tumor, teal_bai_tumor, teal_bam_normal, teal_bai_normal, bamtools_dir_tumor, bamtools_dir_normal, cobalt_dir, purple_dir ->

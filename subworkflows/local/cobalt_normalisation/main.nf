@@ -4,7 +4,7 @@
 
 include { COBALT_PANEL_NORMALISATION } from '../../../modules/local/cobalt/panel_normalisation/main'
 include { groupByMeta; joinMeta; restoreMeta } from '../utils_nfcore_oncoanalyser_pipeline/channel_helpers'
-include { selectCurrentOrExisting } from '../utils_nfcore_oncoanalyser_pipeline/utils'
+include { getAmberDir; getCobaltDir; selectCurrentOrExisting } from '../utils_nfcore_oncoanalyser_pipeline/utils'
 
 workflow COBALT_NORMALISATION {
     take:
@@ -27,8 +27,8 @@ workflow COBALT_NORMALISATION {
     ])
         .map { meta, amber_dir, cobalt_dir ->
             return [
-                selectCurrentOrExisting(amber_dir, meta, Constants.INPUT.AMBER_DIR),
-                selectCurrentOrExisting(cobalt_dir, meta, Constants.INPUT.COBALT_DIR),
+                selectCurrentOrExisting(amber_dir, getAmberDir(meta)),
+                selectCurrentOrExisting(cobalt_dir, getCobaltDir(meta)),
             ]
         }
         .collect(flat: false)

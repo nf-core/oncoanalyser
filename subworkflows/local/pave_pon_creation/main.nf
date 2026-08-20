@@ -3,7 +3,7 @@
 //
 
 include { PAVE_PON_PANEL_CREATION } from '../../../modules/local/pave/pon_creation/main'
-include { getTumorDnaSampleName; selectCurrentOrExisting } from '../utils_nfcore_oncoanalyser_pipeline/utils'
+include { getTumorDnaSageDir; getTumorDnaSampleName; selectCurrentOrExisting } from '../utils_nfcore_oncoanalyser_pipeline/utils'
 
 workflow PAVE_PON_CREATION {
     take:
@@ -19,7 +19,7 @@ workflow PAVE_PON_CREATION {
     ch_pave_inputs = ch_sage_dir_somatic
         .map { meta, sage_dir ->
 
-            def sage_dir_selected = selectCurrentOrExisting(sage_dir, meta, Constants.INPUT.SAGE_DIR_TUMOR)
+            def sage_dir_selected = selectCurrentOrExisting(sage_dir, getTumorDnaSageDir(meta))
             def sage_vcf = sage_dir_selected ? sage_dir_selected.resolve("${getTumorDnaSampleName(meta)}.sage.somatic.vcf.gz") : []
             def sage_tbi = sage_dir_selected ? sage_dir_selected.resolve("${getTumorDnaSampleName(meta)}.sage.somatic.vcf.gz.tbi") : []
 

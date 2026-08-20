@@ -5,7 +5,7 @@
 include { LINXREPORT      } from '../../../modules/local/linxreport/main'
 include { LINX_VISUALISER } from '../../../modules/local/linx/visualiser/main'
 include { groupByMeta; joinMeta; restoreMeta } from '../utils_nfcore_oncoanalyser_pipeline/channel_helpers'
-include { getTumorDnaSampleName; hasExistingInput; selectCurrentOrExisting } from '../utils_nfcore_oncoanalyser_pipeline/utils'
+include { getAmberDir; getCobaltDir; getPurpleDir; getTumorDnaLinxAnnoDir; getTumorDnaSampleName; hasLinxPlotDir; selectCurrentOrExisting } from '../utils_nfcore_oncoanalyser_pipeline/utils'
 
 workflow LINX_PLOTTING {
     take:
@@ -37,15 +37,15 @@ workflow LINX_PLOTTING {
 
             return [
                 meta,
-                selectCurrentOrExisting(linx_annotations_dir, meta, Constants.INPUT.LINX_ANNO_DIR_TUMOR),
-                selectCurrentOrExisting(amber_dir, meta, Constants.INPUT.AMBER_DIR),
-                selectCurrentOrExisting(cobalt_dir, meta, Constants.INPUT.COBALT_DIR),
-                selectCurrentOrExisting(purple_dir, meta, Constants.INPUT.PURPLE_DIR),
+                selectCurrentOrExisting(linx_annotations_dir, getTumorDnaLinxAnnoDir(meta)),
+                selectCurrentOrExisting(amber_dir, getAmberDir(meta)),
+                selectCurrentOrExisting(cobalt_dir, getCobaltDir(meta)),
+                selectCurrentOrExisting(purple_dir, getPurpleDir(meta)),
             ]
         }
         .branch { meta, linx_annotations_dir, amber_dir, cobalt_dir, purple_dir ->
 
-            def has_existing = hasExistingInput(meta, Constants.INPUT.LINX_PLOT_DIR_TUMOR)
+            def has_existing = hasLinxPlotDir(meta)
 
             runnable: linx_annotations_dir && ! has_existing
             skip: true

@@ -4,7 +4,7 @@
 
 include { ORANGE } from '../../../modules/local/orange/main'
 include { groupByMeta; joinMeta; restoreMeta } from '../utils_nfcore_oncoanalyser_pipeline/channel_helpers'
-include { getNormalDnaSampleName; getTumorDnaSampleName; getTumorRnaSampleName; selectCurrentOrExisting } from '../utils_nfcore_oncoanalyser_pipeline/utils'
+include { getChordDir; getCuppaDir; getLilacDir; getLinxPlotDir; getNormalDnaLinxAnnoDir; getNormalDnaSageAppendDir; getNormalDnaSageDir; getNormalDnaSampleName; getPeachDir; getPurpleDir; getQseeDir; getSagePlotDir; getSigsDir; getTumorDnaLinxAnnoDir; getTumorDnaSageAppendDir; getTumorDnaSageDir; getTumorDnaSampleName; getTumorRnaIsofoxDir; getTumorRnaSampleName; getVirusinterpreterDir; selectCurrentOrExisting } from '../utils_nfcore_oncoanalyser_pipeline/utils'
 
 workflow ORANGE_REPORTING {
     take:
@@ -90,23 +90,23 @@ workflow ORANGE_REPORTING {
             // NOTE(SW): avoiding further complexity with loops etc
             return [
                 meta,
-                selectCurrentOrExisting(inputs[input_indexes['sage_dir_somatic']],             meta, Constants.INPUT.SAGE_DIR_TUMOR),
-                selectCurrentOrExisting(inputs[input_indexes['sage_dir_germline']],            meta, Constants.INPUT.SAGE_DIR_NORMAL),
-                selectCurrentOrExisting(inputs[input_indexes['sage_append_dir_somatic']],      meta, Constants.INPUT.SAGE_APPEND_DIR_TUMOR),
-                selectCurrentOrExisting(inputs[input_indexes['sage_append_dir_germline']],     meta, Constants.INPUT.SAGE_APPEND_DIR_NORMAL),
-                selectCurrentOrExisting(inputs[input_indexes['sage_plot_dir_somatic']],        meta, Constants.INPUT.SAGE_PLOT_DIR_TUMOR),
-                selectCurrentOrExisting(inputs[input_indexes['purple_dir']],                   meta, Constants.INPUT.PURPLE_DIR),
-                selectCurrentOrExisting(inputs[input_indexes['qsee_dir']],                     meta, Constants.INPUT.QSEE_DIR),
-                selectCurrentOrExisting(inputs[input_indexes['linx_annotation_dir_somatic']],  meta, Constants.INPUT.LINX_ANNO_DIR_TUMOR),
-                selectCurrentOrExisting(inputs[input_indexes['linx_plot_dir_somatic']],        meta, Constants.INPUT.LINX_PLOT_DIR_TUMOR),
-                selectCurrentOrExisting(inputs[input_indexes['linx_annotation_dir_germline']], meta, Constants.INPUT.LINX_ANNO_DIR_NORMAL),
-                selectCurrentOrExisting(inputs[input_indexes['virusinterpreter_dir']],         meta, Constants.INPUT.VIRUSINTERPRETER_DIR),
-                selectCurrentOrExisting(inputs[input_indexes['chord_dir']],                    meta, Constants.INPUT.CHORD_DIR),
-                selectCurrentOrExisting(inputs[input_indexes['sigs_dir']],                     meta, Constants.INPUT.SIGS_DIR),
-                selectCurrentOrExisting(inputs[input_indexes['lilac_dir']],                    meta, Constants.INPUT.LILAC_DIR),
-                selectCurrentOrExisting(inputs[input_indexes['cuppa_dir']],                    meta, Constants.INPUT.CUPPA_DIR),
-                selectCurrentOrExisting(inputs[input_indexes['peach_dir']],                    meta, Constants.INPUT.PEACH_DIR),
-                selectCurrentOrExisting(inputs[input_indexes['isofox_dir']],                   meta, Constants.INPUT.ISOFOX_DIR),
+                selectCurrentOrExisting(inputs[input_indexes['sage_dir_somatic']],             getTumorDnaSageDir(meta)),
+                selectCurrentOrExisting(inputs[input_indexes['sage_dir_germline']],            getNormalDnaSageDir(meta)),
+                selectCurrentOrExisting(inputs[input_indexes['sage_append_dir_somatic']],      getTumorDnaSageAppendDir(meta)),
+                selectCurrentOrExisting(inputs[input_indexes['sage_append_dir_germline']],     getNormalDnaSageAppendDir(meta)),
+                selectCurrentOrExisting(inputs[input_indexes['sage_plot_dir_somatic']],        getSagePlotDir(meta)),
+                selectCurrentOrExisting(inputs[input_indexes['purple_dir']],                   getPurpleDir(meta)),
+                selectCurrentOrExisting(inputs[input_indexes['qsee_dir']],                     getQseeDir(meta)),
+                selectCurrentOrExisting(inputs[input_indexes['linx_annotation_dir_somatic']],  getTumorDnaLinxAnnoDir(meta)),
+                selectCurrentOrExisting(inputs[input_indexes['linx_plot_dir_somatic']],        getLinxPlotDir(meta)),
+                selectCurrentOrExisting(inputs[input_indexes['linx_annotation_dir_germline']], getNormalDnaLinxAnnoDir(meta)),
+                selectCurrentOrExisting(inputs[input_indexes['virusinterpreter_dir']],         getVirusinterpreterDir(meta)),
+                selectCurrentOrExisting(inputs[input_indexes['chord_dir']],                    getChordDir(meta)),
+                selectCurrentOrExisting(inputs[input_indexes['sigs_dir']],                     getSigsDir(meta)),
+                selectCurrentOrExisting(inputs[input_indexes['lilac_dir']],                    getLilacDir(meta)),
+                selectCurrentOrExisting(inputs[input_indexes['cuppa_dir']],                    getCuppaDir(meta)),
+                selectCurrentOrExisting(inputs[input_indexes['peach_dir']],                    getPeachDir(meta)),
+                selectCurrentOrExisting(inputs[input_indexes['isofox_dir']],                   getTumorRnaIsofoxDir(meta)),
             ]
 
         }

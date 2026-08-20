@@ -9,7 +9,7 @@ include { paramsSummaryMap } from 'plugin/nf-schema'
 include { paramsSummaryMultiqc   } from '../../../subworkflows/nf-core/utils_nfcore_pipeline'
 include { methodsDescriptionText } from '../../../subworkflows/local/utils_nfcore_oncoanalyser_pipeline'
 include { groupByMeta; joinMeta; restoreMeta } from '../utils_nfcore_oncoanalyser_pipeline/channel_helpers'
-include { getNormalDnaSampleName; getTumorDnaSampleName; getTumorRnaSampleName; selectCurrentOrExisting } from '../utils_nfcore_oncoanalyser_pipeline/utils'
+include { getAmberDir; getNormalDnaBamtoolsDir; getNormalDnaSampleName; getPurpleDir; getTumorDnaBamtoolsDir; getTumorDnaSampleName; getTumorRnaSampleName; selectCurrentOrExisting } from '../utils_nfcore_oncoanalyser_pipeline/utils'
 
 workflow MULTIQC_REPORTING {
     take:
@@ -42,10 +42,10 @@ workflow MULTIQC_REPORTING {
 
             return [
                 meta,
-                selectCurrentOrExisting(bamtools_dir_tumor, meta, Constants.INPUT.BAMTOOLS_DIR_TUMOR),
-                selectCurrentOrExisting(bamtools_dir_normal, meta, Constants.INPUT.BAMTOOLS_DIR_NORMAL),
-                selectCurrentOrExisting(amber_dir, meta, Constants.INPUT.AMBER_DIR),
-                selectCurrentOrExisting(purple_dir, meta, Constants.INPUT.PURPLE_DIR),
+                selectCurrentOrExisting(bamtools_dir_tumor, getTumorDnaBamtoolsDir(meta)),
+                selectCurrentOrExisting(bamtools_dir_normal, getNormalDnaBamtoolsDir(meta)),
+                selectCurrentOrExisting(amber_dir, getAmberDir(meta)),
+                selectCurrentOrExisting(purple_dir, getPurpleDir(meta)),
                 star_log,
                 rna_md_metrics,
             ]

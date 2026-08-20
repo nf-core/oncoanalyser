@@ -4,7 +4,7 @@
 
 include { SAGE_VISUALISER } from '../../../modules/local/sage/visualiser/main'
 include { groupByMeta; joinMeta; restoreMeta } from '../utils_nfcore_oncoanalyser_pipeline/channel_helpers'
-include { getDonorDnaSampleName; getDonorReduxDirAlignment; getDonorReduxTsvs; getNormalDnaSampleName; getNormalReduxDirAlignment; getNormalReduxTsvs; getTumorDnaSampleName; getTumorReduxDirAlignment; getTumorReduxTsvs; hasExistingInput; selectCurrentOrExisting } from '../utils_nfcore_oncoanalyser_pipeline/utils'
+include { getDonorDnaReduxDir; getDonorDnaSampleName; getDonorReduxDirAlignment; getDonorReduxTsvs; getNormalDnaReduxDir; getNormalDnaSampleName; getNormalReduxDirAlignment; getNormalReduxTsvs; getPurpleDir; getTumorDnaReduxDir; getTumorDnaSampleName; getTumorReduxDirAlignment; getTumorReduxTsvs; hasSagePlotDir; selectCurrentOrExisting } from '../utils_nfcore_oncoanalyser_pipeline/utils'
 
 workflow SAGE_PLOTTING {
     take:
@@ -40,9 +40,9 @@ workflow SAGE_PLOTTING {
     ])
         .map { meta, redux_dir_tumor, redux_dir_normal, redux_dir_donor, purple_dir ->
 
-            def redux_dir_tumor_selected = selectCurrentOrExisting(redux_dir_tumor, meta, Constants.INPUT.REDUX_DIR_TUMOR)
-            def redux_dir_normal_selected = selectCurrentOrExisting(redux_dir_normal, meta, Constants.INPUT.REDUX_DIR_NORMAL)
-            def redux_dir_donor_selected = selectCurrentOrExisting(redux_dir_donor, meta, Constants.INPUT.REDUX_DIR_DONOR)
+            def redux_dir_tumor_selected = selectCurrentOrExisting(redux_dir_tumor, getTumorDnaReduxDir(meta))
+            def redux_dir_normal_selected = selectCurrentOrExisting(redux_dir_normal, getNormalDnaReduxDir(meta))
+            def redux_dir_donor_selected = selectCurrentOrExisting(redux_dir_donor, getDonorDnaReduxDir(meta))
 
             def (tumor_aln, tumor_idx) = getTumorReduxDirAlignment(meta, redux_dir_tumor_selected)
             def (normal_aln, normal_idx) = getNormalReduxDirAlignment(meta, redux_dir_normal_selected)
@@ -62,13 +62,13 @@ workflow SAGE_PLOTTING {
                 donor_aln,
                 donor_idx,
                 redux_tsvs,
-                selectCurrentOrExisting(purple_dir, meta, Constants.INPUT.PURPLE_DIR),
+                selectCurrentOrExisting(purple_dir, getPurpleDir(meta)),
             ]
 
         }
         .branch { meta, tumor_aln, tumor_idx, normal_aln, normal_idx, donor_aln, donor_idx, redux_tsvs, purple_dir ->
 
-            def has_existing = hasExistingInput(meta, Constants.INPUT.SAGE_PLOT_DIR_TUMOR)
+            def has_existing = hasSagePlotDir(meta)
 
             def tumor_dna_id = getTumorDnaSampleName(meta)
             def has_smlv_vcf = purple_dir ? purple_dir.resolve("${tumor_dna_id}.purple.somatic.vcf.gz").exists() : false

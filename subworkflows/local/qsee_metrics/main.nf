@@ -4,7 +4,7 @@
 
 include { QSEE } from '../../../modules/local/qsee/main'
 include { groupByMeta; joinMeta; restoreMeta } from '../utils_nfcore_oncoanalyser_pipeline/channel_helpers'
-include { getNormalDnaSampleName; getNormalReduxTsvs; getTumorDnaSampleName; getTumorReduxTsvs; selectCurrentOrExisting } from '../utils_nfcore_oncoanalyser_pipeline/utils'
+include { getCobaltDir; getEsveeDir; getNormalDnaBamtoolsDir; getNormalDnaReduxDir; getNormalDnaSampleName; getNormalReduxTsvs; getPurpleDir; getTumorDnaBamtoolsDir; getTumorDnaReduxDir; getTumorDnaSampleName; getTumorReduxTsvs; selectCurrentOrExisting } from '../utils_nfcore_oncoanalyser_pipeline/utils'
 
 workflow QSEE_METRICS {
     take:
@@ -41,8 +41,8 @@ workflow QSEE_METRICS {
     ])
         .map { meta, redux_dir_tumor, redux_dir_normal, bamtools_dir_tumor, bamtools_dir_normal, cobalt_dir, esvee_dir, purple_dir ->
 
-            def redux_tumor_dir_selected = selectCurrentOrExisting(redux_dir_tumor, meta, Constants.INPUT.REDUX_DIR_TUMOR)
-            def redux_normal_dir_selected = selectCurrentOrExisting(redux_dir_normal, meta, Constants.INPUT.REDUX_DIR_NORMAL)
+            def redux_tumor_dir_selected = selectCurrentOrExisting(redux_dir_tumor, getTumorDnaReduxDir(meta))
+            def redux_normal_dir_selected = selectCurrentOrExisting(redux_dir_normal, getNormalDnaReduxDir(meta))
 
             def redux_tsvs_tumor = getTumorReduxTsvs(meta, redux_tumor_dir_selected)
             def redux_tsvs_normal = getNormalReduxTsvs(meta, redux_normal_dir_selected)
@@ -51,11 +51,11 @@ workflow QSEE_METRICS {
                 meta,
                 redux_tsvs_tumor,
                 redux_tsvs_normal,
-                selectCurrentOrExisting(bamtools_dir_tumor, meta, Constants.INPUT.BAMTOOLS_DIR_TUMOR),
-                selectCurrentOrExisting(bamtools_dir_normal, meta, Constants.INPUT.BAMTOOLS_DIR_NORMAL),
-                selectCurrentOrExisting(cobalt_dir, meta, Constants.INPUT.COBALT_DIR),
-                selectCurrentOrExisting(esvee_dir, meta, Constants.INPUT.ESVEE_DIR),
-                selectCurrentOrExisting(purple_dir, meta, Constants.INPUT.PURPLE_DIR),
+                selectCurrentOrExisting(bamtools_dir_tumor, getTumorDnaBamtoolsDir(meta)),
+                selectCurrentOrExisting(bamtools_dir_normal, getNormalDnaBamtoolsDir(meta)),
+                selectCurrentOrExisting(cobalt_dir, getCobaltDir(meta)),
+                selectCurrentOrExisting(esvee_dir, getEsveeDir(meta)),
+                selectCurrentOrExisting(purple_dir, getPurpleDir(meta)),
             ]
 
         }

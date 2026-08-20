@@ -5,7 +5,7 @@
 include { SAGE_GERMLINE } from '../../../modules/local/sage/germline/main'
 include { SAGE_SOMATIC  } from '../../../modules/local/sage/somatic/main'
 include { groupByMeta; joinMeta; restoreMeta } from '../utils_nfcore_oncoanalyser_pipeline/channel_helpers'
-include { getDonorDnaSampleName; getDonorReduxDirAlignment; getDonorReduxTsvs; getNormalDnaSampleName; getNormalReduxDirAlignment; getNormalReduxTsvs; getTumorDnaSampleName; getTumorReduxDirAlignment; getTumorReduxTsvs; hasExistingInput; selectCurrentOrExisting } from '../utils_nfcore_oncoanalyser_pipeline/utils'
+include { getDonorDnaReduxDir; getDonorDnaSampleName; getDonorReduxDirAlignment; getDonorReduxTsvs; getNormalDnaReduxDir; getNormalDnaSampleName; getNormalReduxDirAlignment; getNormalReduxTsvs; getTumorDnaReduxDir; getTumorDnaSampleName; getTumorReduxDirAlignment; getTumorReduxTsvs; hasNormalDnaSageDir; hasTumorDnaSageDir; selectCurrentOrExisting } from '../utils_nfcore_oncoanalyser_pipeline/utils'
 
 workflow SAGE_CALLING {
     take:
@@ -47,9 +47,9 @@ workflow SAGE_CALLING {
     ])
         .map { meta, redux_dir_tumor, redux_dir_normal, redux_dir_donor ->
 
-            def redux_dir_tumor_selected = selectCurrentOrExisting(redux_dir_tumor, meta, Constants.INPUT.REDUX_DIR_TUMOR)
-            def redux_dir_normal_selected = selectCurrentOrExisting(redux_dir_normal, meta, Constants.INPUT.REDUX_DIR_NORMAL)
-            def redux_dir_donor_selected = selectCurrentOrExisting(redux_dir_donor, meta, Constants.INPUT.REDUX_DIR_DONOR)
+            def redux_dir_tumor_selected = selectCurrentOrExisting(redux_dir_tumor, getTumorDnaReduxDir(meta))
+            def redux_dir_normal_selected = selectCurrentOrExisting(redux_dir_normal, getNormalDnaReduxDir(meta))
+            def redux_dir_donor_selected = selectCurrentOrExisting(redux_dir_donor, getDonorDnaReduxDir(meta))
 
             def (tumor_aln, tumor_idx) = getTumorReduxDirAlignment(meta, redux_dir_tumor_selected)
             def (normal_aln, normal_idx) = getNormalReduxDirAlignment(meta, redux_dir_normal_selected)
@@ -77,7 +77,7 @@ workflow SAGE_CALLING {
     ch_inputs_germline_sorted = ch_inputs_sorted.runnable
         .branch { meta, tumor_aln, tumor_idx, normal_aln, normal_idx, donor_aln, donor_idx, redux_tsvs ->
             def has_tumor_normal = tumor_aln && normal_aln
-            def has_existing = hasExistingInput(meta, Constants.INPUT.SAGE_DIR_NORMAL)
+            def has_existing = hasNormalDnaSageDir(meta)
 
             runnable: has_tumor_normal && ! has_existing && enable_germline
             skip: true
@@ -123,7 +123,7 @@ workflow SAGE_CALLING {
     ch_inputs_somatic_sorted = ch_inputs_sorted.runnable
         .branch { meta, tumor_aln, tumor_idx, normal_aln, normal_idx, donor_aln, donor_idx, redux_tsvs ->
             def has_tumor = tumor_aln
-            def has_existing = hasExistingInput(meta, Constants.INPUT.SAGE_DIR_TUMOR)
+            def has_existing = hasTumorDnaSageDir(meta)
 
             runnable: has_tumor && ! has_existing
             skip: true

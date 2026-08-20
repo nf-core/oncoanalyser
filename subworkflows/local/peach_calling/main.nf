@@ -4,7 +4,7 @@
 
 include { PEACH } from '../../../modules/local/peach/main'
 include { groupByMeta; joinMeta; restoreMeta } from '../utils_nfcore_oncoanalyser_pipeline/channel_helpers'
-include { getNormalDnaSampleName; getTumorDnaSampleName; hasExistingInput; hasNormalDna; selectCurrentOrExisting } from '../utils_nfcore_oncoanalyser_pipeline/utils'
+include { getNormalDnaSampleName; getPurpleDir; getTumorDnaSampleName; hasNormalDna; hasPeachDir; selectCurrentOrExisting } from '../utils_nfcore_oncoanalyser_pipeline/utils'
 
 workflow PEACH_CALLING {
     take:
@@ -25,13 +25,13 @@ workflow PEACH_CALLING {
         .map { meta, purple_dir ->
             return [
                 meta,
-                selectCurrentOrExisting(purple_dir, meta, Constants.INPUT.PURPLE_DIR),
+                selectCurrentOrExisting(purple_dir, getPurpleDir(meta)),
             ]
         }
         .branch { meta, purple_dir ->
 
             def has_normal = hasNormalDna(meta)
-            def has_existing = hasExistingInput(meta, Constants.INPUT.PEACH_DIR)
+            def has_existing = hasPeachDir(meta)
 
             def tumor_id = getTumorDnaSampleName(meta)
             def has_smlv_vcf = purple_dir ? purple_dir.resolve("${tumor_id}.purple.germline.vcf.gz").exists() : false

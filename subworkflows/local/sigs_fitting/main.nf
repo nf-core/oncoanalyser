@@ -4,7 +4,7 @@
 
 include { SIGS } from '../../../modules/local/sigs/main'
 include { groupByMeta; joinMeta; restoreMeta } from '../utils_nfcore_oncoanalyser_pipeline/channel_helpers'
-include { getTumorDnaSampleName; hasExistingInput; hasNormalDna; hasTumorDna; selectCurrentOrExisting } from '../utils_nfcore_oncoanalyser_pipeline/utils'
+include { getPurpleDir; getTumorDnaSampleName; hasNormalDna; hasSigsDir; hasTumorDna; selectCurrentOrExisting } from '../utils_nfcore_oncoanalyser_pipeline/utils'
 
 workflow SIGS_FITTING {
     take:
@@ -21,7 +21,7 @@ workflow SIGS_FITTING {
     // channel: skip: [ meta ]
     ch_inputs_sorted = ch_purple_dir
         .map { meta, purple_dir ->
-            return [meta, selectCurrentOrExisting(purple_dir, meta, Constants.INPUT.PURPLE_DIR)]
+            return [meta, selectCurrentOrExisting(purple_dir, getPurpleDir(meta))]
         }
         .branch { meta, purple_dir ->
 
@@ -33,7 +33,7 @@ workflow SIGS_FITTING {
                 has_smlv_vcf = purple_dir.resolve("${tumor_id}.purple.somatic.vcf.gz").exists()
             }
 
-            def has_existing = hasExistingInput(meta, Constants.INPUT.SIGS_DIR)
+            def has_existing = hasSigsDir(meta)
 
             runnable: has_tumor_normal_dna && purple_dir && has_smlv_vcf && ! has_existing
             skip: true

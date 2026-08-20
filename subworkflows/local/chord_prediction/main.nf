@@ -4,7 +4,7 @@
 
 include { CHORD } from '../../../modules/local/chord/main'
 include { groupByMeta; joinMeta; restoreMeta } from '../utils_nfcore_oncoanalyser_pipeline/channel_helpers'
-include { getTumorDnaSampleName; hasExistingInput; hasNormalDna; hasTumorDna; selectCurrentOrExisting } from '../utils_nfcore_oncoanalyser_pipeline/utils'
+include { getPurpleDir; getTumorDnaSampleName; hasChordDir; hasNormalDna; hasTumorDna; selectCurrentOrExisting } from '../utils_nfcore_oncoanalyser_pipeline/utils'
 
 workflow CHORD_PREDICTION {
     take:
@@ -23,7 +23,7 @@ workflow CHORD_PREDICTION {
     // channel: skip: [ meta ]
     ch_inputs_sorted = ch_purple_dir
         .map { meta, purple_dir ->
-            return [meta, selectCurrentOrExisting(purple_dir, meta, Constants.INPUT.PURPLE_DIR)]
+            return [meta, selectCurrentOrExisting(purple_dir, getPurpleDir(meta))]
         }
         .branch { meta, purple_dir ->
 
@@ -37,7 +37,7 @@ workflow CHORD_PREDICTION {
                 has_sv_vcf = purple_dir.resolve("${tumor_id}.purple.sv.vcf.gz").exists()
             }
 
-            def has_existing = hasExistingInput(meta, Constants.INPUT.CHORD_DIR)
+            def has_existing = hasChordDir(meta)
 
             runnable: has_tumor_normal_dna && purple_dir && has_smlv_vcf && has_sv_vcf && ! has_existing
             skip: true

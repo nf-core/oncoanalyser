@@ -4,7 +4,7 @@
 
 include { REDUX } from '../../../modules/local/redux/main'
 include { groupByMeta; joinMeta; restoreMeta } from '../utils_nfcore_oncoanalyser_pipeline/channel_helpers'
-include { getDonorDnaSample; getInput; getNormalDnaSample; getTumorDnaSample; hasExistingInput } from '../utils_nfcore_oncoanalyser_pipeline/utils'
+include { getDonorDnaAln; getDonorDnaBai; getDonorDnaSample; getNormalDnaAln; getNormalDnaBai; getNormalDnaSample; getTumorDnaAln; getTumorDnaBai; getTumorDnaSample; hasDonorDnaAln; hasDonorDnaBai; hasDonorDnaReduxDir; hasNormalDnaAln; hasNormalDnaBai; hasNormalDnaReduxDir; hasTumorDnaAln; hasTumorDnaBai; hasTumorDnaReduxDir } from '../utils_nfcore_oncoanalyser_pipeline/utils'
 
 workflow REDUX_PROCESSING {
     take:
@@ -38,12 +38,12 @@ workflow REDUX_PROCESSING {
         .map { meta, alns, idxs ->
             return [
                 meta,
-                hasExistingInput(meta, Constants.INPUT.ALN_DNA_TUMOR) ? [getInput(meta, Constants.INPUT.ALN_DNA_TUMOR)] : alns,
-                hasExistingInput(meta, Constants.INPUT.IDX_DNA_TUMOR) ? [getInput(meta, Constants.INPUT.IDX_DNA_TUMOR)] : idxs,
+                hasTumorDnaAln(meta) ? [getTumorDnaAln(meta)] : alns,
+                hasTumorDnaBai(meta) ? [getTumorDnaBai(meta)] : idxs,
             ]
         }
         .branch { meta, alns, idxs ->
-            def has_existing = hasExistingInput(meta, Constants.INPUT.REDUX_DIR_TUMOR)
+            def has_existing = hasTumorDnaReduxDir(meta)
             runnable: alns && ! has_existing
             skip: true
                 return meta
@@ -53,12 +53,12 @@ workflow REDUX_PROCESSING {
         .map { meta, alns, idxs ->
             return [
                 meta,
-                hasExistingInput(meta, Constants.INPUT.ALN_DNA_NORMAL) ? [getInput(meta, Constants.INPUT.ALN_DNA_NORMAL)] : alns,
-                hasExistingInput(meta, Constants.INPUT.IDX_DNA_NORMAL) ? [getInput(meta, Constants.INPUT.IDX_DNA_NORMAL)] : idxs,
+                hasNormalDnaAln(meta) ? [getNormalDnaAln(meta)] : alns,
+                hasNormalDnaBai(meta) ? [getNormalDnaBai(meta)] : idxs,
             ]
         }
         .branch { meta, alns, idxs ->
-            def has_existing = hasExistingInput(meta, Constants.INPUT.REDUX_DIR_NORMAL)
+            def has_existing = hasNormalDnaReduxDir(meta)
             runnable: alns && ! has_existing
             skip: true
                 return meta
@@ -68,12 +68,12 @@ workflow REDUX_PROCESSING {
         .map { meta, alns, idxs ->
             return [
                 meta,
-                hasExistingInput(meta, Constants.INPUT.ALN_DNA_DONOR) ? [getInput(meta, Constants.INPUT.ALN_DNA_DONOR)] : alns,
-                hasExistingInput(meta, Constants.INPUT.IDX_DNA_DONOR) ? [getInput(meta, Constants.INPUT.IDX_DNA_DONOR)] : idxs,
+                hasDonorDnaAln(meta) ? [getDonorDnaAln(meta)] : alns,
+                hasDonorDnaBai(meta) ? [getDonorDnaBai(meta)] : idxs,
             ]
         }
         .branch { meta, alns, idxs ->
-            def has_existing = hasExistingInput(meta, Constants.INPUT.REDUX_DIR_DONOR)
+            def has_existing = hasDonorDnaReduxDir(meta)
             runnable: alns && ! has_existing
             skip: true
             return meta

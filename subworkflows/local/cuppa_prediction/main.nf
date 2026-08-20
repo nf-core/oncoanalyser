@@ -4,7 +4,7 @@
 
 include { CUPPA } from '../../../modules/local/cuppa/main'
 include { groupByMeta; joinMeta; restoreMeta } from '../utils_nfcore_oncoanalyser_pipeline/channel_helpers'
-include { getTumorDnaSampleName; getTumorRnaSampleName; hasExistingInput; hasNormalDna; hasTumorDna; hasTumorRna; selectCurrentOrExisting } from '../utils_nfcore_oncoanalyser_pipeline/utils'
+include { getPurpleDir; getTumorDnaLinxAnnoDir; getTumorDnaSampleName; getTumorRnaIsofoxDir; getTumorRnaSampleName; getVirusinterpreterDir; hasCuppaDir; hasNormalDna; hasTumorDna; hasTumorRna; selectCurrentOrExisting } from '../utils_nfcore_oncoanalyser_pipeline/utils'
 
 workflow CUPPA_PREDICTION {
     take:
@@ -33,10 +33,10 @@ workflow CUPPA_PREDICTION {
         .map { meta, isofox_dir, purple_dir, linx_annotation_dir, virusinterpreter_dir ->
             return [
                 meta,
-                selectCurrentOrExisting(isofox_dir, meta, Constants.INPUT.ISOFOX_DIR),
-                selectCurrentOrExisting(purple_dir, meta, Constants.INPUT.PURPLE_DIR),
-                selectCurrentOrExisting(linx_annotation_dir, meta, Constants.INPUT.LINX_ANNO_DIR_TUMOR),
-                selectCurrentOrExisting(virusinterpreter_dir, meta, Constants.INPUT.VIRUSINTERPRETER_DIR),
+                selectCurrentOrExisting(isofox_dir, getTumorRnaIsofoxDir(meta)),
+                selectCurrentOrExisting(purple_dir, getPurpleDir(meta)),
+                selectCurrentOrExisting(linx_annotation_dir, getTumorDnaLinxAnnoDir(meta)),
+                selectCurrentOrExisting(virusinterpreter_dir, getVirusinterpreterDir(meta)),
             ]
         }
         .branch { meta, isofox_dir, purple_dir, linx_annotation_dir, virusinterpreter_dir ->
@@ -52,7 +52,7 @@ workflow CUPPA_PREDICTION {
             //
             // (run exclusions currently done basis for presence of normal DNA)
 
-            def has_existing = hasExistingInput(meta, Constants.INPUT.CUPPA_DIR)
+            def has_existing = hasCuppaDir(meta)
             def has_normal_dna = hasNormalDna(meta)
 
             def tumor_dna_id = getTumorDnaSampleName(meta)

@@ -4,7 +4,7 @@
 
 include { AMBER } from '../../../modules/local/amber/main'
 include { groupByMeta; joinMeta; restoreMeta } from '../utils_nfcore_oncoanalyser_pipeline/channel_helpers'
-include { getDonorDnaSampleName; getDonorReduxDirAlignment; getNormalDnaSampleName; getNormalReduxDirAlignment; getTumorDnaSampleName; getTumorReduxDirAlignment; hasExistingInput; selectCurrentOrExisting } from '../utils_nfcore_oncoanalyser_pipeline/utils'
+include { getDonorDnaReduxDir; getDonorDnaSampleName; getDonorReduxDirAlignment; getNormalDnaReduxDir; getNormalDnaSampleName; getNormalReduxDirAlignment; getTumorDnaReduxDir; getTumorDnaSampleName; getTumorReduxDirAlignment; hasAmberDir; selectCurrentOrExisting } from '../utils_nfcore_oncoanalyser_pipeline/utils'
 
 workflow AMBER_PROFILING {
     take:
@@ -37,9 +37,9 @@ workflow AMBER_PROFILING {
     ])
         .map { meta, redux_dir_tumor, redux_dir_normal, redux_dir_donor ->
 
-            def redux_dir_tumor_selected = selectCurrentOrExisting(redux_dir_tumor, meta, Constants.INPUT.REDUX_DIR_TUMOR)
-            def redux_dir_normal_selected = selectCurrentOrExisting(redux_dir_normal, meta, Constants.INPUT.REDUX_DIR_NORMAL)
-            def redux_dir_donor_selected = selectCurrentOrExisting(redux_dir_donor, meta, Constants.INPUT.REDUX_DIR_DONOR)
+            def redux_dir_tumor_selected = selectCurrentOrExisting(redux_dir_tumor, getTumorDnaReduxDir(meta))
+            def redux_dir_normal_selected = selectCurrentOrExisting(redux_dir_normal, getNormalDnaReduxDir(meta))
+            def redux_dir_donor_selected = selectCurrentOrExisting(redux_dir_donor, getDonorDnaReduxDir(meta))
 
             def (tumor_aln, tumor_idx) = getTumorReduxDirAlignment(meta, redux_dir_tumor_selected)
             def (normal_aln, normal_idx) = getNormalReduxDirAlignment(meta, redux_dir_normal_selected)
@@ -50,7 +50,7 @@ workflow AMBER_PROFILING {
         }
         .branch { meta, tumor_aln, tumor_idx, normal_aln, normal_idx, donor_aln, donor_idx ->
 
-            def has_existing = hasExistingInput(meta, Constants.INPUT.AMBER_DIR)
+            def has_existing = hasAmberDir(meta)
             def runnable_standard = ! purity_estimate_mode && tumor_aln && ! has_existing
 
             // TODO(SW): must improve handling through separation of sample information in meta; currently unable to provide ccfDNA AMBER directory in samplesheet

@@ -4,7 +4,7 @@
 
 include { BAMTOOLS } from '../../../modules/local/bamtools/main'
 include { groupByMeta; joinMeta; restoreMeta } from '../utils_nfcore_oncoanalyser_pipeline/channel_helpers'
-include { getNormalDnaSample; getNormalReduxDirAlignment; getTumorDnaSample; getTumorReduxDirAlignment; hasExistingInput; selectCurrentOrExisting } from '../utils_nfcore_oncoanalyser_pipeline/utils'
+include { getNormalDnaReduxDir; getNormalDnaSample; getNormalReduxDirAlignment; getTumorDnaReduxDir; getTumorDnaSample; getTumorReduxDirAlignment; hasNormalDnaBamtoolsDir; hasTumorDnaBamtoolsDir; selectCurrentOrExisting } from '../utils_nfcore_oncoanalyser_pipeline/utils'
 
 workflow BAMTOOLS_METRICS {
     take:
@@ -28,14 +28,14 @@ workflow BAMTOOLS_METRICS {
     ch_inputs_tumor_sorted = ch_redux_dir_tumor
         .map { meta, redux_dir ->
 
-            def redux_dir_selected = selectCurrentOrExisting(redux_dir, meta, Constants.INPUT.REDUX_DIR_TUMOR)
+            def redux_dir_selected = selectCurrentOrExisting(redux_dir, getTumorDnaReduxDir(meta))
             def (aln, idx) = getTumorReduxDirAlignment(meta, redux_dir_selected)
 
             return [meta, aln, idx]
 
         }
         .branch { meta, aln, idx ->
-            def has_existing = hasExistingInput(meta, Constants.INPUT.BAMTOOLS_DIR_TUMOR)
+            def has_existing = hasTumorDnaBamtoolsDir(meta)
             runnable: aln && ! has_existing
             skip: true
                 return meta
@@ -46,13 +46,13 @@ workflow BAMTOOLS_METRICS {
     ch_inputs_normal_sorted = ch_redux_dir_normal
         .map { meta, redux_dir ->
 
-            def redux_dir_selected = selectCurrentOrExisting(redux_dir, meta, Constants.INPUT.REDUX_DIR_NORMAL)
+            def redux_dir_selected = selectCurrentOrExisting(redux_dir, getNormalDnaReduxDir(meta))
             def (aln, idx) = getNormalReduxDirAlignment(meta, redux_dir_selected)
 
             return [meta, aln, idx]
         }
         .branch { meta, aln, idx ->
-            def has_existing = hasExistingInput(meta, Constants.INPUT.BAMTOOLS_DIR_NORMAL)
+            def has_existing = hasNormalDnaBamtoolsDir(meta)
             runnable: aln && ! has_existing
             skip: true
                 return meta

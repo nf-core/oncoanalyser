@@ -4,7 +4,7 @@
 
 include { ISOFOX } from '../../../modules/local/isofox/run/main'
 include { groupByMeta; joinMeta; restoreMeta } from '../utils_nfcore_oncoanalyser_pipeline/channel_helpers'
-include { getTumorDnaSampleName; getTumorRnaSampleName; hasExistingInput; selectCurrentOrExisting } from '../utils_nfcore_oncoanalyser_pipeline/utils'
+include { getTumorDnaSampleName; getTumorRnaBai; getTumorRnaBam; getTumorRnaSampleName; hasTumorRnaIsofoxDir; selectCurrentOrExisting } from '../utils_nfcore_oncoanalyser_pipeline/utils'
 
 workflow ISOFOX_QUANTIFICATION {
     take:
@@ -38,12 +38,12 @@ workflow ISOFOX_QUANTIFICATION {
         .map { meta, tumor_aln, tumor_idx ->
             return [
                 meta,
-                selectCurrentOrExisting(tumor_aln, meta, Constants.INPUT.ALN_RNA_TUMOR),
-                selectCurrentOrExisting(tumor_idx, meta, Constants.INPUT.IDX_RNA_TUMOR),
+                selectCurrentOrExisting(tumor_aln, getTumorRnaBam(meta)),
+                selectCurrentOrExisting(tumor_idx, getTumorRnaBai(meta)),
             ]
         }
         .branch { meta, tumor_aln, tumor_idx ->
-            def has_existing = hasExistingInput(meta, Constants.INPUT.ISOFOX_DIR)
+            def has_existing = hasTumorRnaIsofoxDir(meta)
             runnable: tumor_aln && ! has_existing
             skip: true
                 return meta

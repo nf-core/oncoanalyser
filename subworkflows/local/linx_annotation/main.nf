@@ -5,7 +5,7 @@
 include { LINX_GERMLINE } from '../../../modules/local/linx/germline/main'
 include { LINX_SOMATIC  } from '../../../modules/local/linx/somatic/main'
 include { groupByMeta; joinMeta; restoreMeta } from '../utils_nfcore_oncoanalyser_pipeline/channel_helpers'
-include { getTumorDnaSampleName; hasExistingInput; hasNormalDna; hasTumorDna; selectCurrentOrExisting } from '../utils_nfcore_oncoanalyser_pipeline/utils'
+include { getPurpleDir; getTumorDnaSampleName; hasNormalDna; hasNormalDnaLinxAnnoDir; hasTumorDna; hasTumorDnaLinxAnnoDir; selectCurrentOrExisting } from '../utils_nfcore_oncoanalyser_pipeline/utils'
 
 workflow LINX_ANNOTATION {
     take:
@@ -30,7 +30,7 @@ workflow LINX_ANNOTATION {
         .map { meta, purple_dir ->
             return [
                 meta,
-                selectCurrentOrExisting(purple_dir, meta, Constants.INPUT.PURPLE_DIR),
+                selectCurrentOrExisting(purple_dir, getPurpleDir(meta)),
             ]
         }
         .branch { meta, purple_dir ->
@@ -52,7 +52,7 @@ workflow LINX_ANNOTATION {
 
             def has_tumor_normal = hasTumorDna(meta) && hasNormalDna(meta)
             def has_sv_germline_vcf = purple_dir.resolve("${tumor_id}.purple.sv.germline.vcf.gz").exists()
-            def has_existing = hasExistingInput(meta, Constants.INPUT.LINX_ANNO_DIR_NORMAL)
+            def has_existing = hasNormalDnaLinxAnnoDir(meta)
 
             runnable: has_tumor_normal && has_sv_germline_vcf && ! has_existing
             skip: true
@@ -95,7 +95,7 @@ workflow LINX_ANNOTATION {
         .branch { meta, purple_dir ->
 
             def has_tumor = hasTumorDna(meta)
-            def has_existing = hasExistingInput(meta, Constants.INPUT.LINX_ANNO_DIR_TUMOR)
+            def has_existing = hasTumorDnaLinxAnnoDir(meta)
 
             runnable: has_tumor && ! has_existing
             skip: true
