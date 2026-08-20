@@ -2,7 +2,8 @@
 // SAGE append adds additional sample data to an existing SAGE VCF
 //
 
-include { SAGE_APPEND as SAGE_APPEND_TASK } from '../../../modules/local/sage/append/main'
+include { SAGE_APPEND as SAGE_APPEND_SOMATIC   } from '../../../modules/local/sage/append/main'
+include { SAGE_APPEND as SAGE_APPEND_GERMLINE  } from '../../../modules/local/sage/append/main'
 
 include { FileType; RunMode } from '../utils_nfcore_oncoanalyser_pipeline/types'
 
@@ -138,6 +139,15 @@ workflow SAGE_APPEND {
         }
 
     // Run process
+    SAGE_APPEND_GERMLINE(
+        ch_sage_append_germline_inputs,
+        genome_fasta,
+        genome_version,
+        genome_fai,
+        genome_dict,
+        sequencing_platform,
+        targeted_mode,
+    )
 
     //
     // MODULE: SAGE append somatic
@@ -207,11 +217,8 @@ workflow SAGE_APPEND {
         }
 
     // Run process
-    // NOTE(SW): de-aliased SAGE_APPEND (was SAGE_APPEND_SOMATIC / SAGE_APPEND_GERMLINE) to work
-    // around Nextflow issue #7434: an aliased typed process with a `topic:` section hangs the run.
-    // Somatic and germline variants are distinguished downstream via meta.topic_key.
-    SAGE_APPEND_TASK(
-        ch_sage_append_somatic_inputs.mix(ch_sage_append_germline_inputs),
+    SAGE_APPEND_SOMATIC(
+        ch_sage_append_somatic_inputs,
         genome_fasta,
         genome_version,
         genome_fai,

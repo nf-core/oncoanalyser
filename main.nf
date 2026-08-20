@@ -42,7 +42,7 @@ params.ref_data_genome_star_index    = getGenomeAttribute('star_index')
 */
 
 include { PANEL_RESOURCE_CREATION  } from './workflows/panel_resource_creation'
-//include { PREPARE_REFERENCE        } from './workflows/prepare_reference'
+include { PREPARE_REFERENCE        } from './workflows/prepare_reference'
 include { PURITY_ESTIMATE          } from './workflows/purity_estimate'
 include { TARGETED                 } from './workflows/targeted'
 include { WGTS                     } from './workflows/wgts'
@@ -84,8 +84,8 @@ workflow NFCORE_ONCOANALYSER {
     // Run selected workflow
     // NOTE(SW): prepare reference is checked early as params.input is not required
     if (run_mode == RunMode.PREPARE_REFERENCE)  {
-        //PREPARE_REFERENCE(params)
-        //ch_results = ch_results.mix(PREPARE_REFERENCE.out.results)
+        PREPARE_REFERENCE(params)
+        ch_results = ch_results.mix(PREPARE_REFERENCE.out.results)
     } else {
         // Parse and validate inputs
         inputs = parseInput(params.input, workflow.stubRun, log)
