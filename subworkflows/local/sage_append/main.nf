@@ -4,6 +4,7 @@
 
 include { SAGE_APPEND as SAGE_APPEND_SOMATIC  } from '../../../modules/local/sage/append/main'
 include { SAGE_APPEND as SAGE_APPEND_GERMLINE } from '../../../modules/local/sage/append/main'
+
 include { groupByMeta               } from '../utils_nfcore_oncoanalyser_pipeline/channel_helpers'
 include { joinMeta                  } from '../utils_nfcore_oncoanalyser_pipeline/channel_helpers'
 include { restoreMeta               } from '../utils_nfcore_oncoanalyser_pipeline/channel_helpers'

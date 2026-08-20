@@ -5,6 +5,7 @@
 include { NEO_ANNOTATE_FUSIONS } from '../../../modules/local/neo/annotate_fusions/main'
 include { NEO_FINDER           } from '../../../modules/local/neo/finder/main'
 include { NEO_SCORER           } from '../../../modules/local/neo/scorer/main'
+
 include { groupByMeta              } from '../utils_nfcore_oncoanalyser_pipeline/channel_helpers'
 include { joinMeta                 } from '../utils_nfcore_oncoanalyser_pipeline/channel_helpers'
 include { restoreMeta              } from '../utils_nfcore_oncoanalyser_pipeline/channel_helpers'

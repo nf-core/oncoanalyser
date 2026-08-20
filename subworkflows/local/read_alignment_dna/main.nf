@@ -4,6 +4,7 @@
 
 include { BWAMEM2_ALIGN } from '../../../modules/local/bwa-mem2/mem/main'
 include { FASTP_SPLIT   } from '../../../modules/local/fastp/split/main'
+
 include { groupByMeta       } from '../utils_nfcore_oncoanalyser_pipeline/channel_helpers'
 include { joinMeta          } from '../utils_nfcore_oncoanalyser_pipeline/channel_helpers'
 include { restoreMeta       } from '../utils_nfcore_oncoanalyser_pipeline/channel_helpers'

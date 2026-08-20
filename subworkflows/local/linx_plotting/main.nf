@@ -4,6 +4,7 @@
 
 include { LINXREPORT      } from '../../../modules/local/linxreport/main'
 include { LINX_VISUALISER } from '../../../modules/local/linx/visualiser/main'
+
 include { groupByMeta             } from '../utils_nfcore_oncoanalyser_pipeline/channel_helpers'
 include { joinMeta                } from '../utils_nfcore_oncoanalyser_pipeline/channel_helpers'
 include { restoreMeta             } from '../utils_nfcore_oncoanalyser_pipeline/channel_helpers'

@@ -4,6 +4,7 @@
 
 include { PAVE_GERMLINE } from '../../../modules/local/pave/germline/main'
 include { PAVE_SOMATIC  } from '../../../modules/local/pave/somatic/main'
+
 include { groupByMeta             } from '../utils_nfcore_oncoanalyser_pipeline/channel_helpers'
 include { joinMeta                } from '../utils_nfcore_oncoanalyser_pipeline/channel_helpers'
 include { restoreMeta             } from '../utils_nfcore_oncoanalyser_pipeline/channel_helpers'

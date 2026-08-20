@@ -9,6 +9,7 @@
 // isn't used in the main pipeline and is only used for execution of tests.
 
 include { parseInput } from '../utils_nfcore_oncoanalyser_pipeline/parse_inputs'
+
 workflow PREPARE_INPUTS {
     take:
     input_fp_str

@@ -3,6 +3,7 @@
 //
 
 include { COBALT_PANEL_NORMALISATION } from '../../../modules/local/cobalt/panel_normalisation/main'
+
 include { groupByMeta             } from '../utils_nfcore_oncoanalyser_pipeline/channel_helpers'
 include { joinMeta                } from '../utils_nfcore_oncoanalyser_pipeline/channel_helpers'
 include { restoreMeta             } from '../utils_nfcore_oncoanalyser_pipeline/channel_helpers'

@@ -4,6 +4,7 @@
 
 include { VIRUSBREAKEND    } from '../../../modules/local/virusbreakend/main'
 include { VIRUSINTERPRETER } from '../../../modules/local/virusinterpreter/main'
+
 include { groupByMeta               } from '../utils_nfcore_oncoanalyser_pipeline/channel_helpers'
 include { joinMeta                  } from '../utils_nfcore_oncoanalyser_pipeline/channel_helpers'
 include { restoreMeta               } from '../utils_nfcore_oncoanalyser_pipeline/channel_helpers'

@@ -3,6 +3,7 @@
 //
 
 include { CIDER } from '../../../modules/local/cider/main'
+
 include { getTumorDnaReduxDir       } from '../utils_nfcore_oncoanalyser_pipeline/utils'
 include { getTumorDnaSample         } from '../utils_nfcore_oncoanalyser_pipeline/utils'
 include { getTumorReduxDirAlignment } from '../utils_nfcore_oncoanalyser_pipeline/utils'

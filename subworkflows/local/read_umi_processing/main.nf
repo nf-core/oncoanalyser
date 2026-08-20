@@ -4,6 +4,7 @@
 
 include { FASTP_UMI   } from '../../../modules/local/fastp/umi/main'
 include { FASTQ_TOOLS } from '../../../modules/local/fastqtools/main'
+
 include { groupByMeta } from '../utils_nfcore_oncoanalyser_pipeline/channel_helpers'
 include { joinMeta    } from '../utils_nfcore_oncoanalyser_pipeline/channel_helpers'
 include { restoreMeta } from '../utils_nfcore_oncoanalyser_pipeline/channel_helpers'
