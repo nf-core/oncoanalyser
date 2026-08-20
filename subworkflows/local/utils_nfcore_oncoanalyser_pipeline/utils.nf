@@ -607,7 +607,7 @@ def hasReduxData(sample) {
     if (! sample) {
         return null
     }
-    return sample.files.get(Constants.FileType.ALN_REDUX, null) ?: sample.files.get(Constants.FileType.REDUX_DIR, null)
+    return sample.files.get(Constants.FileType.ALN_REDUX) ?: sample.files.get(Constants.FileType.REDUX_DIR)
 }
 
 

@@ -78,7 +78,7 @@ def parseSampleEntry(case_id, patient_id, ctx, entry, sample_builders, directori
     }
 
     def sample_key = "${sample_type_enum}_${sequence_type_enum}_${entry.sample_id}"
-    def b = sample_builders.get(sample_key, null)
+    def b = sample_builders[sample_key]
     if (! b) {
         b = [sample_id: entry.sample_id, sample_type: sample_type_enum, sequence_type: sequence_type_enum, files: [:], generate_redux_tsvs_only: false]
         sample_builders[sample_key] = b
