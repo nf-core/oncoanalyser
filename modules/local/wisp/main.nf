@@ -33,6 +33,8 @@ process WISP {
 
     def log_level_arg = task.ext.log_level ? "-log_level ${task.ext.log_level}" : ''
 
+    def reference_arg = meta.containsKey('normal_id') ? "-reference ${meta.normal_id}" : ''
+
     def amber_dir_arg
     def cobalt_dir_arg
     def gc_ratio_min_arg
@@ -81,6 +83,7 @@ process WISP {
         ${args} \\
         -patient_id ${meta.subject_id} \\
         -tumor_id ${meta.primary_id} \\
+        ${reference_arg} \\
         -samples ${meta.longitudinal_id} \\
         -purity_methods ${purity_methods_arg} \\
         -somatic_vcf ${longitudinal_sage_append_dir}/${meta.longitudinal_id}.sage.append.vcf.gz \\
