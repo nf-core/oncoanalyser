@@ -10,6 +10,7 @@ include { getTumorDnaSample          } from '../utils_nfcore_oncoanalyser_pipeli
 include { getTumorReduxDirAlignment  } from '../utils_nfcore_oncoanalyser_pipeline/accessors'
 include { getTumorRnaSample          } from '../utils_nfcore_oncoanalyser_pipeline/accessors'
 include { selectCurrentOrExisting    } from '../utils_nfcore_oncoanalyser_pipeline/utils'
+include { restoreMeta                } from '../utils_nfcore_oncoanalyser_pipeline/channel_helpers'
 
 workflow CIDER_CALLING {
     take:
@@ -87,4 +88,8 @@ workflow CIDER_CALLING {
         genome_dict,
         genome_img,
     )
+
+    // channel: [ meta, cider_results ]
+    emit:
+    cider_results = restoreMeta(channel.topic('cider_results'), ch_inputs)
 }

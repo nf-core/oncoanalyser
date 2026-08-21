@@ -220,7 +220,9 @@ workflow NEO_PREDICTION {
 
     // channel: [ meta, neo_finder_dir ]
     // channel: [ meta, annotated_fusions ]
+    // channel: [ meta, neo_scorer_dir ]
     emit:
     finder_out = ch_finder_out
     annotated_fusions_out = ch_annotate_fusions_out
+    neo_scorer_dir = restoreMeta(channel.topic('neo_scorer_dir'), ch_inputs)
 }

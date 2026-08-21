@@ -122,4 +122,5 @@ workflow LINX_PLOTTING {
 
     emit:
     visualiser_dir = ch_outputs // channel: [ meta, linx_visualiser_dir ]
+    linxreport_html = restoreMeta(channel.topic('linxreport_html'), ch_inputs) // channel: [ meta, linxreport_html ]
 }

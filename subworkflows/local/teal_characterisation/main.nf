@@ -169,7 +169,9 @@ workflow TEAL_CHARACTERISATION {
     )
 
     // channel: [ meta, teal_bam, teal_bai ]
+    // channel: [ meta, teal_tsvs ]
     emit:
     tumor_bam = ch_tumor_teal_bam
     normal_bam = ch_normal_teal_bam
+    teal_tsvs = restoreMeta(channel.topic('teal_tsvs'), ch_inputs)
 }

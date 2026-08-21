@@ -255,4 +255,10 @@ workflow ORANGE_REPORTING {
         targeted_mode,
         panel,
     )
+
+    // channel: [ meta, orange_json ] / [ meta, orange_pdf ]
+    ch_meta = ch_sage_dir_somatic.map { meta, d -> meta }
+    emit:
+    orange_json = restoreMeta(channel.topic('orange_json'), ch_meta)
+    orange_pdf = restoreMeta(channel.topic('orange_pdf'), ch_meta)
 }

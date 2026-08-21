@@ -615,6 +615,8 @@ workflow WGTS {
     //
     // channel: [ meta, linx_visualiser_dir ]
     ch_linx_somatic_visualiser_out = channel.empty()
+    // channel: [ meta, linxreport_html ]
+    ch_linxreport_html_out = channel.empty()
     if (run_config.stages.linx) {
 
         LINX_PLOTTING(
@@ -628,6 +630,7 @@ workflow WGTS {
         )
 
         ch_linx_somatic_visualiser_out = ch_linx_somatic_visualiser_out.mix(LINX_PLOTTING.out.visualiser_dir)
+        ch_linxreport_html_out = ch_linxreport_html_out.mix(LINX_PLOTTING.out.linxreport_html)
 
     } else {
 
@@ -638,6 +641,8 @@ workflow WGTS {
     //
     // SUBWORKFLOW: Run CIDER to identify and annotate CDR3 sequences of IG and TCR loci
     //
+    // channel: [ meta, cider_results ]
+    ch_cider_out = channel.empty()
     if (run_config.stages.cider) {
 
         CIDER_CALLING(
@@ -650,6 +655,8 @@ workflow WGTS {
             ref_data.genome_dict,
             ref_data.genome_img,
         )
+
+        ch_cider_out = ch_cider_out.mix(CIDER_CALLING.out.cider_results)
 
     }
 
@@ -732,6 +739,8 @@ workflow WGTS {
     // channel: [ meta, teal_bam, teal_bai ]
     ch_teal_tumor_bam_out = channel.empty()
     ch_teal_normal_bam_out = channel.empty()
+    // channel: [ meta, teal_tsvs ]
+    ch_teal_tsvs_out = channel.empty()
     if (run_config.stages.teal && run_config.stages.purple) {
 
         TEAL_CHARACTERISATION(
@@ -750,6 +759,7 @@ workflow WGTS {
 
         ch_teal_tumor_bam_out = ch_teal_tumor_bam_out.mix(TEAL_CHARACTERISATION.out.tumor_bam)
         ch_teal_normal_bam_out = ch_teal_normal_bam_out.mix(TEAL_CHARACTERISATION.out.normal_bam)
+        ch_teal_tsvs_out = ch_teal_tsvs_out.mix(TEAL_CHARACTERISATION.out.teal_tsvs)
 
     }
 
@@ -760,6 +770,8 @@ workflow WGTS {
     ch_virusinterpreter_out = channel.empty()
     // channel: [ meta, virusbreakend_tsv ]
     ch_virusbreakend_tsv_out = channel.empty()
+    // channel: [ meta, virusbreakend_vcf ]
+    ch_virusbreakend_vcf_out = channel.empty()
 
     // NOTE(LN): Virusbreakend currently broken for SBX and Ultima
     def sequencing_platform = getEnumFromString(params.sequencing_platform, SequencingPlatform)
@@ -783,6 +795,7 @@ workflow WGTS {
 
         ch_virusinterpreter_out = ch_virusinterpreter_out.mix(VIRUSBREAKEND_CALLING.out.virusinterpreter_dir)
         ch_virusbreakend_tsv_out = ch_virusbreakend_tsv_out.mix(VIRUSBREAKEND_CALLING.out.virusbreakend_tsv)
+        ch_virusbreakend_vcf_out = ch_virusbreakend_vcf_out.mix(VIRUSBREAKEND_CALLING.out.virusbreakend_vcf)
 
     } else {
 
@@ -818,8 +831,10 @@ workflow WGTS {
     //
     // channel: [ meta, neo_finder_dir ]
     // channel: [ meta, annotated_fusions ]
+    // channel: [ meta, neo_scorer_dir ]
     ch_neo_finder_out = channel.empty()
     ch_neo_annotated_fusions_out = channel.empty()
+    ch_neo_scorer_dir_out = channel.empty()
     if (run_config.stages.neo) {
 
         NEO_PREDICTION(
@@ -841,6 +856,7 @@ workflow WGTS {
 
         ch_neo_finder_out = ch_neo_finder_out.mix(NEO_PREDICTION.out.finder_out)
         ch_neo_annotated_fusions_out = ch_neo_annotated_fusions_out.mix(NEO_PREDICTION.out.annotated_fusions_out)
+        ch_neo_scorer_dir_out = ch_neo_scorer_dir_out.mix(NEO_PREDICTION.out.neo_scorer_dir)
 
     }
 
@@ -873,6 +889,9 @@ workflow WGTS {
     //
     // SUBWORKFLOW: Run ORANGE to generate static PDF report
     //
+    // channel: [ meta, orange_json ] / [ meta, orange_pdf ]
+    ch_orange_json_out = channel.empty()
+    ch_orange_pdf_out = channel.empty()
     if (run_config.stages.orange) {
 
         ORANGE_REPORTING(
@@ -899,6 +918,9 @@ workflow WGTS {
             false,  // targeted_mode
             '' ,  // panel
         )
+
+        ch_orange_json_out = ch_orange_json_out.mix(ORANGE_REPORTING.out.orange_json)
+        ch_orange_pdf_out = ch_orange_pdf_out.mix(ORANGE_REPORTING.out.orange_pdf)
 
     }
 
@@ -966,7 +988,7 @@ workflow WGTS {
             ch_bamtools_tumor_out.flatMap { meta, d ->            return get_dir_filepaths(meta, d, "bamtools/${getTumorDnaSampleName(meta, primary: true)}") },
             ch_bamtools_normal_out.flatMap { meta, d ->           return get_dir_filepaths(meta, d, "bamtools/${getNormalDnaSampleName(meta)}") },
             ch_chord_out.flatMap { meta, d ->                     return get_dir_filepaths(meta, d) },
-            channel.topic('cider_results').flatMap { meta, fps -> return fps.collect { d -> ["${meta.key}/cider/${d.name}", d] } },
+            ch_cider_out.flatMap { meta, fps ->                   return fps.collect { d -> ["${meta.case_id}/cider/${d.name}", d] } },
             ch_cobalt_out.flatMap { meta, d ->                    return get_dir_filepaths(meta, d) },
             ch_cuppa_out.flatMap { meta, d ->                     return get_dir_filepaths(meta, d) },
             ch_esvee_out.flatMap { meta, d ->                     return get_dir_filepaths(meta, d) },
@@ -979,13 +1001,13 @@ workflow WGTS {
             ch_linx_germline_out.flatMap { meta, d ->             return get_dir_filepaths(meta, d, 'linx/germline_annotations') },
             ch_linx_somatic_out.flatMap { meta, d ->              return get_dir_filepaths(meta, d, 'linx/somatic_annotations') },
             ch_linx_somatic_visualiser_out.flatMap { meta, d ->   return get_dir_filepaths(meta, d, 'linx/somatic_plots') },
-            channel.topic('linxreport_html').map { meta, d ->     return ["${meta.key}/linx/${d.name}", d] },
+            ch_linxreport_html_out.map { meta, d ->               return ["${meta.case_id}/linx/${d.name}", d] },
             ch_multiqc_out.flatMap { fps ->                      return fps.collect { d -> [d.name, d] } },
             ch_neo_annotated_fusions_out.filter { meta, d -> d != null }.map { meta, d -> return ["${meta.case_id}/neo/annotated_fusions/${d.name}", d] },
             ch_neo_finder_out.flatMap { meta, d ->               return get_dir_filepaths(meta, d, 'neo/finder') },
-            channel.topic('neo_scorer_dir').flatMap { meta, d ->  return get_dir_filepaths(meta, d, 'neo/scorer') },
-            channel.topic('orange_json').map { meta, d ->         return ["${meta.key}/orange/${d.name}", d] },
-            channel.topic('orange_pdf').map { meta, d ->          return ["${meta.key}/orange/${d.name}", d] },
+            ch_neo_scorer_dir_out.flatMap { meta, d ->            return get_dir_filepaths(meta, d, 'neo/scorer') },
+            ch_orange_json_out.filter { meta, d -> d != null }.map { meta, d -> return ["${meta.case_id}/orange/${d.name}", d] },
+            ch_orange_pdf_out.filter { meta, d -> d != null }.map { meta, d ->  return ["${meta.case_id}/orange/${d.name}", d] },
             ch_pave_germline_out.flatMap { meta, d ->             return get_dir_filepaths(meta, d, 'pave/germline') },
             ch_pave_somatic_out.flatMap { meta, d ->              return get_dir_filepaths(meta, d, 'pave/somatic') },
             ch_peach_out.flatMap { meta, d ->                     return get_dir_filepaths(meta, d) },
@@ -1002,9 +1024,9 @@ workflow WGTS {
             ch_sigs_out.flatMap { meta, d ->                      return get_dir_filepaths(meta, d) },
             ch_teal_normal_bam_out.flatMap { meta, bam, bai ->  return [bam, bai].findAll().collect { d -> ["${meta.case_id}/teal/${d.name}", d] } },
             ch_teal_tumor_bam_out.flatMap { meta, bam, bai ->   return [bam, bai].findAll().collect { d -> ["${meta.case_id}/teal/${d.name}", d] } },
-            channel.topic('teal_tsvs').flatMap { meta, e ->       def fps = e instanceof Collection ? e : [e]; fps.collect { d -> ["${meta.key}/teal/${d.name}", d] } },
+            ch_teal_tsvs_out.flatMap { meta, e ->                 def fps = e instanceof Collection ? e : [e]; fps.collect { d -> ["${meta.case_id}/teal/${d.name}", d] } },
             ch_virusbreakend_tsv_out.map { meta, d ->            return ["${meta.case_id}/virusbreakend/${d.name}", d] },
-            channel.topic('virusbreakend_vcf').map { meta, d ->   return ["${meta.key}/virusbreakend/${d.name}", d] },
+            ch_virusbreakend_vcf_out.map { meta, d ->             return ["${meta.case_id}/virusbreakend/${d.name}", d] },
             ch_virusinterpreter_out.flatMap { meta, d ->          return get_dir_filepaths(meta, d) },
 
             channel.topic('write_reference_data').map { d -> return ["reference_data/${workflow.manifest.version}/", d] },

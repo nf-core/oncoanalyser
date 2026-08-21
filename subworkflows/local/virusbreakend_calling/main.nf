@@ -161,4 +161,5 @@ workflow VIRUSBREAKEND_CALLING {
     emit:
     virusinterpreter_dir = ch_outputs // channel: [ meta, virusinterpreter_dir ]
     virusbreakend_tsv = ch_virusbreakend_tsv_restored // channel: [ meta, virusbreakend_tsv ]
+    virusbreakend_vcf = restoreMeta(channel.topic('virusbreakend_vcf'), ch_inputs) // channel: [ meta, virusbreakend_vcf ]
 }
