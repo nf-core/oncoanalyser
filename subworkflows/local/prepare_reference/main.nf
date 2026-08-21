@@ -40,6 +40,11 @@ workflow PREPARE_REFERENCE {
     //
     ch_genome_version = channel.value(params.genome_version)
 
+    // NOTE(SW): 'extracted_dir' is a single-consumer topic in typed mode, emitted by each
+    // DECOMP_* alias with a distinct topic_key. Subscribe once and derive the per-resource
+    // streams below from this single subscription.
+    ch_extracted_dirs = channel.topic('extracted_dir')
+
     ch_genome_fasta = channel.empty()
     if (prep_config.require_fasta) {
         ch_genome_fasta = channel.fromPath(params.ref_data_genome_fasta)
@@ -98,7 +103,7 @@ workflow PREPARE_REFERENCE {
                 .map { fp_str -> def fp = file(fp_str); return [[topic_key: fp_str, id: "${fp.name.replaceAll('\\.tar\\.gz\$', '')}"], fp] }
 
             DECOMP_BWAMEM2_INDEX(ch_genome_bwamem2_index_inputs)
-            ch_genome_bwamem2_index = channel.topic('extracted_dir')
+            ch_genome_bwamem2_index = ch_extracted_dirs
                 .filter { meta, _dir -> meta.topic_key == params.ref_data_genome_bwamem2_index }
                 .map { _meta, dir -> dir }
 
@@ -136,7 +141,7 @@ workflow PREPARE_REFERENCE {
                 .map { fp_str -> def fp = file(fp_str); return [[topic_key: fp_str, id: "${fp.name.replaceAll('\\.tar\\.gz\$', '')}"], fp] }
 
             DECOMP_GRIDSS_INDEX(ch_genome_gridss_index_inputs)
-            ch_genome_gridss_index = channel.topic('extracted_dir')
+            ch_genome_gridss_index = ch_extracted_dirs
                 .filter { meta, _dir -> meta.topic_key == params.ref_data_genome_gridss_index }
                 .map { _meta, dir -> dir }
 
@@ -167,7 +172,7 @@ workflow PREPARE_REFERENCE {
                 .map { fp_str -> def fp = file(fp_str); return [[topic_key: fp_str, id: "${fp.name.replaceAll('\\.tar\\.gz\$', '')}"], fp] }
 
             DECOMP_STAR_INDEX(ch_genome_star_index_inputs)
-            ch_genome_star_index = channel.topic('extracted_dir')
+            ch_genome_star_index = ch_extracted_dirs
                 .filter { meta, _dir -> meta.topic_key == params.ref_data_genome_star_index }
                 .map { _meta, dir -> dir }
 
@@ -193,7 +198,7 @@ workflow PREPARE_REFERENCE {
 
             DECOMP_HMF_DATA(ch_hmf_data_inputs)
 
-            ch_hmf_data = channel.topic('extracted_dir')
+            ch_hmf_data = ch_extracted_dirs
                 .filter { meta, _dir -> meta.topic_key == params.ref_data_hmf_data_path }
                 .map { _meta, dir -> dir }
                 .collect()
@@ -227,7 +232,7 @@ workflow PREPARE_REFERENCE {
 
             DECOMP_PANEL_DATA(ch_panel_data_inputs)
 
-            ch_panel_data = channel.topic('extracted_dir')
+            ch_panel_data = ch_extracted_dirs
                 .filter { meta, dir -> meta.topic_key == params.ref_data_panel_data_path }
                 .map { meta, dir -> dir }
                 .collect()
