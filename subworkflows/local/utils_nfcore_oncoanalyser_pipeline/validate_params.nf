@@ -105,7 +105,7 @@ def setRunModeDefaults(params, run_mode) {
     // Attempt to set default panel data path; make no assumption on valid 'panel' value
     if (run_mode == RunMode.TARGETED || run_mode == RunMode.PREPARE_REFERENCE) {
 
-        if (params.containsKey('panel')) {
+        if (params.panel != null) {
 
             if (params.panel.toLowerCase() == 'tso500') {
                 if (params.genome_version.toString() == '37') {
@@ -126,7 +126,7 @@ def setUmiDefaults(params, log) {
     def umi_type
     if (params.containsKey('umi_type') && params.umi_type) {
         umi_type = getEnumFromString(params.umi_type, UmiType)
-    } else if (params.containsKey('panel') && Constants.PANELS_DEFINED.contains(params.panel.toLowerCase())) {
+    } else if (params.panel != null && Constants.PANELS_DEFINED.contains(params.panel.toLowerCase())) {
         if (params.panel.toLowerCase() == 'tso500') {
             umi_type = UmiType.TSO500
         }
