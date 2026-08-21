@@ -67,13 +67,13 @@ workflow PANEL_RESOURCE_CREATION {
 
     // Configure selectable reference data and inputs
     def hmf_data_pons = getSequencingPlatformPons(hmf_data, params.sequencing_platform, log)
-    def target_regions_bed = params.target_regions_bed != null ? file(params.target_regions_bed) : []
-    def driver_gene_panel = params.driver_gene_panel != null ? file(params.driver_gene_panel) : []
+    def target_regions_bed = params.target_regions_bed != null ? file(params.target_regions_bed) : null
+    def driver_gene_panel = params.driver_gene_panel != null ? file(params.driver_gene_panel) : null
 
-    def copy_number_percentiles = params.enable_cn_norm_with_wgs_pct ? hmf_data.copy_number_percentiles : []
+    def copy_number_percentiles = params.enable_cn_norm_with_wgs_pct ? hmf_data.copy_number_percentiles : null
 
     def isofox_counts = params.isofox_counts != null ? file(params.isofox_counts) : hmf_data.isofox_counts
-    def isofox_gene_ids = params.isofox_gene_ids != null ? file(params.isofox_gene_ids) : []
+    def isofox_gene_ids = params.isofox_gene_ids != null ? file(params.isofox_gene_ids) : null
     def isofox_gc_ratios = params.isofox_gc_ratios != null ? file(params.isofox_gc_ratios) : hmf_data.isofox_gc_ratios
     def isofox_read_length = params.isofox_read_length != null ? params.isofox_read_length : Constants.DEFAULT_ISOFOX_READ_LENGTH_TARGETED
 
@@ -143,7 +143,7 @@ workflow PANEL_RESOURCE_CREATION {
         ch_inputs,
         ch_align_dna_tumor_out,
         ch_align_dna_normal_out,
-        ch_inputs.map { meta -> [meta, [], []] },  // ch_dna_donor
+        ch_inputs.map { meta -> [meta, null, null] },  // ch_dna_donor
         ref_data.genome_fasta,
         ref_data.genome_version,
         ref_data.genome_fai,
@@ -179,7 +179,7 @@ workflow PANEL_RESOURCE_CREATION {
         hmf_data.isofox_alt_sj_distribution,
         isofox_counts,
         isofox_gc_ratios,
-        [],  // isofox_tpm_norm
+        null,  // isofox_tpm_norm
         'TRANSCRIPT_COUNTS',
         isofox_read_length,
     )
@@ -194,7 +194,7 @@ workflow PANEL_RESOURCE_CREATION {
         ch_inputs,
         ch_redux_tumor_out,
         ch_redux_normal_out,
-        ch_inputs.map { meta -> [meta, []] },  // ch_redux_dir_donor
+        ch_inputs.map { meta -> [meta, null] },  // ch_redux_dir_donor
         ref_data.genome_fasta,
         ref_data.genome_version,
         ref_data.genome_fai,
@@ -220,7 +220,7 @@ workflow PANEL_RESOURCE_CREATION {
         ref_data.genome_fai,
         hmf_data.gc_profile,
         hmf_data.diploid_bed,
-        [],  // panel_target_regions_normalisation
+        null,  // panel_target_regions_normalisation
         true,  // targeted_mode
         false,  // purity_estimate_mode
     )
@@ -235,7 +235,7 @@ workflow PANEL_RESOURCE_CREATION {
         ch_inputs,
         ch_redux_tumor_out,
         ch_redux_normal_out,
-        ch_inputs.map { meta -> [meta, []] },  // ch_redux_dir_donor
+        ch_inputs.map { meta -> [meta, null] },  // ch_redux_dir_donor
         ref_data.genome_fasta,
         ref_data.genome_version,
         ref_data.genome_fai,

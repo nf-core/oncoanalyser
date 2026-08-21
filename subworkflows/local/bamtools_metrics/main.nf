@@ -112,14 +112,14 @@ workflow BAMTOOLS_METRICS {
     ch_tumor_out = channel.empty()
         .mix(
             restoreMeta(ch_bamtools_out.tumor, ch_inputs),
-            ch_inputs_tumor_sorted.skip.map { meta -> [meta, []] },
+            ch_inputs_tumor_sorted.skip.map { meta -> [meta, null] },
         )
 
     // channel: [ meta, bamtools_dir ]
     ch_normal_out = channel.empty()
         .mix(
             restoreMeta(ch_bamtools_out.normal, ch_inputs),
-            ch_inputs_normal_sorted.skip.map { meta -> [meta, []] },
+            ch_inputs_normal_sorted.skip.map { meta -> [meta, null] },
         )
 
     emit:

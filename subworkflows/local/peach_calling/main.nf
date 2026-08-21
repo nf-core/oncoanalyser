@@ -81,7 +81,7 @@ workflow PEACH_CALLING {
     ch_outputs = channel.empty()
         .mix(
             restoreMeta(channel.topic('peach_dir'), ch_inputs),
-            ch_inputs_sorted.skip.map { meta -> [meta, []] },
+            ch_inputs_sorted.skip.map { meta -> [meta, null] },
         )
 
     emit:

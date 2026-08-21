@@ -64,16 +64,16 @@ def getDnaFastqChannel(ch_inputs) {
                          fastq_info.flowcell = fastq.flowcell
                     }
 
-                    return [case_record, fastq_info, fastq.read_fwd, fastq.read_rev ?: []]
+                    return [case_record, fastq_info, fastq.read_fwd, fastq.read_rev ?: null]
                 }
         }
 
     return channel.empty()
         .mix(
             ch_fastqs,
-            ch_inputs_tumor_sorted.skip.map { case_record -> [case_record, [:], [], []] },
-            ch_inputs_normal_sorted.skip.map { case_record -> [case_record, [:], [], []] },
-            ch_inputs_donor_sorted.skip.map { case_record -> [case_record, [:], [], []] },
+            ch_inputs_tumor_sorted.skip.map { case_record -> [case_record, [:], null, null] },
+            ch_inputs_normal_sorted.skip.map { case_record -> [case_record, [:], null, null] },
+            ch_inputs_donor_sorted.skip.map { case_record -> [case_record, [:], null, null] },
         )
 }
 
@@ -113,6 +113,6 @@ def getRnaFastqChannel(ch_inputs) {
     return channel.empty()
         .mix(
             ch_fastqs,
-            ch_inputs_sorted.skip.map { case_record -> [case_record, [:], [], []] },
+            ch_inputs_sorted.skip.map { case_record -> [case_record, [:], null, null] },
         )
 }

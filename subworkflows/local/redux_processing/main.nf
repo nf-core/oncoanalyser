@@ -150,21 +150,21 @@ workflow REDUX_PROCESSING {
     ch_outputs_tumor = channel.empty()
         .mix(
             restoreMeta(ch_redux_out_sorted.tumor, ch_inputs),
-            ch_inputs_tumor_sorted.skip.map { meta -> [meta, []] },
+            ch_inputs_tumor_sorted.skip.map { meta -> [meta, null] },
         )
 
     // channel: [ meta, redux_dir ]
     ch_outputs_normal = channel.empty()
         .mix(
             restoreMeta(ch_redux_out_sorted.normal, ch_inputs),
-            ch_inputs_normal_sorted.skip.map { meta -> [meta, []] },
+            ch_inputs_normal_sorted.skip.map { meta -> [meta, null] },
         )
 
     // channel: [ meta, redux_dir ]
     ch_outputs_donor = channel.empty()
         .mix(
             restoreMeta(ch_redux_out_sorted.donor, ch_inputs),
-            ch_inputs_donor_sorted.skip.map { meta -> [meta, []] },
+            ch_inputs_donor_sorted.skip.map { meta -> [meta, null] },
         )
 
     emit:

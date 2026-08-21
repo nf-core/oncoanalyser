@@ -96,7 +96,7 @@ workflow ISOFOX_QUANTIFICATION {
     ch_outputs = channel.empty()
         .mix(
             restoreMeta(channel.topic('isofox_dir'), ch_inputs),
-            ch_inputs_sorted.skip.map { meta -> [meta, []] },
+            ch_inputs_sorted.skip.map { meta -> [meta, null] },
         )
 
     emit:

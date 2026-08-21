@@ -53,8 +53,8 @@ workflow PAVE_ANNOTATION {
         .map { meta, sage_dir ->
 
             def sage_dir_selected = selectCurrentOrExisting(sage_dir, getInput(getNormalDnaSample(meta), FileType.SAGE_DIR))
-            def sage_vcf = sage_dir_selected ? sage_dir_selected.resolve("${getTumorDnaSampleName(meta)}.sage.germline.vcf.gz") : []
-            def sage_tbi = sage_dir_selected ? sage_dir_selected.resolve("${getTumorDnaSampleName(meta)}.sage.germline.vcf.gz.tbi") : []
+            def sage_vcf = sage_dir_selected ? sage_dir_selected.resolve("${getTumorDnaSampleName(meta)}.sage.germline.vcf.gz") : null
+            def sage_tbi = sage_dir_selected ? sage_dir_selected.resolve("${getTumorDnaSampleName(meta)}.sage.germline.vcf.gz.tbi") : null
 
             return [meta, sage_vcf, sage_tbi]
         }
@@ -106,8 +106,8 @@ workflow PAVE_ANNOTATION {
         .map { meta, sage_dir ->
 
             def sage_dir_selected = selectCurrentOrExisting(sage_dir, getInput(getTumorDnaSample(meta), FileType.SAGE_DIR))
-            def sage_vcf = sage_dir_selected ? sage_dir_selected.resolve("${getTumorDnaSampleName(meta)}.sage.somatic.vcf.gz") : []
-            def sage_tbi = sage_dir_selected ? sage_dir_selected.resolve("${getTumorDnaSampleName(meta)}.sage.somatic.vcf.gz.tbi") : []
+            def sage_vcf = sage_dir_selected ? sage_dir_selected.resolve("${getTumorDnaSampleName(meta)}.sage.somatic.vcf.gz") : null
+            def sage_tbi = sage_dir_selected ? sage_dir_selected.resolve("${getTumorDnaSampleName(meta)}.sage.somatic.vcf.gz.tbi") : null
 
             return [meta, sage_vcf, sage_tbi]
         }
@@ -158,14 +158,14 @@ workflow PAVE_ANNOTATION {
     ch_outputs_somatic = channel.empty()
         .mix(
             restoreMeta(channel.topic('pave_somatic_dir'), ch_inputs),
-            ch_sage_somatic_inputs_sorted.skip.map { meta -> [meta, []] },
+            ch_sage_somatic_inputs_sorted.skip.map { meta -> [meta, null] },
         )
 
     // channel: [ meta, pave_dir ]
     ch_outputs_germline = channel.empty()
         .mix(
             restoreMeta(channel.topic('pave_germline_dir'), ch_inputs),
-            ch_sage_germline_inputs_sorted.skip.map { meta -> [meta, []] },
+            ch_sage_germline_inputs_sorted.skip.map { meta -> [meta, null] },
         )
 
     emit:

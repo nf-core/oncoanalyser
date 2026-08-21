@@ -92,7 +92,9 @@ process PURPLE {
 
     stub:
     """
-    mkdir -p purple/
+    mkdir -p purple/ purple/plot/
+
+    touch purple/plot/${meta.tumor_id}.circos.png
 
     touch purple/${meta.tumor_id}.purple.cnv.gene.tsv
     touch purple/${meta.tumor_id}.purple.cnv.somatic.tsv

@@ -160,12 +160,12 @@ workflow TARGETED {
 
     } else {
 
-        ch_align_dna_tumor_out = ch_inputs.map { meta -> [meta, [], []] }
-        ch_align_dna_normal_out = ch_inputs.map { meta -> [meta, [], []] }
-        ch_align_dna_donor_out = ch_inputs.map { meta -> [meta, [], []] }
+        ch_align_dna_tumor_out = ch_inputs.map { meta -> [meta, null, null] }
+        ch_align_dna_normal_out = ch_inputs.map { meta -> [meta, null, null] }
+        ch_align_dna_donor_out = ch_inputs.map { meta -> [meta, null, null] }
 
-        ch_align_rna_tumor_out = ch_inputs.map { meta -> [meta, [], []] }
-        ch_align_rna_qc_tumor_out = ch_inputs.map { meta -> [meta, [], []] }
+        ch_align_rna_tumor_out = ch_inputs.map { meta -> [meta, null, null] }
+        ch_align_rna_qc_tumor_out = ch_inputs.map { meta -> [meta, null, null] }
 
     }
 
@@ -203,9 +203,9 @@ workflow TARGETED {
 
     } else {
 
-        ch_redux_tumor_out = ch_inputs.map { meta -> [meta, []] }
-        ch_redux_normal_out = ch_inputs.map { meta -> [meta, []] }
-        ch_redux_donor_out = ch_inputs.map { meta -> [meta, []] }
+        ch_redux_tumor_out = ch_inputs.map { meta -> [meta, null] }
+        ch_redux_normal_out = ch_inputs.map { meta -> [meta, null] }
+        ch_redux_donor_out = ch_inputs.map { meta -> [meta, null] }
 
     }
 
@@ -234,8 +234,8 @@ workflow TARGETED {
 
     } else {
 
-        ch_bamtools_tumor_out = ch_inputs.map { meta -> [meta, []] }
-        ch_bamtools_normal_out = ch_inputs.map { meta -> [meta, []] }
+        ch_bamtools_tumor_out = ch_inputs.map { meta -> [meta, null] }
+        ch_bamtools_normal_out = ch_inputs.map { meta -> [meta, null] }
 
     }
 
@@ -269,7 +269,7 @@ workflow TARGETED {
 
     } else {
 
-        ch_isofox_out = ch_inputs.map { meta -> [meta, []] }
+        ch_isofox_out = ch_inputs.map { meta -> [meta, null] }
 
     }
 
@@ -290,7 +290,7 @@ workflow TARGETED {
             ref_data.genome_fai,
             hmf_data.heterozygous_sites,
             panel_data.target_regions_bed,
-            [],  // tumor_min_depth
+            null,  // tumor_min_depth
             params.sequencing_platform,
             false,  // purity_estimate_mode
         )
@@ -299,7 +299,7 @@ workflow TARGETED {
 
     } else {
 
-        ch_amber_out = ch_inputs.map { meta -> [meta, []] }
+        ch_amber_out = ch_inputs.map { meta -> [meta, null] }
 
     }
 
@@ -328,7 +328,7 @@ workflow TARGETED {
 
     } else {
 
-        ch_cobalt_out = ch_inputs.map { meta -> [meta, []] }
+        ch_cobalt_out = ch_inputs.map { meta -> [meta, null] }
 
     }
 
@@ -362,7 +362,7 @@ workflow TARGETED {
 
     } else {
 
-        ch_esvee_out = ch_inputs.map { meta -> [meta, []] }
+        ch_esvee_out = ch_inputs.map { meta -> [meta, null] }
 
     }
 
@@ -401,8 +401,8 @@ workflow TARGETED {
 
     } else {
 
-        ch_sage_germline_out = ch_inputs.map { meta -> [meta, []] }
-        ch_sage_somatic_out = ch_inputs.map { meta -> [meta, []] }
+        ch_sage_germline_out = ch_inputs.map { meta -> [meta, null] }
+        ch_sage_somatic_out = ch_inputs.map { meta -> [meta, null] }
 
     }
 
@@ -438,8 +438,8 @@ workflow TARGETED {
 
     } else {
 
-        ch_pave_germline_out = ch_inputs.map { meta -> [meta, []] }
-        ch_pave_somatic_out = ch_inputs.map { meta -> [meta, []] }
+        ch_pave_germline_out = ch_inputs.map { meta -> [meta, null] }
+        ch_pave_somatic_out = ch_inputs.map { meta -> [meta, null] }
 
     }
 
@@ -475,7 +475,7 @@ workflow TARGETED {
 
     } else {
 
-        ch_purple_out = ch_inputs.map { meta -> [meta, []] }
+        ch_purple_out = ch_inputs.map { meta -> [meta, null] }
 
     }
 
@@ -505,7 +505,7 @@ workflow TARGETED {
 
     } else {
 
-        ch_qsee_out = ch_inputs.map { meta -> [meta, []] }
+        ch_qsee_out = ch_inputs.map { meta -> [meta, null] }
 
     }
 
@@ -520,7 +520,7 @@ workflow TARGETED {
         SAGE_APPEND(
             ch_inputs,
             ch_purple_out,
-            ch_inputs.map { meta -> [meta, []] },  // ch_redux_dir_tumor
+            ch_inputs.map { meta -> [meta, null] },  // ch_redux_dir_tumor
             ch_align_rna_tumor_out,
             ref_data.genome_fasta,
             ref_data.genome_version,
@@ -536,8 +536,8 @@ workflow TARGETED {
 
     } else {
 
-        ch_sage_append_somatic_out = ch_inputs.map { meta -> [meta, []] }
-        ch_sage_append_germline_out = ch_inputs.map { meta -> [meta, []] }
+        ch_sage_append_somatic_out = ch_inputs.map { meta -> [meta, null] }
+        ch_sage_append_germline_out = ch_inputs.map { meta -> [meta, null] }
 
     }
 
@@ -569,7 +569,7 @@ workflow TARGETED {
 
     } else {
 
-        ch_sage_somatic_visualiser_out = ch_inputs.map { meta -> [meta, []] }
+        ch_sage_somatic_visualiser_out = ch_inputs.map { meta -> [meta, null] }
 
     }
 
@@ -595,8 +595,8 @@ workflow TARGETED {
 
     } else {
 
-        ch_linx_somatic_out = ch_inputs.map { meta -> [meta, []] }
-        ch_linx_germline_out = ch_inputs.map { meta -> [meta, []] }
+        ch_linx_somatic_out = ch_inputs.map { meta -> [meta, null] }
+        ch_linx_germline_out = ch_inputs.map { meta -> [meta, null] }
 
     }
 
@@ -621,7 +621,7 @@ workflow TARGETED {
 
     } else {
 
-        ch_linx_somatic_visualiser_out = ch_inputs.map { meta -> [meta, []] }
+        ch_linx_somatic_visualiser_out = ch_inputs.map { meta -> [meta, null] }
 
     }
 
@@ -668,7 +668,7 @@ workflow TARGETED {
 
     } else {
 
-        ch_lilac_out = ch_inputs.map { meta -> [meta, []] }
+        ch_lilac_out = ch_inputs.map { meta -> [meta, null] }
 
     }
 
@@ -691,7 +691,7 @@ workflow TARGETED {
 
     } else {
 
-        ch_peach_out = ch_inputs.map { meta -> [meta, []] }
+        ch_peach_out = ch_inputs.map { meta -> [meta, null] }
 
     }
 
@@ -701,10 +701,10 @@ workflow TARGETED {
     if (run_config.stages.orange) {
 
         // Create placeholder channels for empty remaining channels
-        ch_chord_out = ch_inputs.map { meta -> [meta, []] }
-        ch_cuppa_out = ch_inputs.map { meta -> [meta, []] }
-        ch_sigs_out = ch_inputs.map { meta -> [meta, []] }
-        ch_virusinterpreter_out = ch_inputs.map { meta -> [meta, []] }
+        ch_chord_out = ch_inputs.map { meta -> [meta, null] }
+        ch_cuppa_out = ch_inputs.map { meta -> [meta, null] }
+        ch_sigs_out = ch_inputs.map { meta -> [meta, null] }
+        ch_virusinterpreter_out = ch_inputs.map { meta -> [meta, null] }
 
         ORANGE_REPORTING(
             ch_sage_somatic_out,

@@ -24,7 +24,7 @@ process ISOFOX {
     alt_sj_distribution: Path
     exp_counts: Path
     exp_gc_ratios: Path
-    tpm_norm: Path
+    tpm_norm: Path?
 
     topic:
     tuple(meta, file('isofox/')) >> 'isofox_dir'

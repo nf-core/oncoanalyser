@@ -235,16 +235,16 @@ workflow SAGE_APPEND {
     ch_outputs_somatic = channel.empty()
         .mix(
             restoreMeta(channel.topic('sage_append_dir').filter { d -> d[0].topic_key == 'somatic' }, ch_inputs),
-            ch_inputs_somatic_sorted.skip.map { meta -> [meta, []] },
-            ch_inputs_sorted.skip.map { meta -> [meta, []] },
+            ch_inputs_somatic_sorted.skip.map { meta -> [meta, null] },
+            ch_inputs_sorted.skip.map { meta -> [meta, null] },
         )
 
     // channel: [ meta, sage_append_dir ]
     ch_outputs_germline = channel.empty()
         .mix(
             restoreMeta(channel.topic('sage_append_dir').filter { d -> d[0].topic_key == 'germline' }, ch_inputs),
-            ch_inputs_germline_sorted.skip.map { meta -> [meta, []] },
-            ch_inputs_sorted.skip.map { meta -> [meta, []] },
+            ch_inputs_germline_sorted.skip.map { meta -> [meta, null] },
+            ch_inputs_sorted.skip.map { meta -> [meta, null] },
         )
 
     emit:

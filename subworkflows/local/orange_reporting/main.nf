@@ -167,7 +167,7 @@ workflow ORANGE_REPORTING {
             if (has_dna_normal && has_germline_smlv_vcf) {
                 meta_orange.normal_dna_id = getNormalDnaSampleName(meta)
             } else {
-                dna_normal_input_keys.each { k -> def i = input_indexes[k]; inputs_selected[i] = [] }
+                dna_normal_input_keys.each { k -> def i = input_indexes[k]; inputs_selected[i] = null }
             }
 
             // Require all tumor RNA inputs to be present else clear them
@@ -184,7 +184,7 @@ workflow ORANGE_REPORTING {
             if (has_rna_tumor) {
                 meta_orange.tumor_rna_id = getTumorRnaSampleName(meta)
             } else {
-                rna_tumor_input_keys.each { k -> def i = input_indexes[k]; inputs_selected[i] = [] }
+                rna_tumor_input_keys.each { k -> def i = input_indexes[k]; inputs_selected[i] = null }
             }
 
             // ORANGE only accepts CUPPA with DNA; when providing DNA/RNA inputs but skipping Virus Interpreter CUPPA
@@ -193,7 +193,7 @@ workflow ORANGE_REPORTING {
             if (cuppa_dir) {
                 def cuppa_vis_data = cuppa_dir.resolve("${meta_orange.tumor_id}.cuppa.vis_data.tsv")
                 if (! cuppa_vis_data.exists()) {
-                    inputs_selected[input_indexes['cuppa_dir']] = []
+                    inputs_selected[input_indexes['cuppa_dir']] = null
                 }
             }
 
@@ -216,19 +216,19 @@ workflow ORANGE_REPORTING {
 
             // Set LINX reportable plot directory
             def linx_plot_dir_somatic = inputs_selected[input_indexes['linx_plot_dir_somatic']]
-            def linx_plot_dir_somatic_reportable = []
+            def linx_plot_dir_somatic_reportable = null
             if (linx_plot_dir_somatic) {
                 // The LINX directory may not exist on object store providers where no plots where created
                 def dp = linx_plot_dir_somatic.resolve('reportable/')
-                linx_plot_dir_somatic_reportable = dp.exists() ? dp : []
+                linx_plot_dir_somatic_reportable = dp.exists() ? dp : null
             }
 
             return [
                 meta_orange,
                 inputs_selected[input_indexes['sage_dir_somatic']],
                 inputs_selected[input_indexes['sage_dir_germline']],
-                sage_append_vcf_somatic ?: [],
-                sage_append_vcf_germline ?: [],
+                sage_append_vcf_somatic ?: null,
+                sage_append_vcf_germline ?: null,
                 inputs_selected[input_indexes['sage_plot_dir_somatic']],
                 inputs_selected[input_indexes['purple_dir']],
                 inputs_selected[input_indexes['qsee_dir']],

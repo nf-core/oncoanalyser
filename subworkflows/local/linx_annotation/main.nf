@@ -144,15 +144,15 @@ workflow LINX_ANNOTATION {
     ch_outputs_somatic = channel.empty()
         .mix(
             restoreMeta(channel.topic('linx_somatic_annotation_dir'), ch_inputs),
-            ch_inputs_somatic_sorted.skip.map { meta -> [meta, []] },
-            ch_inputs_sorted.skip.map { meta -> [meta, []] },
+            ch_inputs_somatic_sorted.skip.map { meta -> [meta, null] },
+            ch_inputs_sorted.skip.map { meta -> [meta, null] },
         )
 
     ch_outputs_germline = channel.empty()
         .mix(
             restoreMeta(channel.topic('linx_germline_annotation_dir'), ch_inputs),
-            ch_inputs_germline_sorted.skip.map { meta -> [meta, []] },
-            ch_inputs_sorted.skip.map { meta -> [meta, []] },
+            ch_inputs_germline_sorted.skip.map { meta -> [meta, null] },
+            ch_inputs_sorted.skip.map { meta -> [meta, null] },
         )
 
     emit:

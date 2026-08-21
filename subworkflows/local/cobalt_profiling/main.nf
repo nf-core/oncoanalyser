@@ -116,7 +116,7 @@ workflow COBALT_PROFILING {
     ch_outputs = channel.empty()
         .mix(
             restoreMeta(channel.topic('cobalt_dir'), ch_inputs),
-            ch_inputs_sorted.skip.map { meta -> [meta, []] },
+            ch_inputs_sorted.skip.map { meta -> [meta, null] },
         )
 
     emit:

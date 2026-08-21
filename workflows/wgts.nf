@@ -165,12 +165,12 @@ workflow WGTS {
 
     } else {
 
-        ch_align_dna_tumor_out = ch_inputs.map { meta -> [meta, [], []] }
-        ch_align_dna_normal_out = ch_inputs.map { meta -> [meta, [], []] }
-        ch_align_dna_donor_out = ch_inputs.map { meta -> [meta, [], []] }
+        ch_align_dna_tumor_out = ch_inputs.map { meta -> [meta, null, null] }
+        ch_align_dna_normal_out = ch_inputs.map { meta -> [meta, null, null] }
+        ch_align_dna_donor_out = ch_inputs.map { meta -> [meta, null, null] }
 
-        ch_align_rna_tumor_out = ch_inputs.map { meta -> [meta, [], []] }
-        ch_align_rna_qc_tumor_out = ch_inputs.map { meta -> [meta, [], []] }
+        ch_align_rna_tumor_out = ch_inputs.map { meta -> [meta, null, null] }
+        ch_align_rna_qc_tumor_out = ch_inputs.map { meta -> [meta, null, null] }
 
     }
 
@@ -208,9 +208,9 @@ workflow WGTS {
 
     } else {
 
-        ch_redux_tumor_out = ch_inputs.map { meta -> [meta, []] }
-        ch_redux_normal_out = ch_inputs.map { meta -> [meta, []] }
-        ch_redux_donor_out = ch_inputs.map { meta -> [meta, []] }
+        ch_redux_tumor_out = ch_inputs.map { meta -> [meta, null] }
+        ch_redux_normal_out = ch_inputs.map { meta -> [meta, null] }
+        ch_redux_donor_out = ch_inputs.map { meta -> [meta, null] }
 
     }
 
@@ -239,8 +239,8 @@ workflow WGTS {
 
     } else {
 
-        ch_bamtools_tumor_out = ch_inputs.map { meta -> [meta, []] }
-        ch_bamtools_normal_out = ch_inputs.map { meta -> [meta, []] }
+        ch_bamtools_tumor_out = ch_inputs.map { meta -> [meta, null] }
+        ch_bamtools_normal_out = ch_inputs.map { meta -> [meta, null] }
 
     }
 
@@ -274,7 +274,7 @@ workflow WGTS {
 
     } else {
 
-        ch_isofox_out = ch_inputs.map { meta -> [meta, []] }
+        ch_isofox_out = ch_inputs.map { meta -> [meta, null] }
 
     }
 
@@ -304,7 +304,7 @@ workflow WGTS {
 
     } else {
 
-        ch_amber_out = ch_inputs.map { meta -> [meta, []] }
+        ch_amber_out = ch_inputs.map { meta -> [meta, null] }
 
     }
 
@@ -333,7 +333,7 @@ workflow WGTS {
 
     } else {
 
-        ch_cobalt_out = ch_inputs.map { meta -> [meta, []] }
+        ch_cobalt_out = ch_inputs.map { meta -> [meta, null] }
 
     }
 
@@ -367,7 +367,7 @@ workflow WGTS {
 
     } else {
 
-        ch_esvee_out = ch_inputs.map { meta -> [meta, []] }
+        ch_esvee_out = ch_inputs.map { meta -> [meta, null] }
 
     }
 
@@ -406,8 +406,8 @@ workflow WGTS {
 
     } else {
 
-        ch_sage_germline_out = ch_inputs.map { meta -> [meta, []] }
-        ch_sage_somatic_out = ch_inputs.map { meta -> [meta, []] }
+        ch_sage_germline_out = ch_inputs.map { meta -> [meta, null] }
+        ch_sage_somatic_out = ch_inputs.map { meta -> [meta, null] }
 
     }
 
@@ -443,8 +443,8 @@ workflow WGTS {
 
     } else {
 
-        ch_pave_germline_out = ch_inputs.map { meta -> [meta, []] }
-        ch_pave_somatic_out = ch_inputs.map { meta -> [meta, []] }
+        ch_pave_germline_out = ch_inputs.map { meta -> [meta, null] }
+        ch_pave_somatic_out = ch_inputs.map { meta -> [meta, null] }
 
     }
 
@@ -462,7 +462,7 @@ workflow WGTS {
             ch_esvee_out,
             ch_pave_somatic_out,
             ch_pave_germline_out,
-            ch_inputs.map { meta -> [meta, []] },  // ch_redux_dir_tumor
+            ch_inputs.map { meta -> [meta, null] },  // ch_redux_dir_tumor
             ref_data.genome_fasta,
             ref_data.genome_version,
             ref_data.genome_fai,
@@ -480,7 +480,7 @@ workflow WGTS {
 
     } else {
 
-        ch_purple_out = ch_inputs.map { meta -> [meta, []] }
+        ch_purple_out = ch_inputs.map { meta -> [meta, null] }
 
     }
 
@@ -510,7 +510,7 @@ workflow WGTS {
 
     } else {
 
-        ch_qsee_out = ch_inputs.map { meta -> [meta, []] }
+        ch_qsee_out = ch_inputs.map { meta -> [meta, null] }
 
     }
 
@@ -525,7 +525,7 @@ workflow WGTS {
         SAGE_APPEND(
             ch_inputs,
             ch_purple_out,
-            ch_inputs.map { meta -> [meta, []] },  // ch_redux_dir_tumor
+            ch_inputs.map { meta -> [meta, null] },  // ch_redux_dir_tumor
             ch_align_rna_tumor_out,
             ref_data.genome_fasta,
             ref_data.genome_version,
@@ -541,8 +541,8 @@ workflow WGTS {
 
     } else {
 
-        ch_sage_append_somatic_out = ch_inputs.map { meta -> [meta, []] }
-        ch_sage_append_germline_out = ch_inputs.map { meta -> [meta, []] }
+        ch_sage_append_somatic_out = ch_inputs.map { meta -> [meta, null] }
+        ch_sage_append_germline_out = ch_inputs.map { meta -> [meta, null] }
 
     }
 
@@ -574,7 +574,7 @@ workflow WGTS {
 
     } else {
 
-        ch_sage_somatic_visualiser_out = ch_inputs.map { meta -> [meta, []] }
+        ch_sage_somatic_visualiser_out = ch_inputs.map { meta -> [meta, null] }
 
     }
 
@@ -600,8 +600,8 @@ workflow WGTS {
 
     } else {
 
-        ch_linx_somatic_out = ch_inputs.map { meta -> [meta, []] }
-        ch_linx_germline_out = ch_inputs.map { meta -> [meta, []] }
+        ch_linx_somatic_out = ch_inputs.map { meta -> [meta, null] }
+        ch_linx_germline_out = ch_inputs.map { meta -> [meta, null] }
 
     }
 
@@ -615,9 +615,9 @@ workflow WGTS {
         LINX_PLOTTING(
             ch_inputs,
             ch_linx_somatic_out,
-            ch_inputs.map { meta -> [meta, []] },  // ch_amber_dir
-            ch_inputs.map { meta -> [meta, []] },  // ch_cobalt_dir
-            ch_inputs.map { meta -> [meta, []] },  // ch_purple_dir
+            ch_inputs.map { meta -> [meta, null] },  // ch_amber_dir
+            ch_inputs.map { meta -> [meta, null] },  // ch_cobalt_dir
+            ch_inputs.map { meta -> [meta, null] },  // ch_purple_dir
             ref_data.genome_version,
             hmf_data.ensembl_data_resources,
         )
@@ -626,7 +626,7 @@ workflow WGTS {
 
     } else {
 
-        ch_linx_somatic_visualiser_out = ch_inputs.map { meta -> [meta, []] }
+        ch_linx_somatic_visualiser_out = ch_inputs.map { meta -> [meta, null] }
 
     }
 
@@ -665,7 +665,7 @@ workflow WGTS {
 
     } else {
 
-        ch_sigs_out = ch_inputs.map { meta -> [meta, []] }
+        ch_sigs_out = ch_inputs.map { meta -> [meta, null] }
 
     }
 
@@ -688,7 +688,7 @@ workflow WGTS {
 
     } else {
 
-        ch_chord_out = ch_inputs.map { meta -> [meta, []] }
+        ch_chord_out = ch_inputs.map { meta -> [meta, null] }
 
     }
 
@@ -717,7 +717,7 @@ workflow WGTS {
 
     } else {
 
-        ch_lilac_out = ch_inputs.map { meta -> [meta, []] }
+        ch_lilac_out = ch_inputs.map { meta -> [meta, null] }
 
     }
 
@@ -772,7 +772,7 @@ workflow WGTS {
 
     } else {
 
-        ch_virusinterpreter_out = ch_inputs.map { meta -> [meta, []] }
+        ch_virusinterpreter_out = ch_inputs.map { meta -> [meta, null] }
 
     }
 
@@ -795,7 +795,7 @@ workflow WGTS {
 
     } else {
 
-        ch_peach_out = ch_inputs.map { meta -> [meta, []] }
+        ch_peach_out = ch_inputs.map { meta -> [meta, null] }
 
     }
 
@@ -845,7 +845,7 @@ workflow WGTS {
 
     } else {
 
-        ch_cuppa_out = ch_inputs.map { meta -> [meta, []] }
+        ch_cuppa_out = ch_inputs.map { meta -> [meta, null] }
 
     }
 

@@ -117,7 +117,7 @@ workflow LINX_PLOTTING {
     ch_outputs = channel.empty()
         .mix(
             restoreMeta(channel.topic('linx_visualiser_plots'), ch_inputs),
-            ch_inputs_sorted.skip.map { meta -> [meta, []] },
+            ch_inputs_sorted.skip.map { meta -> [meta, null] },
         )
 
     emit:

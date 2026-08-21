@@ -173,14 +173,14 @@ workflow READ_ALIGNMENT_RNA {
     ch_outputs_aln = channel.empty()
         .mix(
             ch_alns_ready,
-            ch_inputs_sorted.skip.map { meta -> [meta, [], []] },
+            ch_inputs_sorted.skip.map { meta -> [meta, null, null] },
         )
 
     // channel: [ meta, star_log, md_metrics ]
     ch_outputs_qc_files = channel.empty()
         .mix(
             ch_qc_files_ready,
-            ch_inputs_sorted.skip.map { meta -> [meta, [], []] },
+            ch_inputs_sorted.skip.map { meta -> [meta, null, null] },
         )
 
     emit:

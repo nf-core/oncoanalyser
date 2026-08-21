@@ -127,7 +127,7 @@ workflow READ_ALIGNMENT_DNA {
                     return reads_fwd.collect { fwd ->
                         def split_fwd = fwd.name.replaceAll('\\..+$', '')
                         def meta_fastq_ready = meta_fastq + [id: "${meta_fastq.id}_${split_fwd}", split: split_fwd]
-                        return [meta_fastq_ready, fwd, []]
+                        return [meta_fastq_ready, fwd, null]
                     }
                 }
 
@@ -229,21 +229,21 @@ workflow READ_ALIGNMENT_DNA {
     ch_outputs_tumor = channel.empty()
         .mix(
             restoreMeta(ch_alns_united.tumor, ch_inputs),
-            ch_inputs_tumor_sorted.skip.unique().map { meta -> [meta, [], []] },
+            ch_inputs_tumor_sorted.skip.unique().map { meta -> [meta, null, null] },
         )
 
     // channel: [ meta, [aln, ...], [idx, ...] ]
     ch_outputs_normal = channel.empty()
         .mix(
             restoreMeta(ch_alns_united.normal, ch_inputs),
-            ch_inputs_normal_sorted.skip.unique().map { meta -> [meta, [], []] },
+            ch_inputs_normal_sorted.skip.unique().map { meta -> [meta, null, null] },
         )
 
     // channel: [ meta, [aln, ...], [idx, ...] ]
     ch_outputs_donor = channel.empty()
         .mix(
             restoreMeta(ch_alns_united.donor, ch_inputs),
-            ch_inputs_donor_sorted.skip.unique().map { meta -> [meta, [], []] },
+            ch_inputs_donor_sorted.skip.unique().map { meta -> [meta, null, null] },
         )
 
     emit:

@@ -39,8 +39,8 @@ workflow CHORD_PREDICTION {
 
             def has_tumor_normal_dna = hasTumorDna(meta) && hasNormalDna(meta)
 
-            def has_smlv_vcf = []
-            def has_sv_vcf = []
+            def has_smlv_vcf = false
+            def has_sv_vcf = false
             if (has_tumor_normal_dna && purple_dir) {
                 def tumor_id = getTumorDnaSampleName(meta)
                 has_smlv_vcf = purple_dir.resolve("${tumor_id}.purple.somatic.vcf.gz").exists()
@@ -86,7 +86,7 @@ workflow CHORD_PREDICTION {
     ch_outputs = channel.empty()
         .mix(
             restoreMeta(channel.topic('chord_dir'), ch_inputs),
-            ch_inputs_sorted.skip.map { meta -> [meta, []] },
+            ch_inputs_sorted.skip.map { meta -> [meta, null] },
         )
 
     emit:

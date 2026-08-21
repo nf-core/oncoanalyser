@@ -25,8 +25,8 @@ workflow PAVE_PON_CREATION {
         .map { meta, sage_dir ->
 
             def sage_dir_selected = selectCurrentOrExisting(sage_dir, getInput(getTumorDnaSample(meta), FileType.SAGE_DIR))
-            def sage_vcf = sage_dir_selected ? sage_dir_selected.resolve("${getTumorDnaSampleName(meta)}.sage.somatic.vcf.gz") : []
-            def sage_tbi = sage_dir_selected ? sage_dir_selected.resolve("${getTumorDnaSampleName(meta)}.sage.somatic.vcf.gz.tbi") : []
+            def sage_vcf = sage_dir_selected ? sage_dir_selected.resolve("${getTumorDnaSampleName(meta)}.sage.somatic.vcf.gz") : null
+            def sage_tbi = sage_dir_selected ? sage_dir_selected.resolve("${getTumorDnaSampleName(meta)}.sage.somatic.vcf.gz.tbi") : null
 
             return [sage_vcf, sage_tbi]
         }

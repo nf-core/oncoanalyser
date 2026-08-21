@@ -10,7 +10,7 @@ process ORANGE {
         'biocontainers/hmftools-orange:5.0.1--hdfd78af_0' }"
 
     input:
-    tuple(meta: Map, sage_dir_somatic: Path, sage_dir_germline: Path?, smlv_vcf_somatic: Path?, smlv_vcf_germline: Path?, sage_plot_dir_somatic: Path?, purple_dir: Path, qsee_dir: Path, linx_annotation_dir_somatic: Path, linx_plot_dir_reportable_somatic: Path, linx_annotation_dir_germline: Path?, virusinterpreter_dir: Path?, chord_dir: Path?, sigs_dir: Path?, lilac_dir: Path?, cuppa_dir: Path?, peach_dir: Path?, isofox_dir: Path?)
+    tuple(meta: Map, sage_dir_somatic: Path, sage_dir_germline: Path?, smlv_vcf_somatic: Path?, smlv_vcf_germline: Path?, sage_plot_dir_somatic: Path?, purple_dir: Path, qsee_dir: Path, linx_annotation_dir_somatic: Path, linx_plot_dir_reportable_somatic: Path?, linx_annotation_dir_germline: Path?, virusinterpreter_dir: Path?, chord_dir: Path?, sigs_dir: Path?, lilac_dir: Path?, cuppa_dir: Path?, peach_dir: Path?, isofox_dir: Path?)
     genome_ver: String
     disease_ontology: Path
     pipeline_version: String?

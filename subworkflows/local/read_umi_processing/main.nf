@@ -202,14 +202,14 @@ workflow READ_UMI_PROCESSING {
     ch_outputs_dna = channel.empty()
         .mix(
             restoreMeta(ch_fastq_processed_sorted.dna, ch_inputs),
-            ch_inputs_dna_sorted.skip.map { meta -> [meta, [:], [], []] },
+            ch_inputs_dna_sorted.skip.map { meta -> [meta, [:], null, null] },
         )
 
     // channel: [ meta, fastq_info, fastq_fwd, fastq_rev ]
     ch_outputs_rna = channel.empty()
         .mix(
             restoreMeta(ch_fastq_processed_sorted.rna, ch_inputs),
-            ch_inputs_rna_sorted.skip.map { meta -> [meta, [:], [], []] },
+            ch_inputs_rna_sorted.skip.map { meta -> [meta, [:], null, null] },
         )
 
     emit:

@@ -79,7 +79,7 @@ workflow PURITY_ESTIMATE {
             READ_UMI_PROCESSING(
                 ch_inputs,
                 ch_fastq_dna,
-                ch_inputs.map { meta -> [meta, [:], [], []] },  // ch_rna_fastq
+                ch_inputs.map { meta -> [meta, [:], null, null] },  // ch_rna_fastq
                 panel_data.known_umis,
                 params.fastp_umi_enabled,
                 params.fastp_umi_location,
@@ -112,9 +112,9 @@ workflow PURITY_ESTIMATE {
 
     } else {
 
-        ch_align_dna_tumor_out = ch_inputs.map { meta -> [meta, [], []] }
-        ch_align_dna_normal_out = ch_inputs.map { meta -> [meta, [], []] }
-        ch_align_dna_donor_out = ch_inputs.map { meta -> [meta, [], []] }
+        ch_align_dna_tumor_out = ch_inputs.map { meta -> [meta, null, null] }
+        ch_align_dna_normal_out = ch_inputs.map { meta -> [meta, null, null] }
+        ch_align_dna_donor_out = ch_inputs.map { meta -> [meta, null, null] }
 
     }
 
@@ -139,8 +139,8 @@ workflow PURITY_ESTIMATE {
             hmf_data.unmap_regions,
             hmf_data.msi_jitter_sites,
             // NOTE(LN): panel specific MSI predictions not used as indels are unimportant for WISP
-            [],  // msi_model_coefficients
-            [],  // msi_model_error_rates
+            null,  // msi_model_coefficients
+            null,  // msi_model_error_rates
             params.sequencing_platform,
             targeted_mode,
             params.redux_umi_enabled,
@@ -153,9 +153,9 @@ workflow PURITY_ESTIMATE {
 
     } else {
 
-        ch_redux_tumor_out = ch_inputs.map { meta -> [meta, []] }
-        ch_redux_normal_out = ch_inputs.map { meta -> [meta, []] }
-        ch_redux_donor_out = ch_inputs.map { meta -> [meta, []] }
+        ch_redux_tumor_out = ch_inputs.map { meta -> [meta, null] }
+        ch_redux_normal_out = ch_inputs.map { meta -> [meta, null] }
+        ch_redux_donor_out = ch_inputs.map { meta -> [meta, null] }
 
     }
 
@@ -175,7 +175,7 @@ workflow PURITY_ESTIMATE {
             ref_data.genome_version,
             ref_data.genome_fai,
             hmf_data.heterozygous_sites,
-            [],  // target_regions_bed
+            null,  // target_regions_bed
             1,  // tumor_min_depth
             params.sequencing_platform,
             true,  // purity_estimate_mode
@@ -185,7 +185,7 @@ workflow PURITY_ESTIMATE {
 
     } else {
 
-        ch_amber_out = ch_inputs.map { meta -> [meta, []] }
+        ch_amber_out = ch_inputs.map { meta -> [meta, null] }
 
     }
 
@@ -205,7 +205,7 @@ workflow PURITY_ESTIMATE {
             ref_data.genome_fai,
             hmf_data.gc_profile,
             hmf_data.diploid_bed,
-            [],  // panel_target_regions_normalisation
+            null,  // panel_target_regions_normalisation
             targeted_mode,
             true,  // purity_estimate_mode
         )
@@ -214,7 +214,7 @@ workflow PURITY_ESTIMATE {
 
     } else {
 
-        ch_cobalt_out = ch_inputs.map { meta -> [meta, []] }
+        ch_cobalt_out = ch_inputs.map { meta -> [meta, null] }
 
     }
 
@@ -227,9 +227,9 @@ workflow PURITY_ESTIMATE {
 
         SAGE_APPEND(
             ch_inputs,
-            ch_inputs.map { meta -> [meta, []] },  // ch_purple_dir
+            ch_inputs.map { meta -> [meta, null] },  // ch_purple_dir
             ch_redux_tumor_out,
-            ch_inputs.map { meta -> [meta, [], []] },  // ch_tumor_rna_aln
+            ch_inputs.map { meta -> [meta, null, null] },  // ch_tumor_rna_aln
             ref_data.genome_fasta,
             ref_data.genome_version,
             ref_data.genome_fai,
@@ -243,7 +243,7 @@ workflow PURITY_ESTIMATE {
 
     } else {
 
-        ch_sage_somatic_append_out = ch_inputs.map { meta -> [meta, []] }
+        ch_sage_somatic_append_out = ch_inputs.map { meta -> [meta, null] }
 
     }
 

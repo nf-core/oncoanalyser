@@ -161,7 +161,7 @@ workflow NEO_PREDICTION {
     ch_annotate_fusions_out = channel.empty()
         .mix(
             restoreMeta(channel.topic('neo_annotated_fusions_tsv'), ch_inputs),
-            ch_isofox_inputs_sorted.skip.map { meta -> [meta, []] },
+            ch_isofox_inputs_sorted.skip.map { meta -> [meta, null] },
         )
 
     //
@@ -186,7 +186,7 @@ workflow NEO_PREDICTION {
                 cancer_type: meta.cancer_type,
             ]
 
-            def sage_append_vcf_somatic = []
+            def sage_append_vcf_somatic = null
             if (hasTumorRna(meta)) {
                 meta_scorer.sample_rna_id = getTumorRnaSampleName(meta)
 

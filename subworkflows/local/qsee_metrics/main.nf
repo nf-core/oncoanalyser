@@ -110,7 +110,7 @@ workflow QSEE_METRICS {
     ch_outputs = channel.empty()
         .mix(
             restoreMeta(channel.topic('qsee_dir'), ch_inputs),
-            ch_inputs_sorted.skip.map { meta -> [meta, []] },
+            ch_inputs_sorted.skip.map { meta -> [meta, null] },
         )
 
     emit:

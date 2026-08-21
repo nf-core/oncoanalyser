@@ -117,7 +117,7 @@ workflow CUPPA_PREDICTION {
 
                 meta_cuppa.sample_id = tumor_dna_id
 
-                isofox_dir = []
+                isofox_dir = null
 
             } else if (run_rna) {
 
@@ -126,9 +126,9 @@ workflow CUPPA_PREDICTION {
                 meta_cuppa.sample_id = has_tumor_dna ? tumor_dna_id : tumor_rna_id
                 meta_cuppa.sample_rna_id = tumor_rna_id
 
-                purple_dir = []
-                linx_annotation_dir = []
-                virusinterpreter_dir = []
+                purple_dir = null
+                linx_annotation_dir = null
+                virusinterpreter_dir = null
 
             } else {
 
@@ -154,7 +154,7 @@ workflow CUPPA_PREDICTION {
     ch_outputs = channel.empty()
         .mix(
             restoreMeta(channel.topic('cuppa_dir'), ch_inputs),
-            ch_inputs_sorted.skip.map { meta -> [meta, []] },
+            ch_inputs_sorted.skip.map { meta -> [meta, null] },
         )
 
     emit:

@@ -42,7 +42,7 @@ workflow PREPARE_OUTPUTS_WGTS {
             channel.topic('sigs_dir').flatMap { meta, d ->                     return get_dir_filepaths(meta, d) },
             channel.topic('teal_prep_normal_bam').flatMap { meta, bam, bai ->  return [bam, bai].findAll().collect { d -> ["${meta.key}/teal/${d.name}", d] } },
             channel.topic('teal_prep_tumor_bam').flatMap { meta, bam, bai ->   return [bam, bai].findAll().collect { d -> ["${meta.key}/teal/${d.name}", d] } },
-            channel.topic('teal_tsvs').flatMap { meta, e ->                    def fps = e instanceof List ? e : [e]; fps.collect { d -> ["${meta.key}/teal/${d.name}", d] } },
+            channel.topic('teal_tsvs').flatMap { meta, e ->                    def fps = e instanceof Collection ? e : [e]; fps.collect { d -> ["${meta.key}/teal/${d.name}", d] } },
             channel.topic('virusbreakend_tsv').map { meta, d ->                return ["${meta.key}/virusbreakend/${d.name}", d] },
             channel.topic('virusbreakend_vcf').map { meta, d ->                return ["${meta.key}/virusbreakend/${d.name}", d] },
             channel.topic('virusinterpreter_dir').flatMap { meta, d ->         return get_dir_filepaths(meta, d) },
@@ -51,7 +51,7 @@ workflow PREPARE_OUTPUTS_WGTS {
 
             channel.topic('command_files').flatMap { f -> get_command_log_filepath(f) }
         )
-        .flatMap { meta, d -> return d instanceof List ? d.collect { e -> [meta, e] } : [[meta, d]] }
+        .flatMap { meta, d -> return d instanceof Collection ? d.collect { e -> [meta, e] } : [[meta, d]] }
 
     emit:
     results = ch_results
@@ -93,7 +93,7 @@ workflow PREPARE_OUTPUTS_TARGETED {
 
             channel.topic('command_files').flatMap { f -> get_command_log_filepath(f) }
         )
-        .flatMap { meta, d -> return d instanceof List ? d.collect { e -> [meta, e] } : [[meta, d]] }
+        .flatMap { meta, d -> return d instanceof Collection ? d.collect { e -> [meta, e] } : [[meta, d]] }
 
     emit:
     results = ch_results
@@ -114,7 +114,7 @@ workflow PREPARE_OUTPUTS_PURITY_ESTIMATE {
 
             channel.topic('command_files').flatMap { f -> get_command_log_filepath(f) }
         )
-        .flatMap { meta, d -> return d instanceof List ? d.collect { e -> [meta, e] } : [[meta, d]] }
+        .flatMap { meta, d -> return d instanceof Collection ? d.collect { e -> [meta, e] } : [[meta, d]] }
 
     emit:
     results = ch_results
@@ -142,7 +142,7 @@ workflow PREPARE_OUTPUTS_PANEL_RESOURCE_CREATION {
 
             channel.topic('command_files').flatMap { f -> get_command_log_filepath(f) }
         )
-        .flatMap { meta, d -> return d instanceof List ? d.collect { e -> [meta, e] } : [[meta, d]] }
+        .flatMap { meta, d -> return d instanceof Collection ? d.collect { e -> [meta, e] } : [[meta, d]] }
 
     emit:
     results = ch_results

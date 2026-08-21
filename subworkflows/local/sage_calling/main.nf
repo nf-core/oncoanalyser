@@ -196,16 +196,16 @@ workflow SAGE_CALLING {
     ch_outputs_somatic = channel.empty()
         .mix(
             restoreMeta(channel.topic('sage_somatic_dir'), ch_inputs),
-            ch_inputs_somatic_sorted.skip.map { meta -> [meta, []] },
-            ch_inputs_sorted.skip.map { meta -> [meta, []] },
+            ch_inputs_somatic_sorted.skip.map { meta -> [meta, null] },
+            ch_inputs_sorted.skip.map { meta -> [meta, null] },
         )
 
     // channel: [ meta, sage_dir ]
     ch_outputs_germline = channel.empty()
         .mix(
             restoreMeta(channel.topic('sage_germline_dir'), ch_inputs),
-            ch_inputs_germline_sorted.skip.map { meta -> [meta, []] },
-            ch_inputs_sorted.skip.map { meta -> [meta, []] },
+            ch_inputs_germline_sorted.skip.map { meta -> [meta, null] },
+            ch_inputs_sorted.skip.map { meta -> [meta, null] },
         )
 
     emit:
