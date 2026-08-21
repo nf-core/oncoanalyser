@@ -6,7 +6,8 @@
 
 include { AMBER_PROFILING                  } from '../subworkflows/local/amber_profiling'
 include { COBALT_PROFILING                 } from '../subworkflows/local/cobalt_profiling'
-include { PREPARE_OUTPUTS_PURITY_ESTIMATE  } from '../subworkflows/local/prepare_outputs'
+include { get_dir_filepaths       } from '../subworkflows/local/prepare_outputs'
+include { get_command_log_filepath } from '../subworkflows/local/prepare_outputs'
 include { PREPARE_REFERENCE                } from '../subworkflows/local/prepare_reference'
 include { READ_ALIGNMENT_DNA               } from '../subworkflows/local/read_alignment_dna'
 include { READ_UMI_PROCESSING              } from '../subworkflows/local/read_umi_processing'
@@ -21,6 +22,9 @@ include { RunMode                       } from '../subworkflows/local/utils_nfco
 include { getDnaFastqChannel            } from '../subworkflows/local/utils_nfcore_oncoanalyser_pipeline/channels'
 include { getEnumFromString             } from '../subworkflows/local/utils_nfcore_oncoanalyser_pipeline/utils'
 include { getPrepConfigFromSamplesheet  } from '../subworkflows/local/utils_nfcore_oncoanalyser_pipeline/validate_params'
+include { getTumorDnaSampleName         } from '../subworkflows/local/utils_nfcore_oncoanalyser_pipeline/accessors'
+include { getNormalDnaSampleName        } from '../subworkflows/local/utils_nfcore_oncoanalyser_pipeline/accessors'
+include { getDonorDnaSampleName         } from '../subworkflows/local/utils_nfcore_oncoanalyser_pipeline/accessors'
 
 /*
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -297,10 +301,24 @@ workflow PURITY_ESTIMATE {
     //
     // SUBWORKFLOW: Prepare outputs for publishing
     //
-    PREPARE_OUTPUTS_PURITY_ESTIMATE()
+    ch_results = channel.empty()
+        .mix(
+            ch_amber_out.flatMap { meta, d ->               return get_dir_filepaths(meta, d) },
+            ch_cobalt_out.flatMap { meta, d ->              return get_dir_filepaths(meta, d) },
+            ch_redux_tumor_out.flatMap { meta, d ->         return get_dir_filepaths(meta, d, "alignments/${getTumorDnaSampleName(meta, primary: true)}") },
+            ch_redux_normal_out.flatMap { meta, d ->        return get_dir_filepaths(meta, d, "alignments/${getNormalDnaSampleName(meta)}") },
+            ch_redux_donor_out.flatMap { meta, d ->         return get_dir_filepaths(meta, d, "alignments/${getDonorDnaSampleName(meta)}") },
+            ch_sage_somatic_append_out.flatMap { meta, d -> return get_dir_filepaths(meta, d, "sage_append/${getTumorDnaSampleName(meta, primary: false)}") },
+            channel.topic('wisp_dir').flatMap { meta, d ->  return get_dir_filepaths(meta, d) },
+
+            channel.topic('write_reference_data').map { d -> return ["reference_data/${workflow.manifest.version}/", d] },
+
+            channel.topic('command_files').flatMap { f -> get_command_log_filepath(f) }
+        )
+        .flatMap { meta, d -> return d instanceof Collection ? d.collect { e -> [meta, e] } : [[meta, d]] }
 
     emit:
-    results = PREPARE_OUTPUTS_PURITY_ESTIMATE.out.results
+    results = ch_results
 }
 
 /*

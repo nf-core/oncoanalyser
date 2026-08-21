@@ -4,7 +4,7 @@
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 */
 
-include { PREPARE_OUTPUTS_PREPARE_REFERENCE    } from '../subworkflows/local/prepare_outputs'
+include { get_command_log_filepath  } from '../subworkflows/local/prepare_outputs'
 include { PREPARE_REFERENCE as STAGE_REFERENCE } from '../subworkflows/local/prepare_reference'
 
 include { softwareVersionsToYAML } from '../subworkflows/nf-core/utils_nfcore_pipeline'
@@ -62,10 +62,14 @@ workflow PREPARE_REFERENCE {
     //
     // SUBWORKFLOW: Prepare outputs for publishing
     //
-    PREPARE_OUTPUTS_PREPARE_REFERENCE()
+    ch_results = channel.empty()
+        .mix(
+            channel.topic('write_reference_data').map { d -> return ["reference_data/${workflow.manifest.version}/", d] },
+            channel.topic('command_files').flatMap { f -> get_command_log_filepath(f) }
+        )
 
     emit:
-    results = PREPARE_OUTPUTS_PREPARE_REFERENCE.out.results
+    results = ch_results
 }
 
 /*
