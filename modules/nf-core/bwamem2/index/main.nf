@@ -1,3 +1,5 @@
+nextflow.enable.types = true
+
 process BWAMEM2_INDEX {
     tag "$fasta"
     label 'process_single'
@@ -9,13 +11,13 @@ process BWAMEM2_INDEX {
         'biocontainers/bwa-mem2:2.2.1--he513fc3_0' }"
 
     input:
-    path fasta
-    path alt
+    fasta: Path
+    alt: Path?
 
-    output:
-    path 'bwa-mem2_index'                                   , topic: bwamem2_index
-    tuple val([:]), val('bwamem2_index'), path('.command.*'), topic: command_files
-    path 'versions.yml'                                     , topic: versions
+    topic:
+    file('bwa-mem2_index/') >> 'bwamem2_index'
+    tuple([:], 'bwamem2_index', files('.command.*')) >> 'command_files'
+    file('versions.yml') >> 'versions'
 
     when:
     task.ext.when == null || task.ext.when
