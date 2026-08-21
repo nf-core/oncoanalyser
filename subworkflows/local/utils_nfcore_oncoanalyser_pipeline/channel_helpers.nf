@@ -18,7 +18,11 @@ def groupByMeta(Map named_args, List channels) {
         return d
     }
 
-    r = r.inject(Channel.empty()) { acc, ch -> acc.mix(ch) }
+    // NOTE(SW): seed the fold with the first channel, not Channel.empty(). A typed process
+    // `topic:` output is a DataflowStream; mixing it with a queue (Channel.empty()) fails in
+    // typed mode. Use `.drop(1)` rather than `r[1..-1]`: the reverse range 1..-1 normalises
+    // to subList(0, 2) for a single-element list and throws IndexOutOfBoundsException.
+    r = r.drop(1).inject(r[0]) { acc, ch -> acc.mix(ch) }
 
     // NOTE(SW): As of Nextflow 22.10.6, groupTuple requires a matching meta /and/ an additional element to complete without error, these placeholders are filtered in the groupByMeta function
     r = r.filter { it[0] != Constants.PLACEHOLDER_META }

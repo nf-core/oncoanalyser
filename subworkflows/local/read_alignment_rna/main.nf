@@ -2,6 +2,8 @@
 // Align RNA reads
 //
 
+nextflow.enable.types = true
+
 include { GATK4_MARKDUPLICATES  } from '../../../modules/nf-core/gatk4/markduplicates/main'
 include { SAMTOOLS_SORT  } from '../../../modules/nf-core/samtools/sort/main'
 include { STAR_ALIGN  } from '../../../modules/local/star/align/main'
