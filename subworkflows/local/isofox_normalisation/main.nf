@@ -28,7 +28,8 @@ workflow ISOFOX_NORMALISATION {
         .map { meta, isofox_dir ->
             return selectCurrentOrExisting(isofox_dir, getInput(getTumorRnaSample(meta), FileType.ISOFOX_DIR))
         }
-        .collect()
+        .filter { it != null }
+        .toList()
 
     // Run process
     ISOFOX_PANEL_NORMALISATION(

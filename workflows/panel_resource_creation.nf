@@ -286,13 +286,16 @@ workflow PANEL_RESOURCE_CREATION {
     //
     // SUBWORKFLOW: Run Isofox TPM normalisation
     //
-    ISOFOX_NORMALISATION(
-        ch_isofox_out,
-        ref_data.genome_version,
-        isofox_gene_ids,
-        hmf_data.map { it.isofox_gene_distribution },
-    )
-    ch_isofox_normalisation_csv = ISOFOX_NORMALISATION.out.isofox_normalisation_csv
+    ch_isofox_normalisation_csv = channel.empty()
+    if (run_config.has_rna) {
+        ISOFOX_NORMALISATION(
+            ch_isofox_out,
+            ref_data.genome_version,
+            isofox_gene_ids,
+            hmf_data.map { it.isofox_gene_distribution },
+        )
+        ch_isofox_normalisation_csv = ISOFOX_NORMALISATION.out.isofox_normalisation_csv
+    }
 
     //
     // TASK: Aggregate software versions

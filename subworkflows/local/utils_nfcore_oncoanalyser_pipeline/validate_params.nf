@@ -769,4 +769,21 @@ def validateInput(inputs, run_config, params, log) {
         exit 1
     }
 
+    // Require panel definition inputs in PANEL_RESOURCE_CREATION mode
+    if (run_config.mode == RunMode.PANEL_RESOURCE_CREATION && ! params.target_regions_bed) {
+        log.error "\n~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n" +
+            "  Running the panel resource creation workflow requires that the\n" +
+            "  --target_regions_bed argument is set with an appropriate panel target regions file.\n" +
+            "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
+        exit 1
+    }
+
+    if (run_config.mode == RunMode.PANEL_RESOURCE_CREATION && ! params.driver_gene_panel) {
+        log.error "\n~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n" +
+            "  Running the panel resource creation workflow requires that the\n" +
+            "  --driver_gene_panel argument is set with an appropriate driver gene list file.\n" +
+            "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
+        exit 1
+    }
+
 }

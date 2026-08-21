@@ -9,9 +9,9 @@ process ISOFOX_PANEL_NORMALISATION {
         'biocontainers/hmftools-isofox:2.0.1--hdfd78af_0' }"
 
     input:
-    isofox_dirs: Path
+    isofox_dirs: List<Path>
     genome_ver: String
-    gene_ids: Path
+    gene_ids: Path?
     gene_distribution: Path
 
     topic:
@@ -26,6 +26,8 @@ process ISOFOX_PANEL_NORMALISATION {
     def args = task.ext.args ?: ''
 
     def log_level_arg = task.ext.log_level ? "-log_level ${task.ext.log_level}" : ''
+
+    def gene_ids_arg = gene_ids ? "-gene_id_file ${gene_ids}" : ''
 
     """
     mkdir -p inputs/
@@ -43,7 +45,7 @@ process ISOFOX_PANEL_NORMALISATION {
         -sample_data_file sample_ids.txt \\
         -root_data_dir inputs/ \\
         -analyses PANEL_TPM_NORMALISATION \\
-        -gene_id_file ${gene_ids} \\
+        ${gene_ids_arg} \\
         -gene_distribution_file ${gene_distribution} \\
         ${log_level_arg} \\
         -output_dir ./
