@@ -10,7 +10,16 @@ process WISP {
         'biocontainers/hmftools-wisp:1.3.1--hdfd78af_0' }"
 
     input:
-    tuple(meta: Map, primary_purple_dir: Path, primary_amber_dir: Path?, primary_normal_aln: Path?, longitudinal_redux_dir: Path, longitudinal_amber_dir: Path, longitudinal_cobalt_dir: Path, longitudinal_sage_append_dir: Path)
+    tuple(
+        meta: Map,
+        primary_purple_dir: Path,
+        primary_amber_dir: Path?,
+        primary_normal_aln: Path?,
+        longitudinal_redux_dir: Path,
+        longitudinal_amber_dir: Path,
+        longitudinal_cobalt_dir: Path,
+        longitudinal_sage_append_dir: Path,
+    )
     genome_fasta: Path
     genome_fai: Path
     targeted_mode: Boolean
@@ -24,9 +33,9 @@ process WISP {
     stageAs longitudinal_sage_append_dir, 'sage_append_longitudinal'
 
     topic:
-    tuple(meta, file('wisp/')) >> 'wisp_dir'
+    tuple(meta, file('wisp/'))               >> 'wisp_dir'
     tuple(meta, 'wisp', files('.command.*')) >> 'command_files'
-    file('versions.yml') >> 'versions'
+    file('versions.yml')                     >> 'versions'
 
     when:
     task.ext.when == null || task.ext.when

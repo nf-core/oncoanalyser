@@ -12,7 +12,8 @@ process SAGE_VISUALISER {
         'biocontainers/hmftools-sage:5.0.2--hdfd78af_0' }"
 
     input:
-    tuple(meta: Map,
+    tuple(
+        meta: Map,
         tumor_aln: Path,
         normal_aln: Path?,
         donor_aln: Path?,
@@ -21,7 +22,8 @@ process SAGE_VISUALISER {
         donor_idx: Path?,
         redux_tsvs: List<Path>,
         purple_vcf: Path,
-        purple_vcf_tbi: Path)
+        purple_vcf_tbi: Path,
+    )
     genome_fasta: Path
     genome_ver: String
     genome_fai: Path
@@ -33,9 +35,9 @@ process SAGE_VISUALISER {
     targeted_mode: Boolean
 
     topic:
-    tuple(meta, file('sage_vis/')) >> 'sage_visualiser_dir'
+    tuple(meta, file('sage_vis/'))                      >> 'sage_visualiser_dir'
     tuple(meta, 'sage_visualiser', files('.command.*')) >> 'command_files'
-    file('versions.yml') >> 'versions'
+    file('versions.yml')                                >> 'versions'
 
     when:
     task.ext.when == null || task.ext.when

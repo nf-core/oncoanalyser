@@ -16,9 +16,9 @@ process PEACH {
     drug_info: Path
 
     topic:
-    tuple(meta, file('peach/')) >> 'peach_dir'
+    tuple(meta, file('peach/'))               >> 'peach_dir'
     tuple(meta, 'peach', files('.command.*')) >> 'command_files'
-    file('versions.yml') >> 'versions'
+    file('versions.yml')                      >> 'versions'
 
     when:
     task.ext.when == null || task.ext.when

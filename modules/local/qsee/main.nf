@@ -10,7 +10,16 @@ process QSEE {
         'biocontainers/hmftools-qsee:1.0--hdfd78af_0' }"
 
     input:
-    tuple(meta: Map, redux_tsvs_tumor: List<Path>, redux_tsvs_normal: List<Path>?, bamtools_dir_tumor: Path, bamtools_dir_normal: Path?, cobalt_dir: Path?, esvee_dir: Path?, purple_dir: Path)
+    tuple(
+        meta: Map,
+        redux_tsvs_tumor: List<Path>,
+        redux_tsvs_normal: List<Path>?,
+        bamtools_dir_tumor: Path,
+        bamtools_dir_normal: Path?,
+        cobalt_dir: Path?,
+        esvee_dir: Path?,
+        purple_dir: Path,
+    )
     driver_gene_panel: Path
     cohort_percentiles: Path
     sequencing_platform: String
@@ -23,9 +32,9 @@ process QSEE {
     stageAs bamtools_dir_normal, 'bamtools_normal'
 
     topic:
-    tuple(meta, file('qsee/')) >> 'qsee_dir'
+    tuple(meta, file('qsee/'))               >> 'qsee_dir'
     tuple(meta, 'qsee', files('.command.*')) >> 'command_files'
-    file('versions.yml') >> 'versions'
+    file('versions.yml')                     >> 'versions'
 
     when:
     task.ext.when == null || task.ext.when

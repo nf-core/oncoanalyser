@@ -27,8 +27,8 @@ process REDUX {
 
     topic:
     tuple(meta, file("redux_${meta.sample_id}/")) >> 'redux_dir'
-    tuple(meta, 'redux', files('.command.*')) >> 'command_files'
-    file('versions.yml') >> 'versions'
+    tuple(meta, 'redux', files('.command.*'))     >> 'command_files'
+    file('versions.yml')                          >> 'versions'
 
     when:
     task.ext.when == null || task.ext.when

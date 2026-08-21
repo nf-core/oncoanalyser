@@ -14,9 +14,9 @@ process SIGS {
     signatures: Path
 
     topic:
-    tuple(meta, file('sigs/')) >> 'sigs_dir'
+    tuple(meta, file('sigs/'))               >> 'sigs_dir'
     tuple(meta, 'sigs', files('.command.*')) >> 'command_files'
-    file('versions.yml') >> 'versions'
+    file('versions.yml')                     >> 'versions'
 
     when:
     task.ext.when == null || task.ext.when

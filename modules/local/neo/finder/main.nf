@@ -17,9 +17,9 @@ process NEO_FINDER {
     ensembl_data_resources: Path
 
     topic:
-    tuple(meta, file('neo_finder/')) >> 'neo_finder_dir'
+    tuple(meta, file('neo_finder/'))               >> 'neo_finder_dir'
     tuple(meta, 'neo_finder', files('.command.*')) >> 'command_files'
-    file('versions.yml') >> 'versions'
+    file('versions.yml')                           >> 'versions'
 
     when:
     task.ext.when == null || task.ext.when

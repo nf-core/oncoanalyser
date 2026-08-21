@@ -26,9 +26,9 @@ process ESVEE {
     sequencing_platform: String
 
     topic:
-    tuple(meta, file('esvee/')) >> 'esvee_dir'
+    tuple(meta, file('esvee/'))               >> 'esvee_dir'
     tuple(meta, 'esvee', files('.command.*')) >> 'command_files'
-    file('versions.yml') >> 'versions'
+    file('versions.yml')                      >> 'versions'
 
     when:
     task.ext.when == null || task.ext.when

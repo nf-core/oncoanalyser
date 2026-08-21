@@ -16,9 +16,9 @@ process VIRUSINTERPRETER {
     blocklist_db: Path
 
     topic:
-    tuple(meta, file('virusinterpreter/')) >> 'virusinterpreter_dir'
+    tuple(meta, file('virusinterpreter/'))               >> 'virusinterpreter_dir'
     tuple(meta, 'virusinterpreter', files('.command.*')) >> 'command_files'
-    file('versions.yml') >> 'versions'
+    file('versions.yml')                                 >> 'versions'
 
     when:
     task.ext.when == null || task.ext.when

@@ -17,9 +17,9 @@ process GRIDSS_INDEX {
     genome_bwa_index: Path
 
     topic:
-    file('gridss_index/') >> 'gridss_index'
+    file('gridss_index/')                           >> 'gridss_index'
     tuple([:], 'gridss_index', files('.command.*')) >> 'command_files'
-    file('versions.yml') >> 'versions'
+    file('versions.yml')                            >> 'versions'
 
     when:
     task.ext.when == null || task.ext.when

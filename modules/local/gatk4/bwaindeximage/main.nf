@@ -13,9 +13,9 @@ process GATK4_BWA_INDEX_IMAGE {
     genome_fasta: Path
 
     topic:
-    file("${genome_fasta}.img") >> 'gatk4_bwa_index_img'
+    file("${genome_fasta}.img")                              >> 'gatk4_bwa_index_img'
     tuple([:], 'gatk4_bwa_index_image', files('.command.*')) >> 'command_files'
-    file('versions.yml') >> 'versions'
+    file('versions.yml')                                     >> 'versions'
 
     when:
     task.ext.when == null || task.ext.when

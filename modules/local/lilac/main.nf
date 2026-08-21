@@ -10,7 +10,16 @@ process LILAC {
         'biocontainers/hmftools-lilac:2.0--hdfd78af_0' }"
 
     input:
-    tuple(meta: Map, normal_dna_aln: Path?, normal_dna_idx: Path?, tumor_dna_aln: Path?, tumor_dna_idx: Path?, tumor_rna_aln: Path?, tumor_rna_idx: Path?, purple_dir: Path?)
+    tuple(
+        meta: Map,
+        normal_dna_aln: Path?,
+        normal_dna_idx: Path?,
+        tumor_dna_aln: Path?,
+        tumor_dna_idx: Path?,
+        tumor_rna_aln: Path?,
+        tumor_rna_idx: Path?,
+        purple_dir: Path?,
+    )
     genome_fasta: Path
     genome_ver: String
     genome_fai: Path
@@ -22,9 +31,9 @@ process LILAC {
     stageAs lilac_resources, 'lilac_resources'
 
     topic:
-    tuple(meta, file('lilac/')) >> 'lilac_dir'
+    tuple(meta, file('lilac/'))               >> 'lilac_dir'
     tuple(meta, 'lilac', files('.command.*')) >> 'command_files'
-    file('versions.yml') >> 'versions'
+    file('versions.yml')                      >> 'versions'
 
     when:
     task.ext.when == null || task.ext.when

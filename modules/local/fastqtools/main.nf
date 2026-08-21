@@ -16,8 +16,8 @@ process FASTQ_TOOLS {
 
     topic:
     tuple(meta, file('output/*R1.umi.fastq.gz'), file('output/*R2.umi.fastq.gz')) >> 'fastqtools_fastq'
-    tuple(meta, 'fastqtools', files('.command.*')) >> 'command_files'
-    file('versions.yml') >> 'versions'
+    tuple(meta, 'fastqtools', files('.command.*'))                                >> 'command_files'
+    file('versions.yml')                                                          >> 'versions'
 
     when:
     task.ext.when == null || task.ext.when

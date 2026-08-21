@@ -14,10 +14,10 @@ process STAR_ALIGN {
     genome_star_index: Path
 
     topic:
-    tuple(meta, file('*bam')) >> 'star_align_bam'
-    tuple(meta, file('*Log.final.out')) >> 'star_align_qc_log'
+    tuple(meta, file('*bam'))                      >> 'star_align_bam'
+    tuple(meta, file('*Log.final.out'))            >> 'star_align_qc_log'
     tuple(meta, 'star_align', files('.command.*')) >> 'command_files'
-    file('versions.yml') >> 'versions'
+    file('versions.yml')                           >> 'versions'
 
     when:
     task.ext.when == null || task.ext.when

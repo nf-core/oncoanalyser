@@ -20,8 +20,8 @@ process BAMTOOLS {
 
     topic:
     tuple(meta, file("bamtools_${meta.sample_id}/")) >> 'bamtools_metrics_dir'
-    tuple(meta, 'bamtools', files('.command.*')) >> 'command_files'
-    file('versions.yml') >> 'versions'
+    tuple(meta, 'bamtools', files('.command.*'))     >> 'command_files'
+    file('versions.yml')                             >> 'versions'
 
     when:
     task.ext.when == null || task.ext.when

@@ -16,9 +16,9 @@ process LINX_GERMLINE {
     driver_gene_panel: Path
 
     topic:
-    tuple(meta, file('linx_germline/')) >> 'linx_germline_annotation_dir'
+    tuple(meta, file('linx_germline/'))               >> 'linx_germline_annotation_dir'
     tuple(meta, 'linx_germline', files('.command.*')) >> 'command_files'
-    file('versions.yml') >> 'versions'
+    file('versions.yml')                              >> 'versions'
 
     when:
     task.ext.when == null || task.ext.when

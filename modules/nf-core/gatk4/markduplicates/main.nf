@@ -15,13 +15,13 @@ process GATK4_MARKDUPLICATES {
     fasta_fai: Path?
 
     topic:
-    tuple(meta, file('*.cram', optional: true)) >> 'gatk4_markduplicates_cram'
-    tuple(meta, file('*.bam', optional: true)) >> 'gatk4_markduplicates_bam'
-    tuple(meta, file('*.crai', optional: true)) >> 'gatk4_markduplicates_crai'
-    tuple(meta, file('*.bai', optional: true)) >> 'gatk4_markduplicates_bai'
-    tuple(meta, file('*.metrics')) >> 'gatk4_markduplicates_metrics'
+    tuple(meta, file('*.cram', optional: true))              >> 'gatk4_markduplicates_cram'
+    tuple(meta, file('*.bam', optional: true))               >> 'gatk4_markduplicates_bam'
+    tuple(meta, file('*.crai', optional: true))              >> 'gatk4_markduplicates_crai'
+    tuple(meta, file('*.bai', optional: true))               >> 'gatk4_markduplicates_bai'
+    tuple(meta, file('*.metrics'))                           >> 'gatk4_markduplicates_metrics'
     tuple(meta, 'gatk4_markduplicates', files('.command.*')) >> 'command_files'
-    file('versions.yml') >> 'versions'
+    file('versions.yml')                                     >> 'versions'
 
     when:
     task.ext.when == null || task.ext.when

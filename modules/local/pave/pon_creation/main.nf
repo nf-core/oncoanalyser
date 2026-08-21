@@ -13,9 +13,9 @@ process PAVE_PON_PANEL_CREATION {
     genome_ver: String
 
     topic:
-    file('pave.somatic_artefacts.*.tsv') >> 'pave_pon_panel_creation_artefacts'
+    file('pave.somatic_artefacts.*.tsv')                       >> 'pave_pon_panel_creation_artefacts'
     tuple([:], 'pave_pon_panel_creation', files('.command.*')) >> 'command_files'
-    file('versions.yml') >> 'versions'
+    file('versions.yml')                                       >> 'versions'
 
     when:
     task.ext.when == null || task.ext.when

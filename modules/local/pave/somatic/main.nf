@@ -24,9 +24,9 @@ process PAVE_SOMATIC {
     sequencing_platform: String
 
     topic:
-    tuple(meta, file('pave_somatic/')) >> 'pave_somatic_dir'
+    tuple(meta, file('pave_somatic/'))               >> 'pave_somatic_dir'
     tuple(meta, 'pave_somatic', files('.command.*')) >> 'command_files'
-    file('versions.yml') >> 'versions'
+    file('versions.yml')                             >> 'versions'
 
     when:
     task.ext.when == null || task.ext.when

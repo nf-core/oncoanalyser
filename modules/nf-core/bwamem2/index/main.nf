@@ -15,9 +15,9 @@ process BWAMEM2_INDEX {
     alt: Path?
 
     topic:
-    file('bwa-mem2_index/') >> 'bwamem2_index'
+    file('bwa-mem2_index/')                          >> 'bwamem2_index'
     tuple([:], 'bwamem2_index', files('.command.*')) >> 'command_files'
-    file('versions.yml') >> 'versions'
+    file('versions.yml')                             >> 'versions'
 
     when:
     task.ext.when == null || task.ext.when

@@ -15,8 +15,8 @@ process FASTP_SPLIT {
 
     topic:
     tuple(meta, files('output/*_R1.fastp_split.fastq.gz'), files('output/*_R2.fastp_split.fastq.gz', optional: true)) >> 'fastp_split_fastq'
-    tuple(meta, 'fastp_split', files('.command.*')) >> 'command_files'
-    file('versions.yml') >> 'versions'
+    tuple(meta, 'fastp_split', files('.command.*'))                                                                   >> 'command_files'
+    file('versions.yml')                                                                                              >> 'versions'
 
     when:
     task.ext.when == null || task.ext.when

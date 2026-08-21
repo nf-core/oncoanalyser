@@ -10,7 +10,15 @@ process NEO_SCORER {
         'biocontainers/hmftools-neo:1.3--hdfd78af_0' }"
 
     input:
-    tuple(meta: Map, isofox_dir: Path?, purple_dir: Path, sage_vcf: Path?, lilac_dir: Path, neo_finder_dir: Path, annotated_fusions: Path?)
+    tuple(
+        meta: Map,
+        isofox_dir: Path?,
+        purple_dir: Path,
+        sage_vcf: Path?,
+        lilac_dir: Path,
+        neo_finder_dir: Path,
+        annotated_fusions: Path?,
+    )
     ensembl_data_resources: Path
     neo_resources: Path
     cohort_tpm_medians: Path
@@ -19,9 +27,9 @@ process NEO_SCORER {
     stageAs neo_resources, 'neo_reference_data'
 
     topic:
-    tuple(meta, file('neo_scorer/')) >> 'neo_scorer_dir'
+    tuple(meta, file('neo_scorer/'))               >> 'neo_scorer_dir'
     tuple(meta, 'neo_scorer', files('.command.*')) >> 'command_files'
-    file('versions.yml') >> 'versions'
+    file('versions.yml')                           >> 'versions'
 
     when:
     task.ext.when == null || task.ext.when

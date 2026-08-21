@@ -19,10 +19,10 @@ process VIRUSBREAKEND {
     gridss_config: Path
 
     topic:
-    tuple(meta, file('*.summary.tsv')) >> 'virusbreakend_tsv'
-    tuple(meta, file('*.virusbreakend.vcf')) >> 'virusbreakend_vcf'
+    tuple(meta, file('*.summary.tsv'))                >> 'virusbreakend_tsv'
+    tuple(meta, file('*.virusbreakend.vcf'))          >> 'virusbreakend_vcf'
     tuple(meta, 'virusbreakend', files('.command.*')) >> 'command_files'
-    file('versions.yml') >> 'versions'
+    file('versions.yml')                              >> 'versions'
 
     when:
     task.ext.when == null || task.ext.when

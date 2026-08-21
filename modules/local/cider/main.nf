@@ -19,9 +19,9 @@ process CIDER {
     genome_img: Path
 
     topic:
-    tuple(meta, files('cider/*')) >> 'cider_results'
+    tuple(meta, files('cider/*'))             >> 'cider_results'
     tuple(meta, 'cider', files('.command.*')) >> 'command_files'
-    file('versions.yml') >> 'versions'
+    file('versions.yml')                      >> 'versions'
 
     when:
     task.ext.when == null || task.ext.when

@@ -17,9 +17,9 @@ process CUPPA {
     categories: String
 
     topic:
-    tuple(meta, file('cuppa/')) >> 'cuppa_dir'
+    tuple(meta, file('cuppa/'))               >> 'cuppa_dir'
     tuple(meta, 'cuppa', files('.command.*')) >> 'command_files'
-    file('versions.yml') >> 'versions'
+    file('versions.yml')                      >> 'versions'
 
     when:
     task.ext.when == null || task.ext.when

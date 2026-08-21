@@ -15,9 +15,9 @@ process ISOFOX_PANEL_NORMALISATION {
     gene_distribution: Path
 
     topic:
-    file('isofox.gene_normalisation.*.csv') >> 'isofox_normalisation_csv'
+    file('isofox.gene_normalisation.*.csv')                       >> 'isofox_normalisation_csv'
     tuple([:], 'isofox_panel_normalisation', files('.command.*')) >> 'command_files'
-    file('versions.yml') >> 'versions'
+    file('versions.yml')                                          >> 'versions'
 
     when:
     task.ext.when == null || task.ext.when

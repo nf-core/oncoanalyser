@@ -10,7 +10,15 @@ process AMBER {
         'biocontainers/hmftools-amber:4.3--hdfd78af_0' }"
 
     input:
-    tuple(meta: Map, tumor_aln: Path, tumor_idx: Path, normal_aln: Path?, normal_idx: Path?, donor_aln: Path?, donor_idx: Path?)
+    tuple(
+        meta: Map,
+        tumor_aln: Path,
+        tumor_idx: Path,
+        normal_aln: Path?,
+        normal_idx: Path?,
+        donor_aln: Path?,
+        donor_idx: Path?,
+    )
     genome_fasta: Path
     genome_ver: String
     genome_fai: Path
@@ -20,9 +28,9 @@ process AMBER {
     sequencing_platform: String
 
     topic:
-    tuple(meta, file('amber/')) >> 'amber_dir'
+    tuple(meta, file('amber/'))               >> 'amber_dir'
     tuple(meta, 'amber', files('.command.*')) >> 'command_files'
-    file('versions.yml') >> 'versions'
+    file('versions.yml')                      >> 'versions'
 
     when:
     task.ext.when == null || task.ext.when

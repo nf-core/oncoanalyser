@@ -14,9 +14,9 @@ process BWA_INDEX {
     alt: Path?
 
     topic:
-    file('bwa_index/') >> 'bwa_index'
+    file('bwa_index/')                           >> 'bwa_index'
     tuple([:], 'bwa_index', files('.command.*')) >> 'command_files'
-    file('versions.yml') >> 'versions'
+    file('versions.yml')                         >> 'versions'
 
     when:
     task.ext.when == null || task.ext.when

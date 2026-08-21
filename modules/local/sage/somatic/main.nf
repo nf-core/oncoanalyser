@@ -12,7 +12,16 @@ process SAGE_SOMATIC {
         'biocontainers/hmftools-sage:5.0.2--hdfd78af_0' }"
 
     input:
-    tuple(meta: Map, tumor_aln: Path, tumor_bai: Path, normal_aln: Path?, normal_bai: Path?, donor_aln: Path?, donor_bai: Path?, redux_tsvs: List<Path>)
+    tuple(
+        meta: Map,
+        tumor_aln: Path,
+        tumor_bai: Path,
+        normal_aln: Path?,
+        normal_bai: Path?,
+        donor_aln: Path?,
+        donor_bai: Path?,
+        redux_tsvs: List<Path>,
+    )
     genome_fasta: Path
     genome_ver: String
     genome_fai: Path
@@ -27,9 +36,9 @@ process SAGE_SOMATIC {
     targeted_mode: Boolean
 
     topic:
-    tuple(meta, file('somatic/')) >> 'sage_somatic_dir'
+    tuple(meta, file('somatic/'))                    >> 'sage_somatic_dir'
     tuple(meta, 'sage_somatic', files('.command.*')) >> 'command_files'
-    file('versions.yml') >> 'versions'
+    file('versions.yml')                             >> 'versions'
 
     when:
     task.ext.when == null || task.ext.when

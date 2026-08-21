@@ -23,9 +23,9 @@ process SAGE_GERMLINE {
     targeted_mode: Boolean
 
     topic:
-    tuple(meta, file('germline/')) >> 'sage_germline_dir'
+    tuple(meta, file('germline/'))                    >> 'sage_germline_dir'
     tuple(meta, 'sage_germline', files('.command.*')) >> 'command_files'
-    file('versions.yml') >> 'versions'
+    file('versions.yml')                              >> 'versions'
 
     when:
     task.ext.when == null || task.ext.when

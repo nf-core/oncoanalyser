@@ -23,9 +23,9 @@ process PAVE_GERMLINE {
     sequencing_platform: String
 
     topic:
-    tuple(meta, file('pave_germline/')) >> 'pave_germline_dir'
+    tuple(meta, file('pave_germline/'))               >> 'pave_germline_dir'
     tuple(meta, 'pave_germline', files('.command.*')) >> 'command_files'
-    file('versions.yml') >> 'versions'
+    file('versions.yml')                              >> 'versions'
 
     when:
     task.ext.when == null || task.ext.when

@@ -20,9 +20,9 @@ process COBALT {
     targeted_mode: Boolean
 
     topic:
-    tuple(meta, file('cobalt/')) >> 'cobalt_dir'
+    tuple(meta, file('cobalt/'))               >> 'cobalt_dir'
     tuple(meta, 'cobalt', files('.command.*')) >> 'command_files'
-    file('versions.yml') >> 'versions'
+    file('versions.yml')                       >> 'versions'
 
     when:
     task.ext.when == null || task.ext.when

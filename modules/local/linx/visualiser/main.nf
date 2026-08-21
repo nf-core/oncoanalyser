@@ -15,9 +15,9 @@ process LINX_VISUALISER {
     ensembl_data_resources: Path
 
     topic:
-    tuple(meta, file('plots/')) >> 'linx_visualiser_plots'
+    tuple(meta, file('plots/'))                         >> 'linx_visualiser_plots'
     tuple(meta, 'linx_visualiser', files('.command.*')) >> 'command_files'
-    file('versions.yml') >> 'versions'
+    file('versions.yml')                                >> 'versions'
 
     when:
     task.ext.when == null || task.ext.when

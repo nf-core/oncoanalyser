@@ -27,9 +27,9 @@ process ISOFOX {
     tpm_norm: Path?
 
     topic:
-    tuple(meta, file('isofox/')) >> 'isofox_dir'
+    tuple(meta, file('isofox/'))               >> 'isofox_dir'
     tuple(meta, 'isofox', files('.command.*')) >> 'command_files'
-    file('versions.yml') >> 'versions'
+    file('versions.yml')                       >> 'versions'
 
     when:
     task.ext.when == null || task.ext.when

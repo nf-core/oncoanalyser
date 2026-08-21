@@ -10,7 +10,15 @@ process PURPLE {
         'biocontainers/hmftools-purple:4.4--hdfd78af_0' }"
 
     input:
-    tuple(meta: Map, amber_dir: Path, cobalt_dir: Path, esvee_dir: Path?, pave_somatic_dir: Path?, pave_germline_dir: Path?, redux_tumor_tsvs: List<Path>?)
+    tuple(
+        meta: Map,
+        amber_dir: Path,
+        cobalt_dir: Path,
+        esvee_dir: Path?,
+        pave_somatic_dir: Path?,
+        pave_germline_dir: Path?,
+        redux_tumor_tsvs: List<Path>?,
+    )
     genome_fasta: Path
     genome_ver: String
     genome_fai: Path
@@ -27,9 +35,9 @@ process PURPLE {
     stageAs redux_tumor_tsvs, 'redux_tumor_tsvs/*'
 
     topic:
-    tuple(meta, file('purple/')) >> 'purple_dir'
+    tuple(meta, file('purple/'))               >> 'purple_dir'
     tuple(meta, 'purple', files('.command.*')) >> 'command_files'
-    file('versions.yml') >> 'versions'
+    file('versions.yml')                       >> 'versions'
 
     when:
     task.ext.when == null || task.ext.when

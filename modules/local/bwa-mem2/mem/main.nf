@@ -16,9 +16,9 @@ process BWAMEM2_ALIGN {
     append_fastq_comment: Boolean
 
     topic:
-    tuple(meta, file('*.bam'), file('*.bai')) >> 'bwamem2_align_bam'
+    tuple(meta, file('*.bam'), file('*.bai'))         >> 'bwamem2_align_bam'
     tuple(meta, 'bwamem2_align', files('.command.*')) >> 'command_files'
-    file('versions.yml') >> 'versions'
+    file('versions.yml')                              >> 'versions'
 
     when:
     task.ext.when == null || task.ext.when

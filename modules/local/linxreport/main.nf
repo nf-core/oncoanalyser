@@ -13,9 +13,9 @@ process LINXREPORT {
     tuple(meta: Map, linx_annotation_dir: Path, linx_visualiser_dir: Path)
 
     topic:
-    tuple(meta, file('*_linx.html')) >> 'linxreport_html'
+    tuple(meta, file('*_linx.html'))               >> 'linxreport_html'
     tuple(meta, 'linxreport', files('.command.*')) >> 'command_files'
-    file('versions.yml') >> 'versions'
+    file('versions.yml')                           >> 'versions'
 
     when:
     task.ext.when == null || task.ext.when
