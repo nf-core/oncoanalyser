@@ -2,6 +2,8 @@
 // PURPLE is a CNV caller that infers purity/ploidy and recovers low-confidence SVs
 //
 
+nextflow.enable.types = true
+
 include { PURPLE  } from '../../../modules/local/purple/main'
 
 include { FileType                 } from '../utils_nfcore_oncoanalyser_pipeline/types'

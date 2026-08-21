@@ -2,6 +2,8 @@
 // MultiQC aggregates and collates metrics for QC review
 //
 
+nextflow.enable.types = true
+
 include { MULTIQC  } from '../../../modules/local/multiqc/main'
 
 include { paramsSummaryMap  } from 'plugin/nf-schema'

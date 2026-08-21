@@ -2,6 +2,8 @@
 // CIDER identifies and annotates CDR3 sequences of IG and TCR loci
 //
 
+nextflow.enable.types = true
+
 include { CIDER  } from '../../../modules/local/cider/main'
 
 include { FileType                   } from '../utils_nfcore_oncoanalyser_pipeline/types'

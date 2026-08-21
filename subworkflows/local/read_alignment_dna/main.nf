@@ -2,6 +2,8 @@
 // Align DNA reads
 //
 
+nextflow.enable.types = true
+
 include { BWAMEM2_ALIGN  } from '../../../modules/local/bwa-mem2/mem/main'
 include { FASTP_SPLIT  } from '../../../modules/local/fastp/split/main'
 

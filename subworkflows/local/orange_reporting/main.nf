@@ -2,6 +2,8 @@
 // ORANGE collates outputs of hmftools into a static PDF report
 //
 
+nextflow.enable.types = true
+
 include { ORANGE  } from '../../../modules/local/orange/main'
 
 include { FileType                 } from '../utils_nfcore_oncoanalyser_pipeline/types'

@@ -2,6 +2,8 @@
 // ISOFOX normalisation prepares panel-specific TPM normalisation resource
 //
 
+nextflow.enable.types = true
+
 include { ISOFOX_PANEL_NORMALISATION  } from '../../../modules/local/isofox/panel_normalisation/main'
 
 include { FileType                 } from '../utils_nfcore_oncoanalyser_pipeline/types'

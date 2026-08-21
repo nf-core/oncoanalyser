@@ -2,6 +2,8 @@
 // COBALT normalisation prepares the panel-specific target region normalisation resource
 //
 
+nextflow.enable.types = true
+
 include { COBALT_PANEL_NORMALISATION  } from '../../../modules/local/cobalt/panel_normalisation/main'
 
 include { FileType                 } from '../utils_nfcore_oncoanalyser_pipeline/types'

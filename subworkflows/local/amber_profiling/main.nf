@@ -2,6 +2,8 @@
 // AMBER determines b-allele frequencies at predetermined positions
 //
 
+nextflow.enable.types = true
+
 include { AMBER  } from '../../../modules/local/amber/main'
 
 include { FileType                    } from '../utils_nfcore_oncoanalyser_pipeline/types'

@@ -2,6 +2,8 @@
 // PAVE PON creation prepares the panel-specific small variant artefact resource
 //
 
+nextflow.enable.types = true
+
 include { PAVE_PON_PANEL_CREATION  } from '../../../modules/local/pave/pon_creation/main'
 
 include { FileType                 } from '../utils_nfcore_oncoanalyser_pipeline/types'

@@ -2,6 +2,8 @@
 // TEAL performs characterisation of telomeric features and rearrangements
 //
 
+nextflow.enable.types = true
+
 include { TEAL_PREP  } from '../../../modules/local/teal/prep/main'
 include { TEAL_PIPELINE  } from '../../../modules/local/teal/pipeline/main'
 

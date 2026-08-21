@@ -2,6 +2,8 @@
 // LILAC is a WGS tool for HLA typing and somatic CNV and SNV calling
 //
 
+nextflow.enable.types = true
+
 include { LILAC  } from '../../../modules/local/lilac/main'
 
 include { FileType                    } from '../utils_nfcore_oncoanalyser_pipeline/types'

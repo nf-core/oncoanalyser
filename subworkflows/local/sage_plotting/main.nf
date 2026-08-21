@@ -2,6 +2,8 @@
 // SAGE is a precise and highly sensitive somatic SNV, MNV and small INDEL caller
 //
 
+nextflow.enable.types = true
+
 include { SAGE_VISUALISER  } from '../../../modules/local/sage/visualiser/main'
 
 include { FileType                    } from '../utils_nfcore_oncoanalyser_pipeline/types'

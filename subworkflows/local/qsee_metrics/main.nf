@@ -2,6 +2,8 @@
 // Qsee calculates and visualises QC metrics
 //
 
+nextflow.enable.types = true
+
 include { QSEE  } from '../../../modules/local/qsee/main'
 
 include { FileType                 } from '../utils_nfcore_oncoanalyser_pipeline/types'

@@ -2,6 +2,8 @@
 // ESVEE detects structural variants, and reports breakends and breakpoints.
 //
 
+nextflow.enable.types = true
+
 include { ESVEE  } from '../../../modules/local/esvee/main'
 
 include { FileType                    } from '../utils_nfcore_oncoanalyser_pipeline/types'

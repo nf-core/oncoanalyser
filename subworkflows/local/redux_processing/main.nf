@@ -2,6 +2,8 @@
 // Apply post-alignment processing
 //
 
+nextflow.enable.types = true
+
 include { REDUX  } from '../../../modules/local/redux/main'
 
 include { FileType            } from '../utils_nfcore_oncoanalyser_pipeline/types'

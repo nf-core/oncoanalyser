@@ -2,6 +2,8 @@
 // Process read UMIs
 //
 
+nextflow.enable.types = true
+
 include { FASTP_UMI   } from '../../../modules/local/fastp/umi/main'
 include { FASTQ_TOOLS } from '../../../modules/local/fastqtools/main'
 

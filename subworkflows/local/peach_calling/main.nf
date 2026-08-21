@@ -2,6 +2,8 @@
 // PEACH infers germline haplotypes and reports relevant pharmacogenomics
 //
 
+nextflow.enable.types = true
+
 include { PEACH  } from '../../../modules/local/peach/main'
 
 include { FileType                 } from '../utils_nfcore_oncoanalyser_pipeline/types'

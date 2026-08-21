@@ -2,6 +2,8 @@
 // VIRUSBreakend and Virus Interpreter identify viral content and insertion sites
 //
 
+nextflow.enable.types = true
+
 include { VIRUSBREAKEND  } from '../../../modules/local/virusbreakend/main'
 include { VIRUSINTERPRETER  } from '../../../modules/local/virusinterpreter/main'
 

@@ -2,6 +2,8 @@
 // Bam Tools calculates summary statistics for BAMs
 //
 
+nextflow.enable.types = true
+
 include { BAMTOOLS  } from '../../../modules/local/bamtools/main'
 
 include { FileType                    } from '../utils_nfcore_oncoanalyser_pipeline/types'

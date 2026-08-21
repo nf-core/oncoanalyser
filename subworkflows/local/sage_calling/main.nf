@@ -2,6 +2,8 @@
 // SAGE is a precise and highly sensitive somatic SNV, MNV and small INDEL caller
 //
 
+nextflow.enable.types = true
+
 include { SAGE_GERMLINE  } from '../../../modules/local/sage/germline/main'
 include { SAGE_SOMATIC  } from '../../../modules/local/sage/somatic/main'
 

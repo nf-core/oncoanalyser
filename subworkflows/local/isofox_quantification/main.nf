@@ -2,6 +2,8 @@
 // Isofox estimates transcript abundance, detects novel SJs, and identifies fusion events
 //
 
+nextflow.enable.types = true
+
 include { ISOFOX  } from '../../../modules/local/isofox/run/main'
 
 include { FileType                 } from '../utils_nfcore_oncoanalyser_pipeline/types'

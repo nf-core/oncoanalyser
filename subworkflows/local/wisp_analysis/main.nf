@@ -2,6 +2,8 @@
 // WISP estimates tumor purity in longitudinal samples using WGS data of the primary
 //
 
+nextflow.enable.types = true
+
 include { WISP  } from '../../../modules/local/wisp/main'
 
 include { FileType                    } from '../utils_nfcore_oncoanalyser_pipeline/types'

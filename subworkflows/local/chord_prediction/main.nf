@@ -2,6 +2,8 @@
 // CHORD predicts HR status for tumor samples
 //
 
+nextflow.enable.types = true
+
 include { CHORD  } from '../../../modules/local/chord/main'
 
 include { FileType                 } from '../utils_nfcore_oncoanalyser_pipeline/types'

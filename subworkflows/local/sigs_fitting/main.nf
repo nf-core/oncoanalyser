@@ -2,6 +2,8 @@
 // Sigs fits trinucleotide signature definitions with sample SNV counts
 //
 
+nextflow.enable.types = true
+
 include { SIGS  } from '../../../modules/local/sigs/main'
 
 include { FileType                 } from '../utils_nfcore_oncoanalyser_pipeline/types'

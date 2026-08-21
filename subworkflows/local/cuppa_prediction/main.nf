@@ -2,6 +2,8 @@
 // CUPPA predicts tissue of origin from molecular profiles
 //
 
+nextflow.enable.types = true
+
 include { CUPPA  } from '../../../modules/local/cuppa/main'
 
 include { FileType                 } from '../utils_nfcore_oncoanalyser_pipeline/types'
