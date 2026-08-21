@@ -2,6 +2,8 @@
 // LINX plotting visualises clusters structural variants
 //
 
+nextflow.enable.types = true
+
 include { LINXREPORT  } from '../../../modules/local/linxreport/main'
 include { LINX_VISUALISER  } from '../../../modules/local/linx/visualiser/main'
 
@@ -88,10 +90,13 @@ workflow LINX_PLOTTING {
     // MODULE: gpgr LINX report
     //
     // Create process input channel
+    // NOTE(SW): subscribe once and reuse, channel.topic() is single-consumer under types
+    ch_linx_plots_topic = channel.topic('linx_visualiser_plots')
+
     // channel: [ meta_gpgr, linx_annotation_dir, linx_visualiser_dir ]
     ch_gpgr_linx_inputs = groupByMeta([
         ch_inputs_sorted.runnable,
-        restoreMeta(channel.topic('linx_visualiser_plots'), ch_inputs),
+        restoreMeta(ch_linx_plots_topic, ch_inputs),
     ])
         .map { meta, linx_annotation_dir, _amber_dir, _cobalt_dir, _purple_dir, linx_visualiser_dir ->
 
@@ -116,7 +121,7 @@ workflow LINX_PLOTTING {
     // channel: [ meta, linx_visualiser_dir ]
     ch_outputs = channel.empty()
         .mix(
-            restoreMeta(channel.topic('linx_visualiser_plots'), ch_inputs),
+            restoreMeta(ch_linx_plots_topic, ch_inputs),
             ch_inputs_sorted.skip.map { meta -> [meta, null] },
         )
 

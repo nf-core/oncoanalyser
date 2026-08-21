@@ -323,7 +323,7 @@ workflow TARGETED {
             ref_data.genome_version,
             ref_data.genome_fai,
             hmf_data.gc_profile,
-            hmf_data.diploid_bed,
+            hmf_data.map { it.diploid_bed },
             panel_data.target_regions_normalisation,
             true,  // targeted_mode
             false,  // purity_estimate_mode

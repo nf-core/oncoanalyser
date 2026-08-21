@@ -2,6 +2,8 @@
 // COBALT calculates read ratios between tumor and normal samples
 //
 
+nextflow.enable.types = true
+
 include { COBALT  } from '../../../modules/local/cobalt/run/main'
 
 include { FileType                    } from '../utils_nfcore_oncoanalyser_pipeline/types'

@@ -2,6 +2,8 @@
 // SAGE append adds additional sample data to an existing SAGE VCF
 //
 
+nextflow.enable.types = true
+
 include { SAGE_APPEND as SAGE_APPEND_SOMATIC   } from '../../../modules/local/sage/append/main'
 include { SAGE_APPEND as SAGE_APPEND_GERMLINE  } from '../../../modules/local/sage/append/main'
 
@@ -231,10 +233,13 @@ workflow SAGE_APPEND {
     // STEP: Handle outputs
     //
     // Set outputs, restoring original meta
+    // NOTE(SW): subscribe once and reuse, channel.topic() is single-consumer under types
+    ch_sage_append_topic = channel.topic('sage_append_dir')
+
     // channel: [ meta, sage_append_dir ]
     ch_outputs_somatic = channel.empty()
         .mix(
-            restoreMeta(channel.topic('sage_append_dir').filter { d -> d[0].topic_key == 'somatic' }, ch_inputs),
+            restoreMeta(ch_sage_append_topic.filter { d -> d[0].topic_key == 'somatic' }, ch_inputs),
             ch_inputs_somatic_sorted.skip.map { meta -> [meta, null] },
             ch_inputs_sorted.skip.map { meta -> [meta, null] },
         )
@@ -242,7 +247,7 @@ workflow SAGE_APPEND {
     // channel: [ meta, sage_append_dir ]
     ch_outputs_germline = channel.empty()
         .mix(
-            restoreMeta(channel.topic('sage_append_dir').filter { d -> d[0].topic_key == 'germline' }, ch_inputs),
+            restoreMeta(ch_sage_append_topic.filter { d -> d[0].topic_key == 'germline' }, ch_inputs),
             ch_inputs_germline_sorted.skip.map { meta -> [meta, null] },
             ch_inputs_sorted.skip.map { meta -> [meta, null] },
         )
