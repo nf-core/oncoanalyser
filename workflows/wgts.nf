@@ -20,7 +20,8 @@ include { NEO_PREDICTION         } from '../subworkflows/local/neo_prediction'
 include { ORANGE_REPORTING       } from '../subworkflows/local/orange_reporting'
 include { PAVE_ANNOTATION        } from '../subworkflows/local/pave_annotation'
 include { PEACH_CALLING          } from '../subworkflows/local/peach_calling'
-include { PREPARE_OUTPUTS_WGTS   } from '../subworkflows/local/prepare_outputs'
+include { get_dir_filepaths        } from '../subworkflows/local/prepare_outputs'
+include { get_command_log_filepath  } from '../subworkflows/local/prepare_outputs'
 include { PREPARE_REFERENCE      } from '../subworkflows/local/prepare_reference'
 include { PURPLE_CALLING         } from '../subworkflows/local/purple_calling'
 include { QSEE_METRICS           } from '../subworkflows/local/qsee_metrics'
@@ -44,6 +45,10 @@ include { getEnumFromString             } from '../subworkflows/local/utils_nfco
 include { getRnaFastqChannel            } from '../subworkflows/local/utils_nfcore_oncoanalyser_pipeline/channels'
 include { getSequencingPlatformPons     } from '../subworkflows/local/utils_nfcore_oncoanalyser_pipeline/utils'
 include { getPrepConfigFromSamplesheet  } from '../subworkflows/local/utils_nfcore_oncoanalyser_pipeline/validate_params'
+include { getTumorDnaSampleName         } from '../subworkflows/local/utils_nfcore_oncoanalyser_pipeline/accessors'
+include { getNormalDnaSampleName        } from '../subworkflows/local/utils_nfcore_oncoanalyser_pipeline/accessors'
+include { getDonorDnaSampleName         } from '../subworkflows/local/utils_nfcore_oncoanalyser_pipeline/accessors'
+include { getTumorRnaSampleName         } from '../subworkflows/local/utils_nfcore_oncoanalyser_pipeline/accessors'
 
 /*
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -936,10 +941,64 @@ workflow WGTS {
     //
     // SUBWORKFLOW: Prepare outputs for publishing
     //
-    PREPARE_OUTPUTS_WGTS()
+    //
+    // Prepare outputs for publishing
+    //
+    ch_results = channel.empty()
+        .mix(
+            ch_amber_out.flatMap { meta, d ->                     return get_dir_filepaths(meta, d) },
+            ch_bamtools_tumor_out.flatMap { meta, d ->            return get_dir_filepaths(meta, d, "bamtools/${getTumorDnaSampleName(meta)}") },
+            ch_bamtools_normal_out.flatMap { meta, d ->           return get_dir_filepaths(meta, d, "bamtools/${getNormalDnaSampleName(meta)}") },
+            ch_chord_out.flatMap { meta, d ->                     return get_dir_filepaths(meta, d) },
+            channel.topic('cider_results').flatMap { meta, fps -> return fps.collect { d -> ["${meta.key}/cider/${d.name}", d] } },
+            ch_cobalt_out.flatMap { meta, d ->                    return get_dir_filepaths(meta, d) },
+            ch_cuppa_out.flatMap { meta, d ->                     return get_dir_filepaths(meta, d) },
+            ch_esvee_out.flatMap { meta, d ->                     return get_dir_filepaths(meta, d) },
+            ch_align_dna_tumor_out.flatMap { meta, bam, bai ->    return [bam, bai].findAll().collect { d -> ["${meta.case_id}/alignments/${getTumorDnaSampleName(meta)}/${d.name}", d] } },
+            ch_align_dna_normal_out.flatMap { meta, bam, bai ->   return [bam, bai].findAll().collect { d -> ["${meta.case_id}/alignments/${getNormalDnaSampleName(meta)}/${d.name}", d] } },
+            ch_align_dna_donor_out.flatMap { meta, bam, bai ->    return [bam, bai].findAll().collect { d -> ["${meta.case_id}/alignments/${getDonorDnaSampleName(meta)}/${d.name}", d] } },
+            ch_align_rna_tumor_out.flatMap { meta, bam, bai ->    return [bam, bai].findAll().collect { d -> ["${meta.case_id}/alignments/${getTumorRnaSampleName(meta)}/${d.name}", d] } },
+            ch_isofox_out.flatMap { meta, d ->                    return get_dir_filepaths(meta, d) },
+            ch_lilac_out.flatMap { meta, d ->                     return get_dir_filepaths(meta, d) },
+            ch_linx_germline_out.flatMap { meta, d ->             return get_dir_filepaths(meta, d, 'linx/germline_annotations') },
+            ch_linx_somatic_out.flatMap { meta, d ->              return get_dir_filepaths(meta, d, 'linx/somatic_annotations') },
+            ch_linx_somatic_visualiser_out.flatMap { meta, d ->   return get_dir_filepaths(meta, d, 'linx/somatic_plots') },
+            channel.topic('linxreport_html').map { meta, d ->     return ["${meta.key}/linx/${d.name}", d] },
+            channel.topic('multiqc_report').map { d ->            return [d.name, d] },
+            channel.topic('neo_annotated_fusions_tsv').map { meta, d -> return ["${meta.key}/neo/annotated_fusions/${d.name}", d] },
+            channel.topic('neo_finder_dir').flatMap { meta, d ->  return get_dir_filepaths(meta, d, 'neo/finder') },
+            channel.topic('neo_scorer_dir').flatMap { meta, d ->  return get_dir_filepaths(meta, d, 'neo/scorer') },
+            channel.topic('orange_json').map { meta, d ->         return ["${meta.key}/orange/${d.name}", d] },
+            channel.topic('orange_pdf').map { meta, d ->          return ["${meta.key}/orange/${d.name}", d] },
+            ch_pave_germline_out.flatMap { meta, d ->             return get_dir_filepaths(meta, d, 'pave/germline') },
+            ch_pave_somatic_out.flatMap { meta, d ->              return get_dir_filepaths(meta, d, 'pave/somatic') },
+            ch_peach_out.flatMap { meta, d ->                     return get_dir_filepaths(meta, d) },
+            ch_purple_out.flatMap { meta, d ->                    return get_dir_filepaths(meta, d) },
+            ch_qsee_out.flatMap { meta, d ->                      return get_dir_filepaths(meta, d) },
+            ch_redux_tumor_out.flatMap { meta, d ->               return get_dir_filepaths(meta, d, "alignments/${getTumorDnaSampleName(meta)}") },
+            ch_redux_normal_out.flatMap { meta, d ->              return get_dir_filepaths(meta, d, "alignments/${getNormalDnaSampleName(meta)}") },
+            ch_redux_donor_out.flatMap { meta, d ->               return get_dir_filepaths(meta, d, "alignments/${getDonorDnaSampleName(meta)}") },
+            ch_sage_append_somatic_out.flatMap { meta, d ->       return get_dir_filepaths(meta, d, "sage_append/${getTumorDnaSampleName(meta)}") },
+            ch_sage_append_germline_out.flatMap { meta, d ->      return get_dir_filepaths(meta, d, "sage_append/${getNormalDnaSampleName(meta)}") },
+            ch_sage_germline_out.flatMap { meta, d ->             return get_dir_filepaths(meta, d, 'sage/germline') },
+            ch_sage_somatic_out.flatMap { meta, d ->              return get_dir_filepaths(meta, d, 'sage/somatic') },
+            ch_sage_somatic_visualiser_out.flatMap { meta, d ->   return get_dir_filepaths(meta, d, 'sage/visualiser') },
+            ch_sigs_out.flatMap { meta, d ->                      return get_dir_filepaths(meta, d) },
+            channel.topic('teal_prep_normal_bam').flatMap { meta, bam, bai -> return [bam, bai].findAll().collect { d -> ["${meta.key}/teal/${d.name}", d] } },
+            channel.topic('teal_prep_tumor_bam').flatMap { meta, bam, bai ->  return [bam, bai].findAll().collect { d -> ["${meta.key}/teal/${d.name}", d] } },
+            channel.topic('teal_tsvs').flatMap { meta, e ->       def fps = e instanceof Collection ? e : [e]; fps.collect { d -> ["${meta.key}/teal/${d.name}", d] } },
+            channel.topic('virusbreakend_tsv').map { meta, d ->   return ["${meta.key}/virusbreakend/${d.name}", d] },
+            channel.topic('virusbreakend_vcf').map { meta, d ->   return ["${meta.key}/virusbreakend/${d.name}", d] },
+            ch_virusinterpreter_out.flatMap { meta, d ->          return get_dir_filepaths(meta, d) },
+
+            channel.topic('write_reference_data').map { d -> return ["reference_data/${workflow.manifest.version}/", d] },
+
+            channel.topic('command_files').flatMap { f -> get_command_log_filepath(f) }
+        )
+        .flatMap { meta, d -> return d instanceof Collection ? d.collect { e -> [meta, e] } : [[meta, d]] }
 
     emit:
-    results = PREPARE_OUTPUTS_WGTS.out.results
+    results = ch_results
 }
 
 /*
