@@ -729,6 +729,9 @@ workflow WGTS {
     //
     // SUBWORKFLOW: Run TEAL for characterisation of telometic regions
     //
+    // channel: [ meta, teal_bam, teal_bai ]
+    ch_teal_tumor_bam_out = channel.empty()
+    ch_teal_normal_bam_out = channel.empty()
     if (run_config.stages.teal && run_config.stages.purple) {
 
         TEAL_CHARACTERISATION(
@@ -745,6 +748,9 @@ workflow WGTS {
             params.sequencing_platform,
         )
 
+        ch_teal_tumor_bam_out = ch_teal_tumor_bam_out.mix(TEAL_CHARACTERISATION.out.tumor_bam)
+        ch_teal_normal_bam_out = ch_teal_normal_bam_out.mix(TEAL_CHARACTERISATION.out.normal_bam)
+
     }
 
     //
@@ -752,6 +758,8 @@ workflow WGTS {
     //
     // channel: [ meta, virusinterpreter_dir ]
     ch_virusinterpreter_out = channel.empty()
+    // channel: [ meta, virusbreakend_tsv ]
+    ch_virusbreakend_tsv_out = channel.empty()
 
     // NOTE(LN): Virusbreakend currently broken for SBX and Ultima
     def sequencing_platform = getEnumFromString(params.sequencing_platform, SequencingPlatform)
@@ -774,6 +782,7 @@ workflow WGTS {
         )
 
         ch_virusinterpreter_out = ch_virusinterpreter_out.mix(VIRUSBREAKEND_CALLING.out.virusinterpreter_dir)
+        ch_virusbreakend_tsv_out = ch_virusbreakend_tsv_out.mix(VIRUSBREAKEND_CALLING.out.virusbreakend_tsv)
 
     } else {
 
@@ -807,6 +816,10 @@ workflow WGTS {
     //
     // SUBWORKFLOW: Run Neo to identify and score neoepitopes
     //
+    // channel: [ meta, neo_finder_dir ]
+    // channel: [ meta, annotated_fusions ]
+    ch_neo_finder_out = channel.empty()
+    ch_neo_annotated_fusions_out = channel.empty()
     if (run_config.stages.neo) {
 
         NEO_PREDICTION(
@@ -825,6 +838,9 @@ workflow WGTS {
             hmf_data.cohort_tpm_medians,
             isofox_read_length,
         )
+
+        ch_neo_finder_out = ch_neo_finder_out.mix(NEO_PREDICTION.out.finder_out)
+        ch_neo_annotated_fusions_out = ch_neo_annotated_fusions_out.mix(NEO_PREDICTION.out.annotated_fusions_out)
 
     }
 
@@ -964,9 +980,9 @@ workflow WGTS {
             ch_linx_somatic_out.flatMap { meta, d ->              return get_dir_filepaths(meta, d, 'linx/somatic_annotations') },
             ch_linx_somatic_visualiser_out.flatMap { meta, d ->   return get_dir_filepaths(meta, d, 'linx/somatic_plots') },
             channel.topic('linxreport_html').map { meta, d ->     return ["${meta.key}/linx/${d.name}", d] },
-            channel.topic('multiqc_report').map { d ->            return [d.name, d] },
-            channel.topic('neo_annotated_fusions_tsv').map { meta, d -> return ["${meta.key}/neo/annotated_fusions/${d.name}", d] },
-            channel.topic('neo_finder_dir').flatMap { meta, d ->  return get_dir_filepaths(meta, d, 'neo/finder') },
+            ch_multiqc_out.flatMap { fps ->                      return fps.collect { d -> [d.name, d] } },
+            ch_neo_annotated_fusions_out.filter { meta, d -> d != null }.map { meta, d -> return ["${meta.case_id}/neo/annotated_fusions/${d.name}", d] },
+            ch_neo_finder_out.flatMap { meta, d ->               return get_dir_filepaths(meta, d, 'neo/finder') },
             channel.topic('neo_scorer_dir').flatMap { meta, d ->  return get_dir_filepaths(meta, d, 'neo/scorer') },
             channel.topic('orange_json').map { meta, d ->         return ["${meta.key}/orange/${d.name}", d] },
             channel.topic('orange_pdf').map { meta, d ->          return ["${meta.key}/orange/${d.name}", d] },
@@ -984,10 +1000,10 @@ workflow WGTS {
             ch_sage_somatic_out.flatMap { meta, d ->              return get_dir_filepaths(meta, d, 'sage/somatic') },
             ch_sage_somatic_visualiser_out.flatMap { meta, d ->   return get_dir_filepaths(meta, d, 'sage/visualiser') },
             ch_sigs_out.flatMap { meta, d ->                      return get_dir_filepaths(meta, d) },
-            channel.topic('teal_prep_normal_bam').flatMap { meta, bam, bai -> return [bam, bai].findAll().collect { d -> ["${meta.key}/teal/${d.name}", d] } },
-            channel.topic('teal_prep_tumor_bam').flatMap { meta, bam, bai ->  return [bam, bai].findAll().collect { d -> ["${meta.key}/teal/${d.name}", d] } },
+            ch_teal_normal_bam_out.flatMap { meta, bam, bai ->  return [bam, bai].findAll().collect { d -> ["${meta.case_id}/teal/${d.name}", d] } },
+            ch_teal_tumor_bam_out.flatMap { meta, bam, bai ->   return [bam, bai].findAll().collect { d -> ["${meta.case_id}/teal/${d.name}", d] } },
             channel.topic('teal_tsvs').flatMap { meta, e ->       def fps = e instanceof Collection ? e : [e]; fps.collect { d -> ["${meta.key}/teal/${d.name}", d] } },
-            channel.topic('virusbreakend_tsv').map { meta, d ->   return ["${meta.key}/virusbreakend/${d.name}", d] },
+            ch_virusbreakend_tsv_out.map { meta, d ->            return ["${meta.case_id}/virusbreakend/${d.name}", d] },
             channel.topic('virusbreakend_vcf').map { meta, d ->   return ["${meta.key}/virusbreakend/${d.name}", d] },
             ch_virusinterpreter_out.flatMap { meta, d ->          return get_dir_filepaths(meta, d) },
 

@@ -217,4 +217,10 @@ workflow NEO_PREDICTION {
         neo_resources,
         cohort_tpm_medians,
     )
+
+    // channel: [ meta, neo_finder_dir ]
+    // channel: [ meta, annotated_fusions ]
+    emit:
+    finder_out = ch_finder_out
+    annotated_fusions_out = ch_annotate_fusions_out
 }

@@ -93,8 +93,10 @@ workflow VIRUSBREAKEND_CALLING {
     //
     // Select input sources
     // channel: [ meta, virusbreakend_tsv, bamtools_dir_tumor, purple_dir ]
+    ch_virusbreakend_tsv_restored = restoreMeta(channel.topic('virusbreakend_tsv'), ch_inputs)
+
     ch_virusinterpreter_inputs_selected = groupByMeta([
-        restoreMeta(channel.topic('virusbreakend_tsv'), ch_inputs),
+        ch_virusbreakend_tsv_restored,
         ch_bamtools_dir_tumor,
         ch_purple,
     ])
@@ -158,4 +160,5 @@ workflow VIRUSBREAKEND_CALLING {
 
     emit:
     virusinterpreter_dir = ch_outputs // channel: [ meta, virusinterpreter_dir ]
+    virusbreakend_tsv = ch_virusbreakend_tsv_restored // channel: [ meta, virusbreakend_tsv ]
 }

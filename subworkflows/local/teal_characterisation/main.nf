@@ -167,4 +167,9 @@ workflow TEAL_CHARACTERISATION {
         genome_version,
         sequencing_platform,
     )
+
+    // channel: [ meta, teal_bam, teal_bai ]
+    emit:
+    tumor_bam = ch_tumor_teal_bam
+    normal_bam = ch_normal_teal_bam
 }
