@@ -79,6 +79,7 @@ workflow WISP_ANALYSIS {
                 subject_id: meta.subject_id,
                 primary_id: Utils.getTumorDnaSampleName(meta, primary: true),
                 longitudinal_id: Utils.getTumorDnaSampleName(meta, primary: false),
+                normal_id: Utils.getNormalDnaSampleName(meta)
             ]
 
             return [meta_wisp] + inputs
