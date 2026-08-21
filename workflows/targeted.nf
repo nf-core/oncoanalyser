@@ -610,6 +610,8 @@ workflow TARGETED {
     //
     // channel: [ meta, linx_visualiser_dir ]
     ch_linx_somatic_visualiser_out = channel.empty()
+    // channel: [ meta, linxreport_html ]
+    ch_linxreport_html_out = channel.empty()
     if (run_config.stages.linx) {
 
         LINX_PLOTTING(
@@ -623,6 +625,7 @@ workflow TARGETED {
         )
 
         ch_linx_somatic_visualiser_out = ch_linx_somatic_visualiser_out.mix(LINX_PLOTTING.out.visualiser_dir)
+        ch_linxreport_html_out = ch_linxreport_html_out.mix(LINX_PLOTTING.out.linxreport_html)
 
     } else {
 
@@ -633,6 +636,8 @@ workflow TARGETED {
     //
     // SUBWORKFLOW: Run CIDER to identify and annotate CDR3 sequences of IG and TCR loci
     //
+    // channel: [ meta, cider_results ]
+    ch_cider_out = channel.empty()
     if (run_config.stages.cider) {
 
         CIDER_CALLING(
@@ -645,6 +650,8 @@ workflow TARGETED {
             ref_data.genome_dict,
             ref_data.genome_img,
         )
+
+        ch_cider_out = ch_cider_out.mix(CIDER_CALLING.out.cider_results)
 
     }
 
@@ -703,6 +710,9 @@ workflow TARGETED {
     //
     // SUBWORKFLOW: Run ORANGE to generate static PDF report
     //
+    // channel: [ meta, orange_json ] / [ meta, orange_pdf ]
+    ch_orange_json_out = channel.empty()
+    ch_orange_pdf_out = channel.empty()
     if (run_config.stages.orange) {
 
         // Create placeholder channels for empty remaining channels
@@ -735,6 +745,9 @@ workflow TARGETED {
             true,  // targeted_mode
             params.panel,
         )
+
+        ch_orange_json_out = ch_orange_json_out.mix(ORANGE_REPORTING.out.orange_json)
+        ch_orange_pdf_out = ch_orange_pdf_out.mix(ORANGE_REPORTING.out.orange_pdf)
 
     }
 
@@ -798,7 +811,7 @@ workflow TARGETED {
             ch_amber_out.flatMap { meta, d ->                     return get_dir_filepaths(meta, d) },
             ch_bamtools_tumor_out.flatMap { meta, d ->            return get_dir_filepaths(meta, d, "bamtools/${getTumorDnaSampleName(meta, primary: true)}") },
             ch_bamtools_normal_out.flatMap { meta, d ->           return get_dir_filepaths(meta, d, "bamtools/${getNormalDnaSampleName(meta)}") },
-            channel.topic('cider_results').flatMap { meta, fps -> return fps.collect { d -> ["${meta.key}/cider/${d.name}", d] } },
+            ch_cider_out.flatMap { meta, fps ->                   return fps.collect { d -> ["${meta.case_id}/cider/${d.name}", d] } },
             ch_cobalt_out.flatMap { meta, d ->                    return get_dir_filepaths(meta, d) },
             ch_esvee_out.flatMap { meta, d ->                     return get_dir_filepaths(meta, d) },
             ch_align_dna_tumor_out.flatMap { meta, bam, bai ->    return [bam, bai].findAll().collect { d -> ["${meta.case_id}/alignments/${getTumorDnaSampleName(meta, primary: true)}/${d.name}", d] } },
@@ -810,10 +823,10 @@ workflow TARGETED {
             ch_linx_germline_out.flatMap { meta, d ->             return get_dir_filepaths(meta, d, 'linx/germline_annotations') },
             ch_linx_somatic_out.flatMap { meta, d ->              return get_dir_filepaths(meta, d, 'linx/somatic_annotations') },
             ch_linx_somatic_visualiser_out.flatMap { meta, d ->   return get_dir_filepaths(meta, d, 'linx/somatic_plots') },
-            channel.topic('linxreport_html').map { meta, d ->     return ["${meta.key}/linx/${d.name}", d] },
+            ch_linxreport_html_out.map { meta, d ->               return ["${meta.case_id}/linx/${d.name}", d] },
             ch_multiqc_out.flatMap { fps ->                      return fps.collect { d -> [d.name, d] } },
-            channel.topic('orange_json').map { meta, d ->         return ["${meta.key}/orange/${d.name}", d] },
-            channel.topic('orange_pdf').map { meta, d ->          return ["${meta.key}/orange/${d.name}", d] },
+            ch_orange_json_out.filter { meta, d -> d != null }.map { meta, d -> return ["${meta.case_id}/orange/${d.name}", d] },
+            ch_orange_pdf_out.filter { meta, d -> d != null }.map { meta, d ->  return ["${meta.case_id}/orange/${d.name}", d] },
             ch_pave_germline_out.flatMap { meta, d ->             return get_dir_filepaths(meta, d, 'pave/germline') },
             ch_pave_somatic_out.flatMap { meta, d ->              return get_dir_filepaths(meta, d, 'pave/somatic') },
             ch_peach_out.flatMap { meta, d ->                     return get_dir_filepaths(meta, d) },

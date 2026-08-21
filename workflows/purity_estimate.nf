@@ -254,6 +254,8 @@ workflow PURITY_ESTIMATE {
     //
     // SUBWORKFLOW: Run WISP to estimate tumor purity
     //
+    // channel: [ meta, wisp_dir ]
+    ch_wisp_out = channel.empty()
     if (run_config.stages.wisp) {
 
         WISP_ANALYSIS(
@@ -266,6 +268,8 @@ workflow PURITY_ESTIMATE {
             ref_data.genome_fai,
             targeted_mode,
         )
+
+        ch_wisp_out = ch_wisp_out.mix(WISP_ANALYSIS.out.wisp_dir)
 
     }
 
@@ -309,7 +313,7 @@ workflow PURITY_ESTIMATE {
             ch_redux_normal_out.flatMap { meta, d ->        return get_dir_filepaths(meta, d, "alignments/${getNormalDnaSampleName(meta)}") },
             ch_redux_donor_out.flatMap { meta, d ->         return get_dir_filepaths(meta, d, "alignments/${getDonorDnaSampleName(meta)}") },
             ch_sage_somatic_append_out.flatMap { meta, d -> return get_dir_filepaths(meta, d, "sage_append/${getTumorDnaSampleName(meta, primary: false)}") },
-            channel.topic('wisp_dir').flatMap { meta, d ->  return get_dir_filepaths(meta, d) },
+            ch_wisp_out.flatMap { meta, d ->                 return get_dir_filepaths(meta, d) },
 
             channel.topic('write_reference_data').map { d -> return ["reference_data/${workflow.manifest.version}/", d] },
 

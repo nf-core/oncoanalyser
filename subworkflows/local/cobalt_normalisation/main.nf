@@ -48,4 +48,7 @@ workflow COBALT_NORMALISATION {
         copy_number_percentiles,
         target_regions_bed,
     )
+
+    emit:
+    cobalt_normalisation_tsv = channel.topic('cobalt_normalisation_tsv')
 }

@@ -272,6 +272,7 @@ workflow PANEL_RESOURCE_CREATION {
         copy_number_percentiles,
         target_regions_bed,
     )
+    ch_cobalt_normalisation_tsv = COBALT_NORMALISATION.out.cobalt_normalisation_tsv
 
     //
     // SUBWORKFLOW: Run PAVE panel of normals creation
@@ -280,6 +281,7 @@ workflow PANEL_RESOURCE_CREATION {
         ch_sage_somatic_dir_out,
         ref_data.genome_version,
     )
+    ch_pave_pon_panel_creation_artefacts = PAVE_PON_CREATION.out.pave_pon_panel_creation_artefacts
 
     //
     // SUBWORKFLOW: Run Isofox TPM normalisation
@@ -290,6 +292,7 @@ workflow PANEL_RESOURCE_CREATION {
         isofox_gene_ids,
         hmf_data.isofox_gene_distribution,
     )
+    ch_isofox_normalisation_csv = ISOFOX_NORMALISATION.out.isofox_normalisation_csv
 
     //
     // TASK: Aggregate software versions
@@ -336,9 +339,9 @@ workflow PANEL_RESOURCE_CREATION {
             ch_sage_germline_dir_out.flatMap { meta, d ->            return get_dir_filepaths(meta, d, 'sage/germline') },
             ch_sage_somatic_dir_out.flatMap { meta, d ->             return get_dir_filepaths(meta, d, 'sage/somatic') },
 
-            channel.topic('cobalt_normalisation_tsv').map { d ->          return ["panel_resources/${d.name}", d] },
-            channel.topic('isofox_normalisation_csv').map { d ->          return ["panel_resources/${d.name}", d] },
-            channel.topic('pave_pon_panel_creation_artefacts').map { d -> return ["panel_resources/${d.name}", d] },
+            ch_cobalt_normalisation_tsv.map { d ->                       return ["panel_resources/${d.name}", d] },
+            ch_isofox_normalisation_csv.map { d ->                       return ["panel_resources/${d.name}", d] },
+            ch_pave_pon_panel_creation_artefacts.map { d ->              return ["panel_resources/${d.name}", d] },
 
             channel.topic('write_reference_data').map { d -> return ["reference_data/${workflow.manifest.version}/", d] },
 

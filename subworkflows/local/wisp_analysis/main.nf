@@ -102,4 +102,8 @@ workflow WISP_ANALYSIS {
         genome_fai,
         targeted_mode,
     )
+
+    // channel: [ meta, wisp_dir ]
+    emit:
+    wisp_dir = restoreMeta(channel.topic('wisp_dir'), ch_inputs)
 }

@@ -35,4 +35,7 @@ workflow ISOFOX_NORMALISATION {
         isofox_gene_ids,
         isofox_gene_distribution,
     )
+
+    emit:
+    isofox_normalisation_csv = channel.topic('isofox_normalisation_csv')
 }

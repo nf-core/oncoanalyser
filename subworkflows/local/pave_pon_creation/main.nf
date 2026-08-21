@@ -38,4 +38,7 @@ workflow PAVE_PON_CREATION {
         ch_pave_inputs,
         genome_version,
     )
+
+    emit:
+    pave_pon_panel_creation_artefacts = channel.topic('pave_pon_panel_creation_artefacts')
 }
