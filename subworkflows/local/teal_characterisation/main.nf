@@ -98,92 +98,73 @@ workflow TEAL_CHARACTERISATION {
         sequencing_platform,
     )
 
-    // Flatten TEAL_PREP output
-    // channel: [ meta, teal_bam, teal_bai ]
-    ch_tumor_teal_bam = restoreMeta(channel.topic('teal_prep_tumor_bam'), ch_inputs)
-        .map { meta, bam_bai -> [meta] + orderTealBamBai(bam_bai) }
+    //// Restore metas
+    //// channel: [ meta, teal_bam, teal_bai ]
+    //ch_tumor_teal_bam = restoreMeta(channel.topic('teal_prep_tumor_bam'), ch_inputs)
+    //ch_normal_teal_bam = restoreMeta(channel.topic('teal_prep_normal_bam'), ch_inputs)
 
-    ch_normal_teal_bam_placeholder = restoreMeta(
-        ch_teal_prep_inputs
-            .filter { d -> d[0].normal_id == null }  // Only populate placeholder channel if normal sample is missing
-            .map { d -> [d[0], [], []] },
-        ch_inputs
-    )
+    ////
+    //// MODULE: TEAL pipeline
+    ////
+    //// Select input sources then sort
+    //// channel: runnable: [ meta, teal_bam_tumor, teal_bai_tumor, teal_bam_normal, teal_bai_normal, bamtools_dir_tumor, bamtools_dir_normal, cobalt_dir, purple_dir ]
+    //// channel: skip: [ meta ]
+    //ch_teal_pipeline_inputs_sorted = groupByMeta([
+    //    ch_tumor_teal_bam,
+    //    ch_normal_teal_bam,
+    //    ch_bamtools_dir_tumor,
+    //    ch_bamtools_dir_normal,
+    //    ch_cobalt_dir,
+    //    ch_purple_dir,
+    //])
+    //    .map { meta, teal_bam_tumor, teal_bai_tumor, teal_bam_normal, teal_bai_normal, bamtools_dir_tumor, bamtools_dir_normal, cobalt_dir, purple_dir ->
+    //        return [
+    //            meta,
+    //            teal_bam_tumor,
+    //            teal_bai_tumor,
+    //            teal_bam_normal,
+    //            teal_bai_normal,
+    //            selectCurrentOrExisting(bamtools_dir_tumor, getInput(getTumorDnaSample(meta), FileType.BAMTOOLS_DIR)),
+    //            selectCurrentOrExisting(bamtools_dir_normal, getInput(getNormalDnaSample(meta), FileType.BAMTOOLS_DIR)),
+    //            selectCurrentOrExisting(cobalt_dir, getInput(getTumorDnaSample(meta), FileType.COBALT_DIR)),
+    //            selectCurrentOrExisting(purple_dir, getInput(getTumorDnaSample(meta), FileType.PURPLE_DIR)),
+    //        ]
+    //    }
+    //    .branch { meta, teal_bam_tumor, teal_bai_tumor, teal_bam_normal, teal_bai_normal, bamtools_dir_tumor, bamtools_dir_normal, cobalt_dir, purple_dir ->
 
-    ch_normal_teal_bam = restoreMeta(channel.topic('teal_prep_normal_bam'), ch_inputs)
-        .map { meta, bam_bai -> [meta] + orderTealBamBai(bam_bai) }
-        .mix(ch_normal_teal_bam_placeholder)
+    //        def has_tumor = teal_bam_tumor && bamtools_dir_tumor && purple_dir
+    //        def has_normal = teal_bam_normal && bamtools_dir_normal
 
-    //
-    // MODULE: TEAL pipeline
-    //
-    // Select input sources then sort
-    // channel: runnable: [ meta, teal_bam_tumor, teal_bai_tumor, teal_bam_normal, teal_bai_normal, bamtools_dir_tumor, bamtools_dir_normal, cobalt_dir, purple_dir ]
-    // channel: skip: [ meta ]
-    ch_teal_pipeline_inputs_sorted = groupByMeta([
-        ch_tumor_teal_bam,
-        ch_normal_teal_bam,
-        ch_bamtools_dir_tumor,
-        ch_bamtools_dir_normal,
-        ch_cobalt_dir,
-        ch_purple_dir,
-    ])
-        .map { meta, teal_bam_tumor, teal_bai_tumor, teal_bam_normal, teal_bai_normal, bamtools_dir_tumor, bamtools_dir_normal, cobalt_dir, purple_dir ->
-            return [
-                meta,
-                teal_bam_tumor,
-                teal_bai_tumor,
-                teal_bam_normal,
-                teal_bai_normal,
-                selectCurrentOrExisting(bamtools_dir_tumor, getInput(getTumorDnaSample(meta), FileType.BAMTOOLS_DIR)),
-                selectCurrentOrExisting(bamtools_dir_normal, getInput(getNormalDnaSample(meta), FileType.BAMTOOLS_DIR)),
-                selectCurrentOrExisting(cobalt_dir, getInput(getTumorDnaSample(meta), FileType.COBALT_DIR)),
-                selectCurrentOrExisting(purple_dir, getInput(getTumorDnaSample(meta), FileType.PURPLE_DIR)),
-            ]
-        }
-        .branch { meta, teal_bam_tumor, teal_bai_tumor, teal_bam_normal, teal_bai_normal, bamtools_dir_tumor, bamtools_dir_normal, cobalt_dir, purple_dir ->
+    //        runnable: (has_tumor || has_normal) && cobalt_dir
+    //        skip: true
+    //            return meta
+    //    }
 
-            def has_tumor = teal_bam_tumor && bamtools_dir_tumor && purple_dir
-            def has_normal = teal_bam_normal && bamtools_dir_normal
+    //// Create process input channel
+    //// channel: [ meta_teal, teal_bam_tumor, teal_bai_tumor, teal_bam_normal, teal_bai_normal, bamtools_dir_tumor, bamtools_dir_normal, cobalt_dir, purple_dir ]
+    //ch_teal_pipeline_inputs = ch_teal_pipeline_inputs_sorted.runnable
+    //    .map { meta, teal_bam_tumor, teal_bai_tumor, teal_bam_normal, teal_bai_normal, bamtools_dir_tumor, bamtools_dir_normal, cobalt_dir, purple_dir ->
 
-            runnable: (has_tumor || has_normal) && cobalt_dir
-            skip: true
-                return meta
-        }
+    //        def meta_teal = [
+    //            key: meta.case_id,
+    //            id: meta.case_id,
+    //        ]
 
-    // Create process input channel
-    // channel: [ meta_teal, teal_bam_tumor, teal_bai_tumor, teal_bam_normal, teal_bai_normal, bamtools_dir_tumor, bamtools_dir_normal, cobalt_dir, purple_dir ]
-    ch_teal_pipeline_inputs = ch_teal_pipeline_inputs_sorted.runnable
-        .map { meta, teal_bam_tumor, teal_bai_tumor, teal_bam_normal, teal_bai_normal, bamtools_dir_tumor, bamtools_dir_normal, cobalt_dir, purple_dir ->
+    //        if (teal_bam_tumor) {
+    //            meta_teal.tumor_id = getTumorDnaSampleName(meta)
+    //        }
 
-            def meta_teal = [
-                key: meta.case_id,
-                id: meta.case_id,
-            ]
+    //        if (teal_bam_normal) {
+    //            meta_teal.normal_id = getNormalDnaSampleName(meta)
+    //        }
 
-            if (teal_bam_tumor) {
-                meta_teal.tumor_id = getTumorDnaSampleName(meta)
-            }
+    //        return [meta_teal, teal_bam_tumor, teal_bai_tumor, teal_bam_normal, teal_bai_normal, bamtools_dir_tumor, bamtools_dir_normal, cobalt_dir, purple_dir]
+    //    }
 
-            if (teal_bam_normal) {
-                meta_teal.normal_id = getNormalDnaSampleName(meta)
-            }
-
-            return [meta_teal, teal_bam_tumor, teal_bai_tumor, teal_bam_normal, teal_bai_normal, bamtools_dir_tumor, bamtools_dir_normal, cobalt_dir, purple_dir]
-        }
-
-    // Run process
-    TEAL_PIPELINE(
-        ch_teal_pipeline_inputs,
-        genome_version,
-        sequencing_platform,
-    )
-}
-
-// NOTE(SW): teal_prep emits the .bam and .bam.bai as a single files() glob, whose order is not
-// guaranteed (filesystem order varies on APFS). Order them so the bam precedes the bai.
-def orderTealBamBai(files) {
-    def bam = files.find { it.name.endsWith('.bam') }
-    def bai = files.find { it.name.endsWith('.bam.bai') }
-    return [bam, bai]
+    //// Run process
+    //TEAL_PIPELINE(
+    //    ch_teal_pipeline_inputs,
+    //    genome_version,
+    //    sequencing_platform,
+    //)
 }

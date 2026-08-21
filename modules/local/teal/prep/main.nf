@@ -17,8 +17,8 @@ process TEAL_PREP {
     sequencing_platform: String
 
     topic:
-    tuple(meta, files("teal_bam/${meta.tumor_id}.teal.telbam{.bam,.bam.bai}")) >> 'teal_prep_tumor_bam'
-    tuple(meta, files("teal_bam/${meta.normal_id}.teal.telbam{.bam,.bam.bai}", optional: true)) >> 'teal_prep_normal_bam'
+    tuple(meta, file("teal_bam/${meta.tumor_id}.teal.telbam.bam"), file("teal_bam/${meta.tumor_id}.teal.telbam.bam.bai")) >> 'teal_prep_tumor_bam'
+    tuple(meta, file("teal_bam/${meta.normal_id}.teal.telbam.bam", optional: true), file("teal_bam/${meta.normal_id}.teal.telbam.bam.bai", optional: true)) >> 'teal_prep_normal_bam'
     tuple(meta, 'teal_prep', files('.command.*')) >> 'command_files'
     file('versions.yml') >> 'versions'
 
