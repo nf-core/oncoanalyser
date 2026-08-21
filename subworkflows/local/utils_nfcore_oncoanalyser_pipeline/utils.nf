@@ -51,32 +51,27 @@ def createStubPlaceholders(params) {
 
 }
 
-def getSequencingPlatformPons(hmf_data, sequencing_platform_string, log) {
+def getSequencingPlatformPon(hmf_data, sequencing_platform_string, pon_key, log) {
     def sequencing_platform = getEnumFromString(sequencing_platform_string, SequencingPlatform)
-    hmf_data.map { d ->
-        if (sequencing_platform == SequencingPlatform.ILLUMINA) {
-            return [
-                'esvee_breakends': d.esvee_pon_breakends_illumina,
-                'esvee_breakpoints': d.esvee_pon_breakpoints_illumina,
-                'sage': d.sage_pon_illumina,
-            ]
-        } else if (sequencing_platform == SequencingPlatform.SBX) {
-            return [
-                'esvee_breakends': d.esvee_pon_breakends_sbx,
-                'esvee_breakpoints': d.esvee_pon_breakpoints_sbx,
-                'sage': d.sage_pon_sbx,
-            ]
-        } else if (sequencing_platform == SequencingPlatform.ULTIMA) {
-            return [
-                'esvee_breakends': d.esvee_pon_breakends_ultima,
-                'esvee_breakpoints': d.esvee_pon_breakpoints_ultima,
-                'sage': d.sage_pon_ultima,
-            ]
-        } else {
-            log.error "Got bad sequencing platform: ${sequencing_platform}"
-            exit 1
-        }
+    def suffix = null
+    if (sequencing_platform == SequencingPlatform.ILLUMINA) {
+        suffix = 'illumina'
+    } else if (sequencing_platform == SequencingPlatform.SBX) {
+        suffix = 'sbx'
+    } else if (sequencing_platform == SequencingPlatform.ULTIMA) {
+        suffix = 'ultima'
+    } else {
+        log.error "Got bad sequencing platform: ${sequencing_platform}"
+        exit 1
     }
+
+    def pon_property = pon_key == 'esvee_breakends' ? "esvee_pon_breakends_${suffix}"
+        : pon_key == 'esvee_breakpoints' ? "esvee_pon_breakpoints_${suffix}"
+        : "sage_pon_${suffix}"
+
+    // NOTE(SW): map over hmf_data (a broadcast) rather than a shared intermediate, so each
+    // call yields an independent stream a typed workflow may consume once.
+    hmf_data.map { d -> d[pon_property] }
 }
 
 def getEnumFromString(s, e) {

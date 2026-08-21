@@ -4,6 +4,8 @@
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 */
 
+nextflow.enable.types = true
+
 include { AMBER_PROFILING                  } from '../subworkflows/local/amber_profiling'
 include { COBALT_PROFILING                 } from '../subworkflows/local/cobalt_profiling'
 include { get_dir_filepaths       } from '../subworkflows/local/prepare_outputs'
@@ -84,7 +86,7 @@ workflow PURITY_ESTIMATE {
                 ch_inputs,
                 ch_fastq_dna,
                 ch_inputs.map { meta -> [meta, [:], null, null] },  // ch_rna_fastq
-                panel_data.known_umis,
+                panel_data.map { it.known_umis },
                 params.fastp_umi_enabled,
                 params.fastp_umi_location,
                 params.fastp_umi_length,
@@ -93,8 +95,7 @@ workflow PURITY_ESTIMATE {
                 '',  // fastq_tools_umi_delim
             )
 
-            ch_align_dna_input = ch_align_dna_input.mix(READ_UMI_PROCESSING.out.fastq_dna)
-
+            ch_align_dna_input = READ_UMI_PROCESSING.out.fastq_dna
         } else {
 
             ch_align_dna_input = ch_fastq_dna
@@ -110,10 +111,9 @@ workflow PURITY_ESTIMATE {
             params.sequencing_platform,
         )
 
-        ch_align_dna_tumor_out = ch_align_dna_tumor_out.mix(READ_ALIGNMENT_DNA.out.tumor)
-        ch_align_dna_normal_out = ch_align_dna_normal_out.mix(READ_ALIGNMENT_DNA.out.normal)
-        ch_align_dna_donor_out = ch_align_dna_donor_out.mix(READ_ALIGNMENT_DNA.out.donor)
-
+        ch_align_dna_tumor_out = READ_ALIGNMENT_DNA.out.tumor
+        ch_align_dna_normal_out = READ_ALIGNMENT_DNA.out.normal
+        ch_align_dna_donor_out = READ_ALIGNMENT_DNA.out.donor
     } else {
 
         ch_align_dna_tumor_out = ch_inputs.map { meta -> [meta, null, null] }
@@ -140,8 +140,8 @@ workflow PURITY_ESTIMATE {
             ref_data.genome_version,
             ref_data.genome_fai,
             ref_data.genome_dict,
-            hmf_data.unmap_regions,
-            hmf_data.msi_jitter_sites,
+            hmf_data.map { it.unmap_regions },
+            hmf_data.map { it.msi_jitter_sites },
             // NOTE(LN): panel specific MSI predictions not used as indels are unimportant for WISP
             null,  // msi_model_coefficients
             null,  // msi_model_error_rates
@@ -151,10 +151,9 @@ workflow PURITY_ESTIMATE {
             params.redux_umi_duplex_delim,
         )
 
-        ch_redux_tumor_out = ch_redux_tumor_out.mix(REDUX_PROCESSING.out.tumor_dir)
-        ch_redux_normal_out = ch_redux_normal_out.mix(REDUX_PROCESSING.out.normal_dir)
-        ch_redux_donor_out = ch_redux_donor_out.mix(REDUX_PROCESSING.out.donor_dir)
-
+        ch_redux_tumor_out = REDUX_PROCESSING.out.tumor_dir
+        ch_redux_normal_out = REDUX_PROCESSING.out.normal_dir
+        ch_redux_donor_out = REDUX_PROCESSING.out.donor_dir
     } else {
 
         ch_redux_tumor_out = ch_inputs.map { meta -> [meta, null] }
@@ -178,15 +177,14 @@ workflow PURITY_ESTIMATE {
             ref_data.genome_fasta,
             ref_data.genome_version,
             ref_data.genome_fai,
-            hmf_data.heterozygous_sites,
+            hmf_data.map { it.heterozygous_sites },
             null,  // target_regions_bed
             1,  // tumor_min_depth
             params.sequencing_platform,
             true,  // purity_estimate_mode
         )
 
-        ch_amber_out = ch_amber_out.mix(AMBER_PROFILING.out.amber_dir)
-
+        ch_amber_out = AMBER_PROFILING.out.amber_dir
     } else {
 
         ch_amber_out = ch_inputs.map { meta -> [meta, null] }
@@ -207,15 +205,14 @@ workflow PURITY_ESTIMATE {
             ref_data.genome_fasta,
             ref_data.genome_version,
             ref_data.genome_fai,
-            hmf_data.gc_profile,
+            hmf_data.map { it.gc_profile },
             hmf_data.map { it.diploid_bed },
             null,  // panel_target_regions_normalisation
             targeted_mode,
             true,  // purity_estimate_mode
         )
 
-        ch_cobalt_out = ch_cobalt_out.mix(COBALT_PROFILING.out.cobalt_dir)
-
+        ch_cobalt_out = COBALT_PROFILING.out.cobalt_dir
     } else {
 
         ch_cobalt_out = ch_inputs.map { meta -> [meta, null] }
@@ -243,8 +240,7 @@ workflow PURITY_ESTIMATE {
             targeted_mode,
         )
 
-        ch_sage_somatic_append_out = ch_sage_somatic_append_out.mix(SAGE_APPEND.out.somatic_dir)
-
+        ch_sage_somatic_append_out = SAGE_APPEND.out.somatic_dir
     } else {
 
         ch_sage_somatic_append_out = ch_inputs.map { meta -> [meta, null] }
@@ -269,8 +265,7 @@ workflow PURITY_ESTIMATE {
             targeted_mode,
         )
 
-        ch_wisp_out = ch_wisp_out.mix(WISP_ANALYSIS.out.wisp_dir)
-
+        ch_wisp_out = WISP_ANALYSIS.out.wisp_dir
     }
 
     //

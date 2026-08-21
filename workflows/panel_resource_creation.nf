@@ -4,6 +4,8 @@
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 */
 
+nextflow.enable.types = true
+
 include { AMBER_PROFILING                          } from '../subworkflows/local/amber_profiling'
 include { COBALT_NORMALISATION                     } from '../subworkflows/local/cobalt_normalisation'
 include { COBALT_PROFILING                         } from '../subworkflows/local/cobalt_profiling'
@@ -23,7 +25,7 @@ include { softwareVersionsToYAML  } from '../subworkflows/nf-core/utils_nfcore_p
 
 include { getDnaFastqChannel            } from '../subworkflows/local/utils_nfcore_oncoanalyser_pipeline/channels'
 include { getRnaFastqChannel            } from '../subworkflows/local/utils_nfcore_oncoanalyser_pipeline/channels'
-include { getSequencingPlatformPons     } from '../subworkflows/local/utils_nfcore_oncoanalyser_pipeline/utils'
+include { getSequencingPlatformPon     } from '../subworkflows/local/utils_nfcore_oncoanalyser_pipeline/utils'
 include { getPrepConfigFromSamplesheet  } from '../subworkflows/local/utils_nfcore_oncoanalyser_pipeline/validate_params'
 include { getTumorDnaSampleName         } from '../subworkflows/local/utils_nfcore_oncoanalyser_pipeline/accessors'
 include { getNormalDnaSampleName        } from '../subworkflows/local/utils_nfcore_oncoanalyser_pipeline/accessors'
@@ -70,15 +72,14 @@ workflow PANEL_RESOURCE_CREATION {
     def panel_data = PREPARE_REFERENCE.out.panel_data
 
     // Configure selectable reference data and inputs
-    def hmf_data_pons = getSequencingPlatformPons(hmf_data, params.sequencing_platform, log)
     def target_regions_bed = params.target_regions_bed != null ? file(params.target_regions_bed) : null
     def driver_gene_panel = params.driver_gene_panel != null ? file(params.driver_gene_panel) : null
 
-    def copy_number_percentiles = params.enable_cn_norm_with_wgs_pct ? hmf_data.copy_number_percentiles : null
+    def copy_number_percentiles = params.enable_cn_norm_with_wgs_pct ? hmf_data.map { it.copy_number_percentiles } : null
 
-    def isofox_counts = params.isofox_counts != null ? file(params.isofox_counts) : hmf_data.isofox_counts
+    def isofox_counts = params.isofox_counts != null ? file(params.isofox_counts) : hmf_data.map { it.isofox_counts }
     def isofox_gene_ids = params.isofox_gene_ids != null ? file(params.isofox_gene_ids) : null
-    def isofox_gc_ratios = params.isofox_gc_ratios != null ? file(params.isofox_gc_ratios) : hmf_data.isofox_gc_ratios
+    def isofox_gc_ratios = params.isofox_gc_ratios != null ? file(params.isofox_gc_ratios) : hmf_data.map { it.isofox_gc_ratios }
     def isofox_read_length = params.isofox_read_length != null ? params.isofox_read_length : Constants.DEFAULT_ISOFOX_READ_LENGTH_TARGETED
 
     //
@@ -101,7 +102,7 @@ workflow PANEL_RESOURCE_CREATION {
             ch_inputs,
             ch_fastq_dna,
             ch_fastq_rna,
-            panel_data.known_umis,
+            panel_data.map { it.known_umis },
             params.fastp_umi_enabled,
             params.fastp_umi_location,
             params.fastp_umi_length,
@@ -110,9 +111,8 @@ workflow PANEL_RESOURCE_CREATION {
             params.fastq_tools_umi_delim,
         )
 
-        ch_align_dna_input = ch_align_dna_input.mix(READ_UMI_PROCESSING.out.fastq_dna)
-        ch_align_rna_input = ch_align_rna_input.mix(READ_UMI_PROCESSING.out.fastq_rna)
-
+        ch_align_dna_input = READ_UMI_PROCESSING.out.fastq_dna
+        ch_align_rna_input = READ_UMI_PROCESSING.out.fastq_rna
     } else {
 
         ch_align_dna_input = ch_fastq_dna
@@ -152,10 +152,10 @@ workflow PANEL_RESOURCE_CREATION {
         ref_data.genome_version,
         ref_data.genome_fai,
         ref_data.genome_dict,
-        hmf_data.unmap_regions,
-        hmf_data.msi_jitter_sites,
-        hmf_data.msi_model_coefficients,
-        hmf_data.msi_model_error_rates,
+        hmf_data.map { it.unmap_regions },
+        hmf_data.map { it.msi_jitter_sites },
+        hmf_data.map { it.msi_model_coefficients },
+        hmf_data.map { it.msi_model_error_rates },
         params.sequencing_platform,
         true,  // targeted_mode
         params.redux_umi_enabled,
@@ -175,12 +175,12 @@ workflow PANEL_RESOURCE_CREATION {
         ref_data.genome_fasta,
         ref_data.genome_version,
         ref_data.genome_fai,
-        hmf_data.ensembl_data_resources,
+        hmf_data.map { it.ensembl_data_resources },
         driver_gene_panel,
-        hmf_data.known_fusion_data,
-        hmf_data.isofox_excluded_regions,
-        hmf_data.isofox_gene_distribution,
-        hmf_data.isofox_alt_sj_distribution,
+        hmf_data.map { it.known_fusion_data },
+        hmf_data.map { it.isofox_excluded_regions },
+        hmf_data.map { it.isofox_gene_distribution },
+        hmf_data.map { it.isofox_alt_sj_distribution },
         isofox_counts,
         isofox_gc_ratios,
         null,  // isofox_tpm_norm
@@ -202,7 +202,7 @@ workflow PANEL_RESOURCE_CREATION {
         ref_data.genome_fasta,
         ref_data.genome_version,
         ref_data.genome_fai,
-        hmf_data.heterozygous_sites,
+        hmf_data.map { it.heterozygous_sites },
         target_regions_bed,
         2,  // tumor_min_depth
         params.sequencing_platform,
@@ -222,7 +222,7 @@ workflow PANEL_RESOURCE_CREATION {
         ref_data.genome_fasta,
         ref_data.genome_version,
         ref_data.genome_fai,
-        hmf_data.gc_profile,
+        hmf_data.map { it.gc_profile },
         hmf_data.map { it.diploid_bed },
         null,  // panel_target_regions_normalisation
         true,  // targeted_mode
@@ -244,14 +244,14 @@ workflow PANEL_RESOURCE_CREATION {
         ref_data.genome_version,
         ref_data.genome_fai,
         ref_data.genome_dict,
-        hmf_data_pons.sage,
-        hmf_data.sage_known_hotspots_somatic,
-        hmf_data.sage_known_hotspots_germline,
-        hmf_data.sage_highconf_regions,
-        hmf_data.segment_mappability,
+        getSequencingPlatformPon(hmf_data, params.sequencing_platform, 'sage', log),
+        hmf_data.map { it.sage_known_hotspots_somatic },
+        hmf_data.map { it.sage_known_hotspots_germline },
+        hmf_data.map { it.sage_highconf_regions },
+        hmf_data.map { it.segment_mappability },
         driver_gene_panel,
-        hmf_data.ensembl_data_resources,
-        hmf_data.gnomad_resource,
+        hmf_data.map { it.ensembl_data_resources },
+        hmf_data.map { it.gnomad_resource },
         params.sequencing_platform,
         true,  // targeted_mode
         true,  // enable_germline
@@ -268,7 +268,7 @@ workflow PANEL_RESOURCE_CREATION {
         ch_amber_out,
         ch_cobalt_out,
         ref_data.genome_version,
-        hmf_data.gc_profile,
+        hmf_data.map { it.gc_profile },
         copy_number_percentiles,
         target_regions_bed,
     )
@@ -290,7 +290,7 @@ workflow PANEL_RESOURCE_CREATION {
         ch_isofox_out,
         ref_data.genome_version,
         isofox_gene_ids,
-        hmf_data.isofox_gene_distribution,
+        hmf_data.map { it.isofox_gene_distribution },
     )
     ch_isofox_normalisation_csv = ISOFOX_NORMALISATION.out.isofox_normalisation_csv
 
