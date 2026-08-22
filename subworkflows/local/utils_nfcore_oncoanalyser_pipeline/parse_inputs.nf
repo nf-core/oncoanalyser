@@ -3,9 +3,9 @@
 //
 
 include { getReduxDirAlignment     } from './accessors'
-include { CaseRecord               } from './records'
+include { Case                     } from './records'
 include { FastqFile                } from './records'
-include { SampleRecord             } from './records'
+include { Sample                   } from './records'
 include { FileType                 } from './types'
 include { InfoField                } from './types'
 include { SampleType               } from './types'
@@ -50,7 +50,7 @@ def parseCaseEntry(case_id, entries, stub_run, log) {
         promoteAlignmentFiles(b)
         resolveReduxInputs(b, case_id, stub_run, log)
         checkAlignmentIndexes(b, case_id, stub_run, log)
-        SampleRecord(b.sample_id, case_id, patient_id, b.sample_type, b.sequence_type, b.files, b.generate_redux_tsvs_only)
+        record(sample_id: b.sample_id, case_id: case_id, patient_id: patient_id, sample_type: b.sample_type, sequence_type: b.sequence_type, files: b.files, generate_redux_tsvs_only: b.generate_redux_tsvs_only)
     }
 
     // NOTE(SW): dna_rna samples are folded into the DNA lists until the dna_rna overhaul lands
@@ -60,7 +60,7 @@ def parseCaseEntry(case_id, entries, stub_run, log) {
     def tumor_rna = samples.findAll { it.sample_type == SampleType.TUMOR && it.sequence_type == SequenceType.RNA }
     def longitudinal = samples.findAll { it.sample_type == SampleType.LONGITUDINAL }
 
-    return CaseRecord(case_id, patient_id, ctx.cancer_type, normal_dna, donor_dna, tumor_dna, tumor_rna, longitudinal)
+    return record(case_id: case_id, patient_id: patient_id, cancer_type: ctx.cancer_type, normal_dna_samples: normal_dna, donor_dna_samples: donor_dna, tumor_dna_samples: tumor_dna, tumor_rna_samples: tumor_rna, longitudinal_samples: longitudinal)
 }
 
 def parseSampleEntry(case_id, patient_id, ctx, entry, sample_builders, log) {
@@ -146,14 +146,14 @@ def parseFastqFile(b, entry, info_data, case_id, log) {
         b.files[FileType.FASTQ] = []
     }
 
-    def fastq = FastqFile(
-        fwd,
-        rev,
-        single_end,
-        info_data[InfoField.LIBRARY_ID],
-        info_data[InfoField.LANE],
-        info_data.getOrDefault(InfoField.FLOWCELL, null),
-        rg_fields,
+    def fastq = record(
+        read_fwd: fwd,
+        read_rev: rev,
+        single_end: single_end,
+        library_id: info_data[InfoField.LIBRARY_ID],
+        lane: info_data[InfoField.LANE],
+        flowcell: info_data.getOrDefault(InfoField.FLOWCELL, null),
+        rg_fields: rg_fields,
     )
 
     def duplicate = b.files[FileType.FASTQ].find { existing ->

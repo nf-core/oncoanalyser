@@ -1,46 +1,43 @@
 //
-// Record constructors for the nf-core/oncoanalyser case/sample model
+// Named record types for the nf-core/oncoanalyser case/sample model
 //
-// Built with the legacy `record()` factory, which returns a RecordMap (a LinkedHashMap
-// subclass carrying a Record marker). Fields are read with dot access or bracket access,
-// e.g. `case.case_id` or `case['case_id']`.
+// Used for type annotations at process/workflow boundaries. Instances are created with
+// the record() factory, which returns a RecordMap that structurally matches these types
+// (a record type is a minimum set of required fields, not a class).
 //
 
 nextflow.enable.types = true
 
-def FastqFile(read_fwd, read_rev, single_end, library_id, lane, flowcell, rg_fields) {
-    return record(
-        read_fwd: read_fwd,
-        read_rev: read_rev,
-        single_end: single_end,
-        library_id: library_id,
-        lane: lane,
-        flowcell: flowcell,
-        rg_fields: rg_fields,
-    )
+include { SampleType   } from './types'
+include { SequenceType } from './types'
+
+record FastqFile {
+    read_fwd: Path
+    read_rev: Path?
+    single_end: Boolean
+    library_id: String
+    lane: String
+    flowcell: String?
+    rg_fields: Map
 }
 
-def SampleRecord(sample_id, case_id, patient_id, sample_type, sequence_type, files, generate_redux_tsvs_only) {
-    return record(
-        sample_id: sample_id,
-        case_id: case_id,
-        patient_id: patient_id,
-        sample_type: sample_type,
-        sequence_type: sequence_type,
-        files: files,
-        generate_redux_tsvs_only: generate_redux_tsvs_only,
-    )
+record Sample {
+    sample_id: String
+    case_id: String
+    patient_id: String
+    sample_type: SampleType
+    sequence_type: SequenceType
+    files: Map
+    generate_redux_tsvs_only: Boolean
 }
 
-def CaseRecord(case_id, patient_id, cancer_type, normal_dna_samples, donor_dna_samples, tumor_dna_samples, tumor_rna_samples, longitudinal_samples) {
-    return record(
-        case_id: case_id,
-        patient_id: patient_id,
-        cancer_type: cancer_type,
-        normal_dna_samples: normal_dna_samples,
-        donor_dna_samples: donor_dna_samples,
-        tumor_dna_samples: tumor_dna_samples,
-        tumor_rna_samples: tumor_rna_samples,
-        longitudinal_samples: longitudinal_samples,
-    )
+record Case {
+    case_id: String
+    patient_id: String
+    cancer_type: String?
+    normal_dna_samples: List
+    donor_dna_samples: List
+    tumor_dna_samples: List
+    tumor_rna_samples: List
+    longitudinal_samples: List
 }
