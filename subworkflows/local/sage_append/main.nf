@@ -7,12 +7,11 @@ nextflow.enable.types = true
 include { SAGE_APPEND as SAGE_APPEND_SOMATIC   } from '../../../modules/local/sage/append/main'
 include { SAGE_APPEND as SAGE_APPEND_GERMLINE  } from '../../../modules/local/sage/append/main'
 
-include { FileType; RunMode } from '../utils_nfcore_oncoanalyser_pipeline/types_enums'
+include { FileType } from '../utils_nfcore_oncoanalyser_pipeline/types_enums'
 
 include { groupByMeta                } from '../utils_nfcore_oncoanalyser_pipeline/helpers_channel'
 include { joinMeta                   } from '../utils_nfcore_oncoanalyser_pipeline/helpers_channel'
 include { restoreMeta                } from '../utils_nfcore_oncoanalyser_pipeline/helpers_channel'
-include { getEnumFromString          } from '../utils_nfcore_oncoanalyser_pipeline/utils'
 include { getInput                   } from '../utils_nfcore_oncoanalyser_pipeline/accessors_samples'
 include { getLongitudinalSampleName } from '../utils_nfcore_oncoanalyser_pipeline/accessors_samples'
 include { getNormalDnaSample         } from '../utils_nfcore_oncoanalyser_pipeline/accessors_samples'
@@ -49,13 +48,12 @@ workflow SAGE_APPEND {
     sequencing_platform: String // string:  [mandatory] sequencing platform
     enable_germline: Boolean     // boolean: [mandatory] Enable germline
     targeted_mode: Boolean       // boolean: [mandatory] Set targeted mode
+    purity_estimate_mode: Boolean // boolean: [mandatory] Set purity estimate mode
 
     main:
     //
     // STEP: Handle inputs
     //
-    def run_mode = getEnumFromString(params.mode, RunMode)
-    def purity_estimate_mode = run_mode == RunMode.PURITY_ESTIMATE
 
     // Select input sources then sort
     // channel: runnable: [ meta, purple_dir, tumor_dna_aln, tumor_dna_idx, [redux_tsv_tumor, ...], tumor_rna_aln, tumor_rna_idx ]

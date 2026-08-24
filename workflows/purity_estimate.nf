@@ -235,6 +235,7 @@ workflow PURITY_ESTIMATE {
             params.sequencing_platform,
             false,  // enable_germline
             targeted_mode,
+            true,  // purity_estimate_mode
         )
 
         ch_sage_somatic_append_out = SAGE_APPEND.out.somatic_dir

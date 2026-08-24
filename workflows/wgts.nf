@@ -523,6 +523,7 @@ workflow WGTS {
             params.sequencing_platform,
             run_config.stages.orange,  // enable_germline [run for ORANGE but not Neo]
             false,  // targeted_mode
+            false,  // purity_estimate_mode
         )
 
         ch_sage_append_somatic_out = SAGE_APPEND.out.somatic_dir

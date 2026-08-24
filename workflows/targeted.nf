@@ -519,6 +519,7 @@ workflow TARGETED {
             params.sequencing_platform,
             true,  // enable_germline
             true,  // targeted_mode
+            false,  // purity_estimate_mode
         )
 
         ch_sage_append_somatic_out = SAGE_APPEND.out.somatic_dir
