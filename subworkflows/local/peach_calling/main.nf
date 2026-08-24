@@ -59,11 +59,11 @@ workflow PEACH_CALLING {
     ch_peach_inputs = ch_inputs_sorted.runnable
         .map { meta, purple_dir ->
 
-            def meta_peach = [
+            def meta_peach = record(
                 key: meta.case_id,
                 id: meta.case_id,
                 sample_id: getNormalDnaSampleName(meta),
-            ]
+            )
 
             def purple_germline_smlv_vcf = purple_dir.resolve("${getTumorDnaSampleName(meta)}.purple.germline.vcf.gz")
 

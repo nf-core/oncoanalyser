@@ -65,11 +65,11 @@ workflow ISOFOX_QUANTIFICATION {
     ch_isofox_inputs = ch_inputs_sorted.runnable
         .map { meta, tumor_aln, tumor_idx ->
 
-            def meta_isofox = [
+            def meta_isofox = record(
                 key: meta.case_id,
                 id: meta.case_id,
                 sample_id: getTumorDnaSampleName(meta) ?: getTumorRnaSampleName(meta),
-            ]
+            )
 
             return [meta_isofox, tumor_aln, tumor_idx]
         }

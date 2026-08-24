@@ -1,5 +1,7 @@
 nextflow.enable.types = true
 
+include { SampleMeta } from '../../../subworkflows/local/utils_nfcore_oncoanalyser_pipeline/records'
+
 process CHORD {
     tag "${meta.id}"
     label 'process_low'
@@ -10,7 +12,7 @@ process CHORD {
         'biocontainers/hmftools-chord:2.1.2--hdfd78af_0' }"
 
     input:
-    tuple(meta: Map, smlv_vcf: Path, sv_vcf: Path)
+    tuple(meta: SampleMeta, smlv_vcf: Path, sv_vcf: Path)
     genome_fasta: Path
     genome_fai: Path
     genome_dict: Path

@@ -1,5 +1,7 @@
 nextflow.enable.types = true
 
+include { SampleMeta } from '../../../../subworkflows/local/utils_nfcore_oncoanalyser_pipeline/records'
+
 process LINX_SOMATIC {
     tag "${meta.id}"
     label 'process_low'
@@ -10,7 +12,7 @@ process LINX_SOMATIC {
         'biocontainers/hmftools-linx:2.3.1--hdfd78af_0' }"
 
     input:
-    tuple(meta: Map, purple_dir: Path)
+    tuple(meta: SampleMeta, purple_dir: Path)
     genome_ver: String
     ensembl_data_resources: Path
     known_fusion_data: Path

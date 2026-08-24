@@ -1,5 +1,7 @@
 nextflow.enable.types = true
 
+include { SampleMeta } from '../../../../subworkflows/local/utils_nfcore_oncoanalyser_pipeline/records'
+
 process ISOFOX {
     tag "${meta.id}"
     label 'process_high'
@@ -10,7 +12,7 @@ process ISOFOX {
         'biocontainers/hmftools-isofox:2.0.1--hdfd78af_0' }"
 
     input:
-    tuple(meta: Map, aln: Path, idx: Path)
+    tuple(meta: SampleMeta, aln: Path, idx: Path)
     functions: String?
     read_length: Integer
     genome_fasta: Path

@@ -79,11 +79,11 @@ workflow LINX_ANNOTATION {
 
             def tumor_id = getTumorDnaSampleName(meta)
 
-            def meta_linx = [
+            def meta_linx = record(
                 key: meta.case_id,
                 id: meta.case_id,
                 sample_id: tumor_id,
-            ]
+            )
 
             def sv_vcf = purple_dir.resolve("${tumor_id}.purple.sv.germline.vcf.gz")
 
@@ -120,11 +120,11 @@ workflow LINX_ANNOTATION {
     ch_linx_somatic_inputs = ch_inputs_somatic_sorted.runnable
         .map { meta, purple_dir ->
 
-            def meta_linx = [
+            def meta_linx = record(
                 key: meta.case_id,
                 id: meta.case_id,
                 sample_id: getTumorDnaSampleName(meta),
-            ]
+            )
 
             return [meta_linx, purple_dir]
         }

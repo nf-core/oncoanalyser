@@ -1,5 +1,7 @@
 nextflow.enable.types = true
 
+include { SampleMeta } from '../../../subworkflows/local/utils_nfcore_oncoanalyser_pipeline/records'
+
 process SIGS {
     tag "${meta.id}"
     label 'process_low'
@@ -10,7 +12,7 @@ process SIGS {
         'biocontainers/hmftools-sigs:1.2.1--hdfd78af_1' }"
 
     input:
-    tuple(meta: Map, smlv_vcf: Path)
+    tuple(meta: SampleMeta, smlv_vcf: Path)
     signatures: Path
 
     topic:

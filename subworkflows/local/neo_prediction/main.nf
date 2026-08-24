@@ -86,11 +86,11 @@ workflow NEO_PREDICTION {
     ch_finder_inputs = ch_finder_inputs_sorted.runnable
         .map { meta, purple_dir, linx_annotation_dir ->
 
-            def meta_finder = [
+            def meta_finder = record(
                 key: meta.case_id,
                 id: meta.case_id,
                 sample_id: getTumorDnaSampleName(meta),
-            ]
+            )
 
             return [meta_finder, purple_dir, linx_annotation_dir]
         }
@@ -139,11 +139,11 @@ workflow NEO_PREDICTION {
     ch_isofox_inputs = ch_isofox_inputs_sorted.runnable
         .map { meta, neo_finder_dir, tumor_rna_aln, tumor_rna_idx ->
 
-            def meta_isofox = [
+            def meta_isofox = record(
                 key: meta.case_id,
                 id: meta.case_id,
                 sample_id: getTumorDnaSampleName(meta),
-            ]
+            )
 
             return [meta_isofox, neo_finder_dir, tumor_rna_aln, tumor_rna_idx]
         }
@@ -181,17 +181,16 @@ workflow NEO_PREDICTION {
     ])
         .map { meta, isofox_dir, purple_dir, sage_append_dir_somatic, lilac_dir, neo_finder_dir, annotated_fusions ->
 
-            def meta_scorer = [
+            def meta_scorer = record(
                 key: meta.case_id,
                 id: meta.case_id,
                 sample_id: getTumorDnaSampleName(meta),
                 cancer_type: meta.cancer_type,
-            ]
+                sample_rna_id: hasTumorRna(meta) ? getTumorRnaSampleName(meta) : null,
+            )
 
             def sage_append_vcf_somatic = null
             if (hasTumorRna(meta)) {
-                meta_scorer.sample_rna_id = getTumorRnaSampleName(meta)
-
                 def sage_append_dir_somatic_selected = selectCurrentOrExisting(sage_append_dir_somatic, getInput(getTumorDnaSample(meta), FileType.SAGE_APPEND_DIR))
                 sage_append_vcf_somatic = file(sage_append_dir_somatic_selected).resolve("${meta_scorer.sample_id}.sage.append.vcf.gz")
             }

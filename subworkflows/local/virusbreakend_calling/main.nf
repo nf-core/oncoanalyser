@@ -70,11 +70,11 @@ workflow VIRUSBREAKEND_CALLING {
     ch_virusbreakend_inputs = ch_inputs_sorted.runnable
         .map { meta, tumor_aln, _tumor_idx ->
 
-            def meta_virus = [
+            def meta_virus = record(
                 key: meta.case_id,
                 id: meta.case_id,
                 sample_id: getTumorDnaSampleName(meta),
-            ]
+            )
 
             return [meta_virus, tumor_aln]
         }
@@ -131,11 +131,11 @@ workflow VIRUSBREAKEND_CALLING {
             def meta = d[0]
             def inputs = d[1..-1]
 
-            def meta_virus = [
+            def meta_virus = record(
                 key: meta.case_id,
                 id: meta.case_id,
                 sample_id: getTumorDnaSampleName(meta),
-            ]
+            )
 
             return [meta_virus] + inputs
         }

@@ -1,5 +1,7 @@
 nextflow.enable.types = true
 
+include { SampleMeta } from '../../../../subworkflows/local/utils_nfcore_oncoanalyser_pipeline/records'
+
 process NEO_ANNOTATE_FUSIONS {
     tag "${meta.id}"
     label 'process_medium'
@@ -10,7 +12,7 @@ process NEO_ANNOTATE_FUSIONS {
         'biocontainers/hmftools-isofox:2.0.1--hdfd78af_0' }"
 
     input:
-    tuple(meta: Map, neo_finder_dir: Path, aln: Path, idx: Path)
+    tuple(meta: SampleMeta, neo_finder_dir: Path, aln: Path, idx: Path)
     read_length: Integer
     genome_fasta: Path
     genome_ver: String

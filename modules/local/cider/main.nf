@@ -1,5 +1,7 @@
 nextflow.enable.types = true
 
+include { SampleMeta } from '../../../subworkflows/local/utils_nfcore_oncoanalyser_pipeline/records'
+
 process CIDER {
     tag "${meta.id}"
     label 'process_medium'
@@ -11,7 +13,7 @@ process CIDER {
         'biocontainers/hmftools-cider:1.2--hdfd78af_0' }"
 
     input:
-    tuple(meta: Map, aln: Path, idx: Path)
+    tuple(meta: SampleMeta, aln: Path, idx: Path)
     genome_fasta: Path
     genome_ver: String
     genome_fai: Path

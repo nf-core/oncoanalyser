@@ -1,5 +1,7 @@
 nextflow.enable.types = true
 
+include { SampleMeta } from '../../../../subworkflows/local/utils_nfcore_oncoanalyser_pipeline/records'
+
 process LINX_VISUALISER {
     tag "${meta.id}"
     label 'process_medium'
@@ -10,7 +12,7 @@ process LINX_VISUALISER {
         'biocontainers/hmftools-linx:2.3.1--hdfd78af_0' }"
 
     input:
-    tuple(meta: Map, linx_annotation_dir: Path, amber_dir: Path?, cobalt_dir: Path?, purple_dir: Path?)
+    tuple(meta: SampleMeta, linx_annotation_dir: Path, amber_dir: Path?, cobalt_dir: Path?, purple_dir: Path?)
     genome_ver: String
     ensembl_data_resources: Path
 

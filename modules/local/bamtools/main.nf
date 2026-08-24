@@ -1,5 +1,7 @@
 nextflow.enable.types = true
 
+include { SampleMeta } from '../../../subworkflows/local/utils_nfcore_oncoanalyser_pipeline/records'
+
 process BAMTOOLS {
     tag "${meta.id}"
     label 'process_medium'
@@ -10,7 +12,7 @@ process BAMTOOLS {
         'biocontainers/hmftools-bam-tools:1.6.1--hdfd78af_0' }"
 
     input:
-    tuple(meta: Map, aln: Path, idx: Path)
+    tuple(meta: SampleMeta, aln: Path, idx: Path)
     genome_fasta: Path
     genome_ver: String
     genome_fai: Path

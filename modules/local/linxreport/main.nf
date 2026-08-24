@@ -1,5 +1,7 @@
 nextflow.enable.types = true
 
+include { SampleMeta } from '../../../subworkflows/local/utils_nfcore_oncoanalyser_pipeline/records'
+
 process LINXREPORT {
     tag "${meta.id}"
     label 'process_single'
@@ -10,7 +12,7 @@ process LINXREPORT {
         'biocontainers/r-linxreport:1.2.0--r45hdfd78af_0' }"
 
     input:
-    tuple(meta: Map, linx_annotation_dir: Path, linx_visualiser_dir: Path)
+    tuple(meta: SampleMeta, linx_annotation_dir: Path, linx_visualiser_dir: Path)
 
     topic:
     tuple(meta, file('*_linx.html'))               >> 'linxreport_html'

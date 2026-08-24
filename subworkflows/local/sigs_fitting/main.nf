@@ -59,11 +59,11 @@ workflow SIGS_FITTING {
 
             def tumor_id = getTumorDnaSampleName(meta)
 
-            def meta_sigs = [
+            def meta_sigs = record(
                 key: meta.case_id,
                 id: meta.case_id,
                 sample_id: tumor_id,
-            ]
+            )
 
             def smlv_vcf = purple_dir.resolve("${tumor_id}.purple.somatic.vcf.gz")
 

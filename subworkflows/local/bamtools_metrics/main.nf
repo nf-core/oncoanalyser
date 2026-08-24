@@ -79,12 +79,12 @@ workflow BAMTOOLS_METRICS {
         )
         .map { meta, meta_sample, sample_type, aln, idx ->
 
-            def meta_bamtools = [
+            def meta_bamtools = record(
                 key: meta.case_id,
                 id: "${meta.case_id}_${meta_sample.sample_id}",
                 sample_id: meta_sample.sample_id,
                 sample_type: sample_type,
-            ]
+            )
 
             return [meta_bamtools, aln, idx]
         }

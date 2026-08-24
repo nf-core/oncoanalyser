@@ -1,5 +1,7 @@
 nextflow.enable.types = true
 
+include { SampleMeta } from '../../../../subworkflows/local/utils_nfcore_oncoanalyser_pipeline/records'
+
 process PAVE_GERMLINE {
     tag "${meta.id}"
     label 'process_medium'
@@ -10,7 +12,7 @@ process PAVE_GERMLINE {
         'biocontainers/hmftools-pave:1.9--hdfd78af_0' }"
 
     input:
-    tuple(meta: Map, sage_vcf: Path, sage_tbi: Path)
+    tuple(meta: SampleMeta, sage_vcf: Path, sage_tbi: Path)
     genome_fasta: Path
     genome_ver: String
     genome_fai: Path

@@ -48,6 +48,7 @@ record SampleMeta {
     key: String
     id: String
     sample_id: String
+    sample_type: String?
 }
 
 record ReferenceMeta {

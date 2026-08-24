@@ -63,11 +63,11 @@ workflow CHORD_PREDICTION {
 
             def tumor_id = getTumorDnaSampleName(meta)
 
-            def meta_chord = [
+            def meta_chord = record(
                 key: meta.case_id,
                 id: meta.case_id,
                 sample_id: tumor_id,
-            ]
+            )
 
             def smlv_vcf = purple_dir.resolve("${tumor_id}.purple.somatic.vcf.gz")
             def sv_vcf = purple_dir.resolve("${tumor_id}.purple.sv.vcf.gz")

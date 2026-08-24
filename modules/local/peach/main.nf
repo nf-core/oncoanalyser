@@ -1,5 +1,7 @@
 nextflow.enable.types = true
 
+include { SampleMeta } from '../../../subworkflows/local/utils_nfcore_oncoanalyser_pipeline/records'
+
 process PEACH {
     tag "${meta.id}"
     label 'process_single'
@@ -10,7 +12,7 @@ process PEACH {
         'biocontainers/hmftools-peach:2.0.0--hdfd78af_1' }"
 
     input:
-    tuple(meta: Map, germline_smlv_vcf: Path)
+    tuple(meta: SampleMeta, germline_smlv_vcf: Path)
     haplotypes: Path
     haplotype_functions: Path
     drug_info: Path
