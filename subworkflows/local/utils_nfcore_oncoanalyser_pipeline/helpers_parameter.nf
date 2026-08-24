@@ -671,6 +671,11 @@ def getPrepConfigFromCli(params, log) {
 
 def validateInput(inputs, run_config, params, log) {
 
+    if (! inputs) {
+        log.error "no sample entries found in the samplesheet; at least one case row is required"
+        exit 1
+    }
+
     inputs.each { case_record ->
 
         // Require ALN or ALN_REDUX or REDUX_DIR or FASTQs for each defined sample
