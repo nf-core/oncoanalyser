@@ -82,9 +82,9 @@ workflow READ_ALIGNMENT_DNA {
             def rg_entries = [ID: rg_id, SM: fastq_info.sample_id, LB: fastq_info.library_id] + fastq_info.rg_fields
             def rg_line = '@RG\\t' + rg_entries.collect { k, v -> "${k}:${v}" }.join('\\t')
 
-            def meta_fastq_id = "${meta.case_id}_${fastq_info.sample_id}_${fastq_info.library_id}_${fastq_info.lane}"
+            def meta_fastq_id = "${meta.case_id}:${fastq_info.sample_id}:${fastq_info.library_id}:${fastq_info.lane}"
             if (fastq_info.flowcell) {
-                meta_fastq_id = "${meta_fastq_id}_${fastq_info.flowcell}"
+                meta_fastq_id = "${meta_fastq_id}:${fastq_info.flowcell}"
             }
 
             def meta_fastq = record(
@@ -131,7 +131,7 @@ workflow READ_ALIGNMENT_DNA {
                         def split_fwd = fwd.name.replaceAll('\\..+$', '')
                         def meta_fastq_ready = record(
                             key: meta_fastq.key,
-                            id: "${meta_fastq.id}_${split_fwd}",
+                            id: "${meta_fastq.id}:${split_fwd}",
                             rg_line: meta_fastq.rg_line,
                             sample_id: meta_fastq.sample_id,
                             library_id: meta_fastq.library_id,
@@ -159,7 +159,7 @@ workflow READ_ALIGNMENT_DNA {
                         // NOTE(SW): split allows meta_fastq_ready to be unique, which is required during reunite below
                         def meta_fastq_ready = record(
                             key: meta_fastq.key,
-                            id: "${meta_fastq.id}_${split_fwd}",
+                            id: "${meta_fastq.id}:${split_fwd}",
                             rg_line: meta_fastq.rg_line,
                             sample_id: meta_fastq.sample_id,
                             library_id: meta_fastq.library_id,

@@ -124,7 +124,7 @@ workflow SAGE_APPEND {
             def meta_append = [
                 key: meta.case_id,
                 topic_key: 'germline',
-                id: "${meta.case_id}_${output_file_id}",
+                id: "${meta.case_id}:${output_file_id}",
                 output_file_id: output_file_id,
                 reference_ids: [getTumorRnaSampleName(meta)],
             ]
@@ -189,7 +189,7 @@ workflow SAGE_APPEND {
             def meta_append = [
                 key: meta.case_id,
                 topic_key: 'somatic',
-                id: "${meta.case_id}_${output_file_id}",
+                id: "${meta.case_id}:${output_file_id}",
                 output_file_id: output_file_id,
                 reference_ids: [],
             ]

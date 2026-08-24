@@ -81,7 +81,7 @@ workflow BAMTOOLS_METRICS {
 
             def meta_bamtools = record(
                 key: meta.case_id,
-                id: "${meta.case_id}_${meta_sample.sample_id}",
+                id: "${meta.case_id}:${meta_sample.sample_id}",
                 sample_id: meta_sample.sample_id,
                 sample_type: sample_type,
             )

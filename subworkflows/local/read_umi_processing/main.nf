@@ -70,7 +70,7 @@ workflow READ_UMI_PROCESSING {
 
               def meta_fastq = record(
                   key: meta.case_id,
-                  id: "${meta.case_id}_${fastq_info.sample_id}",
+                  id: "${meta.case_id}:${fastq_info.sample_id}",
                   sequence_type: sequence_type,
                   sample_id: fastq_info.sample_id,
                   library_id: fastq_info.library_id,

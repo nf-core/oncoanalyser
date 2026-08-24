@@ -111,7 +111,7 @@ workflow REDUX_PROCESSING {
 
             def meta_redux = record(
                 key: meta.case_id,
-                id: "${meta.case_id}_${sample_id}",
+                id: "${meta.case_id}:${sample_id}",
                 sample_id: sample_id,
                 sample_type: sample_type,
             )
