@@ -1,9 +1,5 @@
 //
-// Named record types for the nf-core/oncoanalyser case/sample model
-//
-// Used for type annotations at process/workflow boundaries. Instances are created with
-// the record() factory, which returns a RecordMap that structurally matches these types
-// (a record type is a minimum set of required fields, not a class).
+// Named record types for the nf-core/oncoanalyser pipeline case / sample model
 //
 
 nextflow.enable.types = true

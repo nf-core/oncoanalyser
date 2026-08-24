@@ -1,7 +1,5 @@
 //
-// Shared enumerations and derived type-level data for the oncoanalyser pipeline.
-// These live here (not lib/*.groovy) so they can be explicitly included, which avoids
-// a name collision between the `Process` enum and java.lang.Process.
+// Shared enums for the nf-core/oncoanalyser pipeline various components / elements
 //
 
 nextflow.enable.types = true
