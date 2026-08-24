@@ -17,16 +17,16 @@ include { hasTumorDnaFastq   } from '../utils_nfcore_oncoanalyser_pipeline/acces
 workflow READ_ALIGNMENT_DNA {
     take:
     // Sample data
-    ch_inputs            // channel: [mandatory] [ meta ]
-    ch_fastq             // channel: [mandatory] [ meta, fastq_info, fastq_fwd, fastq_rev ]
+    ch_inputs: Channel<Map>            // channel: [mandatory] [ meta ]
+    ch_fastq: Channel<Tuple<Map, Map, Path?, Path?>>             // channel: [mandatory] [ meta, fastq_info, fastq_fwd, fastq_rev ]
 
     // Reference data
-    genome_fasta         // channel: [mandatory] /path/to/genome_fasta
-    genome_bwamem2_index // channel: [mandatory] /path/to/genome_bwa-mem2_index_dir/
+    genome_fasta: Channel<Path>         // channel: [mandatory] /path/to/genome_fasta
+    genome_bwamem2_index: Channel<Path> // channel: [mandatory] /path/to/genome_bwa-mem2_index_dir/
 
     // Params
-    max_fastq_records    // numeric: [optional]  max number of FASTQ records per split
-    sequencing_platform  // string:  [mandatory] sequencing platform
+    max_fastq_records: Integer?    // numeric: [optional]  max number of FASTQ records per split
+    sequencing_platform: String  // string:  [mandatory] sequencing platform
 
     main:
     //

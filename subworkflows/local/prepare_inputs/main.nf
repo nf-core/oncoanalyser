@@ -14,7 +14,7 @@ include { parseInput } from '../utils_nfcore_oncoanalyser_pipeline/parse_inputs'
 
 workflow PREPARE_INPUTS {
     take:
-    input_fp_str
+    input_fp_str: String
 
     main:
     ch_inputs = channel.fromList(

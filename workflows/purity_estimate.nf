@@ -19,6 +19,7 @@ include { WISP_ANALYSIS                    } from '../subworkflows/local/wisp_an
 include { softwareVersionsToYAML  } from '../subworkflows/nf-core/utils_nfcore_pipeline'
 
 include { RunMode                       } from '../subworkflows/local/utils_nfcore_oncoanalyser_pipeline/types'
+include { Case                          } from '../subworkflows/local/utils_nfcore_oncoanalyser_pipeline/records'
 
 include { getDnaFastqChannel            } from '../subworkflows/local/utils_nfcore_oncoanalyser_pipeline/channels'
 include { getEnumFromString             } from '../subworkflows/local/utils_nfcore_oncoanalyser_pipeline/utils'
@@ -32,9 +33,9 @@ include { getPrepConfigFromSamplesheet  } from '../subworkflows/local/utils_nfco
 
 workflow PURITY_ESTIMATE {
     take:
-    inputs
-    run_config
-    params
+    inputs: List<Case>
+    run_config: Map
+    params: Map
 
     main:
     // Create input channel from parsed CSV

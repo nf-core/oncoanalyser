@@ -26,21 +26,21 @@ include { selectCurrentOrExisting     } from '../utils_nfcore_oncoanalyser_pipel
 workflow LILAC_CALLING {
     take:
     // Sample data
-    ch_inputs           // channel: [mandatory] [ meta ]
-    ch_redux_dir_tumor  // channel: [mandatory] [ meta, redux_dir ]
-    ch_redux_dir_normal // channel: [mandatory] [ meta, redux_dir ]
-    ch_tumor_rna_aln    // channel: [mandatory] [ meta, aln, idx ]
-    ch_purple           // channel: [mandatory] [ meta, purple_dir ]
+    ch_inputs: Channel<Map>           // channel: [mandatory] [ meta ]
+    ch_redux_dir_tumor: Channel<Tuple<Map, Path>>  // channel: [mandatory] [ meta, redux_dir ]
+    ch_redux_dir_normal: Channel<Tuple<Map, Path>> // channel: [mandatory] [ meta, redux_dir ]
+    ch_tumor_rna_aln: Channel<Tuple<Map, Path, Path>>    // channel: [mandatory] [ meta, aln, idx ]
+    ch_purple: Channel<Tuple<Map, Path>>           // channel: [mandatory] [ meta, purple_dir ]
 
     // Reference data
-    genome_fasta        // channel: [mandatory] /path/to/genome_fasta
-    genome_version      // channel: [mandatory] genome version
-    genome_fai          // channel: [mandatory] /path/to/genome_fai
-    lilac_resource_dir  // channel: [mandatory] /path/to/lilac_resource_dir/
+    genome_fasta: Channel<Path>        // channel: [mandatory] /path/to/genome_fasta
+    genome_version: Channel<String>      // channel: [mandatory] genome version
+    genome_fai: Channel<Path>          // channel: [mandatory] /path/to/genome_fai
+    lilac_resource_dir: Channel<Path>  // channel: [mandatory] /path/to/lilac_resource_dir/
 
     // Params
-    sequencing_platform // string:  [mandatory] sequencing platform
-    targeted_mode       // boolean: [mandatory] Set targeted mode
+    sequencing_platform: String // string:  [mandatory] sequencing platform
+    targeted_mode: Boolean       // boolean: [mandatory] Set targeted mode
 
     main:
     // Select input sources then sort

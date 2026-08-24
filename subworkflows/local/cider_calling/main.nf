@@ -17,16 +17,16 @@ include { restoreMeta                } from '../utils_nfcore_oncoanalyser_pipeli
 workflow CIDER_CALLING {
     take:
     // Sample data
-    ch_inputs          // channel: [mandatory] [ meta ]
-    ch_redux_dir_tumor // channel: [mandatory] [ meta, redux_dir ]
-    ch_tumor_rna_aln   // channel: [mandatory] [ meta, aln, idx ]
+    ch_inputs: Channel<Map>          // channel: [mandatory] [ meta ]
+    ch_redux_dir_tumor: Channel<Tuple<Map, Path>> // channel: [mandatory] [ meta, redux_dir ]
+    ch_tumor_rna_aln: Channel<Tuple<Map, Path, Path>>   // channel: [mandatory] [ meta, aln, idx ]
 
     // Reference data
-    genome_fasta       // channel: [mandatory] /path/to/genome_fasta
-    genome_version     // channel: [mandatory] genome version
-    genome_fai         // channel: [mandatory] /path/to/genome_fai
-    genome_dict        // channel: [mandatory] /path/to/genome_dict
-    genome_img         // channel: [optional]  /path/to/genome_img
+    genome_fasta: Channel<Path>       // channel: [mandatory] /path/to/genome_fasta
+    genome_version: Channel<String>     // channel: [mandatory] genome version
+    genome_fai: Channel<Path>         // channel: [mandatory] /path/to/genome_fai
+    genome_dict: Channel<Path>        // channel: [mandatory] /path/to/genome_dict
+    genome_img: Channel<Path>         // channel: [optional]  /path/to/genome_img
 
     main:
     // Select input sources then sort, separate by DNA and RNA

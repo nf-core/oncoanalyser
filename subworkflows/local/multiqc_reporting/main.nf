@@ -25,17 +25,17 @@ include { selectCurrentOrExisting  } from '../utils_nfcore_oncoanalyser_pipeline
 workflow MULTIQC_REPORTING {
     take:
     // Sample data
-    ch_bamtools_dir_tumor     // channel: [mandatory] [ meta, bamtools_dir ]
-    ch_bamtools_dir_normal    // channel: [optional]  [ meta, bamtools_dir ]
-    ch_amber_dir              // channel: [mandatory] [ meta, amber_dir ]
-    ch_purple_dir             // channel: [mandatory] [ meta, purple_dir ]
-    ch_align_rna_qc_tumor_out // channel: [mandatory] [ meta, star_log, rna_md_metrics ]
+    ch_bamtools_dir_tumor: Channel<Tuple<Map, Path>>     // channel: [mandatory] [ meta, bamtools_dir ]
+    ch_bamtools_dir_normal: Channel<Tuple<Map, Path>>    // channel: [optional]  [ meta, bamtools_dir ]
+    ch_amber_dir: Channel<Tuple<Map, Path>>              // channel: [mandatory] [ meta, amber_dir ]
+    ch_purple_dir: Channel<Tuple<Map, Path>>             // channel: [mandatory] [ meta, purple_dir ]
+    ch_align_rna_qc_tumor_out: Channel<Tuple<Map, Path, Path>> // channel: [mandatory] [ meta, star_log, rna_md_metrics ]
 
     // Other
-    ch_collated_versions      // channel: [mandatory] [ collated_versions.yml ]
-    custom_config             //  string: [optional]  Custom configuration for MultiQC
-    custom_desc               //  string: [optional]  Custom methods description for MultiQC
-    custom_logo               //  string: [optional]  Custom logo for MultiQC
+    ch_collated_versions: Channel<Path>      // channel: [mandatory] [ collated_versions.yml ]
+    custom_config: String?             //  string: [optional]  Custom configuration for MultiQC
+    custom_desc: String?               //  string: [optional]  Custom methods description for MultiQC
+    custom_logo: String?               //  string: [optional]  Custom logo for MultiQC
 
     main:
     // Select input sources then sort

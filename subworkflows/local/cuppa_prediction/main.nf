@@ -24,16 +24,16 @@ include { selectCurrentOrExisting  } from '../utils_nfcore_oncoanalyser_pipeline
 workflow CUPPA_PREDICTION {
     take:
     // Sample data
-    ch_inputs               // channel: [mandatory] [ meta ]
-    ch_isofox_dir           // channel: [mandatory] [ meta, isofox_dir ]
-    ch_purple_dir           // channel: [mandatory] [ meta, purple_dir ]
-    ch_linx_annotation_dir  // channel: [mandatory] [ meta, linx_annotation_dir ]
-    ch_virusinterpreter_dir // channel: [mandatory] [ meta, virusinterpreter_dir ]
+    ch_inputs: Channel<Map>               // channel: [mandatory] [ meta ]
+    ch_isofox_dir: Channel<Tuple<Map, Path>>           // channel: [mandatory] [ meta, isofox_dir ]
+    ch_purple_dir: Channel<Tuple<Map, Path>>           // channel: [mandatory] [ meta, purple_dir ]
+    ch_linx_annotation_dir: Channel<Tuple<Map, Path>>  // channel: [mandatory] [ meta, linx_annotation_dir ]
+    ch_virusinterpreter_dir: Channel<Tuple<Map, Path>> // channel: [mandatory] [ meta, virusinterpreter_dir ]
 
     // Reference data
-    genome_version          // channel: [mandatory] genome version
-    cuppa_alt_sj            // channel: [mandatory] /path/to/cuppa_alt_sj/
-    cuppa_classifier        // channel: [mandatory] /path/to/cuppa_classifier/
+    genome_version: Channel<String>          // channel: [mandatory] genome version
+    cuppa_alt_sj: Channel<Path>            // channel: [mandatory] /path/to/cuppa_alt_sj/
+    cuppa_classifier: Channel<Path>        // channel: [mandatory] /path/to/cuppa_classifier/
 
     main:
     // Select input sources then sort

@@ -25,26 +25,26 @@ include { hasTumorDnaAln      } from '../utils_nfcore_oncoanalyser_pipeline/acce
 workflow REDUX_PROCESSING {
     take:
     // Sample data
-    ch_inputs              // channel: [mandatory] [ meta ]
-    ch_dna_tumor           // channel: [mandatory] [ meta, [aln, ...], [idx, ...] ]
-    ch_dna_normal          // channel: [mandatory] [ meta, [aln, ...], [idx, ...] ]
-    ch_dna_donor           // channel: [mandatory] [ meta, [aln, ...], [idx, ...] ]
+    ch_inputs: Channel<Map>              // channel: [mandatory] [ meta ]
+    ch_dna_tumor: Channel<Tuple<Map, List<Path>, List<Path>>>           // channel: [mandatory] [ meta, [aln, ...], [idx, ...] ]
+    ch_dna_normal: Channel<Tuple<Map, List<Path>, List<Path>>>          // channel: [mandatory] [ meta, [aln, ...], [idx, ...] ]
+    ch_dna_donor: Channel<Tuple<Map, List<Path>, List<Path>>>           // channel: [mandatory] [ meta, [aln, ...], [idx, ...] ]
 
     // Reference data
-    genome_fasta           // channel: [mandatory] /path/to/genome_fasta
-    genome_version         // channel: [mandatory] genome version
-    genome_fai             // channel: [mandatory] /path/to/genome_fai
-    genome_dict            // channel: [mandatory] /path/to/genome_dict
-    unmap_regions          // channel: [mandatory] /path/to/unmap_regions
-    msi_jitter_sites       // channel: [mandatory] /path/to/msi_jitter_sites
-    msi_model_coefficients // channel: [mandatory] /path/to/msi_model_coefficients
-    msi_model_error_rates  // channel: [mandatory] /path/to/msi_model_error_rates
+    genome_fasta: Channel<Path>           // channel: [mandatory] /path/to/genome_fasta
+    genome_version: Channel<String>         // channel: [mandatory] genome version
+    genome_fai: Channel<Path>             // channel: [mandatory] /path/to/genome_fai
+    genome_dict: Channel<Path>            // channel: [mandatory] /path/to/genome_dict
+    unmap_regions: Channel<Path>          // channel: [mandatory] /path/to/unmap_regions
+    msi_jitter_sites: Channel<Path>       // channel: [mandatory] /path/to/msi_jitter_sites
+    msi_model_coefficients: Channel<Path> // channel: [mandatory] /path/to/msi_model_coefficients
+    msi_model_error_rates: Channel<Path>  // channel: [mandatory] /path/to/msi_model_error_rates
 
     // Params
-    sequencing_platform    // string:  [mandatory] sequencing platform
-    targeted_mode          // boolean: [mandatory] Set targeted mode
-    umi_enable             // boolean: [mandatory] enable UMI processing
-    umi_duplex_delim       // string:  [optional] UMI duplex delimiter
+    sequencing_platform: String    // string:  [mandatory] sequencing platform
+    targeted_mode: Boolean          // boolean: [mandatory] Set targeted mode
+    umi_enable: Boolean             // boolean: [mandatory] enable UMI processing
+    umi_duplex_delim: String?       // string:  [optional] UMI duplex delimiter
 
     main:
     // Select input sources then sort, separating by sample type

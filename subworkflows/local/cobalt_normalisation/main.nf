@@ -17,14 +17,14 @@ include { selectCurrentOrExisting  } from '../utils_nfcore_oncoanalyser_pipeline
 workflow COBALT_NORMALISATION {
     take:
     // Sample data
-    ch_amber                // channel: [mandatory] [ meta, amber_dir ]
-    ch_cobalt               // channel: [mandatory] [ meta, cobalt_dir ]
+    ch_amber: Channel<Tuple<Map, Path>>                // channel: [mandatory] [ meta, amber_dir ]
+    ch_cobalt: Channel<Tuple<Map, Path>>               // channel: [mandatory] [ meta, cobalt_dir ]
 
     // Reference data
-    genome_version          // channel: [mandatory] genome version
-    gc_profile              // channel: [mandatory] /path/to/gc_profile
-    copy_number_percentiles // channel: [mandatory] /path/to/copy_number_percentiles
-    target_regions_bed      // channel: [mandatory] /path/to/target_regions_bed
+    genome_version: Channel<String>          // channel: [mandatory] genome version
+    gc_profile: Channel<Path>              // channel: [mandatory] /path/to/gc_profile
+    copy_number_percentiles: Channel<Path> // channel: [mandatory] /path/to/copy_number_percentiles
+    target_regions_bed: Channel<Path>      // channel: [mandatory] /path/to/target_regions_bed
 
     main:
     // Create process input channel

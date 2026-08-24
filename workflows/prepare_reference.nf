@@ -21,7 +21,7 @@ include { getPrepConfigFromCli } from '../subworkflows/local/utils_nfcore_oncoan
 
 workflow PREPARE_REFERENCE {
     take:
-    params
+    params: Map
 
     main:
     // Stage in reference data as requested

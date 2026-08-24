@@ -15,10 +15,10 @@ include { selectCurrentOrExisting  } from '../utils_nfcore_oncoanalyser_pipeline
 workflow PAVE_PON_CREATION {
     take:
     // Sample data
-    ch_sage_dir_somatic // channel: [mandatory] [ meta, sage_dir ]
+    ch_sage_dir_somatic: Channel<Tuple<Map, Path>> // channel: [mandatory] [ meta, sage_dir ]
 
     // Reference data
-    genome_version      // channel: [mandatory] genome version
+    genome_version: Channel<String>      // channel: [mandatory] genome version
 
     main:
     // Create process input channel

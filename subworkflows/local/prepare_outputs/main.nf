@@ -56,53 +56,53 @@ def get_command_log_filepath(data) {
 
 workflow PREPARE_OUTPUTS {
     take:
-    amber
-    bamtools_tumor
-    bamtools_normal
-    chord
-    cider
-    cobalt
-    cuppa
-    esvee
-    align_rna_tumor
-    isofox
-    lilac
-    linx_germline
-    linx_somatic
-    linx_somatic_visualiser
-    linxreport_html
-    multiqc
-    neo_annotated_fusions
-    neo_finder
-    neo_scorer_dir
-    orange_json
-    orange_pdf
-    pave_germline
-    pave_somatic
-    peach
-    purple
-    qsee
-    redux_tumor
-    redux_normal
-    redux_donor
-    sage_append_somatic
-    sage_append_germline
-    sage_germline
-    sage_somatic
-    sage_somatic_visualiser
-    sigs
-    teal_normal_bam
-    teal_tumor_bam
-    teal_tsvs
-    virusbreakend_tsv
-    virusbreakend_vcf
-    virusinterpreter
-    write_reference_data
-    command_files
-    wisp
-    cobalt_normalisation_tsv
-    isofox_normalisation_csv
-    pave_pon_panel_creation_artefacts
+    amber: Channel<Tuple<Map, Path>>
+    bamtools_tumor: Channel<Tuple<Map, Path>>
+    bamtools_normal: Channel<Tuple<Map, Path>>
+    chord: Channel<Tuple<Map, Path>>
+    cider: Channel<Tuple<Map, List<Path>>>
+    cobalt: Channel<Tuple<Map, Path>>
+    cuppa: Channel<Tuple<Map, Path>>
+    esvee: Channel<Tuple<Map, Path>>
+    align_rna_tumor: Channel<Tuple<Map, Path, Path>>
+    isofox: Channel<Tuple<Map, Path>>
+    lilac: Channel<Tuple<Map, Path>>
+    linx_germline: Channel<Tuple<Map, Path>>
+    linx_somatic: Channel<Tuple<Map, Path>>
+    linx_somatic_visualiser: Channel<Tuple<Map, Path>>
+    linxreport_html: Channel<Tuple<Map, Path>>
+    multiqc: Channel<List<Path>>
+    neo_annotated_fusions: Channel<Tuple<Map, Path>>
+    neo_finder: Channel<Tuple<Map, Path>>
+    neo_scorer_dir: Channel<Tuple<Map, Path>>
+    orange_json: Channel<Tuple<Map, Path>>
+    orange_pdf: Channel<Tuple<Map, Path>>
+    pave_germline: Channel<Tuple<Map, Path>>
+    pave_somatic: Channel<Tuple<Map, Path>>
+    peach: Channel<Tuple<Map, Path>>
+    purple: Channel<Tuple<Map, Path>>
+    qsee: Channel<Tuple<Map, Path>>
+    redux_tumor: Channel<Tuple<Map, Path>>
+    redux_normal: Channel<Tuple<Map, Path>>
+    redux_donor: Channel<Tuple<Map, Path>>
+    sage_append_somatic: Channel<Tuple<Map, Path>>
+    sage_append_germline: Channel<Tuple<Map, Path>>
+    sage_germline: Channel<Tuple<Map, Path>>
+    sage_somatic: Channel<Tuple<Map, Path>>
+    sage_somatic_visualiser: Channel<Tuple<Map, Path>>
+    sigs: Channel<Tuple<Map, Path>>
+    teal_normal_bam: Channel<Tuple<Map, Path, Path>>
+    teal_tumor_bam: Channel<Tuple<Map, Path, Path>>
+    teal_tsvs: Channel<Tuple<Map, List<Path>>>
+    virusbreakend_tsv: Channel<Tuple<Map, Path>>
+    virusbreakend_vcf: Channel<Tuple<Map, Path>>
+    virusinterpreter: Channel<Tuple<Map, Path>>
+    write_reference_data: Channel<Path>
+    command_files: Channel<Tuple<Map, String, List<Path>>>
+    wisp: Channel<Tuple<Map, Path>>
+    cobalt_normalisation_tsv: Channel<Path>
+    isofox_normalisation_csv: Channel<Path>
+    pave_pon_panel_creation_artefacts: Channel<Path>
 
     main:
     results = channel.empty()

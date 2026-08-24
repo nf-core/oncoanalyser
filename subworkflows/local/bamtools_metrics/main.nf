@@ -21,17 +21,17 @@ include { selectCurrentOrExisting     } from '../utils_nfcore_oncoanalyser_pipel
 workflow BAMTOOLS_METRICS {
     take:
     // Sample data
-    ch_inputs              // channel: [mandatory] [ meta ]
-    ch_redux_dir_tumor     // channel: [mandatory] [ meta, redux_dir ]
-    ch_redux_dir_normal    // channel: [mandatory] [ meta, redux_dir ]
+    ch_inputs: Channel<Map>              // channel: [mandatory] [ meta ]
+    ch_redux_dir_tumor: Channel<Tuple<Map, Path>>     // channel: [mandatory] [ meta, redux_dir ]
+    ch_redux_dir_normal: Channel<Tuple<Map, Path>>    // channel: [mandatory] [ meta, redux_dir ]
 
     // Reference data
-    genome_fasta           // channel: [mandatory] /path/to/genome_fasta
-    genome_version         // channel: [mandatory] genome version
-    genome_fai             // channel: [mandatory] /path/to/genome_fai
-    driver_gene_panel      // channel: [mandatory] /path/to/driver_gene_panel
-    ensembl_data_resources // channel: [mandatory] /path/to/ensembl_data_resources/
-    target_regions_bed     // channel: [optional]  /path/to/target_regions_bed
+    genome_fasta: Channel<Path>           // channel: [mandatory] /path/to/genome_fasta
+    genome_version: Channel<String>         // channel: [mandatory] genome version
+    genome_fai: Channel<Path>             // channel: [mandatory] /path/to/genome_fai
+    driver_gene_panel: Channel<Path>      // channel: [mandatory] /path/to/driver_gene_panel
+    ensembl_data_resources: Channel<Path> // channel: [mandatory] /path/to/ensembl_data_resources/
+    target_regions_bed: Channel<Path>     // channel: [optional]  /path/to/target_regions_bed
 
     main:
     // Select input sources then sort

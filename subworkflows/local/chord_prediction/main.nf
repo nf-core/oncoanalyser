@@ -21,13 +21,13 @@ include { selectCurrentOrExisting  } from '../utils_nfcore_oncoanalyser_pipeline
 workflow CHORD_PREDICTION {
     take:
     // Sample data
-    ch_inputs      // channel: [mandatory] [ meta ]
-    ch_purple_dir  // channel: [mandatory] [ meta, purple_dir ]
+    ch_inputs: Channel<Map>      // channel: [mandatory] [ meta ]
+    ch_purple_dir: Channel<Tuple<Map, Path>>  // channel: [mandatory] [ meta, purple_dir ]
 
     // Reference data
-    genome_fasta   // channel: [mandatory] /path/to/genome_fasta
-    genome_fai     // channel: [mandatory] /path/to/genome_fai
-    genome_dict    // channel: [mandatory] /path/to/genome_dict
+    genome_fasta: Channel<Path>   // channel: [mandatory] /path/to/genome_fasta
+    genome_fai: Channel<Path>     // channel: [mandatory] /path/to/genome_fai
+    genome_dict: Channel<Path>    // channel: [mandatory] /path/to/genome_dict
 
     main:
     // Select input sources then sort

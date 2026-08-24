@@ -33,6 +33,8 @@ include { SAGE_PLOTTING             } from '../subworkflows/local/sage_plotting'
 
 include { softwareVersionsToYAML  } from '../subworkflows/nf-core/utils_nfcore_pipeline'
 
+include { Case                           } from '../subworkflows/local/utils_nfcore_oncoanalyser_pipeline/records'
+
 include { getDnaFastqChannel            } from '../subworkflows/local/utils_nfcore_oncoanalyser_pipeline/channels'
 include { getRnaFastqChannel            } from '../subworkflows/local/utils_nfcore_oncoanalyser_pipeline/channels'
 include { getSequencingPlatformPon     } from '../subworkflows/local/utils_nfcore_oncoanalyser_pipeline/utils'
@@ -46,9 +48,9 @@ include { getPrepConfigFromSamplesheet  } from '../subworkflows/local/utils_nfco
 
 workflow TARGETED {
     take:
-    inputs
-    run_config
-    params
+    inputs: List<Case>
+    run_config: Map
+    params: Map
 
     main:
     // Check input path parameters to see if they exist

@@ -40,6 +40,7 @@ include { VIRUSBREAKEND_CALLING  } from '../subworkflows/local/virusbreakend_cal
 include { softwareVersionsToYAML  } from '../subworkflows/nf-core/utils_nfcore_pipeline'
 
 include { SequencingPlatform            } from '../subworkflows/local/utils_nfcore_oncoanalyser_pipeline/types'
+include { Case                          } from '../subworkflows/local/utils_nfcore_oncoanalyser_pipeline/records'
 
 include { getDnaFastqChannel            } from '../subworkflows/local/utils_nfcore_oncoanalyser_pipeline/channels'
 include { getEnumFromString             } from '../subworkflows/local/utils_nfcore_oncoanalyser_pipeline/utils'
@@ -55,9 +56,9 @@ include { getPrepConfigFromSamplesheet  } from '../subworkflows/local/utils_nfco
 
 workflow WGTS {
     take:
-    inputs
-    run_config
-    params
+    inputs: List<Case>
+    run_config: Map
+    params: Map
 
     main:
     // Check input path parameters to see if they exist

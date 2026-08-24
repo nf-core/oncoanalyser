@@ -30,9 +30,9 @@ include { WRITE_REFERENCE_DATA as WRITE_PANEL_DATA      } from '../../../modules
 
 workflow PREPARE_REFERENCE {
     take:
-    prep_config // channel: [mandatory] configuration indicating which reference data is required
-    run_config
-    params
+    prep_config: Map // channel: [mandatory] configuration indicating which reference data is required
+    run_config: Map
+    params: Map
 
     main:
     //

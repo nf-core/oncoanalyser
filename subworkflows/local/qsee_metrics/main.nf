@@ -22,22 +22,22 @@ include { selectCurrentOrExisting  } from '../utils_nfcore_oncoanalyser_pipeline
 workflow QSEE_METRICS {
     take:
     // Sample data
-    ch_inputs                // channel: [mandatory] [ meta ]
-    ch_redux_dir_tumor       // channel: [mandatory] [ meta, redux_dir ]
-    ch_redux_dir_normal      // channel: [mandatory] [ meta, redux_dir ]
-    ch_bamtools_dir_tumor    // channel: [mandatory] [ meta, bamtools_dir ]
-    ch_bamtools_dir_normal   // channel: [optional]  [ meta, bamtools_dir ]
-    ch_cobalt_dir            // channel: [optional]  [ meta, cobalt_dir ]
-    ch_esvee_dir             // channel: [optional]  [ meta, esvee_dir ]
-    ch_purple_dir            // channel: [mandatory] [ meta, purple_dir ]
+    ch_inputs: Channel<Map>                // channel: [mandatory] [ meta ]
+    ch_redux_dir_tumor: Channel<Tuple<Map, Path>>       // channel: [mandatory] [ meta, redux_dir ]
+    ch_redux_dir_normal: Channel<Tuple<Map, Path>>      // channel: [mandatory] [ meta, redux_dir ]
+    ch_bamtools_dir_tumor: Channel<Tuple<Map, Path>>    // channel: [mandatory] [ meta, bamtools_dir ]
+    ch_bamtools_dir_normal: Channel<Tuple<Map, Path>>   // channel: [optional]  [ meta, bamtools_dir ]
+    ch_cobalt_dir: Channel<Tuple<Map, Path>>            // channel: [optional]  [ meta, cobalt_dir ]
+    ch_esvee_dir: Channel<Tuple<Map, Path>>             // channel: [optional]  [ meta, esvee_dir ]
+    ch_purple_dir: Channel<Tuple<Map, Path>>            // channel: [mandatory] [ meta, purple_dir ]
 
     // Reference data
-    driver_gene_panel        // channel: [mandatory] /path/to/driver_gene_panel
-    qsee_cohort_percentiles  // channel: [mandatory] /path/to/cohort_percentiles
+    driver_gene_panel: Channel<Path>        // channel: [mandatory] /path/to/driver_gene_panel
+    qsee_cohort_percentiles: Channel<Path>  // channel: [mandatory] /path/to/cohort_percentiles
 
     // Params
-    sequencing_platform      // string:  [mandatory] sequencing platform
-    targeted_mode            // boolean: [mandatory] Set targeted mode
+    sequencing_platform: String      // string:  [mandatory] sequencing platform
+    targeted_mode: Boolean            // boolean: [mandatory] Set targeted mode
 
     main:
     // Select input sources then sort
