@@ -2,8 +2,8 @@
 // Generic helpers for the nf-core/oncoanalyser pipeline
 //
 
-include { RunMode            } from './types'
-include { SequencingPlatform } from './types'
+include { RunMode            } from './types_enums'
+include { SequencingPlatform } from './types_enums'
 
 def createStubPlaceholders(params) {
 

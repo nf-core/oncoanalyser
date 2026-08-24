@@ -7,9 +7,9 @@ nextflow.enable.types = true
 include { FASTP_UMI   } from '../../../modules/local/fastp/umi/main'
 include { FASTQ_TOOLS } from '../../../modules/local/fastqtools/main'
 
-include { groupByMeta } from '../utils_nfcore_oncoanalyser_pipeline/channel_helpers'
-include { joinMeta    } from '../utils_nfcore_oncoanalyser_pipeline/channel_helpers'
-include { restoreMeta } from '../utils_nfcore_oncoanalyser_pipeline/channel_helpers'
+include { groupByMeta } from '../utils_nfcore_oncoanalyser_pipeline/helpers_channel'
+include { joinMeta    } from '../utils_nfcore_oncoanalyser_pipeline/helpers_channel'
+include { restoreMeta } from '../utils_nfcore_oncoanalyser_pipeline/helpers_channel'
 
 workflow READ_UMI_PROCESSING {
     take:

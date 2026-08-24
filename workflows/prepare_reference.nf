@@ -11,7 +11,7 @@ include { PREPARE_REFERENCE as STAGE_REFERENCE } from '../subworkflows/local/pre
 
 include { softwareVersionsToYAML } from '../subworkflows/nf-core/utils_nfcore_pipeline'
 
-include { getPrepConfigFromCli } from '../subworkflows/local/utils_nfcore_oncoanalyser_pipeline/validate_params'
+include { getPrepConfigFromCli } from '../subworkflows/local/utils_nfcore_oncoanalyser_pipeline/helpers_parameter'
 
 /*
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~

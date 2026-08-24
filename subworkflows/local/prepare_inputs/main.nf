@@ -10,7 +10,7 @@
 
 nextflow.enable.types = true
 
-include { parseInput } from '../utils_nfcore_oncoanalyser_pipeline/parse_inputs'
+include { parseInput } from '../utils_nfcore_oncoanalyser_pipeline/helpers_samplesheet'
 
 workflow PREPARE_INPUTS {
     take:

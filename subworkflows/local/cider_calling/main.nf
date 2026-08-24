@@ -6,13 +6,13 @@ nextflow.enable.types = true
 
 include { CIDER  } from '../../../modules/local/cider/main'
 
-include { FileType                   } from '../utils_nfcore_oncoanalyser_pipeline/types'
-include { getInput                   } from '../utils_nfcore_oncoanalyser_pipeline/accessors'
-include { getTumorDnaSample          } from '../utils_nfcore_oncoanalyser_pipeline/accessors'
-include { getTumorReduxDirAlignment  } from '../utils_nfcore_oncoanalyser_pipeline/accessors'
-include { getTumorRnaSample          } from '../utils_nfcore_oncoanalyser_pipeline/accessors'
+include { FileType                   } from '../utils_nfcore_oncoanalyser_pipeline/types_enums'
+include { getInput                   } from '../utils_nfcore_oncoanalyser_pipeline/accessors_samples'
+include { getTumorDnaSample          } from '../utils_nfcore_oncoanalyser_pipeline/accessors_samples'
+include { getTumorReduxDirAlignment  } from '../utils_nfcore_oncoanalyser_pipeline/accessors_alignments'
+include { getTumorRnaSample          } from '../utils_nfcore_oncoanalyser_pipeline/accessors_samples'
 include { selectCurrentOrExisting    } from '../utils_nfcore_oncoanalyser_pipeline/utils'
-include { restoreMeta                } from '../utils_nfcore_oncoanalyser_pipeline/channel_helpers'
+include { restoreMeta                } from '../utils_nfcore_oncoanalyser_pipeline/helpers_channel'
 
 workflow CIDER_CALLING {
     take:

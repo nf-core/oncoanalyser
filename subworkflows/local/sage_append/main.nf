@@ -7,26 +7,28 @@ nextflow.enable.types = true
 include { SAGE_APPEND as SAGE_APPEND_SOMATIC   } from '../../../modules/local/sage/append/main'
 include { SAGE_APPEND as SAGE_APPEND_GERMLINE  } from '../../../modules/local/sage/append/main'
 
-include { FileType; RunMode } from '../utils_nfcore_oncoanalyser_pipeline/types'
+include { FileType; RunMode } from '../utils_nfcore_oncoanalyser_pipeline/types_enums'
 
-include { groupByMeta                } from '../utils_nfcore_oncoanalyser_pipeline/channel_helpers'
-include { joinMeta                   } from '../utils_nfcore_oncoanalyser_pipeline/channel_helpers'
-include { restoreMeta                } from '../utils_nfcore_oncoanalyser_pipeline/channel_helpers'
+include { groupByMeta                } from '../utils_nfcore_oncoanalyser_pipeline/helpers_channel'
+include { joinMeta                   } from '../utils_nfcore_oncoanalyser_pipeline/helpers_channel'
+include { restoreMeta                } from '../utils_nfcore_oncoanalyser_pipeline/helpers_channel'
 include { getEnumFromString          } from '../utils_nfcore_oncoanalyser_pipeline/utils'
-include { getInput                   } from '../utils_nfcore_oncoanalyser_pipeline/accessors'
-include { getLongitudinalSampleName } from '../utils_nfcore_oncoanalyser_pipeline/accessors'
-include { getNormalDnaSample         } from '../utils_nfcore_oncoanalyser_pipeline/accessors'
-include { getNormalDnaSampleName     } from '../utils_nfcore_oncoanalyser_pipeline/accessors'
-include { getTumorDnaSample          } from '../utils_nfcore_oncoanalyser_pipeline/accessors'
-include { getTumorDnaSampleName      } from '../utils_nfcore_oncoanalyser_pipeline/accessors'
-include { getTumorReduxDirAlignment  } from '../utils_nfcore_oncoanalyser_pipeline/accessors'
-include { getTumorReduxTsvs          } from '../utils_nfcore_oncoanalyser_pipeline/accessors'
-include { getTumorRnaSample          } from '../utils_nfcore_oncoanalyser_pipeline/accessors'
-include { getTumorRnaSampleName      } from '../utils_nfcore_oncoanalyser_pipeline/accessors'
-include { hasInput                   } from '../utils_nfcore_oncoanalyser_pipeline/accessors'
-include { hasNormalDna               } from '../utils_nfcore_oncoanalyser_pipeline/accessors'
-include { hasTumorDna                } from '../utils_nfcore_oncoanalyser_pipeline/accessors'
-include { hasTumorRna                } from '../utils_nfcore_oncoanalyser_pipeline/accessors'
+include { getInput                   } from '../utils_nfcore_oncoanalyser_pipeline/accessors_samples'
+include { getLongitudinalSampleName } from '../utils_nfcore_oncoanalyser_pipeline/accessors_samples'
+include { getNormalDnaSample         } from '../utils_nfcore_oncoanalyser_pipeline/accessors_samples'
+include { getNormalDnaSampleName     } from '../utils_nfcore_oncoanalyser_pipeline/accessors_samples'
+include { getTumorDnaSample          } from '../utils_nfcore_oncoanalyser_pipeline/accessors_samples'
+include { getTumorDnaSampleName      } from '../utils_nfcore_oncoanalyser_pipeline/accessors_samples'
+include { getPurpleGermlineVcf      } from '../utils_nfcore_oncoanalyser_pipeline/accessors_outputs'
+include { getPurpleSomaticVcf       } from '../utils_nfcore_oncoanalyser_pipeline/accessors_outputs'
+include { getTumorReduxDirAlignment  } from '../utils_nfcore_oncoanalyser_pipeline/accessors_alignments'
+include { getTumorReduxTsvs          } from '../utils_nfcore_oncoanalyser_pipeline/accessors_alignments'
+include { getTumorRnaSample          } from '../utils_nfcore_oncoanalyser_pipeline/accessors_samples'
+include { getTumorRnaSampleName      } from '../utils_nfcore_oncoanalyser_pipeline/accessors_samples'
+include { hasInput                   } from '../utils_nfcore_oncoanalyser_pipeline/accessors_samples'
+include { hasNormalDna               } from '../utils_nfcore_oncoanalyser_pipeline/accessors_samples'
+include { hasTumorDna                } from '../utils_nfcore_oncoanalyser_pipeline/accessors_samples'
+include { hasTumorRna                } from '../utils_nfcore_oncoanalyser_pipeline/accessors_samples'
 include { selectCurrentOrExisting    } from '../utils_nfcore_oncoanalyser_pipeline/utils'
 
 workflow SAGE_APPEND {
@@ -101,7 +103,7 @@ workflow SAGE_APPEND {
 
             def has_tumor_rna = hasTumorRna(meta)
             def has_normal_dna = hasNormalDna(meta)
-            def has_smlv_germline = purple_dir.resolve("${tumor_dna_id}.purple.germline.vcf.gz").exists()
+            def has_smlv_germline = getPurpleGermlineVcf(tumor_dna_id, purple_dir).exists()
 
             def should_append_rna_variants = has_tumor_rna && has_normal_dna && has_smlv_germline
 
@@ -132,7 +134,7 @@ workflow SAGE_APPEND {
             def alns = [tumor_rna_aln]
             def idxs = [tumor_rna_idx]
 
-            def purple_smlv_vcf = purple_dir.resolve("${tumor_dna_id}.purple.germline.vcf.gz")
+            def purple_smlv_vcf = getPurpleGermlineVcf(tumor_dna_id, purple_dir)
 
             // NOTE(SW): in stub mode we allow absence of indexes so must handle here
             idxs = idxs.flatten()
@@ -165,7 +167,7 @@ workflow SAGE_APPEND {
 
             def has_tumor_rna = hasTumorRna(meta)
             def has_tumor_dna = hasTumorDna(meta)
-            def has_smlv_somatic = purple_dir.resolve("${tumor_dna_id}.purple.somatic.vcf.gz").exists()
+            def has_smlv_somatic = getPurpleSomaticVcf(tumor_dna_id, purple_dir).exists()
 
             def should_append_rna_variants = ! purity_estimate_mode && has_tumor_rna && has_tumor_dna && has_smlv_somatic
             def should_append_longitudinal_variants = purity_estimate_mode && has_tumor_dna && has_smlv_somatic
@@ -211,7 +213,7 @@ workflow SAGE_APPEND {
                 redux_tsvs = redux_tsvs_tumor
             }
 
-            def purple_smlv_vcf = purple_dir.resolve("${tumor_dna_id}.purple.somatic.vcf.gz")
+            def purple_smlv_vcf = getPurpleSomaticVcf(tumor_dna_id, purple_dir)
 
             // NOTE(SW): in stub mode we allow absence of indexes so must handle here
             idxs = idxs.flatten()

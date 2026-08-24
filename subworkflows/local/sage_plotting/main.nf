@@ -6,24 +6,26 @@ nextflow.enable.types = true
 
 include { SAGE_VISUALISER  } from '../../../modules/local/sage/visualiser/main'
 
-include { FileType                    } from '../utils_nfcore_oncoanalyser_pipeline/types'
-include { groupByMeta                 } from '../utils_nfcore_oncoanalyser_pipeline/channel_helpers'
-include { joinMeta                    } from '../utils_nfcore_oncoanalyser_pipeline/channel_helpers'
-include { restoreMeta                 } from '../utils_nfcore_oncoanalyser_pipeline/channel_helpers'
-include { getDonorDnaSample           } from '../utils_nfcore_oncoanalyser_pipeline/accessors'
-include { getDonorDnaSampleNames      } from '../utils_nfcore_oncoanalyser_pipeline/accessors'
-include { getDonorReduxDirAlignments  } from '../utils_nfcore_oncoanalyser_pipeline/accessors'
-include { getDonorReduxTsvs           } from '../utils_nfcore_oncoanalyser_pipeline/accessors'
-include { getInput                    } from '../utils_nfcore_oncoanalyser_pipeline/accessors'
-include { getNormalDnaSample          } from '../utils_nfcore_oncoanalyser_pipeline/accessors'
-include { getNormalDnaSampleName      } from '../utils_nfcore_oncoanalyser_pipeline/accessors'
-include { getNormalReduxDirAlignment  } from '../utils_nfcore_oncoanalyser_pipeline/accessors'
-include { getNormalReduxTsvs          } from '../utils_nfcore_oncoanalyser_pipeline/accessors'
-include { getTumorDnaSample           } from '../utils_nfcore_oncoanalyser_pipeline/accessors'
-include { getTumorDnaSampleName       } from '../utils_nfcore_oncoanalyser_pipeline/accessors'
-include { getTumorReduxDirAlignment   } from '../utils_nfcore_oncoanalyser_pipeline/accessors'
-include { getTumorReduxTsvs           } from '../utils_nfcore_oncoanalyser_pipeline/accessors'
-include { hasInput                    } from '../utils_nfcore_oncoanalyser_pipeline/accessors'
+include { FileType                    } from '../utils_nfcore_oncoanalyser_pipeline/types_enums'
+include { groupByMeta                 } from '../utils_nfcore_oncoanalyser_pipeline/helpers_channel'
+include { joinMeta                    } from '../utils_nfcore_oncoanalyser_pipeline/helpers_channel'
+include { restoreMeta                 } from '../utils_nfcore_oncoanalyser_pipeline/helpers_channel'
+include { getDonorDnaSample           } from '../utils_nfcore_oncoanalyser_pipeline/accessors_samples'
+include { getDonorDnaSampleNames      } from '../utils_nfcore_oncoanalyser_pipeline/accessors_samples'
+include { getDonorReduxDirAlignments  } from '../utils_nfcore_oncoanalyser_pipeline/accessors_alignments'
+include { getDonorReduxTsvs           } from '../utils_nfcore_oncoanalyser_pipeline/accessors_alignments'
+include { getInput                    } from '../utils_nfcore_oncoanalyser_pipeline/accessors_samples'
+include { getNormalDnaSample          } from '../utils_nfcore_oncoanalyser_pipeline/accessors_samples'
+include { getNormalDnaSampleName      } from '../utils_nfcore_oncoanalyser_pipeline/accessors_samples'
+include { getNormalReduxDirAlignment  } from '../utils_nfcore_oncoanalyser_pipeline/accessors_alignments'
+include { getNormalReduxTsvs          } from '../utils_nfcore_oncoanalyser_pipeline/accessors_alignments'
+include { getTumorDnaSample           } from '../utils_nfcore_oncoanalyser_pipeline/accessors_samples'
+include { getTumorDnaSampleName       } from '../utils_nfcore_oncoanalyser_pipeline/accessors_samples'
+include { getPurpleSomaticVcf         } from '../utils_nfcore_oncoanalyser_pipeline/accessors_outputs'
+include { getVcfTbi                   } from '../utils_nfcore_oncoanalyser_pipeline/accessors_outputs'
+include { getTumorReduxDirAlignment   } from '../utils_nfcore_oncoanalyser_pipeline/accessors_alignments'
+include { getTumorReduxTsvs           } from '../utils_nfcore_oncoanalyser_pipeline/accessors_alignments'
+include { hasInput                    } from '../utils_nfcore_oncoanalyser_pipeline/accessors_samples'
 include { selectCurrentOrExisting     } from '../utils_nfcore_oncoanalyser_pipeline/utils'
 
 workflow SAGE_PLOTTING {
@@ -67,8 +69,8 @@ workflow SAGE_PLOTTING {
             def (tumor_aln, tumor_idx) = getTumorReduxDirAlignment(meta, redux_dir_tumor_selected)
             def (normal_aln, normal_idx) = getNormalReduxDirAlignment(meta, redux_dir_normal_selected)
             def donor_alignments = getDonorReduxDirAlignments(meta, redux_dir_donor_selected)
-            def donor_alns = donor_alignments.collect { it[0] }
-            def donor_idxs = donor_alignments.collect { it[1] }
+            def donor_alns = donor_alignments.collect { aln, idx -> aln }
+            def donor_idxs = donor_alignments.collect { aln, idx -> idx }
 
             def redux_tsvs_tumor = getTumorReduxTsvs(meta, redux_dir_tumor_selected)
             def redux_tsvs_normal = getNormalReduxTsvs(meta, redux_dir_normal_selected)
@@ -93,7 +95,7 @@ workflow SAGE_PLOTTING {
             def has_existing = hasInput(getTumorDnaSample(meta), FileType.SAGE_PLOT_DIR)
 
             def tumor_dna_id = getTumorDnaSampleName(meta)
-            def has_smlv_vcf = purple_dir ? purple_dir.resolve("${tumor_dna_id}.purple.somatic.vcf.gz").exists() : false
+            def has_smlv_vcf = getPurpleSomaticVcf(tumor_dna_id, purple_dir)?.exists() ?: false
 
             runnable: tumor_aln && has_smlv_vcf && ! has_existing
             skip: true
@@ -113,8 +115,8 @@ workflow SAGE_PLOTTING {
                 donor_ids: donor_alns ? getDonorDnaSampleNames(meta) : null,
             )
 
-            def purple_smlv_vcf = purple_dir.resolve("${getTumorDnaSampleName(meta)}.purple.somatic.vcf.gz")
-            def purple_smlv_vcf_tbi = purple_dir.resolve("${getTumorDnaSampleName(meta)}.purple.somatic.vcf.gz.tbi")
+            def purple_smlv_vcf = getPurpleSomaticVcf(getTumorDnaSampleName(meta), purple_dir)
+            def purple_smlv_vcf_tbi = getVcfTbi(purple_smlv_vcf)
 
             return [
                 meta_sage,

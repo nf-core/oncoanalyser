@@ -7,17 +7,20 @@ nextflow.enable.types = true
 include { PAVE_GERMLINE  } from '../../../modules/local/pave/germline/main'
 include { PAVE_SOMATIC  } from '../../../modules/local/pave/somatic/main'
 
-include { FileType                 } from '../utils_nfcore_oncoanalyser_pipeline/types'
-include { groupByMeta              } from '../utils_nfcore_oncoanalyser_pipeline/channel_helpers'
-include { joinMeta                 } from '../utils_nfcore_oncoanalyser_pipeline/channel_helpers'
-include { restoreMeta              } from '../utils_nfcore_oncoanalyser_pipeline/channel_helpers'
-include { getInput                 } from '../utils_nfcore_oncoanalyser_pipeline/accessors'
-include { getNormalDnaSample       } from '../utils_nfcore_oncoanalyser_pipeline/accessors'
-include { getTumorDnaSample        } from '../utils_nfcore_oncoanalyser_pipeline/accessors'
-include { getTumorDnaSampleName    } from '../utils_nfcore_oncoanalyser_pipeline/accessors'
-include { hasInput                 } from '../utils_nfcore_oncoanalyser_pipeline/accessors'
-include { hasNormalDna             } from '../utils_nfcore_oncoanalyser_pipeline/accessors'
-include { hasTumorDna              } from '../utils_nfcore_oncoanalyser_pipeline/accessors'
+include { FileType                 } from '../utils_nfcore_oncoanalyser_pipeline/types_enums'
+include { groupByMeta              } from '../utils_nfcore_oncoanalyser_pipeline/helpers_channel'
+include { joinMeta                 } from '../utils_nfcore_oncoanalyser_pipeline/helpers_channel'
+include { restoreMeta              } from '../utils_nfcore_oncoanalyser_pipeline/helpers_channel'
+include { getInput                 } from '../utils_nfcore_oncoanalyser_pipeline/accessors_samples'
+include { getNormalDnaSample       } from '../utils_nfcore_oncoanalyser_pipeline/accessors_samples'
+include { getTumorDnaSample        } from '../utils_nfcore_oncoanalyser_pipeline/accessors_samples'
+include { getTumorDnaSampleName    } from '../utils_nfcore_oncoanalyser_pipeline/accessors_samples'
+include { getSageGermlineVcf     } from '../utils_nfcore_oncoanalyser_pipeline/accessors_outputs'
+include { getSageSomaticVcf      } from '../utils_nfcore_oncoanalyser_pipeline/accessors_outputs'
+include { getVcfTbi               } from '../utils_nfcore_oncoanalyser_pipeline/accessors_outputs'
+include { hasInput                 } from '../utils_nfcore_oncoanalyser_pipeline/accessors_samples'
+include { hasNormalDna             } from '../utils_nfcore_oncoanalyser_pipeline/accessors_samples'
+include { hasTumorDna              } from '../utils_nfcore_oncoanalyser_pipeline/accessors_samples'
 include { selectCurrentOrExisting  } from '../utils_nfcore_oncoanalyser_pipeline/utils'
 
 workflow PAVE_ANNOTATION {
@@ -55,8 +58,8 @@ workflow PAVE_ANNOTATION {
         .map { meta, sage_dir ->
 
             def sage_dir_selected = selectCurrentOrExisting(sage_dir, getInput(getNormalDnaSample(meta), FileType.SAGE_DIR))
-            def sage_vcf = sage_dir_selected ? sage_dir_selected.resolve("${getTumorDnaSampleName(meta)}.sage.germline.vcf.gz") : null
-            def sage_tbi = sage_dir_selected ? sage_dir_selected.resolve("${getTumorDnaSampleName(meta)}.sage.germline.vcf.gz.tbi") : null
+            def sage_vcf = getSageGermlineVcf(getTumorDnaSampleName(meta), sage_dir_selected)
+            def sage_tbi = getVcfTbi(sage_vcf)
 
             return [meta, sage_vcf, sage_tbi]
         }
@@ -108,8 +111,8 @@ workflow PAVE_ANNOTATION {
         .map { meta, sage_dir ->
 
             def sage_dir_selected = selectCurrentOrExisting(sage_dir, getInput(getTumorDnaSample(meta), FileType.SAGE_DIR))
-            def sage_vcf = sage_dir_selected ? sage_dir_selected.resolve("${getTumorDnaSampleName(meta)}.sage.somatic.vcf.gz") : null
-            def sage_tbi = sage_dir_selected ? sage_dir_selected.resolve("${getTumorDnaSampleName(meta)}.sage.somatic.vcf.gz.tbi") : null
+            def sage_vcf = getSageSomaticVcf(getTumorDnaSampleName(meta), sage_dir_selected)
+            def sage_tbi = getVcfTbi(sage_vcf)
 
             return [meta, sage_vcf, sage_tbi]
         }

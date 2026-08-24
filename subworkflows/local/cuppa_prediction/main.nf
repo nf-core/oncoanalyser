@@ -6,19 +6,20 @@ nextflow.enable.types = true
 
 include { CUPPA  } from '../../../modules/local/cuppa/main'
 
-include { FileType                 } from '../utils_nfcore_oncoanalyser_pipeline/types'
-include { groupByMeta              } from '../utils_nfcore_oncoanalyser_pipeline/channel_helpers'
-include { joinMeta                 } from '../utils_nfcore_oncoanalyser_pipeline/channel_helpers'
-include { restoreMeta              } from '../utils_nfcore_oncoanalyser_pipeline/channel_helpers'
-include { getInput                 } from '../utils_nfcore_oncoanalyser_pipeline/accessors'
-include { getTumorDnaSample        } from '../utils_nfcore_oncoanalyser_pipeline/accessors'
-include { getTumorDnaSampleName    } from '../utils_nfcore_oncoanalyser_pipeline/accessors'
-include { getTumorRnaSample        } from '../utils_nfcore_oncoanalyser_pipeline/accessors'
-include { getTumorRnaSampleName    } from '../utils_nfcore_oncoanalyser_pipeline/accessors'
-include { hasInput                 } from '../utils_nfcore_oncoanalyser_pipeline/accessors'
-include { hasNormalDna             } from '../utils_nfcore_oncoanalyser_pipeline/accessors'
-include { hasTumorDna              } from '../utils_nfcore_oncoanalyser_pipeline/accessors'
-include { hasTumorRna              } from '../utils_nfcore_oncoanalyser_pipeline/accessors'
+include { FileType                 } from '../utils_nfcore_oncoanalyser_pipeline/types_enums'
+include { groupByMeta              } from '../utils_nfcore_oncoanalyser_pipeline/helpers_channel'
+include { joinMeta                 } from '../utils_nfcore_oncoanalyser_pipeline/helpers_channel'
+include { restoreMeta              } from '../utils_nfcore_oncoanalyser_pipeline/helpers_channel'
+include { getInput                 } from '../utils_nfcore_oncoanalyser_pipeline/accessors_samples'
+include { getTumorDnaSample        } from '../utils_nfcore_oncoanalyser_pipeline/accessors_samples'
+include { getTumorDnaSampleName    } from '../utils_nfcore_oncoanalyser_pipeline/accessors_samples'
+include { getTumorRnaSample        } from '../utils_nfcore_oncoanalyser_pipeline/accessors_samples'
+include { getTumorRnaSampleName    } from '../utils_nfcore_oncoanalyser_pipeline/accessors_samples'
+include { getPurpleSomaticVcf    } from '../utils_nfcore_oncoanalyser_pipeline/accessors_outputs'
+include { hasInput                 } from '../utils_nfcore_oncoanalyser_pipeline/accessors_samples'
+include { hasNormalDna             } from '../utils_nfcore_oncoanalyser_pipeline/accessors_samples'
+include { hasTumorDna              } from '../utils_nfcore_oncoanalyser_pipeline/accessors_samples'
+include { hasTumorRna              } from '../utils_nfcore_oncoanalyser_pipeline/accessors_samples'
 include { selectCurrentOrExisting  } from '../utils_nfcore_oncoanalyser_pipeline/utils'
 
 workflow CUPPA_PREDICTION {
@@ -71,7 +72,7 @@ workflow CUPPA_PREDICTION {
             def has_normal_dna = hasNormalDna(meta)
 
             def tumor_dna_id = getTumorDnaSampleName(meta)
-            def has_smlv_vcf = purple_dir ? purple_dir.resolve("${tumor_dna_id}.purple.somatic.vcf.gz").exists() : false
+            def has_smlv_vcf = getPurpleSomaticVcf(tumor_dna_id, purple_dir)?.exists() ?: false
 
             def has_runnable_inputs = isofox_dir || (has_smlv_vcf && linx_annotation_dir && has_normal_dna)
 

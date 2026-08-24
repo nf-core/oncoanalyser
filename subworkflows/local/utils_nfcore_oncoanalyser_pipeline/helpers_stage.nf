@@ -1,8 +1,8 @@
 //
-// Process-selection helpers for the nf-core/oncoanalyser pipeline
+// Run-stage selection helpers for the nf-core/oncoanalyser pipeline
 //
 
-include { Process } from './types'
+include { Process } from './types_enums'
 
 def getDefaultExcludedProcesses() { return [] }
 

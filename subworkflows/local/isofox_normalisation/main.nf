@@ -6,9 +6,9 @@ nextflow.enable.types = true
 
 include { ISOFOX_PANEL_NORMALISATION  } from '../../../modules/local/isofox/panel_normalisation/main'
 
-include { FileType                 } from '../utils_nfcore_oncoanalyser_pipeline/types'
-include { getInput                 } from '../utils_nfcore_oncoanalyser_pipeline/accessors'
-include { getTumorRnaSample        } from '../utils_nfcore_oncoanalyser_pipeline/accessors'
+include { FileType                 } from '../utils_nfcore_oncoanalyser_pipeline/types_enums'
+include { getInput                 } from '../utils_nfcore_oncoanalyser_pipeline/accessors_samples'
+include { getTumorRnaSample        } from '../utils_nfcore_oncoanalyser_pipeline/accessors_samples'
 include { selectCurrentOrExisting  } from '../utils_nfcore_oncoanalyser_pipeline/utils'
 
 workflow ISOFOX_NORMALISATION {

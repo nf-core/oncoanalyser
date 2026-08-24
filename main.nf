@@ -29,6 +29,7 @@ include { getGenomeAttribute       } from './subworkflows/local/utils_nfcore_onc
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 */
 
+// NOTE(SW): minimal set of parameters to enable switch to static typing
 params {
     ref_data_genome_fasta         = getGenomeAttribute('fasta')
     ref_data_genome_fai           = getGenomeAttribute('fai')
@@ -57,14 +58,14 @@ include { WGTS                     } from './workflows/wgts'
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 */
 
-include { parseInput             } from './subworkflows/local/utils_nfcore_oncoanalyser_pipeline/parse_inputs'
-include { RunMode                } from './subworkflows/local/utils_nfcore_oncoanalyser_pipeline/types'
+include { parseInput             } from './subworkflows/local/utils_nfcore_oncoanalyser_pipeline/helpers_samplesheet'
+include { RunMode                } from './subworkflows/local/utils_nfcore_oncoanalyser_pipeline/types_enums'
 include { createStubPlaceholders } from './subworkflows/local/utils_nfcore_oncoanalyser_pipeline/utils'
 include { getRunMode             } from './subworkflows/local/utils_nfcore_oncoanalyser_pipeline/utils'
-include { getRunConfig           } from './subworkflows/local/utils_nfcore_oncoanalyser_pipeline/validate_params'
-include { setParamsDefaults      } from './subworkflows/local/utils_nfcore_oncoanalyser_pipeline/validate_params'
-include { validateInput          } from './subworkflows/local/utils_nfcore_oncoanalyser_pipeline/validate_params'
-include { validateParams         } from './subworkflows/local/utils_nfcore_oncoanalyser_pipeline/validate_params'
+include { getRunConfig           } from './subworkflows/local/utils_nfcore_oncoanalyser_pipeline/helpers_parameter'
+include { setParamsDefaults      } from './subworkflows/local/utils_nfcore_oncoanalyser_pipeline/helpers_parameter'
+include { validateInput          } from './subworkflows/local/utils_nfcore_oncoanalyser_pipeline/helpers_parameter'
+include { validateParams         } from './subworkflows/local/utils_nfcore_oncoanalyser_pipeline/helpers_parameter'
 
 /*
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~

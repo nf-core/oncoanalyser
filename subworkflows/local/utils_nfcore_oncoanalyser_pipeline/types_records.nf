@@ -4,8 +4,8 @@
 
 nextflow.enable.types = true
 
-include { SampleType   } from './types'
-include { SequenceType } from './types'
+include { SampleType   } from './types_enums'
+include { SequenceType } from './types_enums'
 
 record FastqFile {
     read_fwd: Path

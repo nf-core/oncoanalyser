@@ -6,10 +6,12 @@ nextflow.enable.types = true
 
 include { PAVE_PON_PANEL_CREATION  } from '../../../modules/local/pave/pon_creation/main'
 
-include { FileType                 } from '../utils_nfcore_oncoanalyser_pipeline/types'
-include { getInput                 } from '../utils_nfcore_oncoanalyser_pipeline/accessors'
-include { getTumorDnaSample        } from '../utils_nfcore_oncoanalyser_pipeline/accessors'
-include { getTumorDnaSampleName    } from '../utils_nfcore_oncoanalyser_pipeline/accessors'
+include { FileType                 } from '../utils_nfcore_oncoanalyser_pipeline/types_enums'
+include { getInput                 } from '../utils_nfcore_oncoanalyser_pipeline/accessors_samples'
+include { getTumorDnaSample        } from '../utils_nfcore_oncoanalyser_pipeline/accessors_samples'
+include { getTumorDnaSampleName    } from '../utils_nfcore_oncoanalyser_pipeline/accessors_samples'
+include { getSageSomaticVcf      } from '../utils_nfcore_oncoanalyser_pipeline/accessors_outputs'
+include { getVcfTbi               } from '../utils_nfcore_oncoanalyser_pipeline/accessors_outputs'
 include { selectCurrentOrExisting  } from '../utils_nfcore_oncoanalyser_pipeline/utils'
 
 workflow PAVE_PON_CREATION {
@@ -27,8 +29,8 @@ workflow PAVE_PON_CREATION {
         .map { meta, sage_dir ->
 
             def sage_dir_selected = selectCurrentOrExisting(sage_dir, getInput(getTumorDnaSample(meta), FileType.SAGE_DIR))
-            def sage_vcf = sage_dir_selected ? sage_dir_selected.resolve("${getTumorDnaSampleName(meta)}.sage.somatic.vcf.gz") : null
-            def sage_tbi = sage_dir_selected ? sage_dir_selected.resolve("${getTumorDnaSampleName(meta)}.sage.somatic.vcf.gz.tbi") : null
+            def sage_vcf = getSageSomaticVcf(getTumorDnaSampleName(meta), sage_dir_selected)
+            def sage_tbi = getVcfTbi(sage_vcf)
 
             return [sage_vcf, sage_tbi]
         }

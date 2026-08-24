@@ -6,16 +6,18 @@ nextflow.enable.types = true
 
 include { CHORD  } from '../../../modules/local/chord/main'
 
-include { FileType                 } from '../utils_nfcore_oncoanalyser_pipeline/types'
-include { groupByMeta              } from '../utils_nfcore_oncoanalyser_pipeline/channel_helpers'
-include { joinMeta                 } from '../utils_nfcore_oncoanalyser_pipeline/channel_helpers'
-include { restoreMeta              } from '../utils_nfcore_oncoanalyser_pipeline/channel_helpers'
-include { getInput                 } from '../utils_nfcore_oncoanalyser_pipeline/accessors'
-include { getTumorDnaSample        } from '../utils_nfcore_oncoanalyser_pipeline/accessors'
-include { getTumorDnaSampleName    } from '../utils_nfcore_oncoanalyser_pipeline/accessors'
-include { hasInput                 } from '../utils_nfcore_oncoanalyser_pipeline/accessors'
-include { hasNormalDna             } from '../utils_nfcore_oncoanalyser_pipeline/accessors'
-include { hasTumorDna              } from '../utils_nfcore_oncoanalyser_pipeline/accessors'
+include { FileType                 } from '../utils_nfcore_oncoanalyser_pipeline/types_enums'
+include { groupByMeta              } from '../utils_nfcore_oncoanalyser_pipeline/helpers_channel'
+include { joinMeta                 } from '../utils_nfcore_oncoanalyser_pipeline/helpers_channel'
+include { restoreMeta              } from '../utils_nfcore_oncoanalyser_pipeline/helpers_channel'
+include { getInput                 } from '../utils_nfcore_oncoanalyser_pipeline/accessors_samples'
+include { getTumorDnaSample        } from '../utils_nfcore_oncoanalyser_pipeline/accessors_samples'
+include { getTumorDnaSampleName    } from '../utils_nfcore_oncoanalyser_pipeline/accessors_samples'
+include { getPurpleSomaticVcf    } from '../utils_nfcore_oncoanalyser_pipeline/accessors_outputs'
+include { getPurpleSvVcf         } from '../utils_nfcore_oncoanalyser_pipeline/accessors_outputs'
+include { hasInput                 } from '../utils_nfcore_oncoanalyser_pipeline/accessors_samples'
+include { hasNormalDna             } from '../utils_nfcore_oncoanalyser_pipeline/accessors_samples'
+include { hasTumorDna              } from '../utils_nfcore_oncoanalyser_pipeline/accessors_samples'
 include { selectCurrentOrExisting  } from '../utils_nfcore_oncoanalyser_pipeline/utils'
 
 workflow CHORD_PREDICTION {
@@ -45,8 +47,8 @@ workflow CHORD_PREDICTION {
             def has_sv_vcf = false
             if (has_tumor_normal_dna && purple_dir) {
                 def tumor_id = getTumorDnaSampleName(meta)
-                has_smlv_vcf = purple_dir.resolve("${tumor_id}.purple.somatic.vcf.gz").exists()
-                has_sv_vcf = purple_dir.resolve("${tumor_id}.purple.sv.vcf.gz").exists()
+                has_smlv_vcf = getPurpleSomaticVcf(tumor_id, purple_dir).exists()
+                has_sv_vcf = getPurpleSvVcf(tumor_id, purple_dir).exists()
             }
 
             def has_existing = hasInput(getTumorDnaSample(meta), FileType.CHORD_DIR)
@@ -69,8 +71,8 @@ workflow CHORD_PREDICTION {
                 sample_id: tumor_id,
             )
 
-            def smlv_vcf = purple_dir.resolve("${tumor_id}.purple.somatic.vcf.gz")
-            def sv_vcf = purple_dir.resolve("${tumor_id}.purple.sv.vcf.gz")
+            def smlv_vcf = getPurpleSomaticVcf(tumor_id, purple_dir)
+            def sv_vcf = getPurpleSvVcf(tumor_id, purple_dir)
 
             return [meta_chord, smlv_vcf, sv_vcf]
         }

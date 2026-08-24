@@ -8,17 +8,19 @@ include { NEO_ANNOTATE_FUSIONS  } from '../../../modules/local/neo/annotate_fusi
 include { NEO_FINDER  } from '../../../modules/local/neo/finder/main'
 include { NEO_SCORER  } from '../../../modules/local/neo/scorer/main'
 
-include { FileType                 } from '../utils_nfcore_oncoanalyser_pipeline/types'
-include { groupByMeta              } from '../utils_nfcore_oncoanalyser_pipeline/channel_helpers'
-include { joinMeta                 } from '../utils_nfcore_oncoanalyser_pipeline/channel_helpers'
-include { restoreMeta              } from '../utils_nfcore_oncoanalyser_pipeline/channel_helpers'
-include { getInput                 } from '../utils_nfcore_oncoanalyser_pipeline/accessors'
-include { getTumorDnaSample        } from '../utils_nfcore_oncoanalyser_pipeline/accessors'
-include { getTumorDnaSampleName    } from '../utils_nfcore_oncoanalyser_pipeline/accessors'
-include { getTumorRnaSample        } from '../utils_nfcore_oncoanalyser_pipeline/accessors'
-include { getTumorRnaSampleName    } from '../utils_nfcore_oncoanalyser_pipeline/accessors'
-include { hasNormalDna             } from '../utils_nfcore_oncoanalyser_pipeline/accessors'
-include { hasTumorRna              } from '../utils_nfcore_oncoanalyser_pipeline/accessors'
+include { FileType                 } from '../utils_nfcore_oncoanalyser_pipeline/types_enums'
+include { groupByMeta              } from '../utils_nfcore_oncoanalyser_pipeline/helpers_channel'
+include { joinMeta                 } from '../utils_nfcore_oncoanalyser_pipeline/helpers_channel'
+include { restoreMeta              } from '../utils_nfcore_oncoanalyser_pipeline/helpers_channel'
+include { getInput                 } from '../utils_nfcore_oncoanalyser_pipeline/accessors_samples'
+include { getTumorDnaSample        } from '../utils_nfcore_oncoanalyser_pipeline/accessors_samples'
+include { getTumorDnaSampleName    } from '../utils_nfcore_oncoanalyser_pipeline/accessors_samples'
+include { getTumorRnaSample        } from '../utils_nfcore_oncoanalyser_pipeline/accessors_samples'
+include { getTumorRnaSampleName    } from '../utils_nfcore_oncoanalyser_pipeline/accessors_samples'
+include { getPurpleSomaticVcf    } from '../utils_nfcore_oncoanalyser_pipeline/accessors_outputs'
+include { getSageAppendVcf       } from '../utils_nfcore_oncoanalyser_pipeline/accessors_outputs'
+include { hasNormalDna             } from '../utils_nfcore_oncoanalyser_pipeline/accessors_samples'
+include { hasTumorRna              } from '../utils_nfcore_oncoanalyser_pipeline/accessors_samples'
 include { selectCurrentOrExisting  } from '../utils_nfcore_oncoanalyser_pipeline/utils'
 
 workflow NEO_PREDICTION {
@@ -72,7 +74,7 @@ workflow NEO_PREDICTION {
             def has_normal_dna = hasNormalDna(meta)
 
             def tumor_id = getTumorDnaSampleName(meta)
-            def has_smlv_vcf = purple_dir ? purple_dir.resolve("${tumor_id}.purple.somatic.vcf.gz").exists() : false
+            def has_smlv_vcf = getPurpleSomaticVcf(tumor_id, purple_dir)?.exists() ?: false
 
             def has_runnable_inputs = has_smlv_vcf && linx_annotation_dir && has_normal_dna
 
@@ -192,7 +194,7 @@ workflow NEO_PREDICTION {
             def sage_append_vcf_somatic = null
             if (hasTumorRna(meta)) {
                 def sage_append_dir_somatic_selected = selectCurrentOrExisting(sage_append_dir_somatic, getInput(getTumorDnaSample(meta), FileType.SAGE_APPEND_DIR))
-                sage_append_vcf_somatic = file(sage_append_dir_somatic_selected).resolve("${meta_scorer.sample_id}.sage.append.vcf.gz")
+                sage_append_vcf_somatic = getSageAppendVcf(meta_scorer.sample_id, sage_append_dir_somatic_selected)
             }
 
             return [

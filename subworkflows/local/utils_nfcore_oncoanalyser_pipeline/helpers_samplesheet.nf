@@ -1,15 +1,15 @@
 //
-// Input parsing helpers for the nf-core/oncoanalyser pipeline
+// Samplesheet parsing helpers for the nf-core/oncoanalyser pipeline
 //
 
-include { getReduxDirAlignment     } from './accessors'
-include { Case                     } from './records'
-include { FastqFile                } from './records'
-include { Sample                   } from './records'
-include { FileType                 } from './types'
-include { InfoField                } from './types'
-include { SampleType               } from './types'
-include { SequenceType             } from './types'
+include { getReduxDirAlignment     } from './accessors_alignments'
+include { Case                     } from './types_records'
+include { FastqFile                } from './types_records'
+include { Sample                   } from './types_records'
+include { FileType                 } from './types_enums'
+include { InfoField                } from './types_enums'
+include { SampleType               } from './types_enums'
+include { SequenceType             } from './types_enums'
 include { getEnumFromStringOrFail  } from './utils'
 include { getFileObject            } from './utils'
 
@@ -259,7 +259,8 @@ def resolveReduxInputs(b, case_id, stub_run, log) {
 
         redux_dir = files[FileType.REDUX_DIR]
         redux_input = redux_dir
-        redux_aln = getReduxDirAlignment(sample_id, redux_dir)[0]
+        def (redux_aln_sel, redux_idx_sel) = getReduxDirAlignment(sample_id, redux_dir)
+        redux_aln = redux_aln_sel
         if (! redux_input.isDirectory()) {
             log.error "didn't receive directory as REDUX directory for ${case_id} ${sample_id}: ${redux_input}"
             exit 1

@@ -6,22 +6,22 @@ nextflow.enable.types = true
 
 include { AMBER  } from '../../../modules/local/amber/main'
 
-include { FileType                    } from '../utils_nfcore_oncoanalyser_pipeline/types'
-include { groupByMeta                 } from '../utils_nfcore_oncoanalyser_pipeline/channel_helpers'
-include { joinMeta                    } from '../utils_nfcore_oncoanalyser_pipeline/channel_helpers'
-include { restoreMeta                 } from '../utils_nfcore_oncoanalyser_pipeline/channel_helpers'
-include { getDonorDnaSample           } from '../utils_nfcore_oncoanalyser_pipeline/accessors'
-include { getDonorDnaSampleNames      } from '../utils_nfcore_oncoanalyser_pipeline/accessors'
-include { getDonorReduxDirAlignments  } from '../utils_nfcore_oncoanalyser_pipeline/accessors'
-include { getInput                    } from '../utils_nfcore_oncoanalyser_pipeline/accessors'
-include { getLongitudinalSampleName } from '../utils_nfcore_oncoanalyser_pipeline/accessors'
-include { getNormalDnaSample          } from '../utils_nfcore_oncoanalyser_pipeline/accessors'
-include { getNormalDnaSampleName      } from '../utils_nfcore_oncoanalyser_pipeline/accessors'
-include { getNormalReduxDirAlignment  } from '../utils_nfcore_oncoanalyser_pipeline/accessors'
-include { getTumorDnaSample           } from '../utils_nfcore_oncoanalyser_pipeline/accessors'
-include { getTumorDnaSampleName       } from '../utils_nfcore_oncoanalyser_pipeline/accessors'
-include { getTumorReduxDirAlignment   } from '../utils_nfcore_oncoanalyser_pipeline/accessors'
-include { hasInput                    } from '../utils_nfcore_oncoanalyser_pipeline/accessors'
+include { FileType                    } from '../utils_nfcore_oncoanalyser_pipeline/types_enums'
+include { groupByMeta                 } from '../utils_nfcore_oncoanalyser_pipeline/helpers_channel'
+include { joinMeta                    } from '../utils_nfcore_oncoanalyser_pipeline/helpers_channel'
+include { restoreMeta                 } from '../utils_nfcore_oncoanalyser_pipeline/helpers_channel'
+include { getDonorDnaSample           } from '../utils_nfcore_oncoanalyser_pipeline/accessors_samples'
+include { getDonorDnaSampleNames      } from '../utils_nfcore_oncoanalyser_pipeline/accessors_samples'
+include { getDonorReduxDirAlignments  } from '../utils_nfcore_oncoanalyser_pipeline/accessors_alignments'
+include { getInput                    } from '../utils_nfcore_oncoanalyser_pipeline/accessors_samples'
+include { getLongitudinalSampleName } from '../utils_nfcore_oncoanalyser_pipeline/accessors_samples'
+include { getNormalDnaSample          } from '../utils_nfcore_oncoanalyser_pipeline/accessors_samples'
+include { getNormalDnaSampleName      } from '../utils_nfcore_oncoanalyser_pipeline/accessors_samples'
+include { getNormalReduxDirAlignment  } from '../utils_nfcore_oncoanalyser_pipeline/accessors_alignments'
+include { getTumorDnaSample           } from '../utils_nfcore_oncoanalyser_pipeline/accessors_samples'
+include { getTumorDnaSampleName       } from '../utils_nfcore_oncoanalyser_pipeline/accessors_samples'
+include { getTumorReduxDirAlignment   } from '../utils_nfcore_oncoanalyser_pipeline/accessors_alignments'
+include { hasInput                    } from '../utils_nfcore_oncoanalyser_pipeline/accessors_samples'
 include { selectCurrentOrExisting     } from '../utils_nfcore_oncoanalyser_pipeline/utils'
 
 workflow AMBER_PROFILING {
@@ -62,8 +62,8 @@ workflow AMBER_PROFILING {
             def (tumor_aln, tumor_idx) = getTumorReduxDirAlignment(meta, redux_dir_tumor_selected)
             def (normal_aln, normal_idx) = getNormalReduxDirAlignment(meta, redux_dir_normal_selected)
             def donor_alignments = getDonorReduxDirAlignments(meta, redux_dir_donor_selected)
-            def donor_alns = donor_alignments.collect { it[0] }
-            def donor_idxs = donor_alignments.collect { it[1] }
+            def donor_alns = donor_alignments.collect { aln, idx -> aln }
+            def donor_idxs = donor_alignments.collect { aln, idx -> idx }
 
             return [meta, tumor_aln, tumor_idx, normal_aln, normal_idx, donor_alns, donor_idxs]
 

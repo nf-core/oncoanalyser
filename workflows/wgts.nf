@@ -39,14 +39,14 @@ include { VIRUSBREAKEND_CALLING  } from '../subworkflows/local/virusbreakend_cal
 
 include { softwareVersionsToYAML  } from '../subworkflows/nf-core/utils_nfcore_pipeline'
 
-include { SequencingPlatform            } from '../subworkflows/local/utils_nfcore_oncoanalyser_pipeline/types'
-include { Case                          } from '../subworkflows/local/utils_nfcore_oncoanalyser_pipeline/records'
+include { SequencingPlatform            } from '../subworkflows/local/utils_nfcore_oncoanalyser_pipeline/types_enums'
+include { Case                          } from '../subworkflows/local/utils_nfcore_oncoanalyser_pipeline/types_records'
 
-include { getDnaFastqChannel            } from '../subworkflows/local/utils_nfcore_oncoanalyser_pipeline/channels'
+include { getDnaFastqChannel            } from '../subworkflows/local/utils_nfcore_oncoanalyser_pipeline/builders_channel'
 include { getEnumFromString             } from '../subworkflows/local/utils_nfcore_oncoanalyser_pipeline/utils'
-include { getRnaFastqChannel            } from '../subworkflows/local/utils_nfcore_oncoanalyser_pipeline/channels'
+include { getRnaFastqChannel            } from '../subworkflows/local/utils_nfcore_oncoanalyser_pipeline/builders_channel'
 include { getSequencingPlatformPon     } from '../subworkflows/local/utils_nfcore_oncoanalyser_pipeline/utils'
-include { getPrepConfigFromSamplesheet  } from '../subworkflows/local/utils_nfcore_oncoanalyser_pipeline/validate_params'
+include { getPrepConfigFromSamplesheet  } from '../subworkflows/local/utils_nfcore_oncoanalyser_pipeline/helpers_parameter'
 
 /*
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~

@@ -6,17 +6,22 @@ nextflow.enable.types = true
 
 include { ORANGE  } from '../../../modules/local/orange/main'
 
-include { FileType                 } from '../utils_nfcore_oncoanalyser_pipeline/types'
-include { groupByMeta              } from '../utils_nfcore_oncoanalyser_pipeline/channel_helpers'
-include { joinMeta                 } from '../utils_nfcore_oncoanalyser_pipeline/channel_helpers'
-include { restoreMeta              } from '../utils_nfcore_oncoanalyser_pipeline/channel_helpers'
-include { getInput                 } from '../utils_nfcore_oncoanalyser_pipeline/accessors'
-include { getNormalDnaSample       } from '../utils_nfcore_oncoanalyser_pipeline/accessors'
-include { getNormalDnaSampleName   } from '../utils_nfcore_oncoanalyser_pipeline/accessors'
-include { getTumorDnaSample        } from '../utils_nfcore_oncoanalyser_pipeline/accessors'
-include { getTumorDnaSampleName    } from '../utils_nfcore_oncoanalyser_pipeline/accessors'
-include { getTumorRnaSample        } from '../utils_nfcore_oncoanalyser_pipeline/accessors'
-include { getTumorRnaSampleName    } from '../utils_nfcore_oncoanalyser_pipeline/accessors'
+include { FileType                 } from '../utils_nfcore_oncoanalyser_pipeline/types_enums'
+include { groupByMeta              } from '../utils_nfcore_oncoanalyser_pipeline/helpers_channel'
+include { joinMeta                 } from '../utils_nfcore_oncoanalyser_pipeline/helpers_channel'
+include { restoreMeta              } from '../utils_nfcore_oncoanalyser_pipeline/helpers_channel'
+include { getInput                 } from '../utils_nfcore_oncoanalyser_pipeline/accessors_samples'
+include { getNormalDnaSample       } from '../utils_nfcore_oncoanalyser_pipeline/accessors_samples'
+include { getNormalDnaSampleName   } from '../utils_nfcore_oncoanalyser_pipeline/accessors_samples'
+include { getTumorDnaSample        } from '../utils_nfcore_oncoanalyser_pipeline/accessors_samples'
+include { getTumorDnaSampleName    } from '../utils_nfcore_oncoanalyser_pipeline/accessors_samples'
+include { getTumorRnaSample        } from '../utils_nfcore_oncoanalyser_pipeline/accessors_samples'
+include { getTumorRnaSampleName    } from '../utils_nfcore_oncoanalyser_pipeline/accessors_samples'
+include { getCircosPlot          } from '../utils_nfcore_oncoanalyser_pipeline/accessors_outputs'
+include { getCuppaVisData        } from '../utils_nfcore_oncoanalyser_pipeline/accessors_outputs'
+include { getPurpleGermlineVcf   } from '../utils_nfcore_oncoanalyser_pipeline/accessors_outputs'
+include { getPurpleSomaticVcf    } from '../utils_nfcore_oncoanalyser_pipeline/accessors_outputs'
+include { getSageAppendVcf       } from '../utils_nfcore_oncoanalyser_pipeline/accessors_outputs'
 include { selectCurrentOrExisting  } from '../utils_nfcore_oncoanalyser_pipeline/utils'
 
 workflow ORANGE_REPORTING {
@@ -133,8 +138,8 @@ workflow ORANGE_REPORTING {
 
             def purple_dir = inputs[input_indexes['purple_dir']]
             def tumor_dna_id = getTumorDnaSampleName(meta)
-            def has_smlv_vcf = purple_dir ? purple_dir.resolve("${tumor_dna_id}.purple.somatic.vcf.gz").exists() : false
-            def has_purple_plots = purple_dir ? purple_dir.resolve("plot/${tumor_dna_id}.circos.png").exists() : false
+            def has_smlv_vcf = getPurpleSomaticVcf(tumor_dna_id, purple_dir)?.exists() ?: false
+            def has_purple_plots = getCircosPlot(tumor_dna_id, purple_dir)?.exists() ?: false
 
             runnable: has_dna_tumor && has_smlv_vcf && has_purple_plots
             skip: true
@@ -160,7 +165,7 @@ workflow ORANGE_REPORTING {
 
             // NOTE(SW): guards against inputs where no germline smlv are called; relevant to minifed data
             def purple_dir = inputs[input_indexes['purple_dir']]
-            def has_germline_smlv_vcf = purple_dir ? purple_dir.resolve("${tumor_id}.purple.germline.vcf.gz").exists() : false
+            def has_germline_smlv_vcf = getPurpleGermlineVcf(tumor_id, purple_dir)?.exists() ?: false
 
             def normal_dna_id = null
             if (has_dna_normal && has_germline_smlv_vcf) {
@@ -200,7 +205,7 @@ workflow ORANGE_REPORTING {
             // will generate RNA only outputs and no visualisation, which triggers missing file error in ORANGE
             def cuppa_dir = inputs[input_indexes['cuppa_dir']]
             if (cuppa_dir) {
-                def cuppa_vis_data = cuppa_dir.resolve("${meta_orange.tumor_id}.cuppa.vis_data.tsv")
+                def cuppa_vis_data = getCuppaVisData(meta_orange.tumor_id, cuppa_dir)
                 if (! cuppa_vis_data.exists()) {
                     inputs_selected[input_indexes['cuppa_dir']] = null
                 }
@@ -213,13 +218,13 @@ workflow ORANGE_REPORTING {
                 // Somatic
                 def sage_append_dir_somatic = inputs_selected[input_indexes['sage_append_dir_somatic']]
                 if (sage_append_dir_somatic) {
-                    sage_append_vcf_somatic = sage_append_dir_somatic.resolve("${meta_orange.tumor_id}.sage.append.vcf.gz")
+                    sage_append_vcf_somatic = getSageAppendVcf(meta_orange.tumor_id, sage_append_dir_somatic)
                 }
 
                 // Germline
                 def sage_append_dir_germline = inputs_selected[input_indexes['sage_append_dir_germline']]
                 if (sage_append_dir_germline && meta_orange.normal_dna_id) {
-                    sage_append_vcf_germline = sage_append_dir_germline.resolve("${meta_orange.normal_dna_id}.sage.append.vcf.gz")
+                    sage_append_vcf_germline = getSageAppendVcf(meta_orange.normal_dna_id, sage_append_dir_germline)
                 }
             }
 

@@ -2,19 +2,19 @@
 // Input channel builders for the nf-core/oncoanalyser pipeline
 //
 
-include { getDonorDnaSamples  } from './accessors'
-include { getNormalDnaSample  } from './accessors'
-include { getTumorDnaSample   } from './accessors'
-include { getTumorRnaSample   } from './accessors'
-include { hasDonorDnaAlns     } from './accessors'
-include { hasDonorDnaFastqs   } from './accessors'
-include { hasInput            } from './accessors'
-include { hasNormalDnaAln     } from './accessors'
-include { hasNormalDnaFastq   } from './accessors'
-include { hasTumorDnaAln      } from './accessors'
-include { hasTumorDnaFastq    } from './accessors'
-include { hasTumorRnaFastq    } from './accessors'
-include { FileType            } from './types'
+include { getDonorDnaSamples  } from './accessors_samples'
+include { getNormalDnaSample  } from './accessors_samples'
+include { getTumorDnaSample   } from './accessors_samples'
+include { getTumorRnaSample   } from './accessors_samples'
+include { hasDonorDnaAlns     } from './accessors_alignments'
+include { hasDonorDnaFastqs   } from './accessors_samples'
+include { hasInput            } from './accessors_samples'
+include { hasNormalDnaAln     } from './accessors_alignments'
+include { hasNormalDnaFastq   } from './accessors_samples'
+include { hasTumorDnaAln      } from './accessors_alignments'
+include { hasTumorDnaFastq    } from './accessors_samples'
+include { hasTumorRnaFastq    } from './accessors_samples'
+include { FileType            } from './types_enums'
 
 def getDnaFastqChannel(ch_inputs) {
     // Sort inputs

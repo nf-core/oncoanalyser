@@ -134,4 +134,3 @@ enum InfoField {
     GENERATE_REDUX_TSVS_ONLY,
     READ_GROUP_OVERRIDES,
 }
-
