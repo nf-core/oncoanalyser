@@ -2,6 +2,8 @@
 // Channel helpers for the nf-core/oncoanalyser pipeline
 //
 
+def getPlaceholderMeta() { return [meta_placeholder: null] }
+
 def groupByMeta(Map named_args, List channels) {
     def r = channels
     // Set position; required to use non-blocking .mix operator
@@ -25,7 +27,7 @@ def groupByMeta(Map named_args, List channels) {
     r = r.drop(1).inject(r[0]) { acc, ch -> acc.mix(ch) }
 
     // NOTE(SW): As of Nextflow 22.10.6, groupTuple requires a matching meta /and/ an additional element to complete without error, these placeholders are filtered in the groupByMeta function
-    r = r.filter { it[0] != Constants.PLACEHOLDER_META }
+    r = r.filter { it[0] != getPlaceholderMeta() }
 
     r = r
         .groupTuple(size: channels.size())

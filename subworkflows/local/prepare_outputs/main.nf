@@ -1,6 +1,13 @@
 //
-// Publish helpers shared by the workflow emit blocks
+// Publish helpers and output aggregation for the nf-core/oncoanalyser pipeline
 //
+
+nextflow.enable.types = true
+
+include { getDonorDnaSampleName  } from '../utils_nfcore_oncoanalyser_pipeline/accessors'
+include { getNormalDnaSampleName } from '../utils_nfcore_oncoanalyser_pipeline/accessors'
+include { getTumorDnaSampleName  } from '../utils_nfcore_oncoanalyser_pipeline/accessors'
+include { getTumorRnaSampleName  } from '../utils_nfcore_oncoanalyser_pipeline/accessors'
 
 // NOTE(LN): Nextflow bug as of NXF_VER=26.04.6
 //
@@ -45,4 +52,109 @@ def get_command_log_filepath(data) {
         return fps.collect { d -> ["logs/${meta.key}/${name}.${meta.id}${d.name}", d] }
     }
 
+}
+
+workflow PREPARE_OUTPUTS {
+    take:
+    amber
+    bamtools_tumor
+    bamtools_normal
+    chord
+    cider
+    cobalt
+    cuppa
+    esvee
+    align_dna_tumor
+    align_dna_normal
+    align_dna_donor
+    align_rna_tumor
+    isofox
+    lilac
+    linx_germline
+    linx_somatic
+    linx_somatic_visualiser
+    linxreport_html
+    multiqc
+    neo_annotated_fusions
+    neo_finder
+    neo_scorer_dir
+    orange_json
+    orange_pdf
+    pave_germline
+    pave_somatic
+    peach
+    purple
+    qsee
+    redux_tumor
+    redux_normal
+    redux_donor
+    sage_append_somatic
+    sage_append_germline
+    sage_germline
+    sage_somatic
+    sage_somatic_visualiser
+    sigs
+    teal_normal_bam
+    teal_tumor_bam
+    teal_tsvs
+    virusbreakend_tsv
+    virusbreakend_vcf
+    virusinterpreter
+    write_reference_data
+    command_files
+
+    main:
+    results = channel.empty()
+        .mix(
+            amber.flatMap { meta, d -> return get_dir_filepaths(meta, d) },
+            bamtools_tumor.flatMap { meta, d -> return get_dir_filepaths(meta, d, "bamtools/${getTumorDnaSampleName(meta, primary: true)}") },
+            bamtools_normal.flatMap { meta, d -> return get_dir_filepaths(meta, d, "bamtools/${getNormalDnaSampleName(meta)}") },
+            chord.flatMap { meta, d -> return get_dir_filepaths(meta, d) },
+            cider.flatMap { meta, fps -> return fps.collect { d -> ["${meta.case_id}/cider/${d.name}", d] } },
+            cobalt.flatMap { meta, d -> return get_dir_filepaths(meta, d) },
+            cuppa.flatMap { meta, d -> return get_dir_filepaths(meta, d) },
+            esvee.flatMap { meta, d -> return get_dir_filepaths(meta, d) },
+            align_dna_tumor.flatMap { meta, bam, bai -> return [bam, bai].findAll().collect { d -> ["${meta.case_id}/alignments/${getTumorDnaSampleName(meta, primary: true)}/${d.name}", d] } },
+            align_dna_normal.flatMap { meta, bam, bai -> return [bam, bai].findAll().collect { d -> ["${meta.case_id}/alignments/${getNormalDnaSampleName(meta)}/${d.name}", d] } },
+            align_dna_donor.flatMap { meta, bam, bai -> return [bam, bai].findAll().collect { d -> ["${meta.case_id}/alignments/${getDonorDnaSampleName(meta)}/${d.name}", d] } },
+            align_rna_tumor.flatMap { meta, bam, bai -> return [bam, bai].findAll().collect { d -> ["${meta.case_id}/alignments/${getTumorRnaSampleName(meta)}/${d.name}", d] } },
+            isofox.flatMap { meta, d -> return get_dir_filepaths(meta, d) },
+            lilac.flatMap { meta, d -> return get_dir_filepaths(meta, d) },
+            linx_germline.flatMap { meta, d -> return get_dir_filepaths(meta, d, 'linx/germline_annotations') },
+            linx_somatic.flatMap { meta, d -> return get_dir_filepaths(meta, d, 'linx/somatic_annotations') },
+            linx_somatic_visualiser.flatMap { meta, d -> return get_dir_filepaths(meta, d, 'linx/somatic_plots') },
+            linxreport_html.map { meta, d -> return ["${meta.case_id}/linx/${d.name}", d] },
+            multiqc.flatMap { fps -> return fps.collect { d -> [d.name, d] } },
+            neo_annotated_fusions.filter { meta, d -> d != null }.map { meta, d -> return ["${meta.case_id}/neo/annotated_fusions/${d.name}", d] },
+            neo_finder.flatMap { meta, d -> return get_dir_filepaths(meta, d, 'neo/finder') },
+            neo_scorer_dir.flatMap { meta, d -> return get_dir_filepaths(meta, d, 'neo/scorer') },
+            orange_json.filter { meta, d -> d != null }.map { meta, d -> return ["${meta.case_id}/orange/${d.name}", d] },
+            orange_pdf.filter { meta, d -> d != null }.map { meta, d -> return ["${meta.case_id}/orange/${d.name}", d] },
+            pave_germline.flatMap { meta, d -> return get_dir_filepaths(meta, d, 'pave/germline') },
+            pave_somatic.flatMap { meta, d -> return get_dir_filepaths(meta, d, 'pave/somatic') },
+            peach.flatMap { meta, d -> return get_dir_filepaths(meta, d) },
+            purple.flatMap { meta, d -> return get_dir_filepaths(meta, d) },
+            qsee.flatMap { meta, d -> return get_dir_filepaths(meta, d) },
+            redux_tumor.flatMap { meta, d -> return get_dir_filepaths(meta, d, "alignments/${getTumorDnaSampleName(meta, primary: true)}") },
+            redux_normal.flatMap { meta, d -> return get_dir_filepaths(meta, d, "alignments/${getNormalDnaSampleName(meta)}") },
+            redux_donor.flatMap { meta, d -> return get_dir_filepaths(meta, d, "alignments/${getDonorDnaSampleName(meta)}") },
+            sage_append_somatic.flatMap { meta, d -> return get_dir_filepaths(meta, d, "sage_append/${getTumorDnaSampleName(meta, primary: true)}") },
+            sage_append_germline.flatMap { meta, d -> return get_dir_filepaths(meta, d, "sage_append/${getNormalDnaSampleName(meta)}") },
+            sage_germline.flatMap { meta, d -> return get_dir_filepaths(meta, d, 'sage/germline') },
+            sage_somatic.flatMap { meta, d -> return get_dir_filepaths(meta, d, 'sage/somatic') },
+            sage_somatic_visualiser.flatMap { meta, d -> return get_dir_filepaths(meta, d, 'sage/visualiser') },
+            sigs.flatMap { meta, d -> return get_dir_filepaths(meta, d) },
+            teal_normal_bam.flatMap { meta, bam, bai -> return [bam, bai].findAll().collect { d -> ["${meta.case_id}/teal/${d.name}", d] } },
+            teal_tumor_bam.flatMap { meta, bam, bai -> return [bam, bai].findAll().collect { d -> ["${meta.case_id}/teal/${d.name}", d] } },
+            teal_tsvs.flatMap { meta, e -> def fps = e instanceof Collection ? e : [e]; fps.collect { d -> ["${meta.case_id}/teal/${d.name}", d] } },
+            virusbreakend_tsv.map { meta, d -> return ["${meta.case_id}/virusbreakend/${d.name}", d] },
+            virusbreakend_vcf.map { meta, d -> return ["${meta.case_id}/virusbreakend/${d.name}", d] },
+            virusinterpreter.flatMap { meta, d -> return get_dir_filepaths(meta, d) },
+            write_reference_data.map { d -> return ["reference_data/${workflow.manifest.version}/", d] },
+            command_files.flatMap { f -> get_command_log_filepath(f) }
+        )
+        .flatMap { meta, d -> return d instanceof Collection ? d.collect { e -> [meta, e] } : [[meta, d]] }
+
+    emit:
+    results = results
 }

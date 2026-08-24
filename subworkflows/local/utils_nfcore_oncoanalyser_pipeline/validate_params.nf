@@ -24,6 +24,21 @@ include { getEnumNames             } from './utils'
 include { getRunMode               } from './utils'
 
 //
+// Reference genome and panel definitions
+//
+def getGenomesVersion37() { return ['GRCh37_hmf', 'GRCh37'] }
+def getGenomesVersion38() { return ['GRCh38_hmf', 'GRCh38', 'hg38'] }
+def getGenomesAlt() { return ['GRCh38', 'hg38'] }
+def getGenomesSupported() { return ['GRCh37_hmf', 'GRCh38_hmf'] }
+def getGenomesDefined() { return getGenomesVersion37() + getGenomesVersion38() }
+def getPanelsDefined() { return ['tso500'] }
+
+// NOTE(SW): HMF reference data is incompatible with hg19 (contig naming); paths are relative to ref_data_base
+def getHmfData37Path() { return 'hartwig/pipeline_resources/hmf_pipeline_resources.37_v3.0.0--8.tar.gz' }
+def getHmfData38Path() { return 'hartwig/pipeline_resources/hmf_pipeline_resources.38_v3.0.0--8.tar.gz' }
+def getTso500Panel37Path() { return 'hartwig/panel_resources/hmf_panel_resources.tso500.37_v3.0.0--8.tar.gz' }
+
+//
 // Set parameter defaults where required
 //
 def setParamsDefaults(params, log) {
@@ -68,9 +83,9 @@ def setCommonDefaults(params) {
     }
 
     if (! params.containsKey('genome_version')) {
-        if (Constants.GENOMES_VERSION_37.contains(params.genome)) {
+        if (getGenomesVersion37().contains(params.genome)) {
             params.genome_version = '37'
-        } else if (Constants.GENOMES_VERSION_38.contains(params.genome)) {
+        } else if (getGenomesVersion38().contains(params.genome)) {
             params.genome_version = '38'
         } else {
             default_invalid = true
@@ -78,9 +93,9 @@ def setCommonDefaults(params) {
     }
 
     if (! params.containsKey('genome_type')) {
-        if (Constants.GENOMES_ALT.contains(params.genome)) {
+        if (getGenomesAlt().contains(params.genome)) {
             params.genome_type = 'alt'
-        } else if (Constants.GENOMES_DEFINED.contains(params.genome)) {
+        } else if (getGenomesDefined().contains(params.genome)) {
             params.genome_type = 'no_alt'
         } else {
             default_invalid = true
@@ -89,9 +104,9 @@ def setCommonDefaults(params) {
 
     if (! params.containsKey('ref_data_hmf_data_path')) {
         if (params.genome_version.toString() == '37') {
-            params.ref_data_hmf_data_path = "${params.ref_data_base}/${Constants.HMF_DATA_37_PATH}"
+            params.ref_data_hmf_data_path = "${params.ref_data_base}/${getHmfData37Path()}"
         } else if (params.genome_version.toString() == '38') {
-            params.ref_data_hmf_data_path = "${params.ref_data_base}/${Constants.HMF_DATA_38_PATH}"
+            params.ref_data_hmf_data_path = "${params.ref_data_base}/${getHmfData38Path()}"
         } else {
             default_invalid = true
         }
@@ -109,7 +124,7 @@ def setRunModeDefaults(params, run_mode) {
 
             if (params.panel.toLowerCase() == 'tso500') {
                 if (params.genome_version.toString() == '37') {
-                    params.ref_data_panel_data_path = "${params.ref_data_base}/${Constants.TSO500_PANEL_37_PATH}"
+                    params.ref_data_panel_data_path = "${params.ref_data_base}/${getTso500Panel37Path()}"
                 }
             }
 
@@ -126,7 +141,7 @@ def setUmiDefaults(params, log) {
     def umi_type
     if (params.containsKey('umi_type') && params.umi_type) {
         umi_type = getEnumFromString(params.umi_type, UmiType)
-    } else if (params.panel != null && Constants.PANELS_DEFINED.contains(params.panel.toLowerCase())) {
+    } else if (params.panel != null && getPanelsDefined().contains(params.panel.toLowerCase())) {
         if (params.panel.toLowerCase() == 'tso500') {
             umi_type = UmiType.TSO500
         }
@@ -218,7 +233,7 @@ def validateGenomeParams(params, log) {
         exit 1
     }
 
-    if (! Constants.GENOMES_SUPPORTED.contains(params.genome)) {
+    if (! getGenomesSupported().contains(params.genome)) {
         if (! params.force_genome) {
             log.error "currently only the GRCh37_hmf and GRCh38_hmf genomes are supported but got ${params.genome}" +
                 ", please adjust the --genome argument accordingly or override with --force_genome."
@@ -234,7 +249,7 @@ def validateGenomeParams(params, log) {
             "  Genome version wasn't provided and genome '${params.genome}' is not defined in   \n" +
             "  genome version list.\n" +
             "  Currently, the list of genomes in the version list includes:\n" +
-            "  ${Constants.GENOMES_DEFINED.join(", ")}\n" +
+            "  ${getGenomesDefined().join(", ")}\n" +
             "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
         exit 1
     }
@@ -244,7 +259,7 @@ def validateGenomeParams(params, log) {
             "  Genome type wasn't provided and genome '${params.genome}' is not defined in      \n" +
             "  genome type list.\n" +
             "  Currently, the list of genomes in the type list include:\n" +
-            "  ${Constants.GENOMES_DEFINED.join(", ")}\n" +
+            "  ${getGenomesDefined().join(", ")}\n" +
             "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
         exit 1
     }
@@ -322,7 +337,7 @@ def validateTargetedParams(params, run_mode, log) {
 
         if (! params.containsKey('panel') || params.panel == null) {
 
-            def panels = Constants.PANELS_DEFINED.join('\n    - ')
+            def panels = getPanelsDefined().join('\n    - ')
             log.error "\n~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n" +
                 "  A panel is required to be set using the --panel CLI argument or in a\n" +
                 "  configuration file when running in targeted mode or panel resource creation mode.\n" +
@@ -331,12 +346,12 @@ def validateTargetedParams(params, run_mode, log) {
                 "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
             exit 1
 
-        } else if (! Constants.PANELS_DEFINED.contains(params.panel.toLowerCase())) {
+        } else if (! getPanelsDefined().contains(params.panel.toLowerCase())) {
 
             if (params.containsKey('force_panel') && params.force_panel) {
                 log.warn "provided panel ${params.panel.toLowerCase()} does not have built-in support but forcing to proceed"
             } else {
-                def panels = Constants.PANELS_DEFINED.join('\n    - ')
+                def panels = getPanelsDefined().join('\n    - ')
                 log.error "\n~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n" +
                     "  The ${params.panel.toLowerCase()} panel does not have built-in support. Currently, the\n" +
                     "  available supported panels are:\n" +
@@ -631,7 +646,7 @@ def getPrepConfigFromCli(params, log) {
         if (! params.containsKey('panel') || params.panel == null) {
             require_panel_data = false
             log.warn "Skipping preparing panel specific reference data as --panel CLI argument was not provided"
-        } else if (! Constants.PANELS_DEFINED.contains(params.panel.toLowerCase())) {
+        } else if (! getPanelsDefined().contains(params.panel.toLowerCase())) {
             require_panel_data = false
             log.warn "Skipping preparing panel specific reference data for custom panel: ${params.panel.toLowerCase()}"
         }

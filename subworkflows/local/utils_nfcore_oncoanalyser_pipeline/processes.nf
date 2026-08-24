@@ -4,6 +4,8 @@
 
 include { Process } from './types'
 
+def getDefaultExcludedProcesses() { return [] }
+
 def getRunStages(processes_include, exclude, manual_select, log) {
 
     def processes
@@ -21,7 +23,7 @@ def getRunStages(processes_include, exclude, manual_select, log) {
         processes = Process.values().toList()
 
         // NOTE(LN): Disable some processes from running by default
-        Constants.DEFAULT_EXCLUDED_PROCESSES.each {it -> processes.remove(it) }
+        getDefaultExcludedProcesses().each {it -> processes.remove(it) }
 
         def include_list = getProcessList(processes_include, log)
         def exclude_list = getProcessList(exclude, log)

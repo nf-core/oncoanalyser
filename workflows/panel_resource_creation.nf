@@ -80,7 +80,7 @@ workflow PANEL_RESOURCE_CREATION {
     def isofox_counts = params.isofox_counts != null ? file(params.isofox_counts) : hmf_data.map { it.isofox_counts }
     def isofox_gene_ids = params.isofox_gene_ids != null ? file(params.isofox_gene_ids) : null
     def isofox_gc_ratios = params.isofox_gc_ratios != null ? file(params.isofox_gc_ratios) : hmf_data.map { it.isofox_gc_ratios }
-    def isofox_read_length = params.isofox_read_length != null ? params.isofox_read_length : Constants.DEFAULT_ISOFOX_READ_LENGTH_TARGETED
+    def isofox_read_length = params.isofox_read_length != null ? params.isofox_read_length : 93  // targeted default read length
 
     //
     // SUBWORKFLOW: Run read alignment to generate BAMs
