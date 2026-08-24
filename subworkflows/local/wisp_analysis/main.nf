@@ -11,6 +11,7 @@ include { groupByMeta                 } from '../utils_nfcore_oncoanalyser_pipel
 include { joinMeta                    } from '../utils_nfcore_oncoanalyser_pipeline/channel_helpers'
 include { restoreMeta                 } from '../utils_nfcore_oncoanalyser_pipeline/channel_helpers'
 include { getInput                    } from '../utils_nfcore_oncoanalyser_pipeline/accessors'
+include { getLongitudinalSampleName } from '../utils_nfcore_oncoanalyser_pipeline/accessors'
 include { getNormalDnaSample          } from '../utils_nfcore_oncoanalyser_pipeline/accessors'
 include { getNormalReduxDirAlignment  } from '../utils_nfcore_oncoanalyser_pipeline/accessors'
 include { getTumorDnaSample           } from '../utils_nfcore_oncoanalyser_pipeline/accessors'
@@ -90,8 +91,8 @@ workflow WISP_ANALYSIS {
                 key: meta.case_id,
                 id: meta.case_id,
                 patient_id: meta.patient_id,
-                primary_id: getTumorDnaSampleName(meta, primary: true),
-                longitudinal_id: getTumorDnaSampleName(meta, primary: false),
+                primary_id: getTumorDnaSampleName(meta),
+                longitudinal_id: getLongitudinalSampleName(meta),
             )
 
             return [meta_wisp] + inputs

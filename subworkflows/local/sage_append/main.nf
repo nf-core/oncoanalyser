@@ -14,6 +14,7 @@ include { joinMeta                   } from '../utils_nfcore_oncoanalyser_pipeli
 include { restoreMeta                } from '../utils_nfcore_oncoanalyser_pipeline/channel_helpers'
 include { getEnumFromString          } from '../utils_nfcore_oncoanalyser_pipeline/utils'
 include { getInput                   } from '../utils_nfcore_oncoanalyser_pipeline/accessors'
+include { getLongitudinalSampleName } from '../utils_nfcore_oncoanalyser_pipeline/accessors'
 include { getNormalDnaSample         } from '../utils_nfcore_oncoanalyser_pipeline/accessors'
 include { getNormalDnaSampleName     } from '../utils_nfcore_oncoanalyser_pipeline/accessors'
 include { getTumorDnaSample          } from '../utils_nfcore_oncoanalyser_pipeline/accessors'
@@ -96,7 +97,7 @@ workflow SAGE_APPEND {
         .branch { meta, purple_dir, tumor_dna_aln, tumor_dna_idx, redux_tsvs_tumor, tumor_rna_aln, tumor_rna_idx ->
 
             // NOTE(SW): explicit in expectation to always obtain the primary tumor DNA sample ID here
-            def tumor_dna_id = getTumorDnaSampleName(meta, primary: true)
+            def tumor_dna_id = getTumorDnaSampleName(meta)
 
             def has_tumor_rna = hasTumorRna(meta)
             def has_normal_dna = hasNormalDna(meta)
@@ -117,7 +118,7 @@ workflow SAGE_APPEND {
         .map { meta, purple_dir, _tumor_dna_aln, _tumor_dna_idx, _redux_tsvs_tumor, tumor_rna_aln, tumor_rna_idx ->
 
             // NOTE(SW): explicit in expectation to always obtain the primary tumor DNA sample ID here
-            def tumor_dna_id = getTumorDnaSampleName(meta, primary: true)
+            def tumor_dna_id = getTumorDnaSampleName(meta)
             def output_file_id = getNormalDnaSampleName(meta)
 
             def meta_append = [
@@ -160,7 +161,7 @@ workflow SAGE_APPEND {
     ch_inputs_somatic_sorted = ch_inputs_sorted.runnable
         .branch { meta, purple_dir, tumor_dna_aln, tumor_dna_idx, redux_tsvs_tumor, tumor_rna_aln, tumor_rna_idx ->
 
-            def tumor_dna_id = getTumorDnaSampleName(meta, primary: true)
+            def tumor_dna_id = getTumorDnaSampleName(meta)
 
             def has_tumor_rna = hasTumorRna(meta)
             def has_tumor_dna = hasTumorDna(meta)
@@ -182,8 +183,8 @@ workflow SAGE_APPEND {
         .map { meta, purple_dir, tumor_dna_aln, tumor_dna_idx, redux_tsvs_tumor, tumor_rna_aln, tumor_rna_idx ->
 
             // NOTE(SW): explicit in expectation to always obtain the primary tumor DNA sample ID here
-            def tumor_dna_id = getTumorDnaSampleName(meta, primary: true)
-            def output_file_id = purity_estimate_mode ? getTumorDnaSampleName(meta, primary: false) : tumor_dna_id
+            def tumor_dna_id = getTumorDnaSampleName(meta)
+            def output_file_id = purity_estimate_mode ? getLongitudinalSampleName(meta) : tumor_dna_id
 
             def meta_append = [
                 key: meta.case_id,
@@ -204,7 +205,7 @@ workflow SAGE_APPEND {
             }
 
             if (purity_estimate_mode && tumor_dna_aln) {
-                meta_append.reference_ids.add(getTumorDnaSampleName(meta, primary: false))
+                meta_append.reference_ids.add(getLongitudinalSampleName(meta))
                 alns.add(tumor_dna_aln)
                 idxs.add(tumor_dna_idx)
                 redux_tsvs = redux_tsvs_tumor

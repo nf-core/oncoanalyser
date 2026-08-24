@@ -11,6 +11,7 @@ include { groupByMeta                 } from '../utils_nfcore_oncoanalyser_pipel
 include { joinMeta                    } from '../utils_nfcore_oncoanalyser_pipeline/channel_helpers'
 include { restoreMeta                 } from '../utils_nfcore_oncoanalyser_pipeline/channel_helpers'
 include { getInput                    } from '../utils_nfcore_oncoanalyser_pipeline/accessors'
+include { getLongitudinalSampleName } from '../utils_nfcore_oncoanalyser_pipeline/accessors'
 include { getNormalDnaSample          } from '../utils_nfcore_oncoanalyser_pipeline/accessors'
 include { getNormalDnaSampleName      } from '../utils_nfcore_oncoanalyser_pipeline/accessors'
 include { getNormalReduxDirAlignment  } from '../utils_nfcore_oncoanalyser_pipeline/accessors'
@@ -82,9 +83,9 @@ workflow COBALT_PROFILING {
 
             def tumor_id
             if (purity_estimate_mode) {
-                tumor_id = getTumorDnaSampleName(meta, primary: false)
+                tumor_id = getLongitudinalSampleName(meta)
             } else {
-                tumor_id = getTumorDnaSampleName(meta, primary: true)
+                tumor_id = getTumorDnaSampleName(meta)
             }
 
             def meta_cobalt = record(

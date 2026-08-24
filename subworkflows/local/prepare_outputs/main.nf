@@ -4,7 +4,8 @@
 
 nextflow.enable.types = true
 
-include { getNormalDnaSampleName } from '../utils_nfcore_oncoanalyser_pipeline/accessors'
+include { getLongitudinalSampleName } from '../utils_nfcore_oncoanalyser_pipeline/accessors'
+include { getNormalDnaSampleName    } from '../utils_nfcore_oncoanalyser_pipeline/accessors'
 include { getTumorDnaSampleName  } from '../utils_nfcore_oncoanalyser_pipeline/accessors'
 include { getTumorRnaSampleName  } from '../utils_nfcore_oncoanalyser_pipeline/accessors'
 
@@ -26,7 +27,7 @@ def get_dir_filepaths(meta, d, target_dir=null) {
     def filepaths = []
     d.eachFileRecurse(groovy.io.FileType.FILES) { f ->
         def rel_path = d.relativize(f).toString()
-        filepaths << ["${meta.key ?: meta.case_id}/${dir}/${rel_path}", f]
+        filepaths << ["${meta.case_id}/${dir}/${rel_path}", f]
     }
     return filepaths
 }
@@ -107,7 +108,7 @@ workflow PREPARE_OUTPUTS {
     results = channel.empty()
         .mix(
             amber.flatMap { meta, d -> return get_dir_filepaths(meta, d) },
-            bamtools_tumor.flatMap { meta, d -> return get_dir_filepaths(meta, d, "bamtools/${getTumorDnaSampleName(meta, primary: true)}") },
+            bamtools_tumor.flatMap { meta, d -> return get_dir_filepaths(meta, d, "bamtools/${getTumorDnaSampleName(meta)}") },
             bamtools_normal.flatMap { meta, d -> return get_dir_filepaths(meta, d, "bamtools/${getNormalDnaSampleName(meta)}") },
             chord.flatMap { meta, d -> return get_dir_filepaths(meta, d) },
             cider.flatMap { meta, fps -> return fps.collect { d -> ["${meta.case_id}/cider/${d.name}", d] } },
@@ -132,13 +133,13 @@ workflow PREPARE_OUTPUTS {
             peach.flatMap { meta, d -> return get_dir_filepaths(meta, d) },
             purple.flatMap { meta, d -> return get_dir_filepaths(meta, d) },
             qsee.flatMap { meta, d -> return get_dir_filepaths(meta, d) },
-            redux_tumor.flatMap { meta, d -> return get_dir_filepaths(meta, d, "alignments/${getTumorDnaSampleName(meta, primary: true)}") },
+            redux_tumor.flatMap { meta, d -> return get_dir_filepaths(meta, d, "alignments/${getTumorDnaSampleName(meta)}") },
             redux_normal.flatMap { meta, d -> return get_dir_filepaths(meta, d, "alignments/${getNormalDnaSampleName(meta)}") },
             redux_donor.flatMap { meta, dirs ->
                 def donor_dirs = dirs == null ? [] : (dirs instanceof List ? dirs : [dirs])
                 return donor_dirs.collectMany { d -> get_dir_filepaths(meta, d, "alignments/${d.name.replaceFirst(/^redux_/, '')}") }
             },
-            sage_append_somatic.flatMap { meta, d -> return get_dir_filepaths(meta, d, "sage_append/${getTumorDnaSampleName(meta, primary: false)}") },
+            sage_append_somatic.flatMap { meta, d -> return get_dir_filepaths(meta, d, "sage_append/${getLongitudinalSampleName(meta) ?: getTumorDnaSampleName(meta)}") },
             sage_append_germline.flatMap { meta, d -> return get_dir_filepaths(meta, d, "sage_append/${getNormalDnaSampleName(meta)}") },
             sage_germline.flatMap { meta, d -> return get_dir_filepaths(meta, d, 'sage/germline') },
             sage_somatic.flatMap { meta, d -> return get_dir_filepaths(meta, d, 'sage/somatic') },

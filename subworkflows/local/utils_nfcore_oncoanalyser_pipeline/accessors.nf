@@ -52,18 +52,12 @@ def getLongitudinalSample(case_record) {
 }
 
 // Sample names
-def getTumorDnaSampleName(Map named_args, case_record) {
-    def sample
-    if (named_args.getOrDefault('primary', false)) {
-        sample = getTumorDnaSample(case_record)
-    } else {
-        sample = getLongitudinalSample(case_record) ?: getTumorDnaSample(case_record)
-    }
-    return sample?.sample_id
+def getTumorDnaSampleName(case_record) {
+    return getTumorDnaSample(case_record)?.sample_id
 }
 
-def getTumorDnaSampleName(case_record) {
-    getTumorDnaSampleName([:], case_record)
+def getLongitudinalSampleName(case_record) {
+    return getLongitudinalSample(case_record)?.sample_id
 }
 
 def getTumorRnaSampleName(case_record) {
