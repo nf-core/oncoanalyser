@@ -9,7 +9,7 @@ process PAVE_PON_PANEL_CREATION {
         'biocontainers/hmftools-pave:1.9--hdfd78af_0' }"
 
     input:
-    tuple(sage_vcf: Path, sage_tbi: Path)
+    tuple(sage_vcf: List<Path>, sage_tbi: List<Path>)
     genome_ver: String
 
     topic:

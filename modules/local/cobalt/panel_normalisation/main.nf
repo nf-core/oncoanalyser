@@ -9,7 +9,7 @@ process COBALT_PANEL_NORMALISATION {
         'biocontainers/hmftools-cobalt:3.0--hdfd78af_0' }"
 
     input:
-    tuple(amber_dir: Path, cobalt_dir: Path)
+    tuple(amber_dir: List<Path>, cobalt_dir: List<Path>)
     genome_ver: String
     gc_profile: Path
     copy_number_percentiles: Path?
