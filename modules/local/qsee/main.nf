@@ -1,5 +1,7 @@
 nextflow.enable.types = true
 
+include { NormalReferenceMeta } from '../../../subworkflows/local/utils_nfcore_oncoanalyser_pipeline/records'
+
 process QSEE {
     tag "${meta.id}"
     label 'process_low'
@@ -11,7 +13,7 @@ process QSEE {
 
     input:
     tuple(
-        meta: Map,
+        meta: NormalReferenceMeta,
         redux_tsvs_tumor: List<Path>,
         redux_tsvs_normal: List<Path>?,
         bamtools_dir_tumor: Path,
@@ -46,7 +48,7 @@ process QSEE {
 
     def log_level_arg = task.ext.log_level ? "-log_level ${task.ext.log_level}" : ''
 
-    def reference_arg = meta.containsKey('normal_id') ? "-reference ${meta.normal_id}" : ''
+    def reference_arg = meta.normal_id != null ? "-reference ${meta.normal_id}" : ''
     def redux_ref_dir_arg = redux_tsvs_normal ? '-redux_ref_dir redux_tsvs_normal/' : ''
     def bamtools_ref_dir_arg = bamtools_dir_normal ? "-bam_metrics_ref_dir ${bamtools_dir_normal}" : ''
 

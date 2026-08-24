@@ -84,15 +84,12 @@ workflow QSEE_METRICS {
     ch_qsee_inputs = ch_inputs_sorted.runnable
         .map { meta, redux_tsvs_tumor, redux_tsvs_normal, bamtools_dir_tumor, bamtools_dir_normal, cobalt_dir, esvee_dir, purple_dir ->
 
-            def meta_qsee = [
+            def meta_qsee = record(
                 key: meta.case_id,
                 id: meta.case_id,
                 tumor_id: getTumorDnaSampleName(meta),
-            ]
-
-            if (redux_tsvs_normal || bamtools_dir_normal) {
-                meta_qsee.normal_id = getNormalDnaSampleName(meta)
-            }
+                normal_id: (redux_tsvs_normal || bamtools_dir_normal) ? getNormalDnaSampleName(meta) : null,
+            )
 
             return [meta_qsee, redux_tsvs_tumor, redux_tsvs_normal, bamtools_dir_tumor, bamtools_dir_normal, cobalt_dir, esvee_dir, purple_dir]
 

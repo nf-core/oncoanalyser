@@ -82,15 +82,12 @@ workflow ESVEE_CALLING {
         )
         .map { meta, tumor_aln, tumor_idx, normal_aln, normal_idx ->
 
-            def meta_esvee = [
+            def meta_esvee = record(
                 key: meta.case_id,
                 id: meta.case_id,
                 tumor_id: getTumorDnaSampleName(meta),
-            ]
-
-            if (normal_aln) {
-                meta_esvee.normal_id = getNormalDnaSampleName(meta)
-            }
+                normal_id: normal_aln ? getNormalDnaSampleName(meta) : null,
+            )
 
             return [meta_esvee, tumor_aln, tumor_idx, normal_aln, normal_idx]
         }

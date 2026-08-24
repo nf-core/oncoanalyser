@@ -65,6 +65,13 @@ record NormalReferenceMeta {
     normal_id: String?
 }
 
+record TumorNormalMeta {
+    key: String
+    id: String
+    tumor_id: String?
+    normal_id: String?
+}
+
 record RnaSampleMeta {
     key: String
     id: String

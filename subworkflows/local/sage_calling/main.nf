@@ -109,12 +109,12 @@ workflow SAGE_CALLING {
     ch_sage_germline_inputs = ch_inputs_germline_sorted.runnable
         .map { meta, tumor_aln, tumor_idx, normal_aln, normal_idx, _donor_aln, _donor_idx, redux_tsvs ->
 
-            def meta_sage = [
+            def meta_sage = record(
                 key: meta.case_id,
                 id: meta.case_id,
                 tumor_id: getTumorDnaSampleName(meta),
                 normal_id: getNormalDnaSampleName(meta),
-            ]
+            )
 
             return [meta_sage, tumor_aln, tumor_idx, normal_aln, normal_idx, redux_tsvs]
         }

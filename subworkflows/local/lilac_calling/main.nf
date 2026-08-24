@@ -93,18 +93,12 @@ workflow LILAC_CALLING {
     ])
         .map { meta, normal_dna_aln, normal_dna_idx, tumor_dna_aln, tumor_dna_idx, tumor_rna_aln, tumor_rna_idx, purple_dir ->
 
-            def meta_lilac = [
+            def meta_lilac = record(
                 key: meta.case_id,
                 id: meta.case_id,
-            ]
-
-            if (hasTumorDna(meta)) {
-                meta_lilac.tumor_id = getTumorDnaSampleName(meta)
-            }
-
-            if (hasNormalDna(meta)) {
-                meta_lilac.normal_id = getNormalDnaSampleName(meta)
-            }
+                tumor_id: hasTumorDna(meta) ? getTumorDnaSampleName(meta) : null,
+                normal_id: hasNormalDna(meta) ? getNormalDnaSampleName(meta) : null,
+            )
 
             return [meta_lilac, normal_dna_aln, normal_dna_idx, tumor_dna_aln, tumor_dna_idx, tumor_rna_aln, tumor_rna_idx, purple_dir]
         }

@@ -1,5 +1,7 @@
 nextflow.enable.types = true
 
+include { NormalReferenceMeta } from '../../../subworkflows/local/utils_nfcore_oncoanalyser_pipeline/records'
+
 process PURPLE {
     tag "${meta.id}"
     label 'process_medium'
@@ -11,7 +13,7 @@ process PURPLE {
 
     input:
     tuple(
-        meta: Map,
+        meta: NormalReferenceMeta,
         amber_dir: Path,
         cobalt_dir: Path,
         esvee_dir: Path?,
@@ -49,7 +51,7 @@ process PURPLE {
 
     def log_level_arg = task.ext.log_level ? "-log_level ${task.ext.log_level}" : ''
 
-    def reference_arg = meta.containsKey('normal_id') ? "-reference ${meta.normal_id}" : ''
+    def reference_arg = meta.normal_id != null ? "-reference ${meta.normal_id}" : ''
 
     def esvee_dir_arg = esvee_dir ? "-esvee_dir ${esvee_dir}" : ''
     def pave_somatic_dir_arg = pave_somatic_dir ? "-pave_somatic_dir ${pave_somatic_dir}" : ''

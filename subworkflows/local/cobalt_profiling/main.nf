@@ -87,15 +87,12 @@ workflow COBALT_PROFILING {
                 tumor_id = getTumorDnaSampleName(meta, primary: true)
             }
 
-            def meta_cobalt = [
+            def meta_cobalt = record(
                 key: meta.case_id,
                 id: meta.case_id,
                 tumor_id: tumor_id,
-            ]
-
-            if (normal_aln) {
-                meta_cobalt.normal_id = getNormalDnaSampleName(meta)
-            }
+                normal_id: normal_aln ? getNormalDnaSampleName(meta) : null,
+            )
 
             sample_data: [meta_cobalt, tumor_aln, tumor_idx, normal_aln, normal_idx]
             diploid_bed: ref_diploid_bed

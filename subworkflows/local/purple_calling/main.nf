@@ -85,15 +85,12 @@ workflow PURPLE_CALLING {
     ch_purple_inputs = ch_inputs_sorted.runnable
         .map { meta, amber_dir, cobalt_dir, esvee_dir, pave_somatic_dir, pave_germline_dir, redux_tsvs_tumor ->
 
-            def meta_purple = [
+            def meta_purple = record(
                 key: meta.case_id,
                 id: meta.case_id,
                 tumor_id: getTumorDnaSampleName(meta),
-            ]
-
-            if (hasNormalDna(meta)) {
-                meta_purple.normal_id = getNormalDnaSampleName(meta)
-            }
+                normal_id: hasNormalDna(meta) ? getNormalDnaSampleName(meta) : null,
+            )
 
             return [meta_purple, amber_dir, cobalt_dir, esvee_dir, pave_somatic_dir, pave_germline_dir, redux_tsvs_tumor]
         }

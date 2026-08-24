@@ -1,5 +1,7 @@
 nextflow.enable.types = true
 
+include { NormalReferenceMeta } from '../../../subworkflows/local/utils_nfcore_oncoanalyser_pipeline/records'
+
 process ESVEE {
     tag "${meta.id}"
     label 'process_high'
@@ -10,7 +12,7 @@ process ESVEE {
         'biocontainers/hmftools-esvee:2.0.1--hdfd78af_0' }"
 
     input:
-    tuple(meta: Map, tumor_aln: Path, tumor_bai: Path, normal_aln: Path?, normal_bai: Path?)
+    tuple(meta: NormalReferenceMeta, tumor_aln: Path, tumor_bai: Path, normal_aln: Path?, normal_bai: Path?)
     genome_fasta: Path
     genome_ver: String
     genome_fai: Path
@@ -38,8 +40,8 @@ process ESVEE {
 
     def log_level_arg = task.ext.log_level ? "-log_level ${task.ext.log_level}" : ''
 
-    def reference_arg = meta.containsKey('normal_id') ? "-reference ${meta.normal_id}" : ''
-    def reference_bam_arg = meta.containsKey('normal_id') ? "-reference_bam ${normal_aln}" : ''
+    def reference_arg = meta.normal_id != null ? "-reference ${meta.normal_id}" : ''
+    def reference_bam_arg = meta.normal_id != null ? "-reference_bam ${normal_aln}" : ''
 
     def decoy_genome_arg = decoy_sequences_image ? "-decoy_genome ${decoy_sequences_image}" : ''
 

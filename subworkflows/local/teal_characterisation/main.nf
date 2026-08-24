@@ -75,18 +75,12 @@ workflow TEAL_CHARACTERISATION {
     ch_teal_prep_inputs = ch_inputs_sorted.runnable
         .map { meta, tumor_aln, tumor_idx, normal_aln, normal_idx ->
 
-            def meta_teal = [
+            def meta_teal = record(
                 key: meta.case_id,
                 id: meta.case_id,
-            ]
-
-            if (tumor_aln) {
-                meta_teal.tumor_id = getTumorDnaSampleName(meta)
-            }
-
-            if (normal_aln) {
-                meta_teal.normal_id = getNormalDnaSampleName(meta)
-            }
+                tumor_id: tumor_aln ? getTumorDnaSampleName(meta) : null,
+                normal_id: normal_aln ? getNormalDnaSampleName(meta) : null,
+            )
 
             return [meta_teal, tumor_aln, tumor_idx, normal_aln, normal_idx]
         }
@@ -147,18 +141,12 @@ workflow TEAL_CHARACTERISATION {
     ch_teal_pipeline_inputs = ch_teal_pipeline_inputs_sorted.runnable
         .map { meta, teal_bam_tumor, teal_bai_tumor, teal_bam_normal, teal_bai_normal, bamtools_dir_tumor, bamtools_dir_normal, cobalt_dir, purple_dir ->
 
-            def meta_teal = [
+            def meta_teal = record(
                 key: meta.case_id,
                 id: meta.case_id,
-            ]
-
-            if (teal_bam_tumor) {
-                meta_teal.tumor_id = getTumorDnaSampleName(meta)
-            }
-
-            if (teal_bam_normal) {
-                meta_teal.normal_id = getNormalDnaSampleName(meta)
-            }
+                tumor_id: teal_bam_tumor ? getTumorDnaSampleName(meta) : null,
+                normal_id: teal_bam_normal ? getNormalDnaSampleName(meta) : null,
+            )
 
             return [meta_teal, teal_bam_tumor, teal_bai_tumor, teal_bam_normal, teal_bai_normal, bamtools_dir_tumor, bamtools_dir_normal, cobalt_dir, purple_dir]
         }

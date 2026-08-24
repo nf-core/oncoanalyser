@@ -1,5 +1,7 @@
 nextflow.enable.types = true
 
+include { NormalReferenceMeta } from '../../../../subworkflows/local/utils_nfcore_oncoanalyser_pipeline/records'
+
 process SAGE_GERMLINE {
     tag "${meta.id}"
     label 'process_high'
@@ -10,7 +12,7 @@ process SAGE_GERMLINE {
         'biocontainers/hmftools-sage:5.0.2--hdfd78af_0' }"
 
     input:
-    tuple(meta: Map, tumor_aln: Path, tumor_idx: Path, normal_aln: Path?, normal_idx: Path?, redux_tsvs: List<Path>)
+    tuple(meta: NormalReferenceMeta, tumor_aln: Path, tumor_idx: Path, normal_aln: Path?, normal_idx: Path?, redux_tsvs: List<Path>)
     genome_fasta: Path
     genome_ver: String
     genome_fai: Path

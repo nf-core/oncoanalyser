@@ -1,5 +1,7 @@
 nextflow.enable.types = true
 
+include { NormalReferenceMeta } from '../../../../subworkflows/local/utils_nfcore_oncoanalyser_pipeline/records'
+
 process COBALT {
     tag "${meta.id}"
     label 'process_high'
@@ -10,7 +12,7 @@ process COBALT {
         'biocontainers/hmftools-cobalt:3.0--hdfd78af_0' }"
 
     input:
-    tuple(meta: Map, tumor_aln: Path, tumor_idx: Path, normal_aln: Path?, normal_idx: Path?)
+    tuple(meta: NormalReferenceMeta, tumor_aln: Path, tumor_idx: Path, normal_aln: Path?, normal_idx: Path?)
     genome_fasta: Path
     genome_ver: String
     genome_fai: Path
@@ -34,12 +36,12 @@ process COBALT {
 
     def log_level_arg = task.ext.log_level ? "-log_level ${task.ext.log_level}" : ''
 
-    def reference_arg = meta.containsKey('normal_id') ? "-reference ${meta.normal_id}" : ''
+    def reference_arg = meta.normal_id != null ? "-reference ${meta.normal_id}" : ''
     def reference_bam_arg = normal_aln ? "-reference_bam ${normal_aln}" : ''
 
     def target_regions_norm_file_arg = target_regions_normalisation ? "-target_region_norm_file ${target_regions_normalisation}" : ''
 
-    def tumor_only_mode = ! meta.containsKey('normal_id')
+    def tumor_only_mode = meta.normal_id == null
 
     def pcf_gamma_arg = targeted_mode && tumor_only_mode ? '-pcf_gamma 50' : ''
 
