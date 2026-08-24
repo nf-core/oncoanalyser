@@ -52,6 +52,9 @@ def getReduxDirAlignment(sample_name, redux_dir) {
     }
 
     def redux_bam = redux_dir.resolve("${sample_name}.redux.bam")
+    if (! redux_bam.exists()) {
+        error "no REDUX alignment (.redux.bam or .redux.cram) found for ${sample_name} in ${redux_dir}"
+    }
     return [redux_bam, nextflow.Nextflow.file("${redux_bam.toUriString()}.bai")]
 }
 
