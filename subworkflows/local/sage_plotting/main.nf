@@ -103,19 +103,13 @@ workflow SAGE_PLOTTING {
     ch_sage_plotting_inputs = ch_inputs_sorted.runnable
         .map { meta, tumor_aln, tumor_idx, normal_aln, normal_idx, donor_aln, donor_idx, redux_tsvs, purple_dir ->
 
-            def meta_sage = [
+            def meta_sage = record(
                 key: meta.case_id,
                 id: meta.case_id,
                 tumor_id: getTumorDnaSampleName(meta),
-            ]
-
-            if (normal_aln) {
-                meta_sage.normal_id = getNormalDnaSampleName(meta)
-            }
-
-            if (donor_aln) {
-                meta_sage.donor_id = getDonorDnaSampleName(meta)
-            }
+                normal_id: normal_aln ? getNormalDnaSampleName(meta) : null,
+                donor_id: donor_aln ? getDonorDnaSampleName(meta) : null,
+            )
 
             def purple_smlv_vcf = purple_dir.resolve("${getTumorDnaSampleName(meta)}.purple.somatic.vcf.gz")
             def purple_smlv_vcf_tbi = purple_dir.resolve("${getTumorDnaSampleName(meta)}.purple.somatic.vcf.gz.tbi")

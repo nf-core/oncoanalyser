@@ -156,19 +156,13 @@ workflow SAGE_CALLING {
     ch_sage_somatic_inputs = ch_inputs_somatic_sorted.runnable
         .map { meta, tumor_aln, tumor_idx, normal_aln, normal_idx, donor_aln, donor_idx, redux_tsvs ->
 
-            def meta_sage = [
+            def meta_sage = record(
                 key: meta.case_id,
                 id: meta.case_id,
                 tumor_id: getTumorDnaSampleName(meta),
-            ]
-
-            if (normal_aln) {
-                meta_sage.normal_id = getNormalDnaSampleName(meta)
-            }
-
-            if (donor_aln) {
-                meta_sage.donor_id = getDonorDnaSampleName(meta)
-            }
+                normal_id: normal_aln ? getNormalDnaSampleName(meta) : null,
+                donor_id: donor_aln ? getDonorDnaSampleName(meta) : null,
+            )
 
             return [meta_sage, tumor_aln, tumor_idx, normal_aln, normal_idx, donor_aln, donor_idx, redux_tsvs]
         }

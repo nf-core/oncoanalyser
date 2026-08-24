@@ -1,5 +1,7 @@
 nextflow.enable.types = true
 
+include { ReferenceMeta } from '../../../../subworkflows/local/utils_nfcore_oncoanalyser_pipeline/records'
+
 // NOTE(SW): logic that determines BQR outputs assumes '-output_vcf' is a path that includes at least leading one directory
 
 process SAGE_VISUALISER {
@@ -13,7 +15,7 @@ process SAGE_VISUALISER {
 
     input:
     tuple(
-        meta: Map,
+        meta: ReferenceMeta,
         tumor_aln: Path,
         normal_aln: Path?,
         donor_aln: Path?,
@@ -48,8 +50,8 @@ process SAGE_VISUALISER {
     def log_level_arg = task.ext.log_level ? "-log_level ${task.ext.log_level}" : ''
 
     def reference_ids = []
-    if (meta.containsKey('normal_id')) { reference_ids.add(meta.normal_id) }
-    if (meta.containsKey('donor_id')) { reference_ids.add(meta.donor_id) }
+    if (meta.normal_id != null) { reference_ids.add(meta.normal_id) }
+    if (meta.donor_id != null) { reference_ids.add(meta.donor_id) }
     def reference_arg = reference_ids.size() > 0 ? "-reference ${reference_ids.join(',')}" : ''
     def ref_sample_count_arg = reference_ids.size() > 0 ? "-ref_sample_count ${reference_ids.size()}" : ''
 

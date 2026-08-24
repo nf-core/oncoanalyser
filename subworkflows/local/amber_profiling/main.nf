@@ -90,19 +90,13 @@ workflow AMBER_PROFILING {
                 tumor_id = getTumorDnaSampleName(meta, primary: true)
             }
 
-            def meta_amber = [
+            def meta_amber = record(
                 key: meta.case_id,
                 id: meta.case_id,
                 tumor_id: tumor_id,
-            ]
-
-            if (normal_aln) {
-                meta_amber.normal_id = getNormalDnaSampleName(meta)
-            }
-
-            if (donor_aln) {
-                meta_amber.donor_id = getDonorDnaSampleName(meta)
-            }
+                normal_id: normal_aln ? getNormalDnaSampleName(meta) : null,
+                donor_id: donor_aln ? getDonorDnaSampleName(meta) : null,
+            )
 
             return [meta_amber, tumor_aln, tumor_idx, normal_aln, normal_idx, donor_aln, donor_idx]
         }

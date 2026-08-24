@@ -1,5 +1,7 @@
 nextflow.enable.types = true
 
+include { ReferenceMeta } from '../../../subworkflows/local/utils_nfcore_oncoanalyser_pipeline/records'
+
 process AMBER {
     tag "${meta.id}"
     label 'process_high'
@@ -11,7 +13,7 @@ process AMBER {
 
     input:
     tuple(
-        meta: Map,
+        meta: ReferenceMeta,
         tumor_aln: Path,
         tumor_idx: Path,
         normal_aln: Path?,
@@ -43,8 +45,8 @@ process AMBER {
     def log_level_arg = task.ext.log_level ? "-log_level ${task.ext.log_level}" : ''
 
     def reference_ids = []
-    if (meta.containsKey('normal_id')) { reference_ids.add(meta.normal_id) }
-    if (meta.containsKey('donor_id')) { reference_ids.add(meta.donor_id) }
+    if (meta.normal_id != null) { reference_ids.add(meta.normal_id) }
+    if (meta.donor_id != null) { reference_ids.add(meta.donor_id) }
     def reference_arg = reference_ids.size() > 0 ? "-reference ${reference_ids.join(',')}" : ''
 
     def reference_alns = []
