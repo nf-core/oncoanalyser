@@ -55,7 +55,7 @@ def getProcessList(process_str, log) {
 }
 
 def checkIncludeExcludeList(include_list, exclude_list, log) {
-    def processes_shared = include_list + exclude_list
+    def processes_shared = (include_list + exclude_list)
         .countBy { it }
         .findAll { k, v -> v > 1 }
         .keySet()
