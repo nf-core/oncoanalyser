@@ -42,9 +42,9 @@ include { softwareVersionsToYAML  } from '../subworkflows/nf-core/utils_nfcore_p
 include { SequencingPlatform            } from '../subworkflows/local/utils_nfcore_oncoanalyser_pipeline/types_enums'
 include { Case                          } from '../subworkflows/local/utils_nfcore_oncoanalyser_pipeline/types_records'
 
-include { getDnaFastqChannel            } from '../subworkflows/local/utils_nfcore_oncoanalyser_pipeline/builders_channel'
+include { getDnaFastqChannel            } from '../subworkflows/local/utils_nfcore_oncoanalyser_pipeline/helpers_channel'
 include { getEnumFromString             } from '../subworkflows/local/utils_nfcore_oncoanalyser_pipeline/utils'
-include { getRnaFastqChannel            } from '../subworkflows/local/utils_nfcore_oncoanalyser_pipeline/builders_channel'
+include { getRnaFastqChannel            } from '../subworkflows/local/utils_nfcore_oncoanalyser_pipeline/helpers_channel'
 include { getSequencingPlatformPon     } from '../subworkflows/local/utils_nfcore_oncoanalyser_pipeline/utils'
 include { getPrepConfigFromSamplesheet  } from '../subworkflows/local/utils_nfcore_oncoanalyser_pipeline/helpers_parameter'
 
