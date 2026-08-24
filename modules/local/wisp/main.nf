@@ -1,5 +1,7 @@
 nextflow.enable.types = true
 
+include { WispMeta } from '../../../subworkflows/local/utils_nfcore_oncoanalyser_pipeline/records'
+
 process WISP {
     tag "${meta.id}"
     label 'process_low'
@@ -11,7 +13,7 @@ process WISP {
 
     input:
     tuple(
-        meta: Map,
+        meta: WispMeta,
         primary_purple_dir: Path,
         primary_amber_dir: Path?,
         primary_normal_aln: Path?,

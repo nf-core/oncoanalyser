@@ -107,12 +107,12 @@ workflow REDUX_PROCESSING {
 
             def sample_id = meta_sample.sample_id
 
-            def meta_redux = [
+            def meta_redux = record(
                 key: meta.case_id,
                 id: "${meta.case_id}_${sample_id}",
                 sample_id: sample_id,
                 sample_type: sample_type,
-            ]
+            )
 
             sample_data: [meta_redux, alns, idxs]
             generate_tsvs_only: meta_sample.generate_redux_tsvs_only

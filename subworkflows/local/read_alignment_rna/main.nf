@@ -84,11 +84,11 @@ workflow READ_ALIGNMENT_RNA {
             def group_size = count_tuple[1]
             def (meta_group, meta_fastq, fastq_fwd, fastq_rev) = inputs_tuple
 
-            def meta_star = [
+            def meta_star = record(
                 key: meta_fastq.key,
                 id: meta_fastq.id,
                 sample_id: meta_fastq.sample_id,
-            ]
+            )
 
             return tuple(groupKey(meta_star, group_size), meta_fastq.rg_line, fastq_fwd, fastq_rev)
         }

@@ -149,12 +149,8 @@ workflow ORANGE_REPORTING {
             def meta = d[0]
             def inputs = d[1..-1]
 
-            def meta_orange = [
-                key: meta.case_id,
-                id: meta.case_id,
-                tumor_id: getTumorDnaSampleName(meta),
-                cancer_type: meta.cancer_type,
-            ]
+            def tumor_id = getTumorDnaSampleName(meta)
+            def cancer_type = meta.cancer_type
 
             def inputs_selected = inputs.clone()
 
@@ -164,10 +160,11 @@ workflow ORANGE_REPORTING {
 
             // NOTE(SW): guards against inputs where no germline smlv are called; relevant to minifed data
             def purple_dir = inputs[input_indexes['purple_dir']]
-            def has_germline_smlv_vcf = purple_dir ? purple_dir.resolve("${meta_orange.tumor_id}.purple.germline.vcf.gz").exists() : false
+            def has_germline_smlv_vcf = purple_dir ? purple_dir.resolve("${tumor_id}.purple.germline.vcf.gz").exists() : false
 
+            def normal_dna_id = null
             if (has_dna_normal && has_germline_smlv_vcf) {
-                meta_orange.normal_dna_id = getNormalDnaSampleName(meta)
+                normal_dna_id = getNormalDnaSampleName(meta)
             } else {
                 dna_normal_input_keys.each { k -> def i = input_indexes[k]; inputs_selected[i] = null }
             }
@@ -183,11 +180,21 @@ workflow ORANGE_REPORTING {
 
             def has_rna_tumor = rna_tumor_input_keys.every { k -> def i = input_indexes[k]; return inputs[i] }
 
+            def tumor_rna_id = null
             if (has_rna_tumor) {
-                meta_orange.tumor_rna_id = getTumorRnaSampleName(meta)
+                tumor_rna_id = getTumorRnaSampleName(meta)
             } else {
                 rna_tumor_input_keys.each { k -> def i = input_indexes[k]; inputs_selected[i] = null }
             }
+
+            def meta_orange = record(
+                key: meta.case_id,
+                id: meta.case_id,
+                tumor_id: tumor_id,
+                cancer_type: cancer_type,
+                normal_dna_id: normal_dna_id,
+                tumor_rna_id: tumor_rna_id,
+            )
 
             // ORANGE only accepts CUPPA with DNA; when providing DNA/RNA inputs but skipping Virus Interpreter CUPPA
             // will generate RNA only outputs and no visualisation, which triggers missing file error in ORANGE

@@ -86,11 +86,6 @@ workflow CUPPA_PREDICTION {
     ch_cuppa_inputs = ch_inputs_sorted.runnable
         .multiMap { meta, isofox_dir, purple_dir, linx_annotation_dir, virusinterpreter_dir ->
 
-            def meta_cuppa = [
-                key: meta.case_id,
-                id: meta.case_id,
-            ]
-
             def has_tumor_dna = hasTumorDna(meta)
             def has_normal_dna = hasNormalDna(meta)
             def has_tumor_rna = hasTumorRna(meta)
@@ -105,19 +100,21 @@ workflow CUPPA_PREDICTION {
             def tumor_rna_id = getTumorRnaSampleName(meta)
 
             def categories
+            def sample_id = null
+            def sample_rna_id = null
 
             if (run_dna && run_rna) {
 
                 categories = 'ALL'
 
-                meta_cuppa.sample_id = tumor_dna_id
-                meta_cuppa.sample_rna_id = tumor_rna_id
+                sample_id = tumor_dna_id
+                sample_rna_id = tumor_rna_id
 
             } else if (run_dna) {
 
                 categories = 'DNA'
 
-                meta_cuppa.sample_id = tumor_dna_id
+                sample_id = tumor_dna_id
 
                 isofox_dir = null
 
@@ -125,8 +122,8 @@ workflow CUPPA_PREDICTION {
 
                 categories = 'RNA'
 
-                meta_cuppa.sample_id = has_tumor_dna ? tumor_dna_id : tumor_rna_id
-                meta_cuppa.sample_rna_id = tumor_rna_id
+                sample_id = has_tumor_dna ? tumor_dna_id : tumor_rna_id
+                sample_rna_id = tumor_rna_id
 
                 purple_dir = null
                 linx_annotation_dir = null
@@ -137,6 +134,13 @@ workflow CUPPA_PREDICTION {
                 assert false
 
             }
+
+            def meta_cuppa = record(
+                key: meta.case_id,
+                id: meta.case_id,
+                sample_id: sample_id,
+                sample_rna_id: sample_rna_id,
+            )
 
             sample_data: [meta_cuppa, isofox_dir, purple_dir, linx_annotation_dir, virusinterpreter_dir]
             categories: categories

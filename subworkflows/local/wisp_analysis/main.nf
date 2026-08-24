@@ -86,13 +86,13 @@ workflow WISP_ANALYSIS {
             def meta = d[0]
             def inputs = d[1..-1]
 
-            def meta_wisp = [
+            def meta_wisp = record(
                 key: meta.case_id,
                 id: meta.case_id,
                 patient_id: meta.patient_id,
                 primary_id: getTumorDnaSampleName(meta, primary: true),
                 longitudinal_id: getTumorDnaSampleName(meta, primary: false),
-            ]
+            )
 
             return [meta_wisp] + inputs
         }

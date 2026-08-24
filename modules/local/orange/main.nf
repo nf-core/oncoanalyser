@@ -1,5 +1,7 @@
 nextflow.enable.types = true
 
+include { OrangeMeta } from '../../../subworkflows/local/utils_nfcore_oncoanalyser_pipeline/records'
+
 process ORANGE {
     tag "${meta.id}"
     label 'process_single'
@@ -11,7 +13,7 @@ process ORANGE {
 
     input:
     tuple(
-        meta: Map,
+        meta: OrangeMeta,
         sage_dir_somatic: Path,
         sage_dir_germline: Path?,
         smlv_vcf_somatic: Path?,
@@ -68,7 +70,7 @@ process ORANGE {
 
     def primary_tumor_location_arg = meta.cancer_type ? "-primary_tumor_location ${meta.cancer_type}" : ''
 
-    def reference_arg = meta.containsKey('normal_dna_id') ? "-reference ${meta.normal_dna_id}" : ''
+    def reference_arg = meta.normal_dna_id != null ? "-reference ${meta.normal_dna_id}" : ''
     def sage_germline_dir_arg = sage_dir_germline ? "-sage_germline_dir ${sage_dir_germline}" : ''
     def linx_germline_dir_arg = linx_annotation_dir_germline ? "-linx_germline_dir ${linx_annotation_dir_germline}" : ''
 
@@ -80,7 +82,7 @@ process ORANGE {
     def cuppa_dir_arg = cuppa_dir ? "-cuppa_dir ${cuppa_dir}" : ''
     def peach_dir_arg = peach_dir ? "-peach_dir ${peach_dir}" : ''
 
-    def rna_sample_id_arg = meta.containsKey('tumor_rna_id') ? "-rna_sample_id ${meta.tumor_rna_id}" : ''
+    def rna_sample_id_arg = meta.tumor_rna_id != null ? "-rna_sample_id ${meta.tumor_rna_id}" : ''
     def isofox_dir_local = 'isofox__prepared'
     def isofox_dir_arg = isofox_dir ? "-isofox_dir ${isofox_dir_local}" : ''
 

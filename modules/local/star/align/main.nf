@@ -1,5 +1,7 @@
 nextflow.enable.types = true
 
+include { StarMeta } from '../../../../subworkflows/local/utils_nfcore_oncoanalyser_pipeline/records'
+
 process STAR_ALIGN {
     tag "${meta.id}"
     label 'process_high'
@@ -10,7 +12,7 @@ process STAR_ALIGN {
         'biocontainers/star:2.7.3a--0' }"
 
     input:
-    tuple(meta: Map, rg_lines: List<String>, reads_fwds: List<Path>, reads_revs: List<Path>)
+    tuple(meta: StarMeta, rg_lines: List<String>, reads_fwds: List<Path>, reads_revs: List<Path>)
     genome_star_index: Path
 
     topic:

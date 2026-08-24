@@ -115,4 +115,5 @@ record WispMeta {
 record StarMeta {
     key: String
     id: String
+    sample_id: String
 }

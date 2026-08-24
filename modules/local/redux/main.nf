@@ -1,5 +1,7 @@
 nextflow.enable.types = true
 
+include { ReduxMeta } from '../../../subworkflows/local/utils_nfcore_oncoanalyser_pipeline/records'
+
 process REDUX {
     tag "${meta.id}"
     label 'process_high'
@@ -10,7 +12,7 @@ process REDUX {
         'biocontainers/hmftools-redux:2.0.5--hdfd78af_0' }"
 
     input:
-    tuple(meta: Map, alns: List<Path>, idxs: List<Path>)
+    tuple(meta: ReduxMeta, alns: List<Path>, idxs: List<Path>)
     genome_fasta: Path
     genome_ver: String
     genome_fai: Path
