@@ -1,7 +1,5 @@
 nextflow.enable.types = true
 
-include { TumorNormalMeta } from '../../../subworkflows/local/utils_nfcore_oncoanalyser_pipeline/records'
-
 process LILAC {
     tag "${meta.id}"
     label 'process_medium'
@@ -13,7 +11,7 @@ process LILAC {
 
     input:
     tuple(
-        meta: TumorNormalMeta,
+        meta: Record,
         normal_dna_aln: Path?,
         normal_dna_idx: Path?,
         tumor_dna_aln: Path?,

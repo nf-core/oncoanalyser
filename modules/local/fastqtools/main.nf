@@ -10,7 +10,7 @@ process FASTQ_TOOLS {
         'biocontainers/hmftools-fastq-tools:1.0--hdfd78af_0' }"
 
     input:
-    tuple(meta: Map, reads_fwd: Path, reads_rev: Path)
+    tuple(meta: Record, reads_fwd: Path, reads_rev: Path)
     umi_delim: String
     known_umis: Path
 

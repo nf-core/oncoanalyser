@@ -1,7 +1,5 @@
 nextflow.enable.types = true
 
-include { SampleMeta } from '../../../subworkflows/local/utils_nfcore_oncoanalyser_pipeline/records'
-
 process VIRUSINTERPRETER {
     tag "${meta.id}"
     label 'process_single'
@@ -12,7 +10,7 @@ process VIRUSINTERPRETER {
         'biocontainers/hmftools-virus-interpreter:1.7.2--hdfd78af_0' }"
 
     input:
-    tuple(meta: SampleMeta, virusbreakend_tsv: Path, bamtools_somatic_dir: Path, purple_dir: Path)
+    tuple(meta: Record, virusbreakend_tsv: Path, bamtools_somatic_dir: Path, purple_dir: Path)
     taxonomy_db: Path
     reporting_db: Path
     blocklist_db: Path

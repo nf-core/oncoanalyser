@@ -1,7 +1,5 @@
 nextflow.enable.types = true
 
-include { NeoScorerMeta } from '../../../../subworkflows/local/utils_nfcore_oncoanalyser_pipeline/records'
-
 process NEO_SCORER {
     tag "${meta.id}"
     label 'process_medium'
@@ -13,7 +11,7 @@ process NEO_SCORER {
 
     input:
     tuple(
-        meta: NeoScorerMeta,
+        meta: Record,
         isofox_dir: Path?,
         purple_dir: Path,
         sage_vcf: Path?,

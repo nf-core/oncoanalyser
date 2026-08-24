@@ -68,7 +68,7 @@ workflow READ_UMI_PROCESSING {
     ch_fastq_inputs = ch_inputs_runnable
         .map { meta, sequence_type, fastq_info, fastq_fwd, fastq_rev ->
 
-              def meta_fastq = [
+              def meta_fastq = record(
                   key: meta.case_id,
                   id: "${meta.case_id}_${fastq_info.sample_id}",
                   sequence_type: sequence_type,
@@ -77,11 +77,8 @@ workflow READ_UMI_PROCESSING {
                   lane: fastq_info.lane,
                   flowcell: fastq_info.flowcell,
                   rg_fields: fastq_info.rg_fields,
-              ]
-
-              if (sequence_type == 'dna') {
-                  meta_fastq.sample_type = fastq_info.sample_type
-              }
+                  sample_type: sequence_type == 'dna' ? fastq_info.sample_type : null,
+              )
 
               return [meta_fastq, fastq_fwd, fastq_rev]
 

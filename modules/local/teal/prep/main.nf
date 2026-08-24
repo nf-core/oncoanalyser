@@ -1,7 +1,5 @@
 nextflow.enable.types = true
 
-include { TumorNormalMeta } from '../../../../subworkflows/local/utils_nfcore_oncoanalyser_pipeline/records'
-
 process TEAL_PREP {
     tag "${meta.id}"
     label 'process_medium'
@@ -12,7 +10,7 @@ process TEAL_PREP {
         'biocontainers/hmftools-teal:1.4--hdfd78af_0' }"
 
     input:
-    tuple(meta: TumorNormalMeta, tumor_aln: Path?, tumor_idx: Path?, normal_aln: Path?, normal_idx: Path?)
+    tuple(meta: Record, tumor_aln: Path?, tumor_idx: Path?, normal_aln: Path?, normal_idx: Path?)
     genome_fasta: Path
     genome_ver: String
     genome_fai: Path

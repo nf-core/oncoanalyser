@@ -1,7 +1,5 @@
 nextflow.enable.types = true
 
-include { RnaSampleMeta } from '../../../subworkflows/local/utils_nfcore_oncoanalyser_pipeline/records'
-
 process CUPPA {
     tag "${meta.id}"
     label 'process_low'
@@ -12,7 +10,7 @@ process CUPPA {
         'biocontainers/hmftools-cuppa:2.5.1--py311r42hdfd78af_0' }"
 
     input:
-    tuple(meta: RnaSampleMeta, isofox_dir: Path?, purple_dir: Path?, linx_dir: Path?, virusinterpreter_dir: Path?)
+    tuple(meta: Record, isofox_dir: Path?, purple_dir: Path?, linx_dir: Path?, virusinterpreter_dir: Path?)
     genome_ver: String
     cuppa_alt_sj: Path
     cuppa_classifier: Path

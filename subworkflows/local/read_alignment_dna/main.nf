@@ -82,9 +82,14 @@ workflow READ_ALIGNMENT_DNA {
             def rg_entries = [ID: rg_id, SM: fastq_info.sample_id, LB: fastq_info.library_id] + fastq_info.rg_fields
             def rg_line = '@RG\\t' + rg_entries.collect { k, v -> "${k}:${v}" }.join('\\t')
 
-            def meta_fastq = [
+            def meta_fastq_id = "${meta.case_id}_${fastq_info.sample_id}_${fastq_info.library_id}_${fastq_info.lane}"
+            if (fastq_info.flowcell) {
+                meta_fastq_id = "${meta_fastq_id}_${fastq_info.flowcell}"
+            }
+
+            def meta_fastq = record(
                 key: meta.case_id,
-                id: "${meta.case_id}_${fastq_info.sample_id}_${fastq_info.library_id}_${fastq_info.lane}",
+                id: meta_fastq_id,
                 rg_line: rg_line,
                 sample_id: fastq_info.sample_id,
                 library_id: fastq_info.library_id,
@@ -92,11 +97,7 @@ workflow READ_ALIGNMENT_DNA {
                 output_file_id: rg_id,
                 sample_type: fastq_info.sample_type,
                 single_end: fastq_info.single_end,
-            ]
-
-            if (fastq_info.flowcell) {
-                meta_fastq.id = "${meta_fastq.id}_${fastq_info.flowcell}"
-            }
+            )
 
             return [meta_fastq, fastq_fwd, fastq_rev]
 
@@ -128,7 +129,18 @@ workflow READ_ALIGNMENT_DNA {
                 if (meta_fastq.single_end) {
                     return reads_fwd.collect { fwd ->
                         def split_fwd = fwd.name.replaceAll('\\..+$', '')
-                        def meta_fastq_ready = meta_fastq + [id: "${meta_fastq.id}_${split_fwd}", split: split_fwd]
+                        def meta_fastq_ready = record(
+                            key: meta_fastq.key,
+                            id: "${meta_fastq.id}_${split_fwd}",
+                            rg_line: meta_fastq.rg_line,
+                            sample_id: meta_fastq.sample_id,
+                            library_id: meta_fastq.library_id,
+                            lane: meta_fastq.lane,
+                            output_file_id: meta_fastq.output_file_id,
+                            sample_type: meta_fastq.sample_type,
+                            single_end: meta_fastq.single_end,
+                            split: split_fwd,
+                        )
                         return [meta_fastq_ready, fwd, null]
                     }
                 }
@@ -145,7 +157,18 @@ workflow READ_ALIGNMENT_DNA {
                         assert split_fwd == split_rev
 
                         // NOTE(SW): split allows meta_fastq_ready to be unique, which is required during reunite below
-                        def meta_fastq_ready = meta_fastq + [id: "${meta_fastq.id}_${split_fwd}", split: split_fwd]
+                        def meta_fastq_ready = record(
+                            key: meta_fastq.key,
+                            id: "${meta_fastq.id}_${split_fwd}",
+                            rg_line: meta_fastq.rg_line,
+                            sample_id: meta_fastq.sample_id,
+                            library_id: meta_fastq.library_id,
+                            lane: meta_fastq.lane,
+                            output_file_id: meta_fastq.output_file_id,
+                            sample_type: meta_fastq.sample_type,
+                            single_end: meta_fastq.single_end,
+                            split: split_fwd,
+                        )
 
                         return [meta_fastq_ready, fwd, rev]
                     }
@@ -158,7 +181,18 @@ workflow READ_ALIGNMENT_DNA {
         ch_fastqs_ready = ch_fastq_inputs
             .map { meta_fastq, fastq_fwd, fastq_rev ->
 
-                def meta_fastq_ready = meta_fastq + [split: null]
+                def meta_fastq_ready = record(
+                    key: meta_fastq.key,
+                    id: meta_fastq.id,
+                    rg_line: meta_fastq.rg_line,
+                    sample_id: meta_fastq.sample_id,
+                    library_id: meta_fastq.library_id,
+                    lane: meta_fastq.lane,
+                    output_file_id: meta_fastq.output_file_id,
+                    sample_type: meta_fastq.sample_type,
+                    single_end: meta_fastq.single_end,
+                    split: null,
+                )
 
                 return [meta_fastq_ready, fastq_fwd, fastq_rev]
             }
@@ -172,7 +206,7 @@ workflow READ_ALIGNMENT_DNA {
     // channel: [ meta_bwamem2, fastq_fwd, fastq_rev ]
     ch_bwamem2_inputs = ch_fastqs_ready
         .map { meta_fastq_ready, fastq_fwd, fastq_rev ->
-            def meta_bwamem2 = meta_fastq_ready.clone()
+            def meta_bwamem2 = meta_fastq_ready
             return [meta_bwamem2, fastq_fwd, fastq_rev]
         }
 

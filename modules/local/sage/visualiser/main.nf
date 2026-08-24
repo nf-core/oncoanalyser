@@ -1,7 +1,5 @@
 nextflow.enable.types = true
 
-include { ReferenceMeta } from '../../../../subworkflows/local/utils_nfcore_oncoanalyser_pipeline/records'
-
 // NOTE(SW): logic that determines BQR outputs assumes '-output_vcf' is a path that includes at least leading one directory
 
 process SAGE_VISUALISER {
@@ -15,7 +13,7 @@ process SAGE_VISUALISER {
 
     input:
     tuple(
-        meta: ReferenceMeta,
+        meta: Record,
         tumor_aln: Path,
         normal_aln: Path?,
         donor_aln: Path?,

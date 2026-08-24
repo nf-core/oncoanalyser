@@ -47,12 +47,12 @@ workflow READ_ALIGNMENT_RNA {
             def rg_entries = [ID: rg_id, SM: fastq_info.sample_id, LB: fastq_info.library_id] + fastq_info.rg_fields
             def rg_line = rg_entries.collect { k, v -> "'${k}:${v}'" }.join(' ')
 
-            def meta_fastq = [
+            def meta_fastq = record(
                 key: meta.case_id,
                 id: "${meta.case_id}_${fastq_info.sample_id}",
                 sample_id: fastq_info.sample_id,
                 rg_line: rg_line,
-            ]
+            )
 
             return [meta_fastq, fastq_fwd, fastq_rev]
         }
@@ -122,7 +122,12 @@ workflow READ_ALIGNMENT_RNA {
     // channel: [ meta_sort, aln ]
     ch_sort_inputs = channel.topic('star_align_bam')
         .map { meta_star, aln ->
-            def meta_sort = meta_star + [prefix: meta_star.sample_id]
+            def meta_sort = record(
+                key: meta_star.key,
+                id: meta_star.id,
+                sample_id: meta_star.sample_id,
+                prefix: meta_star.sample_id,
+            )
             return [meta_sort, aln]
         }
 
@@ -138,11 +143,11 @@ workflow READ_ALIGNMENT_RNA {
     // channel: [ meta_markdups, aln ]
     ch_markdups_inputs = restoreMeta(channel.topic('samtools_sort_bam'), ch_inputs)
         .map { meta, aln ->
-            def meta_markdups = [
+            def meta_markdups = record(
                 key: meta.case_id,
                 id: meta.case_id,
                 sample_id: getTumorRnaSampleName(meta),
-            ]
+            )
             return [meta_markdups, aln]
         }
 

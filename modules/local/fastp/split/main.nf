@@ -10,7 +10,7 @@ process FASTP_SPLIT {
         'biocontainers/fastp:0.23.4--hadf994f_2' }"
 
     input:
-    tuple(meta: Map, reads_fwd: Path, reads_rev: Path)
+    tuple(meta: Record, reads_fwd: Path, reads_rev: Path)
     max_fastq_records: Integer
 
     topic:

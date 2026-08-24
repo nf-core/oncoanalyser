@@ -1,7 +1,5 @@
 nextflow.enable.types = true
 
-include { ReferenceMeta } from '../../../subworkflows/local/utils_nfcore_oncoanalyser_pipeline/records'
-
 process AMBER {
     tag "${meta.id}"
     label 'process_high'
@@ -13,7 +11,7 @@ process AMBER {
 
     input:
     tuple(
-        meta: ReferenceMeta,
+        meta: Record,
         tumor_aln: Path,
         tumor_idx: Path,
         normal_aln: Path?,

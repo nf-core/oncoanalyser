@@ -1,7 +1,5 @@
 nextflow.enable.types = true
 
-include { NormalReferenceMeta } from '../../../subworkflows/local/utils_nfcore_oncoanalyser_pipeline/records'
-
 process ESVEE {
     tag "${meta.id}"
     label 'process_high'
@@ -12,7 +10,7 @@ process ESVEE {
         'biocontainers/hmftools-esvee:2.0.1--hdfd78af_0' }"
 
     input:
-    tuple(meta: NormalReferenceMeta, tumor_aln: Path, tumor_bai: Path, normal_aln: Path?, normal_bai: Path?)
+    tuple(meta: Record, tumor_aln: Path, tumor_bai: Path, normal_aln: Path?, normal_bai: Path?)
     genome_fasta: Path
     genome_ver: String
     genome_fai: Path

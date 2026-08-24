@@ -1,7 +1,5 @@
 nextflow.enable.types = true
 
-include { NormalReferenceMeta } from '../../../subworkflows/local/utils_nfcore_oncoanalyser_pipeline/records'
-
 process PURPLE {
     tag "${meta.id}"
     label 'process_medium'
@@ -13,7 +11,7 @@ process PURPLE {
 
     input:
     tuple(
-        meta: NormalReferenceMeta,
+        meta: Record,
         amber_dir: Path,
         cobalt_dir: Path,
         esvee_dir: Path?,

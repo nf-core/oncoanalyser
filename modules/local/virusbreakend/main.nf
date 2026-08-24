@@ -1,7 +1,5 @@
 nextflow.enable.types = true
 
-include { SampleMeta } from '../../../subworkflows/local/utils_nfcore_oncoanalyser_pipeline/records'
-
 // NOTE(SW): the --db argument for the virusbreakend command must have a trailing slash if it is a symlink
 
 process VIRUSBREAKEND {
@@ -12,7 +10,7 @@ process VIRUSBREAKEND {
     container "nf-core/gridss:2.13.2--1"
 
     input:
-    tuple(meta: SampleMeta, aln: Path)
+    tuple(meta: Record, aln: Path)
     genome_fasta: Path
     genome_fai: Path
     genome_dict: Path

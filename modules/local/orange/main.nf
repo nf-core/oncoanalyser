@@ -1,7 +1,5 @@
 nextflow.enable.types = true
 
-include { OrangeMeta } from '../../../subworkflows/local/utils_nfcore_oncoanalyser_pipeline/records'
-
 process ORANGE {
     tag "${meta.id}"
     label 'process_single'
@@ -13,7 +11,7 @@ process ORANGE {
 
     input:
     tuple(
-        meta: OrangeMeta,
+        meta: Record,
         sage_dir_somatic: Path,
         sage_dir_germline: Path?,
         smlv_vcf_somatic: Path?,

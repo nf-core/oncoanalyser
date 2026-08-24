@@ -10,7 +10,7 @@ process BWAMEM2_ALIGN {
         'biocontainers/mulled-v2-4dde50190ae599f2bb2027cb2c8763ea00fb5084:596c0d6a494faa218562f2be03af2714d454da4f-0' }"
 
     input:
-    tuple(meta: Map, reads_fwd: Path, reads_rev: Path?)
+    tuple(meta: Record, reads_fwd: Path, reads_rev: Path?)
     genome_fasta: Path
     genome_bwamem2_index: Path
     append_fastq_comment: Boolean
