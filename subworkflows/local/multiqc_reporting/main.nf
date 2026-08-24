@@ -160,7 +160,7 @@ workflow MULTIQC_REPORTING {
     // Run process
     MULTIQC(
         ch_multiqc_files_sample,
-        ch_multiqc_files.collect(),
+        ch_multiqc_files.toList(),
         ch_multiqc_config.toList(),
         ch_multiqc_custom_config.toList(),
         ch_multiqc_logo.toList(),
