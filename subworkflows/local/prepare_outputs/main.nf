@@ -4,7 +4,6 @@
 
 nextflow.enable.types = true
 
-include { getDonorDnaSampleName  } from '../utils_nfcore_oncoanalyser_pipeline/accessors'
 include { getNormalDnaSampleName } from '../utils_nfcore_oncoanalyser_pipeline/accessors'
 include { getTumorDnaSampleName  } from '../utils_nfcore_oncoanalyser_pipeline/accessors'
 include { getTumorRnaSampleName  } from '../utils_nfcore_oncoanalyser_pipeline/accessors'
@@ -135,7 +134,10 @@ workflow PREPARE_OUTPUTS {
             qsee.flatMap { meta, d -> return get_dir_filepaths(meta, d) },
             redux_tumor.flatMap { meta, d -> return get_dir_filepaths(meta, d, "alignments/${getTumorDnaSampleName(meta, primary: true)}") },
             redux_normal.flatMap { meta, d -> return get_dir_filepaths(meta, d, "alignments/${getNormalDnaSampleName(meta)}") },
-            redux_donor.flatMap { meta, d -> return get_dir_filepaths(meta, d, "alignments/${getDonorDnaSampleName(meta)}") },
+            redux_donor.flatMap { meta, dirs ->
+                def donor_dirs = dirs == null ? [] : (dirs instanceof List ? dirs : [dirs])
+                return donor_dirs.collectMany { d -> get_dir_filepaths(meta, d, "alignments/${d.name.replaceFirst(/^redux_/, '')}") }
+            },
             sage_append_somatic.flatMap { meta, d -> return get_dir_filepaths(meta, d, "sage_append/${getTumorDnaSampleName(meta, primary: false)}") },
             sage_append_germline.flatMap { meta, d -> return get_dir_filepaths(meta, d, "sage_append/${getNormalDnaSampleName(meta)}") },
             sage_germline.flatMap { meta, d -> return get_dir_filepaths(meta, d, 'sage/germline') },

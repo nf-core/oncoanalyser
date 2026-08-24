@@ -10,7 +10,7 @@ include { FASTP_SPLIT  } from '../../../modules/local/fastp/split/main'
 include { groupByMeta        } from '../utils_nfcore_oncoanalyser_pipeline/channel_helpers'
 include { joinMeta           } from '../utils_nfcore_oncoanalyser_pipeline/channel_helpers'
 include { restoreMeta        } from '../utils_nfcore_oncoanalyser_pipeline/channel_helpers'
-include { hasDonorDnaFastq   } from '../utils_nfcore_oncoanalyser_pipeline/accessors'
+include { hasDonorDnaFastqs  } from '../utils_nfcore_oncoanalyser_pipeline/accessors'
 include { hasNormalDnaFastq  } from '../utils_nfcore_oncoanalyser_pipeline/accessors'
 include { hasTumorDnaFastq   } from '../utils_nfcore_oncoanalyser_pipeline/accessors'
 
@@ -63,7 +63,7 @@ workflow READ_ALIGNMENT_DNA {
         .branch { meta, fastq_info, fastq_fwd, fastq_rev ->
             def has_inputs = fastq_fwd
             runnable: fastq_info.sample_type == 'donor' && has_inputs
-            skip: ! hasDonorDnaFastq(meta)
+            skip: ! hasDonorDnaFastqs(meta)
               return meta
         }
 
@@ -227,6 +227,7 @@ workflow READ_ALIGNMENT_DNA {
             def meta_group = [
                 key: meta_bwamem2.key,
                 sample_type: meta_bwamem2.sample_type,
+                sample_id: meta_bwamem2.sample_id,
             ]
 
             return [meta_group, meta_bwamem2]
@@ -240,8 +241,9 @@ workflow READ_ALIGNMENT_DNA {
         // channel: [ [ meta_group, count ], [ meta_group, aln, idx ] ]
         .cross(
             // First element to match meta_group above for `cross`
-            channel.topic('bwamem2_align_bam').map { meta_bwamem2, aln, idx -> [[key: meta_bwamem2.key, sample_type: meta_bwamem2.sample_type], aln, idx] }
+            channel.topic('bwamem2_align_bam').map { meta_bwamem2, aln, idx -> [[key: meta_bwamem2.key, sample_type: meta_bwamem2.sample_type, sample_id: meta_bwamem2.sample_id], aln, idx] }
         )
+        .filter { count_tuple, inputs_tuple -> count_tuple[0] == inputs_tuple[0] }
         .map { count_tuple, inputs_tuple ->
             def group_size = count_tuple[1]
             def (meta_group, aln, idx) = inputs_tuple
@@ -275,15 +277,18 @@ workflow READ_ALIGNMENT_DNA {
             ch_inputs_normal_sorted.skip.unique().map { meta -> [meta, null, null] },
         )
 
-    // channel: [ meta, [aln, ...], [idx, ...] ]
+    // channel: [ meta, sample_id, [aln, ...], [idx, ...] ]
     ch_outputs_donor = channel.empty()
         .mix(
-            restoreMeta(ch_alns_united.donor, ch_inputs),
-            ch_inputs_donor_sorted.skip.unique().map { meta -> [meta, null, null] },
+            restoreMeta(
+                ch_alns_united.donor.map { meta_group, alns, idxs -> [meta_group, meta_group.sample_id, alns, idxs] },
+                ch_inputs,
+            ),
+            ch_inputs_donor_sorted.skip.unique().map { meta -> [meta, null, null, null] },
         )
 
     emit:
     tumor  = ch_outputs_tumor  // channel: [ meta, [aln, ...], [idx, ...] ]
     normal = ch_outputs_normal // channel: [ meta, [aln, ...], [idx, ...] ]
-    donor  = ch_outputs_donor  // channel: [ meta, [aln, ...], [idx, ...] ]
+    donor  = ch_outputs_donor  // channel: [ meta, sample_id, [aln, ...], [idx, ...] ]
 }

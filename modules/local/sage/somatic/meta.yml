@@ -33,14 +33,12 @@ input:
       type: file
       description: Normal index file
       pattern: "*.{bai,crai}"
-  - donor_aln:
-      type: file
-      description: Donor alignment file
-      pattern: "*.{bam,cram}"
-  - donor_idx:
-      type: file
-      description: Donor index file
-      pattern: "*.{bai,crai}"
+  - donor_alns:
+      type: list
+      description: Donor alignment files
+  - donor_bais:
+      type: list
+      description: Donor index files
   - redux_tsvs:
       type: list
       description: REDUX MS files

@@ -10,14 +10,13 @@ include { FileType            } from '../utils_nfcore_oncoanalyser_pipeline/type
 include { groupByMeta         } from '../utils_nfcore_oncoanalyser_pipeline/channel_helpers'
 include { joinMeta            } from '../utils_nfcore_oncoanalyser_pipeline/channel_helpers'
 include { restoreMeta         } from '../utils_nfcore_oncoanalyser_pipeline/channel_helpers'
-include { getDonorDnaAln      } from '../utils_nfcore_oncoanalyser_pipeline/accessors'
 include { getDonorDnaSample   } from '../utils_nfcore_oncoanalyser_pipeline/accessors'
+include { getDonorDnaSamples  } from '../utils_nfcore_oncoanalyser_pipeline/accessors'
 include { getInput            } from '../utils_nfcore_oncoanalyser_pipeline/accessors'
 include { getNormalDnaAln     } from '../utils_nfcore_oncoanalyser_pipeline/accessors'
 include { getNormalDnaSample  } from '../utils_nfcore_oncoanalyser_pipeline/accessors'
 include { getTumorDnaAln      } from '../utils_nfcore_oncoanalyser_pipeline/accessors'
 include { getTumorDnaSample   } from '../utils_nfcore_oncoanalyser_pipeline/accessors'
-include { hasDonorDnaAln      } from '../utils_nfcore_oncoanalyser_pipeline/accessors'
 include { hasInput            } from '../utils_nfcore_oncoanalyser_pipeline/accessors'
 include { hasNormalDnaAln     } from '../utils_nfcore_oncoanalyser_pipeline/accessors'
 include { hasTumorDnaAln      } from '../utils_nfcore_oncoanalyser_pipeline/accessors'
@@ -81,15 +80,18 @@ workflow REDUX_PROCESSING {
         }
 
     ch_inputs_donor_sorted = ch_dna_donor
-        .map { meta, alns, idxs ->
+        .map { meta, sample_id, alns, idxs ->
+            def donor = sample_id ? getDonorDnaSamples(meta).find { it.sample_id == sample_id } : getDonorDnaSample(meta)
+            def donor_aln = donor ? getInput(donor, FileType.ALN) ?: getInput(donor, FileType.ALN_REDUX) : null
             return [
                 meta,
-                hasDonorDnaAln(meta) ? [getDonorDnaAln(meta)] : alns,
-                hasInput(getDonorDnaSample(meta), FileType.IDX) ? [getInput(getDonorDnaSample(meta), FileType.IDX)] : idxs,
+                donor,
+                donor_aln ? [donor_aln] : alns,
+                donor && hasInput(donor, FileType.IDX) ? [getInput(donor, FileType.IDX)] : idxs,
             ]
         }
-        .branch { meta, alns, idxs ->
-            def has_existing = hasInput(getDonorDnaSample(meta), FileType.REDUX_DIR)
+        .branch { meta, donor, alns, idxs ->
+            def has_existing = donor && hasInput(donor, FileType.REDUX_DIR)
             runnable: alns && ! has_existing
             skip: true
             return meta
@@ -101,7 +103,7 @@ workflow REDUX_PROCESSING {
         .mix(
             ch_inputs_tumor_sorted.runnable.map { meta, alns, idxs -> [meta, getTumorDnaSample(meta), 'tumor', alns, idxs] },
             ch_inputs_normal_sorted.runnable.map { meta, alns, idxs -> [meta, getNormalDnaSample(meta), 'normal', alns, idxs] },
-            ch_inputs_donor_sorted.runnable.map { meta, alns, idxs -> [meta, getDonorDnaSample(meta), 'donor', alns, idxs] },
+            ch_inputs_donor_sorted.runnable.map { meta, donor, alns, idxs -> [meta, donor, 'donor', alns, idxs] },
         )
         .multiMap { meta, meta_sample, sample_type, alns, idxs ->
 
@@ -162,15 +164,15 @@ workflow REDUX_PROCESSING {
             ch_inputs_normal_sorted.skip.map { meta -> [meta, null] },
         )
 
-    // channel: [ meta, redux_dir ]
+    // channel: [ meta, [redux_dir, ...] ]
     ch_outputs_donor = channel.empty()
         .mix(
-            restoreMeta(ch_redux_out_sorted.donor, ch_inputs),
+            restoreMeta(ch_redux_out_sorted.donor, ch_inputs).groupTuple(),
             ch_inputs_donor_sorted.skip.map { meta -> [meta, null] },
         )
 
     emit:
     tumor_dir  = ch_outputs_tumor  // channel: [ meta, redux_dir ]
     normal_dir = ch_outputs_normal // channel: [ meta, redux_dir ]
-    donor_dir  = ch_outputs_donor  // channel: [ meta, redux_dir ]
+    donor_dir  = ch_outputs_donor  // channel: [ meta, [redux_dir, ...] ]
 }

@@ -43,6 +43,10 @@ def getDonorDnaSample(case_record) {
     return samples ? samples[0] : null
 }
 
+def getDonorDnaSamples(case_record) {
+    return case_record.donor_dna_samples.findAll { it.sequence_type == SequenceType.DNA }
+}
+
 def getLongitudinalSample(case_record) {
     return case_record.longitudinal_samples ? case_record.longitudinal_samples[0] : null
 }
@@ -70,8 +74,8 @@ def getNormalDnaSampleName(case_record) {
     return getNormalDnaSample(case_record)?.sample_id
 }
 
-def getDonorDnaSampleName(case_record) {
-    return getDonorDnaSample(case_record)?.sample_id
+def getDonorDnaSampleNames(case_record) {
+    return getDonorDnaSamples(case_record).collect { it.sample_id }
 }
 
 // Files - Tumor DNA
@@ -111,12 +115,8 @@ def hasNormalDnaReduxInput(case_record) {
 }
 
 // Files - Donor DNA
-def getDonorDnaFastq(case_record) {
-    return getDonorDnaSample(case_record)?.files?.get(FileType.FASTQ)
-}
-
-def hasDonorDnaFastq(case_record) {
-    return getDonorDnaFastq(case_record) != null
+def hasDonorDnaFastqs(case_record) {
+    return getDonorDnaSamples(case_record).any { it.files?.get(FileType.FASTQ) != null }
 }
 
 // Files - Tumor RNA
@@ -169,8 +169,12 @@ def getNormalReduxDirAlignment(case_record, redux_dir) {
     return getReduxDirAlignment(getNormalDnaSampleName(case_record), redux_dir)
 }
 
-def getDonorReduxDirAlignment(case_record, redux_dir) {
-    return getReduxDirAlignment(getDonorDnaSampleName(case_record), redux_dir)
+def getDonorReduxDirAlignments(case_record, donor_dirs) {
+    def dirs = donor_dirs == null ? [] : (donor_dirs instanceof List ? donor_dirs : [donor_dirs])
+    return getDonorDnaSamples(case_record).collect { donor ->
+        def dir = dirs.find { it?.name == "redux_${donor.sample_id}" }
+        getReduxDirAlignment(donor.sample_id, dir)
+    }
 }
 
 def getReduxDirAlignment(sample_name, redux_dir) {
@@ -196,8 +200,12 @@ def getNormalReduxTsvs(case_record, redux_dir) {
     return getReduxTsvs(getNormalDnaSampleName(case_record), redux_dir)
 }
 
-def getDonorReduxTsvs(case_record, redux_dir) {
-    return getReduxTsvs(getDonorDnaSampleName(case_record), redux_dir)
+def getDonorReduxTsvs(case_record, donor_dirs) {
+    def dirs = donor_dirs == null ? [] : (donor_dirs instanceof List ? donor_dirs : [donor_dirs])
+    return getDonorDnaSamples(case_record).collectMany { donor ->
+        def dir = dirs.find { it?.name == "redux_${donor.sample_id}" }
+        getReduxTsvs(donor.sample_id, dir)
+    }
 }
 
 def getReduxTsvs(sample_name, redux_dir) {
@@ -231,10 +239,8 @@ def getNormalDnaAln(case_record) {
     return getInput(getNormalDnaSample(case_record), FileType.ALN) ?: getInput(getNormalDnaSample(case_record), FileType.ALN_REDUX)
 }
 
-def getDonorDnaAln(case_record) {
-    return getInput(getDonorDnaSample(case_record), FileType.ALN) ?: getInput(getDonorDnaSample(case_record), FileType.ALN_REDUX)
-}
-
 def hasTumorDnaAln(case_record) { return getTumorDnaAln(case_record) != null }
 def hasNormalDnaAln(case_record) { return getNormalDnaAln(case_record) != null }
-def hasDonorDnaAln(case_record) { return getDonorDnaAln(case_record) != null }
+def hasDonorDnaAlns(case_record) {
+    return getDonorDnaSamples(case_record).any { getInput(it, FileType.ALN) != null || getInput(it, FileType.ALN_REDUX) != null }
+}

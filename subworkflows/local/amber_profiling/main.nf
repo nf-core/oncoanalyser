@@ -11,8 +11,8 @@ include { groupByMeta                 } from '../utils_nfcore_oncoanalyser_pipel
 include { joinMeta                    } from '../utils_nfcore_oncoanalyser_pipeline/channel_helpers'
 include { restoreMeta                 } from '../utils_nfcore_oncoanalyser_pipeline/channel_helpers'
 include { getDonorDnaSample           } from '../utils_nfcore_oncoanalyser_pipeline/accessors'
-include { getDonorDnaSampleName       } from '../utils_nfcore_oncoanalyser_pipeline/accessors'
-include { getDonorReduxDirAlignment   } from '../utils_nfcore_oncoanalyser_pipeline/accessors'
+include { getDonorDnaSampleNames      } from '../utils_nfcore_oncoanalyser_pipeline/accessors'
+include { getDonorReduxDirAlignments  } from '../utils_nfcore_oncoanalyser_pipeline/accessors'
 include { getInput                    } from '../utils_nfcore_oncoanalyser_pipeline/accessors'
 include { getNormalDnaSample          } from '../utils_nfcore_oncoanalyser_pipeline/accessors'
 include { getNormalDnaSampleName      } from '../utils_nfcore_oncoanalyser_pipeline/accessors'
@@ -60,12 +60,14 @@ workflow AMBER_PROFILING {
 
             def (tumor_aln, tumor_idx) = getTumorReduxDirAlignment(meta, redux_dir_tumor_selected)
             def (normal_aln, normal_idx) = getNormalReduxDirAlignment(meta, redux_dir_normal_selected)
-            def (donor_aln, donor_idx) = getDonorReduxDirAlignment(meta, redux_dir_donor_selected)
+            def donor_alignments = getDonorReduxDirAlignments(meta, redux_dir_donor_selected)
+            def donor_alns = donor_alignments.collect { it[0] }
+            def donor_idxs = donor_alignments.collect { it[1] }
 
-            return [meta, tumor_aln, tumor_idx, normal_aln, normal_idx, donor_aln, donor_idx]
+            return [meta, tumor_aln, tumor_idx, normal_aln, normal_idx, donor_alns, donor_idxs]
 
         }
-        .branch { meta, tumor_aln, tumor_idx, normal_aln, normal_idx, donor_aln, donor_idx ->
+        .branch { meta, tumor_aln, tumor_idx, normal_aln, normal_idx, donor_alns, donor_idxs ->
 
             def has_existing = hasInput(getTumorDnaSample(meta), FileType.AMBER_DIR)
             def runnable_standard = ! purity_estimate_mode && tumor_aln && ! has_existing
@@ -81,7 +83,7 @@ workflow AMBER_PROFILING {
     // Create process input channel
     // channel: [ meta_amber, tumor_aln, normal_aln, donor_aln, tumor_idx, normal_idx, donor_idx ]
     ch_amber_inputs = ch_inputs_sorted.runnable
-        .map { meta, tumor_aln, tumor_idx, normal_aln, normal_idx, donor_aln, donor_idx ->
+        .map { meta, tumor_aln, tumor_idx, normal_aln, normal_idx, donor_alns, donor_idxs ->
 
             def tumor_id
             if (purity_estimate_mode) {
@@ -95,10 +97,10 @@ workflow AMBER_PROFILING {
                 id: meta.case_id,
                 tumor_id: tumor_id,
                 normal_id: normal_aln ? getNormalDnaSampleName(meta) : null,
-                donor_id: donor_aln ? getDonorDnaSampleName(meta) : null,
+                donor_ids: donor_alns ? getDonorDnaSampleNames(meta) : null,
             )
 
-            return [meta_amber, tumor_aln, tumor_idx, normal_aln, normal_idx, donor_aln, donor_idx]
+            return [meta_amber, tumor_aln, tumor_idx, normal_aln, normal_idx, donor_alns, donor_idxs]
         }
 
     // Run process

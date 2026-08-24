@@ -2,12 +2,12 @@
 // Input channel builders for the nf-core/oncoanalyser pipeline
 //
 
-include { getDonorDnaSample   } from './accessors'
+include { getDonorDnaSamples  } from './accessors'
 include { getNormalDnaSample  } from './accessors'
 include { getTumorDnaSample   } from './accessors'
 include { getTumorRnaSample   } from './accessors'
-include { hasDonorDnaAln      } from './accessors'
-include { hasDonorDnaFastq    } from './accessors'
+include { hasDonorDnaAlns     } from './accessors'
+include { hasDonorDnaFastqs   } from './accessors'
 include { hasInput            } from './accessors'
 include { hasNormalDnaAln     } from './accessors'
 include { hasNormalDnaFastq   } from './accessors'
@@ -35,8 +35,8 @@ def getDnaFastqChannel(ch_inputs) {
 
     def ch_inputs_donor_sorted = ch_inputs
         .branch { case_record ->
-            def has_existing = hasDonorDnaAln(case_record)
-            runnable: hasDonorDnaFastq(case_record) && ! has_existing
+            def has_existing = hasDonorDnaAlns(case_record)
+            runnable: hasDonorDnaFastqs(case_record) && ! has_existing
             skip: true
         }
 
@@ -46,7 +46,7 @@ def getDnaFastqChannel(ch_inputs) {
         .mix(
             ch_inputs_tumor_sorted.runnable.map { case_record -> [case_record, getTumorDnaSample(case_record), 'tumor'] },
             ch_inputs_normal_sorted.runnable.map { case_record -> [case_record, getNormalDnaSample(case_record), 'normal'] },
-            ch_inputs_donor_sorted.runnable.map { case_record -> [case_record, getDonorDnaSample(case_record), 'donor'] },
+            ch_inputs_donor_sorted.runnable.flatMap { case_record -> getDonorDnaSamples(case_record).collect { donor -> [case_record, donor, 'donor'] } },
         )
         .flatMap { case_record, sample, sample_type ->
             sample.files.getAt(FileType.FASTQ)

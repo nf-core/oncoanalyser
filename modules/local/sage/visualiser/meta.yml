@@ -25,10 +25,9 @@ input:
       type: file
       description: Normal BAM file
       pattern: "*.{bam}"
-  - donor_bam:
-      type: file
-      description: Donor BAM file
-      pattern: "*.{bam}"
+  - donor_alns:
+      type: list
+      description: Donor alignment files
   - tumor_bai:
       type: file
       description: Tumor BAI file
@@ -37,10 +36,9 @@ input:
       type: file
       description: Normal BAI file
       pattern: "*.{bai}"
-  - donor_bai:
-      type: file
-      description: Donor BAI file
-      pattern: "*.{bai}"
+  - donor_idxs:
+      type: list
+      description: Donor index files
   - redux_tsvs:
       type: list
       description: REDUX MS files

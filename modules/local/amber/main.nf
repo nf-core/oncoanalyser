@@ -16,8 +16,8 @@ process AMBER {
         tumor_idx: Path,
         normal_aln: Path?,
         normal_idx: Path?,
-        donor_aln: Path?,
-        donor_idx: Path?,
+        donor_alns: List<Path>,
+        donor_idxs: List<Path>,
     )
     genome_fasta: Path
     genome_ver: String
@@ -44,12 +44,12 @@ process AMBER {
 
     def reference_ids = []
     if (meta.normal_id != null) { reference_ids.add(meta.normal_id) }
-    if (meta.donor_id != null) { reference_ids.add(meta.donor_id) }
+    if (meta.donor_ids != null) { reference_ids.addAll(meta.donor_ids) }
     def reference_arg = reference_ids.size() > 0 ? "-reference ${reference_ids.join(',')}" : ''
 
     def reference_alns = []
     if (normal_aln) { reference_alns.add(normal_aln.toString()) }
-    if (donor_aln) { reference_alns.add(donor_aln.toString()) }
+    if (donor_alns) { reference_alns.addAll(donor_alns.collect { it.toString() }) }
 
     def reference_bam_arg = reference_alns.size() > 0 ? "-reference_bam ${reference_alns.join(',')}" : ''
 
