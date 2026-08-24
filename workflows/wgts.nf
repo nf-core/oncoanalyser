@@ -953,9 +953,6 @@ workflow WGTS {
         ch_cobalt_out,
         ch_cuppa_out,
         ch_esvee_out,
-        ch_align_dna_tumor_out,
-        ch_align_dna_normal_out,
-        ch_align_dna_donor_out,
         ch_align_rna_tumor_out,
         ch_isofox_out,
         ch_lilac_out,
@@ -991,6 +988,10 @@ workflow WGTS {
         ch_virusinterpreter_out,
         channel.topic('write_reference_data'),
         channel.topic('command_files'),
+        channel.empty(),  // wisp
+        channel.empty(),  // cobalt_normalisation_tsv
+        channel.empty(),  // isofox_normalisation_csv
+        channel.empty(),  // pave_pon_panel_creation_artefacts
     )
 
     emit:

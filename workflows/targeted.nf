@@ -786,9 +786,6 @@ workflow TARGETED {
         ch_cobalt_out,
         channel.empty(),  // cuppa
         ch_esvee_out,
-        ch_align_dna_tumor_out,
-        ch_align_dna_normal_out,
-        ch_align_dna_donor_out,
         ch_align_rna_tumor_out,
         ch_isofox_out,
         ch_lilac_out,
@@ -824,6 +821,10 @@ workflow TARGETED {
         channel.empty(),  // virusinterpreter
         channel.topic('write_reference_data'),
         channel.topic('command_files'),
+        channel.empty(),  // wisp
+        channel.empty(),  // cobalt_normalisation_tsv
+        channel.empty(),  // isofox_normalisation_csv
+        channel.empty(),  // pave_pon_panel_creation_artefacts
     )
 
     emit:

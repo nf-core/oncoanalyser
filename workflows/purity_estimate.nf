@@ -8,8 +8,7 @@ nextflow.enable.types = true
 
 include { AMBER_PROFILING                  } from '../subworkflows/local/amber_profiling'
 include { COBALT_PROFILING                 } from '../subworkflows/local/cobalt_profiling'
-include { get_dir_filepaths       } from '../subworkflows/local/prepare_outputs'
-include { get_command_log_filepath } from '../subworkflows/local/prepare_outputs'
+include { PREPARE_OUTPUTS                } from '../subworkflows/local/prepare_outputs'
 include { PREPARE_REFERENCE                } from '../subworkflows/local/prepare_reference'
 include { READ_ALIGNMENT_DNA               } from '../subworkflows/local/read_alignment_dna'
 include { READ_UMI_PROCESSING              } from '../subworkflows/local/read_umi_processing'
@@ -24,9 +23,6 @@ include { RunMode                       } from '../subworkflows/local/utils_nfco
 include { getDnaFastqChannel            } from '../subworkflows/local/utils_nfcore_oncoanalyser_pipeline/channels'
 include { getEnumFromString             } from '../subworkflows/local/utils_nfcore_oncoanalyser_pipeline/utils'
 include { getPrepConfigFromSamplesheet  } from '../subworkflows/local/utils_nfcore_oncoanalyser_pipeline/validate_params'
-include { getTumorDnaSampleName         } from '../subworkflows/local/utils_nfcore_oncoanalyser_pipeline/accessors'
-include { getNormalDnaSampleName        } from '../subworkflows/local/utils_nfcore_oncoanalyser_pipeline/accessors'
-include { getDonorDnaSampleName         } from '../subworkflows/local/utils_nfcore_oncoanalyser_pipeline/accessors'
 
 /*
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -300,24 +296,58 @@ workflow PURITY_ESTIMATE {
     //
     // SUBWORKFLOW: Prepare outputs for publishing
     //
-    ch_results = channel.empty()
-        .mix(
-            ch_amber_out.flatMap { meta, d ->               return get_dir_filepaths(meta, d) },
-            ch_cobalt_out.flatMap { meta, d ->              return get_dir_filepaths(meta, d) },
-            ch_redux_tumor_out.flatMap { meta, d ->         return get_dir_filepaths(meta, d, "alignments/${getTumorDnaSampleName(meta, primary: true)}") },
-            ch_redux_normal_out.flatMap { meta, d ->        return get_dir_filepaths(meta, d, "alignments/${getNormalDnaSampleName(meta)}") },
-            ch_redux_donor_out.flatMap { meta, d ->         return get_dir_filepaths(meta, d, "alignments/${getDonorDnaSampleName(meta)}") },
-            ch_sage_somatic_append_out.flatMap { meta, d -> return get_dir_filepaths(meta, d, "sage_append/${getTumorDnaSampleName(meta, primary: false)}") },
-            ch_wisp_out.flatMap { meta, d ->                 return get_dir_filepaths(meta, d) },
-
-            channel.topic('write_reference_data').map { d -> return ["reference_data/${workflow.manifest.version}/", d] },
-
-            channel.topic('command_files').flatMap { f -> get_command_log_filepath(f) }
-        )
-        .flatMap { meta, d -> return d instanceof Collection ? d.collect { e -> [meta, e] } : [[meta, d]] }
+    PREPARE_OUTPUTS(
+        ch_amber_out,
+        channel.empty(),  // bamtools_tumor
+        channel.empty(),  // bamtools_normal
+        channel.empty(),  // chord
+        channel.empty(),  // cider
+        ch_cobalt_out,
+        channel.empty(),  // cuppa
+        channel.empty(),  // esvee
+        channel.empty(),  // align_rna_tumor
+        channel.empty(),  // isofox
+        channel.empty(),  // lilac
+        channel.empty(),  // linx_germline
+        channel.empty(),  // linx_somatic
+        channel.empty(),  // linx_somatic_visualiser
+        channel.empty(),  // linxreport_html
+        channel.empty(),  // multiqc
+        channel.empty(),  // neo_annotated_fusions
+        channel.empty(),  // neo_finder
+        channel.empty(),  // neo_scorer_dir
+        channel.empty(),  // orange_json
+        channel.empty(),  // orange_pdf
+        channel.empty(),  // pave_germline
+        channel.empty(),  // pave_somatic
+        channel.empty(),  // peach
+        channel.empty(),  // purple
+        channel.empty(),  // qsee
+        ch_redux_tumor_out,
+        ch_redux_normal_out,
+        ch_redux_donor_out,
+        ch_sage_somatic_append_out,
+        channel.empty(),  // sage_append_germline
+        channel.empty(),  // sage_germline
+        channel.empty(),  // sage_somatic
+        channel.empty(),  // sage_somatic_visualiser
+        channel.empty(),  // sigs
+        channel.empty(),  // teal_normal_bam
+        channel.empty(),  // teal_tumor_bam
+        channel.empty(),  // teal_tsvs
+        channel.empty(),  // virusbreakend_tsv
+        channel.empty(),  // virusbreakend_vcf
+        channel.empty(),  // virusinterpreter
+        channel.topic('write_reference_data'),
+        channel.topic('command_files'),
+        ch_wisp_out,
+        channel.empty(),  // cobalt_normalisation_tsv
+        channel.empty(),  // isofox_normalisation_csv
+        channel.empty(),  // pave_pon_panel_creation_artefacts
+    )
 
     emit:
-    results = ch_results
+    results = PREPARE_OUTPUTS.out.results
 }
 
 /*

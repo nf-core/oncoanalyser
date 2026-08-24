@@ -12,8 +12,7 @@ include { COBALT_PROFILING                         } from '../subworkflows/local
 include { ISOFOX_NORMALISATION                     } from '../subworkflows/local/isofox_normalisation'
 include { ISOFOX_QUANTIFICATION                    } from '../subworkflows/local/isofox_quantification'
 include { PAVE_PON_CREATION                        } from '../subworkflows/local/pave_pon_creation'
-include { get_dir_filepaths       } from '../subworkflows/local/prepare_outputs'
-include { get_command_log_filepath } from '../subworkflows/local/prepare_outputs'
+include { PREPARE_OUTPUTS                        } from '../subworkflows/local/prepare_outputs'
 include { PREPARE_REFERENCE                        } from '../subworkflows/local/prepare_reference'
 include { READ_ALIGNMENT_DNA                       } from '../subworkflows/local/read_alignment_dna'
 include { READ_ALIGNMENT_RNA                       } from '../subworkflows/local/read_alignment_rna'
@@ -27,9 +26,6 @@ include { getDnaFastqChannel            } from '../subworkflows/local/utils_nfco
 include { getRnaFastqChannel            } from '../subworkflows/local/utils_nfcore_oncoanalyser_pipeline/channels'
 include { getSequencingPlatformPon     } from '../subworkflows/local/utils_nfcore_oncoanalyser_pipeline/utils'
 include { getPrepConfigFromSamplesheet  } from '../subworkflows/local/utils_nfcore_oncoanalyser_pipeline/validate_params'
-include { getTumorDnaSampleName         } from '../subworkflows/local/utils_nfcore_oncoanalyser_pipeline/accessors'
-include { getNormalDnaSampleName        } from '../subworkflows/local/utils_nfcore_oncoanalyser_pipeline/accessors'
-include { getTumorRnaSampleName         } from '../subworkflows/local/utils_nfcore_oncoanalyser_pipeline/accessors'
 
 /*
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -329,31 +325,58 @@ workflow PANEL_RESOURCE_CREATION {
     //
     // SUBWORKFLOW: Prepare outputs for publishing
     //
-    ch_results = channel.empty()
-        .mix(
-            ch_amber_out.flatMap { meta, d ->                        return get_dir_filepaths(meta, d) },
-            ch_cobalt_out.flatMap { meta, d ->                       return get_dir_filepaths(meta, d) },
-            ch_align_dna_tumor_out.flatMap { meta, bam, bai ->       return [bam, bai].findAll().collect { d -> ["${meta.case_id}/alignments/${getTumorDnaSampleName(meta, primary: true)}/${d.name}", d] } },
-            ch_align_dna_normal_out.flatMap { meta, bam, bai ->      return [bam, bai].findAll().collect { d -> ["${meta.case_id}/alignments/${getNormalDnaSampleName(meta)}/${d.name}", d] } },
-            ch_align_rna_tumor_out.flatMap { meta, bam, bai ->       return [bam, bai].findAll().collect { d -> ["${meta.case_id}/alignments/${getTumorRnaSampleName(meta)}/${d.name}", d] } },
-            ch_isofox_out.flatMap { meta, d ->                       return get_dir_filepaths(meta, d) },
-            ch_redux_tumor_out.flatMap { meta, d ->                  return get_dir_filepaths(meta, d, "alignments/${getTumorDnaSampleName(meta, primary: true)}") },
-            ch_redux_normal_out.flatMap { meta, d ->                 return get_dir_filepaths(meta, d, "alignments/${getNormalDnaSampleName(meta)}") },
-            ch_sage_germline_dir_out.flatMap { meta, d ->            return get_dir_filepaths(meta, d, 'sage/germline') },
-            ch_sage_somatic_dir_out.flatMap { meta, d ->             return get_dir_filepaths(meta, d, 'sage/somatic') },
-
-            ch_cobalt_normalisation_tsv.map { d ->                       return ["panel_resources/${d.name}", d] },
-            ch_isofox_normalisation_csv.map { d ->                       return ["panel_resources/${d.name}", d] },
-            ch_pave_pon_panel_creation_artefacts.map { d ->              return ["panel_resources/${d.name}", d] },
-
-            channel.topic('write_reference_data').map { d -> return ["reference_data/${workflow.manifest.version}/", d] },
-
-            channel.topic('command_files').flatMap { f -> get_command_log_filepath(f) }
-        )
-        .flatMap { meta, d -> return d instanceof Collection ? d.collect { e -> [meta, e] } : [[meta, d]] }
+    PREPARE_OUTPUTS(
+        ch_amber_out,
+        channel.empty(),  // bamtools_tumor
+        channel.empty(),  // bamtools_normal
+        channel.empty(),  // chord
+        channel.empty(),  // cider
+        ch_cobalt_out,
+        channel.empty(),  // cuppa
+        channel.empty(),  // esvee
+        ch_align_rna_tumor_out,
+        ch_isofox_out,
+        channel.empty(),  // lilac
+        channel.empty(),  // linx_germline
+        channel.empty(),  // linx_somatic
+        channel.empty(),  // linx_somatic_visualiser
+        channel.empty(),  // linxreport_html
+        channel.empty(),  // multiqc
+        channel.empty(),  // neo_annotated_fusions
+        channel.empty(),  // neo_finder
+        channel.empty(),  // neo_scorer_dir
+        channel.empty(),  // orange_json
+        channel.empty(),  // orange_pdf
+        channel.empty(),  // pave_germline
+        channel.empty(),  // pave_somatic
+        channel.empty(),  // peach
+        channel.empty(),  // purple
+        channel.empty(),  // qsee
+        ch_redux_tumor_out,
+        ch_redux_normal_out,
+        channel.empty(),  // redux_donor
+        channel.empty(),  // sage_append_somatic
+        channel.empty(),  // sage_append_germline
+        ch_sage_germline_dir_out,
+        ch_sage_somatic_dir_out,
+        channel.empty(),  // sage_somatic_visualiser
+        channel.empty(),  // sigs
+        channel.empty(),  // teal_normal_bam
+        channel.empty(),  // teal_tumor_bam
+        channel.empty(),  // teal_tsvs
+        channel.empty(),  // virusbreakend_tsv
+        channel.empty(),  // virusbreakend_vcf
+        channel.empty(),  // virusinterpreter
+        channel.topic('write_reference_data'),
+        channel.topic('command_files'),
+        channel.empty(),  // wisp
+        ch_cobalt_normalisation_tsv,
+        ch_isofox_normalisation_csv,
+        ch_pave_pon_panel_creation_artefacts,
+    )
 
     emit:
-    results = ch_results
+    results = PREPARE_OUTPUTS.out.results
 }
 
 /*

@@ -6,7 +6,7 @@
 
 nextflow.enable.types = true
 
-include { get_command_log_filepath  } from '../subworkflows/local/prepare_outputs'
+include { PREPARE_OUTPUTS           } from '../subworkflows/local/prepare_outputs'
 include { PREPARE_REFERENCE as STAGE_REFERENCE } from '../subworkflows/local/prepare_reference'
 
 include { softwareVersionsToYAML } from '../subworkflows/nf-core/utils_nfcore_pipeline'
@@ -64,14 +64,58 @@ workflow PREPARE_REFERENCE {
     //
     // SUBWORKFLOW: Prepare outputs for publishing
     //
-    ch_results = channel.empty()
-        .mix(
-            channel.topic('write_reference_data').map { d -> return ["reference_data/${workflow.manifest.version}/", d] },
-            channel.topic('command_files').flatMap { f -> get_command_log_filepath(f) }
-        )
+    PREPARE_OUTPUTS(
+        channel.empty(),  // amber
+        channel.empty(),  // bamtools_tumor
+        channel.empty(),  // bamtools_normal
+        channel.empty(),  // chord
+        channel.empty(),  // cider
+        channel.empty(),  // cobalt
+        channel.empty(),  // cuppa
+        channel.empty(),  // esvee
+        channel.empty(),  // align_rna_tumor
+        channel.empty(),  // isofox
+        channel.empty(),  // lilac
+        channel.empty(),  // linx_germline
+        channel.empty(),  // linx_somatic
+        channel.empty(),  // linx_somatic_visualiser
+        channel.empty(),  // linxreport_html
+        channel.empty(),  // multiqc
+        channel.empty(),  // neo_annotated_fusions
+        channel.empty(),  // neo_finder
+        channel.empty(),  // neo_scorer_dir
+        channel.empty(),  // orange_json
+        channel.empty(),  // orange_pdf
+        channel.empty(),  // pave_germline
+        channel.empty(),  // pave_somatic
+        channel.empty(),  // peach
+        channel.empty(),  // purple
+        channel.empty(),  // qsee
+        channel.empty(),  // redux_tumor
+        channel.empty(),  // redux_normal
+        channel.empty(),  // redux_donor
+        channel.empty(),  // sage_append_somatic
+        channel.empty(),  // sage_append_germline
+        channel.empty(),  // sage_germline
+        channel.empty(),  // sage_somatic
+        channel.empty(),  // sage_somatic_visualiser
+        channel.empty(),  // sigs
+        channel.empty(),  // teal_normal_bam
+        channel.empty(),  // teal_tumor_bam
+        channel.empty(),  // teal_tsvs
+        channel.empty(),  // virusbreakend_tsv
+        channel.empty(),  // virusbreakend_vcf
+        channel.empty(),  // virusinterpreter
+        channel.topic('write_reference_data'),
+        channel.topic('command_files'),
+        channel.empty(),  // wisp
+        channel.empty(),  // cobalt_normalisation_tsv
+        channel.empty(),  // isofox_normalisation_csv
+        channel.empty(),  // pave_pon_panel_creation_artefacts
+    )
 
     emit:
-    results = ch_results
+    results = PREPARE_OUTPUTS.out.results
 }
 
 /*

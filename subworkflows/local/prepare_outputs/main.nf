@@ -64,9 +64,6 @@ workflow PREPARE_OUTPUTS {
     cobalt
     cuppa
     esvee
-    align_dna_tumor
-    align_dna_normal
-    align_dna_donor
     align_rna_tumor
     isofox
     lilac
@@ -102,6 +99,10 @@ workflow PREPARE_OUTPUTS {
     virusinterpreter
     write_reference_data
     command_files
+    wisp
+    cobalt_normalisation_tsv
+    isofox_normalisation_csv
+    pave_pon_panel_creation_artefacts
 
     main:
     results = channel.empty()
@@ -114,9 +115,6 @@ workflow PREPARE_OUTPUTS {
             cobalt.flatMap { meta, d -> return get_dir_filepaths(meta, d) },
             cuppa.flatMap { meta, d -> return get_dir_filepaths(meta, d) },
             esvee.flatMap { meta, d -> return get_dir_filepaths(meta, d) },
-            align_dna_tumor.flatMap { meta, bam, bai -> return [bam, bai].findAll().collect { d -> ["${meta.case_id}/alignments/${getTumorDnaSampleName(meta, primary: true)}/${d.name}", d] } },
-            align_dna_normal.flatMap { meta, bam, bai -> return [bam, bai].findAll().collect { d -> ["${meta.case_id}/alignments/${getNormalDnaSampleName(meta)}/${d.name}", d] } },
-            align_dna_donor.flatMap { meta, bam, bai -> return [bam, bai].findAll().collect { d -> ["${meta.case_id}/alignments/${getDonorDnaSampleName(meta)}/${d.name}", d] } },
             align_rna_tumor.flatMap { meta, bam, bai -> return [bam, bai].findAll().collect { d -> ["${meta.case_id}/alignments/${getTumorRnaSampleName(meta)}/${d.name}", d] } },
             isofox.flatMap { meta, d -> return get_dir_filepaths(meta, d) },
             lilac.flatMap { meta, d -> return get_dir_filepaths(meta, d) },
@@ -138,7 +136,7 @@ workflow PREPARE_OUTPUTS {
             redux_tumor.flatMap { meta, d -> return get_dir_filepaths(meta, d, "alignments/${getTumorDnaSampleName(meta, primary: true)}") },
             redux_normal.flatMap { meta, d -> return get_dir_filepaths(meta, d, "alignments/${getNormalDnaSampleName(meta)}") },
             redux_donor.flatMap { meta, d -> return get_dir_filepaths(meta, d, "alignments/${getDonorDnaSampleName(meta)}") },
-            sage_append_somatic.flatMap { meta, d -> return get_dir_filepaths(meta, d, "sage_append/${getTumorDnaSampleName(meta, primary: true)}") },
+            sage_append_somatic.flatMap { meta, d -> return get_dir_filepaths(meta, d, "sage_append/${getTumorDnaSampleName(meta, primary: false)}") },
             sage_append_germline.flatMap { meta, d -> return get_dir_filepaths(meta, d, "sage_append/${getNormalDnaSampleName(meta)}") },
             sage_germline.flatMap { meta, d -> return get_dir_filepaths(meta, d, 'sage/germline') },
             sage_somatic.flatMap { meta, d -> return get_dir_filepaths(meta, d, 'sage/somatic') },
@@ -150,7 +148,11 @@ workflow PREPARE_OUTPUTS {
             virusbreakend_tsv.map { meta, d -> return ["${meta.case_id}/virusbreakend/${d.name}", d] },
             virusbreakend_vcf.map { meta, d -> return ["${meta.case_id}/virusbreakend/${d.name}", d] },
             virusinterpreter.flatMap { meta, d -> return get_dir_filepaths(meta, d) },
+            wisp.flatMap { meta, d -> return get_dir_filepaths(meta, d) },
             write_reference_data.map { d -> return ["reference_data/${workflow.manifest.version}/", d] },
+            cobalt_normalisation_tsv.map { d -> return ["panel_resources/${d.name}", d] },
+            isofox_normalisation_csv.map { d -> return ["panel_resources/${d.name}", d] },
+            pave_pon_panel_creation_artefacts.map { d -> return ["panel_resources/${d.name}", d] },
             command_files.flatMap { f -> get_command_log_filepath(f) }
         )
         .flatMap { meta, d -> return d instanceof Collection ? d.collect { e -> [meta, e] } : [[meta, d]] }
