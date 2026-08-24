@@ -66,7 +66,7 @@ workflow PEACH_CALLING {
                 sample_id: getNormalDnaSampleName(meta),
             )
 
-            def purple_germline_smlv_vcf = getPurpleGermlineVcf(getTumorDnaSampleName(meta), purple_dir)[0]
+            def purple_germline_smlv_vcf = getPurpleGermlineVcf(getTumorDnaSampleName(meta), purple_dir)
 
             return [meta_peach, purple_germline_smlv_vcf]
         }
