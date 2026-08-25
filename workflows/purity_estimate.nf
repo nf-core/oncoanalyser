@@ -6,24 +6,23 @@
 
 nextflow.enable.types = true
 
-include { AMBER_PROFILING                  } from '../subworkflows/local/amber_profiling'
-include { COBALT_PROFILING                 } from '../subworkflows/local/cobalt_profiling'
-include { PREPARE_OUTPUTS                } from '../subworkflows/local/prepare_outputs'
-include { PREPARE_REFERENCE                } from '../subworkflows/local/prepare_reference'
-include { READ_ALIGNMENT_DNA               } from '../subworkflows/local/read_alignment_dna'
-include { READ_UMI_PROCESSING              } from '../subworkflows/local/read_umi_processing'
-include { REDUX_PROCESSING                 } from '../subworkflows/local/redux_processing'
-include { SAGE_APPEND                      } from '../subworkflows/local/sage_append'
-include { WISP_ANALYSIS                    } from '../subworkflows/local/wisp_analysis'
+include { AMBER_PROFILING     } from '../subworkflows/local/amber_profiling'
+include { COBALT_PROFILING    } from '../subworkflows/local/cobalt_profiling'
+include { PREPARE_OUTPUTS     } from '../subworkflows/local/prepare_outputs'
+include { PREPARE_REFERENCE   } from '../subworkflows/local/prepare_reference'
+include { READ_ALIGNMENT_DNA  } from '../subworkflows/local/read_alignment_dna'
+include { READ_UMI_PROCESSING } from '../subworkflows/local/read_umi_processing'
+include { REDUX_PROCESSING    } from '../subworkflows/local/redux_processing'
+include { SAGE_APPEND         } from '../subworkflows/local/sage_append'
+include { WISP_ANALYSIS       } from '../subworkflows/local/wisp_analysis'
 
-include { softwareVersionsToYAML  } from '../subworkflows/nf-core/utils_nfcore_pipeline'
+include { softwareVersionsToYAML } from '../subworkflows/nf-core/utils_nfcore_pipeline'
 
-include { RunMode                       } from '../subworkflows/local/utils_nfcore_oncoanalyser_pipeline/types_enums'
-include { Case                          } from '../subworkflows/local/utils_nfcore_oncoanalyser_pipeline/types_records'
-
-include { getDnaFastqChannel            } from '../subworkflows/local/utils_nfcore_oncoanalyser_pipeline/helpers_channel'
-include { getEnumFromString             } from '../subworkflows/local/utils_nfcore_oncoanalyser_pipeline/utils'
-include { getPrepConfigFromSamplesheet  } from '../subworkflows/local/utils_nfcore_oncoanalyser_pipeline/helpers_parameter'
+include { getDnaFastqChannel           } from '../subworkflows/local/utils_nfcore_oncoanalyser_pipeline/helpers_channel'
+include { getPrepConfigFromSamplesheet } from '../subworkflows/local/utils_nfcore_oncoanalyser_pipeline/helpers_parameter'
+include { RunMode                      } from '../subworkflows/local/utils_nfcore_oncoanalyser_pipeline/types_enums'
+include { Case                         } from '../subworkflows/local/utils_nfcore_oncoanalyser_pipeline/types_records'
+include { getEnumFromString            } from '../subworkflows/local/utils_nfcore_oncoanalyser_pipeline/utils'
 
 /*
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~

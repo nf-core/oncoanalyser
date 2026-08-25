@@ -6,28 +6,27 @@
 
 nextflow.enable.types = true
 
-include { AMBER_PROFILING                          } from '../subworkflows/local/amber_profiling'
-include { COBALT_NORMALISATION                     } from '../subworkflows/local/cobalt_normalisation'
-include { COBALT_PROFILING                         } from '../subworkflows/local/cobalt_profiling'
-include { ISOFOX_NORMALISATION                     } from '../subworkflows/local/isofox_normalisation'
-include { ISOFOX_QUANTIFICATION                    } from '../subworkflows/local/isofox_quantification'
-include { PAVE_PON_CREATION                        } from '../subworkflows/local/pave_pon_creation'
-include { PREPARE_OUTPUTS                        } from '../subworkflows/local/prepare_outputs'
-include { PREPARE_REFERENCE                        } from '../subworkflows/local/prepare_reference'
-include { READ_ALIGNMENT_DNA                       } from '../subworkflows/local/read_alignment_dna'
-include { READ_ALIGNMENT_RNA                       } from '../subworkflows/local/read_alignment_rna'
-include { READ_UMI_PROCESSING                      } from '../subworkflows/local/read_umi_processing'
-include { REDUX_PROCESSING                         } from '../subworkflows/local/redux_processing'
-include { SAGE_CALLING                             } from '../subworkflows/local/sage_calling'
+include { AMBER_PROFILING       } from '../subworkflows/local/amber_profiling'
+include { COBALT_NORMALISATION  } from '../subworkflows/local/cobalt_normalisation'
+include { COBALT_PROFILING      } from '../subworkflows/local/cobalt_profiling'
+include { ISOFOX_NORMALISATION  } from '../subworkflows/local/isofox_normalisation'
+include { ISOFOX_QUANTIFICATION } from '../subworkflows/local/isofox_quantification'
+include { PAVE_PON_CREATION     } from '../subworkflows/local/pave_pon_creation'
+include { PREPARE_OUTPUTS       } from '../subworkflows/local/prepare_outputs'
+include { PREPARE_REFERENCE     } from '../subworkflows/local/prepare_reference'
+include { READ_ALIGNMENT_DNA    } from '../subworkflows/local/read_alignment_dna'
+include { READ_ALIGNMENT_RNA    } from '../subworkflows/local/read_alignment_rna'
+include { READ_UMI_PROCESSING   } from '../subworkflows/local/read_umi_processing'
+include { REDUX_PROCESSING      } from '../subworkflows/local/redux_processing'
+include { SAGE_CALLING          } from '../subworkflows/local/sage_calling'
 
-include { softwareVersionsToYAML  } from '../subworkflows/nf-core/utils_nfcore_pipeline'
+include { softwareVersionsToYAML } from '../subworkflows/nf-core/utils_nfcore_pipeline'
 
-include { Case                           } from '../subworkflows/local/utils_nfcore_oncoanalyser_pipeline/types_records'
-
-include { getDnaFastqChannel            } from '../subworkflows/local/utils_nfcore_oncoanalyser_pipeline/helpers_channel'
-include { getRnaFastqChannel            } from '../subworkflows/local/utils_nfcore_oncoanalyser_pipeline/helpers_channel'
+include { getDnaFastqChannel           } from '../subworkflows/local/utils_nfcore_oncoanalyser_pipeline/helpers_channel'
+include { getRnaFastqChannel           } from '../subworkflows/local/utils_nfcore_oncoanalyser_pipeline/helpers_channel'
+include { getPrepConfigFromSamplesheet } from '../subworkflows/local/utils_nfcore_oncoanalyser_pipeline/helpers_parameter'
+include { Case                         } from '../subworkflows/local/utils_nfcore_oncoanalyser_pipeline/types_records'
 include { getSequencingPlatformPon     } from '../subworkflows/local/utils_nfcore_oncoanalyser_pipeline/utils'
-include { getPrepConfigFromSamplesheet  } from '../subworkflows/local/utils_nfcore_oncoanalyser_pipeline/helpers_parameter'
 
 /*
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~

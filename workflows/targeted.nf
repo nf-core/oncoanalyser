@@ -31,14 +31,13 @@ include { SAGE_APPEND               } from '../subworkflows/local/sage_append'
 include { SAGE_CALLING              } from '../subworkflows/local/sage_calling'
 include { SAGE_PLOTTING             } from '../subworkflows/local/sage_plotting'
 
-include { softwareVersionsToYAML  } from '../subworkflows/nf-core/utils_nfcore_pipeline'
+include { softwareVersionsToYAML } from '../subworkflows/nf-core/utils_nfcore_pipeline'
 
-include { Case                           } from '../subworkflows/local/utils_nfcore_oncoanalyser_pipeline/types_records'
-
-include { getDnaFastqChannel            } from '../subworkflows/local/utils_nfcore_oncoanalyser_pipeline/helpers_channel'
-include { getRnaFastqChannel            } from '../subworkflows/local/utils_nfcore_oncoanalyser_pipeline/helpers_channel'
+include { getDnaFastqChannel           } from '../subworkflows/local/utils_nfcore_oncoanalyser_pipeline/helpers_channel'
+include { getRnaFastqChannel           } from '../subworkflows/local/utils_nfcore_oncoanalyser_pipeline/helpers_channel'
+include { getPrepConfigFromSamplesheet } from '../subworkflows/local/utils_nfcore_oncoanalyser_pipeline/helpers_parameter'
+include { Case                         } from '../subworkflows/local/utils_nfcore_oncoanalyser_pipeline/types_records'
 include { getSequencingPlatformPon     } from '../subworkflows/local/utils_nfcore_oncoanalyser_pipeline/utils'
-include { getPrepConfigFromSamplesheet  } from '../subworkflows/local/utils_nfcore_oncoanalyser_pipeline/helpers_parameter'
 
 /*
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~

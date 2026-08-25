@@ -6,7 +6,7 @@
 
 nextflow.enable.types = true
 
-include { PREPARE_OUTPUTS           } from '../subworkflows/local/prepare_outputs'
+include { PREPARE_OUTPUTS                      } from '../subworkflows/local/prepare_outputs'
 include { PREPARE_REFERENCE as STAGE_REFERENCE } from '../subworkflows/local/prepare_reference'
 
 include { softwareVersionsToYAML } from '../subworkflows/nf-core/utils_nfcore_pipeline'
