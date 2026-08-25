@@ -478,24 +478,12 @@ class Utils {
                 Nextflow.exit(1)
             }
 
-            // Apply some required restrictions to targeted mode
-            if (run_config.mode == Constants.RunMode.TARGETED) {
-
-                // Do not allow donor DNA
-                if (Utils.hasDonorDna(meta)) {
-                    log.error "targeted mode is not compatible with the donor DNA BAM/CRAM provided for ${meta.group_id}\n\n" +
-                        "The targeted workflow supports only tumor and normal DNA BAM/CRAMs (and tumor RNA BAM/CRAMs for TSO500)"
-                    Nextflow.exit(1)
-                }
-
-                // Do not allow only tumor RNA
-                if (Utils.hasTumorRna(meta) && ! Utils.hasTumorDna(meta)) {
-                    log.error "targeted mode is not compatible with only tumor RNA provided for ${meta.group_id}\n\n" +
-                        "The targeted workflow requires tumor DNA and can optionally take tumor RNA, depending on " +
-                        "the configured panel."
-                    Nextflow.exit(1)
-                }
-
+            // Do not allow only tumor RNA in targeted mode
+            if (run_config.mode == Constants.RunMode.TARGETED && Utils.hasTumorRna(meta) && ! Utils.hasTumorDna(meta)) {
+                log.error "targeted mode is not compatible with only tumor RNA provided for ${meta.group_id}\n\n" +
+                    "The targeted workflow requires tumor DNA and can optionally take tumor RNA, depending on " +
+                    "the configured panel."
+                Nextflow.exit(1)
             }
 
             // Do not allow normal DNA only
