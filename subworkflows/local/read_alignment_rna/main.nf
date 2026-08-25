@@ -4,14 +4,14 @@
 
 nextflow.enable.types = true
 
-include { GATK4_MARKDUPLICATES  } from '../../../modules/nf-core/gatk4/markduplicates/main'
-include { SAMTOOLS_SORT  } from '../../../modules/nf-core/samtools/sort/main'
-include { STAR_ALIGN  } from '../../../modules/local/star/align/main'
+include { GATK4_MARKDUPLICATES } from '../../../modules/nf-core/gatk4/markduplicates/main'
+include { SAMTOOLS_SORT        } from '../../../modules/nf-core/samtools/sort/main'
+include { STAR_ALIGN           } from '../../../modules/local/star/align/main'
 
+include { getTumorRnaSampleName  } from '../utils_nfcore_oncoanalyser_pipeline/accessors_samples'
 include { groupByMeta            } from '../utils_nfcore_oncoanalyser_pipeline/helpers_channel'
 include { joinMeta               } from '../utils_nfcore_oncoanalyser_pipeline/helpers_channel'
 include { restoreMeta            } from '../utils_nfcore_oncoanalyser_pipeline/helpers_channel'
-include { getTumorRnaSampleName  } from '../utils_nfcore_oncoanalyser_pipeline/accessors_samples'
 
 workflow READ_ALIGNMENT_RNA {
     take:

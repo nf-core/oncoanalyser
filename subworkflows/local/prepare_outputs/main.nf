@@ -6,8 +6,8 @@ nextflow.enable.types = true
 
 include { getLongitudinalSampleName } from '../utils_nfcore_oncoanalyser_pipeline/accessors_samples'
 include { getNormalDnaSampleName    } from '../utils_nfcore_oncoanalyser_pipeline/accessors_samples'
-include { getTumorDnaSampleName  } from '../utils_nfcore_oncoanalyser_pipeline/accessors_samples'
-include { getTumorRnaSampleName  } from '../utils_nfcore_oncoanalyser_pipeline/accessors_samples'
+include { getTumorDnaSampleName     } from '../utils_nfcore_oncoanalyser_pipeline/accessors_samples'
+include { getTumorRnaSampleName     } from '../utils_nfcore_oncoanalyser_pipeline/accessors_samples'
 
 // NOTE(LN): Nextflow bug as of NXF_VER=26.04.6
 //

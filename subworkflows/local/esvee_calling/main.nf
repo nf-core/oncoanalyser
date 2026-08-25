@@ -4,20 +4,20 @@
 
 nextflow.enable.types = true
 
-include { ESVEE  } from '../../../modules/local/esvee/main'
+include { ESVEE } from '../../../modules/local/esvee/main'
 
+include { getNormalReduxDirAlignment  } from '../utils_nfcore_oncoanalyser_pipeline/accessors_alignments'
+include { getTumorReduxDirAlignment   } from '../utils_nfcore_oncoanalyser_pipeline/accessors_alignments'
+include { getInput                    } from '../utils_nfcore_oncoanalyser_pipeline/accessors_samples'
+include { getNormalDnaSample          } from '../utils_nfcore_oncoanalyser_pipeline/accessors_samples'
+include { getNormalDnaSampleName      } from '../utils_nfcore_oncoanalyser_pipeline/accessors_samples'
+include { getTumorDnaSample           } from '../utils_nfcore_oncoanalyser_pipeline/accessors_samples'
+include { getTumorDnaSampleName       } from '../utils_nfcore_oncoanalyser_pipeline/accessors_samples'
+include { hasInput                    } from '../utils_nfcore_oncoanalyser_pipeline/accessors_samples'
 include { FileType                    } from '../utils_nfcore_oncoanalyser_pipeline/types_enums'
 include { groupByMeta                 } from '../utils_nfcore_oncoanalyser_pipeline/helpers_channel'
 include { joinMeta                    } from '../utils_nfcore_oncoanalyser_pipeline/helpers_channel'
 include { restoreMeta                 } from '../utils_nfcore_oncoanalyser_pipeline/helpers_channel'
-include { getInput                    } from '../utils_nfcore_oncoanalyser_pipeline/accessors_samples'
-include { getNormalDnaSample          } from '../utils_nfcore_oncoanalyser_pipeline/accessors_samples'
-include { getNormalDnaSampleName      } from '../utils_nfcore_oncoanalyser_pipeline/accessors_samples'
-include { getNormalReduxDirAlignment  } from '../utils_nfcore_oncoanalyser_pipeline/accessors_alignments'
-include { getTumorDnaSample           } from '../utils_nfcore_oncoanalyser_pipeline/accessors_samples'
-include { getTumorDnaSampleName       } from '../utils_nfcore_oncoanalyser_pipeline/accessors_samples'
-include { getTumorReduxDirAlignment   } from '../utils_nfcore_oncoanalyser_pipeline/accessors_alignments'
-include { hasInput                    } from '../utils_nfcore_oncoanalyser_pipeline/accessors_samples'
 include { selectCurrentOrExisting     } from '../utils_nfcore_oncoanalyser_pipeline/utils'
 
 workflow ESVEE_CALLING {

@@ -4,21 +4,21 @@
 
 nextflow.enable.types = true
 
-include { CHORD  } from '../../../modules/local/chord/main'
+include { CHORD } from '../../../modules/local/chord/main'
 
-include { FileType                 } from '../utils_nfcore_oncoanalyser_pipeline/types_enums'
-include { groupByMeta              } from '../utils_nfcore_oncoanalyser_pipeline/helpers_channel'
-include { joinMeta                 } from '../utils_nfcore_oncoanalyser_pipeline/helpers_channel'
-include { restoreMeta              } from '../utils_nfcore_oncoanalyser_pipeline/helpers_channel'
-include { getInput                 } from '../utils_nfcore_oncoanalyser_pipeline/accessors_samples'
-include { getTumorDnaSample        } from '../utils_nfcore_oncoanalyser_pipeline/accessors_samples'
-include { getTumorDnaSampleName    } from '../utils_nfcore_oncoanalyser_pipeline/accessors_samples'
-include { getPurpleSomaticVcf    } from '../utils_nfcore_oncoanalyser_pipeline/accessors_outputs'
-include { getPurpleSvVcf         } from '../utils_nfcore_oncoanalyser_pipeline/accessors_outputs'
-include { hasInput                 } from '../utils_nfcore_oncoanalyser_pipeline/accessors_samples'
-include { hasNormalDna             } from '../utils_nfcore_oncoanalyser_pipeline/accessors_samples'
-include { hasTumorDna              } from '../utils_nfcore_oncoanalyser_pipeline/accessors_samples'
-include { selectCurrentOrExisting  } from '../utils_nfcore_oncoanalyser_pipeline/utils'
+include { getPurpleSomaticVcf     } from '../utils_nfcore_oncoanalyser_pipeline/accessors_outputs'
+include { getPurpleSvVcf          } from '../utils_nfcore_oncoanalyser_pipeline/accessors_outputs'
+include { getInput                } from '../utils_nfcore_oncoanalyser_pipeline/accessors_samples'
+include { getTumorDnaSample       } from '../utils_nfcore_oncoanalyser_pipeline/accessors_samples'
+include { getTumorDnaSampleName   } from '../utils_nfcore_oncoanalyser_pipeline/accessors_samples'
+include { hasInput                } from '../utils_nfcore_oncoanalyser_pipeline/accessors_samples'
+include { hasNormalDna            } from '../utils_nfcore_oncoanalyser_pipeline/accessors_samples'
+include { hasTumorDna             } from '../utils_nfcore_oncoanalyser_pipeline/accessors_samples'
+include { groupByMeta             } from '../utils_nfcore_oncoanalyser_pipeline/helpers_channel'
+include { joinMeta                } from '../utils_nfcore_oncoanalyser_pipeline/helpers_channel'
+include { restoreMeta             } from '../utils_nfcore_oncoanalyser_pipeline/helpers_channel'
+include { FileType                } from '../utils_nfcore_oncoanalyser_pipeline/types_enums'
+include { selectCurrentOrExisting } from '../utils_nfcore_oncoanalyser_pipeline/utils'
 
 workflow CHORD_PREDICTION {
     take:

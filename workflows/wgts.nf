@@ -828,9 +828,9 @@ workflow WGTS {
             isofox_read_length,
         )
 
-        ch_neo_finder_out = NEO_PREDICTION.out.finder_out
-        ch_neo_annotated_fusions_out = NEO_PREDICTION.out.annotated_fusions_out
-        ch_neo_scorer_dir_out = NEO_PREDICTION.out.neo_scorer_dir
+        ch_neo_finder_out = NEO_PREDICTION.out.finder_dir
+        ch_neo_annotated_fusions_out = NEO_PREDICTION.out.annotated_fusions
+        ch_neo_scorer_dir_out = NEO_PREDICTION.out.scorer_dir
     }
 
     //
@@ -867,6 +867,7 @@ workflow WGTS {
     if (run_config.stages.orange) {
 
         ORANGE_REPORTING(
+            ch_inputs,
             ch_sage_somatic_out,
             ch_sage_germline_out,
             ch_sage_append_somatic_out,

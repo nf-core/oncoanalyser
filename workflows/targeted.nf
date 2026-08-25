@@ -701,6 +701,7 @@ workflow TARGETED {
         ch_virusinterpreter_out = ch_inputs.map { meta -> [meta, null] }
 
         ORANGE_REPORTING(
+            ch_inputs,
             ch_sage_somatic_out,
             ch_sage_germline_out,
             ch_sage_append_somatic_out,

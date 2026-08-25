@@ -4,14 +4,14 @@
 
 nextflow.enable.types = true
 
-include { COBALT_PANEL_NORMALISATION  } from '../../../modules/local/cobalt/panel_normalisation/main'
+include { COBALT_PANEL_NORMALISATION } from '../../../modules/local/cobalt/panel_normalisation/main'
 
-include { FileType                 } from '../utils_nfcore_oncoanalyser_pipeline/types_enums'
+include { getInput                 } from '../utils_nfcore_oncoanalyser_pipeline/accessors_samples'
+include { getTumorDnaSample        } from '../utils_nfcore_oncoanalyser_pipeline/accessors_samples'
 include { groupByMeta              } from '../utils_nfcore_oncoanalyser_pipeline/helpers_channel'
 include { joinMeta                 } from '../utils_nfcore_oncoanalyser_pipeline/helpers_channel'
 include { restoreMeta              } from '../utils_nfcore_oncoanalyser_pipeline/helpers_channel'
-include { getInput                 } from '../utils_nfcore_oncoanalyser_pipeline/accessors_samples'
-include { getTumorDnaSample        } from '../utils_nfcore_oncoanalyser_pipeline/accessors_samples'
+include { FileType                 } from '../utils_nfcore_oncoanalyser_pipeline/types_enums'
 include { selectCurrentOrExisting  } from '../utils_nfcore_oncoanalyser_pipeline/utils'
 
 workflow COBALT_NORMALISATION {
@@ -51,6 +51,10 @@ workflow COBALT_NORMALISATION {
         target_regions_bed,
     )
 
+    // Set outputs
+    // channel: [ meta, cobalt_normalisation_tsv ]
+    ch_outputs = channel.topic('cobalt_normalisation_tsv')
+
     emit:
-    cobalt_normalisation_tsv = channel.topic('cobalt_normalisation_tsv')
+    cobalt_normalisation_tsv = ch_outputs // channel: [ meta, cobalt_normalisation_tsv ]
 }

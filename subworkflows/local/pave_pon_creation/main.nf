@@ -4,15 +4,15 @@
 
 nextflow.enable.types = true
 
-include { PAVE_PON_PANEL_CREATION  } from '../../../modules/local/pave/pon_creation/main'
+include { PAVE_PON_PANEL_CREATION } from '../../../modules/local/pave/pon_creation/main'
 
-include { FileType                 } from '../utils_nfcore_oncoanalyser_pipeline/types_enums'
-include { getInput                 } from '../utils_nfcore_oncoanalyser_pipeline/accessors_samples'
-include { getTumorDnaSample        } from '../utils_nfcore_oncoanalyser_pipeline/accessors_samples'
-include { getTumorDnaSampleName    } from '../utils_nfcore_oncoanalyser_pipeline/accessors_samples'
-include { getSageSomaticVcf      } from '../utils_nfcore_oncoanalyser_pipeline/accessors_outputs'
+include { getInput                } from '../utils_nfcore_oncoanalyser_pipeline/accessors_samples'
+include { getTumorDnaSample       } from '../utils_nfcore_oncoanalyser_pipeline/accessors_samples'
+include { getTumorDnaSampleName   } from '../utils_nfcore_oncoanalyser_pipeline/accessors_samples'
+include { getSageSomaticVcf       } from '../utils_nfcore_oncoanalyser_pipeline/accessors_outputs'
 include { getVcfTbi               } from '../utils_nfcore_oncoanalyser_pipeline/accessors_outputs'
-include { selectCurrentOrExisting  } from '../utils_nfcore_oncoanalyser_pipeline/utils'
+include { FileType                } from '../utils_nfcore_oncoanalyser_pipeline/types_enums'
+include { selectCurrentOrExisting } from '../utils_nfcore_oncoanalyser_pipeline/utils'
 
 workflow PAVE_PON_CREATION {
     take:
@@ -43,6 +43,10 @@ workflow PAVE_PON_CREATION {
         genome_version,
     )
 
+    // Set outputs
+    // channel: [ pave_pon_artefacts ]
+    ch_outputs = channel.topic('pave_pon_panel_creation_artefacts')
+
     emit:
-    pave_pon_panel_creation_artefacts = channel.topic('pave_pon_panel_creation_artefacts')
+    pave_pon_artefacts = ch_outputs // channel: [ pave_pon_artefacts ]
 }

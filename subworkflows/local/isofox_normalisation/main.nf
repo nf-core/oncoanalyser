@@ -4,11 +4,11 @@
 
 nextflow.enable.types = true
 
-include { ISOFOX_PANEL_NORMALISATION  } from '../../../modules/local/isofox/panel_normalisation/main'
+include { ISOFOX_PANEL_NORMALISATION } from '../../../modules/local/isofox/panel_normalisation/main'
 
-include { FileType                 } from '../utils_nfcore_oncoanalyser_pipeline/types_enums'
 include { getInput                 } from '../utils_nfcore_oncoanalyser_pipeline/accessors_samples'
 include { getTumorRnaSample        } from '../utils_nfcore_oncoanalyser_pipeline/accessors_samples'
+include { FileType                 } from '../utils_nfcore_oncoanalyser_pipeline/types_enums'
 include { selectCurrentOrExisting  } from '../utils_nfcore_oncoanalyser_pipeline/utils'
 
 workflow ISOFOX_NORMALISATION {
@@ -39,6 +39,10 @@ workflow ISOFOX_NORMALISATION {
         isofox_gene_distribution,
     )
 
+    // Set outputs
+    // channel: [ meta, isofox_normalisation_csv ]
+    ch_outputs = channel.topic('isofox_normalisation_csv')
+
     emit:
-    isofox_normalisation_csv = channel.topic('isofox_normalisation_csv')
+    isofox_normalisation_csv = ch_outputs // channel: [ meta, isofox_normalisation_csv ]
 }

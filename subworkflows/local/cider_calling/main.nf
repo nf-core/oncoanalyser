@@ -4,15 +4,15 @@
 
 nextflow.enable.types = true
 
-include { CIDER  } from '../../../modules/local/cider/main'
+include { CIDER } from '../../../modules/local/cider/main'
 
-include { FileType                   } from '../utils_nfcore_oncoanalyser_pipeline/types_enums'
+include { getTumorReduxDirAlignment  } from '../utils_nfcore_oncoanalyser_pipeline/accessors_alignments'
 include { getInput                   } from '../utils_nfcore_oncoanalyser_pipeline/accessors_samples'
 include { getTumorDnaSample          } from '../utils_nfcore_oncoanalyser_pipeline/accessors_samples'
-include { getTumorReduxDirAlignment  } from '../utils_nfcore_oncoanalyser_pipeline/accessors_alignments'
 include { getTumorRnaSample          } from '../utils_nfcore_oncoanalyser_pipeline/accessors_samples'
-include { selectCurrentOrExisting    } from '../utils_nfcore_oncoanalyser_pipeline/utils'
 include { restoreMeta                } from '../utils_nfcore_oncoanalyser_pipeline/helpers_channel'
+include { FileType                   } from '../utils_nfcore_oncoanalyser_pipeline/types_enums'
+include { selectCurrentOrExisting    } from '../utils_nfcore_oncoanalyser_pipeline/utils'
 
 workflow CIDER_CALLING {
     take:
@@ -91,7 +91,18 @@ workflow CIDER_CALLING {
         genome_img,
     )
 
+
+
+
+    // TODO(SW): must review use of skip below in the output channel
+
+
+
+
+    // Set outputs, restoring original meta
     // channel: [ meta, cider_results ]
+    ch_outputs = restoreMeta(channel.topic('cider_results'), ch_inputs)
+
     emit:
-    cider_results = restoreMeta(channel.topic('cider_results'), ch_inputs)
+    cider_results = ch_outputs // channel: [ meta, cider_results ]
 }

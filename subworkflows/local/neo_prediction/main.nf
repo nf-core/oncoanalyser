@@ -4,24 +4,24 @@
 
 nextflow.enable.types = true
 
-include { NEO_ANNOTATE_FUSIONS  } from '../../../modules/local/neo/annotate_fusions/main'
-include { NEO_FINDER  } from '../../../modules/local/neo/finder/main'
-include { NEO_SCORER  } from '../../../modules/local/neo/scorer/main'
+include { NEO_ANNOTATE_FUSIONS } from '../../../modules/local/neo/annotate_fusions/main'
+include { NEO_FINDER           } from '../../../modules/local/neo/finder/main'
+include { NEO_SCORER           } from '../../../modules/local/neo/scorer/main'
 
-include { FileType                 } from '../utils_nfcore_oncoanalyser_pipeline/types_enums'
-include { groupByMeta              } from '../utils_nfcore_oncoanalyser_pipeline/helpers_channel'
-include { joinMeta                 } from '../utils_nfcore_oncoanalyser_pipeline/helpers_channel'
-include { restoreMeta              } from '../utils_nfcore_oncoanalyser_pipeline/helpers_channel'
-include { getInput                 } from '../utils_nfcore_oncoanalyser_pipeline/accessors_samples'
-include { getTumorDnaSample        } from '../utils_nfcore_oncoanalyser_pipeline/accessors_samples'
-include { getTumorDnaSampleName    } from '../utils_nfcore_oncoanalyser_pipeline/accessors_samples'
-include { getTumorRnaSample        } from '../utils_nfcore_oncoanalyser_pipeline/accessors_samples'
-include { getTumorRnaSampleName    } from '../utils_nfcore_oncoanalyser_pipeline/accessors_samples'
-include { getPurpleSomaticVcf    } from '../utils_nfcore_oncoanalyser_pipeline/accessors_outputs'
-include { getSageAppendVcf       } from '../utils_nfcore_oncoanalyser_pipeline/accessors_outputs'
-include { hasNormalDna             } from '../utils_nfcore_oncoanalyser_pipeline/accessors_samples'
-include { hasTumorRna              } from '../utils_nfcore_oncoanalyser_pipeline/accessors_samples'
-include { selectCurrentOrExisting  } from '../utils_nfcore_oncoanalyser_pipeline/utils'
+include { getPurpleSomaticVcf     } from '../utils_nfcore_oncoanalyser_pipeline/accessors_outputs'
+include { getSageAppendVcf        } from '../utils_nfcore_oncoanalyser_pipeline/accessors_outputs'
+include { getInput                } from '../utils_nfcore_oncoanalyser_pipeline/accessors_samples'
+include { getTumorDnaSample       } from '../utils_nfcore_oncoanalyser_pipeline/accessors_samples'
+include { getTumorDnaSampleName   } from '../utils_nfcore_oncoanalyser_pipeline/accessors_samples'
+include { getTumorRnaSample       } from '../utils_nfcore_oncoanalyser_pipeline/accessors_samples'
+include { getTumorRnaSampleName   } from '../utils_nfcore_oncoanalyser_pipeline/accessors_samples'
+include { hasNormalDna            } from '../utils_nfcore_oncoanalyser_pipeline/accessors_samples'
+include { hasTumorRna             } from '../utils_nfcore_oncoanalyser_pipeline/accessors_samples'
+include { groupByMeta             } from '../utils_nfcore_oncoanalyser_pipeline/helpers_channel'
+include { joinMeta                } from '../utils_nfcore_oncoanalyser_pipeline/helpers_channel'
+include { restoreMeta             } from '../utils_nfcore_oncoanalyser_pipeline/helpers_channel'
+include { FileType                } from '../utils_nfcore_oncoanalyser_pipeline/types_enums'
+include { selectCurrentOrExisting } from '../utils_nfcore_oncoanalyser_pipeline/utils'
 
 workflow NEO_PREDICTION {
     take:
@@ -221,11 +221,19 @@ workflow NEO_PREDICTION {
         cohort_tpm_medians,
     )
 
+    //
+    // STEP: Handle outputs
+    //
+    // Set outputs, restoring original meta where needed
     // channel: [ meta, neo_finder_dir ]
+    ch_outputs_finder = ch_finder_out
     // channel: [ meta, annotated_fusions ]
+    ch_outputs_annotated_fusions = ch_annotate_fusions_out
     // channel: [ meta, neo_scorer_dir ]
+    ch_outputs_scorer = restoreMeta(channel.topic('neo_scorer_dir'), ch_inputs)
+
     emit:
-    finder_out = ch_finder_out
-    annotated_fusions_out = ch_annotate_fusions_out
-    neo_scorer_dir = restoreMeta(channel.topic('neo_scorer_dir'), ch_inputs)
+    finder_dir        = ch_outputs_finder            // channel: [ meta, neo_finder_dir ]
+    annotated_fusions = ch_outputs_annotated_fusions // channel: [ meta, annotated_fusions ]
+    scorer_dir        = ch_outputs_scorer            // channel: [ meta, neo_scorer_dir ]
 }

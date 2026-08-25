@@ -18,15 +18,15 @@ include { CUSTOM_EXTRACTTARBALL as DECOMP_HMF_DATA      } from '../../../modules
 include { CUSTOM_EXTRACTTARBALL as DECOMP_PANEL_DATA    } from '../../../modules/local/custom/extract_tarball/main'
 include { CUSTOM_EXTRACTTARBALL as DECOMP_STAR_INDEX    } from '../../../modules/local/custom/extract_tarball/main'
 
-include { WRITE_REFERENCE_DATA as WRITE_FASTA           } from '../../../modules/local/custom/write_reference_data/main'
-include { WRITE_REFERENCE_DATA as WRITE_FAI             } from '../../../modules/local/custom/write_reference_data/main'
-include { WRITE_REFERENCE_DATA as WRITE_DICT            } from '../../../modules/local/custom/write_reference_data/main'
-include { WRITE_REFERENCE_DATA as WRITE_IMG             } from '../../../modules/local/custom/write_reference_data/main'
-include { WRITE_REFERENCE_DATA as WRITE_BWA_INDEX       } from '../../../modules/local/custom/write_reference_data/main'
-include { WRITE_REFERENCE_DATA as WRITE_GRIDSS_INDEX    } from '../../../modules/local/custom/write_reference_data/main'
-include { WRITE_REFERENCE_DATA as WRITE_STAR_INDEX      } from '../../../modules/local/custom/write_reference_data/main'
-include { WRITE_REFERENCE_DATA as WRITE_HMF_DATA        } from '../../../modules/local/custom/write_reference_data/main'
-include { WRITE_REFERENCE_DATA as WRITE_PANEL_DATA      } from '../../../modules/local/custom/write_reference_data/main'
+include { WRITE_REFERENCE_DATA as WRITE_FASTA        } from '../../../modules/local/custom/write_reference_data/main'
+include { WRITE_REFERENCE_DATA as WRITE_FAI          } from '../../../modules/local/custom/write_reference_data/main'
+include { WRITE_REFERENCE_DATA as WRITE_DICT         } from '../../../modules/local/custom/write_reference_data/main'
+include { WRITE_REFERENCE_DATA as WRITE_IMG          } from '../../../modules/local/custom/write_reference_data/main'
+include { WRITE_REFERENCE_DATA as WRITE_BWA_INDEX    } from '../../../modules/local/custom/write_reference_data/main'
+include { WRITE_REFERENCE_DATA as WRITE_GRIDSS_INDEX } from '../../../modules/local/custom/write_reference_data/main'
+include { WRITE_REFERENCE_DATA as WRITE_STAR_INDEX   } from '../../../modules/local/custom/write_reference_data/main'
+include { WRITE_REFERENCE_DATA as WRITE_HMF_DATA     } from '../../../modules/local/custom/write_reference_data/main'
+include { WRITE_REFERENCE_DATA as WRITE_PANEL_DATA   } from '../../../modules/local/custom/write_reference_data/main'
 
 workflow PREPARE_REFERENCE {
     take:

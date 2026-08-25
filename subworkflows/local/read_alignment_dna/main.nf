@@ -4,15 +4,15 @@
 
 nextflow.enable.types = true
 
-include { BWAMEM2_ALIGN  } from '../../../modules/local/bwa-mem2/mem/main'
-include { FASTP_SPLIT  } from '../../../modules/local/fastp/split/main'
+include { BWAMEM2_ALIGN } from '../../../modules/local/bwa-mem2/mem/main'
+include { FASTP_SPLIT   } from '../../../modules/local/fastp/split/main'
 
-include { groupByMeta        } from '../utils_nfcore_oncoanalyser_pipeline/helpers_channel'
-include { joinMeta           } from '../utils_nfcore_oncoanalyser_pipeline/helpers_channel'
-include { restoreMeta        } from '../utils_nfcore_oncoanalyser_pipeline/helpers_channel'
-include { hasDonorDnaFastqs  } from '../utils_nfcore_oncoanalyser_pipeline/accessors_samples'
-include { hasNormalDnaFastq  } from '../utils_nfcore_oncoanalyser_pipeline/accessors_samples'
-include { hasTumorDnaFastq   } from '../utils_nfcore_oncoanalyser_pipeline/accessors_samples'
+include { hasDonorDnaFastqs } from '../utils_nfcore_oncoanalyser_pipeline/accessors_samples'
+include { hasNormalDnaFastq } from '../utils_nfcore_oncoanalyser_pipeline/accessors_samples'
+include { hasTumorDnaFastq  } from '../utils_nfcore_oncoanalyser_pipeline/accessors_samples'
+include { groupByMeta       } from '../utils_nfcore_oncoanalyser_pipeline/helpers_channel'
+include { joinMeta          } from '../utils_nfcore_oncoanalyser_pipeline/helpers_channel'
+include { restoreMeta       } from '../utils_nfcore_oncoanalyser_pipeline/helpers_channel'
 
 workflow READ_ALIGNMENT_DNA {
     take:

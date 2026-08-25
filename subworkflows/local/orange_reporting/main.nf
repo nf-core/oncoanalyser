@@ -4,29 +4,30 @@
 
 nextflow.enable.types = true
 
-include { ORANGE  } from '../../../modules/local/orange/main'
+include { ORANGE } from '../../../modules/local/orange/main'
 
-include { FileType                 } from '../utils_nfcore_oncoanalyser_pipeline/types_enums'
-include { groupByMeta              } from '../utils_nfcore_oncoanalyser_pipeline/helpers_channel'
-include { joinMeta                 } from '../utils_nfcore_oncoanalyser_pipeline/helpers_channel'
-include { restoreMeta              } from '../utils_nfcore_oncoanalyser_pipeline/helpers_channel'
-include { getInput                 } from '../utils_nfcore_oncoanalyser_pipeline/accessors_samples'
-include { getNormalDnaSample       } from '../utils_nfcore_oncoanalyser_pipeline/accessors_samples'
-include { getNormalDnaSampleName   } from '../utils_nfcore_oncoanalyser_pipeline/accessors_samples'
-include { getTumorDnaSample        } from '../utils_nfcore_oncoanalyser_pipeline/accessors_samples'
-include { getTumorDnaSampleName    } from '../utils_nfcore_oncoanalyser_pipeline/accessors_samples'
-include { getTumorRnaSample        } from '../utils_nfcore_oncoanalyser_pipeline/accessors_samples'
-include { getTumorRnaSampleName    } from '../utils_nfcore_oncoanalyser_pipeline/accessors_samples'
-include { getCircosPlot          } from '../utils_nfcore_oncoanalyser_pipeline/accessors_outputs'
-include { getCuppaVisData        } from '../utils_nfcore_oncoanalyser_pipeline/accessors_outputs'
-include { getPurpleGermlineVcf   } from '../utils_nfcore_oncoanalyser_pipeline/accessors_outputs'
-include { getPurpleSomaticVcf    } from '../utils_nfcore_oncoanalyser_pipeline/accessors_outputs'
-include { getSageAppendVcf       } from '../utils_nfcore_oncoanalyser_pipeline/accessors_outputs'
-include { selectCurrentOrExisting  } from '../utils_nfcore_oncoanalyser_pipeline/utils'
+include { getCircosPlot           } from '../utils_nfcore_oncoanalyser_pipeline/accessors_outputs'
+include { getCuppaVisData         } from '../utils_nfcore_oncoanalyser_pipeline/accessors_outputs'
+include { getPurpleGermlineVcf    } from '../utils_nfcore_oncoanalyser_pipeline/accessors_outputs'
+include { getPurpleSomaticVcf     } from '../utils_nfcore_oncoanalyser_pipeline/accessors_outputs'
+include { getSageAppendVcf        } from '../utils_nfcore_oncoanalyser_pipeline/accessors_outputs'
+include { getInput                } from '../utils_nfcore_oncoanalyser_pipeline/accessors_samples'
+include { getNormalDnaSample      } from '../utils_nfcore_oncoanalyser_pipeline/accessors_samples'
+include { getNormalDnaSampleName  } from '../utils_nfcore_oncoanalyser_pipeline/accessors_samples'
+include { getTumorDnaSample       } from '../utils_nfcore_oncoanalyser_pipeline/accessors_samples'
+include { getTumorDnaSampleName   } from '../utils_nfcore_oncoanalyser_pipeline/accessors_samples'
+include { getTumorRnaSample       } from '../utils_nfcore_oncoanalyser_pipeline/accessors_samples'
+include { getTumorRnaSampleName   } from '../utils_nfcore_oncoanalyser_pipeline/accessors_samples'
+include { FileType                } from '../utils_nfcore_oncoanalyser_pipeline/types_enums'
+include { groupByMeta             } from '../utils_nfcore_oncoanalyser_pipeline/helpers_channel'
+include { joinMeta                } from '../utils_nfcore_oncoanalyser_pipeline/helpers_channel'
+include { restoreMeta             } from '../utils_nfcore_oncoanalyser_pipeline/helpers_channel'
+include { selectCurrentOrExisting } from '../utils_nfcore_oncoanalyser_pipeline/utils'
 
 workflow ORANGE_REPORTING {
     take:
     // Sample data
+    ch_inputs: Channel<Map>                  // channel: [mandatory] [ meta ]
     ch_sage_dir_somatic: Channel<Tuple<Map, Path>>             // channel: [mandatory] [ meta, sage_dir ]
     ch_sage_dir_germline: Channel<Tuple<Map, Path>>            // channel: [mandatory] [ meta, sage_dir ]
     ch_sage_append_dir_somatic: Channel<Tuple<Map, Path>>      // channel: [mandatory] [ meta, sage_append_dir ]
@@ -270,9 +271,13 @@ workflow ORANGE_REPORTING {
         panel,
     )
 
-    // channel: [ meta, orange_json ] / [ meta, orange_pdf ]
-    ch_meta = ch_sage_dir_somatic.map { meta, d -> meta }
+    // Set outputs, restoring original meta
+    // channel: [ meta, orange_json ]
+    ch_outputs_json = restoreMeta(channel.topic('orange_json'), ch_inputs)
+    // channel: [ meta, orange_pdf ]
+    ch_outputs_pdf = restoreMeta(channel.topic('orange_pdf'), ch_inputs)
+
     emit:
-    orange_json = restoreMeta(channel.topic('orange_json'), ch_meta)
-    orange_pdf = restoreMeta(channel.topic('orange_pdf'), ch_meta)
+    orange_json = ch_outputs_json // channel: [ meta, orange_json ]
+    orange_pdf  = ch_outputs_pdf  // channel: [ meta, orange_pdf ]
 }

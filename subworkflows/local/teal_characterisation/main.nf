@@ -4,20 +4,20 @@
 
 nextflow.enable.types = true
 
-include { TEAL_PREP  } from '../../../modules/local/teal/prep/main'
-include { TEAL_PIPELINE  } from '../../../modules/local/teal/pipeline/main'
+include { TEAL_PREP     } from '../../../modules/local/teal/prep/main'
+include { TEAL_PIPELINE } from '../../../modules/local/teal/pipeline/main'
 
+include { getNormalReduxDirAlignment  } from '../utils_nfcore_oncoanalyser_pipeline/accessors_alignments'
+include { getTumorReduxDirAlignment   } from '../utils_nfcore_oncoanalyser_pipeline/accessors_alignments'
+include { getInput                    } from '../utils_nfcore_oncoanalyser_pipeline/accessors_samples'
+include { getNormalDnaSample          } from '../utils_nfcore_oncoanalyser_pipeline/accessors_samples'
+include { getNormalDnaSampleName      } from '../utils_nfcore_oncoanalyser_pipeline/accessors_samples'
+include { getTumorDnaSample           } from '../utils_nfcore_oncoanalyser_pipeline/accessors_samples'
+include { getTumorDnaSampleName       } from '../utils_nfcore_oncoanalyser_pipeline/accessors_samples'
 include { FileType                    } from '../utils_nfcore_oncoanalyser_pipeline/types_enums'
 include { groupByMeta                 } from '../utils_nfcore_oncoanalyser_pipeline/helpers_channel'
 include { joinMeta                    } from '../utils_nfcore_oncoanalyser_pipeline/helpers_channel'
 include { restoreMeta                 } from '../utils_nfcore_oncoanalyser_pipeline/helpers_channel'
-include { getInput                    } from '../utils_nfcore_oncoanalyser_pipeline/accessors_samples'
-include { getNormalDnaSample          } from '../utils_nfcore_oncoanalyser_pipeline/accessors_samples'
-include { getNormalDnaSampleName      } from '../utils_nfcore_oncoanalyser_pipeline/accessors_samples'
-include { getNormalReduxDirAlignment  } from '../utils_nfcore_oncoanalyser_pipeline/accessors_alignments'
-include { getTumorDnaSample           } from '../utils_nfcore_oncoanalyser_pipeline/accessors_samples'
-include { getTumorDnaSampleName       } from '../utils_nfcore_oncoanalyser_pipeline/accessors_samples'
-include { getTumorReduxDirAlignment   } from '../utils_nfcore_oncoanalyser_pipeline/accessors_alignments'
 include { selectCurrentOrExisting     } from '../utils_nfcore_oncoanalyser_pipeline/utils'
 
 workflow TEAL_CHARACTERISATION {
@@ -158,10 +158,16 @@ workflow TEAL_CHARACTERISATION {
         sequencing_platform,
     )
 
+    // Set outputs, restoring original meta where needed
     // channel: [ meta, teal_bam, teal_bai ]
+    ch_outputs_tumor_bam = ch_tumor_teal_bam
+    // channel: [ meta, teal_bam, teal_bai ]
+    ch_outputs_normal_bam = ch_normal_teal_bam
     // channel: [ meta, teal_tsvs ]
+    ch_outputs_tsvs = restoreMeta(channel.topic('teal_tsvs'), ch_inputs)
+
     emit:
-    tumor_bam = ch_tumor_teal_bam
-    normal_bam = ch_normal_teal_bam
-    teal_tsvs = restoreMeta(channel.topic('teal_tsvs'), ch_inputs)
+    tumor_bam = ch_outputs_tumor_bam   // channel: [ meta, teal_bam, teal_bai ]
+    normal_bam = ch_outputs_normal_bam // channel: [ meta, teal_bam, teal_bai ]
+    teal_tsvs = ch_outputs_tsvs        // channel: [meta, teal_tsvs ]
 }

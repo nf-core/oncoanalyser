@@ -4,23 +4,23 @@
 
 nextflow.enable.types = true
 
-include { MULTIQC  } from '../../../modules/local/multiqc/main'
+include { MULTIQC } from '../../../modules/local/multiqc/main'
 
 include { paramsSummaryMap  } from 'plugin/nf-schema'
 
-include { paramsSummaryMultiqc  } from '../../../subworkflows/nf-core/utils_nfcore_pipeline'
-include { FileType                 } from '../utils_nfcore_oncoanalyser_pipeline/types_enums'
-include { methodsDescriptionText  } from '../../../subworkflows/local/utils_nfcore_oncoanalyser_pipeline'
-include { groupByMeta              } from '../utils_nfcore_oncoanalyser_pipeline/helpers_channel'
-include { joinMeta                 } from '../utils_nfcore_oncoanalyser_pipeline/helpers_channel'
-include { restoreMeta              } from '../utils_nfcore_oncoanalyser_pipeline/helpers_channel'
-include { getInput                 } from '../utils_nfcore_oncoanalyser_pipeline/accessors_samples'
-include { getNormalDnaSample       } from '../utils_nfcore_oncoanalyser_pipeline/accessors_samples'
-include { getNormalDnaSampleName   } from '../utils_nfcore_oncoanalyser_pipeline/accessors_samples'
-include { getTumorDnaSample        } from '../utils_nfcore_oncoanalyser_pipeline/accessors_samples'
-include { getTumorDnaSampleName    } from '../utils_nfcore_oncoanalyser_pipeline/accessors_samples'
-include { getTumorRnaSampleName    } from '../utils_nfcore_oncoanalyser_pipeline/accessors_samples'
-include { selectCurrentOrExisting  } from '../utils_nfcore_oncoanalyser_pipeline/utils'
+include { paramsSummaryMultiqc    } from '../../nf-core/utils_nfcore_pipeline'
+include { methodsDescriptionText  } from '../utils_nfcore_oncoanalyser_pipeline'
+include { getInput                } from '../utils_nfcore_oncoanalyser_pipeline/accessors_samples'
+include { getNormalDnaSample      } from '../utils_nfcore_oncoanalyser_pipeline/accessors_samples'
+include { getNormalDnaSampleName  } from '../utils_nfcore_oncoanalyser_pipeline/accessors_samples'
+include { getTumorDnaSample       } from '../utils_nfcore_oncoanalyser_pipeline/accessors_samples'
+include { getTumorDnaSampleName   } from '../utils_nfcore_oncoanalyser_pipeline/accessors_samples'
+include { getTumorRnaSampleName   } from '../utils_nfcore_oncoanalyser_pipeline/accessors_samples'
+include { groupByMeta             } from '../utils_nfcore_oncoanalyser_pipeline/helpers_channel'
+include { joinMeta                } from '../utils_nfcore_oncoanalyser_pipeline/helpers_channel'
+include { restoreMeta             } from '../utils_nfcore_oncoanalyser_pipeline/helpers_channel'
+include { FileType                } from '../utils_nfcore_oncoanalyser_pipeline/types_enums'
+include { selectCurrentOrExisting } from '../utils_nfcore_oncoanalyser_pipeline/utils'
 
 workflow MULTIQC_REPORTING {
     take:
@@ -167,6 +167,7 @@ workflow MULTIQC_REPORTING {
     )
 
     // Set outputs
+    // path: multiqc_report
     ch_outputs = channel.topic('multiqc_report').toList()
 
     emit:

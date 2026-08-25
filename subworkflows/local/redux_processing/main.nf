@@ -4,22 +4,22 @@
 
 nextflow.enable.types = true
 
-include { REDUX  } from '../../../modules/local/redux/main'
+include { REDUX } from '../../../modules/local/redux/main'
 
-include { FileType            } from '../utils_nfcore_oncoanalyser_pipeline/types_enums'
-include { groupByMeta         } from '../utils_nfcore_oncoanalyser_pipeline/helpers_channel'
-include { joinMeta            } from '../utils_nfcore_oncoanalyser_pipeline/helpers_channel'
-include { restoreMeta         } from '../utils_nfcore_oncoanalyser_pipeline/helpers_channel'
-include { getDonorDnaSample   } from '../utils_nfcore_oncoanalyser_pipeline/accessors_samples'
-include { getDonorDnaSamples  } from '../utils_nfcore_oncoanalyser_pipeline/accessors_samples'
-include { getInput            } from '../utils_nfcore_oncoanalyser_pipeline/accessors_samples'
-include { getNormalDnaAln     } from '../utils_nfcore_oncoanalyser_pipeline/accessors_alignments'
-include { getNormalDnaSample  } from '../utils_nfcore_oncoanalyser_pipeline/accessors_samples'
-include { getTumorDnaAln      } from '../utils_nfcore_oncoanalyser_pipeline/accessors_alignments'
-include { getTumorDnaSample   } from '../utils_nfcore_oncoanalyser_pipeline/accessors_samples'
-include { hasInput            } from '../utils_nfcore_oncoanalyser_pipeline/accessors_samples'
-include { hasNormalDnaAln     } from '../utils_nfcore_oncoanalyser_pipeline/accessors_alignments'
-include { hasTumorDnaAln      } from '../utils_nfcore_oncoanalyser_pipeline/accessors_alignments'
+include { getNormalDnaAln    } from '../utils_nfcore_oncoanalyser_pipeline/accessors_alignments'
+include { getTumorDnaAln     } from '../utils_nfcore_oncoanalyser_pipeline/accessors_alignments'
+include { hasNormalDnaAln    } from '../utils_nfcore_oncoanalyser_pipeline/accessors_alignments'
+include { hasTumorDnaAln     } from '../utils_nfcore_oncoanalyser_pipeline/accessors_alignments'
+include { getDonorDnaSample  } from '../utils_nfcore_oncoanalyser_pipeline/accessors_samples'
+include { getDonorDnaSamples } from '../utils_nfcore_oncoanalyser_pipeline/accessors_samples'
+include { getInput           } from '../utils_nfcore_oncoanalyser_pipeline/accessors_samples'
+include { getNormalDnaSample } from '../utils_nfcore_oncoanalyser_pipeline/accessors_samples'
+include { getTumorDnaSample  } from '../utils_nfcore_oncoanalyser_pipeline/accessors_samples'
+include { hasInput           } from '../utils_nfcore_oncoanalyser_pipeline/accessors_samples'
+include { FileType           } from '../utils_nfcore_oncoanalyser_pipeline/types_enums'
+include { groupByMeta        } from '../utils_nfcore_oncoanalyser_pipeline/helpers_channel'
+include { joinMeta           } from '../utils_nfcore_oncoanalyser_pipeline/helpers_channel'
+include { restoreMeta        } from '../utils_nfcore_oncoanalyser_pipeline/helpers_channel'
 
 workflow REDUX_PROCESSING {
     take:
