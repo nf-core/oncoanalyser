@@ -222,6 +222,7 @@ workflow WGTS {
             ch_redux_normal_out,
             ref_data.genome_fasta,
             ref_data.genome_version,
+            ref_data.genome_fai,
             driver_gene_panel,
             hmf_data.ensembl_data_resources,
             [],  // target_regions_bed
@@ -283,7 +284,9 @@ workflow WGTS {
             ch_redux_tumor_out,
             ch_redux_normal_out,
             ch_redux_donor_out,
+            ref_data.genome_fasta,
             ref_data.genome_version,
+            ref_data.genome_fai,
             hmf_data.heterozygous_sites,
             [],  // target_regions_bed
             [],  // tumor_min_depth
@@ -310,7 +313,9 @@ workflow WGTS {
             ch_inputs,
             ch_redux_tumor_out,
             ch_redux_normal_out,
+            ref_data.genome_fasta,
             ref_data.genome_version,
+            ref_data.genome_fai,
             hmf_data.gc_profile,
             hmf_data.diploid_bed,
             [],  // panel_target_regions_normalisation
@@ -630,6 +635,7 @@ workflow WGTS {
             ch_align_rna_tumor_out,
             ref_data.genome_fasta,
             ref_data.genome_version,
+            ref_data.genome_fai,
             ref_data.genome_dict,
             ref_data.genome_img,
         )
@@ -722,7 +728,9 @@ workflow WGTS {
             ch_bamtools_normal_out,
             ch_cobalt_out,
             ch_purple_out,
+            ref_data.genome_fasta,
             ref_data.genome_version,
+            ref_data.genome_fai,
             params.sequencing_platform,
         )
 

@@ -311,9 +311,13 @@ class Utils {
                         meta_sample[Constants.FileType.ALN_REDUX] = redux_aln
                     }
 
-                    if (meta_sample.containsKey(Constants.FileType.ALN_REDUX) && meta_sample.containsKey(Constants.FileType.IDX) && ! generate_tsvs_only) {
+                    if (meta_sample.containsKey(Constants.FileType.ALN_REDUX) && meta_sample.containsKey(Constants.FileType.IDX) && ! has_redux_tsvs && ! generate_tsvs_only) {
                         log.error "REDUX alignments without colocated TSVs requires generate_redux_tsvs_only to be set in the samplesheet: ${meta.group_id} ${sample_id}: ${redux_input}"
                         Nextflow.exit(1)
+                    }
+
+                    if (meta_sample.containsKey(Constants.FileType.REDUX_DIR) && has_redux_tsvs && generate_tsvs_only) {
+                        log.warn "REDUX directory already contains TSVs, ignoring generate_redux_tsvs_only flag for: ${meta.group_id} ${sample_id}: ${redux_input}"
                     }
 
                 }
@@ -326,6 +330,10 @@ class Utils {
                         def meta_sample = meta[sample_key]
                         def is_primary = ! meta_sample.containsKey('longitudinal_sample_id')
                         def sample_id = is_primary ? meta_sample.sample_id : meta_sample.longitudinal_sample_id
+
+                        if (stub_run) {
+                            return
+                        }
 
                         def aln
                         if (key == Constants.FileType.ALN || key == Constants.FileType.ALN_REDUX) {
@@ -343,7 +351,9 @@ class Utils {
                         } else if (aln.name.endsWith('.cram')) {
                             index_ext = 'crai'
                         } else {
-                            assert false
+                            def (sample_type, sequence_type) = sample_key
+                            log.error "got bad alignment type for ${meta.group_id} ${sample_type}/${sequence_type}: ${key}: ${aln}"
+                            Nextflow.exit(1)
                         }
 
                         if (meta_sample.containsKey(Constants.FileType.IDX) && meta_sample[Constants.FileType.IDX].name.endsWith(index_ext)) {
@@ -401,7 +411,7 @@ class Utils {
             }
 
         if (params.panel != null) {
-            params.panel_data_paths[params.panel][params.genome_version.toString()]
+            params.panel_data_paths[params.panel.toLowerCase()][params.genome_version.toString()]
                 .each { k, v ->
                     fps << "${params.ref_data_panel_data_path.replaceAll('/$', '')}/${v}"
                 }

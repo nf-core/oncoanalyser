@@ -11,6 +11,7 @@ process BAMTOOLS {
     tuple val(meta), path(aln), path(idx)
     path genome_fasta
     val genome_ver
+    path genome_fai
     path driver_gene_panel
     path ensembl_data_resources
     path target_regions_bed

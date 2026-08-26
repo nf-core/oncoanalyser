@@ -107,7 +107,8 @@
                 "umi_type": {
                     "type": "string",
                     "description": "UMI type. Sets default '*_umi_* settings'",
-                    "fa_icon": "fas fa-cog"
+                    "fa_icon": "fas fa-cog",
+                    "enum": ["kapa", "msk", "tso500", "twist"]
                 },
                 "fastq_tools_umi_enabled": {
                     "type": "boolean",
@@ -329,6 +330,7 @@
                 },
                 "prepare_reference_only": {
                     "type": "boolean",
+                    "description": "Set the pipeline to only prepare reference data.",
                     "default": false,
                     "fa_icon": "fas fa-cog",
                     "hidden": true

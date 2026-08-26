@@ -13,7 +13,9 @@ workflow AMBER_PROFILING {
     ch_redux_dir_donor   // channel: [mandatory] [ meta, redux_dir ]
 
     // Reference data
+    genome_fasta         // channel: [mandatory] /path/to/genome_fasta
     genome_version       // channel: [mandatory] genome version
+    genome_fai           // channel: [mandatory] /path/to/genome_fai
     heterozygous_sites   // channel: [optional]  /path/to/heterozygous_sites
     target_regions_bed   // channel: [optional]  /path/to/target_regions_bed
     tumor_min_depth      // integer: [optional]  -tumor_min_depth argument value
@@ -89,7 +91,9 @@ workflow AMBER_PROFILING {
     // Run process
     AMBER(
         ch_amber_inputs,
+        genome_fasta,
         genome_version,
+        genome_fai,
         heterozygous_sites,
         target_regions_bed,
         tumor_min_depth,

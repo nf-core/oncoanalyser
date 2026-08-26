@@ -2,7 +2,7 @@
 // MultiQC aggregates and collates metrics for QC review
 //
 
-include { MULTIQC } from '../../../modules/nf-core/multiqc/main'
+include { MULTIQC } from '../../../modules/local/multiqc/main'
 
 include { paramsSummaryMap } from 'plugin/nf-schema'
 

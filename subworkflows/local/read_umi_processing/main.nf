@@ -69,6 +69,7 @@ workflow READ_UMI_PROCESSING {
                   sample_id: fastq_info.sample_id,
                   library_id: fastq_info.library_id,
                   lane: fastq_info.lane,
+                  flowcell: fastq_info.flowcell,
                   rg_fields: fastq_info.rg_fields,
               ]
 
@@ -173,6 +174,7 @@ workflow READ_UMI_PROCESSING {
                 'sample_id': meta_fastq.sample_id,
                 'library_id': meta_fastq.library_id,
                 'lane': meta_fastq.lane,
+                'flowcell': meta_fastq.flowcell,
                 'rg_fields': meta_fastq.rg_fields,
             ]
 

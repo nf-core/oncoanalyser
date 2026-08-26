@@ -215,7 +215,7 @@ workflow PREPARE_REFERENCE {
     ch_panel_data = channel.empty()
     if (prep_config.require_panel_data) {
 
-        panel_data_paths_versions = params.panel_data_paths[params.panel]
+        panel_data_paths_versions = params.panel_data_paths[params.panel.toLowerCase()]
         panel_data_paths = panel_data_paths_versions[params.genome_version.toString()]
 
         if (params.ref_data_panel_data_path.endsWith('tar.gz')) {

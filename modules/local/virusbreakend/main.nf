@@ -34,6 +34,12 @@ process VIRUSBREAKEND {
     # Symlink indices next to assembly FASTA
     ln -sf \$(find -L ${genome_gridss_index} -regex '.*\\.\\(amb\\|ann\\|pac\\|gridsscache\\|sa\\|bwt\\|img\\|alt\\)') ./
 
+    # NOTE(SW): a htslib-compatible reference cache must be provided for CRAMs with stale UR fields
+    if [[ "${aln}" == *.cram ]]; then
+        seq_cache_populate.pl -root ref_cache/ -subdirs 2 ${genome_fasta}
+        export REF_CACHE=ref_cache/%2s/%2s/%s
+    fi
+
     virusbreakend \\
         ${args} \\
         --gridssargs "--jvmheap ${Math.round(task.memory.bytes * xmx_mod)}" \\

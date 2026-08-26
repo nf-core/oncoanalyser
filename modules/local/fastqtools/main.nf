@@ -37,8 +37,8 @@ process FASTQ_TOOLS {
         -fastq_files '${reads_fwd};${reads_rev}' \\
         -known_umi_file ${known_umis} \\
         -umi_delim ${umi_delim} \\
-        -output_dir output/ \\
-        ${log_level_arg}
+        ${log_level_arg} \\
+        -output_dir output/
 
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":

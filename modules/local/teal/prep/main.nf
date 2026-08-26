@@ -9,7 +9,9 @@ process TEAL_PREP {
 
     input:
     tuple val(meta), path(tumor_aln), path(tumor_idx), path(normal_aln), path(normal_idx)
+    path genome_fasta
     val genome_ver
+    path genome_fai
     val sequencing_platform
 
     output:
@@ -51,6 +53,7 @@ process TEAL_PREP {
         ${reference_bam_arg} \\
         ${tumor_arg} \\
         ${tumor_bam_arg} \\
+        -ref_genome ${genome_fasta} \\
         -ref_genome_version ${genome_ver} \\
         -sequencing_type ${sequencing_platform.toUpperCase()} \\
         -threads ${task.cpus} \\
