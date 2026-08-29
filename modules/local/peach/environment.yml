@@ -3,4 +3,4 @@ channels:
   - conda-forge
   - bioconda
 dependencies:
-  - bioconda::hmftools-peach=2.0.0
+  - bioconda::hmftools-peach==2.0.0

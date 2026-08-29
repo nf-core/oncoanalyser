@@ -3,4 +3,4 @@ channels:
   - conda-forge
   - bioconda
 dependencies:
-  - bioconda::hmftools-virus-interpreter=1.7.2
+  - bioconda::hmftools-virus-interpreter==1.7.2

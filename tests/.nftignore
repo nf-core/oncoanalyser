@@ -28,11 +28,13 @@ pipeline_info/*.{html,json,txt,yml}
 */isofox/*.isf.gene_collection.tsv
 */isofox/*.isf.pass_fusions.tsv
 */isofox/*.isf.retained_intron.csv
+*/lilac/*.lilac.qc.tsv
 */linx/*_linx.html
 */orange/*.orange.pdf
 */orange/*.orange.json
 */purple/*.purple.sv.vcf.gz
 */purple/*.purple.sv.vcf.gz.tbi
+*/purple/circos/*.baf.circos
 */qsee/*.qsee.vis.report.pdf
 */sage/visualiser/*.sage.*.html.gz
 */teal/*.teal.telbam.bam
