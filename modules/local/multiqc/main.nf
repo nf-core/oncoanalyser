@@ -10,7 +10,7 @@ process MULTIQC {
 
     input:
     tuple(
-        meta: Map,
+        case_information: Map,
         fs_case_ids: List<String>,
         fs: List<Path>,
     )
@@ -27,7 +27,7 @@ process MULTIQC {
     file('*multiqc_report.html')            >> 'multiqc_report'
     file('*_data')                          >> 'multiqc_data'
     file('*_plots', optional: true)         >> 'multiqc_plots'
-    tuple(meta, 'multiqc', files('.command.*')) >> 'command_files'
+    tuple([:], 'multiqc', files('.command.*')) >> 'command_files'
     // NOTE(SW): cannot published otherwise produce ~ consume on topic channel becomes circular and blocks
     // file('versions.yml') >> 'versions'
 
@@ -45,7 +45,7 @@ process MULTIQC {
     def logo_arg = multiqc_logo ? "--cl-config 'custom_logo: \"${multiqc_logo.first()}\"'" : ''
 
     // Prepare sample linkage for process
-    def case_id_data = meta.collectEntries { gid, _sns -> [gid, "sample/${gid}"] }
+    def case_id_data = case_information.collectEntries { gid, _sns -> [gid, "sample/${gid}"] }
 
     def case_id_mapping = [fs_case_ids, fs]
         .transpose()
@@ -55,7 +55,7 @@ process MULTIQC {
         }
         .join('\n')
 
-    def manifest = meta
+    def manifest = case_information
         .collect { gid, sns ->
             def fd = case_id_data[gid]
             "${gid},${sns.normal_dna_id},${sns.tumor_dna_id},${sns.tumor_rna_id},${fd}"

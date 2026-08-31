@@ -3,41 +3,55 @@ description: Fit somatic small variants to signature definitions
 keywords:
   - signatures
   - variants
+  - mutational signatures
 tools:
   - sigs:
       description: Fits somatic small variants to signature definitions.
       homepage: https://github.com/hartwigmedical/hmftools/tree/master/sigs
       documentation: https://github.com/hartwigmedical/hmftools/tree/master/sigs
-      licence: ["GPL v3"]
+      licence:
+        - GPL v3
 input:
-  - meta:
-      type: map
-      description: |
-        Groovy Map containing sample information
-        e.g. [id: 'sample_id']
-  - smlv_vcf:
-      type: file
-      description: Small somatic variant VCF file
-      pattern: "*.{vcf.gz}"
-  - signatures:
-      type: file
-      description: Signatures file
-      pattern: "*.{csv}"
-output:
-  - meta:
-      type: map
-      description: |
-        Groovy Map containing sample information
-        e.g. [id: 'sample_id']
-  - sigs_dir:
-      type: directory
-      description: Sigs output directory
-  - command_files:
-      type: list
-      description: List of command files
-  - versions:
-      type: file
-      description: File containing software versions
-      pattern: "versions.yml"
+  - - meta:
+        type: map
+        description: |-
+          Groovy Map containing sample information
+          e.g. [id: 'sample_id']
+    - smlv_vcf:
+        type: file
+        description: Small somatic variant VCF file
+        pattern: '*.{vcf.gz}'
+  - - signatures:
+        type: file
+        description: Signatures file
+        pattern: '*.{csv}'
+output: {}
+topics:
+  sigs_dir:
+    - - meta:
+          type: map
+          description: |-
+            Groovy Map containing sample information
+            e.g. [id: 'sample_id']
+      - sigs/:
+          type: directory
+          description: Sigs output directory
+  command_files:
+    - - meta:
+          type: map
+          description: |-
+            Groovy Map containing sample information
+            e.g. [id: 'sample_id']
+      - identifier:
+          type: string
+          description: Identifier for command files
+      - command_files:
+          type: list
+          description: List of command files
+  versions:
+    - - versions.yml:
+          type: file
+          description: File containing software versions
+          pattern: versions.yml
 authors:
-  - "@scwatts"
+  - '@scwatts'

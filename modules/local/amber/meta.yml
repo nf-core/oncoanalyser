@@ -3,81 +3,94 @@ description: Generate a tumor BAF file for PURPLE copy number fit
 keywords:
   - baf
   - cnv
+  - tumor
 tools:
   - amber:
       description: Generate a tumor BAF file for PURPLE copy number fit.
       homepage: https://github.com/hartwigmedical/hmftools/tree/master/amber
       documentation: https://github.com/hartwigmedical/hmftools/tree/master/amber
-      licence: ["GPL v3"]
+      licence:
+        - GPL v3
 input:
-  - meta:
-      type: map
-      description: |
-        Groovy Map containing sample information
-        e.g. [id: 'sample_id']
-  - tumor_aln:
-      type: file
-      description: Tumor alignment file
-      pattern: "*.{bam,cram}"
-  - tumor_idx:
-      type: file
-      description: Tumor index file
-      pattern: "*.{bai,crai}"
-  - normal_aln:
-      type: file
-      description: Normal alignment file
-      pattern: "*.{bam,cram}"
-  - normal_idx:
-      type: file
-      description: Normal index file
-      pattern: "*.{bai,crai}"
-  - donor_alns:
-      type: list
-      description: Donor alignment files
-  - donor_idxs:
-      type: list
-      description: Donor index files
-  - genome_fasta:
-      type: file
-      description: Reference genome assembly FASTA file
-      pattern: "*.{fa,fasta}"
-  - genome_ver:
-      type: string
-      description: Reference genome version
-  - genome_fai:
-      type: file
-      description: Reference genome assembly fai file
-      pattern: "*.{fai}"
-  - heterozygous_sites:
-      type: file
-      description: AMBER heterozygous sites file
-      pattern: "*.{vcf.gz}"
-  - target_regions_bed:
-      type: file
-      description: Target regions BED file (optional)
-      pattern: "*.{bed}"
-  - tumor_min_depth:
-      type: string
-      description: Minimum depth for a site to be considered
-  - sequencing_platform:
-      type: string
-      description: Sequencing platform
-output:
-  - meta:
-      type: map
-      description: |
-        Groovy Map containing sample information
-        e.g. [id: 'sample_id']
-  - amber_dir:
-      file: directory
-      description: AMBER output directory
-      pattern: "versions.yml"
-  - command_files:
-      type: list
-      description: List of command files
-  - versions:
-      type: file
-      description: File containing software versions
-      pattern: "versions.yml"
+  - - meta:
+        type: map
+        description: |-
+          Groovy Map containing sample information
+          e.g. [id: 'sample_id']
+    - tumor_aln:
+        type: file
+        description: Tumor alignment file
+        pattern: '*.{bam,cram}'
+    - tumor_idx:
+        type: file
+        description: Tumor index file
+        pattern: '*.{bai,crai}'
+    - normal_aln:
+        type: file
+        description: Normal alignment file (optional)
+        pattern: '*.{bam,cram}'
+    - normal_idx:
+        type: file
+        description: Normal index file (optional)
+        pattern: '*.{bai,crai}'
+    - donor_alns:
+        type: list
+        description: Donor alignment files
+    - donor_idxs:
+        type: list
+        description: Donor index files
+  - - genome_fasta:
+        type: file
+        description: Reference genome assembly FASTA file
+        pattern: '*.{fa,fasta}'
+  - - genome_ver:
+        type: string
+        description: Reference genome version
+  - - genome_fai:
+        type: file
+        description: Reference genome assembly fai file
+        pattern: '*.{fai}'
+  - - heterozygous_sites:
+        type: file
+        description: AMBER heterozygous sites file
+        pattern: '*.{vcf.gz}'
+  - - target_regions_bed:
+        type: file
+        description: Target regions BED file (optional)
+        pattern: '*.{bed}'
+  - - tumor_min_depth:
+        type: integer
+        description: Minimum depth for a site to be considered (optional)
+  - - sequencing_platform:
+        type: string
+        description: Sequencing platform
+output: {}
+topics:
+  amber_dir:
+    - - meta:
+          type: map
+          description: |-
+            Groovy Map containing sample information
+            e.g. [id: 'sample_id']
+      - amber/:
+          type: directory
+          description: AMBER output directory
+  command_files:
+    - - meta:
+          type: map
+          description: |-
+            Groovy Map containing sample information
+            e.g. [id: 'sample_id']
+      - identifier:
+          type: string
+          description: Identifier for command files
+      - command_files:
+          type: list
+          description: List of command files
+  versions:
+    - - versions.yml:
+          type: file
+          description: File containing software versions
+          pattern: versions.yml
 authors:
-  - "@scwatts"
+  - '@scwatts'

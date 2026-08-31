@@ -9,75 +9,88 @@ tools:
       description: Performs HLA typing and calls somatic structural variants
       homepage: https://github.com/hartwigmedical/hmftools/tree/master/lilac
       documentation: https://github.com/hartwigmedical/hmftools/tree/master/lilac
-      licence: ["GPL v3"]
+      licence:
+        - GPL v3
 input:
-  - meta:
-      type: map
-      description: |
-        Groovy Map containing sample information
-        e.g. [id: 'sample_id']
-  - normal_dna_aln:
-      type: file
-      description: Normal DNA alignment file (optional)
-      pattern: "*.{bam,cram}"
-  - normal_dna_idx:
-      type: file
-      description: Normal DNA index file (optional)
-      pattern: "*.{bai,crai}"
-  - tumor_dna_aln:
-      type: file
-      description: Normal DNA alignment file (optional)
-      pattern: "*.{bam,cram}"
-  - tumor_dna_idx:
-      type: file
-      description: Tumor DNA index file (optional)
-      pattern: "*.{bai,crai}"
-  - tumor_rna_aln:
-      type: file
-      description: Normal RNA alignment file (optional)
-      pattern: "*.{bam,cram}"
-  - tumor_rna_idx:
-      type: file
-      description: Tumor RNA index file (optional)
-      pattern: "*.{bai,crai}"
-  - purple_dir:
-      type: directory
-      description: PURPLE output directory (optional)
-  - genome_fasta:
-      type: file
-      description: Reference genome assembly FASTA file
-      pattern: "*.{fa,fasta}"
-  - genome_ver:
-      type: string
-      description: Reference genome version
-  - genome_fai:
-      type: file
-      description: Reference genome assembly fai file
-      pattern: "*.{fai}"
-  - lilac_resources:
-      type: directory
-      description: LILAC resources directory
-  - targeted_mode:
-      type: boolean
-      description: Flag indicating whether targeted mode is set
-  - sequencing_platform:
-      type: string
-      description: Sequencing platform
-output:
-  - meta:
-      type: map
-      description: |
-        Groovy Map containing sample information
-        e.g. [id: 'sample_id']
-  - lilac_dir:
-      type: file
-      description: LILAC output directory
-  - command_files:
-      type: list
-      description: List of command files
-  - versions:
-      type: file
-      description: File containing software versions
-      pattern: "versions.yml"
+  - - meta:
+        type: map
+        description: |-
+          Groovy Map containing sample information
+          e.g. [id: 'sample_id']
+    - normal_dna_aln:
+        type: file
+        description: Normal DNA alignment file (optional)
+        pattern: '*.{bam,cram}'
+    - normal_dna_idx:
+        type: file
+        description: Normal DNA index file (optional)
+        pattern: '*.{bai,crai}'
+    - tumor_dna_aln:
+        type: file
+        description: Normal DNA alignment file (optional)
+        pattern: '*.{bam,cram}'
+    - tumor_dna_idx:
+        type: file
+        description: Tumor DNA index file (optional)
+        pattern: '*.{bai,crai}'
+    - tumor_rna_aln:
+        type: file
+        description: Normal RNA alignment file (optional)
+        pattern: '*.{bam,cram}'
+    - tumor_rna_idx:
+        type: file
+        description: Tumor RNA index file (optional)
+        pattern: '*.{bai,crai}'
+    - purple_dir:
+        type: directory
+        description: PURPLE output directory (optional)
+  - - genome_fasta:
+        type: file
+        description: Reference genome assembly FASTA file
+        pattern: '*.{fa,fasta}'
+  - - genome_ver:
+        type: string
+        description: Reference genome version
+  - - genome_fai:
+        type: file
+        description: Reference genome assembly fai file
+        pattern: '*.{fai}'
+  - - lilac_resources:
+        type: directory
+        description: LILAC resources directory
+  - - targeted_mode:
+        type: boolean
+        description: Flag indicating whether targeted mode is set
+  - - sequencing_platform:
+        type: string
+        description: Sequencing platform
+output: {}
+topics:
+  lilac_dir:
+    - - meta:
+          type: map
+          description: |-
+            Groovy Map containing sample information
+            e.g. [id: 'sample_id']
+      - lilac/:
+          type: directory
+          description: LILAC output directory
+  command_files:
+    - - meta:
+          type: map
+          description: |-
+            Groovy Map containing sample information
+            e.g. [id: 'sample_id']
+      - identifier:
+          type: string
+          description: Identifier for command files
+      - command_files:
+          type: list
+          description: List of command files
+  versions:
+    - - versions.yml:
+          type: file
+          description: File containing software versions
+          pattern: versions.yml
 authors:
-  - "@scwatts"
+  - '@scwatts'

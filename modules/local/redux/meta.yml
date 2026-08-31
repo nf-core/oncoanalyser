@@ -3,86 +3,100 @@ description: Identify and mark duplicate reads from alignment data
 keywords:
   - duplicating marking
   - redux
+  - deduplication
 tools:
   - REDUX:
       description: Identify and mark duplicate reads from alignment data
       homepage: https://github.com/hartwigmedical/hmftools/tree/master/redux
       documentation: https://github.com/hartwigmedical/hmftools/tree/master/redux
-      licence: ["GPL v3"]
+      licence:
+        - GPL v3
 input:
-  - meta:
-      type: map
-      description: |
-        Groovy Map containing sample information
-        e.g. [id: 'sample_id']
-  - alns:
-      type: list
-      description: List alignment files
-  - idxs:
-      type: list
-      description: List index files
-  - genome_fasta:
-      type: file
-      description: Reference genome assembly FASTA file
-      pattern: "*.{fa,fasta}"
-  - genome_ver:
-      type: string
-      description: Reference genome version
-  - genome_fai:
-      type: file
-      description: Reference genome assembly fai file
-      pattern: "*.{fai}"
-  - genome_dict:
-      type: file
-      description: Reference genome assembly dict file
-      pattern: "*.{dict}"
-  - unmap_regions:
-      type: file
-      description: Unmapped regions file
-      pattern: "*.{tsv}"
-  - msi_jitter_sites:
-      type: file
-      description: MSI jitter sites file
-      pattern: "*.{tsv.gz}"
-  - msi_model_coefficients:
-      type: file
-      description: MSI model coefficients file
-      pattern: "*.{tsv}"
-  - msi_model_error_rates:
-      type: file
-      description: MSI model error rates file
-      pattern: "*.{tsv}"
-  - sequencing_platform:
-      type: string
-      description: Sequencing platform
-  - targeted_mode:
-      type: boolean
-      description: Flag indicating whether targeted mode is set
-  - generate_tsvs_only:
-      type: boolean
-      description: Flag indicating whether to only generate REDUX TSVs
-  - umi_enable:
-      type: boolean
-      description: Flag to enable UMI processing
-  - umi_duplex_delim:
-      type: string
-      description: UMI duplex delimiter
-output:
-  - meta:
-      type: map
-      description: |
-        Groovy Map containing sample information
-        e.g. [id: 'sample_id']
-  - redux_dir:
-      type: directory
-      description: REDUX output directory
-  - command_files:
-      type: list
-      description: List of command files
-  - versions:
-      type: file
-      description: File containing software versions
-      pattern: "versions.yml"
+  - - meta:
+        type: map
+        description: |-
+          Groovy Map containing sample information
+          e.g. [id: 'sample_id']
+    - alns:
+        type: list
+        description: List alignment files
+    - idxs:
+        type: list
+        description: List index files
+  - - genome_fasta:
+        type: file
+        description: Reference genome assembly FASTA file
+        pattern: '*.{fa,fasta}'
+  - - genome_ver:
+        type: string
+        description: Reference genome version
+  - - genome_fai:
+        type: file
+        description: Reference genome assembly fai file
+        pattern: '*.{fai}'
+  - - genome_dict:
+        type: file
+        description: Reference genome assembly dict file
+        pattern: '*.{dict}'
+  - - unmap_regions:
+        type: file
+        description: Unmapped regions file
+        pattern: '*.{tsv}'
+  - - msi_jitter_sites:
+        type: file
+        description: MSI jitter sites file
+        pattern: '*.{tsv.gz}'
+  - - msi_model_coefficients:
+        type: file
+        description: MSI model coefficients file (optional)
+        pattern: '*.{tsv}'
+  - - msi_model_error_rates:
+        type: file
+        description: MSI model error rates file (optional)
+        pattern: '*.{tsv}'
+  - - sequencing_platform:
+        type: string
+        description: Sequencing platform
+  - - targeted_mode:
+        type: boolean
+        description: Flag indicating whether targeted mode is set
+  - - generate_tsvs_only:
+        type: boolean
+        description: Flag indicating whether to only generate REDUX TSVs
+  - - umi_enable:
+        type: boolean
+        description: Flag to enable UMI processing
+  - - umi_duplex_delim:
+        type: string
+        description: UMI duplex delimiter
+output: {}
+topics:
+  redux_dir:
+    - - meta:
+          type: map
+          description: |-
+            Groovy Map containing sample information
+            e.g. [id: 'sample_id']
+      - redux_${meta.sample_id}/:
+          type: directory
+          description: REDUX output directory
+  command_files:
+    - - meta:
+          type: map
+          description: |-
+            Groovy Map containing sample information
+            e.g. [id: 'sample_id']
+      - identifier:
+          type: string
+          description: Identifier for command files
+      - command_files:
+          type: list
+          description: List of command files
+  versions:
+    - - versions.yml:
+          type: file
+          description: File containing software versions
+          pattern: versions.yml
 authors:
-  - "@scwatts"
-  - "@mkcmkc"
+  - '@scwatts'
+  - '@mkcmkc'

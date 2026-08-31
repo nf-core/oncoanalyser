@@ -3,38 +3,50 @@ description: Characterise and count gene, transcript features
 keywords:
   - rna
   - rnaseq
+  - isofox
 tools:
   - isofox:
       description: Characterises and counts gene, transcript features
       homepage: https://github.com/hartwigmedical/hmftools/tree/master/isofox
       documentation: https://github.com/hartwigmedical/hmftools/tree/master/isofox
-      licence: ["GPL v3"]
+      licence:
+        - GPL v3
 input:
-  - isofox_dirs:
-      type: directory
-      description: List of Isofox directories
-  - genome_ver:
-      type: string
-      description: Reference genome version
-  - gene_ids:
-      type: file
-      description: Isofox gene ID file (optional)
-      pattern: "*.{csv}"
-  - gene_distribution:
-      type: file
-      description: Isofox cohort gene expression file
-      pattern: "*.{csv}"
-output:
-  - isofox_normalisation_csv:
-      type: file
-      description: Isofox normalisation file
-      pattern: "*.{csv}"
-  - command_files:
-      type: list
-      description: List of command files
-  - versions:
-      type: file
-      description: File containing software versions
-      pattern: "versions.yml"
+  - - isofox_dirs:
+        type: list
+        description: List of Isofox directories
+  - - genome_ver:
+        type: string
+        description: Reference genome version
+  - - gene_ids:
+        type: file
+        description: Isofox gene ID file (optional)
+        pattern: '*.{csv}'
+  - - gene_distribution:
+        type: file
+        description: Isofox cohort gene expression file
+        pattern: '*.{csv}'
+output: {}
+topics:
+  isofox_normalisation_csv:
+    - - isofox.gene_normalisation.*.csv:
+          type: file
+          description: Isofox normalisation file
+          pattern: isofox.gene_normalisation.*.csv
+  command_files:
+    - - meta:
+          type: map
+          description: Empty map
+      - identifier:
+          type: string
+          description: Identifier for command files
+      - command_files:
+          type: list
+          description: List of command files
+  versions:
+    - - versions.yml:
+          type: file
+          description: File containing software versions
+          pattern: versions.yml
 authors:
-  - "@scwatts"
+  - '@scwatts'
