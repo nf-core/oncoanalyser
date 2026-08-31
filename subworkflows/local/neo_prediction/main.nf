@@ -26,24 +26,24 @@ include { selectCurrentOrExisting } from '../utils_nfcore_oncoanalyser_pipeline/
 workflow NEO_PREDICTION {
     take:
     // Sample data
-    ch_inputs: Channel<Map>                  // channel: [mandatory] [ meta ]
-    ch_tumor_rna_aln: Channel<Tuple<Map, Path, Path>>           // channel: [mandatory] [ meta, aln, idx ]
-    ch_isofox_dir: Channel<Tuple<Map, Path>>              // channel: [mandatory] [ meta, isofox_dir ]
-    ch_purple_dir: Channel<Tuple<Map, Path>>              // channel: [mandatory] [ meta, purple_dir ]
-    ch_sage_append_dir_somatic: Channel<Tuple<Map, Path>> // channel: [mandatory] [ meta, sage_append_dir ]
-    ch_lilac_dir: Channel<Tuple<Map, Path>>               // channel: [mandatory] [ meta, lilac_dir ]
-    ch_linx_annotation_dir: Channel<Tuple<Map, Path>>     // channel: [mandatory] [ meta, linx_annotation_dir ]
+    ch_inputs                 : Channel<Map>                    // channel: [mandatory] [ meta ]
+    ch_tumor_rna_aln          : Channel<Tuple<Map, Path, Path>> // channel: [mandatory] [ meta, aln, idx ]
+    ch_isofox_dir             : Channel<Tuple<Map, Path>>       // channel: [mandatory] [ meta, isofox_dir ]
+    ch_purple_dir             : Channel<Tuple<Map, Path>>       // channel: [mandatory] [ meta, purple_dir ]
+    ch_sage_append_dir_somatic: Channel<Tuple<Map, Path>>       // channel: [mandatory] [ meta, sage_append_dir ]
+    ch_lilac_dir              : Channel<Tuple<Map, Path>>       // channel: [mandatory] [ meta, lilac_dir ]
+    ch_linx_annotation_dir    : Channel<Tuple<Map, Path>>       // channel: [mandatory] [ meta, linx_annotation_dir ]
 
     // Reference data
-    genome_fasta: Channel<Path>               // channel: [mandatory] /path/to/genome_fasta
-    genome_version: Channel<String>             // channel: [mandatory] genome version
-    genome_fai: Channel<Path>                 // channel: [mandatory] /path/to/genome_fai
-    ensembl_data_resources: Channel<Path>     // channel: [mandatory] /path/to/ensembl_data_resources/
-    neo_resources: Channel<Path>              // channel: [mandatory] /path/to/neo_resources/
-    cohort_tpm_medians: Channel<Path>         // channel: [mandatory] /path/to/cohort_tpm_medians/
+    genome_fasta              : Channel<Path>                   // channel: [mandatory] /path/to/genome_fasta
+    genome_version            : Channel<String>                 // channel: [mandatory] genome version
+    genome_fai                : Channel<Path>                   // channel: [mandatory] /path/to/genome_fai
+    ensembl_data_resources    : Channel<Path>                   // channel: [mandatory] /path/to/ensembl_data_resources/
+    neo_resources             : Channel<Path>                   // channel: [mandatory] /path/to/neo_resources/
+    cohort_tpm_medians        : Channel<Path>                   // channel: [mandatory] /path/to/cohort_tpm_medians/
 
     // Params
-    isofox_read_length: Integer         //  string: [mandatory] Isofox read length
+    isofox_read_length        : Integer                         //  string: [mandatory] Isofox read length
 
     main:
     //

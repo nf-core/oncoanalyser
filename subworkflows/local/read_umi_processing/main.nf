@@ -14,20 +14,20 @@ include { restoreMeta } from '../utils_nfcore_oncoanalyser_pipeline/helpers_chan
 workflow READ_UMI_PROCESSING {
     take:
     // Sample data
-    ch_inputs: Channel<Map>               // channel: [mandatory] [ meta ]
-    ch_dna_fastq: Channel<Tuple<Map, Map, Path?, Path?>>            // channel: [mandatory] [ meta, fastq_info, fastq_fwd, fastq_rev ]
-    ch_rna_fastq: Channel<Tuple<Map, Map, Path?, Path?>>            // channel: [mandatory] [ meta, fastq_info, fastq_fwd, fastq_rev ]
+    ch_inputs              : Channel<Map>                          // channel: [mandatory] [ meta ]
+    ch_dna_fastq           : Channel<Tuple<Map, Map, Path, Path?>> // channel: [mandatory] [ meta, fastq_info, fastq_fwd, fastq_rev ]
+    ch_rna_fastq           : Channel<Tuple<Map, Map, Path, Path?>> // channel: [mandatory] [ meta, fastq_info, fastq_fwd, fastq_rev ]
 
     // Reference data
-    known_umis: Channel<Path>              // channel: [mandatory] /path/to/known_umis_file
+    known_umis             : Channel<Path>                         // channel: [mandatory] /path/to/known_umis_file
 
     // Params
-    fastp_umi_enabled: Boolean       // boolean: [mandatory] enable fastp UMI processing
-    fastp_umi_location: String?      //  string: [optional]  fastp UMI location argument (--umi_loc)
-    fastp_umi_length: Integer?        // numeric: [optional]  fastp UMI length argument (--umi_len)
-    fastp_umi_skip: Integer?          // numeric: [optional]  fastp UMI skip argument (--umi_skip)
-    fastq_tools_umi_enabled: Boolean // boolean: [mandatory] enable fastq-tools UMI processing
-    fastq_tools_umi_delim: String?   // boolean: [optional]  fastq-tools -umi_delim argument
+    fastp_umi_enabled      : Boolean                               // boolean: [mandatory] enable fastp UMI processing
+    fastp_umi_location     : String?                               //  string: [optional]  fastp UMI location argument (--umi_loc)
+    fastp_umi_length       : Integer?                              // numeric: [optional]  fastp UMI length argument (--umi_len)
+    fastp_umi_skip         : Integer?                              // numeric: [optional]  fastp UMI skip argument (--umi_skip)
+    fastq_tools_umi_enabled: Boolean                               // boolean: [mandatory] enable fastq-tools UMI processing
+    fastq_tools_umi_delim  : String?                               // boolean: [optional]  fastq-tools -umi_delim argument
 
     main:
     //

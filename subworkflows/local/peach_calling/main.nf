@@ -23,13 +23,13 @@ include { selectCurrentOrExisting } from '../utils_nfcore_oncoanalyser_pipeline/
 workflow PEACH_CALLING {
     take:
     // Sample data
-    ch_inputs: Channel<Map>                 // channel: [mandatory] [ meta ]
-    ch_purple_dir: Channel<Tuple<Map, Path>>             // channel: [mandatory] [ meta, purple_dir ]
+    ch_inputs                : Channel<Map>              // channel: [mandatory] [ meta ]
+    ch_purple_dir            : Channel<Tuple<Map, Path>> // channel: [mandatory] [ meta, purple_dir ]
 
     // Reference data
-    peach_haplotypes: Channel<Path>          // channel: [mandatory] /path/to/peach_haplotypes
-    peach_haplotype_functions: Channel<Path> // channel: [mandatory] /path/to/peach_haplotype_functions
-    peach_drug_info: Channel<Path>           // channel: [mandatory] /path/to/peach_drug_info
+    peach_haplotypes         : Channel<Path>             // channel: [mandatory] /path/to/peach_haplotypes
+    peach_haplotype_functions: Channel<Path>             // channel: [mandatory] /path/to/peach_haplotype_functions
+    peach_drug_info          : Channel<Path>             // channel: [mandatory] /path/to/peach_drug_info
 
     main:
     // Select input sources then sort

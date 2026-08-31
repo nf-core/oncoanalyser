@@ -24,26 +24,26 @@ workflow ESVEE_CALLING {
     take:
 
     // Sample data
-    ch_inputs: Channel<Map>                // channel: [mandatory] [ meta ]
-    ch_redux_dir_tumor: Channel<Tuple<Map, Path>>       // channel: [mandatory] [ meta, redux_dir ]
-    ch_redux_dir_normal: Channel<Tuple<Map, Path>>      // channel: [mandatory] [ meta, redux_dir ]
+    ch_inputs               : Channel<Map>              // channel: [mandatory] [ meta ]
+    ch_redux_dir_tumor      : Channel<Tuple<Map, Path>> // channel: [mandatory] [ meta, redux_dir ]
+    ch_redux_dir_normal     : Channel<Tuple<Map, Path>> // channel: [mandatory] [ meta, redux_dir ]
 
     // Reference data
-    genome_fasta: Channel<Path>             // channel: [mandatory] /path/to/genome_fasta
-    genome_version: Channel<String>           // channel: [mandatory] genome version
-    genome_fai: Channel<Path>               // channel: [mandatory] /path/to/genome_fai
-    genome_dict: Channel<Path>              // channel: [mandatory] /path/to/genome_dict
-    genome_img: Channel<Path>               // channel: [optional]  /path/to/genome_img
-    known_fusions: Channel<Path>            // channel: [mandatory] /path/to/known_fusions
-    pon_breakends: Channel<Path>            // channel: [mandatory] /path/to/pon_sgl
-    pon_breakpoints: Channel<Path>          // channel: [mandatory] /path/to/pon_sv
-    decoy_sequences_image: Channel<Path>    // channel: [mandatory] /path/to/decoy_sequences_image
-    repeatmasker_annotations: Channel<Path> // channel: [mandatory] /path/to/repeatmasker_annotations
-    unmap_regions: Channel<Path>            // channel: [mandatory] /path/to/unmap_regions
-    target_regions_bed: Channel<Path>       // channel: [optional]  /path/to/target_regions_bed
+    genome_fasta            : Channel<Path>             // channel: [mandatory] /path/to/genome_fasta
+    genome_version          : Channel<String>           // channel: [mandatory] genome version
+    genome_fai              : Channel<Path>             // channel: [mandatory] /path/to/genome_fai
+    genome_dict             : Channel<Path>             // channel: [mandatory] /path/to/genome_dict
+    genome_img              : Channel<Path>             // channel: [mandatory]  /path/to/genome_img
+    known_fusions           : Channel<Path>             // channel: [mandatory] /path/to/known_fusions
+    pon_breakends           : Channel<Path>             // channel: [mandatory] /path/to/pon_sgl
+    pon_breakpoints         : Channel<Path>             // channel: [mandatory] /path/to/pon_sv
+    decoy_sequences_image   : Channel<Path>             // channel: [mandatory] /path/to/decoy_sequences_image
+    repeatmasker_annotations: Channel<Path>             // channel: [mandatory] /path/to/repeatmasker_annotations
+    unmap_regions           : Channel<Path>             // channel: [mandatory] /path/to/unmap_regions
+    target_regions_bed      : Channel<Path>?            // channel: [optional]  /path/to/target_regions_bed
 
     // Params
-    sequencing_platform: String      // string:  [mandatory] sequencing platform
+    sequencing_platform     : String                    // string:  [mandatory] sequencing platform
 
     main:
     // Select input sources then sort

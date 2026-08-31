@@ -24,14 +24,14 @@ include { selectCurrentOrExisting } from '../utils_nfcore_oncoanalyser_pipeline/
 workflow LINX_ANNOTATION {
     take:
     // Sample data
-    ch_inputs: Channel<Map>              // channel: [mandatory] [ meta ]
-    ch_purple_dir: Channel<Tuple<Map, Path>>          // channel: [mandatory] [ meta, purple_dir ]
+    ch_inputs             : Channel<Map>              // channel: [mandatory] [ meta ]
+    ch_purple_dir         : Channel<Tuple<Map, Path>> // channel: [mandatory] [ meta, purple_dir ]
 
     // Reference data
-    genome_version: Channel<String>         // channel: [mandatory] genome version
-    ensembl_data_resources: Channel<Path> // channel: [mandatory] /path/to/ensembl_data_resources/
-    known_fusion_data: Channel<Path>      // channel: [mandatory] /path/to/known_fusion_data
-    driver_gene_panel: Channel<Path>      // channel: [mandatory] /path/to/driver_gene_panel
+    genome_version        : Channel<String>           // channel: [mandatory] genome version
+    ensembl_data_resources: Channel<Path>             // channel: [mandatory] /path/to/ensembl_data_resources/
+    known_fusion_data     : Channel<Path>             // channel: [mandatory] /path/to/known_fusion_data
+    driver_gene_panel     : Channel<Path>             // channel: [mandatory] /path/to/driver_gene_panel
 
     main:
     //

@@ -20,26 +20,26 @@ include { selectCurrentOrExisting  } from '../utils_nfcore_oncoanalyser_pipeline
 workflow ISOFOX_QUANTIFICATION {
     take:
     // Sample data
-    ch_inputs: Channel<Map>                  // channel: [mandatory] [ meta ]
-    ch_tumor_rna_aln: Channel<Tuple<Map, Path, Path>>           // channel: [mandatory] [ meta, aln, idx ]
+    ch_inputs                 : Channel<Map>                    // channel: [mandatory] [ meta ]
+    ch_tumor_rna_aln          : Channel<Tuple<Map, Path, Path>> // channel: [mandatory] [ meta, aln, idx ]
 
     // Reference data
-    genome_fasta: Channel<Path>               // channel: [mandatory] /path/to/genome_fasta
-    genome_version: Channel<String>             // channel: [mandatory] genome version
-    genome_fai: Channel<Path>                 // channel: [mandatory] /path/to/genome_fai
-    ensembl_data_resources: Channel<Path>     // channel: [mandatory] /path/to/ensembl_data_resources/
-    driver_gene_panel: Channel<Path>          // channel: [mandatory] /path/to/driver_gene_panel
-    known_fusion_data: Channel<Path>          // channel: [mandatory] /path/to/known_fusion_data
-    isofox_excluded_regions: Channel<Path>    // channel: [mandatory] /path/to/isofox_excluded_regions
-    isofox_gene_distribution: Channel<Path>   // channel: [mandatory] /path/to/isofox_gene_distribution
-    isofox_alt_sj_distribution: Channel<Path> // channel: [mandatory] /path/to/isofox_alt_sj_distribution
-    isofox_counts: Channel<Path>              // channel: [mandatory] /path/to/isofox_counts
-    isofox_gc_ratios: Channel<Path>           // channel: [mandatory] /path/to/isofox_gc_ratios
-    isofox_tpm_norm: Channel<Path>            // channel: [optional]  /path/to/isofox_tpm_norm
+    genome_fasta              : Channel<Path>                   // channel: [mandatory] /path/to/genome_fasta
+    genome_version            : Channel<String>                 // channel: [mandatory] genome version
+    genome_fai                : Channel<Path>                   // channel: [mandatory] /path/to/genome_fai
+    ensembl_data_resources    : Channel<Path>                   // channel: [mandatory] /path/to/ensembl_data_resources/
+    driver_gene_panel         : Channel<Path>                   // channel: [mandatory] /path/to/driver_gene_panel
+    known_fusion_data         : Channel<Path>                   // channel: [mandatory] /path/to/known_fusion_data
+    isofox_excluded_regions   : Channel<Path>                   // channel: [mandatory] /path/to/isofox_excluded_regions
+    isofox_gene_distribution  : Channel<Path>                   // channel: [mandatory] /path/to/isofox_gene_distribution
+    isofox_alt_sj_distribution: Channel<Path>                   // channel: [mandatory] /path/to/isofox_alt_sj_distribution
+    isofox_counts             : Channel<Path>?                  // channel: [optional]  /path/to/isofox_counts
+    isofox_gc_ratios          : Channel<Path>?                  // channel: [optional]  /path/to/isofox_gc_ratios
+    isofox_tpm_norm           : Channel<Path>?                  // channel: [optional]  /path/to/isofox_tpm_norm
 
     // Params
-    isofox_functions: String?       //  string: [optional]  Isofox functions
-    isofox_read_length: Integer     //  string: [mandatory] Isofox read length
+    isofox_functions          : String?                         //  string: [optional]  Isofox functions
+    isofox_read_length        : Integer                         //  string: [mandatory] Isofox read length
 
     main:
     // Select input sources then sort

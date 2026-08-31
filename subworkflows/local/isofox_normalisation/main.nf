@@ -14,12 +14,12 @@ include { selectCurrentOrExisting  } from '../utils_nfcore_oncoanalyser_pipeline
 workflow ISOFOX_NORMALISATION {
     take:
     // Sample data
-    ch_isofox: Channel<Tuple<Map, Path>>                // channel: [mandatory] [ meta, isofox_dir ]
+    ch_isofox               : Channel<Tuple<Map, Path>> // channel: [mandatory] [ meta, isofox_dir ]
 
     // Reference data
-    genome_version: Channel<String>           // channel: [mandatory] genome version
-    isofox_gene_ids: Channel<Path>          // channel: [mandatory]  /path/to/gene_ids
-    isofox_gene_distribution: Channel<Path> // channel: [mandatory] /path/to/isofox_gene_distribution
+    genome_version          : Channel<String>           // channel: [mandatory] genome version
+    isofox_gene_ids         : Channel<Path>             // channel: [mandatory]  /path/to/gene_ids
+    isofox_gene_distribution: Channel<Path>             // channel: [mandatory] /path/to/isofox_gene_distribution
 
     main:
     // Create process input channel

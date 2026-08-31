@@ -21,18 +21,18 @@ include { selectCurrentOrExisting    } from '../utils_nfcore_oncoanalyser_pipeli
 workflow WISP_ANALYSIS {
     take:
     // Sample data
-    ch_inputs: Channel<Map>                  // channel: [mandatory] [ meta ]
-    ch_redux_dir: Channel<Tuple<Map, Path>>               // channel: [mandatory] [ meta, redux_dir ]
-    ch_amber_dir: Channel<Tuple<Map, Path>>               // channel: [mandatory] [ meta, amber_dir ]
-    ch_cobalt_dir: Channel<Tuple<Map, Path>>              // channel: [mandatory] [ meta, cobalt_dir ]
+    ch_inputs                 : Channel<Map>              // channel: [mandatory] [ meta ]
+    ch_redux_dir              : Channel<Tuple<Map, Path>> // channel: [mandatory] [ meta, redux_dir ]
+    ch_amber_dir              : Channel<Tuple<Map, Path>> // channel: [mandatory] [ meta, amber_dir ]
+    ch_cobalt_dir             : Channel<Tuple<Map, Path>> // channel: [mandatory] [ meta, cobalt_dir ]
     ch_sage_append_dir_somatic: Channel<Tuple<Map, Path>> // channel: [mandatory] [ meta, sage_append_dir ]
 
     // Reference data
-    genome_fasta: Channel<Path>               // channel: [mandatory] /path/to/genome_fasta
-    genome_fai: Channel<Path>                 // channel: [mandatory] /path/to/genome_fai
+    genome_fasta              : Channel<Path>             // channel: [mandatory] /path/to/genome_fasta
+    genome_fai                : Channel<Path>             // channel: [mandatory] /path/to/genome_fai
 
     // Params
-    targeted_mode: Boolean              // boolean: [mandatory] Set targeted mode
+    targeted_mode             : Boolean                   // boolean: [mandatory] Set targeted mode
 
     main:
     // Select input sources then sort

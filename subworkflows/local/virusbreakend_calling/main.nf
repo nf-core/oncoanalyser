@@ -21,23 +21,23 @@ include { selectCurrentOrExisting   } from '../utils_nfcore_oncoanalyser_pipelin
 workflow VIRUSBREAKEND_CALLING {
     take:
     // Sample data
-    ch_inputs: Channel<Map>             // channel: [mandatory] [ meta ]
-    ch_redux_dir_tumor: Channel<Tuple<Map, Path>>    // channel: [mandatory] [ meta, redux_dir ]
+    ch_inputs            : Channel<Map>              // channel: [mandatory] [ meta ]
+    ch_redux_dir_tumor   : Channel<Tuple<Map, Path>> // channel: [mandatory] [ meta, redux_dir ]
     ch_bamtools_dir_tumor: Channel<Tuple<Map, Path>> // channel: [mandatory] [ meta, bamtools ]
-    ch_purple: Channel<Tuple<Map, Path>>             // channel: [mandatory] [ meta, purple_dir ]
+    ch_purple            : Channel<Tuple<Map, Path>> // channel: [mandatory] [ meta, purple_dir ]
 
     // Reference data
-    genome_fasta: Channel<Path>          // channel: [mandatory] /path/to/genome_fasta
-    genome_fai: Channel<Path>            // channel: [mandatory] /path/to/genome_fai
-    genome_dict: Channel<Path>           // channel: [mandatory] /path/to/genome_dict
-    genome_gridss_index: Channel<Path>   // channel: [mandatory] /path/to/genome_gridss_index
-    virusbreakenddb: Channel<Path>       // channel: [mandatory] /path/to/virusbreakenddb/
-    virus_taxonomy_db: Channel<Path>     // channel: [mandatory] /path/to/virus_taxonomy_db
-    virus_reporting_db: Channel<Path>    // channel: [mandatory] /path/to/virus_reporting_db
-    virus_blocklist_db: Channel<Path>    // channel: [mandatory] /path/to/virus_blocklist_db
+    genome_fasta         : Channel<Path>             // channel: [mandatory] /path/to/genome_fasta
+    genome_fai           : Channel<Path>             // channel: [mandatory] /path/to/genome_fai
+    genome_dict          : Channel<Path>             // channel: [mandatory] /path/to/genome_dict
+    genome_gridss_index  : Channel<Path>             // channel: [mandatory] /path/to/genome_gridss_index
+    virusbreakenddb      : Channel<Path>             // channel: [mandatory] /path/to/virusbreakenddb/
+    virus_taxonomy_db    : Channel<Path>             // channel: [mandatory] /path/to/virus_taxonomy_db
+    virus_reporting_db   : Channel<Path>             // channel: [mandatory] /path/to/virus_reporting_db
+    virus_blocklist_db   : Channel<Path>             // channel: [mandatory] /path/to/virus_blocklist_db
 
     // Params
-    gridss_config: Channel<Path>         // channel: [optional] /path/to/gridss_config
+    gridss_config        : Channel<Path>?            // channel: [optional] /path/to/gridss_config
 
     main:
     //

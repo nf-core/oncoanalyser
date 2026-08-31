@@ -26,26 +26,26 @@ include { selectCurrentOrExisting } from '../utils_nfcore_oncoanalyser_pipeline/
 workflow PAVE_ANNOTATION {
     take:
     // Sample data
-    ch_inputs: Channel<Map>              // channel: [mandatory] [ meta ]
-    ch_sage_dir_somatic: Channel<Tuple<Map, Path>>    // channel: [mandatory] [ meta, sage_dir ]
-    ch_sage_dir_germline: Channel<Tuple<Map, Path>>   // channel: [mandatory] [ meta, sage_dir ]
+    ch_inputs             : Channel<Map>              // channel: [mandatory] [ meta ]
+    ch_sage_dir_somatic   : Channel<Tuple<Map, Path>> // channel: [mandatory] [ meta, sage_dir ]
+    ch_sage_dir_germline  : Channel<Tuple<Map, Path>> // channel: [mandatory] [ meta, sage_dir ]
 
     // Reference data
-    genome_fasta: Channel<Path>           // channel: [mandatory] /path/to/genome_fasta
-    genome_version: Channel<String>         // channel: [mandatory] genome version
-    genome_fai: Channel<Path>             // channel: [mandatory] /path/to/genome_fai
-    pon_artefacts: Channel<Path>          // channel: [optional]  /path/to/pon_artefacts
-    sage_pon: Channel<Path>               // channel: [mandatory] /path/to/sage_pon
-    sage_blocklist_regions: Channel<Path> // channel: [mandatory] /path/to/sage_blocklist_regions
-    sage_blocklist_sites: Channel<Path>   // channel: [mandatory] /path/to/sage_blocklist_sites
-    clinvar_annotations: Channel<Path>    // channel: [mandatory] /path/to/clinvar_annotations
-    segment_mappability: Channel<Path>    // channel: [mandatory] /path/to/segment_mappability
-    driver_gene_panel: Channel<Path>      // channel: [mandatory] /path/to/driver_gene_panel
-    ensembl_data_resources: Channel<Path> // channel: [mandatory] /path/to/ensembl_data_resources/
-    gnomad_resource: Channel<Path>        // channel: [mandatory] /path/to/gnomad_resource
+    genome_fasta          : Channel<Path>             // channel: [mandatory] /path/to/genome_fasta
+    genome_version        : Channel<String>           // channel: [mandatory] genome version
+    genome_fai            : Channel<Path>             // channel: [mandatory] /path/to/genome_fai
+    pon_artefacts         : Channel<Path>?            // channel: [optional]  /path/to/pon_artefacts
+    sage_pon              : Channel<Path>             // channel: [mandatory] /path/to/sage_pon
+    sage_blocklist_regions: Channel<Path>             // channel: [mandatory] /path/to/sage_blocklist_regions
+    sage_blocklist_sites  : Channel<Path>             // channel: [mandatory] /path/to/sage_blocklist_sites
+    clinvar_annotations   : Channel<Path>             // channel: [mandatory] /path/to/clinvar_annotations
+    segment_mappability   : Channel<Path>             // channel: [mandatory] /path/to/segment_mappability
+    driver_gene_panel     : Channel<Path>             // channel: [mandatory] /path/to/driver_gene_panel
+    ensembl_data_resources: Channel<Path>             // channel: [mandatory] /path/to/ensembl_data_resources/
+    gnomad_resource       : Channel<Path>             // channel: [mandatory] /path/to/gnomad_resource
 
     // Params
-    sequencing_platform: String    // string:  [mandatory] sequencing platform
+    sequencing_platform   : String                    // string:  [mandatory] sequencing platform
 
     main:
     //

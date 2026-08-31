@@ -23,21 +23,21 @@ include { selectCurrentOrExisting     } from '../utils_nfcore_oncoanalyser_pipel
 workflow TEAL_CHARACTERISATION {
     take:
     // Sample data
-    ch_inputs: Channel<Map>              // channel: [mandatory] [ meta ]
-    ch_redux_dir_tumor: Channel<Tuple<Map, Path>>     // channel: [mandatory] [ meta, redux_dir ]
-    ch_redux_dir_normal: Channel<Tuple<Map, Path>>    // channel: [mandatory] [ meta, redux_dir ]
-    ch_bamtools_dir_tumor: Channel<Tuple<Map, Path>>  // channel: [mandatory] [ meta, bamtools_dir ]
+    ch_inputs             : Channel<Map>              // channel: [mandatory] [ meta ]
+    ch_redux_dir_tumor    : Channel<Tuple<Map, Path>> // channel: [mandatory] [ meta, redux_dir ]
+    ch_redux_dir_normal   : Channel<Tuple<Map, Path>> // channel: [mandatory] [ meta, redux_dir ]
+    ch_bamtools_dir_tumor : Channel<Tuple<Map, Path>> // channel: [mandatory] [ meta, bamtools_dir ]
     ch_bamtools_dir_normal: Channel<Tuple<Map, Path>> // channel: [mandatory] [ meta, bamtools_dir ]
-    ch_cobalt_dir: Channel<Tuple<Map, Path>>          // channel: [mandatory] [ meta, cobalt_dir ]
-    ch_purple_dir: Channel<Tuple<Map, Path>>          // channel: [mandatory] [ meta, purple_dir ]
+    ch_cobalt_dir         : Channel<Tuple<Map, Path>> // channel: [mandatory] [ meta, cobalt_dir ]
+    ch_purple_dir         : Channel<Tuple<Map, Path>> // channel: [mandatory] [ meta, purple_dir ]
 
     // Reference data
-    genome_fasta: Channel<Path>           // channel: [mandatory] /path/to/genome_fasta
-    genome_version: Channel<String>         // channel: [mandatory] genome version
-    genome_fai: Channel<Path>             // channel: [mandatory] /path/to/genome_fai
+    genome_fasta          : Channel<Path>             // channel: [mandatory] /path/to/genome_fasta
+    genome_version        : Channel<String>           // channel: [mandatory] genome version
+    genome_fai            : Channel<Path>             // channel: [mandatory] /path/to/genome_fai
 
     // Params
-    sequencing_platform: String    // string:  [mandatory] sequencing platform
+    sequencing_platform   : String                    // string:  [mandatory] sequencing platform
 
     main:
     //

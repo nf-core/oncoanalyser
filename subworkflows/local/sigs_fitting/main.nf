@@ -22,11 +22,11 @@ include { selectCurrentOrExisting  } from '../utils_nfcore_oncoanalyser_pipeline
 workflow SIGS_FITTING {
     take:
     // Sample data
-    ch_inputs: Channel<Map>       // channel: [mandatory] [ meta ]
-    ch_purple_dir: Channel<Tuple<Map, Path>>   // channel: [mandatory] [ meta, purple_dir ]
+    ch_inputs      : Channel<Map>              // channel: [mandatory] [ meta ]
+    ch_purple_dir  : Channel<Tuple<Map, Path>> // channel: [mandatory] [ meta, purple_dir ]
 
     // Reference data
-    sigs_signatures: Channel<Path> // channel: [mandatory] /path/to/sigs_signatures
+    sigs_signatures: Channel<Path>             // channel: [mandatory] /path/to/sigs_signatures
 
     main:
     // Select input sources then sort

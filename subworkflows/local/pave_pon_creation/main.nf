@@ -20,7 +20,7 @@ workflow PAVE_PON_CREATION {
     ch_sage_dir_somatic: Channel<Tuple<Map, Path>> // channel: [mandatory] [ meta, sage_dir ]
 
     // Reference data
-    genome_version: Channel<String>      // channel: [mandatory] genome version
+    genome_version     : Channel<String>           // channel: [mandatory] genome version
 
     main:
     // Create process input channel

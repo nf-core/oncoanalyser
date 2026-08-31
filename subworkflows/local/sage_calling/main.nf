@@ -30,29 +30,29 @@ include { selectCurrentOrExisting     } from '../utils_nfcore_oncoanalyser_pipel
 workflow SAGE_CALLING {
     take:
     // Sample data
-    ch_inputs: Channel<Map>                    // channel: [mandatory] [ meta ]
-    ch_redux_dir_tumor: Channel<Tuple<Map, Path>>           // channel: [mandatory] [ meta, redux_dir ]
-    ch_redux_dir_normal: Channel<Tuple<Map, Path>>          // channel: [mandatory] [ meta, redux_dir ]
-    ch_redux_dir_donor: Channel<Tuple<Map, Path>>           // channel: [mandatory] [ meta, redux_dir ]
+    ch_inputs                   : Channel<Map>              // channel: [mandatory] [ meta ]
+    ch_redux_dir_tumor          : Channel<Tuple<Map, Path>> // channel: [mandatory] [ meta, redux_dir ]
+    ch_redux_dir_normal         : Channel<Tuple<Map, Path>> // channel: [mandatory] [ meta, redux_dir ]
+    ch_redux_dir_donor          : Channel<Tuple<Map, Path>> // channel: [mandatory] [ meta, redux_dir ]
 
     // Reference data
-    genome_fasta: Channel<Path>                 // channel: [mandatory] /path/to/genome_fasta
-    genome_version: Channel<String>               // channel: [mandatory] genome version
-    genome_fai: Channel<Path>                   // channel: [mandatory] /path/to/genome_fai
-    genome_dict: Channel<Path>                  // channel: [mandatory] /path/to/genome_dict
-    sage_pon: Channel<Path>                     // channel: [mandatory] /path/to/sage_pon
-    sage_known_hotspots_somatic: Channel<Path>  // channel: [mandatory] /path/to/sage_known_hotspots_somatic
-    sage_known_hotspots_germline: Channel<Path> // channel: [optional]  /path/to/sage_known_hotspots_germline
-    sage_highconf_regions: Channel<Path>        // channel: [mandatory] /path/to/sage_highconf_regions
-    segment_mappability: Channel<Path>          // channel: [mandatory] /path/to/segment_mappability
-    driver_gene_panel: Channel<Path>            // channel: [mandatory] /path/to/driver_gene_panel
-    ensembl_data_resources: Channel<Path>       // channel: [mandatory] /path/to/ensembl_data_resources/
-    gnomad_resource: Channel<Path>              // channel: [mandatory] /path/to/gnomad_resource
+    genome_fasta                : Channel<Path>             // channel: [mandatory] /path/to/genome_fasta
+    genome_version              : Channel<String>           // channel: [mandatory] genome version
+    genome_fai                  : Channel<Path>             // channel: [mandatory] /path/to/genome_fai
+    genome_dict                 : Channel<Path>             // channel: [mandatory] /path/to/genome_dict
+    sage_pon                    : Channel<Path>             // channel: [mandatory] /path/to/sage_pon
+    sage_known_hotspots_somatic : Channel<Path>             // channel: [mandatory] /path/to/sage_known_hotspots_somatic
+    sage_known_hotspots_germline: Channel<Path>?            // channel: [optional]  /path/to/sage_known_hotspots_germline
+    sage_highconf_regions       : Channel<Path>             // channel: [mandatory] /path/to/sage_highconf_regions
+    segment_mappability         : Channel<Path>             // channel: [mandatory] /path/to/segment_mappability
+    driver_gene_panel           : Channel<Path>             // channel: [mandatory] /path/to/driver_gene_panel
+    ensembl_data_resources      : Channel<Path>             // channel: [mandatory] /path/to/ensembl_data_resources/
+    gnomad_resource             : Channel<Path>             // channel: [mandatory] /path/to/gnomad_resource
 
     // Params
-    sequencing_platform: String          // string:  [mandatory] sequencing platform
-    targeted_mode: Boolean                // boolean: [mandatory] Set targeted mode
-    enable_germline: Boolean              // boolean: [mandatory] Enable germline mode
+    sequencing_platform         : String                    // string:  [mandatory] sequencing platform
+    targeted_mode               : Boolean                   // boolean: [mandatory] Set targeted mode
+    enable_germline             : Boolean                   // boolean: [mandatory] Enable germline mode
 
     main:
     //

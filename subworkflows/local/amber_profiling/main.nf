@@ -27,22 +27,22 @@ include { selectCurrentOrExisting    } from '../utils_nfcore_oncoanalyser_pipeli
 workflow AMBER_PROFILING {
     take:
     // Sample data
-    ch_inputs: Channel<Map>            // channel: [mandatory] [ meta ]
-    ch_redux_dir_tumor: Channel<Tuple<Map, Path>>   // channel: [mandatory] [ meta, redux_dir ]
-    ch_redux_dir_normal: Channel<Tuple<Map, Path>>  // channel: [mandatory] [ meta, redux_dir ]
-    ch_redux_dir_donor: Channel<Tuple<Map, Path>>   // channel: [mandatory] [ meta, redux_dir ]
+    ch_inputs           : Channel<Map>              // channel: [mandatory] [ meta ]
+    ch_redux_dir_tumor  : Channel<Tuple<Map, Path>> // channel: [mandatory] [ meta, redux_dir ]
+    ch_redux_dir_normal : Channel<Tuple<Map, Path>> // channel: [mandatory] [ meta, redux_dir ]
+    ch_redux_dir_donor  : Channel<Tuple<Map, Path>> // channel: [mandatory] [ meta, redux_dir ]
 
     // Reference data
-    genome_fasta: Channel<Path>         // channel: [mandatory] /path/to/genome_fasta
-    genome_version: Channel<String>       // channel: [mandatory] genome version
-    genome_fai: Channel<Path>           // channel: [mandatory] /path/to/genome_fai
-    heterozygous_sites: Channel<Path>   // channel: [optional]  /path/to/heterozygous_sites
-    target_regions_bed: Channel<Path>   // channel: [optional]  /path/to/target_regions_bed
-    tumor_min_depth: Integer?      // integer: [optional]  -tumor_min_depth argument value
+    genome_fasta        : Channel<Path>             // channel: [mandatory] /path/to/genome_fasta
+    genome_version      : Channel<String>           // channel: [mandatory] genome version
+    genome_fai          : Channel<Path>             // channel: [mandatory] /path/to/genome_fai
+    heterozygous_sites  : Channel<Path>?            // channel: [optional]  /path/to/heterozygous_sites
+    target_regions_bed  : Channel<Path>?            // channel: [optional]  /path/to/target_regions_bed
+    tumor_min_depth     : Integer?                  // integer: [optional]  -tumor_min_depth argument value
 
     // Params
-    sequencing_platform: String  // string:  [mandatory] sequencing platform
-    purity_estimate_mode: Boolean // boolean: [mandatory] Set purity estimate mode
+    sequencing_platform : String                    // string:  [mandatory] sequencing platform
+    purity_estimate_mode: Boolean                   // boolean: [mandatory] Set purity estimate mode
 
     main:
     // Select input sources then sort

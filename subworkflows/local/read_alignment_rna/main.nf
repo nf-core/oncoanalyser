@@ -16,11 +16,11 @@ include { restoreMeta            } from '../utils_nfcore_oncoanalyser_pipeline/h
 workflow READ_ALIGNMENT_RNA {
     take:
     // Sample data
-    ch_inputs: Channel<Map>         // channel: [mandatory] [ meta ]
-    ch_fastq: Channel<Tuple<Map, Map, Path?, Path?>>          // channel: [mandatory] [ meta, fastq_info, fastq_fwd, fastq_rev ]
+    ch_inputs        : Channel<Map>                          // channel: [mandatory] [ meta ]
+    ch_fastq         : Channel<Tuple<Map, Map, Path, Path?>> // channel: [mandatory] [ meta, fastq_info, fastq_fwd, fastq_rev ]
 
     // Reference data
-    genome_star_index: Channel<Path> // channel: [mandatory] /path/to/genome_star_index/
+    genome_star_index: Channel<Path>                         // channel: [mandatory] /path/to/genome_star_index/
 
     main:
     //

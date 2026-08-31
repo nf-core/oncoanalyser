@@ -20,15 +20,15 @@ include { selectCurrentOrExisting  } from '../utils_nfcore_oncoanalyser_pipeline
 workflow LINX_PLOTTING {
     take:
     // Sample data
-    ch_inputs: Channel<Map>                   // channel: [mandatory] [ meta ]
+    ch_inputs                  : Channel<Map>              // channel: [mandatory] [ meta ]
     ch_linx_somatic_annotations: Channel<Tuple<Map, Path>> // channel: [mandatory] [ meta, linx_annotation_dir ]
-    ch_amber_dir: Channel<Tuple<Map, Path>>                // channel: [mandatory] [ meta, amber_dir ]
-    ch_cobalt_dir: Channel<Tuple<Map, Path>>               // channel: [mandatory] [ meta, cobalt_dir ]
-    ch_purple_dir: Channel<Tuple<Map, Path>>               // channel: [mandatory] [ meta, purple_dir ]
+    ch_amber_dir               : Channel<Tuple<Map, Path>> // channel: [mandatory] [ meta, amber_dir ]
+    ch_cobalt_dir              : Channel<Tuple<Map, Path>> // channel: [mandatory] [ meta, cobalt_dir ]
+    ch_purple_dir              : Channel<Tuple<Map, Path>> // channel: [mandatory] [ meta, purple_dir ]
 
     // Reference data
-    genome_version: Channel<String>              // channel: [mandatory] genome version
-    ensembl_data_resources: Channel<Path>      // channel: [mandatory] /path/to/ensembl_data_resources/
+    genome_version             : Channel<String>           // channel: [mandatory] genome version
+    ensembl_data_resources     : Channel<Path>             // channel: [mandatory] /path/to/ensembl_data_resources/
 
     main:
     //
