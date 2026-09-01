@@ -22,6 +22,10 @@ workflow ESVEE_CALLING {
     pon_breakends            // channel: [mandatory] /path/to/pon_sgl
     pon_breakpoints          // channel: [mandatory] /path/to/pon_sv
     decoy_sequences_image    // channel: [mandatory] /path/to/decoy_sequences_image
+    saga_fasta               // channel: [optional]  /path/to/saga_fasta
+    saga_fai                 // channel: [optional]  /path/to/saga_fai
+    saga_dict                // channel: [optional]  /path/to/saga_dict
+    saga_img                 // channel: [optional]  /path/to/saga_img
     repeatmasker_annotations // channel: [mandatory] /path/to/repeatmasker_annotations
     unmap_regions            // channel: [mandatory] /path/to/unmap_regions
     target_regions_bed       // channel: [optional]  /path/to/target_regions_bed
@@ -90,6 +94,10 @@ workflow ESVEE_CALLING {
         pon_breakends,
         pon_breakpoints,
         decoy_sequences_image,
+        saga_fasta,
+        saga_fai,
+        saga_dict,
+        saga_img,
         known_fusions,
         repeatmasker_annotations,
         unmap_regions,
