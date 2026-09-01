@@ -3,7 +3,7 @@
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/) and this project mostly adheres to
 [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [[3.0.0](https://github.com/nf-core/oncoanalyser/releases/tag/3.0.0)] Scarlet Honeyeater - 2026-08-27
+## [[3.0.0](https://github.com/nf-core/oncoanalyser/releases/tag/3.0.0)] Scarlet Honeyeater - 2026-09-01
 
 - [314](https://github.com/nf-core/oncoanalyser/pull/314) - Other additions and fixes
   - Switch to single-step RNA alignment for each sample
@@ -35,7 +35,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/) 
 | `CIDER`      | 1.1         | 1.2         |
 | `COBALT`     | 2.2         | 3.0         |
 | `CUPPA`      | 2.3.2       | 2.5.1       |
-| `ESVEE`      | 1.2         | 2.0         |
+| `ESVEE`      | 1.2         | 2.0.1       |
 | `FastqTools` | -           | 1.0         |
 | `ISOFOX`     | 1.7.2       | 2.0.1       |
 | `LILAC`      | 1.7.3       | 2.0         |
@@ -45,7 +45,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/) 
 | `PAVE`       | 1.8.2       | 1.9         |
 | `PURPLE`     | 4.3         | 4.4         |
 | `QSEE`       | -           | 1.0         |
-| `REDUX`      | 1.2.2       | 2.0.4       |
+| `REDUX`      | 1.2.2       | 2.0.5       |
 | `SAGE`       | 4.2         | 5.0.2       |
 | `TEAL`       | 1.3.6       | 1.4         |
 | `WISP`       | 1.2         | 1.3.1       |
