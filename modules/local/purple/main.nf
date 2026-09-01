@@ -19,7 +19,6 @@ process PURPLE {
     val genome_ver
     path genome_fai
     path genome_dict
-    path gc_profile
     path sage_known_hotspots_somatic
     path sage_known_hotspots_germline
     path driver_gene_panel
@@ -74,7 +73,6 @@ process PURPLE {
         ${sage_known_hotspots_germline_arg} \\
         ${target_regions_bed_arg} \\
         ${germline_amp_del_freq_file_arg} \\
-        -gc_profile ${gc_profile} \\
         -circos \$(which circos) \\
         -threads ${task.cpus} \\
         ${log_level_arg} \\
