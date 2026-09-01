@@ -3,4 +3,4 @@ channels:
   - conda-forge
   - bioconda
 dependencies:
-  - bioconda::hmftools-pave=1.8.2
+  - bioconda::hmftools-pave==1.9

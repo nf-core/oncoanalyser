@@ -3,4 +3,4 @@ channels:
   - conda-forge
   - bioconda
 dependencies:
-  - bioconda::hmftools-amber=4.2
+  - bioconda::hmftools-amber==4.3

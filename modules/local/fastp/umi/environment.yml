@@ -1,6 +1,6 @@
-name: sambamba_merge
+name: fastp_umi
 channels:
   - conda-forge
   - bioconda
 dependencies:
-  - bioconda::sambamba=1.0.1
+  - bioconda::fastp=0.23.4

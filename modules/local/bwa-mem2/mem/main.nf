@@ -13,9 +13,9 @@ process BWAMEM2_ALIGN {
     path genome_bwamem2_index
 
     output:
-    tuple val(meta), path('*.bam'), path('*.bai'), emit: bam
-    path 'versions.yml'                          , emit: versions
-    path '.command.*'                            , emit: command_files
+    tuple val(meta), path('*.bam'), path('*.bai')            , topic: bwamem2_align_bam
+    tuple val(meta), val('bwamem2_align'), path('.command.*'), topic: command_files
+    path 'versions.yml'                                      , topic: versions
 
     when:
     task.ext.when == null || task.ext.when
@@ -25,8 +25,7 @@ process BWAMEM2_ALIGN {
     def args2 = task.ext.args2 ?: ''
     def args3 = task.ext.args3 ?: ''
 
-    def read_group_tag = "@RG\\tID:${meta.read_group}\\tSM:${meta.sample_id}"
-    def output_fn = meta.split ? "${meta.split}.${meta.sample_id}.${meta.read_group}.bam" : "${meta.sample_id}.${meta.read_group}.bam"
+    def output_fn = meta.split ? "${meta.split}.${meta.output_file_id}.bam" : "${meta.output_file_id}.bam"
 
     """
     ln -fs \$(find -L ${genome_bwamem2_index} -type f) ./
@@ -35,7 +34,7 @@ process BWAMEM2_ALIGN {
         ${args} \\
         -Y \\
         -K 100000000 \\
-        -R '${read_group_tag}' \\
+        -R '${meta.rg_line}' \\
         -t ${task.cpus} \\
         ${genome_fasta} \\
         ${reads_fwd} \\
@@ -59,12 +58,13 @@ process BWAMEM2_ALIGN {
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":
         bwa-mem2: 2.3
+        samtools: \$(samtools --version | sed -n '/^samtools / { s/^.* //p }')
         sambamba: \$(sambamba --version 2>&1 | sed -n '/^sambamba / { s/^.* //p }' | head -n1)
     END_VERSIONS
     """
 
     stub:
-    def output_fn = meta.split ? "${meta.split}.${meta.sample_id}.${meta.read_group}.bam" : "${meta.sample_id}.${meta.read_group}.bam"
+    def output_fn = meta.split ? "${meta.split}.${meta.output_file_id}.bam" : "${meta.output_file_id}.bam"
 
     """
     touch ${output_fn}

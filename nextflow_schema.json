@@ -20,7 +20,7 @@
                     "mimetype": "text/csv",
                     "pattern": "^\\S+\\.csv$",
                     "description": "Path to comma-separated file containing information about the samples in the experiment.",
-                    "help_text": "You will need to create a design file with information about the samples in your experiment before running the pipeline. Use this parameter to specify its location. It has to be a comma-separated file with 3 columns, and a header row. See [usage docs](https://nf-co.re/oncoanalyser/usage#samplesheet-input).",
+                    "help_text": "You will need to create a design file with information about the samples in your experiment before running the pipeline. Use this parameter to specify its location. It has to be a comma-separated file with 8 columns, and a header row. See [usage docs](https://nf-co.re/oncoanalyser/usage#samplesheet-input).",
                     "fa_icon": "fas fa-file-csv"
                 },
                 "outdir": {
@@ -44,17 +44,28 @@
                     "help_text": "Set this parameter to your e-mail address to get a summary e-mail with details of the run sent to you when the workflow exits. If set in your user config file (`~/.nextflow/config`) then you don't need to specify this on the command line for every run.",
                     "pattern": "^([a-zA-Z0-9_\\-\\.]+)@([a-zA-Z0-9_\\-\\.]+)\\.([a-zA-Z]{2,5})$"
                 },
+                "multiqc_title": {
+                    "type": "string",
+                    "description": "MultiQC report title. Printed as page header, used for filename if not otherwise specified.",
+                    "fa_icon": "fas fa-file-signature"
+                },
                 "mode": {
                     "type": "string",
                     "description": "Workflow run mode.",
                     "fa_icon": "fas fa-diagram-project",
-                    "pattern": "^(wgts|targeted|purity_estimate|panel_resource_creation|prepare_reference)"
+                    "pattern": "(?i)^(wgts|targeted|purity_estimate|panel_resource_creation|prepare_reference)$"
                 },
                 "purity_estimate_mode": {
                     "type": "string",
                     "description": "Purity estimate workflow run mode.",
                     "fa_icon": "fas fa-diagram-project",
-                    "pattern": "^(wgts|targeted)"
+                    "pattern": "(?i)^(wgts|targeted)$"
+                },
+                "sequencing_platform": {
+                    "type": "string",
+                    "description": "Type of sequencing technology.",
+                    "fa_icon": "far fa-file-code",
+                    "enum": ["illumina", "sbx", "ultima"]
                 },
                 "panel": {
                     "type": "string",
@@ -65,13 +76,18 @@
                     "type": "boolean",
                     "description": "Skip check for restricted genome.",
                     "default": false,
-                    "fa_icon": "fas fa-palette"
+                    "fa_icon": "fas fa-lock-open"
                 },
                 "force_panel": {
                     "type": "boolean",
                     "description": "Skip check for known panels.",
                     "default": false,
-                    "fa_icon": "fas fa-palette"
+                    "fa_icon": "fas fa-lock-open"
+                },
+                "ref_data_types": {
+                    "type": "string",
+                    "description": "Which reference data types to download and extract. To be used with --mode prepare_reference.",
+                    "fa_icon": "fas fa-diagram-project"
                 },
                 "processes_manual": {
                     "type": "string",
@@ -88,27 +104,25 @@
                     "description": "Include processes that are excluded by default, provided as a comma separated list.",
                     "fa_icon": "fas fa-diagram-project"
                 },
-                "ref_data_types": {
+                "umi_type": {
                     "type": "string",
-                    "description": "Which reference data types to download and extract.",
-                    "fa_icon": "fas fa-diagram-project"
+                    "description": "UMI type. Sets default '*_umi_* settings'",
+                    "fa_icon": "fas fa-cog",
+                    "enum": ["kapa", "msk", "tso500", "twist"]
                 },
-                "create_stub_placeholders": {
+                "fastq_tools_umi_enabled": {
                     "type": "boolean",
-                    "description": "Create placeholders for reference data during stub run.",
-                    "default": false,
-                    "fa_icon": "fas fa-diagram-project"
+                    "description": "Enable fastq-tools UMI processing.",
+                    "fa_icon": "fas fa-cog"
                 },
-                "max_fastq_records": {
-                    "type": "integer",
-                    "description": "When positive, will use fastp to split fastq files so that each resultant fastq file has no more than max_fastq_records records. When nonpositive, fastp is not used and the provided fastq files are passed as-is to the aligner.",
-                    "default": 10000000,
+                "fastq_tools_umi_delim": {
+                    "type": "string",
+                    "description": "UMI delimiter fastq-tools.",
                     "fa_icon": "fas fa-cog"
                 },
                 "fastp_umi_enabled": {
                     "type": "boolean",
                     "description": "Enable fastp UMI processing.",
-                    "default": false,
                     "fa_icon": "fas fa-cog"
                 },
                 "fastp_umi_location": {
@@ -131,17 +145,11 @@
                 "redux_umi_enabled": {
                     "type": "boolean",
                     "description": "Enable REDUX UMI processing.",
-                    "default": false,
                     "fa_icon": "fas fa-cog"
                 },
                 "redux_umi_duplex_delim": {
                     "type": "string",
                     "description": "UMI duplex delimiter as used by REDUX.",
-                    "fa_icon": "fas fa-cog"
-                },
-                "gridss_config": {
-                    "type": "string",
-                    "description": "Path to GRIDSS configuration file.",
                     "fa_icon": "fas fa-cog"
                 },
                 "isofox_read_length": {
@@ -175,6 +183,11 @@
                     "default": "TRANSCRIPT_COUNTS;ALT_SPLICE_JUNCTIONS;FUSIONS;RETAINED_INTRONS",
                     "fa_icon": "fas fa-cog"
                 },
+                "max_fastq_records": {
+                    "type": "integer",
+                    "description": "When positive, parallelise read alignment across multiple jobs by splitting fastq files into multiple fastq files with no more than max_fastq_records records.",
+                    "fa_icon": "fas fa-cog"
+                },
                 "driver_gene_panel": {
                     "type": "string",
                     "description": "User defined driver gene panel used in panel resource creation, or for overriding the default file located in ref_data_hmf_data_path",
@@ -185,12 +198,29 @@
                     "description": "User defined target regions BED used in panel resource creation.",
                     "fa_icon": "fas fa-cog"
                 },
+                "enable_cn_norm_with_wgs_pct": {
+                    "type": "boolean",
+                    "description": "During panel resource creation, calculate copy number normalisation factors based on per-region copy number percentiles derived from the Hartwig WGS solid tumor cohort.",
+                    "default": false,
+                    "fa_icon": "fas fa-chart-bar"
+                },
+                "gridss_config": {
+                    "type": "string",
+                    "description": "Path to GRIDSS configuration file.",
+                    "fa_icon": "fas fa-cog"
+                },
                 "hmftools_log_level": {
                     "type": "string",
                     "enum": ["ALL", "TRACE", "DEBUG", "INFO", "WARN", "ERROR", "FATAL"],
                     "description": "Log level filter for WiGiTS modules",
                     "default": "DEBUG",
                     "fa_icon": "fas fa-cog"
+                },
+                "create_stub_placeholders": {
+                    "type": "boolean",
+                    "description": "Create placeholders for reference data during stub run.",
+                    "default": false,
+                    "fa_icon": "fas fa-diagram-project"
                 }
             }
         },
@@ -209,7 +239,7 @@
                     "type": "string",
                     "description": "Version of reference genome.",
                     "fa_icon": "far fa-file-code",
-                    "enum": ["37", "38", 37, 38],
+                    "enum": ["37", "38"],
                     "hidden": true
                 },
                 "genome_type": {
@@ -229,19 +259,24 @@
                 },
                 "igenomes_base": {
                     "type": "string",
-                    "format": "directory-path",
                     "description": "The base path to the igenomes reference files",
                     "fa_icon": "fas fa-ban",
                     "hidden": true,
                     "default": "s3://ngi-igenomes/igenomes/"
                 },
-                "hmf_genomes_base": {
+                "ref_data_base": {
                     "type": "string",
                     "format": "directory-path",
-                    "description": "The base path to the HMF genome reference files",
+                    "description": "The URL and root path to the oncoanalyser reference files",
                     "fa_icon": "fas fa-ban",
-                    "hidden": true,
-                    "default": "https://pub-cf6ba01919994c3cbd354659947f74d8.r2.dev/genomes"
+                    "hidden": true
+                },
+                "ref_data_genomes_base": {
+                    "type": "string",
+                    "format": "directory-path",
+                    "description": "The URL and root path to the Hartwig genome reference files",
+                    "fa_icon": "fas fa-ban",
+                    "hidden": true
                 },
                 "ref_data_hmf_data_path": {
                     "type": "string",
@@ -295,6 +330,7 @@
                 },
                 "prepare_reference_only": {
                     "type": "boolean",
+                    "description": "Set the pipeline to only prepare reference data.",
                     "default": false,
                     "fa_icon": "fas fa-cog",
                     "hidden": true
@@ -385,18 +421,37 @@
                     "fa_icon": "fas fa-remove-format",
                     "hidden": true
                 },
+                "max_multiqc_email_size": {
+                    "type": "string",
+                    "description": "File size limit when attaching MultiQC reports to summary emails.",
+                    "pattern": "^\\d+(\\.\\d+)?\\.?\\s*(K|M|G|T)?B$",
+                    "default": "25.MB",
+                    "fa_icon": "fas fa-file-upload",
+                    "hidden": true
+                },
                 "monochrome_logs": {
                     "type": "boolean",
                     "description": "Do not use coloured log outputs.",
                     "fa_icon": "fas fa-palette",
                     "hidden": true
                 },
-                "hook_url": {
+                "multiqc_config": {
                     "type": "string",
-                    "description": "Incoming hook URL for messaging service",
-                    "fa_icon": "fas fa-people-group",
-                    "help_text": "Incoming hook URL for messaging service. Currently, MS Teams and Slack are supported.",
+                    "format": "file-path",
+                    "description": "Custom config file to supply to MultiQC.",
+                    "fa_icon": "fas fa-cog",
                     "hidden": true
+                },
+                "multiqc_logo": {
+                    "type": "string",
+                    "description": "Custom logo file to supply to MultiQC. File name must also be set in the MultiQC config file",
+                    "fa_icon": "fas fa-image",
+                    "hidden": true
+                },
+                "multiqc_methods_description": {
+                    "type": "string",
+                    "description": "Custom MultiQC yaml file containing HTML including a methods description.",
+                    "fa_icon": "fas fa-cog"
                 },
                 "validate_params": {
                     "type": "boolean",

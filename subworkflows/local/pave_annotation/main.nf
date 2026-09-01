@@ -2,9 +2,6 @@
 // PAVE annotates somatic and germline variant VCFs with gene and transcript coding and protein effects
 //
 
-import Constants
-import Utils
-
 include { PAVE_GERMLINE } from '../../../modules/local/pave/germline/main'
 include { PAVE_SOMATIC  } from '../../../modules/local/pave/somatic/main'
 
@@ -12,8 +9,8 @@ workflow PAVE_ANNOTATION {
     take:
     // Sample data
     ch_inputs              // channel: [mandatory] [ meta ]
-    ch_sage_germline_vcf   // channel: [mandatory] [ meta, sage_germline_vcf, sage_somatic_tbi ]
-    ch_sage_somatic_vcf    // channel: [mandatory] [ meta, sage_somatic_vcf, sage_somatic_tbi ]
+    ch_sage_dir_somatic    // channel: [mandatory] [ meta, sage_dir ]
+    ch_sage_dir_germline   // channel: [mandatory] [ meta, sage_dir ]
 
     // Reference data
     genome_fasta           // channel: [mandatory] /path/to/genome_fasta
@@ -29,29 +26,30 @@ workflow PAVE_ANNOTATION {
     ensembl_data_resources // channel: [mandatory] /path/to/ensembl_data_resources/
     gnomad_resource        // channel: [mandatory] /path/to/gnomad_resource
 
-    main:
-    // Channel for version.yml files
-    ch_versions = Channel.empty()
+    // Params
+    sequencing_platform    // string:  [mandatory] sequencing platform
 
+    main:
     //
     // MODULE: PAVE germline
     //
-    // Select input sources and sort
+    // Select input sources then sort
     // channel: runnable: [ meta, sage_vcf, sage_tbi ]
     // channel: skip: [ meta ]
-    ch_sage_germline_inputs_sorted = ch_sage_germline_vcf
-        .map { meta, sage_vcf, sage_tbi ->
-            return [
-                meta,
-                Utils.selectCurrentOrExisting(sage_vcf, meta, Constants.INPUT.SAGE_VCF_NORMAL),
-                Utils.selectCurrentOrExisting(sage_tbi, meta, Constants.INPUT.SAGE_VCF_TBI_NORMAL),
-            ]
+    ch_sage_germline_inputs_sorted = ch_sage_dir_germline
+        .map { meta, sage_dir ->
+
+            def sage_dir_selected = Utils.selectCurrentOrExisting(sage_dir, meta, Constants.INPUT.SAGE_DIR_NORMAL)
+            def sage_vcf = sage_dir_selected ? sage_dir_selected.resolve("${Utils.getTumorDnaSampleName(meta)}.sage.germline.vcf.gz") : []
+            def sage_tbi = sage_dir_selected ? sage_dir_selected.resolve("${Utils.getTumorDnaSampleName(meta)}.sage.germline.vcf.gz.tbi") : []
+
+            return [meta, sage_vcf, sage_tbi]
         }
         .branch { meta, sage_vcf, sage_tbi ->
 
-            def has_existing = Utils.hasExistingInput(meta, Constants.INPUT.PAVE_VCF_NORMAL)
+            def has_existing = Utils.hasExistingInput(meta, Constants.INPUT.PAVE_DIR_NORMAL)
 
-            runnable: Utils.hasTumorDna(meta) && Utils.hasNormalDna(meta) && sage_vcf && !has_existing
+            runnable: Utils.hasTumorDna(meta) && Utils.hasNormalDna(meta) && sage_vcf && ! has_existing
             skip: true
                 return meta
         }
@@ -82,29 +80,29 @@ workflow PAVE_ANNOTATION {
         segment_mappability,
         driver_gene_panel,
         ensembl_data_resources,
+        sequencing_platform,
     )
-
-    ch_versions = ch_versions.mix(PAVE_GERMLINE.out.versions)
 
     //
     // MODULE: PAVE somatic
     //
-    // Select input sources and sort
+    // Select input sources then sort
     // channel: runnable: [ meta, sage_vcf, sage_tbi ]
     // channel: skip: [ meta ]
-    ch_sage_somatic_inputs_sorted = ch_sage_somatic_vcf
-        .map { meta, sage_vcf, sage_tbi ->
-            return [
-                meta,
-                Utils.selectCurrentOrExisting(sage_vcf, meta, Constants.INPUT.SAGE_VCF_TUMOR),
-                Utils.selectCurrentOrExisting(sage_tbi, meta, Constants.INPUT.SAGE_VCF_TBI_TUMOR),
-            ]
+    ch_sage_somatic_inputs_sorted = ch_sage_dir_somatic
+        .map { meta, sage_dir ->
+
+            def sage_dir_selected = Utils.selectCurrentOrExisting(sage_dir, meta, Constants.INPUT.SAGE_DIR_TUMOR)
+            def sage_vcf = sage_dir_selected ? sage_dir_selected.resolve("${Utils.getTumorDnaSampleName(meta)}.sage.somatic.vcf.gz") : []
+            def sage_tbi = sage_dir_selected ? sage_dir_selected.resolve("${Utils.getTumorDnaSampleName(meta)}.sage.somatic.vcf.gz.tbi") : []
+
+            return [meta, sage_vcf, sage_tbi]
         }
         .branch { meta, sage_vcf, sage_tbi ->
 
-            def has_existing = Utils.hasExistingInput(meta, Constants.INPUT.PAVE_VCF_TUMOR)
+            def has_existing = Utils.hasExistingInput(meta, Constants.INPUT.PAVE_DIR_TUMOR)
 
-            runnable: Utils.hasTumorDna(meta) && sage_vcf && !has_existing
+            runnable: Utils.hasTumorDna(meta) && sage_vcf && ! has_existing
             skip: true
                 return meta
         }
@@ -136,27 +134,28 @@ workflow PAVE_ANNOTATION {
         driver_gene_panel,
         ensembl_data_resources,
         gnomad_resource,
+        sequencing_platform,
     )
 
-    ch_versions = ch_versions.mix(PAVE_SOMATIC.out.versions)
-
+    //
+    // STEP: Outputs
+    //
     // Set outputs, restoring original meta
-    // channel: [ meta, pave_vcf ]
-    ch_somatic_out = Channel.empty()
+    // channel: [ meta, pave_dir ]
+    ch_outputs_somatic = channel.empty()
         .mix(
-            WorkflowOncoanalyser.restoreMeta(PAVE_SOMATIC.out.vcf, ch_inputs),
+            WorkflowOncoanalyser.restoreMeta(channel.topic('pave_somatic_dir'), ch_inputs),
             ch_sage_somatic_inputs_sorted.skip.map { meta -> [meta, []] },
         )
 
-    ch_germline_out = Channel.empty()
+    // channel: [ meta, pave_dir ]
+    ch_outputs_germline = channel.empty()
         .mix(
-            WorkflowOncoanalyser.restoreMeta(PAVE_GERMLINE.out.vcf, ch_inputs),
+            WorkflowOncoanalyser.restoreMeta(channel.topic('pave_germline_dir'), ch_inputs),
             ch_sage_germline_inputs_sorted.skip.map { meta -> [meta, []] },
         )
 
     emit:
-    germline = ch_germline_out // channel: [ meta, pave_vcf ]
-    somatic  = ch_somatic_out  // channel: [ meta, pave_vcf ]
-
-    versions = ch_versions     // channel: [ versions.yml ]
+    germline_dir = ch_outputs_germline // channel: [ meta, pave_dir ]
+    somatic_dir  = ch_outputs_somatic  // channel: [ meta, pave_dir ]
 }

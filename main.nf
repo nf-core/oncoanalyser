@@ -1,6 +1,4 @@
 #!/usr/bin/env nextflow
-import Constants
-import Utils
 
 /*
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -25,7 +23,7 @@ include { getGenomeAttribute } from './subworkflows/local/utils_nfcore_oncoanaly
 
 /*
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-    SET DEFAULT VALUES
+    SET GENOME VALUES
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 */
 
@@ -36,21 +34,6 @@ params.ref_data_genome_img           = getGenomeAttribute('img')
 params.ref_data_genome_bwamem2_index = getGenomeAttribute('bwamem2_index')
 params.ref_data_genome_gridss_index  = getGenomeAttribute('gridss_index')
 params.ref_data_genome_star_index    = getGenomeAttribute('star_index')
-
-WorkflowMain.setParamsDefaults(params, log)
-WorkflowMain.validateParams(params, log)
-
-/*
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-    CREATE PLACEHOLDER FILES FOR STUB RUNS
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-*/
-
-// NOTE(SW): required prior to workflow import
-
-if (workflow.stubRun && params.create_stub_placeholders) {
-    Utils.createStubPlaceholders(params)
-}
 
 /*
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -75,14 +58,19 @@ include { WGTS                    } from './workflows/wgts'
 //
 
 workflow NFCORE_ONCOANALYSER {
-
+    main:
     // Get run mode
-    run_mode = Utils.getRunMode(params.mode, log)
+    def run_mode = Utils.getRunMode(params.mode, log)
+
+    // Results channel for eventual publishing
+    // channel: [filepath, file]
+    ch_results = channel.empty()
 
     // Run selected workflow
     // NOTE(SW): prepare reference is checked early as params.input is not required
-    if (run_mode === Constants.RunMode.PREPARE_REFERENCE)  {
-        PREPARE_REFERENCE()
+    if (run_mode == Constants.RunMode.PREPARE_REFERENCE)  {
+        PREPARE_REFERENCE(params)
+        ch_results = ch_results.mix(PREPARE_REFERENCE.out.results)
     } else {
         // Parse and validate inputs
         inputs = Utils.parseInput(params.input, workflow.stubRun, log)
@@ -90,20 +78,26 @@ workflow NFCORE_ONCOANALYSER {
         Utils.validateInput(inputs, run_config, params, log)
 
         // Run requested workflow
-        if (run_mode === Constants.RunMode.WGTS) {
-            WGTS(inputs, run_config)
-        } else if (run_mode === Constants.RunMode.TARGETED) {
-            TARGETED(inputs, run_config)
-        } else if (run_mode === Constants.RunMode.PURITY_ESTIMATE) {
-            PURITY_ESTIMATE(inputs, run_config)
-        } else if (run_mode === Constants.RunMode.PANEL_RESOURCE_CREATION) {
-            PANEL_RESOURCE_CREATION(inputs, run_config)
+        if (run_mode == Constants.RunMode.WGTS) {
+            WGTS(inputs, run_config, params)
+            ch_results = ch_results.mix(WGTS.out.results)
+        } else if (run_mode == Constants.RunMode.TARGETED) {
+            TARGETED(inputs, run_config, params)
+            ch_results = ch_results.mix(TARGETED.out.results)
+        } else if (run_mode == Constants.RunMode.PURITY_ESTIMATE) {
+            PURITY_ESTIMATE(inputs, run_config, params)
+            ch_results = ch_results.mix(PURITY_ESTIMATE.out.results)
+        } else if (run_mode == Constants.RunMode.PANEL_RESOURCE_CREATION) {
+            PANEL_RESOURCE_CREATION(inputs, run_config, params)
+            ch_results = ch_results.mix(PANEL_RESOURCE_CREATION.out.results)
         } else {
             log.error("received bad run mode: ${run_mode}")
-            Nextflow.exit(1)
+            exit(1)
         }
     }
 
+    emit:
+    results = ch_results // channel: [ filepath, file ]
 }
 
 /*
@@ -113,6 +107,19 @@ workflow NFCORE_ONCOANALYSER {
 */
 
 workflow {
+    main:
+    //
+    // STEP: Set defaults and apply extended, custom validation
+    //
+    WorkflowMain.setParamsDefaults(params, log)
+    WorkflowMain.validateParams(params, log)
+
+    //
+    // STEP: Create placeholders for stub runs if requested
+    //
+    if (workflow.stubRun && params.create_stub_placeholders) {
+        Utils.createStubPlaceholders(params)
+    }
 
     //
     // SUBWORKFLOW: Run initialisation tasks
@@ -143,9 +150,17 @@ workflow {
         params.plaintext_email,
         params.outdir,
         params.monochrome_logs,
-        params.hook_url,
+        channel.topic('multiqc_report'),
     )
 
+    publish:
+    results = NFCORE_ONCOANALYSER.out.results
+}
+
+output {
+    results {
+        path { filepath, file -> file >> filepath }
+    }
 }
 
 /*

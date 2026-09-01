@@ -16,7 +16,55 @@ concurrency:
   group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
   cancel-in-progress: true
 
+env:
+  # NOTE: also duplicated in the nf-test job 'with' block below; the env context is
+  # not available in reusable workflow calls (https://github.com/orgs/community/discussions/26671)
+  HMF_REF_VERSION: "grch38_hmf--26.1--1"
+
 jobs:
+  download-reference:
+    name: Download HMF reference data
+    runs-on:
+      - runs-on=${{ github.run_id }}-download-reference
+      - runner=8cpu-linux-x64
+      - volume=300gb
+      - extras=s3-cache
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
+        with:
+          fetch-depth: 0
+
+      - uses: runs-on/action@v2
+
+      - name: Restore HMF reference cache
+        id: cache-hmf-ref
+        uses: actions/cache@v4
+        with:
+          path: reference_data/
+          key: hmf-reference-${{ env.HMF_REF_VERSION }}-${{ hashFiles('nextflow.config', 'conf/hmf_data.config', 'conf/hmf_genomes.config') }}
+
+      - name: Setup Nextflow for reference download
+        if: ${{ steps.cache-hmf-ref.outputs.cache-hit != 'true' }}
+        uses: nf-core/setup-nextflow@v2
+
+      - name: Download HMF reference data from R2
+        if: ${{ steps.cache-hmf-ref.outputs.cache-hit != 'true' }}
+        run: |
+          nextflow run . \
+            -profile docker \
+            --mode prepare_reference \
+            --ref_data_types wgs,bwamem2_index,star_index \
+            --genome GRCh38_hmf \
+            --outdir ./ \
+            -c <(echo "aws.client.anonymous=true")
+
+      - name: Verify reference data
+        run: |
+          echo "Reference data size:"
+          du -sh reference_data/ || echo "reference_data/ not found"
+          echo "Reference data structure:"
+          find reference_data/ -maxdepth 3 -type d 2>/dev/null || echo "No directories found"
+
   # NOTE(SW): only run large tests on up-sized instances to avoid wasting compute (in this case the just test profile)
   # NOTE(SW): the test profile requires more than 32 GB memory and with the available RunsOn instances, the 32cpu-linux-x64 runner is the best fit despite being excessively overprovisioned re vCPUs
   # https://runs-on.com/runners/linux/
@@ -30,6 +78,7 @@ jobs:
   # c7i.12xlarge         48             96  48cpu-linux-x64
   # c7a.16xlarge         64            128  64cpu-linux-x64
   nf-test:
+    needs: [download-reference]
     uses: ./.github/workflows/nf-test-reusable.yml
     strategy:
       matrix:
@@ -38,15 +87,19 @@ jobs:
             tags: cicd
             runson_instance_type: 4cpu-linux-x64
             runson_volume_size: 60gb
+            use_reference_cache: false
           - name: large
             tags: cicd.large
             runson_instance_type: 32cpu-linux-x64
             runson_volume_size: 200gb
+            use_reference_cache: true
     with:
       name: ${{ matrix.name }}
       tags: ${{ matrix.tags }}
       runson_instance_type: ${{ matrix.runson_instance_type }}
       runson_volume_size: ${{ matrix.runson_volume_size }}
+      use_reference_cache: ${{ matrix.use_reference_cache }}
+      hmf_ref_version: "grch38_hmf--26.1--1"
 
   confirm-pass:
     needs: [nf-test]

@@ -4,8 +4,8 @@ process LINX_SOMATIC {
 
     conda "${moduleDir}/environment.yml"
     container "${ workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container ?
-        'https://depot.galaxyproject.org/singularity/hmftools-linx:2.2--hdfd78af_0' :
-        'biocontainers/hmftools-linx:2.2--hdfd78af_0' }"
+        'https://depot.galaxyproject.org/singularity/hmftools-linx:2.3.1--hdfd78af_0' :
+        'biocontainers/hmftools-linx:2.3.1--hdfd78af_0' }"
 
     input:
     tuple val(meta), path(purple_dir)
@@ -15,9 +15,9 @@ process LINX_SOMATIC {
     path driver_gene_panel
 
     output:
-    tuple val(meta), path('linx_somatic/'), emit: annotation_dir
-    path 'versions.yml'                   , emit: versions
-    path '.command.*'                     , emit: command_files
+    tuple val(meta), path('linx_somatic/')                  , topic: linx_somatic_annotation_dir
+    tuple val(meta), val('linx_somatic'), path('.command.*'), topic: command_files
+    path 'versions.yml'                                     , topic: versions
 
     when:
     task.ext.when == null || task.ext.when
@@ -48,14 +48,15 @@ process LINX_SOMATIC {
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":
         linx: \$(linx -version | sed -n '/^Linx version / { s/^.* //p }')
+        java: \$(java --version | sed -n '/^openjdk/ { s/^.*openjdk //; s/ .*//p }')
     END_VERSIONS
     """
 
     stub:
     """
-    mkdir linx_somatic/
+    mkdir -p linx_somatic/
 
-    touch linx_somatic/placeholder
+    touch linx_somatic/.stub
 
     echo -e '${task.process}:\\n  stub: noversions\\n' > versions.yml
     """

@@ -3,15 +3,15 @@ process CUSTOM_EXTRACTTARBALL {
 
     conda "${moduleDir}/environment.yml"
     container "${ workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container ?
-        'https://depot.galaxyproject.org/singularity/ubuntu:20.04' :
-        'quay.io/nf-core/ubuntu:20.04' }"
+        'https://depot.galaxyproject.org/singularity/ubuntu:24.04' :
+        'nf-core/ubuntu:24.04' }"
 
     input:
     tuple val(meta), path(tarball)
 
     output:
-    path "${meta.id}/", emit: extracted_dir
-    path '.command.*' , emit: command_files
+    tuple val(meta), path("${meta.id}/")                      , topic: extracted_dir
+    tuple val(meta), val('extracttarball'), path('.command.*'), topic: command_files
 
     when:
     task.ext.when == null || task.ext.when
@@ -22,7 +22,7 @@ process CUSTOM_EXTRACTTARBALL {
     """
     mkdir -p ${meta.id}/
 
-    tar ${args} -xzvf ${tarball} --strip-components 1 -C ${meta.id}/
+    tar ${args} -xzvf ${tarball} --transform 's#^\\./##' --strip-components 1 -C ${meta.id}/
     """
 
     stub:

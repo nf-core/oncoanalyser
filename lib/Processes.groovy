@@ -1,7 +1,6 @@
 import nextflow.Nextflow
 
 import Constants
-import Utils
 
 
 class Processes {
@@ -14,7 +13,7 @@ class Processes {
             processes = this.getProcessList(manual_select, log)
 
             if (include || exclude) {
-                log.warning "When manually selecting processes, including/excluding processes is ignored"
+                log.warn 'When manually selecting processes, including/excluding processes is ignored'
             }
 
         } else {
@@ -39,7 +38,7 @@ class Processes {
     }
 
     public static getProcessList(process_str, log) {
-        if (!process_str) {
+        if (! process_str) {
             return []
         }
         return process_str
@@ -57,14 +56,14 @@ class Processes {
     }
 
     public static checkIncludeExcludeList(include_list, exclude_list, log) {
-        def processes_shared = [*include_list, *exclude_list]
+        def processes_shared = include_list + exclude_list
             .countBy { it }
             .findAll { k, v -> v > 1 }
             .keySet()
 
         if (processes_shared) {
             def processes_shared_str = processes_shared.join('\n  - ')
-            def message_base = 'the following processes was found in the include and the exclude list'
+            def message_base = 'the following processes were found in the include and the exclude list'
             log.error "${message_base}:\n  - ${processes_shared_str}"
             Nextflow.exit(1)
         }

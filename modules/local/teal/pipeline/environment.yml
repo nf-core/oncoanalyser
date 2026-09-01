@@ -3,4 +3,4 @@ channels:
   - conda-forge
   - bioconda
 dependencies:
-  - bioconda::hmftools-teal=1.3.6
+  - bioconda::hmftools-teal==1.4

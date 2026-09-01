@@ -2,73 +2,68 @@
 // Bam Tools calculates summary statistics for BAMs
 //
 
-import Constants
-import Utils
-
 include { BAMTOOLS } from '../../../modules/local/bamtools/main'
 
 workflow BAMTOOLS_METRICS {
     take:
     // Sample data
     ch_inputs              // channel: [mandatory] [ meta ]
-    ch_tumor_bam           // channel: [mandatory] [ meta, bam, bai ]
-    ch_normal_bam          // channel: [mandatory] [ meta, bam, bai ]
+    ch_redux_dir_tumor     // channel: [mandatory] [ meta, redux_dir ]
+    ch_redux_dir_normal    // channel: [mandatory] [ meta, redux_dir ]
 
     // Reference data
     genome_fasta           // channel: [mandatory] /path/to/genome_fasta
     genome_version         // channel: [mandatory] genome version
+    genome_fai             // channel: [mandatory] /path/to/genome_fai
     driver_gene_panel      // channel: [mandatory] /path/to/driver_gene_panel
     ensembl_data_resources // channel: [mandatory] /path/to/ensembl_data_resources/
-    target_region_bed      // channel: [optional]  /path/to/target_region_bed
+    target_regions_bed     // channel: [optional]  /path/to/target_regions_bed
 
     main:
-    // Channel for version.yml files
-    // channel: [ versions.yml ]
-    ch_versions = Channel.empty()
-
-    // Sort inputs, separate by tumor and normal
-    // channel: runnable: [ meta, bam, bai ]
+    // Select input sources then sort
+    // channel: runnable: [ meta, aln, idx ]
     // channel: skip: [ meta ]
-    ch_inputs_tumor_sorted = ch_tumor_bam
-        .map { meta, bam, bai ->
-            return [
-                meta,
-                Utils.selectCurrentOrExisting(bam, meta, Constants.INPUT.BAM_REDUX_DNA_TUMOR),
-                bai ?: Utils.getInput(meta, Constants.INPUT.BAI_DNA_TUMOR),
-            ]
+    ch_inputs_tumor_sorted = ch_redux_dir_tumor
+        .map { meta, redux_dir ->
+
+            def redux_dir_selected = Utils.selectCurrentOrExisting(redux_dir, meta, Constants.INPUT.REDUX_DIR_TUMOR)
+            def (aln, idx) = Utils.getTumorReduxDirAlignment(meta, redux_dir_selected)
+
+            return [meta, aln, idx]
+
         }
-        .branch { meta, bam, bai ->
+        .branch { meta, aln, idx ->
             def has_existing = Utils.hasExistingInput(meta, Constants.INPUT.BAMTOOLS_DIR_TUMOR)
-            runnable: bam && !has_existing
+            runnable: aln && ! has_existing
             skip: true
                 return meta
         }
 
-    // channel: runnable: [ meta, bam, bai ]
+    // channel: runnable: [ meta, aln, idx ]
     // channel: skip: [ meta ]
-    ch_inputs_normal_sorted = ch_normal_bam
-        .map { meta, bam, bai ->
-            return [
-                meta,
-                Utils.selectCurrentOrExisting(bam, meta, Constants.INPUT.BAM_REDUX_DNA_NORMAL),
-                bai ?: Utils.getInput(meta, Constants.INPUT.BAI_DNA_NORMAL),
-            ]
+    ch_inputs_normal_sorted = ch_redux_dir_normal
+        .map { meta, redux_dir ->
+
+            def redux_dir_selected = Utils.selectCurrentOrExisting(redux_dir, meta, Constants.INPUT.REDUX_DIR_NORMAL)
+            def (aln, idx) = Utils.getNormalReduxDirAlignment(meta, redux_dir_selected)
+
+            return [meta, aln, idx]
         }
-        .branch { meta, bam, bai ->
+        .branch { meta, aln, idx ->
             def has_existing = Utils.hasExistingInput(meta, Constants.INPUT.BAMTOOLS_DIR_NORMAL)
-            runnable: bam && !has_existing
+            runnable: aln && ! has_existing
             skip: true
                 return meta
         }
 
     // Create process input channel
-    // channel: [ meta_bamtools, bam, bai ]
-    ch_bamtools_inputs = Channel.empty()
+    // channel: [ meta_bamtools, aln, idx ]
+    ch_bamtools_inputs = channel.empty()
         .mix(
-            ch_inputs_tumor_sorted.runnable.map { meta, bam, bai -> [meta, Utils.getTumorDnaSample(meta), 'tumor', bam, bai] },
-            ch_inputs_normal_sorted.runnable.map { meta, bam, bai -> [meta, Utils.getNormalDnaSample(meta), 'normal', bam, bai] },
+            ch_inputs_tumor_sorted.runnable.map { meta, aln, idx -> [meta, Utils.getTumorDnaSample(meta), 'tumor', aln, idx] },
+            ch_inputs_normal_sorted.runnable.map { meta, aln, idx -> [meta, Utils.getNormalDnaSample(meta), 'normal', aln, idx] },
         )
-        .map { meta, meta_sample, sample_type, bam, bai ->
+        .map { meta, meta_sample, sample_type, aln, idx ->
 
             def meta_bamtools = [
                 key: meta.group_id,
@@ -77,7 +72,7 @@ workflow BAMTOOLS_METRICS {
                 sample_type: sample_type,
             ]
 
-            return [meta_bamtools, bam, bai]
+            return [meta_bamtools, aln, idx]
         }
 
     // Run process
@@ -85,16 +80,15 @@ workflow BAMTOOLS_METRICS {
         ch_bamtools_inputs,
         genome_fasta,
         genome_version,
+        genome_fai,
         driver_gene_panel,
         ensembl_data_resources,
-        target_region_bed,
+        target_regions_bed,
     )
 
-    ch_versions = ch_versions.mix(BAMTOOLS.out.versions)
-
     // Sort into a tumor and normal channel
-    ch_bamtools_out = BAMTOOLS.out.metrics_dir
-        .branch { meta_bamtools, metrics_dir ->
+    ch_bamtools_out = channel.topic('bamtools_metrics_dir')
+        .branch { meta_bamtools, bamtools_dir ->
             assert ['tumor', 'normal'].contains(meta_bamtools.sample_type)
             tumor: meta_bamtools.sample_type == 'tumor'
             normal: meta_bamtools.sample_type == 'normal'
@@ -102,22 +96,21 @@ workflow BAMTOOLS_METRICS {
         }
 
     // Set outputs, restoring original meta
-    // channel: [ meta, metrics_dir ]
-    ch_somatic_metrics_dir = Channel.empty()
+    // channel: [ meta, bamtools_dir ]
+    ch_tumor_out = channel.empty()
         .mix(
             WorkflowOncoanalyser.restoreMeta(ch_bamtools_out.tumor, ch_inputs),
             ch_inputs_tumor_sorted.skip.map { meta -> [meta, []] },
         )
 
-    ch_germline_metrics_dir = Channel.empty()
+    // channel: [ meta, bamtools_dir ]
+    ch_normal_out = channel.empty()
         .mix(
             WorkflowOncoanalyser.restoreMeta(ch_bamtools_out.normal, ch_inputs),
             ch_inputs_normal_sorted.skip.map { meta -> [meta, []] },
         )
 
     emit:
-    somatic  = ch_somatic_metrics_dir  // channel: [ meta, metrics_dir ]
-    germline = ch_germline_metrics_dir // channel: [ meta, metrics_dir ]
-
-    versions = ch_versions             // channel: [ versions.yml ]
+    tumor_dir  = ch_tumor_out  // channel: [ meta, bamtools_dir ]
+    normal_dir = ch_normal_out // channel: [ meta, bamtools_dir ]
 }

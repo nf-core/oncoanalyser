@@ -2,14 +2,10 @@
 // This file holds several functions specific to the workflow/oncoanalyser.nf in the nf-core/oncoanalyser pipeline
 //
 
-import static groovy.io.FileType.FILES
-
 import nextflow.Channel
 import nextflow.Nextflow
 
 import Constants
-import Processes
-import Utils
 
 class WorkflowOncoanalyser {
 
@@ -44,7 +40,7 @@ class WorkflowOncoanalyser {
                 def values_list = values_map
                     .sort(false) { it.position }
                     .collect { it.values }
-                return [meta, *values_list]
+                return [meta] + values_list
             }
 
         if (named_args.getOrDefault('flatten', true)) {
@@ -55,7 +51,7 @@ class WorkflowOncoanalyser {
                 r = r.map { data ->
                     def meta = data[0]
                     def inputs = data[1..-1].collectMany { it }
-                    return [meta, *inputs]
+                    return [meta] + inputs
                 }
             } else {
                 System.err.println "ERROR: got bad flatten_mode: ${flatten_mode}"
@@ -71,32 +67,6 @@ class WorkflowOncoanalyser {
         return groupByMeta([:], *channels)
     }
 
-    public static getInput(Map named_args, meta, key) {
-
-        def result
-        def (key_filetype, key_filetypes, key_sequencetypes) = key
-
-        for (key_sample in [key_filetypes, key_sequencetypes].combinations()) {
-            if (meta.containsKey(key_sample) && meta[key_sample].containsKey(key_filetype)) {
-                // NOTE(SW): could return early here then false below
-                return meta[key_sample].getAt(key_filetype)
-                break
-            }
-        }
-
-        if (result) {
-            return result
-        } else {
-            return false
-        }
-
-    }
-
-    // NOTE(SW): function signature required to catch where no named arguments are passed
-    public static getInput(ch, key) {
-        return getInput([:], ch, key)
-    }
-
     public static joinMeta(Map named_args, ch_a, ch_b) {
         // NOTE(SW): the cross operator is used to allow many-to-one relationship between ch_output
         // and ch_metas
@@ -109,7 +79,7 @@ class WorkflowOncoanalyser {
             .map { b, a ->
                 def (ka, values) = a
                 def (kb, meta) = b
-                return [meta, *values]
+                return [meta] + values
             }
     }
 

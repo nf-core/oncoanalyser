@@ -23,7 +23,7 @@
                 "type": "string",
                 "description": "Sample identifier",
                 "pattern": "^\\S+$",
-                "errorMessage": "subject_id must be provided and cannot contain spaces"
+                "errorMessage": "sample_id must be provided and cannot contain spaces"
             },
             "sample_type": {
                 "type": "string",
@@ -41,19 +41,19 @@
             },
             "info": {
                 "type": "string",
-                "description": "",
+                "description": "Additional sample information",
                 "pattern": "^\\S+$",
                 "errorMessage": "info cannot contain spaces"
             },
             "filetype": {
                 "type": "string",
-                "description": "",
+                "description": "Type of provided file",
                 "pattern": "^\\S+$",
                 "errorMessage": "filetype must be provided and cannot contain spaces"
             },
             "filepath": {
                 "type": "string",
-                "description": "",
+                "description": "Path to file",
                 "pattern": "^\\S+$",
                 "errorMessage": "filepath must be provided and cannot contain spaces"
             }

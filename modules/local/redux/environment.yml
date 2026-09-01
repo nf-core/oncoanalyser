@@ -3,4 +3,4 @@ channels:
   - conda-forge
   - bioconda
 dependencies:
-  - bioconda::hmftools-redux=1.2.2
+  - bioconda::hmftools-redux==2.0.5

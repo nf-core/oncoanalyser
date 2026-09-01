@@ -2,16 +2,13 @@
 // PEACH infers germline haplotypes and reports relevant pharmacogenomics
 //
 
-import Constants
-import Utils
-
 include { PEACH } from '../../../modules/local/peach/main'
 
 workflow PEACH_CALLING {
     take:
     // Sample data
     ch_inputs                 // channel: [mandatory] [ meta ]
-    ch_purple                 // channel: [mandatory] [ meta, purple_dir ]
+    ch_purple_dir             // channel: [mandatory] [ meta, purple_dir ]
 
     // Reference data
     peach_haplotypes          // channel: [mandatory] /path/to/peach_haplotypes
@@ -19,14 +16,10 @@ workflow PEACH_CALLING {
     peach_drug_info           // channel: [mandatory] /path/to/peach_drug_info
 
     main:
-    // Channel for version.yml files
-    // channel: [ versions.yml ]
-    ch_versions = Channel.empty()
-
-    // Select input sources and sort
+    // Select input sources then sort
     // channel: runnable: [ meta, purple_dir ]
     // channel: skip: [ meta ]
-    ch_inputs_sorted = ch_purple
+    ch_inputs_sorted = ch_purple_dir
         .map { meta, purple_dir ->
             return [
                 meta,
@@ -38,7 +31,10 @@ workflow PEACH_CALLING {
             def has_normal = Utils.hasNormalDna(meta)
             def has_existing = Utils.hasExistingInput(meta, Constants.INPUT.PEACH_DIR)
 
-            runnable: purple_dir && has_normal && !has_existing
+            def tumor_id = Utils.getTumorDnaSampleName(meta)
+            def has_smlv_vcf = purple_dir ? purple_dir.resolve("${tumor_id}.purple.germline.vcf.gz").exists() : false
+
+            runnable: has_smlv_vcf && has_normal && ! has_existing
             skip: true
                 return meta
         }
@@ -54,7 +50,7 @@ workflow PEACH_CALLING {
                 sample_id: Utils.getNormalDnaSampleName(meta),
             ]
 
-            def purple_germline_smlv_vcf = file(purple_dir).resolve("${Utils.getTumorDnaSampleName(meta)}.purple.germline.vcf.gz")
+            def purple_germline_smlv_vcf = purple_dir.resolve("${Utils.getTumorDnaSampleName(meta)}.purple.germline.vcf.gz")
 
             return [meta_peach, purple_germline_smlv_vcf]
         }
@@ -67,18 +63,14 @@ workflow PEACH_CALLING {
         peach_drug_info,
     )
 
-    ch_versions = ch_versions.mix(PEACH.out.versions)
-
     // Set outputs, restoring original meta
     // channel: [ meta, peach_dir ]
-    ch_outputs = Channel.empty()
+    ch_outputs = channel.empty()
         .mix(
-            WorkflowOncoanalyser.restoreMeta(PEACH.out.peach_dir, ch_inputs),
+            WorkflowOncoanalyser.restoreMeta(channel.topic('peach_dir'), ch_inputs),
             ch_inputs_sorted.skip.map { meta -> [meta, []] },
         )
 
     emit:
-    peach_dir = ch_outputs  // channel: [ meta, peach_dir ]
-
-    versions  = ch_versions // channel: [ versions.yml ]
+    peach_dir = ch_outputs // channel: [ meta, peach_dir ]
 }

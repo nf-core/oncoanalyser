@@ -3,4 +3,4 @@ channels:
   - conda-forge
   - bioconda
 dependencies:
-  - bioconda::hmftools-lilac=1.7.3
+  - bioconda::hmftools-lilac==2.0

@@ -4,8 +4,8 @@ process LINX_VISUALISER {
 
     conda "${moduleDir}/environment.yml"
     container "${ workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container ?
-        'https://depot.galaxyproject.org/singularity/hmftools-linx:2.2--hdfd78af_0' :
-        'biocontainers/hmftools-linx:2.2--hdfd78af_0' }"
+        'https://depot.galaxyproject.org/singularity/hmftools-linx:2.3.1--hdfd78af_0' :
+        'biocontainers/hmftools-linx:2.3.1--hdfd78af_0' }"
 
     input:
     tuple val(meta), path(linx_annotation_dir), path(amber_dir), path(cobalt_dir), path(purple_dir)
@@ -13,9 +13,9 @@ process LINX_VISUALISER {
     path ensembl_data_resources
 
     output:
-    tuple val(meta), path('plots/'), emit: plots
-    path 'versions.yml'            , emit: versions
-    path '.command.*'              , emit: command_files
+    tuple val(meta), path('plots/')                            , topic: linx_visualiser_plots
+    tuple val(meta), val('linx_visualiser'), path('.command.*'), topic: command_files
+    path 'versions.yml'                                        , topic: versions
 
     when:
     task.ext.when == null || task.ext.when
@@ -28,7 +28,6 @@ process LINX_VISUALISER {
 
     def log_level_arg = task.ext.log_level ? "-log_level ${task.ext.log_level}" : ''
 
-    // For copy number circos tracks
     def amber_dir_arg = amber_dir ? "-amber_dir ${amber_dir}" : ''
     def cobalt_dir_arg = cobalt_dir ? "-cobalt_dir ${cobalt_dir}" : ''
     def purple_dir_arg = purple_dir ? "-purple_dir ${purple_dir}" : ''
@@ -105,6 +104,11 @@ process LINX_VISUALISER {
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":
         linx: \$(linx -version | sed -n '/^Linx version / { s/^.* //p }')
+        java: \$(java --version | sed -n '/^openjdk/ { s/^.*openjdk //; s/ .*//p }')
+        r: \$(R --version | sed -n '/^R version/ { s/^.*version //; s/ .*//p }')
+        r-dplyr: \$(Rscript -e 'packageVersion("dplyr") |> as.character() |> writeLines()')
+        r-ggplot2: \$(Rscript -e 'packageVersion("ggplot2") |> as.character() |> writeLines()')
+        circos: \$(circos -version | sed -n '/^circos/ { s/^.* v //; s/ .*//p }')
     END_VERSIONS
     """
 
@@ -112,7 +116,7 @@ process LINX_VISUALISER {
     """
     mkdir -p plots/{all,reportable}/
 
-    touch plots/{all,reportable}/placeholder
+    touch plots/{all,reportable}/.stub
 
     echo -e '${task.process}:\n  stub: noversions\n' > versions.yml
     """

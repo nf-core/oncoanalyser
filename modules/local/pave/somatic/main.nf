@@ -4,8 +4,8 @@ process PAVE_SOMATIC {
 
     conda "${moduleDir}/environment.yml"
     container "${ workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container ?
-        'https://depot.galaxyproject.org/singularity/hmftools-pave:1.8.2--hdfd78af_0' :
-        'biocontainers/hmftools-pave:1.8.2--hdfd78af_0' }"
+        'https://depot.galaxyproject.org/singularity/hmftools-pave:1.9--hdfd78af_0' :
+        'biocontainers/hmftools-pave:1.9--hdfd78af_0' }"
 
     input:
     tuple val(meta), path(sage_vcf), path(sage_tbi)
@@ -19,12 +19,12 @@ process PAVE_SOMATIC {
     path driver_gene_panel
     path ensembl_data_resources
     path gnomad_resource
+    val sequencing_platform
 
     output:
-    tuple val(meta), path('*.vcf.gz')    , emit: vcf
-    tuple val(meta), path('*.vcf.gz.tbi'), emit: index
-    path 'versions.yml'                  , emit: versions
-    path '.command.*'                    , emit: command_files
+    tuple val(meta), path('pave_somatic/')                  , topic: pave_somatic_dir
+    tuple val(meta), val('pave_somatic'), path('.command.*'), topic: command_files
+    path 'versions.yml'                                     , topic: versions
 
     when:
     task.ext.when == null || task.ext.when
@@ -37,9 +37,9 @@ process PAVE_SOMATIC {
     def log_level_arg = task.ext.log_level ? "-log_level ${task.ext.log_level}" : ''
 
     def gnomad_args
-    if (genome_ver.toString() == '37') {
+    if (genome_ver == '37') {
         gnomad_args = "-gnomad_freq_file ${gnomad_resource}"
-    } else if (genome_ver.toString() == '38') {
+    } else if (genome_ver == '38') {
         gnomad_args = "-gnomad_freq_dir ${gnomad_resource}"
     } else {
         error "got bad genome version: ${genome_ver}"
@@ -49,12 +49,13 @@ process PAVE_SOMATIC {
     def pon_artefact_arg = pon_artefacts ? "-pon_artefact_file ${pon_artefacts}" : ''
 
     """
+    mkdir -p pave_somatic/
+
     pave \\
         -Xmx${Math.round(task.memory.bytes * xmx_mod)} \\
         ${args} \\
         -sample ${meta.sample_id} \\
         -input_vcf ${sage_vcf} \\
-        -output_vcf ${meta.sample_id}.pave.somatic.vcf.gz \\
         -ref_genome ${genome_fasta} \\
         -ref_genome_version ${genome_ver} \\
         ${pon_artefact_arg} \\
@@ -64,19 +65,25 @@ process PAVE_SOMATIC {
         -driver_gene_panel ${driver_gene_panel} \\
         -mappability_bed ${segment_mappability} \\
         -ensembl_data_dir ${ensembl_data_resources} \\
+        -sequencing_type ${sequencing_platform.toUpperCase()} \\
         -threads ${task.cpus} \\
         ${log_level_arg} \\
-        -output_dir ./
+        -output_dir pave_somatic/ \\
+        -output_vcf pave_somatic/${meta.sample_id}.pave.somatic.vcf.gz
 
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":
         pave: \$(pave -version | sed -n '/^Pave version / { s/^.* //p }')
+        java: \$(java --version | sed -n '/^openjdk/ { s/^.*openjdk //; s/ .*//p }')
     END_VERSIONS
     """
 
     stub:
     """
-    touch ${meta.sample_id}.pave.somatic.vcf.gz{,.tbi}
+    mkdir -p pave_somatic/
+
+    gzip <<< '' > pave_somatic/${meta.sample_id}.pave.somatic.vcf.gz
+    touch pave_somatic/${meta.sample_id}.pave.somatic.vcf.gz.tbi
 
     echo -e '${task.process}:\\n  stub: noversions\\n' > versions.yml
     """

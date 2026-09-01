@@ -25,16 +25,16 @@ input:
       description: Isofox cohort gene expression file
       pattern: "*.{csv}"
 output:
-  - isofox_normalisation:
+  - isofox_normalisation_csv:
       type: file
       description: Isofox normalisation file
-      pattern: "versions.yml"
+      pattern: "*.{csv}"
+  - command_files:
+      type: list
+      description: List of command files
   - versions:
       type: file
       description: File containing software versions
       pattern: "versions.yml"
-  - command_files:
-      type: list
-      description: List of command files
 authors:
   - "@scwatts"

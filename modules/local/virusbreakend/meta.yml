@@ -15,10 +15,10 @@ input:
       description: |
         Groovy Map containing sample information
         e.g. [id: 'sample_id']
-  - bam:
+  - aln:
       type: file
-      description: BAM file
-      pattern: "*.{bam}"
+      description: Alignment file
+      pattern: "*.{bam,cram}"
   - genome_fasta:
       type: file
       description: Reference genome assembly FASTA file
@@ -47,20 +47,20 @@ output:
       description: |
         Groovy Map containing sample information
         e.g. [id: 'sample_id']
-  - tsv:
+  - virusbreakend_tsv:
       type: file
-      description: Summary file
+      description: VIRUSBreakned summary file
       pattern: "*.{tsv}"
-  - vcf:
+  - virusbreakend_vcf:
       type: file
-      description: VCF file
+      description: VIRUSBreakend VCF file
       pattern: "*.{vcf.gz}"
+  - command_files:
+      type: list
+      description: List of command files
   - versions:
       type: file
       description: File containing software versions
       pattern: "versions.yml"
-  - command_files:
-      type: list
-      description: List of command files
 authors:
   - "@scwatts"

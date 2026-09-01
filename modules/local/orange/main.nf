@@ -4,21 +4,21 @@ process ORANGE {
 
     conda "${moduleDir}/environment.yml"
     container "${ workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container ?
-        'https://depot.galaxyproject.org/singularity/hmftools-orange:4.1.2--hdfd78af_0' :
-        'biocontainers/hmftools-orange:4.1.2--hdfd78af_0' }"
+        'https://depot.galaxyproject.org/singularity/hmftools-orange:5.0.1--hdfd78af_0' :
+        'biocontainers/hmftools-orange:5.0.1--hdfd78af_0' }"
 
     input:
     tuple val(meta),
-        path(bamtools_somatic_dir, stageAs: 'bamtools_somatic'),
-        path(bamtools_germline_dir, stageAs: 'bamtools_germline'),
-        path(sage_somatic_dir, stageAs: 'sage_somatic'),
-        path(sage_germline_dir, stageAs: 'sage_germline'),
-        path(smlv_somatic_vcf),
-        path(smlv_germline_vcf),
+        path(sage_dir_somatic, stageAs: 'sage_somatic'),
+        path(sage_dir_germline, stageAs: 'sage_germline'),
+        path(smlv_vcf_somatic),
+        path(smlv_vcf_germline),
+        path(sage_plot_dir_somatic),
         path(purple_dir),
-        path(linx_somatic_anno_dir),
-        path(linx_somatic_plot_dir),
-        path(linx_germline_anno_dir),
+        path(qsee_dir),
+        path(linx_annotation_dir_somatic),
+        path(linx_plot_dir_reportable_somatic),
+        path(linx_annotation_dir_germline),
         path(virusinterpreter_dir),
         path(chord_dir),
         path(sigs_dir),
@@ -28,21 +28,16 @@ process ORANGE {
         path(isofox_dir)
     val genome_ver
     path disease_ontology
-    path cohort_mapping
-    path cohort_percentiles
-    path known_fusion_data
-    path driver_gene_panel
-    path ensembl_data_resources
-    path sigs_etiology
-    path isofox_alt_sj
-    path isofox_gene_distribution
     val pipeline_version
+    val sequencing_platform
+    val targeted_mode
+    val panel
 
     output:
-    tuple val(meta), path('output/*.orange.pdf') , emit: pdf, optional: true
-    tuple val(meta), path('output/*.orange.json'), emit: json, optional: true
-    path 'versions.yml'                          , emit: versions
-    path '.command.*'                            , emit: command_files
+    tuple val(meta), path('output/*.orange.pdf')      , topic: orange_pdf, optional: true
+    tuple val(meta), path('output/*.orange.json')     , topic: orange_json, optional: true
+    tuple val(meta), val('orange'), path('.command.*'), topic: command_files
+    path 'versions.yml'                               , topic: versions
 
     when:
     task.ext.when == null || task.ext.when
@@ -56,32 +51,30 @@ process ORANGE {
 
     def pipeline_version_str = pipeline_version ?: 'not specified'
 
-    def run_mode = Utils.getEnumFromString(params.mode, Constants.RunMode);
-    def experiment_type = (run_mode === Constants.RunMode.WGTS) ? 'WGS' : 'PANEL'
+    def experiment_type = 'WGS'
+    def panel_name_arg = ''
+    if (targeted_mode) {
+        experiment_type = 'PANEL'
+        panel_name_arg = "-panel_name ${panel.toUpperCase()}"
+    }
 
+    def primary_tumor_location_arg = meta.cancer_type ? "-primary_tumor_location ${meta.cancer_type}" : ''
+
+    def reference_arg = meta.containsKey('normal_dna_id') ? "-reference ${meta.normal_dna_id}" : ''
+    def sage_germline_dir_arg = sage_dir_germline ? "-sage_germline_dir ${sage_dir_germline}" : ''
+    def linx_germline_dir_arg = linx_annotation_dir_germline ? "-linx_germline_dir ${linx_annotation_dir_germline}" : ''
+
+    def sage_plot_dir_arg = sage_plot_dir_somatic ? "-sage_plot_dir ${sage_plot_dir_somatic}" : ''
     def virus_dir_arg = virusinterpreter_dir ? "-virus_dir ${virusinterpreter_dir}" : ''
     def lilac_dir_arg = lilac_dir ? "-lilac_dir ${lilac_dir}" : ''
     def chord_dir_arg = chord_dir ? "-chord_dir ${chord_dir}" : ''
     def sigs_dir_arg = sigs_dir ? "-sigs_dir ${sigs_dir}" : ''
     def cuppa_dir_arg = cuppa_dir ? "-cuppa_dir ${cuppa_dir}" : ''
     def peach_dir_arg = peach_dir ? "-peach_dir ${peach_dir}" : ''
-    def plot_dir = linx_somatic_plot_dir.resolve('reportable/').toUriString().replaceAll('/$', '')
 
-    def tumor_metrics_arg = "-tumor_metrics_dir ${bamtools_somatic_dir}"
-    def normal_metrics_arg = bamtools_germline_dir ? "-ref_metrics_dir ${bamtools_germline_dir}" : ''
-
-    def normal_id_arg = meta.containsKey('normal_dna_id') ? "-reference_sample_id ${meta.normal_dna_id}" : ''
-    def normal_sage_dir = sage_germline_dir ? "-sage_germline_dir ${sage_germline_dir}" : ''
-    def normal_linx_arg = linx_germline_anno_dir ? "-linx_germline_dir ${linx_germline_anno_dir}" : ''
-
-    def rna_id_arg = meta.containsKey('tumor_rna_id') ? "-rna_sample_id ${meta.tumor_rna_id}" : ''
-    def isofox_dir_arg = isofox_dir ? '-isofox_dir isofox_dir__prepared/' : ''
-
-    def isofox_gene_distribution_arg = isofox_gene_distribution ? "-isofox_gene_distribution ${isofox_gene_distribution}" : ''
-    def isofox_alt_sj_arg = isofox_alt_sj ? "-isofox_alt_sj_cohort ${isofox_alt_sj}" : ''
-
-    // NOTE(SW): DOID label: 162 [cancer]; Hartwig cohort group: unknown
-    def doid_arg = meta.cancer_type ?: '162'
+    def rna_sample_id_arg = meta.containsKey('tumor_rna_id') ? "-rna_sample_id ${meta.tumor_rna_id}" : ''
+    def isofox_dir_local = 'isofox__prepared'
+    def isofox_dir_arg = isofox_dir ? "-isofox_dir ${isofox_dir_local}" : ''
 
     """
     echo "${pipeline_version_str}" > pipeline_version.txt
@@ -90,12 +83,10 @@ process ORANGE {
     # occur after PURPLE. Since ORANGE only collects the somatic SAGE VCF from the PURPLE output directory, we must
     # prepare accordingly
 
-    # Isofox inputs are also expected to have the tumor sample ID in the filename
-
     # NOTES(SW): Use of symlinks was causing reliability issues on HPC with Singularity, switched to full file copy instead
 
     purple_dir_local=${purple_dir}
-    if [[ -n "${rna_id_arg}" ]]; then
+    if [[ -n "${rna_sample_id_arg}" ]]; then
 
         purple_dir_local=purple__prepared;
 
@@ -104,23 +95,29 @@ process ORANGE {
         fi
 
         cp -rL ${purple_dir} \${purple_dir_local}/
-        cp -L ${smlv_somatic_vcf} \${purple_dir_local}/${meta.tumor_id}.purple.somatic.vcf.gz;
+        cp -L ${smlv_vcf_somatic} \${purple_dir_local}/${meta.tumor_id}.purple.somatic.vcf.gz;
 
-        if [[ -n "${smlv_germline_vcf}" ]]; then
-            cp -L ${smlv_germline_vcf} \${purple_dir_local}/${meta.tumor_id}.purple.germline.vcf.gz;
+        if [[ -n "${smlv_vcf_germline}" ]]; then
+            cp -L ${smlv_vcf_germline} \${purple_dir_local}/${meta.tumor_id}.purple.germline.vcf.gz;
         fi;
-
-        mkdir -p isofox_dir__prepared/;
-        for fp in ${isofox_dir}/*; do
-            cp -L \${fp} isofox_dir__prepared/\$(sed 's/${meta.tumor_rna_id}/${meta.tumor_id}/' <<< \${fp##*/});
-        done;
 
     fi
 
     # Set input plot directory and create it doesn't exist. See the LINX visualiser module for further info.
-    if [[ ! -e ${plot_dir}/ ]]; then
-        mkdir -p ${plot_dir}/;
+    if [[ ! -e ${linx_plot_dir_reportable_somatic}/ ]]; then
+        mkdir -p ${linx_plot_dir_reportable_somatic}/;
     fi;
+
+    # When provided existing ISOFOX results generated in a RNA-only analysis we must adjust identifier
+    if [[ -n "${isofox_dir_arg}" && -n "\$(find -L ${isofox_dir} -name '${meta.tumor_rna_id}*')" ]]; then
+      mkdir -p ${isofox_dir_local}/;
+      for e in \$(find -L ${isofox_dir}/*); do
+         s=\$(sed 's/^${meta.tumor_rna_id}//' <<< \${e##*/});
+         ln -s ../\${e} ${isofox_dir_local}/${meta.tumor_id}\${s};
+      done;
+    elif [[ -n "${isofox_dir_arg}" ]]; then
+      ln -s ${isofox_dir} ${isofox_dir_local};
+    fi
 
     mkdir -p output/
 
@@ -131,14 +128,23 @@ process ORANGE {
         -add_disclaimer \\
         -pipeline_version_file pipeline_version.txt \\
         -experiment_type ${experiment_type} \\
+        -sequencing_type ${sequencing_platform.toUpperCase()} \\
+        ${panel_name_arg} \\
+        ${primary_tumor_location_arg} \\
         \\
-        -tumor_sample_id ${meta.tumor_id} \\
-        -primary_tumor_doids ${doid_arg} \\
-        -sage_dir ${sage_somatic_dir} \\
+        -tumor ${meta.tumor_id} \\
+        -sage_dir ${sage_dir_somatic} \\
         -purple_dir \${purple_dir_local} \\
         -purple_plot_dir \${purple_dir_local}/plot/ \\
-        -linx_dir ${linx_somatic_anno_dir} \\
-        -linx_plot_dir ${plot_dir}/ \\
+        -qsee_dir ${qsee_dir} \\
+        -linx_dir ${linx_annotation_dir_somatic} \\
+        -linx_plot_dir ${linx_plot_dir_reportable_somatic}/ \\
+        \\
+        ${reference_arg} \\
+        ${sage_germline_dir_arg} \\
+        ${linx_germline_dir_arg} \\
+        \\
+        ${sage_plot_dir_arg} \\
         ${virus_dir_arg} \\
         ${lilac_dir_arg} \\
         ${chord_dir_arg} \\
@@ -146,31 +152,18 @@ process ORANGE {
         ${cuppa_dir_arg} \\
         ${peach_dir_arg} \\
         \\
-        ${normal_id_arg} \\
-        ${normal_metrics_arg} \\
-        ${tumor_metrics_arg} \\
-        ${normal_sage_dir} \\
-        ${normal_linx_arg} \\
-        \\
-        ${rna_id_arg} \\
+        ${rna_sample_id_arg} \\
         ${isofox_dir_arg} \\
         \\
         -ref_genome_version ${genome_ver} \\
         -doid_json ${disease_ontology} \\
-        -cohort_mapping_tsv ${cohort_mapping} \\
-        -cohort_percentiles_tsv ${cohort_percentiles} \\
-        -known_fusion_file ${known_fusion_data} \\
-        -driver_gene_panel ${driver_gene_panel} \\
-        -signatures_etiology_tsv ${sigs_etiology} \\
-        -ensembl_data_dir ${ensembl_data_resources} \\
-        ${isofox_gene_distribution_arg} \\
-        ${isofox_alt_sj_arg} \\
         ${log_level_arg} \\
         -output_dir output/
 
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":
         orange: \$(orange -version | sed -n '/^Orange version / { s/^.* //p }')
+        java: \$(java --version | sed -n '/^openjdk/ { s/^.*openjdk //; s/ .*//p }')
     END_VERSIONS
     """
 

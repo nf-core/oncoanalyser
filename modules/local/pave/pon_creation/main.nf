@@ -3,17 +3,17 @@ process PAVE_PON_PANEL_CREATION {
 
     conda "${moduleDir}/environment.yml"
     container "${ workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container ?
-        'https://depot.galaxyproject.org/singularity/hmftools-pave:1.8.2--hdfd78af_0' :
-        'biocontainers/hmftools-pave:1.8.2--hdfd78af_0' }"
+        'https://depot.galaxyproject.org/singularity/hmftools-pave:1.9--hdfd78af_0' :
+        'biocontainers/hmftools-pave:1.9--hdfd78af_0' }"
 
     input:
     tuple path(sage_vcf), path(sage_tbi)
     val genome_ver
 
     output:
-    path 'pave.somatic_artefacts.*.tsv', emit: pave_artefacts
-    path 'versions.yml'                , emit: versions
-    path '.command.*'                  , emit: command_files
+    path 'pave.somatic_artefacts.*.tsv'                               , topic: pave_pon_panel_creation_artefacts
+    tuple val([:]), val('pave_pon_panel_creation'), path('.command.*'), topic: command_files
+    path 'versions.yml'                                               , topic: versions
 
     when:
     task.ext.when == null || task.ext.when
@@ -41,7 +41,8 @@ process PAVE_PON_PANEL_CREATION {
 
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":
-        pave: \$(pave -version | sed 's/^.* //')
+        pave: \$(pave -version | sed -n '/^Pave version / { s/^.* //p }')
+        java: \$(java --version | sed -n '/^openjdk/ { s/^.*openjdk //; s/ .*//p }')
     END_VERSIONS
     """
 

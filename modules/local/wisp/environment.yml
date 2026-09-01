@@ -3,4 +3,4 @@ channels:
   - conda-forge
   - bioconda
 dependencies:
-  - bioconda::hmftools-wisp=1.2
+  - bioconda::hmftools-wisp==1.3.1

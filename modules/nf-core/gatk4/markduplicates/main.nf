@@ -13,21 +13,23 @@ process GATK4_MARKDUPLICATES {
     path  fasta_fai
 
     output:
-    tuple val(meta), path("*cram"),     emit: cram,  optional: true
-    tuple val(meta), path("*bam"),      emit: bam,   optional: true
-    tuple val(meta), path("*.crai"),    emit: crai,  optional: true
-    tuple val(meta), path("*.bai"),     emit: bai,   optional: true
-    tuple val(meta), path("*.metrics"), emit: metrics
-    path "versions.yml",                emit: versions
-    path '.command.{sh,log}',           emit: command_files
+    tuple val(meta), path("*cram")                                  , topic: gatk4_markduplicates_cram, optional: true
+    tuple val(meta), path("*bam")                                   , topic: gatk4_markduplicates_bam, optional: true
+    tuple val(meta), path("*.crai")                                 , topic: gatk4_markduplicates_crai, optional: true
+    tuple val(meta), path("*.bai")                                  , topic: gatk4_markduplicates_bai, optional: true
+    tuple val(meta), path("*.metrics")                              , topic: gatk4_markduplicates_metrics
+    tuple val(meta), val('gatk4_markduplicates'), path('.command.*'), topic: command_files
+    path 'versions.yml'                                             , topic: versions
 
     when:
     task.ext.when == null || task.ext.when
 
     script:
     def args = task.ext.args ?: ''
+
     prefix = task.ext.prefix ?: "${meta.sample_id}"
-    def input_list = bam.collect{"--INPUT $it"}.join(' ')
+
+    def input_list = bam.collect { s -> "--INPUT ${s}" }.join(' ')
     def reference = fasta ? "--REFERENCE_SEQUENCE ${fasta}" : ""
 
     def avail_mem = 3072

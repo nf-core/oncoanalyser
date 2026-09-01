@@ -5,22 +5,22 @@ process STAR_GENOMEGENERATE {
     conda "${moduleDir}/environment.yml"
     container "${ workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container ?
         'https://depot.galaxyproject.org/singularity/star:2.7.3a--0' :
-        'quay.io/biocontainers/star:2.7.3a--0' }"
+        'biocontainers/star:2.7.3a--0' }"
 
     input:
     path fasta
     path gtf
 
     output:
-    path "star_index"  , emit: index
-    path "versions.yml", emit: versions
+    path 'star_index'                                             , topic: star_index
+    tuple val([:]), val('star_genomegenerate'), path('.command.*'), topic: command_files
+    path 'versions.yml'                                           , topic: versions
 
     when:
     task.ext.when == null || task.ext.when
 
     script:
     def args        = task.ext.args ?: ''
-    def args_list   = args.tokenize()
     def memory      = task.memory ? "--limitGenomeGenerateRAM ${task.memory.toBytes() - 100000000}" : ''
     def include_gtf = gtf ? "--sjdbGTFfile $gtf" : ''
 

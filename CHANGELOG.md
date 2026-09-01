@@ -3,6 +3,74 @@
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/) and this project mostly adheres to
 [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [[3.0.0](https://github.com/nf-core/oncoanalyser/releases/tag/3.0.0)] Scarlet Honeyeater - 2026-09-01
+
+- [314](https://github.com/nf-core/oncoanalyser/pull/314) - Other additions and fixes
+  - Switch to single-step RNA alignment for each sample
+  - Implement read group overrides in the samplesheet
+  - Enable UMI processing in the wgts workflow
+  - Update documentation and reference data
+  - Improve creation of stub files
+- [313](https://github.com/nf-core/oncoanalyser/pull/313) - Implement MultiQC
+- [312](https://github.com/nf-core/oncoanalyser/pull/312) - Migrate to strict syntax, workflow outputs, channel topics
+- [311](https://github.com/nf-core/oncoanalyser/pull/311) - Update WiGiTS tools, reference data, documentation
+  - Bump WiGiTS tool versions (see Software dependencies below)
+  - Support analysis of SBX and Ultima sequencing data
+  - Implement QSEE, SAGE visualiser, fastq-tools
+  - Add UMI presets for selected panels
+  - Add UMI processing subworkflow
+  - Remove support for GRCh38 TSO500
+- [273](https://github.com/nf-core/oncoanalyser/pull/273) - Post-release bump
+
+### Breaking change
+
+- Removed support for GRCh38 TSO500
+
+### Software dependencies
+
+| Dependency   | Old version | New version |
+| ------------ | ----------- | ----------- |
+| `AMBER`      | 4.2         | 4.3         |
+| `BamTools`   | 1.5         | 1.6.1       |
+| `CIDER`      | 1.1         | 1.2         |
+| `COBALT`     | 2.2         | 3.0         |
+| `CUPPA`      | 2.3.2       | 2.5.1       |
+| `ESVEE`      | 1.2         | 2.0.1       |
+| `FastqTools` | -           | 1.0         |
+| `ISOFOX`     | 1.7.2       | 2.0.1       |
+| `LILAC`      | 1.7.3       | 2.0         |
+| `LINX`       | 2.2         | 2.3.1       |
+| `NEO`        | 1.2.1       | 1.3         |
+| `ORANGE`     | 4.1.2       | 5.0.1       |
+| `PAVE`       | 1.8.2       | 1.9         |
+| `PURPLE`     | 4.3         | 4.4         |
+| `QSEE`       | -           | 1.0         |
+| `REDUX`      | 1.2.2       | 2.0.5       |
+| `SAGE`       | 4.2         | 5.0.2       |
+| `TEAL`       | 1.3.6       | 1.4         |
+| `WISP`       | 1.2         | 1.3.1       |
+| `linxreport` | 1.1.0       | 1.2.0       |
+
+### Reference data
+
+| Name                         | Old version | New version |
+| ---------------------------- | ----------- | ----------- |
+| `Hartwig pipeline resources` | 2.3.0--2    | 3.0.0--8    |
+| `Hartwig TSO500 resources`   | 2.3.0--2    | 3.0.0--8    |
+
+### Parameters
+
+| Old name           | New name                      | Note                                                                           |
+| ------------------ | ----------------------------- | ------------------------------------------------------------------------------ |
+| -                  | `sequencing_platform`         | Set sequencing technology: illumina (default), sbx, ultima                     |
+| -                  | `max_fastq_records`           | Default change: 10000000 → -1 (disabled)                                       |
+| -                  | `umi_type`                    | Use UMI presets                                                                |
+| -                  | `fastq_tools_umi_enabled`     | Enable fastq-tools UMI processing                                              |
+| -                  | `fastq_tools_umi_delim`       | Set UMI delimiter for fastq-tools                                              |
+| -                  | `enable_cn_norm_with_wgs_pct` | Calculate CN normalisation factors from Hartwig WGS data during panel creation |
+| -                  | `ref_data_base`               | New separate parameter to set base path for all reference data                 |
+| `hmf_genomes_base` | `ref_data_genomes_base`       | Renamed for semantic consistency with other reference data parameters          |
+
 ## [[2.3.0](https://github.com/nf-core/oncoanalyser/releases/tag/2.3.0)] Spotted Nightjar - 2025-12-11
 
 - [268](https://github.com/nf-core/oncoanalyser/pull/268) - Apply minor fixes and updates

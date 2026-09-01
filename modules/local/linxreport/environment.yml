@@ -3,4 +3,4 @@ channels:
   - conda-forge
   - bioconda
 dependencies:
-  - bioconda::r-linxreport=1.1.0
+  - bioconda::r-linxreport==1.2.0

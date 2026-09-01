@@ -2,108 +2,112 @@
 // AMBER determines b-allele frequencies at predetermined positions
 //
 
-import Constants
-import Utils
-
 include { AMBER } from '../../../modules/local/amber/main'
 
 workflow AMBER_PROFILING {
     take:
     // Sample data
-    ch_inputs          // channel: [mandatory] [ meta ]
-    ch_tumor_bam       // channel: [mandatory] [ meta, bam, bai ]
-    ch_normal_bam      // channel: [mandatory] [ meta, bam, bai ]
-    ch_donor_bam       // channel: [mandatory] [ meta, bam, bai ]
+    ch_inputs            // channel: [mandatory] [ meta ]
+    ch_redux_dir_tumor   // channel: [mandatory] [ meta, redux_dir ]
+    ch_redux_dir_normal  // channel: [mandatory] [ meta, redux_dir ]
+    ch_redux_dir_donor   // channel: [mandatory] [ meta, redux_dir ]
 
     // Reference data
-    genome_version     // channel: [mandatory] genome version
-    heterozygous_sites // channel: [optional]  /path/to/heterozygous_sites
-    target_regions_bed // channel: [optional]  /path/to/target_regions_bed
-    tumor_min_depth    // integer: [optional]  -tumor_min_depth argument value
+    genome_fasta         // channel: [mandatory] /path/to/genome_fasta
+    genome_version       // channel: [mandatory] genome version
+    genome_fai           // channel: [mandatory] /path/to/genome_fai
+    heterozygous_sites   // channel: [optional]  /path/to/heterozygous_sites
+    target_regions_bed   // channel: [optional]  /path/to/target_regions_bed
+    tumor_min_depth      // integer: [optional]  -tumor_min_depth argument value
+
+    // Params
+    sequencing_platform  // string:  [mandatory] sequencing platform
+    purity_estimate_mode // boolean: [mandatory] Set purity estimate mode
 
     main:
-    // Channel for version.yml files
-    // channel: [ versions.yml ]
-    ch_versions = Channel.empty()
-
-    // Select input sources and sort
-    // channel: runnable: [ meta, tumor_bam, tumor_bai, normal_bam, normal_bai]
+    // Select input sources then sort
+    // channel: runnable: [ meta, tumor_aln, tumor_idx, normal_aln, normal_idx ]
     // channel: skip: [ meta ]
     ch_inputs_sorted = WorkflowOncoanalyser.groupByMeta(
-        ch_tumor_bam,
-        ch_normal_bam,
-        ch_donor_bam,
+        ch_redux_dir_tumor,
+        ch_redux_dir_normal,
+        ch_redux_dir_donor,
     )
-        .map { meta, tumor_bam, tumor_bai, normal_bam, normal_bai, donor_bam, donor_bai ->
-            return [
-                meta,
-                Utils.selectCurrentOrExisting(tumor_bam, meta, Constants.INPUT.BAM_REDUX_DNA_TUMOR),
-                tumor_bai ?: Utils.getInput(meta, Constants.INPUT.BAI_DNA_TUMOR),
+        .map { meta, redux_dir_tumor, redux_dir_normal, redux_dir_donor ->
 
-                Utils.selectCurrentOrExisting(normal_bam, meta, Constants.INPUT.BAM_REDUX_DNA_NORMAL),
-                normal_bai ?: Utils.getInput(meta, Constants.INPUT.BAI_DNA_NORMAL),
+            def redux_dir_tumor_selected = Utils.selectCurrentOrExisting(redux_dir_tumor, meta, Constants.INPUT.REDUX_DIR_TUMOR)
+            def redux_dir_normal_selected = Utils.selectCurrentOrExisting(redux_dir_normal, meta, Constants.INPUT.REDUX_DIR_NORMAL)
+            def redux_dir_donor_selected = Utils.selectCurrentOrExisting(redux_dir_donor, meta, Constants.INPUT.REDUX_DIR_DONOR)
 
-                Utils.selectCurrentOrExisting(donor_bam, meta, Constants.INPUT.BAM_REDUX_DNA_DONOR),
-                donor_bai ?: Utils.getInput(meta, Constants.INPUT.BAI_DNA_DONOR),
-            ]
+            def (tumor_aln, tumor_idx) = Utils.getTumorReduxDirAlignment(meta, redux_dir_tumor_selected)
+            def (normal_aln, normal_idx) = Utils.getNormalReduxDirAlignment(meta, redux_dir_normal_selected)
+            def (donor_aln, donor_idx) = Utils.getDonorReduxDirAlignment(meta, redux_dir_donor_selected)
+
+            return [meta, tumor_aln, tumor_idx, normal_aln, normal_idx, donor_aln, donor_idx]
+
         }
-        .branch { meta, tumor_bam, tumor_bai, normal_bam, normal_bai, donor_bam, donor_bai ->
-            def has_existing = Utils.hasExistingInput(meta, Constants.INPUT.AMBER_DIR)
+        .branch { meta, tumor_aln, tumor_idx, normal_aln, normal_idx, donor_aln, donor_idx ->
 
+            def has_existing = Utils.hasExistingInput(meta, Constants.INPUT.AMBER_DIR)
+            def runnable_standard = ! purity_estimate_mode && tumor_aln && ! has_existing
 
             // TODO(SW): must improve handling through separation of sample information in meta; currently unable to provide ccfDNA AMBER directory in samplesheet
-            def longitudinal_sample = Utils.getTumorDnaSample(meta).containsKey('longitudinal_sample_id')
+            def runnable_purity_estimate = purity_estimate_mode && normal_aln
 
-            runnable: tumor_bam && (!has_existing || longitudinal_sample)
-
-
+            runnable: runnable_standard || runnable_purity_estimate
             skip: true
                 return meta
         }
 
     // Create process input channel
-    // channel: [ meta_amber, tumor_bam, normal_bam, donor_bam, tumor_bai, normal_bai, donor_bai ]
+    // channel: [ meta_amber, tumor_aln, normal_aln, donor_aln, tumor_idx, normal_idx, donor_idx ]
     ch_amber_inputs = ch_inputs_sorted.runnable
-        .map { meta, tumor_bam, tumor_bai, normal_bam, normal_bai, donor_bam, donor_bai ->
+        .map { meta, tumor_aln, tumor_idx, normal_aln, normal_idx, donor_aln, donor_idx ->
+
+            def tumor_id
+            if (purity_estimate_mode) {
+                tumor_id = Utils.getTumorDnaSampleName(meta, primary: false)
+            } else {
+                tumor_id = Utils.getTumorDnaSampleName(meta, primary: true)
+            }
 
             def meta_amber = [
                 key: meta.group_id,
                 id: meta.group_id,
-                tumor_id: Utils.getTumorDnaSampleName(meta),
+                tumor_id: tumor_id,
             ]
 
-            if (normal_bam) {
+            if (normal_aln) {
                 meta_amber.normal_id = Utils.getNormalDnaSampleName(meta)
             }
 
-            if (donor_bam) {
+            if (donor_aln) {
                 meta_amber.donor_id = Utils.getDonorDnaSampleName(meta)
             }
 
-            [meta_amber, tumor_bam, normal_bam, donor_bam, tumor_bai, normal_bai, donor_bai]
+            return [meta_amber, tumor_aln, tumor_idx, normal_aln, normal_idx, donor_aln, donor_idx]
         }
 
     // Run process
     AMBER(
         ch_amber_inputs,
+        genome_fasta,
         genome_version,
+        genome_fai,
         heterozygous_sites,
         target_regions_bed,
         tumor_min_depth,
+        sequencing_platform,
     )
-
-    ch_versions = ch_versions.mix(AMBER.out.versions)
 
     // Set outputs, restoring original meta
     // channel: [ meta, amber_dir ]
-    ch_outputs = Channel.empty()
+    ch_outputs = channel.empty()
         .mix(
-            WorkflowOncoanalyser.restoreMeta(AMBER.out.amber_dir, ch_inputs),
+            WorkflowOncoanalyser.restoreMeta(channel.topic('amber_dir'), ch_inputs),
             ch_inputs_sorted.skip.map { meta -> [meta, []] },
         )
 
     emit:
-    amber_dir = ch_outputs  // channel: [ meta, amber_dir ]
-
-    versions  = ch_versions // channel: [ versions.yml ]
+    amber_dir = ch_outputs // channel: [ meta, amber_dir ]
 }

@@ -3,4 +3,4 @@ channels:
   - conda-forge
   - bioconda
 dependencies:
-  - bioconda::hmftools-esvee=1.2
+  - bioconda::hmftools-esvee==2.0.1

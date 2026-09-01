@@ -3,19 +3,20 @@ process COBALT_PANEL_NORMALISATION {
 
     conda "${moduleDir}/environment.yml"
     container "${ workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container ?
-        'https://depot.galaxyproject.org/singularity/hmftools-cobalt:2.2--hdfd78af_0' :
-        'biocontainers/hmftools-cobalt:2.2--hdfd78af_0' }"
+        'https://depot.galaxyproject.org/singularity/hmftools-cobalt:3.0--hdfd78af_0' :
+        'biocontainers/hmftools-cobalt:3.0--hdfd78af_0' }"
 
     input:
     tuple path('amber_dir.*'), path('cobalt_dir.*')
     val genome_ver
     path gc_profile
+    path copy_number_percentiles
     path target_regions_bed
 
     output:
-    path 'cobalt.region_normalisation.*.tsv', emit: cobalt_normalisation
-    path 'versions.yml'                     , emit: versions
-    path '.command.*'                       , emit: command_files
+    path 'cobalt.region_normalisation.*.tsv'                             , topic: cobalt_normalisation_tsv
+    tuple val([:]), val('cobalt_panel_normalisation'), path('.command.*'), topic: command_files
+    path 'versions.yml'                                                  , topic: versions
 
     when:
     task.ext.when == null || task.ext.when
@@ -24,6 +25,8 @@ process COBALT_PANEL_NORMALISATION {
     def args = task.ext.args ?: ''
 
     def log_level_arg = task.ext.log_level ? "-log_level ${task.ext.log_level}" : ''
+
+    def wgs_copy_number_percentiles_arg = copy_number_percentiles ? "-wgs_copy_number_percentiles ${copy_number_percentiles}" : ''
 
     """
     mkdir -p inputs/
@@ -46,13 +49,18 @@ process COBALT_PANEL_NORMALISATION {
         -cobalt_dir inputs/ \\
         -ref_genome_version ${genome_ver} \\
         -gc_profile ${gc_profile} \\
+        ${wgs_copy_number_percentiles_arg} \\
         -target_regions_bed ${target_regions_bed} \\
         ${log_level_arg} \\
         -output_file cobalt.region_normalisation.${genome_ver}.tsv
 
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":
-        cobalt_panel_normalisation: \$(cobalt -version | sed 's/^.* //')
+        cobalt: \$(cobalt -version | sed -n '/^Cobalt version / { s/^.* //p }')
+        java: \$(java --version | sed -n '/^openjdk/ { s/^.*openjdk //; s/ .*//p }')
+        r: \$(R --version | sed -n '/^R version/ { s/^.*version //; s/ .*//p }')
+        r-dplyr: \$(Rscript -e 'packageVersion("dplyr") |> as.character() |> writeLines()')
+        bioconductor-copynumber: \$(Rscript -e 'packageVersion("copynumber") |> as.character() |> writeLines()')
     END_VERSIONS
     """
 

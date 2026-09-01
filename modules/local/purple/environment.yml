@@ -3,4 +3,4 @@ channels:
   - conda-forge
   - bioconda
 dependencies:
-  - bioconda::hmftools-purple=4.3
+  - bioconda::hmftools-purple==4.4

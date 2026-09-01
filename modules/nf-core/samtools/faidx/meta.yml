@@ -21,10 +21,13 @@ input:
       description: FASTA file
       pattern: "*.{fa,fasta}"
 output:
-  - fai:
+  - samtools_fai:
     type: file
     description: FASTA index file
     pattern: "*.{fai}"
+  - command_files:
+    type: list
+    description: List of command files
   - versions:
     type: file
     description: File containing software versions

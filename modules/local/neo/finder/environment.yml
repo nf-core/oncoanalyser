@@ -3,4 +3,4 @@ channels:
   - conda-forge
   - bioconda
 dependencies:
-  - bioconda::hmftools-neo=1.2.1
+  - bioconda::hmftools-neo==1.3

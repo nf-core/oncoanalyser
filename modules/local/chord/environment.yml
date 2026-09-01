@@ -3,4 +3,4 @@ channels:
   - conda-forge
   - bioconda
 dependencies:
-  - bioconda::hmftools-chord=2.1.2
+  - bioconda::hmftools-chord==2.1.2

@@ -11,11 +11,10 @@ class Constants {
     static List PANELS_DEFINED = ['tso500']
 
 
-    static String HMF_DATA_37_PATH = 'https://pub-cf6ba01919994c3cbd354659947f74d8.r2.dev/hmf_reference_data/hmftools/hmf_pipeline_resources.37_v2.3.0--2.tar.gz'
-    static String HMF_DATA_38_PATH = 'https://pub-cf6ba01919994c3cbd354659947f74d8.r2.dev/hmf_reference_data/hmftools/hmf_pipeline_resources.38_v2.3.0--2.tar.gz'
+    static String HMF_DATA_37_PATH = 'hartwig/pipeline_resources/hmf_pipeline_resources.37_v3.0.0--8.tar.gz'
+    static String HMF_DATA_38_PATH = 'hartwig/pipeline_resources/hmf_pipeline_resources.38_v3.0.0--8.tar.gz'
 
-    static String TSO500_PANEL_37_PATH = 'https://pub-cf6ba01919994c3cbd354659947f74d8.r2.dev/hmf_reference_data/panels/hmf_panel_resources.tso500.37_v2.3.0--2.tar.gz'
-    static String TSO500_PANEL_38_PATH = 'https://pub-cf6ba01919994c3cbd354659947f74d8.r2.dev/hmf_reference_data/panels/hmf_panel_resources.tso500.38_v2.3.0--2.tar.gz'
+    static String TSO500_PANEL_37_PATH = 'hartwig/panel_resources/hmf_panel_resources.tso500.37_v3.0.0--8.tar.gz'
 
 
     static Integer DEFAULT_ISOFOX_READ_LENGTH_WTS = 151
@@ -28,6 +27,19 @@ class Constants {
         PURITY_ESTIMATE,
         TARGETED,
         WGTS,
+    }
+
+    static enum SequencingPlatform {
+        ILLUMINA,
+        SBX,
+        ULTIMA,
+    }
+
+    static enum UmiType {
+        KAPA,
+        MSK,
+        TSO500,
+        TWIST,
     }
 
     static enum RefDataType {
@@ -62,13 +74,17 @@ class Constants {
         ISOFOX,
         LILAC,
         LINX,
+        MULTIQC,
         NEO,
         ORANGE,
         PAVE,
         PEACH,
         PURPLE,
+        QSEE,
         REDUX,
         SAGE,
+        SAGE_APPEND,
+        SAGE_VISUALISER,
         SIGS,
         TEAL,
         VIRUSINTERPRETER,
@@ -78,42 +94,41 @@ class Constants {
     static List DEFAULT_EXCLUDED_PROCESSES = [] // For experimental tools
 
     static enum FileType {
-        // Generic
-        BAI,
-        BAM,
-        CRAI,
-        CRAM,
+        // Input only
         FASTQ,
-
-        // REDUX
+        BAM,
+        CRAM,
         BAM_REDUX,
         CRAM_REDUX,
-        REDUX_JITTER_TSV,
-        REDUX_MS_TSV,
+        BAI,
+        CRAI,
+
+        // Generic (internal representation)
+        ALN,
+        ALN_REDUX,
+        IDX,
 
         // Process
         AMBER_DIR,
         BAMTOOLS_DIR,
+        CHORD_DIR,
         COBALT_DIR,
-        ESVEE_VCF,
-        ESVEE_VCF_TBI,
+        CUPPA_DIR,
+        ESVEE_DIR,
         ISOFOX_DIR,
         LILAC_DIR,
         LINX_ANNO_DIR,
-        PAVE_VCF,
-        PURPLE_DIR,
-        SAGE_VCF,
-        SAGE_VCF_TBI,
-        SAGE_APPEND_DIR,
-        VIRUSINTERPRETER_DIR,
-
-        // ORANGE specific
-        CHORD_DIR,
-        CUPPA_DIR,
         LINX_PLOT_DIR,
+        PAVE_DIR,
         PEACH_DIR,
+        PURPLE_DIR,
+        QSEE_DIR,
+        REDUX_DIR,
+        SAGE_APPEND_DIR,
         SAGE_DIR,
+        SAGE_PLOT_DIR,
         SIGS_DIR,
+        VIRUSINTERPRETER_DIR,
     }
 
     static enum SampleType {
@@ -131,117 +146,84 @@ class Constants {
 
     static enum InfoField {
         CANCER_TYPE,
+        FLOWCELL,
         LANE,
         LIBRARY_ID,
         LONGITUDINAL_SAMPLE,
+        GENERATE_REDUX_TSVS_ONLY,
+        READ_GROUP_OVERRIDES,
     }
 
     static Map PLACEHOLDER_META = [meta_placeholder: null]
-    static List PLACEHOLDER_OPTIONAL_CHANNEL = []
 
     static Map INPUT = [
 
-        // Bams
-        BAM_DNA_TUMOR: [
-            FileType.BAM,
+        // Alignments
+        // NOTE(SW): The ALN_DNA_* are only used in REDUX, where the ALN_REDUX can only run when they're set to have only TSVs generated
+        ALN_DNA_TUMOR: [
+            [FileType.ALN, FileType.ALN_REDUX],
             SampleType.TUMOR,
             SequenceType.DNA,
         ],
 
-        BAM_DNA_NORMAL: [
-            FileType.BAM,
+        ALN_DNA_NORMAL: [
+            [FileType.ALN, FileType.ALN_REDUX],
             SampleType.NORMAL,
             SequenceType.DNA,
         ],
 
-        BAM_DNA_DONOR: [
-            FileType.BAM,
+        ALN_DNA_DONOR: [
+            [FileType.ALN, FileType.ALN_REDUX],
             SampleType.DONOR,
             SequenceType.DNA,
         ],
 
-        BAM_RNA_TUMOR: [
-            FileType.BAM,
+        ALN_RNA_TUMOR: [
+            FileType.ALN,
             SampleType.TUMOR,
             SequenceType.RNA,
         ],
 
-        BAI_DNA_TUMOR: [
-            FileType.BAI,
+        IDX_DNA_TUMOR: [
+            FileType.IDX,
             SampleType.TUMOR,
             SequenceType.DNA,
         ],
 
-        BAI_DNA_NORMAL: [
-            FileType.BAI,
+        IDX_DNA_NORMAL: [
+            FileType.IDX,
             SampleType.NORMAL,
             SequenceType.DNA,
         ],
 
-        BAI_DNA_DONOR: [
-            FileType.BAI,
+        IDX_DNA_DONOR: [
+            FileType.IDX,
             SampleType.DONOR,
             SequenceType.DNA,
         ],
 
-        BAI_RNA_TUMOR: [
-            FileType.BAI,
+        IDX_RNA_TUMOR: [
+            FileType.IDX,
             SampleType.TUMOR,
             SequenceType.RNA,
         ],
 
 
         // REDUX
-        BAM_REDUX_DNA_TUMOR: [
-            FileType.BAM_REDUX,
+        REDUX_DIR_TUMOR: [
+            FileType.REDUX_DIR,
             SampleType.TUMOR,
             SequenceType.DNA,
         ],
 
-        REDUX_JITTER_TSV_TUMOR: [
-            FileType.REDUX_JITTER_TSV,
-            SampleType.TUMOR,
-            SequenceType.DNA,
-        ],
-
-        REDUX_MS_TSV_TUMOR: [
-            FileType.REDUX_MS_TSV,
-            SampleType.TUMOR,
-            SequenceType.DNA,
-        ],
-
-        BAM_REDUX_DNA_NORMAL: [
-            FileType.BAM_REDUX,
+        REDUX_DIR_NORMAL: [
+            FileType.REDUX_DIR,
             SampleType.NORMAL,
             SequenceType.DNA,
         ],
 
-        REDUX_JITTER_TSV_NORMAL: [
-            FileType.REDUX_JITTER_TSV,
-            SampleType.NORMAL,
-            SequenceType.DNA,
-        ],
-
-        REDUX_MS_TSV_NORMAL: [
-            FileType.REDUX_MS_TSV,
-            SampleType.NORMAL,
-            SequenceType.DNA,
-        ],
-
-        BAM_REDUX_DNA_DONOR: [
-            FileType.BAM_REDUX,
-            SampleType.DONOR,
-            SequenceType.DNA,
-        ],
-
-        REDUX_JITTER_TSV_DONOR: [
-            FileType.REDUX_JITTER_TSV,
-            SampleType.DONOR,
-            SequenceType.DNA,
-        ],
-
-        REDUX_MS_TSV_DONOR: [
-            FileType.REDUX_MS_TSV,
+        REDUX_DIR_DONOR: [
+            FileType.REDUX_DIR,
             SampleType.DONOR,
             SequenceType.DNA,
         ],
@@ -276,26 +258,6 @@ class Constants {
             SequenceType.DNA,
         ],
 
-        SAGE_VCF_TUMOR: [
-            FileType.SAGE_VCF,
-            SampleType.TUMOR,
-            SequenceType.DNA,
-        ],
-        SAGE_VCF_NORMAL: [
-            FileType.SAGE_VCF,
-            SampleType.NORMAL,
-            SequenceType.DNA,
-        ],
-        SAGE_VCF_TBI_TUMOR: [
-            FileType.SAGE_VCF_TBI,
-            SampleType.TUMOR,
-            SequenceType.DNA,
-        ],
-        SAGE_VCF_TBI_NORMAL: [
-            FileType.SAGE_VCF_TBI,
-            SampleType.NORMAL,
-            SequenceType.DNA,
-        ],
         SAGE_DIR_TUMOR: [
             FileType.SAGE_DIR,
             SampleType.TUMOR,
@@ -316,41 +278,37 @@ class Constants {
             SampleType.NORMAL,
             SequenceType.DNA_RNA,
         ],
+        SAGE_PLOT_DIR_TUMOR: [
+            FileType.SAGE_PLOT_DIR,
+            [SampleType.TUMOR, SampleType.TUMOR_NORMAL],
+            SequenceType.DNA,
+        ],
 
-        PAVE_VCF_TUMOR: [
-            FileType.PAVE_VCF,
+        PAVE_DIR_TUMOR: [
+            FileType.PAVE_DIR,
             SampleType.TUMOR,
             SequenceType.DNA,
         ],
-        PAVE_VCF_NORMAL: [
-            FileType.PAVE_VCF,
+        PAVE_DIR_NORMAL: [
+            FileType.PAVE_DIR,
             SampleType.NORMAL,
             SequenceType.DNA,
         ],
 
-        ESVEE_VCF_TUMOR: [
-            FileType.ESVEE_VCF,
+        ESVEE_DIR: [
+            FileType.ESVEE_DIR,
             [SampleType.TUMOR, SampleType.TUMOR_NORMAL],
-            SequenceType.DNA,
-        ],
-        ESVEE_VCF_TUMOR_TBI: [
-            FileType.ESVEE_VCF_TBI,
-            [SampleType.TUMOR, SampleType.TUMOR_NORMAL],
-            SequenceType.DNA,
-        ],
-        ESVEE_VCF_NORMAL: [
-            FileType.ESVEE_VCF,
-            SampleType.NORMAL,
-            SequenceType.DNA,
-        ],
-        ESVEE_VCF_NORMAL_TBI: [
-            FileType.ESVEE_VCF_TBI,
-            SampleType.NORMAL,
             SequenceType.DNA,
         ],
 
         PURPLE_DIR: [
             FileType.PURPLE_DIR,
+            [SampleType.TUMOR, SampleType.TUMOR_NORMAL],
+            SequenceType.DNA,
+        ],
+
+        QSEE_DIR: [
+            FileType.QSEE_DIR,
             [SampleType.TUMOR, SampleType.TUMOR_NORMAL],
             SequenceType.DNA,
         ],

@@ -8,15 +8,15 @@ process VIRUSINTERPRETER {
         'biocontainers/hmftools-virus-interpreter:1.7.2--hdfd78af_0' }"
 
     input:
-    tuple val(meta), path(virus_tsv), path(purple_dir), path(bamtools_somatic_dir)
+    tuple val(meta), path(virusbreakend_tsv), path(bamtools_somatic_dir), path(purple_dir)
     path taxonomy_db
     path reporting_db
     path blocklist_db
 
     output:
-    tuple val(meta), path('virusinterpreter/'), emit: virusinterpreter_dir
-    path 'versions.yml'                       , emit: versions
-    path '.command.*'                         , emit: command_files
+    tuple val(meta), path('virusinterpreter/')                  , topic: virusinterpreter_dir
+    tuple val(meta), val('virusinterpreter'), path('.command.*'), topic: command_files
+    path 'versions.yml'                                         , topic: versions
 
     when:
     task.ext.when == null || task.ext.when
@@ -37,7 +37,7 @@ process VIRUSINTERPRETER {
         -sample ${meta.sample_id} \\
         -purple_dir ${purple_dir} \\
         -tumor_metrics_dir ${bamtools_somatic_dir} \\
-        -virus_breakend_tsv ${virus_tsv} \\
+        -virus_breakend_tsv ${virusbreakend_tsv} \\
         -taxonomy_db_tsv ${taxonomy_db} \\
         -virus_reporting_db_tsv ${reporting_db} \\
         -virus_blacklisting_db_tsv ${blocklist_db} \\
@@ -47,6 +47,7 @@ process VIRUSINTERPRETER {
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":
         virusinterpreter: \$(virusinterpreter -version | sed -n '/^VirusInterpreter version/ { s/^.* //p }')
+        java: \$(java --version | sed -n '/^openjdk/ { s/^.*openjdk //; s/ .*//p }')
     END_VERSIONS
     """
 

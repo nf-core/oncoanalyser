@@ -15,33 +15,41 @@ input:
       description: |
         Groovy Map containing sample information
         e.g. [id: 'sample_id']
-  - tumor_bam:
+  - tumor_aln:
       type: file
-      description: Tumor BAM file
-      pattern: "*.{bam}"
-  - normal_bam:
+      description: Tumor alignment file
+      pattern: "*.{bam,cram}"
+  - tumor_idx:
       type: file
-      description: Normal BAM file
-      pattern: "*.{bam}"
-  - donor_bam:
+      description: Tumor index file
+      pattern: "*.{bai,crai}"
+  - normal_aln:
       type: file
-      description: Donor BAM file
-      pattern: "*.{bam}"
-  - tumor_bai:
+      description: Normal alignment file
+      pattern: "*.{bam,cram}"
+  - normal_idx:
       type: file
-      description: Tumor BAI file
-      pattern: "*.{bai}"
-  - normal_bai:
+      description: Normal index file
+      pattern: "*.{bai,crai}"
+  - donor_aln:
       type: file
-      description: Normal BAI file
-      pattern: "*.{bai}"
-  - donor_bai:
+      description: Donor alignment file
+      pattern: "*.{bam,cram}"
+  - donor_idx:
       type: file
-      description: Donor BAI file
-      pattern: "*.{bai}"
+      description: Donor index file
+      pattern: "*.{bai,crai}"
+  - genome_fasta:
+      type: file
+      description: Reference genome assembly FASTA file
+      pattern: "*.{fa,fasta}"
   - genome_ver:
       type: string
       description: Reference genome version
+  - genome_fai:
+      type: file
+      description: Reference genome assembly fai file
+      pattern: "*.{fai}"
   - heterozygous_sites:
       type: file
       description: AMBER heterozygous sites file
@@ -53,6 +61,9 @@ input:
   - tumor_min_depth:
       type: string
       description: Minimum depth for a site to be considered
+  - sequencing_platform:
+      type: string
+      description: Sequencing platform
 output:
   - meta:
       type: map
@@ -63,12 +74,12 @@ output:
       file: directory
       description: AMBER output directory
       pattern: "versions.yml"
+  - command_files:
+      type: list
+      description: List of command files
   - versions:
       type: file
       description: File containing software versions
       pattern: "versions.yml"
-  - command_files:
-      type: list
-      description: List of command files
 authors:
   - "@scwatts"

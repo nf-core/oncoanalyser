@@ -16,25 +16,33 @@ input:
       description: |
         Groovy Map containing sample information
         e.g. [id: 'sample_id']
-  - tumor_bam:
+  - tumor_aln:
       type: file
-      description: Tumor BAM file
-      pattern: "*.{bam}"
-  - normal_bam:
+      description: Tumor alignment file
+      pattern: "*.{bam,cram}"
+  - tumor_idx:
       type: file
-      description: Normal BAM file (optional)
-      pattern: "*.{bam}"
-  - tumor_bai:
+      description: Tumor index file
+      pattern: "*.{bai,crai}"
+  - normal_aln:
       type: file
-      description: Tumor BAI file
-      pattern: "*.{bai}"
-  - normal_bai:
+      description: Normal alignment file (optional)
+      pattern: "*.{bam,cram}"
+  - normal_idx:
       type: file
-      description: Normal BAI file (optional)
-      pattern: "*.{bai}"
+      description: Normal index file (optional)
+      pattern: "*.{bai,crai}"
+  - genome_fasta:
+      type: file
+      description: Reference genome assembly FASTA file
+      pattern: "*.{fa,fasta}"
   - genome_ver:
       type: string
       description: Reference genome version
+  - genome_fai:
+      type: file
+      description: Reference genome assembly fai file
+      pattern: "*.{fai}"
   - gc_profile:
       type: file
       description: GC profile file
@@ -59,12 +67,12 @@ output:
   - cobalt_dir:
       type: directory
       description: COBALT output directory
+  - command_files:
+      type: list
+      description: List of command files
   - versions:
       type: file
       description: File containing software versions
       pattern: "versions.yml"
-  - command_files:
-      type: list
-      description: List of command files
 authors:
   - "@scwatts"

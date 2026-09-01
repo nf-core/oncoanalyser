@@ -14,14 +14,14 @@ input:
       description: |
         Groovy Map containing sample information
         e.g. [id: 'sample_id']
-  - bam:
+  - aln:
       type: file
-      description: BAM file
-      pattern: "*.{bam}"
-  - bai:
+      description: Alignment file
+      pattern: "*.{bam,cram}"
+  - idx:
       type: file
-      description: BAI file
-      pattern: "*.{bai}"
+      description: Index file
+      pattern: "*.{bai,crai}"
   - genome_fasta:
       type: file
       description: Reference genome assembly FASTA file
@@ -29,6 +29,10 @@ input:
   - genome_ver:
       type: string
       description: Reference genome version
+  - genome_fai:
+      type: file
+      description: Reference genome assembly fai file
+      pattern: "*.{fai}"
   - driver_gene_panel:
       type: file
       description: Driver gene panel file
@@ -46,15 +50,15 @@ output:
       description: |
         Groovy Map containing sample information
         e.g. [id: 'sample_id']
-  - metrics_dir:
+  - bamtools_metrics_dir:
       type: directory
-      description: BAM metrics directory
+      description: Alignment metrics directory
+  - command_files:
+      type: list
+      description: List of command files
   - versions:
       type: file
       description: File containing software versions
       pattern: "versions.yml"
-  - command_files:
-      type: list
-      description: List of command files
 authors:
   - "@scwatts"

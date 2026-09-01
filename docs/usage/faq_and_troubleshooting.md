@@ -1,80 +1,15 @@
 # FAQ and troubleshooting
 
-- [How to start from CRAM?](#how-to-start-from-cram)
-- [How to handle UMIs?](#how-to-handle-umis)
-- [How to use oncoanalyser with a panel or whole exome?](#how-to-use-oncoanalyser-with-a-panel-or-whole-exome)
-- [Why does LILAC crash on my panel sample?](#why-does-lilac-crash-on-my-panel-sample)
-- [Are my BAM files compatible?](#are-my-bam-files-compatible)
-- [I want to store the output BAMs. Why are there only REDUX BAM(s) with additional
-  files?](#i-want-to-store-the-output-bams-why-are-there-only-redux-bams-with-additional-files)
 - [I only want variant calls, where can I find this data?](#i-only-want-variant-calls-where-can-i-find-this-data)
 - [Why does `oncoanalyser` call too many / too few variants than another
   pipeline?](#why-does-oncoanalyser-call-too-many--too-few-variants-than-another-pipeline)
 - [My compute environment does not allow Docker](#my-compute-environment-does-not-allow-docker)
 - [Running `oncoanalyser` offline](#running-oncoanalyser-offline)
 - [Network timeout](#network-timeout)
-- [Automatically increasing compute resources after failed
-  runs](#automatically-increasing-compute-resources-after-failed-runs)
 - [Placing `oncoanalyser` CLI arguments into a configuration
   file](#placing-oncoanalyser-cli-arguments-into-a-configuration-file)
 - [Errors and navigating the `work/` directory](#errors-and-navigating-the-work-directory)
 - [Resuming runs in Google Batch](#resuming-runs-in-google-batch)
-
-## How to start from CRAM?
-
-Simply provide a CRAM path under filetype `cram` in the sample sheet. See section [Input starting points: CRAM](./#cram)
-for details.
-
-## How to handle UMIs?
-
-UMI processing can be enabled and configured via a config file. See section [UMI processing](./#umi-processing).
-
-## How to use oncoanalyser with a panel or whole exome?
-
-`oncoanalyser` currently has built-in support for the TSO500 panel. For custom panels however, additional reference data
-(for panel specific normalisation and filtering) must first be generated using a training procedure detailed
-[here](https://github.com/hartwigmedical/hmftools/blob/master/pipeline/README_TARGETED.md).
-
-## Why does LILAC crash on my panel sample?
-
-If your panel does not include HLA class I regions there will be no reads in those regions, which causes LILAC to crash.
-You can skip the LILAC tool to avoid crashes by specifying `--processes_exclude lilac` in the `oncoanalyser` command.
-
-## Are my BAM files compatible?
-
-The `oncoanalyser` pipeline has been validated on BAMs aligned with BWA-MEM, BWA-MEM2 and DRAGEN. BAM files from other
-aligners / sources may be incompatible with `oncoanalyser` can cause the pipeline to crash.
-
-One requirement for example that the mate CIGAR attribute must be present for any BAM records with paired reads.
-Non-compatible BAMs may be rectified using tools such as the [Picard
-FixMateInformation](https://gatk.broadinstitute.org/hc/en-us/articles/360036713471-FixMateInformation-Picard) routine.
-
-In other cases, converting from BAM back to FASTQ may be required to run `oncoanalyser`.
-
-## I want to store the output BAMs. Why are there only REDUX BAM(s) with additional files?
-
-[REDUX](https://github.com/hartwigmedical/hmftools/tree/master/redux) performs some important read post-processing
-steps:
-
-- Unmapping of reads in pre-defined problematic regions (extremely high depth, reads often discordant or have long soft
-  clipping). This is done to remove obvious poor alignments from the BAM prior to running downstream tools reads are
-  retained in the BAM
-- [Read deduplication](https://github.com/hartwigmedical/hmftools/tree/master/redux#deduplication) to form a consensus
-  read with consensus sequence / base qualities
-- Measure the rate of microsatellite errors (see: [jitter
-  modeling](https://github.com/hartwigmedical/hmftools/tree/master/redux#microsatellite-jitter-modelling)) which are
-  stored in lookup files (`*.jitter_params.tsv` and `*.ms_table.tsv.gz`) to be used downstream by
-  [SAGE](https://github.com/hartwigmedical/hmftools/tree/master/sage#key-concepts-in-sage) for error-calibrated small
-  variant calling.
-
-It was therefore a choice to provide the user the REDUX BAM (plus TSV files) as output, rather than BAMs from BWA-MEM2
-which have potentially more poor alignments and read duplicates.
-
-:::note
-
-When storing REDUX BAMs, the `*.jitter_params.tsv` and `*.ms_table.tsv.gz` must also be stored.
-
-:::
 
 ## I only want variant calls, where can I find this data?
 
@@ -92,7 +27,7 @@ example, you would run `oncoanalyser` with the below command (assuming starting 
 
 ```bash
 nextflow run nf-core/oncoanalyser \
-  -revision 2.3.0 \
+  -revision 3.0.0 \
   -profile docker \
   --mode wgts \
   --processes_manual alignment,redux,amber,cobalt,sage,pave,esvee,purple \
@@ -184,7 +119,7 @@ For example, the `oncoanalyser` arguments which start with `--` in this command:
 
 ```shell
 nextflow run nf-core/oncoanalyser \
-  -revision 2.3.0 \
+  -revision 3.0.0 \
   -profile docker \
   -config refdata.config \
   --mode wgts \
@@ -208,7 +143,7 @@ and provided as a config file when running `oncoanalyser`:
 
 ```shell
 nextflow run nf-core/oncoanalyser \
-  -revision 2.3.0 \
+  -revision 3.0.0 \
   -config refdata.config \
   -config params.config \
   -profile docker \
