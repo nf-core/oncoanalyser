@@ -27,7 +27,7 @@ template:
   name: oncoanalyser
   description: A comprehensive cancer DNA/RNA analysis and reporting pipeline
   author: Stephen Watts
-  version: 3.0.0
+  version: 3.0.0dev
   force: false
   outdir: .
   skip_features:
