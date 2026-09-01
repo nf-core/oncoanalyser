@@ -4,17 +4,20 @@ lint:
     - lib/Utils.groovy
     - lib/WorkflowMain.groovy
     - lib/WorkflowOncoanalyser.groovy
+    - .github/workflows/linting_comment.yml
   files_unchanged:
     - assets/nf-core-oncoanalyser_logo_light.png
     - docs/images/nf-core-oncoanalyser_logo_dark.png
     - docs/images/nf-core-oncoanalyser_logo_light.png
+    - .github/workflows/branch.yml
+    - .github/workflows/linting.yml
   multiqc_config: false
   nextflow_config:
     - config_defaults:
         - params.fastp_umi_length
         - params.fastp_umi_skip
   nf_test_content: false
-nf_core_version: 4.0.3
+nf_core_version: 4.1.0
 repository_type: pipeline
 template:
   author: Stephen Watts
@@ -27,4 +30,4 @@ template:
   skip_features:
     - gpu
     - nf-test
-  version: 2.3.0dev
+  version: 3.0.0
