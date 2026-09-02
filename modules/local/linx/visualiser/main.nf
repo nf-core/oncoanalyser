@@ -1,3 +1,5 @@
+nextflow.enable.types = true
+
 process LINX_VISUALISER {
     tag "${meta.id}"
     label 'process_medium'
@@ -8,14 +10,14 @@ process LINX_VISUALISER {
         'biocontainers/hmftools-linx:2.3.1--hdfd78af_0' }"
 
     input:
-    tuple val(meta), path(linx_annotation_dir), path(amber_dir), path(cobalt_dir), path(purple_dir)
-    val genome_ver
-    path ensembl_data_resources
+    tuple(meta: Record, linx_annotation_dir: Path, amber_dir: Path?, cobalt_dir: Path?, purple_dir: Path?)
+    genome_ver: String
+    ensembl_data_resources: Path
 
-    output:
-    tuple val(meta), path('plots/')                            , topic: linx_visualiser_plots
-    tuple val(meta), val('linx_visualiser'), path('.command.*'), topic: command_files
-    path 'versions.yml'                                        , topic: versions
+    topic:
+    tuple(meta, file('plots/'))                         >> 'linx_visualiser_plots'
+    tuple(meta, 'linx_visualiser', files('.command.*')) >> 'command_files'
+    file('versions.yml')                                >> 'versions'
 
     when:
     task.ext.when == null || task.ext.when

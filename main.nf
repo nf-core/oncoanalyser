@@ -16,10 +16,12 @@
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 */
 
-include { PIPELINE_INITIALISATION } from './subworkflows/local/utils_nfcore_oncoanalyser_pipeline'
-include { PIPELINE_COMPLETION     } from './subworkflows/local/utils_nfcore_oncoanalyser_pipeline'
+nextflow.enable.types = true
 
-include { getGenomeAttribute } from './subworkflows/local/utils_nfcore_oncoanalyser_pipeline'
+include { PIPELINE_INITIALISATION  } from './subworkflows/local/utils_nfcore_oncoanalyser_pipeline'
+include { PIPELINE_COMPLETION      } from './subworkflows/local/utils_nfcore_oncoanalyser_pipeline'
+
+include { getGenomeAttribute       } from './subworkflows/local/utils_nfcore_oncoanalyser_pipeline'
 
 /*
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -27,13 +29,16 @@ include { getGenomeAttribute } from './subworkflows/local/utils_nfcore_oncoanaly
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 */
 
-params.ref_data_genome_fasta         = getGenomeAttribute('fasta')
-params.ref_data_genome_fai           = getGenomeAttribute('fai')
-params.ref_data_genome_dict          = getGenomeAttribute('dict')
-params.ref_data_genome_img           = getGenomeAttribute('img')
-params.ref_data_genome_bwamem2_index = getGenomeAttribute('bwamem2_index')
-params.ref_data_genome_gridss_index  = getGenomeAttribute('gridss_index')
-params.ref_data_genome_star_index    = getGenomeAttribute('star_index')
+// NOTE(SW): minimal set of parameters to enable switch to static typing
+params {
+    ref_data_genome_fasta         = getGenomeAttribute('fasta')
+    ref_data_genome_fai           = getGenomeAttribute('fai')
+    ref_data_genome_dict          = getGenomeAttribute('dict')
+    ref_data_genome_img           = getGenomeAttribute('img')
+    ref_data_genome_bwamem2_index = getGenomeAttribute('bwamem2_index')
+    ref_data_genome_gridss_index  = getGenomeAttribute('gridss_index')
+    ref_data_genome_star_index    = getGenomeAttribute('star_index')
+}
 
 /*
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -41,11 +46,26 @@ params.ref_data_genome_star_index    = getGenomeAttribute('star_index')
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 */
 
-include { PANEL_RESOURCE_CREATION } from './workflows/panel_resource_creation'
-include { PREPARE_REFERENCE       } from './workflows/prepare_reference'
-include { PURITY_ESTIMATE         } from './workflows/purity_estimate'
-include { TARGETED                } from './workflows/targeted'
-include { WGTS                    } from './workflows/wgts'
+include { PANEL_RESOURCE_CREATION  } from './workflows/panel_resource_creation'
+include { PREPARE_REFERENCE        } from './workflows/prepare_reference'
+include { PURITY_ESTIMATE          } from './workflows/purity_estimate'
+include { TARGETED                 } from './workflows/targeted'
+include { WGTS                     } from './workflows/wgts'
+
+/*
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    IMPORT FUNCTIONS
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+*/
+
+include { parseInput             } from './subworkflows/local/utils_nfcore_oncoanalyser_pipeline/helpers_samplesheet'
+include { RunMode                } from './subworkflows/local/utils_nfcore_oncoanalyser_pipeline/types_enums'
+include { createStubPlaceholders } from './subworkflows/local/utils_nfcore_oncoanalyser_pipeline/utils'
+include { getRunMode             } from './subworkflows/local/utils_nfcore_oncoanalyser_pipeline/utils'
+include { getRunConfig           } from './subworkflows/local/utils_nfcore_oncoanalyser_pipeline/helpers_parameter'
+include { setParamsDefaults      } from './subworkflows/local/utils_nfcore_oncoanalyser_pipeline/helpers_parameter'
+include { validateInput          } from './subworkflows/local/utils_nfcore_oncoanalyser_pipeline/helpers_parameter'
+include { validateParams         } from './subworkflows/local/utils_nfcore_oncoanalyser_pipeline/helpers_parameter'
 
 /*
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -60,7 +80,7 @@ include { WGTS                    } from './workflows/wgts'
 workflow NFCORE_ONCOANALYSER {
     main:
     // Get run mode
-    def run_mode = Utils.getRunMode(params.mode, log)
+    def run_mode = getRunMode(params.mode, log)
 
     // Results channel for eventual publishing
     // channel: [filepath, file]
@@ -68,28 +88,28 @@ workflow NFCORE_ONCOANALYSER {
 
     // Run selected workflow
     // NOTE(SW): prepare reference is checked early as params.input is not required
-    if (run_mode == Constants.RunMode.PREPARE_REFERENCE)  {
+    if (run_mode == RunMode.PREPARE_REFERENCE)  {
         PREPARE_REFERENCE(params)
-        ch_results = ch_results.mix(PREPARE_REFERENCE.out.results)
+        ch_results = PREPARE_REFERENCE.out.results
     } else {
         // Parse and validate inputs
-        inputs = Utils.parseInput(params.input, workflow.stubRun, log)
-        run_config = WorkflowMain.getRunConfig(params, inputs, log)
-        Utils.validateInput(inputs, run_config, params, log)
+        inputs = parseInput(params.input, workflow.stubRun, log)
+        run_config = getRunConfig(params, inputs, log)
+        validateInput(inputs, run_config, params, log)
 
         // Run requested workflow
-        if (run_mode == Constants.RunMode.WGTS) {
+        if (run_mode == RunMode.WGTS) {
             WGTS(inputs, run_config, params)
-            ch_results = ch_results.mix(WGTS.out.results)
-        } else if (run_mode == Constants.RunMode.TARGETED) {
+            ch_results = WGTS.out.results
+        } else if (run_mode == RunMode.TARGETED) {
             TARGETED(inputs, run_config, params)
-            ch_results = ch_results.mix(TARGETED.out.results)
-        } else if (run_mode == Constants.RunMode.PURITY_ESTIMATE) {
+            ch_results = TARGETED.out.results
+        } else if (run_mode == RunMode.PURITY_ESTIMATE) {
             PURITY_ESTIMATE(inputs, run_config, params)
-            ch_results = ch_results.mix(PURITY_ESTIMATE.out.results)
-        } else if (run_mode == Constants.RunMode.PANEL_RESOURCE_CREATION) {
+            ch_results = PURITY_ESTIMATE.out.results
+        } else if (run_mode == RunMode.PANEL_RESOURCE_CREATION) {
             PANEL_RESOURCE_CREATION(inputs, run_config, params)
-            ch_results = ch_results.mix(PANEL_RESOURCE_CREATION.out.results)
+            ch_results = PANEL_RESOURCE_CREATION.out.results
         } else {
             log.error("received bad run mode: ${run_mode}")
             exit(1)
@@ -111,14 +131,14 @@ workflow {
     //
     // STEP: Set defaults and apply extended, custom validation
     //
-    WorkflowMain.setParamsDefaults(params, log)
-    WorkflowMain.validateParams(params, log)
+    setParamsDefaults(params, log)
+    validateParams(params, log)
 
     //
     // STEP: Create placeholders for stub runs if requested
     //
     if (workflow.stubRun && params.create_stub_placeholders) {
-        Utils.createStubPlaceholders(params)
+        createStubPlaceholders(params)
     }
 
     //
@@ -141,6 +161,13 @@ workflow {
     //
     NFCORE_ONCOANALYSER()
 
+    ch_results = NFCORE_ONCOANALYSER.out.results
+    // NOTE(SW): extract the MultiQC report from results instead of re-reading the
+    // single-consumer 'multiqc_report' topic (already read by multiqc_reporting)
+    ch_multiqc_report = ch_results
+        .filter { filepath, file -> file.name == 'multiqc_report.html' }
+        .map { filepath, file -> file }
+
     //
     // SUBWORKFLOW: Run completion tasks
     //
@@ -150,11 +177,11 @@ workflow {
         params.plaintext_email,
         params.outdir,
         params.monochrome_logs,
-        channel.topic('multiqc_report'),
+        ch_multiqc_report,
     )
 
     publish:
-    results = NFCORE_ONCOANALYSER.out.results
+    results = ch_results
 }
 
 output {

@@ -4,35 +4,40 @@
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 */
 
-include { AMBER_PROFILING          } from '../subworkflows/local/amber_profiling'
-include { BAMTOOLS_METRICS         } from '../subworkflows/local/bamtools_metrics'
-include { CIDER_CALLING            } from '../subworkflows/local/cider_calling'
-include { COBALT_PROFILING         } from '../subworkflows/local/cobalt_profiling'
-include { ESVEE_CALLING            } from '../subworkflows/local/esvee_calling'
-include { ISOFOX_QUANTIFICATION    } from '../subworkflows/local/isofox_quantification'
-include { LILAC_CALLING            } from '../subworkflows/local/lilac_calling'
-include { LINX_ANNOTATION          } from '../subworkflows/local/linx_annotation'
-include { LINX_PLOTTING            } from '../subworkflows/local/linx_plotting'
-include { MULTIQC_REPORTING        } from '../subworkflows/local/multiqc_reporting'
-include { ORANGE_REPORTING         } from '../subworkflows/local/orange_reporting'
-include { PAVE_ANNOTATION          } from '../subworkflows/local/pave_annotation'
-include { PEACH_CALLING            } from '../subworkflows/local/peach_calling'
-include { PREPARE_OUTPUTS_TARGETED } from '../subworkflows/local/prepare_outputs'
-include { PREPARE_REFERENCE        } from '../subworkflows/local/prepare_reference'
-include { PURPLE_CALLING           } from '../subworkflows/local/purple_calling'
-include { QSEE_METRICS             } from '../subworkflows/local/qsee_metrics'
-include { READ_ALIGNMENT_DNA       } from '../subworkflows/local/read_alignment_dna'
-include { READ_ALIGNMENT_RNA       } from '../subworkflows/local/read_alignment_rna'
-include { READ_UMI_PROCESSING      } from '../subworkflows/local/read_umi_processing'
-include { REDUX_PROCESSING         } from '../subworkflows/local/redux_processing'
-include { SAGE_APPEND              } from '../subworkflows/local/sage_append'
-include { SAGE_CALLING             } from '../subworkflows/local/sage_calling'
-include { SAGE_PLOTTING            } from '../subworkflows/local/sage_plotting'
+nextflow.enable.types = true
+
+include { AMBER_PROFILING           } from '../subworkflows/local/amber_profiling'
+include { BAMTOOLS_METRICS          } from '../subworkflows/local/bamtools_metrics'
+include { CIDER_CALLING             } from '../subworkflows/local/cider_calling'
+include { COBALT_PROFILING          } from '../subworkflows/local/cobalt_profiling'
+include { ESVEE_CALLING             } from '../subworkflows/local/esvee_calling'
+include { ISOFOX_QUANTIFICATION     } from '../subworkflows/local/isofox_quantification'
+include { LILAC_CALLING             } from '../subworkflows/local/lilac_calling'
+include { LINX_ANNOTATION           } from '../subworkflows/local/linx_annotation'
+include { LINX_PLOTTING             } from '../subworkflows/local/linx_plotting'
+include { MULTIQC_REPORTING         } from '../subworkflows/local/multiqc_reporting'
+include { ORANGE_REPORTING          } from '../subworkflows/local/orange_reporting'
+include { PAVE_ANNOTATION           } from '../subworkflows/local/pave_annotation'
+include { PEACH_CALLING             } from '../subworkflows/local/peach_calling'
+include { PREPARE_OUTPUTS          } from '../subworkflows/local/prepare_outputs'
+include { PREPARE_REFERENCE         } from '../subworkflows/local/prepare_reference'
+include { PURPLE_CALLING            } from '../subworkflows/local/purple_calling'
+include { QSEE_METRICS              } from '../subworkflows/local/qsee_metrics'
+include { READ_ALIGNMENT_DNA        } from '../subworkflows/local/read_alignment_dna'
+include { READ_ALIGNMENT_RNA        } from '../subworkflows/local/read_alignment_rna'
+include { READ_UMI_PROCESSING       } from '../subworkflows/local/read_umi_processing'
+include { REDUX_PROCESSING          } from '../subworkflows/local/redux_processing'
+include { SAGE_APPEND               } from '../subworkflows/local/sage_append'
+include { SAGE_CALLING              } from '../subworkflows/local/sage_calling'
+include { SAGE_PLOTTING             } from '../subworkflows/local/sage_plotting'
 
 include { softwareVersionsToYAML } from '../subworkflows/nf-core/utils_nfcore_pipeline'
 
-include { getDnaFastqChannel } from '../subworkflows/local/utils_nfcore_oncoanalyser_pipeline'
-include { getRnaFastqChannel } from '../subworkflows/local/utils_nfcore_oncoanalyser_pipeline'
+include { getDnaFastqChannel           } from '../subworkflows/local/utils_nfcore_oncoanalyser_pipeline/helpers_channel'
+include { getRnaFastqChannel           } from '../subworkflows/local/utils_nfcore_oncoanalyser_pipeline/helpers_channel'
+include { getPrepConfigFromSamplesheet } from '../subworkflows/local/utils_nfcore_oncoanalyser_pipeline/helpers_parameter'
+include { Case                         } from '../subworkflows/local/utils_nfcore_oncoanalyser_pipeline/types_records'
+include { getSequencingPlatformPon     } from '../subworkflows/local/utils_nfcore_oncoanalyser_pipeline/utils'
 
 /*
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -42,9 +47,9 @@ include { getRnaFastqChannel } from '../subworkflows/local/utils_nfcore_oncoanal
 
 workflow TARGETED {
     take:
-    inputs
-    run_config
-    params
+    inputs: List<Case>
+    run_config: Map
+    params: Map
 
     main:
     // Check input path parameters to see if they exist
@@ -62,7 +67,7 @@ workflow TARGETED {
     ch_inputs = channel.fromList(inputs)
 
     // Set up reference data, assign more human readable variables
-    def prep_config = WorkflowMain.getPrepConfigFromSamplesheet(run_config)
+    def prep_config = getPrepConfigFromSamplesheet(run_config)
     PREPARE_REFERENCE(
         prep_config,
         run_config,
@@ -74,14 +79,13 @@ workflow TARGETED {
     def panel_data = PREPARE_REFERENCE.out.panel_data
 
     // Configure selectable reference data and inputs
-    def hmf_data_pons = Utils.getSequencingPlatformPons(hmf_data, params.sequencing_platform, log)
-    def driver_gene_panel = params.driver_gene_panel != null ? file(params.driver_gene_panel) : panel_data.driver_gene_panel
-    def msi_model_error_rates = panel_data.msi_model_error_rates != null ? panel_data.msi_model_error_rates : hmf_data.msi_model_error_rates
+    def driver_gene_panel = params.driver_gene_panel != null ? file(params.driver_gene_panel) : panel_data.map { it.driver_gene_panel }
+    def msi_model_error_rates = panel_data.map { it.msi_model_error_rates } != null ? panel_data.map { it.msi_model_error_rates } : hmf_data.map { it.msi_model_error_rates }
 
-    def isofox_counts = params.isofox_counts != null ? file(params.isofox_counts) : panel_data.isofox_counts
-    def isofox_gc_ratios = params.isofox_gc_ratios != null ? file(params.isofox_gc_ratios) : panel_data.isofox_gc_ratios
-    def isofox_tpm_norm = params.isofox_tpm_norm != null ? file(params.isofox_tpm_norm) : panel_data.isofox_tpm_norm
-    def isofox_read_length = params.isofox_read_length != null ? params.isofox_read_length : Constants.DEFAULT_ISOFOX_READ_LENGTH_TARGETED
+    def isofox_counts = params.isofox_counts != null ? file(params.isofox_counts) : panel_data.map { it.isofox_counts }
+    def isofox_gc_ratios = params.isofox_gc_ratios != null ? file(params.isofox_gc_ratios) : panel_data.map { it.isofox_gc_ratios }
+    def isofox_tpm_norm = params.isofox_tpm_norm != null ? file(params.isofox_tpm_norm) : panel_data.map { it.isofox_tpm_norm }
+    def isofox_read_length = params.isofox_read_length != null ? params.isofox_read_length : 93  // targeted default read length
 
     //
     // SUBWORKFLOW: Run read alignment to generate alignments
@@ -115,7 +119,7 @@ workflow TARGETED {
                 ch_inputs,
                 ch_fastq_dna,
                 ch_fastq_rna,
-                panel_data.known_umis,
+                panel_data.map { it.known_umis },
                 params.fastp_umi_enabled,
                 params.fastp_umi_location,
                 params.fastp_umi_length,
@@ -124,9 +128,8 @@ workflow TARGETED {
                 params.fastq_tools_umi_delim,
             )
 
-            ch_align_dna_input = ch_align_dna_input.mix(READ_UMI_PROCESSING.out.fastq_dna)
-            ch_align_rna_input = ch_align_rna_input.mix(READ_UMI_PROCESSING.out.fastq_rna)
-
+            ch_align_dna_input = READ_UMI_PROCESSING.out.fastq_dna
+            ch_align_rna_input = READ_UMI_PROCESSING.out.fastq_rna
         } else {
 
             ch_align_dna_input = ch_fastq_dna
@@ -140,6 +143,7 @@ workflow TARGETED {
             ref_data.genome_fasta,
             ref_data.genome_bwamem2_index,
             params.max_fastq_records,
+            params.sequencing_platform,
         )
 
         READ_ALIGNMENT_RNA(
@@ -148,21 +152,19 @@ workflow TARGETED {
             ref_data.genome_star_index,
         )
 
-        ch_align_dna_tumor_out = ch_align_dna_tumor_out.mix(READ_ALIGNMENT_DNA.out.tumor)
-        ch_align_dna_normal_out = ch_align_dna_normal_out.mix(READ_ALIGNMENT_DNA.out.normal)
-        ch_align_dna_donor_out = ch_align_dna_donor_out.mix(READ_ALIGNMENT_DNA.out.donor)
-
-        ch_align_rna_tumor_out = ch_align_rna_tumor_out.mix(READ_ALIGNMENT_RNA.out.tumor)
-        ch_align_rna_qc_tumor_out = ch_align_rna_qc_tumor_out.mix(READ_ALIGNMENT_RNA.out.qc_files)
-
+        ch_align_dna_tumor_out = READ_ALIGNMENT_DNA.out.tumor
+        ch_align_dna_normal_out = READ_ALIGNMENT_DNA.out.normal
+        ch_align_dna_donor_out = READ_ALIGNMENT_DNA.out.donor
+        ch_align_rna_tumor_out = READ_ALIGNMENT_RNA.out.tumor
+        ch_align_rna_qc_tumor_out = READ_ALIGNMENT_RNA.out.qc_files
     } else {
 
-        ch_align_dna_tumor_out = ch_inputs.map { meta -> [meta, [], []] }
-        ch_align_dna_normal_out = ch_inputs.map { meta -> [meta, [], []] }
-        ch_align_dna_donor_out = ch_inputs.map { meta -> [meta, [], []] }
+        ch_align_dna_tumor_out = ch_inputs.map { meta -> [meta, null, null] }
+        ch_align_dna_normal_out = ch_inputs.map { meta -> [meta, null, null] }
+        ch_align_dna_donor_out = ch_inputs.map { meta -> [meta, null, null] }
 
-        ch_align_rna_tumor_out = ch_inputs.map { meta -> [meta, [], []] }
-        ch_align_rna_qc_tumor_out = ch_inputs.map { meta -> [meta, [], []] }
+        ch_align_rna_tumor_out = ch_inputs.map { meta -> [meta, null, null] }
+        ch_align_rna_qc_tumor_out = ch_inputs.map { meta -> [meta, null, null] }
 
     }
 
@@ -184,9 +186,9 @@ workflow TARGETED {
             ref_data.genome_version,
             ref_data.genome_fai,
             ref_data.genome_dict,
-            hmf_data.unmap_regions,
-            hmf_data.msi_jitter_sites,
-            hmf_data.msi_model_coefficients,
+            hmf_data.map { it.unmap_regions },
+            hmf_data.map { it.msi_jitter_sites },
+            hmf_data.map { it.msi_model_coefficients },
             msi_model_error_rates,
             params.sequencing_platform,
             true,  // targeted_mode
@@ -194,15 +196,14 @@ workflow TARGETED {
             params.redux_umi_duplex_delim,
         )
 
-        ch_redux_tumor_out = ch_redux_tumor_out.mix(REDUX_PROCESSING.out.tumor_dir)
-        ch_redux_normal_out = ch_redux_normal_out.mix(REDUX_PROCESSING.out.normal_dir)
-        ch_redux_donor_out = ch_redux_donor_out.mix(REDUX_PROCESSING.out.donor_dir)
-
+        ch_redux_tumor_out = REDUX_PROCESSING.out.tumor_dir
+        ch_redux_normal_out = REDUX_PROCESSING.out.normal_dir
+        ch_redux_donor_out = REDUX_PROCESSING.out.donor_dir
     } else {
 
-        ch_redux_tumor_out = ch_inputs.map { meta -> [meta, []] }
-        ch_redux_normal_out = ch_inputs.map { meta -> [meta, []] }
-        ch_redux_donor_out = ch_inputs.map { meta -> [meta, []] }
+        ch_redux_tumor_out = ch_inputs.map { meta -> [meta, null] }
+        ch_redux_normal_out = ch_inputs.map { meta -> [meta, null] }
+        ch_redux_donor_out = ch_inputs.map { meta -> [meta, null] }
 
     }
 
@@ -222,17 +223,16 @@ workflow TARGETED {
             ref_data.genome_version,
             ref_data.genome_fai,
             driver_gene_panel,
-            hmf_data.ensembl_data_resources,
-            panel_data.target_regions_bed,
+            hmf_data.map { it.ensembl_data_resources },
+            panel_data.map { it.target_regions_bed },
         )
 
-        ch_bamtools_tumor_out = ch_bamtools_tumor_out.mix(BAMTOOLS_METRICS.out.tumor_dir)
-        ch_bamtools_normal_out = ch_bamtools_normal_out.mix(BAMTOOLS_METRICS.out.normal_dir)
-
+        ch_bamtools_tumor_out = BAMTOOLS_METRICS.out.tumor_dir
+        ch_bamtools_normal_out = BAMTOOLS_METRICS.out.normal_dir
     } else {
 
-        ch_bamtools_tumor_out = ch_inputs.map { meta -> [meta, []] }
-        ch_bamtools_normal_out = ch_inputs.map { meta -> [meta, []] }
+        ch_bamtools_tumor_out = ch_inputs.map { meta -> [meta, null] }
+        ch_bamtools_normal_out = ch_inputs.map { meta -> [meta, null] }
 
     }
 
@@ -249,12 +249,12 @@ workflow TARGETED {
             ref_data.genome_fasta,
             ref_data.genome_version,
             ref_data.genome_fai,
-            hmf_data.ensembl_data_resources,
+            hmf_data.map { it.ensembl_data_resources },
             driver_gene_panel,
-            hmf_data.known_fusion_data,
-            hmf_data.isofox_excluded_regions,
-            hmf_data.isofox_gene_distribution,
-            hmf_data.isofox_alt_sj_distribution,
+            hmf_data.map { it.known_fusion_data },
+            hmf_data.map { it.isofox_excluded_regions },
+            hmf_data.map { it.isofox_gene_distribution },
+            hmf_data.map { it.isofox_alt_sj_distribution },
             isofox_counts,
             isofox_gc_ratios,
             isofox_tpm_norm,
@@ -262,11 +262,10 @@ workflow TARGETED {
             isofox_read_length,
         )
 
-        ch_isofox_out = ch_isofox_out.mix(ISOFOX_QUANTIFICATION.out.isofox_dir)
-
+        ch_isofox_out = ISOFOX_QUANTIFICATION.out.isofox_dir
     } else {
 
-        ch_isofox_out = ch_inputs.map { meta -> [meta, []] }
+        ch_isofox_out = ch_inputs.map { meta -> [meta, null] }
 
     }
 
@@ -285,18 +284,17 @@ workflow TARGETED {
             ref_data.genome_fasta,
             ref_data.genome_version,
             ref_data.genome_fai,
-            hmf_data.heterozygous_sites,
-            panel_data.target_regions_bed,
-            [],  // tumor_min_depth
+            hmf_data.map { it.heterozygous_sites },
+            panel_data.map { it.target_regions_bed },
+            null,  // tumor_min_depth
             params.sequencing_platform,
             false,  // purity_estimate_mode
         )
 
-        ch_amber_out = ch_amber_out.mix(AMBER_PROFILING.out.amber_dir)
-
+        ch_amber_out = AMBER_PROFILING.out.amber_dir
     } else {
 
-        ch_amber_out = ch_inputs.map { meta -> [meta, []] }
+        ch_amber_out = ch_inputs.map { meta -> [meta, null] }
 
     }
 
@@ -314,18 +312,17 @@ workflow TARGETED {
             ref_data.genome_fasta,
             ref_data.genome_version,
             ref_data.genome_fai,
-            hmf_data.gc_profile,
-            hmf_data.diploid_bed,
-            panel_data.target_regions_normalisation,
+            hmf_data.map { it.gc_profile },
+            hmf_data.map { it.diploid_bed },
+            panel_data.map { it.target_regions_normalisation },
             true,  // targeted_mode
             false,  // purity_estimate_mode
         )
 
-        ch_cobalt_out = ch_cobalt_out.mix(COBALT_PROFILING.out.cobalt_dir)
-
+        ch_cobalt_out = COBALT_PROFILING.out.cobalt_dir
     } else {
 
-        ch_cobalt_out = ch_inputs.map { meta -> [meta, []] }
+        ch_cobalt_out = ch_inputs.map { meta -> [meta, null] }
 
     }
 
@@ -345,21 +342,20 @@ workflow TARGETED {
             ref_data.genome_fai,
             ref_data.genome_dict,
             ref_data.genome_img,
-            hmf_data.known_fusions,
-            hmf_data_pons.esvee_breakends,
-            hmf_data_pons.esvee_breakpoints,
-            hmf_data.decoy_sequences_image,
-            hmf_data.repeatmasker_annotations,
-            hmf_data.unmap_regions,
-            panel_data.target_regions_bed,
+            hmf_data.map { it.known_fusions },
+            getSequencingPlatformPon(hmf_data, params.sequencing_platform, 'esvee_breakends', log),
+            getSequencingPlatformPon(hmf_data, params.sequencing_platform, 'esvee_breakpoints', log),
+            channel.value(null),  // decoy_sequences_image is [] (null) for GRCh38; hmf_data.map of null hangs typed broadcast
+            hmf_data.map { it.repeatmasker_annotations },
+            hmf_data.map { it.unmap_regions },
+            panel_data.map { it.target_regions_bed },
             params.sequencing_platform,
         )
 
-        ch_esvee_out = ch_esvee_out.mix(ESVEE_CALLING.out.esvee_dir)
-
+        ch_esvee_out = ESVEE_CALLING.out.esvee_dir
     } else {
 
-        ch_esvee_out = ch_inputs.map { meta -> [meta, []] }
+        ch_esvee_out = ch_inputs.map { meta -> [meta, null] }
 
     }
 
@@ -380,26 +376,25 @@ workflow TARGETED {
             ref_data.genome_version,
             ref_data.genome_fai,
             ref_data.genome_dict,
-            hmf_data_pons.sage,
-            hmf_data.sage_known_hotspots_somatic,
-            hmf_data.sage_known_hotspots_germline,
-            hmf_data.sage_highconf_regions,
-            hmf_data.segment_mappability,
+            getSequencingPlatformPon(hmf_data, params.sequencing_platform, 'sage', log),
+            hmf_data.map { it.sage_known_hotspots_somatic },
+            hmf_data.map { it.sage_known_hotspots_germline },
+            hmf_data.map { it.sage_highconf_regions },
+            hmf_data.map { it.segment_mappability },
             driver_gene_panel,
-            hmf_data.ensembl_data_resources,
-            hmf_data.gnomad_resource,
+            hmf_data.map { it.ensembl_data_resources },
+            hmf_data.map { it.gnomad_resource },
             params.sequencing_platform,
             true,  // targeted_mode
             true,  // enable_germline
         )
 
-        ch_sage_germline_out = ch_sage_germline_out.mix(SAGE_CALLING.out.germline_dir)
-        ch_sage_somatic_out = ch_sage_somatic_out.mix(SAGE_CALLING.out.somatic_dir)
-
+        ch_sage_germline_out = SAGE_CALLING.out.germline_dir
+        ch_sage_somatic_out = SAGE_CALLING.out.somatic_dir
     } else {
 
-        ch_sage_germline_out = ch_inputs.map { meta -> [meta, []] }
-        ch_sage_somatic_out = ch_inputs.map { meta -> [meta, []] }
+        ch_sage_germline_out = ch_inputs.map { meta -> [meta, null] }
+        ch_sage_somatic_out = ch_inputs.map { meta -> [meta, null] }
 
     }
 
@@ -418,25 +413,24 @@ workflow TARGETED {
             ref_data.genome_fasta,
             ref_data.genome_version,
             ref_data.genome_fai,
-            panel_data.pon_artefacts,
-            hmf_data_pons.sage,
-            hmf_data.sage_blocklist_regions,
-            hmf_data.sage_blocklist_sites,
-            hmf_data.clinvar_annotations,
-            hmf_data.segment_mappability,
+            panel_data.map { it.pon_artefacts },
+            getSequencingPlatformPon(hmf_data, params.sequencing_platform, 'sage', log),
+            hmf_data.map { it.sage_blocklist_regions },
+            hmf_data.map { it.sage_blocklist_sites },
+            hmf_data.map { it.clinvar_annotations },
+            hmf_data.map { it.segment_mappability },
             driver_gene_panel,
-            hmf_data.ensembl_data_resources,
-            hmf_data.gnomad_resource,
+            hmf_data.map { it.ensembl_data_resources },
+            hmf_data.map { it.gnomad_resource },
             params.sequencing_platform,
         )
 
-        ch_pave_germline_out = ch_pave_germline_out.mix(PAVE_ANNOTATION.out.germline_dir)
-        ch_pave_somatic_out = ch_pave_somatic_out.mix(PAVE_ANNOTATION.out.somatic_dir)
-
+        ch_pave_germline_out = PAVE_ANNOTATION.out.germline_dir
+        ch_pave_somatic_out = PAVE_ANNOTATION.out.somatic_dir
     } else {
 
-        ch_pave_germline_out = ch_inputs.map { meta -> [meta, []] }
-        ch_pave_somatic_out = ch_inputs.map { meta -> [meta, []] }
+        ch_pave_germline_out = ch_inputs.map { meta -> [meta, null] }
+        ch_pave_somatic_out = ch_inputs.map { meta -> [meta, null] }
 
     }
 
@@ -459,20 +453,19 @@ workflow TARGETED {
             ref_data.genome_version,
             ref_data.genome_fai,
             ref_data.genome_dict,
-            hmf_data.gc_profile,
-            hmf_data.sage_known_hotspots_somatic,
-            hmf_data.sage_known_hotspots_germline,
+            hmf_data.map { it.gc_profile },
+            hmf_data.map { it.sage_known_hotspots_somatic },
+            hmf_data.map { it.sage_known_hotspots_germline },
             driver_gene_panel,
-            hmf_data.ensembl_data_resources,
-            hmf_data.germline_amp_del_freq,
-            panel_data.target_regions_bed,
+            hmf_data.map { it.ensembl_data_resources },
+            hmf_data.map { it.germline_amp_del_freq },
+            panel_data.map { it.target_regions_bed },
         )
 
-        ch_purple_out = ch_purple_out.mix(PURPLE_CALLING.out.purple_dir)
-
+        ch_purple_out = PURPLE_CALLING.out.purple_dir
     } else {
 
-        ch_purple_out = ch_inputs.map { meta -> [meta, []] }
+        ch_purple_out = ch_inputs.map { meta -> [meta, null] }
 
     }
 
@@ -493,16 +486,15 @@ workflow TARGETED {
             ch_esvee_out,
             ch_purple_out,
             driver_gene_panel,
-            hmf_data.qsee_cohort_percentiles,
+            hmf_data.map { it.qsee_cohort_percentiles },
             params.sequencing_platform,
             true,  // targeted_mode
         )
 
-        ch_qsee_out = ch_qsee_out.mix(QSEE_METRICS.out.qsee_dir)
-
+        ch_qsee_out = QSEE_METRICS.out.qsee_dir
     } else {
 
-        ch_qsee_out = ch_inputs.map { meta -> [meta, []] }
+        ch_qsee_out = ch_inputs.map { meta -> [meta, null] }
 
     }
 
@@ -517,7 +509,7 @@ workflow TARGETED {
         SAGE_APPEND(
             ch_inputs,
             ch_purple_out,
-            ch_inputs.map { meta -> [meta, []] },  // ch_redux_dir_tumor
+            ch_inputs.map { meta -> [meta, null] },  // ch_redux_dir_tumor
             ch_align_rna_tumor_out,
             ref_data.genome_fasta,
             ref_data.genome_version,
@@ -526,15 +518,15 @@ workflow TARGETED {
             params.sequencing_platform,
             true,  // enable_germline
             true,  // targeted_mode
+            false,  // purity_estimate_mode
         )
 
-        ch_sage_append_somatic_out = ch_sage_append_somatic_out.mix(SAGE_APPEND.out.somatic_dir)
-        ch_sage_append_germline_out = ch_sage_append_germline_out.mix(SAGE_APPEND.out.germline_dir)
-
+        ch_sage_append_somatic_out = SAGE_APPEND.out.somatic_dir
+        ch_sage_append_germline_out = SAGE_APPEND.out.germline_dir
     } else {
 
-        ch_sage_append_somatic_out = ch_inputs.map { meta -> [meta, []] }
-        ch_sage_append_germline_out = ch_inputs.map { meta -> [meta, []] }
+        ch_sage_append_somatic_out = ch_inputs.map { meta -> [meta, null] }
+        ch_sage_append_germline_out = ch_inputs.map { meta -> [meta, null] }
 
     }
 
@@ -555,18 +547,17 @@ workflow TARGETED {
             ref_data.genome_version,
             ref_data.genome_fai,
             ref_data.genome_dict,
-            hmf_data_pons.sage,
-            hmf_data.sage_known_hotspots_somatic,
-            hmf_data.sage_highconf_regions,
-            hmf_data.ensembl_data_resources,
+            getSequencingPlatformPon(hmf_data, params.sequencing_platform, 'sage', log),
+            hmf_data.map { it.sage_known_hotspots_somatic },
+            hmf_data.map { it.sage_highconf_regions },
+            hmf_data.map { it.ensembl_data_resources },
             true,  // targeted_mode
         )
 
-        ch_sage_somatic_visualiser_out = ch_sage_somatic_visualiser_out.mix(SAGE_PLOTTING.out.visualiser_dir)
-
+        ch_sage_somatic_visualiser_out = SAGE_PLOTTING.out.visualiser_dir
     } else {
 
-        ch_sage_somatic_visualiser_out = ch_inputs.map { meta -> [meta, []] }
+        ch_sage_somatic_visualiser_out = ch_inputs.map { meta -> [meta, null] }
 
     }
 
@@ -582,18 +573,17 @@ workflow TARGETED {
             ch_inputs,
             ch_purple_out,
             ref_data.genome_version,
-            hmf_data.ensembl_data_resources,
-            hmf_data.known_fusion_data,
+            hmf_data.map { it.ensembl_data_resources },
+            hmf_data.map { it.known_fusion_data },
             driver_gene_panel,
         )
 
-        ch_linx_somatic_out = ch_linx_somatic_out.mix(LINX_ANNOTATION.out.somatic_dir)
-        ch_linx_germline_out = ch_linx_germline_out.mix(LINX_ANNOTATION.out.germline_dir)
-
+        ch_linx_somatic_out = LINX_ANNOTATION.out.somatic_dir
+        ch_linx_germline_out = LINX_ANNOTATION.out.germline_dir
     } else {
 
-        ch_linx_somatic_out = ch_inputs.map { meta -> [meta, []] }
-        ch_linx_germline_out = ch_inputs.map { meta -> [meta, []] }
+        ch_linx_somatic_out = ch_inputs.map { meta -> [meta, null] }
+        ch_linx_germline_out = ch_inputs.map { meta -> [meta, null] }
 
     }
 
@@ -602,6 +592,8 @@ workflow TARGETED {
     //
     // channel: [ meta, linx_visualiser_dir ]
     ch_linx_somatic_visualiser_out = channel.empty()
+    // channel: [ meta, linxreport_html ]
+    ch_linxreport_html_out = channel.empty()
     if (run_config.stages.linx) {
 
         LINX_PLOTTING(
@@ -611,20 +603,22 @@ workflow TARGETED {
             ch_cobalt_out,
             ch_purple_out,
             ref_data.genome_version,
-            hmf_data.ensembl_data_resources,
+            hmf_data.map { it.ensembl_data_resources },
         )
 
-        ch_linx_somatic_visualiser_out = ch_linx_somatic_visualiser_out.mix(LINX_PLOTTING.out.visualiser_dir)
-
+        ch_linx_somatic_visualiser_out = LINX_PLOTTING.out.visualiser_dir
+        ch_linxreport_html_out = LINX_PLOTTING.out.linxreport_html
     } else {
 
-        ch_linx_somatic_visualiser_out = ch_inputs.map { meta -> [meta, []] }
+        ch_linx_somatic_visualiser_out = ch_inputs.map { meta -> [meta, null] }
 
     }
 
     //
     // SUBWORKFLOW: Run CIDER to identify and annotate CDR3 sequences of IG and TCR loci
     //
+    // channel: [ meta, cider_results ]
+    ch_cider_out = channel.empty()
     if (run_config.stages.cider) {
 
         CIDER_CALLING(
@@ -638,6 +632,7 @@ workflow TARGETED {
             ref_data.genome_img,
         )
 
+        ch_cider_out = CIDER_CALLING.out.cider_results
     }
 
     //
@@ -656,16 +651,15 @@ workflow TARGETED {
             ref_data.genome_fasta,
             ref_data.genome_version,
             ref_data.genome_fai,
-            hmf_data.lilac_resources,
+            hmf_data.map { it.lilac_resources },
             params.sequencing_platform,
             true,  // targeted_mode,
         )
 
-        ch_lilac_out = ch_lilac_out.mix(LILAC_CALLING.out.lilac_dir)
-
+        ch_lilac_out = LILAC_CALLING.out.lilac_dir
     } else {
 
-        ch_lilac_out = ch_inputs.map { meta -> [meta, []] }
+        ch_lilac_out = ch_inputs.map { meta -> [meta, null] }
 
     }
 
@@ -679,31 +673,34 @@ workflow TARGETED {
         PEACH_CALLING(
             ch_inputs,
             ch_purple_out,
-            hmf_data.peach_haplotypes,
-            hmf_data.peach_haplotype_functions,
-            hmf_data.peach_drug_info,
+            hmf_data.map { it.peach_haplotypes },
+            hmf_data.map { it.peach_haplotype_functions },
+            hmf_data.map { it.peach_drug_info },
         )
 
-        ch_peach_out = ch_peach_out.mix(PEACH_CALLING.out.peach_dir)
-
+        ch_peach_out = PEACH_CALLING.out.peach_dir
     } else {
 
-        ch_peach_out = ch_inputs.map { meta -> [meta, []] }
+        ch_peach_out = ch_inputs.map { meta -> [meta, null] }
 
     }
 
     //
     // SUBWORKFLOW: Run ORANGE to generate static PDF report
     //
+    // channel: [ meta, orange_json ] / [ meta, orange_pdf ]
+    ch_orange_json_out = channel.empty()
+    ch_orange_pdf_out = channel.empty()
     if (run_config.stages.orange) {
 
         // Create placeholder channels for empty remaining channels
-        ch_chord_out = ch_inputs.map { meta -> [meta, []] }
-        ch_cuppa_out = ch_inputs.map { meta -> [meta, []] }
-        ch_sigs_out = ch_inputs.map { meta -> [meta, []] }
-        ch_virusinterpreter_out = ch_inputs.map { meta -> [meta, []] }
+        ch_chord_out = ch_inputs.map { meta -> [meta, null] }
+        ch_cuppa_out = ch_inputs.map { meta -> [meta, null] }
+        ch_sigs_out = ch_inputs.map { meta -> [meta, null] }
+        ch_virusinterpreter_out = ch_inputs.map { meta -> [meta, null] }
 
         ORANGE_REPORTING(
+            ch_inputs,
             ch_sage_somatic_out,
             ch_sage_germline_out,
             ch_sage_append_somatic_out,
@@ -722,12 +719,14 @@ workflow TARGETED {
             ch_peach_out,
             ch_isofox_out,
             ref_data.genome_version,
-            hmf_data.disease_ontology,
+            hmf_data.map { it.disease_ontology },
             params.sequencing_platform,
             true,  // targeted_mode
             params.panel,
         )
 
+        ch_orange_json_out = ORANGE_REPORTING.out.orange_json
+        ch_orange_pdf_out = ORANGE_REPORTING.out.orange_pdf
     }
 
     //
@@ -778,17 +777,61 @@ workflow TARGETED {
             params.multiqc_logo,
         )
 
-        ch_multiqc_out = ch_multiqc_out.mix(MULTIQC_REPORTING.out.report)
-
+        ch_multiqc_out = MULTIQC_REPORTING.out.report
     }
 
-    //
-    // SUBWORKFLOW: Prepare outputs for publishing
-    //
-    PREPARE_OUTPUTS_TARGETED()
+    PREPARE_OUTPUTS(
+        ch_amber_out,
+        ch_bamtools_tumor_out,
+        ch_bamtools_normal_out,
+        channel.empty(),  // chord
+        ch_cider_out,
+        ch_cobalt_out,
+        channel.empty(),  // cuppa
+        ch_esvee_out,
+        ch_align_rna_tumor_out,
+        ch_isofox_out,
+        ch_lilac_out,
+        ch_linx_germline_out,
+        ch_linx_somatic_out,
+        ch_linx_somatic_visualiser_out,
+        ch_linxreport_html_out,
+        ch_multiqc_out,
+        channel.empty(),  // neo_annotated_fusions
+        channel.empty(),  // neo_finder
+        channel.empty(),  // neo_scorer_dir
+        ch_orange_json_out,
+        ch_orange_pdf_out,
+        ch_pave_germline_out,
+        ch_pave_somatic_out,
+        ch_peach_out,
+        ch_purple_out,
+        ch_qsee_out,
+        ch_redux_tumor_out,
+        ch_redux_normal_out,
+        ch_redux_donor_out,
+        ch_sage_append_somatic_out,
+        ch_sage_append_germline_out,
+        ch_sage_germline_out,
+        ch_sage_somatic_out,
+        ch_sage_somatic_visualiser_out,
+        channel.empty(),  // sigs
+        channel.empty(),  // teal_normal_bam
+        channel.empty(),  // teal_tumor_bam
+        channel.empty(),  // teal_tsvs
+        channel.empty(),  // virusbreakend_tsv
+        channel.empty(),  // virusbreakend_vcf
+        channel.empty(),  // virusinterpreter
+        channel.topic('write_reference_data'),
+        channel.topic('command_files'),
+        channel.empty(),  // wisp
+        channel.empty(),  // cobalt_normalisation_tsv
+        channel.empty(),  // isofox_normalisation_csv
+        channel.empty(),  // pave_pon_panel_creation_artefacts
+    )
 
     emit:
-    results = PREPARE_OUTPUTS_TARGETED.out.results
+    results = PREPARE_OUTPUTS.out.results
 }
 
 /*

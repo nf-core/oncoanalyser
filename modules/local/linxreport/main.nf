@@ -1,3 +1,5 @@
+nextflow.enable.types = true
+
 process LINXREPORT {
     tag "${meta.id}"
     label 'process_single'
@@ -8,12 +10,12 @@ process LINXREPORT {
         'biocontainers/r-linxreport:1.2.0--r45hdfd78af_0' }"
 
     input:
-    tuple val(meta), path(linx_annotation_dir), path(linx_visualiser_dir)
+    tuple(meta: Record, linx_annotation_dir: Path, linx_visualiser_dir: Path)
 
-    output:
-    tuple val(meta), path('*_linx.html')                  , topic: linxreport_html
-    tuple val(meta), val('linxreport'), path('.command.*'), topic: command_files
-    path 'versions.yml'                                   , topic: versions
+    topic:
+    tuple(meta, file('*_linx.html'))               >> 'linxreport_html'
+    tuple(meta, 'linxreport', files('.command.*')) >> 'command_files'
+    file('versions.yml')                           >> 'versions'
 
     when:
     task.ext.when == null || task.ext.when

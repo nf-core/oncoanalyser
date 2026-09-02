@@ -2,31 +2,44 @@
 // Isofox estimates transcript abundance, detects novel SJs, and identifies fusion events
 //
 
+nextflow.enable.types = true
+
 include { ISOFOX } from '../../../modules/local/isofox/run/main'
+
+include { getInput                 } from '../utils_nfcore_oncoanalyser_pipeline/accessors_samples'
+include { getTumorDnaSampleName    } from '../utils_nfcore_oncoanalyser_pipeline/accessors_samples'
+include { getTumorRnaSample        } from '../utils_nfcore_oncoanalyser_pipeline/accessors_samples'
+include { getTumorRnaSampleName    } from '../utils_nfcore_oncoanalyser_pipeline/accessors_samples'
+include { hasInput                 } from '../utils_nfcore_oncoanalyser_pipeline/accessors_samples'
+include { groupByMeta              } from '../utils_nfcore_oncoanalyser_pipeline/helpers_channel'
+include { joinMeta                 } from '../utils_nfcore_oncoanalyser_pipeline/helpers_channel'
+include { restoreMeta              } from '../utils_nfcore_oncoanalyser_pipeline/helpers_channel'
+include { FileType                 } from '../utils_nfcore_oncoanalyser_pipeline/types_enums'
+include { selectCurrentOrExisting  } from '../utils_nfcore_oncoanalyser_pipeline/utils'
 
 workflow ISOFOX_QUANTIFICATION {
     take:
     // Sample data
-    ch_inputs                  // channel: [mandatory] [ meta ]
-    ch_tumor_rna_aln           // channel: [mandatory] [ meta, aln, idx ]
+    ch_inputs                 : Channel<Map>                    // channel: [mandatory] [ meta ]
+    ch_tumor_rna_aln          : Channel<Tuple<Map, Path, Path>> // channel: [mandatory] [ meta, aln, idx ]
 
     // Reference data
-    genome_fasta               // channel: [mandatory] /path/to/genome_fasta
-    genome_version             // channel: [mandatory] genome version
-    genome_fai                 // channel: [mandatory] /path/to/genome_fai
-    ensembl_data_resources     // channel: [mandatory] /path/to/ensembl_data_resources/
-    driver_gene_panel          // channel: [mandatory] /path/to/driver_gene_panel
-    known_fusion_data          // channel: [mandatory] /path/to/known_fusion_data
-    isofox_excluded_regions    // channel: [mandatory] /path/to/isofox_excluded_regions
-    isofox_gene_distribution   // channel: [mandatory] /path/to/isofox_gene_distribution
-    isofox_alt_sj_distribution // channel: [mandatory] /path/to/isofox_alt_sj_distribution
-    isofox_counts              // channel: [mandatory] /path/to/isofox_counts
-    isofox_gc_ratios           // channel: [mandatory] /path/to/isofox_gc_ratios
-    isofox_tpm_norm            // channel: [optional]  /path/to/isofox_tpm_norm
+    genome_fasta              : Channel<Path>                   // channel: [mandatory] /path/to/genome_fasta
+    genome_version            : Channel<String>                 // channel: [mandatory] genome version
+    genome_fai                : Channel<Path>                   // channel: [mandatory] /path/to/genome_fai
+    ensembl_data_resources    : Channel<Path>                   // channel: [mandatory] /path/to/ensembl_data_resources/
+    driver_gene_panel         : Channel<Path>                   // channel: [mandatory] /path/to/driver_gene_panel
+    known_fusion_data         : Channel<Path>                   // channel: [mandatory] /path/to/known_fusion_data
+    isofox_excluded_regions   : Channel<Path>                   // channel: [mandatory] /path/to/isofox_excluded_regions
+    isofox_gene_distribution  : Channel<Path>                   // channel: [mandatory] /path/to/isofox_gene_distribution
+    isofox_alt_sj_distribution: Channel<Path>                   // channel: [mandatory] /path/to/isofox_alt_sj_distribution
+    isofox_counts             : Channel<Path>?                  // channel: [optional]  /path/to/isofox_counts
+    isofox_gc_ratios          : Channel<Path>?                  // channel: [optional]  /path/to/isofox_gc_ratios
+    isofox_tpm_norm           : Channel<Path>?                  // channel: [optional]  /path/to/isofox_tpm_norm
 
     // Params
-    isofox_functions       //  string: [optional]  Isofox functions
-    isofox_read_length     //  string: [mandatory] Isofox read length
+    isofox_functions          : String?                         //  string: [optional]  Isofox functions
+    isofox_read_length        : Integer                         //  string: [mandatory] Isofox read length
 
     main:
     // Select input sources then sort
@@ -36,12 +49,12 @@ workflow ISOFOX_QUANTIFICATION {
         .map { meta, tumor_aln, tumor_idx ->
             return [
                 meta,
-                Utils.selectCurrentOrExisting(tumor_aln, meta, Constants.INPUT.ALN_RNA_TUMOR),
-                Utils.selectCurrentOrExisting(tumor_idx, meta, Constants.INPUT.IDX_RNA_TUMOR),
+                selectCurrentOrExisting(tumor_aln, getInput(getTumorRnaSample(meta), FileType.ALN)),
+                selectCurrentOrExisting(tumor_idx, getInput(getTumorRnaSample(meta), FileType.IDX)),
             ]
         }
         .branch { meta, tumor_aln, tumor_idx ->
-            def has_existing = Utils.hasExistingInput(meta, Constants.INPUT.ISOFOX_DIR)
+            def has_existing = hasInput(getTumorRnaSample(meta), FileType.ISOFOX_DIR)
             runnable: tumor_aln && ! has_existing
             skip: true
                 return meta
@@ -52,11 +65,11 @@ workflow ISOFOX_QUANTIFICATION {
     ch_isofox_inputs = ch_inputs_sorted.runnable
         .map { meta, tumor_aln, tumor_idx ->
 
-            def meta_isofox = [
-                key: meta.group_id,
-                id: meta.group_id,
-                sample_id: Utils.getTumorDnaSampleName(meta) ?: Utils.getTumorRnaSampleName(meta),
-            ]
+            def meta_isofox = record(
+                key: meta.case_id,
+                id: meta.case_id,
+                sample_id: getTumorDnaSampleName(meta) ?: getTumorRnaSampleName(meta),
+            )
 
             return [meta_isofox, tumor_aln, tumor_idx]
         }
@@ -84,8 +97,8 @@ workflow ISOFOX_QUANTIFICATION {
     // channel: [ meta, isofox_dir ]
     ch_outputs = channel.empty()
         .mix(
-            WorkflowOncoanalyser.restoreMeta(channel.topic('isofox_dir'), ch_inputs),
-            ch_inputs_sorted.skip.map { meta -> [meta, []] },
+            restoreMeta(channel.topic('isofox_dir'), ch_inputs),
+            ch_inputs_sorted.skip.map { meta -> [meta, null] },
         )
 
     emit:

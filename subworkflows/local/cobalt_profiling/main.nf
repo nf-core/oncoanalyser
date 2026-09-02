@@ -2,47 +2,64 @@
 // COBALT calculates read ratios between tumor and normal samples
 //
 
+nextflow.enable.types = true
+
 include { COBALT } from '../../../modules/local/cobalt/run/main'
+
+include { getNormalReduxDirAlignment } from '../utils_nfcore_oncoanalyser_pipeline/accessors_alignments'
+include { getTumorReduxDirAlignment  } from '../utils_nfcore_oncoanalyser_pipeline/accessors_alignments'
+include { getInput                   } from '../utils_nfcore_oncoanalyser_pipeline/accessors_samples'
+include { getLongitudinalSampleName  } from '../utils_nfcore_oncoanalyser_pipeline/accessors_samples'
+include { getNormalDnaSample         } from '../utils_nfcore_oncoanalyser_pipeline/accessors_samples'
+include { getNormalDnaSampleName     } from '../utils_nfcore_oncoanalyser_pipeline/accessors_samples'
+include { getTumorDnaSample          } from '../utils_nfcore_oncoanalyser_pipeline/accessors_samples'
+include { getTumorDnaSampleName      } from '../utils_nfcore_oncoanalyser_pipeline/accessors_samples'
+include { hasInput                   } from '../utils_nfcore_oncoanalyser_pipeline/accessors_samples'
+include { groupByMeta                } from '../utils_nfcore_oncoanalyser_pipeline/helpers_channel'
+include { joinMeta                   } from '../utils_nfcore_oncoanalyser_pipeline/helpers_channel'
+include { restoreMeta                } from '../utils_nfcore_oncoanalyser_pipeline/helpers_channel'
+include { FileType                   } from '../utils_nfcore_oncoanalyser_pipeline/types_enums'
+include { selectCurrentOrExisting    } from '../utils_nfcore_oncoanalyser_pipeline/utils'
 
 workflow COBALT_PROFILING {
     take:
     // Sample data
-    ch_inputs                    // channel: [mandatory] [ meta ]
-    ch_redux_dir_tumor           // channel: [mandatory] [ meta, redux_dir ]
-    ch_redux_dir_normal          // channel: [mandatory] [ meta, redux_dir ]
+    ch_inputs                   : Channel<Map>              // channel: [mandatory] [ meta ]
+    ch_redux_dir_tumor          : Channel<Tuple<Map, Path>> // channel: [mandatory] [ meta, redux_dir ]
+    ch_redux_dir_normal         : Channel<Tuple<Map, Path>> // channel: [mandatory] [ meta, redux_dir ]
 
     // Reference data
-    genome_fasta                 // channel: [mandatory] /path/to/genome_fasta
-    genome_version               // channel: [mandatory] genome version
-    genome_fai                   // channel: [mandatory] /path/to/genome_fai
-    gc_profile                   // channel: [mandatory] /path/to/gc_profile
-    diploid_bed                  // channel: [optional]  /path/to/diploid_bed
-    target_regions_normalisation // channel: [optional]  /path/to/target_regions_normalisation
-    targeted_mode                // boolean: [mandatory] Set targeted mode
-    purity_estimate_mode         // boolean: [mandatory] Set purity estimate mode
+    genome_fasta                : Channel<Path>             // channel: [mandatory] /path/to/genome_fasta
+    genome_version              : Channel<String>           // channel: [mandatory] genome version
+    genome_fai                  : Channel<Path>             // channel: [mandatory] /path/to/genome_fai
+    gc_profile                  : Channel<Path>             // channel: [mandatory] /path/to/gc_profile
+    diploid_bed                 : Channel<Path>?            // channel: [optional]  /path/to/diploid_bed
+    target_regions_normalisation: Channel<Path>?            // channel: [optional]  /path/to/target_regions_normalisation
+    targeted_mode               : Boolean                   // boolean: [mandatory] Set targeted mode
+    purity_estimate_mode        : Boolean                   // boolean: [mandatory] Set purity estimate mode
 
     main:
     // Select input sources then sort
     // NOTE(SW): germline mode is not currently supported
     // channel: runnable: [ meta, tumor_aln, tumor_idx, normal_aln, normal_idx ]
     // channel: skip: [ meta ]
-    ch_inputs_sorted = WorkflowOncoanalyser.groupByMeta(
+    ch_inputs_sorted = groupByMeta([
         ch_redux_dir_tumor,
         ch_redux_dir_normal,
-    )
+    ])
         .map { meta, redux_dir_tumor, redux_dir_normal ->
 
-            def redux_dir_tumor_selected = Utils.selectCurrentOrExisting(redux_dir_tumor, meta, Constants.INPUT.REDUX_DIR_TUMOR)
-            def redux_dir_normal_selected = Utils.selectCurrentOrExisting(redux_dir_normal, meta, Constants.INPUT.REDUX_DIR_NORMAL)
+            def redux_dir_tumor_selected = selectCurrentOrExisting(redux_dir_tumor, getInput(getTumorDnaSample(meta), FileType.REDUX_DIR))
+            def redux_dir_normal_selected = selectCurrentOrExisting(redux_dir_normal, getInput(getNormalDnaSample(meta), FileType.REDUX_DIR))
 
-            def (tumor_aln, tumor_idx) = Utils.getTumorReduxDirAlignment(meta, redux_dir_tumor_selected)
-            def (normal_aln, normal_idx) = Utils.getNormalReduxDirAlignment(meta, redux_dir_normal_selected)
+            def (tumor_aln, tumor_idx) = getTumorReduxDirAlignment(meta, redux_dir_tumor_selected)
+            def (normal_aln, normal_idx) = getNormalReduxDirAlignment(meta, redux_dir_normal_selected)
 
             return [meta, tumor_aln, tumor_idx, normal_aln, normal_idx]
 
         }
         .branch { meta, tumor_aln, tumor_idx, normal_aln, normal_idx ->
-            def has_existing = Utils.hasExistingInput(meta, Constants.INPUT.COBALT_DIR)
+            def has_existing = hasInput(getTumorDnaSample(meta), FileType.COBALT_DIR)
             runnable_tn: tumor_aln && normal_aln && ! has_existing
             runnable_to: tumor_aln && ! has_existing
             skip: true
@@ -54,7 +71,7 @@ workflow COBALT_PROFILING {
     // channel: [ meta, tumor_aln, tumor_idx, normal_aln, normal_idx, diploid_bed ]
     ch_inputs_runnable = channel.empty()
         .mix(
-            ch_inputs_sorted.runnable_tn.map { d -> d + [[]] },
+            ch_inputs_sorted.runnable_tn.map { d -> d + [null] },
             ch_inputs_sorted.runnable_to.combine(diploid_bed),
         )
 
@@ -66,20 +83,17 @@ workflow COBALT_PROFILING {
 
             def tumor_id
             if (purity_estimate_mode) {
-                tumor_id = Utils.getTumorDnaSampleName(meta, primary: false)
+                tumor_id = getLongitudinalSampleName(meta)
             } else {
-                tumor_id = Utils.getTumorDnaSampleName(meta, primary: true)
+                tumor_id = getTumorDnaSampleName(meta)
             }
 
-            def meta_cobalt = [
-                key: meta.group_id,
-                id: meta.group_id,
+            def meta_cobalt = record(
+                key: meta.case_id,
+                id: meta.case_id,
                 tumor_id: tumor_id,
-            ]
-
-            if (normal_aln) {
-                meta_cobalt.normal_id = Utils.getNormalDnaSampleName(meta)
-            }
+                normal_id: normal_aln ? getNormalDnaSampleName(meta) : null,
+            )
 
             sample_data: [meta_cobalt, tumor_aln, tumor_idx, normal_aln, normal_idx]
             diploid_bed: ref_diploid_bed
@@ -101,8 +115,8 @@ workflow COBALT_PROFILING {
     // channel: [ meta, cobalt_dir ]
     ch_outputs = channel.empty()
         .mix(
-            WorkflowOncoanalyser.restoreMeta(channel.topic('cobalt_dir'), ch_inputs),
-            ch_inputs_sorted.skip.map { meta -> [meta, []] },
+            restoreMeta(channel.topic('cobalt_dir'), ch_inputs),
+            ch_inputs_sorted.skip.map { meta -> [meta, null] },
         )
 
     emit:

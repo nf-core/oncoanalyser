@@ -5,9 +5,6 @@ nf_core_version: 4.1.0
 lint:
   files_exist:
     - .github/workflows/nf-test.yml
-    - lib/Utils.groovy
-    - lib/WorkflowMain.groovy
-    - lib/WorkflowOncoanalyser.groovy
     - .github/workflows/linting_comment.yml
   files_unchanged:
     - assets/nf-core-oncoanalyser_logo_light.png

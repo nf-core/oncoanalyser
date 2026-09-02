@@ -1,4 +1,4 @@
-name: bwa-mem2_mem
+name: bwamem2_align
 description: The mem alignment algorithm of bwa-mem2
 keywords:
   - bwa
@@ -10,45 +10,65 @@ tools:
       description: Burrow-Wheeler Aligner for short-read alignment
       homepage: https://github.com/bwa-mem2/bwa-mem2
       documentation: https://github.com/bwa-mem2/bwa-mem2
-      licence: ["MIT"]
+      licence:
+        - MIT
 input:
-  - meta:
-      type: map
-      description: |
-        Groovy Map containing sample information
-        e.g. [id: 'sample_id']
-  - reads_fwd:
-      type: file
-      description: Forward reads FASTQ file
-      pattern: "*.{fastq.gz}"
-  - reads_rev:
-      type: file
-      description: Reverse reads FASTQ file
-      pattern: "*.{fastq.gz}"
-  - genome_fasta:
-      type: file
-      description: Reference genome assembly FASTA file
-      pattern: "*.{fa,fasta}"
-  - genome_bwamem2_index:
-      type: directory
-      description: bwa-mem2 index directory
-output:
-  - meta:
-      type: map
-      description: |
-        Groovy Map containing sample information
-        e.g. [id: 'sample_id']
-  - bwamem2_align_bam:
-      type: list
-      description: BAM and BAI file
-      pattern: "*.{bam,bam.bai}"
-  - command_files:
-      type: list
-      description: List of command files
-  - versions:
-      type: file
-      description: File containing software versions
-      pattern: "versions.yml"
+  - - meta:
+        type: map
+        description: |-
+          Groovy Map containing sample information
+          e.g. [id: 'sample_id']
+    - reads_fwd:
+        type: file
+        description: Forward reads FASTQ file
+        pattern: '*.{fastq.gz}'
+    - reads_rev:
+        type: file
+        description: Reverse reads FASTQ file (optional)
+        pattern: '*.{fastq.gz}'
+  - - genome_fasta:
+        type: file
+        description: Reference genome assembly FASTA file
+        pattern: '*.{fa,fasta}'
+  - - genome_bwamem2_index:
+        type: directory
+        description: Bwa-mem2 index directory
+  - - append_fastq_comment:
+        type: boolean
+        description: Append FASTQ comment flag
+output: {}
+topics:
+  bwamem2_align_bam:
+    - - meta:
+          type: map
+          description: |-
+            Groovy Map containing sample information
+            e.g. [id: 'sample_id']
+      - '*.bam':
+          type: file
+          description: BAM file
+          pattern: '*.bam'
+      - '*.bai':
+          type: file
+          description: BAI file
+          pattern: '*.bai'
+  command_files:
+    - - meta:
+          type: map
+          description: |-
+            Groovy Map containing sample information
+            e.g. [id: 'sample_id']
+      - identifier:
+          type: string
+          description: Identifier for command files
+      - command_files:
+          type: list
+          description: List of command files
+  versions:
+    - - versions.yml:
+          type: file
+          description: File containing software versions
+          pattern: versions.yml
 authors:
-  - "@scwatts"
-  - "@mkcmkc"
+  - '@scwatts'
+  - '@mkcmkc'

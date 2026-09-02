@@ -1,3 +1,6 @@
+// NOTE(SW): kept untyped (legacy `topic:` qualifier) because this process is aliased multiple times
+// in prepare_reference, and a typed process with a `topic:` section under multiple aliases hangs the
+// run (Nextflow issue #7434). Re-enable static types once that bug is fixed.
 process CUSTOM_EXTRACTTARBALL {
     label 'process_single'
 

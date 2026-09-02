@@ -1,3 +1,5 @@
+nextflow.enable.types = true
+
 process CUPPA {
     tag "${meta.id}"
     label 'process_low'
@@ -8,16 +10,16 @@ process CUPPA {
         'biocontainers/hmftools-cuppa:2.5.1--py311r42hdfd78af_0' }"
 
     input:
-    tuple val(meta), path(isofox_dir), path(purple_dir), path(linx_dir), path(virusinterpreter_dir)
-    val genome_ver
-    path cuppa_alt_sj
-    path cuppa_classifier
-    val categories
+    tuple(meta: Record, isofox_dir: Path?, purple_dir: Path?, linx_dir: Path?, virusinterpreter_dir: Path?)
+    genome_ver: String
+    cuppa_alt_sj: Path
+    cuppa_classifier: Path
+    categories: String
 
-    output:
-    tuple val(meta), path('cuppa/')                  , topic: cuppa_dir
-    tuple val(meta), val('cuppa'), path('.command.*'), topic: command_files
-    path 'versions.yml'                              , topic: versions
+    topic:
+    tuple(meta, file('cuppa/'))               >> 'cuppa_dir'
+    tuple(meta, 'cuppa', files('.command.*')) >> 'command_files'
+    file('versions.yml')                      >> 'versions'
 
     when:
     task.ext.when == null || task.ext.when

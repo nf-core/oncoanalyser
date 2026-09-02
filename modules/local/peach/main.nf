@@ -1,3 +1,5 @@
+nextflow.enable.types = true
+
 process PEACH {
     tag "${meta.id}"
     label 'process_single'
@@ -8,15 +10,15 @@ process PEACH {
         'biocontainers/hmftools-peach:2.0.0--hdfd78af_1' }"
 
     input:
-    tuple val(meta), path(germline_smlv_vcf)
-    path haplotypes
-    path haplotype_functions
-    path drug_info
+    tuple(meta: Record, germline_smlv_vcf: Path)
+    haplotypes: Path
+    haplotype_functions: Path
+    drug_info: Path
 
-    output:
-    tuple val(meta), path('peach/')                  , topic: peach_dir
-    tuple val(meta), val('peach'), path('.command.*'), topic: command_files
-    path 'versions.yml'                              , topic: versions
+    topic:
+    tuple(meta, file('peach/'))               >> 'peach_dir'
+    tuple(meta, 'peach', files('.command.*')) >> 'command_files'
+    file('versions.yml')                      >> 'versions'
 
     when:
     task.ext.when == null || task.ext.when
@@ -39,7 +41,6 @@ process PEACH {
         -drugs_file ${drug_info} \\
         ${log_level_arg} \\
         -output_dir peach/
-
 
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":

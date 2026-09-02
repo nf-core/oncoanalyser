@@ -10,83 +10,96 @@ tools:
       description: A precise and highly sensitive somatic SNV, MNV and small INDEL caller.
       homepage: https://github.com/hartwigmedical/hmftools/tree/master/sage
       documentation: https://github.com/hartwigmedical/hmftools/tree/master/sage
-      licence: ["GPL v3"]
+      licence:
+        - GPL v3
 input:
-  - meta:
-      type: map
-      description: |
-        Groovy Map containing sample informatio
-        e.g. [id: 'sample_id']
-  - tumor_aln:
-      type: file
-      description: Tumor alignment file
-      pattern: "*.{bam,cram}"
-  - tumor_idx:
-      type: file
-      description: Tumor index file
-      pattern: "*.{bai,crai}"
-  - normal_aln:
-      type: file
-      description: Normal alignment file
-      pattern: "*.{bam,cram}"
-  - normal_idx:
-      type: file
-      description: Normal index file
-      pattern: "*.{tsv,tsv.gz}"
-  - redux_tsvs:
-      type: list
-      description: REDUX MS files
-  - genome_fasta:
-      type: file
-      description: Reference genome assembly FASTA file
-      pattern: "*.{fa,fasta}"
-  - genome_ver:
-      type: string
-      description: Reference genome version
-  - genome_fai:
-      type: file
-      description: Reference genome assembly fai file
-      pattern: "*.{fai}"
-  - genome_dict:
-      type: file
-      description: Reference genome assembly dict file
-      pattern: "*.{dict}"
-  - sage_known_hotspots_germline:
-      type: file
-      description: SAGE germline known hotspots file
-      pattern: "*.{vcf.gz}"
-  - sage_highconf_regions:
-      type: file
-      description: SAGE high confidence regions file
-      pattern: "*.{bed.gz}"
-  - driver_gene_panel:
-      type: file
-      description: Driver gene panel file
-      pattern: "*.{tsv}"
-  - ensembl_data_resources:
-      type: directory
-      description: HMF ensembl data resources directory
-  - sequencing_platform:
-      type: string
-      description: Sequencing platform
-  - targeted_mode:
-      type: boolean
-      description: Flag indicating whether targeted mode is set
-output:
-  - meta:
-      type: map
-      description: |
-        Groovy Map containing sample information
-        e.g. [id: 'sample_id']
-  - sage_germline_dir:
-      type: directory
-      description: SAGE germline output directory
-  - command_files:
-      type: list
-      description: List of command files
-  - versions:
-      type: file
-      description: File containing software versions
-      pattern: "versions.yml"
+  - - meta:
+        type: map
+        description: |-
+          Groovy Map containing sample information
+          e.g. [id: 'sample_id']
+    - tumor_aln:
+        type: file
+        description: Tumor alignment file
+        pattern: '*.{bam,cram}'
+    - tumor_idx:
+        type: file
+        description: Tumor index file
+        pattern: '*.{bai,crai}'
+    - normal_aln:
+        type: file
+        description: Normal alignment file (optional)
+        pattern: '*.{bam,cram}'
+    - normal_idx:
+        type: file
+        description: Normal index file (optional)
+        pattern: '*.{bai,crai}'
+    - redux_tsvs:
+        type: list
+        description: REDUX MS files
+  - - genome_fasta:
+        type: file
+        description: Reference genome assembly FASTA file
+        pattern: '*.{fa,fasta}'
+  - - genome_ver:
+        type: string
+        description: Reference genome version
+  - - genome_fai:
+        type: file
+        description: Reference genome assembly fai file
+        pattern: '*.{fai}'
+  - - genome_dict:
+        type: file
+        description: Reference genome assembly dict file
+        pattern: '*.{dict}'
+  - - sage_known_hotspots_germline:
+        type: file
+        description: SAGE germline known hotspots file
+        pattern: '*.{vcf.gz}'
+  - - sage_highconf_regions:
+        type: file
+        description: SAGE high confidence regions file
+        pattern: '*.{bed.gz}'
+  - - driver_gene_panel:
+        type: file
+        description: Driver gene panel file
+        pattern: '*.{tsv}'
+  - - ensembl_data_resources:
+        type: directory
+        description: HMF ensembl data resources directory
+  - - sequencing_platform:
+        type: string
+        description: Sequencing platform
+  - - targeted_mode:
+        type: boolean
+        description: Flag indicating whether targeted mode is set
+output: {}
+topics:
+  sage_germline_dir:
+    - - meta:
+          type: map
+          description: |-
+            Groovy Map containing sample information
+            e.g. [id: 'sample_id']
+      - germline/:
+          type: directory
+          description: SAGE germline output directory
+  command_files:
+    - - meta:
+          type: map
+          description: |-
+            Groovy Map containing sample information
+            e.g. [id: 'sample_id']
+      - identifier:
+          type: string
+          description: Identifier for command files
+      - command_files:
+          type: list
+          description: List of command files
+  versions:
+    - - versions.yml:
+          type: file
+          description: File containing software versions
+          pattern: versions.yml
 authors:
-  - "@scwatts"
+  - '@scwatts'

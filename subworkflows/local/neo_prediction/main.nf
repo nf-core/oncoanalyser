@@ -2,31 +2,48 @@
 // Neo identifies and scores neoepitopes
 //
 
+nextflow.enable.types = true
+
 include { NEO_ANNOTATE_FUSIONS } from '../../../modules/local/neo/annotate_fusions/main'
 include { NEO_FINDER           } from '../../../modules/local/neo/finder/main'
 include { NEO_SCORER           } from '../../../modules/local/neo/scorer/main'
 
+include { getPurpleSomaticVcf     } from '../utils_nfcore_oncoanalyser_pipeline/accessors_outputs'
+include { getSageAppendVcf        } from '../utils_nfcore_oncoanalyser_pipeline/accessors_outputs'
+include { getInput                } from '../utils_nfcore_oncoanalyser_pipeline/accessors_samples'
+include { getTumorDnaSample       } from '../utils_nfcore_oncoanalyser_pipeline/accessors_samples'
+include { getTumorDnaSampleName   } from '../utils_nfcore_oncoanalyser_pipeline/accessors_samples'
+include { getTumorRnaSample       } from '../utils_nfcore_oncoanalyser_pipeline/accessors_samples'
+include { getTumorRnaSampleName   } from '../utils_nfcore_oncoanalyser_pipeline/accessors_samples'
+include { hasNormalDna            } from '../utils_nfcore_oncoanalyser_pipeline/accessors_samples'
+include { hasTumorRna             } from '../utils_nfcore_oncoanalyser_pipeline/accessors_samples'
+include { groupByMeta             } from '../utils_nfcore_oncoanalyser_pipeline/helpers_channel'
+include { joinMeta                } from '../utils_nfcore_oncoanalyser_pipeline/helpers_channel'
+include { restoreMeta             } from '../utils_nfcore_oncoanalyser_pipeline/helpers_channel'
+include { FileType                } from '../utils_nfcore_oncoanalyser_pipeline/types_enums'
+include { selectCurrentOrExisting } from '../utils_nfcore_oncoanalyser_pipeline/utils'
+
 workflow NEO_PREDICTION {
     take:
     // Sample data
-    ch_inputs                  // channel: [mandatory] [ meta ]
-    ch_tumor_rna_aln           // channel: [mandatory] [ meta, aln, idx ]
-    ch_isofox_dir              // channel: [mandatory] [ meta, isofox_dir ]
-    ch_purple_dir              // channel: [mandatory] [ meta, purple_dir ]
-    ch_sage_append_dir_somatic // channel: [mandatory] [ meta, sage_append_dir ]
-    ch_lilac_dir               // channel: [mandatory] [ meta, lilac_dir ]
-    ch_linx_annotation_dir     // channel: [mandatory] [ meta, linx_annotation_dir ]
+    ch_inputs                 : Channel<Map>                    // channel: [mandatory] [ meta ]
+    ch_tumor_rna_aln          : Channel<Tuple<Map, Path, Path>> // channel: [mandatory] [ meta, aln, idx ]
+    ch_isofox_dir             : Channel<Tuple<Map, Path>>       // channel: [mandatory] [ meta, isofox_dir ]
+    ch_purple_dir             : Channel<Tuple<Map, Path>>       // channel: [mandatory] [ meta, purple_dir ]
+    ch_sage_append_dir_somatic: Channel<Tuple<Map, Path>>       // channel: [mandatory] [ meta, sage_append_dir ]
+    ch_lilac_dir              : Channel<Tuple<Map, Path>>       // channel: [mandatory] [ meta, lilac_dir ]
+    ch_linx_annotation_dir    : Channel<Tuple<Map, Path>>       // channel: [mandatory] [ meta, linx_annotation_dir ]
 
     // Reference data
-    genome_fasta               // channel: [mandatory] /path/to/genome_fasta
-    genome_version             // channel: [mandatory] genome version
-    genome_fai                 // channel: [mandatory] /path/to/genome_fai
-    ensembl_data_resources     // channel: [mandatory] /path/to/ensembl_data_resources/
-    neo_resources              // channel: [mandatory] /path/to/neo_resources/
-    cohort_tpm_medians         // channel: [mandatory] /path/to/cohort_tpm_medians/
+    genome_fasta              : Channel<Path>                   // channel: [mandatory] /path/to/genome_fasta
+    genome_version            : Channel<String>                 // channel: [mandatory] genome version
+    genome_fai                : Channel<Path>                   // channel: [mandatory] /path/to/genome_fai
+    ensembl_data_resources    : Channel<Path>                   // channel: [mandatory] /path/to/ensembl_data_resources/
+    neo_resources             : Channel<Path>                   // channel: [mandatory] /path/to/neo_resources/
+    cohort_tpm_medians        : Channel<Path>                   // channel: [mandatory] /path/to/cohort_tpm_medians/
 
     // Params
-    isofox_read_length         //  string: [mandatory] Isofox read length
+    isofox_read_length        : Integer                         //  string: [mandatory] Isofox read length
 
     main:
     //
@@ -34,16 +51,16 @@ workflow NEO_PREDICTION {
     //
     // Select input sources
     // channel: [ meta, purple_dir, linx_annotation_dir ]
-    ch_finder_inputs_selected = WorkflowOncoanalyser.groupByMeta(
+    ch_finder_inputs_selected = groupByMeta([
         ch_purple_dir,
         ch_linx_annotation_dir,
-    )
+    ])
         .map { meta, purple_dir, linx_annotation_dir ->
 
             return [
                 meta,
-                Utils.selectCurrentOrExisting(purple_dir, meta, Constants.INPUT.PURPLE_DIR),
-                Utils.selectCurrentOrExisting(linx_annotation_dir, meta, Constants.INPUT.LINX_ANNO_DIR_TUMOR),
+                selectCurrentOrExisting(purple_dir, getInput(getTumorDnaSample(meta), FileType.PURPLE_DIR)),
+                selectCurrentOrExisting(linx_annotation_dir, getInput(getTumorDnaSample(meta), FileType.LINX_ANNO_DIR)),
             ]
 
         }
@@ -54,10 +71,10 @@ workflow NEO_PREDICTION {
     ch_finder_inputs_sorted = ch_finder_inputs_selected
         .branch { meta, purple_dir, linx_annotation_dir ->
 
-            def has_normal_dna = Utils.hasNormalDna(meta)
+            def has_normal_dna = hasNormalDna(meta)
 
-            def tumor_id = Utils.getTumorDnaSampleName(meta)
-            def has_smlv_vcf = purple_dir ? purple_dir.resolve("${tumor_id}.purple.somatic.vcf.gz").exists() : false
+            def tumor_id = getTumorDnaSampleName(meta)
+            def has_smlv_vcf = getPurpleSomaticVcf(tumor_id, purple_dir)?.exists() ?: false
 
             def has_runnable_inputs = has_smlv_vcf && linx_annotation_dir && has_normal_dna
 
@@ -71,11 +88,11 @@ workflow NEO_PREDICTION {
     ch_finder_inputs = ch_finder_inputs_sorted.runnable
         .map { meta, purple_dir, linx_annotation_dir ->
 
-            def meta_finder = [
-                key: meta.group_id,
-                id: meta.group_id,
-                sample_id: Utils.getTumorDnaSampleName(meta),
-            ]
+            def meta_finder = record(
+                key: meta.case_id,
+                id: meta.case_id,
+                sample_id: getTumorDnaSampleName(meta),
+            )
 
             return [meta_finder, purple_dir, linx_annotation_dir]
         }
@@ -91,7 +108,7 @@ workflow NEO_PREDICTION {
 
     // Set outputs, restoring original meta
     // channel: [ meta, neo_finder_dir ]
-    ch_finder_out = WorkflowOncoanalyser.restoreMeta(channel.topic('neo_finder_dir'), ch_inputs)
+    ch_finder_out = restoreMeta(channel.topic('neo_finder_dir'), ch_inputs)
 
     //
     // MODULE: Fusion annotation (Isofox)
@@ -101,20 +118,20 @@ workflow NEO_PREDICTION {
     // Select input sources and sort
     // channel: runnable: [ meta, neo_finder_dir, tumor_rna_aln, tumor_rna_idx ]
     // channel: skip: [ meta ]
-    ch_isofox_inputs_sorted = WorkflowOncoanalyser.groupByMeta(
+    ch_isofox_inputs_sorted = groupByMeta([
         ch_finder_out,
         ch_tumor_rna_aln,
-    )
+    ])
         .map { meta, neo_finder_dir, tumor_rna_aln, tumor_rna_idx ->
             return [
                 meta,
                 neo_finder_dir,
-                Utils.selectCurrentOrExisting(tumor_rna_aln, meta, Constants.INPUT.ALN_RNA_TUMOR),
-                Utils.selectCurrentOrExisting(tumor_rna_idx, meta, Constants.INPUT.IDX_RNA_TUMOR),
+                selectCurrentOrExisting(tumor_rna_aln, getInput(getTumorRnaSample(meta), FileType.ALN)),
+                selectCurrentOrExisting(tumor_rna_idx, getInput(getTumorRnaSample(meta), FileType.IDX)),
             ]
         }
         .branch { meta, neo_finder_dir, tumor_rna_aln, tumor_rna_idx ->
-            runnable: Utils.hasTumorRna(meta)
+            runnable: hasTumorRna(meta)
             skip: true
                 return meta
         }
@@ -124,11 +141,11 @@ workflow NEO_PREDICTION {
     ch_isofox_inputs = ch_isofox_inputs_sorted.runnable
         .map { meta, neo_finder_dir, tumor_rna_aln, tumor_rna_idx ->
 
-            def meta_isofox = [
-                key: meta.group_id,
-                id: meta.group_id,
-                sample_id: Utils.getTumorDnaSampleName(meta),
-            ]
+            def meta_isofox = record(
+                key: meta.case_id,
+                id: meta.case_id,
+                sample_id: getTumorDnaSampleName(meta),
+            )
 
             return [meta_isofox, neo_finder_dir, tumor_rna_aln, tumor_rna_idx]
         }
@@ -147,8 +164,8 @@ workflow NEO_PREDICTION {
     // channel: [ meta, annotated_fusions ]
     ch_annotate_fusions_out = channel.empty()
         .mix(
-            WorkflowOncoanalyser.restoreMeta(channel.topic('neo_annotated_fusions_tsv'), ch_inputs),
-            ch_isofox_inputs_sorted.skip.map { meta -> [meta, []] },
+            restoreMeta(channel.topic('neo_annotated_fusions_tsv'), ch_inputs),
+            ch_isofox_inputs_sorted.skip.map { meta -> [meta, null] },
         )
 
     //
@@ -156,37 +173,36 @@ workflow NEO_PREDICTION {
     //
     // Select input sources and prepare input channel
     // channel: [ meta_scorer, isofox_dir, purple_dir, sage_append_dir_somatic, lilac_dir, neo_finder_dir, annotated_fusions ]
-    ch_scorer_inputs = WorkflowOncoanalyser.groupByMeta(
+    ch_scorer_inputs = groupByMeta([
         ch_isofox_dir,
         ch_purple_dir,
         ch_sage_append_dir_somatic,
         ch_lilac_dir,
         ch_finder_out,
         ch_annotate_fusions_out,
-    )
+    ])
         .map { meta, isofox_dir, purple_dir, sage_append_dir_somatic, lilac_dir, neo_finder_dir, annotated_fusions ->
 
-            def meta_scorer = [
-                key: meta.group_id,
-                id: meta.group_id,
-                sample_id: Utils.getTumorDnaSampleName(meta),
-                cancer_type: meta[Constants.InfoField.CANCER_TYPE],
-            ]
+            def meta_scorer = record(
+                key: meta.case_id,
+                id: meta.case_id,
+                sample_id: getTumorDnaSampleName(meta),
+                cancer_type: meta.cancer_type,
+                sample_rna_id: hasTumorRna(meta) ? getTumorRnaSampleName(meta) : null,
+            )
 
-            def sage_append_vcf_somatic = []
-            if (Utils.hasTumorRna(meta)) {
-                meta_scorer.sample_rna_id = Utils.getTumorRnaSampleName(meta)
-
-                def sage_append_dir_somatic_selected = Utils.selectCurrentOrExisting(sage_append_dir_somatic, meta, Constants.INPUT.SAGE_APPEND_DIR_TUMOR)
-                sage_append_vcf_somatic = file(sage_append_dir_somatic_selected).resolve("${meta_scorer.sample_id}.sage.append.vcf.gz")
+            def sage_append_vcf_somatic = null
+            if (hasTumorRna(meta)) {
+                def sage_append_dir_somatic_selected = selectCurrentOrExisting(sage_append_dir_somatic, getInput(getTumorDnaSample(meta), FileType.SAGE_APPEND_DIR))
+                sage_append_vcf_somatic = getSageAppendVcf(meta_scorer.sample_id, sage_append_dir_somatic_selected)
             }
 
             return [
                 meta_scorer,
-                Utils.selectCurrentOrExisting(isofox_dir, meta, Constants.INPUT.ISOFOX_DIR),
-                Utils.selectCurrentOrExisting(purple_dir, meta, Constants.INPUT.PURPLE_DIR),
+                selectCurrentOrExisting(isofox_dir, getInput(getTumorRnaSample(meta), FileType.ISOFOX_DIR)),
+                selectCurrentOrExisting(purple_dir, getInput(getTumorDnaSample(meta), FileType.PURPLE_DIR)),
                 sage_append_vcf_somatic,
-                Utils.selectCurrentOrExisting(lilac_dir, meta, Constants.INPUT.LILAC_DIR),
+                selectCurrentOrExisting(lilac_dir, getInput(getTumorDnaSample(meta), FileType.LILAC_DIR)),
                 neo_finder_dir,
                 annotated_fusions,
             ]
@@ -204,4 +220,20 @@ workflow NEO_PREDICTION {
         neo_resources,
         cohort_tpm_medians,
     )
+
+    //
+    // STEP: Handle outputs
+    //
+    // Set outputs, restoring original meta where needed
+    // channel: [ meta, neo_finder_dir ]
+    ch_outputs_finder = ch_finder_out
+    // channel: [ meta, annotated_fusions ]
+    ch_outputs_annotated_fusions = ch_annotate_fusions_out
+    // channel: [ meta, neo_scorer_dir ]
+    ch_outputs_scorer = restoreMeta(channel.topic('neo_scorer_dir'), ch_inputs)
+
+    emit:
+    finder_dir        = ch_outputs_finder            // channel: [ meta, neo_finder_dir ]
+    annotated_fusions = ch_outputs_annotated_fusions // channel: [ meta, annotated_fusions ]
+    scorer_dir        = ch_outputs_scorer            // channel: [ meta, neo_scorer_dir ]
 }

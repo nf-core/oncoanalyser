@@ -1,3 +1,5 @@
+nextflow.enable.types = true
+
 process NEO_ANNOTATE_FUSIONS {
     tag "${meta.id}"
     label 'process_medium'
@@ -8,17 +10,17 @@ process NEO_ANNOTATE_FUSIONS {
         'biocontainers/hmftools-isofox:2.0.1--hdfd78af_0' }"
 
     input:
-    tuple val(meta), path(neo_finder_dir), path(aln), path(idx)
-    val read_length
-    path genome_fasta
-    val genome_ver
-    path genome_fai
-    path ensembl_data_resources
+    tuple(meta: Record, neo_finder_dir: Path, aln: Path, idx: Path)
+    read_length: Integer
+    genome_fasta: Path
+    genome_ver: String
+    genome_fai: Path
+    ensembl_data_resources: Path
 
-    output:
-    tuple val(meta), path('*isf.neoepitope.tsv')                    , topic: neo_annotated_fusions_tsv
-    tuple val(meta), val('neo_annotate_fusions'), path('.command.*'), topic: command_files
-    path 'versions.yml'                                             , topic: versions
+    topic:
+    tuple(meta, file('*isf.neoepitope.tsv'))                 >> 'neo_annotated_fusions_tsv'
+    tuple(meta, 'neo_annotate_fusions', files('.command.*')) >> 'command_files'
+    file('versions.yml')                                     >> 'versions'
 
     when:
     task.ext.when == null || task.ext.when

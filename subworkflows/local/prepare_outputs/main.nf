@@ -1,185 +1,122 @@
 //
-// Prepare results to be published by entry workflow output block
+// Publish helpers and output aggregation for the nf-core/oncoanalyser pipeline
 //
 
-// NOTE(SW): this approach is used so that linkage does not need to be maintained until the `output` block and absent outputs are handled implicitly and to avoid have verbose / repetitive emit blocks
+nextflow.enable.types = true
 
-workflow PREPARE_OUTPUTS_WGTS {
+include { getLongitudinalSampleName } from '../utils_nfcore_oncoanalyser_pipeline/accessors_samples'
+include { getNormalDnaSampleName    } from '../utils_nfcore_oncoanalyser_pipeline/accessors_samples'
+include { getTumorDnaSampleName     } from '../utils_nfcore_oncoanalyser_pipeline/accessors_samples'
+include { getTumorRnaSampleName     } from '../utils_nfcore_oncoanalyser_pipeline/accessors_samples'
+
+workflow PREPARE_OUTPUTS {
+    take:
+    amber: Channel<Tuple<Map, Path>>
+    bamtools_tumor: Channel<Tuple<Map, Path>>
+    bamtools_normal: Channel<Tuple<Map, Path>>
+    chord: Channel<Tuple<Map, Path>>
+    cider: Channel<Tuple<Map, List<Path>>>
+    cobalt: Channel<Tuple<Map, Path>>
+    cuppa: Channel<Tuple<Map, Path>>
+    esvee: Channel<Tuple<Map, Path>>
+    align_rna_tumor: Channel<Tuple<Map, Path, Path>>
+    isofox: Channel<Tuple<Map, Path>>
+    lilac: Channel<Tuple<Map, Path>>
+    linx_germline: Channel<Tuple<Map, Path>>
+    linx_somatic: Channel<Tuple<Map, Path>>
+    linx_somatic_visualiser: Channel<Tuple<Map, Path>>
+    linxreport_html: Channel<Tuple<Map, Path>>
+    multiqc: Channel<List<Path>>
+    neo_annotated_fusions: Channel<Tuple<Map, Path>>
+    neo_finder: Channel<Tuple<Map, Path>>
+    neo_scorer_dir: Channel<Tuple<Map, Path>>
+    orange_json: Channel<Tuple<Map, Path>>
+    orange_pdf: Channel<Tuple<Map, Path>>
+    pave_germline: Channel<Tuple<Map, Path>>
+    pave_somatic: Channel<Tuple<Map, Path>>
+    peach: Channel<Tuple<Map, Path>>
+    purple: Channel<Tuple<Map, Path>>
+    qsee: Channel<Tuple<Map, Path>>
+    redux_tumor: Channel<Tuple<Map, Path>>
+    redux_normal: Channel<Tuple<Map, Path>>
+    redux_donor: Channel<Tuple<Map, Path>>
+    sage_append_somatic: Channel<Tuple<Map, Path>>
+    sage_append_germline: Channel<Tuple<Map, Path>>
+    sage_germline: Channel<Tuple<Map, Path>>
+    sage_somatic: Channel<Tuple<Map, Path>>
+    sage_somatic_visualiser: Channel<Tuple<Map, Path>>
+    sigs: Channel<Tuple<Map, Path>>
+    teal_normal_bam: Channel<Tuple<Map, Path, Path>>
+    teal_tumor_bam: Channel<Tuple<Map, Path, Path>>
+    teal_tsvs: Channel<Tuple<Map, List<Path>>>
+    virusbreakend_tsv: Channel<Tuple<Map, Path>>
+    virusbreakend_vcf: Channel<Tuple<Map, Path>>
+    virusinterpreter: Channel<Tuple<Map, Path>>
+    write_reference_data: Channel<Path>
+    command_files: Channel<Tuple<Map, String, List<Path>>>
+    wisp: Channel<Tuple<Map, Path>>
+    cobalt_normalisation_tsv: Channel<Path>
+    isofox_normalisation_csv: Channel<Path>
+    pave_pon_panel_creation_artefacts: Channel<Path>
+
     main:
-    ch_results = channel.empty()
+    results = channel.empty()
         .mix(
-            channel.topic('amber_dir').flatMap { meta, d ->                    return get_dir_filepaths(meta, d) },
-            channel.topic('bamtools_metrics_dir').flatMap { meta, d ->         return get_dir_filepaths(meta, d, "bamtools/${meta.sample_id}") },
-            channel.topic('chord_dir').flatMap { meta, d ->                    return get_dir_filepaths(meta, d) },
-            channel.topic('cider_results').flatMap { meta, fps ->              return fps.collect { d -> ["${meta.key}/cider/${d.name}", d] } },
-            channel.topic('cobalt_dir').flatMap { meta, d ->                   return get_dir_filepaths(meta, d) },
-            channel.topic('cuppa_dir').flatMap { meta, d ->                    return get_dir_filepaths(meta, d) },
-            channel.topic('esvee_dir').flatMap { meta, d ->                    return get_dir_filepaths(meta, d) },
-            channel.topic('gatk4_markduplicates_bai').map { meta, d ->         return ["${meta.key}/alignments/${meta.sample_id}/${d.name}", d] },
-            channel.topic('gatk4_markduplicates_bam').map { meta, d ->         return ["${meta.key}/alignments/${meta.sample_id}/${d.name}", d] },
-            channel.topic('isofox_dir').flatMap { meta, d ->                   return get_dir_filepaths(meta, d) },
-            channel.topic('lilac_dir').flatMap { meta, d ->                    return get_dir_filepaths(meta, d) },
-            channel.topic('linx_germline_annotation_dir').flatMap { meta, d -> return get_dir_filepaths(meta, d, 'linx/germline_annotations') },
-            channel.topic('linx_somatic_annotation_dir').flatMap { meta, d ->  return get_dir_filepaths(meta, d, 'linx/somatic_annotations') },
-            channel.topic('linx_visualiser_plots').flatMap { meta, d ->        return get_dir_filepaths(meta, d, 'linx/somatic_plots') },
-            channel.topic('linxreport_html').map { meta, d ->                  return ["${meta.key}/linx/${d.name}", d] },
-            channel.topic('multiqc_report').map { d ->                         return [d.name, d] },
-            channel.topic('neo_annotated_fusions_tsv').map { meta, d ->        return ["${meta.key}/neo/annotated_fusions/${d.name}", d] },
-            channel.topic('neo_finder_dir').flatMap { meta, d ->               return get_dir_filepaths(meta, d, 'neo/finder') },
-            channel.topic('neo_scorer_dir').flatMap { meta, d ->               return get_dir_filepaths(meta, d, 'neo/scorer') },
-            channel.topic('orange_json').map { meta, d ->                      return ["${meta.key}/orange/${d.name}", d] },
-            channel.topic('orange_pdf').map { meta, d ->                       return ["${meta.key}/orange/${d.name}", d] },
-            channel.topic('pave_germline_dir').flatMap { meta, d ->            return get_dir_filepaths(meta, d, 'pave/germline') },
-            channel.topic('pave_somatic_dir').flatMap { meta, d ->             return get_dir_filepaths(meta, d, 'pave/somatic') },
-            channel.topic('peach_dir').flatMap { meta, d ->                    return get_dir_filepaths(meta, d) },
-            channel.topic('purple_dir').flatMap { meta, d ->                   return get_dir_filepaths(meta, d) },
-            channel.topic('qsee_dir').flatMap { meta, d ->                     return get_dir_filepaths(meta, d) },
-            channel.topic('redux_dir').flatMap { meta, d ->                    return get_dir_filepaths(meta, d, "alignments/${meta.sample_id}") },
-            channel.topic('sage_append_dir').flatMap { meta, d ->              return get_dir_filepaths(meta, d, "sage_append/${meta.output_file_id}") },
-            channel.topic('sage_germline_dir').flatMap { meta, d ->            return get_dir_filepaths(meta, d, 'sage/germline') },
-            channel.topic('sage_somatic_dir').flatMap { meta, d ->             return get_dir_filepaths(meta, d, 'sage/somatic') },
-            channel.topic('sage_visualiser_dir').flatMap { meta, d ->          return get_dir_filepaths(meta, d, 'sage/visualiser') },
-            channel.topic('sigs_dir').flatMap { meta, d ->                     return get_dir_filepaths(meta, d) },
-            channel.topic('teal_prep_normal_bam').flatMap { meta, fps ->       return fps.collect { d -> ["${meta.key}/teal/${d.name}", d] } },
-            channel.topic('teal_prep_tumor_bam').flatMap { meta, fps ->        return fps.collect { d -> ["${meta.key}/teal/${d.name}", d] } },
-            channel.topic('teal_tsvs').flatMap { meta, e ->                    def fps = e instanceof List ? e : [e]; fps.collect { d -> ["${meta.key}/teal/${d.name}", d] } },
-            channel.topic('virusbreakend_tsv').map { meta, d ->                return ["${meta.key}/virusbreakend/${d.name}", d] },
-            channel.topic('virusbreakend_vcf').map { meta, d ->                return ["${meta.key}/virusbreakend/${d.name}", d] },
-            channel.topic('virusinterpreter_dir').flatMap { meta, d ->         return get_dir_filepaths(meta, d) },
-
-            channel.topic('write_reference_data').map { d -> return ["reference_data/${workflow.manifest.version}/", d] },
-
-            channel.topic('command_files').flatMap { f -> get_command_log_filepath(f) }
+            amber.flatMap { meta, d -> return get_dir_filepaths(meta, d) },
+            bamtools_tumor.flatMap { meta, d -> return get_dir_filepaths(meta, d, "bamtools/${getTumorDnaSampleName(meta)}") },
+            bamtools_normal.flatMap { meta, d -> return get_dir_filepaths(meta, d, "bamtools/${getNormalDnaSampleName(meta)}") },
+            chord.flatMap { meta, d -> return get_dir_filepaths(meta, d) },
+            cider.flatMap { meta, fps -> return fps.collect { d -> ["${meta.case_id}/cider/${d.name}", d] } },
+            cobalt.flatMap { meta, d -> return get_dir_filepaths(meta, d) },
+            cuppa.flatMap { meta, d -> return get_dir_filepaths(meta, d) },
+            esvee.flatMap { meta, d -> return get_dir_filepaths(meta, d) },
+            align_rna_tumor.flatMap { meta, bam, bai -> return [bam, bai].findAll().collect { d -> ["${meta.case_id}/alignments/${getTumorRnaSampleName(meta)}/${d.name}", d] } },
+            isofox.flatMap { meta, d -> return get_dir_filepaths(meta, d) },
+            lilac.flatMap { meta, d -> return get_dir_filepaths(meta, d) },
+            linx_germline.flatMap { meta, d -> return get_dir_filepaths(meta, d, 'linx/germline_annotations') },
+            linx_somatic.flatMap { meta, d -> return get_dir_filepaths(meta, d, 'linx/somatic_annotations') },
+            linx_somatic_visualiser.flatMap { meta, d -> return get_dir_filepaths(meta, d, 'linx/somatic_plots') },
+            linxreport_html.map { meta, d -> return ["${meta.case_id}/linx/${d.name}", d] },
+            multiqc.flatMap { fps -> return fps.collect { d -> [d.name, d] } },
+            neo_annotated_fusions.filter { meta, d -> d != null }.map { meta, d -> return ["${meta.case_id}/neo/annotated_fusions/${d.name}", d] },
+            neo_finder.flatMap { meta, d -> return get_dir_filepaths(meta, d, 'neo/finder') },
+            neo_scorer_dir.flatMap { meta, d -> return get_dir_filepaths(meta, d, 'neo/scorer') },
+            orange_json.filter { meta, d -> d != null }.map { meta, d -> return ["${meta.case_id}/orange/${d.name}", d] },
+            orange_pdf.filter { meta, d -> d != null }.map { meta, d -> return ["${meta.case_id}/orange/${d.name}", d] },
+            pave_germline.flatMap { meta, d -> return get_dir_filepaths(meta, d, 'pave/germline') },
+            pave_somatic.flatMap { meta, d -> return get_dir_filepaths(meta, d, 'pave/somatic') },
+            peach.flatMap { meta, d -> return get_dir_filepaths(meta, d) },
+            purple.flatMap { meta, d -> return get_dir_filepaths(meta, d) },
+            qsee.flatMap { meta, d -> return get_dir_filepaths(meta, d) },
+            redux_tumor.flatMap { meta, d -> return get_dir_filepaths(meta, d, "alignments/${getTumorDnaSampleName(meta)}") },
+            redux_normal.flatMap { meta, d -> return get_dir_filepaths(meta, d, "alignments/${getNormalDnaSampleName(meta)}") },
+            redux_donor.flatMap { meta, dirs ->
+                def donor_dirs = dirs == null ? [] : (dirs instanceof List ? dirs : [dirs])
+                return donor_dirs.collectMany { d -> get_dir_filepaths(meta, d, "alignments/${d.name.replaceFirst(/^redux_/, '')}") }
+            },
+            sage_append_somatic.flatMap { meta, d -> return get_dir_filepaths(meta, d, "sage_append/${getLongitudinalSampleName(meta) ?: getTumorDnaSampleName(meta)}") },
+            sage_append_germline.flatMap { meta, d -> return get_dir_filepaths(meta, d, "sage_append/${getNormalDnaSampleName(meta)}") },
+            sage_germline.flatMap { meta, d -> return get_dir_filepaths(meta, d, 'sage/germline') },
+            sage_somatic.flatMap { meta, d -> return get_dir_filepaths(meta, d, 'sage/somatic') },
+            sage_somatic_visualiser.flatMap { meta, d -> return get_dir_filepaths(meta, d, 'sage/visualiser') },
+            sigs.flatMap { meta, d -> return get_dir_filepaths(meta, d) },
+            teal_normal_bam.flatMap { meta, bam, bai -> return [bam, bai].findAll().collect { d -> ["${meta.case_id}/teal/${d.name}", d] } },
+            teal_tumor_bam.flatMap { meta, bam, bai -> return [bam, bai].findAll().collect { d -> ["${meta.case_id}/teal/${d.name}", d] } },
+            teal_tsvs.flatMap { meta, e -> def fps = e instanceof Collection ? e : [e]; fps.collect { d -> ["${meta.case_id}/teal/${d.name}", d] } },
+            virusbreakend_tsv.map { meta, d -> return ["${meta.case_id}/virusbreakend/${d.name}", d] },
+            virusbreakend_vcf.map { meta, d -> return ["${meta.case_id}/virusbreakend/${d.name}", d] },
+            virusinterpreter.flatMap { meta, d -> return get_dir_filepaths(meta, d) },
+            wisp.flatMap { meta, d -> return get_dir_filepaths(meta, d) },
+            write_reference_data.map { d -> return ["reference_data/${workflow.manifest.version}/", d] },
+            cobalt_normalisation_tsv.map { d -> return ["panel_resources/${d.name}", d] },
+            isofox_normalisation_csv.map { d -> return ["panel_resources/${d.name}", d] },
+            pave_pon_panel_creation_artefacts.map { d -> return ["panel_resources/${d.name}", d] },
+            command_files.flatMap { f -> get_command_log_filepath(f) }
         )
-        .flatMap { meta, d -> return d instanceof List ? d.collect { e -> [meta, e] } : [[meta, d]] }
+        .flatMap { meta, d -> return d instanceof Collection ? d.collect { e -> [meta, e] } : [[meta, d]] }
 
     emit:
-    results = ch_results
-}
-
-
-workflow PREPARE_OUTPUTS_TARGETED {
-    main:
-    ch_results = channel.empty()
-        .mix(
-            channel.topic('amber_dir').flatMap { meta, d ->                    return get_dir_filepaths(meta, d) },
-            channel.topic('bamtools_metrics_dir').flatMap { meta, d ->         return get_dir_filepaths(meta, d, "bamtools/${meta.sample_id}") },
-            channel.topic('cider_results').flatMap { meta, fps ->              return fps.collect { d -> ["${meta.key}/cider/${d.name}", d] } },
-            channel.topic('cobalt_dir').flatMap { meta, d ->                   return get_dir_filepaths(meta, d) },
-            channel.topic('esvee_dir').flatMap { meta, d ->                    return get_dir_filepaths(meta, d) },
-            channel.topic('gatk4_markduplicates_bai').map { meta, d ->         return ["${meta.key}/alignments/${meta.sample_id}/${d.name}", d] },
-            channel.topic('gatk4_markduplicates_bam').map { meta, d ->         return ["${meta.key}/alignments/${meta.sample_id}/${d.name}", d] },
-            channel.topic('isofox_dir').flatMap { meta, d ->                   return get_dir_filepaths(meta, d) },
-            channel.topic('lilac_dir').flatMap { meta, d ->                    return get_dir_filepaths(meta, d) },
-            channel.topic('linx_germline_annotation_dir').flatMap { meta, d -> return get_dir_filepaths(meta, d, 'linx/germline_annotations') },
-            channel.topic('linx_somatic_annotation_dir').flatMap { meta, d ->  return get_dir_filepaths(meta, d, 'linx/somatic_annotations') },
-            channel.topic('linx_visualiser_plots').flatMap { meta, d ->        return get_dir_filepaths(meta, d, 'linx/somatic_plots') },
-            channel.topic('linxreport_html').map { meta, d ->                  return ["${meta.key}/linx/${d.name}", d] },
-            channel.topic('multiqc_report').map { d ->                         return [d.name, d] },
-            channel.topic('orange_json').map { meta, d ->                      return ["${meta.key}/orange/${d.name}", d] },
-            channel.topic('orange_pdf').map { meta, d ->                       return ["${meta.key}/orange/${d.name}", d] },
-            channel.topic('pave_germline_dir').flatMap { meta, d ->            return get_dir_filepaths(meta, d, 'pave/germline') },
-            channel.topic('pave_somatic_dir').flatMap { meta, d ->             return get_dir_filepaths(meta, d, 'pave/somatic') },
-            channel.topic('peach_dir').flatMap { meta, d ->                    return get_dir_filepaths(meta, d) },
-            channel.topic('purple_dir').flatMap { meta, d ->                   return get_dir_filepaths(meta, d) },
-            channel.topic('qsee_dir').flatMap { meta, d ->                     return get_dir_filepaths(meta, d) },
-            channel.topic('redux_dir').flatMap { meta, d ->                    return get_dir_filepaths(meta, d, "alignments/${meta.sample_id}") },
-            channel.topic('sage_append_dir').flatMap { meta, d ->              return get_dir_filepaths(meta, d, "sage_append/${meta.output_file_id}") },
-            channel.topic('sage_germline_dir').flatMap { meta, d ->            return get_dir_filepaths(meta, d, 'sage/germline') },
-            channel.topic('sage_somatic_dir').flatMap { meta, d ->             return get_dir_filepaths(meta, d, 'sage/somatic') },
-            channel.topic('sage_visualiser_dir').flatMap { meta, d ->          return get_dir_filepaths(meta, d, 'sage/visualiser') },
-
-            channel.topic('write_reference_data').map { d -> return ["reference_data/${workflow.manifest.version}/", d] },
-
-            channel.topic('command_files').flatMap { f -> get_command_log_filepath(f) }
-        )
-        .flatMap { meta, d -> return d instanceof List ? d.collect { e -> [meta, e] } : [[meta, d]] }
-
-    emit:
-    results = ch_results
-}
-
-
-workflow PREPARE_OUTPUTS_PURITY_ESTIMATE {
-    main:
-    ch_results = channel.empty()
-        .mix(
-            channel.topic('amber_dir').flatMap { meta, d ->            return get_dir_filepaths(meta, d) },
-            channel.topic('cobalt_dir').flatMap { meta, d ->           return get_dir_filepaths(meta, d) },
-            channel.topic('redux_dir').flatMap { meta, d ->            return get_dir_filepaths(meta, d, "alignments/${meta.sample_id}") },
-            channel.topic('sage_append_dir').flatMap { meta, d ->      return get_dir_filepaths(meta, d, "sage_append/${meta.output_file_id}") },
-            channel.topic('wisp_dir').flatMap { meta, d ->             return get_dir_filepaths(meta, d) },
-
-            channel.topic('write_reference_data').map { d -> return ["reference_data/${workflow.manifest.version}/", d] },
-
-            channel.topic('command_files').flatMap { f -> get_command_log_filepath(f) }
-        )
-        .flatMap { meta, d -> return d instanceof List ? d.collect { e -> [meta, e] } : [[meta, d]] }
-
-    emit:
-    results = ch_results
-}
-
-
-workflow PREPARE_OUTPUTS_PANEL_RESOURCE_CREATION {
-    main:
-    ch_results = channel.empty()
-        .mix(
-            channel.topic('amber_dir').flatMap { meta, d ->               return get_dir_filepaths(meta, d) },
-            channel.topic('cobalt_dir').flatMap { meta, d ->              return get_dir_filepaths(meta, d) },
-            channel.topic('gatk4_markduplicates_bai').map { meta, d ->    return ["${meta.key}/alignments/${meta.sample_id}/${d.name}", d] },
-            channel.topic('gatk4_markduplicates_bam').map { meta, d ->    return ["${meta.key}/alignments/${meta.sample_id}/${d.name}", d] },
-            channel.topic('isofox_dir').flatMap { meta, d ->              return get_dir_filepaths(meta, d) },
-            channel.topic('redux_dir').flatMap { meta, d ->               return get_dir_filepaths(meta, d, "alignments/${meta.sample_id}") },
-            channel.topic('sage_germline_dir').flatMap { meta, d ->       return get_dir_filepaths(meta, d, 'sage/germline') },
-            channel.topic('sage_somatic_dir').flatMap { meta, d ->        return get_dir_filepaths(meta, d, 'sage/somatic') },
-
-            channel.topic('cobalt_normalisation_tsv').map { d ->          return ["panel_resources/${d.name}", d] },
-            channel.topic('isofox_normalisation_csv').map { d ->          return ["panel_resources/${d.name}", d] },
-            channel.topic('pave_pon_panel_creation_artefacts').map { d -> return ["panel_resources/${d.name}", d] },
-
-            channel.topic('write_reference_data').map { d -> return ["reference_data/${workflow.manifest.version}/", d] },
-
-            channel.topic('command_files').flatMap { f -> get_command_log_filepath(f) }
-        )
-        .flatMap { meta, d -> return d instanceof List ? d.collect { e -> [meta, e] } : [[meta, d]] }
-
-    emit:
-    results = ch_results
-}
-
-
-workflow PREPARE_OUTPUTS_PREPARE_REFERENCE {
-    main:
-    ch_results = channel.empty()
-        .mix(
-            channel.topic('write_reference_data').map { d -> return ["reference_data/${workflow.manifest.version}/", d] },
-
-            channel.topic('command_files').flatMap { f -> get_command_log_filepath(f) }
-        )
-
-    emit:
-    results = ch_results
-}
-
-// NOTE(LN): Nextflow bug as of NXF_VER=26.04.6
-//
-// When using google cloud executor (and potentially other cloud executors):
-// - Process emits output as directory (e.g. amber_dir) -> directory publish FAIL -> BUG
-// - Process emits output as files or glob (e.g. teal_tsvs) -> individual files publish SUCCESS
-//
-// To publish directories, the workaround is to recursively extract the file paths within that directory
-//
-def get_dir_filepaths(meta, d, target_dir=null) {
-
-    def dir = target_dir ?: d.name
-
-    def filepaths = []
-    d.eachFileRecurse(groovy.io.FileType.FILES) { f ->
-        def rel_path = d.relativize(f).toString()
-        filepaths << ["${meta.key}/${dir}/${rel_path}", f]
-    }
-    return filepaths
+    results = results
 }
 
 
@@ -202,4 +139,28 @@ def get_command_log_filepath(data) {
         return fps.collect { d -> ["logs/${meta.key}/${name}.${meta.id}${d.name}", d] }
     }
 
+}
+
+
+// NOTE(LN): Nextflow bug as of NXF_VER=26.04.6
+//
+// When using google cloud executor (and potentially other cloud executors):
+// - Process emits output as directory (e.g. amber_dir) -> directory publish FAIL -> BUG
+// - Process emits output as files or glob (e.g. teal_tsvs) -> individual files publish SUCCESS
+//
+// To publish directories, the workaround is to recursively extract the file paths within that directory
+//
+def get_dir_filepaths(meta, d, target_dir=null) {
+
+    // NOTE(SW): restored channels carry [meta, null] for skipped cases; a topic would just not emit
+    if (d == null) { return [] }
+
+    def dir = target_dir ?: d.name
+
+    def filepaths = []
+    d.eachFileRecurse(groovy.io.FileType.FILES) { f ->
+        def rel_path = d.relativize(f).toString()
+        filepaths << ["${meta.case_id}/${dir}/${rel_path}", f]
+    }
+    return filepaths
 }

@@ -1,3 +1,5 @@
+nextflow.enable.types = true
+
 process CHORD {
     tag "${meta.id}"
     label 'process_low'
@@ -8,15 +10,15 @@ process CHORD {
         'biocontainers/hmftools-chord:2.1.2--hdfd78af_0' }"
 
     input:
-    tuple val(meta), path(smlv_vcf), path(sv_vcf)
-    path genome_fasta
-    path genome_fai
-    path genome_dict
+    tuple(meta: Record, smlv_vcf: Path, sv_vcf: Path)
+    genome_fasta: Path
+    genome_fai: Path
+    genome_dict: Path
 
-    output:
-    tuple val(meta), path('chord/')                  , topic: chord_dir
-    tuple val(meta), val('chord'), path('.command.*'), topic: command_files
-    path 'versions.yml'                              , topic: versions
+    topic:
+    tuple(meta, file('chord/'))               >> 'chord_dir'
+    tuple(meta, 'chord', files('.command.*')) >> 'command_files'
+    file('versions.yml')                      >> 'versions'
 
     when:
     task.ext.when == null || task.ext.when

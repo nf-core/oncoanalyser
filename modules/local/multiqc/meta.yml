@@ -1,91 +1,80 @@
 name: multiqc
-description: Aggregate results from bioinformatics analyses across many samples
-  into a single report
+description: Aggregate results from bioinformatics analyses across many samples into a single report
 keywords:
   - QC
   - bioinformatics tools
   - Beautiful stand-alone HTML report
 tools:
   - multiqc:
-      description: |
+      description: |-
         MultiQC searches a given directory for analysis logs and compiles a HTML report.
         It's a general use tool, perfect for summarising the output from numerous bioinformatics tools.
       homepage: https://multiqc.info/
       documentation: https://multiqc.info/docs/
       licence:
-        - "GPL-3.0-or-later"
+        - GPL-3.0-or-later
       identifier: biotools:multiqc
 input:
-  - - meta:
+  - - case_information:
         type: map
-        description: |
-          Groovy Map containing sample information
-          e.g. [ id:'sample1', single_end:false ]
-    - fs_group_ids:
+        description: |-
+          Map of case ids to their normal and tumor sample ids, keyed by case id
+          e.g. [ case_1: [ normal_dna_id: 'normal_1', tumor_dna_id: 'tumor_1', tumor_rna_id: 'rna_1' ] ]
+    - fs_case_ids:
         type: list
-        description: |
-          List of file group identifiers
+        description: List of file group identifiers
         ontologies: []
     - fs:
         type: list
-        description: |
-          List of sample reports / files recognised by MultiQC
+        description: List of sample reports / files recognised by MultiQC
         ontologies: []
-    - multiqc_files_other:
-        type: file
-        description: |
-          List of other reports / files recognised by MultiQC, for example the html and zip output of FastQC
+  - - multiqc_files_other:
+        type: list
+        description: List of other reports / files recognised by MultiQC, for example the html and zip output of FastQC
         ontologies: []
-    - multiqc_config:
-        type: file
-        description: Optional config yml for MultiQC
-        pattern: "*.{yml,yaml}"
+  - - multiqc_config:
+        type: list
+        description: Config yml for MultiQC
         ontologies:
           - edam: http://edamontology.org/format_3750
-    - extra_multiqc_config:
-        type: file
-        description: Optional extra config yml for MultiQC
-        pattern: "*.{yml,yaml}"
+  - - extra_multiqc_config:
+        type: list
+        description: Extra config yml for MultiQC
         ontologies:
           - edam: http://edamontology.org/format_3750
-    - multiqc_logo:
-        type: file
-        description: Optional logo file for MultiQC
-        pattern: "*.{png}"
+  - - multiqc_logo:
+        type: list
+        description: Logo file for MultiQC
         ontologies: []
-output:
+output: {}
+topics:
   multiqc_report:
-    - - "*.html":
+    - - '*multiqc_report.html':
           type: file
-          description: MultiQC report file
-          pattern: ".html"
-          ontologies: []
+          description: '*multiqc_report.html'
+          pattern: '*multiqc_report.html'
   multiqc_data:
-    - - "*_data":
+    - - '*_data':
           type: directory
           description: MultiQC data dir
-          pattern: "multiqc_data"
   multiqc_plots:
-    - - "*_plots":
-          type: file
+    - - '*_plots':
+          type: directory
           description: Plots created by MultiQC
-          pattern: "*_plots"
-          ontologies: []
   command_files:
     - - meta:
           type: map
-          description: |
-            Groovy Map containing sample information
-            e.g. [ id:'sample1', single_end:false ]
+          description: |-
+            Empty meta (case-specific information not required for output files)
       - identifier:
-        type: string
-        description: Identifier for command files
+          type: string
+          description: Identifier for command files
       - command_files:
-        type: list
-        description: List of command files
+          type: list
+          description: List of command files
 authors:
-  - "@abhi18av"
-  - "@bunop"
-  - "@drpatelh"
-  - "@jfy133"
-  - "@scwatts"
+  - '@abhi18av'
+  - '@bunop'
+  - '@drpatelh'
+  - '@jfy133'
+  - '@scwatts'

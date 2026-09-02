@@ -2,26 +2,32 @@
 // Process read UMIs
 //
 
+nextflow.enable.types = true
+
 include { FASTP_UMI   } from '../../../modules/local/fastp/umi/main'
 include { FASTQ_TOOLS } from '../../../modules/local/fastqtools/main'
+
+include { groupByMeta } from '../utils_nfcore_oncoanalyser_pipeline/helpers_channel'
+include { joinMeta    } from '../utils_nfcore_oncoanalyser_pipeline/helpers_channel'
+include { restoreMeta } from '../utils_nfcore_oncoanalyser_pipeline/helpers_channel'
 
 workflow READ_UMI_PROCESSING {
     take:
     // Sample data
-    ch_inputs               // channel: [mandatory] [ meta ]
-    ch_dna_fastq            // channel: [mandatory] [ meta, fastq_info, fastq_fwd, fastq_rev ]
-    ch_rna_fastq            // channel: [mandatory] [ meta, fastq_info, fastq_fwd, fastq_rev ]
+    ch_inputs              : Channel<Map>                          // channel: [mandatory] [ meta ]
+    ch_dna_fastq           : Channel<Tuple<Map, Map, Path, Path?>> // channel: [mandatory] [ meta, fastq_info, fastq_fwd, fastq_rev ]
+    ch_rna_fastq           : Channel<Tuple<Map, Map, Path, Path?>> // channel: [mandatory] [ meta, fastq_info, fastq_fwd, fastq_rev ]
 
     // Reference data
-    known_umis              // channel: [mandatory] /path/to/known_umis_file
+    known_umis             : Channel<Path>                         // channel: [mandatory] /path/to/known_umis_file
 
     // Params
-    fastp_umi_enabled       // boolean: [mandatory] enable fastp UMI processing
-    fastp_umi_location      //  string: [optional]  fastp UMI location argument (--umi_loc)
-    fastp_umi_length        // numeric: [optional]  fastp UMI length argument (--umi_len)
-    fastp_umi_skip          // numeric: [optional]  fastp UMI skip argument (--umi_skip)
-    fastq_tools_umi_enabled // boolean: [mandatory] enable fastq-tools UMI processing
-    fastq_tools_umi_delim   // boolean: [optional]  fastq-tools -umi_delim argument
+    fastp_umi_enabled      : Boolean                               // boolean: [mandatory] enable fastp UMI processing
+    fastp_umi_location     : String?                               //  string: [optional]  fastp UMI location argument (--umi_loc)
+    fastp_umi_length       : Integer?                              // numeric: [optional]  fastp UMI length argument (--umi_len)
+    fastp_umi_skip         : Integer?                              // numeric: [optional]  fastp UMI skip argument (--umi_skip)
+    fastq_tools_umi_enabled: Boolean                               // boolean: [mandatory] enable fastq-tools UMI processing
+    fastq_tools_umi_delim  : String?                               // boolean: [optional]  fastq-tools -umi_delim argument
 
     main:
     //
@@ -62,20 +68,17 @@ workflow READ_UMI_PROCESSING {
     ch_fastq_inputs = ch_inputs_runnable
         .map { meta, sequence_type, fastq_info, fastq_fwd, fastq_rev ->
 
-              def meta_fastq = [
-                  key: meta.group_id,
-                  id: "${meta.group_id}_${fastq_info.sample_id}",
+              def meta_fastq = record(
+                  key: meta.case_id,
+                  id: "${meta.case_id}:${fastq_info.sample_id}",
                   sequence_type: sequence_type,
                   sample_id: fastq_info.sample_id,
                   library_id: fastq_info.library_id,
                   lane: fastq_info.lane,
                   flowcell: fastq_info.flowcell,
                   rg_fields: fastq_info.rg_fields,
-              ]
-
-              if (sequence_type == 'dna') {
-                  meta_fastq.sample_type = fastq_info.sample_type
-              }
+                  sample_type: sequence_type == 'dna' ? fastq_info.sample_type : null,
+              )
 
               return [meta_fastq, fastq_fwd, fastq_rev]
 
@@ -197,15 +200,15 @@ workflow READ_UMI_PROCESSING {
     // channel: [ meta, fastq_info, fastq_fwd, fastq_rev ]
     ch_outputs_dna = channel.empty()
         .mix(
-            WorkflowOncoanalyser.restoreMeta(ch_fastq_processed_sorted.dna, ch_inputs),
-            ch_inputs_dna_sorted.skip.map { meta -> [meta, [:], [], []] },
+            restoreMeta(ch_fastq_processed_sorted.dna, ch_inputs),
+            ch_inputs_dna_sorted.skip.map { meta -> [meta, [:], null, null] },
         )
 
     // channel: [ meta, fastq_info, fastq_fwd, fastq_rev ]
     ch_outputs_rna = channel.empty()
         .mix(
-            WorkflowOncoanalyser.restoreMeta(ch_fastq_processed_sorted.rna, ch_inputs),
-            ch_inputs_rna_sorted.skip.map { meta -> [meta, [:], [], []] },
+            restoreMeta(ch_fastq_processed_sorted.rna, ch_inputs),
+            ch_inputs_rna_sorted.skip.map { meta -> [meta, [:], null, null] },
         )
 
     emit:

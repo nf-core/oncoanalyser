@@ -1,3 +1,5 @@
+nextflow.enable.types = true
+
 process PURPLE {
     tag "${meta.id}"
     label 'process_medium'
@@ -8,29 +10,34 @@ process PURPLE {
         'biocontainers/hmftools-purple:4.4--hdfd78af_0' }"
 
     input:
-    tuple val(meta),
-        path(amber_dir),
-        path(cobalt_dir),
-        path(esvee_dir),
-        path(pave_somatic_dir),
-        path(pave_germline_dir),
-        path(redux_tumor_tsvs, stageAs: 'redux_tumor_tsvs/*')
-    path genome_fasta
-    val genome_ver
-    path genome_fai
-    path genome_dict
-    path gc_profile
-    path sage_known_hotspots_somatic
-    path sage_known_hotspots_germline
-    path driver_gene_panel
-    path ensembl_data_resources
-    path germline_amp_del_freq
-    path target_regions_bed
+    tuple(
+        meta: Record,
+        amber_dir: Path,
+        cobalt_dir: Path,
+        esvee_dir: Path?,
+        pave_somatic_dir: Path?,
+        pave_germline_dir: Path?,
+        redux_tumor_tsvs: List<Path>?,
+    )
+    genome_fasta: Path
+    genome_ver: String
+    genome_fai: Path
+    genome_dict: Path
+    gc_profile: Path
+    sage_known_hotspots_somatic: Path
+    sage_known_hotspots_germline: Path?
+    driver_gene_panel: Path
+    ensembl_data_resources: Path
+    germline_amp_del_freq: Path?
+    target_regions_bed: Path?
 
-    output:
-    tuple val(meta), path('purple/')                  , topic: purple_dir
-    tuple val(meta), val('purple'), path('.command.*'), topic: command_files
-    path 'versions.yml'                               , topic: versions
+    stage:
+    stageAs redux_tumor_tsvs, 'redux_tumor_tsvs/*'
+
+    topic:
+    tuple(meta, file('purple/'))               >> 'purple_dir'
+    tuple(meta, 'purple', files('.command.*')) >> 'command_files'
+    file('versions.yml')                       >> 'versions'
 
     when:
     task.ext.when == null || task.ext.when
@@ -42,7 +49,7 @@ process PURPLE {
 
     def log_level_arg = task.ext.log_level ? "-log_level ${task.ext.log_level}" : ''
 
-    def reference_arg = meta.containsKey('normal_id') ? "-reference ${meta.normal_id}" : ''
+    def reference_arg = meta.normal_id != null ? "-reference ${meta.normal_id}" : ''
 
     def esvee_dir_arg = esvee_dir ? "-esvee_dir ${esvee_dir}" : ''
     def pave_somatic_dir_arg = pave_somatic_dir ? "-pave_somatic_dir ${pave_somatic_dir}" : ''
@@ -93,7 +100,9 @@ process PURPLE {
 
     stub:
     """
-    mkdir -p purple/
+    mkdir -p purple/ purple/plot/
+
+    touch purple/plot/${meta.tumor_id}.circos.png
 
     touch purple/${meta.tumor_id}.purple.cnv.gene.tsv
     touch purple/${meta.tumor_id}.purple.cnv.somatic.tsv

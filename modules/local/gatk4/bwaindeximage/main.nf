@@ -1,3 +1,5 @@
+nextflow.enable.types = true
+
 process GATK4_BWA_INDEX_IMAGE {
     tag "${genome_fasta.name}"
     label 'process_medium'
@@ -8,12 +10,12 @@ process GATK4_BWA_INDEX_IMAGE {
         'biocontainers/gatk4:4.6.1.0--py310hdfd78af_0' }"
 
     input:
-    path genome_fasta
+    genome_fasta: Path
 
-    output:
-    path "${genome_fasta}.img"                                      , topic: gatk4_bwa_index_img
-    tuple val([:]), val('gatk4_bwa_index_image'), path('.command.*'), topic: command_files
-    path 'versions.yml'                                             , topic: versions
+    topic:
+    file("${genome_fasta}.img")                              >> 'gatk4_bwa_index_img'
+    tuple([:], 'gatk4_bwa_index_image', files('.command.*')) >> 'command_files'
+    file('versions.yml')                                     >> 'versions'
 
     when:
     task.ext.when == null || task.ext.when

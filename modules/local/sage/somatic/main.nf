@@ -1,3 +1,5 @@
+nextflow.enable.types = true
+
 // NOTE(SW): logic that determines BQR outputs assumes '-output_vcf' is a path that includes at least leading one directory
 
 process SAGE_SOMATIC {
@@ -10,24 +12,33 @@ process SAGE_SOMATIC {
         'biocontainers/hmftools-sage:5.0.2--hdfd78af_0' }"
 
     input:
-    tuple val(meta), path(tumor_aln), path(tumor_bai), path(normal_aln), path(normal_bai), path(donor_aln), path(donor_bai), path(redux_tsvs)
-    path genome_fasta
-    val genome_ver
-    path genome_fai
-    path genome_dict
-    path sage_pon
-    path sage_known_hotspots_somatic
-    path sage_highconf_regions
-    path driver_gene_panel
-    path ensembl_data_resources
-    path gnomad_resource
-    val sequencing_platform
-    val targeted_mode
+    tuple(
+        meta: Record,
+        tumor_aln: Path,
+        tumor_bai: Path,
+        normal_aln: Path?,
+        normal_bai: Path?,
+        donor_alns: List<Path>,
+        donor_bais: List<Path>,
+        redux_tsvs: List<Path>,
+    )
+    genome_fasta: Path
+    genome_ver: String
+    genome_fai: Path
+    genome_dict: Path
+    sage_pon: Path
+    sage_known_hotspots_somatic: Path
+    sage_highconf_regions: Path
+    driver_gene_panel: Path
+    ensembl_data_resources: Path
+    gnomad_resource: Path
+    sequencing_platform: String
+    targeted_mode: Boolean
 
-    output:
-    tuple val(meta), path('somatic/')                       , topic: sage_somatic_dir
-    tuple val(meta), val('sage_somatic'), path('.command.*'), topic: command_files
-    path 'versions.yml'                                     , topic: versions
+    topic:
+    tuple(meta, file('somatic/'))                    >> 'sage_somatic_dir'
+    tuple(meta, 'sage_somatic', files('.command.*')) >> 'command_files'
+    file('versions.yml')                             >> 'versions'
 
     when:
     task.ext.when == null || task.ext.when
@@ -38,14 +49,14 @@ process SAGE_SOMATIC {
     def log_level_arg = task.ext.log_level ? "-log_level ${task.ext.log_level}" : ''
 
     def reference_ids = []
-    if (meta.containsKey('normal_id')) { reference_ids.add(meta.normal_id) }
-    if (meta.containsKey('donor_id')) { reference_ids.add(meta.donor_id) }
+    if (meta.normal_id != null) { reference_ids.add(meta.normal_id) }
+    if (meta.donor_ids != null) { reference_ids.addAll(meta.donor_ids) }
     def reference_arg = reference_ids.size() > 0 ? "-reference ${reference_ids.join(',')}" : ''
     def ref_sample_count_arg = reference_ids.size() > 0 ? "-ref_sample_count ${reference_ids.size()}" : ''
 
     def reference_alns = []
     if (normal_aln) { reference_alns.add(normal_aln.toString()) }
-    if (donor_aln) { reference_alns.add(donor_aln.toString()) }
+    if (donor_alns) { reference_alns.addAll(donor_alns.collect { it.toString() }) }
     def reference_bam_arg = reference_alns.size() > 0 ? "-reference_bam ${reference_alns.join(',')}" : ''
 
     def include_mt_arg = targeted_mode ? '' : '-include_mt'

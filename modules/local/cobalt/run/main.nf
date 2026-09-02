@@ -1,3 +1,5 @@
+nextflow.enable.types = true
+
 process COBALT {
     tag "${meta.id}"
     label 'process_high'
@@ -8,19 +10,19 @@ process COBALT {
         'biocontainers/hmftools-cobalt:3.0--hdfd78af_0' }"
 
     input:
-    tuple val(meta), path(tumor_aln), path(tumor_idx), path(normal_aln), path(normal_idx)
-    path genome_fasta
-    val genome_ver
-    path genome_fai
-    path gc_profile
-    path diploid_regions
-    path target_regions_normalisation
-    val targeted_mode
+    tuple(meta: Record, tumor_aln: Path, tumor_idx: Path, normal_aln: Path?, normal_idx: Path?)
+    genome_fasta: Path
+    genome_ver: String
+    genome_fai: Path
+    gc_profile: Path
+    diploid_regions: Path?
+    target_regions_normalisation: Path?
+    targeted_mode: Boolean
 
-    output:
-    tuple val(meta), path('cobalt/')                  , topic: cobalt_dir
-    tuple val(meta), val('cobalt'), path('.command.*'), topic: command_files
-    path 'versions.yml'                               , topic: versions
+    topic:
+    tuple(meta, file('cobalt/'))               >> 'cobalt_dir'
+    tuple(meta, 'cobalt', files('.command.*')) >> 'command_files'
+    file('versions.yml')                       >> 'versions'
 
     when:
     task.ext.when == null || task.ext.when
@@ -32,12 +34,12 @@ process COBALT {
 
     def log_level_arg = task.ext.log_level ? "-log_level ${task.ext.log_level}" : ''
 
-    def reference_arg = meta.containsKey('normal_id') ? "-reference ${meta.normal_id}" : ''
+    def reference_arg = meta.normal_id != null ? "-reference ${meta.normal_id}" : ''
     def reference_bam_arg = normal_aln ? "-reference_bam ${normal_aln}" : ''
 
     def target_regions_norm_file_arg = target_regions_normalisation ? "-target_region_norm_file ${target_regions_normalisation}" : ''
 
-    def tumor_only_mode = ! meta.containsKey('normal_id')
+    def tumor_only_mode = meta.normal_id == null
 
     def pcf_gamma_arg = targeted_mode && tumor_only_mode ? '-pcf_gamma 50' : ''
 

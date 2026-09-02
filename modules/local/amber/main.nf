@@ -1,3 +1,5 @@
+nextflow.enable.types = true
+
 process AMBER {
     tag "${meta.id}"
     label 'process_high'
@@ -8,19 +10,27 @@ process AMBER {
         'biocontainers/hmftools-amber:4.3--hdfd78af_0' }"
 
     input:
-    tuple val(meta), path(tumor_aln), path(tumor_idx), path(normal_aln), path(normal_idx), path(donor_aln), path(donor_idx)
-    path genome_fasta
-    val genome_ver
-    path genome_fai
-    path heterozygous_sites
-    path target_regions_bed
-    val tumor_min_depth
-    val sequencing_platform
+    tuple(
+        meta: Record,
+        tumor_aln: Path,
+        tumor_idx: Path,
+        normal_aln: Path?,
+        normal_idx: Path?,
+        donor_alns: List<Path>?,
+        donor_idxs: List<Path>?,
+    )
+    genome_fasta: Path
+    genome_ver: String
+    genome_fai: Path
+    heterozygous_sites: Path
+    target_regions_bed: Path?
+    tumor_min_depth: Integer?
+    sequencing_platform: String
 
-    output:
-    tuple val(meta), path('amber/')                  , topic: amber_dir
-    tuple val(meta), val('amber'), path('.command.*'), topic: command_files
-    path 'versions.yml'                              , topic: versions
+    topic:
+    tuple(meta, file('amber/'))               >> 'amber_dir'
+    tuple(meta, 'amber', files('.command.*')) >> 'command_files'
+    file('versions.yml')                      >> 'versions'
 
     when:
     task.ext.when == null || task.ext.when
@@ -33,13 +43,13 @@ process AMBER {
     def log_level_arg = task.ext.log_level ? "-log_level ${task.ext.log_level}" : ''
 
     def reference_ids = []
-    if (meta.containsKey('normal_id')) { reference_ids.add(meta.normal_id) }
-    if (meta.containsKey('donor_id')) { reference_ids.add(meta.donor_id) }
+    if (meta.normal_id != null) { reference_ids.add(meta.normal_id) }
+    if (meta.donor_ids != null) { reference_ids.addAll(meta.donor_ids) }
     def reference_arg = reference_ids.size() > 0 ? "-reference ${reference_ids.join(',')}" : ''
 
     def reference_alns = []
     if (normal_aln) { reference_alns.add(normal_aln.toString()) }
-    if (donor_aln) { reference_alns.add(donor_aln.toString()) }
+    if (donor_alns) { reference_alns.addAll(donor_alns.collect { it.toString() }) }
 
     def reference_bam_arg = reference_alns.size() > 0 ? "-reference_bam ${reference_alns.join(',')}" : ''
 

@@ -1,3 +1,5 @@
+nextflow.enable.types = true
+
 process SIGS {
     tag "${meta.id}"
     label 'process_low'
@@ -8,13 +10,13 @@ process SIGS {
         'biocontainers/hmftools-sigs:1.2.1--hdfd78af_1' }"
 
     input:
-    tuple val(meta), path(smlv_vcf)
-    path signatures
+    tuple(meta: Record, smlv_vcf: Path)
+    signatures: Path
 
-    output:
-    tuple val(meta), path('sigs/')                  , topic: sigs_dir
-    tuple val(meta), val('sigs'), path('.command.*'), topic: command_files
-    path 'versions.yml'                             , topic: versions
+    topic:
+    tuple(meta, file('sigs/'))               >> 'sigs_dir'
+    tuple(meta, 'sigs', files('.command.*')) >> 'command_files'
+    file('versions.yml')                     >> 'versions'
 
     when:
     task.ext.when == null || task.ext.when

@@ -2,27 +2,42 @@
 // TEAL performs characterisation of telomeric features and rearrangements
 //
 
+nextflow.enable.types = true
+
 include { TEAL_PREP     } from '../../../modules/local/teal/prep/main'
 include { TEAL_PIPELINE } from '../../../modules/local/teal/pipeline/main'
+
+include { getNormalReduxDirAlignment  } from '../utils_nfcore_oncoanalyser_pipeline/accessors_alignments'
+include { getTumorReduxDirAlignment   } from '../utils_nfcore_oncoanalyser_pipeline/accessors_alignments'
+include { getInput                    } from '../utils_nfcore_oncoanalyser_pipeline/accessors_samples'
+include { getNormalDnaSample          } from '../utils_nfcore_oncoanalyser_pipeline/accessors_samples'
+include { getNormalDnaSampleName      } from '../utils_nfcore_oncoanalyser_pipeline/accessors_samples'
+include { getTumorDnaSample           } from '../utils_nfcore_oncoanalyser_pipeline/accessors_samples'
+include { getTumorDnaSampleName       } from '../utils_nfcore_oncoanalyser_pipeline/accessors_samples'
+include { FileType                    } from '../utils_nfcore_oncoanalyser_pipeline/types_enums'
+include { groupByMeta                 } from '../utils_nfcore_oncoanalyser_pipeline/helpers_channel'
+include { joinMeta                    } from '../utils_nfcore_oncoanalyser_pipeline/helpers_channel'
+include { restoreMeta                 } from '../utils_nfcore_oncoanalyser_pipeline/helpers_channel'
+include { selectCurrentOrExisting     } from '../utils_nfcore_oncoanalyser_pipeline/utils'
 
 workflow TEAL_CHARACTERISATION {
     take:
     // Sample data
-    ch_inputs              // channel: [mandatory] [ meta ]
-    ch_redux_dir_tumor     // channel: [mandatory] [ meta, redux_dir ]
-    ch_redux_dir_normal    // channel: [mandatory] [ meta, redux_dir ]
-    ch_bamtools_dir_tumor  // channel: [mandatory] [ meta, bamtools_dir ]
-    ch_bamtools_dir_normal // channel: [mandatory] [ meta, bamtools_dir ]
-    ch_cobalt_dir          // channel: [mandatory] [ meta, cobalt_dir ]
-    ch_purple_dir          // channel: [mandatory] [ meta, purple_dir ]
+    ch_inputs             : Channel<Map>              // channel: [mandatory] [ meta ]
+    ch_redux_dir_tumor    : Channel<Tuple<Map, Path>> // channel: [mandatory] [ meta, redux_dir ]
+    ch_redux_dir_normal   : Channel<Tuple<Map, Path>> // channel: [mandatory] [ meta, redux_dir ]
+    ch_bamtools_dir_tumor : Channel<Tuple<Map, Path>> // channel: [mandatory] [ meta, bamtools_dir ]
+    ch_bamtools_dir_normal: Channel<Tuple<Map, Path>> // channel: [mandatory] [ meta, bamtools_dir ]
+    ch_cobalt_dir         : Channel<Tuple<Map, Path>> // channel: [mandatory] [ meta, cobalt_dir ]
+    ch_purple_dir         : Channel<Tuple<Map, Path>> // channel: [mandatory] [ meta, purple_dir ]
 
     // Reference data
-    genome_fasta           // channel: [mandatory] /path/to/genome_fasta
-    genome_version         // channel: [mandatory] genome version
-    genome_fai             // channel: [mandatory] /path/to/genome_fai
+    genome_fasta          : Channel<Path>             // channel: [mandatory] /path/to/genome_fasta
+    genome_version        : Channel<String>           // channel: [mandatory] genome version
+    genome_fai            : Channel<Path>             // channel: [mandatory] /path/to/genome_fai
 
     // Params
-    sequencing_platform    // string:  [mandatory] sequencing platform
+    sequencing_platform   : String                    // string:  [mandatory] sequencing platform
 
     main:
     //
@@ -31,17 +46,17 @@ workflow TEAL_CHARACTERISATION {
     // Select input sources then sort
     // channel: runnable: [ meta, tumor_aln, tumor_idx, normal_aln, normal_idx ]
     // channel: skip: [ meta ]
-    ch_inputs_sorted = WorkflowOncoanalyser.groupByMeta(
+    ch_inputs_sorted = groupByMeta([
         ch_redux_dir_tumor,
         ch_redux_dir_normal,
-    )
+    ])
         .map { meta, redux_dir_tumor, redux_dir_normal ->
 
-            def redux_dir_tumor_selected = Utils.selectCurrentOrExisting(redux_dir_tumor, meta, Constants.INPUT.REDUX_DIR_TUMOR)
-            def redux_dir_normal_selected = Utils.selectCurrentOrExisting(redux_dir_normal, meta, Constants.INPUT.REDUX_DIR_NORMAL)
+            def redux_dir_tumor_selected = selectCurrentOrExisting(redux_dir_tumor, getInput(getTumorDnaSample(meta), FileType.REDUX_DIR))
+            def redux_dir_normal_selected = selectCurrentOrExisting(redux_dir_normal, getInput(getNormalDnaSample(meta), FileType.REDUX_DIR))
 
-            def (tumor_aln, tumor_idx) = Utils.getTumorReduxDirAlignment(meta, redux_dir_tumor_selected)
-            def (normal_aln, normal_idx) = Utils.getNormalReduxDirAlignment(meta, redux_dir_normal_selected)
+            def (tumor_aln, tumor_idx) = getTumorReduxDirAlignment(meta, redux_dir_tumor_selected)
+            def (normal_aln, normal_idx) = getNormalReduxDirAlignment(meta, redux_dir_normal_selected)
 
             return [meta, tumor_aln, tumor_idx, normal_aln, normal_idx]
 
@@ -60,18 +75,12 @@ workflow TEAL_CHARACTERISATION {
     ch_teal_prep_inputs = ch_inputs_sorted.runnable
         .map { meta, tumor_aln, tumor_idx, normal_aln, normal_idx ->
 
-            def meta_teal = [
-                key: meta.group_id,
-                id: meta.group_id,
-            ]
-
-            if (tumor_aln) {
-                meta_teal.tumor_id = Utils.getTumorDnaSampleName(meta)
-            }
-
-            if (normal_aln) {
-                meta_teal.normal_id = Utils.getNormalDnaSampleName(meta)
-            }
+            def meta_teal = record(
+                key: meta.case_id,
+                id: meta.case_id,
+                tumor_id: tumor_aln ? getTumorDnaSampleName(meta) : null,
+                normal_id: normal_aln ? getNormalDnaSampleName(meta) : null,
+            )
 
             return [meta_teal, tumor_aln, tumor_idx, normal_aln, normal_idx]
         }
@@ -85,21 +94,10 @@ workflow TEAL_CHARACTERISATION {
         sequencing_platform,
     )
 
-    // Flatten TEAL_PREP output
+    // Restore metas
     // channel: [ meta, teal_bam, teal_bai ]
-    ch_tumor_teal_bam = WorkflowOncoanalyser.restoreMeta(channel.topic('teal_prep_tumor_bam'), ch_inputs)
-        .map { meta, bam_bai -> [meta] + bam_bai }
-
-    ch_normal_teal_bam_placeholder = WorkflowOncoanalyser.restoreMeta(
-        ch_teal_prep_inputs
-            .filter { d -> d[0].normal_id == null }  // Only populate placeholder channel if normal sample is missing
-            .map { d -> [d[0], [], []] },
-        ch_inputs
-    )
-
-    ch_normal_teal_bam = WorkflowOncoanalyser.restoreMeta(channel.topic('teal_prep_normal_bam'), ch_inputs)
-        .map { meta, bam_bai -> [meta] + bam_bai }
-        .mix(ch_normal_teal_bam_placeholder)
+    ch_tumor_teal_bam = restoreMeta(channel.topic('teal_prep_tumor_bam'), ch_inputs)
+    ch_normal_teal_bam = restoreMeta(channel.topic('teal_prep_normal_bam'), ch_inputs)
 
     //
     // MODULE: TEAL pipeline
@@ -107,14 +105,14 @@ workflow TEAL_CHARACTERISATION {
     // Select input sources then sort
     // channel: runnable: [ meta, teal_bam_tumor, teal_bai_tumor, teal_bam_normal, teal_bai_normal, bamtools_dir_tumor, bamtools_dir_normal, cobalt_dir, purple_dir ]
     // channel: skip: [ meta ]
-    ch_teal_pipeline_inputs_sorted = WorkflowOncoanalyser.groupByMeta(
+    ch_teal_pipeline_inputs_sorted = groupByMeta([
         ch_tumor_teal_bam,
         ch_normal_teal_bam,
         ch_bamtools_dir_tumor,
         ch_bamtools_dir_normal,
         ch_cobalt_dir,
         ch_purple_dir,
-    )
+    ])
         .map { meta, teal_bam_tumor, teal_bai_tumor, teal_bam_normal, teal_bai_normal, bamtools_dir_tumor, bamtools_dir_normal, cobalt_dir, purple_dir ->
             return [
                 meta,
@@ -122,10 +120,10 @@ workflow TEAL_CHARACTERISATION {
                 teal_bai_tumor,
                 teal_bam_normal,
                 teal_bai_normal,
-                Utils.selectCurrentOrExisting(bamtools_dir_tumor, meta, Constants.INPUT.BAMTOOLS_DIR_TUMOR),
-                Utils.selectCurrentOrExisting(bamtools_dir_normal, meta, Constants.INPUT.BAMTOOLS_DIR_NORMAL),
-                Utils.selectCurrentOrExisting(cobalt_dir, meta, Constants.INPUT.COBALT_DIR),
-                Utils.selectCurrentOrExisting(purple_dir, meta, Constants.INPUT.PURPLE_DIR),
+                selectCurrentOrExisting(bamtools_dir_tumor, getInput(getTumorDnaSample(meta), FileType.BAMTOOLS_DIR)),
+                selectCurrentOrExisting(bamtools_dir_normal, getInput(getNormalDnaSample(meta), FileType.BAMTOOLS_DIR)),
+                selectCurrentOrExisting(cobalt_dir, getInput(getTumorDnaSample(meta), FileType.COBALT_DIR)),
+                selectCurrentOrExisting(purple_dir, getInput(getTumorDnaSample(meta), FileType.PURPLE_DIR)),
             ]
         }
         .branch { meta, teal_bam_tumor, teal_bai_tumor, teal_bam_normal, teal_bai_normal, bamtools_dir_tumor, bamtools_dir_normal, cobalt_dir, purple_dir ->
@@ -143,18 +141,12 @@ workflow TEAL_CHARACTERISATION {
     ch_teal_pipeline_inputs = ch_teal_pipeline_inputs_sorted.runnable
         .map { meta, teal_bam_tumor, teal_bai_tumor, teal_bam_normal, teal_bai_normal, bamtools_dir_tumor, bamtools_dir_normal, cobalt_dir, purple_dir ->
 
-            def meta_teal = [
-                key: meta.group_id,
-                id: meta.group_id,
-            ]
-
-            if (teal_bam_tumor) {
-                meta_teal.tumor_id = Utils.getTumorDnaSampleName(meta)
-            }
-
-            if (teal_bam_normal) {
-                meta_teal.normal_id = Utils.getNormalDnaSampleName(meta)
-            }
+            def meta_teal = record(
+                key: meta.case_id,
+                id: meta.case_id,
+                tumor_id: teal_bam_tumor ? getTumorDnaSampleName(meta) : null,
+                normal_id: teal_bam_normal ? getNormalDnaSampleName(meta) : null,
+            )
 
             return [meta_teal, teal_bam_tumor, teal_bai_tumor, teal_bam_normal, teal_bai_normal, bamtools_dir_tumor, bamtools_dir_normal, cobalt_dir, purple_dir]
         }
@@ -165,4 +157,17 @@ workflow TEAL_CHARACTERISATION {
         genome_version,
         sequencing_platform,
     )
+
+    // Set outputs, restoring original meta where needed
+    // channel: [ meta, teal_bam, teal_bai ]
+    ch_outputs_tumor_bam = ch_tumor_teal_bam
+    // channel: [ meta, teal_bam, teal_bai ]
+    ch_outputs_normal_bam = ch_normal_teal_bam
+    // channel: [ meta, teal_tsvs ]
+    ch_outputs_tsvs = restoreMeta(channel.topic('teal_tsvs'), ch_inputs)
+
+    emit:
+    tumor_bam = ch_outputs_tumor_bam   // channel: [ meta, teal_bam, teal_bai ]
+    normal_bam = ch_outputs_normal_bam // channel: [ meta, teal_bam, teal_bai ]
+    teal_tsvs = ch_outputs_tsvs        // channel: [meta, teal_tsvs ]
 }

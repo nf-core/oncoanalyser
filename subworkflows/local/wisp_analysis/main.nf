@@ -2,43 +2,57 @@
 // WISP estimates tumor purity in longitudinal samples using WGS data of the primary
 //
 
+nextflow.enable.types = true
+
 include { WISP } from '../../../modules/local/wisp/main'
+
+include { getNormalReduxDirAlignment } from '../utils_nfcore_oncoanalyser_pipeline/accessors_alignments'
+include { getInput                   } from '../utils_nfcore_oncoanalyser_pipeline/accessors_samples'
+include { getLongitudinalSampleName  } from '../utils_nfcore_oncoanalyser_pipeline/accessors_samples'
+include { getNormalDnaSample         } from '../utils_nfcore_oncoanalyser_pipeline/accessors_samples'
+include { getTumorDnaSample          } from '../utils_nfcore_oncoanalyser_pipeline/accessors_samples'
+include { getTumorDnaSampleName      } from '../utils_nfcore_oncoanalyser_pipeline/accessors_samples'
+include { FileType                   } from '../utils_nfcore_oncoanalyser_pipeline/types_enums'
+include { groupByMeta                } from '../utils_nfcore_oncoanalyser_pipeline/helpers_channel'
+include { joinMeta                   } from '../utils_nfcore_oncoanalyser_pipeline/helpers_channel'
+include { restoreMeta                } from '../utils_nfcore_oncoanalyser_pipeline/helpers_channel'
+include { selectCurrentOrExisting    } from '../utils_nfcore_oncoanalyser_pipeline/utils'
 
 workflow WISP_ANALYSIS {
     take:
     // Sample data
-    ch_inputs                  // channel: [mandatory] [ meta ]
-    ch_redux_dir               // channel: [mandatory] [ meta, redux_dir ]
-    ch_amber_dir               // channel: [mandatory] [ meta, amber_dir ]
-    ch_cobalt_dir              // channel: [mandatory] [ meta, cobalt_dir ]
-    ch_sage_append_dir_somatic // channel: [mandatory] [ meta, sage_append_dir ]
+    ch_inputs                 : Channel<Map>              // channel: [mandatory] [ meta ]
+    ch_redux_dir              : Channel<Tuple<Map, Path>> // channel: [mandatory] [ meta, redux_dir ]
+    ch_amber_dir              : Channel<Tuple<Map, Path>> // channel: [mandatory] [ meta, amber_dir ]
+    ch_cobalt_dir             : Channel<Tuple<Map, Path>> // channel: [mandatory] [ meta, cobalt_dir ]
+    ch_sage_append_dir_somatic: Channel<Tuple<Map, Path>> // channel: [mandatory] [ meta, sage_append_dir ]
 
     // Reference data
-    genome_fasta               // channel: [mandatory] /path/to/genome_fasta
-    genome_fai                 // channel: [mandatory] /path/to/genome_fai
+    genome_fasta              : Channel<Path>             // channel: [mandatory] /path/to/genome_fasta
+    genome_fai                : Channel<Path>             // channel: [mandatory] /path/to/genome_fai
 
     // Params
-    targeted_mode              // boolean: [mandatory] Set targeted mode
+    targeted_mode             : Boolean                   // boolean: [mandatory] Set targeted mode
 
     main:
     // Select input sources then sort
     // channel: runnable: [ meta, purple_dir (primary), amber_dir (primary), normal_aln (primary), redux_dir (longitudinal), amber_dir (longitudinal), cobalt_dir (longitudinal), sage_append_dir (longitudinal) ]
     // channel: skip: [ meta ]
-    ch_inputs_sorted = WorkflowOncoanalyser.groupByMeta(
+    ch_inputs_sorted = groupByMeta([
         ch_redux_dir,
         ch_amber_dir,
         ch_cobalt_dir,
         ch_sage_append_dir_somatic,
-    )
+    ])
         .map { meta, longitudinal_redux_dir, longitudinal_amber_dir, longitudinal_cobalt_dir, longitudinal_sage_append_dir ->
 
-            def primary_normal_redux_dir = Utils.getInput(meta, Constants.INPUT.REDUX_DIR_NORMAL)
-            def (primary_normal_aln, _primary_normal_idx) = Utils.getNormalReduxDirAlignment(meta, primary_normal_redux_dir)
+            def primary_normal_redux_dir = getInput(getNormalDnaSample(meta), FileType.REDUX_DIR)
+            def (primary_normal_aln, _primary_normal_idx) = getNormalReduxDirAlignment(meta, primary_normal_redux_dir)
 
-            def primary_purple_dir = Utils.getInput(meta, Constants.INPUT.PURPLE_DIR)
-            def primary_amber_dir = Utils.getInput(meta, Constants.INPUT.AMBER_DIR)
+            def primary_purple_dir = getInput(getTumorDnaSample(meta), FileType.PURPLE_DIR)
+            def primary_amber_dir = getInput(getTumorDnaSample(meta), FileType.AMBER_DIR)
 
-            def longitudinal_redux_dir_selected = Utils.selectCurrentOrExisting(longitudinal_redux_dir, meta, Constants.INPUT.REDUX_DIR_TUMOR)
+            def longitudinal_redux_dir_selected = selectCurrentOrExisting(longitudinal_redux_dir, getInput(getTumorDnaSample(meta), FileType.REDUX_DIR))
 
             return [
               meta,
@@ -73,13 +87,13 @@ workflow WISP_ANALYSIS {
             def meta = d[0]
             def inputs = d[1..-1]
 
-            def meta_wisp = [
-                key: meta.group_id,
-                id: meta.group_id,
-                subject_id: meta.subject_id,
-                primary_id: Utils.getTumorDnaSampleName(meta, primary: true),
-                longitudinal_id: Utils.getTumorDnaSampleName(meta, primary: false),
-            ]
+            def meta_wisp = record(
+                key: meta.case_id,
+                id: meta.case_id,
+                patient_id: meta.patient_id,
+                primary_id: getTumorDnaSampleName(meta),
+                longitudinal_id: getLongitudinalSampleName(meta),
+            )
 
             return [meta_wisp] + inputs
         }
@@ -91,4 +105,11 @@ workflow WISP_ANALYSIS {
         genome_fai,
         targeted_mode,
     )
+
+    // Set outputs, restoring original meta
+    // channel: [ meta, wisp_dir ]
+    ch_outputs = restoreMeta(channel.topic('wisp_dir'), ch_inputs)
+
+    emit:
+    wisp_dir = ch_outputs
 }

@@ -1,3 +1,5 @@
+nextflow.enable.types = true
+
 process ISOFOX {
     tag "${meta.id}"
     label 'process_high'
@@ -8,26 +10,26 @@ process ISOFOX {
         'biocontainers/hmftools-isofox:2.0.1--hdfd78af_0' }"
 
     input:
-    tuple val(meta), path(aln), path(idx)
-    val functions
-    val read_length
-    path genome_fasta
-    val genome_ver
-    path genome_fai
-    path ensembl_data_resources
-    path driver_gene_panel
-    path known_fusion_data
-    path excluded_regions
-    path gene_distribution
-    path alt_sj_distribution
-    path exp_counts
-    path exp_gc_ratios
-    path tpm_norm
+    tuple(meta: Record, aln: Path, idx: Path)
+    functions: String?
+    read_length: Integer
+    genome_fasta: Path
+    genome_ver: String
+    genome_fai: Path
+    ensembl_data_resources: Path
+    driver_gene_panel: Path
+    known_fusion_data: Path
+    excluded_regions: Path
+    gene_distribution: Path
+    alt_sj_distribution: Path
+    exp_counts: Path
+    exp_gc_ratios: Path
+    tpm_norm: Path?
 
-    output:
-    tuple val(meta), path('isofox/')                  , topic: isofox_dir
-    tuple val(meta), val('isofox'), path('.command.*'), topic: command_files
-    path 'versions.yml'                               , topic: versions
+    topic:
+    tuple(meta, file('isofox/'))               >> 'isofox_dir'
+    tuple(meta, 'isofox', files('.command.*')) >> 'command_files'
+    file('versions.yml')                       >> 'versions'
 
     when:
     task.ext.when == null || task.ext.when

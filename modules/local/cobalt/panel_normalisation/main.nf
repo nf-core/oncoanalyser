@@ -1,3 +1,5 @@
+nextflow.enable.types = true
+
 process COBALT_PANEL_NORMALISATION {
     label 'process_single'
 
@@ -7,16 +9,16 @@ process COBALT_PANEL_NORMALISATION {
         'biocontainers/hmftools-cobalt:3.0--hdfd78af_0' }"
 
     input:
-    tuple path('amber_dir.*'), path('cobalt_dir.*')
-    val genome_ver
-    path gc_profile
-    path copy_number_percentiles
-    path target_regions_bed
+    tuple(amber_dir: List<Path>, cobalt_dir: List<Path>)
+    genome_ver: String
+    gc_profile: Path
+    copy_number_percentiles: Path?
+    target_regions_bed: Path
 
-    output:
-    path 'cobalt.region_normalisation.*.tsv'                             , topic: cobalt_normalisation_tsv
-    tuple val([:]), val('cobalt_panel_normalisation'), path('.command.*'), topic: command_files
-    path 'versions.yml'                                                  , topic: versions
+    topic:
+    file('cobalt.region_normalisation.*.tsv')                     >> 'cobalt_normalisation_tsv'
+    tuple([:], 'cobalt_panel_normalisation', files('.command.*')) >> 'command_files'
+    file('versions.yml')                                          >> 'versions'
 
     when:
     task.ext.when == null || task.ext.when

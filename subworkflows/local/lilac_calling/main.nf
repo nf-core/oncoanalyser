@@ -2,44 +2,64 @@
 // LILAC is a WGS tool for HLA typing and somatic CNV and SNV calling
 //
 
+nextflow.enable.types = true
+
 include { LILAC } from '../../../modules/local/lilac/main'
+
+include { getNormalReduxDirAlignment  } from '../utils_nfcore_oncoanalyser_pipeline/accessors_alignments'
+include { getTumorReduxDirAlignment   } from '../utils_nfcore_oncoanalyser_pipeline/accessors_alignments'
+include { getPurpleSomaticVcf         } from '../utils_nfcore_oncoanalyser_pipeline/accessors_outputs'
+include { getInput                    } from '../utils_nfcore_oncoanalyser_pipeline/accessors_samples'
+include { getNormalDnaSample          } from '../utils_nfcore_oncoanalyser_pipeline/accessors_samples'
+include { getNormalDnaSampleName      } from '../utils_nfcore_oncoanalyser_pipeline/accessors_samples'
+include { getTumorDnaSample           } from '../utils_nfcore_oncoanalyser_pipeline/accessors_samples'
+include { getTumorDnaSampleName       } from '../utils_nfcore_oncoanalyser_pipeline/accessors_samples'
+include { getTumorRnaSample           } from '../utils_nfcore_oncoanalyser_pipeline/accessors_samples'
+include { hasInput                    } from '../utils_nfcore_oncoanalyser_pipeline/accessors_samples'
+include { hasNormalDna                } from '../utils_nfcore_oncoanalyser_pipeline/accessors_samples'
+include { hasTumorDna                 } from '../utils_nfcore_oncoanalyser_pipeline/accessors_samples'
+include { FileType                    } from '../utils_nfcore_oncoanalyser_pipeline/types_enums'
+include { groupByMeta                 } from '../utils_nfcore_oncoanalyser_pipeline/helpers_channel'
+include { joinMeta                    } from '../utils_nfcore_oncoanalyser_pipeline/helpers_channel'
+include { restoreMeta                 } from '../utils_nfcore_oncoanalyser_pipeline/helpers_channel'
+include { selectCurrentOrExisting     } from '../utils_nfcore_oncoanalyser_pipeline/utils'
 
 workflow LILAC_CALLING {
     take:
     // Sample data
-    ch_inputs           // channel: [mandatory] [ meta ]
-    ch_redux_dir_tumor  // channel: [mandatory] [ meta, redux_dir ]
-    ch_redux_dir_normal // channel: [mandatory] [ meta, redux_dir ]
-    ch_tumor_rna_aln    // channel: [mandatory] [ meta, aln, idx ]
-    ch_purple           // channel: [mandatory] [ meta, purple_dir ]
+    ch_inputs          : Channel<Map>                    // channel: [mandatory] [ meta ]
+    ch_redux_dir_tumor : Channel<Tuple<Map, Path>>       // channel: [mandatory] [ meta, redux_dir ]
+    ch_redux_dir_normal: Channel<Tuple<Map, Path>>       // channel: [mandatory] [ meta, redux_dir ]
+    ch_tumor_rna_aln   : Channel<Tuple<Map, Path, Path>> // channel: [mandatory] [ meta, aln, idx ]
+    ch_purple          : Channel<Tuple<Map, Path>>       // channel: [mandatory] [ meta, purple_dir ]
 
     // Reference data
-    genome_fasta        // channel: [mandatory] /path/to/genome_fasta
-    genome_version      // channel: [mandatory] genome version
-    genome_fai          // channel: [mandatory] /path/to/genome_fai
-    lilac_resource_dir  // channel: [mandatory] /path/to/lilac_resource_dir/
+    genome_fasta       : Channel<Path>                   // channel: [mandatory] /path/to/genome_fasta
+    genome_version     : Channel<String>                 // channel: [mandatory] genome version
+    genome_fai         : Channel<Path>                   // channel: [mandatory] /path/to/genome_fai
+    lilac_resource_dir : Channel<Path>                   // channel: [mandatory] /path/to/lilac_resource_dir/
 
     // Params
-    sequencing_platform // string:  [mandatory] sequencing platform
-    targeted_mode       // boolean: [mandatory] Set targeted mode
+    sequencing_platform: String                          // string:  [mandatory] sequencing platform
+    targeted_mode      : Boolean                         // boolean: [mandatory] Set targeted mode
 
     main:
     // Select input sources then sort
     // channel: runnable: [meta, normal_dna_aln, normal_dna_idx, tumor_dna_aln, tumor_dna_idx, tumor_rna_aln, tumor_rna_idx, purple_dir]
     // channel: skip: [ meta ]
-    ch_dna_inputs_sorted = WorkflowOncoanalyser.groupByMeta(
+    ch_dna_inputs_sorted = groupByMeta([
         ch_redux_dir_tumor,
         ch_redux_dir_normal,
         ch_tumor_rna_aln,
         ch_purple,
-    )
+    ])
         .map { meta, redux_dir_tumor, redux_dir_normal, tumor_rna_aln, tumor_rna_idx, purple_dir ->
 
-            def redux_dir_tumor_selected = Utils.selectCurrentOrExisting(redux_dir_tumor, meta, Constants.INPUT.REDUX_DIR_TUMOR)
-            def redux_dir_normal_selected = Utils.selectCurrentOrExisting(redux_dir_normal, meta, Constants.INPUT.REDUX_DIR_NORMAL)
+            def redux_dir_tumor_selected = selectCurrentOrExisting(redux_dir_tumor, getInput(getTumorDnaSample(meta), FileType.REDUX_DIR))
+            def redux_dir_normal_selected = selectCurrentOrExisting(redux_dir_normal, getInput(getNormalDnaSample(meta), FileType.REDUX_DIR))
 
-            def (tumor_dna_aln, tumor_dna_idx) = Utils.getTumorReduxDirAlignment(meta, redux_dir_tumor_selected)
-            def (normal_dna_aln, normal_dna_idx) = Utils.getNormalReduxDirAlignment(meta, redux_dir_normal_selected)
+            def (tumor_dna_aln, tumor_dna_idx) = getTumorReduxDirAlignment(meta, redux_dir_tumor_selected)
+            def (normal_dna_aln, normal_dna_idx) = getNormalReduxDirAlignment(meta, redux_dir_normal_selected)
 
             return [
                 meta,
@@ -47,20 +67,20 @@ workflow LILAC_CALLING {
                 normal_dna_idx,
                 tumor_dna_aln,
                 tumor_dna_idx,
-                Utils.selectCurrentOrExisting(tumor_rna_aln, meta, Constants.INPUT.ALN_RNA_TUMOR),
-                Utils.selectCurrentOrExisting(tumor_rna_idx, meta, Constants.INPUT.IDX_RNA_TUMOR),
-                Utils.selectCurrentOrExisting(purple_dir, meta, Constants.INPUT.PURPLE_DIR),
+                selectCurrentOrExisting(tumor_rna_aln, getInput(getTumorRnaSample(meta), FileType.ALN)),
+                selectCurrentOrExisting(tumor_rna_idx, getInput(getTumorRnaSample(meta), FileType.IDX)),
+                selectCurrentOrExisting(purple_dir, getInput(getTumorDnaSample(meta), FileType.PURPLE_DIR)),
             ]
 
         }
         .branch { meta, normal_dna_aln, normal_dna_idx, tumor_dna_aln, tumor_dna_idx, tumor_rna_aln, tumor_rna_idx, purple_dir ->
 
-            def has_existing = Utils.hasExistingInput(meta, Constants.INPUT.LILAC_DIR)
+            def has_existing = hasInput(getTumorDnaSample(meta), FileType.LILAC_DIR)
 
             def tumor_normal_mode = tumor_dna_aln && normal_dna_aln
 
-            def tumor_dna_id = Utils.getTumorDnaSampleName(meta)
-            def has_tn_smlv_vcf = purple_dir ? purple_dir.resolve("${tumor_dna_id}.purple.somatic.vcf.gz").exists() : false
+            def tumor_dna_id = getTumorDnaSampleName(meta)
+            def has_tn_smlv_vcf = getPurpleSomaticVcf(tumor_dna_id, purple_dir)?.exists() ?: false
 
             runnable: (tumor_dna_aln || normal_dna_aln) && (has_tn_smlv_vcf || ! tumor_normal_mode) && ! has_existing
             skip: true
@@ -69,23 +89,17 @@ workflow LILAC_CALLING {
 
     // Create process input channel
     // channel: [ meta_lilac, normal_dna_aln, normal_dna_idx, tumor_dna_aln, tumor_dna_idx, tumor_rna_aln, tumor_rna_idx, purple_dir
-    ch_lilac_inputs = WorkflowOncoanalyser.groupByMeta(
+    ch_lilac_inputs = groupByMeta([
         ch_dna_inputs_sorted.runnable,
-    )
+    ])
         .map { meta, normal_dna_aln, normal_dna_idx, tumor_dna_aln, tumor_dna_idx, tumor_rna_aln, tumor_rna_idx, purple_dir ->
 
-            def meta_lilac = [
-                key: meta.group_id,
-                id: meta.group_id,
-            ]
-
-            if (Utils.hasTumorDna(meta)) {
-                meta_lilac.tumor_id = Utils.getTumorDnaSampleName(meta)
-            }
-
-            if (Utils.hasNormalDna(meta)) {
-                meta_lilac.normal_id = Utils.getNormalDnaSampleName(meta)
-            }
+            def meta_lilac = record(
+                key: meta.case_id,
+                id: meta.case_id,
+                tumor_id: hasTumorDna(meta) ? getTumorDnaSampleName(meta) : null,
+                normal_id: hasNormalDna(meta) ? getNormalDnaSampleName(meta) : null,
+            )
 
             return [meta_lilac, normal_dna_aln, normal_dna_idx, tumor_dna_aln, tumor_dna_idx, tumor_rna_aln, tumor_rna_idx, purple_dir]
         }
@@ -105,8 +119,8 @@ workflow LILAC_CALLING {
     // channel: [ meta, lilac_dir ]
     ch_outputs = channel.empty()
         .mix(
-            WorkflowOncoanalyser.restoreMeta(channel.topic('lilac_dir'), ch_inputs),
-            ch_dna_inputs_sorted.skip.map { meta -> [meta, []] },
+            restoreMeta(channel.topic('lilac_dir'), ch_inputs),
+            ch_dna_inputs_sorted.skip.map { meta -> [meta, null] },
         )
 
     emit:

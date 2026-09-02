@@ -202,18 +202,18 @@ row as the first line with the below columns:
 
 | Column          | Description                                                                                                                 |
 | :-------------- | :-------------------------------------------------------------------------------------------------------------------------- |
-| `group_id`      | Groups `sample_id` entries into the same analysis                                                                           |
-| `subject_id`    | Must be the same value within each `group_id`                                                                               |
+| `case_id`      | Groups `sample_id` entries into the same analysis                                                                           |
+| `patient_id`    | Must be the same value within each `case_id`                                                                               |
 | `sample_id`     | Sample identifier                                                                                                           |
-| `sample_type`   | Sample type: `tumor`, `normal`, or `tumor_normal`                                                                           |
+| `sample_type`   | Sample type: `tumor`, `normal`, `donor`, `tumor_normal`, or `longitudinal`                                                 |
 | `sequence_type` | Sequence type: `dna`, `rna`, or `dna_rna`                                                                                   |
 | `filetype`      | File type: e.g. `fastq`, `bam`, `bai`. All valid values can be found [here](../lib/Constants.groovy).                       |
 | `info`          | Additional sample info in the form `<key>:<value>;<key>:<value>;...`. See [info field keys](#info-field-keys).              |
 | `filepath`      | Absolute filepath to input file. Can be a local path, URL (e.g. http://, https://, ftp://) or cloud URI (e.g. gs://, s3://) |
 
-Output file paths are constructed based on `group_id` and `sample_id`:
+Output file paths are constructed based on `case_id` and `sample_id`:
 
-- `group_id`: top-level output directory for analysis files e.g. `output/PATIENT1/`
+- `case_id`: top-level output directory for analysis files e.g. `output/PATIENT1/`
 - tumor `sample_id`: output prefix for most filenames e.g. `PATIENT1-T.purple.somatic.vcf.gz`
 - normal `sample_id`: output prefix for some filenames e.g. `PATIENT1-N.cobalt.ratio.pcf`
 
@@ -224,7 +224,6 @@ Output file paths are constructed based on `group_id` and `sample_id`:
 | `lane`                     | Sequencing lane                                    | FASTQ inputs                                         |
 | `library_id`               | Sequencing library identifier                      | FASTQ inputs                                         |
 | `flowcell`                 | Flowcell identifier                                | FASTQ inputs                                         |
-| `longitudinal_sample`      | Longitudinal sample identifier                     | Mode `purity_estimate`                               |
 | `cancer_type`              | Name of cancer type                                | NEO scorer (TPM analysis) and ORANGE (report header) |
 | `generate_redux_tsvs_only` | Only generate REDUX TSV files, skip BAM processing | REDUX inputs                                         |
 | `read_group_overrides`     | Override read group tags in output BAM/CRAM        | FASTQ inputs                                         |
@@ -248,14 +247,16 @@ To run from FASTQ:
 - provide the forward ('R1') and reverse ('R2') FASTQ files in the `filepath` field separated by `;`
 
 ```csv title="samplesheet.csv"
-group_id,subject_id,sample_id,sample_type,sequence_type,filetype,info,filepath
+case_id,patient_id,sample_id,sample_type,sequence_type,filetype,info,filepath
 PATIENT1,PATIENT1,PATIENT1-T,tumor,dna,fastq,library_id:S1;lane:001,/path/to/PATIENT1-T_S1_L001_R1_001.fastq.gz;/path/to/PATIENT1-T_S1_L001_R2_001.fastq.gz
 PATIENT1,PATIENT1,PATIENT1-T,tumor,dna,fastq,library_id:S1;lane:002,/path/to/PATIENT1-T_S1_L002_R1_001.fastq.gz;/path/to/PATIENT1-T_S1_L002_R2_001.fastq.gz
 ```
 
 :::note
 
-Currently only gzip compressed, non-interleaved paired-end FASTQ files are supported.
+Currently only gzip compressed, non-interleaved FASTQ files are supported. Paired-end FASTQ is provided as a
+`;`-separated forward/reverse pair in `filepath`. Single-end FASTQ (a single filepath) is supported for DNA
+alignment on SBX and Ultima sequencing platforms only.
 
 :::
 
@@ -264,7 +265,7 @@ Currently only gzip compressed, non-interleaved paired-end FASTQ files are suppo
 To run from BAM, specify `bam` in the `filetype` field:
 
 ```csv title="samplesheet.bam.csv"
-group_id,subject_id,sample_id,sample_type,sequence_type,filetype,filepath
+case_id,patient_id,sample_id,sample_type,sequence_type,filetype,filepath
 PATIENT1,PATIENT1,PATIENT1-T,tumor,dna,bam,/path/to/PATIENT1-T.dna.bam
 ```
 
@@ -273,7 +274,7 @@ BAM indexes (.bai files) are expected to be in the same location as the BAM file
 `filetype` field:
 
 ```csv title="samplesheet.bam_bai.csv"
-group_id,subject_id,sample_id,sample_type,sequence_type,filetype,filepath
+case_id,patient_id,sample_id,sample_type,sequence_type,filetype,filepath
 PATIENT1,PATIENT1,PATIENT1-T,tumor,dna,bam,/path/to/PATIENT1-T.dna.bam
 PATIENT1,PATIENT1,PATIENT1-T,tumor,dna,bai,/other/dir/PATIENT1-T.dna.bam.bai
 ```
@@ -284,7 +285,7 @@ To run from CRAM, use `cram` and `crai` in the `filetype` field. `crai` only nee
 not in the same directory as the CRAM file:
 
 ```csv title="samplesheet.cram.csv"
-group_id,subject_id,sample_id,sample_type,sequence_type,filetype,filepath
+case_id,patient_id,sample_id,sample_type,sequence_type,filetype,filepath
 PATIENT1,PATIENT1,PATIENT1-T,tumor,dna,cram,/path/to/PATIENT1-T.dna.cram
 PATIENT1,PATIENT1,PATIENT1-T,tumor,dna,crai,/other/dir/PATIENT1-T.dna.cram.crai
 ```
@@ -339,7 +340,7 @@ When starting the pipeline from REDUX outputs, provide the path containing the R
 (note: the provided `sample_id` must match the output file prefix, i.e. `<sample_id>` shown above):
 
 ```csv title="samplesheet.redux_bam.csv"
-group_id,subject_id,sample_id,sample_type,sequence_type,filetype,filepath
+case_id,patient_id,sample_id,sample_type,sequence_type,filetype,filepath
 PATIENT1,PATIENT1,PATIENT1-T,tumor,dna,redux_dir,/path/to/redux_PATIENT1-T/
 ```
 
@@ -358,7 +359,7 @@ You may have existing REDUX BAMs but one or more REDUX TSV files or missing or o
 REDUX by setting `generate_redux_tsvs_only` in the samplesheet info field for the corresponding REDUX alignment:
 
 ```csv title="samplesheet.redux_bam_no_tsv.csv"
-group_id,subject_id,sample_id,sample_type,sequence_type,filetype,filepath,info
+case_id,patient_id,sample_id,sample_type,sequence_type,filetype,filepath,info
 PATIENT1,PATIENT1,PATIENT1-T,tumor,dna,bam_redux,/path/to/PATIENT1-T.dna.redux.bam,generate_redux_tsvs_only
 ```
 
@@ -366,7 +367,7 @@ You may explicitly provide the path to the BAM index with `bai` in the `filetype
 directory as the BAM file:
 
 ```csv title="samplesheet.redux_bam_no_tsv_with_bai.csv"
-group_id,subject_id,sample_id,sample_type,sequence_type,filetype,filepath,info
+case_id,patient_id,sample_id,sample_type,sequence_type,filetype,filepath,info
 PATIENT1,PATIENT1,PATIENT1-T,tumor,dna,bam_redux,/path/to/PATIENT1-T.dna.redux.bam,generate_redux_tsvs_only
 PATIENT1,PATIENT1,PATIENT1-T,tumor,dna,bai,/other/dir/PATIENT1-T.redux.bam.bai
 ```
@@ -399,7 +400,7 @@ and structural variant calling from [ESVEE](https://github.com/hartwigmedical/hm
 run the rest of the pipeline.
 
 ```csv title='samplesheet.resume.csv'
-group_id,subject_id,sample_id,sample_type,sequence_type,filetype,filepath
+case_id,patient_id,sample_id,sample_type,sequence_type,filetype,filepath
 PATIENT1,PATIENT1,PATIENT1-N,normal,dna,redux_dir,/path/to/redux_PATIENT1-N/
 PATIENT1,PATIENT1,PATIENT1-T,tumor,dna,redux_dir,/path/to/redux_PATIENT1-T/
 PATIENT1,PATIENT1,PATIENT1-N,normal,dna,sage_dir,/path/to/sage/germline/
@@ -421,7 +422,7 @@ files.
 #### Paired tumor and normal DNA
 
 ```csv title="samplesheet.tn_dna.csv"
-group_id,subject_id,sample_id,sample_type,sequence_type,filetype,filepath
+case_id,patient_id,sample_id,sample_type,sequence_type,filetype,filepath
 PATIENT1,PATIENT1,PATIENT1-N,normal,dna,bam,/path/to/PATIENT1-N.dna.bam
 PATIENT1,PATIENT1,PATIENT1-T,tumor,dna,bam,/path/to/PATIENT1-T.dna.bam
 ```
@@ -429,21 +430,21 @@ PATIENT1,PATIENT1,PATIENT1-T,tumor,dna,bam,/path/to/PATIENT1-T.dna.bam
 #### Tumor-only DNA
 
 ```csv title="samplesheet.to_dna.csv"
-group_id,subject_id,sample_id,sample_type,sequence_type,filetype,filepath
+case_id,patient_id,sample_id,sample_type,sequence_type,filetype,filepath
 PATIENT1,PATIENT1,PATIENT1-T,tumor,dna,bam,/path/to/PATIENT1-T.dna.bam
 ```
 
 #### Tumor-only RNA
 
 ```csv title="samplesheet.to_rna.csv"
-group_id,subject_id,sample_id,sample_type,sequence_type,filetype,filepath
+case_id,patient_id,sample_id,sample_type,sequence_type,filetype,filepath
 PATIENT1,PATIENT1,PATIENT1-T-RNA,tumor,rna,bam,/path/to/PATIENT1-T.rna.bam
 ```
 
 #### Paired tumor and normal DNA with tumor-only RNA
 
 ```csv title="samplesheet.wgts.csv"
-group_id,subject_id,sample_id,sample_type,sequence_type,filetype,filepath
+case_id,patient_id,sample_id,sample_type,sequence_type,filetype,filepath
 PATIENT1,PATIENT1,PATIENT1-N,normal,dna,bam,/path/to/PATIENT1-N.dna.bam
 PATIENT1,PATIENT1,PATIENT1-T,tumor,dna,bam,/path/to/PATIENT1-T.dna.bam
 PATIENT1,PATIENT1,PATIENT1-T-RNA,tumor,rna,bam,/path/to/PATIENT1-T.rna.bam
@@ -458,7 +459,7 @@ To include a donor sample in an analysis, specify `donor` in the `sample_type` f
 the `sample_id` field:
 
 ```csv title="samplesheet.tn_with_donor.csv"
-group_id,subject_id,sample_id,sample_type,sequence_type,filetype,filepath
+case_id,patient_id,sample_id,sample_type,sequence_type,filetype,filepath
 PATIENT1,PATIENT1,PATIENT1-N,normal,dna,bam,/path/to/PATIENT1-N.dna.bam
 PATIENT1,PATIENT1,PATIENT1-D,donor,dna,bam,/path/to/PATIENT1-D.dna.bam
 PATIENT1,PATIENT1,PATIENT1-T,tumor,dna,bam,/path/to/PATIENT1-T.dna.bam
@@ -466,10 +467,10 @@ PATIENT1,PATIENT1,PATIENT1-T,tumor,dna,bam,/path/to/PATIENT1-T.dna.bam
 
 #### Multiple samples
 
-To run with multiple samples, specify a different `group_id` and `subject_id` for each desired grouping:
+To run with multiple samples, specify a different `case_id` and `patient_id` for each desired grouping:
 
 ```csv title="samplesheet.batch.csv"
-group_id,subject_id,sample_id,sample_type,sequence_type,filetype,filepath
+case_id,patient_id,sample_id,sample_type,sequence_type,filetype,filepath
 PATIENT1,PATIENT1,PATIENT1-N,normal,dna,bam,/path/to/PATIENT1-N.dna.bam
 PATIENT1,PATIENT1,PATIENT1-T,tumor,dna,bam,/path/to/PATIENT1-T.dna.bam
 PATIENT2,PATIENT2,PATIENT2-N,normal,dna,bam,/path/to/PATIENT2-N.dna.bam
@@ -732,7 +733,7 @@ In the samplesheet the longitudinal sample must have `longitudinal_sample` set i
 samplesheet starting from a primary sample PURPLE directory and longitudinal sample REDUX directory:
 
 ```csv title="samplesheet.purity_estimate.redux_dir.csv"
-group_id,subject_id,sample_id,sample_type,sequence_type,filetype,info,filepath
+case_id,patient_id,sample_id,sample_type,sequence_type,filetype,info,filepath
 PATIENT1,PATIENT1,PATIENT1-T,tumor,dna,purple_dir,,/path/to/PATIENT1-T/purple/
 PATIENT1,PATIENT1,PATIENT1-L,tumor,dna,redux_dir,longitudinal_sample,/path/to/redux_PATIENT1-L/
 ```
@@ -740,7 +741,7 @@ PATIENT1,PATIENT1,PATIENT1-L,tumor,dna,redux_dir,longitudinal_sample,/path/to/re
 Similarly, a minimal samplesheet instead starting from FASTQ for the longitudinal sample:
 
 ```csv title="samplesheet.purity_estimate.fastq.csv"
-group_id,subject_id,sample_id,sample_type,sequence_type,filetype,info,filepath
+case_id,patient_id,sample_id,sample_type,sequence_type,filetype,info,filepath
 PATIENT1,PATIENT1,PATIENT1-T,tumor,dna,purple_dir,,/path/to/PATIENT1-T/purple/
 PATIENT1,PATIENT1,PATIENT1-L,tumor,dna,fastq,longitudinal_sample;library_id:PATIENT1-L_library;lane:001,/path/to/PATIENT1-L.R1.fastq.gz;/path/to/PATIENT1-L.R2.fastq.gz
 ```
@@ -753,7 +754,7 @@ In `--purity_estimate_mode wgts`, to use LOH for purity estimation, you can opti
 For example:
 
 ```csv title="samplesheet.purity_estimate.with_amber.csv"
-group_id,subject_id,sample_id,sample_type,sequence_type,filetype,info,filepath
+case_id,patient_id,sample_id,sample_type,sequence_type,filetype,info,filepath
 PATIENT1,PATIENT1,PATIENT1-N,normal,dna,redux_dir,,/path/to/redux_PATIENT1-N/
 PATIENT1,PATIENT1,PATIENT1-T,tumor,dna,purple_dir,,/path/to/PATIENT1-T/purple/
 PATIENT1,PATIENT1,PATIENT1-T,tumor,dna,amber_dir,,/path/to/PATIENT1-T/amber/
@@ -821,7 +822,7 @@ Once your manually created files are ready, create a samplesheet with a represen
 RNA samples are only required if your panel supports RNA-seq data.
 
 ```csv title="samplesheet.panel_resource_creation.csv"
-group_id,subject_id,sample_id,sample_type,sequence_type,filetype,filepath
+case_id,patient_id,sample_id,sample_type,sequence_type,filetype,filepath
 PATIENT1,PATIENT1,PATIENT1-T,tumor,dna,bam,/path/to/PATIENT1-T.dna.bam
 PATIENT2,PATIENT2,PATIENT2-T,tumor,dna,bam,/path/to/PATIENT2-T.dna.bam
 PATIENT1,PATIENT1,PATIENT1-T-RNA,tumor,rna,bam,/path/to/PATIENT1-T.rna.bam

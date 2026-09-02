@@ -1,3 +1,5 @@
+nextflow.enable.types = true
+
 process GATK4_MARKDUPLICATES {
     tag "$meta.id"
     label 'process_medium'
@@ -8,18 +10,18 @@ process GATK4_MARKDUPLICATES {
         'biocontainers/gatk4:4.6.1.0--py310hdfd78af_0' }"
 
     input:
-    tuple val(meta), path(bam)
-    path  fasta
-    path  fasta_fai
+    tuple(meta: Map, bam: Path)
+    fasta: Path?
+    fasta_fai: Path?
 
-    output:
-    tuple val(meta), path("*cram")                                  , topic: gatk4_markduplicates_cram, optional: true
-    tuple val(meta), path("*bam")                                   , topic: gatk4_markduplicates_bam, optional: true
-    tuple val(meta), path("*.crai")                                 , topic: gatk4_markduplicates_crai, optional: true
-    tuple val(meta), path("*.bai")                                  , topic: gatk4_markduplicates_bai, optional: true
-    tuple val(meta), path("*.metrics")                              , topic: gatk4_markduplicates_metrics
-    tuple val(meta), val('gatk4_markduplicates'), path('.command.*'), topic: command_files
-    path 'versions.yml'                                             , topic: versions
+    topic:
+    tuple(meta, file('*.cram', optional: true))              >> 'gatk4_markduplicates_cram'
+    tuple(meta, file('*.bam', optional: true))               >> 'gatk4_markduplicates_bam'
+    tuple(meta, file('*.crai', optional: true))              >> 'gatk4_markduplicates_crai'
+    tuple(meta, file('*.bai', optional: true))               >> 'gatk4_markduplicates_bai'
+    tuple(meta, file('*.metrics'))                           >> 'gatk4_markduplicates_metrics'
+    tuple(meta, 'gatk4_markduplicates', files('.command.*')) >> 'command_files'
+    file('versions.yml')                                     >> 'versions'
 
     when:
     task.ext.when == null || task.ext.when

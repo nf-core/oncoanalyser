@@ -1,3 +1,5 @@
+nextflow.enable.types = true
+
 process BAMTOOLS {
     tag "${meta.id}"
     label 'process_medium'
@@ -8,18 +10,18 @@ process BAMTOOLS {
         'biocontainers/hmftools-bam-tools:1.6.1--hdfd78af_0' }"
 
     input:
-    tuple val(meta), path(aln), path(idx)
-    path genome_fasta
-    val genome_ver
-    path genome_fai
-    path driver_gene_panel
-    path ensembl_data_resources
-    path target_regions_bed
+    tuple(meta: Record, aln: Path, idx: Path)
+    genome_fasta: Path
+    genome_ver: String
+    genome_fai: Path
+    driver_gene_panel: Path
+    ensembl_data_resources: Path
+    target_regions_bed: Path?
 
-    output:
-    tuple val(meta), path("bamtools_${meta.sample_id}/"), topic: bamtools_metrics_dir
-    tuple val(meta), val('bamtools'), path('.command.*'), topic: command_files
-    path 'versions.yml'                                 , topic: versions
+    topic:
+    tuple(meta, file("bamtools_${meta.sample_id}/")) >> 'bamtools_metrics_dir'
+    tuple(meta, 'bamtools', files('.command.*'))     >> 'command_files'
+    file('versions.yml')                             >> 'versions'
 
     when:
     task.ext.when == null || task.ext.when

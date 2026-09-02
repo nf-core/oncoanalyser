@@ -1,3 +1,5 @@
+nextflow.enable.types = true
+
 process FASTP_UMI {
     tag "${meta.id}"
     label 'process_medium'
@@ -8,15 +10,15 @@ process FASTP_UMI {
         'biocontainers/fastp:0.23.4--hadf994f_2' }"
 
     input:
-    tuple val(meta), path(reads_fwd), path(reads_rev)
-    val umi_location
-    val umi_length
-    val umi_skip
+    tuple(meta: Record, reads_fwd: Path, reads_rev: Path?)
+    umi_location: String?
+    umi_length: Integer?
+    umi_skip: Integer?
 
-    output:
-    tuple val(meta), path('output/*_R1.fastp_umi.fastq.gz'), path('output/*_R2.fastp_umi.fastq.gz'), topic: fastp_umi_fastq
-    tuple val(meta), val('fastp_umi'), path('.command.*')                                          , topic: command_files
-    path 'versions.yml'                                                                            , topic: versions
+    topic:
+    tuple(meta, file('output/*_R1.fastp_umi.fastq.gz'), file('output/*_R2.fastp_umi.fastq.gz')) >> 'fastp_umi_fastq'
+    tuple(meta, 'fastp_umi', files('.command.*'))                                               >> 'command_files'
+    file('versions.yml')                                                                        >> 'versions'
 
     when:
     task.ext.when == null || task.ext.when

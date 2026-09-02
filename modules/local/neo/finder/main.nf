@@ -1,3 +1,5 @@
+nextflow.enable.types = true
+
 process NEO_FINDER {
     tag "${meta.id}"
     label 'process_low'
@@ -8,16 +10,16 @@ process NEO_FINDER {
         'biocontainers/hmftools-neo:1.3--hdfd78af_0' }"
 
     input:
-    tuple val(meta), path(purple_dir), path(linx_annotation_dir)
-    path genome_fasta
-    val genome_ver
-    path genome_fai
-    path ensembl_data_resources
+    tuple(meta: Record, purple_dir: Path, linx_annotation_dir: Path)
+    genome_fasta: Path
+    genome_ver: String
+    genome_fai: Path
+    ensembl_data_resources: Path
 
-    output:
-    tuple val(meta), path('neo_finder/')                  , topic: neo_finder_dir
-    tuple val(meta), val('neo_finder'), path('.command.*'), topic: command_files
-    path 'versions.yml'                                   , topic: versions
+    topic:
+    tuple(meta, file('neo_finder/'))               >> 'neo_finder_dir'
+    tuple(meta, 'neo_finder', files('.command.*')) >> 'command_files'
+    file('versions.yml')                           >> 'versions'
 
     when:
     task.ext.when == null || task.ext.when

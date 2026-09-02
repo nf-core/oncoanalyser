@@ -3,33 +3,42 @@ description: Create a BWA-MEM index image file for use with GATK BWA tools
 keywords:
   - img
   - fasta
+  - bwa
 tools:
   - gatk4:
-      description:
-        Developed in the Data Sciences Platform at the Broad Institute, the toolkit offers a wide variety of tools
-        with a primary focus on variant discovery and genotyping. Its powerful processing engine
-        and high-performance computing features make it capable of taking on projects of any size.
+      description: Developed in the Data Sciences Platform at the Broad Institute, the toolkit offers a wide variety of tools with a primary focus on variant discovery and genotyping. Its powerful processing engine and high-performance computing features make it capable of taking on projects of any size.
       homepage: https://gatk.broadinstitute.org/hc/en-us
       documentation: https://gatk.broadinstitute.org/hc/en-us/articles/360037052812-MarkDuplicates-Picard-
       tool_dev_url: https://github.com/broadinstitute/gatk
       doi: 10.1158/1538-7445.AM2017-3590
-      licence: ["MIT"]
+      licence:
+        - MIT
 input:
-  - genome_fasta:
-      type: file
-      description: Reference genome assembly FASTA file
-      pattern: "*.{fa,fasta}"
-output:
-  - gatk4_bwa_index_img:
-      type: file
-      description: Reference genome assembly img file
-      pattern: "*.{img}"
-  - command_files:
-      type: list
-      description: List of command files
-  - versions:
-      type: file
-      description: File containing software versions
-      pattern: "versions.yml"
+  - - genome_fasta:
+        type: file
+        description: Reference genome assembly FASTA file
+        pattern: '*.{fa,fasta}'
+output: {}
+topics:
+  gatk4_bwa_index_img:
+    - - '*.img':
+          type: file
+          description: Reference genome assembly img file
+          pattern: '*.img'
+  command_files:
+    - - meta:
+          type: map
+          description: Empty map
+      - identifier:
+          type: string
+          description: Identifier for command files
+      - command_files:
+          type: list
+          description: List of command files
+  versions:
+    - - versions.yml:
+          type: file
+          description: File containing software versions
+          pattern: versions.yml
 authors:
-  - "@scwatts"
+  - '@scwatts'

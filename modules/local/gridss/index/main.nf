@@ -1,3 +1,5 @@
+nextflow.enable.types = true
+
 process GRIDSS_INDEX {
     tag "${genome_fasta.name}"
     label 'process_single'
@@ -9,15 +11,15 @@ process GRIDSS_INDEX {
         'biocontainers/gridss:2.13.2--h50ea8bc_3' }"
 
     input:
-    path genome_fasta
-    path genome_fai
-    path genome_dict
-    path genome_bwa_index
+    genome_fasta: Path
+    genome_fai: Path
+    genome_dict: Path
+    genome_bwa_index: Path
 
-    output:
-    path 'gridss_index/'                                   , topic: gridss_index
-    tuple val([:]), val('gridss_index'), path('.command.*'), topic: command_files
-    path 'versions.yml'                                    , topic: versions
+    topic:
+    file('gridss_index/')                           >> 'gridss_index'
+    tuple([:], 'gridss_index', files('.command.*')) >> 'command_files'
+    file('versions.yml')                            >> 'versions'
 
     when:
     task.ext.when == null || task.ext.when

@@ -1,3 +1,5 @@
+nextflow.enable.types = true
+
 process FASTQ_TOOLS {
     tag "${meta.id}"
     label 'process_medium'
@@ -8,14 +10,14 @@ process FASTQ_TOOLS {
         'biocontainers/hmftools-fastq-tools:1.0--hdfd78af_0' }"
 
     input:
-    tuple val(meta), path(reads_fwd), path(reads_rev)
-    val umi_delim
-    path known_umis
+    tuple(meta: Record, reads_fwd: Path, reads_rev: Path)
+    umi_delim: String
+    known_umis: Path
 
-    output:
-    tuple val(meta), path('output/*R1.umi.fastq.gz'), path('output/*R2.umi.fastq.gz'), topic: fastqtools_fastq
-    tuple val(meta), val('fastqtools'), path('.command.*')                           , topic: command_files
-    path 'versions.yml'                                                              , topic: versions
+    topic:
+    tuple(meta, file('output/*R1.umi.fastq.gz'), file('output/*R2.umi.fastq.gz')) >> 'fastqtools_fastq'
+    tuple(meta, 'fastqtools', files('.command.*'))                                >> 'command_files'
+    file('versions.yml')                                                          >> 'versions'
 
     when:
     task.ext.when == null || task.ext.when

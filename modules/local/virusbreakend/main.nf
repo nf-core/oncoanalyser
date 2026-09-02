@@ -1,3 +1,5 @@
+nextflow.enable.types = true
+
 // NOTE(SW): the --db argument for the virusbreakend command must have a trailing slash if it is a symlink
 
 process VIRUSBREAKEND {
@@ -8,19 +10,19 @@ process VIRUSBREAKEND {
     container "nf-core/gridss:2.13.2--1"
 
     input:
-    tuple val(meta), path(aln)
-    path genome_fasta
-    path genome_fai
-    path genome_dict
-    path genome_gridss_index
-    path virusbreakenddb
-    path gridss_config
+    tuple(meta: Record, aln: Path)
+    genome_fasta: Path
+    genome_fai: Path
+    genome_dict: Path
+    genome_gridss_index: Path
+    virusbreakenddb: Path
+    gridss_config: Path
 
-    output:
-    tuple val(meta), path('*.summary.tsv')                   , topic: virusbreakend_tsv
-    tuple val(meta), path('*.virusbreakend.vcf')             , topic: virusbreakend_vcf
-    tuple val(meta), val('virusbreakend'), path('.command.*'), topic: command_files
-    path 'versions.yml'                                      , topic: versions
+    topic:
+    tuple(meta, file('*.summary.tsv'))                >> 'virusbreakend_tsv'
+    tuple(meta, file('*.virusbreakend.vcf'))          >> 'virusbreakend_vcf'
+    tuple(meta, 'virusbreakend', files('.command.*')) >> 'command_files'
+    file('versions.yml')                              >> 'versions'
 
     when:
     task.ext.when == null || task.ext.when

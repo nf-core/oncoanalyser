@@ -1,3 +1,5 @@
+nextflow.enable.types = true
+
 process TEAL_PIPELINE {
     tag "${meta.id}"
     label 'process_medium'
@@ -8,22 +10,24 @@ process TEAL_PIPELINE {
         'biocontainers/hmftools-teal:1.4--hdfd78af_0' }"
 
     input:
-    tuple val(meta),
-        path(teal_bam_tumor),
-        path(tumor_bai_tumor),
-        path(teal_bam_normal),
-        path(teal_bai_normal),
-        path(bamtools_dir_tumor),
-        path(bamtools_dir_normal),
-        path(cobalt_dir),
-        path(purple_dir)
-    val genome_ver
-    val sequencing_platform
+    tuple(
+        meta: Record,
+        teal_bam_tumor: Path?,
+        tumor_bai_tumor: Path?,
+        teal_bam_normal: Path?,
+        teal_bai_normal: Path?,
+        bamtools_dir_tumor: Path?,
+        bamtools_dir_normal: Path?,
+        cobalt_dir: Path,
+        purple_dir: Path?,
+    )
+    genome_ver: String
+    sequencing_platform: String
 
-    output:
-    tuple val(meta), path('teal/*.tsv*')                     , topic: teal_tsvs
-    tuple val(meta), val('teal_pipeline'), path('.command.*'), topic: command_files
-    path 'versions.yml'                                      , topic: versions
+    topic:
+    tuple(meta, files('teal/*.tsv*'))                 >> 'teal_tsvs'
+    tuple(meta, 'teal_pipeline', files('.command.*')) >> 'command_files'
+    file('versions.yml')                              >> 'versions'
 
     when:
     task.ext.when == null || task.ext.when
