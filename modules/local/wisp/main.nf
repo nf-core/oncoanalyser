@@ -16,8 +16,8 @@ process WISP {
         primary_amber_dir: Path?,
         primary_normal_aln: Path?,
         longitudinal_redux_dir: Path,
-        longitudinal_amber_dir: Path,
-        longitudinal_cobalt_dir: Path,
+        longitudinal_amber_dir?: Path,
+        longitudinal_cobalt_dir?: Path,
         longitudinal_sage_append_dir: Path,
     )
     genome_fasta: Path
@@ -66,7 +66,7 @@ process WISP {
             purity_methods += 'AMBER_LOH'
         } else {
             amber_dir_arg = ''
-        }
+
 
         cobalt_dir_arg = "-cobalt_dir ${longitudinal_cobalt_dir}"
         purity_methods += 'COPY_NUMBER'
