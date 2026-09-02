@@ -23,26 +23,26 @@ include { selectCurrentOrExisting } from '../utils_nfcore_oncoanalyser_pipeline/
 workflow PURPLE_CALLING {
     take:
     // Sample data
-    ch_inputs                   : Channel<Map>               // channel: [mandatory] [ meta ]
-    ch_amber_dir                : Channel<Tuple<Map, Path>>  // channel: [mandatory] [ meta, amber_dir ]
-    ch_cobalt_dir               : Channel<Tuple<Map, Path>>  // channel: [mandatory] [ meta, cobalt_dir ]
-    ch_esvee_dir                : Channel<Tuple<Map, Path>>  // channel: [mandatory] [ meta, esvee_dir ]
-    ch_pave_somatic_dir         : Channel<Tuple<Map, Path>>  // channel: [mandatory] [ meta, pave_dir ]
-    ch_pave_germline_dir        : Channel<Tuple<Map, Path>>  // channel: [mandatory] [ meta, pave_dir ]
-    ch_redux_dir_tumor          : Channel<Tuple<Map, Path>>  // channel: [mandatory] [ meta, redux_dir ]
+    ch_inputs                   : Channel<Map>              // channel: [mandatory] [ meta ]
+    ch_amber_dir                : Channel<Tuple<Map, Path>> // channel: [mandatory] [ meta, amber_dir ]
+    ch_cobalt_dir               : Channel<Tuple<Map, Path>> // channel: [mandatory] [ meta, cobalt_dir ]
+    ch_esvee_dir                : Channel<Tuple<Map, Path>> // channel: [mandatory] [ meta, esvee_dir ]
+    ch_pave_somatic_dir         : Channel<Tuple<Map, Path>> // channel: [mandatory] [ meta, pave_dir ]
+    ch_pave_germline_dir        : Channel<Tuple<Map, Path>> // channel: [mandatory] [ meta, pave_dir ]
+    ch_redux_dir_tumor          : Channel<Tuple<Map, Path>> // channel: [mandatory] [ meta, redux_dir ]
 
     // Reference data
-    genome_fasta                : Channel<Path>              // channel: [mandatory] /path/to/genome_fasta
-    genome_version              : Channel<String>            // channel: [mandatory] genome version
-    genome_fai                  : Channel<Path>              // channel: [mandatory] /path/to/genome_fai
-    genome_dict                 : Channel<Path>              // channel: [mandatory] /path/to/genome_dict
-    gc_profile                  : Channel<Path>              // channel: [mandatory] /path/to/gc_profile
-    sage_known_hotspots_somatic : Channel<Path>              // channel: [mandatory] /path/to/sage_known_hotspots_somatic
-    sage_known_hotspots_germline: Channel<Path>?             // channel: [optional]  /path/to/sage_known_hotspots_germline
-    driver_gene_panel           : Channel<Path>              // channel: [mandatory] /path/to/driver_gene_panel
-    ensembl_data_resources      : Channel<Path>              // channel: [mandatory] /path/to/ensembl_data_resources/
-    germline_amp_del_freq       : Channel<Path>?             // channel: [optional]  /path/to/germline_amp_del_freq
-    target_regions_bed          : Channel<Path>?             // channel: [optional]  /path/to/target_regions_bed
+    genome_fasta                : Channel<Path>             // channel: [mandatory] /path/to/genome_fasta
+    genome_version              : Channel<String>           // channel: [mandatory] genome version
+    genome_fai                  : Channel<Path>             // channel: [mandatory] /path/to/genome_fai
+    genome_dict                 : Channel<Path>             // channel: [mandatory] /path/to/genome_dict
+    gc_profile                  : Channel<Path>             // channel: [mandatory] /path/to/gc_profile
+    sage_known_hotspots_somatic : Channel<Path>             // channel: [mandatory] /path/to/sage_known_hotspots_somatic
+    sage_known_hotspots_germline: Channel<Path>?            // channel: [optional]  /path/to/sage_known_hotspots_germline
+    driver_gene_panel           : Channel<Path>             // channel: [mandatory] /path/to/driver_gene_panel
+    ensembl_data_resources      : Channel<Path>             // channel: [mandatory] /path/to/ensembl_data_resources/
+    germline_amp_del_freq       : Channel<Path>?            // channel: [optional]  /path/to/germline_amp_del_freq
+    target_regions_bed          : Channel<Path>?            // channel: [optional]  /path/to/target_regions_bed
 
     main:
     // Select input sources then sort

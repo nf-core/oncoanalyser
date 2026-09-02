@@ -27,33 +27,33 @@ include { selectCurrentOrExisting } from '../utils_nfcore_oncoanalyser_pipeline/
 workflow ORANGE_REPORTING {
     take:
     // Sample data
-    ch_inputs                      : Channel<Map>               // channel: [mandatory] [ meta ]
-    ch_sage_dir_somatic            : Channel<Tuple<Map, Path>>  // channel: [mandatory] [ meta, sage_dir ]
-    ch_sage_dir_germline           : Channel<Tuple<Map, Path>>  // channel: [mandatory] [ meta, sage_dir ]
-    ch_sage_append_dir_somatic     : Channel<Tuple<Map, Path>>  // channel: [mandatory] [ meta, sage_append_dir ]
-    ch_sage_append_dir_germline    : Channel<Tuple<Map, Path>>  // channel: [mandatory] [ meta, sage_append_dir ]
-    ch_sage_plot_dir_somatic       : Channel<Tuple<Map, Path>>  // channel: [mandatory] [ meta, sage_visualiser_dir ]
-    ch_purple_dir                  : Channel<Tuple<Map, Path>>  // channel: [mandatory] [ meta, purple_dir ]
-    ch_qsee_dir                    : Channel<Tuple<Map, Path>>  // channel: [mandatory] [ meta, qsee_dir ]
-    ch_linx_annotation_dir_somatic : Channel<Tuple<Map, Path>>  // channel: [mandatory] [ meta, linx_annotation_dir ]
-    ch_linx_plot_dir_somatic       : Channel<Tuple<Map, Path>>  // channel: [mandatory] [ meta, linx_visualiser_dir ]
-    ch_linx_annotation_dir_germline: Channel<Tuple<Map, Path>>  // channel: [mandatory] [ meta, linx_annotation_dir ]
-    ch_virusinterpreter_dir        : Channel<Tuple<Map, Path>>  // channel: [mandatory] [ meta, virusinterpreter_dir ]
-    ch_chord_dir                   : Channel<Tuple<Map, Path>>  // channel: [mandatory] [ meta, chord_dir ]
-    ch_sigs_dir                    : Channel<Tuple<Map, Path>>  // channel: [mandatory] [ meta, sigs_dir ]
-    ch_lilac_dir                   : Channel<Tuple<Map, Path>>? // channel: [optional]  [ meta, lilac_dir ]
-    ch_cuppa_dir                   : Channel<Tuple<Map, Path>>  // channel: [mandatory] [ meta, cuppa_dir ]
-    ch_peach_dir                   : Channel<Tuple<Map, Path>>  // channel: [mandatory] [ meta, peach_dir ]
-    ch_isofox_dir                  : Channel<Tuple<Map, Path>>  // channel: [mandatory] [ meta, isofox_dir ]
+    ch_inputs                      : Channel<Map>              // channel: [mandatory] [ meta ]
+    ch_sage_dir_somatic            : Channel<Tuple<Map, Path>> // channel: [mandatory] [ meta, sage_dir ]
+    ch_sage_dir_germline           : Channel<Tuple<Map, Path>> // channel: [mandatory] [ meta, sage_dir ]
+    ch_sage_append_dir_somatic     : Channel<Tuple<Map, Path>> // channel: [mandatory] [ meta, sage_append_dir ]
+    ch_sage_append_dir_germline    : Channel<Tuple<Map, Path>> // channel: [mandatory] [ meta, sage_append_dir ]
+    ch_sage_plot_dir_somatic       : Channel<Tuple<Map, Path>> // channel: [mandatory] [ meta, sage_visualiser_dir ]
+    ch_purple_dir                  : Channel<Tuple<Map, Path>> // channel: [mandatory] [ meta, purple_dir ]
+    ch_qsee_dir                    : Channel<Tuple<Map, Path>> // channel: [mandatory] [ meta, qsee_dir ]
+    ch_linx_annotation_dir_somatic : Channel<Tuple<Map, Path>> // channel: [mandatory] [ meta, linx_annotation_dir ]
+    ch_linx_plot_dir_somatic       : Channel<Tuple<Map, Path>> // channel: [mandatory] [ meta, linx_visualiser_dir ]
+    ch_linx_annotation_dir_germline: Channel<Tuple<Map, Path>> // channel: [mandatory] [ meta, linx_annotation_dir ]
+    ch_virusinterpreter_dir        : Channel<Tuple<Map, Path>> // channel: [mandatory] [ meta, virusinterpreter_dir ]
+    ch_chord_dir                   : Channel<Tuple<Map, Path>> // channel: [mandatory] [ meta, chord_dir ]
+    ch_sigs_dir                    : Channel<Tuple<Map, Path>> // channel: [mandatory] [ meta, sigs_dir ]
+    ch_lilac_dir                   : Channel<Tuple<Map, Path>> // channel: [mandatory] [ meta, lilac_dir ]
+    ch_cuppa_dir                   : Channel<Tuple<Map, Path>> // channel: [mandatory] [ meta, cuppa_dir ]
+    ch_peach_dir                   : Channel<Tuple<Map, Path>> // channel: [mandatory] [ meta, peach_dir ]
+    ch_isofox_dir                  : Channel<Tuple<Map, Path>> // channel: [mandatory] [ meta, isofox_dir ]
 
     // Reference data
-    genome_version                 : Channel<String>            // channel: [mandatory] genome version
-    disease_ontology               : Channel<Path>              // channel: [mandatory] /path/to/disease_ontology
+    genome_version                 : Channel<String>           // channel: [mandatory] genome version
+    disease_ontology               : Channel<Path>             // channel: [mandatory] /path/to/disease_ontology
 
     // Params
-    sequencing_platform            : String                     // string:  [mandatory] sequencing platform
-    targeted_mode                  : Boolean                    // boolean: [mandatory] Set targeted mode
-    panel                          : String?                    // string:  [optional]  panel
+    sequencing_platform            : String                    // string:  [mandatory] sequencing platform
+    targeted_mode                  : Boolean                   // boolean: [mandatory] Set targeted mode
+    panel                          : String?                   // string:  [optional]  panel
 
     main:
     // Mapping for semantic input retrieval
