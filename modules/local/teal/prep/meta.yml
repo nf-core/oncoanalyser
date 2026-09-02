@@ -1,0 +1,72 @@
+name: teal_prep
+description: TEAL measures telomere content, and estimates telomeric length based on WGS read data
+keywords:
+  - telomere
+  - telomere length
+  - rearrangements
+tools:
+  - teal:
+      description: TEAL measures telomere content, and estimates telomeric length based on WGS read data.
+      homepage: https://github.com/hartwigmedical/hmftools/tree/master/teal
+      documentation: https://github.com/hartwigmedical/hmftools/tree/master/teal
+      tool_dev_url: https://github.com/hartwigmedical/hmftools/tree/master/teal
+      licence: ["GPL v3"]
+input:
+  - meta:
+      type: map
+      description: |
+        Groovy Map containing sample information
+        e.g. [id: 'sample_id']
+  - tumor_aln:
+      type: file
+      description: Tumor alignment file (optional)
+      pattern: "*.{bam,cram}"
+  - tumor_idx:
+      type: file
+      description: Tumor index file (optional)
+      pattern: "*.{bai,crai}"
+  - normal_aln:
+      type: file
+      description: Normal alignment file (optional)
+      pattern: "*.{bam,cram}"
+  - normal_idx:
+      type: file
+      description: Normal index file (optional)
+      pattern: "*.{bai,crai}"
+  - genome_fasta:
+      type: file
+      description: Reference genome assembly FASTA file
+      pattern: "*.{fa,fasta}"
+  - genome_ver:
+      type: string
+      description: Reference genome version
+  - genome_fai:
+      type: file
+      description: Reference genome assembly fai file
+      pattern: "*.{fai}"
+  - sequencing_platform:
+      type: string
+      description: Sequencing platform
+output:
+  - meta:
+      type: map
+      description: |
+        Groovy Map containing sample information
+        e.g. [id: 'sample_id']
+  - teal_prep_tumor_bam:
+      type: list
+      description: Tumor TEAL alignment and index file
+      pattern: "*.{bam,bai}"
+  - teal_prep_normal_bam:
+      type: list
+      description: Normal TEAL alignment and index file
+      pattern: "*.{bam,bai}"
+  - command_files:
+      type: list
+      description: List of command files
+  - versions:
+      type: file
+      description: File containing software versions
+      pattern: "versions.yml"
+authors:
+  - "@scwatts"

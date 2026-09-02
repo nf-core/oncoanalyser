@@ -1,0 +1,78 @@
+name: cobalt_run
+description: Count bam lines determines the read depth ratios of the supplied tumor and reference genomes
+keywords:
+  - cobalt
+  - read depth ratios
+  - cnv
+tools:
+  - cobalt:
+      description: Count bam lines determines the read depth ratios of the supplied tumor and reference genomes.
+      homepage: https://github.com/hartwigmedical/hmftools/tree/master/cobalt
+      documentation: https://github.com/hartwigmedical/hmftools/tree/master/cobalt
+      licence: ["GPL v3"]
+input:
+  - meta:
+      type: map
+      description: |
+        Groovy Map containing sample information
+        e.g. [id: 'sample_id']
+  - tumor_aln:
+      type: file
+      description: Tumor alignment file
+      pattern: "*.{bam,cram}"
+  - tumor_idx:
+      type: file
+      description: Tumor index file
+      pattern: "*.{bai,crai}"
+  - normal_aln:
+      type: file
+      description: Normal alignment file (optional)
+      pattern: "*.{bam,cram}"
+  - normal_idx:
+      type: file
+      description: Normal index file (optional)
+      pattern: "*.{bai,crai}"
+  - genome_fasta:
+      type: file
+      description: Reference genome assembly FASTA file
+      pattern: "*.{fa,fasta}"
+  - genome_ver:
+      type: string
+      description: Reference genome version
+  - genome_fai:
+      type: file
+      description: Reference genome assembly fai file
+      pattern: "*.{fai}"
+  - gc_profile:
+      type: file
+      description: GC profile file
+      pattern: "*.{cnp}"
+  - diploid_regions:
+      type: file
+      description: Diploid regions file (optional)
+      pattern: "*.{bed.gz}"
+  - target_region_normalisation:
+      type: file
+      description: Normalisation file (optional)
+      pattern: "*.{tsv}"
+  - targeted_mode:
+      type: boolean
+      description: Flag indicating whether targeted mode is set
+output:
+  - meta:
+      type: map
+      description: |
+        Groovy Map containing sample information
+        e.g. [id: 'sample_id']
+  - cobalt_dir:
+      type: directory
+      description: COBALT output directory
+  - command_files:
+      type: list
+      description: List of command files
+  - versions:
+      type: file
+      description: File containing software versions
+      pattern: "versions.yml"
+authors:
+  - "@scwatts"

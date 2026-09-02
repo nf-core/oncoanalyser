@@ -1,0 +1,85 @@
+name: pave_somatic
+description: Annotate small variant VCF with gene, transcript coding and protein effects
+keywords:
+  - pave
+  - annotation
+  - gene
+  - transcript
+  - protein
+  - vcf
+tools:
+  - pave:
+      description: Annotates small variant VCF with gene, transcript coding and protein effects.
+      homepage: https://github.com/hartwigmedical/hmftools/tree/master/pave
+      documentation: https://github.com/hartwigmedical/hmftools/tree/master/pave
+      licence: ["GPL v3"]
+input:
+  - meta:
+      type: map
+      description: |
+        Groovy Map containing sample information
+        e.g. [id: 'sample_id']
+  - sage_vcf:
+      type: file
+      description: SAGE VCF file
+      pattern: "*.{vcf.gz}"
+  - sage_tbi:
+      type: file
+      description: SAGE VCF index file
+      pattern: "*.{tbi}"
+  - genome_fasta:
+      type: file
+      description: Reference genome assembly FASTA file
+      pattern: "*.{fa,fasta}"
+  - genome_ver:
+      type: string
+      description: Reference genome version
+  - genome_fai:
+      type: file
+      description: Reference genome assembly fai file
+      pattern: "*.{fai}"
+  - pon_artefacts:
+      type: file
+      description: Taregeted sequencing PON artefacts file (optional)
+  - sage_pon:
+      type: file
+      description: SAGE PON file
+      pattern: "*.{tsv.gz}"
+  - clinvar_annotations:
+      type: file
+      description: ClinVar annotations VCF file
+      pattern: "*.{vcf.gz}"
+  - segment_mappability:
+      type: file
+      description: Segment mappability file
+      pattern: "*.{bed.gz}"
+  - driver_gene_panel:
+      type: file
+      description: Driver gene panel file
+      pattern: "*.{tsv}"
+  - ensembl_data_resources:
+      type: directory
+      description: HMF ensembl data resources directory
+  - gnomad_resource:
+      description: gnomAD resource
+  - sequencing_platform:
+      type: string
+      description: Sequencing platform
+output:
+  - meta:
+      type: map
+      description: |
+        Groovy Map containing sample information
+        e.g. [id: 'sample_id']
+  - pave_somatic_dir:
+      type: directory
+      description: PAVE somatic directory
+  - command_files:
+      type: list
+      description: List of command files
+  - versions:
+      type: file
+      description: File containing software versions
+      pattern: "versions.yml"
+authors:
+  - "@scwatts"

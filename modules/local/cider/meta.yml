@@ -1,0 +1,63 @@
+name: cider
+description: Determine a comprehensive list of CDR3 sequences for IG and TCR loci
+keywords:
+  - cdr3
+  - ig
+  - tcr
+tools:
+  - cider:
+      description: Determine a comprehensive list of CDR3 sequences for IG and TCR loci.
+      homepage: https://github.com/hartwigmedical/hmftools/tree/master/cider
+      documentation: https://github.com/hartwigmedical/hmftools/tree/master/cider
+      licence: ["GPL v3"]
+input:
+  - meta:
+      type: map
+      description: |
+        Groovy Map containing sample information
+        e.g. [id: 'sample_id']
+  - aln:
+      type: file
+      description: Alignment file
+      pattern: "*.{bam,cram}"
+  - idx:
+      type: file
+      description: Index file
+      pattern: "*.{bai,crai}"
+  - genome_fasta:
+      type: file
+      description: Reference genome assembly FASTA file
+      pattern: "*.{fa,fasta}"
+  - genome_ver:
+      type: string
+      description: Reference genome version
+  - genome_fai:
+      type: file
+      description: Reference genome assembly fai file
+      pattern: "*.{fai}"
+  - genome_dict:
+      type: file
+      description: Reference genome assembly dict file
+      pattern: "*.{dict}"
+  - genome_img:
+      type: file
+      description: Reference genome assembly img file
+      pattern: "*.{img}"
+output:
+  - meta:
+      type: map
+      description: |
+        Groovy Map containing sample information
+        e.g. [id: 'sample_id']
+  - cider_results:
+      type: list
+      description: CIDER result files
+  - command_files:
+      type: list
+      description: List of command files
+  - versions:
+      type: file
+      description: File containing software versions
+      pattern: "versions.yml"
+authors:
+  - "@scwatts"

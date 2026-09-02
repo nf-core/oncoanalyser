@@ -1,0 +1,6 @@
+name: esvee
+channels:
+  - conda-forge
+  - bioconda
+dependencies:
+  - bioconda::hmftools-esvee==2.0.1

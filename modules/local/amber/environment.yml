@@ -1,0 +1,6 @@
+name: amber
+channels:
+  - conda-forge
+  - bioconda
+dependencies:
+  - bioconda::hmftools-amber==4.3

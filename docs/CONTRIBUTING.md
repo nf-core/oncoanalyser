@@ -182,4 +182,11 @@ If you update images or graphics, follow the nf-core [style guidelines](https://
 
 ## Pipeline specific contribution guidelines
 
-<!-- TODO nf-core: Add any pipeline specific contribution guidelines here, such as coding styles, procedures, checklists etc. -->
+When contributing to nf-core/oncoanalyser, please keep the following pipeline-specific checks in mind:
+
+- New tools should be added to the appropriate analysis workflow (`wgts`, `targeted`, `purity_estimate`, `prepare_reference`, or `panel_resource_creation`) based on the sequencing type and analysis mode they support.
+- Reference data uses Hartwig Medical Foundation genome definitions in `conf/hmf_genomes.config` and `conf/hmf_data.config`. If a new tool requires additional reference files, add paths for both GRCh37 and GRCh38.
+- Container images should support both `amd64` and `arm64` architectures where feasible. Remember to update corresponding container config files under `conf/` when changing a module's container image.
+- When possible pipeline-specific logic should be kept in `modules/local/` or `subworkflows/local/` with matching `main.nf`, `meta.yml`, tests, and snapshots.
+- If you change input requirements, output files, or parameter behaviour, update `nextflow_schema.json`, `docs/usage.md`, `docs/output.md`, and the affected test profiles.
+- Run the relevant test profile before opening a pull request and update snapshots with `--update-snapshots` if output content has changed.

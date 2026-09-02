@@ -1,0 +1,46 @@
+nextflow_pipeline {
+
+    name "Test pipeline"
+    script "../main.nf"
+    tag "pipeline"
+    tag "cicd.large"
+
+    profile "test"
+
+    test("-profile test") {
+
+        when {
+            params {
+                outdir = "$outputDir"
+            }
+        }
+
+        then {
+            // stable_path: All files + folders in ${params.outdir}/ with a stable name
+            def stable_path = getAllFilesFromDir(params.outdir, relative: true, includeDir: true, ignore: ['pipeline_info/*.{html,json,txt}', 'logs/*', 'logs/other/extracttarball*'])
+            // stable_content: All files in ${params.outdir}/ with stable content
+            def stable_content = getAllFilesFromDir(params.outdir, ignoreFile: 'tests/.nftignore', ignore: [
+                '*/alignments/*/*.redux.bqr.png',
+                '*/cuppa/*.cuppa.vis.png',
+                '*/linx/somatic_plots/*/*.png',
+                '*/purple/plot/*.png',
+                '*/qsee/*.qsee.vis.report.png',
+                '*/virusbreakend/*.virusbreakend.vcf',
+            ])
+            // Task count depends on config: when NXF_REF_DATA_PATH is set, reference data is cached (no DECOMP tasks)
+            def refDataCached = System.getenv('NXF_REF_DATA_PATH') != null
+            def expectedTaskCount = refDataCached ? 42 : 46
+            def actualTaskCount = workflow.trace.succeeded().size()
+            assertAll(
+                { assert workflow.success },
+                { assert actualTaskCount == expectedTaskCount : "Expected ${expectedTaskCount} tasks (ref data cached: ${refDataCached}), got ${actualTaskCount}" },
+                { assert snapshot(
+                    // All stable path name, with a relative path
+                    stable_path,
+                    // All files with stable content
+                    stable_content,
+                ).match() }
+            )
+        }
+    }
+}
