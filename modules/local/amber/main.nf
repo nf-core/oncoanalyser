@@ -16,8 +16,8 @@ process AMBER {
         tumor_idx: Path,
         normal_aln: Path?,
         normal_idx: Path?,
-        donor_alns: List<Path>,
-        donor_idxs: List<Path>,
+        donor_alns: List<Path>?,
+        donor_idxs: List<Path>?,
     )
     genome_fasta: Path
     genome_ver: String
