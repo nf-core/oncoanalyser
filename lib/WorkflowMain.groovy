@@ -107,8 +107,8 @@ class WorkflowMain {
               params.redux_umi_enabled = true
               params.redux_umi_duplex_delim = '_'
         } else if (umi_type == Constants.UmiType.MSK) {
-              params.fastq_tools_umi_enabled = true
-              params.fastq_tools_umi_delim = '+'
+              params.taur_umi_enabled = true
+              params.taur_umi_delim = '+'
               params.redux_umi_enabled = true
               params.redux_umi_duplex_delim = ''
         } else if (umi_type == Constants.UmiType.TSO500) {
@@ -134,8 +134,8 @@ class WorkflowMain {
         if (! params.containsKey('fastp_umi_length')) params.fastp_umi_length = 0
         if (! params.containsKey('fastp_umi_location')) params.fastp_umi_location = ''
         if (! params.containsKey('fastp_umi_skip')) params.fastp_umi_skip = -1
-        if (! params.containsKey('fastq_tools_umi_enabled')) params.fastq_tools_umi_enabled = false
-        if (! params.containsKey('fastq_tools_umi_delim')) params.fastq_tools_umi_delim = ''
+        if (! params.containsKey('taur_umi_enabled')) params.taur_umi_enabled = false
+        if (! params.containsKey('taur_umi_delim')) params.taur_umi_delim = ''
         if (! params.containsKey('redux_umi_enabled')) params.redux_umi_enabled = false
         if (! params.containsKey('redux_umi_duplex_delim')) params.redux_umi_duplex_delim = ''
 
@@ -240,11 +240,11 @@ class WorkflowMain {
 
         if (run_mode == Constants.RunMode.WGTS) {
 
-            // We allow fastq-tools UMI processing in WGTS but this requires that the user manually set the 'known_umis' file in hmf_data, enforce here
+            // We allow Taur UMI processing in WGTS but this requires that the user manually set the 'known_umis' file in hmf_data, enforce here
             def has_known_umis = params.hmf_data_paths[params.genome_version.toString()].containsKey('known_umis')
-            if (params.fastq_tools_umi_enabled && ! has_known_umis) {
+            if (params.taur_umi_enabled && ! has_known_umis) {
                 log.error "\n~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n" +
-                    "  The fastq-tools process is enabled but the required 'known_umis' data path was\n" +
+                    "  The Taur process is enabled but the required 'known_umis' data path was\n" +
                     "  not configured in the respective 'hmf_data_paths' for genome version ${params.genome_version.toString()}\n" +
                     "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
                 Nextflow.exit(1)
@@ -360,10 +360,10 @@ class WorkflowMain {
                 Nextflow.exit(1)
             }
 
-            // Require known_umis in panel data when fastq-tools UMI processing is enabled
-            if (params.fastq_tools_umi_enabled && ! panel_data_paths['known_umis']) {
+            // Require known_umis in panel data when Taur UMI processing is enabled
+            if (params.taur_umi_enabled && ! panel_data_paths['known_umis']) {
                 log.error "\n~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n" +
-                    "  The fastq-tools process is enabled but the required 'known_umis' data path was\n" +
+                    "  The Taur process is enabled but the required 'known_umis' data path was\n" +
                     "  not configured in the panel data paths for panel ${params.panel.toLowerCase()}\n" +
                     "  (${params.genome_version}).\n" +
                     "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
@@ -415,16 +415,16 @@ class WorkflowMain {
         }
 
         // UMI parameters
-        if (params.fastp_umi_enabled && params.fastq_tools_umi_enabled) {
+        if (params.fastp_umi_enabled && params.taur_umi_enabled) {
             log.error "\n~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n" +
-                  "  UMI processing with either fastp or fastq-tools but not both can be enabled\n" +
+                  "  UMI processing with either fastp or Taur but not both can be enabled\n" +
                   "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
             Nextflow.exit(1)
         }
 
-        if ((params.fastp_umi_enabled || params.fastq_tools_umi_enabled) && ! params.redux_umi_enabled) {
+        if ((params.fastp_umi_enabled || params.taur_umi_enabled) && ! params.redux_umi_enabled) {
             log.error "\n~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n" +
-                  "  When FASTQ UMI processing is enabled (via fastp_umi_enabled or fastq_tools_umi_enabled),\n" +
+                  "  When FASTQ UMI processing is enabled (via fastp_umi_enabled or taur_umi_enabled),\n" +
                   "  REDUX UMI processing must also be enabled with redux_umi_enabled\n" +
                   "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
             Nextflow.exit(1)
@@ -449,18 +449,18 @@ class WorkflowMain {
             Nextflow.exit(1)
         }
 
-        if (params.fastq_tools_umi_delim && ! params.fastq_tools_umi_enabled) {
+        if (params.taur_umi_delim && ! params.taur_umi_enabled) {
             log.error "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n" +
-                "  Detected use of fastq-tools UMI parameter fastq_tools_umi_delim but fastq-tools UMI\n" +
+                "  Detected use of Taur UMI parameter taur_umi_delim but Taur UMI\n" +
                 "  processing has not been enabled. Please review your configuration and set the\n" +
-                "  fastq_tools_umi_enabled or otherwise adjust accordingly.\n" +
+                "  taur_umi_enabled or otherwise adjust accordingly.\n" +
                 "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
             Nextflow.exit(1)
         }
 
-        if (params.fastq_tools_umi_enabled && ! params.fastq_tools_umi_delim) {
+        if (params.taur_umi_enabled && ! params.taur_umi_delim) {
             log.error "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n" +
-                "  Refusing to run fastq-tools UMI processing without fastq_tools_umi_delim configured.\n" +
+                "  Refusing to run Taur UMI processing without taur_umi_delim configured.\n" +
                 "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
             Nextflow.exit(1)
         }
