@@ -1,6 +1,6 @@
 process TAUR {
     tag "${meta.id}"
-    label 'process_medium'
+    label 'process_high'
 
     conda "${moduleDir}/environment.yml"
     container "${ workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container ?
@@ -37,6 +37,7 @@ process TAUR {
         -fastq_files '${reads_fwd};${reads_rev}' \\
         -known_umi_file ${known_umis} \\
         -umi_delim ${umi_delim} \\
+        -threads ${task.cpus} \\
         ${log_level_arg} \\
         -output_dir output/
 
