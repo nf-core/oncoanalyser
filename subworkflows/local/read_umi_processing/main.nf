@@ -2,8 +2,8 @@
 // Process read UMIs
 //
 
-include { FASTP_UMI   } from '../../../modules/local/fastp/umi/main'
-include { FASTQ_TOOLS } from '../../../modules/local/fastqtools/main'
+include { FASTP_UMI } from '../../../modules/local/fastp/umi/main'
+include { TAUR      } from '../../../modules/local/taur/main'
 
 workflow READ_UMI_PROCESSING {
     take:
@@ -20,8 +20,8 @@ workflow READ_UMI_PROCESSING {
     fastp_umi_location      //  string: [optional]  fastp UMI location argument (--umi_loc)
     fastp_umi_length        // numeric: [optional]  fastp UMI length argument (--umi_len)
     fastp_umi_skip          // numeric: [optional]  fastp UMI skip argument (--umi_skip)
-    fastq_tools_umi_enabled // boolean: [mandatory] enable fastq-tools UMI processing
-    fastq_tools_umi_delim   // boolean: [optional]  fastq-tools -umi_delim argument
+    taur_umi_enabled        // boolean: [mandatory] enable Taur UMI processing
+    taur_umi_delim          // boolean: [optional]  Taur -umi_delim argument
 
     main:
     //
@@ -83,10 +83,10 @@ workflow READ_UMI_PROCESSING {
 
     // Process UMIs
     // The run conditions for each stage is as follows:
-    //  - DNA: either fastp or fastqtools
-    //  - RNA: fastqtools only
+    //  - DNA: either fastp or Taur
+    //  - RNA: Taur only
     //
-    // As such DNA / RNA may trigger both fastp (DNA) and fastqtools (RNA), so each must be handled separately
+    // As such DNA / RNA may trigger both fastp (DNA) and Taur (RNA), so each must be handled separately
 
     //
     // MODULE: fastp
@@ -129,45 +129,45 @@ workflow READ_UMI_PROCESSING {
     }
 
     //
-    // MODULE: FASTQTOOLS
+    // MODULE: TAUR
     //
     // channel: [ meta_fastq, fastq_fwd, fastq_rev ]
-    ch_post_fastqtools = channel.empty()
-    if (fastq_tools_umi_enabled) {
+    ch_post_taur = channel.empty()
+    if (taur_umi_enabled) {
 
         // NOTE(SW): only run DNA FASTQs when fastp hasn't already been run
         // Sort inputs
         // channel: runnable: [ meta_fastq, fastq_fwd, fastq_rev ]
         // channel: skip: [ meta_fastq, fastq_fwd, fastq_rev ]
-        ch_fastqtools_inputs_sorted = ch_post_fastp
+        ch_taur_inputs_sorted = ch_post_fastp
             .branch { meta_fastq, fastq_fwd, fastq_rev ->
                 runnable: ! (fastp_umi_enabled && meta_fastq.sequence_type == 'dna')
                 skip: true
             }
 
         // Run process
-        FASTQ_TOOLS(
-            ch_fastqtools_inputs_sorted.runnable,
-            fastq_tools_umi_delim,
+        TAUR(
+            ch_taur_inputs_sorted.runnable,
+            taur_umi_delim,
             known_umis,
         )
 
         // Set outputs
-        ch_post_fastqtools = channel.empty()
+        ch_post_taur = channel.empty()
             .mix(
-                channel.topic('fastqtools_fastq'),
-                ch_fastqtools_inputs_sorted.skip,
+                channel.topic('taur_fastq'),
+                ch_taur_inputs_sorted.skip,
             )
 
     } else {
 
-        ch_post_fastqtools = ch_post_fastp
+        ch_post_taur = ch_post_fastp
 
     }
 
     // Re-construct fastq_info and separate processed FASTQ into DNA / RNA sequence type
     // NOTE(SW): not taking the route of grouping since identity requires additional keying in this one-to-many scenario
-    ch_fastq_processed_sorted = ch_post_fastqtools
+    ch_fastq_processed_sorted = ch_post_taur
         .map { meta_fastq, fastq_fwd, fastq_rev ->
 
             def fastq_info = [

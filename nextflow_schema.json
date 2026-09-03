@@ -110,16 +110,6 @@
                     "fa_icon": "fas fa-cog",
                     "enum": ["kapa", "msk", "tso500", "twist"]
                 },
-                "fastq_tools_umi_enabled": {
-                    "type": "boolean",
-                    "description": "Enable fastq-tools UMI processing.",
-                    "fa_icon": "fas fa-cog"
-                },
-                "fastq_tools_umi_delim": {
-                    "type": "string",
-                    "description": "UMI delimiter fastq-tools.",
-                    "fa_icon": "fas fa-cog"
-                },
                 "fastp_umi_enabled": {
                     "type": "boolean",
                     "description": "Enable fastp UMI processing.",
@@ -140,6 +130,16 @@
                     "type": "integer",
                     "description": "fastp UMI skip parameter (--umi_skip)",
                     "default": -1,
+                    "fa_icon": "fas fa-cog"
+                },
+                "taur_umi_enabled": {
+                    "type": "boolean",
+                    "description": "Enable Taur UMI processing.",
+                    "fa_icon": "fas fa-cog"
+                },
+                "taur_umi_delim": {
+                    "type": "string",
+                    "description": "Taur UMI delimiter.",
                     "fa_icon": "fas fa-cog"
                 },
                 "redux_umi_enabled": {
