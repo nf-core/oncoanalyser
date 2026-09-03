@@ -16,7 +16,6 @@ workflow MULTIQC_REPORTING {
     ch_bamtools_dir_normal    // channel: [optional]  [ meta, bamtools_dir ]
     ch_amber_dir              // channel: [mandatory] [ meta, amber_dir ]
     ch_purple_dir             // channel: [mandatory] [ meta, purple_dir ]
-    ch_align_rna_qc_tumor_out // channel: [mandatory] [ meta, star_log, rna_md_metrics ]
 
     // Other
     ch_collated_versions      // channel: [mandatory] [ collated_versions.yml ]
@@ -26,17 +25,16 @@ workflow MULTIQC_REPORTING {
 
     main:
     // Select input sources then sort
-    // channel: [ meta, bamtools_tumor_dir, bamtools_normal_dir, amber_dir, purple_dir, star_log, rna_md_metrics ]
+    // NOTE(LN): RNA alignment QC files are not collected while RNA alignment is being moved from STAR to
+    // bwa-mem2 / TARS / REDUX; REDUX derived metrics are to be added back with the REDUX step
+    // channel: [ meta, bamtools_tumor_dir, bamtools_normal_dir, amber_dir, purple_dir ]
     ch_inputs_sorted = WorkflowOncoanalyser.groupByMeta(
         ch_bamtools_dir_tumor,
         ch_bamtools_dir_normal,
         ch_amber_dir,
         ch_purple_dir,
-        ch_align_rna_qc_tumor_out,
     )
-        .map { meta, bamtools_dir_tumor, bamtools_dir_normal, amber_dir, purple_dir, star_log, rna_md_metrics ->
-
-            // NOTE(SW): will not implement ability for user to provide RNA alignment QC metrics
+        .map { meta, bamtools_dir_tumor, bamtools_dir_normal, amber_dir, purple_dir ->
 
             return [
                 meta,
@@ -44,14 +42,12 @@ workflow MULTIQC_REPORTING {
                 Utils.selectCurrentOrExisting(bamtools_dir_normal, meta, Constants.INPUT.BAMTOOLS_DIR_NORMAL),
                 Utils.selectCurrentOrExisting(amber_dir, meta, Constants.INPUT.AMBER_DIR),
                 Utils.selectCurrentOrExisting(purple_dir, meta, Constants.INPUT.PURPLE_DIR),
-                star_log,
-                rna_md_metrics,
             ]
 
         }
-        .branch { meta, bamtools_dir_tumor, bamtools_dir_normal, amber_dir, purple_dir, star_log, rna_md_metrics ->
+        .branch { meta, bamtools_dir_tumor, bamtools_dir_normal, amber_dir, purple_dir ->
 
-            runnable: bamtools_dir_tumor || bamtools_dir_normal || amber_dir || purple_dir || star_log || rna_md_metrics
+            runnable: bamtools_dir_tumor || bamtools_dir_normal || amber_dir || purple_dir
             skip: true
                 return meta
         }

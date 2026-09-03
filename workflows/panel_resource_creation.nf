@@ -12,8 +12,8 @@ include { ISOFOX_QUANTIFICATION                   } from '../subworkflows/local/
 include { PAVE_PON_CREATION                       } from '../subworkflows/local/pave_pon_creation'
 include { PREPARE_OUTPUTS_PANEL_RESOURCE_CREATION } from '../subworkflows/local/prepare_outputs'
 include { PREPARE_REFERENCE                       } from '../subworkflows/local/prepare_reference'
-include { READ_ALIGNMENT_DNA                      } from '../subworkflows/local/read_alignment_dna'
-include { READ_ALIGNMENT_RNA                      } from '../subworkflows/local/read_alignment_rna'
+include { READ_ALIGNMENT as READ_ALIGNMENT_DNA    } from '../subworkflows/local/read_alignment'
+include { READ_ALIGNMENT as READ_ALIGNMENT_RNA    } from '../subworkflows/local/read_alignment'
 include { READ_UMI_PROCESSING                     } from '../subworkflows/local/read_umi_processing'
 include { REDUX_PROCESSING                        } from '../subworkflows/local/redux_processing'
 include { SAGE_CALLING                            } from '../subworkflows/local/sage_calling'
@@ -119,18 +119,22 @@ workflow PANEL_RESOURCE_CREATION {
         ref_data.genome_fasta,
         ref_data.genome_bwamem2_index,
         params.max_fastq_records,
+        false,  // is_rna
     )
 
     READ_ALIGNMENT_RNA(
         ch_inputs,
         ch_align_rna_input,
-        ref_data.genome_star_index,
+        ref_data.genome_rna_fasta,
+        ref_data.genome_rna_bwamem2_index,
+        params.max_fastq_records,
+        true,  // is_rna
     )
 
     // channel: [ meta, [aln, ...], [idx, ...] ]
     ch_align_dna_tumor_out = READ_ALIGNMENT_DNA.out.tumor
     ch_align_dna_normal_out = READ_ALIGNMENT_DNA.out.normal
-    ch_align_rna_tumor_out = READ_ALIGNMENT_RNA.out.tumor
+    ch_align_rna_tumor_out = READ_ALIGNMENT_RNA.out.rna
 
     //
     // SUBWORKFLOW: Run REDUX for DNA alignments

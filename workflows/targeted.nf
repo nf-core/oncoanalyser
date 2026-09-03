@@ -4,30 +4,30 @@
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 */
 
-include { AMBER_PROFILING          } from '../subworkflows/local/amber_profiling'
-include { BAMTOOLS_METRICS         } from '../subworkflows/local/bamtools_metrics'
-include { CIDER_CALLING            } from '../subworkflows/local/cider_calling'
-include { COBALT_PROFILING         } from '../subworkflows/local/cobalt_profiling'
-include { ESVEE_CALLING            } from '../subworkflows/local/esvee_calling'
-include { ISOFOX_QUANTIFICATION    } from '../subworkflows/local/isofox_quantification'
-include { LILAC_CALLING            } from '../subworkflows/local/lilac_calling'
-include { LINX_ANNOTATION          } from '../subworkflows/local/linx_annotation'
-include { LINX_PLOTTING            } from '../subworkflows/local/linx_plotting'
-include { MULTIQC_REPORTING        } from '../subworkflows/local/multiqc_reporting'
-include { ORANGE_REPORTING         } from '../subworkflows/local/orange_reporting'
-include { PAVE_ANNOTATION          } from '../subworkflows/local/pave_annotation'
-include { PEACH_CALLING            } from '../subworkflows/local/peach_calling'
-include { PREPARE_OUTPUTS_TARGETED } from '../subworkflows/local/prepare_outputs'
-include { PREPARE_REFERENCE        } from '../subworkflows/local/prepare_reference'
-include { PURPLE_CALLING           } from '../subworkflows/local/purple_calling'
-include { QSEE_METRICS             } from '../subworkflows/local/qsee_metrics'
-include { READ_ALIGNMENT_DNA       } from '../subworkflows/local/read_alignment_dna'
-include { READ_ALIGNMENT_RNA       } from '../subworkflows/local/read_alignment_rna'
-include { READ_UMI_PROCESSING      } from '../subworkflows/local/read_umi_processing'
-include { REDUX_PROCESSING         } from '../subworkflows/local/redux_processing'
-include { SAGE_APPEND              } from '../subworkflows/local/sage_append'
-include { SAGE_CALLING             } from '../subworkflows/local/sage_calling'
-include { SAGE_PLOTTING            } from '../subworkflows/local/sage_plotting'
+include { AMBER_PROFILING                      } from '../subworkflows/local/amber_profiling'
+include { BAMTOOLS_METRICS                     } from '../subworkflows/local/bamtools_metrics'
+include { CIDER_CALLING                        } from '../subworkflows/local/cider_calling'
+include { COBALT_PROFILING                     } from '../subworkflows/local/cobalt_profiling'
+include { ESVEE_CALLING                        } from '../subworkflows/local/esvee_calling'
+include { ISOFOX_QUANTIFICATION                } from '../subworkflows/local/isofox_quantification'
+include { LILAC_CALLING                        } from '../subworkflows/local/lilac_calling'
+include { LINX_ANNOTATION                      } from '../subworkflows/local/linx_annotation'
+include { LINX_PLOTTING                        } from '../subworkflows/local/linx_plotting'
+include { MULTIQC_REPORTING                    } from '../subworkflows/local/multiqc_reporting'
+include { ORANGE_REPORTING                     } from '../subworkflows/local/orange_reporting'
+include { PAVE_ANNOTATION                      } from '../subworkflows/local/pave_annotation'
+include { PEACH_CALLING                        } from '../subworkflows/local/peach_calling'
+include { PREPARE_OUTPUTS_TARGETED             } from '../subworkflows/local/prepare_outputs'
+include { PREPARE_REFERENCE                    } from '../subworkflows/local/prepare_reference'
+include { PURPLE_CALLING                       } from '../subworkflows/local/purple_calling'
+include { QSEE_METRICS                         } from '../subworkflows/local/qsee_metrics'
+include { READ_ALIGNMENT as READ_ALIGNMENT_DNA } from '../subworkflows/local/read_alignment'
+include { READ_ALIGNMENT as READ_ALIGNMENT_RNA } from '../subworkflows/local/read_alignment'
+include { READ_UMI_PROCESSING                  } from '../subworkflows/local/read_umi_processing'
+include { REDUX_PROCESSING                     } from '../subworkflows/local/redux_processing'
+include { SAGE_APPEND                          } from '../subworkflows/local/sage_append'
+include { SAGE_CALLING                         } from '../subworkflows/local/sage_calling'
+include { SAGE_PLOTTING                        } from '../subworkflows/local/sage_plotting'
 
 include { softwareVersionsToYAML } from '../subworkflows/nf-core/utils_nfcore_pipeline'
 
@@ -91,9 +91,6 @@ workflow TARGETED {
     ch_align_dna_donor_out = channel.empty()
     ch_align_rna_tumor_out = channel.empty()
 
-    // channel: [ meta, star_log, rna_md_metrics ]
-    ch_align_rna_qc_tumor_out = channel.empty()
-
     if (run_config.stages.alignment) {
 
 
@@ -139,20 +136,23 @@ workflow TARGETED {
             ref_data.genome_fasta,
             ref_data.genome_bwamem2_index,
             params.max_fastq_records,
+            false,  // is_rna
         )
 
         READ_ALIGNMENT_RNA(
             ch_inputs,
             ch_align_rna_input,
-            ref_data.genome_star_index,
+            ref_data.genome_rna_fasta,
+            ref_data.genome_rna_bwamem2_index,
+            params.max_fastq_records,
+            true,  // is_rna
         )
 
         ch_align_dna_tumor_out = ch_align_dna_tumor_out.mix(READ_ALIGNMENT_DNA.out.tumor)
         ch_align_dna_normal_out = ch_align_dna_normal_out.mix(READ_ALIGNMENT_DNA.out.normal)
         ch_align_dna_donor_out = ch_align_dna_donor_out.mix(READ_ALIGNMENT_DNA.out.donor)
 
-        ch_align_rna_tumor_out = ch_align_rna_tumor_out.mix(READ_ALIGNMENT_RNA.out.tumor)
-        ch_align_rna_qc_tumor_out = ch_align_rna_qc_tumor_out.mix(READ_ALIGNMENT_RNA.out.qc_files)
+        ch_align_rna_tumor_out = ch_align_rna_tumor_out.mix(READ_ALIGNMENT_RNA.out.rna)
 
     } else {
 
@@ -161,7 +161,6 @@ workflow TARGETED {
         ch_align_dna_donor_out = ch_inputs.map { meta -> [meta, [], []] }
 
         ch_align_rna_tumor_out = ch_inputs.map { meta -> [meta, [], []] }
-        ch_align_rna_qc_tumor_out = ch_inputs.map { meta -> [meta, [], []] }
 
     }
 
@@ -773,7 +772,6 @@ workflow TARGETED {
             ch_bamtools_normal_out,
             ch_amber_out,
             ch_purple_out,
-            ch_align_rna_qc_tumor_out,
             ch_collated_versions,
             params.multiqc_config,
             params.multiqc_methods_description,
