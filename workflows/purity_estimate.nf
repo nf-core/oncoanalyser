@@ -16,7 +16,7 @@ include { WISP_ANALYSIS                   } from '../subworkflows/local/wisp_ana
 
 include { softwareVersionsToYAML } from '../subworkflows/nf-core/utils_nfcore_pipeline'
 
-include { getDnaFastqChannel } from '../subworkflows/local/utils_nfcore_oncoanalyser_pipeline'
+include { getFastqChannel    } from '../subworkflows/local/utils_nfcore_oncoanalyser_pipeline'
 
 /*
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -66,7 +66,7 @@ workflow PURITY_ESTIMATE {
 
 
         // channel: [ meta, fastq_info, fastq_fwd, fastq_rev ]
-        ch_fastq_dna = getDnaFastqChannel(ch_inputs)
+        ch_fastq_dna = getFastqChannel(ch_inputs, ['dna_tumor', 'dna_normal', 'dna_donor'])
 
         // channel: [ meta, fastq_info, fastq_fwd, fastq_rev ]
         ch_align_dna_input = channel.empty()

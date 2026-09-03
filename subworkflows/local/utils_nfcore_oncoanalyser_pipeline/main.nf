@@ -273,39 +273,54 @@ def methodsDescriptionText(mqc_methods_yaml) {
     return description_html.toString()
 }
 
-def getDnaFastqChannel(ch_inputs) {
+// NOTE(LN): a sample key names one sample of the input as <sequence_type>_<sample_type>; callers pass the keys they
+// want, and the samples of the keys they do not pass are left out of both the runnable and the skip channels
+def getFastqChannel(ch_inputs, sample_keys) {
     // Sort inputs
     // channel: [ meta ]
     def ch_inputs_tumor_sorted = ch_inputs
         .branch { meta ->
+            def selected = hasSampleKey(sample_keys, 'dna', 'tumor')
             def has_existing = Utils.hasExistingInput(meta, Constants.INPUT.ALN_DNA_TUMOR)
-            runnable: Utils.hasTumorDnaFastq(meta) && ! has_existing
-            skip: true
+            runnable: selected && Utils.hasTumorDnaFastq(meta) && ! has_existing
+            skip: selected
         }
 
     def ch_inputs_normal_sorted = ch_inputs
         .branch { meta ->
+            def selected = hasSampleKey(sample_keys, 'dna', 'normal')
             def has_existing = Utils.hasExistingInput(meta, Constants.INPUT.ALN_DNA_NORMAL)
-            runnable: Utils.hasNormalDnaFastq(meta) && ! has_existing
-            skip: true
+            runnable: selected && Utils.hasNormalDnaFastq(meta) && ! has_existing
+            skip: selected
         }
 
     def ch_inputs_donor_sorted = ch_inputs
         .branch { meta ->
+            def selected = hasSampleKey(sample_keys, 'dna', 'donor')
             def has_existing = Utils.hasExistingInput(meta, Constants.INPUT.ALN_DNA_DONOR)
-            runnable: Utils.hasDonorDnaFastq(meta) && ! has_existing
-            skip: true
+            runnable: selected && Utils.hasDonorDnaFastq(meta) && ! has_existing
+            skip: selected
+        }
+
+    // NOTE(LN): RNA is only ever sequenced for the tumor sample
+    def ch_inputs_rna_sorted = ch_inputs
+        .branch { meta ->
+            def selected = hasSampleKey(sample_keys, 'rna', 'tumor')
+            def has_existing = Utils.hasExistingInput(meta, Constants.INPUT.ALN_RNA_TUMOR)
+            runnable: selected && Utils.hasTumorRnaFastq(meta) && ! has_existing
+            skip: selected
         }
 
     // Create FASTQ input channel
     // channel: [ meta, fastq_info, fastq_fwd, fastq_rev ]
     def ch_fastqs = channel.empty()
         .mix(
-            ch_inputs_tumor_sorted.runnable.map { meta -> [meta, Utils.getTumorDnaSample(meta), 'tumor'] },
-            ch_inputs_normal_sorted.runnable.map { meta -> [meta, Utils.getNormalDnaSample(meta), 'normal'] },
-            ch_inputs_donor_sorted.runnable.map { meta -> [meta, Utils.getDonorDnaSample(meta), 'donor'] },
+            ch_inputs_tumor_sorted.runnable.map { meta -> [meta, Utils.getTumorDnaSample(meta), 'dna', 'tumor'] },
+            ch_inputs_normal_sorted.runnable.map { meta -> [meta, Utils.getNormalDnaSample(meta), 'dna', 'normal'] },
+            ch_inputs_donor_sorted.runnable.map { meta -> [meta, Utils.getDonorDnaSample(meta), 'dna', 'donor'] },
+            ch_inputs_rna_sorted.runnable.map { meta -> [meta, Utils.getTumorRnaSample(meta), 'rna', 'tumor'] },
         )
-        .flatMap { meta, meta_sample, sample_type ->
+        .flatMap { meta, meta_sample, sequence_type, sample_type ->
             meta_sample
                 .getAt(Constants.FileType.FASTQ)
                 .collect { key, d ->
@@ -318,6 +333,7 @@ def getDnaFastqChannel(ch_inputs) {
                         'library_id': library_id,
                         'lane': lane,
                         'sample_type': sample_type,
+                        'sequence_type': sequence_type,
                         'rg_fields': d.rg_fields,
                     ]
 
@@ -329,53 +345,18 @@ def getDnaFastqChannel(ch_inputs) {
                 }
         }
 
+    // NOTE(LN): skipped entries carry the sample and sequence type so that consumers can sort them without repeating
+    // the input checks made here
     return channel.empty()
         .mix(
             ch_fastqs,
-            ch_inputs_tumor_sorted.skip.map { meta -> [meta, [:], [], []] },
-            ch_inputs_normal_sorted.skip.map { meta -> [meta, [:], [], []] },
-            ch_inputs_donor_sorted.skip.map { meta -> [meta, [:], [], []] },
+            ch_inputs_tumor_sorted.skip.map { meta -> [meta, ['sample_type': 'tumor', 'sequence_type': 'dna'], [], []] },
+            ch_inputs_normal_sorted.skip.map { meta -> [meta, ['sample_type': 'normal', 'sequence_type': 'dna'], [], []] },
+            ch_inputs_donor_sorted.skip.map { meta -> [meta, ['sample_type': 'donor', 'sequence_type': 'dna'], [], []] },
+            ch_inputs_rna_sorted.skip.map { meta -> [meta, ['sample_type': 'tumor', 'sequence_type': 'rna'], [], []] },
         )
 }
 
-def getRnaFastqChannel(ch_inputs) {
-    // Sort inputs
-    // channel: [ meta ]
-    def ch_inputs_sorted = ch_inputs
-        .branch { meta ->
-            def has_existing = Utils.hasExistingInput(meta, Constants.INPUT.ALN_RNA_TUMOR)
-            runnable: Utils.hasTumorRnaFastq(meta) && ! has_existing
-            skip: true
-        }
-
-    // Create FASTQ input channel
-    // channel: [ meta, fastq_info, fastq_fwd, fastq_rev ]
-    def ch_fastqs = ch_inputs_sorted.runnable
-        .flatMap { meta ->
-            def meta_sample = Utils.getTumorRnaSample(meta)
-            meta_sample
-                .getAt(Constants.FileType.FASTQ)
-                .collect { key, d ->
-                    def (library_id, lane, flowcell) = key
-
-                    def fastq_info = [
-                        'sample_id': meta_sample.sample_id,
-                        'library_id': library_id,
-                        'lane': lane,
-                        'rg_fields': d.rg_fields,
-                    ]
-
-                    if (flowcell) {
-                         fastq_info.flowcell = flowcell
-                    }
-
-                    return [meta, fastq_info, d['fwd'], d['rev']]
-                }
-        }
-
-    return channel.empty()
-        .mix(
-            ch_fastqs,
-            ch_inputs_sorted.skip.map { meta -> [meta, [:], [], []] },
-        )
+def hasSampleKey(sample_keys, sequence_type, sample_type) {
+    return sample_keys.contains("${sequence_type}_${sample_type}".toString())
 }

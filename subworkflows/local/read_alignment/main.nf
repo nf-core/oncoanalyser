@@ -1,11 +1,11 @@
 //
-// Align DNA reads
+// Align DNA or RNA reads
 //
 
 include { BWAMEM2_ALIGN } from '../../../modules/local/bwa-mem2/mem/main'
 include { FASTP_SPLIT   } from '../../../modules/local/fastp/split/main'
 
-workflow READ_ALIGNMENT_DNA {
+workflow READ_ALIGNMENT {
     take:
     // Sample data
     ch_inputs            // channel: [mandatory] [ meta ]
@@ -17,6 +17,7 @@ workflow READ_ALIGNMENT_DNA {
 
     // Params
     max_fastq_records    // numeric: [optional]  max number of FASTQ records per split
+    is_rna               // boolean: [mandatory] align RNA reads
 
     main:
     //
@@ -33,27 +34,44 @@ workflow READ_ALIGNMENT_DNA {
     //   - skip conditional is adjusted for this albiet emits duplicate case meta
     //   - case meta in skip channel deduplicated at join below
 
+    // NOTE(LN): fastq_info carries the sample and sequence type for both runnable and skipped entries, so the input
+    // checks made in getFastqChannel are not repeated here; each caller passes only the sample keys its instance of
+    // this workflow aligns, leaving the remaining channels empty
+
     ch_inputs_tumor_sorted = ch_fastq
         .branch { meta, fastq_info, fastq_fwd, fastq_rev ->
+            def is_target = fastq_info.sequence_type == 'dna' && fastq_info.sample_type == 'tumor'
             def has_inputs = fastq_fwd && fastq_rev
-            runnable: fastq_info.sample_type == 'tumor' && has_inputs
-            skip: ! Utils.hasTumorDnaFastq(meta)
+            runnable: is_target && has_inputs
+            skip: is_target && ! has_inputs
               return meta
         }
 
     ch_inputs_normal_sorted = ch_fastq
         .branch { meta, fastq_info, fastq_fwd, fastq_rev ->
+            def is_target = fastq_info.sequence_type == 'dna' && fastq_info.sample_type == 'normal'
             def has_inputs = fastq_fwd && fastq_rev
-            runnable: fastq_info.sample_type == 'normal' && has_inputs
-            skip: ! Utils.hasNormalDnaFastq(meta)
+            runnable: is_target && has_inputs
+            skip: is_target && ! has_inputs
               return meta
         }
 
     ch_inputs_donor_sorted = ch_fastq
         .branch { meta, fastq_info, fastq_fwd, fastq_rev ->
+            def is_target = fastq_info.sequence_type == 'dna' && fastq_info.sample_type == 'donor'
             def has_inputs = fastq_fwd && fastq_rev
-            runnable: fastq_info.sample_type == 'donor' && has_inputs
-            skip: ! Utils.hasDonorDnaFastq(meta)
+            runnable: is_target && has_inputs
+            skip: is_target && ! has_inputs
+              return meta
+        }
+
+    // NOTE(LN): RNA is only ever sequenced for the tumor sample
+    ch_inputs_rna_sorted = ch_fastq
+        .branch { meta, fastq_info, fastq_fwd, fastq_rev ->
+            def is_target = fastq_info.sequence_type == 'rna' && fastq_info.sample_type == 'tumor'
+            def has_inputs = fastq_fwd && fastq_rev
+            runnable: is_target && has_inputs
+            skip: is_target && ! has_inputs
               return meta
         }
 
@@ -64,12 +82,17 @@ workflow READ_ALIGNMENT_DNA {
             ch_inputs_tumor_sorted.runnable,
             ch_inputs_normal_sorted.runnable,
             ch_inputs_donor_sorted.runnable,
+            ch_inputs_rna_sorted.runnable,
         )
         .map { meta, fastq_info, fastq_fwd, fastq_rev ->
 
             // NOTE(SW): initial map sets defaults and conventional ordering of selected fields, merging then overwrites / adds while preserving order
             def rg_id = [fastq_info.sample_id, fastq_info.library_id, fastq_info.lane, fastq_info.flowcell].findAll().join('.')
-            def rg_entries = [ID: rg_id, SM: fastq_info.sample_id, LB: fastq_info.library_id] + fastq_info.rg_fields
+            def rg_entries = [
+                ID: rg_id,
+                SM: fastq_info.sample_id,
+                LB: fastq_info.library_id
+            ] + fastq_info.rg_fields
             def rg_line = '@RG\\t' + rg_entries.collect { k, v -> "${k}:${v}" }.join('\\t')
 
             def meta_fastq = [
@@ -81,6 +104,7 @@ workflow READ_ALIGNMENT_DNA {
                 lane: fastq_info.lane,
                 output_file_id: rg_id,
                 sample_type: fastq_info.sample_type,
+                sequence_type: fastq_info.sequence_type,
             ]
 
             if (fastq_info.flowcell) {
@@ -131,6 +155,10 @@ workflow READ_ALIGNMENT_DNA {
 
                 return data
             }
+            // NOTE(LN): the topic is shared with the other instance of this workflow
+            .filter { meta_fastq_ready, _fwd, _rev ->
+                meta_fastq_ready.sequence_type == (is_rna ? 'rna' : 'dna')
+            }
 
     } else {
 
@@ -160,6 +188,7 @@ workflow READ_ALIGNMENT_DNA {
         ch_bwamem2_inputs,
         genome_fasta,
         genome_bwamem2_index,
+        is_rna,
     )
 
     // Reunite BAMs
@@ -171,6 +200,7 @@ workflow READ_ALIGNMENT_DNA {
             def meta_group = [
                 key: meta_bwamem2.key,
                 sample_type: meta_bwamem2.sample_type,
+                sequence_type: meta_bwamem2.sequence_type,
             ]
 
             return [meta_group, meta_bwamem2]
@@ -179,12 +209,22 @@ workflow READ_ALIGNMENT_DNA {
         .map { meta_group, metas_bwamem2 -> return [meta_group, metas_bwamem2.size()] }
 
     // Now, group with expected size then sort into tumor and normal channels
+    // NOTE(LN): `cross` only emits matching pairs, so BAMs of the other instance of this workflow are discarded here
     // channel: [ meta_group, [aln, ...], [idx, ...] ]
     ch_alns_united = ch_sample_fastq_counts
         // channel: [ [ meta_group, count ], [ meta_group, aln, idx ] ]
         .cross(
             // First element to match meta_group above for `cross`
-            channel.topic('bwamem2_align_bam').map { meta_bwamem2, aln, idx -> [[key: meta_bwamem2.key, sample_type: meta_bwamem2.sample_type], aln, idx] }
+            channel.topic('bwamem2_align_bam').map { meta_bwamem2, aln, idx -> [
+                    [
+                        key: meta_bwamem2.key,
+                        sample_type: meta_bwamem2.sample_type,
+                        sequence_type: meta_bwamem2.sequence_type
+                    ],
+                    aln,
+                    idx
+                ]
+            }
         )
         .map { count_tuple, inputs_tuple ->
             def group_size = count_tuple[1]
@@ -193,11 +233,13 @@ workflow READ_ALIGNMENT_DNA {
             return tuple(groupKey(meta_group, group_size), aln, idx)
         }
         .groupTuple()
+        .map { meta_group, alns, idxs -> return [meta_group, alns, idxs.flatten()] }
         .branch { meta_group, alns, idxs ->
             assert ['tumor', 'normal', 'donor'].contains(meta_group.sample_type)
             tumor: meta_group.sample_type == 'tumor'
             normal: meta_group.sample_type == 'normal'
             donor: meta_group.sample_type == 'donor'
+            rna: meta_group.sequence_type == 'rna'
             placeholder: true
         }
 
@@ -226,8 +268,16 @@ workflow READ_ALIGNMENT_DNA {
             ch_inputs_donor_sorted.skip.unique().map { meta -> [meta, [], []] },
         )
 
+    // channel: [ meta, [aln, ...], [idx, ...] ]
+    ch_outputs_rna = channel.empty()
+        .mix(
+            WorkflowOncoanalyser.restoreMeta(ch_alns_united.rna, ch_inputs),
+            ch_inputs_rna_sorted.skip.unique().map { meta -> [meta, [], []] },
+        )
+
     emit:
     tumor  = ch_outputs_tumor  // channel: [ meta, [aln, ...], [idx, ...] ]
     normal = ch_outputs_normal // channel: [ meta, [aln, ...], [idx, ...] ]
     donor  = ch_outputs_donor  // channel: [ meta, [aln, ...], [idx, ...] ]
+    rna    = ch_outputs_rna    // channel: [ meta, [aln, ...], [idx, ...] ]
 }

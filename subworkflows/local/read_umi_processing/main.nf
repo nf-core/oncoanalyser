@@ -29,7 +29,7 @@ workflow READ_UMI_PROCESSING {
     //
     // Sort inputs
     // runnable: channel: [ meta, sequence_type, fastq_info, fastq_fwd, fastq_rev ]
-    // skip: channel: [ meta ]
+    // skip: channel: [ meta, fastq_info ]
     ch_inputs_dna_sorted = ch_dna_fastq
         .branch { meta, fastq_info, fastq_fwd, fastq_rev ->
             // NOTE(SW): inferred state from upstream
@@ -37,7 +37,7 @@ workflow READ_UMI_PROCESSING {
             runnable: has_inputs
                 return [meta, 'dna', fastq_info, fastq_fwd, fastq_rev]
             skip: true
-              return meta
+              return [meta, fastq_info]
         }
 
     ch_inputs_rna_sorted = ch_rna_fastq
@@ -47,7 +47,7 @@ workflow READ_UMI_PROCESSING {
             runnable: has_inputs
                 return [meta, 'rna', fastq_info, fastq_fwd, fastq_rev]
             skip: true
-                return meta
+                return [meta, fastq_info]
         }
 
     // Create base FASTQ input channel
@@ -67,15 +67,12 @@ workflow READ_UMI_PROCESSING {
                   id: "${meta.group_id}_${fastq_info.sample_id}",
                   sequence_type: sequence_type,
                   sample_id: fastq_info.sample_id,
+                  sample_type: fastq_info.sample_type,
                   library_id: fastq_info.library_id,
                   lane: fastq_info.lane,
                   flowcell: fastq_info.flowcell,
                   rg_fields: fastq_info.rg_fields,
               ]
-
-              if (sequence_type == 'dna') {
-                  meta_fastq.sample_type = fastq_info.sample_type
-              }
 
               return [meta_fastq, fastq_fwd, fastq_rev]
 
@@ -175,12 +172,10 @@ workflow READ_UMI_PROCESSING {
                 'library_id': meta_fastq.library_id,
                 'lane': meta_fastq.lane,
                 'flowcell': meta_fastq.flowcell,
+                'sample_type': meta_fastq.sample_type,
+                'sequence_type': meta_fastq.sequence_type,
                 'rg_fields': meta_fastq.rg_fields,
             ]
-
-            if (meta_fastq.sequence_type == 'dna') {
-                fastq_info.sample_type = meta_fastq.sample_type
-            }
 
             return [meta_fastq, fastq_info, fastq_fwd, fastq_rev]
 
@@ -198,14 +193,14 @@ workflow READ_UMI_PROCESSING {
     ch_outputs_dna = channel.empty()
         .mix(
             WorkflowOncoanalyser.restoreMeta(ch_fastq_processed_sorted.dna, ch_inputs),
-            ch_inputs_dna_sorted.skip.map { meta -> [meta, [:], [], []] },
+            ch_inputs_dna_sorted.skip.map { meta, fastq_info -> [meta, fastq_info, [], []] },
         )
 
     // channel: [ meta, fastq_info, fastq_fwd, fastq_rev ]
     ch_outputs_rna = channel.empty()
         .mix(
             WorkflowOncoanalyser.restoreMeta(ch_fastq_processed_sorted.rna, ch_inputs),
-            ch_inputs_rna_sorted.skip.map { meta -> [meta, [:], [], []] },
+            ch_inputs_rna_sorted.skip.map { meta, fastq_info -> [meta, fastq_info, [], []] },
         )
 
     emit:

@@ -31,8 +31,7 @@ include { SAGE_PLOTTING            } from '../subworkflows/local/sage_plotting'
 
 include { softwareVersionsToYAML } from '../subworkflows/nf-core/utils_nfcore_pipeline'
 
-include { getDnaFastqChannel } from '../subworkflows/local/utils_nfcore_oncoanalyser_pipeline'
-include { getRnaFastqChannel } from '../subworkflows/local/utils_nfcore_oncoanalyser_pipeline'
+include { getFastqChannel    } from '../subworkflows/local/utils_nfcore_oncoanalyser_pipeline'
 
 /*
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -103,8 +102,8 @@ workflow TARGETED {
 
 
         // channel: [ meta, fastq_info, fastq_fwd, fastq_rev ]
-        ch_fastq_dna = getDnaFastqChannel(ch_inputs)
-        ch_fastq_rna = getRnaFastqChannel(ch_inputs)
+        ch_fastq_dna = getFastqChannel(ch_inputs, ['dna_tumor', 'dna_normal', 'dna_donor'])
+        ch_fastq_rna = getFastqChannel(ch_inputs, ['rna_tumor'])
 
         // channel: [ meta, fastq_info, fastq_fwd, fastq_rev ]
         ch_align_dna_input = channel.empty()
