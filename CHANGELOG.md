@@ -36,7 +36,6 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/) 
 | `COBALT`     | 2.2         | 3.0         |
 | `CUPPA`      | 2.3.2       | 2.5.1       |
 | `ESVEE`      | 1.2         | 2.0.1       |
-| `FastqTools` | -           | 1.0         |
 | `ISOFOX`     | 1.7.2       | 2.0.1       |
 | `LILAC`      | 1.7.3       | 2.0         |
 | `LINX`       | 2.2         | 2.3.1       |
@@ -47,6 +46,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/) 
 | `QSEE`       | -           | 1.0         |
 | `REDUX`      | 1.2.2       | 2.0.5       |
 | `SAGE`       | 4.2         | 5.0.2       |
+| `Taur`       | -           | 1.0         |
 | `TEAL`       | 1.3.6       | 1.4         |
 | `WISP`       | 1.2         | 1.3.1       |
 | `linxreport` | 1.1.0       | 1.2.0       |
@@ -65,8 +65,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/) 
 | -                  | `sequencing_platform`         | Set sequencing technology: illumina (default), sbx, ultima                     |
 | -                  | `max_fastq_records`           | Default change: 10000000 → -1 (disabled)                                       |
 | -                  | `umi_type`                    | Use UMI presets                                                                |
-| -                  | `fastq_tools_umi_enabled`     | Enable fastq-tools UMI processing                                              |
-| -                  | `fastq_tools_umi_delim`       | Set UMI delimiter for fastq-tools                                              |
+| -                  | `taur_umi_enabled`            | Enable Taur UMI processing                                                     |
+| -                  | `taur_umi_delim`              | Set UMI delimiter for Taur                                                     |
 | -                  | `enable_cn_norm_with_wgs_pct` | Calculate CN normalisation factors from Hartwig WGS data during panel creation |
 | -                  | `ref_data_base`               | New separate parameter to set base path for all reference data                 |
 | `hmf_genomes_base` | `ref_data_genomes_base`       | Renamed for semantic consistency with other reference data parameters          |

@@ -922,7 +922,7 @@ nextflow run nf-core/oncoanalyser \
 
 Unique molecular identifiers (UMI) allow for read deduplication and error correction. UMI processing is performed by
 [fastp](https://github.com/OpenGene/fastp?tab=readme-ov-file#unique-molecular-identifier-umi-processing) or
-[fastq-tools](https://github.com/hartwigmedical/hmftools/tree/master/fastq-tools) for FASTQ files,
+[Taur](https://github.com/hartwigmedical/hmftools/tree/master/taur) for FASTQ files,
 and [REDUX](https://github.com/hartwigmedical/hmftools/tree/master/redux#deduplication) for alignment files.
 
 We recommend using the `--umi_type` argument to automatically configure the above tools with the correct arguments.
@@ -941,8 +941,8 @@ params {
     fastp_umi_length = 7            // --umi_len fastp arg
     fastp_umi_skip = 0              // --umi_skip fastp arg
 
-    fastq_tools_umi_enabled = false // Enable UMI stripping by fastq-tools
-    fastq_tools_umi_delim = ""      // UMI delimiter
+    taur_umi_enabled = false        // Enable UMI stripping by Taur
+    taur_umi_delim = ""             // UMI delimiter
 
     redux_umi_enabled = true        // Enable UMI processing by REDUX
     redux_umi_duplex_delim = "_"    // Duplex UMI delimiter
