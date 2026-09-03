@@ -32,6 +32,11 @@ input:
   - genome_bwamem2_index:
       type: directory
       description: bwa-mem2 index directory
+  - is_rna:
+      type: boolean
+      description: |
+        Align RNA reads; sets the RNA-specific bwa-mem2 arguments and leaves the output BAM
+        name-grouped and unindexed as required by TARS
 output:
   - meta:
       type: map
@@ -40,7 +45,7 @@ output:
         e.g. [id: 'sample_id']
   - bwamem2_align_bam:
       type: list
-      description: BAM and BAI file
+      description: BAM file, and BAI file for DNA alignment only
       pattern: "*.{bam,bam.bai}"
   - command_files:
       type: list
