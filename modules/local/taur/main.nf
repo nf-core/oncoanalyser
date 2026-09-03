@@ -32,7 +32,6 @@ process TAUR {
 
     taur \\
         -Xmx${Math.round(task.memory.bytes * xmx_mod)} \\
-        com.hartwig.hmftools.taur.TaurApplication \\
         ${args} \\
         -fastq_files '${reads_fwd};${reads_rev}' \\
         -known_umi_file ${known_umis} \\
