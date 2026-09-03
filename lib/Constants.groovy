@@ -50,6 +50,7 @@ class Constants {
 
         // Individual types
         BWAMEM2_INDEX,
+        BWAMEM2_INDEX_RNA,
         DICT,
         DNA_ALIGNMENT,
         FAI,
@@ -59,7 +60,6 @@ class Constants {
         IMG,
         PANEL,
         RNA_ALIGNMENT,
-        STAR_INDEX,
     }
 
     static enum Process {
