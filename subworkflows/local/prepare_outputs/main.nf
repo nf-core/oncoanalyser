@@ -15,8 +15,6 @@ workflow PREPARE_OUTPUTS_WGTS {
             channel.topic('cobalt_dir').flatMap { meta, d ->                   return get_dir_filepaths(meta, d) },
             channel.topic('cuppa_dir').flatMap { meta, d ->                    return get_dir_filepaths(meta, d) },
             channel.topic('esvee_dir').flatMap { meta, d ->                    return get_dir_filepaths(meta, d) },
-            channel.topic('gatk4_markduplicates_bai').map { meta, d ->         return ["${meta.key}/alignments/${meta.sample_id}/${d.name}", d] },
-            channel.topic('gatk4_markduplicates_bam').map { meta, d ->         return ["${meta.key}/alignments/${meta.sample_id}/${d.name}", d] },
             channel.topic('isofox_dir').flatMap { meta, d ->                   return get_dir_filepaths(meta, d) },
             channel.topic('lilac_dir').flatMap { meta, d ->                    return get_dir_filepaths(meta, d) },
             channel.topic('linx_germline_annotation_dir').flatMap { meta, d -> return get_dir_filepaths(meta, d, 'linx/germline_annotations') },
@@ -67,8 +65,6 @@ workflow PREPARE_OUTPUTS_TARGETED {
             channel.topic('cider_results').flatMap { meta, fps ->              return fps.collect { d -> ["${meta.key}/cider/${d.name}", d] } },
             channel.topic('cobalt_dir').flatMap { meta, d ->                   return get_dir_filepaths(meta, d) },
             channel.topic('esvee_dir').flatMap { meta, d ->                    return get_dir_filepaths(meta, d) },
-            channel.topic('gatk4_markduplicates_bai').map { meta, d ->         return ["${meta.key}/alignments/${meta.sample_id}/${d.name}", d] },
-            channel.topic('gatk4_markduplicates_bam').map { meta, d ->         return ["${meta.key}/alignments/${meta.sample_id}/${d.name}", d] },
             channel.topic('isofox_dir').flatMap { meta, d ->                   return get_dir_filepaths(meta, d) },
             channel.topic('lilac_dir').flatMap { meta, d ->                    return get_dir_filepaths(meta, d) },
             channel.topic('linx_germline_annotation_dir').flatMap { meta, d -> return get_dir_filepaths(meta, d, 'linx/germline_annotations') },
@@ -127,8 +123,6 @@ workflow PREPARE_OUTPUTS_PANEL_RESOURCE_CREATION {
         .mix(
             channel.topic('amber_dir').flatMap { meta, d ->               return get_dir_filepaths(meta, d) },
             channel.topic('cobalt_dir').flatMap { meta, d ->              return get_dir_filepaths(meta, d) },
-            channel.topic('gatk4_markduplicates_bai').map { meta, d ->    return ["${meta.key}/alignments/${meta.sample_id}/${d.name}", d] },
-            channel.topic('gatk4_markduplicates_bam').map { meta, d ->    return ["${meta.key}/alignments/${meta.sample_id}/${d.name}", d] },
             channel.topic('isofox_dir').flatMap { meta, d ->              return get_dir_filepaths(meta, d) },
             channel.topic('redux_dir').flatMap { meta, d ->               return get_dir_filepaths(meta, d, "alignments/${meta.sample_id}") },
             channel.topic('sage_germline_dir').flatMap { meta, d ->       return get_dir_filepaths(meta, d, 'sage/germline') },
@@ -185,7 +179,7 @@ def get_dir_filepaths(meta, d, target_dir=null) {
 
 def get_command_log_filepath(data) {
 
-    def other_logs = ['gatk4_bwa_index_image', 'gridss_index', 'bwa_index', 'bwamem2_index', 'samtools_dict', 'samtools_faidx', 'star_genomegenerate', 'multiqc']
+    def other_logs = ['gatk4_bwa_index_image', 'gridss_index', 'bwa_index', 'bwamem2_index', 'samtools_dict', 'samtools_faidx', 'multiqc']
     def panel_logs = ['cobalt_panel_normalisation', 'pave_pon_panel_creation', 'isofox_panel_normalisation']
 
     def (meta, name, fps_all) = data

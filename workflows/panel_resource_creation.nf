@@ -125,13 +125,15 @@ workflow PANEL_RESOURCE_CREATION {
     READ_ALIGNMENT_RNA(
         ch_inputs,
         ch_align_rna_input,
-        ref_data.genome_star_index,
+        ref_data.genome_rna_fasta,
+        ref_data.genome_rna_bwamem2_index,
+        params.max_fastq_records,
     )
 
     // channel: [ meta, [aln, ...], [idx, ...] ]
     ch_align_dna_tumor_out = READ_ALIGNMENT_DNA.out.tumor
     ch_align_dna_normal_out = READ_ALIGNMENT_DNA.out.normal
-    ch_align_rna_tumor_out = READ_ALIGNMENT_RNA.out.tumor
+    ch_align_rna_tumor_out = READ_ALIGNMENT_RNA.out.rna
 
     //
     // SUBWORKFLOW: Run REDUX for DNA alignments

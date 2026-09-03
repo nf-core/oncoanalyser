@@ -2,18 +2,28 @@
 // Align RNA reads
 //
 
-include { GATK4_MARKDUPLICATES } from '../../../modules/nf-core/gatk4/markduplicates/main'
-include { SAMTOOLS_SORT        } from '../../../modules/nf-core/samtools/sort/main'
-include { STAR_ALIGN           } from '../../../modules/local/star/align/main'
+include { BWAMEM2_ALIGN_RNA } from '../../../modules/local/bwa-mem2/mem/rna/main'
+include { FASTP_SPLIT       } from '../../../modules/local/fastp/split/main'
+
+include { getFastqsBySampleType } from '../utils_nfcore_oncoanalyser_pipeline/helpers_read_alignment'
+include { createFastqInputs     } from '../utils_nfcore_oncoanalyser_pipeline/helpers_read_alignment'
+include { expandSplitFastqs     } from '../utils_nfcore_oncoanalyser_pipeline/helpers_read_alignment'
+include { markUnsplitFastqs     } from '../utils_nfcore_oncoanalyser_pipeline/helpers_read_alignment'
+include { createBwamem2Inputs   } from '../utils_nfcore_oncoanalyser_pipeline/helpers_read_alignment'
+include { getSampleFastqCounts  } from '../utils_nfcore_oncoanalyser_pipeline/helpers_read_alignment'
 
 workflow READ_ALIGNMENT_RNA {
     take:
     // Sample data
-    ch_inputs         // channel: [mandatory] [ meta ]
-    ch_fastq          // channel: [mandatory] [ meta, fastq_info, fastq_fwd, fastq_rev ]
+    ch_inputs            // channel: [mandatory] [ meta ]
+    ch_fastq             // channel: [mandatory] [ meta, fastq_info, fastq_fwd, fastq_rev ]
 
     // Reference data
-    genome_star_index // channel: [mandatory] /path/to/genome_star_index/
+    genome_fasta         // channel: [mandatory] /path/to/genome_fasta
+    genome_bwamem2_index // channel: [mandatory] /path/to/genome_bwa-mem2_index_dir/
+
+    // Params
+    max_fastq_records    // numeric: [optional]  max number of FASTQ records per split
 
     main:
     //
@@ -22,163 +32,86 @@ workflow READ_ALIGNMENT_RNA {
     // Sort inputs
     // runnable: channel: [ meta, fastq_info, fastq_fwd, fastq_rev ]
     // skip: channel: [ meta ]
-    ch_inputs_sorted = ch_fastq
-        .branch { meta, fastq_info, fastq_fwd, fastq_rev ->
-            def has_inputs = fastq_fwd && fastq_rev
-            runnable: has_inputs
-            skip: true
-              return meta
-        }
+
+    // NOTE(LN): RNA is only ever sequenced for the tumor sample
+    ch_inputs_rna_sorted = getFastqsBySampleType(ch_fastq, 'tumor')
 
     // Create FASTQ input channel
     // channel: [ meta_fastq, fastq_fwd, fastq_rev ]
-    ch_fastq_inputs = ch_inputs_sorted.runnable
-        .map { meta, fastq_info, fastq_fwd, fastq_rev ->
-
-            // NOTE(SW): initial map sets defaults and conventional ordering of selected fields, merging then overwrites / adds while preserving order
-            def rg_id = [fastq_info.sample_id, fastq_info.library_id, fastq_info.lane, fastq_info.flowcell].findAll().join('.')
-            def rg_entries = [ID: rg_id, SM: fastq_info.sample_id, LB: fastq_info.library_id] + fastq_info.rg_fields
-            def rg_line = rg_entries.collect { k, v -> "'${k}:${v}'" }.join(' ')
-
-            def meta_fastq = [
-                key: meta.group_id,
-                id: "${meta.group_id}_${fastq_info.sample_id}",
-                sample_id: fastq_info.sample_id,
-                rg_line: rg_line,
-            ]
-
-            return [meta_fastq, fastq_fwd, fastq_rev]
-        }
+    ch_fastq_inputs = createFastqInputs([ch_inputs_rna_sorted])
 
     //
-    // MODULE: STAR alignment
+    // MODULE: fastp
+    //
+    // Split FASTQ into chunks if requested for distributed processing
+    // channel: [ meta_fastq_ready, fastq_fwd, fastq_fwd ]
+    ch_fastqs_ready = channel.empty()
+    // NOTE(SW): required for strict syntax without params block declaration
+    if (max_fastq_records.toInteger() > 0) {
+
+        // Run process
+        FASTP_SPLIT(
+            ch_fastq_inputs,
+            // NOTE(SW): required for strict syntax without params block declaration
+            max_fastq_records.toInteger(),
+        )
+
+        ch_fastqs_ready = expandSplitFastqs(FASTP_SPLIT.out[0])
+
+    } else {
+
+        ch_fastqs_ready = markUnsplitFastqs(ch_fastq_inputs)
+
+    }
+
+    //
+    // MODULE: BWA-MEM2
     //
     // Create process input channel
-    // First, count expected FASTQ pairs per sample for non-blocking groupTuple op
-    // channel: [ meta_group, group_size ]
-    ch_fastq_counts = ch_fastq_inputs
-        .map { meta_fastq, _fastq_fwd, _fastq_rev ->
-            def meta_group = [key: meta_fastq.key]
-            return [meta_group, meta_fastq]
-        }
-        .groupTuple()
-        .map { meta_group, meta_fastqs -> return [meta_group, meta_fastqs.size()] }
+    // channel: [ meta_bwamem2, fastq_fwd, fastq_rev ]
+    ch_bwamem2_inputs = createBwamem2Inputs(ch_fastqs_ready)
 
-    // Now, group with expected size to proceed without blocking
-    // channel: [ meta_star, [ rg_line, ... ], [ fastq_fwd, ... ], [ fastq_rev, ... ] ]
-    ch_star_inputs = ch_fastq_counts
-        // channel: [ [ meta_group, count ], [ meta_group, fastq_fwd, fastq_rev ] ]
+    // Run process
+    BWAMEM2_ALIGN_RNA(
+        ch_bwamem2_inputs,
+        genome_fasta,
+        genome_bwamem2_index,
+    )
+
+    // Reunite BAMs
+    // channel: [ meta_group, group_size ]
+    ch_sample_fastq_counts = getSampleFastqCounts(ch_bwamem2_inputs)
+
+    // Now, group with expected size
+    // NOTE(LN): RNA alignments are name-grouped and therefore unindexed, so no index is carried here
+    // channel: [ meta_group, [aln, ...] ]
+    ch_alns_united = ch_sample_fastq_counts
+        // channel: [ [ meta_group, count ], [ meta_group, aln ] ]
         .cross(
             // First element to match meta_group above for `cross`
-            ch_fastq_inputs.map { meta_fastq, fastq_fwd, fastq_rev -> [[key: meta_fastq.key], meta_fastq, fastq_fwd, fastq_rev] }
+            channel.topic('bwamem2_align_rna_bam').map { meta_bwamem2, aln -> [[key: meta_bwamem2.key, sample_type: meta_bwamem2.sample_type], aln] }
         )
-        // channel: [ GroupKey(meta_group, size), rg_line, fastq_fwd, fastq_rev ]
         .map { count_tuple, inputs_tuple ->
             def group_size = count_tuple[1]
-            def (meta_group, meta_fastq, fastq_fwd, fastq_rev) = inputs_tuple
+            def (meta_group, aln) = inputs_tuple
 
-            def meta_star = [
-                key: meta_fastq.key,
-                id: meta_fastq.id,
-                sample_id: meta_fastq.sample_id,
-            ]
-
-            return tuple(groupKey(meta_star, group_size), meta_fastq.rg_line, fastq_fwd, fastq_rev)
+            return tuple(groupKey(meta_group, group_size), aln)
         }
-        // channel: [ meta_star, rg_lines, fastq_fwds, fastq_revs ]
         .groupTuple()
-        // Sort for stablised inputs
-        .map { meta_star, rg_lines, fastq_fwds, fastq_revs ->
-            def entries_sorted = [rg_lines, fastq_fwds, fastq_revs]
-                // [ [ rg_line, fastq_fwd, fastq_rev ], ... ]
-                .transpose()
-                .sort()
-                // [ [ rg_line, ... ], [ fastq_fwd, ... ], [ fastq_rev, ... ] ]
-                .transpose()
-
-            // Unpack cleanly
-            def (rg_lines_sorted, fastq_fwds_sorted, fastq_revs_sorted) = entries_sorted
-
-            return [meta_star, rg_lines_sorted, fastq_fwds_sorted, fastq_revs_sorted]
-        }
-
-    // Run process
-    STAR_ALIGN(
-        ch_star_inputs,
-        genome_star_index,
-    )
-
-    //
-    // MODULE: SAMtools sort
-    //
-    // Create process input channel
-    // channel: [ meta_sort, aln ]
-    ch_sort_inputs = channel.topic('star_align_bam')
-        .map { meta_star, aln ->
-            def meta_sort = meta_star + [prefix: meta_star.sample_id]
-            return [meta_sort, aln]
-        }
-
-    // Run process
-    SAMTOOLS_SORT(
-        ch_sort_inputs,
-    )
-
-    //
-    // MODULE: GATK4 markduplicates
-    //
-    // Create process input channel
-    // channel: [ meta_markdups, aln ]
-    ch_markdups_inputs = WorkflowOncoanalyser.restoreMeta(channel.topic('samtools_sort_bam'), ch_inputs)
-        .map { meta, aln ->
-            def meta_markdups = [
-                key: meta.group_id,
-                id: meta.group_id,
-                sample_id: Utils.getTumorRnaSampleName(meta),
-            ]
-            return [meta_markdups, aln]
-        }
-
-    // Run process
-    GATK4_MARKDUPLICATES(
-        ch_markdups_inputs,
-        [],
-        [],
-    )
 
     //
     // STEP: Handle outputs
     //
-    // Combine BAMs and BAIs
-    // channel: [ meta, aln, idx ]
-    ch_alns_ready = WorkflowOncoanalyser.groupByMeta(
-        WorkflowOncoanalyser.restoreMeta(channel.topic('gatk4_markduplicates_bam'), ch_inputs),
-        WorkflowOncoanalyser.restoreMeta(channel.topic('gatk4_markduplicates_bai'), ch_inputs),
-    )
-
-    // Combine STAR log with QC and MarkDuplicates metrics
-    // channel: [ meta, star_log, md_metrics ]
-    ch_qc_files_ready = WorkflowOncoanalyser.groupByMeta(
-        WorkflowOncoanalyser.restoreMeta(channel.topic('star_align_qc_log'), ch_inputs),
-        WorkflowOncoanalyser.restoreMeta(channel.topic('gatk4_markduplicates_metrics'), ch_inputs),
-    )
-
-    // Set outputs
-    // channel: [ meta, aln, idx ]
-    ch_outputs_aln = channel.empty()
+    // Set outputs, restoring original meta
+    // NOTE(LN): the empty index position is kept so that the output shape matches the DNA alignment subworkflow and
+    // the placeholders set by the calling workflows
+    // channel: [ meta, [aln, ...], [] ]
+    ch_outputs_rna = channel.empty()
         .mix(
-            ch_alns_ready,
-            ch_inputs_sorted.skip.map { meta -> [meta, [], []] },
-        )
-
-    // channel: [ meta, star_log, md_metrics ]
-    ch_outputs_qc_files = channel.empty()
-        .mix(
-            ch_qc_files_ready,
-            ch_inputs_sorted.skip.map { meta -> [meta, [], []] },
+            WorkflowOncoanalyser.restoreMeta(ch_alns_united.map { meta_group, alns -> [meta_group, alns, []] }, ch_inputs),
+            ch_inputs_rna_sorted.skip.unique().map { meta -> [meta, [], []] },
         )
 
     emit:
-    tumor    = ch_outputs_aln      // channel: [ meta, aln, idx ]
-    qc_files = ch_outputs_qc_files // channel: [ meta, star_log, md_metrics ]
+    rna = ch_outputs_rna // channel: [ meta, [aln, ...], [] ]
 }

@@ -1,10 +1,11 @@
-name: bwa-mem2_mem
-description: The mem alignment algorithm of bwa-mem2
+name: bwa-mem2_mem_dna
+description: The mem alignment algorithm of bwa-mem2, for DNA reads
 keywords:
   - bwa
   - mem
   - read alignment
   - bwa-mem2
+  - dna
 tools:
   - bwa-mem2:
       description: Burrow-Wheeler Aligner for short-read alignment
@@ -38,9 +39,9 @@ output:
       description: |
         Groovy Map containing sample information
         e.g. [id: 'sample_id']
-  - bwamem2_align_bam:
+  - bwamem2_align_dna_bam:
       type: list
-      description: BAM and BAI file
+      description: Coordinate sorted BAM file and BAI index
       pattern: "*.{bam,bam.bai}"
   - command_files:
       type: list

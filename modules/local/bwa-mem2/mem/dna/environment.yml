@@ -1,4 +1,4 @@
-name: bwa-mem2_mem
+name: bwa-mem2_mem_dna
 channels:
   - conda-forge
   - bioconda
