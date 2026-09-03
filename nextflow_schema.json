@@ -318,14 +318,14 @@
                     "description": "Path to reference genome GRIDSS index.",
                     "fa_icon": "far fa-file-code"
                 },
-                "ref_data_genome_star_index": {
+                "ref_data_genome_fasta_rna": {
                     "type": "string",
-                    "description": "Path to reference genome STAR index.",
+                    "description": "Path to RNA reference genome FASTA, i.e. the reference genome with transcript contigs appended.",
                     "fa_icon": "far fa-file-code"
                 },
-                "ref_data_genome_gtf": {
+                "ref_data_genome_bwamem2_index_rna": {
                     "type": "string",
-                    "description": "Path to reference genome GTF.",
+                    "description": "Path to RNA reference genome bwa-mem2 index.",
                     "fa_icon": "far fa-file-code"
                 },
                 "prepare_reference_only": {

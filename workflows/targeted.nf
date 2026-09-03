@@ -142,8 +142,8 @@ workflow TARGETED {
         READ_ALIGNMENT_RNA(
             ch_inputs,
             ch_align_rna_input,
-            ref_data.genome_rna_fasta,
-            ref_data.genome_rna_bwamem2_index,
+            ref_data.genome_fasta_rna,
+            ref_data.genome_bwamem2_index_rna,
             params.max_fastq_records,
             true,  // is_rna
         )
