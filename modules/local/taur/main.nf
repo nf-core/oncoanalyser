@@ -1,11 +1,11 @@
-process FASTQ_TOOLS {
+process TAUR {
     tag "${meta.id}"
     label 'process_medium'
 
     conda "${moduleDir}/environment.yml"
     container "${ workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container ?
-        'https://depot.galaxyproject.org/singularity/hmftools-fastq-tools:1.0--hdfd78af_0' :
-        'biocontainers/hmftools-fastq-tools:1.0--hdfd78af_0' }"
+        'https://depot.galaxyproject.org/singularity/hmftools-taur:1.0--hdfd78af_0' :
+        'biocontainers/hmftools-taur:1.0--hdfd78af_0' }"
 
     input:
     tuple val(meta), path(reads_fwd), path(reads_rev)
@@ -13,8 +13,8 @@ process FASTQ_TOOLS {
     path known_umis
 
     output:
-    tuple val(meta), path('output/*R1.umi.fastq.gz'), path('output/*R2.umi.fastq.gz'), topic: fastqtools_fastq
-    tuple val(meta), val('fastqtools'), path('.command.*')                           , topic: command_files
+    tuple val(meta), path('output/*R1.umi.fastq.gz'), path('output/*R2.umi.fastq.gz'), topic: taur_fastq
+    tuple val(meta), val('taur'), path('.command.*')                                 , topic: command_files
     path 'versions.yml'                                                              , topic: versions
 
     when:
@@ -30,9 +30,9 @@ process FASTQ_TOOLS {
     """
     mkdir -p output/
 
-    fastq-tools \\
+    taur \\
         -Xmx${Math.round(task.memory.bytes * xmx_mod)} \\
-        com.hartwig.hmftools.fastqtools.umi.FastqUmiExtracter \\
+        com.hartwig.hmftools.taur.TaurApplication \\
         ${args} \\
         -fastq_files '${reads_fwd};${reads_rev}' \\
         -known_umi_file ${known_umis} \\
@@ -42,7 +42,7 @@ process FASTQ_TOOLS {
 
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":
-        fastq-tools: 1.0
+        taur: 1.0
         java: \$(java --version | sed -n '/^openjdk/ { s/^.*openjdk //; s/ .*//p }')
     END_VERSIONS
     """

@@ -1,12 +1,12 @@
-name: fastq-tools
+name: taur
 description: Operate on FASTQs to process UMIs
 keywords:
-  - fastq-tools
+  - taur
   - processing
 tools:
-  - fastq-tools:
+  - taur:
       description: FASTQ processor
-      homepage: https://github.com/hartwigmedical/hmftools/tree/master/fastq-tools
+      homepage: https://github.com/hartwigmedical/hmftools/tree/master/taur
       licence: ["MIT"]
 input:
   - meta:
@@ -34,7 +34,7 @@ output:
       description: |
         Groovy Map containing sample information
         e.g. [id: 'sample_id']
-  - fastqtools_fastq:
+  - taur_fastq:
       type: list
       description: Forward and reverse FASTQ files
       pattern: "*.{fastq.gz}"

@@ -1,6 +1,0 @@
-name: fastq-tools
-channels:
-  - conda-forge
-  - bioconda
-dependencies:
-  - bioconda::hmftools-fastq-tools==1.0
