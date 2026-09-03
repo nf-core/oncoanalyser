@@ -111,7 +111,7 @@ workflow WGTS {
         // channel: [ meta, fastq_info, fastq_fwd, fastq_rev ]
         ch_align_dna_input = channel.empty()
         ch_align_rna_input = channel.empty()
-        if (params.fastp_umi_enabled || params.fastq_tools_umi_enabled) {
+        if (params.fastp_umi_enabled || params.taur_umi_enabled) {
 
             READ_UMI_PROCESSING(
                 ch_inputs,
@@ -122,8 +122,8 @@ workflow WGTS {
                 params.fastp_umi_location,
                 params.fastp_umi_length,
                 params.fastp_umi_skip,
-                params.fastq_tools_umi_enabled,
-                params.fastq_tools_umi_delim,
+                params.taur_umi_enabled,
+                params.taur_umi_delim,
             )
 
             ch_align_dna_input = ch_align_dna_input.mix(READ_UMI_PROCESSING.out.fastq_dna)
