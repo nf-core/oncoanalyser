@@ -2,8 +2,9 @@
 // Align DNA or RNA reads
 //
 
-include { BWAMEM2_ALIGN } from '../../../modules/local/bwa-mem2/mem/main'
-include { FASTP_SPLIT   } from '../../../modules/local/fastp/split/main'
+include { BWAMEM2_ALIGN_DNA } from '../../../modules/local/bwa-mem2/mem/dna/main'
+include { BWAMEM2_ALIGN_RNA } from '../../../modules/local/bwa-mem2/mem/rna/main'
+include { FASTP_SPLIT       } from '../../../modules/local/fastp/split/main'
 
 workflow READ_ALIGNMENT {
     take:
@@ -184,12 +185,33 @@ workflow READ_ALIGNMENT {
         }
 
     // Run process
-    BWAMEM2_ALIGN(
-        ch_bwamem2_inputs,
-        genome_fasta,
-        genome_bwamem2_index,
-        is_rna,
-    )
+    // NOTE(LN): each instance of this workflow runs only one of these processes, so each reads a topic that no other
+    // instance writes to
+    // channel: [ meta_bwamem2, aln, idx ]
+    ch_bwamem2_out = channel.empty()
+    if (is_rna) {
+
+        BWAMEM2_ALIGN_RNA(
+            ch_bwamem2_inputs,
+            genome_fasta,
+            genome_bwamem2_index,
+        )
+
+        // NOTE(LN): RNA alignments are name-grouped and therefore unindexed; pad to keep the tuple shape shared with DNA
+        ch_bwamem2_out = channel.topic('bwamem2_align_rna_bam')
+            .map { meta_bwamem2, aln -> [meta_bwamem2, aln, []] }
+
+    } else {
+
+        BWAMEM2_ALIGN_DNA(
+            ch_bwamem2_inputs,
+            genome_fasta,
+            genome_bwamem2_index,
+        )
+
+        ch_bwamem2_out = channel.topic('bwamem2_align_dna_bam')
+
+    }
 
     // Reunite BAMs
     // First, count expected BAMs per sample for non-blocking groupTuple op
@@ -209,13 +231,12 @@ workflow READ_ALIGNMENT {
         .map { meta_group, metas_bwamem2 -> return [meta_group, metas_bwamem2.size()] }
 
     // Now, group with expected size then sort into tumor and normal channels
-    // NOTE(LN): `cross` only emits matching pairs, so BAMs of the other instance of this workflow are discarded here
     // channel: [ meta_group, [aln, ...], [idx, ...] ]
     ch_alns_united = ch_sample_fastq_counts
         // channel: [ [ meta_group, count ], [ meta_group, aln, idx ] ]
         .cross(
             // First element to match meta_group above for `cross`
-            channel.topic('bwamem2_align_bam').map { meta_bwamem2, aln, idx -> [
+            ch_bwamem2_out.map { meta_bwamem2, aln, idx -> [
                     [
                         key: meta_bwamem2.key,
                         sample_type: meta_bwamem2.sample_type,

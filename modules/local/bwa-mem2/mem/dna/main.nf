@@ -1,4 +1,4 @@
-process BWAMEM2_ALIGN {
+process BWAMEM2_ALIGN_DNA {
     tag "${meta.id}"
     label 'process_high'
 
@@ -11,12 +11,11 @@ process BWAMEM2_ALIGN {
     tuple val(meta), path(reads_fwd), path(reads_rev)
     path genome_fasta
     path genome_bwamem2_index
-    val is_rna
 
     output:
-    tuple val(meta), path('*.bam'), path('*.bai', arity: '0..*'), topic: bwamem2_align_bam
-    tuple val(meta), val('bwamem2_align'), path('.command.*')   , topic: command_files
-    path 'versions.yml'                                         , topic: versions
+    tuple val(meta), path('*.bam'), path('*.bam.bai')             , topic: bwamem2_align_dna_bam
+    tuple val(meta), val('bwamem2_align_dna'), path('.command.*') , topic: command_files
+    path 'versions.yml'                                           , topic: versions
 
     when:
     task.ext.when == null || task.ext.when
@@ -32,26 +31,21 @@ process BWAMEM2_ALIGN {
     def input_bases_per_batch_arg     = '-K 100000000'
     def read_group_header_arg         = "-R '${meta.rg_line}'"
     def threads_arg                   = "-t ${task.cpus}"
-    def min_alignment_score_arg       = is_rna ? '-T 19' : ''
-    def max_alt_loci_per_read_arg     = is_rna ? '-h 75' : ''
 
-    def bam_write_command
-    if (is_rna) {
-        // NOTE(LN): Tars consumes read groups:
-        // - Output BAM must therefore stay name-grouped, not coordinate sorted
-        // - No BAI file created - that would required a coordinate sorted BAM
-        bam_write_command = """\\
-        | sambamba view \\
-            ${args2} \\
-            --sam-input \\
-            --format bam \\
-            --nthreads ${task.cpus} \\
-            --output-filename ${output_fn} \\
-            /dev/stdin"""
+    """
+    ln -fs \$(find -L ${genome_bwamem2_index} -type f) ./
 
-    } else {
-
-        bam_write_command = """\\
+    bwa-mem2 mem \\
+        ${args} \\
+        ${soft_clip_supplementaries_arg} \\
+        ${input_bases_per_batch_arg} \\
+        ${read_group_header_arg} \\
+        ${threads_arg} \\
+        \\
+        ${genome_fasta} \\
+        ${reads_fwd} \\
+        ${reads_rev} \\
+        \\
         | sambamba view \\
             ${args2} \\
             --sam-input \\
@@ -63,25 +57,7 @@ process BWAMEM2_ALIGN {
             ${args3} \\
             --nthreads ${task.cpus} \\
             --out ${output_fn} \\
-            /dev/stdin"""
-    }
-
-    """
-    ln -fs \$(find -L ${genome_bwamem2_index} -type f) ./
-
-    bwa-mem2 mem \\
-        ${args} \\
-        ${soft_clip_supplementaries_arg} \\
-        ${input_bases_per_batch_arg} \\
-        ${read_group_header_arg} \\
-        ${threads_arg} \\
-        ${min_alignment_score_arg} \\
-        ${max_alt_loci_per_read_arg} \\
-        \\
-        ${genome_fasta} \\
-        ${reads_fwd} \\
-        ${reads_rev} \\
-        ${bam_write_command}
+            /dev/stdin
 
     # NOTE(SW): bwa-mem2 version hardcoded as 2.3 reports the wrong version, see https://github.com/bwa-mem2/bwa-mem2/issues/276
     cat <<-END_VERSIONS > versions.yml
@@ -95,11 +71,9 @@ process BWAMEM2_ALIGN {
     stub:
     def output_fn = meta.split ? "${meta.split}.${meta.output_file_id}.bam" : "${meta.output_file_id}.bam"
 
-    def index_command = is_rna ? '' : "touch ${output_fn}.bai"
-
     """
     touch ${output_fn}
-    ${index_command}
+    touch ${output_fn}.bai
 
     echo -e '${task.process}:\\n  stub: noversions\\n' > versions.yml
     """
