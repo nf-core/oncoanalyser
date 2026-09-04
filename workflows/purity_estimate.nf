@@ -8,7 +8,7 @@ include { AMBER_PROFILING                      } from '../subworkflows/local/amb
 include { COBALT_PROFILING                     } from '../subworkflows/local/cobalt_profiling'
 include { PREPARE_OUTPUTS_PURITY_ESTIMATE      } from '../subworkflows/local/prepare_outputs'
 include { PREPARE_REFERENCE                    } from '../subworkflows/local/prepare_reference'
-include { READ_ALIGNMENT as READ_ALIGNMENT_DNA } from '../subworkflows/local/read_alignment'
+include { READ_ALIGNMENT_DNA } from '../subworkflows/local/read_alignment_dna'
 include { READ_UMI_PROCESSING                  } from '../subworkflows/local/read_umi_processing'
 include { REDUX_PROCESSING                     } from '../subworkflows/local/redux_processing'
 include { SAGE_APPEND                          } from '../subworkflows/local/sage_append'
@@ -99,7 +99,6 @@ workflow PURITY_ESTIMATE {
             ref_data.genome_fasta,
             ref_data.genome_bwamem2_index,
             params.max_fastq_records,
-            false,  // is_rna
         )
 
         ch_align_dna_tumor_out = ch_align_dna_tumor_out.mix(READ_ALIGNMENT_DNA.out.tumor)

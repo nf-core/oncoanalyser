@@ -12,8 +12,8 @@ include { ISOFOX_QUANTIFICATION                   } from '../subworkflows/local/
 include { PAVE_PON_CREATION                       } from '../subworkflows/local/pave_pon_creation'
 include { PREPARE_OUTPUTS_PANEL_RESOURCE_CREATION } from '../subworkflows/local/prepare_outputs'
 include { PREPARE_REFERENCE                       } from '../subworkflows/local/prepare_reference'
-include { READ_ALIGNMENT as READ_ALIGNMENT_DNA    } from '../subworkflows/local/read_alignment'
-include { READ_ALIGNMENT as READ_ALIGNMENT_RNA    } from '../subworkflows/local/read_alignment'
+include { READ_ALIGNMENT_DNA                      } from '../subworkflows/local/read_alignment_dna'
+include { READ_ALIGNMENT_RNA                      } from '../subworkflows/local/read_alignment_rna'
 include { READ_UMI_PROCESSING                     } from '../subworkflows/local/read_umi_processing'
 include { REDUX_PROCESSING                        } from '../subworkflows/local/redux_processing'
 include { SAGE_CALLING                            } from '../subworkflows/local/sage_calling'
@@ -119,7 +119,6 @@ workflow PANEL_RESOURCE_CREATION {
         ref_data.genome_fasta,
         ref_data.genome_bwamem2_index,
         params.max_fastq_records,
-        false,  // is_rna
     )
 
     READ_ALIGNMENT_RNA(
@@ -128,7 +127,6 @@ workflow PANEL_RESOURCE_CREATION {
         ref_data.genome_fasta_rna,
         ref_data.genome_bwamem2_index_rna,
         params.max_fastq_records,
-        true,  // is_rna
     )
 
     // channel: [ meta, [aln, ...], [idx, ...] ]

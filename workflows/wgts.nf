@@ -24,8 +24,8 @@ include { PREPARE_OUTPUTS_WGTS                 } from '../subworkflows/local/pre
 include { PREPARE_REFERENCE                    } from '../subworkflows/local/prepare_reference'
 include { PURPLE_CALLING                       } from '../subworkflows/local/purple_calling'
 include { QSEE_METRICS                         } from '../subworkflows/local/qsee_metrics'
-include { READ_ALIGNMENT as READ_ALIGNMENT_DNA } from '../subworkflows/local/read_alignment'
-include { READ_ALIGNMENT as READ_ALIGNMENT_RNA } from '../subworkflows/local/read_alignment'
+include { READ_ALIGNMENT_DNA } from '../subworkflows/local/read_alignment_dna'
+include { READ_ALIGNMENT_RNA } from '../subworkflows/local/read_alignment_rna'
 include { READ_UMI_PROCESSING                  } from '../subworkflows/local/read_umi_processing'
 include { REDUX_PROCESSING                     } from '../subworkflows/local/redux_processing'
 include { SAGE_APPEND                          } from '../subworkflows/local/sage_append'
@@ -138,7 +138,6 @@ workflow WGTS {
             ref_data.genome_fasta,
             ref_data.genome_bwamem2_index,
             params.max_fastq_records,
-            false,  // is_rna
         )
 
         READ_ALIGNMENT_RNA(
@@ -147,7 +146,6 @@ workflow WGTS {
             ref_data.genome_fasta_rna,
             ref_data.genome_bwamem2_index_rna,
             params.max_fastq_records,
-            true,  // is_rna
         )
 
         ch_align_dna_tumor_out = ch_align_dna_tumor_out.mix(READ_ALIGNMENT_DNA.out.tumor)
