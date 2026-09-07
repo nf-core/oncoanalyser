@@ -58,7 +58,7 @@ Command to run:
 ```bash
 java -jar tars.jar \
 -sample <sample> \
--input_bam <sample>.namegrouped.bam \
+-input_bam <sample>.lane_01.namegrouped.bam,<sample>.lane_02.namegrouped.bam \
 -ref_genome /path/to/Homo_sapiens_assembly38.alt.masked.with_rna_contigs.fasta \
 -ref_genome_version V38 \
 -contig_sidecar /path/to/ref_genome_v38_rna_contigs.rna_contigs_mappings.tsv \
