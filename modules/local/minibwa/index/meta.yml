@@ -1,0 +1,33 @@
+name: minibwa_index
+description: Create minibwa index for reference genome
+keywords:
+  - index
+  - fasta
+  - genome
+  - reference
+tools:
+  - minibwa:
+      description: |
+        Minibwa is a software package for mapping DNA sequences against
+        a large reference genome, the successor of bwa-mem.
+      homepage: https://github.com/lh3/minibwa
+      documentation: https://github.com/lh3/minibwa#usage
+      licence: ["MIT"]
+input:
+  - fasta:
+      type: file
+      description: Input genome fasta file
+output:
+  - minibwa_index:
+      type: file
+      description: minibwa genome index files
+      pattern: "*.{l2b,mbw}"
+  - command_files:
+      type: list
+      description: List of command files
+  - versions:
+      type: file
+      description: File containing software versions
+      pattern: "versions.yml"
+authors:
+  - "@scwatts"

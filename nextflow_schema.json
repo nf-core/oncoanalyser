@@ -303,9 +303,9 @@
                     "description": "Path to reference genome dict.",
                     "fa_icon": "far fa-file-code"
                 },
-                "ref_data_genome_bwamem2_index": {
+                "ref_data_genome_minibwa_index": {
                     "type": "string",
-                    "description": "Path to reference genome bwa-mem2 index.",
+                    "description": "Path to reference genome minibwa index.",
                     "fa_icon": "far fa-file-code"
                 },
                 "ref_data_genome_img": {

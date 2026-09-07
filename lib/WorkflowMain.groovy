@@ -506,7 +506,7 @@ class WorkflowMain {
             require_dict: true,
             require_img: true,
 
-            require_bwamem2_index: run_config.has_dna_fastq && run_config.stages.alignment,
+            require_minibwa_index: run_config.has_dna_fastq && run_config.stages.alignment,
             require_star_index: run_config.has_rna_fastq && run_config.stages.alignment,
 
             require_gridss_index: run_config.has_dna && run_config.mode == Constants.RunMode.WGTS && run_config.stages.virusinterpreter,
@@ -557,7 +557,7 @@ class WorkflowMain {
         def require_dict = ref_data_types.contains(Constants.RefDataType.DICT)
         def require_img = ref_data_types.contains(Constants.RefDataType.IMG)
 
-        def require_bwamem2_index = ref_data_types.contains(Constants.RefDataType.BWAMEM2_INDEX) || ref_data_types.contains(Constants.RefDataType.DNA_ALIGNMENT)
+        def require_minibwa_index = ref_data_types.contains(Constants.RefDataType.MINIBWA_INDEX) || ref_data_types.contains(Constants.RefDataType.DNA_ALIGNMENT)
         def require_star_index = ref_data_types.contains(Constants.RefDataType.STAR_INDEX) || ref_data_types.contains(Constants.RefDataType.RNA_ALIGNMENT)
 
         def require_gridss_index = ref_data_types.contains(Constants.RefDataType.GRIDSS_INDEX)
@@ -582,7 +582,7 @@ class WorkflowMain {
             require_dict: require_dict,
             require_img: require_img,
 
-            require_bwamem2_index: require_bwamem2_index,
+            require_minibwa_index: require_minibwa_index,
             require_star_index: require_star_index,
 
             require_gridss_index: require_gridss_index,

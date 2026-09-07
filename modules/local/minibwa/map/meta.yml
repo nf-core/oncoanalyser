@@ -1,15 +1,14 @@
-name: bwa-mem2_mem
-description: The mem alignment algorithm of bwa-mem2
+name: minibwa_map
+description: Align DNA reads to a reference genome with minibwa map
 keywords:
-  - bwa
-  - mem
+  - map
   - read alignment
-  - bwa-mem2
+  - minibwa
 tools:
-  - bwa-mem2:
-      description: Burrow-Wheeler Aligner for short-read alignment
-      homepage: https://github.com/bwa-mem2/bwa-mem2
-      documentation: https://github.com/bwa-mem2/bwa-mem2
+  - minibwa:
+      description: Minibwa is a software package for mapping DNA sequences against a large reference genome, the successor of bwa-mem
+      homepage: https://github.com/lh3/minibwa
+      documentation: https://github.com/lh3/minibwa
       licence: ["MIT"]
 input:
   - meta:
@@ -29,16 +28,16 @@ input:
       type: file
       description: Reference genome assembly FASTA file
       pattern: "*.{fa,fasta}"
-  - genome_bwamem2_index:
+  - genome_minibwa_index:
       type: directory
-      description: bwa-mem2 index directory
+      description: minibwa index directory
 output:
   - meta:
       type: map
       description: |
         Groovy Map containing sample information
         e.g. [id: 'sample_id']
-  - bwamem2_align_bam:
+  - minibwa_align_bam:
       type: list
       description: BAM and BAI file
       pattern: "*.{bam,bam.bai}"
@@ -51,4 +50,3 @@ output:
       pattern: "versions.yml"
 authors:
   - "@scwatts"
-  - "@mkcmkc"
