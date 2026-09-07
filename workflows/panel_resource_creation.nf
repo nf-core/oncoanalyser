@@ -160,6 +160,7 @@ workflow PANEL_RESOURCE_CREATION {
         ch_align_dna_tumor_out,
         ch_align_dna_normal_out,
         ch_inputs.map { meta -> [meta, [], []] },  // ch_dna_donor
+        ch_align_rna_tumor_out,
         ref_data.genome_fasta,
         ref_data.genome_version,
         ref_data.genome_fai,
@@ -176,6 +177,7 @@ workflow PANEL_RESOURCE_CREATION {
 
     // channel: [ meta, redux_dir ]
     ch_redux_tumor_out = REDUX_PROCESSING.out.tumor_dir
+    ch_redux_rna_out = REDUX_PROCESSING.out.rna_dir
     ch_redux_normal_out = REDUX_PROCESSING.out.normal_dir
 
     //
@@ -183,7 +185,7 @@ workflow PANEL_RESOURCE_CREATION {
     //
     ISOFOX_QUANTIFICATION(
         ch_inputs,
-        ch_align_rna_tumor_out,
+        ch_redux_rna_out,
         ref_data.genome_fasta,
         ref_data.genome_version,
         ref_data.genome_fai,

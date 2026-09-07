@@ -127,6 +127,7 @@ workflow PURITY_ESTIMATE {
             ch_align_dna_tumor_out,
             ch_align_dna_normal_out,
             ch_align_dna_donor_out,
+            ch_inputs.map { meta -> [meta, [], []] },  // ch_rna_tumor
             ref_data.genome_fasta,
             ref_data.genome_version,
             ref_data.genome_fai,
@@ -224,7 +225,7 @@ workflow PURITY_ESTIMATE {
             ch_inputs,
             ch_inputs.map { meta -> [meta, []] },  // ch_purple_dir
             ch_redux_tumor_out,
-            ch_inputs.map { meta -> [meta, [], []] },  // ch_tumor_rna_aln
+            ch_inputs.map { meta -> [meta, []] },  // ch_redux_dir_rna
             ref_data.genome_fasta,
             ref_data.genome_version,
             ref_data.genome_fai,

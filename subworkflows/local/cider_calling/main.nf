@@ -9,7 +9,7 @@ workflow CIDER_CALLING {
     // Sample data
     ch_inputs          // channel: [mandatory] [ meta ]
     ch_redux_dir_tumor // channel: [mandatory] [ meta, redux_dir ]
-    ch_tumor_rna_aln   // channel: [mandatory] [ meta, aln, idx ]
+    ch_redux_dir_rna   // channel: [mandatory] [ meta, redux_dir ]
 
     // Reference data
     genome_fasta       // channel: [mandatory] /path/to/genome_fasta
@@ -39,12 +39,15 @@ workflow CIDER_CALLING {
 
     // channel: runnable: [ meta, aln, idx ]
     // channel: skip: [ meta ]
-    ch_inputs_tumor_rna_sorted = ch_tumor_rna_aln
-        .map { meta, aln, idx ->
+    ch_inputs_tumor_rna_sorted = ch_redux_dir_rna
+        .map { meta, redux_dir_rna ->
+
+            def (rna_aln, rna_idx) = Utils.getTumorRnaReduxDirAlignment(meta, redux_dir_rna)
+
             return [
                 meta,
-                Utils.selectCurrentOrExisting(aln, meta, Constants.INPUT.ALN_RNA_TUMOR),
-                idx ?: Utils.getInput(meta, Constants.INPUT.IDX_RNA_TUMOR),
+                Utils.selectCurrentOrExisting(rna_aln, meta, Constants.INPUT.ALN_RNA_TUMOR),
+                rna_idx ?: Utils.getInput(meta, Constants.INPUT.IDX_RNA_TUMOR),
             ]
         }
         .branch { meta, aln, idx ->

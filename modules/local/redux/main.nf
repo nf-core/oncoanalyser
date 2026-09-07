@@ -13,6 +13,7 @@ process REDUX {
     val genome_ver
     path genome_fai
     path genome_dict
+    // NOTE(LN): Also use DNA unmap regions file for Tars RNA BAM because reads have genome (not transcriptome) coordinates.
     path unmap_regions
     path msi_jitter_sites
     path msi_model_coefficients
@@ -89,7 +90,7 @@ process REDUX {
         bqr_jitter_msi_only_arg = '-bqr_jitter_msi_only'
     }
 
-    if (meta.sample_type == 'tumor') {
+    if (meta.sample_type == 'tumor' && meta.sequence_type == 'dna') {
 
         if (msi_model_coefficients) {
             msi_model_coefficients_arg = "-msi_model_coefficients ${msi_model_coefficients}"

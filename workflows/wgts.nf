@@ -188,6 +188,7 @@ workflow WGTS {
     ch_redux_tumor_out = channel.empty()
     ch_redux_normal_out = channel.empty()
     ch_redux_donor_out = channel.empty()
+    ch_redux_rna_out = channel.empty()
     if (run_config.stages.redux) {
 
         REDUX_PROCESSING(
@@ -195,6 +196,7 @@ workflow WGTS {
             ch_align_dna_tumor_out,
             ch_align_dna_normal_out,
             ch_align_dna_donor_out,
+            ch_align_rna_tumor_out,
             ref_data.genome_fasta,
             ref_data.genome_version,
             ref_data.genome_fai,
@@ -212,12 +214,14 @@ workflow WGTS {
         ch_redux_tumor_out = ch_redux_tumor_out.mix(REDUX_PROCESSING.out.tumor_dir)
         ch_redux_normal_out = ch_redux_normal_out.mix(REDUX_PROCESSING.out.normal_dir)
         ch_redux_donor_out = ch_redux_donor_out.mix(REDUX_PROCESSING.out.donor_dir)
+        ch_redux_rna_out = ch_redux_rna_out.mix(REDUX_PROCESSING.out.rna_dir)
 
     } else {
 
         ch_redux_tumor_out = ch_inputs.map { meta -> [meta, []] }
         ch_redux_normal_out = ch_inputs.map { meta -> [meta, []] }
         ch_redux_donor_out = ch_inputs.map { meta -> [meta, []] }
+        ch_redux_rna_out = ch_inputs.map { meta -> [meta, []] }
 
     }
 
@@ -260,7 +264,7 @@ workflow WGTS {
 
         ISOFOX_QUANTIFICATION(
             ch_inputs,
-            ch_align_rna_tumor_out,
+            ch_redux_rna_out,
             ref_data.genome_fasta,
             ref_data.genome_version,
             ref_data.genome_fai,
@@ -536,7 +540,7 @@ workflow WGTS {
             ch_inputs,
             ch_purple_out,
             ch_inputs.map { meta -> [meta, []] },  // ch_redux_dir_tumor
-            ch_align_rna_tumor_out,
+            ch_redux_rna_out,
             ref_data.genome_fasta,
             ref_data.genome_version,
             ref_data.genome_fai,
@@ -648,7 +652,7 @@ workflow WGTS {
         CIDER_CALLING(
             ch_inputs,
             ch_redux_tumor_out,
-            ch_align_rna_tumor_out,
+            ch_redux_rna_out,
             ref_data.genome_fasta,
             ref_data.genome_version,
             ref_data.genome_fai,
@@ -713,7 +717,7 @@ workflow WGTS {
             ch_inputs,
             ch_redux_tumor_out,
             ch_redux_normal_out,
-            ch_align_rna_tumor_out,
+            ch_redux_rna_out,
             ch_purple_out,
             ref_data.genome_fasta,
             ref_data.genome_version,
@@ -816,7 +820,7 @@ workflow WGTS {
 
         NEO_PREDICTION(
             ch_inputs,
-            ch_align_rna_tumor_out,
+            ch_redux_rna_out,
             ch_isofox_out,
             ch_purple_out,
             ch_sage_append_somatic_out,

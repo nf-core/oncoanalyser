@@ -58,13 +58,16 @@ workflow TARS_ALIGNMENT {
     )
 
     // Set outputs, restoring original meta
-    // channel: [ meta, aln, idx ]
+    // NOTE(LN): Tars emits one BAM per sample, but it is carried as a list so that the output shape matches the DNA
+    // read alignment subworkflow
+    // channel: [ meta, [aln, ...], [idx, ...] ]
     ch_outputs = channel.empty()
         .mix(
-            WorkflowOncoanalyser.restoreMeta(channel.topic('tars_bam'), ch_inputs),
+            WorkflowOncoanalyser.restoreMeta(channel.topic('tars_bam'), ch_inputs)
+                .map { meta, aln, idx -> [meta, [aln], [idx]] },
             ch_inputs_sorted.skip.map { meta -> [meta, [], []] },
         )
 
     emit:
-    rna = ch_outputs // channel: [ meta, aln, idx ]
+    rna = ch_outputs // channel: [ meta, [aln, ...], [idx, ...] ]
 }

@@ -228,6 +228,12 @@ class Constants {
             SequenceType.DNA,
         ],
 
+        REDUX_DIR_RNA: [
+            FileType.REDUX_DIR,
+            SampleType.TUMOR,
+            SequenceType.RNA,
+        ],
+
 
         // Other tools
         ISOFOX_DIR: [

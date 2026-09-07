@@ -843,6 +843,10 @@ class Utils {
         return getReduxDirAlignment(getTumorDnaSampleName(meta), redux_dir)
     }
 
+    public static getTumorRnaReduxDirAlignment(meta, redux_dir) {
+        return getReduxDirAlignment(getTumorRnaSampleName(meta), redux_dir)
+    }
+
     public static getNormalReduxDirAlignment(meta, redux_dir) {
         return getReduxDirAlignment(getNormalDnaSampleName(meta), redux_dir)
     }

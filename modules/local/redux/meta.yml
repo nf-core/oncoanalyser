@@ -38,7 +38,7 @@ input:
       pattern: "*.{dict}"
   - unmap_regions:
       type: file
-      description: Unmapped regions file
+      description: Unmapped regions file; applied to both DNA and RNA alignments
       pattern: "*.{tsv}"
   - msi_jitter_sites:
       type: file

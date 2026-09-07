@@ -10,7 +10,7 @@ workflow LILAC_CALLING {
     ch_inputs           // channel: [mandatory] [ meta ]
     ch_redux_dir_tumor  // channel: [mandatory] [ meta, redux_dir ]
     ch_redux_dir_normal // channel: [mandatory] [ meta, redux_dir ]
-    ch_tumor_rna_aln    // channel: [mandatory] [ meta, aln, idx ]
+    ch_redux_dir_rna    // channel: [mandatory] [ meta, redux_dir ]
     ch_purple           // channel: [mandatory] [ meta, purple_dir ]
 
     // Reference data
@@ -30,16 +30,17 @@ workflow LILAC_CALLING {
     ch_dna_inputs_sorted = WorkflowOncoanalyser.groupByMeta(
         ch_redux_dir_tumor,
         ch_redux_dir_normal,
-        ch_tumor_rna_aln,
+        ch_redux_dir_rna,
         ch_purple,
     )
-        .map { meta, redux_dir_tumor, redux_dir_normal, tumor_rna_aln, tumor_rna_idx, purple_dir ->
+        .map { meta, redux_dir_tumor, redux_dir_normal, redux_dir_rna, purple_dir ->
 
             def redux_dir_tumor_selected = Utils.selectCurrentOrExisting(redux_dir_tumor, meta, Constants.INPUT.REDUX_DIR_TUMOR)
             def redux_dir_normal_selected = Utils.selectCurrentOrExisting(redux_dir_normal, meta, Constants.INPUT.REDUX_DIR_NORMAL)
 
             def (tumor_dna_aln, tumor_dna_idx) = Utils.getTumorReduxDirAlignment(meta, redux_dir_tumor_selected)
             def (normal_dna_aln, normal_dna_idx) = Utils.getNormalReduxDirAlignment(meta, redux_dir_normal_selected)
+            def (tumor_rna_aln, tumor_rna_idx) = Utils.getTumorRnaReduxDirAlignment(meta, redux_dir_rna)
 
             return [
                 meta,
