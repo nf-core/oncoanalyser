@@ -56,7 +56,21 @@ process LINX_SOMATIC {
     """
     mkdir -p linx_somatic/
 
-    touch linx_somatic/.stub
+    touch linx_somatic/linx.version
+    touch linx_somatic/${meta.sample_id}.linx.breakend.tsv
+    touch linx_somatic/${meta.sample_id}.linx.clusters.tsv
+    touch linx_somatic/${meta.sample_id}.linx.driver.catalog.tsv
+    touch linx_somatic/${meta.sample_id}.tumor.linx.drivers.tsv
+    touch linx_somatic/${meta.sample_id}.linx.fusion.tsv
+    touch linx_somatic/${meta.sample_id}.linx.links.tsv
+    touch linx_somatic/${meta.sample_id}.linx.neoepitope.tsv
+    touch linx_somatic/${meta.sample_id}.linx.svs.tsv
+    touch linx_somatic/${meta.sample_id}.linx.vis_copy_number.tsv
+    touch linx_somatic/${meta.sample_id}.linx.vis_fusion.tsv
+    touch linx_somatic/${meta.sample_id}.linx.vis_gene_exon.tsv
+    touch linx_somatic/${meta.sample_id}.linx.vis_protein_domain.tsv
+    touch linx_somatic/${meta.sample_id}.linx.vis_segments.tsv
+    touch linx_somatic/${meta.sample_id}.linx.vis_sv_data.tsv
 
     echo -e '${task.process}:\\n  stub: noversions\\n' > versions.yml
     """
