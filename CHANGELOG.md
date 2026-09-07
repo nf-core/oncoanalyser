@@ -6,6 +6,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/) 
 ## [dev]
 
 - [325](https://github.com/nf-core/oncoanalyser/pull/325) - Post-release bump
+- [330](https://github.com/nf-core/oncoanalyser/pull/330) - Fix stub behaviour of `LINX_SOMATIC` module.
 
 ## [[3.0.0](https://github.com/nf-core/oncoanalyser/releases/tag/3.0.0)] Scarlet Honeyeater - 2026-09-01
 
