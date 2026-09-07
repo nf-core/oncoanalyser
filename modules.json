@@ -11,12 +11,6 @@
                         "installed_by": ["modules"],
                         "patch": "modules/nf-core/bwa/index/bwa-index.diff"
                     },
-                    "bwamem2/index": {
-                        "branch": "master",
-                        "git_sha": "7081e04c18de9480948d34513a1c1e2d0fa9126d",
-                        "installed_by": ["modules"],
-                        "patch": "modules/nf-core/bwamem2/index/bwamem2-index.diff"
-                    },
                     "gatk4/markduplicates": {
                         "branch": "master",
                         "git_sha": "c066b820236aa43fce94c7b5353a6e0cccff9910",

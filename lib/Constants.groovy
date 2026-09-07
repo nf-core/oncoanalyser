@@ -49,7 +49,7 @@ class Constants {
         WTS,
 
         // Individual types
-        BWAMEM2_INDEX,
+        MINIBWA_INDEX,
         DICT,
         DNA_ALIGNMENT,
         FAI,

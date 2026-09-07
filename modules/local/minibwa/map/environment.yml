@@ -1,8 +1,8 @@
-name: bwa-mem2_mem
+name: minibwa_map
 channels:
   - conda-forge
   - bioconda
 dependencies:
-  - bioconda::bwa-mem2=2.3
+  - bioconda::minibwa=0.7
   - bioconda::samtools=1.21
   - bioconda::sambamba=1.0.1
