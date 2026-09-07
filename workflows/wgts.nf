@@ -24,8 +24,9 @@ include { PREPARE_OUTPUTS_WGTS                 } from '../subworkflows/local/pre
 include { PREPARE_REFERENCE                    } from '../subworkflows/local/prepare_reference'
 include { PURPLE_CALLING                       } from '../subworkflows/local/purple_calling'
 include { QSEE_METRICS                         } from '../subworkflows/local/qsee_metrics'
-include { READ_ALIGNMENT_DNA } from '../subworkflows/local/read_alignment_dna'
-include { READ_ALIGNMENT_RNA } from '../subworkflows/local/read_alignment_rna'
+include { READ_ALIGNMENT_DNA                   } from '../subworkflows/local/read_alignment_dna'
+include { READ_ALIGNMENT_RNA                   } from '../subworkflows/local/read_alignment_rna'
+include { TARS_ALIGNMENT                       } from '../subworkflows/local/tars_alignment'
 include { READ_UMI_PROCESSING                  } from '../subworkflows/local/read_umi_processing'
 include { REDUX_PROCESSING                     } from '../subworkflows/local/redux_processing'
 include { SAGE_APPEND                          } from '../subworkflows/local/sage_append'
@@ -153,7 +154,22 @@ workflow WGTS {
         ch_align_dna_normal_out = ch_align_dna_normal_out.mix(READ_ALIGNMENT_DNA.out.normal)
         ch_align_dna_donor_out = ch_align_dna_donor_out.mix(READ_ALIGNMENT_DNA.out.donor)
 
-        ch_align_rna_tumor_out = ch_align_rna_tumor_out.mix(READ_ALIGNMENT_RNA.out.rna)
+
+        //
+        // SUBWORKFLOW: Run TARS to lift RNA alignments back to genome coordinates
+        //
+        TARS_ALIGNMENT(
+            ch_inputs,
+            READ_ALIGNMENT_RNA.out.rna,
+            ref_data.genome_fasta_rna,
+            ref_data.genome_version,
+            ref_data.genome_fai_rna,
+            ref_data.genome_dict_rna,
+            hmf_data.contigs_mapping_rna,
+            hmf_data.unmap_regions_rna,
+        )
+
+        ch_align_rna_tumor_out = ch_align_rna_tumor_out.mix(TARS_ALIGNMENT.out.rna)
 
     } else {
 

@@ -14,6 +14,7 @@ include { PREPARE_OUTPUTS_PANEL_RESOURCE_CREATION } from '../subworkflows/local/
 include { PREPARE_REFERENCE                       } from '../subworkflows/local/prepare_reference'
 include { READ_ALIGNMENT_DNA                      } from '../subworkflows/local/read_alignment_dna'
 include { READ_ALIGNMENT_RNA                      } from '../subworkflows/local/read_alignment_rna'
+include { TARS_ALIGNMENT                          } from '../subworkflows/local/tars_alignment'
 include { READ_UMI_PROCESSING                     } from '../subworkflows/local/read_umi_processing'
 include { REDUX_PROCESSING                        } from '../subworkflows/local/redux_processing'
 include { SAGE_CALLING                            } from '../subworkflows/local/sage_calling'
@@ -133,7 +134,23 @@ workflow PANEL_RESOURCE_CREATION {
     // channel: [ meta, [aln, ...], [idx, ...] ]
     ch_align_dna_tumor_out = READ_ALIGNMENT_DNA.out.tumor
     ch_align_dna_normal_out = READ_ALIGNMENT_DNA.out.normal
-    ch_align_rna_tumor_out = READ_ALIGNMENT_RNA.out.rna
+
+    //
+    // SUBWORKFLOW: Run TARS to lift RNA alignments back to genome coordinates
+    //
+    TARS_ALIGNMENT(
+        ch_inputs,
+        READ_ALIGNMENT_RNA.out.rna,
+        ref_data.genome_fasta_rna,
+        ref_data.genome_version,
+        ref_data.genome_fai_rna,
+        ref_data.genome_dict_rna,
+        hmf_data.contigs_mapping_rna,
+        hmf_data.unmap_regions_rna,
+    )
+
+    // channel: [ meta, aln, idx ]
+    ch_align_rna_tumor_out = TARS_ALIGNMENT.out.rna
 
     //
     // SUBWORKFLOW: Run REDUX for DNA alignments
