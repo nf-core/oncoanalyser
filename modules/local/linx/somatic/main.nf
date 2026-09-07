@@ -60,7 +60,7 @@ process LINX_SOMATIC {
     touch linx_somatic/${meta.sample_id}.linx.breakend.tsv
     touch linx_somatic/${meta.sample_id}.linx.clusters.tsv
     touch linx_somatic/${meta.sample_id}.linx.driver.catalog.tsv
-    touch linx_somatic/${meta.sample_id}.tumor.linx.drivers.tsv
+    touch linx_somatic/${meta.sample_id}.linx.drivers.tsv
     touch linx_somatic/${meta.sample_id}.linx.fusion.tsv
     touch linx_somatic/${meta.sample_id}.linx.links.tsv
     touch linx_somatic/${meta.sample_id}.linx.neoepitope.tsv
