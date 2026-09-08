@@ -35,7 +35,7 @@ process REDUX {
     script:
     def args = task.ext.args ?: ''
 
-    def xmx_mod = task.ext.xmx_mod ?: 0.95
+    def xmx_mod = task.ext.xmx_mod ?: 0.75
 
     def log_level_arg = task.ext.log_level ? "-log_level ${task.ext.log_level}" : ''
 
