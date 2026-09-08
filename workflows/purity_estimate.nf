@@ -132,7 +132,7 @@ workflow PURITY_ESTIMATE {
             ref_data.genome_version,
             ref_data.genome_fai,
             ref_data.genome_dict,
-            hmf_data.unmap_regions,
+            hmf_data.unmap_regions_dna,
             hmf_data.msi_jitter_sites,
             // NOTE(LN): panel specific MSI predictions not used as indels are unimportant for WISP
             [],  // msi_model_coefficients

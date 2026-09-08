@@ -36,7 +36,7 @@ input:
       type: file
       description: Reference genome assembly dict file
       pattern: "*.{dict}"
-  - unmap_regions:
+  - unmap_regions_dna:
       type: file
       description: Unmapped regions file; applied to both DNA and RNA alignments
       pattern: "*.{tsv}"

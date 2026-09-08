@@ -165,7 +165,7 @@ workflow PANEL_RESOURCE_CREATION {
         ref_data.genome_version,
         ref_data.genome_fai,
         ref_data.genome_dict,
-        hmf_data.unmap_regions,
+        hmf_data.unmap_regions_dna,
         hmf_data.msi_jitter_sites,
         hmf_data.msi_model_coefficients,
         hmf_data.msi_model_error_rates,

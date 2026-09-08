@@ -69,7 +69,7 @@ input:
   - repeatmasker_annotations:
       type: file
       description: RepeatMasker annotations file
-  - unmap_regions:
+  - unmap_regions_dna:
       type: file
       description: Hartwig unmap regions file
       pattern: "*.{tsv}"

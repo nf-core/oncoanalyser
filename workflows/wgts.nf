@@ -201,7 +201,7 @@ workflow WGTS {
             ref_data.genome_version,
             ref_data.genome_fai,
             ref_data.genome_dict,
-            hmf_data.unmap_regions,
+            hmf_data.unmap_regions_dna,
             hmf_data.msi_jitter_sites,
             [],  // msi_model_coefficients
             [],  // msi_model_error_rates
@@ -373,7 +373,7 @@ workflow WGTS {
             hmf_data.saga_germline_variants_dict,
             hmf_data.saga_germline_variants_img,
             hmf_data.repeatmasker_annotations,
-            hmf_data.unmap_regions,
+            hmf_data.unmap_regions_dna,
             [],  // target_regions_bed
             params.sequencing_platform,
         )

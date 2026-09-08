@@ -18,7 +18,7 @@ workflow REDUX_PROCESSING {
     genome_version         // channel: [mandatory] genome version
     genome_fai             // channel: [mandatory] /path/to/genome_fai
     genome_dict            // channel: [mandatory] /path/to/genome_dict
-    unmap_regions      // channel: [mandatory] /path/to/unmap_regions
+    unmap_regions_dna      // channel: [mandatory] /path/to/unmap_regions_dna
     msi_jitter_sites       // channel: [mandatory] /path/to/msi_jitter_sites
     msi_model_coefficients // channel: [mandatory] /path/to/msi_model_coefficients
     msi_model_error_rates  // channel: [mandatory] /path/to/msi_model_error_rates
@@ -70,7 +70,7 @@ workflow REDUX_PROCESSING {
         genome_version,
         genome_fai,
         genome_dict,
-        unmap_regions,
+        unmap_regions_dna,
         msi_jitter_sites,
         msi_model_coefficients,
         msi_model_error_rates,

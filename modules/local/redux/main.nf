@@ -14,7 +14,7 @@ process REDUX {
     path genome_fai
     path genome_dict
     // NOTE(LN): Also use DNA unmap regions file for Tars RNA BAM because reads have genome (not transcriptome) coordinates.
-    path unmap_regions
+    path unmap_regions_dna
     path msi_jitter_sites
     path msi_model_coefficients
     path msi_model_error_rates
@@ -113,7 +113,7 @@ process REDUX {
         -ref_genome ${genome_fasta} \\
         -ref_genome_version ${genome_ver} \\
         -ref_genome_msi_file ${msi_jitter_sites} \\
-        -unmap_regions ${unmap_regions} \\
+        -unmap_regions ${unmap_regions_dna} \\
         -bamtool \$(which samtools) \\
         -sequencing_type ${sequencing_platform.toUpperCase()} \\
         -bqr_write_plot \\
