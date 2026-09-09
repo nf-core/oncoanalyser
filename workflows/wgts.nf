@@ -220,12 +220,14 @@ workflow WGTS {
     // channel: [ meta, bamtools_dir ]
     ch_bamtools_tumor_out = channel.empty()
     ch_bamtools_normal_out = channel.empty()
+    ch_bamtools_rna_out = channel.empty()
     if (run_config.stages.bamtools) {
 
         BAMTOOLS_METRICS(
             ch_inputs,
             ch_redux_tumor_out,
             ch_redux_normal_out,
+            ch_redux_rna_out,
             ref_data.genome_fasta,
             ref_data.genome_version,
             ref_data.genome_fai,
@@ -236,11 +238,13 @@ workflow WGTS {
 
         ch_bamtools_tumor_out = ch_bamtools_tumor_out.mix(BAMTOOLS_METRICS.out.tumor_dir)
         ch_bamtools_normal_out = ch_bamtools_normal_out.mix(BAMTOOLS_METRICS.out.normal_dir)
+        ch_bamtools_rna_out = ch_bamtools_rna_out.mix(BAMTOOLS_METRICS.out.rna_dir)
 
     } else {
 
         ch_bamtools_tumor_out = ch_inputs.map { meta -> [meta, []] }
         ch_bamtools_normal_out = ch_inputs.map { meta -> [meta, []] }
+        ch_bamtools_rna_out = ch_inputs.map { meta -> [meta, []] }
 
     }
 

@@ -263,6 +263,11 @@ class Constants {
             SampleType.NORMAL,
             SequenceType.DNA,
         ],
+        BAMTOOLS_DIR_RNA: [
+            FileType.BAMTOOLS_DIR,
+            SampleType.TUMOR,
+            SequenceType.RNA,
+        ],
 
         SAGE_DIR_TUMOR: [
             FileType.SAGE_DIR,
