@@ -26,13 +26,6 @@ process BWAMEM2_ALIGN_RNA {
 
     def output_fn = meta.split ? "${meta.split}.${meta.output_file_id}.bam" : "${meta.output_file_id}.bam"
 
-    def soft_clip_supplementaries_arg = '-Y'
-    def input_bases_per_batch_arg     = '-K 100000000'
-    def read_group_header_arg         = "-R '${meta.rg_line}'"
-    def threads_arg                   = "-t ${task.cpus}"
-    def min_alignment_score_arg       = '-T 19'
-    def max_alt_loci_per_read_arg     = '-h 75'
-
     // NOTE(LN): TARS consumes read groups:
     // - Output BAM must therefore stay name-grouped, not coordinate sorted
     // - No BAI file created - that would require a coordinate sorted BAM
@@ -41,18 +34,18 @@ process BWAMEM2_ALIGN_RNA {
 
     bwa-mem2 mem \\
         ${args} \\
-        ${soft_clip_supplementaries_arg} \\
-        ${input_bases_per_batch_arg} \\
-        ${read_group_header_arg} \\
-        ${threads_arg} \\
-        ${min_alignment_score_arg} \\
-        ${max_alt_loci_per_read_arg} \\
+        -Y \\
+        -K 100000000 \\
+        -R '${meta.rg_line}' \\
+        -t ${task.cpus} \\
+        -T 19 \\
+        -h 75 \\
         \\
         ${genome_fasta} \\
         ${reads_fwd} \\
-        ${reads_rev} \\
+        ${reads_rev} | \\
         \\
-        | sambamba view \\
+        sambamba view \\
             ${args2} \\
             --sam-input \\
             --format bam \\
