@@ -1,9 +1,10 @@
 //
-// Align RNA reads
+// Align RNA reads and lift alignments back to genome coordinates
 //
 
 include { BWAMEM2_ALIGN_RNA } from '../../../modules/local/bwa-mem2/mem/rna/main'
 include { FASTP_SPLIT       } from '../../../modules/local/fastp/split/main'
+include { TARS              } from '../../../modules/local/tars/main'
 
 include { getFastqsBySampleType } from '../utils_nfcore_oncoanalyser_pipeline/helpers_read_alignment'
 include { createFastqInputs     } from '../utils_nfcore_oncoanalyser_pipeline/helpers_read_alignment'
@@ -20,7 +21,12 @@ workflow READ_ALIGNMENT_RNA {
 
     // Reference data
     genome_fasta         // channel: [mandatory] /path/to/genome_fasta
+    genome_version       // channel: [mandatory] genome version
+    genome_fai           // channel: [mandatory] /path/to/genome_fai
+    genome_dict          // channel: [mandatory] /path/to/genome_dict
     genome_bwamem2_index // channel: [mandatory] /path/to/genome_bwa-mem2_index_dir/
+    contigs_mapping_rna  // channel: [mandatory] /path/to/contigs_mapping_rna
+    unmap_regions_rna    // channel: [mandatory] /path/to/unmap_regions_rna
 
     // Params
     max_fastq_records    // numeric: [optional]  max number of FASTQ records per split
@@ -100,18 +106,49 @@ workflow READ_ALIGNMENT_RNA {
         .groupTuple()
 
     //
+    // MODULE: TARS
+    //
+    // Create process input channel, restoring original meta to source the RNA sample name
+    // channel: [ meta_tars, [aln, ...] ]
+    ch_tars_inputs = WorkflowOncoanalyser.restoreMeta(ch_alns_united, ch_inputs)
+        .map { meta, alns ->
+
+            def sample_id = Utils.getTumorRnaSampleName(meta)
+
+            def meta_tars = [
+                key: meta.group_id,
+                id: "${meta.group_id}_${sample_id}",
+                sample_id: sample_id,
+            ]
+
+            return [meta_tars, alns]
+        }
+
+    // Run process
+    TARS(
+        ch_tars_inputs,
+        genome_fasta,
+        genome_version,
+        genome_fai,
+        genome_dict,
+        contigs_mapping_rna,
+        unmap_regions_rna,
+    )
+
+    //
     // STEP: Handle outputs
     //
     // Set outputs, restoring original meta
-    // NOTE(LN): the empty index position is kept so that the output shape matches the DNA alignment subworkflow and
-    // the placeholders set by the calling workflows
-    // channel: [ meta, [aln, ...], [] ]
+    // NOTE(LN): Tars emits one BAM per sample, but it is carried as a list so that the output shape matches the DNA
+    // read alignment subworkflow
+    // channel: [ meta, [aln, ...], [idx, ...] ]
     ch_outputs_rna = channel.empty()
         .mix(
-            WorkflowOncoanalyser.restoreMeta(ch_alns_united.map { meta_group, alns -> [meta_group, alns, []] }, ch_inputs),
+            WorkflowOncoanalyser.restoreMeta(channel.topic('tars_bam'), ch_inputs)
+                .map { meta, aln, idx -> [meta, [aln], [idx]] },
             ch_inputs_rna_sorted.skip.unique().map { meta -> [meta, [], []] },
         )
 
     emit:
-    rna = ch_outputs_rna // channel: [ meta, [aln, ...], [] ]
+    rna = ch_outputs_rna // channel: [ meta, [aln, ...], [idx, ...] ]
 }
