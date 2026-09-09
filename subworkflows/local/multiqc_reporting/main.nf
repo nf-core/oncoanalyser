@@ -14,6 +14,7 @@ workflow MULTIQC_REPORTING {
     // Sample data
     ch_bamtools_dir_tumor     // channel: [mandatory] [ meta, bamtools_dir ]
     ch_bamtools_dir_normal    // channel: [optional]  [ meta, bamtools_dir ]
+    ch_bamtools_dir_rna       // channel: [optional]  [ meta, bamtools_dir ]
     ch_amber_dir              // channel: [mandatory] [ meta, amber_dir ]
     ch_purple_dir             // channel: [mandatory] [ meta, purple_dir ]
 
@@ -25,29 +26,29 @@ workflow MULTIQC_REPORTING {
 
     main:
     // Select input sources then sort
-    // NOTE(LN): RNA alignment QC files are not collected while RNA alignment is being moved from STAR to
-    // bwa-mem2 / TARS / REDUX; REDUX derived metrics are to be added back with the REDUX step
-    // channel: [ meta, bamtools_tumor_dir, bamtools_normal_dir, amber_dir, purple_dir ]
+    // channel: [ meta, bamtools_tumor_dir, bamtools_normal_dir, bamtools_rna_dir, amber_dir, purple_dir ]
     ch_inputs_sorted = WorkflowOncoanalyser.groupByMeta(
         ch_bamtools_dir_tumor,
         ch_bamtools_dir_normal,
+        ch_bamtools_dir_rna,
         ch_amber_dir,
         ch_purple_dir,
     )
-        .map { meta, bamtools_dir_tumor, bamtools_dir_normal, amber_dir, purple_dir ->
+        .map { meta, bamtools_dir_tumor, bamtools_dir_normal, bamtools_dir_rna, amber_dir, purple_dir ->
 
             return [
                 meta,
                 Utils.selectCurrentOrExisting(bamtools_dir_tumor, meta, Constants.INPUT.BAMTOOLS_DIR_TUMOR),
                 Utils.selectCurrentOrExisting(bamtools_dir_normal, meta, Constants.INPUT.BAMTOOLS_DIR_NORMAL),
+                Utils.selectCurrentOrExisting(bamtools_dir_rna, meta, Constants.INPUT.BAMTOOLS_DIR_RNA),
                 Utils.selectCurrentOrExisting(amber_dir, meta, Constants.INPUT.AMBER_DIR),
                 Utils.selectCurrentOrExisting(purple_dir, meta, Constants.INPUT.PURPLE_DIR),
             ]
 
         }
-        .branch { meta, bamtools_dir_tumor, bamtools_dir_normal, amber_dir, purple_dir ->
+        .branch { meta, bamtools_dir_tumor, bamtools_dir_normal, bamtools_dir_rna, amber_dir, purple_dir ->
 
-            runnable: bamtools_dir_tumor || bamtools_dir_normal || amber_dir || purple_dir
+            runnable: bamtools_dir_tumor || bamtools_dir_normal || bamtools_dir_rna || amber_dir || purple_dir
             skip: true
                 return meta
         }

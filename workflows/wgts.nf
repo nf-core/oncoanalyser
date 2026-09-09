@@ -927,6 +927,7 @@ workflow WGTS {
         MULTIQC_REPORTING(
             ch_bamtools_tumor_out,
             ch_bamtools_normal_out,
+            ch_bamtools_rna_out,
             ch_amber_out,
             ch_purple_out,
             ch_collated_versions,
