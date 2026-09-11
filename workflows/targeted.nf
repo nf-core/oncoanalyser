@@ -92,9 +92,6 @@ workflow TARGETED {
     ch_align_dna_donor_out = channel.empty()
     ch_align_rna_tumor_out = channel.empty()
 
-    // channel: [ meta, star_log, rna_md_metrics ]
-    ch_align_rna_qc_tumor_out = channel.empty()
-
     if (run_config.stages.alignment) {
 
 
@@ -145,15 +142,21 @@ workflow TARGETED {
         READ_ALIGNMENT_RNA(
             ch_inputs,
             ch_align_rna_input,
-            ref_data.genome_star_index,
+            ref_data.genome_fasta_rna,
+            ref_data.genome_version,
+            ref_data.genome_fai_rna,
+            ref_data.genome_dict_rna,
+            ref_data.genome_bwamem2_index_rna,
+            hmf_data.contigs_mapping_rna,
+            hmf_data.unmap_regions_rna,
+            params.max_fastq_records,
         )
 
         ch_align_dna_tumor_out = ch_align_dna_tumor_out.mix(READ_ALIGNMENT_DNA.out.tumor)
         ch_align_dna_normal_out = ch_align_dna_normal_out.mix(READ_ALIGNMENT_DNA.out.normal)
         ch_align_dna_donor_out = ch_align_dna_donor_out.mix(READ_ALIGNMENT_DNA.out.donor)
 
-        ch_align_rna_tumor_out = ch_align_rna_tumor_out.mix(READ_ALIGNMENT_RNA.out.tumor)
-        ch_align_rna_qc_tumor_out = ch_align_rna_qc_tumor_out.mix(READ_ALIGNMENT_RNA.out.qc_files)
+        ch_align_rna_tumor_out = ch_align_rna_tumor_out.mix(READ_ALIGNMENT_RNA.out.rna)
 
     } else {
 
@@ -162,7 +165,6 @@ workflow TARGETED {
         ch_align_dna_donor_out = ch_inputs.map { meta -> [meta, [], []] }
 
         ch_align_rna_tumor_out = ch_inputs.map { meta -> [meta, [], []] }
-        ch_align_rna_qc_tumor_out = ch_inputs.map { meta -> [meta, [], []] }
 
     }
 
@@ -173,6 +175,7 @@ workflow TARGETED {
     ch_redux_tumor_out = channel.empty()
     ch_redux_normal_out = channel.empty()
     ch_redux_donor_out = channel.empty()
+    ch_redux_rna_out = channel.empty()
     if (run_config.stages.redux) {
 
         REDUX_PROCESSING(
@@ -180,11 +183,12 @@ workflow TARGETED {
             ch_align_dna_tumor_out,
             ch_align_dna_normal_out,
             ch_align_dna_donor_out,
+            ch_align_rna_tumor_out,
             ref_data.genome_fasta,
             ref_data.genome_version,
             ref_data.genome_fai,
             ref_data.genome_dict,
-            hmf_data.unmap_regions,
+            hmf_data.unmap_regions_dna,
             hmf_data.msi_jitter_sites,
             hmf_data.msi_model_coefficients,
             msi_model_error_rates,
@@ -197,12 +201,14 @@ workflow TARGETED {
         ch_redux_tumor_out = ch_redux_tumor_out.mix(REDUX_PROCESSING.out.tumor_dir)
         ch_redux_normal_out = ch_redux_normal_out.mix(REDUX_PROCESSING.out.normal_dir)
         ch_redux_donor_out = ch_redux_donor_out.mix(REDUX_PROCESSING.out.donor_dir)
+        ch_redux_rna_out = ch_redux_rna_out.mix(REDUX_PROCESSING.out.rna_dir)
 
     } else {
 
         ch_redux_tumor_out = ch_inputs.map { meta -> [meta, []] }
         ch_redux_normal_out = ch_inputs.map { meta -> [meta, []] }
         ch_redux_donor_out = ch_inputs.map { meta -> [meta, []] }
+        ch_redux_rna_out = ch_inputs.map { meta -> [meta, []] }
 
     }
 
@@ -212,12 +218,14 @@ workflow TARGETED {
     // channel: [ meta, bamtools_dir ]
     ch_bamtools_tumor_out = channel.empty()
     ch_bamtools_normal_out = channel.empty()
+    ch_bamtools_rna_out = channel.empty()
     if (run_config.stages.bamtools) {
 
         BAMTOOLS_METRICS(
             ch_inputs,
             ch_redux_tumor_out,
             ch_redux_normal_out,
+            ch_redux_rna_out,
             ref_data.genome_fasta,
             ref_data.genome_version,
             ref_data.genome_fai,
@@ -228,11 +236,13 @@ workflow TARGETED {
 
         ch_bamtools_tumor_out = ch_bamtools_tumor_out.mix(BAMTOOLS_METRICS.out.tumor_dir)
         ch_bamtools_normal_out = ch_bamtools_normal_out.mix(BAMTOOLS_METRICS.out.normal_dir)
+        ch_bamtools_rna_out = ch_bamtools_rna_out.mix(BAMTOOLS_METRICS.out.rna_dir)
 
     } else {
 
         ch_bamtools_tumor_out = ch_inputs.map { meta -> [meta, []] }
         ch_bamtools_normal_out = ch_inputs.map { meta -> [meta, []] }
+        ch_bamtools_rna_out = ch_inputs.map { meta -> [meta, []] }
 
     }
 
@@ -245,7 +255,7 @@ workflow TARGETED {
 
         ISOFOX_QUANTIFICATION(
             ch_inputs,
-            ch_align_rna_tumor_out,
+            ch_redux_rna_out,
             ref_data.genome_fasta,
             ref_data.genome_version,
             ref_data.genome_fai,
@@ -354,7 +364,7 @@ workflow TARGETED {
             hmf_data.saga_germline_variants_dict,
             hmf_data.saga_germline_variants_img,
             hmf_data.repeatmasker_annotations,
-            hmf_data.unmap_regions,
+            hmf_data.unmap_regions_dna,
             panel_data.target_regions_bed,
             params.sequencing_platform,
         )
@@ -521,7 +531,7 @@ workflow TARGETED {
             ch_inputs,
             ch_purple_out,
             ch_inputs.map { meta -> [meta, []] },  // ch_redux_dir_tumor
-            ch_align_rna_tumor_out,
+            ch_redux_rna_out,
             ref_data.genome_fasta,
             ref_data.genome_version,
             ref_data.genome_fai,
@@ -633,7 +643,7 @@ workflow TARGETED {
         CIDER_CALLING(
             ch_inputs,
             ch_redux_tumor_out,
-            ch_align_rna_tumor_out,
+            ch_redux_rna_out,
             ref_data.genome_fasta,
             ref_data.genome_version,
             ref_data.genome_fai,
@@ -654,7 +664,7 @@ workflow TARGETED {
             ch_inputs,
             ch_redux_tumor_out,
             ch_redux_normal_out,
-            ch_align_rna_tumor_out,
+            ch_redux_rna_out,
             ch_purple_out,
             ref_data.genome_fasta,
             ref_data.genome_version,
@@ -772,9 +782,9 @@ workflow TARGETED {
         MULTIQC_REPORTING(
             ch_bamtools_tumor_out,
             ch_bamtools_normal_out,
+            ch_bamtools_rna_out,
             ch_amber_out,
             ch_purple_out,
-            ch_align_rna_qc_tumor_out,
             ch_collated_versions,
             params.multiqc_config,
             params.multiqc_methods_description,

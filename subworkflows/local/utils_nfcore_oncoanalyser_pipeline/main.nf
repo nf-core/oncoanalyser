@@ -297,16 +297,36 @@ def getDnaFastqChannel(ch_inputs) {
             skip: true
         }
 
+    // channel: [ meta, meta_sample, sample_type ]
+    def ch_sorted = channel.empty()
+        .mix(
+            ch_inputs_tumor_sorted.runnable.map  { meta -> [meta, Utils.getTumorDnaSample(meta), 'tumor'] },
+            ch_inputs_normal_sorted.runnable.map { meta -> [meta, Utils.getNormalDnaSample(meta), 'normal'] },
+            ch_inputs_donor_sorted.runnable.map  { meta -> [meta, Utils.getDonorDnaSample(meta), 'donor'] },
+            ch_inputs_tumor_sorted.skip.map  { meta -> [meta, [:], 'tumor'] },
+            ch_inputs_normal_sorted.skip.map { meta -> [meta, [:], 'normal'] },
+            ch_inputs_donor_sorted.skip.map  { meta -> [meta, [:], 'donor'] },
+        )
+
     // Create FASTQ input channel
     // channel: [ meta, fastq_info, fastq_fwd, fastq_rev ]
-    def ch_fastqs = channel.empty()
-        .mix(
-            ch_inputs_tumor_sorted.runnable.map { meta -> [meta, Utils.getTumorDnaSample(meta), 'tumor'] },
-            ch_inputs_normal_sorted.runnable.map { meta -> [meta, Utils.getNormalDnaSample(meta), 'normal'] },
-            ch_inputs_donor_sorted.runnable.map { meta -> [meta, Utils.getDonorDnaSample(meta), 'donor'] },
-        )
+    return ch_sorted
         .flatMap { meta, meta_sample, sample_type ->
-            meta_sample
+
+            // Convert [ meta, meta_sample, sample_type ] -> [ meta, fastq_info, fastq_fwd, fastq_rev ]
+            if (! meta_sample) {
+                def fastq_info = [
+                    'sample_type': sample_type  // NOTE(LN): used by downstream helper methods
+                ]
+
+                def fastq_fwd = []
+                def fastq_rev = []
+
+                def fastq_entry = [meta, fastq_info, fastq_fwd, fastq_rev]
+                return [fastq_entry]
+            }
+
+            return meta_sample
                 .getAt(Constants.FileType.FASTQ)
                 .collect { key, d ->
                     def (library_id, lane, flowcell) = key
@@ -322,60 +342,77 @@ def getDnaFastqChannel(ch_inputs) {
                     ]
 
                     if (flowcell) {
-                         fastq_info.flowcell = flowcell
+                        fastq_info.flowcell = flowcell
                     }
 
-                    return [meta, fastq_info, d['fwd'], d['rev']]
+                    def fastq_fwd = d['fwd']
+                    def fastq_rev = d['rev']
+
+                    def fastq_entry = [meta, fastq_info, fastq_fwd, fastq_rev]
+                    return fastq_entry
                 }
         }
-
-    return channel.empty()
-        .mix(
-            ch_fastqs,
-            ch_inputs_tumor_sorted.skip.map { meta -> [meta, [:], [], []] },
-            ch_inputs_normal_sorted.skip.map { meta -> [meta, [:], [], []] },
-            ch_inputs_donor_sorted.skip.map { meta -> [meta, [:], [], []] },
-        )
 }
 
 def getRnaFastqChannel(ch_inputs) {
     // Sort inputs
     // channel: [ meta ]
-    def ch_inputs_sorted = ch_inputs
+    def ch_inputs_tumor_sorted = ch_inputs
         .branch { meta ->
             def has_existing = Utils.hasExistingInput(meta, Constants.INPUT.ALN_RNA_TUMOR)
             runnable: Utils.hasTumorRnaFastq(meta) && ! has_existing
             skip: true
         }
 
+    // channel: [ meta, meta_sample, sample_type ]
+    def ch_sorted = channel.empty()
+        .mix(
+            ch_inputs_tumor_sorted.runnable.map { meta -> [meta, Utils.getTumorRnaSample(meta), 'tumor'] },
+            ch_inputs_tumor_sorted.skip.map { meta -> [meta, [:], 'tumor'] },
+        )
+
     // Create FASTQ input channel
     // channel: [ meta, fastq_info, fastq_fwd, fastq_rev ]
-    def ch_fastqs = ch_inputs_sorted.runnable
-        .flatMap { meta ->
-            def meta_sample = Utils.getTumorRnaSample(meta)
-            meta_sample
+    return ch_sorted
+        .flatMap { meta, meta_sample, sample_type ->
+
+            // Convert [ meta, meta_sample, sample_type ] -> [ meta, fastq_info, fastq_fwd, fastq_rev ]
+            if (! meta_sample) {
+                def fastq_info = [
+                    'sample_type': sample_type  // NOTE(LN): used by downstream helper methods
+                ]
+
+                def fastq_fwd = []
+                def fastq_rev = []
+
+                def fastq_entry = [meta, fastq_info, fastq_fwd, fastq_rev]
+                return [fastq_entry]
+            }
+
+            return meta_sample
                 .getAt(Constants.FileType.FASTQ)
                 .collect { key, d ->
                     def (library_id, lane, flowcell) = key
 
+                    def sample_id = meta_sample.getOrDefault('longitudinal_sample_id', meta_sample['sample_id'])
+
                     def fastq_info = [
-                        'sample_id': meta_sample.sample_id,
+                        'sample_id': sample_id,
                         'library_id': library_id,
                         'lane': lane,
+                        'sample_type': sample_type,
                         'rg_fields': d.rg_fields,
                     ]
 
                     if (flowcell) {
-                         fastq_info.flowcell = flowcell
+                        fastq_info.flowcell = flowcell
                     }
 
-                    return [meta, fastq_info, d['fwd'], d['rev']]
+                    def fastq_fwd = d['fwd']
+                    def fastq_rev = d['rev']
+
+                    def fastq_entry = [meta, fastq_info, fastq_fwd, fastq_rev]
+                    return fastq_entry
                 }
         }
-
-    return channel.empty()
-        .mix(
-            ch_fastqs,
-            ch_inputs_sorted.skip.map { meta -> [meta, [:], [], []] },
-        )
 }

@@ -1,0 +1,79 @@
+name: tars
+description: Lift RNA alignments made against transcript contigs back to genome coordinates
+keywords:
+  - rna
+  - read alignment
+  - splicing
+  - liftback
+tools:
+  - tars:
+      description: Transcript Alignment for RNA Splicing
+      homepage: https://github.com/hartwigmedical/hmftools
+      documentation: https://github.com/hartwigmedical/hmftools
+      licence: ["GPL v3"]
+input:
+  - meta:
+      type: map
+      description: |
+        Groovy Map containing sample information
+        e.g. [id: 'sample_id']
+  - alns:
+      type: list
+      description: |
+        Name-grouped BAM files produced by bwa-mem2 against the genome with transcript contigs appended; these are
+        concatenated into a single BAM before being passed to TARS
+      pattern: "*.{bam}"
+  - genome_fasta:
+      type: file
+      description: |
+        Reference genome assembly FASTA file with transcript contigs appended; must be the same file that was used for
+        alignment, since TARS reads the transcript contigs it lifts from
+      pattern: "*.{fa,fasta}"
+  - genome_ver:
+      type: string
+      description: Reference genome version
+  - genome_fai:
+      type: file
+      description: |
+        Reference genome assembly fai index for the FASTA with transcript contigs appended; not passed on the command
+        line but must be staged alongside the FASTA
+      pattern: "*.{fai}"
+  - genome_dict:
+      type: file
+      description: |
+        Reference genome assembly sequence dictionary for the FASTA with transcript contigs appended; not passed on the
+        command line but must be staged alongside the FASTA
+      pattern: "*.{dict}"
+  - contig_sidecar:
+      type: file
+      description: |
+        Maps each transcript contig interval back to its genomic exon span; also provides the exon and junction
+        annotation, so no Ensembl cache is required
+      pattern: "*.{tsv}"
+  - unmap_regions_rna:
+      type: file
+      description: Regions for which RNA alignments are unmapped
+      pattern: "*.{tsv}"
+output:
+  - meta:
+      type: map
+      description: |
+        Groovy Map containing sample information
+        e.g. [id: 'sample_id']
+  - tars_bam:
+      type: list
+      description: Coordinate sorted and indexed genomic BAM file, and BAI index; input to REDUX
+      pattern: "*.{bam,bam.bai}"
+  - tars_summary:
+      type: file
+      description: Counts summary of the liftback
+      pattern: "*.{tsv}"
+  - command_files:
+      type: list
+      description: List of command files
+  - versions:
+      type: file
+      description: File containing software versions
+      pattern: "versions.yml"
+authors:
+  - "@mkcmkc"

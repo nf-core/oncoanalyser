@@ -10,7 +10,7 @@ workflow NEO_PREDICTION {
     take:
     // Sample data
     ch_inputs                  // channel: [mandatory] [ meta ]
-    ch_tumor_rna_aln           // channel: [mandatory] [ meta, aln, idx ]
+    ch_redux_dir_rna           // channel: [mandatory] [ meta, redux_dir ]
     ch_isofox_dir              // channel: [mandatory] [ meta, isofox_dir ]
     ch_purple_dir              // channel: [mandatory] [ meta, purple_dir ]
     ch_sage_append_dir_somatic // channel: [mandatory] [ meta, sage_append_dir ]
@@ -103,9 +103,12 @@ workflow NEO_PREDICTION {
     // channel: skip: [ meta ]
     ch_isofox_inputs_sorted = WorkflowOncoanalyser.groupByMeta(
         ch_finder_out,
-        ch_tumor_rna_aln,
+        ch_redux_dir_rna,
     )
-        .map { meta, neo_finder_dir, tumor_rna_aln, tumor_rna_idx ->
+        .map { meta, neo_finder_dir, redux_dir_rna ->
+
+            def (tumor_rna_aln, tumor_rna_idx) = Utils.getTumorRnaReduxDirAlignment(meta, redux_dir_rna)
+
             return [
                 meta,
                 neo_finder_dir,

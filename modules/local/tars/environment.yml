@@ -1,6 +1,6 @@
-name: star_align
+name: tars
 channels:
   - conda-forge
   - bioconda
 dependencies:
-  - bioconda::star=2.7.3a
+  - bioconda::hmftools-tars==1.0

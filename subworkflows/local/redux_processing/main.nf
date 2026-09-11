@@ -11,13 +11,14 @@ workflow REDUX_PROCESSING {
     ch_dna_tumor           // channel: [mandatory] [ meta, [aln, ...], [idx, ...] ]
     ch_dna_normal          // channel: [mandatory] [ meta, [aln, ...], [idx, ...] ]
     ch_dna_donor           // channel: [mandatory] [ meta, [aln, ...], [idx, ...] ]
+    ch_rna_tumor           // channel: [mandatory] [ meta, [aln, ...], [idx, ...] ]
 
     // Reference data
     genome_fasta           // channel: [mandatory] /path/to/genome_fasta
     genome_version         // channel: [mandatory] genome version
     genome_fai             // channel: [mandatory] /path/to/genome_fai
     genome_dict            // channel: [mandatory] /path/to/genome_dict
-    unmap_regions          // channel: [mandatory] /path/to/unmap_regions
+    unmap_regions_dna      // channel: [mandatory] /path/to/unmap_regions_dna
     msi_jitter_sites       // channel: [mandatory] /path/to/msi_jitter_sites
     msi_model_coefficients // channel: [mandatory] /path/to/msi_model_coefficients
     msi_model_error_rates  // channel: [mandatory] /path/to/msi_model_error_rates
@@ -74,18 +75,34 @@ workflow REDUX_PROCESSING {
             def has_existing = Utils.hasExistingInput(meta, Constants.INPUT.REDUX_DIR_DONOR)
             runnable: alns && ! has_existing
             skip: true
-            return meta
+                return meta
+        }
+
+    ch_inputs_rna_sorted = ch_rna_tumor
+        .map { meta, alns, idxs ->
+            return [
+                meta,
+                Utils.hasExistingInput(meta, Constants.INPUT.ALN_RNA_TUMOR) ? [Utils.getInput(meta, Constants.INPUT.ALN_RNA_TUMOR)] : alns,
+                Utils.hasExistingInput(meta, Constants.INPUT.IDX_RNA_TUMOR) ? [Utils.getInput(meta, Constants.INPUT.IDX_RNA_TUMOR)] : idxs,
+            ]
+        }
+        .branch { meta, alns, idxs ->
+            def has_existing = Utils.hasExistingInput(meta, Constants.INPUT.REDUX_DIR_RNA)
+            runnable: alns && ! has_existing
+            skip: true
+                return meta
         }
 
     // Create process input channel
     // channel: [ meta_redux, [aln, ...], [idx, ...] ]
     ch_redux_inputs = channel.empty()
         .mix(
-            ch_inputs_tumor_sorted.runnable.map { meta, alns, idxs -> [meta, Utils.getTumorDnaSample(meta), 'tumor', alns, idxs] },
-            ch_inputs_normal_sorted.runnable.map { meta, alns, idxs -> [meta, Utils.getNormalDnaSample(meta), 'normal', alns, idxs] },
-            ch_inputs_donor_sorted.runnable.map { meta, alns, idxs -> [meta, Utils.getDonorDnaSample(meta), 'donor', alns, idxs] },
+            ch_inputs_tumor_sorted.runnable.map { meta, alns, idxs -> [meta, Utils.getTumorDnaSample(meta), 'tumor', 'dna', alns, idxs] },
+            ch_inputs_normal_sorted.runnable.map { meta, alns, idxs -> [meta, Utils.getNormalDnaSample(meta), 'normal', 'dna', alns, idxs] },
+            ch_inputs_donor_sorted.runnable.map { meta, alns, idxs -> [meta, Utils.getDonorDnaSample(meta), 'donor', 'dna', alns, idxs] },
+            ch_inputs_rna_sorted.runnable.map { meta, alns, idxs -> [meta, Utils.getTumorRnaSample(meta), 'tumor', 'rna', alns, idxs] },
         )
-        .multiMap { meta, meta_sample, sample_type, alns, idxs ->
+        .multiMap { meta, meta_sample, sample_type, sequence_type, alns, idxs ->
 
             def sample_id = meta_sample.getOrDefault('longitudinal_sample_id', meta_sample['sample_id'])
 
@@ -94,6 +111,7 @@ workflow REDUX_PROCESSING {
                 id: "${meta.group_id}_${sample_id}",
                 sample_id: sample_id,
                 sample_type: sample_type,
+                sequence_type: sequence_type,
             ]
 
             sample_data: [meta_redux, alns, idxs]
@@ -107,7 +125,7 @@ workflow REDUX_PROCESSING {
         genome_version,
         genome_fai,
         genome_dict,
-        unmap_regions,
+        unmap_regions_dna,
         msi_jitter_sites,
         msi_model_coefficients,
         msi_model_error_rates,
@@ -123,6 +141,8 @@ workflow REDUX_PROCESSING {
     ch_redux_out_sorted = channel.topic('redux_dir')
         .branch { meta_redux, redux_dir ->
             assert ['tumor', 'normal', 'donor'].contains(meta_redux.sample_type)
+            assert ['dna', 'rna'].contains(meta_redux.sequence_type)
+            rna: meta_redux.sequence_type == 'rna'
             tumor: meta_redux.sample_type == 'tumor'
             normal: meta_redux.sample_type == 'normal'
             donor: meta_redux.sample_type == 'donor'
@@ -151,8 +171,16 @@ workflow REDUX_PROCESSING {
             ch_inputs_donor_sorted.skip.map { meta -> [meta, []] },
         )
 
+    // channel: [ meta, redux_dir ]
+    ch_outputs_rna = channel.empty()
+        .mix(
+            WorkflowOncoanalyser.restoreMeta(ch_redux_out_sorted.rna, ch_inputs),
+            ch_inputs_rna_sorted.skip.map { meta -> [meta, []] },
+        )
+
     emit:
     tumor_dir  = ch_outputs_tumor  // channel: [ meta, redux_dir ]
     normal_dir = ch_outputs_normal // channel: [ meta, redux_dir ]
     donor_dir  = ch_outputs_donor  // channel: [ meta, redux_dir ]
+    rna_dir    = ch_outputs_rna    // channel: [ meta, redux_dir ]
 }

@@ -11,7 +11,7 @@ workflow SAGE_APPEND {
     ch_inputs           // channel: [mandatory] [ meta ]
     ch_purple_dir       // channel: [mandatory] [ meta, purple_dir ]
     ch_redux_dir_tumor  // channel: [mandatory] [ meta, redux_dir ]
-    ch_tumor_rna_aln    // channel: [mandatory] [ meta, aln, idx ]
+    ch_redux_dir_rna    // channel: [mandatory] [ meta, redux_dir ]
 
     // Reference data
     genome_fasta        // channel: [mandatory] /path/to/genome_fasta
@@ -37,13 +37,14 @@ workflow SAGE_APPEND {
     ch_inputs_sorted = WorkflowOncoanalyser.groupByMeta(
         ch_purple_dir,
         ch_redux_dir_tumor,
-        ch_tumor_rna_aln,
+        ch_redux_dir_rna,
     )
-        .map { meta, purple_dir, redux_dir_tumor, tumor_rna_aln, tumor_rna_idx ->
+        .map { meta, purple_dir, redux_dir_tumor, redux_dir_rna ->
 
             def redux_dir_tumor_selected = Utils.selectCurrentOrExisting(redux_dir_tumor, meta, Constants.INPUT.REDUX_DIR_TUMOR)
             def (tumor_aln, tumor_idx) = Utils.getTumorReduxDirAlignment(meta, redux_dir_tumor_selected)
             def redux_tsvs_tumor = Utils.getTumorReduxTsvs(meta, redux_dir_tumor_selected)
+            def (tumor_rna_aln, tumor_rna_idx) = Utils.getTumorRnaReduxDirAlignment(meta, redux_dir_rna)
 
             return [
                 meta,

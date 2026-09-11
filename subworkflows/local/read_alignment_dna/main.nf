@@ -2,8 +2,8 @@
 // Align DNA reads
 //
 
-include { BWAMEM2_ALIGN } from '../../../modules/local/bwa-mem2/mem/main'
-include { FASTP_SPLIT   } from '../../../modules/local/fastp/split/main'
+include { BWAMEM2_ALIGN_DNA } from '../../../modules/local/bwa-mem2/mem/dna/main'
+include { FASTP_SPLIT       } from '../../../modules/local/fastp/split/main'
 
 workflow READ_ALIGNMENT_DNA {
     take:
@@ -37,7 +37,7 @@ workflow READ_ALIGNMENT_DNA {
         .branch { meta, fastq_info, fastq_fwd, fastq_rev ->
             def has_inputs = fastq_fwd && fastq_rev
             runnable: fastq_info.sample_type == 'tumor' && has_inputs
-            skip: ! Utils.hasTumorDnaFastq(meta)
+            skip: fastq_info.sample_type == 'tumor' && ! has_inputs
               return meta
         }
 
@@ -45,7 +45,7 @@ workflow READ_ALIGNMENT_DNA {
         .branch { meta, fastq_info, fastq_fwd, fastq_rev ->
             def has_inputs = fastq_fwd && fastq_rev
             runnable: fastq_info.sample_type == 'normal' && has_inputs
-            skip: ! Utils.hasNormalDnaFastq(meta)
+            skip: fastq_info.sample_type == 'normal' && ! has_inputs
               return meta
         }
 
@@ -53,7 +53,7 @@ workflow READ_ALIGNMENT_DNA {
         .branch { meta, fastq_info, fastq_fwd, fastq_rev ->
             def has_inputs = fastq_fwd && fastq_rev
             runnable: fastq_info.sample_type == 'donor' && has_inputs
-            skip: ! Utils.hasDonorDnaFastq(meta)
+            skip: fastq_info.sample_type == 'donor' && ! has_inputs
               return meta
         }
 
@@ -107,29 +107,21 @@ workflow READ_ALIGNMENT_DNA {
             max_fastq_records.toInteger(),
         )
 
-        // Now prepare according to FASTQs splitting
-        ch_fastqs_ready = channel.topic('fastp_split_fastq')
-            .flatMap { meta_fastq, reads_fwd_input, reads_rev_input ->
+        // NOTE(LN): the transpose operator pairs the R1 and R2 chunks by index, and also covers the single chunk case
+        // where fastp emits one file per read rather than a list
+        ch_fastqs_ready = FASTP_SPLIT.out[0]
+            .transpose()
+            .map { meta_fastq, fwd, rev ->
 
-                def reads_fwd = reads_fwd_input instanceof List ? reads_fwd_input : [reads_fwd_input]
-                def reads_rev = reads_rev_input instanceof List ? reads_rev_input : [reads_rev_input]
+                def split_fwd = fwd.name.replaceAll('\\..+$', '')
+                def split_rev = rev.name.replaceAll('\\..+$', '')
 
-                def data = [reads_fwd, reads_rev]
-                    .transpose()
-                    .collect { fwd, rev ->
+                assert split_fwd == split_rev
 
-                        def split_fwd = fwd.name.replaceAll('\\..+$', '')
-                        def split_rev = rev.name.replaceAll('\\..+$', '')
+                // NOTE(SW): split allows meta_fastq_ready to be unique, which is required during reunite below
+                def meta_fastq_ready = meta_fastq + [id: "${meta_fastq.id}_${split_fwd}", split: split_fwd]
 
-                        assert split_fwd == split_rev
-
-                        // NOTE(SW): split allows meta_fastq_ready to be unique, which is required during reunite below
-                        def meta_fastq_ready = meta_fastq + [id: "${meta_fastq.id}_${split_fwd}", split: split_fwd]
-
-                        return [meta_fastq_ready, fwd, rev]
-                    }
-
-                return data
+                return [meta_fastq_ready, fwd, rev]
             }
 
     } else {
@@ -156,7 +148,7 @@ workflow READ_ALIGNMENT_DNA {
         }
 
     // Run process
-    BWAMEM2_ALIGN(
+    BWAMEM2_ALIGN_DNA(
         ch_bwamem2_inputs,
         genome_fasta,
         genome_bwamem2_index,
@@ -184,7 +176,7 @@ workflow READ_ALIGNMENT_DNA {
         // channel: [ [ meta_group, count ], [ meta_group, aln, idx ] ]
         .cross(
             // First element to match meta_group above for `cross`
-            channel.topic('bwamem2_align_bam').map { meta_bwamem2, aln, idx -> [[key: meta_bwamem2.key, sample_type: meta_bwamem2.sample_type], aln, idx] }
+            channel.topic('bwamem2_align_dna_bam').map { meta_bwamem2, aln, idx -> [[key: meta_bwamem2.key, sample_type: meta_bwamem2.sample_type], aln, idx] }
         )
         .map { count_tuple, inputs_tuple ->
             def group_size = count_tuple[1]
