@@ -33,10 +33,65 @@ workflow REDUX_PROCESSING {
     // Select input sources then sort, separating by sample type
     // channel: runnable: [ meta, [aln, ...], [idx, ...] ]
     // channel: skip: [ meta ]
-    ch_inputs_tumor_sorted = getInputsSorted(ch_dna_tumor, Constants.INPUT.ALN_DNA_TUMOR, Constants.INPUT.IDX_DNA_TUMOR, Constants.INPUT.REDUX_DIR_TUMOR)
-    ch_inputs_normal_sorted = getInputsSorted(ch_dna_normal, Constants.INPUT.ALN_DNA_NORMAL, Constants.INPUT.IDX_DNA_NORMAL, Constants.INPUT.REDUX_DIR_NORMAL)
-    ch_inputs_donor_sorted = getInputsSorted(ch_dna_donor, Constants.INPUT.ALN_DNA_DONOR, Constants.INPUT.IDX_DNA_DONOR, Constants.INPUT.REDUX_DIR_DONOR)
-    ch_inputs_rna_sorted = getInputsSorted(ch_rna_tumor, Constants.INPUT.ALN_RNA_TUMOR, Constants.INPUT.IDX_RNA_TUMOR, Constants.INPUT.REDUX_DIR_RNA)
+    ch_inputs_tumor_sorted = ch_dna_tumor
+        .map { meta, alns, idxs ->
+            return [
+                meta,
+                Utils.hasExistingInput(meta, Constants.INPUT.ALN_DNA_TUMOR) ? [Utils.getInput(meta, Constants.INPUT.ALN_DNA_TUMOR)] : alns,
+                Utils.hasExistingInput(meta, Constants.INPUT.IDX_DNA_TUMOR) ? [Utils.getInput(meta, Constants.INPUT.IDX_DNA_TUMOR)] : idxs,
+            ]
+        }
+        .branch { meta, alns, idxs ->
+            def has_existing = Utils.hasExistingInput(meta, Constants.INPUT.REDUX_DIR_TUMOR)
+            runnable: alns && ! has_existing
+            skip: true
+                return meta
+        }
+
+    ch_inputs_normal_sorted = ch_dna_normal
+        .map { meta, alns, idxs ->
+            return [
+                meta,
+                Utils.hasExistingInput(meta, Constants.INPUT.ALN_DNA_NORMAL) ? [Utils.getInput(meta, Constants.INPUT.ALN_DNA_NORMAL)] : alns,
+                Utils.hasExistingInput(meta, Constants.INPUT.IDX_DNA_NORMAL) ? [Utils.getInput(meta, Constants.INPUT.IDX_DNA_NORMAL)] : idxs,
+            ]
+        }
+        .branch { meta, alns, idxs ->
+            def has_existing = Utils.hasExistingInput(meta, Constants.INPUT.REDUX_DIR_NORMAL)
+            runnable: alns && ! has_existing
+            skip: true
+                return meta
+        }
+
+    ch_inputs_donor_sorted = ch_dna_donor
+        .map { meta, alns, idxs ->
+            return [
+                meta,
+                Utils.hasExistingInput(meta, Constants.INPUT.ALN_DNA_DONOR) ? [Utils.getInput(meta, Constants.INPUT.ALN_DNA_DONOR)] : alns,
+                Utils.hasExistingInput(meta, Constants.INPUT.IDX_DNA_DONOR) ? [Utils.getInput(meta, Constants.INPUT.IDX_DNA_DONOR)] : idxs,
+            ]
+        }
+        .branch { meta, alns, idxs ->
+            def has_existing = Utils.hasExistingInput(meta, Constants.INPUT.REDUX_DIR_DONOR)
+            runnable: alns && ! has_existing
+            skip: true
+                return meta
+        }
+
+    ch_inputs_rna_sorted = ch_rna_tumor
+        .map { meta, alns, idxs ->
+            return [
+                meta,
+                Utils.hasExistingInput(meta, Constants.INPUT.ALN_RNA_TUMOR) ? [Utils.getInput(meta, Constants.INPUT.ALN_RNA_TUMOR)] : alns,
+                Utils.hasExistingInput(meta, Constants.INPUT.IDX_RNA_TUMOR) ? [Utils.getInput(meta, Constants.INPUT.IDX_RNA_TUMOR)] : idxs,
+            ]
+        }
+        .branch { meta, alns, idxs ->
+            def has_existing = Utils.hasExistingInput(meta, Constants.INPUT.REDUX_DIR_RNA)
+            runnable: alns && ! has_existing
+            skip: true
+                return meta
+        }
 
     // Create process input channel
     // channel: [ meta_redux, [aln, ...], [idx, ...] ]
@@ -128,23 +183,4 @@ workflow REDUX_PROCESSING {
     normal_dir = ch_outputs_normal // channel: [ meta, redux_dir ]
     donor_dir  = ch_outputs_donor  // channel: [ meta, redux_dir ]
     rna_dir    = ch_outputs_rna    // channel: [ meta, redux_dir ]
-}
-
-def getInputsSorted(ch_alns, aln_key, idx_key, redux_dir_key) {
-    // runnable: channel: [ meta, [aln, ...], [idx, ...] ]
-    // skip: channel: [ meta ]
-    return ch_alns
-        .map { meta, alns, idxs ->
-            return [
-                meta,
-                Utils.hasExistingInput(meta, aln_key) ? [Utils.getInput(meta, aln_key)] : alns,
-                Utils.hasExistingInput(meta, idx_key) ? [Utils.getInput(meta, idx_key)] : idxs,
-            ]
-        }
-        .branch { meta, alns, idxs ->
-            def has_existing = Utils.hasExistingInput(meta, redux_dir_key)
-            runnable: alns && ! has_existing
-            skip: true
-                return meta
-        }
 }

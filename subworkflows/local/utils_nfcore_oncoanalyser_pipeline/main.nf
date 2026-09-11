@@ -312,7 +312,45 @@ def getDnaFastqChannel(ch_inputs) {
     // channel: [ meta, fastq_info, fastq_fwd, fastq_rev ]
     return ch_sorted
         .flatMap { meta, meta_sample, sample_type ->
-            return createFastqEntries(meta, meta_sample, sample_type)
+
+            // Convert [ meta, meta_sample, sample_type ] -> [ meta, fastq_info, fastq_fwd, fastq_rev ]
+            if (! meta_sample) {
+                def fastq_info = [
+                    'sample_type': sample_type  // NOTE(LN): used by downstream helper methods
+                ]
+
+                def fastq_fwd = []
+                def fastq_rev = []
+
+                def fastq_entry = [meta, fastq_info, fastq_fwd, fastq_rev]
+                return [fastq_entry]
+            }
+
+            return meta_sample
+                .getAt(Constants.FileType.FASTQ)
+                .collect { key, d ->
+                    def (library_id, lane, flowcell) = key
+
+                    def sample_id = meta_sample.getOrDefault('longitudinal_sample_id', meta_sample['sample_id'])
+
+                    def fastq_info = [
+                        'sample_id': sample_id,
+                        'library_id': library_id,
+                        'lane': lane,
+                        'sample_type': sample_type,
+                        'rg_fields': d.rg_fields,
+                    ]
+
+                    if (flowcell) {
+                        fastq_info.flowcell = flowcell
+                    }
+
+                    def fastq_fwd = d['fwd']
+                    def fastq_rev = d['rev']
+
+                    def fastq_entry = [meta, fastq_info, fastq_fwd, fastq_rev]
+                    return fastq_entry
+                }
         }
 }
 
@@ -337,49 +375,44 @@ def getRnaFastqChannel(ch_inputs) {
     // channel: [ meta, fastq_info, fastq_fwd, fastq_rev ]
     return ch_sorted
         .flatMap { meta, meta_sample, sample_type ->
-            return createFastqEntries(meta, meta_sample, sample_type)
-        }
-}
 
-def createFastqEntries(meta, meta_sample, sample_type) {
+            // Convert [ meta, meta_sample, sample_type ] -> [ meta, fastq_info, fastq_fwd, fastq_rev ]
+            if (! meta_sample) {
+                def fastq_info = [
+                    'sample_type': sample_type  // NOTE(LN): used by downstream helper methods
+                ]
 
-    // Convert [ meta, meta_sample, sample_type ] -> [ meta, fastq_info, fastq_fwd, fastq_rev ]
+                def fastq_fwd = []
+                def fastq_rev = []
 
-    if (! meta_sample) {
-        def fastq_info = [
-            'sample_type': sample_type  // NOTE(LN): used by downstream helper methods
-        ]
-        
-        def fastq_fwd = []
-        def fastq_rev = []
-
-        def fastq_entry = [meta, fastq_info, fastq_fwd, fastq_rev]
-        return [fastq_entry]
-    }
-
-    return meta_sample
-        .getAt(Constants.FileType.FASTQ)
-        .collect { key, d ->
-            def (library_id, lane, flowcell) = key
-
-            def sample_id = meta_sample.getOrDefault('longitudinal_sample_id', meta_sample['sample_id'])
-
-            def fastq_info = [
-                'sample_id': sample_id,
-                'library_id': library_id,
-                'lane': lane,
-                'sample_type': sample_type,
-                'rg_fields': d.rg_fields,
-            ]
-
-            if (flowcell) {
-                 fastq_info.flowcell = flowcell
+                def fastq_entry = [meta, fastq_info, fastq_fwd, fastq_rev]
+                return [fastq_entry]
             }
 
-            def fastq_fwd = d['fwd']
-            def fastq_rev = d['rev']
+            return meta_sample
+                .getAt(Constants.FileType.FASTQ)
+                .collect { key, d ->
+                    def (library_id, lane, flowcell) = key
 
-            def fastq_entry = [meta, fastq_info, fastq_fwd, fastq_rev]
-            return fastq_entry
+                    def sample_id = meta_sample.getOrDefault('longitudinal_sample_id', meta_sample['sample_id'])
+
+                    def fastq_info = [
+                        'sample_id': sample_id,
+                        'library_id': library_id,
+                        'lane': lane,
+                        'sample_type': sample_type,
+                        'rg_fields': d.rg_fields,
+                    ]
+
+                    if (flowcell) {
+                        fastq_info.flowcell = flowcell
+                    }
+
+                    def fastq_fwd = d['fwd']
+                    def fastq_rev = d['rev']
+
+                    def fastq_entry = [meta, fastq_info, fastq_fwd, fastq_rev]
+                    return fastq_entry
+                }
         }
 }
