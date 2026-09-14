@@ -107,13 +107,14 @@ workflow NEO_PREDICTION {
     )
         .map { meta, neo_finder_dir, redux_dir_rna ->
 
-            def (tumor_rna_aln, tumor_rna_idx) = Utils.getTumorRnaReduxDirAlignment(meta, redux_dir_rna)
+            def redux_dir_rna_selected = Utils.selectCurrentOrExisting(redux_dir_rna, meta, Constants.INPUT.REDUX_DIR_RNA)
+            def (tumor_rna_aln, tumor_rna_idx) = Utils.getTumorRnaReduxDirAlignment(meta, redux_dir_rna_selected)
 
             return [
                 meta,
                 neo_finder_dir,
-                Utils.selectCurrentOrExisting(tumor_rna_aln, meta, Constants.INPUT.ALN_RNA_TUMOR),
-                Utils.selectCurrentOrExisting(tumor_rna_idx, meta, Constants.INPUT.IDX_RNA_TUMOR),
+                tumor_rna_aln,
+                tumor_rna_idx,
             ]
         }
         .branch { meta, neo_finder_dir, tumor_rna_aln, tumor_rna_idx ->

@@ -42,9 +42,12 @@ workflow SAGE_APPEND {
         .map { meta, purple_dir, redux_dir_tumor, redux_dir_rna ->
 
             def redux_dir_tumor_selected = Utils.selectCurrentOrExisting(redux_dir_tumor, meta, Constants.INPUT.REDUX_DIR_TUMOR)
+            def redux_dir_rna_selected = Utils.selectCurrentOrExisting(redux_dir_rna, meta, Constants.INPUT.REDUX_DIR_RNA)
+
             def (tumor_aln, tumor_idx) = Utils.getTumorReduxDirAlignment(meta, redux_dir_tumor_selected)
+            def (tumor_rna_aln, tumor_rna_idx) = Utils.getTumorRnaReduxDirAlignment(meta, redux_dir_rna_selected)
+
             def redux_tsvs_tumor = Utils.getTumorReduxTsvs(meta, redux_dir_tumor_selected)
-            def (tumor_rna_aln, tumor_rna_idx) = Utils.getTumorRnaReduxDirAlignment(meta, redux_dir_rna)
 
             return [
                 meta,
@@ -52,8 +55,8 @@ workflow SAGE_APPEND {
                 tumor_aln,
                 tumor_idx,
                 redux_tsvs_tumor,
-                Utils.selectCurrentOrExisting(tumor_rna_aln, meta, Constants.INPUT.ALN_RNA_TUMOR),
-                Utils.selectCurrentOrExisting(tumor_rna_idx, meta, Constants.INPUT.IDX_RNA_TUMOR),
+                tumor_rna_aln,
+                tumor_rna_idx,
             ]
 
         }

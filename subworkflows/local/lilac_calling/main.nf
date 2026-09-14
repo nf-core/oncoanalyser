@@ -37,10 +37,11 @@ workflow LILAC_CALLING {
 
             def redux_dir_tumor_selected = Utils.selectCurrentOrExisting(redux_dir_tumor, meta, Constants.INPUT.REDUX_DIR_TUMOR)
             def redux_dir_normal_selected = Utils.selectCurrentOrExisting(redux_dir_normal, meta, Constants.INPUT.REDUX_DIR_NORMAL)
+            def redux_dir_rna_selected = Utils.selectCurrentOrExisting(redux_dir_rna, meta, Constants.INPUT.REDUX_DIR_RNA)
 
             def (tumor_dna_aln, tumor_dna_idx) = Utils.getTumorReduxDirAlignment(meta, redux_dir_tumor_selected)
             def (normal_dna_aln, normal_dna_idx) = Utils.getNormalReduxDirAlignment(meta, redux_dir_normal_selected)
-            def (tumor_rna_aln, tumor_rna_idx) = Utils.getTumorRnaReduxDirAlignment(meta, redux_dir_rna)
+            def (tumor_rna_aln, tumor_rna_idx) = Utils.getTumorRnaReduxDirAlignment(meta, redux_dir_rna_selected)
 
             return [
                 meta,
@@ -48,8 +49,8 @@ workflow LILAC_CALLING {
                 normal_dna_idx,
                 tumor_dna_aln,
                 tumor_dna_idx,
-                Utils.selectCurrentOrExisting(tumor_rna_aln, meta, Constants.INPUT.ALN_RNA_TUMOR),
-                Utils.selectCurrentOrExisting(tumor_rna_idx, meta, Constants.INPUT.IDX_RNA_TUMOR),
+                tumor_rna_aln,
+                tumor_rna_idx,
                 Utils.selectCurrentOrExisting(purple_dir, meta, Constants.INPUT.PURPLE_DIR),
             ]
 
