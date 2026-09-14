@@ -57,6 +57,16 @@ class Utils {
                         Nextflow.exit(1)
                     }
 
+                    // Disallow raw BAM inputs for RNA
+                    if (sequence_type_enum == Constants.SequenceType.RNA) {
+                        def rna_disallowed_input_list = [Constants.FileType.BAM, Constants.FileType.CRAM]
+                        if (rna_disallowed_input_list.contains(filetype_enum)) {
+                            log.error "got disallowed '${it.filetype}' input for ${group_id} ${sample_type_enum}/${sequence_type_enum}: " +
+                                "RNA alignments must be provided as 'bam_redux', 'cram_redux', or 'redux_dir' input, or aligned from 'fastq' input"
+                            Nextflow.exit(1)
+                        }
+                    }
+
                     def sample_key = [sample_type_enum, sequence_type_enum]
                     def meta_sample = meta.get(sample_key, [:])
 

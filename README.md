@@ -82,13 +82,13 @@ For the `purity_estimate` mode, several of the above tools are run with adjusted
 > [!NOTE]
 > If you are new to Nextflow and nf-core, please refer to [this page](https://nf-co.re/docs/get_started/environment_setup/overview) on how to set-up Nextflow. Make sure to [test your setup](https://nf-co.re/docs/get_started/run-your-first-pipeline) with `-profile test` before running the workflow on actual data.
 
-Create a samplesheet with your inputs (WGS/WTS BAMs in this example):
+Create a samplesheet with your inputs (WGS BAMs and WTS FASTQs in this example):
 
 ```csv
-group_id,subject_id,sample_id,sample_type,sequence_type,filetype,filepath
-PATIENT1_WGTS,PATIENT1,PATIENT1-N,normal,dna,bam,/path/to/PATIENT1-N.dna.bam
-PATIENT1_WGTS,PATIENT1,PATIENT1-T,tumor,dna,bam,/path/to/PATIENT1-T.dna.bam
-PATIENT1_WGTS,PATIENT1,PATIENT1-T-RNA,tumor,rna,bam,/path/to/PATIENT1-T.rna.bam
+group_id,subject_id,sample_id,sample_type,sequence_type,filetype,filepath,info
+PATIENT1_WGTS,PATIENT1,PATIENT1-N,normal,dna,bam,/path/to/PATIENT1-N.dna.bam,
+PATIENT1_WGTS,PATIENT1,PATIENT1-T,tumor,dna,bam,/path/to/PATIENT1-T.dna.bam,
+PATIENT1_WGTS,PATIENT1,PATIENT1-R,tumor,rna,fastq,/path/to/PATIENT1-R_S1_L001_R1_001.fastq.gz;/path/to/PATIENT1-R_S1_L001_R2_001.fastq.gz,library_id:S1;lane:001
 ```
 
 Launch `oncoanalyser`:
