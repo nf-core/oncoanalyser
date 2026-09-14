@@ -109,7 +109,7 @@ workflow READ_ALIGNMENT_DNA {
 
         // NOTE(LN): the transpose operator pairs the R1 and R2 chunks by index, and also covers the single chunk case
         // where fastp emits one file per read rather than a list
-        ch_fastqs_ready = FASTP_SPLIT.out[0]
+        ch_fastqs_ready = channel.topic('fastp_split_fastq')
             .transpose()
             .map { meta_fastq, fwd, rev ->
 
