@@ -263,6 +263,7 @@
                 "subject_a/linx/somatic_annotations/subject_a.tumor.linx.breakend.tsv",
                 "subject_a/linx/somatic_annotations/subject_a.tumor.linx.clusters.tsv",
                 "subject_a/linx/somatic_annotations/subject_a.tumor.linx.driver.catalog.tsv",
+                "subject_a/linx/somatic_annotations/subject_a.tumor.linx.drivers.tsv",
                 "subject_a/linx/somatic_annotations/subject_a.tumor.linx.fusion.tsv",
                 "subject_a/linx/somatic_annotations/subject_a.tumor.linx.links.tsv",
                 "subject_a/linx/somatic_annotations/subject_a.tumor.linx.neoepitope.tsv",
@@ -273,7 +274,6 @@
                 "subject_a/linx/somatic_annotations/subject_a.tumor.linx.vis_protein_domain.tsv",
                 "subject_a/linx/somatic_annotations/subject_a.tumor.linx.vis_segments.tsv",
                 "subject_a/linx/somatic_annotations/subject_a.tumor.linx.vis_sv_data.tsv",
-                "subject_a/linx/somatic_annotations/subject_a.tumor.linx.drivers.tsv",
                 "subject_a/linx/somatic_plots",
                 "subject_a/linx/somatic_plots/all",
                 "subject_a/linx/somatic_plots/all/.stub",
@@ -412,6 +412,7 @@
                 "subject_a.tumor.linx.breakend.tsv:md5,d41d8cd98f00b204e9800998ecf8427e",
                 "subject_a.tumor.linx.clusters.tsv:md5,d41d8cd98f00b204e9800998ecf8427e",
                 "subject_a.tumor.linx.driver.catalog.tsv:md5,d41d8cd98f00b204e9800998ecf8427e",
+                "subject_a.tumor.linx.drivers.tsv:md5,d41d8cd98f00b204e9800998ecf8427e",
                 "subject_a.tumor.linx.fusion.tsv:md5,d41d8cd98f00b204e9800998ecf8427e",
                 "subject_a.tumor.linx.links.tsv:md5,d41d8cd98f00b204e9800998ecf8427e",
                 "subject_a.tumor.linx.neoepitope.tsv:md5,d41d8cd98f00b204e9800998ecf8427e",
@@ -422,7 +423,6 @@
                 "subject_a.tumor.linx.vis_protein_domain.tsv:md5,d41d8cd98f00b204e9800998ecf8427e",
                 "subject_a.tumor.linx.vis_segments.tsv:md5,d41d8cd98f00b204e9800998ecf8427e",
                 "subject_a.tumor.linx.vis_sv_data.tsv:md5,d41d8cd98f00b204e9800998ecf8427e",
-                "subject_a.tumor.linx.drivers.tsv:md5,d41d8cd98f00b204e9800998ecf8427e",
                 ".stub:md5,d41d8cd98f00b204e9800998ecf8427e",
                 ".stub:md5,d41d8cd98f00b204e9800998ecf8427e",
                 "subject_a.tumor.isf.neoepitope.tsv:md5,d41d8cd98f00b204e9800998ecf8427e",
@@ -486,7 +486,7 @@
                 "subject_a.tumor.virus.annotated.tsv:md5,d41d8cd98f00b204e9800998ecf8427e"
             ]
         ],
-        "timestamp": "2026-09-07T13:18:53.164196",
+        "timestamp": "2026-09-15T14:11:34.612186",
         "meta": {
             "nf-test": "0.9.5",
             "nextflow": "25.10.4"
