@@ -85,10 +85,10 @@ For the `purity_estimate` mode, several of the above tools are run with adjusted
 Create a samplesheet with your inputs (WGS BAMs and WTS FASTQs in this example):
 
 ```csv
-group_id,subject_id,sample_id,sample_type,sequence_type,filetype,filepath,info
-PATIENT1_WGTS,PATIENT1,PATIENT1-N,normal,dna,bam,/path/to/PATIENT1-N.dna.bam,
-PATIENT1_WGTS,PATIENT1,PATIENT1-T,tumor,dna,bam,/path/to/PATIENT1-T.dna.bam,
-PATIENT1_WGTS,PATIENT1,PATIENT1-R,tumor,rna,fastq,/path/to/PATIENT1-R_S1_L001_R1_001.fastq.gz;/path/to/PATIENT1-R_S1_L001_R2_001.fastq.gz,library_id:S1;lane:001
+group_id,subject_id,sample_id,sample_type,sequence_type,filetype,info,filepath
+PATIENT1_WGTS,PATIENT1,PATIENT1-N,normal,dna,bam,,/path/to/PATIENT1-N.dna.bam
+PATIENT1_WGTS,PATIENT1,PATIENT1-T,tumor,dna,bam,,/path/to/PATIENT1-T.dna.bam
+PATIENT1_WGTS,PATIENT1,PATIENT1-T-RNA,tumor,rna,fastq,library_id:S1;lane:001,/path/to/PATIENT1-T-RNA_S1_L001_R1_001.fastq.gz;/path/to/PATIENT1-T-RNA_S1_L001_R2_001.fastq.gz
 ```
 
 Launch `oncoanalyser`:

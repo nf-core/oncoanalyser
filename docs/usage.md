@@ -248,10 +248,10 @@ To run from FASTQ:
 - provide the forward ('R1') and reverse ('R2') FASTQ files in the `filepath` field separated by `;`
 
 ```csv title="samplesheet.csv"
-group_id,subject_id,sample_id,sample_type,sequence_type,filetype,filepath,info
-PATIENT1,PATIENT1,PATIENT1-T,tumor,dna,fastq,/path/to/PATIENT1-T_S1_L001_R1_001.fastq.gz;/path/to/PATIENT1-T_S1_L001_R2_001.fastq.gz,library_id:S1;lane:001
-PATIENT1,PATIENT1,PATIENT1-T,tumor,dna,fastq,/path/to/PATIENT1-T_S1_L002_R1_001.fastq.gz;/path/to/PATIENT1-T_S1_L002_R2_001.fastq.gz,library_id:S1;lane:002
-PATIENT1,PATIENT1,PATIENT1-R,tumor,rna,fastq,/path/to/PATIENT1-R_S1_L001_R1_001.fastq.gz;/path/to/PATIENT1-R_S1_L001_R2_001.fastq.gz,library_id:S1;lane:001
+group_id,subject_id,sample_id,sample_type,sequence_type,filetype,info,filepath
+PATIENT1,PATIENT1,PATIENT1-T,tumor,dna,fastq,library_id:S1;lane:001,/path/to/PATIENT1-T_S1_L001_R1_001.fastq.gz;/path/to/PATIENT1-T_S1_L001_R2_001.fastq.gz
+PATIENT1,PATIENT1,PATIENT1-T,tumor,dna,fastq,library_id:S1;lane:002,/path/to/PATIENT1-T_S1_L002_R1_001.fastq.gz;/path/to/PATIENT1-T_S1_L002_R2_001.fastq.gz
+PATIENT1,PATIENT1,PATIENT1-T-RNA,tumor,rna,fastq,library_id:S1;lane:001,/path/to/PATIENT1-T-RNA_S1_L001_R1_001.fastq.gz;/path/to/PATIENT1-T-RNA_S1_L001_R2_001.fastq.gz
 ```
 
 :::note
@@ -444,17 +444,17 @@ PATIENT1,PATIENT1,PATIENT1-T,tumor,dna,bam,/path/to/PATIENT1-T.dna.bam
 #### Tumor-only RNA
 
 ```csv title="samplesheet.to_rna.csv"
-group_id,subject_id,sample_id,sample_type,sequence_type,filetype,filepath,info
-PATIENT1,PATIENT1,PATIENT1-R,tumor,rna,fastq,/path/to/PATIENT1-R_S1_L001_R1_001.fastq.gz;/path/to/PATIENT1-R_S1_L001_R2_001.fastq.gz,library_id:S1;lane:001
+group_id,subject_id,sample_id,sample_type,sequence_type,filetype,info,filepath
+PATIENT1,PATIENT1,PATIENT1-T-RNA,tumor,rna,fastq,library_id:S1;lane:001,/path/to/PATIENT1-T-RNA_S1_L001_R1_001.fastq.gz;/path/to/PATIENT1-T-RNA_S1_L001_R2_001.fastq.gz
 ```
 
 #### Paired tumor and normal DNA with tumor-only RNA
 
 ```csv title="samplesheet.wgts.csv"
-group_id,subject_id,sample_id,sample_type,sequence_type,filetype,filepath,info
-PATIENT1,PATIENT1,PATIENT1-N,normal,dna,bam,/path/to/PATIENT1-N.dna.bam,
-PATIENT1,PATIENT1,PATIENT1-T,tumor,dna,bam,/path/to/PATIENT1-T.dna.bam,
-PATIENT1,PATIENT1,PATIENT1-R,tumor,rna,fastq,/path/to/PATIENT1-R_S1_L001_R1_001.fastq.gz;/path/to/PATIENT1-R_S1_L001_R2_001.fastq.gz,library_id:S1;lane:001
+group_id,subject_id,sample_id,sample_type,sequence_type,filetype,info,filepath
+PATIENT1,PATIENT1,PATIENT1-N,normal,dna,bam,,/path/to/PATIENT1-N.dna.bam
+PATIENT1,PATIENT1,PATIENT1-T,tumor,dna,bam,,/path/to/PATIENT1-T.dna.bam
+PATIENT1,PATIENT1,PATIENT1-T-RNA,tumor,rna,fastq,library_id:S1;lane:001,/path/to/PATIENT1-T-RNA_S1_L001_R1_001.fastq.gz;/path/to/PATIENT1-T-RNA_S1_L001_R2_001.fastq.gz
 ```
 
 #### Paired tumor and normal DNA with donor sample
@@ -748,9 +748,9 @@ PATIENT1,PATIENT1,PATIENT1-L,tumor,dna,redux_dir,longitudinal_sample,/path/to/re
 Similarly, a minimal samplesheet instead starting from FASTQ for the longitudinal sample:
 
 ```csv title="samplesheet.purity_estimate.fastq.csv"
-group_id,subject_id,sample_id,sample_type,sequence_type,filetype,filepath,info
-PATIENT1,PATIENT1,PATIENT1-T,tumor,dna,purple_dir,/path/to/PATIENT1-T/purple/,
-PATIENT1,PATIENT1,PATIENT1-L,tumor,dna,fastq,/path/to/PATIENT1-L.R1.fastq.gz;/path/to/PATIENT1-L.R2.fastq.gz,longitudinal_sample;library_id:PATIENT1-L_library;lane:001
+group_id,subject_id,sample_id,sample_type,sequence_type,filetype,info,filepath
+PATIENT1,PATIENT1,PATIENT1-T,tumor,dna,purple_dir,,/path/to/PATIENT1-T/purple/
+PATIENT1,PATIENT1,PATIENT1-L,tumor,dna,fastq,longitudinal_sample;library_id:PATIENT1-L_library;lane:001,/path/to/PATIENT1-L.R1.fastq.gz;/path/to/PATIENT1-L.R2.fastq.gz
 ```
 
 In `--purity_estimate_mode wgts`, to use LOH for purity estimation, you can optionally provide:
@@ -829,11 +829,11 @@ Once your manually created files are ready, create a samplesheet with a represen
 provided. RNA samples are only required if your panel supports RNA-seq data.
 
 ```csv title="samplesheet.panel_resource_creation.csv"
-group_id,subject_id,sample_id,sample_type,sequence_type,filetype,filepath,info
-PATIENT1,PATIENT1,PATIENT1-T,tumor,dna,bam,/path/to/PATIENT1-T.dna.bam,
-PATIENT2,PATIENT2,PATIENT2-T,tumor,dna,bam,/path/to/PATIENT2-T.dna.bam,
-PATIENT1,PATIENT1,PATIENT1-R,tumor,rna,fastq,/path/to/PATIENT1-R_S1_L001_R1_001.fastq.gz;/path/to/PATIENT1-R_S1_L001_R2_001.fastq.gz,library_id:S1;lane:001
-PATIENT2,PATIENT2,PATIENT2-R,tumor,rna,fastq,/path/to/PATIENT2-R_S1_L001_R1_001.fastq.gz;/path/to/PATIENT2-R_S1_L001_R2_001.fastq.gz,library_id:S1;lane:001
+group_id,subject_id,sample_id,sample_type,sequence_type,filetype,info,filepath
+PATIENT1,PATIENT1,PATIENT1-T,tumor,dna,bam,,/path/to/PATIENT1-T.dna.bam
+PATIENT2,PATIENT2,PATIENT2-T,tumor,dna,bam,,/path/to/PATIENT2-T.dna.bam
+PATIENT1,PATIENT1,PATIENT1-T-RNA,tumor,rna,fastq,library_id:S1;lane:001,/path/to/PATIENT1-T-RNA_S1_L001_R1_001.fastq.gz;/path/to/PATIENT1-T-RNA_S1_L001_R2_001.fastq.gz
+PATIENT2,PATIENT2,PATIENT2-T-RNA,tumor,rna,fastq,library_id:S1;lane:001,/path/to/PATIENT2-T-RNA_S1_L001_R1_001.fastq.gz;/path/to/PATIENT2-T-RNA_S1_L001_R2_001.fastq.gz
 ```
 
 Then, run `oncoanalyser` with `--mode panel_resource_creation` providing the samplesheet, as well as the relevant
