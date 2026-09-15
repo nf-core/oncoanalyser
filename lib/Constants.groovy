@@ -50,6 +50,7 @@ class Constants {
 
         // Individual types
         BWAMEM2_INDEX,
+        BWAMEM2_INDEX_RNA,
         DICT,
         DNA_ALIGNMENT,
         FAI,
@@ -59,7 +60,6 @@ class Constants {
         IMG,
         PANEL,
         RNA_ALIGNMENT,
-        STAR_INDEX,
     }
 
     static enum Process {
@@ -228,6 +228,12 @@ class Constants {
             SequenceType.DNA,
         ],
 
+        REDUX_DIR_RNA: [
+            FileType.REDUX_DIR,
+            SampleType.TUMOR,
+            SequenceType.RNA,
+        ],
+
 
         // Other tools
         ISOFOX_DIR: [
@@ -256,6 +262,11 @@ class Constants {
             FileType.BAMTOOLS_DIR,
             SampleType.NORMAL,
             SequenceType.DNA,
+        ],
+        BAMTOOLS_DIR_RNA: [
+            FileType.BAMTOOLS_DIR,
+            SampleType.TUMOR,
+            SequenceType.RNA,
         ],
 
         SAGE_DIR_TUMOR: [

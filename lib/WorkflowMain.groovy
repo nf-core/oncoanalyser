@@ -126,7 +126,6 @@ class WorkflowMain {
         // Final point to set any default to avoid access to undefined parameters during nf-validation
         if (! params.containsKey('panel')) params.panel = null
         if (! params.containsKey('ref_data_genome_alt')) params.ref_data_genome_alt = null
-        if (! params.containsKey('ref_data_genome_gtf')) params.ref_data_genome_gtf = null
         if (! params.containsKey('ref_data_panel_data_path')) params.ref_data_panel_data_path = null
 
         // Additionally set selected parameters with false-ish truthy values to avoid passing null values as inputs
@@ -507,7 +506,7 @@ class WorkflowMain {
             require_img: true,
 
             require_bwamem2_index: run_config.has_dna_fastq && run_config.stages.alignment,
-            require_star_index: run_config.has_rna_fastq && run_config.stages.alignment,
+            require_bwamem2_index_rna: run_config.has_rna_fastq && run_config.stages.alignment,
 
             require_gridss_index: run_config.has_dna && run_config.mode == Constants.RunMode.WGTS && run_config.stages.virusinterpreter,
             require_hmftools_data: true,
@@ -558,7 +557,7 @@ class WorkflowMain {
         def require_img = ref_data_types.contains(Constants.RefDataType.IMG)
 
         def require_bwamem2_index = ref_data_types.contains(Constants.RefDataType.BWAMEM2_INDEX) || ref_data_types.contains(Constants.RefDataType.DNA_ALIGNMENT)
-        def require_star_index = ref_data_types.contains(Constants.RefDataType.STAR_INDEX) || ref_data_types.contains(Constants.RefDataType.RNA_ALIGNMENT)
+        def require_bwamem2_index_rna = ref_data_types.contains(Constants.RefDataType.BWAMEM2_INDEX_RNA) || ref_data_types.contains(Constants.RefDataType.RNA_ALIGNMENT)
 
         def require_gridss_index = ref_data_types.contains(Constants.RefDataType.GRIDSS_INDEX)
         def require_hmftools_data = ref_data_types.contains(Constants.RefDataType.HMFTOOLS)
@@ -583,7 +582,7 @@ class WorkflowMain {
             require_img: require_img,
 
             require_bwamem2_index: require_bwamem2_index,
-            require_star_index: require_star_index,
+            require_bwamem2_index_rna: require_bwamem2_index_rna,
 
             require_gridss_index: require_gridss_index,
             require_hmftools_data: require_hmftools_data,

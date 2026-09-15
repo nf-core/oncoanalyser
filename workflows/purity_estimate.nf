@@ -127,11 +127,12 @@ workflow PURITY_ESTIMATE {
             ch_align_dna_tumor_out,
             ch_align_dna_normal_out,
             ch_align_dna_donor_out,
+            ch_inputs.map { meta -> [meta, [], []] },  // ch_rna_tumor
             ref_data.genome_fasta,
             ref_data.genome_version,
             ref_data.genome_fai,
             ref_data.genome_dict,
-            hmf_data.unmap_regions,
+            hmf_data.unmap_regions_dna,
             hmf_data.msi_jitter_sites,
             // NOTE(LN): panel specific MSI predictions not used as indels are unimportant for WISP
             [],  // msi_model_coefficients
@@ -224,7 +225,7 @@ workflow PURITY_ESTIMATE {
             ch_inputs,
             ch_inputs.map { meta -> [meta, []] },  // ch_purple_dir
             ch_redux_tumor_out,
-            ch_inputs.map { meta -> [meta, [], []] },  // ch_tumor_rna_aln
+            ch_inputs.map { meta -> [meta, []] },  // ch_redux_dir_rna
             ref_data.genome_fasta,
             ref_data.genome_version,
             ref_data.genome_fai,

@@ -27,7 +27,7 @@ workflow ESVEE_CALLING {
     saga_dict                // channel: [optional]  /path/to/saga_dict
     saga_img                 // channel: [optional]  /path/to/saga_img
     repeatmasker_annotations // channel: [mandatory] /path/to/repeatmasker_annotations
-    unmap_regions            // channel: [mandatory] /path/to/unmap_regions
+    unmap_regions_dna        // channel: [mandatory] /path/to/unmap_regions_dna
     target_regions_bed       // channel: [optional]  /path/to/target_regions_bed
 
     // Params
@@ -100,7 +100,7 @@ workflow ESVEE_CALLING {
         saga_img,
         known_fusions,
         repeatmasker_annotations,
-        unmap_regions,
+        unmap_regions_dna,
         target_regions_bed,
         sequencing_platform,
     )

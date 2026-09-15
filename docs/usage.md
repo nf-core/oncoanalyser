@@ -251,6 +251,7 @@ To run from FASTQ:
 group_id,subject_id,sample_id,sample_type,sequence_type,filetype,info,filepath
 PATIENT1,PATIENT1,PATIENT1-T,tumor,dna,fastq,library_id:S1;lane:001,/path/to/PATIENT1-T_S1_L001_R1_001.fastq.gz;/path/to/PATIENT1-T_S1_L001_R2_001.fastq.gz
 PATIENT1,PATIENT1,PATIENT1-T,tumor,dna,fastq,library_id:S1;lane:002,/path/to/PATIENT1-T_S1_L002_R1_001.fastq.gz;/path/to/PATIENT1-T_S1_L002_R2_001.fastq.gz
+PATIENT1,PATIENT1,PATIENT1-T-RNA,tumor,rna,fastq,library_id:S1;lane:001,/path/to/PATIENT1-T-RNA_S1_L001_R1_001.fastq.gz;/path/to/PATIENT1-T-RNA_S1_L001_R2_001.fastq.gz
 ```
 
 :::note
@@ -277,6 +278,13 @@ group_id,subject_id,sample_id,sample_type,sequence_type,filetype,filepath
 PATIENT1,PATIENT1,PATIENT1-T,tumor,dna,bam,/path/to/PATIENT1-T.dna.bam
 PATIENT1,PATIENT1,PATIENT1-T,tumor,dna,bai,/other/dir/PATIENT1-T.dna.bam.bai
 ```
+
+:::note
+Only FASTQ files are supported for RNA sequencing.
+
+BAMs from RNA sequencing data can be converted to back to FASTQs, but be aware that these FASTQs may lack or contain 
+reads additional reads depending the aligner (e.g. STAR).
+:::
 
 #### CRAM
 
@@ -436,17 +444,17 @@ PATIENT1,PATIENT1,PATIENT1-T,tumor,dna,bam,/path/to/PATIENT1-T.dna.bam
 #### Tumor-only RNA
 
 ```csv title="samplesheet.to_rna.csv"
-group_id,subject_id,sample_id,sample_type,sequence_type,filetype,filepath
-PATIENT1,PATIENT1,PATIENT1-T-RNA,tumor,rna,bam,/path/to/PATIENT1-T.rna.bam
+group_id,subject_id,sample_id,sample_type,sequence_type,filetype,info,filepath
+PATIENT1,PATIENT1,PATIENT1-T-RNA,tumor,rna,fastq,library_id:S1;lane:001,/path/to/PATIENT1-T-RNA_S1_L001_R1_001.fastq.gz;/path/to/PATIENT1-T-RNA_S1_L001_R2_001.fastq.gz
 ```
 
 #### Paired tumor and normal DNA with tumor-only RNA
 
 ```csv title="samplesheet.wgts.csv"
-group_id,subject_id,sample_id,sample_type,sequence_type,filetype,filepath
-PATIENT1,PATIENT1,PATIENT1-N,normal,dna,bam,/path/to/PATIENT1-N.dna.bam
-PATIENT1,PATIENT1,PATIENT1-T,tumor,dna,bam,/path/to/PATIENT1-T.dna.bam
-PATIENT1,PATIENT1,PATIENT1-T-RNA,tumor,rna,bam,/path/to/PATIENT1-T.rna.bam
+group_id,subject_id,sample_id,sample_type,sequence_type,filetype,info,filepath
+PATIENT1,PATIENT1,PATIENT1-N,normal,dna,bam,,/path/to/PATIENT1-N.dna.bam
+PATIENT1,PATIENT1,PATIENT1-T,tumor,dna,bam,,/path/to/PATIENT1-T.dna.bam
+PATIENT1,PATIENT1,PATIENT1-T-RNA,tumor,rna,fastq,library_id:S1;lane:001,/path/to/PATIENT1-T-RNA_S1_L001_R1_001.fastq.gz;/path/to/PATIENT1-T-RNA_S1_L001_R2_001.fastq.gz
 ```
 
 #### Paired tumor and normal DNA with donor sample
@@ -817,15 +825,15 @@ Files marked as '**[RNA]**' are only required if your panel supports RNA-seq dat
 ### Panel resource creation
 
 Once your manually created files are ready, create a samplesheet with a representative set of panel sequencing samples
-(**≥20 recommended**). The below example samplesheet provides BAM files, but [FASTQ files](#fastq) can also be provided.
-RNA samples are only required if your panel supports RNA-seq data.
+(**≥20 recommended**). The below example samplesheet provides DNA BAM files, but [FASTQ files](#fastq) can also be
+provided. RNA samples are only required if your panel supports RNA-seq data.
 
 ```csv title="samplesheet.panel_resource_creation.csv"
-group_id,subject_id,sample_id,sample_type,sequence_type,filetype,filepath
-PATIENT1,PATIENT1,PATIENT1-T,tumor,dna,bam,/path/to/PATIENT1-T.dna.bam
-PATIENT2,PATIENT2,PATIENT2-T,tumor,dna,bam,/path/to/PATIENT2-T.dna.bam
-PATIENT1,PATIENT1,PATIENT1-T-RNA,tumor,rna,bam,/path/to/PATIENT1-T.rna.bam
-PATIENT2,PATIENT2,PATIENT2-T-RNA,tumor,rna,bam,/path/to/PATIENT2-T.rna.bam
+group_id,subject_id,sample_id,sample_type,sequence_type,filetype,info,filepath
+PATIENT1,PATIENT1,PATIENT1-T,tumor,dna,bam,,/path/to/PATIENT1-T.dna.bam
+PATIENT2,PATIENT2,PATIENT2-T,tumor,dna,bam,,/path/to/PATIENT2-T.dna.bam
+PATIENT1,PATIENT1,PATIENT1-T-RNA,tumor,rna,fastq,library_id:S1;lane:001,/path/to/PATIENT1-T-RNA_S1_L001_R1_001.fastq.gz;/path/to/PATIENT1-T-RNA_S1_L001_R2_001.fastq.gz
+PATIENT2,PATIENT2,PATIENT2-T-RNA,tumor,rna,fastq,library_id:S1;lane:001,/path/to/PATIENT2-T-RNA_S1_L001_R1_001.fastq.gz;/path/to/PATIENT2-T-RNA_S1_L001_R2_001.fastq.gz
 ```
 
 Then, run `oncoanalyser` with `--mode panel_resource_creation` providing the samplesheet, as well as the relevant

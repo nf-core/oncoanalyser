@@ -53,7 +53,7 @@ jobs:
           nextflow run . \
             -profile docker \
             --mode prepare_reference \
-            --ref_data_types wgs,bwamem2_index,star_index \
+            --ref_data_types wgs,bwamem2_index \
             --genome GRCh38_hmf \
             --outdir ./ \
             -c <(echo "aws.client.anonymous=true")
