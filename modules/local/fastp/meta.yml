@@ -1,4 +1,4 @@
-name: fastp_umi
+name: fastp
 description: An ultra-fast all-in-one FASTQ preprocessor
 keywords:
   - fastp
@@ -40,7 +40,7 @@ output:
       description: |
         Groovy Map containing sample information
         e.g. [id: 'sample_id']
-  - fastp_umi_fastq:
+  - fastp_fastq:
       type: list
       description: Forward and reverse FASTQ files
       pattern: "*.{fastq.gz}"
