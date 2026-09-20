@@ -77,7 +77,7 @@ workflow PREPARE_OUTPUTS {
             linx_somatic.flatMap { meta, d -> return get_dir_filepaths(meta, d, 'linx/somatic_annotations') },
             linx_somatic_visualiser.flatMap { meta, d -> return get_dir_filepaths(meta, d, 'linx/somatic_plots') },
             linxreport_html.map { meta, d -> return ["${meta.case_id}/linx/${d.name}", d] },
-            multiqc.flatMap { fps -> return fps.collect { d -> [d.name, d] } },
+            multiqc.flatMap { fps -> return fps.collectMany { d -> d.isDirectory() ? get_dir_filepaths([case_id: 'multiqc'], d) : [["multiqc/${d.name}", d]] } },
             neo_annotated_fusions.filter { meta, d -> d != null }.map { meta, d -> return ["${meta.case_id}/neo/annotated_fusions/${d.name}", d] },
             neo_finder.flatMap { meta, d -> return get_dir_filepaths(meta, d, 'neo/finder') },
             neo_scorer_dir.flatMap { meta, d -> return get_dir_filepaths(meta, d, 'neo/scorer') },

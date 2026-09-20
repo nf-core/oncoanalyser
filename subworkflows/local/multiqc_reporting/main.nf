@@ -167,9 +167,12 @@ workflow MULTIQC_REPORTING {
     )
 
     // Set outputs
-    // path: multiqc_report
-    ch_outputs = channel.topic('multiqc_report').toList()
+    // path: multiqc_report, multiqc_data, multiqc_plots
+    ch_outputs = channel.topic('multiqc_report')
+        .mix(channel.topic('multiqc_data'))
+        .mix(channel.topic('multiqc_plots'))
+        .toList()
 
     emit:
-    report = ch_outputs // path: multiqc_report
+    report = ch_outputs // path: multiqc_report, multiqc_data, multiqc_plots
 }

@@ -187,6 +187,9 @@ workflow {
 output {
     results {
         path { filepath, file -> file >> filepath }
+        index {
+            path "workflow_outputs.json"
+        }
     }
 }
 
