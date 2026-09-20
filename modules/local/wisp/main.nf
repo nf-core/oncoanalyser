@@ -16,8 +16,8 @@ process WISP {
         primary_amber_dir: Path?,
         primary_normal_aln: Path?,
         longitudinal_redux_dir: Path,
-        longitudinal_amber_dir?: Path,
-        longitudinal_cobalt_dir?: Path,
+        longitudinal_amber_dir: Path?,
+        longitudinal_cobalt_dir: Path?,
         longitudinal_sage_append_dir: Path,
     )
     genome_fasta: Path
@@ -67,12 +67,12 @@ process WISP {
         } else {
             amber_dir_arg = ''
 
+            cobalt_dir_arg = "-cobalt_dir ${longitudinal_cobalt_dir}"
+            purity_methods += 'COPY_NUMBER'
 
-        cobalt_dir_arg = "-cobalt_dir ${longitudinal_cobalt_dir}"
-        purity_methods += 'COPY_NUMBER'
-
-        gc_ratio_min_arg = ''
-        write_types_arg = '-write_types ALL'
+            gc_ratio_min_arg = ''
+            write_types_arg = '-write_types ALL'
+        }
     }
 
     def purity_methods_arg = "'${purity_methods.join(';')}'"
