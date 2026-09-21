@@ -18,6 +18,7 @@ workflow WISP_ANALYSIS {
     genome_fai                 // channel: [mandatory] /path/to/genome_fai
 
     // Params
+    sequencing_platform        // string:  [mandatory] sequencing platform
     targeted_mode              // boolean: [mandatory] Set targeted mode
 
     main:
@@ -90,6 +91,7 @@ workflow WISP_ANALYSIS {
         ch_wisp_inputs,
         genome_fasta,
         genome_fai,
+        sequencing_platform,
         targeted_mode,
     )
 }

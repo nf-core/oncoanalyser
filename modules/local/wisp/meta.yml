@@ -46,6 +46,9 @@ input:
       type: file
       description: Reference genome assembly fai file
       pattern: "*.{fai}"
+  - sequencing_platform:
+      type: string
+      description: Sequencing platform
   - targeted_mode:
       type: boolean
       description: Flag indicating whether targeted mode is set
