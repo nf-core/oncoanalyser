@@ -2,7 +2,7 @@
 // Align DNA reads
 //
 
-include { BWAMEM2_ALIGN } from '../../../modules/local/bwa-mem2/mem/main'
+include { BWAMEM3_ALIGN } from '../../../modules/local/bwa-mem3/mem/main'
 include { FASTP_SPLIT   } from '../../../modules/local/fastp/split/main'
 
 workflow READ_ALIGNMENT_DNA {
@@ -145,7 +145,7 @@ workflow READ_ALIGNMENT_DNA {
     }
 
     //
-    // MODULE: BWA-MEM2
+    // MODULE: BWA-MEM3
     //
     // Create process input channel
     // channel: [ meta_bwamem2, fastq_fwd, fastq_rev ]
@@ -156,7 +156,7 @@ workflow READ_ALIGNMENT_DNA {
         }
 
     // Run process
-    BWAMEM2_ALIGN(
+    BWAMEM3_ALIGN(
         ch_bwamem2_inputs,
         genome_fasta,
         genome_bwamem2_index,
@@ -184,7 +184,7 @@ workflow READ_ALIGNMENT_DNA {
         // channel: [ [ meta_group, count ], [ meta_group, aln, idx ] ]
         .cross(
             // First element to match meta_group above for `cross`
-            channel.topic('bwamem2_align_bam').map { meta_bwamem2, aln, idx -> [[key: meta_bwamem2.key, sample_type: meta_bwamem2.sample_type], aln, idx] }
+            channel.topic('bwamem3_align_bam').map { meta_bwamem2, aln, idx -> [[key: meta_bwamem2.key, sample_type: meta_bwamem2.sample_type], aln, idx] }
         )
         .map { count_tuple, inputs_tuple ->
             def group_size = count_tuple[1]

@@ -1,17 +1,16 @@
-name: bwamem2_index
-description: Create BWA-mem2 index for reference genome
+name: bwa-mem3_index
+description: Create bwa-mem3 (bwa-mem2 format) index for reference genome
 keywords:
   - index
   - fasta
   - genome
   - reference
 tools:
-  - bwamem2:
+  - bwa-mem3:
       description: |
-        BWA-mem2 is a software package for mapping DNA sequences against
-        a large reference genome, such as the human genome.
-      homepage: https://github.com/bwa-mem2/bwa-mem2
-      documentation: https://github.com/bwa-mem2/bwa-mem2#usage
+        Short-read aligner derived from bwa-mem2 with correctness fixes and performance improvements
+      homepage: https://github.com/fg-labs/bwa-mem3
+      documentation: https://bwa-mem3.readthedocs.io
       licence: ["MIT"]
 input:
   - fasta:
@@ -22,10 +21,10 @@ input:
       description: Input genome ALT file (optional)
       pattern: "*.{alt}"
 output:
-  - bwamem2_index:
+  - bwamem3_index:
       type: file
-      description: BWA genome index files
-      pattern: "*.{0123,amb,ann,bwt.2bit.64,pac,alt}"
+      description: BWA genome index files (bwa-mem2 format)
+      pattern: "*.{amb,ann,bwt.2bit.64,pac,alt}"
   - command_files:
       type: list
       description: List of command files

@@ -1,20 +1,20 @@
-process BWAMEM2_INDEX {
+process BWAMEM3_INDEX {
     tag "$fasta"
     label 'process_single'
     label 'process_high_memory'
 
     conda "${moduleDir}/environment.yml"
     container "${ workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container ?
-        'https://depot.galaxyproject.org/singularity/bwa-mem2:2.2.1--he513fc3_0' :
-        'biocontainers/bwa-mem2:2.2.1--he513fc3_0' }"
+        'https://community-cr-prod.seqera.io/docker/registry/v2/blobs/sha256/67/675fb6ba74af9bf75f4f7d8819f8f0590d93a625444fc4d8e000b4bddf6d8d4e/data' :
+        'community.wave.seqera.io/library/bwa-mem3_samtools_sambamba:630ef504d2934496' }"
 
     input:
     path fasta
     path alt
 
     output:
-    path 'bwa-mem2_index'                                   , topic: bwamem2_index
-    tuple val([:]), val('bwamem2_index'), path('.command.*'), topic: command_files
+    path 'bwa-mem2_index'                                   , topic: bwamem3_index
+    tuple val([:]), val('bwamem3_index'), path('.command.*'), topic: command_files
     path 'versions.yml'                                     , topic: versions
 
     when:
@@ -24,12 +24,15 @@ process BWAMEM2_INDEX {
     def prefix = task.ext.prefix ?: "${fasta}"
     def args = task.ext.args ?: ''
 
+    // NOTE: bwa-mem3 reads and writes the bwa-mem2 index format, so the output directory keeps the bwa-mem2_index name
     """
     mkdir -p bwa-mem2_index/
-    bwa-mem2 \\
+    bwa-mem3 \\
         index \\
         $args \\
-        $fasta -p bwa-mem2_index/${prefix}
+        -t ${task.cpus} \\
+        -p bwa-mem2_index/${prefix} \\
+        $fasta
 
     # Include ALT file where necessary
     if [[ -n "${alt}" ]]; then
@@ -38,7 +41,7 @@ process BWAMEM2_INDEX {
 
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":
-        bwamem2: \$(echo \$(bwa-mem2 version 2>&1) | sed 's/.* //')
+        bwa-mem3: \$(bwa-mem3 version | sed -nE '1 s/^([0-9]+(\\.[0-9]+)+).*/\\1/p')
     END_VERSIONS
     """
 
@@ -48,7 +51,6 @@ process BWAMEM2_INDEX {
     """
     mkdir -p bwa-mem2_index/
 
-    touch bwa-mem2_index/${prefix}.0123
     touch bwa-mem2_index/${prefix}.ann
     touch bwa-mem2_index/${prefix}.pac
     touch bwa-mem2_index/${prefix}.amb
