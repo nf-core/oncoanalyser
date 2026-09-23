@@ -1,20 +1,21 @@
-process BWAMEM2_ALIGN {
+process MINIBWA_MAP {
     tag "${meta.id}"
     label 'process_high'
 
     conda "${moduleDir}/environment.yml"
+    // NOTE(SW): container for minibwa + samtools + sambamba is a placeholder; finalize when container support is added
     container "${ workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container ?
-        'https://depot.galaxyproject.org/singularity/mulled-v2-4dde50190ae599f2bb2027cb2c8763ea00fb5084:596c0d6a494faa218562f2be03af2714d454da4f-0' :
-        'biocontainers/mulled-v2-4dde50190ae599f2bb2027cb2c8763ea00fb5084:596c0d6a494faa218562f2be03af2714d454da4f-0' }"
+        'https://depot.galaxyproject.org/singularity/mulled-v2-minibwa-0.7-samtools-1.21-sambamba-1.0.1' :
+        'biocontainers/mulled-v2-minibwa-0.7-samtools-1.21-sambamba-1.0.1' }"
 
     input:
     tuple val(meta), path(reads_fwd), path(reads_rev)
     path genome_fasta
-    path genome_bwamem2_index
+    path genome_minibwa_index
 
     output:
-    tuple val(meta), path('*.bam'), path('*.bai')            , topic: bwamem2_align_bam
-    tuple val(meta), val('bwamem2_align'), path('.command.*'), topic: command_files
+    tuple val(meta), path('*.bam'), path('*.bai')            , topic: minibwa_align_bam
+    tuple val(meta), val('minibwa_align'), path('.command.*'), topic: command_files
     path 'versions.yml'                                      , topic: versions
 
     when:
@@ -28,9 +29,9 @@ process BWAMEM2_ALIGN {
     def output_fn = meta.split ? "${meta.split}.${meta.output_file_id}.bam" : "${meta.output_file_id}.bam"
 
     """
-    ln -fs \$(find -L ${genome_bwamem2_index} -type f) ./
+    ln -fs \$(find -L ${genome_minibwa_index} -type f) ./
 
-    bwa-mem2 mem \\
+    minibwa map \\
         ${args} \\
         -Y \\
         -K 100000000 \\
@@ -54,10 +55,9 @@ process BWAMEM2_ALIGN {
             --out ${output_fn} \\
             /dev/stdin
 
-    # NOTE(SW): bwa-mem2 version hardcoded as 2.3 reports the wrong version, see https://github.com/bwa-mem2/bwa-mem2/issues/276
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":
-        bwa-mem2: 2.3
+        minibwa: \$(minibwa version)
         samtools: \$(samtools --version | sed -n '/^samtools / { s/^.* //p }')
         sambamba: \$(sambamba --version 2>&1 | sed -n '/^sambamba / { s/^.* //p }' | head -n1)
     END_VERSIONS

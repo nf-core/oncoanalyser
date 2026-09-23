@@ -140,7 +140,7 @@ workflow WGTS {
             ch_inputs,
             ch_align_dna_input,
             ref_data.genome_fasta,
-            ref_data.genome_bwamem2_index,
+            ref_data.genome_minibwa_index,
             params.max_fastq_records,
         )
 
