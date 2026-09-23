@@ -18,6 +18,7 @@ process WISP {
         path(longitudinal_sage_append_dir, stageAs: 'sage_append_longitudinal')
     path genome_fasta
     path genome_fai
+    val sequencing_platform
     val targeted_mode
 
     output:
@@ -32,6 +33,8 @@ process WISP {
     def args = task.ext.args ?: ''
 
     def log_level_arg = task.ext.log_level ? "-log_level ${task.ext.log_level}" : ''
+
+    def reference_arg = meta.normal_id ? "-reference_id ${meta.normal_id}" : ''
 
     def amber_dir_arg
     def cobalt_dir_arg
@@ -81,6 +84,7 @@ process WISP {
         ${args} \\
         -patient_id ${meta.subject_id} \\
         -tumor_id ${meta.primary_id} \\
+        ${reference_arg} \\
         -samples ${meta.longitudinal_id} \\
         -purity_methods ${purity_methods_arg} \\
         -somatic_vcf ${longitudinal_sage_append_dir}/${meta.longitudinal_id}.sage.append.vcf.gz \\
@@ -89,6 +93,7 @@ process WISP {
         ${amber_dir_arg} \\
         ${cobalt_dir_arg} \\
         -ref_genome ${genome_fasta} \\
+        -sequencing_type ${sequencing_platform.toUpperCase()} \\
         ${gc_ratio_min_arg} \\
         ${write_types_arg} \\
         ${log_level_arg} \\

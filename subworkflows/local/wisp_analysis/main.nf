@@ -18,6 +18,7 @@ workflow WISP_ANALYSIS {
     genome_fai                 // channel: [mandatory] /path/to/genome_fai
 
     // Params
+    sequencing_platform        // string:  [mandatory] sequencing platform
     targeted_mode              // boolean: [mandatory] Set targeted mode
 
     main:
@@ -79,6 +80,7 @@ workflow WISP_ANALYSIS {
                 subject_id: meta.subject_id,
                 primary_id: Utils.getTumorDnaSampleName(meta, primary: true),
                 longitudinal_id: Utils.getTumorDnaSampleName(meta, primary: false),
+                normal_id: Utils.getNormalDnaSampleName(meta)
             ]
 
             return [meta_wisp] + inputs
@@ -89,6 +91,7 @@ workflow WISP_ANALYSIS {
         ch_wisp_inputs,
         genome_fasta,
         genome_fai,
+        sequencing_platform,
         targeted_mode,
     )
 }
