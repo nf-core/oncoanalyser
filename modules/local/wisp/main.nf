@@ -18,6 +18,7 @@ process WISP {
         path(longitudinal_sage_append_dir, stageAs: 'sage_append_longitudinal')
     path genome_fasta
     path genome_fai
+    val sequencing_platform
     val targeted_mode
 
     output:
@@ -92,6 +93,7 @@ process WISP {
         ${amber_dir_arg} \\
         ${cobalt_dir_arg} \\
         -ref_genome ${genome_fasta} \\
+        -sequencing_type ${sequencing_platform.toUpperCase()} \\
         ${gc_ratio_min_arg} \\
         ${write_types_arg} \\
         ${log_level_arg} \\

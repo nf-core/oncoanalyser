@@ -255,6 +255,7 @@ workflow PURITY_ESTIMATE {
             ch_sage_somatic_append_out,
             ref_data.genome_fasta,
             ref_data.genome_fai,
+            params.sequencing_platform,
             targeted_mode,
         )
 
