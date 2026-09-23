@@ -148,7 +148,7 @@ workflow PANEL_RESOURCE_CREATION {
         hmf_data.unmap_regions,
         hmf_data.msi_jitter_sites,
         hmf_data.msi_model_coefs_illumina,
-        hmf_data.msi_model_error_rates,
+        hmf_data.msi_model_error_rates_panel,
         params.sequencing_platform,
         true,  // targeted_mode
         params.redux_umi_enabled,
