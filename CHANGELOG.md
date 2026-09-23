@@ -6,7 +6,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/) 
 ## [dev]
 
 - [325](https://github.com/nf-core/oncoanalyser/pull/325) - Post-release bump
-- Replace bwa-mem2 with [bwa-mem3](https://github.com/fg-labs/bwa-mem3) for DNA read alignment and index creation
+- [334](https://github.com/nf-core/oncoanalyser/pull/334) - Replace bwa-mem2 with [bwa-mem3](https://github.com/fg-labs/bwa-mem3) for DNA read alignment and index creation
   - Existing bwa-mem2 indexes are compatible and reused as-is
 
 ## [[3.0.0](https://github.com/nf-core/oncoanalyser/releases/tag/3.0.0)] Scarlet Honeyeater - 2026-09-01
