@@ -885,7 +885,7 @@ params {
                 target_regions_normalisation = 'cobalt_normalisation.38.tsv'
 
                 // These are not required and left unset by providing an empty list `[]`
-                msi_model_error_rates        = [] // Currently defaults to TS0500 panel error rates for all custom panels
+                msi_model_error_rates        = [] // Defaults to TSO500 panel error rates for Illumina; required for SBX and Ultima
                 known_umis                   = [] // Only required for MSK-IMPACT panel
 
                 // Only for panels with RNA-seq. Provide e.g. `isofox_counts = []` for panels without RNA
