@@ -9,6 +9,19 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/) 
 - [334](https://github.com/nf-core/oncoanalyser/pull/334) - Replace bwa-mem2 with [bwa-mem3](https://github.com/fg-labs/bwa-mem3) for DNA read alignment and index creation
   - Existing bwa-mem2 indexes are compatible and reused as-is
 
+### Breaking change
+
+- Renamed processes `BWAMEM2_ALIGN` and `BWAMEM2_INDEX` to `BWAMEM3_ALIGN` and `BWAMEM3_INDEX`; update any custom
+  `withName` selectors
+- Indexes created by the pipeline are now written to `bwamem3/` rather than `bwa-mem2_index/`
+
+### Software dependencies
+
+| Dependency | Old version | New version |
+| ---------- | ----------- | ----------- |
+| `bwa-mem2` | 2.3         | -           |
+| `bwa-mem3` | -           | 0.12.0      |
+
 ## [[3.0.0](https://github.com/nf-core/oncoanalyser/releases/tag/3.0.0)] Scarlet Honeyeater - 2026-09-01
 
 - [314](https://github.com/nf-core/oncoanalyser/pull/314) - Other additions and fixes

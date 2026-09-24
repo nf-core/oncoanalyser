@@ -101,7 +101,7 @@ WiGiTS workflow.
 #### bwa-mem3
 
 [bwa-mem3](https://github.com/fg-labs/bwa-mem3) is a short-read mapping tool derived from BWA-MEM2 used to align reads
-to a large reference sequences. In `oncoanalyser`, bwa-mem3 is used to align DNA reads to the human genome.
+to large reference sequences. In `oncoanalyser`, bwa-mem3 is used to align DNA reads to the human genome.
 
 _No outputs are published directly from bwa-mem3, see [REDUX](#redux) for the fully processed alignment outputs_
 
