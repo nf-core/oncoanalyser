@@ -1,8 +1,0 @@
-name: bwa-mem3_index
-channels:
-  - conda-forge
-  - bioconda
-dependencies:
-  - bioconda::bwa-mem3=0.12.0
-  - bioconda::samtools=1.21
-  - bioconda::sambamba=1.0.1
