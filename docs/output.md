@@ -48,7 +48,7 @@ output/
 ## Pipeline overview
 
 - [Read alignment](#read-alignment)
-  - [BWA-MEM2](#bwa-mem2) - DNA read alignment
+  - [bwa-mem3](#bwa-mem3) - DNA read alignment
   - [STAR](#star) - RNA read alignment
 - [Read post-processing](#alignment-post-processing)
   - [REDUX](#redux) - DNA read post-processing
@@ -98,12 +98,12 @@ output/
 Alignment functionality in `oncoanalyser` is simple and rigid, and exists only to meet the exact requirements of the
 WiGiTS workflow.
 
-#### BWA-MEM2
+#### bwa-mem3
 
-[BWA-MEM2](https://github.com/bwa-mem2/bwa-mem2) is a short-read mapping tool used to align reads to a large reference
-sequences. In `oncoanalyser`, BWA-MEM2 is used to align DNA reads to the human genome.
+[bwa-mem3](https://github.com/fg-labs/bwa-mem3) is a short-read mapping tool derived from BWA-MEM2 used to align reads
+to large reference sequences. In `oncoanalyser`, bwa-mem3 is used to align DNA reads to the human genome.
 
-_No outputs are published directly from bwa-mem2, see [REDUX](#redux) for the fully processed alignment outputs_
+_No outputs are published directly from bwa-mem3, see [REDUX](#redux) for the fully processed alignment outputs_
 
 #### STAR
 

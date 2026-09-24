@@ -1,0 +1,95 @@
+Changes in component 'nf-core/bwamem3/index'
+Changes in 'bwamem3/index/environment.yml':
+--- modules/nf-core/bwamem3/index/environment.yml
++++ modules/nf-core/bwamem3/index/environment.yml
+@@ -5,4 +5,4 @@
+   - bioconda
+ dependencies:
+   # renovate: datasource=conda depName=bioconda/bwa-mem3
+-  - "bioconda::bwa-mem3=0.8.0"
++  - "bioconda::bwa-mem3=0.12.0"
+
+Changes in 'bwamem3/index/meta.yml':
+--- modules/nf-core/bwamem3/index/meta.yml
++++ modules/nf-core/bwamem3/index/meta.yml
+@@ -27,6 +27,10 @@
+         ontologies:
+           - edam: "http://edamontology.org/data_2044"
+           - edam: "http://edamontology.org/format_1929"
++  - alt:
++      type: file
++      description: Input genome ALT file (optional)
++      pattern: "*.{alt}"
+ output:
+   index:
+     - - meta:
+@@ -61,6 +65,19 @@
+       - bwa-mem3 version | sed -nE '1 s/^([0-9]+(\.[0-9]+)+).*/\1/p':
+           type: eval
+           description: The expression to obtain the version of the tool
++  command_files:
++    - - meta:
++          type: map
++          description: |
++            Groovy Map containing sample information
++            e.g. [ id:'test', single_end:false ]
++      - bwamem3_index:
++          type: string
++          description: Name of the command log group
++      - .command.*:
++          type: file
++          description: Nextflow command files
++          pattern: ".command.*"
+ authors:
+   - "@nh13"
+ maintainers:
+
+Changes in 'bwamem3/index/main.nf':
+--- modules/nf-core/bwamem3/index/main.nf
++++ modules/nf-core/bwamem3/index/main.nf
+@@ -5,14 +5,16 @@
+ 
+     conda "${moduleDir}/environment.yml"
+     container "${workflow.containerEngine in ['singularity', 'apptainer'] && !task.ext.singularity_pull_docker_container
+-        ? 'https://community-cr-prod.seqera.io/docker/registry/v2/blobs/sha256/09/09c0e84ac22ba722bae6f75c5c450d72dfdc06e7224ad2c0bd042849632ca70e/data'
+-        : 'community.wave.seqera.io/library/bwa-mem3:0.8.0--a430e1e1df49a92e'}"
++        ? 'https://community-cr-prod.seqera.io/docker/registry/v2/blobs/sha256/e6/e6ad16b0d97b68ea5ec5c9a29c372ffe73f54488bb262a03f8496868488463ad/data'
++        : 'community.wave.seqera.io/library/bwa-mem3:0.12.0--d4a9f23b4fb7bcd6'}"
+ 
+     input:
+     tuple val(meta), path(fasta)
++    path alt
+ 
+     output:
+     tuple val(meta), path("bwamem3"), emit: index
++    tuple val(meta), val('bwamem3_index'), path('.command.*'), topic: command_files
+     tuple val("${task.process}"), val('bwamem3'), eval("bwa-mem3 version | sed -nE '1 s/^([0-9]+(\\.[0-9]+)+).*/\\1/p'"), emit: versions_bwamem3, topic: versions
+ 
+     when:
+@@ -29,6 +31,11 @@
+         -t ${task.cpus} \\
+         -p bwamem3/${prefix} \\
+         $fasta
++
++    # Include ALT file where necessary
++    if [[ -n "${alt}" ]]; then
++        ln -s ../${alt} bwamem3/;
++    fi;
+     """
+ 
+     stub:
+@@ -40,5 +47,10 @@
+     touch bwamem3/${prefix}.ann
+     touch bwamem3/${prefix}.bwt.2bit.64
+     touch bwamem3/${prefix}.pac
++
++    # Include ALT file where necessary
++    if [[ -n "${alt}" ]]; then
++        ln -s ../${alt} bwamem3/;
++    fi;
+     """
+ }
+
+'modules/nf-core/bwamem3/index/tests/main.nf.test.snap' is unchanged
+'modules/nf-core/bwamem3/index/tests/main.nf.test' is unchanged
+************************************************************

@@ -56,7 +56,7 @@ the tool information below primarily relates to the `wgts` and `targeted` analys
 > [!NOTE]
 > Due to the limitations of panel data, certain tools (indicated with `*` below) do not run in `targeted` mode.
 
-- Read alignment: [BWA-MEM2](https://github.com/bwa-mem2/bwa-mem2) (DNA), [STAR](https://github.com/alexdobin/STAR) (RNA)
+- Read alignment: [bwa-mem3](https://github.com/fg-labs/bwa-mem3) (DNA), [STAR](https://github.com/alexdobin/STAR) (RNA)
 - Read post-processing: [REDUX](https://github.com/hartwigmedical/hmftools/tree/master/redux) (DNA), [Picard MarkDuplicates](https://gatk.broadinstitute.org/hc/en-us/articles/360037052812-MarkDuplicates-Picard) (RNA)
 - SNV, MNV, INDEL calling: [SAGE](https://github.com/hartwigmedical/hmftools/tree/master/sage), [PAVE](https://github.com/hartwigmedical/hmftools/tree/master/pave)
 - SV calling: [ESVEE](https://github.com/hartwigmedical/hmftools/tree/master/esvee)

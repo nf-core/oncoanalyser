@@ -1,15 +1,15 @@
-name: bwa-mem2_mem
-description: The mem alignment algorithm of bwa-mem2
+name: bwa-mem3_mem
+description: The mem alignment algorithm of bwa-mem3
 keywords:
   - bwa
   - mem
   - read alignment
-  - bwa-mem2
+  - bwa-mem3
 tools:
-  - bwa-mem2:
+  - bwa-mem3:
       description: Burrow-Wheeler Aligner for short-read alignment
-      homepage: https://github.com/bwa-mem2/bwa-mem2
-      documentation: https://github.com/bwa-mem2/bwa-mem2
+      homepage: https://github.com/fg-labs/bwa-mem3
+      documentation: https://bwa-mem3.readthedocs.io
       licence: ["MIT"]
 input:
   - meta:
@@ -31,14 +31,14 @@ input:
       pattern: "*.{fa,fasta}"
   - genome_bwamem2_index:
       type: directory
-      description: bwa-mem2 index directory
+      description: bwa-mem2 format index directory
 output:
   - meta:
       type: map
       description: |
         Groovy Map containing sample information
         e.g. [id: 'sample_id']
-  - bwamem2_align_bam:
+  - bwamem3_align_bam:
       type: list
       description: BAM and BAI file
       pattern: "*.{bam,bam.bai}"
