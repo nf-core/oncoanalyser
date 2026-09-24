@@ -370,6 +370,17 @@ class WorkflowMain {
                 Nextflow.exit(1)
             }
 
+            // Require msi_model_error_rates in panel data for non-Illumina sequencing platforms since the default is Illumina specific
+            def sequencing_platform = Utils.getEnumFromString(params.sequencing_platform, Constants.SequencingPlatform)
+            if (sequencing_platform != Constants.SequencingPlatform.ILLUMINA && ! panel_data_paths['msi_model_error_rates']) {
+                log.error "\n~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n" +
+                    "  The sequencing platform is ${params.sequencing_platform} but the required\n" +
+                    "  'msi_model_error_rates' data path was not configured in the panel data paths for\n" +
+                    "  panel ${params.panel.toLowerCase()} (${params.genome_version}).\n" +
+                    "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
+                Nextflow.exit(1)
+            }
+
         }
 
         if (run_mode == Constants.RunMode.PURITY_ESTIMATE) {
