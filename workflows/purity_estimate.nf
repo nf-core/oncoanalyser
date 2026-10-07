@@ -62,7 +62,7 @@ workflow PURITY_ESTIMATE {
     if (run_config.stages.alignment) {
 
 
-        // NOTE(LN): For now we won't support purity estimate mode for panel MSK (i.e. UMI processing with fastq-tools)
+        // NOTE(LN): For now we won't support purity estimate mode for panel MSK (i.e. UMI processing with Taur)
 
 
         // channel: [ meta, fastq_info, fastq_fwd, fastq_rev ]
@@ -70,7 +70,7 @@ workflow PURITY_ESTIMATE {
 
         // channel: [ meta, fastq_info, fastq_fwd, fastq_rev ]
         ch_align_dna_input = channel.empty()
-        if (params.fastp_umi_enabled || params.fastq_tools_umi_enabled) {
+        if (params.fastp_umi_enabled || params.taur_umi_enabled) {
 
             READ_UMI_PROCESSING(
                 ch_inputs,
@@ -81,8 +81,8 @@ workflow PURITY_ESTIMATE {
                 params.fastp_umi_location,
                 params.fastp_umi_length,
                 params.fastp_umi_skip,
-                false,  // fastq_tools_umi_enabled
-                '',  // fastq_tools_umi_delim
+                false,  // taur_umi_enabled
+                '',  // taur_umi_delim
             )
 
             ch_align_dna_input = ch_align_dna_input.mix(READ_UMI_PROCESSING.out.fastq_dna)
@@ -127,11 +127,12 @@ workflow PURITY_ESTIMATE {
             ch_align_dna_tumor_out,
             ch_align_dna_normal_out,
             ch_align_dna_donor_out,
+            ch_inputs.map { meta -> [meta, [], []] },  // ch_rna_tumor
             ref_data.genome_fasta,
             ref_data.genome_version,
             ref_data.genome_fai,
             ref_data.genome_dict,
-            hmf_data.unmap_regions,
+            hmf_data.unmap_regions_dna,
             hmf_data.msi_jitter_sites,
             // NOTE(LN): panel specific MSI predictions not used as indels are unimportant for WISP
             [],  // msi_model_coefficients
@@ -224,7 +225,7 @@ workflow PURITY_ESTIMATE {
             ch_inputs,
             ch_inputs.map { meta -> [meta, []] },  // ch_purple_dir
             ch_redux_tumor_out,
-            ch_inputs.map { meta -> [meta, [], []] },  // ch_tumor_rna_aln
+            ch_inputs.map { meta -> [meta, []] },  // ch_redux_dir_rna
             ref_data.genome_fasta,
             ref_data.genome_version,
             ref_data.genome_fai,
@@ -255,6 +256,7 @@ workflow PURITY_ESTIMATE {
             ch_sage_somatic_append_out,
             ref_data.genome_fasta,
             ref_data.genome_fai,
+            params.sequencing_platform,
             targeted_mode,
         )
 

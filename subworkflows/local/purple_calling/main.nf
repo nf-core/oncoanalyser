@@ -20,7 +20,6 @@ workflow PURPLE_CALLING {
     genome_version               // channel: [mandatory] genome version
     genome_fai                   // channel: [mandatory] /path/to/genome_fai
     genome_dict                  // channel: [mandatory] /path/to/genome_dict
-    gc_profile                   // channel: [mandatory] /path/to/gc_profile
     sage_known_hotspots_somatic  // channel: [mandatory] /path/to/sage_known_hotspots_somatic
     sage_known_hotspots_germline // channel: [optional]  /path/to/sage_known_hotspots_germline
     driver_gene_panel            // channel: [mandatory] /path/to/driver_gene_panel
@@ -89,7 +88,6 @@ workflow PURPLE_CALLING {
         genome_version,
         genome_fai,
         genome_dict,
-        gc_profile,
         sage_known_hotspots_somatic,
         sage_known_hotspots_germline,
         driver_gene_panel,

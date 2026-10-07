@@ -17,9 +17,13 @@ process ESVEE {
     path pon_breakends
     path pon_breakpoints
     path decoy_sequences_image
+    path saga_fasta
+    path saga_fai
+    path saga_dict
+    path saga_img
     path known_fusions
     path repeatmasker_annotations
-    path unmap_regions
+    path unmap_regions_dna
     path target_regions_bed
     val sequencing_platform
 
@@ -41,6 +45,8 @@ process ESVEE {
 
     def decoy_genome_arg = decoy_sequences_image ? "-decoy_genome ${decoy_sequences_image}" : ''
 
+    def saga_fasta_arg = saga_fasta ? "-saga_fasta ${saga_fasta}" : ''
+
     def target_regions_bed_arg = target_regions_bed ? "-target_regions_bed ${target_regions_bed}" : ''
 
     """
@@ -60,8 +66,9 @@ process ESVEE {
         -pon_sgl_file ${pon_breakends} \\
         -pon_sv_file ${pon_breakpoints} \\
         -repeat_mask_file ${repeatmasker_annotations} \\
-        -unmap_regions ${unmap_regions} \\
+        -unmap_regions ${unmap_regions_dna} \\
         ${decoy_genome_arg} \\
+        ${saga_fasta_arg} \\
         -sequencing_type ${sequencing_platform.toUpperCase()} \\
         ${target_regions_bed_arg} \\
         -bamtool \$(which sambamba) \\

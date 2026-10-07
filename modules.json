@@ -17,12 +17,6 @@
                         "installed_by": ["modules"],
                         "patch": "modules/nf-core/bwamem2/index/bwamem2-index.diff"
                     },
-                    "gatk4/markduplicates": {
-                        "branch": "master",
-                        "git_sha": "c066b820236aa43fce94c7b5353a6e0cccff9910",
-                        "installed_by": ["modules"],
-                        "patch": "modules/nf-core/gatk4/markduplicates/gatk4-markduplicates.diff"
-                    },
                     "samtools/dict": {
                         "branch": "master",
                         "git_sha": "b13f07be4c508d6ff6312d354d09f2493243e208",
@@ -34,18 +28,6 @@
                         "git_sha": "b13f07be4c508d6ff6312d354d09f2493243e208",
                         "installed_by": ["modules"],
                         "patch": "modules/nf-core/samtools/faidx/samtools-faidx.diff"
-                    },
-                    "samtools/sort": {
-                        "branch": "master",
-                        "git_sha": "b7800db9b069ed505db3f9d91b8c72faea9be17b",
-                        "installed_by": ["modules"],
-                        "patch": "modules/nf-core/samtools/sort/samtools-sort.diff"
-                    },
-                    "star/genomegenerate": {
-                        "branch": "master",
-                        "git_sha": "a21faa6a3481af92a343a10926f59c189a2c16c9",
-                        "installed_by": ["modules"],
-                        "patch": "modules/nf-core/star/genomegenerate/star-genomegenerate.diff"
                     }
                 }
             },

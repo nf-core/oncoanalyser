@@ -13,7 +13,8 @@ process REDUX {
     val genome_ver
     path genome_fai
     path genome_dict
-    path unmap_regions
+    // NOTE(LN): Also use DNA unmap regions file for Tars RNA BAM because reads have genome (not transcriptome) coordinates.
+    path unmap_regions_dna
     path msi_jitter_sites
     path msi_model_coefficients
     path msi_model_error_rates
@@ -34,7 +35,7 @@ process REDUX {
     script:
     def args = task.ext.args ?: ''
 
-    def xmx_mod = task.ext.xmx_mod ?: 0.95
+    def xmx_mod = task.ext.xmx_mod ?: 0.75
 
     def log_level_arg = task.ext.log_level ? "-log_level ${task.ext.log_level}" : ''
 
@@ -89,7 +90,7 @@ process REDUX {
         bqr_jitter_msi_only_arg = '-bqr_jitter_msi_only'
     }
 
-    if (meta.sample_type == 'tumor') {
+    if (meta.sample_type == 'tumor' && meta.sequence_type == 'dna') {
 
         if (msi_model_coefficients) {
             msi_model_coefficients_arg = "-msi_model_coefficients ${msi_model_coefficients}"
@@ -112,7 +113,7 @@ process REDUX {
         -ref_genome ${genome_fasta} \\
         -ref_genome_version ${genome_ver} \\
         -ref_genome_msi_file ${msi_jitter_sites} \\
-        -unmap_regions ${unmap_regions} \\
+        -unmap_regions ${unmap_regions_dna} \\
         -bamtool \$(which samtools) \\
         -sequencing_type ${sequencing_platform.toUpperCase()} \\
         -bqr_write_plot \\

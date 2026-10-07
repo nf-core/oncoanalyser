@@ -1,0 +1,6 @@
+name: tars
+channels:
+  - conda-forge
+  - bioconda
+dependencies:
+  - bioconda::hmftools-tars==1.0

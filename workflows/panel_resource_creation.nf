@@ -89,7 +89,7 @@ workflow PANEL_RESOURCE_CREATION {
     // channel: [ meta, fastq_info, fastq_fwd, fastq_rev ]
     ch_align_dna_input = channel.empty()
     ch_align_rna_input = channel.empty()
-    if (params.fastp_umi_enabled || params.fastq_tools_umi_enabled) {
+    if (params.fastp_umi_enabled || params.taur_umi_enabled) {
 
         READ_UMI_PROCESSING(
             ch_inputs,
@@ -100,8 +100,8 @@ workflow PANEL_RESOURCE_CREATION {
             params.fastp_umi_location,
             params.fastp_umi_length,
             params.fastp_umi_skip,
-            params.fastq_tools_umi_enabled,
-            params.fastq_tools_umi_delim,
+            params.taur_umi_enabled,
+            params.taur_umi_delim,
         )
 
         ch_align_dna_input = ch_align_dna_input.mix(READ_UMI_PROCESSING.out.fastq_dna)
@@ -125,13 +125,21 @@ workflow PANEL_RESOURCE_CREATION {
     READ_ALIGNMENT_RNA(
         ch_inputs,
         ch_align_rna_input,
-        ref_data.genome_star_index,
+        ref_data.genome_fasta_rna,
+        ref_data.genome_version,
+        ref_data.genome_fai_rna,
+        ref_data.genome_dict_rna,
+        ref_data.genome_bwamem2_index_rna,
+        hmf_data.contigs_mapping_rna,
+        hmf_data.unmap_regions_rna,
     )
 
     // channel: [ meta, [aln, ...], [idx, ...] ]
     ch_align_dna_tumor_out = READ_ALIGNMENT_DNA.out.tumor
     ch_align_dna_normal_out = READ_ALIGNMENT_DNA.out.normal
-    ch_align_rna_tumor_out = READ_ALIGNMENT_RNA.out.tumor
+
+    // channel: [ meta, aln, idx ]
+    ch_align_rna_tumor_out = READ_ALIGNMENT_RNA.out.rna
 
     //
     // SUBWORKFLOW: Run REDUX for DNA alignments
@@ -141,11 +149,12 @@ workflow PANEL_RESOURCE_CREATION {
         ch_align_dna_tumor_out,
         ch_align_dna_normal_out,
         ch_inputs.map { meta -> [meta, [], []] },  // ch_dna_donor
+        ch_align_rna_tumor_out,
         ref_data.genome_fasta,
         ref_data.genome_version,
         ref_data.genome_fai,
         ref_data.genome_dict,
-        hmf_data.unmap_regions,
+        hmf_data.unmap_regions_dna,
         hmf_data.msi_jitter_sites,
         hmf_data.msi_model_coefficients,
         hmf_data.msi_model_error_rates,
@@ -157,6 +166,7 @@ workflow PANEL_RESOURCE_CREATION {
 
     // channel: [ meta, redux_dir ]
     ch_redux_tumor_out = REDUX_PROCESSING.out.tumor_dir
+    ch_redux_rna_out = REDUX_PROCESSING.out.rna_dir
     ch_redux_normal_out = REDUX_PROCESSING.out.normal_dir
 
     //
@@ -164,7 +174,7 @@ workflow PANEL_RESOURCE_CREATION {
     //
     ISOFOX_QUANTIFICATION(
         ch_inputs,
-        ch_align_rna_tumor_out,
+        ch_redux_rna_out,
         ref_data.genome_fasta,
         ref_data.genome_version,
         ref_data.genome_fai,

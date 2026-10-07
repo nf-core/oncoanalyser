@@ -2,8 +2,8 @@
 // Align DNA reads
 //
 
-include { BWAMEM2_ALIGN } from '../../../modules/local/bwa-mem2/mem/main'
-include { FASTP_SPLIT   } from '../../../modules/local/fastp/split/main'
+include { BWAMEM2_ALIGN_DNA } from '../../../modules/local/bwa-mem2/mem/dna/main'
+include { SEQKIT_SPLIT2 } from '../../../modules/nf-core/seqkit/split2/main'
 
 workflow READ_ALIGNMENT_DNA {
     take:
@@ -37,7 +37,7 @@ workflow READ_ALIGNMENT_DNA {
         .branch { meta, fastq_info, fastq_fwd, fastq_rev ->
             def has_inputs = fastq_fwd && fastq_rev
             runnable: fastq_info.sample_type == 'tumor' && has_inputs
-            skip: ! Utils.hasTumorDnaFastq(meta)
+            skip: fastq_info.sample_type == 'tumor' && ! has_inputs
               return meta
         }
 
@@ -45,7 +45,7 @@ workflow READ_ALIGNMENT_DNA {
         .branch { meta, fastq_info, fastq_fwd, fastq_rev ->
             def has_inputs = fastq_fwd && fastq_rev
             runnable: fastq_info.sample_type == 'normal' && has_inputs
-            skip: ! Utils.hasNormalDnaFastq(meta)
+            skip: fastq_info.sample_type == 'normal' && ! has_inputs
               return meta
         }
 
@@ -53,7 +53,7 @@ workflow READ_ALIGNMENT_DNA {
         .branch { meta, fastq_info, fastq_fwd, fastq_rev ->
             def has_inputs = fastq_fwd && fastq_rev
             runnable: fastq_info.sample_type == 'donor' && has_inputs
-            skip: ! Utils.hasDonorDnaFastq(meta)
+            skip: fastq_info.sample_type == 'donor' && ! has_inputs
               return meta
         }
 
@@ -92,7 +92,7 @@ workflow READ_ALIGNMENT_DNA {
         }
 
     //
-    // MODULE: fastp
+    // MODULE: SeqKit split2
     //
     // Split FASTQ into chunks if requested for distributed processing
     // channel: [ meta_fastq_ready, fastq_fwd, fastq_fwd ]
@@ -101,14 +101,13 @@ workflow READ_ALIGNMENT_DNA {
     if (max_fastq_records.toInteger() > 0) {
 
         // Run process
-        FASTP_SPLIT(
+        SEQKIT_SPLIT2(
             ch_fastq_inputs,
             // NOTE(SW): required for strict syntax without params block declaration
             max_fastq_records.toInteger(),
         )
 
-        // Now prepare according to FASTQs splitting
-        ch_fastqs_ready = channel.topic('fastp_split_fastq')
+        ch_fastqs_ready = channel.topic('seqkit_split2_fastq')
             .flatMap { meta_fastq, reads_fwd_input, reads_rev_input ->
 
                 def reads_fwd = reads_fwd_input instanceof List ? reads_fwd_input : [reads_fwd_input]
@@ -118,8 +117,8 @@ workflow READ_ALIGNMENT_DNA {
                     .transpose()
                     .collect { fwd, rev ->
 
-                        def split_fwd = fwd.name.replaceAll('\\..+$', '')
-                        def split_rev = rev.name.replaceAll('\\..+$', '')
+                        def split_fwd = fwd.name.replaceAll(/^.+_R1\.split_(\d+)\.fastq\.gz$/, '$1')
+                        def split_rev = rev.name.replaceAll(/^.+_R2\.split_(\d+)\.fastq\.gz$/, '$1')
 
                         assert split_fwd == split_rev
 
@@ -156,7 +155,7 @@ workflow READ_ALIGNMENT_DNA {
         }
 
     // Run process
-    BWAMEM2_ALIGN(
+    BWAMEM2_ALIGN_DNA(
         ch_bwamem2_inputs,
         genome_fasta,
         genome_bwamem2_index,
@@ -184,7 +183,7 @@ workflow READ_ALIGNMENT_DNA {
         // channel: [ [ meta_group, count ], [ meta_group, aln, idx ] ]
         .cross(
             // First element to match meta_group above for `cross`
-            channel.topic('bwamem2_align_bam').map { meta_bwamem2, aln, idx -> [[key: meta_bwamem2.key, sample_type: meta_bwamem2.sample_type], aln, idx] }
+            channel.topic('bwamem2_align_dna_bam').map { meta_bwamem2, aln, idx -> [[key: meta_bwamem2.key, sample_type: meta_bwamem2.sample_type], aln, idx] }
         )
         .map { count_tuple, inputs_tuple ->
             def group_size = count_tuple[1]

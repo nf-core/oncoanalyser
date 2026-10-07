@@ -96,9 +96,6 @@ workflow WGTS {
     ch_align_dna_donor_out = channel.empty()
     ch_align_rna_tumor_out = channel.empty()
 
-    // channel: [ meta, star_log, rna_md_metrics ]
-    ch_align_rna_qc_tumor_out = channel.empty()
-
     if (run_config.stages.alignment) {
 
         // NOTE(SW): fastp can be run twice, multiple passes of the FASTQ in some scenarios, typically not computationally
@@ -111,7 +108,7 @@ workflow WGTS {
         // channel: [ meta, fastq_info, fastq_fwd, fastq_rev ]
         ch_align_dna_input = channel.empty()
         ch_align_rna_input = channel.empty()
-        if (params.fastp_umi_enabled || params.fastq_tools_umi_enabled) {
+        if (params.fastp_umi_enabled || params.taur_umi_enabled) {
 
             READ_UMI_PROCESSING(
                 ch_inputs,
@@ -122,8 +119,8 @@ workflow WGTS {
                 params.fastp_umi_location,
                 params.fastp_umi_length,
                 params.fastp_umi_skip,
-                params.fastq_tools_umi_enabled,
-                params.fastq_tools_umi_delim,
+                params.taur_umi_enabled,
+                params.taur_umi_delim,
             )
 
             ch_align_dna_input = ch_align_dna_input.mix(READ_UMI_PROCESSING.out.fastq_dna)
@@ -147,15 +144,20 @@ workflow WGTS {
         READ_ALIGNMENT_RNA(
             ch_inputs,
             ch_align_rna_input,
-            ref_data.genome_star_index,
+            ref_data.genome_fasta_rna,
+            ref_data.genome_version,
+            ref_data.genome_fai_rna,
+            ref_data.genome_dict_rna,
+            ref_data.genome_bwamem2_index_rna,
+            hmf_data.contigs_mapping_rna,
+            hmf_data.unmap_regions_rna,
         )
 
         ch_align_dna_tumor_out = ch_align_dna_tumor_out.mix(READ_ALIGNMENT_DNA.out.tumor)
         ch_align_dna_normal_out = ch_align_dna_normal_out.mix(READ_ALIGNMENT_DNA.out.normal)
         ch_align_dna_donor_out = ch_align_dna_donor_out.mix(READ_ALIGNMENT_DNA.out.donor)
 
-        ch_align_rna_tumor_out = ch_align_rna_tumor_out.mix(READ_ALIGNMENT_RNA.out.tumor)
-        ch_align_rna_qc_tumor_out = ch_align_rna_qc_tumor_out.mix(READ_ALIGNMENT_RNA.out.qc_files)
+        ch_align_rna_tumor_out = ch_align_rna_tumor_out.mix(READ_ALIGNMENT_RNA.out.rna)
 
     } else {
 
@@ -164,7 +166,6 @@ workflow WGTS {
         ch_align_dna_donor_out = ch_inputs.map { meta -> [meta, [], []] }
 
         ch_align_rna_tumor_out = ch_inputs.map { meta -> [meta, [], []] }
-        ch_align_rna_qc_tumor_out = ch_inputs.map { meta -> [meta, [], []] }
 
     }
 
@@ -175,6 +176,7 @@ workflow WGTS {
     ch_redux_tumor_out = channel.empty()
     ch_redux_normal_out = channel.empty()
     ch_redux_donor_out = channel.empty()
+    ch_redux_rna_out = channel.empty()
     if (run_config.stages.redux) {
 
         REDUX_PROCESSING(
@@ -182,11 +184,12 @@ workflow WGTS {
             ch_align_dna_tumor_out,
             ch_align_dna_normal_out,
             ch_align_dna_donor_out,
+            ch_align_rna_tumor_out,
             ref_data.genome_fasta,
             ref_data.genome_version,
             ref_data.genome_fai,
             ref_data.genome_dict,
-            hmf_data.unmap_regions,
+            hmf_data.unmap_regions_dna,
             hmf_data.msi_jitter_sites,
             [],  // msi_model_coefficients
             [],  // msi_model_error_rates
@@ -199,12 +202,14 @@ workflow WGTS {
         ch_redux_tumor_out = ch_redux_tumor_out.mix(REDUX_PROCESSING.out.tumor_dir)
         ch_redux_normal_out = ch_redux_normal_out.mix(REDUX_PROCESSING.out.normal_dir)
         ch_redux_donor_out = ch_redux_donor_out.mix(REDUX_PROCESSING.out.donor_dir)
+        ch_redux_rna_out = ch_redux_rna_out.mix(REDUX_PROCESSING.out.rna_dir)
 
     } else {
 
         ch_redux_tumor_out = ch_inputs.map { meta -> [meta, []] }
         ch_redux_normal_out = ch_inputs.map { meta -> [meta, []] }
         ch_redux_donor_out = ch_inputs.map { meta -> [meta, []] }
+        ch_redux_rna_out = ch_inputs.map { meta -> [meta, []] }
 
     }
 
@@ -214,12 +219,14 @@ workflow WGTS {
     // channel: [ meta, bamtools_dir ]
     ch_bamtools_tumor_out = channel.empty()
     ch_bamtools_normal_out = channel.empty()
+    ch_bamtools_rna_out = channel.empty()
     if (run_config.stages.bamtools) {
 
         BAMTOOLS_METRICS(
             ch_inputs,
             ch_redux_tumor_out,
             ch_redux_normal_out,
+            ch_redux_rna_out,
             ref_data.genome_fasta,
             ref_data.genome_version,
             ref_data.genome_fai,
@@ -230,11 +237,13 @@ workflow WGTS {
 
         ch_bamtools_tumor_out = ch_bamtools_tumor_out.mix(BAMTOOLS_METRICS.out.tumor_dir)
         ch_bamtools_normal_out = ch_bamtools_normal_out.mix(BAMTOOLS_METRICS.out.normal_dir)
+        ch_bamtools_rna_out = ch_bamtools_rna_out.mix(BAMTOOLS_METRICS.out.rna_dir)
 
     } else {
 
         ch_bamtools_tumor_out = ch_inputs.map { meta -> [meta, []] }
         ch_bamtools_normal_out = ch_inputs.map { meta -> [meta, []] }
+        ch_bamtools_rna_out = ch_inputs.map { meta -> [meta, []] }
 
     }
 
@@ -247,7 +256,7 @@ workflow WGTS {
 
         ISOFOX_QUANTIFICATION(
             ch_inputs,
-            ch_align_rna_tumor_out,
+            ch_redux_rna_out,
             ref_data.genome_fasta,
             ref_data.genome_version,
             ref_data.genome_fai,
@@ -351,8 +360,12 @@ workflow WGTS {
             hmf_data_pons.esvee_breakends,
             hmf_data_pons.esvee_breakpoints,
             hmf_data.decoy_sequences_image,
+            hmf_data.saga_germline_variants,
+            hmf_data.saga_germline_variants_fai,
+            hmf_data.saga_germline_variants_dict,
+            hmf_data.saga_germline_variants_img,
             hmf_data.repeatmasker_annotations,
-            hmf_data.unmap_regions,
+            hmf_data.unmap_regions_dna,
             [],  // target_regions_bed
             params.sequencing_platform,
         )
@@ -461,7 +474,6 @@ workflow WGTS {
             ref_data.genome_version,
             ref_data.genome_fai,
             ref_data.genome_dict,
-            hmf_data.gc_profile,
             hmf_data.sage_known_hotspots_somatic,
             hmf_data.sage_known_hotspots_germline,
             driver_gene_panel,
@@ -520,7 +532,7 @@ workflow WGTS {
             ch_inputs,
             ch_purple_out,
             ch_inputs.map { meta -> [meta, []] },  // ch_redux_dir_tumor
-            ch_align_rna_tumor_out,
+            ch_redux_rna_out,
             ref_data.genome_fasta,
             ref_data.genome_version,
             ref_data.genome_fai,
@@ -632,7 +644,7 @@ workflow WGTS {
         CIDER_CALLING(
             ch_inputs,
             ch_redux_tumor_out,
-            ch_align_rna_tumor_out,
+            ch_redux_rna_out,
             ref_data.genome_fasta,
             ref_data.genome_version,
             ref_data.genome_fai,
@@ -697,7 +709,7 @@ workflow WGTS {
             ch_inputs,
             ch_redux_tumor_out,
             ch_redux_normal_out,
-            ch_align_rna_tumor_out,
+            ch_redux_rna_out,
             ch_purple_out,
             ref_data.genome_fasta,
             ref_data.genome_version,
@@ -800,7 +812,7 @@ workflow WGTS {
 
         NEO_PREDICTION(
             ch_inputs,
-            ch_align_rna_tumor_out,
+            ch_redux_rna_out,
             ch_isofox_out,
             ch_purple_out,
             ch_sage_append_somatic_out,
@@ -914,9 +926,9 @@ workflow WGTS {
         MULTIQC_REPORTING(
             ch_bamtools_tumor_out,
             ch_bamtools_normal_out,
+            ch_bamtools_rna_out,
             ch_amber_out,
             ch_purple_out,
-            ch_align_rna_qc_tumor_out,
             ch_collated_versions,
             params.multiqc_config,
             params.multiqc_methods_description,
