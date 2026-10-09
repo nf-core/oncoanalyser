@@ -435,6 +435,14 @@
                     "fa_icon": "fas fa-palette",
                     "hidden": true
                 },
+                "multiqc_base_config": {
+                    "type": "string",
+                    "format": "file-path",
+                    "description": "Replace the bundled base config file supplied to MultiQC.",
+                    "help_text": "The base MultiQC config is read from `${projectDir}/assets/multiqc_config.yml` by default. Executors that do not make the pipeline project directory visible to task processes cannot stage that path, so point this at an accessible copy instead. Note `--multiqc_config` supplies an ADDITIONAL config and does not replace this one.",
+                    "fa_icon": "fas fa-cog",
+                    "hidden": true
+                },
                 "multiqc_config": {
                     "type": "string",
                     "format": "file-path",
