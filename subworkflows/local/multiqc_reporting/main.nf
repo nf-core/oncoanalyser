@@ -20,6 +20,7 @@ workflow MULTIQC_REPORTING {
 
     // Other
     ch_collated_versions      // channel: [mandatory] [ collated_versions.yml ]
+    base_config               //  string: [optional]  Replaces the bundled base MultiQC configuration
     custom_config             //  string: [optional]  Custom configuration for MultiQC
     custom_desc               //  string: [optional]  Custom methods description for MultiQC
     custom_logo               //  string: [optional]  Custom logo for MultiQC
@@ -126,7 +127,9 @@ workflow MULTIQC_REPORTING {
     ch_multiqc_files = channel.empty()
 
     // nf-core boilerplate
-    ch_multiqc_config = channel.fromPath("$projectDir/assets/multiqc_config.yml", checkIfExists: true)
+    ch_multiqc_config = base_config
+        ? channel.fromPath(base_config, checkIfExists: true)
+        : channel.fromPath("$projectDir/assets/multiqc_config.yml", checkIfExists: true)
     ch_multiqc_custom_config = custom_config ? channel.fromPath(custom_config, checkIfExists: true) : channel.empty()
     ch_multiqc_logo = custom_logo ? channel.fromPath(custom_logo, checkIfExists: true) : channel.empty()
 

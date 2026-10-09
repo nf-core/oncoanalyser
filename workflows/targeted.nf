@@ -773,6 +773,7 @@ workflow TARGETED {
             ch_purple_out,
             ch_align_rna_qc_tumor_out,
             ch_collated_versions,
+            params.multiqc_base_config,
             params.multiqc_config,
             params.multiqc_methods_description,
             params.multiqc_logo,
