@@ -282,6 +282,7 @@ workflow PANEL_RESOURCE_CREATION {
     PAVE_PON_CREATION(
         ch_sage_somatic_dir_out,
         ref_data.genome_version,
+        hmf_data.sage_known_hotspots_somatic,
     )
 
     //
