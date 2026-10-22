@@ -116,6 +116,55 @@ For more details about the output files and reports, please refer to the
 
 ## Version information
 
+### Software versions
+
+The main software used by this version of `oncoanalyser` is listed below. Version changes between releases are recorded
+in the [CHANGELOG](CHANGELOG.md), and the exact versions used in each run are written to
+`pipeline_info/nf_core_oncoanalyser_software_mqc_versions.yml` in the output directory.
+
+<!-- software-versions:start -->
+
+| WiGiTS tool        | Version |
+| ------------------ | ------- |
+| `AMBER`            | 4.3     |
+| `BamTools`         | 1.6.1   |
+| `CHORD`            | 2.1.2   |
+| `CIDER`            | 1.2     |
+| `COBALT`           | 3.0     |
+| `CUPPA`            | 2.5.1   |
+| `ESVEE`            | 2.0.1   |
+| `FastqTools`       | 1.0     |
+| `ISOFOX`           | 2.0.1   |
+| `LILAC`            | 2.0     |
+| `LINX`             | 2.3.1   |
+| `NEO`              | 1.3     |
+| `ORANGE`           | 5.0.1   |
+| `PAVE`             | 1.9     |
+| `PEACH`            | 2.0.0   |
+| `PURPLE`           | 4.4     |
+| `QSEE`             | 1.0     |
+| `REDUX`            | 2.0.5   |
+| `SAGE`             | 5.0.2   |
+| `SIGS`             | 1.2.1   |
+| `TEAL`             | 1.4     |
+| `VirusInterpreter` | 1.7.2   |
+| `WISP`             | 1.3.1   |
+
+| Other tool                      | Version |
+| ------------------------------- | ------- |
+| `BWA-MEM2`                      | 2.3     |
+| `fastp`                         | 0.23.4  |
+| `GATK4` (Picard MarkDuplicates) | 4.6.1.0 |
+| `GRIDSS` (VIRUSbreakend)        | 2.13.2  |
+| `linxreport`                    | 1.2.0   |
+| `MultiQC`                       | 1.35    |
+| `RepeatMasker`                  | 4.1.5   |
+| `sambamba`                      | 1.0.1   |
+| `samtools`                      | 1.21    |
+| `STAR`                          | 2.7.3a  |
+
+<!-- software-versions:end -->
+
 ### Extended support
 
 As `oncoanalyser` is used in clinical settings and subject to accreditation standards in some instances, there is a need

@@ -5,6 +5,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/) 
 
 ## [dev]
 
+- [XXX](https://github.com/nf-core/oncoanalyser/pull/XXX) - Add software versions table to README, generated from module environment files
 - [325](https://github.com/nf-core/oncoanalyser/pull/325) - Post-release bump
 
 ## [[3.0.0](https://github.com/nf-core/oncoanalyser/releases/tag/3.0.0)] Scarlet Honeyeater - 2026-09-01
