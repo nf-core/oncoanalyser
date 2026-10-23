@@ -1108,6 +1108,8 @@ section of the nf-core website.
 
 ### Container images
 
+For the tool versions used by this release, see [Usage: Software versions](./usage/software_versions.md).
+
 #### Custom containers
 
 In some cases, you may wish to change the container or conda environment used by a pipeline steps for a particular tool.
