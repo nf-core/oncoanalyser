@@ -20,6 +20,7 @@ process ISOFOX {
     path excluded_regions
     path gene_distribution
     path alt_sj_distribution
+    path fusion_cohort
     path exp_counts
     path exp_gc_ratios
     path tpm_norm
@@ -44,6 +45,8 @@ process ISOFOX {
     def exp_counts_arg = exp_counts ? "-exp_counts_file ${exp_counts}" : ''
     def exp_gc_ratios_arg = exp_gc_ratios ? "-exp_gc_ratios_file ${exp_gc_ratios}" : ''
 
+    def fusion_cohort_arg = fusion_cohort ? "-fusion_cohort_file ${fusion_cohort}" : ''
+
     def tpm_norm_arg = tpm_norm ? "-panel_tpm_norm_file ${tpm_norm}" : ''
 
     """
@@ -64,6 +67,7 @@ process ISOFOX {
         -excluded_regions ${excluded_regions} \\
         -gene_distribution_file ${gene_distribution} \\
         -alt_sj_cohort_file ${alt_sj_distribution} \\
+        ${fusion_cohort_arg} \\
         ${exp_counts_arg} \\
         ${exp_gc_ratios_arg} \\
         ${tpm_norm_arg} \\
