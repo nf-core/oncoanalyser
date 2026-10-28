@@ -25,6 +25,10 @@ input:
   - genome_ver:
       type: string
       description: Reference genome version
+  - sage_known_hotspots_somatic:
+      type: file
+      description: SAGE somatic known hotspots file
+      pattern: "*.{vcf.gz}"
 output:
   - pave_pon_panel_creation_artefacts:
       type: file
