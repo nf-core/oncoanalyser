@@ -1,0 +1,106 @@
+name: orange
+description: Summarise key outputs of the HMF toolkit
+keywords:
+  - cancer report
+tools:
+  - orange:
+      description: Summarises key outputs of the HMF toolkit
+      homepage: https://github.com/hartwigmedical/hmftools/tree/master/orange
+      documentation: https://github.com/hartwigmedical/hmftools/tree/master/orange
+      licence: ["GPL v3"]
+input:
+  - meta:
+      type: map
+      description: |
+        Groovy Map containing sample information
+        e.g. [id: 'sample_id']
+  - sage_dir_somatic:
+      type: directory
+      description: SAGE somatic output directory
+  - sage_dir_germline:
+      type: directory
+      description: SAGE germline output directory (optional)
+  - smlv_vcf_somatic:
+      type: file
+      description: Small somatic variant VCF file (annotated with RNA data) (optional)
+  - smlv_vcf_germline:
+      type: file
+      description: Small germline variant VCF file (annotated with RNA data) (optional)
+  - sage_plot_dir_somatic:
+      type: file
+      description: SAGE somatic plot directory
+  - purple_dir:
+      type: directory
+      description: PURPLE output directory
+  - qsee_dir:
+      type: directory
+      description: QSEE output directory
+  - linx_annotation_dir_somatic:
+      type: directory
+      description: LINX somatic annotation output directory
+  - linx_plot_dir_reportable_somatic:
+      type: directory
+      description: LINX somatic plot output directory
+  - linx_annotation_dir_germline:
+      type: directory
+      description: LINX germline annotation output directory (optional)
+  - virusinterpreter_dir:
+      type: directory
+      description: Virus Interpreter output directory (optional)
+  - chord_dir:
+      type: directory
+      description: CHORD output directory (optional)
+  - sigs_dir:
+      type: directory
+      description: Sigs output directory (optional)
+  - lilac_dir:
+      type: directory
+      description: LILAC output directory
+  - cuppa_dir:
+      type: directory
+      description: CUPPA output directory (optional)
+  - peach_dir:
+      type: directory
+      description: PEACH output directory (optional)
+  - isofox_dir:
+      type: directory
+      description: Isofox output directory (optional)
+  - genome_ver:
+      type: string
+      description: Reference genome version
+  - disease_ontology:
+      type: file
+      description: Disease ontology file
+      pattern: "*.{json}"
+  - pipeline_version:
+      type: string
+      description: Pipeline version to display in report
+  - sequencing_platform:
+      type: string
+      description: Sequencing platform
+  - targeted_mode:
+      type: boolean
+      description: Flag indicating whether targeted mode is set
+output:
+  - meta:
+      type: map
+      description: |
+        Groovy Map containing sample information
+        e.g. [id: 'sample_id']
+  - orange_pdf:
+      type: file
+      description: PDF report file (optional)
+      pattern: "*.{pdf}"
+  - orange_json:
+      type: file
+      description: Compiled JSON output file (optional)
+      pattern: "*.{json}"
+  - command_files:
+      type: list
+      description: List of command files
+  - versions:
+      type: file
+      description: File containing software versions
+      pattern: "versions.yml"
+authors:
+  - "@scwatts"

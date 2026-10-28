@@ -1,0 +1,6 @@
+name: teal_pipeline
+channels:
+  - conda-forge
+  - bioconda
+dependencies:
+  - bioconda::hmftools-teal==1.4

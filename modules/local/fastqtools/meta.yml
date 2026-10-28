@@ -1,0 +1,50 @@
+name: fastq-tools
+description: Operate on FASTQs to process UMIs
+keywords:
+  - fastq-tools
+  - processing
+tools:
+  - fastq-tools:
+      description: FASTQ processor
+      homepage: https://github.com/hartwigmedical/hmftools/tree/master/fastq-tools
+      licence: ["MIT"]
+input:
+  - meta:
+      type: map
+      description: |
+        Groovy Map containing sample information
+        e.g. [id: 'sample_id']
+  - reads_fwd:
+      type: file
+      description: Forward reads FASTQ file
+      pattern: "*.{fastq.gz}"
+  - reads_rev:
+      type: file
+      description: Reverse reads FASTQ file
+      pattern: "*.{fastq.gz}"
+  - umi_delim:
+      type: string
+      description: UMI delimiter
+  - known_umis:
+      type: file
+      description: Known UMIs file
+output:
+  - meta:
+      type: map
+      description: |
+        Groovy Map containing sample information
+        e.g. [id: 'sample_id']
+  - fastqtools_fastq:
+      type: list
+      description: Forward and reverse FASTQ files
+      pattern: "*.{fastq.gz}"
+  - command_files:
+      type: list
+      description: List of command files
+  - versions:
+      type: file
+      description: File containing software versions
+      pattern: "versions.yml"
+authors:
+  - "@luan-n-nguyen"
+  - "@scwatts"

@@ -1,0 +1,6 @@
+name: linx_germline
+channels:
+  - conda-forge
+  - bioconda
+dependencies:
+  - bioconda::hmftools-linx==2.3.1

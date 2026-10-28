@@ -1,0 +1,69 @@
+name: wisp
+description: Estimates TF in a given sample using biomarkers of an existing sample from the same patient
+keywords:
+  - tumor_fraction
+  - purity
+  - ccfdna
+tools:
+  - wisp:
+      description: Estimates TF in a given sample using biomarkers of an existing sample from the same patient.
+      homepage: https://github.com/hartwigmedical/hmftools/tree/master/wisp
+      documentation: https://github.com/hartwigmedical/hmftools/tree/master/wisp
+      licence: ["GPL v3"]
+input:
+  - meta:
+      type: map
+      description: |
+        Groovy Map containing sample information
+        e.g. [id: 'sample_id']
+  - primary_purple_dir:
+      type: directory
+      description: PURPLE directory of the primary sample
+  - primary_amber_dir:
+      type: directory
+      description: AMBER directory of the primary sample
+  - primary_normal_aln:
+      type: file
+      description: Primary normal alignment file
+      pattern: "*.{bam,ram}"
+  - longitudinal_redux_dir:
+      type: directory
+      description: Longitudinal REDUX directory
+  - longitudinal_amber_dir:
+      type: directory
+      description: Longitudinal AMBER directory
+  - longitudinal_cobalt_dir:
+      type: directory
+      description: Longitudinal COBALT directory
+  - longitudinal_sage_append_dir:
+      type: directory
+      description: Longitudinal SAGE append directory
+  - genome_fasta:
+      type: file
+      description: Reference genome assembly FASTA file
+      pattern: "*.{fa,fasta}"
+  - genome_fai:
+      type: file
+      description: Reference genome assembly fai file
+      pattern: "*.{fai}"
+  - targeted_mode:
+      type: boolean
+      description: Flag indicating whether targeted mode is set
+output:
+  - meta:
+      type: map
+      description: |
+        Groovy Map containing sample information
+        e.g. [id: 'sample_id']
+  - wisp_dir:
+      type: directory
+      description: WISP output direcotry
+  - command_files:
+      type: list
+      description: List of command files
+  - versions:
+      type: file
+      description: File containing software versions
+      pattern: "versions.yml"
+authors:
+  - "@scwatts"

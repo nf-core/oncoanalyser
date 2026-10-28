@@ -1,0 +1,69 @@
+name: qsee
+description: Summarise key outputs of the HMF toolkit
+keywords:
+  - QC
+tools:
+  - orange:
+      description: Calculates and visualises QC metrics
+      homepage: https://github.com/hartwigmedical/hmftools/tree/master/qsee
+      documentation: https://github.com/hartwigmedical/hmftools/tree/master/qsee
+      licence: ["GPL v3"]
+input:
+  - meta:
+      type: map
+      description: |
+        Groovy Map containing sample information
+        e.g. [tumor_id: 'tumor_id', normal_id: 'normal_id']
+  - redux_tsvs_tumor:
+      type: list
+      description: REDUX tumor TSV files
+  - redux_tsvs_normal:
+      type: list
+      description: REDUX normal TSV files
+  - bamtools_dir_tumor:
+      type: directory
+      description: BamTools tumor output directory
+  - bamtools_dir_normal:
+      type: directory
+      description: BamTools normal output directory
+  - cobalt_dir:
+      type: directory
+      description: COBALT output directory
+  - esvee_dir:
+      type: directory
+      description: ESVEE output directory
+  - purple_dir:
+      type: directory
+      description: PURPLE output directory
+  - driver_gene_panel:
+      type: file
+      description: Driver gene panel file
+      pattern: "*.{tsv}"
+  - cohort_percentiles_file:
+      type: file
+      description: HMF cohort percentiles file
+      pattern: "*.{tsv}"
+  - sequencing_platform:
+      type: string
+      description: Sequencing platform
+  - targeted_mode:
+      type: boolean
+      description: Flag indicating whether targeted mode is set
+output:
+  - meta:
+      type: map
+      description: |
+        Groovy Map containing sample information
+        e.g. [tumor_id: 'tumor_id', normal_id: 'normal_id']
+  - qsee_dir:
+      type: directory
+      description: Qsee output directory
+  - command_files:
+      type: list
+      description: List of command files
+  - versions:
+      type: file
+      description: File containing software versions
+      pattern: "versions.yml"
+authors:
+  - "@luan-n-nguyen"

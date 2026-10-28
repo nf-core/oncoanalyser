@@ -1,0 +1,6 @@
+name: sage_somatic
+channels:
+  - conda-forge
+  - bioconda
+dependencies:
+  - bioconda::hmftools-sage==5.0.2

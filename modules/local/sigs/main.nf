@@ -1,0 +1,56 @@
+process SIGS {
+    tag "${meta.id}"
+    label 'process_low'
+
+    conda "${moduleDir}/environment.yml"
+    container "${ workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container ?
+        'https://depot.galaxyproject.org/singularity/hmftools-sigs:1.2.1--hdfd78af_1' :
+        'biocontainers/hmftools-sigs:1.2.1--hdfd78af_1' }"
+
+    input:
+    tuple val(meta), path(smlv_vcf)
+    path signatures
+
+    output:
+    tuple val(meta), path('sigs/')                  , topic: sigs_dir
+    tuple val(meta), val('sigs'), path('.command.*'), topic: command_files
+    path 'versions.yml'                             , topic: versions
+
+    when:
+    task.ext.when == null || task.ext.when
+
+    script:
+    def args = task.ext.args ?: ''
+
+    def xmx_mod = task.ext.xmx_mod ?: 0.75
+
+    def log_level_arg = task.ext.log_level ? "-log_level ${task.ext.log_level}" : ''
+
+    """
+    mkdir -p sigs/
+
+    sigs \\
+        -Xmx${Math.round(task.memory.bytes * xmx_mod)} \\
+        ${args} \\
+        -sample ${meta.sample_id} \\
+        -somatic_vcf_file ${smlv_vcf} \\
+        -signatures_file ${signatures} \\
+        ${log_level_arg} \\
+        -output_dir sigs/
+
+    cat <<-END_VERSIONS > versions.yml
+    "${task.process}":
+        sigs: \$(sigs -version | sed -n '/^Sigs version / { s/^.* //p }')
+        java: \$(java --version | sed -n '/^openjdk/ { s/^.*openjdk //; s/ .*//p }')
+    END_VERSIONS
+    """
+
+    stub:
+    """
+    mkdir -p sigs/
+
+    touch sigs/.stub
+
+    echo -e '${task.process}:\\n  stub: noversions\\n' > versions.yml
+    """
+}
