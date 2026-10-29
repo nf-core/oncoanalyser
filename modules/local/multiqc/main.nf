@@ -76,11 +76,6 @@ process MULTIQC {
         --case_information_fp manifest.csv \\
         other/ \\
         sample/
-
-    cat <<-END_VERSIONS > versions.yml
-    "${task.process}":
-        multiqc: \$( multiqc --version | sed -e "s/multiqc, version //g" )
-    END_VERSIONS
     """
 
     stub:
@@ -91,10 +86,5 @@ process MULTIQC {
     touch multiqc_report.html
     touch multiqc_data/.stub
     touch multiqc_plots/.stub
-
-    cat <<-END_VERSIONS > versions.yml
-    "${task.process}":
-        multiqc: \$( multiqc --version | sed -e "s/multiqc, version //g" )
-    END_VERSIONS
     """
 }
