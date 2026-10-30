@@ -116,6 +116,9 @@ For more details about the output files and reports, please refer to the
 
 ## Version information
 
+The tool versions used by each release are listed in the
+[software versions](https://nf-co.re/oncoanalyser/docs/usage/software_versions) documentation.
+
 ### Extended support
 
 As `oncoanalyser` is used in clinical settings and subject to accreditation standards in some instances, there is a need

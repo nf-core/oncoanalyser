@@ -189,4 +189,5 @@ When contributing to nf-core/oncoanalyser, please keep the following pipeline-sp
 - Container images should support both `amd64` and `arm64` architectures where feasible. Remember to update corresponding container config files under `conf/` when changing a module's container image.
 - When possible pipeline-specific logic should be kept in `modules/local/` or `subworkflows/local/` with matching `main.nf`, `meta.yml`, tests, and snapshots.
 - If you change input requirements, output files, or parameter behaviour, update `nextflow_schema.json`, `docs/usage.md`, `docs/output.md`, and the affected test profiles.
+- If you add or remove a tool, or change a tool's version, update `docs/usage/software_versions.md` so the listed versions match the module `environment.yml` files.
 - Run the relevant test profile before opening a pull request and update snapshots with `--update-snapshots` if output content has changed.
