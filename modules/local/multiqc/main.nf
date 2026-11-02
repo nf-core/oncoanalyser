@@ -35,31 +35,34 @@ process MULTIQC {
     def logo_arg = multiqc_logo ? "--cl-config 'custom_logo: \"${multiqc_logo}\"'" : ''
 
     // Prepare sample linkage for process
+    // NOTE: records are passed as separate shell words and printed with printf rather than joined with newlines;
+    // a newline interpolated into the script defeats Nextflow's indent stripping, which leaves the versions.yml
+    // heredoc terminator indented and unterminated
     def group_id_data = meta.collectEntries { gid, _sns -> [gid, "sample/${gid}"] }
 
     def group_id_mapping = [fs_group_ids, fs]
         .transpose()
         .collect { gid, gfn ->
             def fd = group_id_data[gid]
-            "${gfn},${fd}"
+            "'${gfn},${fd}'"
         }
-        .join('\n')
+        .join(' ')
 
     def manifest = meta
         .collect { gid, sns ->
             def fd = group_id_data[gid]
-            "${gid},${sns.normal_dna_id},${sns.tumor_dna_id},${sns.tumor_rna_id},${fd}"
+            "'${gid},${sns.normal_dna_id},${sns.tumor_dna_id},${sns.tumor_rna_id},${fd}'"
         }
-        .join('\n')
+        .join(' ')
 
     """
     # Write manifest to disk and structure sample inputs
-    echo "${manifest}" > manifest.csv
+    printf '%s\\n' ${manifest} > manifest.csv
 
     while IFS=',' read -r fp fd; do
         mkdir -p \${fd};
         ln -s ../../\${fp%/} \${fd};
-    done <<< "${group_id_mapping}"
+    done < <(printf '%s\\n' ${group_id_mapping})
 
     # Run MultiQC
     multiqc \\
@@ -76,6 +79,11 @@ process MULTIQC {
         --case_information_fp manifest.csv \\
         other/ \\
         sample/
+
+    cat <<-END_VERSIONS > versions.yml
+    "${task.process}":
+        multiqc: \$( multiqc --version | sed -e "s/multiqc, version //g" )
+    END_VERSIONS
     """
 
     stub:
@@ -86,5 +94,10 @@ process MULTIQC {
     touch multiqc_report.html
     touch multiqc_data/.stub
     touch multiqc_plots/.stub
+
+    cat <<-END_VERSIONS > versions.yml
+    "${task.process}":
+        multiqc: \$( multiqc --version | sed -e "s/multiqc, version //g" )
+    END_VERSIONS
     """
 }
