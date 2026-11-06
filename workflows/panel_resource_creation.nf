@@ -23,6 +23,8 @@ include { softwareVersionsToYAML } from '../subworkflows/nf-core/utils_nfcore_pi
 include { getDnaFastqChannel } from '../subworkflows/local/utils_nfcore_oncoanalyser_pipeline'
 include { getRnaFastqChannel } from '../subworkflows/local/utils_nfcore_oncoanalyser_pipeline'
 
+include { SAMTOOLS_MERGE } from '../modules/local/samtools/merge/main'
+
 /*
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     RUN MAIN WORKFLOW
@@ -132,6 +134,32 @@ workflow PANEL_RESOURCE_CREATION {
     ch_align_dna_tumor_out = READ_ALIGNMENT_DNA.out.tumor
     ch_align_dna_normal_out = READ_ALIGNMENT_DNA.out.normal
     ch_align_rna_tumor_out = READ_ALIGNMENT_RNA.out.tumor
+
+    //
+    // PROCESS: Save plain DNA alignments if requested by the user
+    //
+    if (params.plain_alignment_format) {
+
+        // channel: [ meta_plain, [aln, ...] ]
+        ch_plain_alignment_input = channel.empty()
+            .mix(
+                ch_align_dna_tumor_out.map { meta, alns, idxs -> [meta, Utils.getTumorDnaSample(meta), alns] },
+                ch_align_dna_normal_out.map { meta, alns, idxs -> [meta, Utils.getNormalDnaSample(meta), alns] },
+            )
+            .map { meta, meta_sample, alns ->
+                def sample_id = meta_sample.getOrDefault('longitudinal_sample_id', meta_sample['sample_id'])
+                def meta_plain = [key: meta.group_id, id: "${meta.group_id}_${sample_id}", sample_id: sample_id]
+                return [meta_plain, alns]
+            }
+            .filter { meta_plain, alns -> alns }
+
+        SAMTOOLS_MERGE(
+            ch_plain_alignment_input,
+            ref_data.genome_fasta,
+            params.plain_alignment_format,
+        )
+
+    }
 
     //
     // SUBWORKFLOW: Run REDUX for DNA alignments

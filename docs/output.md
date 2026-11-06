@@ -105,6 +105,18 @@ sequences. In `oncoanalyser`, BWA-MEM2 is used to align DNA reads to the human g
 
 _No outputs are published directly from bwa-mem2, see [REDUX](#redux) for the fully processed alignment outputs_
 
+When `plain_alignment_format` is set, the BWA-MEM2 alignment shards are merged into a single per-sample
+alignment and published:
+
+- `<group_id>/alignments/<dna_id>/`
+  - `<dna_id>.plain.bam`: Plain merged DNA alignment (`plain_alignment_format=bam`).
+  - `<dna_id>.plain.bam.bai`: Index of the plain BAM.
+  - `<dna_id>.plain.cram`: Plain merged DNA alignment (`plain_alignment_format=cram`).
+  - `<dna_id>.plain.cram.crai`: Index of the plain CRAM.
+
+The CRAM is written with version 3.0, the reference recorded, and NM tags stored, matching the
+[CRAM input requirements](usage.md#cram).
+
 #### STAR
 
 [STAR](https://github.com/alexdobin/STAR) is a specialised mapping tool used to align RNA reads to a reference

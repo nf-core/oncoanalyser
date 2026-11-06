@@ -1,0 +1,49 @@
+name: samtools_merge
+description: Merge BWA-MEM2 alignment shards into a single per-sample BAM or CRAM
+keywords:
+  - alignment
+  - bam
+  - cram
+  - merge
+tools:
+  - samtools:
+      description: Tools for manipulating sequencing data in SAM/BAM/CRAM format
+      homepage: https://www.htslib.org/
+      documentation: https://www.htslib.org/doc/samtools.html
+      licence: ["MIT"]
+input:
+  - meta:
+      type: map
+      description: |
+        Groovy Map containing sample information
+        e.g. [id: 'sample_id', sample_id: 'sample_id']
+  - alns:
+      type: list
+      description: List of coordinate-sorted BWA-MEM2 alignment shards
+      pattern: "*.bam"
+  - genome_fasta:
+      type: file
+      description: Reference genome assembly FASTA file
+      pattern: "*.{fa,fasta}"
+  - format:
+      type: string
+      description: Output format, bam or cram
+output:
+  - meta:
+      type: map
+      description: |
+        Groovy Map containing sample information
+        e.g. [id: 'sample_id', sample_id: 'sample_id']
+  - plain_aln:
+      type: list
+      description: Merged plain alignment and its index
+      pattern: "*.plain.{bam,cram,bai,crai}"
+  - command_files:
+      type: list
+      description: List of command files
+  - versions:
+      type: file
+      description: File containing software versions
+      pattern: "versions.yml"
+authors:
+  - "@scwatts"
