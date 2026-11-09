@@ -20,6 +20,7 @@ workflow ISOFOX_QUANTIFICATION {
     isofox_excluded_regions    // channel: [mandatory] /path/to/isofox_excluded_regions
     isofox_gene_distribution   // channel: [mandatory] /path/to/isofox_gene_distribution
     isofox_alt_sj_distribution // channel: [mandatory] /path/to/isofox_alt_sj_distribution
+    isofox_fusion_cohort       // channel: [optional]  /path/to/isofox_fusion_cohort
     isofox_counts              // channel: [mandatory] /path/to/isofox_counts
     isofox_gc_ratios           // channel: [mandatory] /path/to/isofox_gc_ratios
     isofox_tpm_norm            // channel: [optional]  /path/to/isofox_tpm_norm
@@ -75,6 +76,7 @@ workflow ISOFOX_QUANTIFICATION {
         isofox_excluded_regions,
         isofox_gene_distribution,
         isofox_alt_sj_distribution,
+        isofox_fusion_cohort,
         isofox_counts,
         isofox_gc_ratios,
         isofox_tpm_norm,
