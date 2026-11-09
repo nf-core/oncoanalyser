@@ -266,14 +266,12 @@
                 },
                 "ref_data_base": {
                     "type": "string",
-                    "format": "directory-path",
                     "description": "The URL and root path to the oncoanalyser reference files",
                     "fa_icon": "fas fa-ban",
                     "hidden": true
                 },
                 "ref_data_genomes_base": {
                     "type": "string",
-                    "format": "directory-path",
                     "description": "The URL and root path to the Hartwig genome reference files",
                     "fa_icon": "fas fa-ban",
                     "hidden": true
