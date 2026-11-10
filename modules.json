@@ -11,11 +11,11 @@
                         "installed_by": ["modules"],
                         "patch": "modules/nf-core/bwa/index/bwa-index.diff"
                     },
-                    "bwamem2/index": {
+                    "bwamem3/index": {
                         "branch": "master",
-                        "git_sha": "7081e04c18de9480948d34513a1c1e2d0fa9126d",
+                        "git_sha": "d38f40ca73e22a520ad4bb56eed2906219696ccc",
                         "installed_by": ["modules"],
-                        "patch": "modules/nf-core/bwamem2/index/bwamem2-index.diff"
+                        "patch": "modules/nf-core/bwamem3/index/bwamem3-index.diff"
                     },
                     "gatk4/markduplicates": {
                         "branch": "master",

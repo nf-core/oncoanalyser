@@ -319,7 +319,7 @@ used throughout the WiGiTS tools). We plan to address this issue in future relea
 
 #### REDUX alignments
 
-The most time and resource-intensive pipeline steps are read alignment by [BWA-MEM2](https://github.com/bwa-mem2/bwa-mem2)
+The most time and resource-intensive pipeline steps are read alignment by [bwa-mem3](https://github.com/fg-labs/bwa-mem3)
 and read post-processing by [REDUX](https://github.com/hartwigmedical/hmftools/tree/master/redux). You may therefore
 want to start from existing REDUX outputs.
 

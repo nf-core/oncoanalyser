@@ -1,11 +1,11 @@
-process BWAMEM2_ALIGN {
+process BWAMEM3_ALIGN {
     tag "${meta.id}"
     label 'process_high'
 
     conda "${moduleDir}/environment.yml"
     container "${ workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container ?
-        'https://depot.galaxyproject.org/singularity/mulled-v2-4dde50190ae599f2bb2027cb2c8763ea00fb5084:596c0d6a494faa218562f2be03af2714d454da4f-0' :
-        'biocontainers/mulled-v2-4dde50190ae599f2bb2027cb2c8763ea00fb5084:596c0d6a494faa218562f2be03af2714d454da4f-0' }"
+        'https://community-cr-prod.seqera.io/docker/registry/v2/blobs/sha256/67/675fb6ba74af9bf75f4f7d8819f8f0590d93a625444fc4d8e000b4bddf6d8d4e/data' :
+        'community.wave.seqera.io/library/bwa-mem3_samtools_sambamba:630ef504d2934496' }"
 
     input:
     tuple val(meta), path(reads_fwd), path(reads_rev)
@@ -13,8 +13,8 @@ process BWAMEM2_ALIGN {
     path genome_bwamem2_index
 
     output:
-    tuple val(meta), path('*.bam'), path('*.bai')            , topic: bwamem2_align_bam
-    tuple val(meta), val('bwamem2_align'), path('.command.*'), topic: command_files
+    tuple val(meta), path('*.bam'), path('*.bai')            , topic: bwamem3_align_bam
+    tuple val(meta), val('bwamem3_align'), path('.command.*'), topic: command_files
     path 'versions.yml'                                      , topic: versions
 
     when:
@@ -30,7 +30,7 @@ process BWAMEM2_ALIGN {
     """
     ln -fs \$(find -L ${genome_bwamem2_index} -type f) ./
 
-    bwa-mem2 mem \\
+    bwa-mem3 mem \\
         ${args} \\
         -Y \\
         -K 100000000 \\
@@ -54,10 +54,9 @@ process BWAMEM2_ALIGN {
             --out ${output_fn} \\
             /dev/stdin
 
-    # NOTE(SW): bwa-mem2 version hardcoded as 2.3 reports the wrong version, see https://github.com/bwa-mem2/bwa-mem2/issues/276
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":
-        bwa-mem2: 2.3
+        bwa-mem3: \$(bwa-mem3 version | sed -nE '1 s/^([0-9]+(\\.[0-9]+)+).*/\\1/p')
         samtools: \$(samtools --version | sed -n '/^samtools / { s/^.* //p }')
         sambamba: \$(sambamba --version 2>&1 | sed -n '/^sambamba / { s/^.* //p }' | head -n1)
     END_VERSIONS

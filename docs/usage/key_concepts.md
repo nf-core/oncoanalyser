@@ -2,7 +2,7 @@
 
 ## Alignment
 
-BWA-MEM2 is used internally in `oncoanalyser` for alignment. The pipeline has been validated on and is compatible with
+bwa-mem3 is used internally in `oncoanalyser` for alignment. The pipeline has been validated on and is compatible with
 BAMs aligned with BWA-MEM, BWA-MEM2 and DRAGEN. Note that the mate CIGAR attribute is mandatory for any BAM records with
 paired reads. Non-compatible BAMs may be rectified using tools such as the [Picard
 FixMateInformation](https://gatk.broadinstitute.org/hc/en-us/articles/360036713471-FixMateInformation-Picard) routine.

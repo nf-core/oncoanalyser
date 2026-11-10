@@ -23,7 +23,7 @@ grep -r "label 'process_" modules/*/ | sort
 
 modules/local/amber/main.nf:    label 'process_high'
 modules/local/bamtools/main.nf:    label 'process_medium'
-modules/local/bwa-mem2/mem/main.nf:    label 'process_high'
+modules/local/bwa-mem3/mem/main.nf:    label 'process_high'
 ...
 ```
 

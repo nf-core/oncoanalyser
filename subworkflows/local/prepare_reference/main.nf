@@ -2,7 +2,7 @@
 // Prepare reference data as required
 //
 
-include { BWAMEM2_INDEX         } from '../../../modules/nf-core/bwamem2/index/main'
+include { BWAMEM3_INDEX         } from '../../../modules/nf-core/bwamem3/index/main'
 include { BWA_INDEX             } from '../../../modules/nf-core/bwa/index/main'
 include { SAMTOOLS_DICT         } from '../../../modules/nf-core/samtools/dict/main'
 include { SAMTOOLS_FAIDX        } from '../../../modules/nf-core/samtools/faidx/main'
@@ -84,11 +84,11 @@ workflow PREPARE_REFERENCE {
 
         if (! params.ref_data_genome_bwamem2_index) {
 
-            BWAMEM2_INDEX(
-                ch_genome_fasta,
+            BWAMEM3_INDEX(
+                ch_genome_fasta.map { fasta -> [[id: fasta.name], fasta] },
                 params.ref_data_genome_alt ? file(params.ref_data_genome_alt) : [],
             )
-            ch_genome_bwamem2_index = channel.topic('bwamem2_index')
+            ch_genome_bwamem2_index = BWAMEM3_INDEX.out.index.map { _meta, index -> index }
 
         } else if (params.ref_data_genome_bwamem2_index.endsWith('.tar.gz')) {
 

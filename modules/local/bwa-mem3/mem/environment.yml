@@ -1,8 +1,8 @@
-name: bwa-mem2_mem
+name: bwa-mem3_mem
 channels:
   - conda-forge
   - bioconda
 dependencies:
-  - bioconda::bwa-mem2=2.3
+  - bioconda::bwa-mem3=0.12.0
   - bioconda::samtools=1.21
   - bioconda::sambamba=1.0.1
