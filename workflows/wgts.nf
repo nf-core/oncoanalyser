@@ -79,7 +79,7 @@ workflow WGTS {
     def hmf_data = PREPARE_REFERENCE.out.hmf_data
 
     // Configure selectable reference data and inputs
-    def hmf_data_pons = Utils.getSequencingPlatformPons(hmf_data, params.sequencing_platform, log)
+    def hmf_data_seq_platform = Utils.getSequencingPlatformResources(hmf_data, params.sequencing_platform, log)
     def driver_gene_panel = params.driver_gene_panel != null ? file(params.driver_gene_panel) : hmf_data.driver_gene_panel
     def gridss_config = params.gridss_config != null ? file(params.gridss_config) : hmf_data.gridss_config
 
@@ -192,8 +192,8 @@ workflow WGTS {
             ref_data.genome_dict,
             hmf_data.unmap_regions_dna,
             hmf_data.msi_jitter_sites,
-            [],  // msi_model_coefficients
-            [],  // msi_model_error_rates
+            hmf_data_seq_platform.msi_model_coefs,
+            hmf_data_seq_platform.msi_model_error_rates,
             params.sequencing_platform,
             false,  // targeted_mode
             params.redux_umi_enabled,
@@ -358,8 +358,8 @@ workflow WGTS {
             ref_data.genome_dict,
             ref_data.genome_img,
             hmf_data.known_fusions,
-            hmf_data_pons.esvee_breakends,
-            hmf_data_pons.esvee_breakpoints,
+            hmf_data_seq_platform.esvee_pon_breakends,
+            hmf_data_seq_platform.esvee_pon_breakpoints,
             hmf_data.decoy_sequences_image,
             hmf_data.saga_germline_variants,
             hmf_data.saga_germline_variants_fai,
@@ -396,7 +396,7 @@ workflow WGTS {
             ref_data.genome_version,
             ref_data.genome_fai,
             ref_data.genome_dict,
-            hmf_data_pons.sage,
+            hmf_data_seq_platform.sage_pon,
             hmf_data.sage_known_hotspots_somatic,
             hmf_data.sage_known_hotspots_germline,
             hmf_data.sage_highconf_regions,
@@ -435,7 +435,7 @@ workflow WGTS {
             ref_data.genome_version,
             ref_data.genome_fai,
             [],  // sage_pon_artefacts
-            hmf_data_pons.sage,
+            hmf_data_seq_platform.sage_pon,
             hmf_data.sage_blocklist_regions,
             hmf_data.sage_blocklist_sites,
             hmf_data.clinvar_annotations,
@@ -570,7 +570,7 @@ workflow WGTS {
             ref_data.genome_version,
             ref_data.genome_fai,
             ref_data.genome_dict,
-            hmf_data_pons.sage,
+            hmf_data_seq_platform.sage_pon,
             hmf_data.sage_known_hotspots_somatic,
             hmf_data.sage_highconf_regions,
             hmf_data.ensembl_data_resources,
