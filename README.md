@@ -64,7 +64,7 @@ the tool information below primarily relates to the `wgts` and `targeted` analys
 - SV and driver event interpretation: [LINX](https://github.com/hartwigmedical/hmftools/tree/master/linx)
 - RNA transcript analysis: [ISOFOX](https://github.com/hartwigmedical/hmftools/tree/master/isofox)
 - Sequencing and variant calling QC metrics: [Qsee](https://github.com/hartwigmedical/hmftools/tree/master/qsee)
-- Oncoviral detection: [VIRUSbreakend](https://github.com/PapenfussLab/gridss)\*, [VirusInterpreter](https://github.com/hartwigmedical/hmftools/tree/master/virus-interpreter)\*
+- Oncoviral detection: [Viridian](https://github.com/hartwigmedical/hmftools/tree/master/viridian)\*
 - Telomere characterisation: [TEAL](https://github.com/hartwigmedical/hmftools/tree/master/teal)\*
 - Immune analysis: [LILAC](https://github.com/hartwigmedical/hmftools/tree/master/lilac), [CIDER](https://github.com/hartwigmedical/hmftools/tree/master/cider), [NEO](https://github.com/hartwigmedical/hmftools/tree/master/neo)\*
 - Mutational signature fitting: [SIGS](https://github.com/hartwigmedical/hmftools/tree/master/sigs)\*

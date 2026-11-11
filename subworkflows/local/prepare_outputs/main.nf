@@ -41,9 +41,7 @@ workflow PREPARE_OUTPUTS_WGTS {
             channel.topic('teal_prep_normal_bam').flatMap { meta, fps ->       return fps.collect { d -> ["${meta.key}/teal/${d.name}", d] } },
             channel.topic('teal_prep_tumor_bam').flatMap { meta, fps ->        return fps.collect { d -> ["${meta.key}/teal/${d.name}", d] } },
             channel.topic('teal_tsvs').flatMap { meta, e ->                    def fps = e instanceof List ? e : [e]; fps.collect { d -> ["${meta.key}/teal/${d.name}", d] } },
-            channel.topic('virusbreakend_tsv').map { meta, d ->                return ["${meta.key}/virusbreakend/${d.name}", d] },
-            channel.topic('virusbreakend_vcf').map { meta, d ->                return ["${meta.key}/virusbreakend/${d.name}", d] },
-            channel.topic('virusinterpreter_dir').flatMap { meta, d ->         return get_dir_filepaths(meta, d) },
+            channel.topic('viridian_dir').flatMap { meta, d ->                 return get_dir_filepaths(meta, d) },
 
             channel.topic('write_reference_data').map { d -> return ["reference_data/${workflow.manifest.version}/", d] },
 
@@ -179,7 +177,7 @@ def get_dir_filepaths(meta, d, target_dir=null) {
 
 def get_command_log_filepath(data) {
 
-    def other_logs = ['gatk4_bwa_index_image', 'gridss_index', 'bwa_index', 'bwamem2_index', 'samtools_dict', 'samtools_faidx', 'multiqc']
+    def other_logs = ['gatk4_bwa_index_image', 'bwamem2_index', 'samtools_dict', 'samtools_faidx', 'multiqc']
     def panel_logs = ['cobalt_panel_normalisation', 'pave_pon_panel_creation', 'isofox_panel_normalisation']
 
     def (meta, name, fps_all) = data

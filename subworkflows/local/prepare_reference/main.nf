@@ -3,17 +3,14 @@
 //
 
 include { BWAMEM2_INDEX         } from '../../../modules/nf-core/bwamem2/index/main'
-include { BWA_INDEX             } from '../../../modules/nf-core/bwa/index/main'
 include { SAMTOOLS_DICT         } from '../../../modules/nf-core/samtools/dict/main'
 include { SAMTOOLS_FAIDX        } from '../../../modules/nf-core/samtools/faidx/main'
 include { GATK4_BWA_INDEX_IMAGE } from '../../../modules/local/gatk4/bwaindeximage/main'
-include { GRIDSS_INDEX          } from '../../../modules/local/gridss/index/main'
 
 include { SAMTOOLS_FAIDX as SAMTOOLS_FAIDX_RNA } from '../../../modules/nf-core/samtools/faidx/main'
 include { SAMTOOLS_DICT as SAMTOOLS_DICT_RNA   } from '../../../modules/nf-core/samtools/dict/main'
 
 include { CUSTOM_EXTRACTTARBALL as DECOMP_BWAMEM2_INDEX     } from '../../../modules/local/custom/extract_tarball/main'
-include { CUSTOM_EXTRACTTARBALL as DECOMP_GRIDSS_INDEX      } from '../../../modules/local/custom/extract_tarball/main'
 include { CUSTOM_EXTRACTTARBALL as DECOMP_HMF_DATA          } from '../../../modules/local/custom/extract_tarball/main'
 include { CUSTOM_EXTRACTTARBALL as DECOMP_PANEL_DATA        } from '../../../modules/local/custom/extract_tarball/main'
 include { CUSTOM_EXTRACTTARBALL as DECOMP_BWAMEM2_INDEX_RNA } from '../../../modules/local/custom/extract_tarball/main'
@@ -23,7 +20,6 @@ include { WRITE_REFERENCE_DATA as WRITE_FAI               } from '../../../modul
 include { WRITE_REFERENCE_DATA as WRITE_DICT              } from '../../../modules/local/custom/write_reference_data/main'
 include { WRITE_REFERENCE_DATA as WRITE_IMG               } from '../../../modules/local/custom/write_reference_data/main'
 include { WRITE_REFERENCE_DATA as WRITE_BWA_INDEX         } from '../../../modules/local/custom/write_reference_data/main'
-include { WRITE_REFERENCE_DATA as WRITE_GRIDSS_INDEX      } from '../../../modules/local/custom/write_reference_data/main'
 
 include { WRITE_REFERENCE_DATA as WRITE_FASTA_RNA         } from '../../../modules/local/custom/write_reference_data/main'
 include { WRITE_REFERENCE_DATA as WRITE_FAI_RNA           } from '../../../modules/local/custom/write_reference_data/main'
@@ -112,44 +108,6 @@ workflow PREPARE_REFERENCE {
         } else {
 
             ch_genome_bwamem2_index = channel.fromPath(params.ref_data_genome_bwamem2_index)
-
-        }
-    }
-
-    //
-    // Set GRIDSS index, unpack or create if required
-    //
-    ch_genome_gridss_index = channel.empty()
-    if (prep_config.require_gridss_index) {
-
-        if (! params.ref_data_genome_gridss_index) {
-
-            BWA_INDEX(
-                ch_genome_fasta,
-                params.ref_data_genome_alt ? file(params.ref_data_genome_alt) : [],
-            )
-
-            GRIDSS_INDEX(
-                ch_genome_fasta,
-                ch_genome_fai,
-                ch_genome_dict,
-                channel.topic('bwa_index'),
-            )
-            ch_genome_gridss_index = channel.topic('gridss_index')
-
-        } else if (params.ref_data_genome_gridss_index.endsWith('.tar.gz')) {
-
-            ch_genome_gridss_index_inputs = channel.of(params.ref_data_genome_gridss_index)
-                .map { fp_str -> def fp = file(fp_str); return [[topic_key: fp_str, id: "${fp.name.replaceAll('\\.tar\\.gz\$', '')}"], fp] }
-
-            DECOMP_GRIDSS_INDEX(ch_genome_gridss_index_inputs)
-            ch_genome_gridss_index = channel.topic('extracted_dir')
-                .filter { meta, _dir -> meta.topic_key == params.ref_data_genome_gridss_index }
-                .map { _meta, dir -> dir }
-
-        } else {
-
-            ch_genome_gridss_index = channel.fromPath(params.ref_data_genome_gridss_index)
 
         }
     }
@@ -281,7 +239,6 @@ workflow PREPARE_REFERENCE {
         WRITE_DICT(ch_genome_dict)
         WRITE_IMG(ch_genome_img)
         WRITE_BWA_INDEX(ch_genome_bwamem2_index)
-        WRITE_GRIDSS_INDEX(ch_genome_gridss_index)
 
         WRITE_FASTA_RNA(ch_genome_fasta_rna)
         WRITE_FAI_RNA(ch_genome_fai_rna)
@@ -302,7 +259,6 @@ workflow PREPARE_REFERENCE {
     genome_dict              = ch_genome_dict.first()              // path: genome_dict
     genome_img               = ch_genome_img.first()               // path: genome_img
     genome_bwamem2_index     = ch_genome_bwamem2_index.first()     // path: genome_bwa-mem2_index
-    genome_gridss_index      = ch_genome_gridss_index.first()      // path: genome_gridss_index
 
     genome_fasta_rna         = ch_genome_fasta_rna.first()         // path: genome_fasta_rna
     genome_fai_rna           = ch_genome_fai_rna.first()           // path: genome_fai_rna

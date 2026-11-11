@@ -410,7 +410,6 @@ class Utils {
             params.ref_data_genome_dict,
             params.ref_data_genome_fai,
             params.ref_data_genome_fasta,
-            params.ref_data_genome_gridss_index,
             params.ref_data_genome_fasta_rna,
             params.ref_data_genome_fai_rna,
             params.ref_data_genome_dict_rna,
@@ -526,14 +525,14 @@ class Utils {
 
         def has_alt_contigs = params.genome_type == 'alt'
 
-        // Ensure that custom genomes with ALT contigs that need indexes built have the required .alt file
-        def has_bwa_indexes = (params.ref_data_genome_bwamem2_index && params.ref_data_genome_gridss_index)
+        // Ensure that custom genomes with ALT contigs that need an index built have the required .alt file
+        def has_bwamem2_index = params.ref_data_genome_bwamem2_index
         def has_alt_file = params.containsKey('ref_data_genome_alt') && params.ref_data_genome_alt
-        def run_bwa_or_gridss_index = run_config.stages.alignment && run_config.has_dna_fastq && ! has_bwa_indexes
+        def run_bwamem2_index = run_config.stages.alignment && run_config.has_dna_fastq && ! has_bwamem2_index
 
-        if (run_bwa_or_gridss_index && has_alt_contigs && ! has_alt_file) {
+        if (run_bwamem2_index && has_alt_contigs && ! has_alt_file) {
             log.error "\n~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n" +
-                "  The genome .alt file is required when building bwa-mem2 or GRIDSS indexes\n" +
+                "  The genome .alt file is required when building the bwa-mem2 index\n" +
                 "  for reference genomes containing ALT contigs\n" +
                 "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
             Nextflow.exit(1)
