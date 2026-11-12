@@ -284,11 +284,6 @@ class Constants {
             SampleType.TUMOR,
             SequenceType.DNA_RNA,
         ],
-        SAGE_APPEND_DIR_NORMAL: [
-            FileType.SAGE_APPEND_DIR,
-            SampleType.NORMAL,
-            SequenceType.DNA_RNA,
-        ],
         SAGE_PLOT_DIR_TUMOR: [
             FileType.SAGE_PLOT_DIR,
             [SampleType.TUMOR, SampleType.TUMOR_NORMAL],

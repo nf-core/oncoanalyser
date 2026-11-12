@@ -23,9 +23,6 @@ input:
   - smlv_vcf_somatic:
       type: file
       description: Small somatic variant VCF file (annotated with RNA data) (optional)
-  - smlv_vcf_germline:
-      type: file
-      description: Small germline variant VCF file (annotated with RNA data) (optional)
   - sage_plot_dir_somatic:
       type: file
       description: SAGE somatic plot directory

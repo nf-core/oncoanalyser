@@ -3,7 +3,6 @@
 //
 
 include { SAGE_APPEND as SAGE_APPEND_SOMATIC  } from '../../../modules/local/sage/append/main'
-include { SAGE_APPEND as SAGE_APPEND_GERMLINE } from '../../../modules/local/sage/append/main'
 
 workflow SAGE_APPEND {
     take:
@@ -21,7 +20,6 @@ workflow SAGE_APPEND {
 
     // Params
     sequencing_platform // string:  [mandatory] sequencing platform
-    enable_germline     // boolean: [mandatory] Enable germline
     targeted_mode       // boolean: [mandatory] Set targeted mode
 
     main:
@@ -66,71 +64,6 @@ workflow SAGE_APPEND {
             skip: true
                 return meta
         }
-
-    //
-    // MODULE: SAGE append germline
-    //
-    // Select inputs that are eligible to run
-    // channel: runnable: [ meta, purple_dir, tumor_dna_aln, tumor_dna_idx, [redux_tsv_tumor, ...], tumor_rna_aln, tumor_rna_idx ]
-    // channel: skip: [ meta ]
-    ch_inputs_germline_sorted = ch_inputs_sorted.runnable
-        .branch { meta, purple_dir, tumor_dna_aln, tumor_dna_idx, redux_tsvs_tumor, tumor_rna_aln, tumor_rna_idx ->
-
-            // NOTE(SW): explicit in expectation to always obtain the primary tumor DNA sample ID here
-            def tumor_dna_id = Utils.getTumorDnaSampleName(meta, primary: true)
-
-            def has_tumor_rna = Utils.hasTumorRna(meta)
-            def has_normal_dna = Utils.hasNormalDna(meta)
-            def has_smlv_germline = purple_dir.resolve("${tumor_dna_id}.purple.germline.vcf.gz").exists()
-
-            def should_append_rna_variants = has_tumor_rna && has_normal_dna && has_smlv_germline
-
-            def has_existing = Utils.hasExistingInput(meta, Constants.INPUT.SAGE_APPEND_DIR_NORMAL)
-
-            runnable: should_append_rna_variants && ! has_existing && enable_germline
-            skip: true
-                return meta
-        }
-
-    // Create process input channel
-    // channel: [ meta_append, purple_smlv_vcf, [aln, ...], [idx, ...], [redux_tsvs_tumor, ...] ]
-    ch_sage_append_germline_inputs = ch_inputs_germline_sorted.runnable
-        .map { meta, purple_dir, _tumor_dna_aln, _tumor_dna_idx, _redux_tsvs_tumor, tumor_rna_aln, tumor_rna_idx ->
-
-            // NOTE(SW): explicit in expectation to always obtain the primary tumor DNA sample ID here
-            def tumor_dna_id = Utils.getTumorDnaSampleName(meta, primary: true)
-            def output_file_id = Utils.getNormalDnaSampleName(meta)
-
-            def meta_append = [
-                key: meta.group_id,
-                topic_key: 'germline',
-                id: "${meta.group_id}_${output_file_id}",
-                output_file_id: output_file_id,
-                reference_ids: [Utils.getTumorRnaSampleName(meta)],
-            ]
-
-            def alns = [tumor_rna_aln]
-            def idxs = [tumor_rna_idx]
-
-            def purple_smlv_vcf = purple_dir.resolve("${tumor_dna_id}.purple.germline.vcf.gz")
-
-            // NOTE(SW): in stub mode we allow absence of indexes so must handle here
-            idxs = idxs.flatten()
-
-            return [meta_append, purple_smlv_vcf, alns, idxs, []]
-
-        }
-
-    // Run process
-    SAGE_APPEND_GERMLINE(
-        ch_sage_append_germline_inputs,
-        genome_fasta,
-        genome_version,
-        genome_fai,
-        genome_dict,
-        sequencing_platform,
-        targeted_mode,
-    )
 
     //
     // MODULE: SAGE append somatic
@@ -222,15 +155,6 @@ workflow SAGE_APPEND {
             ch_inputs_sorted.skip.map { meta -> [meta, []] },
         )
 
-    // channel: [ meta, sage_append_dir ]
-    ch_outputs_germline = channel.empty()
-        .mix(
-            WorkflowOncoanalyser.restoreMeta(channel.topic('sage_append_dir').filter { d -> d[0].topic_key == 'germline' }, ch_inputs),
-            ch_inputs_germline_sorted.skip.map { meta -> [meta, []] },
-            ch_inputs_sorted.skip.map { meta -> [meta, []] },
-        )
-
     emit:
-    somatic_dir  = ch_outputs_somatic  // channel: [ meta, sage_append_dir ]
-    germline_dir = ch_outputs_germline // channel: [ meta, sage_append_dir ]
+    somatic_dir = ch_outputs_somatic // channel: [ meta, sage_append_dir ]
 }
