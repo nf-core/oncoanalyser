@@ -9,8 +9,8 @@ workflow ORANGE_REPORTING {
     // Sample data
     ch_sage_dir_somatic             // channel: [mandatory] [ meta, sage_dir ]
     ch_sage_dir_germline            // channel: [mandatory] [ meta, sage_dir ]
-    ch_sage_append_dir_somatic      // channel: [mandatory] [ meta, sage_append_dir ]
     ch_sage_plot_dir_somatic        // channel: [mandatory] [ meta, sage_visualiser_dir ]
+    ch_sage_append_dir              // channel: [mandatory] [ meta, sage_append_dir ]
     ch_purple_dir                   // channel: [mandatory] [ meta, purple_dir ]
     ch_qsee_dir                     // channel: [mandatory] [ meta, qsee_dir ]
     ch_linx_annotation_dir_somatic  // channel: [mandatory] [ meta, linx_annotation_dir ]
@@ -38,8 +38,8 @@ workflow ORANGE_REPORTING {
     input_indexes = [
         'sage_dir_somatic':             0,
         'sage_dir_germline':            1,
-        'sage_append_dir_somatic':      2,
-        'sage_plot_dir_somatic':        3,
+        'sage_plot_dir_somatic':        2,
+        'sage_append_dir':              3,
         'purple_dir':                   4,
         'qsee_dir':                     5,
         'linx_annotation_dir_somatic':  6,
@@ -55,13 +55,13 @@ workflow ORANGE_REPORTING {
     ]
 
     // Select input sources then sort
-    // channel: runnable: [meta, sage_dir_somatic, sage_dir_germline, sage_append_dir_somatic, sage_visualiser_dir_somatic, purple_dir, qsee_dir, linx_annotation_dir_somatic, linx_plot_dir_somatic, linx_annotation_dir_germline, virusinterpreter_dir, chord_dir, sigs_dir, lilac_dir, cuppa_dir, peach_dir, isofox_dir ]
+    // channel: runnable: [meta, sage_dir_somatic, sage_dir_germline, sage_visualiser_dir_somatic, sage_append_dir, purple_dir, qsee_dir, linx_annotation_dir_somatic, linx_plot_dir_somatic, linx_annotation_dir_germline, virusinterpreter_dir, chord_dir, sigs_dir, lilac_dir, cuppa_dir, peach_dir, isofox_dir ]
     // channel: skip: [ meta ]
     ch_inputs_sorted = WorkflowOncoanalyser.groupByMeta(
         ch_sage_dir_somatic,
         ch_sage_dir_germline,
-        ch_sage_append_dir_somatic,
         ch_sage_plot_dir_somatic,
+        ch_sage_append_dir,
         ch_purple_dir,
         ch_qsee_dir,
         ch_linx_annotation_dir_somatic,
@@ -87,8 +87,8 @@ workflow ORANGE_REPORTING {
                 meta,
                 Utils.selectCurrentOrExisting(inputs[input_indexes['sage_dir_somatic']],             meta, Constants.INPUT.SAGE_DIR_TUMOR),
                 Utils.selectCurrentOrExisting(inputs[input_indexes['sage_dir_germline']],            meta, Constants.INPUT.SAGE_DIR_NORMAL),
-                Utils.selectCurrentOrExisting(inputs[input_indexes['sage_append_dir_somatic']],      meta, Constants.INPUT.SAGE_APPEND_DIR_TUMOR),
                 Utils.selectCurrentOrExisting(inputs[input_indexes['sage_plot_dir_somatic']],        meta, Constants.INPUT.SAGE_PLOT_DIR_TUMOR),
+                Utils.selectCurrentOrExisting(inputs[input_indexes['sage_append_dir']],              meta, Constants.INPUT.SAGE_APPEND_DIR_TUMOR),
                 Utils.selectCurrentOrExisting(inputs[input_indexes['purple_dir']],                   meta, Constants.INPUT.PURPLE_DIR),
                 Utils.selectCurrentOrExisting(inputs[input_indexes['qsee_dir']],                     meta, Constants.INPUT.QSEE_DIR),
                 Utils.selectCurrentOrExisting(inputs[input_indexes['linx_annotation_dir_somatic']],  meta, Constants.INPUT.LINX_ANNO_DIR_TUMOR),
@@ -123,7 +123,7 @@ workflow ORANGE_REPORTING {
         }
 
     // Create process input channel
-    // channel: [meta_orange, sage_dir_somatic, sage_dir_germline, smlv_vcf_somatic, sage_visualiser_dir_somatic, purple_dir, qsee_dir, linx_annotation_dir_somatic, linx_plot_dir_somatic, linx_annotation_dir_germline, virusinterpreter_dir, chord_dir, sigs_dir, lilac_dir, cuppa_dir, peach_dir, isofox_dir ]
+    // channel: [meta_orange, sage_dir_somatic, sage_dir_germline, sage_visualiser_dir_somatic, sage_append_rna_vcf, purple_dir, qsee_dir, linx_annotation_dir_somatic, linx_plot_dir_somatic, linx_annotation_dir_germline, virusinterpreter_dir, chord_dir, sigs_dir, lilac_dir, cuppa_dir, peach_dir, isofox_dir ]
     ch_orange_inputs = ch_inputs_sorted.runnable
         .map { d ->
 
@@ -154,7 +154,7 @@ workflow ORANGE_REPORTING {
             }
 
             // Require all tumor RNA inputs to be present else clear them
-            def rna_tumor_input_keys = ['isofox_dir', 'sage_append_dir_somatic']
+            def rna_tumor_input_keys = ['isofox_dir', 'sage_append_dir']
             def has_rna_tumor = rna_tumor_input_keys.every { k -> def i = input_indexes[k]; return inputs[i] }
 
             if (has_rna_tumor) {
@@ -174,11 +174,11 @@ workflow ORANGE_REPORTING {
             }
 
             // Set SAGE append VCF input
-            def sage_append_vcf_somatic
+            def sage_append_rna_vcf
             if (has_rna_tumor) {
-                def sage_append_dir_somatic = inputs_selected[input_indexes['sage_append_dir_somatic']]
-                if (sage_append_dir_somatic) {
-                    sage_append_vcf_somatic = sage_append_dir_somatic.resolve("${meta_orange.tumor_id}.sage.append.vcf.gz")
+                def sage_append_dir = inputs_selected[input_indexes['sage_append_dir']]
+                if (sage_append_dir) {
+                    sage_append_rna_vcf = sage_append_dir.resolve("${meta_orange.tumor_id}.sage.append.vcf.gz")
                 }
             }
 
@@ -195,8 +195,8 @@ workflow ORANGE_REPORTING {
                 meta_orange,
                 inputs_selected[input_indexes['sage_dir_somatic']],
                 inputs_selected[input_indexes['sage_dir_germline']],
-                sage_append_vcf_somatic ?: [],
                 inputs_selected[input_indexes['sage_plot_dir_somatic']],
+                sage_append_rna_vcf ?: [],
                 inputs_selected[input_indexes['purple_dir']],
                 inputs_selected[input_indexes['qsee_dir']],
                 inputs_selected[input_indexes['linx_annotation_dir_somatic']],
