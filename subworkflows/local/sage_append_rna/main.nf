@@ -90,6 +90,7 @@ workflow SAGE_APPEND_RNA {
         genome_dict,
         sequencing_platform,
         targeted_mode,
+        false,  // write_frag_lengths
     )
 
     // Set outputs, restoring original meta
