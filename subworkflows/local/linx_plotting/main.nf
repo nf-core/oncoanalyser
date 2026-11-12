@@ -44,8 +44,9 @@ workflow LINX_PLOTTING {
         .branch { meta, linx_annotations_dir, amber_dir, cobalt_dir, purple_dir ->
 
             def has_existing = Utils.hasExistingInput(meta, Constants.INPUT.LINX_PLOT_DIR_TUMOR)
+            def has_copy_number_inputs = amber_dir && cobalt_dir && purple_dir
 
-            runnable: linx_annotations_dir && ! has_existing
+            runnable: linx_annotations_dir && has_copy_number_inputs && ! has_existing
             skip: true
                 return meta
         }
