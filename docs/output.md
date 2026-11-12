@@ -199,7 +199,7 @@ _BamTools is only run on DNA alignments_
 <summary>Output files</summary>
 
 - `<group_id>/sage_append/`
-  - `<tumor_dna_id>.sage.append.frag_lengths.tsv.gz`: Tumor DNA sample fragment length data appended to SAGE VCF.
+  - `<tumor_dna_id>.sage.append.frag_lengths.tsv.gz`: Tumor DNA sample fragment length data appended to SAGE VCF (purity estimate mode only).
   - `<tumor_dna_id>.sage.append.vcf.gz`: Tumor DNA sample small variant VCF with RNA data appended.
   - `<tumor_dna_id>.sage.append.vcf.gz.tbi`: Tumor DNA sample small variant VCF index.
 

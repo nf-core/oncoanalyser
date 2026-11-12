@@ -90,6 +90,7 @@ workflow SAGE_APPEND_LONGITUDINAL {
         genome_dict,
         sequencing_platform,
         targeted_mode,
+        true,  // write_frag_lengths
     )
 
     // Set outputs, restoring original meta
