@@ -231,7 +231,6 @@ workflow PURITY_ESTIMATE {
             ref_data.genome_fai,
             ref_data.genome_dict,
             params.sequencing_platform,
-            false,  // enable_germline
             targeted_mode,
         )
 

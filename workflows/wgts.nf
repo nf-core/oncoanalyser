@@ -527,7 +527,6 @@ workflow WGTS {
     //
     // channel: [ meta, sage_append_dir ]
     ch_sage_append_somatic_out = channel.empty()
-    ch_sage_append_germline_out = channel.empty()
     if (run_config.stages.sage_append) {
 
         SAGE_APPEND(
@@ -540,17 +539,14 @@ workflow WGTS {
             ref_data.genome_fai,
             ref_data.genome_dict,
             params.sequencing_platform,
-            run_config.stages.orange,  // enable_germline [run for ORANGE but not Neo]
             false,  // targeted_mode
         )
 
         ch_sage_append_somatic_out = ch_sage_append_somatic_out.mix(SAGE_APPEND.out.somatic_dir)
-        ch_sage_append_germline_out = ch_sage_append_germline_out.mix(SAGE_APPEND.out.germline_dir)
 
     } else {
 
         ch_sage_append_somatic_out = ch_inputs.map { meta -> [meta, []] }
-        ch_sage_append_germline_out = ch_inputs.map { meta -> [meta, []] }
 
     }
 
@@ -866,7 +862,6 @@ workflow WGTS {
             ch_sage_somatic_out,
             ch_sage_germline_out,
             ch_sage_append_somatic_out,
-            ch_sage_append_germline_out,
             ch_sage_somatic_visualiser_out,
             ch_purple_out,
             ch_qsee_out,

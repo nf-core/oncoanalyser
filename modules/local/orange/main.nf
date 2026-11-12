@@ -12,7 +12,6 @@ process ORANGE {
         path(sage_dir_somatic, stageAs: 'sage_somatic'),
         path(sage_dir_germline, stageAs: 'sage_germline'),
         path(smlv_vcf_somatic),
-        path(smlv_vcf_germline),
         path(sage_plot_dir_somatic),
         path(purple_dir),
         path(qsee_dir),
@@ -96,10 +95,6 @@ process ORANGE {
 
         cp -rL ${purple_dir} \${purple_dir_local}/
         cp -L ${smlv_vcf_somatic} \${purple_dir_local}/${meta.tumor_id}.purple.somatic.vcf.gz;
-
-        if [[ -n "${smlv_vcf_germline}" ]]; then
-            cp -L ${smlv_vcf_germline} \${purple_dir_local}/${meta.tumor_id}.purple.germline.vcf.gz;
-        fi;
 
     fi
 
