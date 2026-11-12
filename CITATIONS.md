@@ -62,6 +62,10 @@
 
 > Dobin, A., Davis, C. A., Schlesinger, F., Drenkow, J., Zaleski, C., Jha, S., Batut, P., Chaisson, M., & Gingeras, T. R. (2013). STAR: Ultrafast universal RNA-seq aligner. Bioinformatics, 29(1), 15–21. https://doi.org/10.1093/bioinformatics/bts635
 
+- [VIRUSBreakend](https://doi.org/10.1093/bioinformatics/btab343)
+
+> Cameron, D. L., Jacobs, N., Roepman, P., Priestley, P., Cuppen, E., & Papenfuss, A. T. (2021). VIRUSBreakend: Viral Integration Recognition Using Single Breakends. Bioinformatics, 37(19), 3115–3119. https://doi.org/10.1093/bioinformatics/btab343
+
 ## Software packaging/containerisation tools
 
 - [Anaconda](https://anaconda.com)

@@ -1,7 +1,0 @@
-name: viridian
-channels:
-  - conda-forge
-  - bioconda
-dependencies:
-  # TODO: confirm once hmftools-viridian 1.0 is released on bioconda
-  - bioconda::hmftools-viridian==1.0

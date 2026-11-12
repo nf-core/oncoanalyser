@@ -11,7 +11,6 @@ class Constants {
     static List PANELS_DEFINED = ['tso500']
 
 
-    // TODO: bump to the resource bundle that adds the Viridian resources
     static String HMF_DATA_37_PATH = 'hartwig/pipeline_resources/hmf_pipeline_resources.37_v3.0.0--8.tar.gz'
     static String HMF_DATA_38_PATH = 'hartwig/pipeline_resources/hmf_pipeline_resources.38_v3.0.0--8.tar.gz'
 
@@ -56,6 +55,7 @@ class Constants {
         DNA_ALIGNMENT,
         FAI,
         FASTA,
+        GRIDSS_INDEX,
         HMFTOOLS,
         IMG,
         PANEL,
@@ -87,7 +87,7 @@ class Constants {
         SAGE_VISUALISER,
         SIGS,
         TEAL,
-        VIRIDIAN,
+        VIRUSINTERPRETER,
         WISP,
     }
 
@@ -128,7 +128,7 @@ class Constants {
         SAGE_DIR,
         SAGE_PLOT_DIR,
         SIGS_DIR,
-        VIRIDIAN_DIR,
+        VIRUSINTERPRETER_DIR,
     }
 
     static enum SampleType {
@@ -356,8 +356,8 @@ class Constants {
             [SequenceType.DNA, SequenceType.DNA_RNA],
         ],
 
-        VIRIDIAN_DIR: [
-            FileType.VIRIDIAN_DIR,
+        VIRUSINTERPRETER_DIR: [
+            FileType.VIRUSINTERPRETER_DIR,
             SampleType.TUMOR,
             SequenceType.DNA,
         ],

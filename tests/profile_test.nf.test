@@ -25,10 +25,11 @@ nextflow_pipeline {
                 '*/linx/somatic_plots/*/*.png',
                 '*/purple/plot/*.png',
                 '*/qsee/*.qsee.vis.report.png',
+                '*/virusbreakend/*.virusbreakend.vcf',
             ])
             // Task count depends on config: when NXF_REF_DATA_PATH is set, reference data is cached (no DECOMP tasks)
             def refDataCached = System.getenv('NXF_REF_DATA_PATH') != null
-            def expectedTaskCount = refDataCached ? 41 : 44
+            def expectedTaskCount = refDataCached ? 42 : 46
             def actualTaskCount = workflow.trace.succeeded().size()
             assertAll(
                 { assert workflow.success },

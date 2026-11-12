@@ -31,7 +31,8 @@ output/
 │   ├── sage_append/
 │   ├── sigs/
 │   ├── teal/
-│   ├── viridian/
+│   ├── virusbreakend/
+│   ├── virusinterpreter/
 │   └── wisp/
 │
 ├── <group_id-2>/
@@ -67,7 +68,8 @@ output/
 - [Transcript analysis](#transcript-analysis)
   - [ISOFOX](#isofox) - RNA transcript analysis
 - [Oncoviral detection](#oncoviral-detection)
-  - [Viridian](#viridian) - Oncovirus presence and integration calling
+  - [VIRUSBreakend](#virusbreakend) - Viral content and integration calling
+  - [VirusInterpreter](#virusinterpreter) - Oncoviral calling post-processing
 - [Telomere characterisation](#telomere-characterisation)
   - [TEAL](#teal) - Telomere characterisation
 - [Immune analysis](#immune-analysis)
@@ -425,25 +427,32 @@ transcripts, identify novel splice junctions, and caller fusions.
 
 ### Oncoviral detection
 
-#### Viridian
+#### VIRUSBreakend
 
 <details markdown="1">
 <summary>Output files</summary>
 
-- `<group_id>/viridian/`
-  - `<tumor_dna_id>.viridian.report.tsv`: Tumor DNA sample oncovirus calls with reporting status.
-  - `<tumor_dna_id>.viridian.profile.tsv`: Tumor DNA sample representative virus genome per virus group.
-  - `<tumor_dna_id>.viridian.genome_support.tsv`: Tumor DNA sample read support per virus genome.
-  - `<tumor_dna_id>.viridian.integrations.tsv`: Tumor DNA sample viral integration SVs.
-  - `<tumor_dna_id>.viridian.candidates.fasta`: Tumor DNA sample candidate viral reads.
-  - `<tumor_dna_id>.viridian.all.bam`: Candidate viral read alignments to all virus genomes.
-  - `<tumor_dna_id>.viridian.representative.bam`: Candidate viral read alignments to representative virus genomes.
-  - `<tumor_dna_id>.viridian.manifest.tsv`: Run configuration.
+- `<group_id>/virusbreakend/`
+  - `<tumor_dna_id>.virusbreakend.vcf`: Tumor DNA sample viral integration sites.
+  - `<tumor_dna_id>.virusbreakend.vcf.summary.tsv`: Tumor DNA sample analysis summary file.
 
 </details>
 
-[Viridian](https://github.com/hartwigmedical/hmftools/tree/master/viridian) detects oncoviruses and their integration
-sites in tumor samples, and decides which to report.
+[VIRUSBreakend](https://github.com/PapenfussLab/gridss/blob/master/VIRUSBreakend_Readme.md) detects the presence of
+oncoviruses and integration sites in tumor samples.
+
+#### VirusInterpreter
+
+<details markdown="1">
+<summary>Output files</summary>
+
+- `<group_id>/virusinterpreter/`
+  - `<tumor_dna_id>.virus.annotated.tsv`: Processed oncoviral call/annotation data.
+
+</details>
+
+[VirusInterpreter](https://github.com/hartwigmedical/hmftools/tree/master/virus-interpreter) performs post-processing
+for VIRUSBreakend calls to provide higher-level interpretation of data.
 
 ### Telomere characterisation
 

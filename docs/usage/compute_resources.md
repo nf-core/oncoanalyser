@@ -57,7 +57,8 @@ process {
     withName: 'SAGE.*'           { memory = 72.GB; cpus = 16; disk = 375.GB }
     withName: 'TEAL_PREP'        { memory = 72.GB; cpus = 16; disk = 375.GB }
     withName: 'TEAL_PIPELINE'    { memory = 32.GB; cpus = 8 ; disk = 375.GB }
-    withName: 'VIRIDIAN'         { memory = 32.GB; cpus = 16; disk = 375.GB }
+    withName: 'VIRUSBREAKEND'    { memory = 64.GB; cpus = 16; disk = 375.GB }
+    withName: 'VIRUSINTERPRETER' { memory = 8.GB ; cpus = 2 }
     withName: 'WISP'             { memory = 16.GB; cpus = 4 ; disk = 375.GB }
 }
 ```

@@ -718,7 +718,7 @@ workflow TARGETED {
         ch_chord_out = ch_inputs.map { meta -> [meta, []] }
         ch_cuppa_out = ch_inputs.map { meta -> [meta, []] }
         ch_sigs_out = ch_inputs.map { meta -> [meta, []] }
-        ch_viridian_out = ch_inputs.map { meta -> [meta, []] }
+        ch_virusinterpreter_out = ch_inputs.map { meta -> [meta, []] }
 
         ORANGE_REPORTING(
             ch_sage_somatic_out,
@@ -731,7 +731,7 @@ workflow TARGETED {
             ch_linx_somatic_out,
             ch_linx_somatic_visualiser_out,
             ch_linx_germline_out,
-            ch_viridian_out,
+            ch_virusinterpreter_out,
             ch_chord_out,
             ch_sigs_out,
             ch_lilac_out,

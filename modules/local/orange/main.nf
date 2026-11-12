@@ -19,7 +19,7 @@ process ORANGE {
         path(linx_annotation_dir_somatic),
         path(linx_plot_dir_reportable_somatic),
         path(linx_annotation_dir_germline),
-        path(viridian_dir),
+        path(virusinterpreter_dir),
         path(chord_dir),
         path(sigs_dir),
         path(lilac_dir),
@@ -65,7 +65,7 @@ process ORANGE {
     def linx_germline_dir_arg = linx_annotation_dir_germline ? "-linx_germline_dir ${linx_annotation_dir_germline}" : ''
 
     def sage_plot_dir_arg = sage_plot_dir_somatic ? "-sage_plot_dir ${sage_plot_dir_somatic}" : ''
-    def virus_dir_arg = viridian_dir ? "-virus_dir ${viridian_dir}" : ''
+    def virus_dir_arg = virusinterpreter_dir ? "-virus_dir ${virusinterpreter_dir}" : ''
     def lilac_dir_arg = lilac_dir ? "-lilac_dir ${lilac_dir}" : ''
     def chord_dir_arg = chord_dir ? "-chord_dir ${chord_dir}" : ''
     def sigs_dir_arg = sigs_dir ? "-sigs_dir ${sigs_dir}" : ''
