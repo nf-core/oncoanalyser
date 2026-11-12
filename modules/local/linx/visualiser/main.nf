@@ -28,10 +28,6 @@ process LINX_VISUALISER {
 
     def log_level_arg = task.ext.log_level ? "-log_level ${task.ext.log_level}" : ''
 
-    def amber_dir_arg = amber_dir ? "-amber_dir ${amber_dir}" : ''
-    def cobalt_dir_arg = cobalt_dir ? "-cobalt_dir ${cobalt_dir}" : ''
-    def purple_dir_arg = purple_dir ? "-purple_dir ${purple_dir}" : ''
-
     """
     # NOTE(SW): the output plot directories are always required for ORANGE, which is straightfoward to handle with POSIX
     # fs but more involved with FusionFS since it will not write empty directories to S3. A placeholder file can't be
@@ -57,9 +53,9 @@ process LINX_VISUALISER {
         ${args} \\
         -sample ${meta.sample_id} \\
         -vis_file_dir ${linx_annotation_dir} \\
-        ${amber_dir_arg} \\
-        ${cobalt_dir_arg} \\
-        ${purple_dir_arg} \\
+        -amber_dir ${amber_dir} \\
+        -cobalt_dir ${cobalt_dir} \\
+        -purple_dir ${purple_dir} \\
         -ref_genome_version ${genome_ver} \\
         -ensembl_data_dir ${ensembl_data_resources} \\
         -circos \$(which circos) \\
@@ -84,9 +80,9 @@ process LINX_VISUALISER {
         ${args2} \\
         -sample ${meta.sample_id} \\
         -vis_file_dir ${linx_annotation_dir} \\
-        ${amber_dir_arg} \\
-        ${cobalt_dir_arg} \\
-        ${purple_dir_arg} \\
+        -amber_dir ${amber_dir} \\
+        -cobalt_dir ${cobalt_dir} \\
+        -purple_dir ${purple_dir} \\
         -ref_genome_version ${genome_ver} \\
         -ensembl_data_dir ${ensembl_data_resources} \\
         -circos \$(which circos) \\
