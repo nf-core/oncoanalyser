@@ -11,8 +11,8 @@ process ORANGE {
     tuple val(meta),
         path(sage_dir_somatic, stageAs: 'sage_somatic'),
         path(sage_dir_germline, stageAs: 'sage_germline'),
-        path(smlv_vcf_somatic),
         path(sage_plot_dir_somatic),
+        path(sage_append_rna_vcf),
         path(purple_dir),
         path(qsee_dir),
         path(linx_annotation_dir_somatic),
@@ -78,9 +78,9 @@ process ORANGE {
     """
     echo "${pipeline_version_str}" > pipeline_version.txt
 
-    # When WTS data is present, ORANGE expects the somatic SAGE VCF to have appended WTS data; CS indicates this should
-    # occur after PURPLE. Since ORANGE only collects the somatic SAGE VCF from the PURPLE output directory, we must
-    # prepare accordingly
+    # When RNA data is present, Orange expects the Purple somatic VCF to have tumor RNA data appended by Sage append.
+    # Orange only reads this VCF from the Purple directory, so copy the Purple directory and replace the somatic VCF
+    # with the Sage append VCF
 
     # NOTES(SW): Use of symlinks was causing reliability issues on HPC with Singularity, switched to full file copy instead
 
@@ -94,7 +94,7 @@ process ORANGE {
         fi
 
         cp -rL ${purple_dir} \${purple_dir_local}/
-        cp -L ${smlv_vcf_somatic} \${purple_dir_local}/${meta.tumor_id}.purple.somatic.vcf.gz;
+        cp -L ${sage_append_rna_vcf} \${purple_dir_local}/${meta.tumor_id}.purple.somatic.vcf.gz;
 
     fi
 

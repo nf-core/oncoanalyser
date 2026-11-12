@@ -718,8 +718,8 @@ workflow TARGETED {
         ORANGE_REPORTING(
             ch_sage_somatic_out,
             ch_sage_germline_out,
-            ch_sage_append_out,
             ch_sage_somatic_visualiser_out,
+            ch_sage_append_out,
             ch_purple_out,
             ch_qsee_out,
             ch_linx_somatic_out,

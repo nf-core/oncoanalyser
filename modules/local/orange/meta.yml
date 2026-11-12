@@ -20,12 +20,12 @@ input:
   - sage_dir_germline:
       type: directory
       description: SAGE germline output directory (optional)
-  - smlv_vcf_somatic:
-      type: file
-      description: Small somatic variant VCF file (annotated with RNA data) (optional)
   - sage_plot_dir_somatic:
       type: file
       description: SAGE somatic plot directory
+  - sage_append_rna_vcf:
+      type: file
+      description: SAGE append VCF, i.e. Purple somatic VCF annotated with tumor RNA data (optional)
   - purple_dir:
       type: directory
       description: PURPLE output directory
