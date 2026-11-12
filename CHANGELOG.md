@@ -3,6 +3,33 @@
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/) and this project mostly adheres to
 [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+
+<!-- TODO: add the PR number and link -->
+
+- Replace VIRUSBreakend and Virus Interpreter with Viridian
+  - Run oncovirus detection on all sequencing platforms
+
+### Breaking change
+
+- Removed the `virusinterpreter` process and samplesheet input type. Use `viridian` instead.
+
+### Software dependencies
+
+<!-- TODO: set the ORANGE and CUPPA versions once released -->
+
+| Dependency          | Old version | New version |
+| ------------------- | ----------- | ----------- |
+| `CUPPA`             | 2.5.1       | 2.6         |
+| `ORANGE`            | 5.0.1       | 5.1         |
+| `Viridian`          | -           | 1.0         |
+| `VIRUSBreakend`     | 2.13.2      | -           |
+| `Virus Interpreter` | 1.7.2       | -           |
+
+### Reference data
+
+<!-- TODO: set the Hartwig pipeline resources version that adds the Viridian resources -->
+
 ## [[3.0.0](https://github.com/nf-core/oncoanalyser/releases/tag/3.0.0)] Scarlet Honeyeater - 2026-09-01
 
 - [314](https://github.com/nf-core/oncoanalyser/pull/314) - Other additions and fixes

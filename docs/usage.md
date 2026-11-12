@@ -996,14 +996,14 @@ process running.
 ### Excluding processes
 
 Most of the major components in `oncoanalyser` can be skipped using the `--processes_exclude` argument. You may want to
-skip resource intensive processes like Virusbreakend, or ORANGE because you do not require the report, for example:
+skip resource intensive processes like TEAL, or ORANGE because you do not require the report, for example:
 
 ```bash
 nextflow run nf-core/oncoanalyser \
   -revision 3.0.0 \
   -profile docker \
   --mode wgts \
-  --processes_exclude virusinterpreter,orange \
+  --processes_exclude teal,orange \
   --genome GRCh38_hmf \
   --input samplesheet.csv \
   --outdir output/

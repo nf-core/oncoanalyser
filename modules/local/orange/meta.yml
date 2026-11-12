@@ -44,9 +44,9 @@ input:
   - linx_annotation_dir_germline:
       type: directory
       description: LINX germline annotation output directory (optional)
-  - virusinterpreter_dir:
+  - viridian_dir:
       type: directory
-      description: Virus Interpreter output directory (optional)
+      description: Viridian output directory (optional)
   - chord_dir:
       type: directory
       description: CHORD output directory (optional)
