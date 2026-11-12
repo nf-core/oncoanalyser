@@ -56,7 +56,6 @@ class Constants {
         DNA_ALIGNMENT,
         FAI,
         FASTA,
-        GRIDSS_INDEX,
         HMFTOOLS,
         IMG,
         PANEL,
