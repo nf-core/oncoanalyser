@@ -7,10 +7,11 @@ include { PAVE_PON_PANEL_CREATION } from '../../../modules/local/pave/pon_creati
 workflow PAVE_PON_CREATION {
     take:
     // Sample data
-    ch_sage_dir_somatic // channel: [mandatory] [ meta, sage_dir ]
+    ch_sage_dir_somatic         // channel: [mandatory] [ meta, sage_dir ]
 
     // Reference data
-    genome_version      // channel: [mandatory] genome version
+    genome_version              // channel: [mandatory] genome version
+    sage_known_hotspots_somatic // channel: [mandatory] /path/to/sage_known_hotspots_somatic
 
     main:
     // Create process input channel
@@ -31,5 +32,6 @@ workflow PAVE_PON_CREATION {
     PAVE_PON_PANEL_CREATION(
         ch_pave_inputs,
         genome_version,
+        sage_known_hotspots_somatic,
     )
 }

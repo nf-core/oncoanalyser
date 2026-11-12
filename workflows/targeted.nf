@@ -74,9 +74,12 @@ workflow TARGETED {
     def panel_data = PREPARE_REFERENCE.out.panel_data
 
     // Configure selectable reference data and inputs
-    def hmf_data_pons = Utils.getSequencingPlatformPons(hmf_data, params.sequencing_platform, log)
+    def hmf_data_seq_platform = Utils.getSequencingPlatformResources(hmf_data, params.sequencing_platform, log)
     def driver_gene_panel = params.driver_gene_panel != null ? file(params.driver_gene_panel) : panel_data.driver_gene_panel
-    def msi_model_error_rates = panel_data.msi_model_error_rates != null ? panel_data.msi_model_error_rates : hmf_data.msi_model_error_rates
+
+    // NOTE(LN): panel_data is a channel so its entries cannot be null checked directly; check the panel config instead
+    def panel_data_paths = params.panel_data_paths[params.panel.toLowerCase()][params.genome_version.toString()]
+    def msi_model_error_rates = panel_data_paths.msi_model_error_rates ? panel_data.msi_model_error_rates : hmf_data.msi_model_error_rates_panel
 
     def isofox_counts = params.isofox_counts != null ? file(params.isofox_counts) : panel_data.isofox_counts
     def isofox_gc_ratios = params.isofox_gc_ratios != null ? file(params.isofox_gc_ratios) : panel_data.isofox_gc_ratios
@@ -190,7 +193,7 @@ workflow TARGETED {
             ref_data.genome_dict,
             hmf_data.unmap_regions_dna,
             hmf_data.msi_jitter_sites,
-            hmf_data.msi_model_coefficients,
+            hmf_data_seq_platform.msi_model_coefs,
             msi_model_error_rates,
             params.sequencing_platform,
             true,  // targeted_mode
@@ -265,6 +268,7 @@ workflow TARGETED {
             hmf_data.isofox_excluded_regions,
             hmf_data.isofox_gene_distribution,
             hmf_data.isofox_alt_sj_distribution,
+            hmf_data.isofox_fusion_cohort,
             isofox_counts,
             isofox_gc_ratios,
             isofox_tpm_norm,
@@ -356,8 +360,8 @@ workflow TARGETED {
             ref_data.genome_dict,
             ref_data.genome_img,
             hmf_data.known_fusions,
-            hmf_data_pons.esvee_breakends,
-            hmf_data_pons.esvee_breakpoints,
+            hmf_data_seq_platform.esvee_pon_breakends,
+            hmf_data_seq_platform.esvee_pon_breakpoints,
             hmf_data.decoy_sequences_image,
             hmf_data.saga_germline_variants,
             hmf_data.saga_germline_variants_fai,
@@ -394,7 +398,7 @@ workflow TARGETED {
             ref_data.genome_version,
             ref_data.genome_fai,
             ref_data.genome_dict,
-            hmf_data_pons.sage,
+            hmf_data_seq_platform.sage_pon,
             hmf_data.sage_known_hotspots_somatic,
             hmf_data.sage_known_hotspots_germline,
             hmf_data.sage_highconf_regions,
@@ -433,7 +437,7 @@ workflow TARGETED {
             ref_data.genome_version,
             ref_data.genome_fai,
             panel_data.pon_artefacts,
-            hmf_data_pons.sage,
+            hmf_data_seq_platform.sage_pon,
             hmf_data.sage_blocklist_regions,
             hmf_data.sage_blocklist_sites,
             hmf_data.clinvar_annotations,
@@ -568,7 +572,7 @@ workflow TARGETED {
             ref_data.genome_version,
             ref_data.genome_fai,
             ref_data.genome_dict,
-            hmf_data_pons.sage,
+            hmf_data_seq_platform.sage_pon,
             hmf_data.sage_known_hotspots_somatic,
             hmf_data.sage_highconf_regions,
             hmf_data.ensembl_data_resources,
