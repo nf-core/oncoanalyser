@@ -553,10 +553,6 @@ class WorkflowMain {
             ]
         }
 
-        if (ref_data_types.contains(Constants.RefDataType.WGS)) {
-            ref_data_types += [Constants.RefDataType.GRIDSS_INDEX]
-        }
-
         if (ref_data_types.contains(Constants.RefDataType.TARGETED)) {
             ref_data_types += [Constants.RefDataType.PANEL]
         }
@@ -569,7 +565,6 @@ class WorkflowMain {
         def require_bwamem2_index = ref_data_types.contains(Constants.RefDataType.BWAMEM2_INDEX) || ref_data_types.contains(Constants.RefDataType.DNA_ALIGNMENT)
         def require_bwamem2_index_rna = ref_data_types.contains(Constants.RefDataType.BWAMEM2_INDEX_RNA) || ref_data_types.contains(Constants.RefDataType.RNA_ALIGNMENT)
 
-        def require_gridss_index = ref_data_types.contains(Constants.RefDataType.GRIDSS_INDEX)
         def require_hmftools_data = ref_data_types.contains(Constants.RefDataType.HMFTOOLS)
         def require_panel_data = ref_data_types.contains(Constants.RefDataType.PANEL)
 
@@ -594,7 +589,6 @@ class WorkflowMain {
             require_bwamem2_index: require_bwamem2_index,
             require_bwamem2_index_rna: require_bwamem2_index_rna,
 
-            require_gridss_index: require_gridss_index,
             require_hmftools_data: require_hmftools_data,
             require_panel_data: require_panel_data,
         ]

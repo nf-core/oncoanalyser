@@ -56,7 +56,6 @@ workflow WGTS {
     // Check input path parameters to see if they exist
     def checkPathParamList = [
         params.driver_gene_panel,
-        params.gridss_config,
         params.isofox_counts,
         params.isofox_gc_ratios,
     ]
@@ -81,7 +80,6 @@ workflow WGTS {
     // Configure selectable reference data and inputs
     def hmf_data_seq_platform = Utils.getSequencingPlatformResources(hmf_data, params.sequencing_platform, log)
     def driver_gene_panel = params.driver_gene_panel != null ? file(params.driver_gene_panel) : hmf_data.driver_gene_panel
-    def gridss_config = params.gridss_config != null ? file(params.gridss_config) : hmf_data.gridss_config
 
     def isofox_counts = params.isofox_counts != null ? file(params.isofox_counts) : hmf_data.isofox_counts
     def isofox_gc_ratios = params.isofox_gc_ratios != null ? file(params.isofox_gc_ratios) : hmf_data.isofox_gc_ratios

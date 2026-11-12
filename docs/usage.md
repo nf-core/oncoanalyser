@@ -529,12 +529,11 @@ list, e.g. `--ref_data_types wgs,dna_alignment`
 
 | Value                              | Description                                                                                                                         | Combination of                                            |
 | :--------------------------------- | :---------------------------------------------------------------------------------------------------------------------------------- | :-------------------------------------------------------- |
-| `wgs`                              | Ref data for WGS analysis from alignments                                                                                           | `fasta`, `fai`, `dict`, `img`, `hmftools`, `gridss_index` |
+| `wgs`                              | Ref data for WGS analysis from alignments                                                                                           | `fasta`, `fai`, `dict`, `img`, `hmftools`                 |
 | `wts`                              | Ref data for WTS analysis from alignments                                                                                           | `fasta`, `fai`, `dict`, `img`, `hmftools`                 |
 | `targeted`                         | Ref data for targeted analysis from alignments                                                                                      |                                                           |
 | `bwamem2_index` or `dna_alignment` | BWA-MEM2 index. Required if aligning DNA FASTQs                                                                                     |                                                           |
 | `star_index` or `rna_alignment`    | STAR index. Required if aligning RNA FASTQs                                                                                         |                                                           |
-| `gridss_index`                     | GRIDSS index. Required if running Virusbreakend/Virusinterpreter                                                                    |                                                           |
 | `hmftools`                         | [WiGiTS](https://github.com/hartwigmedical/hmftools) resources files                                                                |                                                           |
 | `panel`                            | Panel ref data. Please also specify arg `--panel <name>`, e.g. `--panel tso500` (must be a [supported](#targeted-sequencing) panel) |                                                           |
 
@@ -560,7 +559,6 @@ params {
             dict          = "/path/to/GRCh38_masked_exclusions_alts_hlas.fasta.dict"
             img           = "/path/to/GRCh38_masked_exclusions_alts_hlas.fasta.img"
             bwamem2_index = "/path/to/bwa-mem2_index/"
-            gridss_index  = "/path/to/gridss_index/"
             star_index    = "/path/to/star_index/"
         }
     }
@@ -623,7 +621,7 @@ nextflow run nf-core/oncoanalyser \
   -config genome.custom.config \
   -profile docker \
   --mode prepare_reference \
-  --ref_data_types wgs,bwamem2_index,gridss_index
+  --ref_data_types wgs,bwamem2_index
   --genome CustomGenome \
   --genome_version <37|38> \
   --genome_type <alt|no_alt> \
@@ -660,7 +658,6 @@ _GRCh37 genome (Hartwig): `GRCh37_hmf`_
 | FASTA seq dictionary | [Homo_sapiens.GRCh37.GATK.illumina.fasta.dict](https://data.oncoanalyser.com/r2/reference/dist/v1/genomes/GRCh37_hmf/26.1/samtools_index-1.16/Homo_sapiens.GRCh37.GATK.illumina.fasta.dict)        |
 | BWA-MEM index image  | [Homo_sapiens.GRCh37.GATK.illumina.fasta.img](https://data.oncoanalyser.com/r2/reference/dist/v1/genomes/GRCh37_hmf/26.1/bwa_index_image-gatk-4.6.1.0/Homo_sapiens.GRCh37.GATK.illumina.fasta.img) |
 | BWA-MEM2 index       | [bwa-mem2_index-2.2.1.tar.gz](https://data.oncoanalyser.com/r2/reference/dist/v1/genomes/GRCh37_hmf/26.1/bwa-mem2_index-2.2.1.tar.gz)                                                              |
-| GRIDSS index         | [gridss_index-2.13.2.tar.gz](https://data.oncoanalyser.com/r2/reference/dist/v1/genomes/GRCh37_hmf/26.1/gridss_index-2.13.2.tar.gz)                                                                |
 | STAR index           | [star_index-gencode_19-2.7.3a.tar.gz](https://data.oncoanalyser.com/r2/reference/dist/v1/genomes/GRCh37_hmf/26.1/star_index-gencode_19-2.7.3a.tar.gz)                                              |
 | WiGiTS data          | [hmf_pipeline_resources.37_v3.0.0--8.tar.gz](https://data.oncoanalyser.com/r2/reference/dist/v1/hartwig/pipeline_resources/hmf_pipeline_resources.37_v3.0.0--8.tar.gz)                             |
 | TSO500 panel data    | [hmf_panel_resources.tso500.37_v3.0.0--8.tar.gz](https://data.oncoanalyser.com/r2/reference/dist/v1/hartwig/panel_resources/hmf_panel_resources.tso500.37_v3.0.0--8.tar.gz)                        |
@@ -674,7 +671,6 @@ _GRCh38 genome (Hartwig): `GRCh38_hmf`_
 | FASTA seq dictionary | [GRCh38_masked_exclusions_alts_hlas.fasta.dict](https://data.oncoanalyser.com/r2/reference/dist/v1/genomes/GRCh38_hmf/26.1/samtools_index-1.16/GRCh38_masked_exclusions_alts_hlas.fasta.dict)        |
 | BWA-MEM index image  | [GRCh38_masked_exclusions_alts_hlas.fasta.img](https://data.oncoanalyser.com/r2/reference/dist/v1/genomes/GRCh38_hmf/26.1/bwa_index_image-gatk-4.6.1.0/GRCh38_masked_exclusions_alts_hlas.fasta.img) |
 | BWA-MEM2 index       | [bwa-mem2_index-2.2.1.tar.gz](https://data.oncoanalyser.com/r2/reference/dist/v1/genomes/GRCh38_hmf/26.1/bwa-mem2_index-2.2.1.tar.gz)                                                                |
-| GRIDSS index         | [gridss_index-2.13.2.tar.gz](https://data.oncoanalyser.com/r2/reference/dist/v1/genomes/GRCh38_hmf/26.1/gridss_index-2.13.2.tar.gz)                                                                  |
 | STAR index           | [star_index-gencode_38-2.7.3a.tar.gz](https://data.oncoanalyser.com/r2/reference/dist/v1/genomes/GRCh38_hmf/26.1/star_index-gencode_38-2.7.3a.tar.gz)                                                |
 | WiGiTS data          | [hmf_pipeline_resources.38_v3.0.0--8.tar.gz](https://data.oncoanalyser.com/r2/reference/dist/v1/hartwig/pipeline_resources/hmf_pipeline_resources.38_v3.0.0--8.tar.gz)                               |
 

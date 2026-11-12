@@ -177,7 +177,7 @@ def get_dir_filepaths(meta, d, target_dir=null) {
 
 def get_command_log_filepath(data) {
 
-    def other_logs = ['gatk4_bwa_index_image', 'gridss_index', 'bwa_index', 'bwamem2_index', 'samtools_dict', 'samtools_faidx', 'multiqc']
+    def other_logs = ['gatk4_bwa_index_image', 'bwamem2_index', 'samtools_dict', 'samtools_faidx', 'multiqc']
     def panel_logs = ['cobalt_panel_normalisation', 'pave_pon_panel_creation', 'isofox_panel_normalisation']
 
     def (meta, name, fps_all) = data

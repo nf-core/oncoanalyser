@@ -9,10 +9,12 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/) 
 
 - Replace VIRUSBreakend and Virus Interpreter with Viridian
   - Run oncovirus detection on all sequencing platforms
+  - Remove the GRIDSS index from reference data preparation
 
 ### Breaking change
 
 - Removed the `virusinterpreter` process and samplesheet input type. Use `viridian` instead.
+- Removed the GRIDSS index reference data type.
 
 ### Software dependencies
 
@@ -29,6 +31,17 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/) 
 ### Reference data
 
 <!-- TODO: set the Hartwig pipeline resources version that adds the Viridian resources -->
+
+| Name             | Old version | New version |
+| ---------------- | ----------- | ----------- |
+| `GRIDSS index`   | 2.13.2      | -           |
+
+### Parameters
+
+| Old name                       | New name | Note    |
+| ------------------------------ | -------- | ------- |
+| `gridss_config`                | -        | Removed |
+| `ref_data_genome_gridss_index` | -        | Removed |
 
 ## [[3.0.0](https://github.com/nf-core/oncoanalyser/releases/tag/3.0.0)] Scarlet Honeyeater - 2026-09-01
 
