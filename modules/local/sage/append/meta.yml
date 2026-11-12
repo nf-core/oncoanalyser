@@ -50,6 +50,9 @@ input:
   - targeted_mode:
       type: boolean
       description: Flag indicating whether targeted mode is set
+  - write_frag_lengths:
+      type: boolean
+      description: Flag indicating whether to write fragment lengths
 output:
   - meta:
       type: map

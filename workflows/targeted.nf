@@ -25,7 +25,7 @@ include { READ_ALIGNMENT_DNA       } from '../subworkflows/local/read_alignment_
 include { READ_ALIGNMENT_RNA       } from '../subworkflows/local/read_alignment_rna'
 include { READ_UMI_PROCESSING      } from '../subworkflows/local/read_umi_processing'
 include { REDUX_PROCESSING         } from '../subworkflows/local/redux_processing'
-include { SAGE_APPEND              } from '../subworkflows/local/sage_append'
+include { SAGE_APPEND_RNA          } from '../subworkflows/local/sage_append_rna'
 include { SAGE_CALLING             } from '../subworkflows/local/sage_calling'
 include { SAGE_PLOTTING            } from '../subworkflows/local/sage_plotting'
 
@@ -527,31 +527,26 @@ workflow TARGETED {
     // SUBWORKFLOW: Append read data to SAGE VCF
     //
     // channel: [ meta, sage_append_dir ]
-    ch_sage_append_somatic_out = channel.empty()
-    ch_sage_append_germline_out = channel.empty()
+    ch_sage_append_out = channel.empty()
     if (run_config.stages.sage_append) {
 
-        SAGE_APPEND(
+        SAGE_APPEND_RNA(
             ch_inputs,
             ch_purple_out,
-            ch_inputs.map { meta -> [meta, []] },  // ch_redux_dir_tumor
             ch_redux_rna_out,
             ref_data.genome_fasta,
             ref_data.genome_version,
             ref_data.genome_fai,
             ref_data.genome_dict,
             params.sequencing_platform,
-            true,  // enable_germline
             true,  // targeted_mode
         )
 
-        ch_sage_append_somatic_out = ch_sage_append_somatic_out.mix(SAGE_APPEND.out.somatic_dir)
-        ch_sage_append_germline_out = ch_sage_append_germline_out.mix(SAGE_APPEND.out.germline_dir)
+        ch_sage_append_out = ch_sage_append_out.mix(SAGE_APPEND_RNA.out.sage_append_dir)
 
     } else {
 
-        ch_sage_append_somatic_out = ch_inputs.map { meta -> [meta, []] }
-        ch_sage_append_germline_out = ch_inputs.map { meta -> [meta, []] }
+        ch_sage_append_out = ch_inputs.map { meta -> [meta, []] }
 
     }
 
@@ -723,9 +718,8 @@ workflow TARGETED {
         ORANGE_REPORTING(
             ch_sage_somatic_out,
             ch_sage_germline_out,
-            ch_sage_append_somatic_out,
-            ch_sage_append_germline_out,
             ch_sage_somatic_visualiser_out,
+            ch_sage_append_out,
             ch_purple_out,
             ch_qsee_out,
             ch_linx_somatic_out,
