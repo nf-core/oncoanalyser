@@ -1,0 +1,7 @@
+name: bwa-mem3_mem_dna
+channels:
+  - conda-forge
+  - bioconda
+dependencies:
+  - bioconda::bwa-mem3=0.15.0
+  - bioconda::sambamba=1.0.1=he614052_4
