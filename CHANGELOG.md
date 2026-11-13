@@ -7,7 +7,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/) 
 
 <!-- TODO: add the PR number and link -->
 
-- Replace BWA-MEM2 with BWA-MEM3 for DNA read alignment
+- Replace BWA-MEM2 with BWA-MEM3 for DNA and RNA read alignment
   - Run BWA-MEM3 in BWA-MEM2 compatibility mode, which writes the same alignments and uses the existing BWA-MEM2 index
   - Require x86 CPUs with AVX2 for alignment
 

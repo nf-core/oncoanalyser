@@ -1,17 +1,17 @@
-name: bwa-mem2_mem_rna
-description: The mem alignment algorithm of bwa-mem2, for RNA reads
+name: bwa-mem3_mem_rna
+description: The mem alignment algorithm of bwa-mem3 in bwa-mem2 compatibility mode, for RNA reads
 keywords:
   - bwa
   - mem
   - read alignment
-  - bwa-mem2
+  - bwa-mem3
   - rna
 tools:
-  - bwa-mem2:
-      description: Burrow-Wheeler Aligner for short-read alignment
-      homepage: https://github.com/bwa-mem2/bwa-mem2
-      documentation: https://github.com/bwa-mem2/bwa-mem2
-      licence: ["MIT"]
+  - bwa-mem3:
+      description: Burrow-Wheeler Aligner for short-read alignment, derived from bwa-mem2
+      homepage: https://github.com/fg-labs/bwa-mem3
+      documentation: https://bwa-mem3.readthedocs.io
+      licence: ["MIT", "Apache-2.0", "Zlib"]
 input:
   - meta:
       type: map
@@ -39,7 +39,7 @@ output:
       description: |
         Groovy Map containing sample information
         e.g. [id: 'sample_id']
-  - bwamem2_align_rna_bam:
+  - bwamem3_align_rna_bam:
       type: file
       description: |
         Name-grouped, unindexed BAM file; TARS consumes read groups so the BAM must not be
