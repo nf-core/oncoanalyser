@@ -204,11 +204,6 @@
                     "default": false,
                     "fa_icon": "fas fa-chart-bar"
                 },
-                "gridss_config": {
-                    "type": "string",
-                    "description": "Path to GRIDSS configuration file.",
-                    "fa_icon": "fas fa-cog"
-                },
                 "hmftools_log_level": {
                     "type": "string",
                     "enum": ["ALL", "TRACE", "DEBUG", "INFO", "WARN", "ERROR", "FATAL"],
@@ -309,11 +304,6 @@
                 "ref_data_genome_img": {
                     "type": "string",
                     "description": "Path to reference genome img.",
-                    "fa_icon": "far fa-file-code"
-                },
-                "ref_data_genome_gridss_index": {
-                    "type": "string",
-                    "description": "Path to reference genome GRIDSS index.",
                     "fa_icon": "far fa-file-code"
                 },
                 "ref_data_genome_fasta_rna": {

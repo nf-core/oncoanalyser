@@ -11,7 +11,7 @@ workflow CUPPA_PREDICTION {
     ch_isofox_dir           // channel: [mandatory] [ meta, isofox_dir ]
     ch_purple_dir           // channel: [mandatory] [ meta, purple_dir ]
     ch_linx_annotation_dir  // channel: [mandatory] [ meta, linx_annotation_dir ]
-    ch_virusinterpreter_dir // channel: [mandatory] [ meta, virusinterpreter_dir ]
+    ch_viridian_dir         // channel: [mandatory] [ meta, viridian_dir ]
 
     // Reference data
     genome_version          // channel: [mandatory] genome version
@@ -20,24 +20,24 @@ workflow CUPPA_PREDICTION {
 
     main:
     // Select input sources then sort
-    // channel: runnable: [ meta, isofox_dir, purple_dir, linx_annotation_dir, virusinterpreter_dir ]
+    // channel: runnable: [ meta, isofox_dir, purple_dir, linx_annotation_dir, viridian_dir ]
     // channel: skip: [ meta ]
     ch_inputs_sorted = WorkflowOncoanalyser.groupByMeta(
         ch_isofox_dir,
         ch_purple_dir,
         ch_linx_annotation_dir,
-        ch_virusinterpreter_dir,
+        ch_viridian_dir,
     )
-        .map { meta, isofox_dir, purple_dir, linx_annotation_dir, virusinterpreter_dir ->
+        .map { meta, isofox_dir, purple_dir, linx_annotation_dir, viridian_dir ->
             return [
                 meta,
                 Utils.selectCurrentOrExisting(isofox_dir, meta, Constants.INPUT.ISOFOX_DIR),
                 Utils.selectCurrentOrExisting(purple_dir, meta, Constants.INPUT.PURPLE_DIR),
                 Utils.selectCurrentOrExisting(linx_annotation_dir, meta, Constants.INPUT.LINX_ANNO_DIR_TUMOR),
-                Utils.selectCurrentOrExisting(virusinterpreter_dir, meta, Constants.INPUT.VIRUSINTERPRETER_DIR),
+                Utils.selectCurrentOrExisting(viridian_dir, meta, Constants.INPUT.VIRIDIAN_DIR),
             ]
         }
-        .branch { meta, isofox_dir, purple_dir, linx_annotation_dir, virusinterpreter_dir ->
+        .branch { meta, isofox_dir, purple_dir, linx_annotation_dir, viridian_dir ->
 
             // Run the following:
             //   - tumor DNA and normal DNA
@@ -64,10 +64,10 @@ workflow CUPPA_PREDICTION {
         }
 
     // Create process input channel
-    // channel: sample_data: [ meta_cuppa, isofox_dir, purple_dir, linx_annotation_dir, virusinterpreter_dir ]
+    // channel: sample_data: [ meta_cuppa, isofox_dir, purple_dir, linx_annotation_dir, viridian_dir ]
     // channel: categories: [ categories ]
     ch_cuppa_inputs = ch_inputs_sorted.runnable
-        .multiMap { meta, isofox_dir, purple_dir, linx_annotation_dir, virusinterpreter_dir ->
+        .multiMap { meta, isofox_dir, purple_dir, linx_annotation_dir, viridian_dir ->
 
             def meta_cuppa = [
                 key: meta.group_id,
@@ -113,7 +113,7 @@ workflow CUPPA_PREDICTION {
 
                 purple_dir = []
                 linx_annotation_dir = []
-                virusinterpreter_dir = []
+                viridian_dir = []
 
             } else {
 
@@ -121,7 +121,7 @@ workflow CUPPA_PREDICTION {
 
             }
 
-            sample_data: [meta_cuppa, isofox_dir, purple_dir, linx_annotation_dir, virusinterpreter_dir]
+            sample_data: [meta_cuppa, isofox_dir, purple_dir, linx_annotation_dir, viridian_dir]
             categories: categories
     }
 

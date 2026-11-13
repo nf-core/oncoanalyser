@@ -33,7 +33,7 @@ include { SAGE_CALLING          } from '../subworkflows/local/sage_calling'
 include { SAGE_PLOTTING         } from '../subworkflows/local/sage_plotting'
 include { SIGS_FITTING          } from '../subworkflows/local/sigs_fitting'
 include { TEAL_CHARACTERISATION } from '../subworkflows/local/teal_characterisation'
-include { VIRUSBREAKEND_CALLING } from '../subworkflows/local/virusbreakend_calling'
+include { VIRIDIAN_CALLING      } from '../subworkflows/local/viridian_calling'
 
 include { softwareVersionsToYAML } from '../subworkflows/nf-core/utils_nfcore_pipeline'
 
@@ -56,7 +56,6 @@ workflow WGTS {
     // Check input path parameters to see if they exist
     def checkPathParamList = [
         params.driver_gene_panel,
-        params.gridss_config,
         params.isofox_counts,
         params.isofox_gc_ratios,
     ]
@@ -81,7 +80,6 @@ workflow WGTS {
     // Configure selectable reference data and inputs
     def hmf_data_seq_platform = Utils.getSequencingPlatformResources(hmf_data, params.sequencing_platform, log)
     def driver_gene_panel = params.driver_gene_panel != null ? file(params.driver_gene_panel) : hmf_data.driver_gene_panel
-    def gridss_config = params.gridss_config != null ? file(params.gridss_config) : hmf_data.gridss_config
 
     def isofox_counts = params.isofox_counts != null ? file(params.isofox_counts) : hmf_data.isofox_counts
     def isofox_gc_ratios = params.isofox_gc_ratios != null ? file(params.isofox_gc_ratios) : hmf_data.isofox_gc_ratios
@@ -751,36 +749,29 @@ workflow WGTS {
     }
 
     //
-    // SUBWORKFLOW: Run VIRUSBreakend and Virus Interpreter to quantify viral content
+    // SUBWORKFLOW: Run Viridian to detect oncoviruses
     //
-    // channel: [ meta, virusinterpreter_dir ]
-    ch_virusinterpreter_out = channel.empty()
+    // channel: [ meta, viridian_dir ]
+    ch_viridian_out = channel.empty()
+    if (run_config.stages.viridian) {
 
-    // NOTE(LN): Virusbreakend currently broken for SBX and Ultima
-    def sequencing_platform = Utils.getEnumFromString(params.sequencing_platform, Constants.SequencingPlatform)
-    if (run_config.stages.virusinterpreter && sequencing_platform == Constants.SequencingPlatform.ILLUMINA) {
-
-        VIRUSBREAKEND_CALLING(
+        VIRIDIAN_CALLING(
             ch_inputs,
             ch_redux_tumor_out,
+            ch_esvee_out,
             ch_bamtools_tumor_out,
             ch_purple_out,
             ref_data.genome_fasta,
             ref_data.genome_fai,
             ref_data.genome_dict,
-            ref_data.genome_gridss_index,
-            hmf_data.virusbreakend_db,
-            hmf_data.virus_taxonomy_db,
-            hmf_data.virus_reporting_db,
-            hmf_data.virus_blocklist_db,
-            gridss_config,
+            hmf_data.viridian_resources,
         )
 
-        ch_virusinterpreter_out = ch_virusinterpreter_out.mix(VIRUSBREAKEND_CALLING.out.virusinterpreter_dir)
+        ch_viridian_out = ch_viridian_out.mix(VIRIDIAN_CALLING.out.viridian_dir)
 
     } else {
 
-        ch_virusinterpreter_out = ch_inputs.map { meta -> [meta, []] }
+        ch_viridian_out = ch_inputs.map { meta -> [meta, []] }
 
     }
 
@@ -843,7 +834,7 @@ workflow WGTS {
             ch_isofox_out,
             ch_purple_out,
             ch_linx_somatic_out,
-            ch_virusinterpreter_out,
+            ch_viridian_out,
             ref_data.genome_version,
             hmf_data.cuppa_alt_sj,
             hmf_data.cuppa_classifier,
@@ -873,7 +864,7 @@ workflow WGTS {
             ch_linx_somatic_out,
             ch_linx_somatic_visualiser_out,
             ch_linx_germline_out,
-            ch_virusinterpreter_out,
+            ch_viridian_out,
             ch_chord_out,
             ch_sigs_out,
             ch_lilac_out,
