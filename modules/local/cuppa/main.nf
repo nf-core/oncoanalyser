@@ -32,7 +32,7 @@ process CUPPA {
 
     def purple_dir_arg = purple_dir ? "-purple_dir ${purple_dir}" : ''
     def linx_dir_arg = linx_dir ? "-linx_dir ${linx_dir}" : ''
-    def viridian_dir_arg = viridian_dir ? "-virus_dir ${viridian_dir}" : ''
+    def viridian_dir_arg = viridian_dir ? "-viridian_dir ${viridian_dir}" : ''
 
     def isofox_dir_local = 'isofox__prepared'
     def isofox_dir_arg = ''
