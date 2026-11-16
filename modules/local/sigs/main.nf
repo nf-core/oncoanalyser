@@ -24,6 +24,8 @@ process SIGS {
 
     def xmx_mod = task.ext.xmx_mod ?: 0.75
 
+    def tumor_only_arg = meta.containsKey('normal_id') ? '' : '-tumor_only'
+
     def log_level_arg = task.ext.log_level ? "-log_level ${task.ext.log_level}" : ''
 
     """
@@ -35,6 +37,7 @@ process SIGS {
         -sample ${meta.sample_id} \\
         -somatic_vcf_file ${smlv_vcf} \\
         -signatures_file ${signatures} \\
+        ${tumor_only_arg} \\
         ${log_level_arg} \\
         -output_dir sigs/
 

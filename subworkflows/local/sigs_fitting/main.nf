@@ -23,17 +23,17 @@ workflow SIGS_FITTING {
         }
         .branch { meta, purple_dir ->
 
-            def has_tumor_normal_dna = Utils.hasTumorDna(meta) && Utils.hasNormalDna(meta)
+            def has_tumor_dna = Utils.hasTumorDna(meta)
 
             def has_smlv_vcf = []
-            if (has_tumor_normal_dna && purple_dir) {
+            if (has_tumor_dna && purple_dir) {
                 def tumor_id = Utils.getTumorDnaSampleName(meta)
                 has_smlv_vcf = purple_dir.resolve("${tumor_id}.purple.somatic.vcf.gz").exists()
             }
 
             def has_existing = Utils.hasExistingInput(meta, Constants.INPUT.SIGS_DIR)
 
-            runnable: has_tumor_normal_dna && purple_dir && has_smlv_vcf && ! has_existing
+            runnable: has_tumor_dna && purple_dir && has_smlv_vcf && ! has_existing
             skip: true
                 return meta
         }
@@ -50,6 +50,10 @@ workflow SIGS_FITTING {
                 id: meta.group_id,
                 sample_id: tumor_id,
             ]
+
+            if (Utils.hasNormalDna(meta)) {
+                meta_sigs.normal_id = Utils.getNormalDnaSampleName(meta)
+            }
 
             def smlv_vcf = purple_dir.resolve("${tumor_id}.purple.somatic.vcf.gz")
 
