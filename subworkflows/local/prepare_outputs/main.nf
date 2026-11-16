@@ -84,6 +84,7 @@ workflow PREPARE_OUTPUTS_TARGETED {
             channel.topic('sage_germline_dir').flatMap { meta, d ->            return get_dir_filepaths(meta, d, 'sage/germline') },
             channel.topic('sage_somatic_dir').flatMap { meta, d ->             return get_dir_filepaths(meta, d, 'sage/somatic') },
             channel.topic('sage_visualiser_dir').flatMap { meta, d ->          return get_dir_filepaths(meta, d, 'sage/visualiser') },
+            channel.topic('sigs_dir').flatMap { meta, d ->                     return get_dir_filepaths(meta, d) },
 
             channel.topic('write_reference_data').map { d -> return ["reference_data/${workflow.manifest.version}/", d] },
 
