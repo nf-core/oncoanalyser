@@ -68,7 +68,7 @@ runs:
           echo "Directory structure:"
           find reference_data -maxdepth 4 -type d 2>/dev/null
           echo "Index directories:"
-          find reference_data -type d -name "*bwa-mem2*" -o -type d -name "*star_index*" -o -type d -name "*gridss*" 2>/dev/null
+          find reference_data -type d -name "*bwa-mem2*" -o -type d -name "*gridss*" 2>/dev/null
         else
           echo "reference_data does not exist"
         fi

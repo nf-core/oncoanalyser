@@ -14,9 +14,9 @@ workflow MULTIQC_REPORTING {
     // Sample data
     ch_bamtools_dir_tumor     // channel: [mandatory] [ meta, bamtools_dir ]
     ch_bamtools_dir_normal    // channel: [optional]  [ meta, bamtools_dir ]
+    ch_bamtools_dir_rna       // channel: [optional]  [ meta, bamtools_dir ]
     ch_amber_dir              // channel: [mandatory] [ meta, amber_dir ]
     ch_purple_dir             // channel: [mandatory] [ meta, purple_dir ]
-    ch_align_rna_qc_tumor_out // channel: [mandatory] [ meta, star_log, rna_md_metrics ]
 
     // Other
     ch_collated_versions      // channel: [mandatory] [ collated_versions.yml ]
@@ -26,32 +26,29 @@ workflow MULTIQC_REPORTING {
 
     main:
     // Select input sources then sort
-    // channel: [ meta, bamtools_tumor_dir, bamtools_normal_dir, amber_dir, purple_dir, star_log, rna_md_metrics ]
+    // channel: [ meta, bamtools_tumor_dir, bamtools_normal_dir, bamtools_rna_dir, amber_dir, purple_dir ]
     ch_inputs_sorted = WorkflowOncoanalyser.groupByMeta(
         ch_bamtools_dir_tumor,
         ch_bamtools_dir_normal,
+        ch_bamtools_dir_rna,
         ch_amber_dir,
         ch_purple_dir,
-        ch_align_rna_qc_tumor_out,
     )
-        .map { meta, bamtools_dir_tumor, bamtools_dir_normal, amber_dir, purple_dir, star_log, rna_md_metrics ->
-
-            // NOTE(SW): will not implement ability for user to provide RNA alignment QC metrics
+        .map { meta, bamtools_dir_tumor, bamtools_dir_normal, bamtools_dir_rna, amber_dir, purple_dir ->
 
             return [
                 meta,
                 Utils.selectCurrentOrExisting(bamtools_dir_tumor, meta, Constants.INPUT.BAMTOOLS_DIR_TUMOR),
                 Utils.selectCurrentOrExisting(bamtools_dir_normal, meta, Constants.INPUT.BAMTOOLS_DIR_NORMAL),
+                Utils.selectCurrentOrExisting(bamtools_dir_rna, meta, Constants.INPUT.BAMTOOLS_DIR_RNA),
                 Utils.selectCurrentOrExisting(amber_dir, meta, Constants.INPUT.AMBER_DIR),
                 Utils.selectCurrentOrExisting(purple_dir, meta, Constants.INPUT.PURPLE_DIR),
-                star_log,
-                rna_md_metrics,
             ]
 
         }
-        .branch { meta, bamtools_dir_tumor, bamtools_dir_normal, amber_dir, purple_dir, star_log, rna_md_metrics ->
+        .branch { meta, bamtools_dir_tumor, bamtools_dir_normal, bamtools_dir_rna, amber_dir, purple_dir ->
 
-            runnable: bamtools_dir_tumor || bamtools_dir_normal || amber_dir || purple_dir || star_log || rna_md_metrics
+            runnable: bamtools_dir_tumor || bamtools_dir_normal || bamtools_dir_rna || amber_dir || purple_dir
             skip: true
                 return meta
         }
