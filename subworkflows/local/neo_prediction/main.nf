@@ -131,7 +131,8 @@ workflow NEO_PREDICTION {
             def meta_isofox = [
                 key: meta.group_id,
                 id: meta.group_id,
-                sample_id: Utils.getTumorDnaSampleName(meta),
+                tumor_rna_id: Utils.getTumorRnaSampleName(meta),
+                tumor_dna_id: Utils.getTumorDnaSampleName(meta),
             ]
 
             return [meta_isofox, neo_finder_dir, tumor_rna_aln, tumor_rna_idx]
@@ -173,16 +174,16 @@ workflow NEO_PREDICTION {
             def meta_scorer = [
                 key: meta.group_id,
                 id: meta.group_id,
-                sample_id: Utils.getTumorDnaSampleName(meta),
+                tumor_dna_id: Utils.getTumorDnaSampleName(meta),
                 cancer_type: meta[Constants.InfoField.CANCER_TYPE],
             ]
 
             def sage_append_vcf_somatic = []
             if (Utils.hasTumorRna(meta)) {
-                meta_scorer.sample_rna_id = Utils.getTumorRnaSampleName(meta)
+                meta_scorer.tumor_rna_id = Utils.getTumorRnaSampleName(meta)
 
                 def sage_append_dir_somatic_selected = Utils.selectCurrentOrExisting(sage_append_dir_somatic, meta, Constants.INPUT.SAGE_APPEND_DIR_TUMOR)
-                sage_append_vcf_somatic = file(sage_append_dir_somatic_selected).resolve("${meta_scorer.sample_id}.sage.append.vcf.gz")
+                sage_append_vcf_somatic = file(sage_append_dir_somatic_selected).resolve("${meta_scorer.tumor_dna_id}.sage.append.vcf.gz")
             }
 
             return [

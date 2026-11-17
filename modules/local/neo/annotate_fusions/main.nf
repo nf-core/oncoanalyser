@@ -34,7 +34,8 @@ process NEO_ANNOTATE_FUSIONS {
     isofox \\
         -Xmx${Math.round(task.memory.bytes * xmx_mod)} \\
         ${args} \\
-        -sample ${meta.sample_id} \\
+        -sample ${meta.tumor_rna_id} \\
+        -tumor ${meta.tumor_dna_id} \\
         -bam_file ${aln} \\
         -functions NEO_EPITOPES \\
         -read_length ${read_length} \\
@@ -55,7 +56,7 @@ process NEO_ANNOTATE_FUSIONS {
 
     stub:
     """
-    touch ${meta.sample_id}.isf.neoepitope.tsv
+    touch ${meta.tumor_rna_id}.isf.neoepitope.tsv
 
     echo -e '${task.process}:\\n  stub: noversions\\n' > versions.yml
     """
