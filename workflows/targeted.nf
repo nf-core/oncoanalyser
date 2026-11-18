@@ -28,6 +28,7 @@ include { REDUX_PROCESSING         } from '../subworkflows/local/redux_processin
 include { SAGE_APPEND              } from '../subworkflows/local/sage_append'
 include { SAGE_CALLING             } from '../subworkflows/local/sage_calling'
 include { SAGE_PLOTTING            } from '../subworkflows/local/sage_plotting'
+include { SIGS_FITTING             } from '../subworkflows/local/sigs_fitting'
 
 include { softwareVersionsToYAML } from '../subworkflows/nf-core/utils_nfcore_pipeline'
 
@@ -710,6 +711,27 @@ workflow TARGETED {
     }
 
     //
+    // SUBWORKFLOW: Run Sigs to fit somatic smlv to signature definitions
+    //
+    // channel: [ meta, sigs_dir ]
+    ch_sigs_out = channel.empty()
+    if (run_config.stages.sigs) {
+
+        SIGS_FITTING(
+            ch_inputs,
+            ch_purple_out,
+            hmf_data.sigs_signatures,
+        )
+
+        ch_sigs_out = ch_sigs_out.mix(SIGS_FITTING.out.sigs_dir)
+
+    } else {
+
+        ch_sigs_out = ch_inputs.map { meta -> [meta, []] }
+
+    }
+
+    //
     // SUBWORKFLOW: Run ORANGE to generate static PDF report
     //
     if (run_config.stages.orange) {
@@ -717,7 +739,6 @@ workflow TARGETED {
         // Create placeholder channels for empty remaining channels
         ch_chord_out = ch_inputs.map { meta -> [meta, []] }
         ch_cuppa_out = ch_inputs.map { meta -> [meta, []] }
-        ch_sigs_out = ch_inputs.map { meta -> [meta, []] }
         ch_virusinterpreter_out = ch_inputs.map { meta -> [meta, []] }
 
         ORANGE_REPORTING(
