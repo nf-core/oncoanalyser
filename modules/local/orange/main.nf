@@ -73,7 +73,7 @@ process ORANGE {
     def cuppa_dir_arg = cuppa_dir ? "-cuppa_dir ${cuppa_dir}" : ''
     def peach_dir_arg = peach_dir ? "-peach_dir ${peach_dir}" : ''
 
-    def rna_sample_id_arg = meta.containsKey('tumor_rna_id') ? "-rna_sample_id ${meta.tumor_rna_id}" : ''
+    def rna_sample_id_arg = meta.containsKey('tumor_rna_id') ? "-rna_sample ${meta.tumor_rna_id}" : ''
     def isofox_dir_local = 'isofox__prepared'
     def isofox_dir_arg = isofox_dir ? "-isofox_dir ${isofox_dir_local}" : ''
 
