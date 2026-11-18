@@ -11,7 +11,7 @@ process NEO_SCORER {
     tuple val(meta),
         path(isofox_dir),
         path(purple_dir),
-        path(sage_append_rna_vcf),
+        path(sage_append_dir),
         path(lilac_dir),
         path(neo_finder_dir),
         path(annotated_fusions)
@@ -35,7 +35,7 @@ process NEO_SCORER {
     def log_level_arg = task.ext.log_level ? "-log_level ${task.ext.log_level}" : ''
 
     def rna_sample_arg = meta.containsKey('tumor_rna_id') ? "-rna_sample ${meta.tumor_rna_id}" : ''
-    def rna_somatic_vcf_arg = meta.containsKey('tumor_rna_id') ? "-rna_somatic_vcf ${sage_append_rna_vcf}" : ''
+    def rna_somatic_vcf_arg = meta.containsKey('tumor_rna_id') ? "-rna_somatic_vcf ${sage_append_dir}/${meta.tumor_dna_id}.sage.append.vcf.gz" : ''
 
     def cancer_type_arg = meta.cancer_type ? "-cancer_type ${meta.cancer_type}" : ''
 

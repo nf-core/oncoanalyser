@@ -178,19 +178,17 @@ workflow NEO_PREDICTION {
                 cancer_type: meta[Constants.InfoField.CANCER_TYPE],
             ]
 
-            def sage_append_rna_vcf = []
+            def sage_append_dir_selected = []
             if (Utils.hasTumorRna(meta)) {
                 meta_scorer.tumor_rna_id = Utils.getTumorRnaSampleName(meta)
-
-                def sage_append_dir_selected = Utils.selectCurrentOrExisting(sage_append_dir, meta, Constants.INPUT.SAGE_APPEND_DIR_TUMOR)
-                sage_append_rna_vcf = file(sage_append_dir_selected).resolve("${meta_scorer.tumor_dna_id}.sage.append.vcf.gz")
+                sage_append_dir_selected = Utils.selectCurrentOrExisting(sage_append_dir, meta, Constants.INPUT.SAGE_APPEND_DIR_TUMOR)
             }
 
             return [
                 meta_scorer,
                 Utils.selectCurrentOrExisting(isofox_dir, meta, Constants.INPUT.ISOFOX_DIR),
                 Utils.selectCurrentOrExisting(purple_dir, meta, Constants.INPUT.PURPLE_DIR),
-                sage_append_rna_vcf,
+                sage_append_dir_selected,
                 Utils.selectCurrentOrExisting(lilac_dir, meta, Constants.INPUT.LILAC_DIR),
                 neo_finder_dir,
                 annotated_fusions,
