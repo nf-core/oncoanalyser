@@ -12,7 +12,7 @@ process ORANGE {
         path(sage_dir_somatic, stageAs: 'sage_somatic'),
         path(sage_dir_germline, stageAs: 'sage_germline'),
         path(sage_plot_dir_somatic),
-        path(sage_append_rna_vcf),
+        path(sage_append_dir),
         path(purple_dir),
         path(qsee_dir),
         path(linx_annotation_dir_somatic),
@@ -71,31 +71,12 @@ process ORANGE {
     def cuppa_dir_arg = cuppa_dir ? "-cuppa_dir ${cuppa_dir}" : ''
     def peach_dir_arg = peach_dir ? "-peach_dir ${peach_dir}" : ''
 
-    def rna_sample_id_arg = meta.containsKey('tumor_rna_id') ? "-rna_sample ${meta.tumor_rna_id}" : ''
+    def rna_sample_arg = meta.containsKey('tumor_rna_id') ? "-rna_sample ${meta.tumor_rna_id}" : ''
     def isofox_dir_arg = isofox_dir ? "-isofox_dir ${isofox_dir}" : ''
+    def purple_rna_append_vcf_arg = sage_append_dir ? "-purple_rna_append_vcf ${sage_append_dir}/${meta.tumor_id}.sage.append.vcf.gz" : ''
 
     """
     echo "${pipeline_version_str}" > pipeline_version.txt
-
-    # When RNA data is present, Orange expects the Purple somatic VCF to have tumor RNA data appended by Sage append.
-    # Orange only reads this VCF from the Purple directory, so copy the Purple directory and replace the somatic VCF
-    # with the Sage append VCF
-
-    # NOTES(SW): Use of symlinks was causing reliability issues on HPC with Singularity, switched to full file copy instead
-
-    purple_dir_local=${purple_dir}
-    if [[ -n "${rna_sample_id_arg}" ]]; then
-
-        purple_dir_local=purple__prepared;
-
-        if [[ -d \${purple_dir_local}/ ]]; then
-            rm -r \${purple_dir_local}/;
-        fi
-
-        cp -rL ${purple_dir} \${purple_dir_local}/
-        cp -L ${sage_append_rna_vcf} \${purple_dir_local}/${meta.tumor_id}.purple.somatic.vcf.gz;
-
-    fi
 
     # Set input plot directory and create it doesn't exist. See the LINX visualiser module for further info.
     if [[ ! -e ${linx_plot_dir_reportable_somatic}/ ]]; then
@@ -117,8 +98,8 @@ process ORANGE {
         \\
         -tumor ${meta.tumor_id} \\
         -sage_dir ${sage_dir_somatic} \\
-        -purple_dir \${purple_dir_local} \\
-        -purple_plot_dir \${purple_dir_local}/plot/ \\
+        -purple_dir ${purple_dir} \\
+        -purple_plot_dir ${purple_dir}/plot/ \\
         -qsee_dir ${qsee_dir} \\
         -linx_dir ${linx_annotation_dir_somatic} \\
         -linx_plot_dir ${linx_plot_dir_reportable_somatic}/ \\
@@ -135,8 +116,9 @@ process ORANGE {
         ${cuppa_dir_arg} \\
         ${peach_dir_arg} \\
         \\
-        ${rna_sample_id_arg} \\
+        ${rna_sample_arg} \\
         ${isofox_dir_arg} \\
+        ${purple_rna_append_vcf_arg} \\
         \\
         -ref_genome_version ${genome_ver} \\
         -doid_json ${disease_ontology} \\

@@ -123,7 +123,7 @@ workflow ORANGE_REPORTING {
         }
 
     // Create process input channel
-    // channel: [meta_orange, sage_dir_somatic, sage_dir_germline, sage_visualiser_dir_somatic, sage_append_rna_vcf, purple_dir, qsee_dir, linx_annotation_dir_somatic, linx_plot_dir_somatic, linx_annotation_dir_germline, virusinterpreter_dir, chord_dir, sigs_dir, lilac_dir, cuppa_dir, peach_dir, isofox_dir ]
+    // channel: [meta_orange, sage_dir_somatic, sage_dir_germline, sage_visualiser_dir_somatic, sage_append_dir, purple_dir, qsee_dir, linx_annotation_dir_somatic, linx_plot_dir_somatic, linx_annotation_dir_germline, virusinterpreter_dir, chord_dir, sigs_dir, lilac_dir, cuppa_dir, peach_dir, isofox_dir ]
     ch_orange_inputs = ch_inputs_sorted.runnable
         .map { d ->
 
@@ -153,14 +153,11 @@ workflow ORANGE_REPORTING {
                 dna_normal_input_keys.each { k -> def i = input_indexes[k]; inputs_selected[i] = [] }
             }
 
-            // Require all tumor RNA inputs to be present else clear them
-            def rna_tumor_input_keys = ['isofox_dir', 'sage_append_dir']
-            def has_rna_tumor = rna_tumor_input_keys.every { k -> def i = input_indexes[k]; return inputs[i] }
+            // Set tumor RNA sample ID if Isofox inputs are present
+            def has_rna_tumor = inputs[input_indexes['isofox_dir']]
 
             if (has_rna_tumor) {
                 meta_orange.tumor_rna_id = Utils.getTumorRnaSampleName(meta)
-            } else {
-                rna_tumor_input_keys.each { k -> def i = input_indexes[k]; inputs_selected[i] = [] }
             }
 
             // ORANGE only accepts CUPPA with DNA; when providing DNA/RNA inputs but skipping Virus Interpreter CUPPA
@@ -170,15 +167,6 @@ workflow ORANGE_REPORTING {
                 def cuppa_vis_data = cuppa_dir.resolve("${meta_orange.tumor_id}.cuppa.vis_data.tsv")
                 if (! cuppa_vis_data.exists()) {
                     inputs_selected[input_indexes['cuppa_dir']] = []
-                }
-            }
-
-            // Set SAGE append VCF input
-            def sage_append_rna_vcf
-            if (has_rna_tumor) {
-                def sage_append_dir = inputs_selected[input_indexes['sage_append_dir']]
-                if (sage_append_dir) {
-                    sage_append_rna_vcf = sage_append_dir.resolve("${meta_orange.tumor_id}.sage.append.vcf.gz")
                 }
             }
 
@@ -196,7 +184,7 @@ workflow ORANGE_REPORTING {
                 inputs_selected[input_indexes['sage_dir_somatic']],
                 inputs_selected[input_indexes['sage_dir_germline']],
                 inputs_selected[input_indexes['sage_plot_dir_somatic']],
-                sage_append_rna_vcf ?: [],
+                inputs_selected[input_indexes['sage_append_dir']],
                 inputs_selected[input_indexes['purple_dir']],
                 inputs_selected[input_indexes['qsee_dir']],
                 inputs_selected[input_indexes['linx_annotation_dir_somatic']],
