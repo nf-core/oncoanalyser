@@ -20,7 +20,7 @@ input:
   - alns:
       type: list
       description: |
-        Name-grouped BAM files produced by bwa-mem2 against the genome with transcript contigs appended; these are
+        Name-grouped BAM files produced by bwa-mem3 against the genome with transcript contigs appended; these are
         concatenated into a single BAM before being passed to TARS
       pattern: "*.{bam}"
   - genome_fasta:
