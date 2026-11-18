@@ -174,6 +174,7 @@ workflow PANEL_RESOURCE_CREATION {
         hmf_data.isofox_excluded_regions,
         hmf_data.isofox_gene_distribution,
         hmf_data.isofox_alt_sj_distribution,
+        [],  // isofox_fusion_cohort
         isofox_counts,
         isofox_gc_ratios,
         [],  // isofox_tpm_norm
@@ -271,6 +272,7 @@ workflow PANEL_RESOURCE_CREATION {
     PAVE_PON_CREATION(
         ch_sage_somatic_dir_out,
         ref_data.genome_version,
+        hmf_data.sage_known_hotspots_somatic,
     )
 
     //

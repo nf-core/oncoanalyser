@@ -258,6 +258,7 @@ workflow TARGETED {
             hmf_data.isofox_excluded_regions,
             hmf_data.isofox_gene_distribution,
             hmf_data.isofox_alt_sj_distribution,
+            hmf_data.isofox_fusion_cohort,
             isofox_counts,
             isofox_gc_ratios,
             isofox_tpm_norm,
