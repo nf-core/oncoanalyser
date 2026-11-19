@@ -25,7 +25,7 @@ include { READ_ALIGNMENT_DNA       } from '../subworkflows/local/read_alignment_
 include { READ_ALIGNMENT_RNA       } from '../subworkflows/local/read_alignment_rna'
 include { READ_UMI_PROCESSING      } from '../subworkflows/local/read_umi_processing'
 include { REDUX_PROCESSING         } from '../subworkflows/local/redux_processing'
-include { SAGE_APPEND_RNA          } from '../subworkflows/local/sage_append_rna'
+include { SAGE_APPEND              } from '../subworkflows/local/sage_append'
 include { SAGE_CALLING             } from '../subworkflows/local/sage_calling'
 include { SAGE_PLOTTING            } from '../subworkflows/local/sage_plotting'
 include { SIGS_FITTING             } from '../subworkflows/local/sigs_fitting'
@@ -530,7 +530,7 @@ workflow TARGETED {
     ch_sage_append_out = channel.empty()
     if (run_config.stages.sage_append) {
 
-        SAGE_APPEND_RNA(
+        SAGE_APPEND(
             ch_inputs,
             ch_purple_out,
             ch_redux_rna_out,
@@ -539,10 +539,11 @@ workflow TARGETED {
             ref_data.genome_fai,
             ref_data.genome_dict,
             params.sequencing_platform,
-            true,  // targeted_mode
+            true,   // targeted_mode
+            'rna',  // append_sample_type
         )
 
-        ch_sage_append_out = ch_sage_append_out.mix(SAGE_APPEND_RNA.out.sage_append_dir)
+        ch_sage_append_out = ch_sage_append_out.mix(SAGE_APPEND.out.sage_append_dir)
 
     } else {
 
