@@ -61,7 +61,6 @@ workflow PANEL_RESOURCE_CREATION {
 
     def ref_data = PREPARE_REFERENCE.out
     def hmf_data = PREPARE_REFERENCE.out.hmf_data
-    def panel_data = PREPARE_REFERENCE.out.panel_data
 
     // Configure selectable reference data and inputs
     def hmf_data_seq_platform = Utils.getSequencingPlatformResources(hmf_data, params.sequencing_platform, log)
@@ -95,7 +94,7 @@ workflow PANEL_RESOURCE_CREATION {
             ch_inputs,
             ch_fastq_dna,
             ch_fastq_rna,
-            panel_data.known_umis,
+            hmf_data.map { it.known_umis ?: [] },
             params.fastp_umi_enabled,
             params.fastp_umi_location,
             params.fastp_umi_length,
