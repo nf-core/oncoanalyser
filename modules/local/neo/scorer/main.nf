@@ -28,8 +28,8 @@ process NEO_SCORER {
 
     def log_level_arg = task.ext.log_level ? "-log_level ${task.ext.log_level}" : ''
 
-    def rna_sample_arg = meta.containsKey('sample_rna_id') ? "-rna_sample ${meta.sample_id}" : ''
-    def rna_somatic_vcf_arg = meta.containsKey('sample_rna_id') ? "-rna_somatic_vcf ${sage_vcf}" : ''
+    def rna_sample_arg = meta.containsKey('tumor_rna_id') ? "-rna_sample ${meta.tumor_rna_id}" : ''
+    def rna_somatic_vcf_arg = meta.containsKey('tumor_rna_id') ? "-rna_somatic_vcf ${sage_vcf}" : ''
 
     def cancer_type_arg = meta.cancer_type ? "-cancer_type ${meta.cancer_type}" : ''
 
@@ -41,16 +41,7 @@ process NEO_SCORER {
 
     # Prepare ISOFOX results
     if [[ -n "${isofox_dir_arg}" ]]; then
-      # When provided existing results generated in a RNA-only analysis we must adjust identifier
-      if [[ -n "\$(find -L ${isofox_dir} -name '${meta.sample_rna_id}*')" ]]; then
-          mkdir -p ${isofox_dir_local}/;
-          for e in \$(find -L ${isofox_dir}/*); do
-             s=\$(sed 's/^${meta.sample_rna_id}//' <<< \${e##*/});
-             ln -s ../\${e} ${isofox_dir_local}/${meta.sample_id}\${s};
-          done;
-      else
-        cp -rL ${isofox_dir} ${isofox_dir_local};
-      fi;
+      cp -rL ${isofox_dir} ${isofox_dir_local};
       cp -r ${annotated_fusions} ${isofox_dir_local};
     fi
 
@@ -58,10 +49,10 @@ process NEO_SCORER {
         -Xmx${Math.round(task.memory.bytes * xmx_mod)} \\
         com.hartwig.hmftools.neo.score.NeoScorer \\
         ${args} \\
-        -sample ${meta.sample_id} \\
+        -sample ${meta.tumor_dna_id} \\
+        ${rna_sample_arg} \\
         ${cancer_type_arg} \\
         -purple_dir ${purple_dir} \\
-        ${rna_sample_arg} \\
         ${isofox_dir_arg} \\
         ${rna_somatic_vcf_arg} \\
         -lilac_dir ${lilac_dir} \\
