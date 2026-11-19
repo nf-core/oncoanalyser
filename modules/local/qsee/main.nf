@@ -89,6 +89,7 @@ process QSEE {
     gzip <<< '' > qsee/${meta.tumor_id}.qsee.status.tsv.gz
     touch qsee/${meta.tumor_id}.qsee.vis.report.pdf
     gzip <<< '' > qsee/${meta.tumor_id}.qsee.vis.data.tsv.gz
+    gzip <<< '' > qsee/${meta.tumor_id}.qsee.gene_lod.tsv.gz
 
     echo -e '${task.process}:\\n  stub: noversions\\n' > versions.yml
     """
