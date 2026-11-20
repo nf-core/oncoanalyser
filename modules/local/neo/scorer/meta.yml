@@ -20,10 +20,9 @@ input:
   - purple_dir:
       type: directory
       description: PURPLE output directory
-  - sage_vcf:
-      type: file
-      description: SAGE VCF file
-      pattern: "*.{vcf.gz}"
+  - sage_append_dir:
+      type: directory
+      description: SAGE append output directory containing Purple somatic VCF annotated with tumor RNA data
   - lilac_dir:
       type: directory
       description: LILAC output directory

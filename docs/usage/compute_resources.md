@@ -10,7 +10,7 @@ For example, `process_high` is defined as:
 process {
     withLabel: process_high {
         cpus   = { 12    * task.attempt }
-        memory = { 72.GB * task.attempt }
+        memory = { 64.GB * task.attempt }
         time   = { 16.h  * task.attempt }
     }
 }
@@ -23,7 +23,7 @@ grep -r "label 'process_" modules/*/ | sort
 
 modules/local/amber/main.nf:    label 'process_high'
 modules/local/bamtools/main.nf:    label 'process_medium'
-modules/local/bwa-mem2/mem/main.nf:    label 'process_high'
+modules/local/bwa-mem2/mem/main.nf:    label 'process_huge'
 ...
 ```
 

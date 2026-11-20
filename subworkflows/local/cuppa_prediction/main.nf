@@ -93,14 +93,14 @@ workflow CUPPA_PREDICTION {
 
                 categories = 'ALL'
 
-                meta_cuppa.sample_id = tumor_dna_id
-                meta_cuppa.sample_rna_id = tumor_rna_id
+                meta_cuppa.tumor_dna_id = tumor_dna_id
+                meta_cuppa.tumor_rna_id = tumor_rna_id
 
             } else if (run_dna) {
 
                 categories = 'DNA'
 
-                meta_cuppa.sample_id = tumor_dna_id
+                meta_cuppa.tumor_dna_id = tumor_dna_id
 
                 isofox_dir = []
 
@@ -108,8 +108,10 @@ workflow CUPPA_PREDICTION {
 
                 categories = 'RNA'
 
-                meta_cuppa.sample_id = has_tumor_dna ? tumor_dna_id : tumor_rna_id
-                meta_cuppa.sample_rna_id = tumor_rna_id
+                if (has_tumor_dna) {
+                    meta_cuppa.tumor_dna_id = tumor_dna_id
+                }
+                meta_cuppa.tumor_rna_id = tumor_rna_id
 
                 purple_dir = []
                 linx_annotation_dir = []

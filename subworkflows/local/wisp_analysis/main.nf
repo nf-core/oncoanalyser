@@ -11,7 +11,7 @@ workflow WISP_ANALYSIS {
     ch_redux_dir               // channel: [mandatory] [ meta, redux_dir ]
     ch_amber_dir               // channel: [mandatory] [ meta, amber_dir ]
     ch_cobalt_dir              // channel: [mandatory] [ meta, cobalt_dir ]
-    ch_sage_append_dir_somatic // channel: [mandatory] [ meta, sage_append_dir ]
+    ch_sage_append_dir         // channel: [mandatory] [ meta, sage_append_dir ]
 
     // Reference data
     genome_fasta               // channel: [mandatory] /path/to/genome_fasta
@@ -29,7 +29,7 @@ workflow WISP_ANALYSIS {
         ch_redux_dir,
         ch_amber_dir,
         ch_cobalt_dir,
-        ch_sage_append_dir_somatic,
+        ch_sage_append_dir,
     )
         .map { meta, longitudinal_redux_dir, longitudinal_amber_dir, longitudinal_cobalt_dir, longitudinal_sage_append_dir ->
 

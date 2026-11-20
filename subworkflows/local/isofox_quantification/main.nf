@@ -17,7 +17,6 @@ workflow ISOFOX_QUANTIFICATION {
     ensembl_data_resources     // channel: [mandatory] /path/to/ensembl_data_resources/
     driver_gene_panel          // channel: [mandatory] /path/to/driver_gene_panel
     known_fusion_data          // channel: [mandatory] /path/to/known_fusion_data
-    isofox_excluded_regions    // channel: [mandatory] /path/to/isofox_excluded_regions
     isofox_gene_distribution   // channel: [mandatory] /path/to/isofox_gene_distribution
     isofox_alt_sj_distribution // channel: [mandatory] /path/to/isofox_alt_sj_distribution
     isofox_fusion_cohort       // channel: [optional]  /path/to/isofox_fusion_cohort
@@ -56,7 +55,7 @@ workflow ISOFOX_QUANTIFICATION {
             def meta_isofox = [
                 key: meta.group_id,
                 id: meta.group_id,
-                sample_id: Utils.getTumorDnaSampleName(meta) ?: Utils.getTumorRnaSampleName(meta),
+                sample_id: Utils.getTumorRnaSampleName(meta),
             ]
 
             return [meta_isofox, tumor_aln, tumor_idx]
@@ -73,7 +72,6 @@ workflow ISOFOX_QUANTIFICATION {
         ensembl_data_resources,
         driver_gene_panel,
         known_fusion_data,
-        isofox_excluded_regions,
         isofox_gene_distribution,
         isofox_alt_sj_distribution,
         isofox_fusion_cohort,

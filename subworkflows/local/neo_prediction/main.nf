@@ -13,7 +13,7 @@ workflow NEO_PREDICTION {
     ch_redux_dir_rna           // channel: [mandatory] [ meta, redux_dir ]
     ch_isofox_dir              // channel: [mandatory] [ meta, isofox_dir ]
     ch_purple_dir              // channel: [mandatory] [ meta, purple_dir ]
-    ch_sage_append_dir_somatic // channel: [mandatory] [ meta, sage_append_dir ]
+    ch_sage_append_dir         // channel: [mandatory] [ meta, sage_append_dir ]
     ch_lilac_dir               // channel: [mandatory] [ meta, lilac_dir ]
     ch_linx_annotation_dir     // channel: [mandatory] [ meta, linx_annotation_dir ]
 
@@ -131,7 +131,8 @@ workflow NEO_PREDICTION {
             def meta_isofox = [
                 key: meta.group_id,
                 id: meta.group_id,
-                sample_id: Utils.getTumorDnaSampleName(meta),
+                tumor_rna_id: Utils.getTumorRnaSampleName(meta),
+                tumor_dna_id: Utils.getTumorDnaSampleName(meta),
             ]
 
             return [meta_isofox, neo_finder_dir, tumor_rna_aln, tumor_rna_idx]
@@ -159,43 +160,41 @@ workflow NEO_PREDICTION {
     // MODULE: Neo scorer
     //
     // Select input sources and prepare input channel
-    // channel: [ meta_scorer, isofox_dir, purple_dir, sage_append_dir_somatic, lilac_dir, neo_finder_dir, annotated_fusions ]
+    // channel: [ meta_scorer, isofox_dir, purple_dir, sage_append_dir, lilac_dir, neo_finder_dir, annotated_fusions ]
     ch_scorer_inputs = WorkflowOncoanalyser.groupByMeta(
         ch_isofox_dir,
         ch_purple_dir,
-        ch_sage_append_dir_somatic,
+        ch_sage_append_dir,
         ch_lilac_dir,
         ch_finder_out,
         ch_annotate_fusions_out,
     )
-        .map { meta, isofox_dir, purple_dir, sage_append_dir_somatic, lilac_dir, neo_finder_dir, annotated_fusions ->
+        .map { meta, isofox_dir, purple_dir, sage_append_dir, lilac_dir, neo_finder_dir, annotated_fusions ->
 
             def meta_scorer = [
                 key: meta.group_id,
                 id: meta.group_id,
-                sample_id: Utils.getTumorDnaSampleName(meta),
+                tumor_dna_id: Utils.getTumorDnaSampleName(meta),
                 cancer_type: meta[Constants.InfoField.CANCER_TYPE],
             ]
 
-            def sage_append_vcf_somatic = []
+            def sage_append_dir_selected = []
             if (Utils.hasTumorRna(meta)) {
-                meta_scorer.sample_rna_id = Utils.getTumorRnaSampleName(meta)
-
-                def sage_append_dir_somatic_selected = Utils.selectCurrentOrExisting(sage_append_dir_somatic, meta, Constants.INPUT.SAGE_APPEND_DIR_TUMOR)
-                sage_append_vcf_somatic = file(sage_append_dir_somatic_selected).resolve("${meta_scorer.sample_id}.sage.append.vcf.gz")
+                meta_scorer.tumor_rna_id = Utils.getTumorRnaSampleName(meta)
+                sage_append_dir_selected = Utils.selectCurrentOrExisting(sage_append_dir, meta, Constants.INPUT.SAGE_APPEND_DIR_TUMOR)
             }
 
             return [
                 meta_scorer,
                 Utils.selectCurrentOrExisting(isofox_dir, meta, Constants.INPUT.ISOFOX_DIR),
                 Utils.selectCurrentOrExisting(purple_dir, meta, Constants.INPUT.PURPLE_DIR),
-                sage_append_vcf_somatic,
+                sage_append_dir_selected,
                 Utils.selectCurrentOrExisting(lilac_dir, meta, Constants.INPUT.LILAC_DIR),
                 neo_finder_dir,
                 annotated_fusions,
             ]
         }
-        .branch { meta, isofox_dir, purple_dir, sage_append_dir_somatic, lilac_dir, neo_finder_dir, annotated_fusions ->
+        .branch { meta, isofox_dir, purple_dir, sage_append_dir, lilac_dir, neo_finder_dir, annotated_fusions ->
             runnable: purple_dir && neo_finder_dir && lilac_dir
             skip: true
                 return meta

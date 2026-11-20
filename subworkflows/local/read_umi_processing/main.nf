@@ -13,7 +13,7 @@ workflow READ_UMI_PROCESSING {
     ch_rna_fastq            // channel: [mandatory] [ meta, fastq_info, fastq_fwd, fastq_rev ]
 
     // Reference data
-    known_umis              // channel: [mandatory] /path/to/known_umis_file
+    known_umis              // channel: [optional]  /path/to/known_umis_file
 
     // Params
     fastp_umi_enabled       // boolean: [mandatory] enable fastp UMI processing

@@ -262,7 +262,6 @@ workflow WGTS {
             hmf_data.ensembl_data_resources,
             driver_gene_panel,
             hmf_data.known_fusion_data,
-            hmf_data.isofox_excluded_regions,
             hmf_data.isofox_gene_distribution,
             hmf_data.isofox_alt_sj_distribution,
             hmf_data.isofox_fusion_cohort,
@@ -524,31 +523,27 @@ workflow WGTS {
     // SUBWORKFLOW: Append read data to SAGE VCF
     //
     // channel: [ meta, sage_append_dir ]
-    ch_sage_append_somatic_out = channel.empty()
-    ch_sage_append_germline_out = channel.empty()
+    ch_sage_append_out = channel.empty()
     if (run_config.stages.sage_append) {
 
         SAGE_APPEND(
             ch_inputs,
             ch_purple_out,
-            ch_inputs.map { meta -> [meta, []] },  // ch_redux_dir_tumor
             ch_redux_rna_out,
             ref_data.genome_fasta,
             ref_data.genome_version,
             ref_data.genome_fai,
             ref_data.genome_dict,
             params.sequencing_platform,
-            run_config.stages.orange,  // enable_germline [run for ORANGE but not Neo]
             false,  // targeted_mode
+            'rna',  // append_sample_type
         )
 
-        ch_sage_append_somatic_out = ch_sage_append_somatic_out.mix(SAGE_APPEND.out.somatic_dir)
-        ch_sage_append_germline_out = ch_sage_append_germline_out.mix(SAGE_APPEND.out.germline_dir)
+        ch_sage_append_out = ch_sage_append_out.mix(SAGE_APPEND.out.sage_append_dir)
 
     } else {
 
-        ch_sage_append_somatic_out = ch_inputs.map { meta -> [meta, []] }
-        ch_sage_append_germline_out = ch_inputs.map { meta -> [meta, []] }
+        ch_sage_append_out = ch_inputs.map { meta -> [meta, []] }
 
     }
 
@@ -808,7 +803,7 @@ workflow WGTS {
             ch_redux_rna_out,
             ch_isofox_out,
             ch_purple_out,
-            ch_sage_append_somatic_out,
+            ch_sage_append_out,
             ch_lilac_out,
             ch_linx_somatic_out,
             ref_data.genome_fasta,
@@ -856,9 +851,8 @@ workflow WGTS {
         ORANGE_REPORTING(
             ch_sage_somatic_out,
             ch_sage_germline_out,
-            ch_sage_append_somatic_out,
-            ch_sage_append_germline_out,
             ch_sage_somatic_visualiser_out,
+            ch_sage_append_out,
             ch_purple_out,
             ch_qsee_out,
             ch_linx_somatic_out,
