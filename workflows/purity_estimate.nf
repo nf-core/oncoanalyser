@@ -50,7 +50,6 @@ workflow PURITY_ESTIMATE {
 
     def ref_data = PREPARE_REFERENCE.out
     def hmf_data = PREPARE_REFERENCE.out.hmf_data
-    def panel_data = PREPARE_REFERENCE.out.panel_data
 
     //
     // SUBWORKFLOW: Run read alignment to generate BAMs
@@ -76,7 +75,7 @@ workflow PURITY_ESTIMATE {
                 ch_inputs,
                 ch_fastq_dna,
                 ch_inputs.map { meta -> [meta, [:], [], []] },  // ch_rna_fastq
-                panel_data.known_umis,
+                [],  // known_umis
                 params.fastp_umi_enabled,
                 params.fastp_umi_location,
                 params.fastp_umi_length,
