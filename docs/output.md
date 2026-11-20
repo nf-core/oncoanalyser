@@ -198,15 +198,10 @@ _BamTools is only run on DNA alignments_
 <details markdown="1">
 <summary>Output files</summary>
 
-- `<group_id>/sage_append/<tumor_dna_id>/`
-  - `<tumor_dna_id>.sage.append.frag_lengths.tsv.gz`: Tumor DNA sample fragment length data appended to SAGE VCF.
+- `<group_id>/sage_append/`
+  - `<tumor_dna_id>.sage.append.frag_lengths.tsv.gz`: Tumor DNA sample fragment length data appended to SAGE VCF (purity estimate mode only).
   - `<tumor_dna_id>.sage.append.vcf.gz`: Tumor DNA sample small variant VCF with RNA data appended.
   - `<tumor_dna_id>.sage.append.vcf.gz.tbi`: Tumor DNA sample small variant VCF index.
-
-- `<group_id>/sage_append/<normal_dna_id>/`
-  - `<normal_dna_id>.sage.append.frag_lengths.tsv.gz`: Normal DNA sample fragment length data appended to SAGE VCF.
-  - `<normal_dna_id>.sage.append.vcf.gz`: Normal DNA sample small variant VCF with RNA data appended.
-  - `<normal_dna_id>.sage.append.vcf.gz.tbi`: Normal DNA sample small variant VCF index.
 
 - `<group_id>/sage/somatic/`
   - `<tumor_dna_id>.sage.somatic.fit_variant.tsv`: Tumor DNA sample somatic variant fit data.

@@ -218,28 +218,27 @@ workflow PURITY_ESTIMATE {
     // SUBWORKFLOW: Append new sample data to primary SAGE WGS VCF
     //
     // channel: [ meta, sage_append_dir ]
-    ch_sage_somatic_append_out = channel.empty()
+    ch_sage_append_out = channel.empty()
     if (run_config.stages.sage_append) {
 
         SAGE_APPEND(
             ch_inputs,
             ch_inputs.map { meta -> [meta, []] },  // ch_purple_dir
             ch_redux_tumor_out,
-            ch_inputs.map { meta -> [meta, []] },  // ch_redux_dir_rna
             ref_data.genome_fasta,
             ref_data.genome_version,
             ref_data.genome_fai,
             ref_data.genome_dict,
             params.sequencing_platform,
-            false,  // enable_germline
             targeted_mode,
+            'longitudinal',  // append_sample_type
         )
 
-        ch_sage_somatic_append_out = ch_sage_somatic_append_out.mix(SAGE_APPEND.out.somatic_dir)
+        ch_sage_append_out = ch_sage_append_out.mix(SAGE_APPEND.out.sage_append_dir)
 
     } else {
 
-        ch_sage_somatic_append_out = ch_inputs.map { meta -> [meta, []] }
+        ch_sage_append_out = ch_inputs.map { meta -> [meta, []] }
 
     }
 
@@ -253,7 +252,7 @@ workflow PURITY_ESTIMATE {
             ch_redux_tumor_out,
             ch_amber_out,
             ch_cobalt_out,
-            ch_sage_somatic_append_out,
+            ch_sage_append_out,
             ref_data.genome_fasta,
             ref_data.genome_fai,
             params.sequencing_platform,

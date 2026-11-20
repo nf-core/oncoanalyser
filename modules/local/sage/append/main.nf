@@ -15,6 +15,7 @@ process SAGE_APPEND {
     path genome_dict
     val sequencing_platform
     val targeted_mode
+    val write_frag_lengths
 
     output:
     tuple val(meta), path("sage_append_${meta.output_file_id}/"), topic: sage_append_dir
@@ -33,6 +34,7 @@ process SAGE_APPEND {
 
     def skip_args = ! redux_tsvs ? '-skip_bqr -skip_msi_jitter' : ''
     def high_depth_mode_arg = targeted_mode ? '-high_depth_mode' : ''
+    def write_frag_lengths_arg = write_frag_lengths ? '-write_frag_lengths' : ''
 
     """
     mkdir -p sage_append_${meta.output_file_id}/
@@ -48,7 +50,7 @@ process SAGE_APPEND {
         -ref_genome ${genome_fasta} \\
         -ref_genome_version ${genome_ver} \\
         -sequencing_type ${sequencing_platform.toUpperCase()} \\
-        -write_frag_lengths \\
+        ${write_frag_lengths_arg} \\
         ${high_depth_mode_arg} \\
         ${skip_args} \\
         -threads ${task.cpus} \\
@@ -66,10 +68,13 @@ process SAGE_APPEND {
     """
     mkdir -p sage_append_${meta.output_file_id}/
 
-    gzip <<< '' > sage_append_${meta.output_file_id}/${meta.output_file_id}.frag_lengths.tsv.gz
     gzip <<< '' > sage_append_${meta.output_file_id}/${meta.output_file_id}.sage.append.vcf.gz
     touch sage_append_${meta.output_file_id}/${meta.output_file_id}.sage.append.vcf.gz.tbi
     touch sage_append_${meta.output_file_id}/${meta.output_file_id}_query.sage.bqr.tsv
+
+    if [[ "${write_frag_lengths}" == "true" ]]; then
+        gzip <<< '' > sage_append_${meta.output_file_id}/${meta.output_file_id}.sage.append.frag_lengths.tsv.gz
+    fi
 
     echo -e '${task.process}:\\n  stub: noversions\\n' > versions.yml
     """
