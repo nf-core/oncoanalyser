@@ -34,7 +34,7 @@ process WISP {
 
     def log_level_arg = task.ext.log_level ? "-log_level ${task.ext.log_level}" : ''
 
-    def reference_arg = meta.normal_id ? "-reference_id ${meta.normal_id}" : ''
+    def reference_arg = meta.normal_id ? "-reference ${meta.normal_id}" : '-skip_reference_id'
 
     def amber_dir_arg
     def cobalt_dir_arg
@@ -82,8 +82,8 @@ process WISP {
         -Xmx${Math.round(task.memory.bytes * 0.95)} \\
         com.hartwig.hmftools.wisp.WispApplication \\
         ${args} \\
-        -patient_id ${meta.subject_id} \\
-        -tumor_id ${meta.primary_id} \\
+        -patient ${meta.subject_id} \\
+        -tumor ${meta.primary_id} \\
         ${reference_arg} \\
         -samples ${meta.longitudinal_id} \\
         -purity_methods ${purity_methods_arg} \\
