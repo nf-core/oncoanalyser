@@ -1,13 +1,14 @@
-name: virusbreakend
-description: Detect viral integration from WGS data
+name: viridian
+description: Detects oncoviruses with Viridian
 keywords:
   - viral
   - integration
+  - calling
 tools:
-  - virusbreakend:
-      description: Performs detection of viral intergation from WGS data
-      homepage: https://github.com/PapenfussLab/gridss/blob/master/VIRUSBreakend_Readme.md
-      documentation: https://github.com/PapenfussLab/gridss/blob/master/VIRUSBreakend_Readme.md
+  - viridian:
+      description: Detects oncoviruses and their host integration sites
+      homepage: https://github.com/hartwigmedical/hmftools/tree/master/viridian
+      documentation: https://github.com/hartwigmedical/hmftools/tree/master/viridian
       licence: ["GPL v3"]
 input:
   - meta:
@@ -15,10 +16,23 @@ input:
       description: |
         Groovy Map containing sample information
         e.g. [id: 'sample_id']
-  - aln:
+  - tumor_aln:
       type: file
-      description: Alignment file
+      description: Tumor alignment file
       pattern: "*.{bam,cram}"
+  - tumor_idx:
+      type: file
+      description: Tumor index file
+      pattern: "*.{bai,crai}"
+  - esvee_dir:
+      type: directory
+      description: ESVEE output directory
+  - bamtools_somatic_dir:
+      type: directory
+      description: BamTools somatic output directory
+  - purple_dir:
+      type: directory
+      description: PURPLE output directory
   - genome_fasta:
       type: file
       description: Reference genome assembly FASTA file
@@ -31,30 +45,18 @@ input:
       type: file
       description: Reference genome assembly dict file
       pattern: "*.{dict}"
-  - genome_gridss_index:
-      type: file
-      description: Reference genome assembly GRIDSS index file
-      pattern: "*.{gridsscache}"
-  - virusbreakenddb:
+  - viridian_resources:
       type: directory
-      description: VIRUSBreakend database directory
-  - gridss_config:
-      type: file
-      description: GRIDSS configuration file (optional)
+      description: Viridian resource directory
 output:
   - meta:
       type: map
       description: |
         Groovy Map containing sample information
         e.g. [id: 'sample_id']
-  - virusbreakend_tsv:
-      type: file
-      description: VIRUSBreakned summary file
-      pattern: "*.{tsv}"
-  - virusbreakend_vcf:
-      type: file
-      description: VIRUSBreakend VCF file
-      pattern: "*.{vcf.gz}"
+  - viridian_dir:
+      type: directory
+      description: Viridian output directory
   - command_files:
       type: list
       description: List of command files
@@ -63,4 +65,4 @@ output:
       description: File containing software versions
       pattern: "versions.yml"
 authors:
-  - "@scwatts"
+  - "@reecejones-hartwig"

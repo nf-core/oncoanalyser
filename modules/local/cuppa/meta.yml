@@ -22,9 +22,9 @@ input:
   - purple_dir:
       type: directory
       description: PURPLE output directory (optional)
-  - virusinterpreter_dir:
+  - viridian_dir:
       type: directory
-      description: Virus Interpreter output directory (optional)
+      description: Viridian output directory (optional)
   - linx_dir:
       type: directory
       description: LINX output directory (optional)
