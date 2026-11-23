@@ -759,7 +759,9 @@ workflow WGTS {
             ref_data.genome_fasta,
             ref_data.genome_fai,
             ref_data.genome_dict,
-            hmf_data.viridian_resources,
+            hmf_data.virus_genomes_fasta,
+            hmf_data.virus_genomes_tsv,
+            hmf_data.virus_groups_tsv,
         )
 
         ch_viridian_out = ch_viridian_out.mix(VIRIDIAN_CALLING.out.viridian_dir)
