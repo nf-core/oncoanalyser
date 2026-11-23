@@ -64,7 +64,6 @@ process ORANGE {
     def linx_germline_dir_arg = linx_annotation_dir_germline ? "-linx_germline_dir ${linx_annotation_dir_germline}" : ''
 
     def sage_plot_dir_arg = sage_plot_dir_somatic ? "-sage_plot_dir ${sage_plot_dir_somatic}" : ''
-    // ORANGE 5.1 reads the Viridian report through -virus_dir and has no -viridian_dir argument
     def viridian_dir_arg = viridian_dir ? "-virus_dir ${viridian_dir}" : ''
     def lilac_dir_arg = lilac_dir ? "-lilac_dir ${lilac_dir}" : ''
     def chord_dir_arg = chord_dir ? "-chord_dir ${chord_dir}" : ''
