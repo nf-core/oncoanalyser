@@ -3,7 +3,6 @@ process VIRIDIAN {
     label 'process_medium'
 
     conda "${moduleDir}/environment.yml"
-    // TODO: confirm once hmftools-viridian 1.0 is released on bioconda
     container "${ workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container ?
         'https://depot.galaxyproject.org/singularity/hmftools-viridian:1.0--hdfd78af_0' :
         'biocontainers/hmftools-viridian:1.0--hdfd78af_0' }"
