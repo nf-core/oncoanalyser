@@ -45,18 +45,9 @@ input:
       type: file
       description: Reference genome assembly dict file
       pattern: "*.{dict}"
-  - virus_genomes_fasta:
-      type: file
-      description: Viridian virus genomes FASTA file
-      pattern: "*.{fasta}"
-  - virus_genomes_tsv:
-      type: file
-      description: Viridian virus genomes TSV file
-      pattern: "*.{tsv}"
-  - virus_groups_tsv:
-      type: file
-      description: Viridian virus groups TSV file
-      pattern: "*.{tsv}"
+  - virus_genomes_dir:
+      type: directory
+      description: Viridian virus genomes resource directory
 output:
   - meta:
       type: map

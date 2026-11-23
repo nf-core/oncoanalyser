@@ -17,9 +17,7 @@ workflow VIRIDIAN_CALLING {
     genome_fasta          // channel: [mandatory] /path/to/genome_fasta
     genome_fai            // channel: [mandatory] /path/to/genome_fai
     genome_dict           // channel: [mandatory] /path/to/genome_dict
-    virus_genomes_fasta   // channel: [mandatory] /path/to/virus_genomes_fasta
-    virus_genomes_tsv     // channel: [mandatory] /path/to/virus_genomes_tsv
-    virus_groups_tsv      // channel: [mandatory] /path/to/virus_groups_tsv
+    virus_genomes_dir     // channel: [mandatory] /path/to/virus_genomes_dir/
 
     main:
     //
@@ -82,9 +80,7 @@ workflow VIRIDIAN_CALLING {
         genome_fasta,
         genome_fai,
         genome_dict,
-        virus_genomes_fasta,
-        virus_genomes_tsv,
-        virus_groups_tsv,
+        virus_genomes_dir,
     )
 
     //

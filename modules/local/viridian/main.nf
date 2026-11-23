@@ -12,9 +12,7 @@ process VIRIDIAN {
     path genome_fasta
     path genome_fai
     path genome_dict
-    path virus_genomes_fasta
-    path virus_genomes_tsv
-    path virus_groups_tsv
+    path virus_genomes_dir, stageAs: 'virus_genomes_dir'
 
     output:
     tuple val(meta), path('viridian/')                  , topic: viridian_dir
@@ -43,9 +41,9 @@ process VIRIDIAN {
         -purple_dir ${purple_dir} \\
         -bam_metrics_tumor_dir ${bamtools_somatic_dir} \\
         -ref_genome ${genome_fasta} \\
-        -virus_genomes_fasta ${virus_genomes_fasta} \\
-        -virus_genomes_tsv ${virus_genomes_tsv} \\
-        -virus_groups_tsv ${virus_groups_tsv} \\
+        -virus_genomes_fasta ${virus_genomes_dir}/virus_genomes.fasta \\
+        -virus_genomes_tsv ${virus_genomes_dir}/virus_genomes.tsv \\
+        -virus_groups_tsv ${virus_genomes_dir}/virus_groups.tsv \\
         -kmer_filter \\
         -threads ${task.cpus} \\
         ${log_level_arg} \\
