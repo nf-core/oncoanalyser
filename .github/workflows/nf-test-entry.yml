@@ -1,0 +1,170 @@
+name: Run nf-test
+on:
+  pull_request:
+    paths-ignore:
+      - "docs/**"
+      - "**/meta.yml"
+      - "**/*.md"
+      - "**/*.png"
+      - "**/*.svg"
+  release:
+    types: [published]
+  workflow_dispatch:
+
+# Cancel if a newer run is started
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+env:
+  # NOTE: also duplicated in the nf-test job 'with' block below; the env context is
+  # not available in reusable workflow calls (https://github.com/orgs/community/discussions/26671)
+  HMF_REF_VERSION: "grch38_hmf--26.1--1"
+
+jobs:
+  download-reference:
+    name: Download HMF reference data
+    runs-on:
+      - runs-on=${{ github.run_id }}-download-reference
+      - runner=8cpu-linux-x64
+      - volume=300gb
+      - extras=s3-cache
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
+        with:
+          fetch-depth: 0
+
+      - uses: runs-on/action@v2
+
+      - name: Restore HMF reference cache
+        id: cache-hmf-ref
+        uses: actions/cache@v4
+        with:
+          path: reference_data/
+          key: hmf-reference-${{ env.HMF_REF_VERSION }}-${{ hashFiles('nextflow.config', 'conf/hmf_data.config', 'conf/hmf_genomes.config') }}
+
+      - name: Setup Nextflow for reference download
+        if: ${{ steps.cache-hmf-ref.outputs.cache-hit != 'true' }}
+        uses: nf-core/setup-nextflow@v2
+
+      - name: Download HMF reference data from R2
+        if: ${{ steps.cache-hmf-ref.outputs.cache-hit != 'true' }}
+        run: |
+          nextflow run . \
+            -profile docker \
+            --mode prepare_reference \
+            --ref_data_types wgs,bwamem2_index,star_index \
+            --genome GRCh38_hmf \
+            --outdir ./ \
+            -c <(echo "aws.client.anonymous=true")
+
+      - name: Verify reference data
+        run: |
+          echo "Reference data size:"
+          du -sh reference_data/ || echo "reference_data/ not found"
+          echo "Reference data structure:"
+          find reference_data/ -maxdepth 3 -type d 2>/dev/null || echo "No directories found"
+
+  # NOTE(SW): only run large tests on up-sized instances to avoid wasting compute (in this case the just test profile)
+  # NOTE(SW): the test profile requires more than 32 GB memory and with the available RunsOn instances, the 32cpu-linux-x64 runner is the best fit despite being excessively overprovisioned re vCPUs
+  # https://runs-on.com/runners/linux/
+  # Instance type     vCPUs   Memory (GiB)  RunsOn name
+  # m7a.medium            1              4  1cpu-linux-x64
+  # m7i.large             2              8  2cpu-linux-x64
+  # m7i.xlarge            4             16  4cpu-linux-x64
+  # c7i.2xlarge           8             16  8cpu-linux-x64
+  # c7i.4xlarge          16             32  16cpu-linux-x64
+  # m7i-flex.8xlarge     32            128  32cpu-linux-x64
+  # c7i.12xlarge         48             96  48cpu-linux-x64
+  # c7a.16xlarge         64            128  64cpu-linux-x64
+  nf-test:
+    needs: [download-reference]
+    uses: ./.github/workflows/nf-test-reusable.yml
+    strategy:
+      matrix:
+        include:
+          - name: small
+            tags: cicd
+            runson_instance_type: 4cpu-linux-x64
+            runson_volume_size: 60gb
+            use_reference_cache: false
+          - name: large
+            tags: cicd.large
+            runson_instance_type: 32cpu-linux-x64
+            runson_volume_size: 200gb
+            use_reference_cache: true
+    with:
+      name: ${{ matrix.name }}
+      tags: ${{ matrix.tags }}
+      runson_instance_type: ${{ matrix.runson_instance_type }}
+      runson_volume_size: ${{ matrix.runson_volume_size }}
+      use_reference_cache: ${{ matrix.use_reference_cache }}
+      hmf_ref_version: "grch38_hmf--26.1--1"
+
+  confirm-pass:
+    needs: [nf-test]
+    if: always()
+    runs-on: # use self-hosted runners
+      - runs-on=${{ github.run_id }}-confirm-pass
+      - runner=1cpu-linux-x64
+    steps:
+      - name: One or more tests failed (excluding latest-everything)
+        if: ${{ contains(needs.*.result, 'failure') }}
+        run: exit 1
+
+      - name: One or more tests cancelled
+        if: ${{ contains(needs.*.result, 'cancelled') }}
+        run: exit 1
+
+      - name: All tests ok
+        if: ${{ contains(needs.*.result, 'success') }}
+        run: exit 0
+
+      - name: debug-print
+        if: always()
+        run: |
+          echo "::group::DEBUG: `needs` Contents"
+          echo "DEBUG: toJSON(needs) = ${{ toJSON(needs) }}"
+          echo "DEBUG: toJSON(needs.*.result) = ${{ toJSON(needs.*.result) }}"
+          echo "::endgroup::"
+
+      - name: Download PR comment fragments
+        if: ${{ always() }}
+        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
+        continue-on-error: true
+        with:
+          pattern: pr-comment-fragment-*
+          path: pr-comment-fragments
+          merge-multiple: true
+
+      # Build a comment for the shared pr-comment.yml poster to publish on the PR.
+      # Based on the fragments above (not needs.*.result) so non-blocking failures are still reported.
+      - name: Prepare PR comment
+        if: ${{ always() }}
+        env:
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+          RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+        run: |
+          mkdir -p pr-comment
+          echo "$PR_NUMBER" > pr-comment/pr_number.txt
+          echo "nf-test" > pr-comment/header.txt
+          if [ -d pr-comment-fragments ] && [ -n "$(ls -A pr-comment-fragments)" ]; then
+            {
+              echo "## ❌ nf-test failed with latest Nextflow version"
+              echo ""
+              echo "> [!NOTE]"
+              echo "> Tests with Nextflow's latest version failed but it will not cause a CI workflow failure."
+              echo "> Please check if the failure is expected with newer (edge-)releases of Nextflow or if it needs fixing."
+              echo ""
+              cat pr-comment-fragments/*.md
+              echo ""
+              echo "See the [full run](${RUN_URL}) for details."
+            } > pr-comment/comment.md
+          fi
+
+      - name: Upload PR comment artifact
+        if: ${{ always() }}
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7
+        with:
+          name: pr-comment
+          path: pr-comment/

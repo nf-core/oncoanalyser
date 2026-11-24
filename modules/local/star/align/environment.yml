@@ -1,0 +1,6 @@
+name: star_align
+channels:
+  - conda-forge
+  - bioconda
+dependencies:
+  - bioconda::star=2.7.3a

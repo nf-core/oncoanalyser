@@ -1,0 +1,7 @@
+channels:
+  - conda-forge
+  - bioconda
+  - oncoanalyser
+dependencies:
+  - bioconda::multiqc=1.35
+  - oncoanalyser::oncoanalyser-multiqc-plugin=0.1.0

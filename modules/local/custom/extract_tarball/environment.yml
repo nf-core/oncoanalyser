@@ -1,0 +1,6 @@
+name: custom_extracttarball
+channels:
+  - conda-forge
+  - bioconda
+dependencies:
+  - conda-forge::tar=1.34

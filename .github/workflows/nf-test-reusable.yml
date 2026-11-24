@@ -1,0 +1,183 @@
+name: Run nf-test on selected test set
+on:
+  workflow_call:
+    inputs:
+      name:
+        description: "Name of test set"
+        type: string
+        required: true
+      tags:
+        description: "Tags to pass as argument for nf-test --tag parameter"
+        type: string
+        required: true
+      runson_instance_type:
+        description: "RunsOn runner instance type"
+        type: string
+        required: true
+      runson_volume_size:
+        description: "RunsOn runner instance volume"
+        type: string
+        required: true
+      use_reference_cache:
+        description: "Whether to restore and use cached HMF reference data for tests"
+        type: boolean
+        required: true
+      hmf_ref_version:
+        description: "HMF reference data version string for cache key"
+        type: string
+        required: true
+
+env:
+  GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+  NFT_VER: "0.9.3"
+  NFT_WORKDIR: "~"
+  NXF_ANSI_LOG: false
+  NXF_SINGULARITY_CACHEDIR: ${{ github.workspace }}/.singularity
+  NXF_SINGULARITY_LIBRARYDIR: ${{ github.workspace }}/.singularity
+  HMF_REF_VERSION: ${{ inputs.hmf_ref_version }}
+
+jobs:
+  nf-test-changes:
+    name: nf-test-changes (${{ inputs.name }})
+    runs-on: # use self-hosted runners
+      - runs-on=${{ github.run_id }}-nf-test-changes
+      - runner=1cpu-linux-x64
+    outputs:
+      shard: ${{ steps.set-shards.outputs.shard }}
+      total_shards: ${{ steps.set-shards.outputs.total_shards }}
+    steps:
+      - name: Clean Workspace # Purge the workspace in case it's running on a self-hosted runner
+        run: |
+          ls -la ./
+          rm -rf ./* || true
+          rm -rf ./.??* || true
+          ls -la ./
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
+        with:
+          fetch-depth: 0
+
+      - name: get number of shards
+        id: set-shards
+        uses: ./.github/actions/get-shards
+        env:
+          NFT_VER: ${{ env.NFT_VER }}
+        with:
+          max_shards: 7
+          tags: ${{ inputs.tags }}
+
+      - name: debug
+        run: |
+          echo ${{ steps.set-shards.outputs.shard }}
+          echo ${{ steps.set-shards.outputs.total_shards }}
+
+  nf-test:
+    name: "${{ inputs.name }} tests | ${{ matrix.profile }} | ${{ matrix.NXF_VER }} | ${{ matrix.shard }}/${{ needs.nf-test-changes.outputs.total_shards }}"
+    needs: [nf-test-changes]
+    if: ${{ needs.nf-test-changes.outputs.total_shards != '0' }}
+    runs-on: # use self-hosted runners
+      - runs-on=${{ github.run_id }}-nf-test
+      - runner=${{ inputs.runson_instance_type }}
+      - volume=${{ inputs.runson_volume_size }}
+      - extras=s3-cache
+    strategy:
+      fail-fast: false
+      matrix:
+        shard: ${{ fromJson(needs.nf-test-changes.outputs.shard) }}
+        profile: [conda, docker, singularity]
+        isMain:
+          - ${{ github.base_ref == 'master' || github.base_ref == 'main' }}
+        # Exclude conda and singularity on dev
+        exclude:
+          - isMain: false
+            profile: "conda"
+          - isMain: false
+            profile: "singularity"
+        NXF_VER:
+          - "25.10.4"
+          - "latest-everything"
+    env:
+      NXF_ANSI_LOG: false
+      TOTAL_SHARDS: ${{ needs.nf-test-changes.outputs.total_shards }}
+
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
+        with:
+          fetch-depth: 0
+
+      - uses: runs-on/action@v2
+
+      - name: Restore HMF reference cache
+        if: ${{ inputs.use_reference_cache }}
+        uses: actions/cache@v4
+        with:
+          path: reference_data/
+          key: hmf-reference-${{ env.HMF_REF_VERSION }}-${{ hashFiles('nextflow.config', 'conf/hmf_data.config', 'conf/hmf_genomes.config') }}
+
+      - name: Set reference data paths
+        if: ${{ inputs.use_reference_cache }}
+        run: |
+          # Find the versioned subdirectory containing the reference FASTA and convert to absolute path
+          REF_DIR=$(find reference_data -type f -name "GRCh38_masked_exclusions_alts_hlas.fasta" -printf '%h\n' 2>/dev/null | head -1)
+          if [ -n "$REF_DIR" ]; then
+            # Convert to absolute path
+            REF_DIR_ABS=$(cd "$REF_DIR" && pwd)
+            echo "NXF_REF_DATA_PATH=$REF_DIR_ABS" >> $GITHUB_ENV
+            echo "Found reference data at: $REF_DIR_ABS"
+
+            # Find index directories using pattern matching (already absolute since REF_DIR_ABS is absolute)
+            BWAMEM2_INDEX=$(find "$REF_DIR_ABS" -maxdepth 1 -type d -name "bwa-mem2_index*" 2>/dev/null | head -1)
+            GRIDSS_INDEX=$(find "$REF_DIR_ABS" -maxdepth 1 -type d -name "gridss_index*" 2>/dev/null | head -1)
+            STAR_INDEX=$(find "$REF_DIR_ABS" -maxdepth 1 -type d -name "star_index*" 2>/dev/null | head -1)
+            HMF_DATA=$(find "$REF_DIR_ABS" -maxdepth 1 -type d -name "hmf_pipeline_resources*" 2>/dev/null | head -1)
+
+            [ -n "$BWAMEM2_INDEX" ] && echo "NXF_REF_BWAMEM2_INDEX=$BWAMEM2_INDEX" >> $GITHUB_ENV
+            [ -n "$GRIDSS_INDEX" ] && echo "NXF_REF_GRIDSS_INDEX=$GRIDSS_INDEX" >> $GITHUB_ENV
+            [ -n "$STAR_INDEX" ] && echo "NXF_REF_STAR_INDEX=$STAR_INDEX" >> $GITHUB_ENV
+            [ -n "$HMF_DATA" ] && echo "NXF_REF_HMF_DATA=$HMF_DATA" >> $GITHUB_ENV
+          else
+            echo "No cached reference data found"
+          fi
+
+      - name: Run nf-test
+        id: run_nf_test
+        uses: ./.github/actions/nf-test
+        continue-on-error: ${{ matrix.NXF_VER == 'latest-everything' }}
+        env:
+          NFT_WORKDIR: ${{ env.NFT_WORKDIR }}
+          NXF_VERSION: ${{ matrix.NXF_VER }}
+        with:
+          profile: ${{ matrix.profile }}
+          shard: ${{ matrix.shard }}
+          total_shards: ${{ env.TOTAL_SHARDS }}
+          tags: ${{ inputs.tags }}
+
+      - name: Report test status
+        if: ${{ always() }}
+        run: |
+          if [[ "${{ steps.run_nf_test.outcome }}" == "failure" ]]; then
+            echo "::error::Test with ${{ matrix.NXF_VER }} failed"
+            # Add to workflow summary
+            echo "## ❌ Test failed: ${{ matrix.profile }} | ${{ matrix.NXF_VER }} | Shard ${{ matrix.shard }}/${{ env.TOTAL_SHARDS }}" >> $GITHUB_STEP_SUMMARY
+            if [[ "${{ matrix.NXF_VER }}" == "latest-everything" ]]; then
+              echo "::warning::Test with latest-everything failed but will not cause workflow failure. Please check if the error is expected or if it needs fixing."
+            fi
+            if [[ "${{ matrix.NXF_VER }}" != "latest-everything" ]]; then
+              exit 1
+            fi
+          fi
+
+      # continue-on-error keeps latest-everything from failing the job, so it never shows up in
+      # `needs.nf-test.result` downstream and CI stays green. Surface it via a PR comment instead;
+      # other NXF_VER failures already fail the job/CI directly, so no comment is needed for those.
+      - name: Prepare PR comment fragment
+        if: ${{ always() && steps.run_nf_test.outcome == 'failure' && matrix.NXF_VER == 'latest-everything' }}
+        run: |
+          mkdir -p pr-comment-fragment
+          echo "* ❌ \`${{ matrix.profile }}\` | \`${{ matrix.NXF_VER }}\` | Shard ${{ matrix.shard }}/${{ env.TOTAL_SHARDS }}" > pr-comment-fragment/fragment.md
+
+      - name: Upload PR comment fragment
+        if: ${{ always() && steps.run_nf_test.outcome == 'failure' && matrix.NXF_VER == 'latest-everything' }}
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7
+        with:
+          name: pr-comment-fragment-${{ strategy.job-index }}
+          path: pr-comment-fragment/

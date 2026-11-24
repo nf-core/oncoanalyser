@@ -1,0 +1,100 @@
+name: esvee
+description: Call somatic SVs with ESVEE
+keywords:
+  - calling
+  - sv
+tools:
+  - esvee:
+      description: Structural variant (SV) calling
+      homepage: https://github.com/hartwigmedical/hmftools/tree/master/esvee
+      documentation: https://github.com/hartwigmedical/hmftools/tree/master/esvee
+      licence: ["GPL v3"]
+input:
+  - meta:
+      type: map
+      description: |
+        Groovy Map containing sample information
+        e.g. [id: 'sample_id']
+  - tumor_aln:
+      type: file
+      description: Tumor alignment file
+      pattern: "*.{bam,cram}"
+  - tumor_idx:
+      type: file
+      description: Tumor index file
+      pattern: "*.{bai,crai}"
+  - normal_aln:
+      type: file
+      description: Normal alignment file
+      pattern: "*.{bam,cram}"
+  - normal_idx:
+      type: file
+      description: Normal index file
+      pattern: "*.{bai,crai}"
+  - genome_fasta:
+      type: file
+      description: Reference genome assembly FASTA file
+      pattern: "*.{fa,fasta}"
+  - genome_ver:
+      type: string
+      description: Reference genome version
+  - genome_fai:
+      type: file
+      description: Reference genome assembly fai file
+      pattern: "*.{fai}"
+  - genome_dict:
+      type: file
+      description: Reference genome assembly dict file
+      pattern: "*.{dict}"
+  - genome_img:
+      type: file
+      description: Reference genome assembly img file
+      pattern: "*.{img}"
+  - pon_breakends:
+      type: file
+      description: GRIDSS breakend PON file
+      pattern: "*.{bed.gz}"
+  - pon_breakpoints:
+      type: file
+      description: GRIDSS breakpoint PON file
+      pattern: "*.{bedpe.gz}"
+  - decoy_sequences_image:
+      type: file
+      description: ESVEE decoy sequences images file
+      pattern: "*.{img}"
+  - known_fusions:
+      type: file
+      description: HMF Known Fusions file
+      pattern: "*.{bedpe}"
+  - repeatmasker_annotations:
+      type: file
+      description: RepeatMasker annotations file
+  - unmap_regions:
+      type: file
+      description: Hartwig unmap regions file
+      pattern: "*.{tsv}"
+  - target_region_bed:
+      type: file
+      description: Target regions BED file (optional)
+      pattern: "*.{bed}"
+  - sequencing_platform:
+      type: string
+      description: Sequencing platform
+output:
+  - meta:
+      type: map
+      description: |
+        Groovy Map containing sample information
+        e.g. [id: 'sample_id']
+  - esvee_dir:
+      type: directory
+      description: ESVEE output directory
+  - command_files:
+      type: list
+      description: List of command files
+  - versions:
+      type: file
+      description: File containing software versions
+      pattern: "versions.yml"
+authors:
+  - "@scwatts"

@@ -1,0 +1,6 @@
+name: gatk4_markduplicates
+channels:
+  - conda-forge
+  - bioconda
+dependencies:
+  - bioconda::gatk4=4.6.1.0
