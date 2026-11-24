@@ -654,8 +654,8 @@ _GRCh37 genome (Hartwig): `GRCh37_hmf`_
 | BWA-MEM2 index       | [bwa-mem2_index-2.2.1.tar.gz](https://data.oncoanalyser.com/r2/reference/dist/v1/genomes/GRCh37_hmf/26.1/bwa-mem2_index-2.2.1.tar.gz)                                                              |
 | GRIDSS index         | [gridss_index-2.13.2.tar.gz](https://data.oncoanalyser.com/r2/reference/dist/v1/genomes/GRCh37_hmf/26.1/gridss_index-2.13.2.tar.gz)                                                                |
 | STAR index           | [star_index-gencode_19-2.7.3a.tar.gz](https://data.oncoanalyser.com/r2/reference/dist/v1/genomes/GRCh37_hmf/26.1/star_index-gencode_19-2.7.3a.tar.gz)                                              |
-| WiGiTS data          | [hmf_pipeline_resources.37_v3.0.0--8.tar.gz](https://data.oncoanalyser.com/r2/reference/dist/v1/hartwig/pipeline_resources/hmf_pipeline_resources.37_v3.0.0--8.tar.gz)                             |
-| TSO500 panel data    | [hmf_panel_resources.tso500.37_v3.0.0--8.tar.gz](https://data.oncoanalyser.com/r2/reference/dist/v1/hartwig/panel_resources/hmf_panel_resources.tso500.37_v3.0.0--8.tar.gz)                        |
+| WiGiTS data          | [hmf_pipeline_resources.37_v3.0.1--3.tar.gz](https://data.oncoanalyser.com/r2/reference/dist/v1/hartwig/pipeline_resources/hmf_pipeline_resources.37_v3.0.1--3.tar.gz)                             |
+| TSO500 panel data    | [hmf_panel_resources.tso500.37_v3.0.1--3.tar.gz](https://data.oncoanalyser.com/r2/reference/dist/v1/hartwig/panel_resources/hmf_panel_resources.tso500.37_v3.0.1--3.tar.gz)                        |
 
 _GRCh38 genome (Hartwig): `GRCh38_hmf`_
 
@@ -668,7 +668,7 @@ _GRCh38 genome (Hartwig): `GRCh38_hmf`_
 | BWA-MEM2 index       | [bwa-mem2_index-2.2.1.tar.gz](https://data.oncoanalyser.com/r2/reference/dist/v1/genomes/GRCh38_hmf/26.1/bwa-mem2_index-2.2.1.tar.gz)                                                                |
 | GRIDSS index         | [gridss_index-2.13.2.tar.gz](https://data.oncoanalyser.com/r2/reference/dist/v1/genomes/GRCh38_hmf/26.1/gridss_index-2.13.2.tar.gz)                                                                  |
 | STAR index           | [star_index-gencode_38-2.7.3a.tar.gz](https://data.oncoanalyser.com/r2/reference/dist/v1/genomes/GRCh38_hmf/26.1/star_index-gencode_38-2.7.3a.tar.gz)                                                |
-| WiGiTS data          | [hmf_pipeline_resources.38_v3.0.0--8.tar.gz](https://data.oncoanalyser.com/r2/reference/dist/v1/hartwig/pipeline_resources/hmf_pipeline_resources.38_v3.0.0--8.tar.gz)                               |
+| WiGiTS data          | [hmf_pipeline_resources.38_v3.0.1--3.tar.gz](https://data.oncoanalyser.com/r2/reference/dist/v1/hartwig/pipeline_resources/hmf_pipeline_resources.38_v3.0.1--3.tar.gz)                               |
 
 ## Pipeline modes
 
