@@ -78,7 +78,16 @@ process AMBER {
     """
     mkdir -p amber/
 
-    touch amber/.stub
+    touch amber/${meta.tumor_id}.amber.baf.pcf
+    echo | gzip > amber/${meta.tumor_id}.amber.baf.tsv.gz
+    touch amber/${meta.tumor_id}.amber.contamination.tsv
+    touch amber/${meta.tumor_id}.amber.qc
+
+    if [[ -n "${meta.normal_id ?: ''}" ]]; then
+        touch amber/${meta.normal_id}.amber.homozygousregion.tsv
+        echo | gzip > amber/${meta.normal_id}.amber.snp.vcf.gz
+        touch amber/${meta.normal_id}.amber.snp.vcf.gz.tbi
+    fi
 
     echo -e '${task.process}:\\n  stub: noversions\\n' > versions.yml
     """
