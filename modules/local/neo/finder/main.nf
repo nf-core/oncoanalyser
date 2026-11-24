@@ -53,9 +53,9 @@ process NEO_FINDER {
 
     stub:
     """
-    mkdir -p neo_finder/
+    mkdir -p neo/finder/
 
-    touch neo_finder/.stub
+    touch neo/finder/${meta.tumor_dna_id}.neo.neo_data.tsv
 
     echo -e '${task.process}:\\n  stub: noversions\\n' > versions.yml
     """

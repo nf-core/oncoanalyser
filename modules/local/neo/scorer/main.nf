@@ -81,9 +81,10 @@ process NEO_SCORER {
 
     stub:
     """
-    mkdir -p neo_scorer/
+    mkdir -p neo/scorer/
 
-    touch neo_scorer/.stub
+    touch neo/scorer/${meta.tumor_dna_id}.neo.peptide_scores.tsv
+    touch neo/scorer/${meta.tumor_dna_id}.neo.neoepitope.tsv
 
     echo -e '${task.process}:\\n  stub: noversions\\n' > versions.yml
     """
