@@ -50,9 +50,14 @@ process LINX_GERMLINE {
 
     stub:
     """
-    mkdir -p linx_germline/
+    mkdir -p linx/germline_annotations/
 
-    touch linx_germline/.stub
+    touch linx/germline_annotations/${meta.tumor_dna_id}.germline.breakend.tsv
+    touch linx/germline_annotations/${meta.tumor_dna_id}.germline.clusters.tsv
+    touch linx/germline_annotations/${meta.tumor_dna_id}.germline.disruption.tsv
+    touch linx/germline_annotations/${meta.tumor_dna_id}.germline.driver.catalog.tsv
+    touch linx/germline_annotations/${meta.tumor_dna_id}.germline.links.tsv
+    touch linx/germline_annotations/${meta.tumor_dna_id}.germline.svs.tsv
 
     echo -e '${task.process}:\\n  stub: noversions\\n' > versions.yml
     """
