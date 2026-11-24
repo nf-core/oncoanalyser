@@ -82,7 +82,15 @@ process ISOFOX {
     """
     mkdir -p isofox/
 
-    touch isofox/.stub
+    touch isofox/${meta.tumor_rna_id}.isf.alt_splice_junc.tsv
+    touch isofox/${meta.tumor_rna_id}.alt_splice_junc_unfiltered.tsv
+    touch isofox/${meta.tumor_rna_id}.isf.fusions.tsv
+    touch isofox/${meta.tumor_rna_id}.isf.gene_collection.tsv
+    touch isofox/${meta.tumor_rna_id}.isf.gene_data.tsv
+    touch isofox/${meta.tumor_rna_id}.isf.pass_fusions.tsv
+    touch isofox/${meta.tumor_rna_id}.isf.retained_intron.csv
+    touch isofox/${meta.tumor_rna_id}.isf.summary.tsv
+    touch isofox/${meta.tumor_rna_id}.isf.transcript_data.tsv
 
     echo -e '${task.process}:\\n  stub: noversions\\n' > versions.yml
     """
