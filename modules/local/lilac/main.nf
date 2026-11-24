@@ -81,12 +81,13 @@ process LILAC {
     """
 
     stub:
+    def sample_name = getSampleName(meta, tumor_dna_aln, normal_dna_aln)
     """
     mkdir -p lilac/
 
-    touch lilac/${meta.tumor_dna_id}.lilac.candidates.coverage.tsv
-    touch lilac/${meta.tumor_dna_id}.lilac.qc.tsv
-    touch lilac/${meta.tumor_dna_id}.lilac.tsv
+    touch lilac/${sample_name}.lilac.candidates.coverage.tsv
+    touch lilac/${sample_name}.lilac.qc.tsv
+    touch lilac/${sample_name}.lilac.tsv
 
     echo -e '${task.process}:\\n  stub: noversions\\n' > versions.yml
     """

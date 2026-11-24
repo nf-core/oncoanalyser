@@ -49,8 +49,8 @@ process SIGS {
     """
     mkdir -p sigs/
 
-    touch sigs/${meta.tumor_dna_id}.sig.allocation.tsv
-    touch sigs/${meta.tumor_dna_id}.sig.snv_counts.csv
+    touch sigs/${meta.sample_id}.sig.allocation.tsv
+    touch sigs/${meta.sample_id}.sig.snv_counts.csv
 
     echo -e '${task.process}:\\n  stub: noversions\\n' > versions.yml
     """
