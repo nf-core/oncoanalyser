@@ -83,7 +83,8 @@ process NEO_SCORER {
     """
     mkdir -p neo_scorer/
 
-    touch neo_scorer/.stub
+    touch neo_scorer/${meta.sample_id}.neo.peptide_scores.tsv
+    touch neo_scorer/${meta.sample_id}.neo.neoepitope.tsv
 
     echo -e '${task.process}:\\n  stub: noversions\\n' > versions.yml
     """

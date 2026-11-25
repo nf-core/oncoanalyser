@@ -75,7 +75,15 @@ process COBALT {
     """
     mkdir -p cobalt/
 
-    touch cobalt/.stub
+    touch cobalt/${meta.tumor_id}.cobalt.gc.median.tsv
+    touch cobalt/${meta.tumor_id}.cobalt.ratio.pcf
+    echo | gzip > cobalt/${meta.tumor_id}.cobalt.ratio.tsv.gz
+
+    if [[ -n "${meta.normal_id ?: ''}" ]]; then
+        touch cobalt/${meta.normal_id}.cobalt.gc.median.tsv
+        touch cobalt/${meta.normal_id}.cobalt.ratio.median.tsv
+        touch cobalt/${meta.normal_id}.cobalt.ratio.pcf
+    fi
 
     echo -e '${task.process}:\\n  stub: noversions\\n' > versions.yml
     """
