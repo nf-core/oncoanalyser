@@ -8,7 +8,7 @@ process CUPPA {
         'biocontainers/hmftools-cuppa:2.5.1--py311r42hdfd78af_0' }"
 
     input:
-    tuple val(meta), path(isofox_dir), path(purple_dir), path(linx_dir), path(virusinterpreter_dir)
+    tuple val(meta), path(isofox_dir), path(purple_dir), path(linx_dir), path(viridian_dir)
     val genome_ver
     path cuppa_alt_sj
     path cuppa_classifier
@@ -34,7 +34,7 @@ process CUPPA {
 
     def purple_dir_arg = purple_dir ? "-purple_dir ${purple_dir}" : ''
     def linx_dir_arg = linx_dir ? "-linx_dir ${linx_dir}" : ''
-    def virusinterpreter_dir_arg = virusinterpreter_dir ? "-virus_dir ${virusinterpreter_dir}" : ''
+    def viridian_dir_arg = viridian_dir ? "-viridian_dir ${viridian_dir}" : ''
 
     def isofox_dir_arg = ''
     def rna_sample_arg = ''
@@ -59,7 +59,7 @@ process CUPPA {
         -categories ${categories} \\
         ${purple_dir_arg} \\
         ${linx_dir_arg} \\
-        ${virusinterpreter_dir_arg} \\
+        ${viridian_dir_arg} \\
         ${isofox_dir_arg} \\
         -ref_genome_version ${genome_ver} \\
         ${ref_alt_sj_sites_arg} \\

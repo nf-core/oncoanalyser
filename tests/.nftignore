@@ -38,4 +38,6 @@ pipeline_info/*.{html,json,txt,yml}
 */qsee/*.qsee.vis.report.pdf
 */sage/visualiser/*.sage.*.html.gz
 */teal/*.teal.telbam.bam
+*/viridian/*.viridian.{all,representative}.bam
+*/viridian/*.viridian.candidates.fasta
 **/*.command.*

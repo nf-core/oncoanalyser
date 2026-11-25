@@ -55,7 +55,6 @@ class Constants {
         DNA_ALIGNMENT,
         FAI,
         FASTA,
-        GRIDSS_INDEX,
         HMFTOOLS,
         IMG,
         PANEL,
@@ -87,7 +86,7 @@ class Constants {
         SAGE_VISUALISER,
         SIGS,
         TEAL,
-        VIRUSINTERPRETER,
+        VIRIDIAN,
         WISP,
     }
 
@@ -128,7 +127,7 @@ class Constants {
         SAGE_DIR,
         SAGE_PLOT_DIR,
         SIGS_DIR,
-        VIRUSINTERPRETER_DIR,
+        VIRIDIAN_DIR,
     }
 
     static enum SampleType {
@@ -351,8 +350,8 @@ class Constants {
             [SequenceType.DNA, SequenceType.DNA_RNA],
         ],
 
-        VIRUSINTERPRETER_DIR: [
-            FileType.VIRUSINTERPRETER_DIR,
+        VIRIDIAN_DIR: [
+            FileType.VIRIDIAN_DIR,
             SampleType.TUMOR,
             SequenceType.DNA,
         ],
