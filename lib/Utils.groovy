@@ -57,6 +57,16 @@ class Utils {
                         Nextflow.exit(1)
                     }
 
+                    // Disallow raw BAM inputs for RNA
+                    if (sequence_type_enum == Constants.SequenceType.RNA) {
+                        def rna_disallowed_input_list = [Constants.FileType.BAM, Constants.FileType.CRAM]
+                        if (rna_disallowed_input_list.contains(filetype_enum)) {
+                            log.error "got disallowed '${it.filetype}' input for ${group_id} ${sample_type_enum}/${sequence_type_enum}: " +
+                                "RNA alignments must be provided as 'bam_redux', 'cram_redux', or 'redux_dir' input, or aligned from 'fastq' input"
+                            Nextflow.exit(1)
+                        }
+                    }
+
                     def sample_key = [sample_type_enum, sequence_type_enum]
                     def meta_sample = meta.get(sample_key, [:])
 
@@ -401,8 +411,10 @@ class Utils {
             params.ref_data_genome_fai,
             params.ref_data_genome_fasta,
             params.ref_data_genome_gridss_index,
-            params.ref_data_genome_gtf,
-            params.ref_data_genome_star_index,
+            params.ref_data_genome_fasta_rna,
+            params.ref_data_genome_fai_rna,
+            params.ref_data_genome_dict_rna,
+            params.ref_data_genome_bwamem2_index_rna,
         ]
 
         params.hmf_data_paths[params.genome_version.toString()]
@@ -478,24 +490,12 @@ class Utils {
                 Nextflow.exit(1)
             }
 
-            // Apply some required restrictions to targeted mode
-            if (run_config.mode == Constants.RunMode.TARGETED) {
-
-                // Do not allow donor DNA
-                if (Utils.hasDonorDna(meta)) {
-                    log.error "targeted mode is not compatible with the donor DNA BAM/CRAM provided for ${meta.group_id}\n\n" +
-                        "The targeted workflow supports only tumor and normal DNA BAM/CRAMs (and tumor RNA BAM/CRAMs for TSO500)"
-                    Nextflow.exit(1)
-                }
-
-                // Do not allow only tumor RNA
-                if (Utils.hasTumorRna(meta) && ! Utils.hasTumorDna(meta)) {
-                    log.error "targeted mode is not compatible with only tumor RNA provided for ${meta.group_id}\n\n" +
-                        "The targeted workflow requires tumor DNA and can optionally take tumor RNA, depending on " +
-                        "the configured panel."
-                    Nextflow.exit(1)
-                }
-
+            // Do not allow only tumor RNA in targeted mode
+            if (run_config.mode == Constants.RunMode.TARGETED && Utils.hasTumorRna(meta) && ! Utils.hasTumorDna(meta)) {
+                log.error "targeted mode is not compatible with only tumor RNA provided for ${meta.group_id}\n\n" +
+                    "The targeted workflow requires tumor DNA and can optionally take tumor RNA, depending on " +
+                    "the configured panel."
+                Nextflow.exit(1)
             }
 
             // Do not allow normal DNA only
@@ -539,22 +539,14 @@ class Utils {
             Nextflow.exit(1)
         }
 
-        // Refuse to create STAR index for reference genome containing ALTs, refer to Slack channel
-        def run_star_index = run_config.stages.alignment && run_config.has_rna_fastq && ! params.ref_data_genome_star_index
+        // Require the RNA reference genome and its index, neither of which can be created by the pipeline
+        def run_rna_alignment = run_config.stages.alignment && run_config.has_rna_fastq
 
-        if (run_star_index && has_alt_contigs) {
+        if (run_rna_alignment && ! (params.ref_data_genome_fasta_rna && params.ref_data_genome_bwamem2_index_rna)) {
             log.error "\n~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n" +
-                "  Refusing to create the STAR index for a reference genome with ALT contigs.\n" +
-                "  Please review https://github.com/alexdobin/STAR docs or contact us on Slack.\n" +
-                "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
-            Nextflow.exit(1)
-        }
-
-        // Require that an input GTF file is provided when creating STAR index
-        if (run_star_index && ! params.ref_data_genome_gtf) {
-            log.error "\n~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n" +
-                "  Creating a STAR index requires the appropriate genome transcript annotations\n" +
-                "  as a GTF file. Please contact us on Slack for further information.\n" +
+                "  RNA alignment requires the reference genome with transcript contigs appended and\n" +
+                "  its bwa-mem2 index. Neither can be created by the pipeline; please provide both\n" +
+                "  with --ref_data_genome_fasta_rna and --ref_data_genome_bwamem2_index_rna.\n" +
                 "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
             Nextflow.exit(1)
         }
@@ -859,6 +851,10 @@ class Utils {
     // REDUX alignment and index retrieval
     public static getTumorReduxDirAlignment(meta, redux_dir) {
         return getReduxDirAlignment(getTumorDnaSampleName(meta), redux_dir)
+    }
+
+    public static getTumorRnaReduxDirAlignment(meta, redux_dir) {
+        return getReduxDirAlignment(getTumorRnaSampleName(meta), redux_dir)
     }
 
     public static getNormalReduxDirAlignment(meta, redux_dir) {

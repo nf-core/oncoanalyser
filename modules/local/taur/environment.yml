@@ -1,0 +1,6 @@
+name: taur
+channels:
+  - conda-forge
+  - bioconda
+dependencies:
+  - bioconda::hmftools-taur==1.0

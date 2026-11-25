@@ -1,6 +1,0 @@
-name: fastp_split
-channels:
-  - conda-forge
-  - bioconda
-dependencies:
-  - bioconda::fastp=0.23.4
