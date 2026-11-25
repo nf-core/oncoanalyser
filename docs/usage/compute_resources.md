@@ -10,7 +10,7 @@ For example, `process_high` is defined as:
 process {
     withLabel: process_high {
         cpus   = { 12    * task.attempt }
-        memory = { 72.GB * task.attempt }
+        memory = { 64.GB * task.attempt }
         time   = { 16.h  * task.attempt }
     }
 }
@@ -23,7 +23,7 @@ grep -r "label 'process_" modules/*/ | sort
 
 modules/local/amber/main.nf:    label 'process_high'
 modules/local/bamtools/main.nf:    label 'process_medium'
-modules/local/bwa-mem3/mem/dna/main.nf:    label 'process_high'
+modules/local/bwa-mem3/mem/dna/main.nf:    label 'process_huge'
 ...
 ```
 
@@ -57,8 +57,7 @@ process {
     withName: 'SAGE.*'           { memory = 72.GB; cpus = 16; disk = 375.GB }
     withName: 'TEAL_PREP'        { memory = 72.GB; cpus = 16; disk = 375.GB }
     withName: 'TEAL_PIPELINE'    { memory = 32.GB; cpus = 8 ; disk = 375.GB }
-    withName: 'VIRUSBREAKEND'    { memory = 64.GB; cpus = 16; disk = 375.GB }
-    withName: 'VIRUSINTERPRETER' { memory = 8.GB ; cpus = 2 }
+    withName: 'VIRIDIAN'         { memory = 32.GB; cpus = 16; disk = 375.GB }
     withName: 'WISP'             { memory = 16.GB; cpus = 4 ; disk = 375.GB }
 }
 ```

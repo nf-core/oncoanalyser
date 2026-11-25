@@ -1,0 +1,6 @@
+name: viridian
+channels:
+  - conda-forge
+  - bioconda
+dependencies:
+  - bioconda::hmftools-viridian==1.0

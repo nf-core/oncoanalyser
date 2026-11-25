@@ -47,10 +47,6 @@ input:
       type: file
       description: Known fusions data file
       pattern: "*.{csv}"
-  - excluded_regions:
-      type: file
-      description: Isofox excluded regions file
-      pattern: "*.{tsv}"
   - gene_distribution:
       type: file
       description: Isofox cohort gene expression file

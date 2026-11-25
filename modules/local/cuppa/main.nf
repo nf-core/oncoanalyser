@@ -8,7 +8,7 @@ process CUPPA {
         'biocontainers/hmftools-cuppa:2.5.1--py311r42hdfd78af_0' }"
 
     input:
-    tuple val(meta), path(isofox_dir), path(purple_dir), path(linx_dir), path(virusinterpreter_dir)
+    tuple val(meta), path(isofox_dir), path(purple_dir), path(linx_dir), path(viridian_dir)
     val genome_ver
     path cuppa_alt_sj
     path cuppa_classifier
@@ -30,46 +30,36 @@ process CUPPA {
 
     def log_level_arg = task.ext.log_level ? "-log_level ${task.ext.log_level}" : ''
 
+    def sample_id = meta.tumor_dna_id ?: meta.tumor_rna_id
+
     def purple_dir_arg = purple_dir ? "-purple_dir ${purple_dir}" : ''
     def linx_dir_arg = linx_dir ? "-linx_dir ${linx_dir}" : ''
-    def virusinterpreter_dir_arg = virusinterpreter_dir ? "-virus_dir ${virusinterpreter_dir}" : ''
+    def viridian_dir_arg = viridian_dir ? "-viridian_dir ${viridian_dir}" : ''
 
-    def isofox_dir_local = 'isofox__prepared'
     def isofox_dir_arg = ''
     def rna_sample_arg = ''
     def ref_alt_sj_sites_arg = ''
 
     if (isofox_dir) {
-        isofox_dir_arg = "-isofox_dir ${isofox_dir_local}"
-        rna_sample_arg = "-rna_sample ${meta.sample_id}"
+        isofox_dir_arg = "-isofox_dir ${isofox_dir}"
+        rna_sample_arg = "-rna_sample ${meta.tumor_rna_id}"
         ref_alt_sj_sites_arg = "-ref_alt_sj_sites ${cuppa_alt_sj}"
     }
 
     """
     mkdir -p cuppa/
 
-    # When provided existing ISOFOX results generated in a RNA-only analysis we must adjust identifier
-    if [[ ${categories} == ALL && -n "\$(find -L ${isofox_dir} -name '${meta.sample_rna_id}*')" ]]; then
-        mkdir -p ${isofox_dir_local}/;
-        for e in \$(find -L ${isofox_dir}/*); do
-           s=\$(sed 's/^${meta.sample_rna_id}//' <<< \${e##*/});
-           ln -s ../\${e} ${isofox_dir_local}/${meta.sample_id}\${s};
-        done;
-    elif [[ -n "${isofox_dir_arg}" ]]; then
-        ln -s ${isofox_dir} ${isofox_dir_local};
-    fi
-
     # Extract input features
     cuppa \\
         -Xmx${Math.round(task.memory.bytes * xmx_mod)} \\
         com.hartwig.hmftools.cup.prep.CuppaDataPrep \\
         ${args} \\
-        -sample ${meta.sample_id} \\
+        -sample ${sample_id} \\
         ${rna_sample_arg} \\
         -categories ${categories} \\
         ${purple_dir_arg} \\
         ${linx_dir_arg} \\
-        ${virusinterpreter_dir_arg} \\
+        ${viridian_dir_arg} \\
         ${isofox_dir_arg} \\
         -ref_genome_version ${genome_ver} \\
         ${ref_alt_sj_sites_arg} \\
@@ -79,8 +69,8 @@ process CUPPA {
     # Make predictions
     python -m cuppa.predict \\
         ${args2} \\
-        --sample_id ${meta.sample_id} \\
-        --features_path cuppa/${meta.sample_id}.cuppa_data.tsv.gz \\
+        --sample_id ${sample_id} \\
+        --features_path cuppa/${sample_id}.cuppa_data.tsv.gz \\
         --clf_group ${categories} \\
         --classifier_path ${cuppa_classifier} \\
         --output_dir cuppa/
@@ -99,13 +89,15 @@ process CUPPA {
     """
 
     stub:
+    def sample_id = meta.tumor_dna_id ?: meta.tumor_rna_id
+
     """
     mkdir -p cuppa/
 
-    gzip <<< '' > cuppa/${meta.sample_id}.cuppa_data.tsv.gz
-    touch cuppa/${meta.sample_id}.cuppa.pred_summ.tsv
-    touch cuppa/${meta.sample_id}.cuppa.vis_data.tsv
-    touch cuppa/${meta.sample_id}.cuppa.vis.png
+    gzip <<< '' > cuppa/${sample_id}.cuppa_data.tsv.gz
+    touch cuppa/${sample_id}.cuppa.pred_summ.tsv
+    touch cuppa/${sample_id}.cuppa.vis_data.tsv
+    touch cuppa/${sample_id}.cuppa.vis.png
 
     echo -e '${task.process}:\\n  stub: noversions\\n' > versions.yml
     """

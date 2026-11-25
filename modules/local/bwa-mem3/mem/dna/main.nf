@@ -1,6 +1,6 @@
 process BWAMEM3_ALIGN_DNA {
     tag "${meta.id}"
-    label 'process_high'
+    label 'process_huge'
 
     conda "${moduleDir}/environment.yml"
     container "${ workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container ?

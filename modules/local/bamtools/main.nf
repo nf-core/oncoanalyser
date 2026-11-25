@@ -67,6 +67,8 @@ process BAMTOOLS {
     touch bamtools_${meta.sample_id}/${meta.sample_id}.bam_metric.frag_length.tsv;
     touch bamtools_${meta.sample_id}/${meta.sample_id}.bam_metric.flag_counts.tsv;
     touch bamtools_${meta.sample_id}/${meta.sample_id}.bam_metric.partition_stats.tsv;
+    touch bamtools_${meta.sample_id}/${meta.sample_id}.bam_metric.gene_coverage.tsv;
+    touch bamtools_${meta.sample_id}/${meta.sample_id}.bam_metric.exon_coverage.tsv;
 
     echo -e '${task.process}:\\n  stub: noversions\\n' > versions.yml
     """
