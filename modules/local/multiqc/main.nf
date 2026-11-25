@@ -3,8 +3,8 @@ process MULTIQC {
 
     conda "${moduleDir}/environment.yml"
     container "${ workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container ?
-        'https://depot.galaxyproject.org/singularity/mulled-v2-d8bcaa0f18f0068460deb4841052ef5429108a27:f0d5b44eec0233d9bc8357f24755076bceef041a-0' :
-        'biocontainers/mulled-v2-d8bcaa0f18f0068460deb4841052ef5429108a27:f0d5b44eec0233d9bc8357f24755076bceef041a-0' }"
+        'https://depot.galaxyproject.org/singularity/mulled-v2-d8bcaa0f18f0068460deb4841052ef5429108a27:3658ca749aee34279e9a6a58abce6ffaecd9744b-0' :
+        'biocontainers/mulled-v2-d8bcaa0f18f0068460deb4841052ef5429108a27:3658ca749aee34279e9a6a58abce6ffaecd9744b-0' }"
 
     input:
     tuple val(meta), val(fs_group_ids), path(fs, name: 'sample_flat/*/*')
