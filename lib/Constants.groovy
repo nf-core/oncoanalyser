@@ -11,7 +11,6 @@ class Constants {
     static List PANELS_DEFINED = ['tso500']
 
 
-    // TODO: bump to the resource bundle that adds the Viridian resources
     static String HMF_DATA_37_PATH = 'hartwig/pipeline_resources/hmf_pipeline_resources.37_v3.0.0--8.tar.gz'
     static String HMF_DATA_38_PATH = 'hartwig/pipeline_resources/hmf_pipeline_resources.38_v3.0.0--8.tar.gz'
 
