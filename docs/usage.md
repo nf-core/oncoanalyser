@@ -621,7 +621,7 @@ nextflow run nf-core/oncoanalyser \
   -config genome.custom.config \
   -profile docker \
   --mode prepare_reference \
-  --ref_data_types wgs,bwamem2_index
+  --ref_data_types wgs,bwamem2_index \
   --genome CustomGenome \
   --genome_version <37|38> \
   --genome_type <alt|no_alt> \
