@@ -234,6 +234,7 @@
                 "subject_a/alignments/subject_a.tumor/subject_a.tumor.redux.duplicate_freq.tsv",
                 "subject_a/alignments/subject_a.tumor/subject_a.tumor.redux.jitter_params.tsv",
                 "subject_a/alignments/subject_a.tumor/subject_a.tumor.redux.ms_table.tsv.gz",
+                "subject_a/alignments/subject_a.tumor/subject_a.tumor.redux.msi_prediction.tsv",
                 "subject_a/alignments/subject_a.tumor_rna",
                 "subject_a/alignments/subject_a.tumor_rna/subject_a.tumor_rna.md.bam",
                 "subject_a/alignments/subject_a.tumor_rna/subject_a.tumor_rna.md.bam.bai",
@@ -485,6 +486,7 @@
                 "subject_a.tumor.redux.duplicate_freq.tsv:md5,f135adcd8e9877c9ebc1c65a6d1ab6a0",
                 "subject_a.tumor.redux.jitter_params.tsv:md5,8de8520cc12ac37b26c9c5bf8b47330b",
                 "subject_a.tumor.redux.ms_table.tsv.gz:md5,f71cad694b86a7cd3e49aac4c81d63f7",
+                "subject_a.tumor.redux.msi_prediction.tsv:md5,8624bf387ed8799d4a6455ceb56d2351",
                 "amber.version:md5,ad243b6cf0380e09a293d555de4c3218",
                 "subject_a.normal.amber.homozygousregion.tsv:md5,0c0a54c49e5b97eb2eef3697bf447266",
                 "subject_a.normal.amber.snp.vcf.gz:md5,5df43e2a13c3d800a2c968da318251e1",
@@ -630,10 +632,10 @@
                 "subject_a.tumor.virus.annotated.tsv:md5,561893f68d6b7fcd9deb1f3212d15164"
             ]
         ],
-        "timestamp": "2026-08-28T08:58:04.516659492",
         "meta": {
-            "nf-test": "0.9.5",
-            "nextflow": "26.04.6"
-        }
+            "nf-test": "0.9.3",
+            "nextflow": "25.10.4"
+        },
+        "timestamp": "2026-11-26T13:58:31.114337"
     }
 }
