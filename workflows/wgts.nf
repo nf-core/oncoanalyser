@@ -83,7 +83,6 @@ workflow WGTS {
 
     def isofox_counts = params.isofox_counts != null ? file(params.isofox_counts) : hmf_data.isofox_counts
     def isofox_gc_ratios = params.isofox_gc_ratios != null ? file(params.isofox_gc_ratios) : hmf_data.isofox_gc_ratios
-    def isofox_read_length = params.isofox_read_length != null ? params.isofox_read_length : Constants.DEFAULT_ISOFOX_READ_LENGTH_WTS
 
     //
     // SUBWORKFLOW: Run read alignment to generate BAMs
@@ -269,7 +268,7 @@ workflow WGTS {
             isofox_gc_ratios,
             [],  // isofox_tpm_norm
             params.isofox_functions,
-            isofox_read_length,
+            params.isofox_read_length ?: [],
         )
 
         ch_isofox_out = ch_isofox_out.mix(ISOFOX_QUANTIFICATION.out.isofox_dir)
@@ -812,7 +811,7 @@ workflow WGTS {
             hmf_data.ensembl_data_resources,
             hmf_data.neo_resources,
             hmf_data.cohort_tpm_medians,
-            isofox_read_length,
+            params.isofox_read_length ?: [],
         )
 
     }

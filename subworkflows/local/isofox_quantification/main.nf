@@ -26,7 +26,7 @@ workflow ISOFOX_QUANTIFICATION {
 
     // Params
     isofox_functions       //  string: [optional]  Isofox functions
-    isofox_read_length     //  string: [mandatory] Isofox read length
+    isofox_read_length     //  string: [optional]  Isofox read length
 
     main:
     // Select input sources then sort

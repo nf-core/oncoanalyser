@@ -26,7 +26,7 @@ workflow NEO_PREDICTION {
     cohort_tpm_medians         // channel: [mandatory] /path/to/cohort_tpm_medians/
 
     // Params
-    isofox_read_length         //  string: [mandatory] Isofox read length
+    isofox_read_length         //  string: [optional] Isofox read length
 
     main:
     //

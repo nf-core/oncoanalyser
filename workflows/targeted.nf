@@ -85,7 +85,6 @@ workflow TARGETED {
     def isofox_counts = params.isofox_counts != null ? file(params.isofox_counts) : panel_data.isofox_counts
     def isofox_gc_ratios = params.isofox_gc_ratios != null ? file(params.isofox_gc_ratios) : panel_data.isofox_gc_ratios
     def isofox_tpm_norm = params.isofox_tpm_norm != null ? file(params.isofox_tpm_norm) : panel_data.isofox_tpm_norm
-    def isofox_read_length = params.isofox_read_length != null ? params.isofox_read_length : Constants.DEFAULT_ISOFOX_READ_LENGTH_TARGETED
 
     //
     // SUBWORKFLOW: Run read alignment to generate alignments
@@ -273,7 +272,7 @@ workflow TARGETED {
             isofox_gc_ratios,
             isofox_tpm_norm,
             params.isofox_functions,
-            isofox_read_length,
+            params.isofox_read_length ?: [],
         )
 
         ch_isofox_out = ch_isofox_out.mix(ISOFOX_QUANTIFICATION.out.isofox_dir)

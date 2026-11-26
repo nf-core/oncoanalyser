@@ -30,6 +30,8 @@ process NEO_ANNOTATE_FUSIONS {
 
     def log_level_arg = task.ext.log_level ? "-log_level ${task.ext.log_level}" : ''
 
+    def read_length_arg = read_length ? "-read_length ${read_length}" : ''
+
     """
     isofox \\
         -Xmx${Math.round(task.memory.bytes * xmx_mod)} \\
@@ -38,7 +40,7 @@ process NEO_ANNOTATE_FUSIONS {
         -tumor ${meta.tumor_dna_id} \\
         -bam_file ${aln} \\
         -functions NEO_EPITOPES \\
-        -read_length ${read_length} \\
+        ${read_length_arg} \\
         -neo_dir ${neo_finder_dir} \\
         -ref_genome ${genome_fasta} \\
         -ref_genome_version ${genome_ver} \\

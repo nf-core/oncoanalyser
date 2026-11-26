@@ -41,6 +41,8 @@ process ISOFOX {
 
     def functions_arg = functions ? "-functions \'${functions}\'" : ''
 
+    def read_length_arg = read_length ? "-read_length ${read_length}" : ''
+
     def exp_counts_arg = exp_counts ? "-exp_counts_file ${exp_counts}" : ''
     def exp_gc_ratios_arg = exp_gc_ratios ? "-exp_gc_ratios_file ${exp_gc_ratios}" : ''
 
@@ -56,7 +58,7 @@ process ISOFOX {
         ${args} \\
         -sample ${meta.sample_id} \\
         ${functions_arg} \\
-        -read_length ${read_length} \\
+        ${read_length_arg} \\
         -bam_file ${aln} \\
         -ref_genome ${genome_fasta} \\
         -ref_genome_version ${genome_ver} \\

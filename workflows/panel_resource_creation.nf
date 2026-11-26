@@ -72,7 +72,6 @@ workflow PANEL_RESOURCE_CREATION {
     def isofox_counts = params.isofox_counts != null ? file(params.isofox_counts) : hmf_data.isofox_counts
     def isofox_gene_ids = params.isofox_gene_ids != null ? file(params.isofox_gene_ids) : []
     def isofox_gc_ratios = params.isofox_gc_ratios != null ? file(params.isofox_gc_ratios) : hmf_data.isofox_gc_ratios
-    def isofox_read_length = params.isofox_read_length != null ? params.isofox_read_length : Constants.DEFAULT_ISOFOX_READ_LENGTH_TARGETED
 
     //
     // SUBWORKFLOW: Run read alignment to generate BAMs
@@ -188,7 +187,7 @@ workflow PANEL_RESOURCE_CREATION {
         isofox_gc_ratios,
         [],  // isofox_tpm_norm
         'TRANSCRIPT_COUNTS',
-        isofox_read_length,
+        params.isofox_read_length ?: [],
     )
 
     // channel: [ meta, isofox_dir ]

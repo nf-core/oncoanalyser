@@ -123,6 +123,10 @@ class WorkflowMain {
               params.redux_umi_duplex_delim = '_'
         }
 
+        if (params.isofox_read_length == null && params.containsKey('panel') && params.panel?.toLowerCase() == 'tso500') {
+            params.isofox_read_length = Constants.DEFAULT_ISOFOX_READ_LENGTH_TSO500
+        }
+
         // Final point to set any default to avoid access to undefined parameters during nf-validation
         if (! params.containsKey('panel')) params.panel = null
         if (! params.containsKey('ref_data_genome_alt')) params.ref_data_genome_alt = null
