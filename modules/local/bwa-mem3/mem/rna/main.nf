@@ -58,7 +58,7 @@ process BWAMEM3_ALIGN_RNA {
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":
         bwa-mem3: \$(bwa-mem3 version 2>&1 | head -n1)
-        sambamba:\$(sambamba --version 2>&1 | sed -n '/^sambamba / { s/^.* //p }' | head -n1)
+        sambamba: \$(sambamba --version 2>&1 | sed -n '/^sambamba / { s/^.* //p }' | head -n1)
     END_VERSIONS
     """
 
