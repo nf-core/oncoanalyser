@@ -2,7 +2,7 @@
 // Align RNA reads and lift alignments back to genome coordinates
 //
 
-include { BWAMEM2_ALIGN_RNA } from '../../../modules/local/bwa-mem2/mem/rna/main'
+include { BWAMEM3_ALIGN_RNA } from '../../../modules/local/bwa-mem3/mem/rna/main'
 include { FASTP_SPLIT       } from '../../../modules/local/fastp/split/main'
 include { TARS              } from '../../../modules/local/tars/main'
 
@@ -117,19 +117,19 @@ workflow READ_ALIGNMENT_RNA {
     }
 
     //
-    // MODULE: BWA-MEM2
+    // MODULE: BWA-MEM3
     //
     // Create process input channel
-    // channel: [ meta_bwamem2, fastq_fwd, fastq_rev ]
-    ch_bwamem2_inputs = ch_fastqs_ready
+    // channel: [ meta_bwamem3, fastq_fwd, fastq_rev ]
+    ch_bwamem3_inputs = ch_fastqs_ready
         .map { meta_fastq_ready, fastq_fwd, fastq_rev ->
-            def meta_bwamem2 = meta_fastq_ready.clone()
-            return [meta_bwamem2, fastq_fwd, fastq_rev]
+            def meta_bwamem3 = meta_fastq_ready.clone()
+            return [meta_bwamem3, fastq_fwd, fastq_rev]
         }
 
     // Run process
-    BWAMEM2_ALIGN_RNA(
-        ch_bwamem2_inputs,
+    BWAMEM3_ALIGN_RNA(
+        ch_bwamem3_inputs,
         genome_fasta,
         genome_bwamem2_index,
     )
@@ -137,18 +137,18 @@ workflow READ_ALIGNMENT_RNA {
     // Reunite BAMs
     // Count expected BAMs per sample for non-blocking groupTuple op
     // channel: [ meta_group, group_size ]
-    ch_sample_fastq_counts = ch_bwamem2_inputs
-        .map { meta_bwamem2, _reads_fwd, _reads_rev ->
+    ch_sample_fastq_counts = ch_bwamem3_inputs
+        .map { meta_bwamem3, _reads_fwd, _reads_rev ->
 
             def meta_group = [
-                key: meta_bwamem2.key,
-                sample_type: meta_bwamem2.sample_type,
+                key: meta_bwamem3.key,
+                sample_type: meta_bwamem3.sample_type,
             ]
 
-            return [meta_group, meta_bwamem2]
+            return [meta_group, meta_bwamem3]
         }
         .groupTuple()
-        .map { meta_group, metas_bwamem2 -> return [meta_group, metas_bwamem2.size()] }
+        .map { meta_group, metas_bwamem3 -> return [meta_group, metas_bwamem3.size()] }
 
     // Now, group with expected size
     // NOTE(LN): RNA alignments are name-grouped and therefore unindexed, so no index is carried here
@@ -157,7 +157,7 @@ workflow READ_ALIGNMENT_RNA {
         // channel: [ [ meta_group, count ], [ meta_group, aln ] ]
         .cross(
             // First element to match meta_group above for `cross`
-            channel.topic('bwamem2_align_rna_bam').map { meta_bwamem2, aln -> [[key: meta_bwamem2.key, sample_type: meta_bwamem2.sample_type], aln] }
+            channel.topic('bwamem3_align_rna_bam').map { meta_bwamem3, aln -> [[key: meta_bwamem3.key, sample_type: meta_bwamem3.sample_type], aln] }
         )
         .map { count_tuple, inputs_tuple ->
             def group_size = count_tuple[1]
