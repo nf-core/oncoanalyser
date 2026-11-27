@@ -3,9 +3,38 @@
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/) and this project mostly adheres to
 [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [dev]
+## [[3.0.1](https://github.com/nf-core/oncoanalyser/releases/tag/3.0.1)] Scarlet Finch - 2026-XX-XX
 
-- [325](https://github.com/nf-core/oncoanalyser/pull/325) - Post-release bump
+- [368](https://github.com/nf-core/oncoanalyser/pull/368) - Update HMF reference data bundles to 3.0.1--3
+- [367](https://github.com/nf-core/oncoanalyser/pull/367) - Fixes minor errors in MultiQC plugin tool and process
+- [365](https://github.com/nf-core/oncoanalyser/pull/365) - Fix known_umis crash in panel resource creation
+- [347](https://github.com/nf-core/oncoanalyser/pull/347) - Various fixes for 3.0.1
+  - Pass somatic hotspots to the PAVE PON builder
+  - Update the ESVEE container to a Java-compatible build
+  - Update REDUX for SBX YC tag validation
+  - Pass the fusion cohort file to ISOFOX
+  - Update ORANGE to 5.0.3 to fix a targeted tumor/normal crash
+- [353](https://github.com/nf-core/oncoanalyser/pull/353) - Fix nf-schema stalling when running offline
+- [336](https://github.com/nf-core/oncoanalyser/pull/336) - Fix missing MSI model resources
+- [335](https://github.com/nf-core/oncoanalyser/pull/335) - Fix WISP arguments
+  - Pass the normal sample ID in tumor/normal mode
+  - Pass `-sequencing_type`
+- [330](https://github.com/nf-core/oncoanalyser/pull/330) - Fix `LINX_SOMATIC` stub output files
+
+### Software dependencies
+
+| Dependency       | Old version | New version |
+| ---------------- | ----------- | ----------- |
+| `MultiQC plugin` | 0.1.0       | 0.1.1       |
+| `ORANGE`         | 5.0.1       | 5.0.3       |
+| `REDUX`          | 2.0.5       | 2.0.7       |
+
+### Reference data
+
+| Name                         | Old version | New version |
+| ---------------------------- | ----------- | ----------- |
+| `Hartwig pipeline resources` | 3.0.0--8    | 3.0.1--3    |
+| `Hartwig TSO500 resources`   | 3.0.0--8    | 3.0.1--3    |
 
 ## [[3.0.0](https://github.com/nf-core/oncoanalyser/releases/tag/3.0.0)] Scarlet Honeyeater - 2026-09-01
 
