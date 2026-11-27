@@ -9,6 +9,9 @@ process WISP {
 
     input:
     tuple val(meta),
+        // NOTE(LN): WISP expects the primary PURPLE VCF to have both tumor and normal samples in the genotype fields.
+        // Primary tumor-only mode will be supported in the future. For now, WISP can be forced to run in primary
+        // tumor-only mode with arg `-skip_reference_id` if needed
         path(primary_purple_dir, stageAs: 'purple_primary'),
         path(primary_amber_dir, stageAs: 'amber_primary'),
         path(primary_normal_aln),
@@ -33,8 +36,6 @@ process WISP {
     def args = task.ext.args ?: ''
 
     def log_level_arg = task.ext.log_level ? "-log_level ${task.ext.log_level}" : ''
-
-    def reference_arg = meta.normal_id ? "-reference_id ${meta.normal_id}" : ''
 
     def amber_dir_arg
     def cobalt_dir_arg
@@ -82,9 +83,9 @@ process WISP {
         -Xmx${Math.round(task.memory.bytes * 0.95)} \\
         com.hartwig.hmftools.wisp.WispApplication \\
         ${args} \\
-        -patient_id ${meta.subject_id} \\
-        -tumor_id ${meta.primary_id} \\
-        ${reference_arg} \\
+        -patient ${meta.subject_id} \\
+        -tumor ${meta.primary_id} \\
+        -infer_vcf_reference_id \\
         -samples ${meta.longitudinal_id} \\
         -purity_methods ${purity_methods_arg} \\
         -somatic_vcf ${longitudinal_sage_append_dir}/${meta.longitudinal_id}.sage.append.vcf.gz \\

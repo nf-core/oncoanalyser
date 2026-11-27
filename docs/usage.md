@@ -730,7 +730,7 @@ Purity estimate of the longitudinal sample can likewise be run in two modes:
 The minimal inputs required are:
 
 - Alignments or REDUX alignments from the **longitudinal tumor** sample
-- PURPLE directory from the **primary tumor** sample
+- PURPLE directory from a **primary tumor+normal** pipeline run (the PURPLE VCF must have tumor and normal samples in the genotype fields)
 
 In the samplesheet the longitudinal sample must have `longitudinal_sample` set in the info field, for example a minimal
 samplesheet starting from a primary sample PURPLE directory and longitudinal sample REDUX directory:
