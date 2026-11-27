@@ -37,6 +37,10 @@ process WISP {
 
     def log_level_arg = task.ext.log_level ? "-log_level ${task.ext.log_level}" : ''
 
+    def reference_arg = meta.normal_id
+        ? "-reference ${meta.normal_id}"
+        : '-infer_vcf_reference_id'  // NOTE(LN): Normal sample is absent in targeted purity estimate mode, and optional in WGS mode
+
     def amber_dir_arg
     def cobalt_dir_arg
     def gc_ratio_min_arg
@@ -85,7 +89,7 @@ process WISP {
         ${args} \\
         -patient ${meta.subject_id} \\
         -tumor ${meta.primary_id} \\
-        -infer_vcf_reference_id \\
+        ${reference_arg} \\
         -samples ${meta.longitudinal_id} \\
         -purity_methods ${purity_methods_arg} \\
         -somatic_vcf ${longitudinal_sage_append_dir}/${meta.longitudinal_id}.sage.append.vcf.gz \\
