@@ -600,26 +600,32 @@ class Utils {
         return fields
     }
 
-    public static getSequencingPlatformPons(hmf_data, sequencing_platform_string, log) {
+    public static getSequencingPlatformResources(hmf_data, sequencing_platform_string, log) {
         def sequencing_platform = Utils.getEnumFromString(sequencing_platform_string, Constants.SequencingPlatform)
         hmf_data.map { d ->
             if (sequencing_platform == Constants.SequencingPlatform.ILLUMINA) {
                 return [
-                    'esvee_breakends': d.esvee_pon_breakends_illumina,
-                    'esvee_breakpoints': d.esvee_pon_breakpoints_illumina,
-                    'sage': d.sage_pon_illumina,
+                    'esvee_pon_breakends': d.esvee_pon_breakends_illumina,
+                    'esvee_pon_breakpoints': d.esvee_pon_breakpoints_illumina,
+                    'sage_pon': d.sage_pon_illumina,
+                    'msi_model_coefs': d.msi_model_coefs_illumina,
+                    'msi_model_error_rates': d.msi_model_error_rates_illumina,
                 ]
             } else if (sequencing_platform == Constants.SequencingPlatform.SBX) {
                 return [
-                    'esvee_breakends': d.esvee_pon_breakends_sbx,
-                    'esvee_breakpoints': d.esvee_pon_breakpoints_sbx,
-                    'sage': d.sage_pon_sbx,
+                    'esvee_pon_breakends': d.esvee_pon_breakends_sbx,
+                    'esvee_pon_breakpoints': d.esvee_pon_breakpoints_sbx,
+                    'sage_pon': d.sage_pon_sbx,
+                    'msi_model_coefs': d.msi_model_coefs_sbx,
+                    'msi_model_error_rates': d.msi_model_error_rates_sbx,
                 ]
             } else if (sequencing_platform == Constants.SequencingPlatform.ULTIMA) {
                 return [
-                    'esvee_breakends': d.esvee_pon_breakends_ultima,
-                    'esvee_breakpoints': d.esvee_pon_breakpoints_ultima,
-                    'sage': d.sage_pon_ultima,
+                    'esvee_pon_breakends': d.esvee_pon_breakends_ultima,
+                    'esvee_pon_breakpoints': d.esvee_pon_breakpoints_ultima,
+                    'sage_pon': d.sage_pon_ultima,
+                    'msi_model_coefs': d.msi_model_coefs_ultima,
+                    'msi_model_error_rates': d.msi_model_error_rates_ultima,
                 ]
             } else {
                 log.error "Got bad sequencing platform: ${sequencing_platform}"

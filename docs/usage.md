@@ -48,7 +48,7 @@ A typical command for running `oncoanalyser` is shown below:
 
 ```bash
 nextflow run nf-core/oncoanalyser \
-  -revision 3.0.0 \
+  -revision 3.0.1 \
   -profile docker \
   -config reference_data.config \ # Optional but recommended
   --mode wgts \
@@ -72,7 +72,7 @@ If you have data from Roche SBX or Ultima sequencing technologies, you will need
 :::tip
 
 If you encounter any issues setting up or running `oncoanalyser`, please see
-[FAQ and troubleshooting](oncoanalyser/3.0.0/docs/usage/faq_and_troubleshooting)
+[FAQ and troubleshooting](oncoanalyser/3.0.1/docs/usage/faq_and_troubleshooting)
 
 :::
 
@@ -111,7 +111,7 @@ outdir: 'output/'
 and be run using this command:
 
 ```bash
-nextflow run nf-core/oncoanalyser -revision 3.0.0 -profile docker -params-file params.yaml
+nextflow run nf-core/oncoanalyser -revision 3.0.1 -profile docker -params-file params.yaml
 ```
 
 You can also generate such `YAML`/`JSON` files via [nf-core/launch](https://nf-co.re/launch).
@@ -165,7 +165,7 @@ to explicitly specify `--sequencing_platform` like so:
 
 ```bash
 nextflow run nf-core/oncoanalyser \
-  -revision 3.0.0 \
+  -revision 3.0.1 \
   -config reference_data.config \
   -profile docker \
   --sequencing_platform sbx \
@@ -375,7 +375,7 @@ Then, run `oncoanalyser` with as normal:
 
 ```bash
 nextflow run nf-core/oncoanalyser \
-  -revision 3.0.0 \
+  -revision 3.0.1 \
   -config reference_data.config \
   -profile docker \
   --mode wgts \
@@ -503,7 +503,7 @@ analysis from alignments.
 
 ```bash
 nextflow run nf-core/oncoanalyser \
-  -revision 3.0.0 \
+  -revision 3.0.1 \
   -profile docker \
   --mode prepare_reference \
   --ref_data_types wgs \
@@ -511,7 +511,7 @@ nextflow run nf-core/oncoanalyser \
   --outdir output/
 ```
 
-Once the above commands complete, the stated reference data can be found in `<outdir>/reference_data/3.0.0`. You will
+Once the above commands complete, the stated reference data can be found in `<outdir>/reference_data/3.0.1`. You will
 then need to provide a config file that points to these reference files (see [Configuring reference data](#configuring-reference-data))
 which can be used for subsequent `oncoanalyser` runs. The Nextflow work directory can also be removed to free up disk
 space.
@@ -565,7 +565,7 @@ The configuration file can then be supplied to `oncoanalyser` via the `-config <
 
 ```bash
 nextflow run nf-core/oncoanalyser \
-  -revision 3.0.0 \
+  -revision 3.0.1 \
   -config reference_data.config  \
   <...>
 ```
@@ -611,7 +611,7 @@ Each index can then be created in by using `--mode prepare_reference` and `--ref
 
 ```bash
 nextflow run nf-core/oncoanalyser \
-  -revision 3.0.0 \
+  -revision 3.0.1 \
   -config genome.custom.config \
   -profile docker \
   --mode prepare_reference \
@@ -654,8 +654,8 @@ _GRCh37 genome (Hartwig): `GRCh37_hmf`_
 | BWA-MEM2 index       | [bwa-mem2_index-2.2.1.tar.gz](https://data.oncoanalyser.com/r2/reference/dist/v1/genomes/GRCh37_hmf/26.1/bwa-mem2_index-2.2.1.tar.gz)                                                              |
 | GRIDSS index         | [gridss_index-2.13.2.tar.gz](https://data.oncoanalyser.com/r2/reference/dist/v1/genomes/GRCh37_hmf/26.1/gridss_index-2.13.2.tar.gz)                                                                |
 | STAR index           | [star_index-gencode_19-2.7.3a.tar.gz](https://data.oncoanalyser.com/r2/reference/dist/v1/genomes/GRCh37_hmf/26.1/star_index-gencode_19-2.7.3a.tar.gz)                                              |
-| WiGiTS data          | [hmf_pipeline_resources.37_v3.0.0--8.tar.gz](https://data.oncoanalyser.com/r2/reference/dist/v1/hartwig/pipeline_resources/hmf_pipeline_resources.37_v3.0.0--8.tar.gz)                             |
-| TSO500 panel data    | [hmf_panel_resources.tso500.37_v3.0.0--8.tar.gz](https://data.oncoanalyser.com/r2/reference/dist/v1/hartwig/panel_resources/hmf_panel_resources.tso500.37_v3.0.0--8.tar.gz)                        |
+| WiGiTS data          | [hmf_pipeline_resources.37_v3.0.1--3.tar.gz](https://data.oncoanalyser.com/r2/reference/dist/v1/hartwig/pipeline_resources/hmf_pipeline_resources.37_v3.0.1--3.tar.gz)                             |
+| TSO500 panel data    | [hmf_panel_resources.tso500.37_v3.0.1--3.tar.gz](https://data.oncoanalyser.com/r2/reference/dist/v1/hartwig/panel_resources/hmf_panel_resources.tso500.37_v3.0.1--3.tar.gz)                        |
 
 _GRCh38 genome (Hartwig): `GRCh38_hmf`_
 
@@ -668,7 +668,7 @@ _GRCh38 genome (Hartwig): `GRCh38_hmf`_
 | BWA-MEM2 index       | [bwa-mem2_index-2.2.1.tar.gz](https://data.oncoanalyser.com/r2/reference/dist/v1/genomes/GRCh38_hmf/26.1/bwa-mem2_index-2.2.1.tar.gz)                                                                |
 | GRIDSS index         | [gridss_index-2.13.2.tar.gz](https://data.oncoanalyser.com/r2/reference/dist/v1/genomes/GRCh38_hmf/26.1/gridss_index-2.13.2.tar.gz)                                                                  |
 | STAR index           | [star_index-gencode_38-2.7.3a.tar.gz](https://data.oncoanalyser.com/r2/reference/dist/v1/genomes/GRCh38_hmf/26.1/star_index-gencode_38-2.7.3a.tar.gz)                                                |
-| WiGiTS data          | [hmf_pipeline_resources.38_v3.0.0--8.tar.gz](https://data.oncoanalyser.com/r2/reference/dist/v1/hartwig/pipeline_resources/hmf_pipeline_resources.38_v3.0.0--8.tar.gz)                               |
+| WiGiTS data          | [hmf_pipeline_resources.38_v3.0.1--3.tar.gz](https://data.oncoanalyser.com/r2/reference/dist/v1/hartwig/pipeline_resources/hmf_pipeline_resources.38_v3.0.1--3.tar.gz)                               |
 
 ## Pipeline modes
 
@@ -678,7 +678,7 @@ _GRCh38 genome (Hartwig): `GRCh38_hmf`_
 
 ```bash
 nextflow run nf-core/oncoanalyser \
-  -revision 3.0.0 \
+  -revision 3.0.1 \
   -config reference_data.config \
   -profile docker \
   --mode wgts \
@@ -696,7 +696,7 @@ A typical run command for TSO500 would be:
 
 ```bash
 nextflow run nf-core/oncoanalyser \
-  -revision 3.0.0 \
+  -revision 3.0.1 \
   -config reference_data.config \
   -profile docker \
   --mode targeted \
@@ -764,7 +764,7 @@ Then run `oncoanalyser` providing `--mode purity_estimate` and `--purity_estimat
 
 ```bash
 nextflow run nf-core/oncoanalyser \
-  -revision 3.0.0 \
+  -revision 3.0.1 \
   -config reference_data.config \
   -profile docker \
   --mode purity_estimate \
@@ -833,7 +833,7 @@ manually created files to `--driver_gene_panel` and `--target_regions_bed`:
 
 ```bash
 nextflow run nf-core/oncoanalyser \
-  -revision 3.0.0 \
+  -revision 3.0.1 \
   -config reference_data.config \
   -profile docker \
   --mode panel_resource_creation \
@@ -885,8 +885,8 @@ params {
                 target_regions_normalisation = 'cobalt_normalisation.38.tsv'
 
                 // These are not required and left unset by providing an empty list `[]`
-                msi_model_error_rates        = [] // Currently defaults to TS0500 panel error rates for all custom panels
-                known_umis                   = [] // Only required for MSK-IMPACT panel
+                msi_model_error_rates        = [] // Defaults to TSO500 panel error rates for Illumina; required for SBX and Ultima
+                known_umis                   = [] // Only required for fastq-tools UMI processing (e.g. MSK-IMPACT)
 
                 // Only for panels with RNA-seq. Provide e.g. `isofox_counts = []` for panels without RNA
                 isofox_tpm_norm              = 'isofox.gene_normalisation.38.csv'
@@ -908,7 +908,7 @@ Run `oncoanalyser` with `--mode targeted` and `-config panel.config`:
 
 ```bash
 nextflow run nf-core/oncoanalyser \
-  -revision 3.0.0 \
+  -revision 3.0.1 \
   -config reference_data.config \
   -config panel.config \
   -profile docker \
@@ -949,6 +949,23 @@ params {
 }
 ```
 
+When using `fastq_tools_umi_enabled`, a known UMIs file is required. In `targeted` mode the file is configured
+with `known_umis` under `panel_data_paths`. In `wgts` and `panel_resource_creation` modes it is configured under
+`hmf_data_paths` for the genome version:
+
+```groovy title='known_umis.config'
+params {
+    hmf_data_paths {
+        '38' {
+            known_umis = 'path/to/known_umis.38.tsv'
+        }
+    }
+}
+```
+
+The path is resolved relative to `ref_data_hmf_data_path` and the file must exist. fastq-tools UMI processing is not
+supported in `purity_estimate` mode.
+
 Below is an R1 FASTQ entry before and after TWIST UMI stripping:
 
 **Before:**
@@ -975,7 +992,7 @@ IIIIIIIIIIIIIIIIIIIIIIIIIIII#I#IIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIII
 ## Process selection
 
 It is possible to exclude or manually select specific processes when running `oncoanalyser`. The full list of processes that can
-be selected is available [here](https://github.com/nf-core/oncoanalyser/blob/3.0.0/lib/Constants.groovy#L53).
+be selected is available [here](https://github.com/nf-core/oncoanalyser/blob/3.0.1/lib/Constants.groovy#L53).
 
 :::warning
 
@@ -992,7 +1009,7 @@ skip resource intensive processes like Virusbreakend, or ORANGE because you do n
 
 ```bash
 nextflow run nf-core/oncoanalyser \
-  -revision 3.0.0 \
+  -revision 3.0.1 \
   -profile docker \
   --mode wgts \
   --processes_exclude virusinterpreter,orange \
@@ -1008,7 +1025,7 @@ you may only want to run alignment and SNV/indel, SV and CNV calling from DNA FA
 
 ```bash
 nextflow run nf-core/oncoanalyser \
-  -revision 3.0.0 \
+  -revision 3.0.1 \
   -profile docker \
   --mode wgts \
   --processes_manual alignment,redux,amber,cobalt,esvee,sage,pave,purple \

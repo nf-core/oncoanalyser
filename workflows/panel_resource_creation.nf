@@ -61,10 +61,9 @@ workflow PANEL_RESOURCE_CREATION {
 
     def ref_data = PREPARE_REFERENCE.out
     def hmf_data = PREPARE_REFERENCE.out.hmf_data
-    def panel_data = PREPARE_REFERENCE.out.panel_data
 
     // Configure selectable reference data and inputs
-    def hmf_data_pons = Utils.getSequencingPlatformPons(hmf_data, params.sequencing_platform, log)
+    def hmf_data_seq_platform = Utils.getSequencingPlatformResources(hmf_data, params.sequencing_platform, log)
     def target_regions_bed = params.target_regions_bed != null ? file(params.target_regions_bed) : []
     def driver_gene_panel = params.driver_gene_panel != null ? file(params.driver_gene_panel) : []
 
@@ -95,7 +94,7 @@ workflow PANEL_RESOURCE_CREATION {
             ch_inputs,
             ch_fastq_dna,
             ch_fastq_rna,
-            panel_data.known_umis,
+            hmf_data.map { it.known_umis ?: [] },
             params.fastp_umi_enabled,
             params.fastp_umi_location,
             params.fastp_umi_length,
@@ -147,8 +146,8 @@ workflow PANEL_RESOURCE_CREATION {
         ref_data.genome_dict,
         hmf_data.unmap_regions,
         hmf_data.msi_jitter_sites,
-        hmf_data.msi_model_coefficients,
-        hmf_data.msi_model_error_rates,
+        hmf_data_seq_platform.msi_model_coefs,
+        hmf_data.msi_model_error_rates_panel,
         params.sequencing_platform,
         true,  // targeted_mode
         params.redux_umi_enabled,
@@ -174,6 +173,7 @@ workflow PANEL_RESOURCE_CREATION {
         hmf_data.isofox_excluded_regions,
         hmf_data.isofox_gene_distribution,
         hmf_data.isofox_alt_sj_distribution,
+        [],  // isofox_fusion_cohort
         isofox_counts,
         isofox_gc_ratios,
         [],  // isofox_tpm_norm
@@ -237,7 +237,7 @@ workflow PANEL_RESOURCE_CREATION {
         ref_data.genome_version,
         ref_data.genome_fai,
         ref_data.genome_dict,
-        hmf_data_pons.sage,
+        hmf_data_seq_platform.sage_pon,
         hmf_data.sage_known_hotspots_somatic,
         hmf_data.sage_known_hotspots_germline,
         hmf_data.sage_highconf_regions,
@@ -271,6 +271,7 @@ workflow PANEL_RESOURCE_CREATION {
     PAVE_PON_CREATION(
         ch_sage_somatic_dir_out,
         ref_data.genome_version,
+        hmf_data.sage_known_hotspots_somatic,
     )
 
     //

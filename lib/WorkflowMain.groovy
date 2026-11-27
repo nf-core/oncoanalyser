@@ -238,17 +238,28 @@ class WorkflowMain {
             Nextflow.exit(1)
         }
 
-        if (run_mode == Constants.RunMode.WGTS) {
+        if (run_mode == Constants.RunMode.WGTS || run_mode == Constants.RunMode.PANEL_RESOURCE_CREATION) {
 
-            // We allow fastq-tools UMI processing in WGTS but this requires that the user manually set the 'known_umis' file in hmf_data, enforce here
-            def has_known_umis = params.hmf_data_paths[params.genome_version.toString()].containsKey('known_umis')
-            if (params.fastq_tools_umi_enabled && ! has_known_umis) {
+            // We also allow fastq-tools UMI processing in these modes but require that the user manually set the 'known_umis' file in hmf_data, enforce here
+            def known_umis = params.hmf_data_paths[params.genome_version.toString()]['known_umis']
+            if (params.fastq_tools_umi_enabled && ! known_umis) {
                 log.error "\n~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n" +
                     "  The fastq-tools process is enabled but the required 'known_umis' data path was\n" +
-                    "  not configured in the respective 'hmf_data_paths' for genome version ${params.genome_version.toString()}\n" +
+                    "  not configured in the respective 'hmf_data_paths' for genome version ${params.genome_version.toString()}.\n" +
+                    "  Configure a valid known UMIs file path to use fastq-tools UMI processing.\n" +
                     "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
                 Nextflow.exit(1)
             }
+
+        }
+
+        if (run_mode == Constants.RunMode.PURITY_ESTIMATE && params.fastq_tools_umi_enabled) {
+
+            log.error "\n~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n" +
+                "  fastq-tools UMI processing is not supported in purity_estimate mode.\n" +
+                "  Use fastp UMI processing or disable UMI processing for this mode.\n" +
+                "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
+            Nextflow.exit(1)
 
         }
 
@@ -366,6 +377,17 @@ class WorkflowMain {
                     "  The fastq-tools process is enabled but the required 'known_umis' data path was\n" +
                     "  not configured in the panel data paths for panel ${params.panel.toLowerCase()}\n" +
                     "  (${params.genome_version}).\n" +
+                    "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
+                Nextflow.exit(1)
+            }
+
+            // Require msi_model_error_rates in panel data for non-Illumina sequencing platforms since the default is Illumina specific
+            def sequencing_platform = Utils.getEnumFromString(params.sequencing_platform, Constants.SequencingPlatform)
+            if (sequencing_platform != Constants.SequencingPlatform.ILLUMINA && ! panel_data_paths['msi_model_error_rates']) {
+                log.error "\n~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n" +
+                    "  The sequencing platform is ${params.sequencing_platform} but the required\n" +
+                    "  'msi_model_error_rates' data path was not configured in the panel data paths for\n" +
+                    "  panel ${params.panel.toLowerCase()} (${params.genome_version}).\n" +
                     "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
                 Nextflow.exit(1)
             }

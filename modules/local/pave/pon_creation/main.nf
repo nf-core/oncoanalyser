@@ -9,6 +9,7 @@ process PAVE_PON_PANEL_CREATION {
     input:
     tuple path(sage_vcf), path(sage_tbi)
     val genome_ver
+    path sage_known_hotspots_somatic
 
     output:
     path 'pave.somatic_artefacts.*.tsv'                               , topic: pave_pon_panel_creation_artefacts
@@ -36,6 +37,7 @@ process PAVE_PON_PANEL_CREATION {
         -sample_id_file sample_ids.txt \\
         -vcf_path '*.sage.somatic.vcf.gz' \\
         -ref_genome_version ${genome_ver} \\
+        -somatic_hotspots ${sage_known_hotspots_somatic} \\
         ${log_level_arg} \\
         -output_pon_file pave.somatic_artefacts.${genome_ver}.tsv
 

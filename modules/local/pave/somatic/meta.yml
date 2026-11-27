@@ -40,7 +40,7 @@ input:
       pattern: "*.{fai}"
   - pon_artefacts:
       type: file
-      description: Taregeted sequencing PON artefacts file (optional)
+      description: Targeted sequencing PON artefacts file (optional)
   - sage_pon:
       type: file
       description: SAGE PON file
